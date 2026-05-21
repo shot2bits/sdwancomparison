@@ -1,0 +1,41 @@
+{
+  "slug": "cato-networks",
+  "name": "Cato Networks",
+  "tagline": "Cloud-native SASE platform on a global private backbone",
+  "website": "https://www.catonetworks.com",
+  "founded": 2015,
+  "headquarters": "Tel Aviv, Israel",
+  "provider_types": ["cloud_native_sase_vendor"],
+  "operating_models": ["fully_managed", "co_managed"],
+  "architecture": "private_global_backbone",
+  "edge_form_factors": ["physical", "virtual", "cloud_image"],
+  "cellular_5g_support": true,
+  "sase_depth": "native_single_platform",
+  "native_sase_components": ["ngfw", "swg", "casb", "ztna", "fwaas", "dlp", "dns_security"],
+  "sse_ecosystem_integrations": [],
+  "cloud_on_ramp_partners": ["aws", "azure", "gcp"],
+  "underlay_management": "partner_coordinated",
+  "noc_coverage": "24_7",
+  "soc_coverage": "24_7",
+  "geographic_strength": ["global", "emea", "north_america"],
+  "industry_focus": ["financial_services", "manufacturing", "retail"],
+  "pricing_tier": "mid_market_to_enterprise",
+  "typical_site_count": "50-1000",
+  "key_differentiators": [
+    "Single converged platform — no policy/log fragmentation across SD-WAN and security",
+    "85+ PoP global private backbone reduces internet variability for SaaS",
+    "Strong story for organisations consolidating multiple point solutions"
+  ],
+  "best_fit_for": [
+    "Mid-market and enterprise consolidating SD-WAN and SASE on one platform",
+    "Global organisations with SaaS-heavy traffic patterns",
+    "Teams without dedicated security operations capacity"
+  ],
+  "watch_outs": [
+    "Less suited to best-of-breed buyers wanting Zscaler/Netskope alongside",
+    "Customer doesn't own the underlay — circuits sourced separately",
+    "Less mature than incumbents for very large multinational deployments"
+  ],
+  "last_verified": "2026-05-21",
+  "verification_notes": "Capabilities verified against vendor documentation; PoP count cited in Cato public materials."
+}
