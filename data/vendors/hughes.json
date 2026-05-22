@@ -1,0 +1,82 @@
+{
+  "slug": "hughes",
+  "name": "Hughes",
+  "website": "https://www.hughes.com/what-we-offer/managed-network-services/managed-sd-wan",
+  "category": "Managed SD-WAN provider",
+  "product_focus": "HughesON managed SD-WAN for distributed enterprise",
+  "primary_sources": [
+    "https://www.hughes.com/what-we-offer/managed-network-services/managed-sd-wan",
+    "https://www.hughes.in/resources/press-releases/hughes-launches-fully-managed-sd-wan-solution-distributed-organizations"
+  ],
+  "evidence_summary": "Hughes sources evidence managed SD-WAN for distributed organisations and end-to-end turnkey network delivery.",
+  "cost_model": "Quote-based managed service; site count, access mix, security, satellite/broadband/cellular and support model drive pricing.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "yes",
+    "f02_diy_self_managed_model": "partial",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f05_professional_services_and_migration_support": "yes",
+    "f06_last_mile_circuit_management": "yes",
+    "f07_lifecycle_management": "yes",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "yes",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f21_private_global_backbone": "partner_integrated",
+    "f22_regional_breakout_and_data_residency": "partner_integrated",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "yes",
+    "f27_integrated_next_generation_firewall": "partner_integrated",
+    "f28_full_sase_platform": "partner_integrated",
+    "f29_sse_ecosystem_integration": "partner_integrated",
+    "f30_zero_trust_network_access": "partner_integrated",
+    "f31_secure_web_gateway": "partner_integrated",
+    "f32_casb_capability": "unknown",
+    "f33_data_loss_prevention": "unknown",
+    "f34_remote_user_access": "partner_integrated",
+    "f35_soc_siem_soar_integration": "partner_integrated",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "yes"
+  },
+  "score_summary": {
+    "yes_count": 25,
+    "partial_count": 2,
+    "partner_integrated_count": 11,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 2,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.95
+  },
+  "key_differentiators": [
+    "Strong specialism in distributed organisations with site count in the hundreds or thousands.",
+    "Multi-access mix including satellite, broadband and cellular suits remote or rural site profiles.",
+    "End-to-end turnkey delivery from design through field operations to ongoing support."
+  ],
+  "best_fit_for": [
+    "Highly distributed enterprises (retail, restaurants, hospitality, fuel retail) with hundreds of sites.",
+    "Organisations with remote or rural sites where satellite access is required alongside terrestrial broadband.",
+    "Buyers wanting one provider for design, access, install and ongoing managed service."
+  ],
+  "watch_outs": [
+    "SASE and SSE capabilities are largely partner-integrated; security depth should be confirmed.",
+    "Less suited to enterprise headquarters or data centre SD-WAN at large bandwidth scale.",
+    "Underlying SD-WAN platform should be confirmed; managed service wraps various vendor platforms."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

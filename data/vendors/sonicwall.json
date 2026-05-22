@@ -1,0 +1,82 @@
+{
+  "slug": "sonicwall",
+  "name": "SonicWall",
+  "website": "https://www.sonicwall.com",
+  "category": "SMB / mid-market firewall-led SD-WAN vendor",
+  "product_focus": "TZ/NSa firewalls, SonicOS SD-WAN",
+  "primary_sources": [
+    "https://www.sonicwall.com/support/knowledge-base/introduction-to-sonicwall-sd-wan-software-defined-wide-area-network/kA1VN0000000NeC0AU",
+    "https://www.sonicwallonline.co.uk/productattachments/index/download?id=488"
+  ],
+  "evidence_summary": "SonicWall sources evidence SD-WAN support on TZ/NSA/SM platforms and integrated SD-WAN/security features in firewall appliances.",
+  "cost_model": "Public hardware/security bundle pricing often available via resellers; managed options partner-dependent.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "partner_integrated",
+    "f02_diy_self_managed_model": "yes",
+    "f03_co_managed_service": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f06_last_mile_circuit_management": "partner_integrated",
+    "f07_lifecycle_management": "partner_integrated",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "partial",
+    "f18_cloud_on_ramp": "partial",
+    "f19_public_cloud_gateways": "not_primary",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "not_primary",
+    "f22_regional_breakout_and_data_residency": "partial",
+    "f23_multi_cloud_transit_fabric": "partial",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f27_integrated_next_generation_firewall": "yes",
+    "f28_full_sase_platform": "partial",
+    "f29_sse_ecosystem_integration": "partial",
+    "f30_zero_trust_network_access": "partial",
+    "f31_secure_web_gateway": "yes",
+    "f32_casb_capability": "partial",
+    "f33_data_loss_prevention": "partial",
+    "f34_remote_user_access": "yes",
+    "f35_soc_siem_soar_integration": "yes",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "partial",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "partner_integrated"
+  },
+  "score_summary": {
+    "yes_count": 18,
+    "partial_count": 11,
+    "partner_integrated_count": 8,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 1,
+    "not_primary_count": 2,
+    "evidence_coverage_pct": 0.925
+  },
+  "key_differentiators": [
+    "SD-WAN delivered via existing TZ, NSa and SM firewall appliances; familiar deployment for organisations standardised on SonicWall.",
+    "Strong SMB and mid-market positioning with reseller channel and public hardware pricing.",
+    "Integrated firewall and SD-WAN avoids separate appliances for smaller branches."
+  ],
+  "best_fit_for": [
+    "SMB and mid-market organisations already running SonicWall firewalls.",
+    "Distributed branch estates where firewall-led SD-WAN is operationally simpler than a separate SD-WAN platform.",
+    "Buyers prioritising public pricing visibility and reseller channel options."
+  ],
+  "watch_outs": [
+    "SASE and SSE capabilities have partial public evidence; depth should be confirmed in RFP.",
+    "Less suited to large enterprise multinational deployments requiring private backbone or PoP architectures.",
+    "Public cloud gateway and multi-cloud transit fabric capabilities are less prominent than cloud-native SASE vendors."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

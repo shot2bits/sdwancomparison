@@ -1,0 +1,364 @@
+{
+  "features": [
+    {
+      "id": "f01_fully_managed_service",
+      "number": 1,
+      "category": "Service delivery and operating model",
+      "name": "Fully managed service",
+      "definition": "Provider designs, deploys, monitors, changes, supports and reports on the service.",
+      "rfp_question": "Confirm whether your solution/service provides: Fully managed service. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f02_diy_self_managed_model",
+      "number": 2,
+      "category": "Service delivery and operating model",
+      "name": "DIY / self-managed model",
+      "definition": "Customer operates SD-WAN controller, policies, updates and incident response.",
+      "rfp_question": "Confirm whether your solution/service provides: DIY / self-managed model. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f03_co_managed_service",
+      "number": 3,
+      "category": "Service delivery and operating model",
+      "name": "Co-managed service",
+      "definition": "Provider runs platform/support while customer retains selected policy or change rights.",
+      "rfp_question": "Confirm whether your solution/service provides: Co-managed service. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f04_multi_tenant_msp_white_label_support",
+      "number": 4,
+      "category": "Service delivery and operating model",
+      "name": "Multi-tenant MSP / white-label support",
+      "definition": "Tenant isolation, delegated administration, branded portals, templates and service-provider scale.",
+      "rfp_question": "Confirm whether your solution/service provides: Multi-tenant MSP / white-label support. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f05_professional_services_and_migration_support",
+      "number": 5,
+      "category": "Service delivery and operating model",
+      "name": "Professional services and migration support",
+      "definition": "Discovery, design, pilot, staging, migration runbooks, rollback and training.",
+      "rfp_question": "Confirm whether your solution/service provides: Professional services and migration support. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f06_last_mile_circuit_management",
+      "number": 6,
+      "category": "Service delivery and operating model",
+      "name": "Last-mile circuit management",
+      "definition": "Sourcing, monitoring and support for broadband, DIA, LTE/5G, MPLS and cross-connects.",
+      "rfp_question": "Confirm whether your solution/service provides: Last-mile circuit management. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f07_lifecycle_management",
+      "number": 7,
+      "category": "Service delivery and operating model",
+      "name": "Lifecycle management",
+      "definition": "Hardware replacement, firmware upgrades, patching, renewals and EoL planning.",
+      "rfp_question": "Confirm whether your solution/service provides: Lifecycle management. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f08_flexible_commercial_model",
+      "number": 8,
+      "category": "Service delivery and operating model",
+      "name": "Flexible commercial model",
+      "definition": "Per-site, per-bandwidth, per-user, per-device, consumption, NaaS or bundled pricing.",
+      "rfp_question": "Confirm whether your solution/service provides: Flexible commercial model. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f09_encrypted_overlay_fabric",
+      "number": 9,
+      "category": "Network architecture and transport",
+      "name": "Encrypted overlay fabric",
+      "definition": "Secure tunnels across broadband, DIA, MPLS, LTE/5G, satellite or private WAN.",
+      "rfp_question": "Confirm whether your solution/service provides: Encrypted overlay fabric. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f10_dynamic_path_selection",
+      "number": 10,
+      "category": "Network architecture and transport",
+      "name": "Dynamic path selection",
+      "definition": "Real-time routing based on latency, jitter, packet loss, brownouts, MOS and policy.",
+      "rfp_question": "Confirm whether your solution/service provides: Dynamic path selection. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f11_active_active_link_utilisation",
+      "number": 11,
+      "category": "Network architecture and transport",
+      "name": "Active-active link utilisation",
+      "definition": "Use multiple links concurrently rather than passive backup only.",
+      "rfp_question": "Confirm whether your solution/service provides: Active-active link utilisation. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f12_application_aware_routing",
+      "number": 12,
+      "category": "Network architecture and transport",
+      "name": "Application-aware routing",
+      "definition": "Identification and routing for SaaS, UCaaS, ERP and custom applications.",
+      "rfp_question": "Confirm whether your solution/service provides: Application-aware routing. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f13_qos_and_traffic_shaping",
+      "number": 13,
+      "category": "Network architecture and transport",
+      "name": "QoS and traffic shaping",
+      "definition": "Per-application and per-class prioritisation, reservation and policing.",
+      "rfp_question": "Confirm whether your solution/service provides: QoS and traffic shaping. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f14_packet_loss_remediation",
+      "number": 14,
+      "category": "Network architecture and transport",
+      "name": "Packet loss remediation",
+      "definition": "FEC, packet duplication, jitter buffering, TCP optimisation and WAN optimisation.",
+      "rfp_question": "Confirm whether your solution/service provides: Packet loss remediation. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f15_local_internet_breakout",
+      "number": 15,
+      "category": "Network architecture and transport",
+      "name": "Local internet breakout",
+      "definition": "Secure direct internet access from branch sites.",
+      "rfp_question": "Confirm whether your solution/service provides: Local internet breakout. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f16_mpls_coexistence_and_migration",
+      "number": 16,
+      "category": "Network architecture and transport",
+      "name": "MPLS coexistence and migration",
+      "definition": "Hybrid MPLS/internet/cellular during transition.",
+      "rfp_question": "Confirm whether your solution/service provides: MPLS coexistence and migration. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f17_cellular_and_5g_support",
+      "number": 17,
+      "category": "Network architecture and transport",
+      "name": "Cellular and 5G support",
+      "definition": "Integrated/external modem, SIM management, signal monitoring and failover.",
+      "rfp_question": "Confirm whether your solution/service provides: Cellular and 5G support. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f18_cloud_on_ramp",
+      "number": 18,
+      "category": "Network architecture and transport",
+      "name": "Cloud on-ramp",
+      "definition": "Automated/simplified connectivity to AWS, Azure, Google Cloud, Oracle, Equinix, Megaport and SaaS.",
+      "rfp_question": "Confirm whether your solution/service provides: Cloud on-ramp. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f19_public_cloud_gateways",
+      "number": 19,
+      "category": "Gateway, PoP and backbone design",
+      "name": "Public cloud gateways",
+      "definition": "Vendor-operated gateways/PoPs for SaaS optimisation, remote access or security enforcement.",
+      "rfp_question": "Confirm whether your solution/service provides: Public cloud gateways. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f20_private_pops_dedicated_pops",
+      "number": 20,
+      "category": "Gateway, PoP and backbone design",
+      "name": "Private PoPs / dedicated PoPs",
+      "definition": "Customer-hosted, dedicated or sovereign PoP options.",
+      "rfp_question": "Confirm whether your solution/service provides: Private PoPs / dedicated PoPs. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f21_private_global_backbone",
+      "number": 21,
+      "category": "Gateway, PoP and backbone design",
+      "name": "Private global backbone",
+      "definition": "Vendor-owned or controlled backbone between PoPs.",
+      "rfp_question": "Confirm whether your solution/service provides: Private global backbone. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f22_regional_breakout_and_data_residency",
+      "number": 22,
+      "category": "Gateway, PoP and backbone design",
+      "name": "Regional breakout and data residency",
+      "definition": "Pin traffic to countries, regions or approved inspection locations.",
+      "rfp_question": "Confirm whether your solution/service provides: Regional breakout and data residency. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f23_multi_cloud_transit_fabric",
+      "number": 23,
+      "category": "Gateway, PoP and backbone design",
+      "name": "Multi-cloud transit fabric",
+      "definition": "Branch-to-cloud, cloud-to-cloud and user-to-cloud connectivity under common policy.",
+      "rfp_question": "Confirm whether your solution/service provides: Multi-cloud transit fabric. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f24_flexible_edge_form_factors",
+      "number": 24,
+      "category": "Gateway, PoP and backbone design",
+      "name": "Flexible edge form factors",
+      "definition": "Physical, virtual, cloud marketplace, container or uCPE.",
+      "rfp_question": "Confirm whether your solution/service provides: Flexible edge form factors. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f25_high_availability_design",
+      "number": 25,
+      "category": "Gateway, PoP and backbone design",
+      "name": "High availability design",
+      "definition": "Dual appliances, dual circuits, dual power, HA clustering and gateway redundancy.",
+      "rfp_question": "Confirm whether your solution/service provides: High availability design. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f26_sla_backed_service_fabric",
+      "number": 26,
+      "category": "Gateway, PoP and backbone design",
+      "name": "SLA-backed service fabric",
+      "definition": "SLA for uptime, response, change handling and possibly latency/jitter/loss.",
+      "rfp_question": "Confirm whether your solution/service provides: SLA-backed service fabric. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f27_integrated_next_generation_firewall",
+      "number": 27,
+      "category": "Security and SASE capability",
+      "name": "Integrated next-generation firewall",
+      "definition": "Stateful firewall, app control, IPS/IDS, malware inspection and URL filtering.",
+      "rfp_question": "Confirm whether your solution/service provides: Integrated next-generation firewall. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f28_full_sase_platform",
+      "number": 28,
+      "category": "Security and SASE capability",
+      "name": "Full SASE platform",
+      "definition": "SD-WAN plus SWG, CASB, ZTNA, FWaaS, DLP, RBI, DNS security and threat prevention.",
+      "rfp_question": "Confirm whether your solution/service provides: Full SASE platform. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f29_sse_ecosystem_integration",
+      "number": 29,
+      "category": "Security and SASE capability",
+      "name": "SSE ecosystem integration",
+      "definition": "Interoperation with Zscaler, Netskope, Palo Alto Prisma Access, Cisco Secure Access, Cloudflare etc.",
+      "rfp_question": "Confirm whether your solution/service provides: SSE ecosystem integration. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f30_zero_trust_network_access",
+      "number": 30,
+      "category": "Security and SASE capability",
+      "name": "Zero Trust Network Access",
+      "definition": "Identity and posture-based access to private applications.",
+      "rfp_question": "Confirm whether your solution/service provides: Zero Trust Network Access. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f31_secure_web_gateway",
+      "number": 31,
+      "category": "Security and SASE capability",
+      "name": "Secure web gateway",
+      "definition": "URL filtering, SSL inspection, malware scanning and acceptable-use controls.",
+      "rfp_question": "Confirm whether your solution/service provides: Secure web gateway. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f32_casb_capability",
+      "number": 32,
+      "category": "Security and SASE capability",
+      "name": "CASB capability",
+      "definition": "SaaS discovery, sanctioned/unsanctioned app control and SaaS policy enforcement.",
+      "rfp_question": "Confirm whether your solution/service provides: CASB capability. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f33_data_loss_prevention",
+      "number": 33,
+      "category": "Security and SASE capability",
+      "name": "Data loss prevention",
+      "definition": "Data classification, inspection, blocking, alerting and exception workflow.",
+      "rfp_question": "Confirm whether your solution/service provides: Data loss prevention. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f34_remote_user_access",
+      "number": 34,
+      "category": "Security and SASE capability",
+      "name": "Remote user access",
+      "definition": "Client or clientless access for remote workers, contractors and mobile users.",
+      "rfp_question": "Confirm whether your solution/service provides: Remote user access. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f35_soc_siem_soar_integration",
+      "number": 35,
+      "category": "Security and SASE capability",
+      "name": "SOC/SIEM/SOAR integration",
+      "definition": "Syslog, APIs, event export, threat intelligence and workflow integration.",
+      "rfp_question": "Confirm whether your solution/service provides: SOC/SIEM/SOAR integration. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f36_centralised_orchestration",
+      "number": 36,
+      "category": "Operations, assurance and automation",
+      "name": "Centralised orchestration",
+      "definition": "Templates, intent-based policy, zero-touch provisioning and configuration compliance.",
+      "rfp_question": "Confirm whether your solution/service provides: Centralised orchestration. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f37_customer_portal_and_rbac",
+      "number": 37,
+      "category": "Operations, assurance and automation",
+      "name": "Customer portal and RBAC",
+      "definition": "Real-time status, role-based access, reporting, tickets and change requests.",
+      "rfp_question": "Confirm whether your solution/service provides: Customer portal and RBAC. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f38_observability_and_digital_experience_monitoring",
+      "number": 38,
+      "category": "Operations, assurance and automation",
+      "name": "Observability and digital experience monitoring",
+      "definition": "App experience, user experience, device health, SaaS telemetry and path analytics.",
+      "rfp_question": "Confirm whether your solution/service provides: Observability and digital experience monitoring. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f39_apis_and_automation",
+      "number": 39,
+      "category": "Operations, assurance and automation",
+      "name": "APIs and automation",
+      "definition": "REST APIs, Terraform, webhooks, event streaming and ITSM integration.",
+      "rfp_question": "Confirm whether your solution/service provides: APIs and automation. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    },
+    {
+      "id": "f40_managed_service_assurance",
+      "number": 40,
+      "category": "Operations, assurance and automation",
+      "name": "Managed service assurance",
+      "definition": "24/7 NOC/SOC, proactive monitoring, incident ownership, RCA, service reviews and change governance.",
+      "rfp_question": "Confirm whether your solution/service provides: Managed service assurance. Include delivery model, limitations, geography and dependencies.",
+      "rfp_evidence_requested": "Product documentation, architecture diagram, service description, RACI, portal screenshot, sample report, SLA or contract extract."
+    }
+  ]
+}

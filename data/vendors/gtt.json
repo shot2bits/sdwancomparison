@@ -1,0 +1,82 @@
+{
+  "slug": "gtt",
+  "name": "GTT",
+  "website": "https://www.gtt.net/services/secure-networking/managed-sd-wan",
+  "category": "Global managed SD-WAN provider",
+  "product_focus": "Managed SD-WAN, SASE/SSE, Envision, Tier 1 backbone",
+  "primary_sources": [
+    "https://www.gtt.net/services/secure-networking/managed-sd-wan/",
+    "https://secure.businesswire.com/news/home/20250724196638/en/ISG-Names-GTT-a-Leader-for-SASE-and-Managed-SD-WAN-in-U.S.-and-U.K."
+  ],
+  "evidence_summary": "GTT sources evidence managed SD-WAN, SASE/SSE, vendor-agnostic delivery, Envision platform and global Tier 1 backbone.",
+  "cost_model": "Quote-based managed service; GTT public page answers cost only as consultative/requirement-based.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "yes",
+    "f02_diy_self_managed_model": "partial",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f05_professional_services_and_migration_support": "yes",
+    "f06_last_mile_circuit_management": "yes",
+    "f07_lifecycle_management": "yes",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "yes",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f21_private_global_backbone": "yes",
+    "f22_regional_breakout_and_data_residency": "yes",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "yes",
+    "f27_integrated_next_generation_firewall": "partner_integrated",
+    "f28_full_sase_platform": "yes",
+    "f29_sse_ecosystem_integration": "yes",
+    "f30_zero_trust_network_access": "partner_integrated",
+    "f31_secure_web_gateway": "partner_integrated",
+    "f32_casb_capability": "partner_integrated",
+    "f33_data_loss_prevention": "unknown",
+    "f34_remote_user_access": "partner_integrated",
+    "f35_soc_siem_soar_integration": "partner_integrated",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "yes"
+  },
+  "score_summary": {
+    "yes_count": 29,
+    "partial_count": 2,
+    "partner_integrated_count": 8,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 1,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.975
+  },
+  "key_differentiators": [
+    "Tier 1 global backbone provides strong international transit capability alongside managed SD-WAN.",
+    "Vendor-agnostic SD-WAN delivery (multiple platform options) with the Envision management platform.",
+    "Recognised as a leader for SASE and managed SD-WAN by industry analysts."
+  ],
+  "best_fit_for": [
+    "Multinational enterprises needing strong international backbone alongside managed SD-WAN.",
+    "Buyers wanting platform flexibility within a managed service.",
+    "Organisations consolidating global transit, SD-WAN and SASE under one provider."
+  ],
+  "watch_outs": [
+    "SASE depth depends heavily on the chosen platform partner; native SSE capabilities are not primary positioning.",
+    "Security stack is largely partner-integrated.",
+    "Commercial model is consultative; ensure cost lines for managed changes, security and SLAs are explicit."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

@@ -1,0 +1,82 @@
+{
+  "slug": "cradlepoint-ericsson",
+  "name": "Cradlepoint / Ericsson",
+  "website": "https://cradlepoint.com",
+  "category": "Wireless WAN / SD-WAN adjacent vendor",
+  "product_focus": "Ericsson NetCloud SD-WAN, NetCloud SASE",
+  "primary_sources": [
+    "https://cradlepoint.com/products/sd-wan/",
+    "https://www.ericsson.com/en/news/2025/4/ericsson-unveils-wireless-first-branch-architecture"
+  ],
+  "evidence_summary": "Ericsson/Cradlepoint sources evidence cellular-centric SD-WAN, 5G, link bonding/SASE and network slicing positioning.",
+  "cost_model": "Quote-based NetCloud subscriptions + routers/adapters; public hardware pricing may exist through resellers.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "partner_integrated",
+    "f02_diy_self_managed_model": "yes",
+    "f03_co_managed_service": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f06_last_mile_circuit_management": "partner_integrated",
+    "f07_lifecycle_management": "partner_integrated",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "yes",
+    "f18_cloud_on_ramp": "partial",
+    "f19_public_cloud_gateways": "partial",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "unknown",
+    "f22_regional_breakout_and_data_residency": "yes",
+    "f23_multi_cloud_transit_fabric": "partial",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f27_integrated_next_generation_firewall": "partial",
+    "f28_full_sase_platform": "yes",
+    "f29_sse_ecosystem_integration": "partial",
+    "f30_zero_trust_network_access": "partial",
+    "f31_secure_web_gateway": "partial",
+    "f32_casb_capability": "unknown",
+    "f33_data_loss_prevention": "unknown",
+    "f34_remote_user_access": "partial",
+    "f35_soc_siem_soar_integration": "partial",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "partner_integrated"
+  },
+  "score_summary": {
+    "yes_count": 18,
+    "partial_count": 10,
+    "partner_integrated_count": 8,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 4,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.9
+  },
+  "key_differentiators": [
+    "Wireless-first branch architecture from Ericsson with deep 5G expertise; NetCloud provides cellular-centric SD-WAN management.",
+    "Strong story for organisations adopting 5G as a primary access medium rather than as a backup.",
+    "Network slicing and private 5G integration roadmap is more credible than competitors lacking cellular heritage."
+  ],
+  "best_fit_for": [
+    "Distributed enterprises with strong cellular/5G access strategy (retail, logistics, transport, public sector).",
+    "Buyers consolidating wireless WAN with traditional fixed-line SD-WAN under one operational tool.",
+    "Organisations interested in private 5G integration with branch SD-WAN."
+  ],
+  "watch_outs": [
+    "SASE story is partner-integrated rather than native; SSE capabilities require validation in RFP.",
+    "Cloud on-ramp and multi-cloud transit fabric have limited public evidence relative to dedicated SASE platforms.",
+    "Best for cellular-led architectures; less strong as a primary fit for fixed-circuit-heavy estates."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

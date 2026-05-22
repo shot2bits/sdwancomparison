@@ -1,0 +1,83 @@
+{
+  "slug": "cisco",
+  "name": "Cisco",
+  "website": "https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html",
+  "category": "SD-WAN / SASE technology vendor",
+  "product_focus": "Catalyst SD-WAN, Meraki MX, Cisco Secure Access",
+  "primary_sources": [
+    "https://www.cisco.com/site/us/en/solutions/networking/sdwan/cloud-onramp/index.html",
+    "https://documentation.meraki.com/Platform_Management/Dashboard_Administration/Design_and_Configure/Architectures_and_Best_Practices/Cisco_Meraki_Best_Practice_Design/Best_Practice_Design_-_MX_Security_and_SD-WAN/Meraki_SD-WAN",
+    "https://www.cisco.com/c/en/us/solutions/collateral/enterprise-networks/sd-wan/nb-06-sase-sd-wan-secure-access-aag-cte-en.html"
+  ],
+  "evidence_summary": "Cisco sources evidence SD-WAN Cloud OnRamp, Meraki SD-WAN, and SD-WAN + Secure Access SASE integration.",
+  "cost_model": "Quote-based subscription/licence + appliance/support; Meraki public SKUs via partners, enterprise pricing varies by platform and term.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "partner_integrated",
+    "f02_diy_self_managed_model": "yes",
+    "f03_co_managed_service": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f06_last_mile_circuit_management": "partner_integrated",
+    "f07_lifecycle_management": "partner_integrated",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "partial",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "unknown",
+    "f22_regional_breakout_and_data_residency": "yes",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f27_integrated_next_generation_firewall": "yes",
+    "f28_full_sase_platform": "yes",
+    "f29_sse_ecosystem_integration": "yes",
+    "f30_zero_trust_network_access": "yes",
+    "f31_secure_web_gateway": "yes",
+    "f32_casb_capability": "yes",
+    "f33_data_loss_prevention": "partial",
+    "f34_remote_user_access": "yes",
+    "f35_soc_siem_soar_integration": "yes",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "yes",
+    "f40_managed_service_assurance": "partner_integrated"
+  },
+  "score_summary": {
+    "yes_count": 28,
+    "partial_count": 2,
+    "partner_integrated_count": 8,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 2,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.95
+  },
+  "key_differentiators": [
+    "Broadest platform portfolio in the category, covering Catalyst SD-WAN for enterprise WAN, Meraki MX for cloud-managed branch, and Cisco Secure Access for converged SASE delivery.",
+    "Cloud OnRamp provides automated optimisation paths for Microsoft 365, Salesforce, and major cloud providers, with native integration into the Cisco security stack.",
+    "Large global partner and integrator ecosystem reduces delivery risk for buyers wanting managed or co-managed delivery."
+  ],
+  "best_fit_for": [
+    "Enterprises already standardised on Cisco networking who want platform consistency from LAN through WAN to security.",
+    "Multinational organisations needing strong vendor presence across regions and a deep partner channel.",
+    "Buyers prioritising single-vendor risk consolidation across networking and security."
+  ],
+  "watch_outs": [
+    "Two distinct SD-WAN product lines (Catalyst and Meraki) means buyers should confirm which fits the target deployment profile and the longer-term roadmap.",
+    "Managed delivery is partner-led rather than first-party, so service quality varies meaningfully by integrator.",
+    "Private global backbone is not part of the platform; cloud transport relies on internet and partner gateways."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

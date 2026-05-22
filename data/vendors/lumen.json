@@ -1,0 +1,81 @@
+{
+  "slug": "lumen",
+  "name": "Lumen",
+  "website": "https://www.lumen.com/en-us/services/sd-wan.html",
+  "category": "Managed SD-WAN / NaaS provider",
+  "product_focus": "Managed or co-managed SD-WAN",
+  "primary_sources": [
+    "https://www.lumen.com/en-us/services/sd-wan.html"
+  ],
+  "evidence_summary": "Lumen source evidences fully managed or co-managed SD-WAN for enterprise.",
+  "cost_model": "Quote-based; Lumen states fully managed or co-managed SD-WAN, with access/network services priced by requirement.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "yes",
+    "f02_diy_self_managed_model": "partial",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f05_professional_services_and_migration_support": "yes",
+    "f06_last_mile_circuit_management": "yes",
+    "f07_lifecycle_management": "yes",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "yes",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f21_private_global_backbone": "yes",
+    "f22_regional_breakout_and_data_residency": "partner_integrated",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "yes",
+    "f27_integrated_next_generation_firewall": "partner_integrated",
+    "f28_full_sase_platform": "partner_integrated",
+    "f29_sse_ecosystem_integration": "partner_integrated",
+    "f30_zero_trust_network_access": "partner_integrated",
+    "f31_secure_web_gateway": "partner_integrated",
+    "f32_casb_capability": "partner_integrated",
+    "f33_data_loss_prevention": "unknown",
+    "f34_remote_user_access": "partner_integrated",
+    "f35_soc_siem_soar_integration": "partner_integrated",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "yes"
+  },
+  "score_summary": {
+    "yes_count": 26,
+    "partial_count": 2,
+    "partner_integrated_count": 11,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 1,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.975
+  },
+  "key_differentiators": [
+    "Fully managed or co-managed SD-WAN with strong NaaS positioning and integrated network services.",
+    "Substantial underlay ownership in North America with global reach.",
+    "Co-managed model provides operational flexibility for customers wanting selective control."
+  ],
+  "best_fit_for": [
+    "North American enterprises wanting integrated managed SD-WAN, access and broader network services from one provider.",
+    "Buyers attracted to the NaaS consumption model.",
+    "Organisations wanting genuine co-managed delivery rather than pure managed or pure DIY."
+  ],
+  "watch_outs": [
+    "SASE and security capabilities are largely partner-integrated rather than native; the SSE platform choice needs explicit evaluation.",
+    "International delivery depth is less prominent than the dedicated global carriers.",
+    "Underlying SD-WAN platform should be confirmed; platform choice affects feature set."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

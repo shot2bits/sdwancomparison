@@ -1,0 +1,82 @@
+{
+  "slug": "peplink",
+  "name": "Peplink",
+  "website": "https://www.peplink.com",
+  "category": "SD-WAN / cellular-first technology vendor",
+  "product_focus": "Balance, MAX, SpeedFusion, InControl, FusionHub",
+  "primary_sources": [
+    "https://www.peplink.com/technology/sd-wan-solutions/",
+    "https://www.peplink.com/software/speedfusion-cloud/"
+  ],
+  "evidence_summary": "Peplink sources evidence SD-WAN, connection resilience, deployment flexibility, InControl and FusionHub/SpeedFusion capabilities.",
+  "cost_model": "Public hardware prices often available via resellers; licences/support/managed service vary by partner and region.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "partner_integrated",
+    "f02_diy_self_managed_model": "yes",
+    "f03_co_managed_service": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f06_last_mile_circuit_management": "partner_integrated",
+    "f07_lifecycle_management": "partner_integrated",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "yes",
+    "f18_cloud_on_ramp": "partial",
+    "f19_public_cloud_gateways": "partial",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "unknown",
+    "f22_regional_breakout_and_data_residency": "not_primary",
+    "f23_multi_cloud_transit_fabric": "partial",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f27_integrated_next_generation_firewall": "partial",
+    "f28_full_sase_platform": "not_primary",
+    "f29_sse_ecosystem_integration": "partner_integrated",
+    "f30_zero_trust_network_access": "not_primary",
+    "f31_secure_web_gateway": "not_primary",
+    "f32_casb_capability": "not_primary",
+    "f33_data_loss_prevention": "not_primary",
+    "f34_remote_user_access": "partial",
+    "f35_soc_siem_soar_integration": "partial",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "partial",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "partner_integrated"
+  },
+  "score_summary": {
+    "yes_count": 15,
+    "partial_count": 9,
+    "partner_integrated_count": 8,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 2,
+    "not_primary_count": 6,
+    "evidence_coverage_pct": 0.8
+  },
+  "key_differentiators": [
+    "SpeedFusion bonding technology is genuinely differentiated for sites needing to combine multiple cellular, broadband or satellite links into a single resilient connection.",
+    "Cellular-first architecture makes Peplink a natural fit for retail, construction, pop-up sites, vehicles and temporary deployments.",
+    "InControl cloud management provides centralised orchestration across distributed appliance estates."
+  ],
+  "best_fit_for": [
+    "Highly distributed branch or site estates where cellular and broadband bonding is more important than enterprise SASE features.",
+    "Specific verticals such as retail, construction, transport and emergency services where link diversity is operational priority one.",
+    "Buyers wanting public hardware pricing transparency through resellers."
+  ],
+  "watch_outs": [
+    "Not a SASE platform; security and ZTNA capabilities are limited compared to category leaders.",
+    "Enterprise-class observability, SOC integration and DLP are not the primary positioning.",
+    "Best paired with a separate SSE platform if cloud-delivered security is required."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

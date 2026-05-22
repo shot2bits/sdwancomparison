@@ -1,0 +1,82 @@
+{
+  "slug": "fatpipe-networks",
+  "name": "FatPipe Networks",
+  "website": "https://www.fatpipe.com",
+  "category": "SD-WAN technology vendor",
+  "product_focus": "FatPipe SD-WAN, MPSec, WAN optimisation",
+  "primary_sources": [
+    "https://www.fatpipe.com/products/fatpipe-sd-wan-software-defined-wan",
+    "https://fe5e0932bbdbee188a67-ade54de1bba9a4fe61c120942a09245b.ssl.cf1.rackcdn.com/SB_FatPipe_SD-WAN.pdf"
+  ],
+  "evidence_summary": "FatPipe sources evidence SD-WAN, dynamic load balancing, native security, application QoS, WAN optimisation and cloud-enabled SD-WAN.",
+  "cost_model": "Quote-based appliances/software/support; public price transparency limited.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "partner_integrated",
+    "f02_diy_self_managed_model": "yes",
+    "f03_co_managed_service": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f06_last_mile_circuit_management": "partner_integrated",
+    "f07_lifecycle_management": "partner_integrated",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "partial",
+    "f18_cloud_on_ramp": "partial",
+    "f19_public_cloud_gateways": "partial",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "unknown",
+    "f22_regional_breakout_and_data_residency": "not_primary",
+    "f23_multi_cloud_transit_fabric": "partial",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f27_integrated_next_generation_firewall": "partial",
+    "f28_full_sase_platform": "not_primary",
+    "f29_sse_ecosystem_integration": "partner_integrated",
+    "f30_zero_trust_network_access": "not_primary",
+    "f31_secure_web_gateway": "partner_integrated",
+    "f32_casb_capability": "not_primary",
+    "f33_data_loss_prevention": "not_primary",
+    "f34_remote_user_access": "partial",
+    "f35_soc_siem_soar_integration": "partial",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "partner_integrated"
+  },
+  "score_summary": {
+    "yes_count": 15,
+    "partial_count": 9,
+    "partner_integrated_count": 9,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 2,
+    "not_primary_count": 5,
+    "evidence_coverage_pct": 0.825
+  },
+  "key_differentiators": [
+    "Long heritage in WAN optimisation, dynamic load balancing and MPSec encryption.",
+    "Independent vendor offering platform flexibility without lock-in to a larger ecosystem.",
+    "Application QoS and traffic shaping capabilities are mature."
+  ],
+  "best_fit_for": [
+    "Mid-market organisations wanting SD-WAN without the operational overhead of larger platform vendors.",
+    "Buyers prioritising load balancing and WAN performance over full SASE convergence.",
+    "Specific use cases requiring native WAN optimisation as part of the SD-WAN platform."
+  ],
+  "watch_outs": [
+    "Significantly smaller vendor than the category leaders; ecosystem, partner channel and roadmap velocity should be confirmed.",
+    "SASE and SSE capabilities are not primary positioning; security relies on partner integration.",
+    "Public pricing and case study transparency are limited; expect more discovery work in evaluation."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

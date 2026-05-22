@@ -1,21 +1,21 @@
 {
-  "slug": "cato-networks",
-  "name": "Cato Networks",
-  "website": "https://www.catonetworks.com",
-  "category": "Cloud-native SASE / SD-WAN provider",
-  "product_focus": "Cato SASE Cloud, Cato Socket, private backbone",
+  "slug": "aryaka",
+  "name": "Aryaka",
+  "website": "https://www.aryaka.com",
+  "category": "Managed SD-WAN / SASE provider",
+  "product_focus": "Aryaka Unified SASE, SmartCONNECT, private core",
   "primary_sources": [
-    "https://www.catonetworks.com/platform/global-private-backbone/",
-    "https://support.catonetworks.com/hc/en-us/articles/34177185210013-Private-PoP-Overview-for-Customers"
+    "https://www.aryaka.com/",
+    "https://www.cvisionintl.com/media/3wwf2ulh/aryaka-unified-sase-as-a-service-overview.pdf"
   ],
-  "evidence_summary": "Cato sources evidence a cloud-native private backbone spanning 85+ PoPs and Private PoP option; SASE/SD-WAN is core platform positioning.",
-  "cost_model": "Quote-based subscription; typically site/user/bandwidth/security bundle based.",
+  "evidence_summary": "Aryaka sources evidence Unified SASE as-a-service, private global core network, SD-WAN, NGFW, SWG, IDPS, WAN optimisation and observability.",
+  "cost_model": "Quote-based managed service; pricing normally depends on sites, bandwidth, regions, security stack and optimisation.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
     "f01_fully_managed_service": "yes",
-    "f02_diy_self_managed_model": "yes",
+    "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "partial",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
     "f07_lifecycle_management": "yes",
@@ -31,7 +31,7 @@
     "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
-    "f20_private_pops_dedicated_pops": "yes",
+    "f20_private_pops_dedicated_pops": "partial",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -43,8 +43,8 @@
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
-    "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "yes",
+    "f32_casb_capability": "partial",
+    "f33_data_loss_prevention": "partial",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
@@ -54,8 +54,8 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 38,
-    "partial_count": 1,
+    "yes_count": 33,
+    "partial_count": 6,
     "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
     "unknown_count": 0,
@@ -63,19 +63,19 @@
     "evidence_coverage_pct": 1.0
   },
   "key_differentiators": [
-    "Single converged platform with no policy or log fragmentation across SD-WAN and security functions.",
-    "85+ PoP global private backbone reduces internet variability and provides predictable performance for SaaS-heavy traffic.",
-    "Strong story for organisations consolidating multiple point solutions onto one operational platform."
+    "Unified SASE delivered as a managed service from end to end, including the private global core network and WAN optimisation.",
+    "Strong story for global organisations needing predictable performance between regions without internet variability.",
+    "Embedded WAN optimisation differentiates from pure cloud-delivered SASE platforms."
   ],
   "best_fit_for": [
-    "Mid-market and enterprise buyers consolidating SD-WAN and SASE on one platform from a single vendor.",
-    "Global organisations with SaaS-heavy traffic patterns that benefit from a private backbone.",
-    "Teams without dedicated security operations capacity who want a managed SASE experience."
+    "Global enterprises wanting SASE delivered as a fully managed service rather than as DIY platform plus tools.",
+    "Buyers who need consistent inter-regional performance for chatty applications.",
+    "Organisations preferring a vendor that owns the platform and the managed service rather than coordinating multiple parties."
   ],
   "watch_outs": [
-    "Less suited to best-of-breed buyers wanting Zscaler or Netskope as the SSE layer.",
-    "Customer does not own the underlay; circuits sourced separately, so multi-supplier coordination remains.",
-    "Less mature than incumbents for very large multinational deployments with heavy legacy MPLS estates."
+    "Smaller PoP footprint and partner ecosystem than the hyperscale SASE vendors; coverage must match your geographic profile.",
+    "DIY/self-managed model has limited evidence; this is a managed-service-first proposition.",
+    "CASB and DLP capabilities have partial public evidence; depth should be confirmed in RFP."
   ],
   "last_verified": "2026-05-22",
   "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."

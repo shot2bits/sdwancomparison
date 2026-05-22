@@ -1,0 +1,83 @@
+{
+  "slug": "telefonica-tech",
+  "name": "Telefónica Tech",
+  "website": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase",
+  "category": "Global managed SD-WAN / SASE provider",
+  "product_focus": "Cloud Networking, SASE, flexWAN, Cisco/Fortinet alliances",
+  "primary_sources": [
+    "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase",
+    "https://telefonicatech.uk/solutions/cyber-security/flexwan/",
+    "https://www.telefonica.com/en/communication-room/press-room/telefonica-tech-and-cisco-join-forces-to-evolve-their-converged-network-and-security-offering/"
+  ],
+  "evidence_summary": "Telefónica sources evidence managed SD-WAN/flexWAN, SASE, cloud networking and Cisco-based converged SD-WAN/security/SASE service.",
+  "cost_model": "Quote-based managed service; pricing depends on flexWAN/SASE scope, access, security platform and countries.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "yes",
+    "f02_diy_self_managed_model": "partial",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f05_professional_services_and_migration_support": "yes",
+    "f06_last_mile_circuit_management": "yes",
+    "f07_lifecycle_management": "yes",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "yes",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f21_private_global_backbone": "yes",
+    "f22_regional_breakout_and_data_residency": "yes",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "yes",
+    "f27_integrated_next_generation_firewall": "partner_integrated",
+    "f28_full_sase_platform": "yes",
+    "f29_sse_ecosystem_integration": "yes",
+    "f30_zero_trust_network_access": "yes",
+    "f31_secure_web_gateway": "yes",
+    "f32_casb_capability": "yes",
+    "f33_data_loss_prevention": "partial",
+    "f34_remote_user_access": "yes",
+    "f35_soc_siem_soar_integration": "yes",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "yes"
+  },
+  "score_summary": {
+    "yes_count": 34,
+    "partial_count": 3,
+    "partner_integrated_count": 3,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 0,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 1.0
+  },
+  "key_differentiators": [
+    "flexWAN and managed SD-WAN delivery with Cisco-based converged SD-WAN, security and SASE service.",
+    "Strong Iberian, Latin American and European presence with growing global delivery.",
+    "Cyber security and managed services depth via Telefónica Tech investments."
+  ],
+  "best_fit_for": [
+    "Spanish-speaking markets (Iberia, Latin America) wanting carrier-led managed SD-WAN and SASE.",
+    "Enterprises wanting Cisco-based managed SASE delivered by a carrier.",
+    "Buyers prioritising integrated cyber security alongside SD-WAN."
+  ],
+  "watch_outs": [
+    "Platform is largely Cisco-led; buyers wanting platform optionality should evaluate alternatives.",
+    "Global delivery depth outside core geographies is less mature than the largest carriers.",
+    "DIY/self-managed model is not the primary positioning."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

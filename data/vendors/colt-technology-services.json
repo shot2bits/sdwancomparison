@@ -1,0 +1,82 @@
+{
+  "slug": "colt-technology-services",
+  "name": "Colt Technology Services",
+  "website": "https://www.colt.net/products/networking/sd-wan",
+  "category": "Enterprise managed SD-WAN / connectivity provider",
+  "product_focus": "Colt SD WAN & SASE, managed/co-managed",
+  "primary_sources": [
+    "https://www.colt.net/products/networking/sd-wan",
+    "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/231080253111893"
+  ],
+  "evidence_summary": "Colt sources evidence SD-WAN & SASE, data sovereignty positioning and managed/co-managed service with management portal access.",
+  "cost_model": "Quote-based managed service; access, SD-WAN/SASE design, data sovereignty and service options drive pricing.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "yes",
+    "f02_diy_self_managed_model": "partial",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f05_professional_services_and_migration_support": "yes",
+    "f06_last_mile_circuit_management": "yes",
+    "f07_lifecycle_management": "yes",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "yes",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f21_private_global_backbone": "yes",
+    "f22_regional_breakout_and_data_residency": "yes",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "yes",
+    "f27_integrated_next_generation_firewall": "partner_integrated",
+    "f28_full_sase_platform": "yes",
+    "f29_sse_ecosystem_integration": "yes",
+    "f30_zero_trust_network_access": "yes",
+    "f31_secure_web_gateway": "yes",
+    "f32_casb_capability": "partial",
+    "f33_data_loss_prevention": "partial",
+    "f34_remote_user_access": "yes",
+    "f35_soc_siem_soar_integration": "yes",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "yes"
+  },
+  "score_summary": {
+    "yes_count": 33,
+    "partial_count": 4,
+    "partner_integrated_count": 3,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 0,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 1.0
+  },
+  "key_differentiators": [
+    "SD-WAN and SASE with strong European data sovereignty positioning.",
+    "Managed and co-managed delivery options with management portal access.",
+    "Enterprise-grade connectivity heritage with substantial European network ownership."
+  ],
+  "best_fit_for": [
+    "European enterprises prioritising data residency, sovereignty and regulatory alignment.",
+    "Buyers wanting genuine co-managed delivery rather than pure managed or pure DIY.",
+    "Organisations consolidating European connectivity with SD-WAN under one provider."
+  ],
+  "watch_outs": [
+    "Global delivery depth outside Europe is less prominent than the largest global carriers.",
+    "CASB and DLP have partial public evidence; SSE platform partner choice should be confirmed.",
+    "Underlying SD-WAN platform should be explicitly confirmed in RFP."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

@@ -1,0 +1,81 @@
+{
+  "slug": "netskope",
+  "name": "Netskope",
+  "website": "https://www.netskope.com",
+  "category": "SSE / SASE platform",
+  "product_focus": "Netskope One, Borderless WAN/Infiot heritage",
+  "primary_sources": [
+    "https://www.netskope.com/press-releases/netskope-acquires-infiot-will-deliver-fully-integrated-single-vendor-sase-platform"
+  ],
+  "evidence_summary": "Netskope source evidences acquisition of Infiot to deliver integrated single-vendor SASE and Borderless WAN for enterprise locations/cloud.",
+  "cost_model": "Quote-based subscription; modules commonly priced by users, sites, traffic and security functions.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "partner_integrated",
+    "f02_diy_self_managed_model": "yes",
+    "f03_co_managed_service": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f06_last_mile_circuit_management": "partner_integrated",
+    "f07_lifecycle_management": "partner_integrated",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "partial",
+    "f10_dynamic_path_selection": "partial",
+    "f11_active_active_link_utilisation": "partial",
+    "f12_application_aware_routing": "partial",
+    "f13_qos_and_traffic_shaping": "partial",
+    "f14_packet_loss_remediation": "partial",
+    "f15_local_internet_breakout": "partial",
+    "f16_mpls_coexistence_and_migration": "partial",
+    "f17_cellular_and_5g_support": "unknown",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "partial",
+    "f22_regional_breakout_and_data_residency": "yes",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "partial",
+    "f25_high_availability_design": "partial",
+    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f27_integrated_next_generation_firewall": "yes",
+    "f28_full_sase_platform": "yes",
+    "f29_sse_ecosystem_integration": "yes",
+    "f30_zero_trust_network_access": "yes",
+    "f31_secure_web_gateway": "yes",
+    "f32_casb_capability": "yes",
+    "f33_data_loss_prevention": "yes",
+    "f34_remote_user_access": "yes",
+    "f35_soc_siem_soar_integration": "yes",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "yes",
+    "f40_managed_service_assurance": "partner_integrated"
+  },
+  "score_summary": {
+    "yes_count": 19,
+    "partial_count": 11,
+    "partner_integrated_count": 8,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 2,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.95
+  },
+  "key_differentiators": [
+    "Strong CASB heritage; widely recognised as a leading SSE vendor for SaaS-heavy environments.",
+    "Borderless WAN (from the Infiot acquisition) extends Netskope into single-vendor SASE for buyers wanting both layers from one platform.",
+    "Detailed SaaS application visibility and policy controls."
+  ],
+  "best_fit_for": [
+    "Enterprises with deep SaaS adoption where CASB and DLP are top procurement priorities.",
+    "Buyers comparing single-vendor SASE platforms after starting with SSE.",
+    "Organisations selecting Netskope SSE alongside a separate SD-WAN platform via partner integration."
+  ],
+  "watch_outs": [
+    "Native SD-WAN (Borderless WAN) is newer than dedicated SD-WAN platforms; validate path selection and QoS depth in RFP.",
+    "Managed delivery is partner-led; first-party managed service is limited.",
+    "Premium pricing with modular structure; full SASE bundle costs can scale meaningfully with users and traffic."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}

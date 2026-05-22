@@ -1,0 +1,82 @@
+{
+  "slug": "forcepoint",
+  "name": "Forcepoint",
+  "website": "https://www.forcepoint.com/product/secure-sd-wan",
+  "category": "Security / secure SD-WAN vendor",
+  "product_focus": "Forcepoint FlexEdge Secure SD-WAN",
+  "primary_sources": [
+    "https://www.forcepoint.com/product/secure-sd-wan",
+    "https://www.content.shi.com/cms-content/accelerator/media/pdfs/forcepoint/forcepoint-102323-secure-sd-wan-solution-brief.pdf"
+  ],
+  "evidence_summary": "Forcepoint sources evidence managed Secure SD-WAN, cloud central management, zero-touch deployment, MultiLink resilience and security controls.",
+  "cost_model": "Quote-based appliances/software/subscriptions; managed SD-WAN positioned but pricing public transparency limited.",
+  "public_pricing_visibility": "quote_based",
+  "capabilities": {
+    "f01_fully_managed_service": "yes",
+    "f02_diy_self_managed_model": "yes",
+    "f03_co_managed_service": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f06_last_mile_circuit_management": "partner_integrated",
+    "f07_lifecycle_management": "partner_integrated",
+    "f08_flexible_commercial_model": "yes",
+    "f09_encrypted_overlay_fabric": "yes",
+    "f10_dynamic_path_selection": "yes",
+    "f11_active_active_link_utilisation": "yes",
+    "f12_application_aware_routing": "yes",
+    "f13_qos_and_traffic_shaping": "yes",
+    "f14_packet_loss_remediation": "yes",
+    "f15_local_internet_breakout": "yes",
+    "f16_mpls_coexistence_and_migration": "yes",
+    "f17_cellular_and_5g_support": "partial",
+    "f18_cloud_on_ramp": "yes",
+    "f19_public_cloud_gateways": "partial",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "unknown",
+    "f22_regional_breakout_and_data_residency": "partial",
+    "f23_multi_cloud_transit_fabric": "yes",
+    "f24_flexible_edge_form_factors": "yes",
+    "f25_high_availability_design": "yes",
+    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f27_integrated_next_generation_firewall": "yes",
+    "f28_full_sase_platform": "partial",
+    "f29_sse_ecosystem_integration": "partial",
+    "f30_zero_trust_network_access": "yes",
+    "f31_secure_web_gateway": "partial",
+    "f32_casb_capability": "partial",
+    "f33_data_loss_prevention": "yes",
+    "f34_remote_user_access": "yes",
+    "f35_soc_siem_soar_integration": "yes",
+    "f36_centralised_orchestration": "yes",
+    "f37_customer_portal_and_rbac": "yes",
+    "f38_observability_and_digital_experience_monitoring": "yes",
+    "f39_apis_and_automation": "partial",
+    "f40_managed_service_assurance": "partner_integrated"
+  },
+  "score_summary": {
+    "yes_count": 23,
+    "partial_count": 8,
+    "partner_integrated_count": 7,
+    "managed_service_dependent_count": 0,
+    "unknown_count": 2,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.95
+  },
+  "key_differentiators": [
+    "FlexEdge Secure SD-WAN combines secure SD-WAN with strong DLP and data security heritage from the wider Forcepoint portfolio.",
+    "MultiLink resilience and zero-touch deployment with cloud central management.",
+    "Strong story for buyers prioritising data security and DLP as a procurement criterion."
+  ],
+  "best_fit_for": [
+    "Enterprises with strong data protection and DLP requirements (regulated industries, government).",
+    "Organisations wanting secure SD-WAN where data security is the primary decision driver.",
+    "Buyers consolidating DLP with SD-WAN under one vendor."
+  ],
+  "watch_outs": [
+    "Smaller SD-WAN market presence than the leading platforms.",
+    "Full SASE platform completeness has partial public evidence; SSE module depth should be confirmed.",
+    "Managed delivery is partner-led; co-managed and white-label support require partner validation."
+  ],
+  "last_verified": "2026-05-22",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+}
