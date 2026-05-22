@@ -1,6 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { VendorSchema } from "../data/schema.ts";
+import { VendorSchema } from "../data/schema";
 
 const vendorsDir = resolve(process.cwd(), "data", "vendors");
 
