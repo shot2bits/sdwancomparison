@@ -1,65 +1,123 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getAllVendors, FEATURES, FEATURE_CATEGORIES } from "@/lib/vendors";
 
 export default function Home() {
+  const vendors = getAllVendors();
+  const totalCount = vendors.length;
+  const featureCount = FEATURES.length;
+  const categoryCount = FEATURE_CATEGORIES.length;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
+      {/* Hero */}
+      <div className="grid md:grid-cols-12 gap-8 mb-20 fade-rise">
+        <div className="md:col-span-8">
+          <p className="eyebrow mb-4">SD-WAN and SASE research</p>
+          <h1 className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 500 }}>
+            A vendor-neutral comparison of {totalCount} SD-WAN and SASE platforms,
+            graded against a {featureCount}-feature evaluation framework.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+          <p className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
+            Most vendor comparisons are written by vendors. This one is published by
+            Netify and grades each platform against the same {categoryCount} capability
+            categories, using only public source evidence. Every status grade is
+            traceable to its source.
+          </p>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/vendors"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
+              Browse {totalCount} vendors
+              <span aria-hidden="true">→</span>
+            </Link>
             <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              href="https://netify.co.uk"
+              className="no-underline text-sm text-[var(--ink-500)] hover:text-[var(--accent)]"
             >
-              Learning
-            </a>{" "}
-            center.
+              About Netify ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <hr className="rule mb-16" />
+
+      {/* Methodology */}
+      <section className="grid md:grid-cols-12 gap-8 mb-20">
+        <div className="md:col-span-4">
+          <p className="eyebrow mb-3">Methodology</p>
+          <h2>Six grades, one matrix, every claim sourced.</h2>
+        </div>
+        <div className="md:col-span-7 md:col-start-6 space-y-6 text-[var(--ink-700)]">
+          <p>
+            Each vendor is scored against {featureCount} capabilities drawn from
+            real-world SD-WAN and SASE RFPs. Capabilities span six categories:
+            service delivery and operating model, network architecture and transport,
+            gateway and PoP design, security and SASE depth, operations and
+            assurance, and commercial flexibility.
+          </p>
+          <p>
+            Each capability is graded using one of six status values rather than a
+            simple yes or no. The grades distinguish between native capability
+            (<span className="status-pill status-yes">Yes</span>), limited or
+            indirect evidence (<span className="status-pill status-partial">Partial</span>),
+            partner-delivered capability
+            (<span className="status-pill status-partner_integrated">Partner / integrated</span>),
+            managed-service dependency, non-primary positioning, and unknowns
+            requiring RFP validation. These distinctions matter to buyers.
+          </p>
+          <p>
+            Source URLs and an evidence summary are provided for every vendor.
+            Where public evidence is limited, the grade reflects that limitation
+            rather than assuming the capability is present.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <hr className="rule mb-16" />
+
+      {/* What you can do here */}
+      <section className="grid md:grid-cols-3 gap-8 mb-16">
+        <div>
+          <p className="eyebrow mb-3">For buyers</p>
+          <h3 className="mb-3">Shortlist by capability, not by marketing</h3>
+          <p className="text-[var(--ink-700)]">
+            Filter and compare vendors against the capabilities that matter to
+            your specific architecture, geography and operating model.
+          </p>
         </div>
-      </main>
+        <div>
+          <p className="eyebrow mb-3">For consultants</p>
+          <h3 className="mb-3">A consistent reference frame</h3>
+          <p className="text-[var(--ink-700)]">
+            Every vendor evaluated against the same matrix, so comparisons are
+            structural rather than narrative.
+          </p>
+        </div>
+        <div>
+          <p className="eyebrow mb-3">For AI agents</p>
+          <h3 className="mb-3">Structured, citable, machine-readable</h3>
+          <p className="text-[var(--ink-700)]">
+            Every vendor record is published with structured data so AI assistants
+            and research agents can cite specific capability grades and sources.
+          </p>
+        </div>
+      </section>
+
+      <hr className="rule mb-16" />
+
+      {/* CTA */}
+      <section className="text-center py-12">
+        <h2 className="mb-6">Start with the full vendor list.</h2>
+        <Link
+          href="/vendors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm"
+        >
+          Browse all {totalCount} vendors
+          <span aria-hidden="true">→</span>
+        </Link>
+      </section>
     </div>
   );
 }
