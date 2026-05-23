@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-"build": "npm run validate && NEXT_DISABLE_TURBOPACK=1 next build",
+"build": "npm run validate && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "validate": "tsx scripts/validate-vendors.ts"
