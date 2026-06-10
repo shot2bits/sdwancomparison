@@ -1,5 +1,6 @@
 import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tools";
 import { getAllVendorSlugs } from "@/lib/vendors";
+import { BEST_PAGES } from "@/lib/best-pages";
 import { SITE_URL } from "@/lib/structured-data";
 
 export async function GET() {
@@ -7,6 +8,9 @@ export async function GET() {
     (t) => `- ${t.name}: ${t.description}`,
   ).join("\n");
   const vendors = getAllVendorSlugs().join(", ");
+  const bestPages = BEST_PAGES.map(
+    (p) => `- ${"${SITE_URL}"}/best/${"${p.slug}"} : ${"${p.title}"} (ranked top 10, ItemList schema, JSON twin at /best/${"${p.slug}"}/data.json)`,
+  ).join("\n");
 
   const body = `# Netify SASE and SD-WAN Shortlist Builder
 
@@ -19,6 +23,12 @@ Operated by Netify Group Limited (netify.co.uk), a UK research and marketplace c
 - ${SITE_URL}/shortlist/data.json : JSON twin of the shortlist page: full vendor dataset, feature catalogue, default shortlist and the interactive surface inventory.
 - ${SITE_URL}/vendors : Index of all 30 graded vendors.
 - ${SITE_URL}/vendors/{slug} : Full capability profile per vendor. Valid slugs: ${vendors}.
+
+## Ranked sector and priority shortlists
+
+Pre-computed, citable top 10 rankings driven by the same engine. Each page emits Article, ItemList (ranked), FAQPage, BreadcrumbList and Speakable JSON-LD and has a JSON twin:
+
+${bestPages}
 
 ## Programmatic access
 

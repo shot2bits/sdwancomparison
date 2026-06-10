@@ -145,6 +145,73 @@ export const Resilience = z.object({
 }).strict();
 export type Resilience = z.infer<typeof Resilience>;
 
+
+/**
+ * Sector capability grades. Evidence basis: case studies, dedicated
+ * sector offerings, certifications and named references in public sources.
+ */
+export const Sectors = z.object({
+  healthcare: CapabilityStatus,
+  financial_services: CapabilityStatus,
+  retail_ecommerce: CapabilityStatus,
+  manufacturing: CapabilityStatus,
+  energy_utilities: CapabilityStatus,
+  government_public_sector: CapabilityStatus,
+  education: CapabilityStatus,
+  transport_logistics: CapabilityStatus,
+  professional_services: CapabilityStatus,
+  hospitality_leisure: CapabilityStatus,
+}).strict();
+export type Sectors = z.infer<typeof Sectors>;
+
+export const OrganisationFit = z.object({
+  large_global_enterprise: CapabilityStatus,
+  mid_market: CapabilityStatus,
+  small_business: CapabilityStatus,
+}).strict();
+export type OrganisationFit = z.infer<typeof OrganisationFit>;
+
+export const PricingUnit = z.enum([
+  "per_user",
+  "per_site",
+  "per_bandwidth",
+  "bundle",
+  "custom_quote",
+]);
+export type PricingUnit = z.infer<typeof PricingUnit>;
+
+export const IdentityProviders = z.object({
+  entra_id: CapabilityStatus,
+  okta: CapabilityStatus,
+  ping: CapabilityStatus,
+  google_workspace: CapabilityStatus,
+}).strict();
+export type IdentityProviders = z.infer<typeof IdentityProviders>;
+
+export const AgentPlatforms = z.object({
+  windows: CapabilityStatus,
+  macos: CapabilityStatus,
+  ios: CapabilityStatus,
+  android: CapabilityStatus,
+  linux: CapabilityStatus,
+  chromeos: CapabilityStatus,
+  agentless: CapabilityStatus,
+}).strict();
+export type AgentPlatforms = z.infer<typeof AgentPlatforms>;
+
+export const SupportModel = z.object({
+  follow_the_sun_24x7: CapabilityStatus,
+  uk_support_desk: CapabilityStatus,
+  named_tam: CapabilityStatus,
+}).strict();
+export type SupportModel = z.infer<typeof SupportModel>;
+
+export const Logging = z.object({
+  siem_export: CapabilityStatus,
+  log_retention_days: z.number().int().positive().nullable(),
+}).strict();
+export type Logging = z.infer<typeof Logging>;
+
 export const VendorSchema = z.object({
   // Identity
   slug: z.string().regex(/^[a-z0-9-]+$/, "slug must be lowercase letters, digits and hyphens only"),
@@ -177,6 +244,18 @@ export const VendorSchema = z.object({
   supported_clouds: SupportedClouds,
   ai_capability: AiCapability,
   resilience: Resilience,
+
+  // Tier 1 buyer data points and sector capability (June 2026, indicative)
+  sectors: Sectors,
+  organisation_fit: OrganisationFit,
+  pricing_units: z.array(PricingUnit).min(1),
+  identity_providers: IdentityProviders,
+  device_posture: CapabilityStatus,
+  agent_platforms: AgentPlatforms,
+  pop_count: z.number().int().positive().nullable(),
+  sla_availability_pct: z.number().min(90).max(100).nullable(),
+  support_model: SupportModel,
+  logging: Logging,
 
   // Qualitative judgements (Netify editorial)
   key_differentiators: z.array(z.string().min(1)).min(1).max(6),

@@ -1,0 +1,180 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
+import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { buildShortlist, encodeScenario } from "@/lib/shortlist-core";
+import {
+  SITE_URL,
+  getBreadcrumbSchema,
+  getOrganizationSchema,
+  getShortlistFaqSchema,
+  getSpeakableSchema,
+} from "@/lib/structured-data";
+
+export const dynamic = "force-static";
+
+type Props = { params: Promise<{ slug: string }> };
+
+export function generateStaticParams() {
+  return BEST_PAGES.map((p) => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const page = getBestPage(slug);
+  if (!page) return {};
+  return {
+    title: page.metaTitle,
+    description: page.metaDescription,
+    alternates: { canonical: `${SITE_URL}/best/${page.slug}` },
+    openGraph: {
+      title: page.metaTitle,
+      description: page.metaDescription,
+      url: `${SITE_URL}/best/${page.slug}`,
+      type: "article",
+      locale: "en_GB",
+    },
+  };
+}
+
+export default async function BestPage({ params }: Props) {
+  const { slug } = await params;
+  const page = getBestPage(slug);
+  if (!page) notFound();
+
+  const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
+  const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
+
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "@id": `${SITE_URL}/best/${page.slug}#ranking`,
+    name: page.title,
+    description: page.metaDescription,
+    itemListOrder: "https://schema.org/ItemListOrderDescending",
+    numberOfItems: result.shortlist.length,
+    itemListElement: result.shortlist.map((v) => ({
+      "@type": "ListItem",
+      position: v.rank,
+      name: v.name,
+      url: `${SITE_URL}/vendors/${v.slug}`,
+      item: {
+        "@type": "Service",
+        name: `${v.name} SD-WAN / SASE`,
+        url: `${SITE_URL}/vendors/${v.slug}`,
+        description: v.key_differentiators[0],
+        provider: { "@type": "Organization", name: v.name, url: v.website },
+      },
+    })),
+  };
+
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${SITE_URL}/best/${page.slug}#article`,
+    headline: page.title,
+    description: page.metaDescription,
+    author: { "@type": "Organization", name: "Netify research team", url: "https://netify.co.uk/about-netify/" },
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    dateModified: "2026-06-10",
+    mainEntityOfPage: `${SITE_URL}/best/${page.slug}`,
+  };
+
+  const schemas = [
+    getOrganizationSchema(),
+    getBreadcrumbSchema(page.title, `/best/${page.slug}`),
+    getSpeakableSchema(`/best/${page.slug}`),
+    articleSchema,
+    itemListSchema,
+    getShortlistFaqSchema(page.faqs),
+  ];
+
+  return (
+    <div className="max-w-4xl mx-auto px-6 py-16">
+      {schemas.map((s, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }}
+        />
+      ))}
+
+      <div className="mb-10 fade-rise">
+        <p className="eyebrow mb-3">Ranked shortlist · Updated June 2026</p>
+        <h1 id="page-h1" className="mb-4">{page.h1}</h1>
+        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
+        <p className="text-sm text-[var(--ink-500)] mt-3">
+          Written and reviewed by the Netify research team. Methodology: weighted
+          scoring across 40 graded capability features; see the FAQ below.
+        </p>
+        <div className="mt-5 flex gap-3 flex-wrap">
+          <Link
+            href={builderUrl}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm text-sm"
+          >
+            Refine this shortlist interactively
+            <span aria-hidden="true">→</span>
+          </Link>
+          <Link
+            href="/vendors"
+            className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors rounded-sm text-sm"
+          >
+            All 30 vendors
+          </Link>
+        </div>
+      </div>
+
+      <ol className="space-y-6 list-none p-0">
+        {result.shortlist.map((v) => (
+          <li key={v.slug} className="border border-[var(--ink-300,#ccc)] rounded-sm p-5">
+            <p className="eyebrow mb-1">No. {v.rank} · Score {v.score}</p>
+            <h2 className="text-xl mb-1">
+              <Link href={`/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+                {v.name}
+              </Link>
+            </h2>
+            <p className="text-sm text-[var(--ink-500)] mb-2">
+              {v.category} · Typical deployment: {v.deployment_speed}
+            </p>
+            <p className="text-sm text-[var(--ink-700)] mb-2">{v.key_differentiators[0]}</p>
+            {v.gaps.length > 0 && (
+              <p className="text-sm text-[var(--ink-500)]">Evidence caveats: {v.gaps.join("; ")}</p>
+            )}
+            <p className="text-sm text-[var(--ink-700)] mt-1">Watch out: {v.watch_outs[0]}</p>
+          </li>
+        ))}
+      </ol>
+
+      <p className="mt-8 text-xs text-[var(--ink-500)]">{result.methodology_note}</p>
+
+      <section className="mt-14">
+        <p className="eyebrow mb-3">Questions</p>
+        <h2 className="mb-6">About this ranking</h2>
+        <div className="space-y-6">
+          {page.faqs.map((f) => (
+            <div key={f.q}>
+              <h3 className="text-base font-medium mb-1">{f.q}</h3>
+              <p className="text-sm text-[var(--ink-700)]">{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-14 border-t border-[var(--ink-300,#ccc)] pt-8">
+        <p className="eyebrow mb-3">More ranked shortlists</p>
+        <div className="flex flex-wrap gap-2">
+          {BEST_PAGES.filter((p) => p.slug !== page.slug).slice(0, 12).map((p) => (
+            <Link
+              key={p.slug}
+              href={`/best/${p.slug}`}
+              className="px-3 py-1.5 text-sm rounded-sm border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
+            >
+              {p.title.replace("Best SD-WAN and SASE providers for ", "")}
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}

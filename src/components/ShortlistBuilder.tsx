@@ -14,6 +14,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AI_KEYS,
   AI_LABELS,
+  INTENT_KEYS,
+  INTENT_LABELS,
+  ORG_SIZE_KEYS,
+  ORG_SIZE_LABELS,
+  SECTOR_KEYS,
+  SECTOR_LABELS,
   CLOUD_KEYS,
   CLOUD_LABELS,
   DEFAULT_INPUT,
@@ -240,6 +246,61 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             </div>
           )}
           {chatError && <p className="mt-3 text-sm text-red-700">{chatError}</p>}
+        </section>
+
+        {/* Sector */}
+        <section>
+          <p className="eyebrow mb-3">Your sector</p>
+          <div className="flex flex-wrap gap-2">
+            {SECTOR_KEYS.map((sec) => (
+              <button
+                key={sec}
+                onClick={() => set("sector", input.sector === sec ? null : sec)}
+                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                  input.sector === sec
+                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+                }`}
+              >
+                {SECTOR_LABELS[sec]}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Organisation size and priority */}
+        <section className="grid grid-cols-1 gap-4">
+          <div>
+            <p className="eyebrow mb-3">Organisation size</p>
+            <div className="flex flex-wrap gap-2">
+              {(["any", ...ORG_SIZE_KEYS] as const).map((o) => (
+                <button
+                  key={o}
+                  onClick={() => set("organisation_size", o)}
+                  className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                    input.organisation_size === o
+                      ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                      : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+                  }`}
+                >
+                  {o === "any" ? "Any size" : ORG_SIZE_LABELS[o]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="eyebrow mb-3">Main priority</p>
+            <select
+              value={input.intent}
+              onChange={(e) => set("intent", e.target.value as ShortlistInput["intent"])}
+              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white"
+            >
+              <option value="none">No specific priority</option>
+              {INTENT_KEYS.map((i) => (
+                <option key={i} value={i}>{INTENT_LABELS[i]}</option>
+              ))}
+            </select>
+          </div>
         </section>
 
         {/* Operating model */}

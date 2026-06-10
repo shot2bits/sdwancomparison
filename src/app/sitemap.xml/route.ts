@@ -1,4 +1,5 @@
 import { getAllVendorSlugs } from "@/lib/vendors";
+import { BEST_PAGES } from "@/lib/best-pages";
 import { SITE_URL } from "@/lib/structured-data";
 
 export async function GET() {
@@ -7,6 +8,10 @@ export async function GET() {
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/shortlist`, priority: "1.0" },
     { loc: `${SITE_URL}/vendors`, priority: "0.9" },
+    ...BEST_PAGES.map((p) => ({
+      loc: `${SITE_URL}/best/${p.slug}`,
+      priority: "0.9",
+    })),
     ...getAllVendorSlugs().map((slug) => ({
       loc: `${SITE_URL}/vendors/${slug}`,
       priority: "0.8",

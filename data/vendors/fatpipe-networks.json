@@ -78,7 +78,7 @@
     "Public pricing and case study transparency are limited; expect more discovery work in evaluation."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "partial",
@@ -105,5 +105,53 @@
   "resilience": {
     "disaster_recovery": "yes",
     "note": "MPVPN multi-path WAN redundancy by design; HA appliance pairs."
+  },
+  "sectors": {
+    "healthcare": "partial",
+    "financial_services": "partial",
+    "retail_ecommerce": "unknown",
+    "manufacturing": "unknown",
+    "energy_utilities": "unknown",
+    "government_public_sector": "partial",
+    "education": "unknown",
+    "transport_logistics": "unknown",
+    "professional_services": "unknown",
+    "hospitality_leisure": "unknown"
+  },
+  "organisation_fit": {
+    "large_global_enterprise": "partial",
+    "mid_market": "yes",
+    "small_business": "partial"
+  },
+  "pricing_units": [
+    "per_site",
+    "custom_quote"
+  ],
+  "identity_providers": {
+    "entra_id": "unknown",
+    "okta": "unknown",
+    "ping": "unknown",
+    "google_workspace": "unknown"
+  },
+  "device_posture": "unknown",
+  "agent_platforms": {
+    "windows": "yes",
+    "macos": "yes",
+    "ios": "partial",
+    "android": "partial",
+    "linux": "partial",
+    "chromeos": "unknown",
+    "agentless": "partial"
+  },
+  "pop_count": null,
+  "sla_availability_pct": null,
+  "support_model": {
+    "follow_the_sun_24x7": "yes",
+    "uk_support_desk": "partial",
+    "named_tam": "partial"
+  },
+  "logging": {
+    "siem_export": "partial",
+    "log_retention_days": null
   }
 }

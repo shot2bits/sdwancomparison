@@ -78,6 +78,94 @@ export const AI_LABELS: Record<AiKey, string> = {
   ai_assistant: "AI assistant / copilot",
 };
 
+export const SECTOR_KEYS = [
+  "healthcare",
+  "financial_services",
+  "retail_ecommerce",
+  "manufacturing",
+  "energy_utilities",
+  "government_public_sector",
+  "education",
+  "transport_logistics",
+  "professional_services",
+  "hospitality_leisure",
+] as const;
+export type SectorKey = (typeof SECTOR_KEYS)[number];
+
+export const SECTOR_LABELS: Record<SectorKey, string> = {
+  healthcare: "Healthcare",
+  financial_services: "Financial services",
+  retail_ecommerce: "Retail and e-commerce",
+  manufacturing: "Manufacturing",
+  energy_utilities: "Energy and utilities",
+  government_public_sector: "Government and public sector",
+  education: "Education",
+  transport_logistics: "Transport and logistics",
+  professional_services: "Professional services",
+  hospitality_leisure: "Hospitality and leisure",
+};
+
+export const ORG_SIZE_KEYS = [
+  "large_global_enterprise",
+  "mid_market",
+  "small_business",
+] as const;
+export type OrgSizeKey = (typeof ORG_SIZE_KEYS)[number];
+
+export const ORG_SIZE_LABELS: Record<OrgSizeKey, string> = {
+  large_global_enterprise: "Large global enterprise",
+  mid_market: "Mid-market",
+  small_business: "Small business",
+};
+
+export const INTENT_KEYS = [
+  "cost_saving",
+  "mpls_migration",
+  "rapid_deployment",
+  "remote_workforce",
+  "security_consolidation",
+  "global_expansion",
+] as const;
+export type IntentKey = (typeof INTENT_KEYS)[number];
+
+export const INTENT_LABELS: Record<IntentKey, string> = {
+  cost_saving: "Cost saving",
+  mpls_migration: "MPLS migration",
+  rapid_deployment: "Rapid deployment",
+  remote_workforce: "Remote and hybrid workforce",
+  security_consolidation: "Security consolidation",
+  global_expansion: "Global expansion",
+};
+
+/** Buyer intent presets: extra preferred features and optional overrides. */
+export const INTENT_PRESETS: Record<
+  IntentKey,
+  { preferred: string[]; weight_preset?: WeightPreset; max_speed?: "hours" | "days" | "weeks" | "months" }
+> = {
+  cost_saving: {
+    preferred: ["f08_flexible_commercial_model", "f15_local_internet_breakout", "f16_mpls_coexistence_and_migration"],
+  },
+  mpls_migration: {
+    preferred: ["f16_mpls_coexistence_and_migration", "f10_dynamic_path_selection", "f06_last_mile_circuit_management"],
+    weight_preset: "network_led",
+  },
+  rapid_deployment: {
+    preferred: ["f24_flexible_edge_form_factors", "f17_cellular_and_5g_support"],
+    max_speed: "weeks",
+  },
+  remote_workforce: {
+    preferred: ["f34_remote_user_access", "f30_zero_trust_network_access", "f31_secure_web_gateway"],
+  },
+  security_consolidation: {
+    preferred: ["f28_full_sase_platform", "f27_integrated_next_generation_firewall", "f36_centralised_orchestration"],
+    weight_preset: "security_led",
+  },
+  global_expansion: {
+    preferred: ["f21_private_global_backbone", "f22_regional_breakout_and_data_residency", "f20_private_pops_dedicated_pops"],
+    weight_preset: "cloud_first",
+  },
+};
+
 export const STATUS_LABELS: Record<CapabilityStatus, string> = {
   yes: "Yes, public evidence",
   partial: "Partial",
@@ -102,6 +190,16 @@ export type ShortlistVendor = {
   supported_clouds: Record<CloudKey, CapabilityStatus>;
   ai_capability: Record<AiKey, CapabilityStatus> & { note: string };
   resilience: { disaster_recovery: CapabilityStatus; note: string };
+  sectors: Record<SectorKey, CapabilityStatus>;
+  organisation_fit: Record<OrgSizeKey, CapabilityStatus>;
+  pricing_units: string[];
+  identity_providers: Record<string, CapabilityStatus>;
+  device_posture: CapabilityStatus;
+  agent_platforms: Record<string, CapabilityStatus>;
+  pop_count: number | null;
+  sla_availability_pct: number | null;
+  support_model: Record<string, CapabilityStatus>;
+  logging: { siem_export: CapabilityStatus; log_retention_days: number | null };
   key_differentiators: string[];
   best_fit_for: string[];
   watch_outs: string[];
@@ -136,6 +234,9 @@ export const ShortlistInputSchema = z.object({
     .default("any"),
   weight_preset: z.enum(WEIGHT_PRESETS).default("balanced"),
   shortlist_size: z.number().int().min(3).max(15).default(8),
+  sector: z.enum(SECTOR_KEYS).nullable().default(null),
+  organisation_size: z.enum([...ORG_SIZE_KEYS, "any"] as const).default("any"),
+  intent: z.enum([...INTENT_KEYS, "none"] as const).default("none"),
 });
 export type ShortlistInput = z.infer<typeof ShortlistInputSchema>;
 
@@ -261,6 +362,11 @@ export function describeCriteria(input: ShortlistInput, featureNames: Record<str
   if (input.max_deployment_speed !== "any") {
     parts.push(`Deployment within: ${input.max_deployment_speed}`);
   }
+  if (input.sector) parts.unshift(`Sector: ${SECTOR_LABELS[input.sector]}`);
+  if (input.organisation_size !== "any") {
+    parts.unshift(`Organisation: ${ORG_SIZE_LABELS[input.organisation_size]}`);
+  }
+  if (input.intent !== "none") parts.unshift(`Priority: ${INTENT_LABELS[input.intent]}`);
   parts.push(`Scoring profile: ${input.weight_preset.replace(/_/g, " ")}`);
   return parts.join(". ") + ".";
 }
@@ -274,7 +380,23 @@ export function buildShortlist(
   rawInput: unknown,
   featureNames: Record<string, string> = {},
 ): ShortlistResult {
-  const input = ShortlistInputSchema.parse(rawInput ?? {});
+  const parsed = ShortlistInputSchema.parse(rawInput ?? {});
+  // Apply buyer intent preset (non-destructive: merges preferences)
+  const preset = parsed.intent !== "none" ? INTENT_PRESETS[parsed.intent] : null;
+  const input: ShortlistInput = preset
+    ? {
+        ...parsed,
+        preferred_features: Array.from(new Set([...parsed.preferred_features, ...preset.preferred])),
+        weight_preset:
+          parsed.weight_preset === "balanced" && preset.weight_preset
+            ? preset.weight_preset
+            : parsed.weight_preset,
+        max_deployment_speed:
+          parsed.max_deployment_speed === "any" && preset.max_speed
+            ? preset.max_speed
+            : parsed.max_deployment_speed,
+      }
+    : parsed;
   const verdicts: VendorVerdict[] = [];
 
   for (const v of vendors) {
@@ -349,7 +471,29 @@ export function buildShortlist(
       }
     }
 
-    // Gate 7: deployment speed ceiling
+    // Gate 7: sector capability
+    if (input.sector) {
+      const status = v.sectors[input.sector];
+      if (!SATISFIES.includes(status)) {
+        gating.push(`No confirmed sector evidence: ${SECTOR_LABELS[input.sector]}`);
+      } else {
+        matched.push(`Sector: ${SECTOR_LABELS[input.sector]}`);
+        if (status !== "yes") gaps.push(`${SECTOR_LABELS[input.sector]}: ${STATUS_LABELS[status]}`);
+      }
+    }
+
+    // Gate 8: organisation size fit
+    if (input.organisation_size !== "any") {
+      const status = v.organisation_fit[input.organisation_size];
+      if (!SATISFIES.includes(status)) {
+        gating.push(`Not positioned for ${ORG_SIZE_LABELS[input.organisation_size].toLowerCase()}`);
+      } else {
+        matched.push(`Fit: ${ORG_SIZE_LABELS[input.organisation_size]}`);
+        if (status !== "yes") gaps.push(`${ORG_SIZE_LABELS[input.organisation_size]}: ${STATUS_LABELS[status]}`);
+      }
+    }
+
+    // Gate 9: deployment speed ceiling
     if (input.max_deployment_speed !== "any") {
       const ceiling = SPEED_ORDER[input.max_deployment_speed as DeploymentSpeed];
       if (SPEED_ORDER[v.deployment_speed] > ceiling) {
@@ -387,6 +531,14 @@ export function buildShortlist(
     }
     if (input.disaster_recovery_required) {
       weighted += STATUS_POINTS[v.resilience.disaster_recovery] * 1.5;
+      weightTotal += 1.5;
+    }
+    if (input.sector) {
+      weighted += STATUS_POINTS[v.sectors[input.sector]] * 2;
+      weightTotal += 2;
+    }
+    if (input.organisation_size !== "any") {
+      weighted += STATUS_POINTS[v.organisation_fit[input.organisation_size]] * 1.5;
       weightTotal += 1.5;
     }
 
@@ -459,6 +611,9 @@ export function encodeScenario(input: ShortlistInput): string {
   if (input.max_deployment_speed !== "any") p.set("ds", input.max_deployment_speed);
   if (input.weight_preset !== "balanced") p.set("w", input.weight_preset);
   if (input.shortlist_size !== 8) p.set("n", String(input.shortlist_size));
+  if (input.sector) p.set("s", input.sector);
+  if (input.organisation_size !== "any") p.set("o", input.organisation_size);
+  if (input.intent !== "none") p.set("i", input.intent);
   return p.toString();
 }
 
@@ -500,6 +655,9 @@ export function decodeScenario(
     max_deployment_speed: p.get("ds") ?? "any",
     weight_preset: p.get("w") ?? "balanced",
     shortlist_size: p.get("n") ? Number(p.get("n")) : 8,
+    sector: (SECTOR_KEYS as readonly string[]).includes(p.get("s") ?? "") ? p.get("s") : null,
+    organisation_size: p.get("o") ?? "any",
+    intent: p.get("i") ?? "none",
   };
 
   const parsed = ShortlistInputSchema.safeParse(candidate);

@@ -79,7 +79,7 @@
     "DIY/self-managed model is not the primary positioning."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -106,5 +106,54 @@
   "resilience": {
     "disaster_recovery": "yes",
     "note": "Global Tier 1 IP backbone with multi-vendor managed redundancy."
+  },
+  "sectors": {
+    "healthcare": "partial",
+    "financial_services": "yes",
+    "retail_ecommerce": "partial",
+    "manufacturing": "yes",
+    "energy_utilities": "partial",
+    "government_public_sector": "partial",
+    "education": "partial",
+    "transport_logistics": "partial",
+    "professional_services": "partial",
+    "hospitality_leisure": "partial"
+  },
+  "organisation_fit": {
+    "large_global_enterprise": "yes",
+    "mid_market": "partial",
+    "small_business": "not_primary"
+  },
+  "pricing_units": [
+    "per_site",
+    "bundle",
+    "custom_quote"
+  ],
+  "identity_providers": {
+    "entra_id": "managed_service_dependent",
+    "okta": "managed_service_dependent",
+    "ping": "managed_service_dependent",
+    "google_workspace": "managed_service_dependent"
+  },
+  "device_posture": "managed_service_dependent",
+  "agent_platforms": {
+    "windows": "managed_service_dependent",
+    "macos": "managed_service_dependent",
+    "ios": "managed_service_dependent",
+    "android": "managed_service_dependent",
+    "linux": "managed_service_dependent",
+    "chromeos": "managed_service_dependent",
+    "agentless": "managed_service_dependent"
+  },
+  "pop_count": null,
+  "sla_availability_pct": null,
+  "support_model": {
+    "follow_the_sun_24x7": "yes",
+    "uk_support_desk": "partial",
+    "named_tam": "yes"
+  },
+  "logging": {
+    "siem_export": "managed_service_dependent",
+    "log_retention_days": null
   }
 }

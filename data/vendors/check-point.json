@@ -78,7 +78,7 @@
     "Managed delivery is partner-led."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -105,5 +105,54 @@
   "resilience": {
     "disaster_recovery": "partial",
     "note": "Cloud-delivered Harmony SASE with regional redundancy; on-prem HA via Quantum clusters."
+  },
+  "sectors": {
+    "healthcare": "partial",
+    "financial_services": "yes",
+    "retail_ecommerce": "partial",
+    "manufacturing": "partial",
+    "energy_utilities": "partial",
+    "government_public_sector": "partial",
+    "education": "partial",
+    "transport_logistics": "partial",
+    "professional_services": "partial",
+    "hospitality_leisure": "partial"
+  },
+  "organisation_fit": {
+    "large_global_enterprise": "yes",
+    "mid_market": "yes",
+    "small_business": "partial"
+  },
+  "pricing_units": [
+    "per_user",
+    "per_site",
+    "custom_quote"
+  ],
+  "identity_providers": {
+    "entra_id": "yes",
+    "okta": "partial",
+    "ping": "partial",
+    "google_workspace": "partial"
+  },
+  "device_posture": "yes",
+  "agent_platforms": {
+    "windows": "yes",
+    "macos": "yes",
+    "ios": "partial",
+    "android": "partial",
+    "linux": "partial",
+    "chromeos": "unknown",
+    "agentless": "partial"
+  },
+  "pop_count": null,
+  "sla_availability_pct": null,
+  "support_model": {
+    "follow_the_sun_24x7": "yes",
+    "uk_support_desk": "partial",
+    "named_tam": "partial"
+  },
+  "logging": {
+    "siem_export": "yes",
+    "log_retention_days": null
   }
 }

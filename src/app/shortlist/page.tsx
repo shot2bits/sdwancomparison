@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
+import { BEST_PAGES } from "@/lib/best-pages";
 import { FEATURES, getShortlistDataset } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import {
@@ -63,6 +65,22 @@ export default function ShortlistPage() {
       </div>
 
       <ShortlistBuilder vendors={vendors} features={features} />
+
+      <section className="mt-20">
+        <p className="eyebrow mb-3">Ranked shortlists</p>
+        <h2 className="mb-4">Pre-built rankings by sector, size and priority</h2>
+        <div className="flex flex-wrap gap-2">
+          {BEST_PAGES.map((bp) => (
+            <Link
+              key={bp.slug}
+              href={`/best/${bp.slug}`}
+              className="px-3 py-1.5 text-sm rounded-sm border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
+            >
+              {bp.title.replace("Best SD-WAN and SASE providers for ", "")}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-20 max-w-3xl">
         <p className="eyebrow mb-3">Questions</p>

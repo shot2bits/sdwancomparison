@@ -3,7 +3,10 @@ import { FEATURES, FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import {
   AI_KEYS,
   CLOUD_KEYS,
+  INTENT_KEYS,
+  ORG_SIZE_KEYS,
   REGION_KEYS,
+  SECTOR_KEYS,
   SERVICE_MODELS,
   WEIGHT_PRESETS,
   ShortlistInputSchema,
@@ -56,6 +59,17 @@ function criteriaTool(): Anthropic.Tool {
       },
       weight_preset: { type: "string", enum: [...WEIGHT_PRESETS] },
       shortlist_size: { type: "integer", minimum: 3, maximum: 15 },
+      sector: {
+        type: ["string", "null"],
+        enum: [...SECTOR_KEYS, null],
+        description: "The buyer's industry sector, if stated or clearly implied.",
+      },
+      organisation_size: { type: "string", enum: [...ORG_SIZE_KEYS, "any"] },
+      intent: {
+        type: "string",
+        enum: [...INTENT_KEYS, "none"],
+        description: "The buyer's main commercial priority.",
+      },
     },
     required: [],
   };
@@ -82,6 +96,8 @@ Feature catalogue (id: name [category]):
 ${FEATURE_CATALOGUE}
 
 Mapping hints: ZTNA is f30. SWG is f31. CASB is f32. DLP is f33. Full SASE platform is f28. NGFW is f27. Remote and hybrid workers map to f34. MPLS migration is f16. 5G or cellular backup is f17. Cloud on-ramp is f18. Multi-cloud is f23. White-label or MSP resale is f04. Reporting and analytics map to f38 and f37. APIs and automation is f39. If the buyer wants someone else to run the service, set service_model to managed. If they want shared control, co_managed. If their own team runs it, diy.
+
+Sector mapping: if the buyer names or implies an industry (hospital or NHS means healthcare; bank, insurer or fund means financial_services; shops, stores or e-commerce means retail_ecommerce; factories or plants means manufacturing; oil, gas, power or water means energy_utilities; council, ministry or agency means government_public_sector; school or university means education; fleet, haulage, rail or shipping means transport_logistics; law, accounting or consulting means professional_services; hotels, restaurants or stadiums means hospitality_leisure), set sector. Set organisation_size from employee count or words like global enterprise, mid-market, SME. Set intent from the dominant goal: cost_saving, mpls_migration, rapid_deployment, remote_workforce, security_consolidation or global_expansion.
 
 Always call the tool exactly once.`;
 

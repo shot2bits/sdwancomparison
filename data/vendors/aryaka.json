@@ -78,7 +78,7 @@
     "CASB and DLP capabilities have partial public evidence; depth should be confirmed in RFP."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -105,5 +105,54 @@
   "resilience": {
     "disaster_recovery": "yes",
     "note": "Owned Layer 2 core with 40+ PoPs and managed middle mile; built-in link and PoP failover."
+  },
+  "sectors": {
+    "healthcare": "partial",
+    "financial_services": "partial",
+    "retail_ecommerce": "partial",
+    "manufacturing": "yes",
+    "energy_utilities": "partial",
+    "government_public_sector": "partial",
+    "education": "partial",
+    "transport_logistics": "partial",
+    "professional_services": "partial",
+    "hospitality_leisure": "partial"
+  },
+  "organisation_fit": {
+    "large_global_enterprise": "yes",
+    "mid_market": "yes",
+    "small_business": "partial"
+  },
+  "pricing_units": [
+    "per_site",
+    "per_bandwidth",
+    "custom_quote"
+  ],
+  "identity_providers": {
+    "entra_id": "yes",
+    "okta": "yes",
+    "ping": "yes",
+    "google_workspace": "yes"
+  },
+  "device_posture": "yes",
+  "agent_platforms": {
+    "windows": "yes",
+    "macos": "yes",
+    "ios": "yes",
+    "android": "yes",
+    "linux": "partial",
+    "chromeos": "partial",
+    "agentless": "yes"
+  },
+  "pop_count": 40,
+  "sla_availability_pct": 99.99,
+  "support_model": {
+    "follow_the_sun_24x7": "yes",
+    "uk_support_desk": "partial",
+    "named_tam": "partial"
+  },
+  "logging": {
+    "siem_export": "yes",
+    "log_retention_days": null
   }
 }
