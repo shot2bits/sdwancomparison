@@ -157,3 +157,38 @@ export const STATUS_DESCRIPTIONS: Record<string, string> = {
   not_primary: "Not primary positioning; not publicly emphasised.",
   unknown: "Not confirmed by reviewed public sources; validate in RFP.",
 };
+
+/* ------------------------------------------------------------------ */
+/* Shortlist dataset (server side): compact records for the engine     */
+/* ------------------------------------------------------------------ */
+
+import type { ShortlistVendor } from "@/lib/shortlist-core";
+
+/** Map of feature id to display name, shared with the engine and agent. */
+export const FEATURE_NAMES: Record<string, string> = Object.fromEntries(
+  FEATURES.map((f) => [f.id, f.name]),
+);
+
+/** Compact, client-safe dataset consumed by every shortlist surface. */
+export function getShortlistDataset(): ShortlistVendor[] {
+  return getAllVendors().map((v) => ({
+    slug: v.slug,
+    name: v.name,
+    website: v.website,
+    category: v.category,
+    product_focus: v.product_focus,
+    cost_model: v.cost_model,
+    public_pricing_visibility: v.public_pricing_visibility,
+    capabilities: v.capabilities,
+    deployment_speed: v.deployment_speed,
+    regions: v.regions,
+    supported_clouds: v.supported_clouds,
+    ai_capability: v.ai_capability,
+    resilience: v.resilience,
+    key_differentiators: v.key_differentiators,
+    best_fit_for: v.best_fit_for,
+    watch_outs: v.watch_outs,
+    evidence_coverage_pct: v.score_summary.evidence_coverage_pct,
+    last_verified: v.last_verified,
+  }));
+}

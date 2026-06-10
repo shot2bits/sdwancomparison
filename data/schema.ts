@@ -96,6 +96,55 @@ export const ScoreSummary = z.object({
 }).strict();
 export type ScoreSummary = z.infer<typeof ScoreSummary>;
 
+
+/**
+ * Extended dimensions added June 2026 for the SASE shortlist builder.
+ * Grades use the same CapabilityStatus scale as the 40-feature matrix.
+ * "unknown" is the honest default where public evidence was not reviewed.
+ */
+export const DeploymentSpeed = z.enum([
+  "hours",
+  "days",
+  "weeks",
+  "months",
+  "unknown",
+]);
+export type DeploymentSpeed = z.infer<typeof DeploymentSpeed>;
+
+export const Regions = z.object({
+  uk_ireland: CapabilityStatus,
+  europe: CapabilityStatus,
+  north_america: CapabilityStatus,
+  asia_pacific: CapabilityStatus,
+  middle_east_africa: CapabilityStatus,
+  latin_america: CapabilityStatus,
+  china_mainland: CapabilityStatus,
+}).strict();
+export type Regions = z.infer<typeof Regions>;
+
+export const SupportedClouds = z.object({
+  aws: CapabilityStatus,
+  azure: CapabilityStatus,
+  gcp: CapabilityStatus,
+  oracle_cloud: CapabilityStatus,
+  alibaba_cloud: CapabilityStatus,
+}).strict();
+export type SupportedClouds = z.infer<typeof SupportedClouds>;
+
+export const AiCapability = z.object({
+  ai_driven_operations: CapabilityStatus,
+  ai_security_analytics: CapabilityStatus,
+  ai_assistant: CapabilityStatus,
+  note: z.string().min(1),
+}).strict();
+export type AiCapability = z.infer<typeof AiCapability>;
+
+export const Resilience = z.object({
+  disaster_recovery: CapabilityStatus,
+  note: z.string().min(1),
+}).strict();
+export type Resilience = z.infer<typeof Resilience>;
+
 export const VendorSchema = z.object({
   // Identity
   slug: z.string().regex(/^[a-z0-9-]+$/, "slug must be lowercase letters, digits and hyphens only"),
@@ -120,6 +169,14 @@ export const VendorSchema = z.object({
   // Capability matrix (40 features)
   capabilities: Capabilities,
   score_summary: ScoreSummary,
+
+  // Extended dimensions (June 2026): regional coverage, cloud support,
+  // AI capability, resilience and deployment velocity
+  deployment_speed: DeploymentSpeed,
+  regions: Regions,
+  supported_clouds: SupportedClouds,
+  ai_capability: AiCapability,
+  resilience: Resilience,
 
   // Qualitative judgements (Netify editorial)
   key_differentiators: z.array(z.string().min(1)).min(1).max(6),

@@ -78,5 +78,32 @@
     "Cloud on-ramp and private backbone capabilities are less prominent than dedicated SASE platforms."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "deployment_speed": "days",
+  "regions": {
+    "uk_ireland": "yes",
+    "europe": "yes",
+    "north_america": "yes",
+    "asia_pacific": "yes",
+    "middle_east_africa": "partial",
+    "latin_america": "partial",
+    "china_mainland": "partial"
+  },
+  "supported_clouds": {
+    "aws": "yes",
+    "azure": "yes",
+    "gcp": "yes",
+    "oracle_cloud": "partial",
+    "alibaba_cloud": "unknown"
+  },
+  "ai_capability": {
+    "ai_driven_operations": "yes",
+    "ai_security_analytics": "partial",
+    "ai_assistant": "yes",
+    "note": "Mist AI and the Marvis conversational assistant; AI-native WAN assurance."
+  },
+  "resilience": {
+    "disaster_recovery": "yes",
+    "note": "Session Smart Routing fails over per session with no tunnel re-establishment; HA clustering."
+  }
 }

@@ -1,0 +1,615 @@
+"use client";
+
+/**
+ * Shortlist builder client island.
+ * All verdict logic lives in src/lib/shortlist-core.ts (shared with the
+ * MCP tool and the Claude agent). This component only collects input,
+ * calls buildShortlist, and renders the result.
+ *
+ * URL state: reads window.location.search on mount, pushes changes back
+ * via history.replaceState (debounced) so every scenario is shareable.
+ */
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  AI_KEYS,
+  AI_LABELS,
+  CLOUD_KEYS,
+  CLOUD_LABELS,
+  DEFAULT_INPUT,
+  REGION_KEYS,
+  REGION_LABELS,
+  buildShortlist,
+  decodeScenario,
+  encodeScenario,
+  type ShortlistInput,
+  type ShortlistVendor,
+  type VendorVerdict,
+} from "@/lib/shortlist-core";
+
+type FeatureMeta = { id: string; name: string; category: string };
+
+type Props = {
+  vendors: ShortlistVendor[];
+  features: FeatureMeta[];
+};
+
+const MODEL_LABELS: Record<string, string> = {
+  any: "Any model",
+  managed: "Fully managed",
+  co_managed: "Co-managed",
+  diy: "DIY / self-managed",
+};
+
+const PRESET_LABELS: Record<string, string> = {
+  balanced: "Balanced",
+  security_led: "Security led",
+  network_led: "Network led",
+  cloud_first: "Cloud first",
+  managed_service_led: "Managed service led",
+};
+
+const SPEED_LABELS: Record<string, string> = {
+  any: "No ceiling",
+  hours: "Hours",
+  days: "Days",
+  weeks: "Weeks",
+  months: "Months",
+};
+
+export default function ShortlistBuilder({ vendors, features }: Props) {
+  const [input, setInput] = useState<ShortlistInput>(DEFAULT_INPUT);
+  const [hydrated, setHydrated] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
+
+  // Agent chat state
+  const [chatPrompt, setChatPrompt] = useState("");
+  const [chatBusy, setChatBusy] = useState(false);
+  const [chatNarrative, setChatNarrative] = useState<string | null>(null);
+  const [chatError, setChatError] = useState<string | null>(null);
+
+  // Lead form state
+  const [lead, setLead] = useState({ name: "", email: "", company: "", company_url: "" });
+  const [leadState, setLeadState] = useState<"idle" | "busy" | "sent" | "error">("idle");
+
+  const featureNames = useMemo(
+    () => Object.fromEntries(features.map((f) => [f.id, f.name])),
+    [features],
+  );
+  const featureIds = useMemo(() => features.map((f) => f.id), [features]);
+  const categories = useMemo(
+    () => Array.from(new Set(features.map((f) => f.category))),
+    [features],
+  );
+
+  // Read URL state on mount
+  useEffect(() => {
+    setInput(decodeScenario(window.location.search, featureIds));
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Push state changes back into the URL (debounced)
+  const urlTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!hydrated) return;
+    if (urlTimer.current) clearTimeout(urlTimer.current);
+    urlTimer.current = setTimeout(() => {
+      const qs = encodeScenario(input);
+      const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+      window.history.replaceState(null, "", url);
+    }, 250);
+  }, [input, hydrated]);
+
+  const result = useMemo(
+    () => buildShortlist(vendors, input, featureNames),
+    [vendors, input, featureNames],
+  );
+
+  function set<K extends keyof ShortlistInput>(key: K, value: ShortlistInput[K]) {
+    setInput((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function toggleIn(list: string[], value: string): string[] {
+    return list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
+  }
+
+  /** Tri-state feature toggle: off, required, preferred. */
+  function cycleFeature(fid: string) {
+    setInput((prev) => {
+      const isReq = prev.required_features.includes(fid);
+      const isPref = prev.preferred_features.includes(fid);
+      if (!isReq && !isPref) {
+        return { ...prev, required_features: [...prev.required_features, fid] };
+      }
+      if (isReq) {
+        return {
+          ...prev,
+          required_features: prev.required_features.filter((x) => x !== fid),
+          preferred_features: [...prev.preferred_features, fid],
+        };
+      }
+      return { ...prev, preferred_features: prev.preferred_features.filter((x) => x !== fid) };
+    });
+  }
+
+  async function copyLink() {
+    const qs = encodeScenario(input);
+    const url = `${window.location.origin}${window.location.pathname}${qs ? `?${qs}` : ""}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  function printUrl(): string {
+    const qs = encodeScenario(input);
+    return `/shortlist/print${qs ? `?${qs}` : ""}`;
+  }
+
+  async function askAgent() {
+    if (!chatPrompt.trim() || chatBusy) return;
+    setChatBusy(true);
+    setChatError(null);
+    setChatNarrative(null);
+    try {
+      const res = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt: chatPrompt, current_input: input }),
+      });
+      if (!res.ok) throw new Error(`Agent returned ${res.status}`);
+      const data = (await res.json()) as {
+        input?: ShortlistInput;
+        narrative?: string;
+        error?: string;
+      };
+      if (data.error) throw new Error(data.error);
+      if (data.input) setInput(data.input);
+      if (data.narrative) setChatNarrative(data.narrative);
+    } catch (err) {
+      setChatError(
+        err instanceof Error && err.message.includes("503")
+          ? "The AI advisor is not configured yet. Use the manual filters below."
+          : "The AI advisor could not process that request. Use the manual filters below, or try rephrasing.",
+      );
+    } finally {
+      setChatBusy(false);
+    }
+  }
+
+  async function submitLead(e: React.FormEvent) {
+    e.preventDefault();
+    if (leadState === "busy") return;
+    setLeadState("busy");
+    try {
+      const qs = encodeScenario(input);
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          ...lead,
+          shortlist_url: `${window.location.origin}/shortlist${qs ? `?${qs}` : ""}`,
+          criteria_summary: result.criteria_summary,
+          top_vendors: result.shortlist.slice(0, 10).map((v) => `${v.rank}. ${v.name} (${v.score})`),
+        }),
+      });
+      if (!res.ok) throw new Error("lead failed");
+      setLeadState("sent");
+    } catch {
+      setLeadState("error");
+    }
+  }
+
+  const featureState = (fid: string): "off" | "required" | "preferred" =>
+    input.required_features.includes(fid)
+      ? "required"
+      : input.preferred_features.includes(fid)
+        ? "preferred"
+        : "off";
+
+  return (
+    <div className="grid lg:grid-cols-12 gap-10">
+      {/* ---------------- Filters column ---------------- */}
+      <div className="lg:col-span-4 space-y-8">
+        {/* AI advisor */}
+        <section className="border border-[var(--ink-900)] rounded-sm p-5 bg-[var(--paper-base)]">
+          <p className="eyebrow mb-2">AI advisor</p>
+          <h2 className="text-lg mb-3">Describe what you need</h2>
+          <p className="text-sm text-[var(--ink-700)] mb-3">
+            Tell the advisor about your sites, regions, security needs and how you
+            want the service run. It sets the filters below for you.
+          </p>
+          <textarea
+            value={chatPrompt}
+            onChange={(e) => setChatPrompt(e.target.value)}
+            rows={4}
+            placeholder="Example: 60 sites across the UK and Germany, fully managed, ZTNA and SWG required, AWS and Azure, live within weeks."
+            className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-sm bg-white"
+          />
+          <button
+            onClick={askAgent}
+            disabled={chatBusy || !chatPrompt.trim()}
+            className="mt-3 w-full px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] rounded-sm text-sm disabled:opacity-50 hover:bg-[var(--accent)] transition-colors"
+          >
+            {chatBusy ? "Thinking..." : "Build my shortlist with AI"}
+          </button>
+          {chatNarrative && (
+            <div className="mt-3 text-sm text-[var(--ink-700)] border-l-2 border-[var(--accent)] pl-3 whitespace-pre-wrap">
+              {chatNarrative}
+            </div>
+          )}
+          {chatError && <p className="mt-3 text-sm text-red-700">{chatError}</p>}
+        </section>
+
+        {/* Operating model */}
+        <section>
+          <p className="eyebrow mb-3">Operating model</p>
+          <div className="flex flex-wrap gap-2">
+            {(["any", "managed", "co_managed", "diy"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => set("service_model", m)}
+                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                  input.service_model === m
+                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+                }`}
+              >
+                {MODEL_LABELS[m]}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Regions */}
+        <section>
+          <p className="eyebrow mb-3">Regions you must cover</p>
+          <div className="flex flex-wrap gap-2">
+            {REGION_KEYS.map((r) => (
+              <button
+                key={r}
+                onClick={() => set("required_regions", toggleIn(input.required_regions, r) as ShortlistInput["required_regions"])}
+                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                  input.required_regions.includes(r)
+                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+                }`}
+              >
+                {REGION_LABELS[r]}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Clouds */}
+        <section>
+          <p className="eyebrow mb-3">Cloud platforms</p>
+          <div className="flex flex-wrap gap-2">
+            {CLOUD_KEYS.map((c) => (
+              <button
+                key={c}
+                onClick={() => set("required_clouds", toggleIn(input.required_clouds, c) as ShortlistInput["required_clouds"])}
+                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                  input.required_clouds.includes(c)
+                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+                }`}
+              >
+                {CLOUD_LABELS[c]}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* AI, DR, speed, preset, size */}
+        <section>
+          <p className="eyebrow mb-3">AI capability</p>
+          <div className="flex flex-wrap gap-2">
+            {AI_KEYS.map((a) => (
+              <button
+                key={a}
+                onClick={() => set("ai_requirements", toggleIn(input.ai_requirements, a) as ShortlistInput["ai_requirements"])}
+                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                  input.ai_requirements.includes(a)
+                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+                }`}
+              >
+                {AI_LABELS[a]}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="eyebrow mb-3">Deployment ceiling</p>
+            <select
+              value={input.max_deployment_speed}
+              onChange={(e) => set("max_deployment_speed", e.target.value as ShortlistInput["max_deployment_speed"])}
+              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white"
+            >
+              {(["any", "hours", "days", "weeks", "months"] as const).map((s) => (
+                <option key={s} value={s}>{SPEED_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <p className="eyebrow mb-3">Scoring profile</p>
+            <select
+              value={input.weight_preset}
+              onChange={(e) => set("weight_preset", e.target.value as ShortlistInput["weight_preset"])}
+              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white"
+            >
+              {Object.entries(PRESET_LABELS).map(([k, label]) => (
+                <option key={k} value={k}>{label}</option>
+              ))}
+            </select>
+          </div>
+        </section>
+
+        <section className="flex items-center justify-between gap-4">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={input.disaster_recovery_required}
+              onChange={(e) => set("disaster_recovery_required", e.target.checked)}
+            />
+            Disaster recovery evidence required
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            Size
+            <select
+              value={input.shortlist_size}
+              onChange={(e) => set("shortlist_size", Number(e.target.value))}
+              className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white"
+            >
+              {[3, 5, 8, 10, 12, 15].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </label>
+        </section>
+
+        {/* Feature matrix picker */}
+        <section>
+          <p className="eyebrow mb-2">Capability requirements</p>
+          <p className="text-xs text-[var(--ink-500)] mb-3">
+            Click once for required (hard filter), twice for preferred (extra
+            scoring weight), three times to clear.
+          </p>
+          <div className="space-y-2">
+            {categories.map((cat) => (
+              <div key={cat} className="border border-[var(--ink-300,#ccc)] rounded-sm">
+                <button
+                  onClick={() => setOpenCategory(openCategory === cat ? null : cat)}
+                  className="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center"
+                >
+                  {cat}
+                  <span aria-hidden="true">{openCategory === cat ? "−" : "+"}</span>
+                </button>
+                {openCategory === cat && (
+                  <div className="px-3 pb-3 flex flex-wrap gap-2">
+                    {features
+                      .filter((f) => f.category === cat)
+                      .map((f) => {
+                        const st = featureState(f.id);
+                        return (
+                          <button
+                            key={f.id}
+                            onClick={() => cycleFeature(f.id)}
+                            title={
+                              st === "off"
+                                ? "Click: require this"
+                                : st === "required"
+                                  ? "Required. Click: prefer instead"
+                                  : "Preferred. Click: clear"
+                            }
+                            className={`px-2.5 py-1 text-xs rounded-sm border transition-colors ${
+                              st === "required"
+                                ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                                : st === "preferred"
+                                  ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                                  : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+                            }`}
+                          >
+                            {f.name}
+                            {st === "required" && " ✓"}
+                            {st === "preferred" && " +"}
+                          </button>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <button
+          onClick={() => setInput(DEFAULT_INPUT)}
+          className="text-sm text-[var(--ink-500)] underline hover:text-[var(--accent)]"
+        >
+          Reset all filters
+        </button>
+      </div>
+
+      {/* ---------------- Results column ---------------- */}
+      <div className="lg:col-span-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+          <h2 className="text-xl">
+            Your shortlist: {result.shortlist.length} of {result.considered} providers
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={copyLink}
+              className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+            >
+              {copied ? "Link copied ✓" : "Copy share link"}
+            </button>
+            <a
+              href={printUrl()}
+              target="_blank"
+              rel="noopener"
+              className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+            >
+              Download PDF
+            </a>
+          </div>
+        </div>
+        <p className="text-sm text-[var(--ink-500)] mb-6">{result.criteria_summary}</p>
+
+        {result.shortlist.length === 0 && (
+          <div className="border border-[var(--ink-300,#ccc)] rounded-sm p-6 text-[var(--ink-700)]">
+            <p className="mb-2 font-medium">No provider meets every requirement.</p>
+            <p className="text-sm">
+              Your hard filters exclude all {result.considered} providers. Relax a
+              requirement, or move some requirements to preferred. The closest
+              matches are shown below.
+            </p>
+          </div>
+        )}
+
+        <ol className="space-y-5 list-none p-0">
+          {result.shortlist.map((v) => (
+            <VendorCard key={v.slug} v={v} />
+          ))}
+        </ol>
+
+        {result.near_misses.length > 0 && (
+          <div className="mt-10">
+            <p className="eyebrow mb-3">Near misses</p>
+            <ul className="space-y-2 list-none p-0">
+              {result.near_misses.map((v) => (
+                <li key={v.slug} className="text-sm text-[var(--ink-700)] border-b border-[var(--ink-300,#ccc)] pb-2">
+                  <span className="font-medium">{v.name}</span> ({v.score}):{" "}
+                  {v.eligible
+                    ? "eligible but outside your shortlist size."
+                    : v.gating_failures[0]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <p className="mt-8 text-xs text-[var(--ink-500)]">{result.methodology_note}</p>
+
+        {/* Email capture */}
+        <section className="mt-12 border border-[var(--ink-900)] rounded-sm p-6">
+          <p className="eyebrow mb-2">Keep this shortlist</p>
+          <h3 className="text-lg mb-2">Email me this shortlist</h3>
+          <p className="text-sm text-[var(--ink-700)] mb-4">
+            We send the shareable link and the ranked list to your inbox. Netify
+            can also issue this shortlist as a structured RFP to the vendors.
+          </p>
+          {leadState === "sent" ? (
+            <p className="text-sm font-medium">Sent. Check your inbox.</p>
+          ) : (
+            <form onSubmit={submitLead} className="grid sm:grid-cols-3 gap-3">
+              <input
+                required
+                placeholder="Name"
+                value={lead.name}
+                onChange={(e) => setLead({ ...lead, name: e.target.value })}
+                className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm bg-white"
+              />
+              <input
+                required
+                type="email"
+                placeholder="Work email"
+                value={lead.email}
+                onChange={(e) => setLead({ ...lead, email: e.target.value })}
+                className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm bg-white"
+              />
+              <input
+                placeholder="Company"
+                value={lead.company}
+                onChange={(e) => setLead({ ...lead, company: e.target.value })}
+                className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm bg-white"
+              />
+              {/* Honeypot: hidden from humans */}
+              <input
+                tabIndex={-1}
+                autoComplete="off"
+                value={lead.company_url}
+                onChange={(e) => setLead({ ...lead, company_url: e.target.value })}
+                name="company_url"
+                aria-hidden="true"
+                style={{ position: "absolute", left: "-9999px", height: 0, width: 0, opacity: 0 }}
+              />
+              <button
+                type="submit"
+                disabled={leadState === "busy"}
+                className="sm:col-span-3 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] rounded-sm text-sm disabled:opacity-50 hover:bg-[var(--accent)] transition-colors"
+              >
+                {leadState === "busy" ? "Sending..." : "Email my shortlist"}
+              </button>
+              {leadState === "error" && (
+                <p className="sm:col-span-3 text-sm text-red-700">
+                  That did not send. Try again, or copy the share link instead.
+                </p>
+              )}
+            </form>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function VendorCard({ v }: { v: VendorVerdict }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <li className="border border-[var(--ink-300,#ccc)] rounded-sm p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="eyebrow mb-1">No. {v.rank} · Score {v.score}</p>
+          <h3 className="text-lg mb-1">
+            <a href={`/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+              {v.name}
+            </a>
+          </h3>
+          <p className="text-sm text-[var(--ink-500)]">{v.category} · Typical deployment: {v.deployment_speed}</p>
+        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-sm border border-[var(--ink-300,#ccc)] rounded-sm px-2.5 py-1 shrink-0 hover:border-[var(--ink-900)]"
+        >
+          {open ? "Less" : "Why this rank?"}
+        </button>
+      </div>
+      <p className="text-sm text-[var(--ink-700)] mt-3">{v.key_differentiators[0]}</p>
+      {open && (
+        <div className="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="font-medium mb-1">Meets your requirements</p>
+            <ul className="list-disc pl-5 space-y-1 text-[var(--ink-700)]">
+              {v.matched_requirements.length > 0 ? (
+                v.matched_requirements.map((m, i) => <li key={i}>{m}</li>)
+              ) : (
+                <li>No hard requirements set; ranked on weighted capability score.</li>
+              )}
+            </ul>
+            {v.gaps.length > 0 && (
+              <>
+                <p className="font-medium mt-3 mb-1">Evidence caveats</p>
+                <ul className="list-disc pl-5 space-y-1 text-[var(--ink-700)]">
+                  {v.gaps.map((g, i) => <li key={i}>{g}</li>)}
+                </ul>
+              </>
+            )}
+          </div>
+          <div>
+            <p className="font-medium mb-1">Watch-outs</p>
+            <ul className="list-disc pl-5 space-y-1 text-[var(--ink-700)]">
+              {v.watch_outs.slice(0, 3).map((w, i) => <li key={i}>{w}</li>)}
+            </ul>
+            <p className="font-medium mt-3 mb-1">Commercials</p>
+            <p className="text-[var(--ink-700)]">{v.cost_model}</p>
+          </div>
+        </div>
+      )}
+    </li>
+  );
+}

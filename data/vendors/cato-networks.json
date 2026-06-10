@@ -78,5 +78,32 @@
     "Less mature than incumbents for very large multinational deployments with heavy legacy MPLS estates."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "deployment_speed": "hours",
+  "regions": {
+    "uk_ireland": "yes",
+    "europe": "yes",
+    "north_america": "yes",
+    "asia_pacific": "yes",
+    "middle_east_africa": "yes",
+    "latin_america": "partial",
+    "china_mainland": "partner_integrated"
+  },
+  "supported_clouds": {
+    "aws": "yes",
+    "azure": "yes",
+    "gcp": "yes",
+    "oracle_cloud": "partial",
+    "alibaba_cloud": "partial"
+  },
+  "ai_capability": {
+    "ai_driven_operations": "yes",
+    "ai_security_analytics": "yes",
+    "ai_assistant": "partial",
+    "note": "Real-time ML threat prevention, autonomous policy recommendations and built-in DEM."
+  },
+  "resilience": {
+    "disaster_recovery": "yes",
+    "note": "Self-healing backbone; sockets fail over between PoPs automatically with no customer action."
+  }
 }

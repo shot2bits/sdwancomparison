@@ -77,5 +77,32 @@
     "Co-managed model and customer control boundaries should be confirmed via RACI and portal demo."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "deployment_speed": "weeks",
+  "regions": {
+    "uk_ireland": "yes",
+    "europe": "yes",
+    "north_america": "yes",
+    "asia_pacific": "yes",
+    "middle_east_africa": "partial",
+    "latin_america": "partial",
+    "china_mainland": "partner_integrated"
+  },
+  "supported_clouds": {
+    "aws": "yes",
+    "azure": "yes",
+    "gcp": "yes",
+    "oracle_cloud": "partial",
+    "alibaba_cloud": "unknown"
+  },
+  "ai_capability": {
+    "ai_driven_operations": "managed_service_dependent",
+    "ai_security_analytics": "managed_service_dependent",
+    "ai_assistant": "managed_service_dependent",
+    "note": "Depends on platform (Meraki, Versa, Fortinet); BT adds managed analytics and reporting."
+  },
+  "resilience": {
+    "disaster_recovery": "yes",
+    "note": "Dual-hub designs, diverse UK last mile and 24x7 UK NOC under a single managed contract."
+  }
 }

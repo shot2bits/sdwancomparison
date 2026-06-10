@@ -77,5 +77,32 @@
     "Premium pricing with modular structure; full SASE bundle costs can scale meaningfully with users and traffic."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "deployment_speed": "days",
+  "regions": {
+    "uk_ireland": "yes",
+    "europe": "yes",
+    "north_america": "yes",
+    "asia_pacific": "yes",
+    "middle_east_africa": "partial",
+    "latin_america": "partial",
+    "china_mainland": "partner_integrated"
+  },
+  "supported_clouds": {
+    "aws": "yes",
+    "azure": "yes",
+    "gcp": "yes",
+    "oracle_cloud": "partial",
+    "alibaba_cloud": "unknown"
+  },
+  "ai_capability": {
+    "ai_driven_operations": "partial",
+    "ai_security_analytics": "yes",
+    "ai_assistant": "partial",
+    "note": "SkopeAI for data and threat protection; UEBA analytics across users and apps."
+  },
+  "resilience": {
+    "disaster_recovery": "yes",
+    "note": "NewEdge private cloud runs full compute in every region; localised failover."
+  }
 }

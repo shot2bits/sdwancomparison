@@ -50,7 +50,7 @@ export default async function VendorPage({ params }: Props) {
   const totalFeatures = 40;
   const yesPct = Math.round((vendor.score_summary.yes_count / totalFeatures) * 100);
 
-  // JSON-LD for structured data — supports AI and search citation
+  // JSON-LD for structured data: supports AI and search citation
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",

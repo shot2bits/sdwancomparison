@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   description:
     "Vendor-neutral SD-WAN and SASE comparison covering 30 platforms and managed providers against a 40-feature evaluation framework. Published by Netify.",
-  metadataBase: new URL("https://comparison.netify.co.uk"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://sase.netify.co.uk"),
   openGraph: {
     type: "website",
     siteName: "Netify Vendor Comparison",
@@ -49,6 +49,9 @@ export default function RootLayout({
               Netify
             </Link>
             <nav className="flex items-center gap-8 text-sm">
+              <Link href="/shortlist" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
+                Shortlist builder
+              </Link>
               <Link href="/vendors" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
                 Vendor comparison
               </Link>

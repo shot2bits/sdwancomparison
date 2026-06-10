@@ -78,5 +78,32 @@
     "Buyers needing one vendor for both SD-WAN and security may prefer a converged platform (Cato, FortiSASE, Prisma)."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "deployment_speed": "days",
+  "regions": {
+    "uk_ireland": "yes",
+    "europe": "yes",
+    "north_america": "yes",
+    "asia_pacific": "yes",
+    "middle_east_africa": "partial",
+    "latin_america": "partial",
+    "china_mainland": "partner_integrated"
+  },
+  "supported_clouds": {
+    "aws": "yes",
+    "azure": "yes",
+    "gcp": "yes",
+    "oracle_cloud": "partial",
+    "alibaba_cloud": "unknown"
+  },
+  "ai_capability": {
+    "ai_driven_operations": "partial",
+    "ai_security_analytics": "yes",
+    "ai_assistant": "yes",
+    "note": "AI-powered phishing and C2 detection; ZDX Copilot for digital experience."
+  },
+  "resilience": {
+    "disaster_recovery": "yes",
+    "note": "160+ PoP cloud with service continuity features across regions."
+  }
 }

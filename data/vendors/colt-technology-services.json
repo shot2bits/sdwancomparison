@@ -78,5 +78,32 @@
     "Underlying SD-WAN platform should be explicitly confirmed in RFP."
   ],
   "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing."
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed) are indicative desk research grades from June 2026; confirm via RFP.",
+  "deployment_speed": "months",
+  "regions": {
+    "uk_ireland": "yes",
+    "europe": "yes",
+    "north_america": "partial",
+    "asia_pacific": "yes",
+    "middle_east_africa": "partial",
+    "latin_america": "unknown",
+    "china_mainland": "partial"
+  },
+  "supported_clouds": {
+    "aws": "yes",
+    "azure": "yes",
+    "gcp": "yes",
+    "oracle_cloud": "partial",
+    "alibaba_cloud": "unknown"
+  },
+  "ai_capability": {
+    "ai_driven_operations": "managed_service_dependent",
+    "ai_security_analytics": "managed_service_dependent",
+    "ai_assistant": "managed_service_dependent",
+    "note": "Depends on vendor platform (Versa, VeloCloud); Colt On Demand portal adds analytics."
+  },
+  "resilience": {
+    "disaster_recovery": "yes",
+    "note": "Owned Colt IQ Network fibre with diverse routing and on-demand failover."
+  }
 }

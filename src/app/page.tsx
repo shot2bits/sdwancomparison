@@ -23,13 +23,19 @@ export default function Home() {
             categories, using only public source evidence. Every status grade is
             traceable to its source.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 flex-wrap">
             <Link
-              href="/vendors"
+              href="/shortlist"
               className="inline-flex items-center gap-2 px-5 py-3 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm"
             >
-              Browse {totalCount} vendors
+              Build your shortlist
               <span aria-hidden="true">→</span>
+            </Link>
+            <Link
+              href="/vendors"
+              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--ink-900)] no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors rounded-sm"
+            >
+              Browse {totalCount} vendors
             </Link>
             <a
               href="https://netify.co.uk"
