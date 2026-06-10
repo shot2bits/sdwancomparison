@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllVendors, FEATURES, FEATURE_CATEGORIES } from "@/lib/vendors";
+import { SITE_URL, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
+
+export const metadata: Metadata = {
+  alternates: { canonical: `${SITE_URL}/` },
+};
 
 export default function Home() {
   const vendors = getAllVendors();
@@ -7,17 +13,26 @@ export default function Home() {
   const featureCount = FEATURES.length;
   const categoryCount = FEATURE_CATEGORIES.length;
 
+  const schemas = [getOrganizationSchema(), getSpeakableSchema("/")];
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-16 md:py-24">
+      {schemas.map((sc, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(sc) }}
+        />
+      ))}
       {/* Hero */}
       <div className="grid md:grid-cols-12 gap-8 mb-20 fade-rise">
         <div className="md:col-span-8">
           <p className="eyebrow mb-4">SD-WAN and SASE research</p>
-          <h1 className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 500 }}>
+          <h1 id="page-h1" className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 500 }}>
             A vendor-neutral comparison of {totalCount} SD-WAN and SASE platforms,
             graded against a {featureCount}-feature evaluation framework.
           </h1>
-          <p className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
+          <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
             Most vendor comparisons are written by vendors. This one is published by
             Netify and grades each platform against the same {categoryCount} capability
             categories, using only public source evidence. Every status grade is
