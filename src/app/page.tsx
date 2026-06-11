@@ -41,14 +41,14 @@ export default function Home() {
           <div className="flex items-center gap-6 flex-wrap">
             <Link
               href="/shortlist"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full"
             >
               Build your shortlist
               <span aria-hidden="true">→</span>
             </Link>
             <Link
               href="/vendors"
-              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--ink-900)] no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors rounded-sm"
+              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--ink-900)] no-underline hover:bg-zinc-900 hover:text-white transition-colors rounded-full"
             >
               Browse {totalCount} vendors
             </Link>
@@ -133,7 +133,7 @@ export default function Home() {
         <h2 className="mb-6">Start with the full vendor list.</h2>
         <Link
           href="/vendors"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full"
         >
           Browse all {totalCount} vendors
           <span aria-hidden="true">→</span>

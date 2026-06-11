@@ -139,14 +139,14 @@ export default async function BestPage({ params }: Props) {
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
             href={builderUrl}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm text-sm"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
           >
             Refine this shortlist interactively
             <span aria-hidden="true">→</span>
           </Link>
           <Link
             href="/vendors"
-            className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors rounded-sm text-sm"
+            className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-zinc-900 hover:text-white transition-colors rounded-full text-sm"
           >
             All 30 vendors
           </Link>
@@ -178,7 +178,7 @@ export default async function BestPage({ params }: Props) {
               href={v.marketplace_url ?? "https://netify.co.uk/marketplace/"}
               target="_blank"
               rel="noopener"
-              className="inline-block mt-3 px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+              className="inline-block mt-3 px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
             >
               Contact {v.name} via Netify ↗
             </a>
@@ -220,7 +220,7 @@ export default async function BestPage({ params }: Props) {
             <Link
               key={p.slug}
               href={`/best/${p.slug}`}
-              className="px-3 py-1.5 text-sm rounded-sm border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
+              className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
             >
               {p.title.replace("Best SD-WAN and SASE providers for ", "")}
             </Link>

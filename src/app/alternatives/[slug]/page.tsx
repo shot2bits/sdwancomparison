@@ -117,13 +117,13 @@ export default async function AlternativesPage({ params }: Props) {
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
             href={`/vendors/${slug}`}
-            className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors rounded-sm text-sm"
+            className="inline-flex items-center px-4 py-2.5 border border-[var(--ink-900)] no-underline hover:bg-zinc-900 hover:text-white transition-colors rounded-full text-sm"
           >
             Full {vendor.name} profile
           </Link>
           <Link
             href="/shortlist"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm text-sm"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
           >
             Build your own shortlist
             <span aria-hidden="true">→</span>
@@ -156,7 +156,7 @@ export default async function AlternativesPage({ params }: Props) {
               href={v.marketplace_url ?? "https://netify.co.uk/marketplace/"}
               target="_blank"
               rel="noopener"
-              className="inline-block mt-3 px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+              className="inline-block mt-3 px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
             >
               Contact {v.name} via Netify ↗
             </a>

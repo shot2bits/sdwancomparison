@@ -74,7 +74,7 @@ export default function ShortlistPage() {
             <Link
               key={bp.slug}
               href={`/best/${bp.slug}`}
-              className="px-3 py-1.5 text-sm rounded-sm border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
+              className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
             >
               {bp.title.replace("Best SD-WAN and SASE providers for ", "")}
             </Link>

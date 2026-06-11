@@ -13,9 +13,9 @@
   --paper-card: #fffefc;
 
   /* Accent — deep teal, used sparingly for links and headlines */
-  --accent: #0d5246;
-  --accent-hover: #0a3d34;
-  --accent-soft: #d6e5e1;
+  --accent: #b45309;
+  --accent-hover: #92400e;
+  --accent-soft: #fef3c7;
 
   /* Capability status palette */
   --status-yes: #2d6a4f;
@@ -227,4 +227,11 @@ a:hover {
 
 .fade-rise {
   animation: fade-rise 600ms ease-out backwards;
+}
+
+/* Buttons: focus visibility to match the amber system */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
 }

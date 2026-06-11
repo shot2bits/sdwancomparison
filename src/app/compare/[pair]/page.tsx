@@ -133,13 +133,13 @@ export default async function ComparePage({ params }: Props) {
                 href={c.meta[s].marketplace_url ?? "https://netify.co.uk/marketplace/"}
                 target="_blank"
                 rel="noopener"
-                className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+                className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
               >
                 Contact via Netify ↗
               </a>
               <Link
                 href={`/alternatives/${s}`}
-                className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-sm no-underline hover:border-[var(--ink-900)]"
+                className="px-3.5 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full no-underline hover:border-[var(--ink-900)]"
               >
                 Alternatives
               </Link>
@@ -153,7 +153,7 @@ export default async function ComparePage({ params }: Props) {
       <div className="mt-8">
         <Link
           href="/shortlist"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
         >
           Score both against your requirements
           <span aria-hidden="true">→</span>
@@ -177,7 +177,7 @@ export default async function ComparePage({ params }: Props) {
         <p className="eyebrow mb-3">More head to heads</p>
         <div className="flex flex-wrap gap-2">
           {COMPARE_PAIRS.filter((p) => p.slug !== pair).slice(0, 12).map((p) => (
-            <Link key={p.slug} href={`/compare/${p.slug}`} className="px-3 py-1.5 text-sm rounded-sm border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]">
+            <Link key={p.slug} href={`/compare/${p.slug}`} className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]">
               {p.slug.replace(/-vs-/, " vs ").replace(/-/g, " ")}
             </Link>
           ))}

@@ -285,7 +285,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           <button
             onClick={askAgent}
             disabled={chatBusy || !chatPrompt.trim()}
-            className="mt-3 w-full px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] rounded-sm text-sm disabled:opacity-50 hover:bg-[var(--accent)] transition-colors"
+            className="mt-3 w-full px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm disabled:opacity-50 hover:bg-amber-400 transition-colors"
           >
             {chatBusy ? "Thinking..." : chatMessages.length > 0 ? "Ask a follow-up" : "Build my shortlist with AI"}
           </button>
@@ -316,9 +316,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               <button
                 key={sec}
                 onClick={() => set("sector", input.sector === sec ? null : sec)}
-                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                className={`px-3.5 py-1.5 text-sm rounded-full border transition-colors ${
                   input.sector === sec
-                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"
                     : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
                 }`}
               >
@@ -337,9 +337,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                 <button
                   key={o}
                   onClick={() => set("organisation_size", o)}
-                  className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                  className={`px-3.5 py-1.5 text-sm rounded-full border transition-colors ${
                     input.organisation_size === o
-                      ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                      ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"
                       : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
                   }`}
                 >
@@ -371,9 +371,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               <button
                 key={m}
                 onClick={() => set("service_model", m)}
-                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                className={`px-3.5 py-1.5 text-sm rounded-full border transition-colors ${
                   input.service_model === m
-                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"
                     : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
                 }`}
               >
@@ -391,9 +391,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               <button
                 key={r}
                 onClick={() => set("required_regions", toggleIn(input.required_regions, r) as ShortlistInput["required_regions"])}
-                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                className={`px-3.5 py-1.5 text-sm rounded-full border transition-colors ${
                   input.required_regions.includes(r)
-                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"
                     : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
                 }`}
               >
@@ -411,9 +411,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               <button
                 key={c}
                 onClick={() => set("required_clouds", toggleIn(input.required_clouds, c) as ShortlistInput["required_clouds"])}
-                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                className={`px-3.5 py-1.5 text-sm rounded-full border transition-colors ${
                   input.required_clouds.includes(c)
-                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"
                     : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
                 }`}
               >
@@ -431,9 +431,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               <button
                 key={a}
                 onClick={() => set("ai_requirements", toggleIn(input.ai_requirements, a) as ShortlistInput["ai_requirements"])}
-                className={`px-3 py-1.5 text-sm rounded-sm border transition-colors ${
+                className={`px-3.5 py-1.5 text-sm rounded-full border transition-colors ${
                   input.ai_requirements.includes(a)
-                    ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                    ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"
                     : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
                 }`}
               >
@@ -527,11 +527,11 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                                   ? "Required. Click: prefer instead"
                                   : "Preferred. Click: clear"
                             }
-                            className={`px-2.5 py-1 text-xs rounded-sm border transition-colors ${
+                            className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                               st === "required"
-                                ? "bg-[var(--ink-900)] text-[var(--paper-base)] border-[var(--ink-900)]"
+                                ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"
                                 : st === "preferred"
-                                  ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                                  ? "bg-amber-100 text-amber-900 border-amber-400"
                                   : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
                             }`}
                           >
@@ -568,7 +568,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                 {curatedPairUrl && (
                   <a
                     href={curatedPairUrl}
-                    className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+                    className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
                   >
                     Permanent comparison page
                   </a>
@@ -578,7 +578,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                     setCompareSlugs([]);
                     setChatComparison(null);
                   }}
-                  className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-sm hover:border-[var(--ink-900)]"
+                  className="px-3.5 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]"
                 >
                   Close
                 </button>
@@ -597,7 +597,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           <div className="flex gap-2">
             <button
               onClick={copyLink}
-              className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+              className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-zinc-900 hover:text-white transition-colors"
             >
               {copied ? "Link copied ✓" : "Copy share link"}
             </button>
@@ -605,7 +605,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               href={printUrl()}
               target="_blank"
               rel="noopener"
-              className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+              className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
             >
               Download PDF
             </a>
@@ -703,7 +703,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               <button
                 type="submit"
                 disabled={leadState === "busy"}
-                className="sm:col-span-3 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] rounded-sm text-sm disabled:opacity-50 hover:bg-[var(--accent)] transition-colors"
+                className="sm:col-span-3 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm disabled:opacity-50 hover:bg-amber-400 transition-colors"
               >
                 {leadState === "busy" ? "Sending..." : "Email my shortlist"}
               </button>
@@ -745,9 +745,9 @@ function VendorCard({
         <div className="flex gap-2 shrink-0">
           <button
             onClick={onCompare}
-            className={`text-sm border rounded-sm px-2.5 py-1 transition-colors ${
+            className={`text-sm border rounded-full px-3 py-1 transition-colors ${
               compared
-                ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                ? "bg-amber-100 text-amber-900 border-amber-400"
                 : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
             }`}
           >
@@ -755,7 +755,7 @@ function VendorCard({
           </button>
           <button
             onClick={() => setOpen(!open)}
-            className="text-sm border border-[var(--ink-300,#ccc)] rounded-sm px-2.5 py-1 hover:border-[var(--ink-900)]"
+            className="text-sm border border-[var(--ink-300,#ccc)] rounded-full px-3 py-1 hover:border-[var(--ink-900)]"
           >
             {open ? "Less" : "Why this rank?"}
           </button>
@@ -793,7 +793,7 @@ function VendorCard({
               href={v.marketplace_url ?? "https://netify.co.uk/marketplace/"}
               target="_blank"
               rel="noopener"
-              className="inline-block mt-3 px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+              className="inline-block mt-3 px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
             >
               Contact {v.name} via Netify ↗
             </a>

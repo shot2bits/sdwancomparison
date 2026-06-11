@@ -125,7 +125,7 @@ export default async function VendorPage({ params }: Props) {
                 href={vendor.marketplace_url ?? "https://netify.co.uk/marketplace/"}
                 target="_blank"
                 rel="noopener"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full"
               >
                 Contact {vendor.name} via Netify ↗
               </a>
