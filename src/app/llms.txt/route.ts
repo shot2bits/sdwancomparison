@@ -30,6 +30,10 @@ Pre-computed, citable top 10 rankings driven by the same engine. Each page emits
 
 ${bestPages}
 
+## Full text version
+
+${SITE_URL}/llms-full.txt carries every ranking in plain text with canonical URLs, one fetch for the whole dataset.
+
 ## Programmatic access
 
 MCP server (JSON-RPC 2.0): POST ${SITE_URL}/api/mcp (no trailing slash). Methods: initialize, tools/list, tools/call.

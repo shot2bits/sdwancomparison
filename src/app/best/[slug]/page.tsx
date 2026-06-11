@@ -81,12 +81,27 @@ export default async function BestPage({ params }: Props) {
     headline: page.title,
     description: page.metaDescription,
     author: { "@type": "Organization", name: "Netify research team", url: "https://netify.co.uk/about-netify/" },
+    reviewedBy: { "@id": `${SITE_URL}/#person-robert-sturt` },
     publisher: { "@id": `${SITE_URL}/#organization` },
     dateModified: "2026-06-10",
     mainEntityOfPage: `${SITE_URL}/best/${page.slug}`,
   };
 
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${SITE_URL}/#person-robert-sturt`,
+    name: "Robert Sturt",
+    worksFor: { "@id": `${SITE_URL}/#organization` },
+    url: "https://netify.co.uk/about-netify/",
+    sameAs: [
+      "https://netify.co.uk/staff-list/",
+      "https://netify.co.uk/about-netify/",
+    ],
+  };
+
   const schemas = [
+    personSchema,
     getOrganizationSchema(),
     getBreadcrumbSchema(page.title, `/best/${page.slug}`),
     getSpeakableSchema(`/best/${page.slug}`),
@@ -109,9 +124,17 @@ export default async function BestPage({ params }: Props) {
         <p className="eyebrow mb-3">Ranked shortlist · Updated June 2026</p>
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
+        <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
+          {`Netify's June 2026 evaluation ranks: `}
+          {result.shortlist
+            .map((v) => `${v.rank}. ${v.name} (${v.score})`)
+            .join("; ")}
+          {`. Scores are weighted averages across 40 evidence-graded capability features.`}
+        </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
-          Written and reviewed by the Netify research team. Methodology: weighted
-          scoring across 40 graded capability features; see the FAQ below.
+          Written by the Netify research team. Reviewed by Robert Sturt, Netify
+          Group Limited. Updated 10 June 2026. Methodology: weighted scoring
+          across 40 graded capability features; see the FAQ below.
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
@@ -132,7 +155,11 @@ export default async function BestPage({ params }: Props) {
 
       <ol className="space-y-6 list-none p-0">
         {result.shortlist.map((v) => (
-          <li key={v.slug} className="border border-[var(--ink-300,#ccc)] rounded-sm p-5">
+          <li
+            key={v.slug}
+            id={`rank-${v.rank}-${v.slug}`}
+            className="border border-[var(--ink-300,#ccc)] rounded-sm p-5"
+          >
             <p className="eyebrow mb-1">No. {v.rank} · Score {v.score}</p>
             <h2 className="text-xl mb-1">
               <Link href={`/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
@@ -160,6 +187,18 @@ export default async function BestPage({ params }: Props) {
       </ol>
 
       <p className="mt-8 text-xs text-[var(--ink-500)]">{result.methodology_note}</p>
+
+      <section className="mt-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5 max-w-3xl">
+        <p className="eyebrow mb-2">Cite this research</p>
+        <p className="text-sm text-[var(--ink-700)]">
+          {`Netify, "${page.title} (2026)", Netify SASE and SD-WAN comparison, updated 10 June 2026: `}
+          <span className="break-all">{`${SITE_URL}/best/${page.slug}`}</span>
+        </p>
+        <p className="text-xs text-[var(--ink-500)] mt-2">
+          Machine-readable version: {`${SITE_URL}/best/${page.slug}/data.json`} ·
+          Programmatic access: POST {`${SITE_URL}/api/mcp`} (tool: build_sase_shortlist)
+        </p>
+      </section>
 
       <section className="mt-14">
         <p className="eyebrow mb-3">Questions</p>

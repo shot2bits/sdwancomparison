@@ -109,7 +109,57 @@ function intentPage(key: IntentKey, slugPart: string, context: string): BestPage
   };
 }
 
+const FLAGSHIP_PAGES: BestPage[] = [
+  {
+    slug: "sd-wan-providers",
+    input: { shortlist_size: 10 },
+    title: "Best SD-WAN providers",
+    metaTitle: `Best SD-WAN Providers (${YEAR}): 30 Vendors Ranked`,
+    metaDescription: `Netify's ${YEAR} ranking of SD-WAN providers: 30 vendors scored across 40 capability features with public evidence grades. Top 10 with scores.`,
+    h1: `Best SD-WAN providers (${YEAR}): 30 vendors ranked by evidence`,
+    intro: `Netify's ${YEAR} evaluation grades 30 SD-WAN providers and vendors against 40 capability features using public source evidence, covering service model, transport, PoP and backbone design, security, and operations. The top 10 by weighted score are ranked below, each with score, deployment speed and caveats. Filter the full field by sector, region, cloud and operating model in the interactive builder.`,
+    faqs: [
+      {
+        q: "Who are the best SD-WAN providers in " + YEAR + "?",
+        a: "Based on the Netify 40-feature evidence matrix (June " + YEAR + "), the top-ranked providers are listed above with their weighted scores. Leaders include Cato Networks, Fortinet, Versa Networks, Palo Alto Networks and BT Business among managed routes. The right choice depends on sector, regions, operating model and security requirements, which the interactive shortlist builder scores for free.",
+      },
+      {
+        q: "How does Netify rank SD-WAN providers?",
+        a: "Every provider is graded on the same 40 features (graded yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0) plus regional coverage, cloud support, AI capability, resilience and deployment speed. Scores are weighted averages; the engine, grades and methodology are published and reproducible via the page URL, JSON twin and MCP tool.",
+      },
+      {
+        q: "What is the difference between an SD-WAN vendor and an SD-WAN provider?",
+        a: "Vendors build the platform (Cisco, Fortinet, Versa, VeloCloud); providers deliver it as a managed service over their networks (BT, Verizon, Orange, GTT). Many buyers procure a vendor platform through a provider. The Netify matrix grades both on the same scale so they can be compared in one shortlist.",
+      },
+    ],
+  },
+  {
+    slug: "sase-providers",
+    input: { weight_preset: "security_led", shortlist_size: 10 },
+    title: "Best SASE providers",
+    metaTitle: `Best SASE Providers (${YEAR}): 30 Vendors Ranked`,
+    metaDescription: `Netify's ${YEAR} ranking of SASE providers and vendors: 30 platforms scored on ZTNA, SWG, CASB, DLP and SD-WAN convergence. Top 10 with scores.`,
+    h1: `Best SASE providers (${YEAR}): ranked on security-led scoring`,
+    intro: `Netify's ${YEAR} evaluation ranks 30 SASE and SD-WAN platforms with security-led weighting: ZTNA, SWG, CASB, DLP and FWaaS capability carry the most weight, alongside PoP coverage, identity integration and operating model. The top 10 are ranked below with scores and caveats. Adjust the weighting or add your sector, regions and clouds in the interactive builder.`,
+    faqs: [
+      {
+        q: "Who are the best SASE providers in " + YEAR + "?",
+        a: "With security-led weighting on the Netify 40-feature matrix (June " + YEAR + "), the leaders are ranked above with scores. Single-vendor SASE strength sits with Cato Networks, Fortinet, Palo Alto Prisma and Versa; SSE depth leaders Zscaler and Netskope pair with third-party SD-WAN; BT Managed SASE leads UK managed routes.",
+      },
+      {
+        q: "Single-vendor SASE or best-of-breed: which should I choose?",
+        a: "Single-vendor SASE (Cato, Fortinet, Palo Alto, Versa) gives one console and policy model with simpler operations. Best-of-breed pairs an SSE leader (Zscaler, Netskope) with a dedicated SD-WAN vendor for maximum per-category depth at the cost of integration. The shortlist builder scores both patterns against your requirements.",
+      },
+      {
+        q: "How is this SASE ranking calculated?",
+        a: "All 30 platforms are scored on the same published evidence grades with security features weighted 1.8x under the security-led profile. Scoring is deterministic and reproducible: the same criteria at the canonical URL, the JSON twin or the MCP tool return the same ranking.",
+      },
+    ],
+  },
+];
+
 export const BEST_PAGES: BestPage[] = [
+  ...FLAGSHIP_PAGES,
   sectorPage("healthcare", "healthcare", "Typical drivers include clinical application performance, site resilience for 24x7 care settings and patient data protection."),
   sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
   sectorPage("retail_ecommerce", "retail", "Typical drivers include rapid store rollout, PCI segmentation, cellular backup and centralised management at scale."),
