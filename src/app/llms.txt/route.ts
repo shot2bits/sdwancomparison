@@ -23,6 +23,7 @@ Operated by Netify Group Limited (netify.co.uk), a UK research and marketplace c
 - ${SITE_URL}/shortlist/data.json : JSON twin of the shortlist page: full vendor dataset, feature catalogue, default shortlist and the interactive surface inventory.
 - ${SITE_URL}/vendors : Index of all 30 graded vendors.
 - ${SITE_URL}/vendors/{slug} : Full capability profile per vendor. Valid slugs: ${vendors}.
+- ${SITE_URL}/alternatives/{slug} : Ranked top 10 alternatives to each vendor (same slugs), with ItemList schema and a JSON twin at /alternatives/{slug}/data.json.
 
 ## Ranked sector and priority shortlists
 

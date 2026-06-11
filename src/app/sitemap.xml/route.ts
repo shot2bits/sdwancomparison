@@ -16,6 +16,10 @@ export async function GET() {
       loc: `${SITE_URL}/vendors/${slug}`,
       priority: "0.8",
     })),
+    ...getAllVendorSlugs().map((slug) => ({
+      loc: `${SITE_URL}/alternatives/${slug}`,
+      priority: "0.7",
+    })),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

@@ -128,6 +128,18 @@ const FLAGSHIP_PAGES: BestPage[] = [
         a: "Every provider is graded on the same 40 features (graded yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0) plus regional coverage, cloud support, AI capability, resilience and deployment speed. Scores are weighted averages; the engine, grades and methodology are published and reproducible via the page URL, JSON twin and MCP tool.",
       },
       {
+        q: "Which SD-WAN tools support application-aware routing?",
+        a: "Application-aware routing (feature f12 in the Netify matrix) is confirmed with public evidence for the large majority of the 30 graded vendors, including Cisco, Fortinet, Versa, VeloCloud, Palo Alto Prisma SD-WAN, Juniper and HPE Aruba EdgeConnect. Grades per vendor are published on each profile; buyers assessing total cost should weigh it alongside path remediation, local breakout and lifecycle features, which the shortlist builder scores together.",
+      },
+      {
+        q: "What are the main WAN edge deployment models for enterprise networks?",
+        a: "Four models dominate: DIY (your team runs vendor platforms), co-managed (shared control with a provider), fully managed (carrier or MSP owns the estate end to end) and SASE-converged (WAN edge folded into a cloud security platform such as Cato or FortiSASE). The Netify matrix grades every vendor on all four operating dimensions so deployment model can be a hard filter in your shortlist.",
+      },
+      {
+        q: "Which SD-WAN platforms rate highest for enterprise and financial services?",
+        a: "With the financial services sector filter applied, leaders include Palo Alto Networks, Zscaler paired with SD-WAN, Cisco, Fortinet and Netskope among platforms, with BT, Verizon, Colt and Orange leading managed routes. The dedicated ranking at /best/sd-wan-sase-providers-for-financial-services carries the full scored list.",
+      },
+      {
         q: "What is the difference between an SD-WAN vendor and an SD-WAN provider?",
         a: "Vendors build the platform (Cisco, Fortinet, Versa, VeloCloud); providers deliver it as a managed service over their networks (BT, Verizon, Orange, GTT). Many buyers procure a vendor platform through a provider. The Netify matrix grades both on the same scale so they can be compared in one shortlist.",
       },
@@ -160,6 +172,29 @@ const FLAGSHIP_PAGES: BestPage[] = [
 
 export const BEST_PAGES: BestPage[] = [
   ...FLAGSHIP_PAGES,
+  {
+    slug: "managed-sd-wan-providers",
+    input: { service_model: "managed", shortlist_size: 10 },
+    title: "Best managed SD-WAN providers",
+    metaTitle: `Best Managed SD-WAN Providers (${YEAR}): Top 10 Ranked`,
+    metaDescription: `Netify's ${YEAR} ranking of managed SD-WAN service providers: fully managed offers scored across 40 evidence-graded features. Top 10 with scores.`,
+    h1: `Best managed SD-WAN providers (${YEAR}): top 10 ranked`,
+    intro: `Netify's ${YEAR} evaluation ranks managed SD-WAN service providers: vendors and carriers with public evidence of a fully managed operating model, scored across 40 capability features including last-mile circuit management, lifecycle, SLA-backed service and security. The top 10 are ranked below with scores. Add your sector, regions and security requirements in the interactive builder.`,
+    faqs: [
+      {
+        q: "Who are the best managed SD-WAN service providers in " + YEAR + "?",
+        a: "Based on the Netify evidence matrix (June " + YEAR + "), the leading fully managed routes are ranked above with scores. They span carriers (BT, Verizon, Orange, NTT, GTT, Vodafone, Colt) and managed-service-first platforms (Cato, Aryaka). The right fit depends on your regions, sector and how much control you want to keep, which the interactive shortlist builder scores against all 30 providers.",
+      },
+      {
+        q: "What is the difference between managed and co-managed SD-WAN?",
+        a: "Fully managed means the provider owns design, deployment, monitoring, changes and incident response end to end, usually including circuits. Co-managed shares control: your team keeps policy visibility and agreed change rights while the provider runs the platform and underlay. Most providers in this ranking offer both; the matrix grades each model separately.",
+      },
+      {
+        q: "Should I buy SD-WAN from a carrier or direct from a vendor?",
+        a: "Carriers bundle circuits, deployment and 24x7 operations under one contract with named service management, which suits estates without deep network teams. Buying direct (DIY) gives maximum control and typically lower cost for capable teams. The shortlist builder lets you filter by operating model to compare both routes on the same scoring.",
+      },
+    ],
+  },
   sectorPage("healthcare", "healthcare", "Typical drivers include clinical application performance, site resilience for 24x7 care settings and patient data protection."),
   sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
   sectorPage("retail_ecommerce", "retail", "Typical drivers include rapid store rollout, PCI segmentation, cellular backup and centralised management at scale."),
