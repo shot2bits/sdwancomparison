@@ -31,8 +31,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const c = buildComparison(getShortlistDataset(), [cp.a, cp.b], featureMeta());
   if (!c) return {};
   const [a, b] = c.slugs;
+  const longTitle = `${c.names[a]} vs ${c.names[b]} (2026): graded head to head`;
+  const title = longTitle.length <= 56 ? longTitle : `${c.names[a]} vs ${c.names[b]} (2026)`;
   return {
-    title: `${c.names[a]} vs ${c.names[b]} (2026): graded head to head`,
+    title,
     description: `${c.names[a]} vs ${c.names[b]} compared feature by feature: 40 graded capabilities plus regions, clouds, AI and resilience. Scores, wins and caveats.`,
     alternates: { canonical: `${SITE_URL}/compare/${pair}` },
     openGraph: {

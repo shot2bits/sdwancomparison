@@ -8,6 +8,7 @@ import {
 } from "@/lib/vendors";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/vendors" },
   title: "SD-WAN and SASE vendor comparison: all 30 vendors",
   description:
     "Side-by-side comparison of 30 SD-WAN and SASE platforms and managed providers, grouped by category and graded against a 40-feature evaluation framework.",
@@ -29,7 +30,7 @@ export default function VendorsPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       <div className="mb-12 max-w-3xl fade-rise">
         <p className="eyebrow mb-3">Vendor index</p>
-        <h1 className="mb-4">All {totalCount} SD-WAN and SASE vendors.</h1>
+        <h1 id="page-h1" className="mb-4">All {totalCount} SD-WAN and SASE vendors.</h1>
         <p className="text-lg text-[var(--ink-700)]">
           Grouped by category. Each vendor is graded against the same 40-feature
           evaluation matrix. Click any vendor to see the full capability profile,

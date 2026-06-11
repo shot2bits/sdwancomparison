@@ -19,8 +19,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const vendor = getVendor(slug);
-    const title = `${vendor.name}: SD-WAN and SASE capability profile`;
-    const description = `${vendor.name} graded against a 40-feature SD-WAN and SASE evaluation framework: ${vendor.score_summary.yes_count} yes, ${vendor.score_summary.partial_count} partial, ${vendor.score_summary.partner_integrated_count} partner-integrated. ${vendor.evidence_summary}`.slice(0, 300);
+    const longTitle = `${vendor.name}: SD-WAN and SASE capability profile`;
+    const title = longTitle.length <= 56 ? longTitle : `${vendor.name}: capability profile`;
+    const description = `${vendor.name} graded on 40 SD-WAN and SASE features: ${vendor.score_summary.yes_count} yes, ${vendor.score_summary.partial_count} partial. Profile, FAQs, alternatives and contact route.`.slice(0, 160);
     return {
       title,
       description,
@@ -113,10 +114,10 @@ export default async function VendorPage({ params }: Props) {
         <header className="mb-16 grid md:grid-cols-12 gap-8 fade-rise">
           <div className="md:col-span-8">
             <p className="eyebrow mb-3">{vendor.category}</p>
-            <h1 className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
+            <h1 id="page-h1" className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
               {vendor.name}
             </h1>
-            <p className="text-lg text-[var(--ink-700)] mb-6 max-w-2xl">
+            <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-6 max-w-2xl">
               {vendor.evidence_summary}
             </p>
             <div className="flex items-center gap-4 text-sm flex-wrap">
