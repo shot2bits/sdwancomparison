@@ -666,3 +666,141 @@ export function decodeScenario(
   const parsed = ShortlistInputSchema.safeParse(candidate);
   return parsed.success ? parsed.data : DEFAULT_INPUT;
 }
+
+/* ------------------------------------------------------------------ */
+/* Vendor comparison                                                   */
+/* ------------------------------------------------------------------ */
+
+export type CompareRow = {
+  key: string;
+  label: string;
+  grades: Record<string, CapabilityStatus | string>;
+};
+
+export type CompareGroup = { name: string; rows: CompareRow[] };
+
+export type ComparisonResult = {
+  slugs: string[];
+  names: Record<string, string>;
+  meta: Record<
+    string,
+    { category: string; deployment_speed: DeploymentSpeed; cost_model: string; score: number; website: string; marketplace_url: string | null }
+  >;
+  groups: CompareGroup[];
+  wins: Record<string, string[]>;
+  even: string[];
+  summary: string;
+};
+
+/**
+ * Feature-by-feature comparison for 2 or 3 vendors. Pure function shared
+ * by the compare pages, the in-tool panel and the AI assistant.
+ */
+export function buildComparison(
+  vendors: ShortlistVendor[],
+  slugs: string[],
+  featureMeta: { id: string; name: string; category: string }[],
+): ComparisonResult | null {
+  const chosen = slugs
+    .map((s) => vendors.find((v) => v.slug === s))
+    .filter((v): v is ShortlistVendor => Boolean(v));
+  if (chosen.length < 2) return null;
+
+  const balanced = buildShortlist(vendors, { shortlist_size: 30 }, {});
+  const scoreOf = (slug: string) =>
+    balanced.shortlist.find((x) => x.slug === slug)?.score ?? 0;
+
+  const groups: CompareGroup[] = [];
+  const categories = Array.from(new Set(featureMeta.map((f) => f.category)));
+  for (const cat of categories) {
+    groups.push({
+      name: cat,
+      rows: featureMeta
+        .filter((f) => f.category === cat)
+        .map((f) => ({
+          key: f.id,
+          label: f.name,
+          grades: Object.fromEntries(chosen.map((v) => [v.slug, v.capabilities[f.id] ?? "unknown"])),
+        })),
+    });
+  }
+  groups.push({
+    name: "Regional coverage",
+    rows: REGION_KEYS.map((r) => ({
+      key: r,
+      label: REGION_LABELS[r],
+      grades: Object.fromEntries(chosen.map((v) => [v.slug, v.regions[r]])),
+    })),
+  });
+  groups.push({
+    name: "Cloud platforms",
+    rows: CLOUD_KEYS.map((c) => ({
+      key: c,
+      label: CLOUD_LABELS[c],
+      grades: Object.fromEntries(chosen.map((v) => [v.slug, v.supported_clouds[c]])),
+    })),
+  });
+  groups.push({
+    name: "AI capability and resilience",
+    rows: [
+      ...AI_KEYS.map((a) => ({
+        key: a as string,
+        label: AI_LABELS[a],
+        grades: Object.fromEntries(chosen.map((v) => [v.slug, v.ai_capability[a]])),
+      })),
+      {
+        key: "disaster_recovery",
+        label: "Disaster recovery",
+        grades: Object.fromEntries(chosen.map((v) => [v.slug, v.resilience.disaster_recovery])),
+      },
+      {
+        key: "deployment_speed",
+        label: "Typical deployment speed",
+        grades: Object.fromEntries(chosen.map((v) => [v.slug, v.deployment_speed])),
+      },
+    ],
+  });
+
+  // Per-feature wins (clear point advantages on the 40-feature matrix)
+  const wins: Record<string, string[]> = Object.fromEntries(chosen.map((v) => [v.slug, []]));
+  const even: string[] = [];
+  for (const f of featureMeta) {
+    const pts = chosen.map((v) => ({ slug: v.slug, p: STATUS_POINTS[v.capabilities[f.id] ?? "unknown"] }));
+    const max = Math.max(...pts.map((x) => x.p));
+    const leaders = pts.filter((x) => x.p === max);
+    if (leaders.length === 1 && max > 0) {
+      wins[leaders[0].slug].push(f.name);
+    } else {
+      even.push(f.name);
+    }
+  }
+
+  const names = Object.fromEntries(chosen.map((v) => [v.slug, v.name]));
+  const summary = `${chosen
+    .map((v) => `${v.name} scores ${scoreOf(v.slug)}`)
+    .join("; ")} on the Netify 40-feature balanced matrix (June 2026). ${chosen
+    .map((v) => `${v.name} leads on ${wins[v.slug].length} features`)
+    .join("; ")}; ${even.length} features are level.`;
+
+  return {
+    slugs: chosen.map((v) => v.slug),
+    names,
+    meta: Object.fromEntries(
+      chosen.map((v) => [
+        v.slug,
+        {
+          category: v.category,
+          deployment_speed: v.deployment_speed,
+          cost_model: v.cost_model,
+          score: scoreOf(v.slug),
+          website: v.website,
+          marketplace_url: v.marketplace_url,
+        },
+      ]),
+    ),
+    groups,
+    wins,
+    even,
+    summary,
+  };
+}

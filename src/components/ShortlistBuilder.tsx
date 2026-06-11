@@ -11,9 +11,12 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import CompareTable from "@/components/CompareTable";
+import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import {
   AI_KEYS,
   AI_LABELS,
+  buildComparison,
   INTENT_KEYS,
   INTENT_LABELS,
   ORG_SIZE_KEYS,
@@ -28,6 +31,7 @@ import {
   buildShortlist,
   decodeScenario,
   encodeScenario,
+  type ComparisonResult,
   type ShortlistInput,
   type ShortlistVendor,
   type VendorVerdict,
@@ -69,11 +73,15 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   const [copied, setCopied] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
 
-  // Agent chat state
+  // Agent chat state (multi-turn)
   const [chatPrompt, setChatPrompt] = useState("");
   const [chatBusy, setChatBusy] = useState(false);
-  const [chatNarrative, setChatNarrative] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [chatComparison, setChatComparison] = useState<ComparisonResult | null>(null);
   const [chatError, setChatError] = useState<string | null>(null);
+
+  // Manual compare selection
+  const [compareSlugs, setCompareSlugs] = useState<string[]>([]);
 
   // Lead form state
   const [lead, setLead] = useState({ name: "", email: "", company: "", company_url: "" });
@@ -163,24 +171,33 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
 
   async function askAgent() {
     if (!chatPrompt.trim() || chatBusy) return;
+    const nextMessages = [...chatMessages, { role: "user" as const, content: chatPrompt }];
+    setChatMessages(nextMessages);
+    setChatPrompt("");
     setChatBusy(true);
     setChatError(null);
-    setChatNarrative(null);
     try {
       const res = await fetch("/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ prompt: chatPrompt, current_input: input }),
+        body: JSON.stringify({ messages: nextMessages, current_input: input }),
       });
       if (!res.ok) throw new Error(`Agent returned ${res.status}`);
       const data = (await res.json()) as {
         input?: ShortlistInput;
         narrative?: string;
+        comparison?: ComparisonResult;
         error?: string;
       };
       if (data.error) throw new Error(data.error);
       if (data.input) setInput(data.input);
-      if (data.narrative) setChatNarrative(data.narrative);
+      if (data.comparison) {
+        setChatComparison(data.comparison);
+        setCompareSlugs(data.comparison.slugs);
+      }
+      if (data.narrative) {
+        setChatMessages([...nextMessages, { role: "assistant", content: data.narrative }]);
+      }
     } catch (err) {
       setChatError(
         err instanceof Error && err.message.includes("503")
@@ -191,6 +208,30 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       setChatBusy(false);
     }
   }
+
+  function toggleCompare(slug: string) {
+    setCompareSlugs((prev) =>
+      prev.includes(slug)
+        ? prev.filter((x) => x !== slug)
+        : prev.length >= 3
+          ? prev
+          : [...prev, slug],
+    );
+  }
+
+  const manualComparison = useMemo(
+    () => (compareSlugs.length >= 2 ? buildComparison(vendors, compareSlugs, features) : null),
+    [vendors, compareSlugs, features],
+  );
+  const activeComparison = manualComparison ?? chatComparison;
+  const curatedPairUrl = useMemo(() => {
+    if (!activeComparison || activeComparison.slugs.length !== 2) return null;
+    const [x, y] = activeComparison.slugs;
+    const hit = COMPARE_PAIRS.find(
+      (p) => (p.a === x && p.b === y) || (p.a === y && p.b === x),
+    );
+    return hit ? `/compare/${hit.slug}` : null;
+  }, [activeComparison]);
 
   async function submitLead(e: React.FormEvent) {
     e.preventDefault();
@@ -238,7 +279,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             value={chatPrompt}
             onChange={(e) => setChatPrompt(e.target.value)}
             rows={4}
-            placeholder="Example: 60 sites across the UK and Germany, fully managed, ZTNA and SWG required, AWS and Azure, live within weeks."
+            placeholder="Example: 60 sites across the UK and Germany, fully managed, ZTNA and SWG required. Or: compare Cato Networks and Zscaler."
             className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-sm bg-white"
           />
           <button
@@ -246,11 +287,22 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             disabled={chatBusy || !chatPrompt.trim()}
             className="mt-3 w-full px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] rounded-sm text-sm disabled:opacity-50 hover:bg-[var(--accent)] transition-colors"
           >
-            {chatBusy ? "Thinking..." : "Build my shortlist with AI"}
+            {chatBusy ? "Thinking..." : chatMessages.length > 0 ? "Ask a follow-up" : "Build my shortlist with AI"}
           </button>
-          {chatNarrative && (
-            <div className="mt-3 text-sm text-[var(--ink-700)] border-l-2 border-[var(--accent)] pl-3 whitespace-pre-wrap">
-              {chatNarrative}
+          {chatMessages.length > 0 && (
+            <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+              {chatMessages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`text-sm whitespace-pre-wrap ${
+                    m.role === "user"
+                      ? "text-[var(--ink-500)]"
+                      : "text-[var(--ink-700)] border-l-2 border-[var(--accent)] pl-3"
+                  }`}
+                >
+                  {m.role === "user" ? `You: ${m.content}` : m.content}
+                </div>
+              ))}
             </div>
           )}
           {chatError && <p className="mt-3 text-sm text-red-700">{chatError}</p>}
@@ -506,6 +558,36 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
 
       {/* ---------------- Results column ---------------- */}
       <div className="lg:col-span-8">
+        {activeComparison && (
+          <section className="mb-10 border border-[var(--ink-900)] rounded-sm p-5">
+            <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
+              <h2 className="text-xl">
+                Comparing: {activeComparison.slugs.map((sl) => activeComparison.names[sl]).join(" vs ")}
+              </h2>
+              <div className="flex gap-2">
+                {curatedPairUrl && (
+                  <a
+                    href={curatedPairUrl}
+                    className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+                  >
+                    Permanent comparison page
+                  </a>
+                )}
+                <button
+                  onClick={() => {
+                    setCompareSlugs([]);
+                    setChatComparison(null);
+                  }}
+                  className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-sm hover:border-[var(--ink-900)]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--ink-700)] mb-4">{activeComparison.summary}</p>
+            <CompareTable comparison={activeComparison} />
+          </section>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <h2 className="text-xl">
             {isDefaultView
@@ -548,7 +630,12 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
 
         <ol className="space-y-5 list-none p-0">
           {result.shortlist.map((v) => (
-            <VendorCard key={v.slug} v={v} />
+            <VendorCard
+              key={v.slug}
+              v={v}
+              compared={compareSlugs.includes(v.slug)}
+              onCompare={() => toggleCompare(v.slug)}
+            />
           ))}
         </ol>
 
@@ -633,7 +720,15 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   );
 }
 
-function VendorCard({ v }: { v: VendorVerdict }) {
+function VendorCard({
+  v,
+  compared,
+  onCompare,
+}: {
+  v: VendorVerdict;
+  compared: boolean;
+  onCompare: () => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <li className="border border-[var(--ink-300,#ccc)] rounded-sm p-5">
@@ -647,12 +742,24 @@ function VendorCard({ v }: { v: VendorVerdict }) {
           </h3>
           <p className="text-sm text-[var(--ink-500)]">{v.category} · Typical deployment: {v.deployment_speed}</p>
         </div>
-        <button
-          onClick={() => setOpen(!open)}
-          className="text-sm border border-[var(--ink-300,#ccc)] rounded-sm px-2.5 py-1 shrink-0 hover:border-[var(--ink-900)]"
-        >
-          {open ? "Less" : "Why this rank?"}
-        </button>
+        <div className="flex gap-2 shrink-0">
+          <button
+            onClick={onCompare}
+            className={`text-sm border rounded-sm px-2.5 py-1 transition-colors ${
+              compared
+                ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"
+            }`}
+          >
+            {compared ? "Comparing ✓" : "Compare"}
+          </button>
+          <button
+            onClick={() => setOpen(!open)}
+            className="text-sm border border-[var(--ink-300,#ccc)] rounded-sm px-2.5 py-1 hover:border-[var(--ink-900)]"
+          >
+            {open ? "Less" : "Why this rank?"}
+          </button>
+        </div>
       </div>
       <p className="text-sm text-[var(--ink-700)] mt-3">{v.key_differentiators[0]}</p>
       {open && (

@@ -24,6 +24,7 @@ Operated by Netify Group Limited (netify.co.uk), a UK research and marketplace c
 - ${SITE_URL}/vendors : Index of all 30 graded vendors.
 - ${SITE_URL}/vendors/{slug} : Full capability profile per vendor. Valid slugs: ${vendors}.
 - ${SITE_URL}/alternatives/{slug} : Ranked top 10 alternatives to each vendor (same slugs), with ItemList schema and a JSON twin at /alternatives/{slug}/data.json.
+- ${SITE_URL}/compare/{a}-vs-{b} : Head to head grade tables for 23 curated vendor pairings (40 features plus regions, clouds, AI, resilience), each with a JSON twin.
 
 ## Ranked sector and priority shortlists
 

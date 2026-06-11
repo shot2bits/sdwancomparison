@@ -1,5 +1,6 @@
 import { getAllVendorSlugs } from "@/lib/vendors";
 import { BEST_PAGES } from "@/lib/best-pages";
+import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import { SITE_URL } from "@/lib/structured-data";
 
 export async function GET() {
@@ -19,6 +20,10 @@ export async function GET() {
     ...getAllVendorSlugs().map((slug) => ({
       loc: `${SITE_URL}/alternatives/${slug}`,
       priority: "0.7",
+    })),
+    ...COMPARE_PAIRS.map((p) => ({
+      loc: `${SITE_URL}/compare/${p.slug}`,
+      priority: "0.8",
     })),
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

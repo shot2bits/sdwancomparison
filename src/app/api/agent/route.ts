@@ -10,8 +10,12 @@ import {
   SERVICE_MODELS,
   WEIGHT_PRESETS,
   ShortlistInputSchema,
+  buildComparison,
   buildShortlist,
+  type ComparisonResult,
+  type ShortlistInput,
 } from "@/lib/shortlist-core";
+import { getAllVendorSlugs } from "@/lib/vendors";
 
 /** The Anthropic SDK needs the Node runtime (it imports node:fs et al). */
 export const runtime = "nodejs";
@@ -81,16 +85,40 @@ function criteriaTool(): Anthropic.Tool {
   };
 }
 
+const COMPARE_TOOL_NAME = "compare_vendors";
+
+function compareTool(): Anthropic.Tool {
+  return {
+    name: COMPARE_TOOL_NAME,
+    description:
+      "Compare 2 or 3 named vendors feature by feature on the Netify evidence matrix. Use when the buyer asks to compare, contrast or choose between specific vendors. Returns per-feature grades, clear wins per vendor and balanced scores.",
+    input_schema: {
+      type: "object",
+      properties: {
+        slugs: {
+          type: "array",
+          minItems: 2,
+          maxItems: 3,
+          items: { type: "string", enum: getAllVendorSlugs() },
+          description: "Vendor slugs to compare.",
+        },
+      },
+      required: ["slugs"],
+    } as unknown as Anthropic.Tool.InputSchema,
+  };
+}
+
 const FEATURE_CATALOGUE = FEATURES.map(
   (f) => `${f.id}: ${f.name} [${f.category}]`,
 ).join("\n");
 
 const SYSTEM = `You are the Netify SASE and SD-WAN shortlist advisor, embedded in the shortlist builder at sase.netify.co.uk.
 
-A buyer describes their estate and requirements in plain language. Your job:
-1. Map their description onto the shortlist criteria using the ${TOOL_NAME} tool.
-2. Be conservative with hard requirements (required_features, regions, clouds): only gate on things the buyer clearly needs. Use preferred_features for softer wants.
-3. Pick the weight_preset that matches their emphasis: security_led, network_led, cloud_first, managed_service_led or balanced.
+A buyer talks to you in plain language, possibly over several turns. You have two tools:
+1. ${TOOL_NAME}: set the shortlist filter criteria when the buyer describes requirements. Be conservative with hard requirements (required_features, regions, clouds): only gate on things the buyer clearly needs. Use preferred_features for softer wants. Pick the weight_preset matching their emphasis.
+2. ${COMPARE_TOOL_NAME}: when the buyer asks to compare, contrast or choose between named vendors, call this with their slugs.
+
+Use the right tool for the request; for a comparison question do not reset the filters. After tool results return, write a short plain-prose answer.
 
 Feature catalogue (id: name [category]):
 ${FEATURE_CATALOGUE}
@@ -99,7 +127,7 @@ Mapping hints: ZTNA is f30. SWG is f31. CASB is f32. DLP is f33. Full SASE platf
 
 Sector mapping: if the buyer names or implies an industry (hospital or NHS means healthcare; bank, insurer or fund means financial_services; shops, stores or e-commerce means retail_ecommerce; factories or plants means manufacturing; oil, gas, power or water means energy_utilities; council, ministry or agency means government_public_sector; school or university means education; fleet, haulage, rail or shipping means transport_logistics; law, accounting or consulting means professional_services; hotels, restaurants or stadiums means hospitality_leisure), set sector. Set organisation_size from employee count or words like global enterprise, mid-market, SME. Set intent from the dominant goal: cost_saving, mpls_migration, rapid_deployment, remote_workforce, security_consolidation or global_expansion.
 
-Always call the tool exactly once.`;
+Call at most one tool per turn, then answer in prose. UK English. Never use em or en dashes. No marketing filler vocabulary. 150 words maximum in your final answer.`;
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -109,74 +137,107 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { prompt?: string; current_input?: unknown };
+  let body: {
+    prompt?: string;
+    messages?: { role: "user" | "assistant"; content: string }[];
+    current_input?: unknown;
+  };
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON body." }, { status: 400 });
   }
-  const prompt = (body.prompt ?? "").toString().slice(0, 4000);
-  if (!prompt.trim()) {
-    return Response.json({ error: "Empty prompt." }, { status: 400 });
+
+  const history: Anthropic.MessageParam[] = (body.messages ?? [])
+    .filter((m) => m && typeof m.content === "string" && m.content.trim())
+    .slice(-12)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
+  if (history.length === 0) {
+    const prompt = (body.prompt ?? "").toString().slice(0, 4000);
+    if (!prompt.trim()) return Response.json({ error: "Empty prompt." }, { status: 400 });
+    history.push({ role: "user", content: prompt });
   }
+  history[history.length - 1] = {
+    role: "user",
+    content: `${history[history.length - 1].content}\n\n(Current filter state: ${JSON.stringify(body.current_input ?? {})})`,
+  };
 
   const client = new Anthropic();
+  let appliedInput: ShortlistInput | null = null;
+  let comparison: ComparisonResult | null = null;
 
   try {
-    // Step 1: map the buyer's description to criteria
-    const first = await client.messages.create({
-      model: MODEL,
-      max_tokens: 1500,
-      system: SYSTEM,
-      tools: [criteriaTool()],
-      tool_choice: { type: "tool", name: TOOL_NAME },
-      messages: [
-        {
-          role: "user",
-          content: `Buyer requirements: ${prompt}\n\nCurrent filter state (may be defaults): ${JSON.stringify(body.current_input ?? {})}`,
-        },
-      ],
-    });
+    const messages: Anthropic.MessageParam[] = [...history];
+    let narrative = "";
 
-    const toolUse = first.content.find(
-      (c): c is Anthropic.ToolUseBlock => c.type === "tool_use",
-    );
-    if (!toolUse) {
-      return Response.json({ error: "Advisor produced no criteria." }, { status: 502 });
+    for (let turn = 0; turn < 3; turn++) {
+      const res = await client.messages.create({
+        model: MODEL,
+        max_tokens: 1200,
+        system: SYSTEM,
+        tools: [criteriaTool(), compareTool()],
+        messages,
+      });
+
+      const toolUse = res.content.find(
+        (c): c is Anthropic.ToolUseBlock => c.type === "tool_use",
+      );
+      const text = res.content
+        .filter((c): c is Anthropic.TextBlock => c.type === "text")
+        .map((c) => c.text)
+        .join(" ")
+        .trim();
+      if (text) narrative = text;
+
+      if (!toolUse) break;
+
+      let toolResult = "";
+      if (toolUse.name === TOOL_NAME) {
+        const parsed = ShortlistInputSchema.safeParse(toolUse.input);
+        if (parsed.success) {
+          appliedInput = parsed.data;
+          const result = buildShortlist(getShortlistDataset(), appliedInput, FEATURE_NAMES);
+          toolResult = JSON.stringify({
+            applied: true,
+            criteria: result.criteria_summary,
+            shortlist: result.shortlist.slice(0, 8).map((v) => `${v.rank}. ${v.name} (${v.score})`),
+            excluded: result.excluded,
+          });
+        } else {
+          toolResult = JSON.stringify({ applied: false, error: "Invalid criteria." });
+        }
+      } else if (toolUse.name === COMPARE_TOOL_NAME) {
+        const slugs = ((toolUse.input as { slugs?: string[] })?.slugs ?? []).slice(0, 3);
+        comparison = buildComparison(
+          getShortlistDataset(),
+          slugs,
+          FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category })),
+        );
+        toolResult = comparison
+          ? JSON.stringify({
+              summary: comparison.summary,
+              wins: Object.fromEntries(
+                comparison.slugs.map((s) => [comparison!.names[s], comparison!.wins[s].slice(0, 6)]),
+              ),
+              level_features: comparison.even.length,
+            })
+          : JSON.stringify({ error: "Need 2 or 3 valid vendor slugs." });
+      } else {
+        toolResult = JSON.stringify({ error: `Unknown tool ${toolUse.name}` });
+      }
+
+      messages.push({ role: "assistant", content: res.content });
+      messages.push({
+        role: "user",
+        content: [{ type: "tool_result", tool_use_id: toolUse.id, content: toolResult }],
+      });
     }
 
-    const parsed = ShortlistInputSchema.safeParse(toolUse.input);
-    if (!parsed.success) {
-      return Response.json({ error: "Advisor produced invalid criteria." }, { status: 502 });
-    }
-    const input = parsed.data;
-
-    // Step 2: run the same engine every other surface uses
-    const result = buildShortlist(getShortlistDataset(), input, FEATURE_NAMES);
-
-    // Step 3: short narrative about the outcome
-    const summary = result.shortlist
-      .slice(0, 8)
-      .map((v) => `${v.rank}. ${v.name} (score ${v.score}; ${v.key_differentiators[0]})`)
-      .join("\n");
-    const second = await client.messages.create({
-      model: MODEL,
-      max_tokens: 600,
-      system:
-        "You write concise buyer guidance for Netify. UK English. Never use em or en dashes; use commas or full stops. No marketing filler vocabulary. Lead with numbers and concrete facts. 120 words maximum.",
-      messages: [
-        {
-          role: "user",
-          content: `The buyer asked: "${prompt}"\n\nCriteria applied: ${result.criteria_summary}\n\nShortlist (${result.shortlist.length} of ${result.considered} providers, ${result.excluded} excluded by hard requirements):\n${summary || "No providers met every requirement."}\n\nWrite a short narrative for the buyer: why these providers lead, one caution to check via RFP, and what to consider relaxing if the list is too short. Plain prose, no headings, no lists.`,
-        },
-      ],
+    return Response.json({
+      narrative,
+      input: appliedInput ?? undefined,
+      comparison: comparison ?? undefined,
     });
-
-    const narrative =
-      second.content.find((c): c is Anthropic.TextBlock => c.type === "text")
-        ?.text ?? "";
-
-    return Response.json({ input, narrative });
   } catch (err) {
     console.error("agent error:", err);
     return Response.json({ error: "Advisor request failed." }, { status: 502 });
