@@ -110,17 +110,31 @@ h3 {
   color: var(--ink-500);
 }
 
-a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
-  text-decoration-thickness: 1px;
-  transition: color 120ms ease;
+/* Editorial underlined links apply to prose; pill buttons opt out below. */
+@layer base {
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+    transition: color 120ms ease;
+  }
 }
 
-a:hover {
-  color: var(--accent-hover);
-  text-decoration-thickness: 2px;
+/* Pill links and buttons: clean labels, utilities stay in control. */
+@layer components {
+  a[class*="rounded-full"],
+  button[class*="rounded-full"] {
+    color: var(--ink-900);
+    text-decoration: none;
+  }
+}
+
+@layer base {
+  a:hover {
+    color: var(--accent-hover);
+    text-decoration-thickness: 2px;
+  }
 }
 
 /* Status pill */
