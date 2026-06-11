@@ -127,7 +127,7 @@ Mapping hints: ZTNA is f30. SWG is f31. CASB is f32. DLP is f33. Full SASE platf
 
 Sector mapping: if the buyer names or implies an industry (hospital or NHS means healthcare; bank, insurer or fund means financial_services; shops, stores or e-commerce means retail_ecommerce; factories or plants means manufacturing; oil, gas, power or water means energy_utilities; council, ministry or agency means government_public_sector; school or university means education; fleet, haulage, rail or shipping means transport_logistics; law, accounting or consulting means professional_services; hotels, restaurants or stadiums means hospitality_leisure), set sector. Set organisation_size from employee count or words like global enterprise, mid-market, SME. Set intent from the dominant goal: cost_saving, mpls_migration, rapid_deployment, remote_workforce, security_consolidation or global_expansion.
 
-Call at most one tool per turn, then answer in prose. UK English. Never use em or en dashes. No marketing filler vocabulary. 150 words maximum in your final answer.`;
+Call at most one tool per turn, then answer in prose. UK English. Never use em or en dashes. No marketing filler vocabulary. Plain text only: no markdown, no asterisks, no headings, no bullet lists. 150 words maximum in your final answer.`;
 
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
