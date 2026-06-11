@@ -108,9 +108,17 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     }, 250);
   }, [input, hydrated]);
 
+  /** True until the user changes anything from the defaults. */
+  const isDefaultView = useMemo(() => encodeScenario(input) === "", [input]);
+
   const result = useMemo(
-    () => buildShortlist(vendors, input, featureNames),
-    [vendors, input, featureNames],
+    () =>
+      buildShortlist(
+        vendors,
+        isDefaultView ? { ...input, shortlist_size: vendors.length } : input,
+        featureNames,
+      ),
+    [vendors, input, featureNames, isDefaultView],
   );
 
   function set<K extends keyof ShortlistInput>(key: K, value: ShortlistInput[K]) {
@@ -500,7 +508,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       <div className="lg:col-span-8">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <h2 className="text-xl">
-            Your shortlist: {result.shortlist.length} of {result.considered} providers
+            {isDefaultView
+              ? `All ${result.considered} providers, ranked`
+              : `Your shortlist: ${result.shortlist.length} of ${result.considered} providers`}
           </h2>
           <div className="flex gap-2">
             <button
@@ -519,7 +529,11 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             </a>
           </div>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-6">{result.criteria_summary}</p>
+        <p className="text-sm text-[var(--ink-500)] mb-6">
+          {isDefaultView
+            ? "Balanced capability score across all 40 features. Set filters, pick your sector, or describe your needs to the AI advisor to build your bespoke shortlist."
+            : result.criteria_summary}
+        </p>
 
         {result.shortlist.length === 0 && (
           <div className="border border-[var(--ink-300,#ccc)] rounded-sm p-6 text-[var(--ink-700)]">

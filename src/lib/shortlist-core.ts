@@ -234,7 +234,7 @@ export const ShortlistInputSchema = z.object({
     .enum(["hours", "days", "weeks", "months", "any"])
     .default("any"),
   weight_preset: z.enum(WEIGHT_PRESETS).default("balanced"),
-  shortlist_size: z.number().int().min(3).max(15).default(8),
+  shortlist_size: z.number().int().min(3).max(30).default(8),
   sector: z.enum(SECTOR_KEYS).nullable().default(null),
   organisation_size: z.enum([...ORG_SIZE_KEYS, "any"] as const).default("any"),
   intent: z.enum([...INTENT_KEYS, "none"] as const).default("none"),

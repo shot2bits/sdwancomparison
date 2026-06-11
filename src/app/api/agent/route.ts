@@ -58,7 +58,7 @@ function criteriaTool(): Anthropic.Tool {
         enum: ["hours", "days", "weeks", "months", "any"],
       },
       weight_preset: { type: "string", enum: [...WEIGHT_PRESETS] },
-      shortlist_size: { type: "integer", minimum: 3, maximum: 15 },
+      shortlist_size: { type: "integer", minimum: 3, maximum: 30 },
       sector: {
         type: ["string", "null"],
         enum: [...SECTOR_KEYS, null],
