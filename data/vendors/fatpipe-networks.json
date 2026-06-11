@@ -154,5 +154,25 @@
     "siem_export": "partial",
     "log_retention_days": null
   },
-  "marketplace_url": null
+  "marketplace_url": null,
+  "profile": {
+    "platform_architecture": "FatPipe pioneered router-clustering and multipath WAN technology, with patents in the space stretching back two decades. Its MPVPN and related appliances aggregate multiple WAN links with per-packet load balancing, failover and WAN path control, deployable without changing existing routers. Management is via FatPipe's central console. The company is US-based with deployments in government, finance and healthcare.",
+    "security_sase": "Security capability covers encryption across aggregated paths, firewalling and integration patterns with third-party security stacks; there is no first-party SASE cloud. Public evidence of AI capability was not confirmed in our review. Buyers needing ZTNA, SWG, CASB or DLP should plan a dual-vendor design with an SSE provider.",
+    "service_support_channel": "Channel and direct sales with support contracts; UK presence is lighter than the major vendors, so confirm local delivery and support arrangements during procurement. Reference verticals include public sector and healthcare in North America and India.",
+    "commercials_verdict": "Appliance plus support licensing, quote based, typically competitive. The Netify verdict: consider FatPipe where multi-link aggregation and link-state independence from carriers is the specific problem, or where its patents-led approach matches an existing estate. For most UK enterprise SASE shortlists, mainstream platforms with deeper local channel and security stacks will rank ahead; our evidence coverage for FatPipe is lower, so verify claims via RFP."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What problem does FatPipe MPVPN solve?",
+      "a": "It aggregates multiple WAN links from different carriers into one logical path with per-packet balancing and instant failover, without BGP complexity or carrier cooperation, which appeals where uptime requirements exceed what one provider can offer."
+    },
+    {
+      "q": "Is FatPipe a SASE platform?",
+      "a": "No. It is WAN reliability and path control technology. Pair it with a cloud security platform for ZTNA, SWG, CASB and DLP if you need SASE outcomes."
+    },
+    {
+      "q": "How strong is FatPipe's UK support?",
+      "a": "Presence is lighter than mainstream vendors. Ask for named UK support arrangements, response SLAs and local references as part of any evaluation; our review graded several dimensions unknown for lack of public evidence."
+    }
+  ]
 }

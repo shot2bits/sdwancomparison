@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/hughes-network-systems/"
+  "marketplace_url": "https://netify.co.uk/marketplace/hughes-network-systems/",
+  "profile": {
+    "platform_architecture": "Hughes Network Systems, an EchoStar company, built its managed SD-WAN practice serving exactly the estates others find hard: thousands of distributed sites with mixed-quality access, blending broadband, cellular and its own satellite capacity (including JUPITER fleet assets) into managed connectivity. Platform delivery uses leading SD-WAN stacks (notably Fortinet) wrapped in Hughes managed operations.",
+    "security_sase": "Managed security wraps the platform stack (Fortinet-led) with Hughes SOC operations tuned for distributed retail-style estates: PCI-conscious segmentation, store-format repeatability and centralised policy. Depth follows the platform; the value is operating security uniformly across thousands of small sites.",
+    "service_support_channel": "Fully managed is the model: 24x7 NOC operations, field services at national scale in North America, and processes built for franchise and multi-banner estates. US-centred with international delivery via partners; UK presence is limited, so confirm in-region arrangements.",
+    "commercials_verdict": "Per-site managed pricing tuned to high-volume small sites, quote based. The Netify verdict: shortlist Hughes for North American retail, restaurant, fuel and franchise estates measured in hundreds or thousands of sites, especially where satellite or cellular fills coverage gaps. It is a specialist: outside distributed-site use cases, generalist carriers fit better."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Why is Hughes strong in retail and franchise networks?",
+      "a": "Decades of operating tens of thousands of small sites: cookie-cutter store designs, PCI-aware segmentation, national field services and a NOC built for volume. Few providers run distributed estates at that scale as the core business."
+    },
+    {
+      "q": "Does satellite still matter in SD-WAN?",
+      "a": "For coverage gaps, yes: Hughes blends satellite with broadband and cellular so remote or rural sites join the same managed WAN with appropriate traffic steering, useful for fuel, agriculture and remote retail."
+    },
+    {
+      "q": "Can Hughes serve UK or European estates?",
+      "a": "Primarily via partners; the operational depth is North American. UK-led estates with US store networks sometimes use Hughes for the US leg alongside a European provider."
+    }
+  ]
 }

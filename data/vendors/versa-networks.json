@@ -155,5 +155,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/versa-networks/"
+  "marketplace_url": "https://netify.co.uk/marketplace/versa-networks/",
+  "profile": {
+    "platform_architecture": "Versa delivers a genuinely unified single-OS platform: VOS runs routing, SD-WAN and a full security stack on the same software image, deployable on Versa appliances, white-box hardware, virtual machines and cloud. Versa Director, Analytics and Concerto provide orchestration, with Versa Cloud Gateways extending reach where private head-ends are not deployed. Multi-tenancy is native throughout, which is why so many carriers build managed offers on Versa.",
+    "security_sase": "Versa positions as unified SASE: NGFW, SWG, ZTNA, CASB and DLP are part of VOS rather than bolted on, enforceable on premises or from the cloud under one policy model. VersaAI adds AIOps and GenAI protections. Security certification coverage is solid, and the single-pass, single-policy story across on-premises and cloud enforcement is among the most complete in the market.",
+    "service_support_channel": "Versa sells direct and through a deep service provider bench: Verizon, Colt, Comcast Business and many UK MSPs run managed Versa. DIY is realistic for capable teams, and Versa Titan offers a simplified cloud-managed tier. Support is 24x7 with professional services through Versa and partners.",
+    "commercials_verdict": "Subscription licensing by appliance or software tier with security bundles, quote based and typically competitive against firewall-heritage rivals. The Netify verdict: shortlist Versa when you want one OS and one policy across routing, SD-WAN and security with freedom over deployment location, or when buying managed SD-WAN from a Versa-based carrier and wanting headroom to grow into full SASE."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Is Versa better consumed direct or via a carrier?",
+      "a": "Both work. Direct or DIY suits teams wanting full control of Director and policy. Carrier routes (Verizon, Colt, Comcast Business and UK MSPs) add managed underlay, lifecycle and support wrappers; confirm which Versa features the provider exposes to you."
+    },
+    {
+      "q": "Does Versa really run security and SD-WAN in one stack?",
+      "a": "Yes. VOS is a single image with routing, SD-WAN, NGFW, SWG, CASB, ZTNA and DLP under one policy model, on premises or via Versa Cloud Gateways. That reduces console sprawl compared with stitched-together stacks."
+    },
+    {
+      "q": "What is Versa Titan?",
+      "a": "Titan is Versa's simplified, cloud-managed consumption tier aimed at lean IT and mid-market estates: the same VOS underneath with an opinionated, dashboard-led operating model rather than full Director complexity."
+    }
+  ]
 }

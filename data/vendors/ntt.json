@@ -156,5 +156,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/ntt-global/"
+  "marketplace_url": "https://netify.co.uk/marketplace/ntt-global/",
+  "profile": {
+    "platform_architecture": "NTT DATA combines a global Tier 1 IP backbone with one of the world's largest IT services businesses, delivering managed SD-WAN on a multi-vendor bench (Cisco, VeloCloud, Versa, Fortinet, Palo Alto) across 190+ countries' reach. Data centre, cloud and network services interlock, and Asia-Pacific delivery depth is a standout among global providers.",
+    "security_sase": "Managed SASE pairs the platform bench with leading SSE stacks under NTT's substantial security division: global SOCs, threat intelligence and consulting at IT-services scale. Predictive analytics within the Managed Network Services platform add operational intelligence. Depth follows the platform; the services organisation behind it is among the largest anywhere.",
+    "service_support_channel": "Fully managed and co-managed with 24x7 follow-the-sun operations, named service management and consulting-led change delivery. UK presence is significant via NTT DATA UK. Japanese heritage shows in APAC strength and delivery discipline.",
+    "commercials_verdict": "Per-site managed pricing on term, quote based. The Netify verdict: shortlist NTT for global estates with Asia-Pacific weight, change programmes wanting consulting plus network plus security from one group, and buyers consolidating data centre, cloud and WAN relationships. Smaller UK estates will find the machine bigger than they need."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Where is NTT strongest geographically?",
+      "a": "Asia-Pacific depth is the differentiator, with Japan home advantage and strong delivery across the region, alongside credible Americas and EMEA operations. Global estates with APAC weight shortlist NTT early."
+    },
+    {
+      "q": "Does NTT bring security scale to SASE?",
+      "a": "Yes: a global security division with SOCs, threat intelligence and consulting wraps the chosen SSE platform, suiting buyers who want managed security operations rather than just licensed software."
+    },
+    {
+      "q": "Is NTT right for mid-market UK companies?",
+      "a": "Usually only when part of a wider NTT relationship or global parent estate; domestically focused mid-market buyers typically fit nimbler UK MSPs or carriers better."
+    }
+  ]
 }

@@ -156,5 +156,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/palo-alto-networks/"
+  "marketplace_url": "https://netify.co.uk/marketplace/palo-alto-networks/",
+  "profile": {
+    "platform_architecture": "Palo Alto Networks delivers SASE as Prisma SASE: Prisma SD-WAN (formerly CloudGenix) ION appliances at the edge and Prisma Access providing cloud-delivered security from compute in 100+ locations on Google Cloud and AWS. Prisma SD-WAN is application-defined, using app-level SLAs rather than tunnel-centric routing, with Strata Cloud Manager unifying management. AIOps for SASE provides predictive monitoring across the stack.",
+    "security_sase": "Security depth is the headline: ZTNA 2.0 with continuous inspection, SWG, CASB, DLP and FWaaS inherit two decades of Palo Alto firewall and threat research, with Precision AI applied across detection. Policy follows the user across branch, remote and data centre via one security model. For security-led procurement, capability per feature is consistently at the top of the market.",
+    "service_support_channel": "Direct enterprise sales plus a strong partner bench; managed Prisma SASE is available through global carriers including Orange, Verizon and NTT and UK security MSPs. Professional services and Unit 42 incident expertise back deployment. Operating the platform DIY suits mature security teams; many UK mid-market buyers take it via an MSP wrapper.",
+    "commercials_verdict": "Licensing is per user for Prisma Access plus appliance subscriptions for Prisma SD-WAN, quote based and at premium positioning. The Netify verdict: shortlist Palo Alto when security architecture leads the decision, when ZTNA depth and DLP capability carry board weight, or when consolidating onto an existing Strata or Cortex estate. Budget-led, network-first projects often find better value elsewhere."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What makes Prisma SD-WAN different from tunnel-based SD-WAN?",
+      "a": "ION appliances make forwarding decisions per application against app-level SLAs rather than per tunnel, which simplifies policy for SaaS-heavy estates and feeds clean telemetry into AIOps. The trade-off is a smaller routing feature set than router-heritage rivals, so validate complex topologies."
+    },
+    {
+      "q": "Is Prisma Access a true ZTNA solution?",
+      "a": "Yes. ZTNA 2.0 applies continuous trust verification and deep inspection after connection, not just at connect time, covering private apps, SaaS and web from one policy. It is among the strongest ZTNA implementations on the market."
+    },
+    {
+      "q": "Can Prisma SASE be consumed as a managed service?",
+      "a": "Yes, through global providers such as Orange Business, Verizon and NTT, and through UK security MSPs. Managed routes suit buyers who want Palo Alto capability without operating Strata Cloud Manager in-house."
+    }
+  ]
 }

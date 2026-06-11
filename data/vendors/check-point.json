@@ -155,5 +155,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/checkpoint-harmony/"
+  "marketplace_url": "https://netify.co.uk/marketplace/checkpoint-harmony/",
+  "profile": {
+    "platform_architecture": "Check Point's SASE is Harmony SASE, built on the Perimeter 81 acquisition: cloud-delivered access from a global PoP network with lightweight agents, plus Quantum gateway integration for sites. SD-WAN capability is delivered through Quantum SD-WAN on Check Point gateways, steering applications across links with security inline. Management converges under the Infinity portal with ThreatCloud AI intelligence shared across the estate.",
+    "security_sase": "Security pedigree is the draw: ZTNA, SWG, full-mesh private access, malware prevention and DLP backed by one of the longest-standing threat research operations. Harmony SASE emphasises fast deployment and identity-led access; Quantum provides mature NGFW, IPS and sandboxing on premises. Infinity AI Copilot assists operations. SD-WAN routing depth is younger than network-heritage rivals, so test complex WAN topologies.",
+    "service_support_channel": "Strong global channel including UK distribution and security-led MSPs; managed Harmony SASE offers exist through partners. Support runs 24x7 with professional services and incident response available. Co-managed security with customer-held policy is a common pattern for Check Point estates.",
+    "commercials_verdict": "Per-user SASE licensing plus gateway subscriptions, quote based, generally positioned below the premium security rivals. The Netify verdict: shortlist Check Point when an existing Quantum estate makes Infinity consolidation natural, when security operations want one threat intelligence spine across site and cloud, or when fast ZTNA rollout matters more than deep WAN routing capability."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Is Harmony SASE the old Perimeter 81?",
+      "a": "Yes. Check Point acquired Perimeter 81 and rebuilt it as Harmony SASE, adding ThreatCloud AI intelligence, deeper malware prevention and Infinity portal integration. The fast, agent-led deployment model remains a hallmark."
+    },
+    {
+      "q": "Can Check Point handle the SD-WAN side alone?",
+      "a": "Quantum SD-WAN steers applications across links on Check Point gateways and suits security-led branches. For complex routing, multi-region overlays or heavy MPLS coexistence, network-heritage SD-WAN vendors remain stronger; dual-vendor designs are reasonable."
+    },
+    {
+      "q": "Who should pick Check Point for SASE?",
+      "a": "Organisations standardised on Check Point Quantum or Harmony products, security teams valuing a single threat intelligence and management spine, and buyers needing rapid ZTNA rollout across hybrid workforces with moderate WAN complexity."
+    }
+  ]
 }

@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/zscaler/"
+  "marketplace_url": "https://netify.co.uk/marketplace/zscaler/",
+  "profile": {
+    "platform_architecture": "Zscaler runs the Zero Trust Exchange, a security cloud of 160+ PoPs processing hundreds of billions of transactions daily. Users, workloads and devices connect to the nearest PoP where policy is enforced; there is no network to join, which is the architectural point. Zscaler does not ship SD-WAN appliances: branch connectivity pairs the Exchange with third-party SD-WAN, and Zscaler Zero Trust Branch options reduce branch hardware needs.",
+    "security_sase": "ZIA (internet and SaaS security) and ZPA (private application access) are category-defining: SWG, CASB, DLP, sandboxing, browser isolation and the most widely deployed ZTNA in the market, with AI-powered phishing and command-and-control detection. Zscaler Digital Experience (ZDX) adds user experience monitoring. For SSE capability depth and scale, Zscaler sets the benchmark most rivals are measured against.",
+    "service_support_channel": "Strong UK presence direct and through security partners and carriers; BT, Vodafone and global SIs deliver managed Zscaler. Deployment is agent and tunnel based with substantial professional services ecosystems. Support tiers run to 24x7 with TAM options; operating Zscaler well still demands skilled policy ownership in-house or via partner.",
+    "commercials_verdict": "Per-user subscription bundles (Editions) that are quote based and premium; transaction volumes justify it for large estates. The Netify verdict: shortlist Zscaler when a zero trust programme leads the agenda, when SSE depth and global PoP scale matter, and when SD-WAN is solved separately. Small organisations and single-site estates are outside its sweet spot."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Does Zscaler replace my SD-WAN?",
+      "a": "Not entirely. Zscaler replaces the security stack and removes much branch security hardware, while site-to-site connectivity still wants an SD-WAN layer; common pairings include Catalyst, EdgeConnect, Fortinet and VeloCloud feeding traffic into the Exchange."
+    },
+    {
+      "q": "What is the difference between ZIA and ZPA?",
+      "a": "ZIA secures traffic to internet and SaaS destinations (SWG, CASB, DLP, sandboxing). ZPA brokers least-privilege access to private applications without placing users on the network, replacing VPN concentrators. Most deployments run both."
+    },
+    {
+      "q": "Is Zscaler suitable for mid-market UK organisations?",
+      "a": "Yes via managed routes: BT, Vodafone and UK MSPs wrap Zscaler with deployment and operations. Direct DIY suits organisations with capable security teams; smaller estates often find the licensing premium harder to justify."
+    }
+  ]
 }

@@ -155,5 +155,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/cloudflare/"
+  "marketplace_url": "https://netify.co.uk/marketplace/cloudflare/",
+  "profile": {
+    "platform_architecture": "Cloudflare One delivers SASE from the same anycast edge that runs Cloudflare's CDN: 330+ cities, every service in every location, with traffic attracted to the nearest PoP and policy applied there. Connectivity options include the WARP agent, Magic WAN for site tunnels and Cloudflare Network Interconnect. There are no Cloudflare branch appliances; Magic WAN partners and standard IPsec/GRE handle site onboarding.",
+    "security_sase": "Gateway (SWG), Access (ZTNA), CASB, DLP, email security and browser isolation compose the SSE layer, tightly integrated with Cloudflare's DDoS and application security heritage. Access is notably easy to adopt app by app. Depth in enterprise DLP and CASB trails the specialist leaders, while network-adjacent security (DDoS, WAF, bot management) is far beyond what SASE rivals carry.",
+    "service_support_channel": "Self-serve to enterprise sales motions, with UK partners growing; managed offers exist though carrier-style wrap is thinner than for appliance vendors. Deployment is fast and developer-friendly with excellent documentation. Enterprise support runs 24x7 with named contacts on larger contracts.",
+    "commercials_verdict": "Per-user Zero Trust plans with transparent public entry pricing and contract pricing at enterprise; Magic WAN priced separately. The Netify verdict: shortlist Cloudflare One when you already trust Cloudflare for performance or security, when fast app-by-app ZTNA adoption appeals, or when global edge reach per pound matters. Heavy CASB/DLP programmes and appliance-led branch estates fit other platforms better."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Can Cloudflare One replace my VPN quickly?",
+      "a": "Yes, that is its strongest entry point: Cloudflare Access publishes internal apps behind zero trust authentication app by app, often within days, without re-architecting the network first. Full SASE adoption can then proceed incrementally."
+    },
+    {
+      "q": "How do sites connect without Cloudflare appliances?",
+      "a": "Magic WAN terminates standard IPsec or GRE tunnels from existing routers, SD-WAN edges or firewalls, and Cloudflare Network Interconnect offers private peering. Cloudflare partners with SD-WAN vendors rather than shipping edges."
+    },
+    {
+      "q": "Is Cloudflare One enterprise-ready for compliance-heavy estates?",
+      "a": "Certifications and regional controls have matured substantially, and the edge offers strong data localisation suites. Deep DLP and CASB programmes should still benchmark against Netskope and Zscaler before committing."
+    }
+  ]
 }

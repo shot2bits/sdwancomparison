@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/orange-business/"
+  "marketplace_url": "https://netify.co.uk/marketplace/orange-business/",
+  "profile": {
+    "platform_architecture": "Orange Business runs one of the most complete global managed WAN practices outside the US: deep owned network across Europe, Africa and Asia, and a multi-vendor SD-WAN bench centred on Cisco, VeloCloud, Fortinet and Palo Alto. Evolution Platform thinking pushes network-as-a-service consumption. Delivery into Africa and the Middle East is a genuine differentiator among Western carriers.",
+    "security_sase": "Orange Cyberdefense is one of Europe's largest security service businesses, and it shows: managed SASE pairs the SD-WAN bench with Zscaler, Palo Alto and Netskope stacks under serious SOC operations, threat intelligence and consulting. For carriers, the security operations depth here is near the top of the class.",
+    "service_support_channel": "Fully managed and co-managed with 24x7 follow-the-sun operations, strong multilingual European delivery and named service management. French heritage with substantial UK presence. Multinational coordination (one contract, many countries) is the core competence.",
+    "commercials_verdict": "Per-site managed pricing on term, quote based. The Netify verdict: shortlist Orange for Europe-led multinationals, estates touching Africa and the Middle East, and security-forward boards that value Orange Cyberdefense in the same contract. UK-only estates may prefer domestic-first providers, though Orange's UK delivery is credible."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What is Orange Cyberdefense and why does it matter?",
+      "a": "Orange's dedicated security division, among Europe's largest MSSPs: SOCs, CERT capability, threat intelligence and consulting. Buying managed SASE from Orange puts genuine security operations behind the platform rather than a thin monitoring wrap."
+    },
+    {
+      "q": "How strong is Orange outside Europe?",
+      "a": "Notably strong in Africa and the Middle East through owned and group networks, with solid Asia delivery. For estates spanning those regions, Orange is frequently the most capable Western carrier option."
+    },
+    {
+      "q": "Which SD-WAN platforms does Orange propose?",
+      "a": "Cisco, VeloCloud, Fortinet and Palo Alto feature core, paired with Zscaler, Netskope or Palo Alto SSE for SASE outcomes, matched to estate and security requirements during design."
+    }
+  ]
 }

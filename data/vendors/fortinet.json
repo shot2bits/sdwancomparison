@@ -155,5 +155,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/fortinet/"
+  "marketplace_url": "https://netify.co.uk/marketplace/fortinet/",
+  "profile": {
+    "platform_architecture": "Fortinet builds SD-WAN into FortiGate, so every firewall is also an SD-WAN edge. Path selection, application steering and overlay VPN run on FortiOS with orchestration through FortiManager and analytics through FortiAnalyzer. Custom ASICs give strong price-to-performance, particularly for encrypted traffic at branch scale. Cloud on-ramps cover AWS, Azure, Google Cloud and Oracle Cloud, and edge form factors run from desktop units to chassis.",
+    "security_sase": "Security is the heritage: NGFW, IPS, web filtering, sandboxing and SSL inspection are native on the same appliance, backed by FortiGuard threat intelligence. FortiSASE extends the stack to cloud-delivered SWG, ZTNA, CASB and DLP from Fortinet PoPs, with universal ZTNA spanning on-premises and cloud enforcement. For buyers wanting one OS across branch firewalling and SASE, the convergence is among the tightest available.",
+    "service_support_channel": "Fortinet is channel-led with deep UK distribution and MSP support, and is the platform behind many managed offers, including BT Managed SASE on Fortinet. FortiCare provides 24x7 support tiers with professional services for migration. DIY, co-managed and fully managed routes are all realistic, and multi-tenant tooling makes it a favourite among MSPs.",
+    "commercials_verdict": "Commercials bundle hardware with FortiCare support and FortiGuard security subscriptions; FortiSASE adds per-user licensing. Pricing is quote based but consistently aggressive against like-for-like NGFW plus SD-WAN stacks. The Netify verdict: shortlist Fortinet when security and WAN budgets are one budget, when branch performance per pound matters, or when an existing FortiGate estate makes convergence the path of least resistance."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Is Fortinet SD-WAN really free with the firewall?",
+      "a": "SD-WAN features ship in FortiOS on every FortiGate, so there is no separate SD-WAN licence. You still pay for FortiCare support and FortiGuard security bundles, and FortiSASE per-user licences if you add the cloud security layer."
+    },
+    {
+      "q": "How strong is FortiSASE against cloud-native rivals?",
+      "a": "FortiSASE delivers ZTNA, SWG, CASB and DLP from Fortinet PoPs with one policy language across appliance and cloud. Cloud-native rivals carry larger PoP fabrics; Fortinet counters with FortiGate integration and total cost. Test from your user geographies before deciding."
+    },
+    {
+      "q": "Can I get Fortinet as a managed service in the UK?",
+      "a": "Yes. BT, Vodafone and many UK MSPs offer managed Fortinet SD-WAN and SASE, including co-managed models where your team keeps policy visibility while the provider runs lifecycle and incident response."
+    }
+  ]
 }

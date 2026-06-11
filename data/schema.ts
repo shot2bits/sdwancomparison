@@ -265,6 +265,18 @@ export const VendorSchema = z.object({
   // Netify marketplace contact route
   marketplace_url: z.string().url().nullable(),
 
+  // Editorial profile (Netify desk research, June 2026)
+  profile: z.object({
+    platform_architecture: z.string().min(100),
+    security_sase: z.string().min(100),
+    service_support_channel: z.string().min(100),
+    commercials_verdict: z.string().min(100),
+  }).strict(),
+  vendor_faqs: z.array(z.object({
+    q: z.string().min(10),
+    a: z.string().min(40),
+  }).strict()).min(2).max(5),
+
   // Provenance
   last_verified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "last_verified must be YYYY-MM-DD"),
   verification_notes: z.string().min(1),

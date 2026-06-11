@@ -156,5 +156,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": null
+  "marketplace_url": null,
+  "profile": {
+    "platform_architecture": "Cato built SASE as a cloud service from day one: the Cato SASE Cloud runs on a private global backbone of 85+ PoPs connected by SLA-backed tier-1 carrier links, with thin Cato Socket edges at sites and a single-pass processing engine in every PoP. All traffic, site and remote user alike, is processed once in the nearest PoP under one policy. Orchestration is a single multi-tenant console with no separate controllers to run.",
+    "security_sase": "The full security stack is native and converged: NGFW, SWG, CASB, DLP, ZTNA, IPS and anti-malware execute in the same pass with shared context, and real-time machine learning models score traffic inline. There is no policy fragmentation between SD-WAN and security because they are one platform. Depth in specialist areas like enterprise DLP trails the dedicated leaders slightly; coherence across the whole stack is the compensating strength.",
+    "service_support_channel": "Cato sells direct and through partners with managed and co-managed options; UK channel presence has grown steadily and several MSPs wrap Cato with local support and underlay. Deployment speed is a signature: sites typically come online in hours once circuits exist. Support runs 24x7 from Cato with named success management on enterprise contracts.",
+    "commercials_verdict": "Subscription pricing per site bandwidth and per user for remote access, quote based and generally mid-market friendly. The Netify verdict: shortlist Cato when you want true single-vendor SASE with the least operational surface, global sites that need a predictable middle mile without MPLS, and a deployment measured in days. Buyers needing best-of-breed depth per security category or full underlay ownership should weigh the trade-offs."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What does the Cato private backbone actually give me?",
+      "a": "Your traffic rides Cato's SLA-backed core between 85+ PoPs instead of the public internet middle mile, which stabilises latency and loss between regions, notably into and out of Asia and across the Atlantic, without buying MPLS."
+    },
+    {
+      "q": "How fast is a Cato deployment really?",
+      "a": "Sockets are zero-touch: sites typically join the SASE Cloud in hours once connectivity exists, and remote users onboard with an agent in minutes. Policy build and migration planning remain the genuine project work."
+    },
+    {
+      "q": "Where does Cato fit against Zscaler or Netskope?",
+      "a": "Cato converges SD-WAN and security in one cloud with one console; Zscaler and Netskope lead on specialist SSE depth and pair with third-party SD-WAN. Choose Cato for convergence and simplicity, the SSE leaders for category-deep security with a dual-vendor design."
+    }
+  ]
 }

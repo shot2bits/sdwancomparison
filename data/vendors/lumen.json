@@ -154,5 +154,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/lumen/"
+  "marketplace_url": "https://netify.co.uk/marketplace/lumen/",
+  "profile": {
+    "platform_architecture": "Lumen operates one of the largest fibre backbones in North America with extensive owned conduit and metro assets, delivering managed SD-WAN on a multi-vendor bench (VeloCloud, Versa, Cisco and Fortinet). Edge computing assets place compute close to enterprise sites. Following the EMEA business sale to Colt, Lumen's centre of gravity is firmly the Americas.",
+    "security_sase": "Managed SASE pairs the SD-WAN bench with partner SSE platforms plus Lumen security services including DDoS mitigation at backbone scale and Black Lotus Labs threat intelligence, which is well regarded. Security depth follows the chosen platform with credible carrier SOC operations behind it.",
+    "service_support_channel": "Fully managed and co-managed models with 24x7 operations and named service management. US enterprise and public sector delivery is the strength; UK and European delivery now routes substantially via partners post-divestment, so confirm in-region arrangements during procurement.",
+    "commercials_verdict": "Per-site managed pricing, quote based, often sharp where Lumen fibre is on-net. The Netify verdict: shortlist Lumen for US-weighted estates, especially where on-net fibre, DDoS scale or edge compute matter. For UK and Europe-led procurement, Lumen's divested EMEA position moves regional rivals ahead."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What is Black Lotus Labs?",
+      "a": "Lumen's threat research team, with visibility drawn from one of the internet's largest backbones. Its intelligence feeds Lumen security services including DDoS mitigation and adds genuine signal to managed security offers."
+    },
+    {
+      "q": "How does Lumen serve UK sites now?",
+      "a": "Primarily through partner networks following the EMEA sale to Colt. UK sites can still sit in a Lumen-managed global estate; validate in-region delivery, support paths and SLAs explicitly in any RFP."
+    },
+    {
+      "q": "When is Lumen the value pick?",
+      "a": "When your sites are on or near Lumen fibre in North America: on-net economics, backbone DDoS protection and edge compute make the bundle hard to beat for US-centric estates."
+    }
+  ]
 }

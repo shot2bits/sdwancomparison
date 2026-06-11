@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/gtt-communications/"
+  "marketplace_url": "https://netify.co.uk/marketplace/gtt-communications/",
+  "profile": {
+    "platform_architecture": "GTT delivers managed SD-WAN and SASE over its global Tier 1 IP backbone (AS3257) spanning 450+ PoPs, with a multi-vendor platform bench and the EtherVision portal providing estate visibility. The model is network-led: GTT's internet backbone is the product, with managed services layered on top and last-mile aggregation handled globally.",
+    "security_sase": "GTT Secure Connect builds SASE outcomes on partner platforms (notably Fortinet and Palo Alto pairings) with managed security operations. Security depth follows the platform; GTT's contribution is backbone performance, global circuit aggregation and a single managed wrap across regions.",
+    "service_support_channel": "Fully managed and co-managed with 24x7 operations and named service management; UK and European delivery is established with US depth too. GTT positions sharply on price against the incumbent carriers, which resonates with cost-led multinational procurement.",
+    "commercials_verdict": "Per-site managed pricing, quote based and typically aggressive. The Netify verdict: shortlist GTT when you want global managed SD-WAN with Tier 1 backbone performance at challenger pricing, particularly for internet-first designs across many countries. Buyers wanting deep first-party security IP or premium-brand service wrap should weigh trade-offs accordingly."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What does GTT's Tier 1 backbone mean for my WAN?",
+      "a": "Your internet-first SD-WAN rides AS3257 with direct global peering rather than transit chains, which improves consistency for site-to-cloud and inter-region traffic without MPLS economics."
+    },
+    {
+      "q": "Is GTT cheaper than the big incumbents?",
+      "a": "Frequently, yes: challenger positioning shows in like-for-like managed SD-WAN bids. Ensure service wrap, SLAs and in-country support match your expectations as part of the comparison."
+    },
+    {
+      "q": "Which platforms does GTT manage?",
+      "a": "A multi-vendor bench including Fortinet and VeloCloud lineages with SASE outcomes via partner SSE; GTT proposes against your estate with its backbone and aggregation as the constant."
+    }
+  ]
 }

@@ -156,5 +156,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/cisco-product-suite/"
+  "marketplace_url": "https://netify.co.uk/marketplace/cisco-product-suite/",
+  "profile": {
+    "platform_architecture": "Cisco offers two SD-WAN families. Catalyst SD-WAN (formerly Viptela) is the enterprise platform: vEdge and Catalyst 8000 routers, separated control and data planes, and vManage (now Catalyst SD-WAN Manager) for orchestration. Meraki is the cloud-managed alternative, with MX appliances configured entirely from the Meraki dashboard. Both integrate with Cisco's wider switching, wireless and identity portfolio, and cloud on-ramps cover AWS, Azure and Google Cloud. The two platforms remain distinct, so buyers should choose a track early.",
+    "security_sase": "Cisco's SASE position combines Cisco Secure Access (the successor to Umbrella for SSE), Duo for identity and device trust, and Talos threat intelligence. ZTNA, SWG, CASB and DLP are delivered from Cisco's cloud with single-console ambitions under Secure Access. On-box security on Catalyst and Meraki includes NGFW, IPS and content filtering. The strongest story is for Meraki estates pairing MX SD-WAN with Secure Access in a Cisco-only stack.",
+    "service_support_channel": "Cisco sells through the largest partner ecosystem in networking. Most buyers consume Catalyst SD-WAN through managed service providers, including BT, Verizon, Orange and NTT, while Meraki suits in-house teams and MSPs alike. Cisco TAC provides 24x7 follow-the-sun support; named technical account management comes via Cisco CX or the partner. UK channel depth is extensive at every tier.",
+    "commercials_verdict": "Licensing is subscription based: Cisco DNA/Catalyst licences per device tier plus Secure Access per user, with Meraki licences per appliance. List pricing is partially public via partners. The Netify verdict: shortlist Cisco when you already run Cisco switching, wireless or identity, when your operations team knows the tooling, or when you want one vendor across campus and WAN. Expect platform choice (Catalyst vs Meraki) to shape cost and operations more than headline pricing."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Should I choose Catalyst SD-WAN or Meraki SD-WAN?",
+      "a": "Catalyst SD-WAN suits large, complex WANs needing granular routing control, segmentation and scale. Meraki suits lean IT teams and distributed estates that value dashboard simplicity over deep configurability. They are separate platforms with separate management, so pilot the operational model, not just the data sheet."
+    },
+    {
+      "q": "Does Cisco offer a full single-vendor SASE?",
+      "a": "Yes in portfolio terms: SD-WAN (Catalyst or Meraki) plus Cisco Secure Access for SSE, with Duo identity and Talos intelligence. Policy and console unification has improved but is newer than rivals built single-stack from day one, so validate console workflows in a proof of concept."
+    },
+    {
+      "q": "How do most UK enterprises buy Cisco SD-WAN?",
+      "a": "Through managed service providers and Cisco Gold partners. BT, Verizon, Orange, NTT and many UK MSPs run managed Catalyst and Meraki offers, which suits buyers who want carrier-grade delivery without operating vManage themselves."
+    }
+  ]
 }

@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/colt/"
+  "marketplace_url": "https://netify.co.uk/marketplace/colt/",
+  "profile": {
+    "platform_architecture": "Colt delivers managed SD-WAN over the Colt IQ Network: dense owned metro fibre across European business districts plus strong Asian reach, now extended by the Lumen EMEA acquisition. Platform options centre on Versa and VeloCloud, with Colt On Demand bringing genuine NaaS behaviour: bandwidth flexing and service changes from a portal in near real time.",
+    "security_sase": "Managed SASE pairs the SD-WAN platforms with partner SSE (Versa's stack and Zscaler pairings) plus managed security operations. Depth follows the platform; Colt's distinctive contribution is the quality of the underlay and the on-demand operating model rather than first-party security IP.",
+    "service_support_channel": "Fully managed and co-managed with 24x7 operations, UK support desks and named service management; capital markets and financial services delivery is a Colt signature, including ultra-low-latency heritage. European city coverage on owned fibre keeps delivery predictable.",
+    "commercials_verdict": "Per-site managed pricing with On Demand consumption options, quote based. The Netify verdict: shortlist Colt for Europe-led estates concentrated in major cities, financial services networks valuing owned-fibre determinism, and buyers attracted to portal-driven bandwidth flexing. Estates needing deep US or rest-of-world delivery should weigh the expanded but still Europe-first footprint."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What does Colt On Demand actually let me change?",
+      "a": "Bandwidth and service characteristics from a portal with near real-time effect on the Colt IQ Network, which suits seasonal or project-driven estates and avoids contract variation cycles for routine changes."
+    },
+    {
+      "q": "Why do financial services firms favour Colt?",
+      "a": "Owned metro fibre into the buildings that matter, low-latency heritage between trading venues, and managed services shaped by two decades of serving capital markets across European and Asian financial centres."
+    },
+    {
+      "q": "How does the Lumen EMEA acquisition change Colt?",
+      "a": "It adds network reach, infrastructure and customers across EMEA, deepening Colt's footprint beyond its metro strongholds. Integration is ongoing; ask for current coverage maps during procurement."
+    }
+  ]
 }

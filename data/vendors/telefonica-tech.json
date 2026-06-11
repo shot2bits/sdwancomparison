@@ -156,5 +156,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": null
+  "marketplace_url": null,
+  "profile": {
+    "platform_architecture": "Telefónica Tech delivers managed SD-WAN and security services on top of Telefónica's carrier estate, with platform partnerships centred on Fortinet and Cisco. Geographic strength follows the group: Spain, wider Europe and deep Latin America, with UK and Ireland delivery through Telefónica Tech UK&I built on acquisitions including Incremental and Cancom UK&I heritage.",
+    "security_sase": "Telefónica Tech's cyber division is substantial in the Spanish-speaking world: SOCs, threat intelligence and managed security services pairing with Fortinet-led SASE outcomes. Depth follows the platform; the regional security operations footprint is the differentiator for estates across Iberia and Latin America.",
+    "service_support_channel": "Fully managed and co-managed models with 24x7 operations. UK&I delivery exists with local teams, while the deepest bench sits in Spain and LatAm. Multinationals bridging Europe and Latin America benefit most from the footprint.",
+    "commercials_verdict": "Per-site managed pricing, quote based. The Netify verdict: shortlist Telefónica Tech when your estate spans Iberia and Latin America, where its network assets and security operations have few equals, or when an existing Telefónica relationship extends naturally. UK-led estates without LatAm exposure will typically rank domestic and pan-European carriers first."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Where does Telefónica Tech have unique strength?",
+      "a": "Latin America and Iberia: owned networks, in-country delivery and Spanish and Portuguese language security operations across the region, which most global rivals serve only through partners."
+    },
+    {
+      "q": "What platforms underpin its SASE offers?",
+      "a": "Fortinet-led SASE with Cisco options, wrapped with Telefónica Tech managed security. Platform proposals follow estate requirements during design."
+    },
+    {
+      "q": "How established is the UK arm?",
+      "a": "Telefónica Tech UK&I operates with local delivery teams built through acquisitions. For UK-centric managed WAN it competes credibly; the group's distinctive value remains strongest where the Telefónica network footprint runs deepest."
+    }
+  ]
 }

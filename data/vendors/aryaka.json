@@ -155,5 +155,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": null
+  "marketplace_url": null,
+  "profile": {
+    "platform_architecture": "Aryaka runs its own Layer 2 private core between 40+ PoPs with built-in WAN optimisation, delivering SD-WAN and application acceleration as a managed service. ANAP edges (or virtual equivalents) connect sites to the nearest PoP; the middle mile is Aryaka's, with deterministic latency that public-internet SASE clouds cannot guarantee. China connectivity is a long-standing speciality.",
+    "security_sase": "Aryaka Unified SASE adds cloud-delivered security at the PoPs: NGFW, SWG, ZTNA and CASB capabilities integrated with the network layer, plus partnerships for specialist depth. AI Observe provides anomaly detection across the estate. Security capability is credible and converging, with the network and acceleration heritage remaining the primary differentiation.",
+    "service_support_channel": "Aryaka is managed-service-first: co-managed and fully managed offers with 24x7 follow-the-sun operations and aggressive deployment timelines (sites in days). Last-mile procurement and management can be bundled. UK and EMEA presence is established direct and through partners.",
+    "commercials_verdict": "Subscription per site by bandwidth with the middle mile included, quote based; pricing reflects the private core. The Netify verdict: shortlist Aryaka for global estates with Asia or China exposure, application performance pain on long routes, or a desire to consume WAN and SASE as one managed service with deterministic performance. Regional UK-only estates rarely need the private core premium."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Why pay for Aryaka's private core instead of internet middle mile?",
+      "a": "Deterministic latency and loss on long-haul routes: Frankfurt to Singapore or London to Shanghai behave consistently because traffic rides Aryaka's Layer 2 core with built-in optimisation, not best-effort internet peering."
+    },
+    {
+      "q": "How good is Aryaka for China connectivity?",
+      "a": "It is one of the established answers: licensed in-country partnerships and PoPs give compliant, performant connectivity for foreign enterprises operating in China, an area where most SASE clouds struggle."
+    },
+    {
+      "q": "Is Aryaka DIY or managed only?",
+      "a": "Managed-first with co-managed options: you keep policy visibility and change rights while Aryaka runs the platform and middle mile. Pure DIY is not the model; buyers wanting full self-operation should look at appliance-led vendors."
+    }
+  ]
 }

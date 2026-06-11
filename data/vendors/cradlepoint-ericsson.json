@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/cradlepoint/"
+  "marketplace_url": "https://netify.co.uk/marketplace/cradlepoint/",
+  "profile": {
+    "platform_architecture": "Cradlepoint, part of Ericsson, leads cellular-first WAN: E-series and R-series routers and adapters built around 4G and 5G with NetCloud SaaS management. Wireless WAN is the design centre, from branch failover to primary 5G connectivity for sites, vehicles and IoT. Ericsson ownership ties roadmaps to 5G network capability, including private network integration.",
+    "security_sase": "NetCloud has grown a zero-trust layer: NetCloud Exchange provides ZTNA and secure connect services over cellular, with firewalling on-box and web security integrations. The Ericom acquisition added isolation-based security capability. Treat the security stack as solid for cellular-led estates rather than a full SASE replacement for deep CASB/DLP needs.",
+    "service_support_channel": "Strong carrier and channel routes (cellular operators bundle Cradlepoint widely) with healthy UK distribution; public safety, transport and retail are signature verticals. NetCloud subscriptions include support, with 24x7 tiers and managed offers through partners and operators.",
+    "commercials_verdict": "Subscription-first: hardware bundled into NetCloud plans per device. The Netify verdict: shortlist Cradlepoint when wireless is strategic, not just backup: day-one site openings, vehicles and field operations, 5G-primary branches and IoT estates. For wired-first enterprises it is the resilience and agility layer alongside a conventional SD-WAN or SASE platform."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Is 5G reliable enough as primary WAN?",
+      "a": "Increasingly yes, where coverage allows: Cradlepoint estates run thousands of 5G-primary sites with dual-SIM and dual-modem designs handling carrier diversity. Model traffic and validate coverage per postcode before committing."
+    },
+    {
+      "q": "What is NetCloud Exchange?",
+      "a": "Cradlepoint's extension of NetCloud into zero-trust services: ZTNA and secure connectivity built for cellular-connected sites, vehicles and IoT, managed from the same console as the routers."
+    },
+    {
+      "q": "How does Ericsson ownership matter to buyers?",
+      "a": "Roadmap alignment with 5G evolution, including private networks and operator integrations, plus financial backing. For organisations betting on cellular WAN, that backing derisks the platform."
+    }
+  ]
 }

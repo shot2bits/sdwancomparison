@@ -56,7 +56,7 @@ export default async function VendorPage({ params }: Props) {
     "@type": "WebPage",
     name: `${vendor.name}: SD-WAN and SASE capability profile`,
     description: vendor.evidence_summary,
-    url: `https://comparison.netify.co.uk/vendors/${vendor.slug}`,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://sase.netify.co.uk"}/vendors/${vendor.slug}`,
     dateModified: vendor.last_verified,
     about: {
       "@type": "Organization",
@@ -74,8 +74,22 @@ export default async function VendorPage({ params }: Props) {
     })),
   };
 
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: vendor.vendor_faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -142,6 +156,44 @@ export default async function VendorPage({ params }: Props) {
         </header>
 
         <hr className="rule mb-16" />
+
+        {/* Full editorial profile */}
+        <section className="mb-16 max-w-3xl">
+          <p className="eyebrow mb-2">Netify profile</p>
+          <h2 className="mb-6">{vendor.name} in depth</h2>
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-base font-medium mb-2">Platform and architecture</h3>
+              <p className="text-[var(--ink-700)]">{vendor.profile.platform_architecture}</p>
+            </div>
+            <div>
+              <h3 className="text-base font-medium mb-2">Security and SASE capability</h3>
+              <p className="text-[var(--ink-700)]">{vendor.profile.security_sase}</p>
+            </div>
+            <div>
+              <h3 className="text-base font-medium mb-2">Service, support and channel</h3>
+              <p className="text-[var(--ink-700)]">{vendor.profile.service_support_channel}</p>
+            </div>
+            <div>
+              <h3 className="text-base font-medium mb-2">Commercials and the Netify verdict</h3>
+              <p className="text-[var(--ink-700)]">{vendor.profile.commercials_verdict}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Vendor FAQs */}
+        <section className="mb-16 max-w-3xl">
+          <p className="eyebrow mb-2">Questions</p>
+          <h2 className="mb-6">{vendor.name}: common buyer questions</h2>
+          <div className="space-y-6">
+            {vendor.vendor_faqs.map((f) => (
+              <div key={f.q}>
+                <h3 className="text-base font-medium mb-1">{f.q}</h3>
+                <p className="text-sm text-[var(--ink-700)]">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Editorial: differentiators / fit / watch-outs */}
         <section className="grid md:grid-cols-3 gap-8 mb-16">

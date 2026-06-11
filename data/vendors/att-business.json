@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/att/"
+  "marketplace_url": "https://netify.co.uk/marketplace/att/",
+  "profile": {
+    "platform_architecture": "AT&T Business delivers managed SD-WAN across a multi-vendor portfolio (Cisco, Fortinet, VeloCloud and Palo Alto pairings) on top of its US-centric fibre and global partner reach. Delivery maturity in North America is first rank; international delivery works through partner networks with AT&T holding the contract and service management.",
+    "security_sase": "AT&T's managed security heritage (including the former AlienVault/Cybersecurity assets, with managed security services now operating alongside LevelBlue) wraps SD-WAN with SASE outcomes built on partner platforms including Fortinet and Palo Alto. As with peers, security depth follows the platform; AT&T adds SOC operations and threat intelligence scale.",
+    "service_support_channel": "Fully managed and co-managed models, 24x7 operations and named service management. UK and European presence exists but is partner-leaning; the centre of gravity is the Americas. Public sector and large enterprise references are extensive in the US.",
+    "commercials_verdict": "Per-site managed pricing, quote based on term. The Netify verdict: shortlist AT&T when your estate is US-weighted with international spokes, when consolidating US connectivity, mobility and managed WAN with one carrier, or when existing AT&T contracts make extension efficient. UK-led estates usually rank European carriers first."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Is AT&T a sensible choice for UK-headquartered companies?",
+      "a": "Where the US footprint dominates the estate, yes: AT&T's domestic delivery is excellent and the UK end works through established operations. For UK and Europe-led estates, BT, Vodafone, Orange or Colt typically fit procurement better."
+    },
+    {
+      "q": "Which platforms does AT&T manage?",
+      "a": "Cisco, Fortinet, VeloCloud and Palo Alto based offers feature, with SASE outcomes assembled from those plus AT&T managed security operations. The proposal will match platform to estate."
+    },
+    {
+      "q": "What happened to AT&T Cybersecurity?",
+      "a": "The managed security business was spun into LevelBlue in 2024, continuing to deliver SOC services aligned with AT&T offers. Contract structures may involve both; clarify accountability lines in the RFP."
+    }
+  ]
 }

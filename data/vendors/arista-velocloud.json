@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/velocloud/"
+  "marketplace_url": "https://netify.co.uk/marketplace/velocloud/",
+  "profile": {
+    "platform_architecture": "VeloCloud, now under Arista Networks after passing through VMware and Broadcom, popularised cloud-delivered SD-WAN: lightweight edges, a large fabric of cloud gateways (700+ across 200+ PoPs) and Dynamic Multipath Optimisation that remediates loss and jitter in real time. Orchestration is multi-tenant SaaS. Arista is integrating VeloCloud with its switching and observability portfolio under the CloudVision umbrella.",
+    "security_sase": "VeloCloud's native security covers stateful firewalling and segmentation, with SASE delivered through partner SSE integrations rather than a deep first-party stack; pairings with Zscaler, Netskope and Symantec are long established. Buyers wanting single-vendor SASE depth should look elsewhere; buyers wanting a proven network layer under best-of-breed SSE find VeloCloud a strong fit.",
+    "service_support_channel": "VeloCloud built the largest carrier managed-service footprint in SD-WAN: AT&T, Lumen, Colt, Vodafone and many others run VeloCloud-based offers, and that channel remains the most common consumption route. Direct and DIY are available with 24x7 vendor support. UK availability through carriers and MSPs is broad.",
+    "commercials_verdict": "Subscription per edge by bandwidth tier, quote based, historically aggressive through carrier deals. The Netify verdict: shortlist VeloCloud for branch-heavy estates on imperfect transport where DMPO still earns its keep, especially when buying through a carrier you already trust. Seek written clarity from Arista on roadmap and SSE strategy as the integration settles."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What happened to VMware SD-WAN?",
+      "a": "Broadcom acquired VMware and subsequently sold the VeloCloud SD-WAN business to Arista Networks. The platform, gateways and orchestration continue, with Arista integrating it alongside its switching and CloudVision tooling. Ask for current roadmap commitments during procurement."
+    },
+    {
+      "q": "How does DMPO improve application quality?",
+      "a": "Dynamic Multipath Optimisation continuously measures each path, steers packets per application, and applies forward error correction and jitter buffering when links degrade. Voice and video stay usable on broadband-grade links, which built VeloCloud's reputation."
+    },
+    {
+      "q": "Is VeloCloud a full SASE platform?",
+      "a": "Not single-vendor. Native security is firewalling and segmentation, with SSE delivered via partners such as Zscaler or Netskope. Treat VeloCloud as the network layer of a dual-vendor SASE rather than a one-stop security stack."
+    }
+  ]
 }

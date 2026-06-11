@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/hpe-aruba/"
+  "marketplace_url": "https://netify.co.uk/marketplace/hpe-aruba/",
+  "profile": {
+    "platform_architecture": "HPE Aruba Networking's SD-WAN is EdgeConnect (from Silver Peak): physical and virtual appliances with WAN optimisation heritage, tunnel bonding, dynamic path conditioning and sub-second failover. Aruba Central provides cloud management with AIOps across WAN, wired and wireless, and Orchestrator handles advanced WAN policy. Cloud on-ramps cover the major hyperscalers. Following the Juniper acquisition, HPE now fields both EdgeConnect and Mist-based WAN portfolios.",
+    "security_sase": "Aruba's SASE combines EdgeConnect SD-WAN with HPE Aruba Networking SSE (from the Axis Security acquisition): ZTNA, SWG, CASB and DLP delivered from a global edge. EdgeConnect also integrates tightly with third-party SSE including Zscaler and Netskope, a genuine strength for dual-vendor SASE designs. On-appliance security covers zone-based firewalling and segmentation with IDS/IPS.",
+    "service_support_channel": "Strong UK channel through HPE partners and MSPs, with managed EdgeConnect offers from carriers and integrators. HPE support runs 24x7 with professional services for migration, and co-managed models are common. Aruba Central's multi-tenant design supports MSP delivery well.",
+    "commercials_verdict": "Subscription licensing by bandwidth tier and appliance class, quote based, with SSE per user. The Netify verdict: shortlist HPE Aruba when link quality is poor or variable (the path conditioning heritage still leads), when you want first-class freedom to pair best-of-breed SSE, or when an Aruba campus estate makes Central the natural console. Clarify the EdgeConnect and Mist roadmap question directly with HPE during selection."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Is EdgeConnect still strong on degraded links?",
+      "a": "Yes. Forward error correction, packet order correction and tunnel bonding from the Silver Peak heritage remain differentiators, keeping voice and video usable on lossy broadband or LTE where simpler SD-WANs degrade."
+    },
+    {
+      "q": "Can EdgeConnect pair with Zscaler or Netskope instead of Aruba SSE?",
+      "a": "Yes, and the integrations are first class: automated tunnel orchestration into third-party SSE clouds is a supported, documented pattern. That makes EdgeConnect a safe network layer for dual-vendor SASE."
+    },
+    {
+      "q": "How does the Juniper acquisition affect Aruba EdgeConnect buyers?",
+      "a": "HPE operates both portfolios today, with consolidation expected over time. Existing EdgeConnect deployments continue to be sold and supported; ask HPE for written roadmap commitments as part of any large procurement."
+    }
+  ]
 }

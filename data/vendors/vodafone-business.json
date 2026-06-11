@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/vodafone/"
+  "marketplace_url": "https://netify.co.uk/marketplace/vodafone/",
+  "profile": {
+    "platform_architecture": "Vodafone Business delivers managed SD-WAN over a global fixed and mobile estate, with platform options centred on VeloCloud and Cisco and a distinctive fixed-mobile convergence story: 4G and 5G backup or primary access are natural extensions of being a global mobile operator. UK and European footprint is deep, with reach into APAC and Africa via group companies and partnerships.",
+    "security_sase": "Managed security wraps the chosen platform with cloud security partnerships (including Zscaler-based offers) and Vodafone's security operations. As with all carriers, depth follows the underlying platform; Vodafone's differentiation is integrating mobile, fixed and security into one managed estate.",
+    "service_support_channel": "Fully managed and co-managed models with 24x7 operations, UK support desks and account-managed delivery. Strong public sector presence in the UK. Last-mile breadth across Vodafone fixed assets and wholesale, plus instant mobile resilience, simplifies multi-country procurement.",
+    "commercials_verdict": "Per-site managed pricing on term contracts, quote based. The Netify verdict: shortlist Vodafone when fixed-mobile convergence is strategic (5G backup as standard, rapid site activation), when your estate spans Europe with UK weight, or when consolidating mobile and WAN spend with one provider strengthens your commercial position."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What makes Vodafone different from other managed SD-WAN carriers?",
+      "a": "Mobile-first resilience: as a global operator, 4G and 5G backup or primary access is native to its offers, enabling same-week site activation and continuity designs without third-party cellular bolt-ons."
+    },
+    {
+      "q": "Which platforms underpin Vodafone managed SD-WAN?",
+      "a": "VeloCloud and Cisco based offers are core, with security partnerships including Zscaler for SASE outcomes. Vodafone proposes the platform against your requirements and runs it as a managed service."
+    },
+    {
+      "q": "Is Vodafone strong for UK public sector?",
+      "a": "Yes, with established frameworks presence and UK support operations. Public sector buyers often shortlist Vodafone alongside BT where UK contract holding and sovereign support arrangements carry procurement weight."
+    }
+  ]
 }

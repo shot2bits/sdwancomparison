@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/verizon/"
+  "marketplace_url": "https://netify.co.uk/marketplace/verizon/",
+  "profile": {
+    "platform_architecture": "Verizon Business runs one of the largest managed WAN practices globally, built on its Private IP MPLS heritage and a multi-vendor SD-WAN portfolio spanning Cisco (Catalyst and Meraki), VeloCloud, Versa and Fortinet. Global delivery is mature: 150+ countries through owned assets and partners, with professional services to match complex, multi-region migrations.",
+    "security_sase": "Managed SASE combines the SD-WAN portfolio with leading SSE platforms (Zscaler, Palo Alto and others) plus Verizon's own security services including Network Detection and Response and the long-running DBIR threat research. Security operations capability is genuine carrier-grade; platform depth follows the chosen vendor stack.",
+    "service_support_channel": "Fully managed and co-managed with 24x7 follow-the-sun operations and named service management. US heritage with substantial UK and European delivery. Verizon suits complex global RFPs where contractual accountability across dozens of countries is the requirement.",
+    "commercials_verdict": "Per-site managed pricing on multi-year terms, quote based and negotiable at scale. The Netify verdict: shortlist Verizon for large multinational estates, especially with Americas weight, MPLS migrations at scale and security-conscious boards: the multi-vendor bench means the platform fits the estate rather than the reverse. UK-only mid-market buyers will find nimbler fits elsewhere."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Which SD-WAN vendors can Verizon manage?",
+      "a": "Cisco Catalyst and Meraki, VeloCloud, Versa and Fortinet feature in Verizon's portfolio, with SSE pairings including Zscaler and Palo Alto. Verizon proposes against your estate; you are buying their delivery and operations as much as the platform."
+    },
+    {
+      "q": "How strong is Verizon outside the Americas?",
+      "a": "Genuinely global: 150+ country delivery through owned network and partners, with established UK and European operations. Americas-weighted multinationals get the most value from the asset base."
+    },
+    {
+      "q": "Does Verizon help with MPLS to SD-WAN migration?",
+      "a": "Yes, it is core business: Verizon runs large Private IP estates and migrates them to hybrid and internet-first SD-WAN designs with professional services, co-existence patterns and global circuit management."
+    }
+  ]
 }

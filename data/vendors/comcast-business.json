@@ -155,5 +155,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/masergy/"
+  "marketplace_url": "https://netify.co.uk/marketplace/masergy/",
+  "profile": {
+    "platform_architecture": "Comcast Business pairs the largest US cable access network with the Masergy acquisition's global software-defined platform, delivering managed SD-WAN domestically and internationally. Platform options span VeloCloud and Fortinet alongside Masergy's own service fabric, with 4G LTE backup widely bundled at US sites. The Masergy digital twin AIOps capability monitors estates predictively.",
+    "security_sase": "Managed SASE builds on Fortinet and partner SSE stacks with Masergy's managed detection and response heritage providing security operations. Depth follows the platform; the AIOps layer and unified global service management are the distinctive contributions.",
+    "service_support_channel": "Fully managed and co-managed with 24x7 operations. The US access estate gives on-net economics domestically; international delivery rides Masergy's established global footprint with UK presence. Mid-market and enterprise both served well, a Masergy signature.",
+    "commercials_verdict": "Per-site managed pricing, quote based, often compelling where Comcast access is on-net. The Netify verdict: shortlist Comcast Business for US-weighted estates with international spokes, mid-market multinationals wanting enterprise-grade managed service without incumbent-carrier overhead, and buyers valuing AIOps-driven proactive operations."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What did Masergy bring to Comcast Business?",
+      "a": "A global managed SD-WAN and security platform with a strong mid-market enterprise reputation, international delivery, and the digital twin AIOps capability for predictive operations: effectively Comcast's enterprise WAN engine beyond the cable footprint."
+    },
+    {
+      "q": "How good is the international coverage?",
+      "a": "Masergy's software-defined platform reaches major global markets with UK presence included. The deepest economics remain US on-net; international sites are delivered credibly via the global fabric and partners."
+    },
+    {
+      "q": "Is 4G backup really standard?",
+      "a": "Widely bundled at US sites, giving day-one resilience against access cuts. For UK and international sites, confirm equivalent cellular resilience options during design."
+    }
+  ]
 }

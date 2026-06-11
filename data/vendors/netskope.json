@@ -153,5 +153,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/netskope/"
+  "marketplace_url": "https://netify.co.uk/marketplace/netskope/",
+  "profile": {
+    "platform_architecture": "Netskope One runs on NewEdge, a private security cloud where every region runs full compute for every service, keeping inspection close to users without backhaul. The platform was built data-first: the Zero Trust Engine inspects traffic and content in a single pass with rich app and instance awareness. Netskope also fields its own Borderless SD-WAN (from the Infiot acquisition), making it one of the few SSE leaders with a first-party WAN edge.",
+    "security_sase": "CASB is where Netskope made its name and it remains the reference: granular SaaS app instance control, inline and API modes, with DLP depth to match. SWG, ZTNA (Private Access) and FWaaS complete the SSE set, with SkopeAI covering AI app governance and shadow AI discovery. For cloud-heavy, data-sensitive estates the control granularity is the differentiator.",
+    "service_support_channel": "UK presence is strong, with managed offers through security MSPs and carriers. Deployment uses agents and IPsec/GRE feeds with substantial migration tooling. Support runs to 24x7 with professional services; like its SSE peers, policy excellence rewards skilled ownership.",
+    "commercials_verdict": "Per-user subscription licensing, quote based, premium positioned alongside Zscaler. The Netify verdict: shortlist Netskope when SaaS and data governance lead: instance-level CASB control, top-tier DLP and AI app governance are the strongest cards. Its first-party SD-WAN makes single-vendor SASE plausible; many buyers still pair NewEdge with established SD-WAN vendors."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What makes Netskope CASB stand out?",
+      "a": "Instance awareness: Netskope distinguishes corporate from personal instances of the same SaaS app and applies different policy to each, with deep activity-level controls and DLP inline. For unsanctioned app governance it remains the benchmark."
+    },
+    {
+      "q": "Does Netskope offer SD-WAN as well as SSE?",
+      "a": "Yes, Borderless SD-WAN from the Infiot acquisition: lightweight edges managed in the same Netskope One console, making single-vendor SASE viable. Validate routing depth against network-heritage rivals for complex topologies."
+    },
+    {
+      "q": "How does NewEdge differ from running security in hyperscale clouds?",
+      "a": "NewEdge is Netskope's own infrastructure with full service compute in every region, extensive peering and published latency commitments, designed to avoid hairpinning and keep single-pass inspection close to the user."
+    }
+  ]
 }

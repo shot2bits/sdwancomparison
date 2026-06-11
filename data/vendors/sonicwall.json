@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/sonicwall/"
+  "marketplace_url": "https://netify.co.uk/marketplace/sonicwall/",
+  "profile": {
+    "platform_architecture": "SonicWall delivers SD-WAN as a feature of its TZ and NSa firewall series, managed through Network Security Manager, with Capture Security Center providing cloud visibility. The architecture is firewall-first: branch appliances steering traffic across links with security inline, suited to distributed estates standardising on SonicWall hardware. Cloud Secure Edge (from the Banyan Security acquisition) adds cloud-delivered access.",
+    "security_sase": "Security capability centres on the firewall stack: deep packet inspection including TLS, Capture ATP cloud sandboxing with RTDMI memory inspection, and content filtering. Cloud Secure Edge provides ZTNA and SWG for remote users on a security service edge model. CASB and DLP depth is lighter than enterprise SASE leaders, positioning SonicWall for SMB and mid-market rather than global enterprise SASE consolidation.",
+    "service_support_channel": "SonicWall is overwhelmingly channel and MSP led, with strong UK distribution and an MSSP programme including multi-tenant management. Education and retail are notable verticals. Support tiers run to 24x7 with partner-delivered managed services common.",
+    "commercials_verdict": "Appliance plus security subscription bundles with aggressive street pricing; Cloud Secure Edge licenses per user. The Netify verdict: shortlist SonicWall for cost-conscious SMB and mid-market estates, education networks and MSP-delivered branch security where firewall-based SD-WAN is sufficient. Global enterprises needing deep CASB, DLP and a large PoP fabric should look to the enterprise SASE tier."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Is SonicWall SD-WAN good enough for multi-site businesses?",
+      "a": "For tens of sites with straightforward topologies, yes: link steering, failover and zero-touch deployment are included with the firewalls. Large or complex global WANs will outgrow it; that is not SonicWall's target buyer."
+    },
+    {
+      "q": "What is Cloud Secure Edge?",
+      "a": "SonicWall's cloud-delivered access service from the Banyan acquisition: ZTNA and web security for remote users, managed from the cloud and licensed per user, extending SonicWall estates beyond the appliance perimeter."
+    },
+    {
+      "q": "Why do MSPs favour SonicWall?",
+      "a": "Multi-tenant management, an MSSP licensing programme, broad UK distribution and price points that fit SMB budgets. For MSP-delivered branch security with SD-WAN included, it remains one of the most economical stacks."
+    }
+  ]
 }

@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/marketplace/forcepoint/"
+  "marketplace_url": "https://netify.co.uk/marketplace/forcepoint/",
+  "profile": {
+    "platform_architecture": "Forcepoint pairs its long-running Secure SD-WAN (NGFW heritage from Stonesoft) with the Forcepoint ONE SSE platform. Secure SD-WAN appliances cluster natively for high availability and are managed centrally through the Security Management Center, with strength in multi-link, multi-ISP branch designs. Forcepoint ONE delivers SWG, CASB and ZTNA from a cloud platform built on a security-first architecture.",
+    "security_sase": "Forcepoint's differentiation is data security: market-leading DLP with unified policy from endpoint to cloud, risk-adaptive protection that adjusts enforcement to user behaviour, and AI Mesh data classification. ZTNA, SWG and CASB are delivered through Forcepoint ONE with the DLP engine underneath. For data-centric and government-adjacent buyers, the data security depth is the reason to shortlist.",
+    "service_support_channel": "Channel-led with government and defence heritage (the Raytheon lineage shows in certifications and clearances), strong in regulated sectors. UK presence is established, with managed offers through security MSPs. Support runs 24x7 with professional services for DLP programmes, which benefit from expert deployment.",
+    "commercials_verdict": "Per-user SSE licensing and appliance subscriptions, quote based. The Netify verdict: shortlist Forcepoint when data loss prevention is the primary driver, in regulated or government-adjacent estates, or when risk-adaptive enforcement maps to your insider-risk programme. Buyers prioritising WAN routing breadth or the largest PoP fabrics will weight other criteria more heavily."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What makes Forcepoint DLP different?",
+      "a": "One policy engine spans endpoint, network and cloud, with mature fingerprinting, OCR and exact data matching, plus risk-adaptive protection that tightens enforcement as user risk rises. Few rivals match the depth for serious data security programmes."
+    },
+    {
+      "q": "Is Forcepoint Secure SD-WAN still developed?",
+      "a": "Yes. The NGFW-based Secure SD-WAN line continues with central management and native clustering, particularly strong for multi-ISP branch resilience in security-conscious estates, and it integrates with Forcepoint ONE for cloud security."
+    },
+    {
+      "q": "Which sectors fit Forcepoint best?",
+      "a": "Government and public sector, defence supply chain, financial services and any organisation where data protection obligations lead the architecture. The certification heritage and DLP depth align with those procurement requirements."
+    }
+  ]
 }

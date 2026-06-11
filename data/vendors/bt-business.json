@@ -154,5 +154,25 @@
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
   },
-  "marketplace_url": "https://netify.co.uk/resell/bt-business-services/"
+  "marketplace_url": "https://netify.co.uk/resell/bt-business-services/",
+  "profile": {
+    "platform_architecture": "BT delivers managed SD-WAN and SASE on top of one of the deepest UK access estates in the market: Openreach-adjacent last mile, owned core, and global reach through BT's international network. Platform choices include Cisco Meraki, Fortinet and Versa-based offers, with BT engineering the underlay, overlay and lifecycle as one service. Dual-hub and diverse last-mile designs are standard practice for resilience.",
+    "security_sase": "BT Managed SASE wraps SD-WAN with ZTNA, SWG and CASB from leading platforms (Fortinet and partner SSE stacks) under a single managed contract, backed by BT's security operations heritage and UK SOC capability. Security depth follows the chosen platform; BT's value is integrating it with connectivity, monitoring it 24x7 and owning the outcome.",
+    "service_support_channel": "This is the headline: a UK contract holder with named support, 24x7 UK NOC and SOC operations, field engineering across the country and managed last-mile circuits in the same contract. Fully managed and co-managed models are both offered. Netify is a BT Authorised Partner, so the BT portfolio can be procured through Netify with channel support.",
+    "commercials_verdict": "Per-site managed pricing bundling circuits, platform and service, quote based on term. The Netify verdict: shortlist BT when you want one accountable UK provider across underlay, overlay and security, when public sector or regulated procurement favours a UK contract holder, or when nationwide field presence matters. Disclosure: Netify earns commission on BT routes; our grades remain evidence-based."
+  },
+  "vendor_faqs": [
+    {
+      "q": "Which SD-WAN platforms does BT manage?",
+      "a": "BT's managed portfolio spans Cisco Meraki, Fortinet and Versa among others, with BT recommending a platform against your estate and running it end to end including circuits, monitoring and lifecycle."
+    },
+    {
+      "q": "Does BT offer co-managed SD-WAN?",
+      "a": "Yes. Co-managed models give your team policy visibility and agreed change rights while BT owns the platform, underlay and incident response, a common pattern for organisations with capable but stretched network teams."
+    },
+    {
+      "q": "Can I buy BT Managed SASE through Netify?",
+      "a": "Yes. Netify is a BT Authorised Partner: you can procure BT Business services through Netify with independent comparison support. Netify earns commission on this route, which never affects how vendors are scored in this tool."
+    }
+  ]
 }

@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": null
+  "marketplace_url": null,
+  "profile": {
+    "platform_architecture": "Juniper's SD-WAN is built on Session Smart Routing from the 128 Technology acquisition: a tunnel-free architecture that routes per session, cutting overlay overhead and preserving bandwidth. Mist AI is the operational layer, with Marvis providing a conversational assistant and AI-driven root cause analysis across WAN, wired and wireless. Now part of HPE following the 2025 acquisition, the Mist platform continues as the AI-native management plane.",
+    "security_sase": "Juniper Secure Edge provides cloud-delivered SWG, CASB, DLP and FWaaS, pairing with Session Smart SD-WAN under Security Director Cloud for a single-vendor SASE. ZTNA capability is delivered through Secure Edge application access. Security depth is credible though less prominent than firewall-heritage rivals; the differentiation remains AI-driven operations rather than security-first positioning.",
+    "service_support_channel": "Channel and service provider routes are well established, with UK availability direct and via MSPs. JTAC provides 24x7 support, and Mist's cloud model suits both DIY teams and providers offering co-managed WAN assurance. The HPE combination consolidates support and channel structures with Aruba over time.",
+    "commercials_verdict": "Subscription licensing per device and per Mist service, quote based. The Netify verdict: shortlist Juniper when operational efficiency is the prize: Marvis and Mist AI measurably cut mean time to resolution for distributed estates, and session-based routing rewards bandwidth-constrained sites. Buyers wanting maximum SASE security depth in one vendor should compare Secure Edge carefully against security-led rivals."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What is tunnel-free SD-WAN and why does it matter?",
+      "a": "Session Smart Routing forwards traffic per session with metadata rather than wrapping everything in IPsec overlays. That removes tunnel overhead (typically 30 percent or more on small packets), improves goodput on constrained links and simplifies failover, because sessions, not tunnels, move."
+    },
+    {
+      "q": "How does Marvis help WAN operations?",
+      "a": "Marvis is Mist's AI assistant: it answers natural language queries about user experience, isolates root cause across WAN, wired and wireless, and raises proactive actions. Organisations report significant ticket reduction, which is the core Juniper value case."
+    },
+    {
+      "q": "Does the HPE acquisition change Juniper SD-WAN plans?",
+      "a": "HPE completed the acquisition in 2025 and has positioned Mist as the AI-native management direction alongside Aruba. Roadmaps consolidate over time, so ask HPE Juniper for current platform guidance during procurement."
+    }
+  ]
 }

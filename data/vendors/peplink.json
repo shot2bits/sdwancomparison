@@ -154,5 +154,25 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": null
+  "marketplace_url": null,
+  "profile": {
+    "platform_architecture": "Peplink builds wireless-first SD-WAN: Balance and MAX routers with multi-SIM cellular, Starlink integration and SpeedFusion technology that bonds multiple links (cellular, satellite, broadband) into one resilient connection with hot failover that keeps sessions alive. InControl 2 provides cloud management. The portfolio spans vehicles, vessels, pop-up sites and branches at price points well below enterprise rivals.",
+    "security_sase": "Security is functional rather than the focus: stateful firewalling, content filtering, VPN with PepVPN/SpeedFusion encryption, and integrations for cloud security where needed. There is no first-party SASE cloud; buyers needing ZTNA, CASB or DLP pair Peplink connectivity with a third-party SSE. Positioning is connectivity resilience first.",
+    "service_support_channel": "Strongly channel-led with specialist partners in transport, maritime, broadcast, events and public safety; UK distribution is healthy. Many partners offer managed connectivity built on Peplink plus airtime. Support is business-hours from Peplink with partner-delivered SLAs filling the gap.",
+    "commercials_verdict": "Hardware plus optional SpeedFusion and InControl subscriptions; entry costs are a fraction of enterprise SD-WAN. The Netify verdict: shortlist Peplink when connectivity itself is the problem: vehicles, vessels, temporary sites, rural branches and anywhere cellular bonding beats waiting for fibre. It complements rather than competes with SASE platforms; pair it with cloud security for the full picture."
+  },
+  "vendor_faqs": [
+    {
+      "q": "What does SpeedFusion bonding actually do?",
+      "a": "It combines multiple links (for example two cellular carriers plus Starlink) into one logical connection, spreading packets across paths with hot failover, so a link drop does not break calls or sessions. That is the core Peplink magic for mobile and remote sites."
+    },
+    {
+      "q": "Can Peplink be my whole SD-WAN?",
+      "a": "For connectivity-led estates (fleets, retail pop-ups, rural sites) yes. For enterprises needing deep application policy, segmentation and SASE security, Peplink is the access and resilience layer paired with a security platform."
+    },
+    {
+      "q": "Does Peplink work with Starlink?",
+      "a": "Yes, Starlink integration is actively supported and widely deployed: Peplink routers manage Starlink alongside cellular links with bonding or failover, common in maritime, events and remote operations."
+    }
+  ]
 }
