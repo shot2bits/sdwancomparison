@@ -154,5 +154,6 @@
   "logging": {
     "siem_export": "managed_service_dependent",
     "log_retention_days": null
-  }
+  },
+  "marketplace_url": "https://netify.co.uk/marketplace/att/"
 }

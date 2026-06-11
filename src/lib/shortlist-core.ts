@@ -200,6 +200,7 @@ export type ShortlistVendor = {
   sla_availability_pct: number | null;
   support_model: Record<string, CapabilityStatus>;
   logging: { siem_export: CapabilityStatus; log_retention_days: number | null };
+  marketplace_url: string | null;
   key_differentiators: string[];
   best_fit_for: string[];
   watch_outs: string[];
@@ -310,6 +311,7 @@ export type VendorVerdict = {
   watch_outs: string[];
   evidence_coverage_pct: number;
   website: string;
+  marketplace_url: string | null;
 };
 
 export type ShortlistResult = {
@@ -567,6 +569,7 @@ export function buildShortlist(
       watch_outs: v.watch_outs,
       evidence_coverage_pct: v.evidence_coverage_pct,
       website: v.website,
+      marketplace_url: v.marketplace_url,
     });
   }
 

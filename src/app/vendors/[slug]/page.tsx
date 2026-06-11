@@ -105,7 +105,15 @@ export default async function VendorPage({ params }: Props) {
             <p className="text-lg text-[var(--ink-700)] mb-6 max-w-2xl">
               {vendor.evidence_summary}
             </p>
-            <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-4 text-sm flex-wrap">
+              <a
+                href={vendor.marketplace_url ?? "https://netify.co.uk/marketplace/"}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--ink-900)] text-[var(--paper-base)] no-underline hover:bg-[var(--accent)] transition-colors rounded-sm"
+              >
+                Contact {vendor.name} via Netify ↗
+              </a>
               <a href={vendor.website} target="_blank" rel="noopener" className="no-underline">
                 {vendor.website.replace(/^https?:\/\//, "").split("/")[0]} ↗
               </a>

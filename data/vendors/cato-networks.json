@@ -155,5 +155,6 @@
   "logging": {
     "siem_export": "yes",
     "log_retention_days": null
-  }
+  },
+  "marketplace_url": null
 }

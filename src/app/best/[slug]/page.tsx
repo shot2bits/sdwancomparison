@@ -65,6 +65,11 @@ export default async function BestPage({ params }: Props) {
         url: `${SITE_URL}/vendors/${v.slug}`,
         description: v.key_differentiators[0],
         provider: { "@type": "Organization", name: v.name, url: v.website },
+        potentialAction: {
+          "@type": "ContactAction",
+          target: v.marketplace_url ?? "https://netify.co.uk/marketplace/",
+          name: `Contact ${v.name} via the Netify marketplace`,
+        },
       },
     })),
   };
@@ -142,6 +147,14 @@ export default async function BestPage({ params }: Props) {
               <p className="text-sm text-[var(--ink-500)]">Evidence caveats: {v.gaps.join("; ")}</p>
             )}
             <p className="text-sm text-[var(--ink-700)] mt-1">Watch out: {v.watch_outs[0]}</p>
+            <a
+              href={v.marketplace_url ?? "https://netify.co.uk/marketplace/"}
+              target="_blank"
+              rel="noopener"
+              className="inline-block mt-3 px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-sm no-underline hover:bg-[var(--ink-900)] hover:text-[var(--paper-base)] transition-colors"
+            >
+              Contact {v.name} via Netify ↗
+            </a>
           </li>
         ))}
       </ol>

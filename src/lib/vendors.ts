@@ -195,6 +195,7 @@ export function getShortlistDataset(): ShortlistVendor[] {
     sla_availability_pct: v.sla_availability_pct,
     support_model: v.support_model,
     logging: v.logging,
+    marketplace_url: v.marketplace_url,
     key_differentiators: v.key_differentiators,
     best_fit_for: v.best_fit_for,
     watch_outs: v.watch_outs,
