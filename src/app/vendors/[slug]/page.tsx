@@ -113,7 +113,7 @@ export default async function VendorPage({ params }: Props) {
         <header className="mb-16 grid md:grid-cols-12 gap-8 fade-rise">
           <div className="md:col-span-8">
             <p className="eyebrow mb-3">{vendor.category}</p>
-            <h1 className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 500 }}>
+            <h1 className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
               {vendor.name}
             </h1>
             <p className="text-lg text-[var(--ink-700)] mb-6 max-w-2xl">

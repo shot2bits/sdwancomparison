@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 
-const fraunces = Fraunces({
+// Inter matches the main netify.co.uk site (SF Pro approximation),
+// self-hosted via next/font so no layout shift and no runtime request.
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-fraunces",
-  weight: ["400", "500", "600"],
-});
-
-const plex = IBM_Plex_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-plex",
-  weight: ["400", "500", "600"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -38,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-GB" className={`${fraunces.variable} ${plex.variable}`}>
+    <html lang="en-GB" className={inter.variable}>
       <body className="paper-texture min-h-screen flex flex-col">
         <header className="border-b border-[var(--ink-200)] bg-[var(--paper-base)]/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-6 py-4 flex items-baseline justify-between gap-8">

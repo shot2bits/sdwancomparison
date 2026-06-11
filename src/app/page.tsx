@@ -28,7 +28,7 @@ export default function Home() {
       <div className="grid md:grid-cols-12 gap-8 mb-20 fade-rise">
         <div className="md:col-span-8">
           <p className="eyebrow mb-4">SD-WAN and SASE research</p>
-          <h1 id="page-h1" className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 500 }}>
+          <h1 id="page-h1" className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
             A vendor-neutral comparison of {totalCount} SD-WAN and SASE platforms,
             graded against a {featureCount}-feature evaluation framework.
           </h1>
