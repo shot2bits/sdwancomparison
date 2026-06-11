@@ -156,7 +156,7 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": null,
+  "marketplace_url": "https://netify.co.uk/marketplace/cato-networks/",
   "profile": {
     "platform_architecture": "Cato built SASE as a cloud service from day one: the Cato SASE Cloud runs on a private global backbone of 85+ PoPs connected by SLA-backed tier-1 carrier links, with thin Cato Socket edges at sites and a single-pass processing engine in every PoP. All traffic, site and remote user alike, is processed once in the nearest PoP under one policy. Orchestration is a single multi-tenant console with no separate controllers to run.",
     "security_sase": "The full security stack is native and converged: NGFW, SWG, CASB, DLP, ZTNA, IPS and anti-malware execute in the same pass with shared context, and real-time machine learning models score traffic inline. There is no policy fragmentation between SD-WAN and security because they are one platform. Depth in specialist areas like enterprise DLP trails the dedicated leaders slightly; coherence across the whole stack is the compensating strength.",

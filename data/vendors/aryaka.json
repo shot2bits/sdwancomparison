@@ -155,7 +155,7 @@
     "siem_export": "yes",
     "log_retention_days": null
   },
-  "marketplace_url": null,
+  "marketplace_url": "https://netify.co.uk/marketplace/aryaka/",
   "profile": {
     "platform_architecture": "Aryaka runs its own Layer 2 private core between 40+ PoPs with built-in WAN optimisation, delivering SD-WAN and application acceleration as a managed service. ANAP edges (or virtual equivalents) connect sites to the nearest PoP; the middle mile is Aryaka's, with deterministic latency that public-internet SASE clouds cannot guarantee. China connectivity is a long-standing speciality.",
     "security_sase": "Aryaka Unified SASE adds cloud-delivered security at the PoPs: NGFW, SWG, ZTNA and CASB capabilities integrated with the network layer, plus partnerships for specialist depth. AI Observe provides anomaly detection across the estate. Security capability is credible and converging, with the network and acceleration heritage remaining the primary differentiation.",
