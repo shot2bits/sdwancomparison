@@ -42,18 +42,35 @@ export default function RootLayout({
             >
               Netify
             </Link>
-            <nav className="flex items-center gap-8 text-sm">
-              <Link href="/shortlist" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
+            {/* Mirrors the netify.co.uk header: same top-level items, plus the
+                tools that live on this subdomain. */}
+            <nav className="flex items-center gap-6 text-sm flex-wrap">
+              <a href="https://netify.co.uk/resell/bt-business-broadband/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
+                Resell
+              </a>
+              <a href="https://netify.co.uk/marketplace/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
+                Marketplace
+              </a>
+              <a href="https://netify.co.uk/tools/bt-cloud-voice-pricing-calculator/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] hidden md:inline">
+                Calculators
+              </a>
+              <a href="https://netify.co.uk/sd-wan-for-healthcare/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] hidden md:inline">
+                Sectors
+              </a>
+              <a href="https://insights.netify.co.uk/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] hidden md:inline">
+                Learning
+              </a>
+              <Link href="/shortlist" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] font-medium">
                 Shortlist builder
               </Link>
-              <Link href="/vendors" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
-                Vendor comparison
+              <Link href="/best/sd-wan-providers" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] font-medium">
+                Rankings
               </Link>
               <a
-                href="https://netify.co.uk"
-                className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]"
+                href="https://app.netify.co.uk/try-rfp-builder"
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400"
               >
-                netify.co.uk
+                Build RFP
               </a>
             </nav>
           </div>

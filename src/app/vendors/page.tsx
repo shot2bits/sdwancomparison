@@ -36,6 +36,12 @@ export default function VendorsPage() {
           evaluation matrix. Click any vendor to see the full capability profile,
           evidence sources, key differentiators and watch-outs.
         </p>
+        <p className="text-sm text-[var(--ink-500)] mt-3">
+          These pages are research profiles: evidence grades, scores and
+          rankings. For company directories, certifications and direct RFP
+          submission, use the{" "}
+          <a href="https://netify.co.uk/marketplace/">Netify Marketplace</a>.
+        </p>
       </div>
 
       {/* Jump nav */}
