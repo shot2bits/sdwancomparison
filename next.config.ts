@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         destination: "/shortlist",
         statusCode: 301,
       },
+      {
+        source: "/best/managed-sd-wan-providers",
+        destination: "/shortlist",
+        statusCode: 301,
+      },
     ];
   },
 };

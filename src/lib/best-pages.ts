@@ -114,29 +114,6 @@ const FLAGSHIP_PAGES: BestPage[] = [
 
 export const BEST_PAGES: BestPage[] = [
   ...FLAGSHIP_PAGES,
-  {
-    slug: "managed-sd-wan-providers",
-    input: { service_model: "managed", shortlist_size: 10 },
-    title: "Best managed SD-WAN providers",
-    metaTitle: `Best Managed SD-WAN Providers (${YEAR}): Top 10 Ranked`,
-    metaDescription: `Netify's ${YEAR} ranking of managed SD-WAN service providers: fully managed offers scored across 40 evidence-graded features. Top 10 with scores.`,
-    h1: `Best managed SD-WAN providers (${YEAR}): top 10 ranked`,
-    intro: `Netify's ${YEAR} evaluation ranks managed SD-WAN service providers: vendors and carriers with public evidence of a fully managed operating model, scored across 40 capability features including last-mile circuit management, lifecycle, SLA-backed service and security. The top 10 are ranked below with scores. Add your sector, regions and security requirements in the interactive builder.`,
-    faqs: [
-      {
-        q: "Who are the best managed SD-WAN service providers in " + YEAR + "?",
-        a: "Based on the Netify evidence matrix (June " + YEAR + "), the leading fully managed routes are ranked above with scores. They span carriers (BT, Verizon, Orange, NTT, GTT, Vodafone, Colt) and managed-service-first platforms (Cato, Aryaka). The right fit depends on your regions, sector and how much control you want to keep, which the interactive shortlist builder scores against all 30 providers.",
-      },
-      {
-        q: "What is the difference between managed and co-managed SD-WAN?",
-        a: "Fully managed means the provider owns design, deployment, monitoring, changes and incident response end to end, usually including circuits. Co-managed shares control: your team keeps policy visibility and agreed change rights while the provider runs the platform and underlay. Most providers in this ranking offer both; the matrix grades each model separately.",
-      },
-      {
-        q: "Should I buy SD-WAN from a carrier or direct from a vendor?",
-        a: "Carriers bundle circuits, deployment and 24x7 operations under one contract with named service management, which suits estates without deep network teams. Buying direct (DIY) gives maximum control and typically lower cost for capable teams. The shortlist builder lets you filter by operating model to compare both routes on the same scoring.",
-      },
-    ],
-  },
   sectorPage("healthcare", "healthcare", "Typical drivers include clinical application performance, site resilience for 24x7 care settings and patient data protection."),
   sectorPage("financial_services", "financial-services", "Typical drivers include low-latency connectivity, regulatory compliance and strong data loss prevention."),
   sectorPage("retail_ecommerce", "retail", "Typical drivers include rapid store rollout, PCI segmentation, cellular backup and centralised management at scale."),

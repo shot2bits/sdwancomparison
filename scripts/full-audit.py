@@ -211,9 +211,9 @@ if st != 200 or "shortlist" not in body.lower():
     FAILS.append("print view broken")
 
 # 7. No-JS content: load-bearing strings present in raw HTML
-st, body = fetch("/best/managed-sd-wan-providers")
+st, body = fetch("/best/sd-wan-sase-providers-for-healthcare")
 if "evaluation ranks" not in body:
-    FAILS.append("/best/managed-sd-wan-providers: quotable summary not server-rendered")
+    FAILS.append("/best/sd-wan-sase-providers-for-healthcare: quotable summary not server-rendered")
 st, body = fetch("/compare/cato-networks-vs-zscaler")
 if body.count("rounded-sm text-xs") < 50:
     WARNS.append("compare grade table may not be fully server-rendered")
