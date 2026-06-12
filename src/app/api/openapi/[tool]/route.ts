@@ -1,5 +1,6 @@
 import { MCP_TOOL_DEFINITIONS, callMcpTool } from "@/lib/mcp-tools";
 import { SITE_URL } from "@/lib/structured-data";
+import { corsHeaders, preflight } from "@/lib/cors";
 
 /**
  * REST equivalent of the MCP tools.
@@ -43,11 +44,15 @@ export async function GET(_req: Request, ctx: Ctx) {
   });
 }
 
+export async function OPTIONS(req: Request) {
+  return preflight(req);
+}
+
 export async function POST(req: Request, ctx: Ctx) {
   const { tool } = await ctx.params;
   const def = MCP_TOOL_DEFINITIONS.find((t) => t.name === tool);
   if (!def) {
-    return Response.json({ error: `Unknown tool: ${tool}` }, { status: 404 });
+    return Response.json({ error: `Unknown tool: ${tool}` }, { status: 404, headers: corsHeaders(req) });
   }
   let args: unknown = {};
   try {
@@ -55,5 +60,5 @@ export async function POST(req: Request, ctx: Ctx) {
   } catch {
     // empty body is acceptable for zero-argument tools
   }
-  return Response.json(callMcpTool(tool, args));
+  return Response.json(callMcpTool(tool, args), { headers: corsHeaders(req) });
 }

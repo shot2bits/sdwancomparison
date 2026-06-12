@@ -16,6 +16,7 @@ import {
   type ShortlistInput,
 } from "@/lib/shortlist-core";
 import { getAllVendorSlugs } from "@/lib/vendors";
+import { corsHeaders, preflight } from "@/lib/cors";
 
 /** The Anthropic SDK needs the Node runtime (it imports node:fs et al). */
 export const runtime = "nodejs";
@@ -129,11 +130,16 @@ Sector mapping: if the buyer names or implies an industry (hospital or NHS means
 
 Call at most one tool per turn, then answer in prose. UK English. Never use em or en dashes. No marketing filler vocabulary. Plain text only: no markdown, no asterisks, no headings, no bullet lists. 150 words maximum in your final answer.`;
 
+export async function OPTIONS(req: Request) {
+  return preflight(req);
+}
+
 export async function POST(req: Request) {
+  const cors = corsHeaders(req);
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json(
       { error: "AI advisor not configured (missing API key)." },
-      { status: 503 },
+      { status: 503, headers: cors },
     );
   }
 
@@ -145,7 +151,7 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
+    return Response.json({ error: "Invalid JSON body." }, { status: 400, headers: cors });
   }
 
   const history: Anthropic.MessageParam[] = (body.messages ?? [])
@@ -154,7 +160,7 @@ export async function POST(req: Request) {
     .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
   if (history.length === 0) {
     const prompt = (body.prompt ?? "").toString().slice(0, 4000);
-    if (!prompt.trim()) return Response.json({ error: "Empty prompt." }, { status: 400 });
+    if (!prompt.trim()) return Response.json({ error: "Empty prompt." }, { status: 400, headers: cors });
     history.push({ role: "user", content: prompt });
   }
   history[history.length - 1] = {
@@ -233,13 +239,16 @@ export async function POST(req: Request) {
       });
     }
 
-    return Response.json({
-      narrative,
-      input: appliedInput ?? undefined,
-      comparison: comparison ?? undefined,
-    });
+    return Response.json(
+      {
+        narrative,
+        input: appliedInput ?? undefined,
+        comparison: comparison ?? undefined,
+      },
+      { headers: cors },
+    );
   } catch (err) {
     console.error("agent error:", err);
-    return Response.json({ error: "Advisor request failed." }, { status: 502 });
+    return Response.json({ error: "Advisor request failed." }, { status: 502, headers: cors });
   }
 }
