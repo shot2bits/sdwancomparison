@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
-import { SiteHeader } from "@/components/SiteHeader";
+import { Inter } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 
 // Inter matches the main netify.co.uk site (SF Pro approximation),
 // self-hosted via next/font so no layout shift and no runtime request.
-const inter = { variable: "--font-inter" };
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -29,7 +34,30 @@ export default function RootLayout({
   return (
     <html lang="en-GB" className={inter.variable}>
       <body className="paper-texture min-h-screen flex flex-col">
-        <SiteHeader />
+        <header className="border-b border-[var(--ink-200)] bg-[var(--paper-base)]/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-8">
+            <Link
+              href="/"
+              className="display text-xl font-semibold tracking-tight no-underline text-[var(--ink-900)] hover:text-[var(--accent)]"
+            >
+              Netify
+            </Link>
+            <nav className="flex items-center gap-6 text-sm">
+              <a
+                href="https://netify.co.uk"
+                className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]"
+              >
+                netify.co.uk ↗
+              </a>
+              <a
+                href="https://app.netify.co.uk/try-rfp-builder"
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400"
+              >
+                Build an RFP
+              </a>
+            </nav>
+          </div>
+        </header>
 
         <main className="flex-1">{children}</main>
 

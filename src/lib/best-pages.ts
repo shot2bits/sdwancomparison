@@ -114,9 +114,9 @@ const FLAGSHIP_PAGES: BestPage[] = [
     slug: "sd-wan-providers",
     input: { shortlist_size: 10 },
     title: "Best SD-WAN providers",
-    metaTitle: `Best SD-WAN Providers (${YEAR}): 30 Vendors Ranked`,
+    metaTitle: `Best SD-WAN Providers (${YEAR}): Top 10 Ranked`,
     metaDescription: `Netify's ${YEAR} ranking of SD-WAN providers: 30 vendors scored across 40 capability features with public evidence grades. Top 10 with scores.`,
-    h1: `Best SD-WAN providers (${YEAR}): 30 vendors ranked by evidence`,
+    h1: `Best SD-WAN providers (${YEAR}): the top 10, from 30 evaluated`,
     intro: `Netify's ${YEAR} evaluation grades 30 SD-WAN providers and vendors against 40 capability features using public source evidence, covering service model, transport, PoP and backbone design, security, and operations. The top 10 by weighted score are ranked below, each with score, deployment speed and caveats. Filter the full field by sector, region, cloud and operating model in the interactive builder.`,
     faqs: [
       {
@@ -149,7 +149,7 @@ const FLAGSHIP_PAGES: BestPage[] = [
     slug: "sase-providers",
     input: { weight_preset: "security_led", shortlist_size: 10 },
     title: "Best SASE providers",
-    metaTitle: `Best SASE Providers (${YEAR}): 30 Vendors Ranked`,
+    metaTitle: `Best SASE Providers (${YEAR}): Top 10 Ranked`,
     metaDescription: `Netify's ${YEAR} ranking of SASE providers and vendors: 30 platforms scored on ZTNA, SWG, CASB, DLP and SD-WAN convergence. Top 10 with scores.`,
     h1: `Best SASE providers (${YEAR}): ranked on security-led scoring`,
     intro: `Netify's ${YEAR} evaluation ranks 30 SASE and SD-WAN platforms with security-led weighting: ZTNA, SWG, CASB, DLP and FWaaS capability carry the most weight, alongside PoP coverage, identity integration and operating model. The top 10 are ranked below with scores and caveats. Adjust the weighting or add your sector, regions and clouds in the interactive builder.`,
