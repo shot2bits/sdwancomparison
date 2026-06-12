@@ -201,6 +201,7 @@ export type ShortlistVendor = {
   support_model: Record<string, CapabilityStatus>;
   logging: { siem_export: CapabilityStatus; log_retention_days: number | null };
   marketplace_url: string | null;
+  shortlist_summary: string;
   key_differentiators: string[];
   best_fit_for: string[];
   watch_outs: string[];
@@ -312,6 +313,7 @@ export type VendorVerdict = {
   evidence_coverage_pct: number;
   website: string;
   marketplace_url: string | null;
+  shortlist_summary: string;
 };
 
 export type ShortlistResult = {
@@ -570,6 +572,7 @@ export function buildShortlist(
       evidence_coverage_pct: v.evidence_coverage_pct,
       website: v.website,
       marketplace_url: v.marketplace_url,
+      shortlist_summary: v.shortlist_summary,
     });
   }
 
@@ -593,7 +596,7 @@ export function buildShortlist(
     near_misses: nearMisses,
     generated_at: new Date().toISOString(),
     methodology_note:
-      "Scores weight public evidence grades across 40 capability features plus the dimensions you required. Grades: yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0. Extended dimensions are indicative desk research; confirm via RFP.",
+      "Scores are weighted across 40 capabilities with points accrued based on: yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0. Extended dimensions are indicative desk research; confirm via RFP.",
   };
 }
 

@@ -761,7 +761,7 @@ function VendorCard({
           </button>
         </div>
       </div>
-      <p className="text-sm text-[var(--ink-700)] mt-3">{v.key_differentiators[0]}</p>
+      <p className="text-sm text-[var(--ink-700)] mt-3">{v.shortlist_summary}</p>
       {open && (
         <div className="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
           <div>

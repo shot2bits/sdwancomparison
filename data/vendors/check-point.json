@@ -175,5 +175,6 @@
       "q": "Who should pick Check Point for SASE?",
       "a": "Organisations standardised on Check Point Quantum or Harmony products, security teams valuing a single threat intelligence and management spine, and buyers needing rapid ZTNA rollout across hybrid workforces with moderate WAN complexity."
     }
-  ]
+  ],
+  "shortlist_summary": "Check Point offer Harmony SASE, combining the established Check Point security heritage with cloud-delivered SASE and SD-WAN performance optimisation. Typically shortlisted by organisations already standardised on Check Point security looking to extend toward SASE rather than replace the security stack, where adding WAN capability whilst avoiding disruption to existing security policy is the priority."
 }

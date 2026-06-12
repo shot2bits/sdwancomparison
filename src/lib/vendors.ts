@@ -196,6 +196,7 @@ export function getShortlistDataset(): ShortlistVendor[] {
     support_model: v.support_model,
     logging: v.logging,
     marketplace_url: v.marketplace_url,
+    shortlist_summary: v.shortlist_summary,
     key_differentiators: v.key_differentiators,
     best_fit_for: v.best_fit_for,
     watch_outs: v.watch_outs,

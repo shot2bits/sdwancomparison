@@ -173,5 +173,6 @@
       "q": "How does NewEdge differ from running security in hyperscale clouds?",
       "a": "NewEdge is Netskope's own infrastructure with full service compute in every region, extensive peering and published latency commitments, designed to avoid hairpinning and keep single-pass inspection close to the user."
     }
-  ]
+  ],
+  "shortlist_summary": "Netskope are widely recognised as a leading SSE vendor, particularly for SaaS-heavy environments, with CASB heritage that few competitors match. Typically shortlisted as the security component in a best-of-breed SASE architecture alongside a separate SD-WAN platform, rather than as a single-vendor SD-WAN replacement. The shortlist score reflects SSE depth rather than SD-WAN breadth, which is consistent with how Netskope is most commonly deployed."
 }

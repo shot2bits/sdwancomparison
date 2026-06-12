@@ -265,6 +265,9 @@ export const VendorSchema = z.object({
   // Netify marketplace contact route
   marketplace_url: z.string().url().nullable(),
 
+  // One-paragraph card summary shown on the shortlist builder (writer: Harry, June 2026)
+  shortlist_summary: z.string().min(60),
+
   // Editorial profile (Netify desk research, June 2026)
   profile: z.object({
     platform_architecture: z.string().min(100),

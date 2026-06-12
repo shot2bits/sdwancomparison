@@ -174,5 +174,6 @@
       "q": "Does the HPE acquisition change Juniper SD-WAN plans?",
       "a": "HPE completed the acquisition in 2025 and has positioned Mist as the AI-native management direction alongside Aruba. Roadmaps consolidate over time, so ask HPE Juniper for current platform guidance during procurement."
     }
-  ]
+  ],
+  "shortlist_summary": "Juniper Networks offer Mist AI with WAN Assurance, delivering AI-driven monitoring and troubleshooting at the WAN edge at a depth that few competitors match. Typically shortlisted by organisations where AIOps and network assurance quality are weighted evaluation criteria rather than SD-WAN feature breadth, and worth examining more closely than the overall score might suggest if AI-driven operations is a primary requirement."
 }

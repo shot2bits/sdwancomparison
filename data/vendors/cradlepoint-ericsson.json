@@ -174,5 +174,6 @@
       "q": "How does Ericsson ownership matter to buyers?",
       "a": "Roadmap alignment with 5G evolution, including private networks and operator integrations, plus financial backing. For organisations betting on cellular WAN, that backing derisks the platform."
     }
-  ]
+  ],
+  "shortlist_summary": "Cradlepoint, now part of Ericsson, offer a wireless-first branch architecture with deep 5G expertise, with NetCloud providing cellular-centric SD-WAN management and the Ericsson acquisition adding carrier-grade credentials. Typically shortlisted by businesses where fixed-line connectivity is unavailable, unreliable or not preferred, and where cellular primary or failover is a hard requirement rather than an edge case."
 }

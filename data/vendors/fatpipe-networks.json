@@ -174,5 +174,6 @@
       "q": "How strong is FatPipe's UK support?",
       "a": "Presence is lighter than mainstream vendors. Ask for named UK support arrangements, response SLAs and local references as part of any evaluation; our review graded several dimensions unknown for lack of public evidence."
     }
-  ]
+  ],
+  "shortlist_summary": "FatPipe bring long heritage in WAN optimisation, dynamic load balancing and MPSec encryption, pre-dating the SASE category and focused on those specific capabilities rather than a full SASE security stack. Typically shortlisted by organisations with particular multi-path WAN optimisation or encryption requirements where that established specialism matters more than broader SASE convergence."
 }

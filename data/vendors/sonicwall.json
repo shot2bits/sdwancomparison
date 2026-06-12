@@ -174,5 +174,6 @@
       "q": "Why do MSPs favour SonicWall?",
       "a": "Multi-tenant management, an MSSP licensing programme, broad UK distribution and price points that fit SMB budgets. For MSP-delivered branch security with SD-WAN included, it remains one of the most economical stacks."
     }
-  ]
+  ],
+  "shortlist_summary": "SonicWall deliver SD-WAN via existing TZ, NSa and SM firewall appliances, which is a real advantage for organisations already standardised on SonicWall and a less compelling proposition for those that aren't. Typically shortlisted by SMB and mid-market businesses with an existing SonicWall estate looking to add SD-WAN capability without the cost and complexity of introducing new hardware."
 }

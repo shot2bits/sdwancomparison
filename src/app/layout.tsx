@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
 // Inter matches the main netify.co.uk site (SF Pro approximation),
 // self-hosted via next/font so no layout shift and no runtime request.
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
+const inter = { variable: "--font-inter" };
 
 export const metadata: Metadata = {
   title: {

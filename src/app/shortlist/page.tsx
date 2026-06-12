@@ -59,8 +59,8 @@ export default function ShortlistPage() {
           {SHORTLIST_INTRO.subhead}
         </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
-          Written and reviewed by the Netify research team. Capability grades last
-          verified May 2026; extended dimensions June 2026.
+          Written and reviewed by the Netify research team, last verified and
+          graded in June 2026.
         </p>
       </div>
 

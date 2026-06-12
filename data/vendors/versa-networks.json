@@ -175,5 +175,6 @@
       "q": "What is Versa Titan?",
       "a": "Titan is Versa's simplified, cloud-managed consumption tier aimed at lean IT and mid-market estates: the same VOS underneath with an opinionated, dashboard-led operating model rather than full Director complexity."
     }
-  ]
+  ],
+  "shortlist_summary": "Versa built multi-tenancy into the platform architecture from day one, which is why they're a common choice for service providers and carriers building their own managed SD-WAN and SASE offerings on top of the Versa technology layer. Typically shortlisted by service providers looking for a technology platform to underpin a managed service, as well as enterprises evaluating Versa direct through a partner."
 }

@@ -176,5 +176,6 @@
       "q": "How do most UK enterprises buy Cisco SD-WAN?",
       "a": "Through managed service providers and Cisco Gold partners. BT, Verizon, Orange, NTT and many UK MSPs run managed Catalyst and Meraki offers, which suits buyers who want carrier-grade delivery without operating vManage themselves."
     }
-  ]
+  ],
+  "shortlist_summary": "Cisco offer the broadest platform portfolio in the category: Catalyst SD-WAN for enterprise WAN, Meraki MX for cloud-managed branch environments, and Cisco Secure Access for converged SASE delivery. Typically shortlisted by organisations with existing Cisco investments looking to extend rather than replace, though buyers should be specific about which Cisco platform they're evaluating as the architectures and operational models differ considerably."
 }
