@@ -35,8 +35,7 @@ export default function Home() {
           <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
             Most vendor comparisons are written by vendors. This one is published by
             Netify and grades each platform against the same {categoryCount} capability
-            categories, using only public source evidence. Every status grade is
-            traceable to its source.
+            categories, using only public source evidence.
           </p>
           <div className="flex items-center gap-6 flex-wrap">
             <Link
@@ -71,22 +70,31 @@ export default function Home() {
           <h2>Six grades, one matrix, every claim sourced.</h2>
         </div>
         <div className="md:col-span-7 md:col-start-6 space-y-6 text-[var(--ink-700)]">
+          <div>
+            <p className="mb-3">
+              For each of the {totalCount} vendors in our matrix, we have scored
+              against {featureCount} capabilities drawn from real-world SD-WAN and
+              SASE RFPs, covering the likes of:
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Service delivery and operating model,</li>
+              <li>Network architecture and transport,</li>
+              <li>Gateway and PoP design,</li>
+              <li>Security and SASE depth,</li>
+              <li>Operations and assurance,</li>
+              <li>Commercial flexibility.</li>
+            </ul>
+          </div>
           <p>
-            Each vendor is scored against {featureCount} capabilities drawn from
-            real-world SD-WAN and SASE RFPs. Capabilities span six categories:
-            service delivery and operating model, network architecture and transport,
-            gateway and PoP design, security and SASE depth, operations and
-            assurance, and commercial flexibility.
-          </p>
-          <p>
-            Each capability is graded using one of six status values rather than a
-            simple yes or no. The grades distinguish between native capability
+            However, we appreciate that not all solutions implement features in
+            the same way and so to assist with comparing these, we have graded
+            each capability between native capability
             (<span className="status-pill status-yes">Yes</span>), limited or
             indirect evidence (<span className="status-pill status-partial">Partial</span>),
             partner-delivered capability
             (<span className="status-pill status-partner_integrated">Partner / integrated</span>),
             managed-service dependency, non-primary positioning, and unknowns
-            requiring RFP validation. These distinctions matter to buyers.
+            (requiring RFP validation).
           </p>
           <p>
             Source URLs and an evidence summary are provided for every vendor.
