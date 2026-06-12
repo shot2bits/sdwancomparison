@@ -15,12 +15,12 @@ import {
 } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
-  title: "SASE shortlist builder: compare 30 providers",
+  title: "Best SD-WAN and SASE Providers (2026): Build a Shortlist",
   description:
-    "Build a bespoke SASE and SD-WAN shortlist from 30 graded providers. Filter 40 features, regions, clouds, AI and resilience, or ask the AI advisor.",
+    "The best SD-WAN and SASE providers and vendors for 2026, ranked from 30 evidence-graded platforms. Filter by sector and features or ask the AI advisor.",
   alternates: { canonical: `${SITE_URL}/shortlist` },
   openGraph: {
-    title: "SASE shortlist builder: compare 30 providers",
+    title: "Best SD-WAN and SASE Providers (2026): Build a Shortlist",
     description:
       "Build a bespoke SASE and SD-WAN shortlist from 30 graded providers, by hand or with the AI advisor.",
     url: `${SITE_URL}/shortlist`,
