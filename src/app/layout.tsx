@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Link from "next/link";
+import { SiteHeader } from "@/components/SiteHeader";
 import "./globals.css";
 
 // Inter matches the main netify.co.uk site (SF Pro approximation),
@@ -34,47 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en-GB" className={inter.variable}>
       <body className="paper-texture min-h-screen flex flex-col">
-        <header className="border-b border-[var(--ink-200)] bg-[var(--paper-base)]/80 backdrop-blur-sm sticky top-0 z-10">
-          <div className="max-w-6xl mx-auto px-6 py-4 flex items-baseline justify-between gap-8">
-            <Link
-              href="/"
-              className="display text-xl font-semibold tracking-tight no-underline text-[var(--ink-900)] hover:text-[var(--accent)]"
-            >
-              Netify
-            </Link>
-            {/* Mirrors the netify.co.uk header: same top-level items, plus the
-                tools that live on this subdomain. */}
-            <nav className="flex items-center gap-6 text-sm flex-wrap">
-              <a href="https://netify.co.uk/resell/bt-business-broadband/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
-                Resell
-              </a>
-              <a href="https://netify.co.uk/marketplace/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">
-                Marketplace
-              </a>
-              <a href="https://netify.co.uk/tools/bt-cloud-voice-pricing-calculator/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] hidden md:inline">
-                Calculators
-              </a>
-              <a href="https://netify.co.uk/sd-wan-for-healthcare/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] hidden md:inline">
-                Sectors
-              </a>
-              <a href="https://insights.netify.co.uk/" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] hidden md:inline">
-                Learning
-              </a>
-              <Link href="/shortlist" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] font-medium">
-                Shortlist builder
-              </Link>
-              <Link href="/best/sd-wan-providers" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)] font-medium">
-                Rankings
-              </Link>
-              <a
-                href="https://app.netify.co.uk/try-rfp-builder"
-                className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400"
-              >
-                Build RFP
-              </a>
-            </nav>
-          </div>
-        </header>
+        <SiteHeader />
 
         <main className="flex-1">{children}</main>
 
