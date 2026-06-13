@@ -8,6 +8,8 @@
 
 import { getProjectByToken, getProject, listResponses, saveResponse, getConnectionByToken, newId, kvConfigured } from "@/lib/rfp-store";
 import { addMessage } from "@/lib/rfp-connect";
+import { resolveOpportunityToken, getOpportunity } from "@/lib/rfp-store";
+import { addFeedItem, vendorName } from "@/lib/opportunity";
 import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { SITE_URL } from "@/lib/structured-data";
@@ -48,6 +50,25 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
     inputSchema: { type: "object", properties: { supplier_token: { type: "string" } }, required: ["supplier_token"] },
   },
   {
+    name: "opportunity_inbox",
+    description: "For a supplier agent: read a live opportunity and its activity feed using the per-supplier opportunity token.",
+    inputSchema: { type: "object", properties: { opportunity_token: { type: "string" } }, required: ["opportunity_token"] },
+  },
+  {
+    name: "opportunity_respond",
+    description: "For a supplier agent: respond to a live opportunity. type is comment, interest, pricing or decline. For pricing include amount, model (per_site_monthly, per_user_monthly, total_monthly, one_off, indicative), currency and notes.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        opportunity_token: { type: "string" },
+        type: { type: "string", enum: ["comment", "interest", "pricing", "decline"] },
+        body: { type: "string" },
+        pricing: { type: "object" },
+      },
+      required: ["opportunity_token", "type"],
+    },
+  },
+  {
     name: "supplier_reply",
     description: "For a supplier agent: reply to the buyer on a connection. type is message, demo_response, contact_share or decline. payload carries structured contact details or demo slots.",
     inputSchema: {
@@ -80,6 +101,25 @@ function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProje
 export async function callRfpTool(name: string, args: Record<string, unknown>): Promise<unknown> {
   // name validated against RFP_TOOL_NAMES by the caller
   if (!kvConfigured()) return { error: "RFP storage not configured." };
+  // Opportunity supplier-agent tools use a per-supplier opportunity token.
+  if (name === "opportunity_inbox" || name === "opportunity_respond") {
+    const otoken = String(args.opportunity_token ?? "");
+    if (!otoken) return { error: "opportunity_token is required." };
+    const ref = await resolveOpportunityToken(otoken);
+    if (!ref) return { error: "Invalid opportunity token." };
+    const opp = await getOpportunity(ref.opp_id);
+    if (!opp) return { error: "Opportunity not found." };
+    if (name === "opportunity_inbox") {
+      return { title: opp.title, scope: opp.scope, sites: opp.sites, regions: opp.regions, summary: opp.summary, status: opp.status, feed: opp.feed.map((f) => ({ actor: f.actor_name, type: f.type, body: f.body, pricing: f.pricing, created: f.created })) };
+    }
+    if (opp.status !== "open") return { error: "Opportunity is not open." };
+    const t = String(args.type ?? "comment");
+    const allowed = ["comment", "interest", "pricing", "decline"];
+    const name2 = vendorName(ref.vendor_slug) ?? ref.vendor_slug;
+    const updated = await addFeedItem(opp, "supplier", ref.vendor_slug, name2, (allowed.includes(t) ? t : "comment") as never, String(args.body ?? ""), t === "pricing" ? ((args.pricing ?? null) as never) : null);
+    return { ok: true, status: updated.status };
+  }
+
   // Supplier-agent tools use a per-connection supplier token.
   if (name === "supplier_inbox" || name === "supplier_reply") {
     const stoken = String(args.supplier_token ?? "");

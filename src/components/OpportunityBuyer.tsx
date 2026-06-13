@@ -1,0 +1,158 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { FeedView, type FeedItem } from "@/components/OpportunityFeed";
+
+type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; buyer_token: string; invited: string[]; feed: FeedItem[]; awarded_vendor_slug: string | null };
+type Suggestion = { rank: number; slug: string; name: string; score: number };
+
+const SCOPES = [
+  { key: "underlay_circuits", label: "Underlay circuits" },
+  { key: "sd_wan", label: "SD-WAN" },
+  { key: "sse", label: "SSE" },
+  { key: "sase", label: "Full SASE" },
+  { key: "managed_service", label: "Managed service" },
+];
+const SECTORS = ["healthcare", "financial_services", "retail_ecommerce", "manufacturing", "energy_utilities", "government_public_sector"];
+
+export default function OpportunityBuyer({ initialId }: { initialId?: string }) {
+  const [opp, setOpp] = useState<Opp | null>(null);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState({ title: "", buyer_org: "", scope: ["sase"] as string[], sites: "", regions: ["uk_ireland"] as string[], summary: "", budget_note: "", timeline_note: "" });
+  const [sector, setSector] = useState("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [comment, setComment] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
+  const lastTs = useRef(0);
+
+  useEffect(() => { if (initialId) load(initialId); /* eslint-disable-next-line */ }, [initialId]);
+  useEffect(() => {
+    if (!opp) return;
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/opportunity/${opp.id}/feed?since=${lastTs.current}`);
+        if (res.ok) { const d = await res.json(); if (d.items?.length) { setFeed((prev) => [...prev, ...d.items]); lastTs.current = Math.max(lastTs.current, ...d.items.map((f: FeedItem) => f.created)); } }
+      } catch { /* ignore */ }
+    }, 5000);
+    return () => clearInterval(poll);
+  }, [opp?.id]);
+
+  async function load(id: string) {
+    try { const res = await fetch(`/api/opportunity/${id}`); if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); } }
+    catch { setError("Could not load."); }
+  }
+
+  async function postOpportunity() {
+    setError(null);
+    if (!form.title.trim() || form.scope.length === 0) { setError("Add a title and at least one scope."); return; }
+    try {
+      const res = await fetch("/api/opportunity", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...form, sites: form.sites ? Number(form.sites) : null }) });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not post."); }
+      const o = (await res.json()) as Opp;
+      setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created));
+      window.history.replaceState(null, "", `/opportunities/${o.id}`);
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not post."); }
+  }
+
+  async function suggest() {
+    try {
+      const res = await fetch("/api/openapi/build_sase_shortlist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sector: sector || null, required_regions: form.regions, shortlist_size: 8 }) });
+      if (res.ok) setSuggestions(((await res.json()) as { shortlist: Suggestion[] }).shortlist);
+    } catch { /* ignore */ }
+  }
+
+  async function invite(slug: string) {
+    if (!opp) return;
+    try {
+      const res = await fetch(`/api/opportunity/${opp.id}/invite`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, buyer_token: opp.buyer_token }) });
+      if (res.ok) { const d = await res.json(); setOpp(d.opportunity); navigator.clipboard.writeText(`${window.location.origin}${d.supplier_url}`); setCopied(slug); setTimeout(() => setCopied(null), 2500); }
+    } catch { /* ignore */ }
+  }
+
+  async function buyerAction(action: string, body: string, award_slug?: string) {
+    if (!opp) return;
+    try {
+      const res = await fetch(`/api/opportunity/${opp.id}/buyer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ buyer_token: opp.buyer_token, action, body, award_slug }) });
+      if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); setComment(""); }
+    } catch { /* ignore */ }
+  }
+
+  const toggle = (list: string[], v: string, set: (x: string[]) => void) => set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+
+  if (!opp) {
+    return (
+      <div className="max-w-2xl">
+        <h2 className="text-xl mb-2">Post an opportunity</h2>
+        <p className="text-[var(--ink-700)] mb-5">Describe what you need, from just underlay circuits to full SASE. Invite graded suppliers and watch them reply with comments and pricing in real time.</p>
+        <div className="space-y-4">
+          <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title, e.g. Underlay circuits for 40 UK retail sites" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+          <input value={form.buyer_org} onChange={(e) => setForm({ ...form, buyer_org: e.target.value })} placeholder="Your organisation (optional)" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+          <div>
+            <p className="eyebrow mb-2">Scope</p>
+            <div className="flex flex-wrap gap-2">
+              {SCOPES.map((s) => <button key={s.key} onClick={() => toggle(form.scope, s.key, (x) => setForm({ ...form, scope: x }))} className={`px-3.5 py-1.5 text-sm rounded-full border transition-colors ${form.scope.includes(s.key) ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>{s.label}</button>)}
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input value={form.sites} onChange={(e) => setForm({ ...form, sites: e.target.value })} placeholder="Number of sites" className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+            <input value={form.budget_note} onChange={(e) => setForm({ ...form, budget_note: e.target.value })} placeholder="Budget note (optional)" className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+          </div>
+          <textarea value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} rows={3} placeholder="Summary of requirements" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+          <input value={form.timeline_note} onChange={(e) => setForm({ ...form, timeline_note: e.target.value })} placeholder="Timeline (optional)" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+          <button onClick={postOpportunity} className="px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors">Post opportunity</button>
+          {error && <p className="text-sm text-red-700">{error}</p>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2">
+        <p className="eyebrow mb-1">Live opportunity room <span className="text-emerald-700">● live</span></p>
+        <h1 className="text-2xl mb-1">{opp.title}</h1>
+        <p className="text-sm text-[var(--ink-500)] mb-4">Scope: {opp.scope.join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""} · {opp.status}{opp.awarded_vendor_slug ? ` · awarded to ${opp.awarded_vendor_slug}` : ""}</p>
+        <FeedView items={feed} />
+        {opp.status === "open" && (
+          <div className="mt-4 flex gap-2">
+            <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Post a comment to all suppliers" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+            <button onClick={() => buyerAction("comment", comment)} disabled={!comment} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
+          </div>
+        )}
+      </div>
+      <div>
+        <p className="eyebrow mb-2">Invite suppliers</p>
+        <div className="flex gap-2 mb-2">
+          <select value={sector} onChange={(e) => setSector(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm flex-1">
+            <option value="">Any sector</option>
+            {SECTORS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
+          </select>
+          <button onClick={suggest} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest</button>
+        </div>
+        <div className="space-y-1.5">
+          {suggestions.map((s) => {
+            const invited = opp.invited.includes(s.slug);
+            return (
+              <div key={s.slug} className="flex items-center justify-between text-sm border border-[var(--ink-200,#e5e5e5)] rounded-sm px-3 py-1.5">
+                <span>{s.name} <span className="text-[var(--ink-400,#9ca3af)]">({s.score})</span></span>
+                <button onClick={() => invite(s.slug)} className={`text-xs px-2.5 py-1 rounded-full border ${invited ? "border-emerald-500 text-emerald-700" : "border-[var(--ink-900)] hover:bg-[var(--ink-900)] hover:text-white"} transition-colors`}>
+                  {copied === s.slug ? "Link copied" : invited ? "Invited" : "Invite"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        {opp.status === "open" && opp.invited.length > 0 && (
+          <div className="mt-4">
+            <p className="eyebrow mb-2">Award</p>
+            <div className="flex flex-wrap gap-1.5">
+              {opp.invited.map((slug) => <button key={slug} onClick={() => buyerAction("award", `Awarded to ${slug}.`, slug)} className="text-xs px-2.5 py-1 rounded-full border border-amber-500 bg-amber-50 hover:bg-amber-100 transition-colors">Award {slug}</button>)}
+            </div>
+          </div>
+        )}
+        <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a supplier copies their private room link. Suppliers reply live with comments and pricing.</p>
+      </div>
+    </div>
+  );
+}

@@ -9,6 +9,7 @@ export async function GET() {
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/shortlist`, priority: "1.0" },
     { loc: `${SITE_URL}/rfp-builder`, priority: "0.9" },
+    { loc: `${SITE_URL}/opportunities`, priority: "0.9" },
     { loc: `${SITE_URL}/vendors`, priority: "0.9" },
     ...BEST_PAGES.map((p) => ({
       loc: `${SITE_URL}/best/${p.slug}`,

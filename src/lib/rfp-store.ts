@@ -198,3 +198,42 @@ export async function getConnectionByToken(token: string): Promise<SupplierConne
   if (!ref) return null;
   return getConnection(ref.rfp_id, ref.vendor_slug);
 }
+
+/* ------------------------------------------------------------------ */
+/* Opportunities (live tender rooms)                                   */
+/* ------------------------------------------------------------------ */
+
+import { OpportunitySchema, type Opportunity } from "@/lib/opportunity-types";
+
+export async function saveOpportunity(o: Opportunity): Promise<Opportunity> {
+  const parsed = OpportunitySchema.parse({ ...o, updated: Date.now() });
+  await setJson(`opp:${parsed.id}`, parsed);
+  await kv(["SADD", "opps", parsed.id]);
+  return parsed;
+}
+
+export async function getOpportunity(id: string): Promise<Opportunity | null> {
+  const data = await getJson<Opportunity>(`opp:${id}`);
+  if (!data) return null;
+  const parsed = OpportunitySchema.safeParse(data);
+  return parsed.success ? parsed.data : null;
+}
+
+export async function listOpportunities(): Promise<Opportunity[]> {
+  if (!kvConfigured()) return [];
+  const ids = ((await kv(["SMEMBERS", "opps"])) as string[]) ?? [];
+  const out: Opportunity[] = [];
+  for (const id of ids) { const o = await getOpportunity(id); if (o) out.push(o); }
+  return out.sort((a, b) => b.created - a.created);
+}
+
+/** Per-supplier access token for an opportunity. */
+export async function inviteToOpportunity(oppId: string, vendorSlug: string): Promise<string> {
+  const token = newId("otok");
+  await kv(["SET", `opp:tok:${token}`, JSON.stringify({ opp_id: oppId, vendor_slug: vendorSlug })]);
+  return token;
+}
+
+export async function resolveOpportunityToken(token: string): Promise<{ opp_id: string; vendor_slug: string } | null> {
+  return getJson<{ opp_id: string; vendor_slug: string }>(`opp:tok:${token}`);
+}
