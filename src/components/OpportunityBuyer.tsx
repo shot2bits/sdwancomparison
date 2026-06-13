@@ -19,7 +19,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   const [opp, setOpp] = useState<Opp | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", buyer_org: "", scope: ["sase"] as string[], sites: "", regions: ["uk_ireland"] as string[], summary: "", budget_note: "", timeline_note: "" });
+  const [form, setForm] = useState({ title: "", buyer_org: "", scope: ["sase"] as string[], sites: "", regions: ["uk_ireland"] as string[], summary: "", budget_note: "", timeline_note: "", engagement_type: "quote_room", auction_format: "open", deadline: "", eligibility: "invited", visibility: "public" });
   const [sector, setSector] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [comment, setComment] = useState("");
@@ -47,7 +47,11 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     setError(null);
     if (!form.title.trim() || form.scope.length === 0) { setError("Add a title and at least one scope."); return; }
     try {
-      const res = await fetch("/api/opportunity", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...form, sites: form.sites ? Number(form.sites) : null }) });
+      const res = await fetch("/api/opportunity", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+        ...form,
+        sites: form.sites ? Number(form.sites) : null,
+        deadline: form.engagement_type === "auction" && form.auction_format === "timed" && form.deadline ? form.deadline : null,
+      }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not post."); }
       const o = (await res.json()) as Opp;
       setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created));
@@ -100,6 +104,44 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           </div>
           <textarea value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} rows={3} placeholder="Summary of requirements" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
           <input value={form.timeline_note} onChange={(e) => setForm({ ...form, timeline_note: e.target.value })} placeholder="Timeline (optional)" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+
+          <div>
+            <p className="eyebrow mb-2">How should vendors respond?</p>
+            <div className="grid sm:grid-cols-2 gap-2">
+              <button onClick={() => setForm({ ...form, engagement_type: "quote_room" })} className={`text-left p-3 rounded-sm border transition-colors ${form.engagement_type === "quote_room" ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>
+                <span className="block text-sm font-medium">Quote room</span>
+                <span className="block text-xs text-[var(--ink-600)]">A live conversation. Vendors reply with comments and indicative quotes, no deadline.</span>
+              </button>
+              <button onClick={() => setForm({ ...form, engagement_type: "auction" })} className={`text-left p-3 rounded-sm border transition-colors ${form.engagement_type === "auction" ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>
+                <span className="block text-sm font-medium">Reverse auction</span>
+                <span className="block text-xs text-[var(--ink-600)]">Vendors compete on price. Bids are ranked. Run it open-ended or to a deadline.</span>
+              </button>
+            </div>
+          </div>
+
+          {form.engagement_type === "auction" && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              <select value={form.auction_format} onChange={(e) => setForm({ ...form, auction_format: e.target.value })} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm">
+                <option value="open">Open-ended (pick anytime)</option>
+                <option value="timed">Timed (closes on a deadline)</option>
+              </select>
+              {form.auction_format === "timed" && (
+                <input type="datetime-local" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+              )}
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <select value={form.eligibility} onChange={(e) => setForm({ ...form, eligibility: e.target.value })} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm">
+              <option value="invited">Invite-only (you pick the vendors)</option>
+              <option value="open">Open to any matching verified vendor</option>
+            </select>
+            <label className="flex items-center gap-2 text-sm text-[var(--ink-700)]">
+              <input type="checkbox" checked={form.visibility === "public"} onChange={(e) => setForm({ ...form, visibility: e.target.checked ? "public" : "unlisted" })} />
+              List on the public board
+            </label>
+          </div>
+
           <button onClick={postOpportunity} className="px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors">Post opportunity</button>
           {error && <p className="text-sm text-red-700">{error}</p>}
         </div>

@@ -7,6 +7,8 @@ export async function GET() {
   const today = new Date().toISOString().slice(0, 10);
   const urls: { loc: string; priority: string }[] = [
     { loc: `${SITE_URL}/`, priority: "1.0" },
+    { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
+    { loc: `${SITE_URL}/for-suppliers`, priority: "0.8" },
     { loc: `${SITE_URL}/shortlist`, priority: "1.0" },
     { loc: `${SITE_URL}/rfp-builder`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities`, priority: "0.9" },

@@ -44,6 +44,18 @@ export default function RootLayout({
             </Link>
             <nav className="flex items-center gap-6 text-sm">
               <a
+                href="/how-it-works"
+                className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]"
+              >
+                How it works
+              </a>
+              <a
+                href="/opportunities/board"
+                className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]"
+              >
+                Opportunities
+              </a>
+              <a
                 href="https://netify.co.uk"
                 className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]"
               >

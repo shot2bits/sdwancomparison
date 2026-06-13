@@ -1,0 +1,169 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
+
+export const metadata: Metadata = {
+  title: "How the Netify SASE & SD-WAN marketplace works",
+  description: "Four ways to buy SASE, SSE and SD-WAN: research a shortlist, run a reverse auction, open a live quote room, or run a structured RFP. Vendor-neutral, open to browse, agent-ready.",
+  alternates: { canonical: `${SITE_URL}/how-it-works` },
+  openGraph: { title: "How the Netify marketplace works", description: "Research, reverse auction, live quote room or structured RFP. Vendor-neutral and open to browse.", url: `${SITE_URL}/how-it-works`, type: "website", locale: "en_GB" },
+};
+
+const PATHS = [
+  {
+    name: "Research a shortlist",
+    when: "I want to understand the market first.",
+    get: "A ranked, filtered shortlist of 30+ vendors graded across 40 features. No sign-in.",
+    href: "/shortlist",
+    cta: "Build a shortlist",
+  },
+  {
+    name: "Run a reverse auction",
+    when: "I know what I need and want competitive prices.",
+    get: "Post once; verified vendors compete on price. Run it open-ended or to a deadline, open to all matching vendors or invite-only.",
+    href: "/opportunities",
+    cta: "Post an auction",
+  },
+  {
+    name: "Open a live quote room",
+    when: "I want a fast conversation and indicative quotes.",
+    get: "Post a need and watch suppliers reply live with comments and indicative pricing.",
+    href: "/opportunities",
+    cta: "Open a quote room",
+  },
+  {
+    name: "Run a structured RFP",
+    when: "I am running a formal, multi-criteria procurement.",
+    get: "An AI agent drafts methodology-backed questions, maps compliance, and manages responses and evaluation.",
+    href: "/rfp-builder",
+    cta: "Start an RFP",
+  },
+];
+
+const BUYER_FLOW = [
+  { step: "1", title: "Describe your need", body: "From underlay circuits to appliances, cloud security or a full managed SASE rollout. Plain language, or use the AI advisor." },
+  { step: "2", title: "Choose how vendors respond", body: "A shortlist for research, a reverse auction for price, a live quote room for speed, or a structured RFP for rigour." },
+  { step: "3", title: "Vendors bid and respond", body: "Verified vendors quote, comment and answer. Bid amounts stay private to you; the need itself is public." },
+  { step: "4", title: "Compare and award", body: "Compare responses against Netify's independent grades and your criteria, then award." },
+];
+
+const SUPPLIER_FLOW = [
+  { step: "1", title: "Browse the open board", body: "See open opportunities at /opportunities/board with scope, region and format. No sign-in to look." },
+  { step: "2", title: "Sign in, domain-verified", body: "A magic link verifies your work email against your organisation. Business email only." },
+  { step: "3", title: "Bid or quote", body: "Submit a competitive bid or an indicative quote, comment, request to engage, or decline." },
+  { step: "4", title: "Win the work", body: "The buyer compares and awards. Your AI agent can also read the board and quote over MCP." },
+];
+
+const FEATURES = [
+  ["AI advisor", "Describe a need in plain language; the agent shortlists vendors and drafts RFP questions."],
+  ["Methodology v2026.1", "40 features across 6 categories, with sector and compliance maps, served openly at /methodology.json."],
+  ["Compliance mapping", "DORA, NIS2, UK GDPR, PCI DSS, IEC 62443, ISO 27001 and the UK Cyber Resilience Bill mapped to questions."],
+  ["Independent grades", "30+ vendors graded by Netify, used to cross-check supplier claims against the evidence."],
+  ["Agent-ready (MCP)", "AI agents read the board, vendor grades and RFPs, and bid, over a public MCP endpoint."],
+  ["Open and ungated", "Browsing, research, building and the machine twins need no login. Only submitting a bid needs a verified sign-in."],
+];
+
+const FAQS = [
+  ["Why not just cold-call vendors?", "One posting reaches every matching verified vendor at once and brings comparable responses back to you, instead of repeating the same conversation many times."],
+  ["Why not just prompt a generic AI to write an RFP?", "A generic prompt cannot see Netify's independent vendor grades, the 386-question analyst bank, the compliance maps, or run a live competitive process with real suppliers. This does."],
+  ["Do I have to sign in?", "No. Researching, building an RFP, posting a need and reading the board are open. Only submitting a bid or asserting a supplier identity needs a domain-verified sign-in."],
+  ["Is pricing public?", "No. The need is public so vendors can find it, but bid and quote amounts are private to the buyer who posted."],
+];
+
+export default function HowItWorksPage() {
+  const schemas = [
+    getOrganizationSchema(),
+    getBreadcrumbSchema("How it works", "/how-it-works"),
+    getSpeakableSchema("/how-it-works"),
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: "How to buy SASE, SSE or SD-WAN on the Netify marketplace",
+      step: BUYER_FLOW.map((s) => ({ "@type": "HowToStep", position: Number(s.step), name: s.title, text: s.body })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: FAQS.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+    },
+  ];
+
+  const card = "rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5";
+
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-16">
+      {schemas.map((s, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />)}
+
+      <div className="mb-12 max-w-3xl">
+        <p className="eyebrow mb-3">How it works</p>
+        <h1 id="page-h1" className="mb-4">From a network need to competing offers, without the cold-calling.</h1>
+        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Netify is a vendor-neutral marketplace for SASE, SSE and SD-WAN. Describe what you need and get comparable, competing responses from 30+ verified providers, graded independently against a 40-feature methodology. Browse and build without an account; sign in only to bid.</p>
+      </div>
+
+      <section className="mb-14">
+        <h2 className="text-2xl font-semibold mb-1">Four ways to use it</h2>
+        <p className="text-[var(--ink-600)] mb-5">Pick the path that matches where you are. You can combine them: research first, then run an auction or an RFP.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {PATHS.map((p) => (
+            <div key={p.name} className={card}>
+              <h3 className="text-lg font-semibold mb-1">{p.name}</h3>
+              <p className="text-sm text-[var(--ink-500)] mb-2 italic">{p.when}</p>
+              <p className="text-sm text-[var(--ink-700)] mb-4">{p.get}</p>
+              <Link href={p.href} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">{p.cta}</Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-14 grid lg:grid-cols-2 gap-10">
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Buyer flow</h2>
+          <ol className="space-y-4">
+            {BUYER_FLOW.map((s) => (
+              <li key={s.step} className="flex gap-4">
+                <span className="flex-none w-8 h-8 rounded-full bg-amber-500 text-zinc-950 font-semibold flex items-center justify-center">{s.step}</span>
+                <div><p className="font-medium">{s.title}</p><p className="text-sm text-[var(--ink-700)]">{s.body}</p></div>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Supplier flow</h2>
+          <ol className="space-y-4">
+            {SUPPLIER_FLOW.map((s) => (
+              <li key={s.step} className="flex gap-4">
+                <span className="flex-none w-8 h-8 rounded-full border border-[var(--ink-900)] font-semibold flex items-center justify-center">{s.step}</span>
+                <div><p className="font-medium">{s.title}</p><p className="text-sm text-[var(--ink-700)]">{s.body}</p></div>
+              </li>
+            ))}
+          </ol>
+          <Link href="/for-suppliers" className="mt-5 inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-4 py-1.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">For vendors and providers</Link>
+        </div>
+      </section>
+
+      <section className="mb-14">
+        <h2 className="text-2xl font-semibold mb-5">What the marketplace provides</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(([t, b]) => (
+            <div key={t} className={card}><h3 className="font-semibold mb-1">{t}</h3><p className="text-sm text-[var(--ink-700)]">{b}</p></div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-14 max-w-3xl">
+        <h2 className="text-2xl font-semibold mb-5">Questions</h2>
+        <div className="space-y-5">
+          {FAQS.map(([q, a]) => (
+            <div key={q}><p className="font-medium mb-1">{q}</p><p className="text-sm text-[var(--ink-700)]">{a}</p></div>
+          ))}
+        </div>
+      </section>
+
+      <div className="flex flex-wrap gap-3">
+        <Link href="/shortlist" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Build a shortlist</Link>
+        <Link href="/opportunities" className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">Post an opportunity</Link>
+        <Link href="/rfp-builder" className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">Start an RFP</Link>
+      </div>
+    </div>
+  );
+}
