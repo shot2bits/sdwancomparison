@@ -19,6 +19,7 @@ Operated by Netify Group Limited (netify.co.uk), a UK research and marketplace c
 ## Key routes
 
 - ${SITE_URL}/ : Homepage. Overview of the comparison methodology and vendor index.
+- ${SITE_URL}/rfp-builder : Agentic SASE and SD-WAN RFP builder. An AI agent synthesises buyer requirements, generates methodology-backed RFP questions, suggests vendors and manages the supplier clarification loop. Methodology served at ${SITE_URL}/methodology.json (SASE Methodology v2026.1: 40 features, 6 categories, sector and compliance maps).
 - ${SITE_URL}/shortlist : The shortlist builder. Interactive filters plus an AI advisor. Every filter combination is encoded in URL query parameters, so scenario URLs are shareable and citable. Emits WebApplication, Dataset, FAQPage, BreadcrumbList and Speakable JSON-LD.
 - ${SITE_URL}/shortlist/data.json : JSON twin of the shortlist page: full vendor dataset, feature catalogue, default shortlist and the interactive surface inventory.
 - ${SITE_URL}/vendors : Index of all 30 graded vendors.
