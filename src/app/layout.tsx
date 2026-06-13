@@ -50,7 +50,7 @@ export default function RootLayout({
                 netify.co.uk ↗
               </a>
               <a
-                href="https://app.netify.co.uk/try-rfp-builder"
+                href="/rfp-builder"
                 className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400"
               >
                 Build an RFP
