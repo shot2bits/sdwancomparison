@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, saveProject, listThreads, saveThread, kvConfigured } from "@/lib/rfp-store";
-import { ProjectDetailsSchema, RFP_STATUSES, type ProjectDetails } from "@/lib/rfp-types";
+import { ProjectDetailsSchema, RFP_STATUSES, type ProjectDetails, type RfpSection } from "@/lib/rfp-types";
 import {
   METHODOLOGY_VERSION,
   buildMethodology,
@@ -69,6 +69,27 @@ function tools(): Anthropic.Tool[] {
           action: { type: "string", enum: ["emphasise", "include", "exclude"] },
         },
         required: ["category", "action"],
+      }),
+    },
+    {
+      name: "set_product_scope",
+      description: "Set the product scope of the RFP. full_sase covers SD-WAN plus the cloud security stack; sse_only is security service edge without transport engineering; sdwan_only is networking without the SASE security layer; single_vendor_sase prefers one converged platform; best_of_breed pairs an SSE leader with a separate SD-WAN. Changing scope filters which methodology questions apply.",
+      input_schema: cast({ type: "object", properties: { product_scope: { type: "string", enum: ["full_sase", "sse_only", "sdwan_only", "single_vendor_sase", "best_of_breed"] } }, required: ["product_scope"] }),
+    },
+    {
+      name: "draft_custom_question",
+      description: "Author a custom RFP question when the buyer wants something the standard methodology does not cover. Provide neutral question text, the evidence to request, the category it belongs in, and a rationale. Maps to the nearest feature id where one fits, otherwise marks it custom.",
+      input_schema: cast({
+        type: "object",
+        properties: {
+          text: { type: "string" },
+          evidence_requested: { type: "string" },
+          category: { type: "string", enum: [...CATEGORIES] },
+          feature_id: { type: "string", description: "Nearest feature id, or empty string for genuinely custom." },
+          rationale: { type: "string" },
+          priority: { type: "string", enum: ["required", "recommended", "optional"] },
+        },
+        required: ["text", "evidence_requested", "category", "rationale"],
       }),
     },
     {
@@ -194,6 +215,29 @@ export async function POST(req: Request, ctx: Ctx) {
             project = setFocus(project, String(input.category), String(input.action));
             dirty = true;
             out = { ok: true };
+          } else if (tu.name === "set_product_scope") {
+            const sc = String(input.product_scope);
+            project = { ...project, buyer: { ...project.buyer, product_scope: sc as typeof project.buyer.product_scope }, rfp_sections: synthesiseSections({ ...project.buyer, product_scope: sc as typeof project.buyer.product_scope }) };
+            dirty = true;
+            out = { ok: true, product_scope: sc, sections: project.rfp_sections.map((s) => s.category) };
+          } else if (tu.name === "draft_custom_question") {
+            const cat = String(input.category);
+            const fid = String(input.feature_id ?? "").trim();
+            const pr = (["required", "recommended", "optional"].includes(String(input.priority)) ? String(input.priority) : "recommended") as "required" | "recommended" | "optional";
+            const sections: RfpSection[] = project.rfp_sections.length ? [...project.rfp_sections] : synthesiseSections(project.buyer);
+            let sec = sections.find((s) => s.category === cat);
+            if (!sec) { sec = { category: cat, included: true, questions: [] }; sections.push(sec); }
+            sec.included = true;
+            sec.questions.push({
+              id: fid ? `q_${fid}` : `q_custom_${Date.now().toString(36)}`,
+              feature_id: fid || "custom",
+              text: String(input.text), evidence_requested: String(input.evidence_requested ?? ""),
+              rationale: String(input.rationale ?? ""), priority: pr,
+              source: fid ? "methodology" : "custom", mandatory: pr === "required", weight: pr === "required" ? 4 : 3,
+            });
+            project = { ...project, rfp_sections: sections };
+            dirty = true;
+            out = { ok: true, added_custom: true, category: cat };
           } else if (tu.name === "suggest_vendors") {
             const size = Number(input.shortlist_size ?? 6);
             const result = buildShortlist(getShortlistDataset(), {
@@ -258,7 +302,7 @@ function addQuestion(project: ProjectDetails, fid: string, rationale: string, pr
     existing.priority = pr;
     existing.rationale = rationale || existing.rationale;
   } else {
-    sec.questions.push({ id: qid, feature_id: fid, text: mq.rfp_question, evidence_requested: mq.evidence_requested, rationale, priority: pr });
+    sec.questions.push({ id: qid, feature_id: fid, text: mq.rfp_question, evidence_requested: mq.evidence_requested, rationale, priority: pr, source: "methodology", mandatory: pr === "required", weight: pr === "required" ? 4 : 3 });
   }
   return { ...project, rfp_sections: sections };
 }

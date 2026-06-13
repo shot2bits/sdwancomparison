@@ -148,7 +148,32 @@ export function questionForFeature(featureId: string): MethodologyQuestion | und
 /* Requirement synthesis: buyer context -> RFP sections               */
 /* ------------------------------------------------------------------ */
 
-import type { BuyerContext, RfpSection, RfpQuestion } from "@/lib/rfp-types";
+import type { BuyerContext, RfpSection, RfpQuestion, ProductScope } from "@/lib/rfp-types";
+
+/**
+ * Product scope decides which methodology categories and features are in
+ * play. SD-WAN only drops the cloud-delivered security stack; SSE only
+ * drops transport and backbone engineering; full SASE keeps everything.
+ */
+const SECURITY_FEATURES = new Set([
+  "f27_integrated_next_generation_firewall", "f28_full_sase_platform", "f29_sse_ecosystem_integration",
+  "f30_zero_trust_network_access", "f31_secure_web_gateway", "f32_casb_capability",
+  "f33_data_loss_prevention", "f34_remote_user_access", "f35_soc_siem_soar_integration",
+]);
+const TRANSPORT_BACKBONE = new Set([
+  "f09_encrypted_overlay_fabric", "f10_dynamic_path_selection", "f11_active_active_link_utilisation",
+  "f12_application_aware_routing", "f13_qos_and_traffic_shaping", "f14_packet_loss_remediation",
+  "f15_local_internet_breakout", "f16_mpls_coexistence_and_migration", "f17_cellular_and_5g_support",
+  "f18_cloud_on_ramp", "f19_public_cloud_gateways", "f20_private_pops_dedicated_pops",
+  "f21_private_global_backbone", "f23_multi_cloud_transit_fabric", "f24_flexible_edge_form_factors",
+]);
+
+export function featureInScope(featureId: string, scope: ProductScope): boolean {
+  if (scope === "sdwan_only") return !SECURITY_FEATURES.has(featureId) || featureId === "f27_integrated_next_generation_firewall";
+  if (scope === "sse_only") return !TRANSPORT_BACKBONE.has(featureId);
+  // full_sase, single_vendor_sase, best_of_breed keep the whole matrix
+  return true;
+}
 
 /**
  * Build RFP sections from buyer context. Every question traces to a
@@ -183,9 +208,29 @@ export function synthesiseSections(buyer: BuyerContext): RfpSection[] {
   if (buyer.operating_model === "managed") {
     required.add("f01_fully_managed_service");
     note("f01_fully_managed_service", "fully managed operating model requested");
+    recommended.add("f40_managed_service_assurance");
+    note("f40_managed_service_assurance", "managed service needs assured operations");
   } else if (buyer.operating_model === "co_managed") {
     required.add("f03_co_managed_service");
     note("f03_co_managed_service", "co-managed operating model requested");
+    recommended.add("f37_customer_portal_and_rbac");
+    note("f37_customer_portal_and_rbac", "co-managed needs portal and role-based access");
+  } else if (buyer.operating_model === "diy") {
+    required.add("f02_diy_self_managed_model");
+    note("f02_diy_self_managed_model", "DIY self-managed model requested");
+    recommended.add("f39_apis_and_automation");
+    note("f39_apis_and_automation", "DIY operation relies on APIs and automation");
+    recommended.add("f36_centralised_orchestration");
+    note("f36_centralised_orchestration", "DIY teams need strong orchestration");
+  }
+
+  // Single-vendor vs best-of-breed scope driver
+  if (buyer.product_scope === "single_vendor_sase") {
+    required.add("f28_full_sase_platform");
+    note("f28_full_sase_platform", "single-vendor SASE scope");
+  } else if (buyer.product_scope === "best_of_breed") {
+    required.add("f29_sse_ecosystem_integration");
+    note("f29_sse_ecosystem_integration", "best-of-breed scope needs SSE ecosystem integration");
   }
 
   // Multi-site and regional drivers
@@ -203,8 +248,10 @@ export function synthesiseSections(buyer: BuyerContext): RfpSection[] {
   const all = methodologyQuestions();
   const sections: RfpSection[] = [];
 
+  const scope = buyer.product_scope ?? "full_sase";
   for (const category of FEATURE_CATEGORIES) {
-    const catFeatures = all.filter((q) => q.category === category);
+    const catFeatures = all.filter((q) => q.category === category && featureInScope(q.feature_id, scope));
+    if (catFeatures.length === 0) continue;
     const questions: RfpQuestion[] = [];
     for (const q of catFeatures) {
       const isRequired = required.has(q.feature_id);
@@ -223,6 +270,9 @@ export function synthesiseSections(buyer: BuyerContext): RfpSection[] {
         evidence_requested: q.evidence_requested,
         rationale,
         priority,
+        source: "methodology",
+        mandatory: isRequired,
+        weight: isRequired ? 4 : isRecommended ? 3 : 2,
       });
     }
     // Section is included by default if it has any required or recommended question

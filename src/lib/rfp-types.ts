@@ -5,6 +5,9 @@
 
 import { z } from "zod";
 
+export const PRODUCT_SCOPES = ["full_sase", "sse_only", "sdwan_only", "single_vendor_sase", "best_of_breed"] as const;
+export type ProductScope = (typeof PRODUCT_SCOPES)[number];
+
 export const RFP_STATUSES = ["draft", "review", "published", "qa", "evaluation"] as const;
 export type RfpStatus = (typeof RFP_STATUSES)[number];
 
@@ -16,6 +19,9 @@ export const RfpQuestionSchema = z.object({
   evidence_requested: z.string().default(""),
   rationale: z.string().default(""), // why this question is here (the citation)
   priority: z.enum(["required", "recommended", "optional"]).default("recommended"),
+  source: z.enum(["methodology", "custom"]).default("methodology"),
+  mandatory: z.boolean().default(false), // buyer flags a hard requirement
+  weight: z.number().int().min(1).max(5).default(3), // evaluation weighting
 }).strict();
 export type RfpQuestion = z.infer<typeof RfpQuestionSchema>;
 
@@ -35,6 +41,7 @@ export const BuyerContextSchema = z.object({
   regions: z.array(z.string()).default([]),
   compliance: z.array(z.string()).default([]),
   operating_model: z.string().default("any"),
+  product_scope: z.enum(PRODUCT_SCOPES).default("full_sase"),
   notes: z.string().default(""),
 }).strict();
 export type BuyerContext = z.infer<typeof BuyerContextSchema>;
