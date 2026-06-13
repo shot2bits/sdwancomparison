@@ -273,6 +273,7 @@ export async function createSession(payload: { role: "supplier" | "buyer" | "net
   const session: AuthSession = { token, ...payload, created: Date.now(), expires: Date.now() + SESSION_TTL_MS };
   await kv(["SET", `auth:sess:${token}`, JSON.stringify(session)]);
   await kv(["PEXPIRE", `auth:sess:${token}`, SESSION_TTL_MS]);
+  await kv(["SADD", "auth:index:sessions", token]);
   return session;
 }
 
@@ -285,6 +286,100 @@ export async function getSession(token: string | null | undefined): Promise<Auth
 
 export async function deleteSession(token: string): Promise<void> {
   await kv(["DEL", `auth:sess:${token}`]);
+  await kv(["SREM", "auth:index:sessions", token]);
+}
+
+/**
+ * All live sessions, newest first. Prunes index entries whose session has
+ * expired or been deleted (TTL drops the value but not the set member).
+ */
+export async function listSessions(): Promise<AuthSession[]> {
+  if (!kvConfigured()) return [];
+  const tokens = ((await kv(["SMEMBERS", "auth:index:sessions"])) as string[]) ?? [];
+  const out: AuthSession[] = [];
+  for (const token of tokens) {
+    const s = await getJson<AuthSession>(`auth:sess:${token}`);
+    if (!s || s.expires < Date.now()) {
+      await kv(["SREM", "auth:index:sessions", token]);
+      continue;
+    }
+    out.push(s);
+  }
+  return out.sort((a, b) => b.created - a.created);
+}
+
+/* ------------------------------------------------------------------ */
+/* Admin-editable config: vendor domain overrides and blocklist extras */
+/* ------------------------------------------------------------------ */
+
+export async function getVendorDomainOverrides(): Promise<Record<string, string[]>> {
+  if (!kvConfigured()) return {};
+  return (await getJson<Record<string, string[]>>("cfg:vendor_domains")) ?? {};
+}
+
+/** Set (or clear) the override for one vendor. Empty array removes the override. */
+export async function setVendorDomainOverride(slug: string, domains: string[]): Promise<Record<string, string[]>> {
+  const map = await getVendorDomainOverrides();
+  const clean = Array.from(new Set(domains.map((d) => d.trim().toLowerCase()).filter(Boolean)));
+  if (clean.length === 0) delete map[slug];
+  else map[slug] = clean;
+  await setJson("cfg:vendor_domains", map);
+  return map;
+}
+
+export async function getBlocklistExtra(): Promise<string[]> {
+  if (!kvConfigured()) return [];
+  return (await getJson<string[]>("cfg:blocklist")) ?? [];
+}
+
+export async function addBlocklistDomain(domain: string): Promise<string[]> {
+  const list = await getBlocklistExtra();
+  const d = domain.trim().toLowerCase();
+  if (d && !list.includes(d)) list.push(d);
+  await setJson("cfg:blocklist", list);
+  return list;
+}
+
+export async function removeBlocklistDomain(domain: string): Promise<string[]> {
+  const d = domain.trim().toLowerCase();
+  const list = (await getBlocklistExtra()).filter((x) => x !== d);
+  await setJson("cfg:blocklist", list);
+  return list;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pending supplier access requests                                    */
+/* ------------------------------------------------------------------ */
+
+export type PendingRequest = { domain: string; email: string; created: number; count: number };
+
+/** Record (or bump) a pending request, keyed by domain so it cannot flood. */
+export async function recordPendingRequest(email: string, domain: string): Promise<void> {
+  const d = domain.toLowerCase();
+  const existing = await getJson<PendingRequest>(`auth:pending:${d}`);
+  const entry: PendingRequest = existing
+    ? { ...existing, email, count: existing.count + 1 }
+    : { domain: d, email: email.toLowerCase(), created: Date.now(), count: 1 };
+  await setJson(`auth:pending:${d}`, entry);
+  await kv(["SADD", "auth:index:pending", d]);
+}
+
+export async function listPendingRequests(): Promise<PendingRequest[]> {
+  if (!kvConfigured()) return [];
+  const domains = ((await kv(["SMEMBERS", "auth:index:pending"])) as string[]) ?? [];
+  const out: PendingRequest[] = [];
+  for (const d of domains) {
+    const entry = await getJson<PendingRequest>(`auth:pending:${d}`);
+    if (entry) out.push(entry);
+    else await kv(["SREM", "auth:index:pending", d]);
+  }
+  return out.sort((a, b) => b.created - a.created);
+}
+
+export async function clearPendingRequest(domain: string): Promise<void> {
+  const d = domain.toLowerCase();
+  await kv(["DEL", `auth:pending:${d}`]);
+  await kv(["SREM", "auth:index:pending", d]);
 }
 
 /* Buyer RFP ownership index (optional account) */
