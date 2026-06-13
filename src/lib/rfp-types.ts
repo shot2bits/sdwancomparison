@@ -19,7 +19,9 @@ export const RfpQuestionSchema = z.object({
   evidence_requested: z.string().default(""),
   rationale: z.string().default(""), // why this question is here (the citation)
   priority: z.enum(["required", "recommended", "optional"]).default("recommended"),
-  source: z.enum(["methodology", "custom"]).default("methodology"),
+  source: z.enum(["methodology", "custom", "bank"]).default("methodology"),
+  buyer_lens: z.string().default(""),
+  supplier_lens: z.string().default(""),
   mandatory: z.boolean().default(false), // buyer flags a hard requirement
   weight: z.number().int().min(1).max(5).default(3), // evaluation weighting
 }).strict();

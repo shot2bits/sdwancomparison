@@ -250,6 +250,8 @@ export function synthesiseSections(buyer: BuyerContext): RfpSection[] {
         rationale,
         priority,
         source: "methodology",
+        buyer_lens: "",
+        supplier_lens: "",
         mandatory: isRequired,
         weight: isRequired ? 4 : isRecommended ? 3 : 2,
       });

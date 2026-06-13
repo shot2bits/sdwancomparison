@@ -12,7 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom"; mandatory: boolean; weight: number };
+type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
 type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
 type Buyer = { organisation: string; sector: string | null; organisation_size: string; site_count: number | null; regions: string[]; compliance: string[]; operating_model: string; product_scope: string };
 type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; methodology_version: string };
@@ -74,6 +74,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [evaluations, setEvaluations] = useState<Evaluation[] | null>(null);
   const [benchmark, setBenchmark] = useState<Benchmark | null>(null);
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [bank, setBank] = useState<{ version: string; canonical: { id: string; category: string; text: string }[]; sector_packs: Record<string, { label: string; sections: { title: string; questions: { id: string; text: string; buyer_lens: string; supplier_lens: string; netify_note: string }[] }[] }> } | null>(null);
+  const [bankOpen, setBankOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
   const [msgDraft, setMsgDraft] = useState<Record<string, string>>({});
 
@@ -81,6 +83,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
   useEffect(() => { fetch("/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
+  useEffect(() => { fetch("/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
   async function loadProject(id: string) {
@@ -213,6 +216,18 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!sec) { sec = { category, included: true, questions: [] }; sections.push(sec); }
     sec.included = true;
     if (!sec.questions.some((x) => x.id === rest.id)) sec.questions.push({ ...rest, priority: "recommended" });
+    persist({ ...project, rfp_sections: sections });
+  }
+
+  function addBankQuestion(category: string, q: { id: string; text: string; buyer_lens: string; supplier_lens: string }) {
+    if (!project) return;
+    const sections = [...project.rfp_sections];
+    let sec = sections.find((s) => s.category === category);
+    if (!sec) { sec = { category, included: true, questions: [] }; sections.push(sec); }
+    sec.included = true;
+    if (!sec.questions.some((x) => x.id === q.id)) {
+      sec.questions.push({ id: q.id, feature_id: "custom", text: q.text, evidence_requested: "", rationale: q.buyer_lens ? `Buyer lens: ${q.buyer_lens}` : "Netify question bank", priority: "recommended", source: "bank", buyer_lens: q.buyer_lens, supplier_lens: q.supplier_lens, mandatory: false, weight: 3 } as RfpQuestion);
+    }
     persist({ ...project, rfp_sections: sections });
   }
 
@@ -409,6 +424,51 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 </div>
               )}
             </div>
+            {/* Netify question bank browser */}
+            {bank && (
+              <div className="border border-[var(--ink-300,#ccc)] rounded-sm p-4">
+                <button onClick={() => setBankOpen(!bankOpen)} className="w-full flex items-center justify-between text-left">
+                  <span className="eyebrow">Netify question bank (v{bank.version})</span>
+                  <span aria-hidden="true">{bankOpen ? "−" : "+"}</span>
+                </button>
+                <p className="text-xs text-[var(--ink-500)] mt-1">Analyst-written questions with buyer and supplier lenses. The matching sector pack is suggested first.</p>
+                {bankOpen && (
+                  <div className="mt-3 space-y-2 max-h-96 overflow-y-auto">
+                    {project.buyer.sector && bank.sector_packs[project.buyer.sector] && (
+                      <div>
+                        <p className="text-sm font-medium text-amber-700 mb-1">{bank.sector_packs[project.buyer.sector].label} pack (your sector)</p>
+                        {bank.sector_packs[project.buyer.sector].sections.map((sec) => (
+                          <details key={sec.title} className="border border-[var(--ink-200,#e5e5e5)] rounded-sm mb-1">
+                            <summary className="px-3 py-1.5 text-sm cursor-pointer">{sec.title} ({sec.questions.length})</summary>
+                            <div className="px-3 pb-2 space-y-2">
+                              {sec.questions.map((q) => (
+                                <div key={q.id} className="text-sm border-b border-[var(--ink-100,#f1f1f1)] pb-2">
+                                  <p>{q.text}</p>
+                                  {q.buyer_lens && <p className="text-xs text-[var(--ink-500)] mt-0.5">Buyer: {q.buyer_lens}</p>}
+                                  {q.supplier_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5">Supplier: {q.supplier_lens}</p>}
+                                  <button onClick={() => addBankQuestion(sec.title, q)} className="mt-1 px-2.5 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        ))}
+                      </div>
+                    )}
+                    <details className="border border-[var(--ink-200,#e5e5e5)] rounded-sm">
+                      <summary className="px-3 py-1.5 text-sm font-medium cursor-pointer">SASE canonical set ({bank.canonical.length})</summary>
+                      <div className="px-3 pb-2 space-y-2">
+                        {bank.canonical.map((q) => (
+                          <div key={q.id} className="text-sm border-b border-[var(--ink-100,#f1f1f1)] pb-2">
+                            <p><span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-1">{q.category}</span>{q.text}</p>
+                            <button onClick={() => addBankQuestion(q.category, { id: q.id, text: q.text, buyer_lens: "", supplier_lens: "" })} className="mt-1 px-2.5 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  </div>
+                )}
+              </div>
+            )}
             {/* AI custom question composer */}
             <div className="border border-[var(--ink-900)] rounded-sm p-4">
               <p className="eyebrow mb-2">Add your own question with AI</p>
@@ -480,8 +540,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                           <span className={`mr-2 text-xs uppercase ${q.mandatory ? "text-amber-700" : "text-[var(--ink-500)]"}`}>{q.mandatory ? "mandatory" : q.priority}</span>
                           {q.text}
                         </p>
-                        <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>
-                        <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5 italic">{q.rationale}</p>
+                        {q.evidence_requested && <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>}
+                        {q.buyer_lens && <p className="text-xs text-[var(--ink-500)] mt-0.5">Buyer: {q.buyer_lens}</p>}
+                        {q.supplier_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5">Supplier: {q.supplier_lens}</p>}
+                        {!q.buyer_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5 italic">{q.rationale}</p>}
                       </div>
                     ))}
                   </div>

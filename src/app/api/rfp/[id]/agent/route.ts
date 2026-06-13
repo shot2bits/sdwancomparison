@@ -246,7 +246,7 @@ export async function POST(req: Request, ctx: Ctx) {
               feature_id: fid || "custom",
               text: String(input.text), evidence_requested: String(input.evidence_requested ?? ""),
               rationale: String(input.rationale ?? ""), priority: pr,
-              source: fid ? "methodology" : "custom", mandatory: pr === "required", weight: pr === "required" ? 4 : 3,
+              source: fid ? "methodology" : "custom", buyer_lens: "", supplier_lens: "", mandatory: pr === "required", weight: pr === "required" ? 4 : 3,
             });
             project = { ...project, rfp_sections: sections };
             dirty = true;
@@ -318,7 +318,7 @@ function addQuestion(project: ProjectDetails, fid: string, rationale: string, pr
     existing.priority = pr;
     existing.rationale = rationale || existing.rationale;
   } else {
-    sec.questions.push({ id: qid, feature_id: fid, text: mq.rfp_question, evidence_requested: mq.evidence_requested, rationale, priority: pr, source: "methodology", mandatory: pr === "required", weight: pr === "required" ? 4 : 3 });
+    sec.questions.push({ id: qid, feature_id: fid, text: mq.rfp_question, evidence_requested: mq.evidence_requested, rationale, priority: pr, source: "methodology", buyer_lens: "", supplier_lens: "", mandatory: pr === "required", weight: pr === "required" ? 4 : 3 });
   }
   return { ...project, rfp_sections: sections };
 }

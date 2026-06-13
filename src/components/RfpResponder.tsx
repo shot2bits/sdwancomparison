@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 
-type Q = { id: string; text: string; evidence_requested: string; priority: string };
+type Q = { id: string; text: string; evidence_requested: string; priority: string; buyer_lens?: string; supplier_lens?: string };
 type Section = { category: string; included: boolean; questions: Q[] };
 type Project = { id: string; title: string; status: string; rfp_sections: Section[] };
 type Thread = { id: string; vendor: string; category: string; question: string; status: string; buyer_answer: string };
@@ -91,7 +91,8 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
               {active.map((q) => (
                 <div key={q.id}>
                   <p className="text-sm font-medium">{q.text}</p>
-                  <p className="text-xs text-[var(--ink-500)] mb-1">Evidence requested: {q.evidence_requested}</p>
+                  {q.evidence_requested && <p className="text-xs text-[var(--ink-500)]">Evidence requested: {q.evidence_requested}</p>}
+                  {q.supplier_lens && <p className="text-xs text-[var(--ink-500)] mb-1">What a strong answer shows: {q.supplier_lens}</p>}
                   <textarea value={answers[q.id] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} rows={2} className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
                 </div>
               ))}
