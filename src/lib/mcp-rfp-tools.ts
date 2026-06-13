@@ -8,7 +8,7 @@
 
 import { getProjectByToken, getProject, listResponses, saveResponse, getConnectionByToken, newId, kvConfigured } from "@/lib/rfp-store";
 import { addMessage } from "@/lib/rfp-connect";
-import { resolveOpportunityToken, getOpportunity } from "@/lib/rfp-store";
+import { resolveOpportunityToken, getOpportunity, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem, vendorName } from "@/lib/opportunity";
 import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
@@ -48,6 +48,11 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
     name: "supplier_inbox",
     description: "For a supplier agent: read the buyer messages on a connection using the per-connection supplier token. Returns the RFP summary and the message thread.",
     inputSchema: { type: "object", properties: { supplier_token: { type: "string" } }, required: ["supplier_token"] },
+  },
+  {
+    name: "list_opportunities",
+    description: "List open opportunities on the public board: title, buyer, scope, region, sites, engagement type (quote_room or auction), auction format, eligibility, deadline and activity counts. No pricing amounts. Open read, no token. Optionally filter by scope (underlay_circuits, sd_wan, sse, sase, managed_service).",
+    inputSchema: { type: "object", properties: { scope: { type: "string", description: "Optional scope filter." } } },
   },
   {
     name: "opportunity_inbox",
@@ -100,6 +105,14 @@ function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProje
 
 export async function callRfpTool(name: string, args: Record<string, unknown>): Promise<unknown> {
   // name validated against RFP_TOOL_NAMES by the caller
+  // Public board read: open, no token. Safe before the storage guard.
+  if (name === "list_opportunities") {
+    if (!kvConfigured()) return { opportunities: [], count: 0 };
+    let opportunities = await listPublicOpportunities();
+    const scope = typeof args.scope === "string" ? args.scope : null;
+    if (scope) opportunities = opportunities.filter((o) => o.scope.includes(scope as never));
+    return { count: opportunities.length, opportunities };
+  }
   if (!kvConfigured()) return { error: "RFP storage not configured." };
   // Opportunity supplier-agent tools use a per-supplier opportunity token.
   if (name === "opportunity_inbox" || name === "opportunity_respond") {

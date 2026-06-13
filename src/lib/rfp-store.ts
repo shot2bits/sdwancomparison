@@ -203,7 +203,7 @@ export async function getConnectionByToken(token: string): Promise<SupplierConne
 /* Opportunities (live tender rooms)                                   */
 /* ------------------------------------------------------------------ */
 
-import { OpportunitySchema, type Opportunity } from "@/lib/opportunity-types";
+import { OpportunitySchema, toPublicOpportunity, type Opportunity, type PublicOpportunity } from "@/lib/opportunity-types";
 
 export async function saveOpportunity(o: Opportunity): Promise<Opportunity> {
   const parsed = OpportunitySchema.parse({ ...o, updated: Date.now() });
@@ -225,6 +225,18 @@ export async function listOpportunities(): Promise<Opportunity[]> {
   const out: Opportunity[] = [];
   for (const id of ids) { const o = await getOpportunity(id); if (o) out.push(o); }
   return out.sort((a, b) => b.created - a.created);
+}
+
+/**
+ * Public board: open, public opportunities as stripped projections (no pricing
+ * amounts, no tokens), newest activity first. Safe for crawlers and agents.
+ */
+export async function listPublicOpportunities(): Promise<PublicOpportunity[]> {
+  const all = await listOpportunities();
+  return all
+    .filter((o) => o.status === "open" && o.visibility === "public")
+    .map(toPublicOpportunity)
+    .sort((a, b) => b.last_activity - a.last_activity);
 }
 
 /** Per-supplier access token for an opportunity. */
