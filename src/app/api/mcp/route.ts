@@ -1,4 +1,5 @@
 import { MCP_TOOL_DEFINITIONS, callMcpTool } from "@/lib/mcp-tools";
+import { MCP_RFP_TOOL_DEFINITIONS, RFP_TOOL_NAMES, callRfpTool } from "@/lib/mcp-rfp-tools";
 
 /**
  * MCP server: JSON-RPC 2.0 over HTTP POST.
@@ -22,6 +23,8 @@ function rpcError(id: string | number | null | undefined, code: number, message:
   return Response.json({ jsonrpc: "2.0", id: id ?? null, error: { code, message } });
 }
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   let body: JsonRpcRequest;
   try {
@@ -40,10 +43,11 @@ export async function POST(req: Request) {
     case "notifications/initialized":
       return new Response(null, { status: 202 });
     case "tools/list":
-      return rpcResult(body.id, { tools: MCP_TOOL_DEFINITIONS });
+      return rpcResult(body.id, { tools: [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS] });
     case "tools/call": {
       const name = body.params?.name ?? "";
-      const result = callMcpTool(name, body.params?.arguments);
+      const args = (body.params?.arguments ?? {}) as Record<string, unknown>;
+      const result = RFP_TOOL_NAMES.has(name) ? await callRfpTool(name, args) : callMcpTool(name, args);
       return rpcResult(body.id, {
         content: [{ type: "text", text: JSON.stringify(result) }],
       });
@@ -61,7 +65,7 @@ export async function GET() {
     transport: "http",
     protocol: "JSON-RPC 2.0 (MCP)",
     endpoint: "/api/mcp",
-    tools: MCP_TOOL_DEFINITIONS.map((t) => t.name),
+    tools: [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS].map((t) => t.name),
     usage: "POST JSON-RPC: methods initialize, tools/list, tools/call.",
   });
 }

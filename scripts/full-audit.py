@@ -178,8 +178,9 @@ def rpc(method, params=None):
         return json.loads(r.read())
 
 tools = [t["name"] for t in rpc("tools/list")["result"]["tools"]]
-if set(tools) != {"build_sase_shortlist", "list_sase_features", "list_sase_vendors", "get_sase_vendor_profile"}:
-    FAILS.append(f"MCP tools/list unexpected: {tools}")
+shortlist_tools = {"build_sase_shortlist", "list_sase_features", "list_sase_vendors", "get_sase_vendor_profile"}
+if not shortlist_tools.issubset(set(tools)):
+    FAILS.append(f"MCP tools/list missing shortlist tools: {tools}")
 r = json.loads(rpc("tools/call", {"name": "build_sase_shortlist", "arguments": {"sector": "healthcare", "service_model": "managed", "shortlist_size": 5}})["result"]["content"][0]["text"])
 if len(r["shortlist"]) != 5 or r["shortlist"][0]["rank"] != 1:
     FAILS.append("MCP build_sase_shortlist verdict malformed")
@@ -190,8 +191,8 @@ err = rpc("nonexistent/method")
 if "error" not in err:
     FAILS.append("MCP unknown method should return JSON-RPC error")
 
-# 5. OpenAPI per tool
-for t in tools:
+# 5. OpenAPI per shortlist tool (RFP tools are MCP-only, KV-backed, no OpenAPI spec)
+for t in sorted(shortlist_tools):
     st, body = fetch(f"/api/openapi/{t}")
     if st != 200 or "openapi" not in body:
         FAILS.append(f"openapi GET {t}: broken")

@@ -31,6 +31,19 @@ const MODELS = [
   { key: "co_managed", label: "Co-managed" },
   { key: "diy", label: "DIY / self-managed" },
 ];
+const REGULATIONS = [
+  { key: "uk_gdpr", label: "UK GDPR / DUAA" },
+  { key: "pci_dss", label: "PCI DSS v4.0" },
+  { key: "iec_62443", label: "IEC 62443 (OT)" },
+  { key: "iso_27001", label: "ISO 27001" },
+  { key: "cyber_resilience_bill", label: "UK Cyber Resilience Bill" },
+  { key: "dora", label: "EU DORA" },
+  { key: "nis2", label: "EU NIS2" },
+];
+type CoverageRow = { regulation: string; label: string; feature_id: string; covered: boolean };
+type ClausePack = { regulation: string; label: string; clauses: string[] };
+type Evaluation = { vendor: string; vendor_slug: string | null; answered: number; total: number; flags: number; checks: { question: string; answer: string; grade_label: string; flag: string; note: string }[] };
+type Benchmark = { available: boolean; total_rfps?: number; top_mandatory_questions?: { name: string; count: number }[]; median_response_completeness?: number | null };
 
 export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [project, setProject] = useState<Project | null>(null);
@@ -50,7 +63,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [drafting, setDrafting] = useState(false);
   const [draft, setDraft] = useState<(RfpQuestion & { category: string }) | null>(null);
 
+  // compliance, research, evaluation, benchmark
+  const [coverage, setCoverage] = useState<{ rows: CoverageRow[]; gaps: CoverageRow[]; clauses: ClausePack[] } | null>(null);
+  const [topic, setTopic] = useState("");
+  const [researching, setResearching] = useState(false);
+  const [researchSet, setResearchSet] = useState<{ analysis: string; questions: (RfpQuestion & { category: string })[] } | null>(null);
+  const [evaluations, setEvaluations] = useState<Evaluation[] | null>(null);
+  const [benchmark, setBenchmark] = useState<Benchmark | null>(null);
+
   useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
+  useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
+  useEffect(() => { fetch("/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
   async function loadProject(id: string) {
@@ -149,6 +172,51 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     setDraft(null); setIntent("");
   }
 
+  async function toggleRegulation(key: string) {
+    if (!project) return;
+    const has = project.buyer.compliance.includes(key);
+    const compliance = has ? project.buyer.compliance.filter((c) => c !== key) : [...project.buyer.compliance, key];
+    await persist({ ...project, buyer: { ...project.buyer, compliance } }, true);
+  }
+
+  async function refreshCoverage() {
+    if (!project) return;
+    try {
+      const res = await fetch(`/api/rfp/${project.id}/compliance`);
+      if (res.ok) setCoverage((await res.json()) as { rows: CoverageRow[]; gaps: CoverageRow[]; clauses: ClausePack[] });
+    } catch { /* ignore */ }
+  }
+
+  async function research() {
+    if (!project || !topic.trim() || researching) return;
+    setResearching(true); setError(null); setResearchSet(null);
+    try {
+      const res = await fetch(`/api/rfp/${project.id}/research`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ topic, count: 4 }) });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not research."); }
+      setResearchSet((await res.json()) as { analysis: string; questions: (RfpQuestion & { category: string })[] });
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not research."); }
+    finally { setResearching(false); }
+  }
+
+  function addResearchQuestion(q: RfpQuestion & { category: string }) {
+    if (!project) return;
+    const { category, ...rest } = q;
+    const sections = [...project.rfp_sections];
+    let sec = sections.find((s) => s.category === category);
+    if (!sec) { sec = { category, included: true, questions: [] }; sections.push(sec); }
+    sec.included = true;
+    if (!sec.questions.some((x) => x.id === rest.id)) sec.questions.push({ ...rest, priority: "recommended" });
+    persist({ ...project, rfp_sections: sections });
+  }
+
+  async function loadEvaluations() {
+    if (!project) return;
+    try {
+      const res = await fetch(`/api/rfp/${project.id}/evaluation`);
+      if (res.ok) setEvaluations(((await res.json()) as { evaluations: Evaluation[] }).evaluations);
+    } catch { /* ignore */ }
+  }
+
   function exportMarkdown() {
     if (!project) return;
     const lines = [`# ${project.title}`, "", `Methodology v${project.methodology_version}. Scope: ${project.buyer.product_scope}. Delivery: ${project.buyer.operating_model}.`, ""];
@@ -212,6 +280,26 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             {MODELS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
           </select>
         </div>
+        <div className="w-full order-last basis-full">
+          <p className="eyebrow mb-1">Compliance and regulation</p>
+          <div className="flex flex-wrap gap-2">
+            {REGULATIONS.map((r) => {
+              const on = project.buyer.compliance.includes(r.key);
+              return (
+                <button key={r.key} onClick={() => toggleRegulation(r.key)} className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${on ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>
+                  {r.label}
+                </button>
+              );
+            })}
+          </div>
+          {coverage && project.buyer.compliance.length > 0 && (
+            <div className="mt-2 text-xs text-[var(--ink-600,#555)]">
+              Coverage: {coverage.rows.filter((r) => r.covered).length}/{coverage.rows.length} obligations have an active question.
+              {coverage.gaps.length > 0 && <span className="text-amber-700"> {coverage.gaps.length} gap{coverage.gaps.length > 1 ? "s" : ""}: ask the AI agent to close them, or add the relevant questions.</span>}
+              {coverage.clauses.length > 0 && <span> {coverage.clauses.reduce((n, c) => n + c.clauses.length, 0)} contractual clauses included in export.</span>}
+            </div>
+          )}
+        </div>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-xs text-[var(--ink-500)] uppercase tracking-wide">{project.status} · {activeCount} questions</span>
           <button onClick={exportMarkdown} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Export</button>
@@ -243,6 +331,28 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         ) : (
           <div className="space-y-5">
+            {/* AI expert research tool */}
+            <div className="border border-[var(--ink-900)] rounded-sm p-4 bg-amber-50">
+              <p className="eyebrow mb-2">AI expert research tool</p>
+              <p className="text-xs text-[var(--ink-600,#555)] mb-2">Give a topic. The expert drafts a themed set of cited questions, grounded in the methodology, the live vendor matrix and your selected regulations, and writes questions that separate strong vendors from weak ones.</p>
+              <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. ransomware containment for OT, or DORA exit and subcontracting terms" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+              <button onClick={research} disabled={researching || !topic.trim()} className="mt-2 px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{researching ? "Researching..." : "Research and draft a set"}</button>
+              {researchSet && (
+                <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
+                  <p className="text-sm text-[var(--ink-700)] italic mb-2">{researchSet.analysis}</p>
+                  <div className="space-y-2">
+                    {researchSet.questions.map((q) => (
+                      <div key={q.id} className="text-sm border border-[var(--ink-200,#e5e5e5)] rounded-sm p-2 bg-white">
+                        <p className="font-medium">{q.text}</p>
+                        <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>
+                        <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-0.5">{q.rationale} · {q.category}</p>
+                        <button onClick={() => addResearchQuestion(q)} className="mt-1 px-3 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             {/* AI custom question composer */}
             <div className="border border-[var(--ink-900)] rounded-sm p-4">
               <p className="eyebrow mb-2">Add your own question with AI</p>
@@ -325,6 +435,46 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         </div>
       </div>
+      {/* Evaluation: independent cross-check of supplier responses */}
+      <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg">Evaluate supplier responses</h2>
+          <button onClick={loadEvaluations} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Load responses</button>
+        </div>
+        <p className="text-sm text-[var(--ink-500)] mb-3">Supplier answers are cross-checked against Netify&#39;s independent capability grades. Claims that exceed the evidence are flagged for you to probe.</p>
+        {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">No responses yet. Share the supplier link and publish the RFP.</p>}
+        {evaluations && evaluations.map((ev) => (
+          <details key={ev.vendor} className="border border-[var(--ink-300,#ccc)] rounded-sm mb-2">
+            <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer">
+              {ev.vendor} · {ev.answered}/{ev.total} answered
+              {ev.flags > 0 && <span className="ml-2 text-amber-700">{ev.flags} claim{ev.flags > 1 ? "s" : ""} to verify</span>}
+            </summary>
+            <div className="px-4 pb-3 space-y-2">
+              {ev.checks.filter((c) => c.flag !== "supported").map((c, i) => (
+                <div key={i} className="text-sm">
+                  <p className="font-medium text-[var(--ink-800)]">{c.question}</p>
+                  <p className="text-[var(--ink-600,#555)]">Answer: {c.answer || "(none)"}</p>
+                  <p className={`text-xs mt-0.5 ${c.flag === "claim_exceeds_evidence" ? "text-amber-700" : "text-[var(--ink-500)]"}`}>{c.note}</p>
+                </div>
+              ))}
+            </div>
+          </details>
+        ))}
+      </section>
+
+      {/* Benchmark flywheel signal */}
+      {benchmark?.available && (benchmark.total_rfps ?? 0) > 0 && (
+        <section className="mt-8 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-4">
+          <p className="eyebrow mb-2">Benchmark signal</p>
+          <p className="text-sm text-[var(--ink-600,#555)]">
+            From {benchmark.total_rfps} RFPs built with this tool.
+            {benchmark.median_response_completeness != null && ` Median supplier response completeness: ${Math.round(benchmark.median_response_completeness * 100)}%.`}
+            {benchmark.top_mandatory_questions && benchmark.top_mandatory_questions.length > 0 && ` Most-required capabilities: ${benchmark.top_mandatory_questions.slice(0, 5).map((q) => q.name).join(", ")}.`}
+          </p>
+          <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-1">Anonymised aggregate, counts only.</p>
+        </section>
+      )}
+
       {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
     </div>
   );

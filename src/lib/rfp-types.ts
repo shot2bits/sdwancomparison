@@ -79,6 +79,7 @@ export const RfpResponseSchema = z.object({
   id: z.string(),
   rfp_id: z.string(),
   vendor: z.string().min(1),
+  vendor_slug: z.string().nullable().default(null), // matched Netify matrix vendor
   answers: z.record(z.string(), z.string()).default({}), // question id -> response
   submitted: z.number().nullable().default(null),
   created: z.number(),

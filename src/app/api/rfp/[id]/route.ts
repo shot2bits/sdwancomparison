@@ -2,6 +2,7 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, saveProject, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
+import { recordRfpBenchmark } from "@/lib/rfp-store";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -56,5 +57,9 @@ export async function PUT(req: Request, ctx: Ctx) {
     return Response.json({ error: "Invalid RFP shape.", issues: parsed.error.issues.slice(0, 5) }, { status: 422, headers: cors });
   }
   const saved = await saveProject(parsed.data);
+  if (existing.status !== "published" && saved.status === "published") {
+    const mandatory = saved.rfp_sections.flatMap((s) => s.questions.filter((q) => q.mandatory && q.feature_id !== "custom").map((q) => q.feature_id));
+    try { await recordRfpBenchmark(saved.buyer.sector, mandatory); } catch { /* best effort */ }
+  }
   return Response.json(saved, { headers: cors });
 }

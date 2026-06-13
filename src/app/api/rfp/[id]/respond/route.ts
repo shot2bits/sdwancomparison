@@ -1,6 +1,8 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, listResponses, saveResponse, newId, kvConfigured } from "@/lib/rfp-store";
 import { RfpResponseSchema } from "@/lib/rfp-types";
+import { matchVendorSlug } from "@/lib/rfp-evaluation";
+import { recordCompletenessSample } from "@/lib/rfp-store";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -39,10 +41,16 @@ export async function POST(req: Request, ctx: Ctx) {
     id: existing?.id ?? newId("resp"),
     rfp_id: id,
     vendor: body.vendor,
+    vendor_slug: existing?.vendor_slug ?? matchVendorSlug(body.vendor),
     answers: { ...(existing?.answers ?? {}), ...(body.answers ?? {}) },
     submitted: body.submit ? Date.now() : existing?.submitted ?? null,
     created: existing?.created ?? Date.now(),
   });
   const saved = await saveResponse(response);
+  if (body.submit) {
+    const active = project.rfp_sections.filter((x) => x.included).flatMap((x) => x.questions.filter((q) => q.priority !== "optional"));
+    const answered = active.filter((q) => (saved.answers[q.id] ?? "").trim()).length;
+    if (active.length) { try { await recordCompletenessSample(answered / active.length); } catch { /* best effort */ } }
+  }
   return Response.json(saved, { headers: cors });
 }

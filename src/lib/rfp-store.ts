@@ -117,3 +117,52 @@ export async function saveResponse(r: RfpResponse): Promise<RfpResponse> {
   await setJson(`rfp:${parsed.rfp_id}:responses`, responses);
   return parsed;
 }
+
+/* ------------------------------------------------------------------ */
+/* Benchmark flywheel: anonymised aggregates. Counts only, no identity. */
+/* ------------------------------------------------------------------ */
+
+type Benchmark = {
+  rfps_by_sector: Record<string, number>;
+  mandatory_by_feature: Record<string, number>; // feature_id -> times marked mandatory
+  mandatory_by_sector_feature: Record<string, Record<string, number>>;
+  response_completeness_samples: number[]; // capped ring of recent ratios
+  updated: number;
+};
+
+const EMPTY_BENCHMARK: Benchmark = {
+  rfps_by_sector: {},
+  mandatory_by_feature: {},
+  mandatory_by_sector_feature: {},
+  response_completeness_samples: [],
+  updated: 0,
+};
+
+export async function getBenchmark(): Promise<Benchmark> {
+  if (!kvConfigured()) return EMPTY_BENCHMARK;
+  return (await getJson<Benchmark>("rfp:benchmark")) ?? EMPTY_BENCHMARK;
+}
+
+/** Record an RFP's shape into the benchmark. Idempotency is not required:
+ *  we recompute mandatory counts from the current RFP each publish. */
+export async function recordRfpBenchmark(sector: string | null, mandatoryFeatureIds: string[]): Promise<void> {
+  if (!kvConfigured()) return;
+  const b = await getBenchmark();
+  const sec = sector ?? "unspecified";
+  b.rfps_by_sector[sec] = (b.rfps_by_sector[sec] ?? 0) + 1;
+  b.mandatory_by_sector_feature[sec] ??= {};
+  for (const fid of mandatoryFeatureIds) {
+    b.mandatory_by_feature[fid] = (b.mandatory_by_feature[fid] ?? 0) + 1;
+    b.mandatory_by_sector_feature[sec][fid] = (b.mandatory_by_sector_feature[sec][fid] ?? 0) + 1;
+  }
+  b.updated = Date.now();
+  await setJson("rfp:benchmark", b);
+}
+
+export async function recordCompletenessSample(ratio: number): Promise<void> {
+  if (!kvConfigured()) return;
+  const b = await getBenchmark();
+  b.response_completeness_samples = [...b.response_completeness_samples, Math.max(0, Math.min(1, ratio))].slice(-500);
+  b.updated = Date.now();
+  await setJson("rfp:benchmark", b);
+}

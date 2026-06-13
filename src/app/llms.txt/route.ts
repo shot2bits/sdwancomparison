@@ -37,6 +37,10 @@ ${bestPages}
 
 ${SITE_URL}/llms-full.txt carries every ranking in plain text with canonical URLs, one fetch for the whole dataset.
 
+## Agent-to-agent RFP
+
+The RFP builder is agent-callable. Supplier AI agents can fetch and respond to a published RFP over the MCP server using its share token. MCP tools: get_rfp, list_rfp_questions, respond_to_rfp, get_rfp_status. This makes a Netify RFP a machine-readable, machine-respondable object, not just a web form.
+
 ## Programmatic access
 
 MCP server (JSON-RPC 2.0): POST ${SITE_URL}/api/mcp (no trailing slash). Methods: initialize, tools/list, tools/call.

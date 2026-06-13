@@ -86,33 +86,8 @@ export const SECTOR_REQUIREMENTS: Record<SectorKey, { required: string[]; recomm
  * Compliance map: regulatory obligations to the features they most
  * directly evidence. Lets the agent justify questions by compliance need.
  */
-export const COMPLIANCE_REQUIREMENTS: Record<string, { label: string; required: string[]; note: string }> = {
-  uk_gdpr: {
-    label: "UK GDPR / DPA 2018 / DUAA 2025",
-    required: ["f33_data_loss_prevention", "f22_regional_breakout_and_data_residency"],
-    note: "Personal data handling requires DLP and control over where data is processed.",
-  },
-  pci_dss: {
-    label: "PCI DSS v4.0",
-    required: ["f27_integrated_next_generation_firewall", "f30_zero_trust_network_access"],
-    note: "Cardholder data environments require segmentation and access control.",
-  },
-  iec_62443: {
-    label: "IEC 62443 (OT security)",
-    required: ["f30_zero_trust_network_access", "f27_integrated_next_generation_firewall"],
-    note: "OT zones and conduits require enforced segmentation between IT and OT.",
-  },
-  iso_27001: {
-    label: "ISO 27001",
-    required: ["f35_soc_siem_soar_integration", "f40_managed_service_assurance"],
-    note: "Information security management benefits from SOC integration and assured operations.",
-  },
-  cyber_resilience_bill: {
-    label: "UK Cyber Security and Resilience Bill",
-    required: ["f35_soc_siem_soar_integration", "f25_high_availability_design"],
-    note: "Resilience obligations point to monitored operations and high-availability design.",
-  },
-};
+import { COMPLIANCE_REQUIREMENTS, REGULATIONS } from "@/lib/rfp-compliance";
+export { COMPLIANCE_REQUIREMENTS };
 
 /** The full methodology document served at /methodology.json. */
 export function buildMethodology() {
@@ -130,11 +105,15 @@ export function buildMethodology() {
       required: SECTOR_REQUIREMENTS[k].required,
       recommended: SECTOR_REQUIREMENTS[k].recommended,
     })),
-    compliance: Object.entries(COMPLIANCE_REQUIREMENTS).map(([key, v]) => ({
-      key,
-      label: v.label,
-      required: v.required,
-      note: v.note,
+    compliance: REGULATIONS.map((r) => ({
+      key: r.key,
+      label: r.label,
+      jurisdiction: r.jurisdiction,
+      applies_to: r.applies_to,
+      in_force: r.in_force,
+      required_features: r.required_features,
+      clauses: r.clauses,
+      note: r.note,
     })),
   };
 }
