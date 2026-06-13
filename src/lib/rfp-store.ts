@@ -166,3 +166,35 @@ export async function recordCompletenessSample(ratio: number): Promise<void> {
   b.updated = Date.now();
   await setJson("rfp:benchmark", b);
 }
+
+/* ------------------------------------------------------------------ */
+/* Supplier connections (two-sided marketplace)                        */
+/* ------------------------------------------------------------------ */
+
+import { SupplierConnectionSchema, type SupplierConnection } from "@/lib/rfp-types";
+
+export async function listConnections(rfpId: string): Promise<SupplierConnection[]> {
+  return (await getJson<SupplierConnection[]>(`rfp:${rfpId}:connections`)) ?? [];
+}
+
+export async function saveConnection(c: SupplierConnection): Promise<SupplierConnection> {
+  const parsed = SupplierConnectionSchema.parse({ ...c, updated: Date.now() });
+  const all = await listConnections(parsed.rfp_id);
+  const idx = all.findIndex((x) => x.vendor_slug === parsed.vendor_slug);
+  if (idx >= 0) all[idx] = parsed;
+  else all.push(parsed);
+  await setJson(`rfp:${parsed.rfp_id}:connections`, all);
+  await kv(["SET", `rfp:conn:${parsed.token}`, JSON.stringify({ rfp_id: parsed.rfp_id, vendor_slug: parsed.vendor_slug })]);
+  return parsed;
+}
+
+export async function getConnection(rfpId: string, vendorSlug: string): Promise<SupplierConnection | null> {
+  return (await listConnections(rfpId)).find((c) => c.vendor_slug === vendorSlug) ?? null;
+}
+
+/** Supplier-side lookup by their per-connection token. */
+export async function getConnectionByToken(token: string): Promise<SupplierConnection | null> {
+  const ref = (await getJson<{ rfp_id: string; vendor_slug: string }>(`rfp:conn:${token}`));
+  if (!ref) return null;
+  return getConnection(ref.rfp_id, ref.vendor_slug);
+}

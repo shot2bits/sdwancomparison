@@ -9,6 +9,7 @@ import {
   synthesiseSections,
 } from "@/lib/rfp-methodology";
 import { buildShortlist } from "@/lib/shortlist-core";
+import { inviteSupplier } from "@/lib/rfp-connect";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 
 export const runtime = "nodejs";
@@ -96,6 +97,18 @@ function tools(): Anthropic.Tool[] {
       name: "suggest_vendors",
       description: "Suggest best-fit vendors from the Netify marketplace for the current buyer context, using the live scoring engine. Returns ranked vendors with scores.",
       input_schema: cast({ type: "object", properties: { shortlist_size: { type: "integer", minimum: 3, maximum: 12 } } }),
+    },
+    {
+      name: "engage_supplier",
+      description: "Invite a graded vendor from the marketplace to engage with this RFP, with a short drafted intro message. Use after suggesting vendors when the buyer wants to connect with one. The supplier can then reply, share contact details or propose a demo.",
+      input_schema: cast({
+        type: "object",
+        properties: {
+          vendor_slug: { type: "string", description: "Marketplace vendor slug, e.g. cato-networks." },
+          intro: { type: "string", description: "A short, specific opening message to the supplier referencing the buyer's needs." },
+        },
+        required: ["vendor_slug", "intro"],
+      }),
     },
     {
       name: "set_status",
@@ -248,6 +261,9 @@ export async function POST(req: Request, ctx: Ctx) {
               shortlist_size: size,
             }, FEATURE_NAMES);
             out = { ok: true, shortlist: result.shortlist.map((v) => `${v.rank}. ${v.name} (${v.score})`), criteria: result.criteria_summary };
+          } else if (tu.name === "engage_supplier") {
+            const r = await inviteSupplier(project.id, String(input.vendor_slug), String(input.intro ?? ""));
+            out = "error" in r ? { ok: false, error: r.error } : { ok: true, invited: r.vendor_name, status: r.status };
           } else if (tu.name === "set_status") {
             const st = String(input.status);
             if ((RFP_STATUSES as readonly string[]).includes(st)) {

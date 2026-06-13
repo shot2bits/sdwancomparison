@@ -6,7 +6,8 @@
  * machine-callable object, not just a web form.
  */
 
-import { getProjectByToken, getProject, listResponses, saveResponse, newId, kvConfigured } from "@/lib/rfp-store";
+import { getProjectByToken, getProject, listResponses, saveResponse, getConnectionByToken, newId, kvConfigured } from "@/lib/rfp-store";
+import { addMessage } from "@/lib/rfp-connect";
 import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { SITE_URL } from "@/lib/structured-data";
@@ -41,6 +42,25 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
     description: "Return an RFP's lifecycle status and response count by share token.",
     inputSchema: { type: "object", properties: { token: { type: "string" } }, required: ["token"] },
   },
+  {
+    name: "supplier_inbox",
+    description: "For a supplier agent: read the buyer messages on a connection using the per-connection supplier token. Returns the RFP summary and the message thread.",
+    inputSchema: { type: "object", properties: { supplier_token: { type: "string" } }, required: ["supplier_token"] },
+  },
+  {
+    name: "supplier_reply",
+    description: "For a supplier agent: reply to the buyer on a connection. type is message, demo_response, contact_share or decline. payload carries structured contact details or demo slots.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        supplier_token: { type: "string" },
+        type: { type: "string", enum: ["message", "demo_response", "contact_share", "decline"] },
+        body: { type: "string" },
+        payload: { type: "object" },
+      },
+      required: ["supplier_token", "body"],
+    },
+  },
 ] as const;
 
 export const RFP_TOOL_NAMES: Set<string> = new Set(MCP_RFP_TOOL_DEFINITIONS.map((t) => t.name as string));
@@ -60,6 +80,26 @@ function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProje
 export async function callRfpTool(name: string, args: Record<string, unknown>): Promise<unknown> {
   // name validated against RFP_TOOL_NAMES by the caller
   if (!kvConfigured()) return { error: "RFP storage not configured." };
+  // Supplier-agent tools use a per-connection supplier token.
+  if (name === "supplier_inbox" || name === "supplier_reply") {
+    const stoken = String(args.supplier_token ?? "");
+    if (!stoken) return { error: "supplier_token is required." };
+    const conn = await getConnectionByToken(stoken);
+    if (!conn) return { error: "Connection not found for that token." };
+    if (name === "supplier_inbox") {
+      const project = await getProject(conn.rfp_id);
+      return {
+        rfp: project ? { title: project.title, status: project.status, sector: project.buyer.sector, scope: project.buyer.product_scope } : null,
+        status: conn.status,
+        messages: conn.messages.map((mm) => ({ from: mm.from, type: mm.type, body: mm.body, payload: mm.payload, created: mm.created })),
+      };
+    }
+    const t = String(args.type ?? "message");
+    const allowed = ["message", "demo_response", "contact_share", "decline"];
+    const updated = await addMessage(conn, "supplier", (allowed.includes(t) ? t : "message") as never, String(args.body ?? ""), (args.payload ?? {}) as Record<string, string>);
+    return { ok: true, status: updated.status };
+  }
+
   const token = String(args.token ?? "");
   if (!token) return { error: "token is required." };
 

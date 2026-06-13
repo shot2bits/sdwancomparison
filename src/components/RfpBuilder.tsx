@@ -14,7 +14,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom"; mandatory: boolean; weight: number };
 type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
-type Buyer = { organisation: string; sector: string | null; site_count: number | null; regions: string[]; compliance: string[]; operating_model: string; product_scope: string };
+type Buyer = { organisation: string; sector: string | null; organisation_size: string; site_count: number | null; regions: string[]; compliance: string[]; operating_model: string; product_scope: string };
 type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; methodology_version: string };
 
 const STATUS_FLOW = ["draft", "review", "published", "qa", "evaluation"];
@@ -44,6 +44,9 @@ type CoverageRow = { regulation: string; label: string; feature_id: string; cove
 type ClausePack = { regulation: string; label: string; clauses: string[] };
 type Evaluation = { vendor: string; vendor_slug: string | null; answered: number; total: number; flags: number; checks: { question: string; answer: string; grade_label: string; flag: string; note: string }[] };
 type Benchmark = { available: boolean; total_rfps?: number; top_mandatory_questions?: { name: string; count: number }[]; median_response_completeness?: number | null };
+type ConnMsg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
+type Connection = { vendor_slug: string; vendor_name: string; token: string; status: string; messages: ConnMsg[] };
+type Suggestion = { rank: number; slug: string; name: string; score: number };
 
 export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [project, setProject] = useState<Project | null>(null);
@@ -70,10 +73,14 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [researchSet, setResearchSet] = useState<{ analysis: string; questions: (RfpQuestion & { category: string })[] } | null>(null);
   const [evaluations, setEvaluations] = useState<Evaluation[] | null>(null);
   const [benchmark, setBenchmark] = useState<Benchmark | null>(null);
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
+  const [msgDraft, setMsgDraft] = useState<Record<string, string>>({});
 
   useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
   useEffect(() => { fetch("/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
+  useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
   async function loadProject(id: string) {
@@ -215,6 +222,55 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const res = await fetch(`/api/rfp/${project.id}/evaluation`);
       if (res.ok) setEvaluations(((await res.json()) as { evaluations: Evaluation[] }).evaluations);
     } catch { /* ignore */ }
+  }
+
+  async function refreshConnections() {
+    if (!project) return;
+    try {
+      const res = await fetch(`/api/rfp/${project.id}/connect`);
+      if (res.ok) setConnections(((await res.json()) as { connections: Connection[] }).connections);
+    } catch { /* ignore */ }
+  }
+
+  async function suggestSuppliers() {
+    if (!project) return;
+    try {
+      const res = await fetch("/api/openapi/build_sase_shortlist", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          sector: project.buyer.sector ?? null,
+          organisation_size: project.buyer.organisation_size ?? "any",
+          service_model: project.buyer.operating_model ?? "any",
+          required_regions: project.buyer.regions ?? [],
+          shortlist_size: 6,
+        }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { shortlist: Suggestion[] };
+        setSuggestions(data.shortlist);
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function inviteSupplier(slug: string, intro: string) {
+    if (!project) return;
+    try {
+      const res = await fetch(`/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, intro }) });
+      if (res.ok) refreshConnections();
+    } catch { /* ignore */ }
+  }
+
+  async function connectAction(slug: string, action: string, body: string) {
+    if (!project) return;
+    try {
+      const res = await fetch(`/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, action, body }) });
+      if (res.ok) { refreshConnections(); setMsgDraft({ ...msgDraft, [slug]: "" }); }
+    } catch { /* ignore */ }
+  }
+
+  function copySupplierLink(token: string) {
+    navigator.clipboard.writeText(`${window.location.origin}/rfp-builder/supplier/${token}`);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
 
   function exportMarkdown() {
@@ -435,6 +491,58 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         </div>
       </div>
+      {/* Suppliers: two-sided marketplace */}
+      <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg">Suppliers</h2>
+          <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit suppliers</button>
+        </div>
+        <p className="text-sm text-[var(--ink-500)] mb-3">Suppliers are the graded vendors and providers from the Netify marketplace. Invite them to engage, then message, request a demo or request contact details. Each invite gives the supplier a private portal link.</p>
+
+        {suggestions && suggestions.length > 0 && (
+          <div className="mb-4">
+            <p className="eyebrow mb-2">Suggested (best-fit for your context)</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.filter((s) => !connections.some((c) => c.vendor_slug === s.slug)).map((s) => (
+                <button key={s.slug} onClick={() => inviteSupplier(s.slug, `We are running a SASE and SD-WAN RFP and would like ${s.name} to participate.`)} className="px-3.5 py-1.5 text-sm rounded-full border border-amber-500 bg-amber-50 hover:bg-amber-100 transition-colors">
+                  Invite {s.name} ({s.score})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No suppliers invited yet.</p>}
+        <div className="space-y-3">
+          {connections.map((c) => (
+            <details key={c.vendor_slug} className="border border-[var(--ink-300,#ccc)] rounded-sm">
+              <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer flex justify-between">
+                <span>{c.vendor_name}</span>
+                <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">{c.status}</span>
+              </summary>
+              <div className="px-4 pb-3">
+                <div className="space-y-2 my-2">
+                  {c.messages.map((m) => (
+                    <div key={m.id} className={`text-sm rounded-sm p-2 ${m.from === "buyer" ? "bg-amber-50" : "border border-[var(--ink-200,#e5e5e5)]"}`}>
+                      <span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-2">{m.from === "buyer" ? "You" : c.vendor_name} · {m.type}</span>
+                      {m.body}
+                      {Object.keys(m.payload).length > 0 && <span className="block text-[var(--ink-700)] mt-0.5">{Object.entries(m.payload).map(([k, v]) => `${k}: ${v}`).join(" · ")}</span>}
+                    </div>
+                  ))}
+                </div>
+                <textarea value={msgDraft[c.vendor_slug] ?? ""} onChange={(e) => setMsgDraft({ ...msgDraft, [c.vendor_slug]: e.target.value })} rows={2} placeholder="Message to the supplier" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
+                <div className="mt-2 flex gap-2 flex-wrap">
+                  <button onClick={() => connectAction(c.vendor_slug, "message", msgDraft[c.vendor_slug] ?? "")} disabled={!msgDraft[c.vendor_slug]} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
+                  <button onClick={() => connectAction(c.vendor_slug, "demo_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request demo</button>
+                  <button onClick={() => connectAction(c.vendor_slug, "contact_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request contact</button>
+                  <button onClick={() => copySupplierLink(c.token)} className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Copy supplier link</button>
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
       {/* Evaluation: independent cross-check of supplier responses */}
       <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
         <div className="flex items-center justify-between mb-2">

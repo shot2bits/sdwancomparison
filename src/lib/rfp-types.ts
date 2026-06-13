@@ -85,3 +85,45 @@ export const RfpResponseSchema = z.object({
   created: z.number(),
 }).strict();
 export type RfpResponse = z.infer<typeof RfpResponseSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Two-sided marketplace: buyer <-> supplier connections and messaging */
+/* ------------------------------------------------------------------ */
+
+export const MESSAGE_TYPES = [
+  "intro",            // buyer's opening message on invite
+  "message",          // free-text either side
+  "demo_request",     // buyer asks for a demo
+  "demo_response",    // supplier proposes demo details
+  "contact_request",  // buyer asks for contact details
+  "contact_share",    // supplier shares contact details (payload)
+  "decline",          // either side declines
+] as const;
+export type MessageType = (typeof MESSAGE_TYPES)[number];
+
+export const ConnectionMessageSchema = z.object({
+  id: z.string(),
+  from: z.enum(["buyer", "supplier"]),
+  type: z.enum(MESSAGE_TYPES).default("message"),
+  body: z.string().default(""),
+  payload: z.record(z.string(), z.string()).default({}), // contact details, demo slots, etc.
+  created: z.number(),
+  read: z.boolean().default(false),
+}).strict();
+export type ConnectionMessage = z.infer<typeof ConnectionMessageSchema>;
+
+export const CONNECTION_STATUSES = ["invited", "engaged", "demo_requested", "contact_shared", "declined"] as const;
+export type ConnectionStatus = (typeof CONNECTION_STATUSES)[number];
+
+export const SupplierConnectionSchema = z.object({
+  id: z.string(),
+  rfp_id: z.string(),
+  vendor_slug: z.string(),       // ties the supplier to the graded vendor directory
+  vendor_name: z.string(),
+  token: z.string(),             // per-connection supplier access token
+  status: z.enum(CONNECTION_STATUSES).default("invited"),
+  messages: z.array(ConnectionMessageSchema).default([]),
+  created: z.number(),
+  updated: z.number(),
+}).strict();
+export type SupplierConnection = z.infer<typeof SupplierConnectionSchema>;
