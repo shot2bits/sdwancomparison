@@ -403,6 +403,26 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           </div>
         </section>
 
+        {/* UK providers only */}
+        <section>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={input.uk_provider_only}
+              onChange={(e) => set("uk_provider_only", e.target.checked)}
+            />
+            UK-based providers only
+          </label>
+          <p className="mt-1 text-xs text-[var(--ink-500)]">
+            Off by default. The shortlist already includes global vendors such as
+            Cato and Fortinet because they deliver in the UK through UK PoPs and
+            partners; each result explains its UK basis. Switch this on only if you
+            need a UK-registered contract holder (UK HQ or UK entity) for
+            sovereignty or procurement reasons, which narrows the list to providers
+            like BT, Vodafone, Colt, NTT UK, Orange UK and Telefónica Tech UK&amp;I.
+          </p>
+        </section>
+
         {/* Clouds */}
         <section>
           <p className="eyebrow mb-3">Cloud platforms</p>
@@ -789,6 +809,8 @@ function VendorCard({
             </ul>
             <p className="font-medium mt-3 mb-1">Commercials</p>
             <p className="text-[var(--ink-700)]">{v.cost_model}</p>
+            <p className="font-medium mt-3 mb-1">UK basis</p>
+            <p className="text-[var(--ink-700)]">{v.uk_basis}</p>
             <a
               href={v.marketplace_url ?? "https://netify.co.uk/marketplace/"}
               target="_blank"

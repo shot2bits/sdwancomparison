@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Fortinet run FortiOS across FortiGate edge, FortiManager and FortiSASE, meaning networking and security policy are converged on a single operating system rather than integrated via API across separate components. Typically shortlisted by organisations already standardised on Fortinet hardware at the edge, or those looking for a vendor where the convergence story is backed up by a common OS rather than a marketing claim.",
   "value_tier": "value",
-  "cost_note": "Strong price-to-performance from custom ASICs; SD-WAN ships in FortiOS so there is no separate SD-WAN licence."
+  "cost_note": "Strong price-to-performance from custom ASICs; SD-WAN ships in FortiOS so there is no separate SD-WAN licence.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). Strong UK channel and FortiSASE PoPs; widely delivered as a UK managed service by BT, Vodafone and UK MSPs."
 }

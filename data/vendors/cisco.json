@@ -179,5 +179,7 @@
   ],
   "shortlist_summary": "Cisco offer the broadest platform portfolio in the category: Catalyst SD-WAN for enterprise WAN, Meraki MX for cloud-managed branch environments, and Cisco Secure Access for converged SASE delivery. Typically shortlisted by organisations with existing Cisco investments looking to extend rather than replace, though buyers should be specific about which Cisco platform they're evaluating as the architectures and operational models differ considerably.",
   "value_tier": "mid",
-  "cost_note": "Subscription licensing; Meraki is mid, Catalyst total cost runs higher, so blended mid leaning premium."
+  "cost_note": "Subscription licensing; Meraki is mid, Catalyst total cost runs higher, so blended mid leaning premium.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). Extensive UK channel; Catalyst and Meraki widely delivered as UK managed services."
 }

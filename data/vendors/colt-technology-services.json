@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Colt offer SD-WAN and SASE with a European data sovereignty positioning that's hard to match from a carrier without Colt's owned fibre network across European business districts. Typically shortlisted by EU-headquartered organisations or those with compliance requirements around in-region data processing, where sovereignty isn't just a preference but a hard procurement filter.",
   "value_tier": "mid",
-  "cost_note": "Per-site managed with on-demand bandwidth flexing; mid pricing on owned European fibre."
+  "cost_note": "Per-site managed with on-demand bandwidth flexing; mid pricing on owned European fibre.",
+  "uk_delivery": "uk_hq",
+  "uk_basis": "UK headquartered (London). UK contracting entity with owned UK metro fibre and UK support."
 }

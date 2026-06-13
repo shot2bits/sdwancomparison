@@ -177,5 +177,7 @@
   ],
   "shortlist_summary": "SonicWall deliver SD-WAN via existing TZ, NSa and SM firewall appliances, which is a real advantage for organisations already standardised on SonicWall and a less compelling proposition for those that aren't. Typically shortlisted by SMB and mid-market businesses with an existing SonicWall estate looking to add SD-WAN capability without the cost and complexity of introducing new hardware.",
   "value_tier": "budget",
-  "cost_note": "Firewall-led SD-WAN with aggressive SMB and mid-market street pricing; low cost where a SonicWall estate exists."
+  "cost_note": "Firewall-led SD-WAN with aggressive SMB and mid-market street pricing; low cost where a SonicWall estate exists.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). Strong UK SMB and mid-market channel and distribution."
 }

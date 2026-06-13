@@ -185,6 +185,8 @@ export type ShortlistVendor = {
   cost_model: string;
   public_pricing_visibility: "public" | "partial_public" | "quote_based";
   value_tier: "budget" | "value" | "mid" | "premium";
+  uk_delivery: "uk_hq" | "uk_entity" | "uk_pops_partner" | "global_managed";
+  uk_basis: string;
   capabilities: Record<string, CapabilityStatus>;
   deployment_speed: DeploymentSpeed;
   regions: Record<RegionKey, CapabilityStatus>;
@@ -237,6 +239,7 @@ export const ShortlistInputSchema = z.object({
     .default("any"),
   weight_preset: z.enum(WEIGHT_PRESETS).default("balanced"),
   shortlist_size: z.number().int().min(3).max(30).default(8),
+  uk_provider_only: z.boolean().default(false),
   sector: z.enum(SECTOR_KEYS).nullable().default(null),
   organisation_size: z.enum([...ORG_SIZE_KEYS, "any"] as const).default("any"),
   intent: z.enum([...INTENT_KEYS, "none"] as const).default("none"),
@@ -338,6 +341,8 @@ export type VendorVerdict = {
   marketplace_url: string | null;
   shortlist_summary: string;
   value_tier: string;
+  uk_delivery: string;
+  uk_basis: string;
 };
 
 export type ShortlistResult = {
@@ -395,6 +400,7 @@ export function describeCriteria(input: ShortlistInput, featureNames: Record<str
     parts.unshift(`Organisation: ${ORG_SIZE_LABELS[input.organisation_size]}`);
   }
   if (input.intent !== "none") parts.unshift(`Priority: ${INTENT_LABELS[input.intent]}`);
+  if (input.uk_provider_only) parts.unshift("UK-based providers only (UK contracting entity required)");
   parts.push(`Scoring profile: ${input.weight_preset.replace(/_/g, " ")}`);
   return parts.join(". ") + ".";
 }
@@ -496,6 +502,15 @@ export function buildShortlist(
       } else {
         matched.push("Disaster recovery");
         if (status !== "yes") gaps.push(`Disaster recovery: ${STATUS_LABELS[status]}`);
+      }
+    }
+
+    // Gate 6b: UK contracting entity only (opt-in sovereignty filter)
+    if (input.uk_provider_only) {
+      if (v.uk_delivery !== "uk_hq" && v.uk_delivery !== "uk_entity") {
+        gating.push("No UK contracting entity (UK-based providers only is on)");
+      } else {
+        matched.push(v.uk_delivery === "uk_hq" ? "UK headquartered" : "UK contracting entity");
       }
     }
 
@@ -602,6 +617,8 @@ export function buildShortlist(
       marketplace_url: v.marketplace_url,
       shortlist_summary: v.shortlist_summary,
       value_tier: v.value_tier,
+      uk_delivery: v.uk_delivery,
+      uk_basis: v.uk_basis,
     });
   }
 
@@ -649,6 +666,7 @@ export function encodeScenario(input: ShortlistInput): string {
   if (input.sector) p.set("s", input.sector);
   if (input.organisation_size !== "any") p.set("o", input.organisation_size);
   if (input.intent !== "none") p.set("i", input.intent);
+  if (input.uk_provider_only) p.set("uk", "1");
   return p.toString();
 }
 
@@ -693,6 +711,7 @@ export function decodeScenario(
     sector: (SECTOR_KEYS as readonly string[]).includes(p.get("s") ?? "") ? p.get("s") : null,
     organisation_size: p.get("o") ?? "any",
     intent: p.get("i") ?? "none",
+    uk_provider_only: p.get("uk") === "1",
   };
 
   const parsed = ShortlistInputSchema.safeParse(candidate);

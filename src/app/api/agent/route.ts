@@ -64,6 +64,7 @@ function criteriaTool(): Anthropic.Tool {
       },
       weight_preset: { type: "string", enum: [...WEIGHT_PRESETS] },
       shortlist_size: { type: "integer", minimum: 3, maximum: 30 },
+      uk_provider_only: { type: "boolean", description: "Restrict to UK contracting entities only. Use when the buyer needs a UK-based contract holder or sovereignty. Otherwise leave off; global vendors deliver in the UK via PoPs and partners." },
       sector: {
         type: ["string", "null"],
         enum: [...SECTOR_KEYS, null],

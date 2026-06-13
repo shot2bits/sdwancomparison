@@ -179,5 +179,7 @@
   ],
   "shortlist_summary": "Palo Alto Networks offer Prisma SASE, converging SD-WAN, cloud-delivered security and digital experience management (ADEM) under a single platform identity, with security depth that goes well beyond most SD-WAN-first platforms. Typically shortlisted by organisations where security capability and application performance visibility are both weighted heavily, rather than those primarily looking to replace an MPLS estate.",
   "value_tier": "premium",
-  "cost_note": "Per-user Prisma Access plus appliance subscriptions at premium positioning; buyers pay for security depth."
+  "cost_note": "Per-user Prisma Access plus appliance subscriptions at premium positioning; buyers pay for security depth.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). UK Prisma Access presence; delivered direct or via UK partners and carriers."
 }

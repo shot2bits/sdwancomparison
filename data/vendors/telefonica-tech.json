@@ -179,5 +179,7 @@
   ],
   "shortlist_summary": "Telefónica Tech deliver managed SD-WAN via their flexWAN programme alongside a Cisco-based converged SD-WAN, security and SASE service, with particularly strong positioning across Spain, Latin America and parts of Europe. Typically shortlisted by businesses with a footprint in those regions or with existing Telefónica carrier relationships looking to extend into managed SD-WAN and SASE.",
   "value_tier": "mid",
-  "cost_note": "Per-site managed pricing; competitive across Iberia and Latin America."
+  "cost_note": "Per-site managed pricing; competitive across Iberia and Latin America.",
+  "uk_delivery": "uk_entity",
+  "uk_basis": "UK contracting entity (Telefónica Tech UK&I) of a Spanish parent, with local UK delivery teams."
 }

@@ -177,5 +177,7 @@
   ],
   "shortlist_summary": "Juniper Networks offer Mist AI with WAN Assurance, delivering AI-driven monitoring and troubleshooting at the WAN edge at a depth that few competitors match. Typically shortlisted by organisations where AIOps and network assurance quality are weighted evaluation criteria rather than SD-WAN feature breadth, and worth examining more closely than the overall score might suggest if AI-driven operations is a primary requirement.",
   "value_tier": "mid",
-  "cost_note": "Subscription per device and Mist service; mid pricing with operational savings from AIOps."
+  "cost_note": "Subscription per device and Mist service; mid pricing with operational savings from AIOps.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US, now HPE). UK channel and delivery via partners and MSPs."
 }

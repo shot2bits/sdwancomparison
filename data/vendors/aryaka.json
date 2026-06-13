@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Aryaka deliver Unified SASE as a fully managed service end to end, and unlike most managed providers, they own the private global core network rather than relying on public internet paths for the underlay. Typically shortlisted by businesses needing a single end-to-end managed provider with a private backbone, particularly where WAN optimisation and fast global deployment are both requirements.",
   "value_tier": "mid",
-  "cost_note": "Subscription per site with the private middle mile included; pricing reflects the owned core."
+  "cost_note": "Subscription per site with the private middle mile included; pricing reflects the owned core.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). UK PoP on the private core; managed-service delivery into the UK."
 }

@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Versa built multi-tenancy into the platform architecture from day one, which is why they're a common choice for service providers and carriers building their own managed SD-WAN and SASE offerings on top of the Versa technology layer. Typically shortlisted by service providers looking for a technology platform to underpin a managed service, as well as enterprises evaluating Versa direct through a partner.",
   "value_tier": "mid",
-  "cost_note": "Subscription by appliance or software tier; competitive against firewall-heritage stacks, flexible via white-box."
+  "cost_note": "Subscription by appliance or software tier; competitive against firewall-heritage stacks, flexible via white-box.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). Delivered in the UK through carrier and MSP partners building managed services on Versa."
 }

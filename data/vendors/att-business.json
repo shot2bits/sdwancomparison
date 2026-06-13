@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "AT&T bring a large carrier-scale managed SD-WAN portfolio, and the multi-vendor platform approach (including Fortinet for AT&T SASE) means buyers aren't locked into a single underlying technology. Typically shortlisted by US-headquartered and multinational businesses looking for a carrier with both the scale to manage a complex global estate and the flexibility to support more than one platform.",
   "value_tier": "premium",
-  "cost_note": "Carrier-scale managed pricing; premium positioning, US-centric delivery."
+  "cost_note": "Carrier-scale managed pricing; premium positioning, US-centric delivery.",
+  "uk_delivery": "global_managed",
+  "uk_basis": "No UK HQ (US). UK sites served through AT&T's global managed network and partners, not UK-native infrastructure."
 }

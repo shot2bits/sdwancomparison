@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Comcast Business bring the Masergy AIOps heritage into a fully managed or co-managed SASE service combining SD-WAN and security, and that operational intelligence tooling is a genuine differentiator rather than a marketing addition. Typically shortlisted by mid-to-large enterprises where AI-driven operations and strong service visibility are weighted criteria alongside the core SASE capability.",
   "value_tier": "mid",
-  "cost_note": "Per-site managed pricing, often compelling where Comcast access is on-net in the US."
+  "cost_note": "Per-site managed pricing, often compelling where Comcast access is on-net in the US.",
+  "uk_delivery": "global_managed",
+  "uk_basis": "No UK HQ (US). UK delivery via the Masergy global platform and partners."
 }

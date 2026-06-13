@@ -177,5 +177,7 @@
   ],
   "shortlist_summary": "Lumen offer fully managed or co-managed SD-WAN with NaaS positioning and integrated network services, framing the proposition as a longer-term network programme rather than a point SD-WAN deployment. Typically shortlisted by organisations thinking about longer-term infrastructure strategy rather than a tactical overlay, particularly where integrating a broader set of network services under a single provider is part of the requirement.",
   "value_tier": "premium",
-  "cost_note": "Per-site managed; sharp where Lumen fibre is on-net in the US, premium elsewhere."
+  "cost_note": "Per-site managed; sharp where Lumen fibre is on-net in the US, premium elsewhere.",
+  "uk_delivery": "global_managed",
+  "uk_basis": "No UK HQ (US); UK delivery is largely via partners following the EMEA divestment to Colt."
 }

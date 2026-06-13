@@ -177,5 +177,7 @@
   ],
   "shortlist_summary": "HPE Aruba Networking offer EdgeConnect SD-WAN (brought in with the Silver Peak acquisition) as the foundation for single-vendor SASE alongside Aruba SSE, with a strong branch networking heritage and deployment speed of days that's competitive for a platform of this capability breadth. Typically shortlisted by businesses already in the HPE ecosystem or those looking for a single-vendor SASE story built on an established SD-WAN platform.",
   "value_tier": "mid",
-  "cost_note": "Subscription by bandwidth tier; mid-market pricing with strong link-quality value on poor circuits."
+  "cost_note": "Subscription by bandwidth tier; mid-market pricing with strong link-quality value on poor circuits.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). EdgeConnect delivered in the UK via HPE partners and MSPs."
 }

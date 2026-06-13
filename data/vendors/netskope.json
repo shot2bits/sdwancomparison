@@ -176,5 +176,7 @@
   ],
   "shortlist_summary": "Netskope are widely recognised as a leading SSE vendor, particularly for SaaS-heavy environments, with CASB heritage that few competitors match. Typically shortlisted as the security component in a best-of-breed SASE architecture alongside a separate SD-WAN platform, rather than as a single-vendor SD-WAN replacement. The shortlist score reflects SSE depth rather than SD-WAN breadth, which is consistent with how Netskope is most commonly deployed.",
   "value_tier": "mid",
-  "cost_note": "Per-user subscription, premium-adjacent but mid versus the most expensive SSE leaders."
+  "cost_note": "Per-user subscription, premium-adjacent but mid versus the most expensive SSE leaders.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). UK NewEdge presence; delivered direct or via UK security MSPs."
 }

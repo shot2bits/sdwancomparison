@@ -177,5 +177,7 @@
   ],
   "shortlist_summary": "Forcepoint offer FlexEdge Secure SD-WAN combining secure SD-WAN with DLP and data security capability drawn from the wider Forcepoint portfolio, and for organisations where DLP is a hard procurement requirement rather than an optional extra, that combination is meaningful. Typically shortlisted specifically for data security depth rather than as a general-purpose SD-WAN evaluation.",
   "value_tier": "mid",
-  "cost_note": "Per-user SSE and appliance subscriptions; mid pricing, with DLP depth the value driver."
+  "cost_note": "Per-user SSE and appliance subscriptions; mid pricing, with DLP depth the value driver.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). UK delivery via security partners; government and defence heritage suits UK public sector."
 }

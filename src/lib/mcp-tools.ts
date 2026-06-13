@@ -28,6 +28,7 @@ export const MCP_TOOL_DEFINITIONS = [
         sector: { type: "string", enum: ["healthcare", "financial_services", "retail_ecommerce", "manufacturing", "energy_utilities", "government_public_sector", "education", "transport_logistics", "professional_services", "hospitality_leisure"], description: "Filter to vendors with evidence of capability in this sector." },
         organisation_size: { type: "string", enum: ["large_global_enterprise", "mid_market", "small_business", "any"] },
         intent: { type: "string", enum: ["cost_saving", "mpls_migration", "rapid_deployment", "remote_workforce", "security_consolidation", "global_expansion", "none"], description: "Buyer priority; adjusts scoring weights and preferred features." },
+        uk_provider_only: { type: "boolean", description: "Restrict to providers with a UK contracting entity (UK HQ or UK-registered arm). Off by default; global vendors with UK PoPs and partner delivery are otherwise included." },
       },
       required: [],
     },

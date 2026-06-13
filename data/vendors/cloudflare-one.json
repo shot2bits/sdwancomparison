@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Cloudflare One provide one of the largest PoP footprints in the category for SASE traffic via the Cloudflare global edge network, with deployment in hours reflecting a lightweight, agentless onboarding model. Typically shortlisted by organisations prioritising Zero Trust network access and cloud-first security rather than branch WAN replacement: the platform scores more strongly on SSE and ZTNA than on traditional SD-WAN appliance functionality.",
   "value_tier": "value",
-  "cost_note": "Transparent per-user pricing with a public entry tier; competitive for Zero Trust adoption."
+  "cost_note": "Transparent per-user pricing with a public entry tier; competitive for Zero Trust adoption.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). Multiple UK edge locations; self-serve or via UK partners."
 }

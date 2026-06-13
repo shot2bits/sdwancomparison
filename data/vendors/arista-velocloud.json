@@ -177,5 +177,7 @@
   ],
   "shortlist_summary": "Arista acquired VeloCloud in 2025, bringing its strong cloud-delivered gateway architecture into the Arista portfolio, though the long-term product direction is worth clarifying with the vendor directly given how recent the acquisition is. Typically shortlisted by organisations already familiar with VeloCloud's architecture or those evaluating how VeloCloud capabilities will integrate with Arista's EOS and CloudVision portfolio going forward.",
   "value_tier": "mid",
-  "cost_note": "Subscription per edge by bandwidth; historically aggressive through carrier deals."
+  "cost_note": "Subscription per edge by bandwidth; historically aggressive through carrier deals.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (US). VeloCloud delivered in the UK through carriers including BT and Vodafone."
 }

@@ -180,6 +180,8 @@ export function getShortlistDataset(): ShortlistVendor[] {
     cost_model: v.cost_model,
     public_pricing_visibility: v.public_pricing_visibility,
     value_tier: v.value_tier,
+    uk_delivery: v.uk_delivery,
+    uk_basis: v.uk_basis,
     capabilities: v.capabilities,
     deployment_speed: v.deployment_speed,
     regions: v.regions,

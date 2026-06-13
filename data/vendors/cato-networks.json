@@ -179,5 +179,7 @@
   ],
   "shortlist_summary": "Scored as easiest-to-use platform by Netify for the third year running, Cato offer a converged cloud-native SASE platform and is typically shortlisted by businesses needing to consolidate appliances or have limited in-house expertise to manage a SASE solution.",
   "value_tier": "mid",
-  "cost_note": "Quote-based subscription, positioned mid-market: neither the cheapest nor the most expensive, with convergence reducing tool sprawl."
+  "cost_note": "Quote-based subscription, positioned mid-market: neither the cheapest nor the most expensive, with convergence reducing tool sprawl.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (Israel and US). Delivers in the UK from London and Manchester PoPs; contract direct or through UK partners including Netify routes."
 }

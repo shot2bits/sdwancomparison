@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "GTT own a Tier 1 global backbone, which is the foundation for their managed SD-WAN positioning and gives strong international transit capability as a result. Typically shortlisted by organisations with a multinational estate where backbone ownership and international performance are scoring criteria, though it's worth confirming during evaluation how much of the delivery for your specific footprint runs over the GTT network versus public internet paths.",
   "value_tier": "value",
-  "cost_note": "Challenger pricing against incumbent carriers on like-for-like global managed SD-WAN, on a Tier 1 backbone."
+  "cost_note": "Challenger pricing against incumbent carriers on like-for-like global managed SD-WAN, on a Tier 1 backbone.",
+  "uk_delivery": "uk_entity",
+  "uk_basis": "UK contracting entity with UK operations on a Tier 1 backbone; UK and EMEA delivery is established."
 }

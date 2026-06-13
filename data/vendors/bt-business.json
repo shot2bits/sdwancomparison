@@ -177,5 +177,7 @@
   ],
   "shortlist_summary": "BT are the UK market leader for managed SD-WAN, and the main reason for that position is access circuit ownership: BT can manage the underlay and the overlay as a single service, which removes one of the most common pain points in managed SD-WAN deployments. Typically shortlisted by UK-headquartered businesses looking for a single accountable supplier across connectivity, platform and operations.",
   "value_tier": "mid",
-  "cost_note": "Per-site managed pricing bundling circuits, platform and service; mid UK carrier positioning."
+  "cost_note": "Per-site managed pricing bundling circuits, platform and service; mid UK carrier positioning.",
+  "uk_delivery": "uk_hq",
+  "uk_basis": "UK headquartered (BT Group). UK contract holder with owned UK access, UK NOC and SOC, and named UK support."
 }

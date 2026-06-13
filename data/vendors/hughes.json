@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Hughes have a background in satellite and large-scale retail deployment that means the operational model is genuinely built for distributed organisations with site counts in the hundreds or thousands. Typically shortlisted by businesses running a large estate of smaller sites, rather than a smaller number of complex locations, where that specific operational specialism matters more than the likes of SASE security depth.",
   "value_tier": "mid",
-  "cost_note": "Per-site managed tuned to high-volume small sites; value for distributed retail estates."
+  "cost_note": "Per-site managed tuned to high-volume small sites; value for distributed retail estates.",
+  "uk_delivery": "global_managed",
+  "uk_basis": "No UK HQ (US). UK delivery via partners; specialism is distributed retail estates."
 }

@@ -178,5 +178,7 @@
   ],
   "shortlist_summary": "Check Point offer Harmony SASE, combining the established Check Point security heritage with cloud-delivered SASE and SD-WAN performance optimisation. Typically shortlisted by organisations already standardised on Check Point security looking to extend toward SASE rather than replace the security stack, where adding WAN capability whilst avoiding disruption to existing security policy is the priority.",
   "value_tier": "mid",
-  "cost_note": "Per-user SASE plus gateway subscriptions, generally below the premium security rivals."
+  "cost_note": "Per-user SASE plus gateway subscriptions, generally below the premium security rivals.",
+  "uk_delivery": "uk_pops_partner",
+  "uk_basis": "No UK HQ (Israel/US). Harmony SASE UK presence; delivered via UK security partners."
 }
