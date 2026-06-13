@@ -81,8 +81,8 @@
   "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "months",
   "regions": {
-    "uk_ireland": "partial",
-    "europe": "partial",
+    "uk_ireland": "partner_integrated",
+    "europe": "partner_integrated",
     "north_america": "yes",
     "asia_pacific": "partial",
     "middle_east_africa": "partial",
@@ -176,5 +176,7 @@
       "a": "The managed security business was spun into LevelBlue in 2024, continuing to deliver SOC services aligned with AT&T offers. Contract structures may involve both; clarify accountability lines in the RFP."
     }
   ],
-  "shortlist_summary": "AT&T bring a large carrier-scale managed SD-WAN portfolio, and the multi-vendor platform approach (including Fortinet for AT&T SASE) means buyers aren't locked into a single underlying technology. Typically shortlisted by US-headquartered and multinational businesses looking for a carrier with both the scale to manage a complex global estate and the flexibility to support more than one platform."
+  "shortlist_summary": "AT&T bring a large carrier-scale managed SD-WAN portfolio, and the multi-vendor platform approach (including Fortinet for AT&T SASE) means buyers aren't locked into a single underlying technology. Typically shortlisted by US-headquartered and multinational businesses looking for a carrier with both the scale to manage a complex global estate and the flexibility to support more than one platform.",
+  "value_tier": "premium",
+  "cost_note": "Carrier-scale managed pricing; premium positioning, US-centric delivery."
 }

@@ -81,7 +81,7 @@
   "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "weeks",
   "regions": {
-    "uk_ireland": "partial",
+    "uk_ireland": "partner_integrated",
     "europe": "partial",
     "north_america": "yes",
     "asia_pacific": "partial",
@@ -176,5 +176,7 @@
       "a": "Primarily via partners; the operational depth is North American. UK-led estates with US store networks sometimes use Hughes for the US leg alongside a European provider."
     }
   ],
-  "shortlist_summary": "Hughes have a background in satellite and large-scale retail deployment that means the operational model is genuinely built for distributed organisations with site counts in the hundreds or thousands. Typically shortlisted by businesses running a large estate of smaller sites, rather than a smaller number of complex locations, where that specific operational specialism matters more than the likes of SASE security depth."
+  "shortlist_summary": "Hughes have a background in satellite and large-scale retail deployment that means the operational model is genuinely built for distributed organisations with site counts in the hundreds or thousands. Typically shortlisted by businesses running a large estate of smaller sites, rather than a smaller number of complex locations, where that specific operational specialism matters more than the likes of SASE security depth.",
+  "value_tier": "mid",
+  "cost_note": "Per-site managed tuned to high-volume small sites; value for distributed retail estates."
 }

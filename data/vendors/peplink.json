@@ -175,5 +175,7 @@
       "a": "Yes, Starlink integration is actively supported and widely deployed: Peplink routers manage Starlink alongside cellular links with bonding or failover, common in maritime, events and remote operations."
     }
   ],
-  "shortlist_summary": "Peplink offer SpeedFusion bonding technology, genuinely differentiated for sites needing to combine the likes of multiple cellular, broadband or satellite links into a single resilient connection. Typically shortlisted for remote, mobile or hard-to-reach sites where link bonding and cellular resilience are the primary requirements, and where Peplink often outperforms higher-scoring vendors on the criteria that actually matter for that use case."
+  "shortlist_summary": "Peplink offer SpeedFusion bonding technology, genuinely differentiated for sites needing to combine the likes of multiple cellular, broadband or satellite links into a single resilient connection. Typically shortlisted for remote, mobile or hard-to-reach sites where link bonding and cellular resilience are the primary requirements, and where Peplink often outperforms higher-scoring vendors on the criteria that actually matter for that use case.",
+  "value_tier": "budget",
+  "cost_note": "Hardware-led with low entry cost; SpeedFusion bonding gives strong value for connectivity-constrained sites."
 }

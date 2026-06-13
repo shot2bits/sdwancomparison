@@ -184,6 +184,7 @@ export type ShortlistVendor = {
   product_focus?: string;
   cost_model: string;
   public_pricing_visibility: "public" | "partial_public" | "quote_based";
+  value_tier: "budget" | "value" | "mid" | "premium";
   capabilities: Record<string, CapabilityStatus>;
   deployment_speed: DeploymentSpeed;
   regions: Record<RegionKey, CapabilityStatus>;
@@ -266,6 +267,28 @@ const SATISFIES: CapabilityStatus[] = [
   "managed_service_dependent",
 ];
 
+/**
+ * Region fit is judged differently from generic capability: a native "yes"
+ * in a required region must decisively outrank partner-delivered or partial
+ * coverage, so a foreign carrier cannot rank beside in-region providers.
+ */
+const REGION_FIT_POINTS: Record<CapabilityStatus, number> = {
+  yes: 1.0,
+  managed_service_dependent: 0.5,
+  partial: 0.4,
+  partner_integrated: 0.35,
+  unknown: 0,
+  not_primary: 0,
+};
+
+/** Value tier points, used to make the cost-saving priority reflect real cost. */
+const VALUE_POINTS: Record<string, number> = {
+  budget: 1.0,
+  value: 0.85,
+  mid: 0.5,
+  premium: 0.25,
+};
+
 const SPEED_ORDER: Record<DeploymentSpeed, number> = {
   hours: 1,
   days: 2,
@@ -314,6 +337,7 @@ export type VendorVerdict = {
   website: string;
   marketplace_url: string | null;
   shortlist_summary: string;
+  value_tier: string;
 };
 
 export type ShortlistResult = {
@@ -522,8 +546,8 @@ export function buildShortlist(
     }
     // Extended dimensions contribute when the buyer asked about them
     for (const r of input.required_regions) {
-      weighted += STATUS_POINTS[v.regions[r]] * 1.5;
-      weightTotal += 1.5;
+      weighted += REGION_FIT_POINTS[v.regions[r]] * 4;
+      weightTotal += 4;
     }
     for (const c of input.required_clouds) {
       weighted += STATUS_POINTS[v.supported_clouds[c]] * 1.5;
@@ -536,6 +560,10 @@ export function buildShortlist(
     if (input.disaster_recovery_required) {
       weighted += STATUS_POINTS[v.resilience.disaster_recovery] * 1.5;
       weightTotal += 1.5;
+    }
+    if (input.intent === "cost_saving") {
+      weighted += (VALUE_POINTS[v.value_tier] ?? 0.5) * 6;
+      weightTotal += 6;
     }
     if (input.sector) {
       weighted += STATUS_POINTS[v.sectors[input.sector]] * 2;
@@ -573,6 +601,7 @@ export function buildShortlist(
       website: v.website,
       marketplace_url: v.marketplace_url,
       shortlist_summary: v.shortlist_summary,
+      value_tier: v.value_tier,
     });
   }
 

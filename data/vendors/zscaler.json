@@ -175,5 +175,7 @@
       "a": "Yes via managed routes: BT, Vodafone and UK MSPs wrap Zscaler with deployment and operations. Direct DIY suits organisations with capable security teams; smaller estates often find the licensing premium harder to justify."
     }
   ],
-  "shortlist_summary": "Zscaler are the category leader in SSE, with ZIA covering secure internet access, ZPA handling private application access, and ZDX providing digital experience monitoring. Typically shortlisted as the security layer in best-of-breed SASE architectures, often evaluated alongside a separate SD-WAN platform rather than as a converged single-vendor option. For organisations already invested in Zscaler for SSE, ZDX's experience monitoring is often the deciding factor on whether to extend the investment."
+  "shortlist_summary": "Zscaler are the category leader in SSE, with ZIA covering secure internet access, ZPA handling private application access, and ZDX providing digital experience monitoring. Typically shortlisted as the security layer in best-of-breed SASE architectures, often evaluated alongside a separate SD-WAN platform rather than as a converged single-vendor option. For organisations already invested in Zscaler for SSE, ZDX's experience monitoring is often the deciding factor on whether to extend the investment.",
+  "value_tier": "premium",
+  "cost_note": "Per-user Editions, premium priced; transaction scale justifies it for large estates."
 }

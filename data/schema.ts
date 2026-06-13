@@ -232,6 +232,8 @@ export const VendorSchema = z.object({
   // Cost
   cost_model: z.string().min(1),
   public_pricing_visibility: PricingVisibility,
+  value_tier: z.enum(["budget", "value", "mid", "premium"]),
+  cost_note: z.string().min(1),
 
   // Capability matrix (40 features)
   capabilities: Capabilities,

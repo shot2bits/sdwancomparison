@@ -80,8 +80,8 @@
   "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "months",
   "regions": {
-    "uk_ireland": "partial",
-    "europe": "partial",
+    "uk_ireland": "partner_integrated",
+    "europe": "partner_integrated",
     "north_america": "yes",
     "asia_pacific": "partial",
     "middle_east_africa": "unknown",
@@ -175,5 +175,7 @@
       "a": "When your sites are on or near Lumen fibre in North America: on-net economics, backbone DDoS protection and edge compute make the bundle hard to beat for US-centric estates."
     }
   ],
-  "shortlist_summary": "Lumen offer fully managed or co-managed SD-WAN with NaaS positioning and integrated network services, framing the proposition as a longer-term network programme rather than a point SD-WAN deployment. Typically shortlisted by organisations thinking about longer-term infrastructure strategy rather than a tactical overlay, particularly where integrating a broader set of network services under a single provider is part of the requirement."
+  "shortlist_summary": "Lumen offer fully managed or co-managed SD-WAN with NaaS positioning and integrated network services, framing the proposition as a longer-term network programme rather than a point SD-WAN deployment. Typically shortlisted by organisations thinking about longer-term infrastructure strategy rather than a tactical overlay, particularly where integrating a broader set of network services under a single provider is part of the requirement.",
+  "value_tier": "premium",
+  "cost_note": "Per-site managed; sharp where Lumen fibre is on-net in the US, premium elsewhere."
 }

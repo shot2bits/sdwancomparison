@@ -81,7 +81,7 @@
   "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
   "deployment_speed": "weeks",
   "regions": {
-    "uk_ireland": "partial",
+    "uk_ireland": "partner_integrated",
     "europe": "partial",
     "north_america": "yes",
     "asia_pacific": "partial",
@@ -176,5 +176,7 @@
       "a": "Widely bundled at US sites, giving day-one resilience against access cuts. For UK and international sites, confirm equivalent cellular resilience options during design."
     }
   ],
-  "shortlist_summary": "Comcast Business bring the Masergy AIOps heritage into a fully managed or co-managed SASE service combining SD-WAN and security, and that operational intelligence tooling is a genuine differentiator rather than a marketing addition. Typically shortlisted by mid-to-large enterprises where AI-driven operations and strong service visibility are weighted criteria alongside the core SASE capability."
+  "shortlist_summary": "Comcast Business bring the Masergy AIOps heritage into a fully managed or co-managed SASE service combining SD-WAN and security, and that operational intelligence tooling is a genuine differentiator rather than a marketing addition. Typically shortlisted by mid-to-large enterprises where AI-driven operations and strong service visibility are weighted criteria alongside the core SASE capability.",
+  "value_tier": "mid",
+  "cost_note": "Per-site managed pricing, often compelling where Comcast access is on-net in the US."
 }

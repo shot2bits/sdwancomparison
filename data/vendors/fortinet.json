@@ -176,5 +176,7 @@
       "a": "Yes. BT, Vodafone and many UK MSPs offer managed Fortinet SD-WAN and SASE, including co-managed models where your team keeps policy visibility while the provider runs lifecycle and incident response."
     }
   ],
-  "shortlist_summary": "Fortinet run FortiOS across FortiGate edge, FortiManager and FortiSASE, meaning networking and security policy are converged on a single operating system rather than integrated via API across separate components. Typically shortlisted by organisations already standardised on Fortinet hardware at the edge, or those looking for a vendor where the convergence story is backed up by a common OS rather than a marketing claim."
+  "shortlist_summary": "Fortinet run FortiOS across FortiGate edge, FortiManager and FortiSASE, meaning networking and security policy are converged on a single operating system rather than integrated via API across separate components. Typically shortlisted by organisations already standardised on Fortinet hardware at the edge, or those looking for a vendor where the convergence story is backed up by a common OS rather than a marketing claim.",
+  "value_tier": "value",
+  "cost_note": "Strong price-to-performance from custom ASICs; SD-WAN ships in FortiOS so there is no separate SD-WAN licence."
 }

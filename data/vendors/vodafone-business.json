@@ -176,5 +176,7 @@
       "a": "Yes, with established frameworks presence and UK support operations. Public sector buyers often shortlist Vodafone alongside BT where UK contract holding and sovereign support arrangements carry procurement weight."
     }
   ],
-  "shortlist_summary": "Vodafone Business offer managed SD-WAN with integrated mobile and fixed access in a single service, which isn't something every managed provider can deliver natively, and removes a separate contract and point of accountability for organisations running a mixed estate. Typically shortlisted by UK and European businesses looking for a managed provider with strong NaaS credentials and a genuine mobile-plus-fixed story."
+  "shortlist_summary": "Vodafone Business offer managed SD-WAN with integrated mobile and fixed access in a single service, which isn't something every managed provider can deliver natively, and removes a separate contract and point of accountability for organisations running a mixed estate. Typically shortlisted by UK and European businesses looking for a managed provider with strong NaaS credentials and a genuine mobile-plus-fixed story.",
+  "value_tier": "mid",
+  "cost_note": "Per-site managed pricing; fixed-mobile convergence can reduce separate contracts."
 }

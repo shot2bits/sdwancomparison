@@ -177,5 +177,7 @@
       "a": "Yes, through global providers such as Orange Business, Verizon and NTT, and through UK security MSPs. Managed routes suit buyers who want Palo Alto capability without operating Strata Cloud Manager in-house."
     }
   ],
-  "shortlist_summary": "Palo Alto Networks offer Prisma SASE, converging SD-WAN, cloud-delivered security and digital experience management (ADEM) under a single platform identity, with security depth that goes well beyond most SD-WAN-first platforms. Typically shortlisted by organisations where security capability and application performance visibility are both weighted heavily, rather than those primarily looking to replace an MPLS estate."
+  "shortlist_summary": "Palo Alto Networks offer Prisma SASE, converging SD-WAN, cloud-delivered security and digital experience management (ADEM) under a single platform identity, with security depth that goes well beyond most SD-WAN-first platforms. Typically shortlisted by organisations where security capability and application performance visibility are both weighted heavily, rather than those primarily looking to replace an MPLS estate.",
+  "value_tier": "premium",
+  "cost_note": "Per-user Prisma Access plus appliance subscriptions at premium positioning; buyers pay for security depth."
 }

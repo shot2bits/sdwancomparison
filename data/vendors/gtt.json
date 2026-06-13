@@ -176,5 +176,7 @@
       "a": "A multi-vendor bench including Fortinet and VeloCloud lineages with SASE outcomes via partner SSE; GTT proposes against your estate with its backbone and aggregation as the constant."
     }
   ],
-  "shortlist_summary": "GTT own a Tier 1 global backbone, which is the foundation for their managed SD-WAN positioning and gives strong international transit capability as a result. Typically shortlisted by organisations with a multinational estate where backbone ownership and international performance are scoring criteria, though it's worth confirming during evaluation how much of the delivery for your specific footprint runs over the GTT network versus public internet paths."
+  "shortlist_summary": "GTT own a Tier 1 global backbone, which is the foundation for their managed SD-WAN positioning and gives strong international transit capability as a result. Typically shortlisted by organisations with a multinational estate where backbone ownership and international performance are scoring criteria, though it's worth confirming during evaluation how much of the delivery for your specific footprint runs over the GTT network versus public internet paths.",
+  "value_tier": "value",
+  "cost_note": "Challenger pricing against incumbent carriers on like-for-like global managed SD-WAN, on a Tier 1 backbone."
 }

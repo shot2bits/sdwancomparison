@@ -740,7 +740,7 @@ function VendorCard({
               {v.name}
             </a>
           </h3>
-          <p className="text-sm text-[var(--ink-500)]">{v.category} · Typical deployment: {v.deployment_speed}</p>
+          <p className="text-sm text-[var(--ink-500)]">{v.category} · Typical deployment: {v.deployment_speed} · {v.value_tier} pricing tier</p>
         </div>
         <div className="flex gap-2 shrink-0">
           <button
