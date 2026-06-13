@@ -3,6 +3,7 @@ import { getProject, listResponses, saveResponse, newId, kvConfigured } from "@/
 import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { recordCompletenessSample } from "@/lib/rfp-store";
+import { sessionFromRequest, requireSupplierFor } from "@/lib/auth";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -36,6 +37,10 @@ export async function POST(req: Request, ctx: Ctx) {
     return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors });
   }
   if (!body.vendor) return Response.json({ error: "vendor is required." }, { status: 422, headers: cors });
+  const slug = matchVendorSlug(body.vendor);
+  const session = await sessionFromRequest(req);
+  const gate = requireSupplierFor(session, slug ?? "__unmatched__", cors);
+  if (gate) return gate;
   const existing = (await listResponses(id)).find((r) => r.vendor === body.vendor);
   const response = RfpResponseSchema.parse({
     id: existing?.id ?? newId("resp"),

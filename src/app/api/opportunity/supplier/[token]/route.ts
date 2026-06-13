@@ -2,6 +2,7 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { resolveOpportunityToken, getOpportunity, kvConfigured } from "@/lib/rfp-store";
 import { addFeedItem, vendorName } from "@/lib/opportunity";
 import type { Pricing } from "@/lib/opportunity-types";
+import { sessionFromRequest, requireSupplierFor } from "@/lib/auth";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ token: string }> };
@@ -29,6 +30,9 @@ export async function POST(req: Request, ctx: Ctx) {
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
   if (opp.status !== "open") return Response.json({ error: "This opportunity is not open." }, { status: 409, headers: cors });
+  const session = await sessionFromRequest(req);
+  const gate = requireSupplierFor(session, ref.vendor_slug, cors);
+  if (gate) return gate;
   let body: { type?: string; body?: string; pricing?: Pricing };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const allowed = ["comment", "pricing", "interest", "decline"];

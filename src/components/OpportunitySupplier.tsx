@@ -42,7 +42,7 @@ export default function OpportunitySupplier({ token }: { token: string }) {
     setError(null);
     try {
       const res = await fetch(`/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing }) });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not send."); }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.auth_required ? "Please sign in above with your supplier work email first." : (e.error ?? "Could not send.")); }
       const updated = (await res.json()) as Opp;
       setFeed(updated.feed); lastTs.current = Math.max(0, ...updated.feed.map((f) => f.created));
     } catch (e) { setError(e instanceof Error ? e.message : "Could not send."); }

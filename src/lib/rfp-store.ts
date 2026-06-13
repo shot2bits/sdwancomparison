@@ -237,3 +237,61 @@ export async function inviteToOpportunity(oppId: string, vendorSlug: string): Pr
 export async function resolveOpportunityToken(token: string): Promise<{ opp_id: string; vendor_slug: string } | null> {
   return getJson<{ opp_id: string; vendor_slug: string }>(`opp:tok:${token}`);
 }
+
+/* ------------------------------------------------------------------ */
+/* Auth: magic-link tokens and sessions                                */
+/* ------------------------------------------------------------------ */
+
+export type AuthSession = {
+  token: string;
+  role: "supplier" | "buyer" | "netify";
+  email: string;
+  vendor_slug: string | null; // set for supplier/netify-relay
+  created: number;
+  expires: number;
+};
+
+const MAGIC_TTL_MS = 20 * 60 * 1000;       // 20 minutes
+const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+export async function createMagicToken(payload: { role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null }): Promise<string> {
+  const token = newId("magic");
+  await kv(["SET", `auth:magic:${token}`, JSON.stringify({ ...payload, created: Date.now(), expires: Date.now() + MAGIC_TTL_MS })]);
+  await kv(["PEXPIRE", `auth:magic:${token}`, MAGIC_TTL_MS]);
+  return token;
+}
+
+export async function consumeMagicToken(token: string): Promise<{ role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null } | null> {
+  const data = await getJson<{ role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null; expires: number }>(`auth:magic:${token}`);
+  if (!data || data.expires < Date.now()) return null;
+  await kv(["DEL", `auth:magic:${token}`]);
+  return { role: data.role, email: data.email, vendor_slug: data.vendor_slug };
+}
+
+export async function createSession(payload: { role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null }): Promise<AuthSession> {
+  const token = newId("sess");
+  const session: AuthSession = { token, ...payload, created: Date.now(), expires: Date.now() + SESSION_TTL_MS };
+  await kv(["SET", `auth:sess:${token}`, JSON.stringify(session)]);
+  await kv(["PEXPIRE", `auth:sess:${token}`, SESSION_TTL_MS]);
+  return session;
+}
+
+export async function getSession(token: string | null | undefined): Promise<AuthSession | null> {
+  if (!token) return null;
+  const s = await getJson<AuthSession>(`auth:sess:${token}`);
+  if (!s || s.expires < Date.now()) return null;
+  return s;
+}
+
+export async function deleteSession(token: string): Promise<void> {
+  await kv(["DEL", `auth:sess:${token}`]);
+}
+
+/* Buyer RFP ownership index (optional account) */
+export async function indexRfpForBuyer(email: string, rfpId: string): Promise<void> {
+  await kv(["SADD", `buyer:${email.toLowerCase()}:rfps`, rfpId]);
+}
+export async function listBuyerRfpIds(email: string): Promise<string[]> {
+  if (!kvConfigured()) return [];
+  return ((await kv(["SMEMBERS", `buyer:${email.toLowerCase()}:rfps`])) as string[]) ?? [];
+}

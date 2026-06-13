@@ -2,6 +2,8 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError } from "@/lib/rfp-store";
 import { BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
+import { sessionFromRequest } from "@/lib/auth";
+import { indexRfpForBuyer } from "@/lib/rfp-store";
 
 export const runtime = "nodejs";
 
@@ -36,5 +38,9 @@ export async function POST(req: Request) {
     methodology_version: "2026.1",
   });
   const saved = await saveProject(project);
+  const session = await sessionFromRequest(req);
+  if (session && (session.role === "buyer" || session.role === "netify")) {
+    try { await indexRfpForBuyer(session.email, saved.id); } catch { /* best effort */ }
+  }
   return Response.json(saved, { headers: cors });
 }
