@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import RfpBuilder from "@/components/RfpBuilder";
 import { buildMethodology } from "@/lib/rfp-methodology";
+import { featureList } from "@/lib/capabilities";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -37,6 +38,7 @@ export default function RfpBuilderPage() {
     offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
     provider: { "@id": `${SITE_URL}/#organization` },
     softwareVersion: m.version,
+    featureList: featureList(),
   };
   const schemas = [getOrganizationSchema(), getBreadcrumbSchema("RFP builder", "/rfp-builder"), getSpeakableSchema("/rfp-builder"), webApp];
 

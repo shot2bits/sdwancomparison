@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
+import { featureList } from "@/lib/capabilities";
 
 export const metadata: Metadata = {
   title: "How the Netify SASE & SD-WAN marketplace works",
@@ -85,6 +86,18 @@ export default function HowItWorksPage() {
       "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: FAQS.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "@id": `${SITE_URL}/#marketplace-app`,
+      name: "Netify SASE and SD-WAN marketplace",
+      url: SITE_URL,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+      featureList: featureList(),
+      potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/capabilities.json`, description: "Machine-readable capability catalogue for agents." },
     },
   ];
 

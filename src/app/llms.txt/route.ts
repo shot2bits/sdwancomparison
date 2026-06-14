@@ -41,6 +41,12 @@ ${bestPages}
 
 ${SITE_URL}/llms-full.txt carries every ranking in plain text with canonical URLs, one fetch for the whole dataset.
 
+## Capabilities
+
+A machine-readable capability catalogue is served at ${SITE_URL}/capabilities.json, listing every action, the surface that exposes it (page, REST and MCP), and its access tier. Access model, by design pull versus push:
+- Open (no identity, agent-drivable anonymously): discover and compare vendors, build a ranked shortlist, build a full SASE and SD-WAN RFP, post a need or a quick pricing request for underlay or overlay to the public board, and read the board. These are pull-based: suppliers discover and respond, so an anonymous AI agent can use the tool end to end.
+- Identified (push, reaches named suppliers): publishing directly to chosen suppliers, messaging a vendor, requesting contact details, and a supplier responding. These accept either a human magic-link sign-in or an agent token, so an authorised agent can also perform them. Identity is required only because these contact real suppliers, never to read or build.
+
 ## Access model
 
 Reference and discovery surfaces are open and ungated for AI engines and agents: the methodology, the question bank, the shortlist data, vendor profiles, published RFPs and opportunities, and the MCP read tools. Building an RFP needs no login. Identity-asserting supplier writes (responding, pricing, sharing contact) require a domain-verified sign-in; supplier AI agents authenticate with their issued per-supplier token instead.
