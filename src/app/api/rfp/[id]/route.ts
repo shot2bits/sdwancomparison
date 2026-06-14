@@ -3,6 +3,7 @@ import { getProject, saveProject, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark } from "@/lib/rfp-store";
+import { sessionFromRequest } from "@/lib/auth";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -33,10 +34,27 @@ export async function PUT(req: Request, ctx: Ctx) {
   } catch {
     return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors });
   }
+
+  // Mutation needs identity. The whole RFP is being rewritten here, so an open
+  // PUT would let anyone with the id overwrite the project, its buyer context
+  // and its status. Require a buyer/Netify session OR the RFP manage_token (the
+  // builder UI and agents both already hold it). Reading stays open via GET.
+  const session = await sessionFromRequest(req);
+  const sessionOk = session?.role === "buyer" || session?.role === "netify";
+  const tokenOk = Boolean(existing.manage_token) && body.manage_token === existing.manage_token;
+  if (!sessionOk && !tokenOk) {
+    return Response.json(
+      { error: "Updating an RFP needs identity. Sign in, or pass the RFP manage_token (issued when the RFP was created).", auth_required: true },
+      { status: 401, headers: cors },
+    );
+  }
+
   const regenerate = body.regenerate === true;
   delete body.regenerate;
 
-  let merged = { ...existing, ...(body as object), id: existing.id, share_token: existing.share_token, created: existing.created } as typeof existing;
+  // Preserve immutable/credential fields: a PUT must never rotate the manage_token
+  // or reassign identity-bearing tokens.
+  let merged = { ...existing, ...(body as object), id: existing.id, share_token: existing.share_token, created: existing.created, manage_token: existing.manage_token } as typeof existing;
 
   // Regenerate methodology sections from buyer context, preserving custom and mandatory choices.
   if (regenerate) {

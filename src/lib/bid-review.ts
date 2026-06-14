@@ -14,6 +14,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { getVendor, STATUS_LABELS } from "@/lib/vendors";
+import { regulation } from "@/lib/rfp-compliance";
 import { newId } from "@/lib/rfp-store";
 import { saveReview, proposeApproval, recordAudit } from "@/lib/agent-store";
 import type { ProcurementGoal } from "@/lib/agent-types";
@@ -61,17 +62,44 @@ function evidenceLayer(project: ProjectDetails, resp: RfpResponse, goal: Procure
     detail: `${answeredCount} of ${required.length} required questions answered (${Math.round(coverage * 100)}%).`,
   });
 
-  // must_have coverage from the goal (deterministic: is each must-have feature answered at all).
+  // must_have coverage from the goal. A must-have can be a single feature id, a
+  // question id, or a compliance key (e.g. pci_dss, dora). Compliance keys are
+  // resolved through the regulation engine to the methodology features that
+  // evidence them, and coverage is measured against every answered question in
+  // the RFP, not only the required ones, so the check is meaningful before we
+  // let autonomous chasing or risk alerts depend on it.
   if (goal?.must_have.length) {
+    const answeredFeatures = new Set<string>();
+    for (const s of project.rfp_sections) {
+      if (!s.included) continue;
+      for (const q of s.questions) if (answeredText(resp, q.id).length > 0) answeredFeatures.add(q.feature_id);
+    }
     for (const mh of goal.must_have) {
-      const matched = required.find(({ q }) => q.feature_id === mh || q.id === mh);
-      const answered = matched ? answeredText(resp, matched.q.id).length > 0 : false;
-      checks.push({
-        key: `must_have:${mh}`,
-        label: `Must-have addressed: ${mh}`,
-        pass: answered,
-        detail: matched ? (answered ? "Answered." : "Not answered in this bid.") : "No matching question in the RFP.",
-      });
+      const reg = regulation(mh);
+      if (reg) {
+        const feats = reg.required_features;
+        const addressed = feats.filter((f) => answeredFeatures.has(f));
+        const missing = feats.filter((f) => !answeredFeatures.has(f));
+        checks.push({
+          key: `must_have:${mh}`,
+          label: `Compliance must-have: ${reg.label}`,
+          pass: feats.length > 0 && missing.length === 0,
+          detail: feats.length
+            ? `${addressed.length} of ${feats.length} evidencing features answered${missing.length ? ` (missing: ${missing.join(", ")})` : ""}.`
+            : "Regulation has no mapped evidencing features.",
+        });
+      } else {
+        const matched = required.find(({ q }) => q.feature_id === mh || q.id === mh) ?? null;
+        const answered = matched ? answeredText(resp, matched.q.id).length > 0 : answeredFeatures.has(mh);
+        checks.push({
+          key: `must_have:${mh}`,
+          label: `Must-have addressed: ${mh}`,
+          pass: answered,
+          detail: matched
+            ? (answered ? "Answered." : "Not answered in this bid.")
+            : (answered ? "Answered (non-required question)." : "No matching question in the RFP."),
+        });
+      }
     }
   }
 

@@ -405,16 +405,73 @@ export function describeCriteria(input: ShortlistInput, featureNames: Record<str
   return parts.join(". ") + ".";
 }
 
+// Common free-form region names mapped to the canonical REGION_KEYS, so buyer
+// context coming from the agent, the RFP or an external caller (which may say
+// "UK" or "EU" rather than "uk_ireland"/"europe") resolves instead of being
+// dropped.
+const REGION_ALIASES: Record<string, RegionKey> = {
+  uk: "uk_ireland", "u.k.": "uk_ireland", gb: "uk_ireland", "united kingdom": "uk_ireland",
+  britain: "uk_ireland", ireland: "uk_ireland", eire: "uk_ireland", ie: "uk_ireland",
+  eu: "europe", "e.u.": "europe", emea: "europe", "europe & uk": "europe",
+  us: "north_america", usa: "north_america", "u.s.": "north_america", "united states": "north_america",
+  "north america": "north_america", canada: "north_america", na: "north_america",
+  apac: "asia_pacific", asia: "asia_pacific", "asia pacific": "asia_pacific", anz: "asia_pacific",
+  mea: "middle_east_africa", "middle east": "middle_east_africa", africa: "middle_east_africa",
+  latam: "latin_america", "latin america": "latin_america", "south america": "latin_america",
+  china: "china_mainland", prc: "china_mainland",
+};
+
+/**
+ * Coerce arbitrary buyer-context input into something ShortlistInputSchema can
+ * parse without throwing. Unknown enum members are dropped (scalars fall back to
+ * their default, array members are filtered out), and common region names are
+ * aliased to canonical keys. This is the boundary that keeps callers like the
+ * publish route and the agent's vendor suggestion robust to free-form input.
+ */
+function sanitiseShortlistInput(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== "object") return {};
+  const r = { ...(raw as Record<string, unknown>) };
+  const has = (set: readonly string[], v: unknown) => typeof v === "string" && (set as readonly string[]).includes(v);
+  const filterArr = (v: unknown, set: readonly string[]) => Array.isArray(v) ? v.filter((x) => has(set, x)) : undefined;
+
+  if ("required_regions" in r) {
+    const arr = Array.isArray(r.required_regions) ? r.required_regions : [];
+    const mapped = arr.map((x) => {
+      if (has(REGION_KEYS, x)) return x as RegionKey;
+      const alias = typeof x === "string" ? REGION_ALIASES[x.trim().toLowerCase()] : undefined;
+      return alias;
+    }).filter((x): x is RegionKey => Boolean(x));
+    r.required_regions = Array.from(new Set(mapped));
+  }
+  if ("required_clouds" in r) r.required_clouds = filterArr(r.required_clouds, CLOUD_KEYS) ?? [];
+  if ("ai_requirements" in r) r.ai_requirements = filterArr(r.ai_requirements, AI_KEYS) ?? [];
+  if ("required_features" in r && !Array.isArray(r.required_features)) delete r.required_features;
+  if ("preferred_features" in r && !Array.isArray(r.preferred_features)) delete r.preferred_features;
+  if ("service_model" in r && !has(SERVICE_MODELS, r.service_model)) delete r.service_model;
+  if ("weight_preset" in r && !has(WEIGHT_PRESETS, r.weight_preset)) delete r.weight_preset;
+  if ("max_deployment_speed" in r && !has(["hours", "days", "weeks", "months", "any"], r.max_deployment_speed)) delete r.max_deployment_speed;
+  if ("sector" in r && r.sector !== null && !has(SECTOR_KEYS, r.sector)) r.sector = null;
+  if ("organisation_size" in r && !has([...ORG_SIZE_KEYS, "any"], r.organisation_size)) delete r.organisation_size;
+  if ("intent" in r && !has([...INTENT_KEYS, "none"], r.intent)) delete r.intent;
+  if ("shortlist_size" in r && typeof r.shortlist_size === "number") r.shortlist_size = Math.max(3, Math.min(30, Math.round(r.shortlist_size)));
+  return r;
+}
+
 /**
  * Build the shortlist. Pure function: same inputs always give the same output.
  * Verdict logic is mirrored nowhere; every surface calls this directly.
+ *
+ * Input is sanitised before parsing, so imperfect buyer context degrades to
+ * sensible defaults rather than throwing. This is what stops the publish path
+ * (and any agent-driven caller) from 500ing on a stray region or sector value.
  */
 export function buildShortlist(
   vendors: ShortlistVendor[],
   rawInput: unknown,
   featureNames: Record<string, string> = {},
 ): ShortlistResult {
-  const parsed = ShortlistInputSchema.parse(rawInput ?? {});
+  const safe = ShortlistInputSchema.safeParse(sanitiseShortlistInput(rawInput));
+  const parsed = safe.success ? safe.data : ShortlistInputSchema.parse({});
   // Apply buyer intent preset (non-destructive: merges preferences)
   const preset = parsed.intent !== "none" ? INTENT_PRESETS[parsed.intent] : null;
   const input: ShortlistInput = preset
