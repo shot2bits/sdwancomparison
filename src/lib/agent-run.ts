@@ -178,7 +178,7 @@ export async function runAgentLoop(trigger: "cron" | "manual"): Promise<AgentRun
   const started = Date.now();
   const report: AgentRun = {
     id: runId, trigger, started, finished: 0, considered: 0, processed: 0, skipped: 0,
-    deferred: 0, proposals_created: 0, digests_created: 0, llm_calls: 0, note: "", errors: [],
+    deferred: 0, proposals_created: 0, digests_created: 0, sends: 0, llm_calls: 0, note: "", errors: [],
   };
 
   const runToken = await acquireLock(RUN_LOCK, RUN_LOCK_TTL_MS);
@@ -228,7 +228,7 @@ export async function runAgentLoop(trigger: "cron" | "manual"): Promise<AgentRun
     // logs (no admin auth needed to confirm a scheduled run processed or skipped
     // correctly). Supplier-facing sends are structurally impossible here, so a
     // zero-send run is implied by the loop having no outbound path.
-    console.log(`[agent-run] ${trigger} ${report.id}: considered=${report.considered} processed=${report.processed} skipped=${report.skipped} deferred=${report.deferred} proposals=${report.proposals_created} digests=${report.digests_created} llm=${report.llm_calls} errors=${report.errors.length}${report.note ? ` note="${report.note}"` : ""}`);
+    console.log(`[agent-run] ${trigger} ${report.id}: considered=${report.considered} processed=${report.processed} skipped=${report.skipped} deferred=${report.deferred} proposals=${report.proposals_created} digests=${report.digests_created} sends=${report.sends} llm=${report.llm_calls} errors=${report.errors.length}${report.note ? ` note="${report.note}"` : ""}`);
     try { await saveRun(report); } catch { /* best effort */ }
     await releaseLock(RUN_LOCK, runToken);
   }

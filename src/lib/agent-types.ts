@@ -224,6 +224,11 @@ export const AgentRunSchema = z.object({
   deferred: z.number().default(0),     // hit budget/soft-deadline, left for next run
   proposals_created: z.number().default(0),
   digests_created: z.number().default(0),
+  // Supplier-facing actions executed by this run. In Slice 2 the loop has no
+  // outbound path, so this is always 0; it is a positive, observable assertion
+  // in the run output, and any future slice that executes a send MUST increment
+  // it (and only after approval), so a non-zero value is immediately auditable.
+  sends: z.number().default(0),
   llm_calls: z.number().default(0),
   note: z.string().default(""),        // e.g. "another run in progress"
   errors: z.array(z.string()).default([]),
