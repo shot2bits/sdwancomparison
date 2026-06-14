@@ -3,7 +3,7 @@ import { kvConfigured } from "@/lib/rfp-store";
 import { sessionFromRequest } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/access-control";
 import { runAgentLoop } from "@/lib/agent-run";
-import { forceClearLock, listRuns } from "@/lib/agent-store";
+import { forceClearLock, listRuns, backdateApproval } from "@/lib/agent-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   const ok = cronAuthorised(req) || (await adminAuthorised(req));
   if (!ok) return Response.json({ error: "Unauthorised. Netify admin or cron secret required." }, { status: 401, headers: cors });
 
-  let body: { action?: string; key?: string } = {};
+  let body: { action?: string; key?: string; rfp_id?: string; approval_id?: string; days?: number } = {};
   try { body = await req.json(); } catch { /* optional */ }
 
   if (body.action === "clear_lock") {
@@ -53,6 +53,14 @@ export async function POST(req: Request) {
   }
   if (body.action === "runs") {
     return Response.json({ ok: true, runs: await listRuns(20) }, { headers: cors });
+  }
+  // Admin test hook: age a pending approval so the stale-approval check (5 days)
+  // can be proven live without waiting. Admin only (gated above).
+  if (body.action === "age_approval") {
+    if (!body.rfp_id || !body.approval_id) return Response.json({ error: "rfp_id and approval_id required." }, { status: 422, headers: cors });
+    const days = typeof body.days === "number" ? body.days : 6;
+    const aged = await backdateApproval(body.rfp_id, body.approval_id, days * 24 * 60 * 60 * 1000);
+    return Response.json({ ok: Boolean(aged), aged }, { headers: cors });
   }
 
   const report = await runAgentLoop("manual");

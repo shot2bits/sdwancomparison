@@ -132,6 +132,21 @@ export async function setApprovalStatus(rfpId: string, id: string, status: Appro
   return all[idx];
 }
 
+/**
+ * Test hook (admin only): age a pending approval by moving its `created`
+ * timestamp back, so the stale-approval check (5 days) can be proven live
+ * without waiting. Only `created` is changed; `expires` is left intact so the
+ * proposal is stale but not expired. Not part of any normal flow.
+ */
+export async function backdateApproval(rfpId: string, id: string, ms: number): Promise<ApprovalItem | null> {
+  const all = await listApprovals(rfpId);
+  const idx = all.findIndex((a) => a.id === id);
+  if (idx < 0) return null;
+  all[idx] = { ...all[idx], created: all[idx].created - ms };
+  await writeApprovals(rfpId, all);
+  return all[idx];
+}
+
 /* ---- Bid reviews ---- */
 
 export async function listReviews(rfpId: string): Promise<BidReview[]> {
