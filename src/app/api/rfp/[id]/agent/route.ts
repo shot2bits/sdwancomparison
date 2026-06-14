@@ -14,7 +14,10 @@ import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
-const MODEL = "claude-sonnet-4-6";
+// Haiku: the agent does structured tool-use and short rationales; the heavy
+// section synthesis is deterministic methodology code, so a fast model fits
+// and roughly halves the round-trip time versus Sonnet.
+const MODEL = "claude-haiku-4-5-20251001";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -146,6 +149,8 @@ Current buyer context: ${JSON.stringify(project.buyer)}.
 Sections present: ${project.rfp_sections.map((s) => `${s.category} (${s.questions.filter((q) => q.priority !== "optional").length} active)`).join(", ") || "none yet"}.
 ${threadsSummary}
 
+Efficiency. Work in as few steps as possible. When the buyer already gives enough context to build (sector, scope, region), do it in one move: call update_buyer_context and regenerate_sections together in the same turn, add any sector-specific questions in that same turn (batch multiple add_question calls at once rather than one per turn), then give the closing narrative. Do not spread the work across many turns.
+
 Keep replies concise and in UK English. Never use em or en dashes; use commas or full stops. No marketing filler. After using tools, tell the buyer what you changed and why, then offer the next step.`;
 }
 
@@ -190,7 +195,7 @@ export async function POST(req: Request, ctx: Ctx) {
     for (let turn = 0; turn < 5; turn++) {
       const res = await client.messages.create({
         model: MODEL,
-        max_tokens: 1500,
+        max_tokens: 1024,
         system: systemPrompt(project, threadsSummary),
         tools: tools(),
         messages,
