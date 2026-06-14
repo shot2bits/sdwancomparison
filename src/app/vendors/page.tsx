@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   getVendorsByGroup,
+  getAllVendors,
   GROUP_LABELS,
   GROUP_DESCRIPTIONS,
   type VendorGroup,
 } from "@/lib/vendors";
+import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/vendors" },
@@ -25,9 +27,35 @@ const GROUP_ORDER: VendorGroup[] = [
 export default function VendorsPage() {
   const grouped = getVendorsByGroup();
   const totalCount = Object.values(grouped).reduce((sum, g) => sum + g.length, 0);
+  const allVendors = getAllVendors();
+
+  const schemas = [
+    getOrganizationSchema(),
+    getBreadcrumbSchema("Vendors", "/vendors"),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "@id": `${SITE_URL}/vendors#collection`,
+      name: `All ${totalCount} SD-WAN and SASE vendors`,
+      description: `Directory of ${totalCount} SD-WAN and SASE platforms and managed providers, each graded against a 40-feature evaluation framework.`,
+      url: `${SITE_URL}/vendors`,
+      isPartOf: { "@id": `${SITE_URL}/#organization` },
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: allVendors.length,
+        itemListElement: allVendors.map((v, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: v.name,
+          url: `${SITE_URL}/vendors/${v.slug}`,
+        })),
+      },
+    },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
+      {schemas.map((s, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />)}
       <div className="mb-12 max-w-3xl fade-rise">
         <p className="eyebrow mb-3">Vendor index</p>
         <h1 id="page-h1" className="mb-4">All {totalCount} SD-WAN and SASE vendors.</h1>

@@ -5,6 +5,9 @@ import { getAllVendors, FEATURES, FEATURE_CATEGORIES } from "@/lib/vendors";
 import { SITE_URL, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
+  title: "Netify: SASE, SSE and SD-WAN marketplace and RFP builder",
+  description:
+    "Vendor-neutral SASE, SSE and SD-WAN marketplace. Compare 30 graded vendors, run a reverse auction or live quote room, or build an RFP. Browse free, agent-ready.",
   alternates: { canonical: `${SITE_URL}/` },
 };
 
