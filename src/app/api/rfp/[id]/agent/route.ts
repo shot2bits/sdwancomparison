@@ -13,7 +13,7 @@ import { inviteSupplier } from "@/lib/rfp-connect";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 120;
 const MODEL = "claude-sonnet-4-6";
 
 type Ctx = { params: Promise<{ id: string }> };

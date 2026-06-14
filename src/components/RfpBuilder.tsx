@@ -59,6 +59,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
 
   // AI custom question composer
@@ -153,15 +154,24 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function send() {
     if (!project || !prompt.trim() || busy) return;
     const next = [...messages, { role: "user" as const, content: prompt }];
-    setMessages(next); setPrompt(""); setBusy(true); setError(null);
+    setMessages(next); setPrompt(""); setBusy(true); setError(null); setElapsed(0);
+    const tick = setInterval(() => setElapsed((e) => e + 1), 1000);
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 115000);
     try {
-      const res = await fetch(`/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }) });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "The advisor could not respond."); }
+      const res = await fetch(`/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }), signal: ctrl.signal });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error ?? `The advisor could not respond (${res.status}).`); }
       const data = (await res.json()) as { narrative?: string; project?: Project };
       if (data.project) setProject(data.project);
       if (data.narrative) setMessages([...next, { role: "assistant", content: data.narrative }]);
-    } catch (e) { setError(e instanceof Error ? e.message : "The advisor could not respond."); }
-    finally { setBusy(false); }
+      else setMessages([...next, { role: "assistant", content: "Done. Review the sections below, or tell me what to change." }]);
+    } catch (e) {
+      const msg = (e instanceof Error && e.name === "AbortError")
+        ? "That took too long. Try a shorter request, or use Build it myself to pick scope and questions directly."
+        : (e instanceof Error ? e.message : "The advisor could not respond.");
+      setError(msg);
+    }
+    finally { clearInterval(tick); clearTimeout(timeout); setBusy(false); }
   }
 
   function toggleQuestion(category: string, qid: string) {
@@ -416,7 +426,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                   {m.role === "user" ? `You: ${m.content}` : m.content}
                 </div>
               ))}
-              {busy && <p className="text-sm text-[var(--ink-500)]">Thinking...</p>}
+              {busy && <p className="text-sm text-[var(--ink-500)]">Drafting your RFP: synthesising requirements and building sections. This usually takes 20 to 40 seconds{elapsed > 0 ? ` (${elapsed}s)` : ""}.</p>}
             </div>
             <div className="mt-3 flex gap-2">
               <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} rows={2} placeholder="Example: healthcare, 40 UK sites, ZTNA and DLP, fully managed. Make it more cloud-security focused." className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-sm" />
