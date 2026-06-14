@@ -60,6 +60,18 @@ async function setJson(key: string, value: unknown): Promise<void> {
   await kv(["SET", key, JSON.stringify(value)]);
 }
 
+/* Public JSON/command helpers so sibling stores (buyer memory, agent store)
+ * share one KV access path instead of re-implementing the REST plumbing. */
+export async function kvGetJson<T>(key: string): Promise<T | null> {
+  return getJson<T>(key);
+}
+export async function kvSetJson(key: string, value: unknown): Promise<void> {
+  return setJson(key, value);
+}
+export async function kvRaw(command: (string | number)[]): Promise<unknown> {
+  return kv(command);
+}
+
 export function newId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }

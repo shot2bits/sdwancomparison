@@ -4,8 +4,11 @@ import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { recordCompletenessSample } from "@/lib/rfp-store";
 import { sessionFromRequest, requireSupplierFor } from "@/lib/auth";
+import { getGoal } from "@/lib/agent-store";
+import { reviewBid } from "@/lib/bid-review";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function OPTIONS(req: Request) {
@@ -52,10 +55,23 @@ export async function POST(req: Request, ctx: Ctx) {
     created: existing?.created ?? Date.now(),
   });
   const saved = await saveResponse(response);
+  let review_summary: { coverage: number; gaps: number; proposed: number; risks: number } | null = null;
   if (body.submit) {
+    const allResponses = await listResponses(id);
     const active = project.rfp_sections.filter((x) => x.included).flatMap((x) => x.questions.filter((q) => q.priority !== "optional"));
     const answered = active.filter((q) => (saved.answers[q.id] ?? "").trim()).length;
     if (active.length) { try { await recordCompletenessSample(answered / active.length); } catch { /* best effort */ } }
+    // Reactive agent review: the agent reviews the bid without the buyer
+    // prompting, scores it, flags gaps, drafts clarifications and queues them
+    // for approval. It sends nothing. Best effort: a review failure must not
+    // block the supplier's submission.
+    try {
+      const goal = await getGoal(id);
+      const { review, risks, proposed } = await reviewBid(project, saved, goal, allResponses.length);
+      review_summary = { coverage: review.coverage_ratio, gaps: review.gaps.length, proposed, risks: risks.length };
+    } catch (e) {
+      console.error("bid review failed:", e);
+    }
   }
-  return Response.json(saved, { headers: cors });
+  return Response.json({ ...saved, review_summary }, { headers: cors });
 }

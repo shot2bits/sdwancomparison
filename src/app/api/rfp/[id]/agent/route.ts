@@ -11,6 +11,8 @@ import {
 import { buildShortlist } from "@/lib/shortlist-core";
 import { inviteSupplier } from "@/lib/rfp-connect";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { sessionFromRequest } from "@/lib/auth";
+import { getBuyerMemory, learnBuyerMemory, memoryBrief, type BuyerMemory } from "@/lib/buyer-memory";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -127,13 +129,35 @@ function tools(): Anthropic.Tool[] {
         required: ["thread_id", "answer"],
       }),
     },
+    {
+      name: "remember",
+      description: "Save a durable fact about THIS buyer to persistent memory, so it carries across all their future RFPs (preferred or avoided vendors, compliance always in scope, regions, organisation size, operating model, risk tolerance, budget notes, or a free-form note). Use only for lasting preferences, not one-off details of this single RFP. Learning is additive and never silently overwrites: if a fact conflicts with something already saved, the tool returns the conflict and you must raise it with the buyer rather than assuming. Only works for a signed-in buyer.",
+      input_schema: cast({
+        type: "object",
+        properties: {
+          organisation: { type: "string" },
+          preferred_vendor_slugs: { type: "array", items: { type: "string" }, description: "Marketplace slugs, e.g. cato-networks." },
+          avoided_vendor_slugs: { type: "array", items: { type: "string" } },
+          compliance_baseline: { type: "array", items: { type: "string" }, description: "Methodology compliance keys always in scope for this buyer." },
+          regions: { type: "array", items: { type: "string" } },
+          organisation_size: { type: "string", enum: ["large_global_enterprise", "mid_market", "small_business", "any"] },
+          operating_model: { type: "string", enum: ["managed", "co_managed", "diy", "any"] },
+          risk_tolerance: { type: "string", enum: ["low", "medium", "high", "unknown"] },
+          budget_notes: { type: "string" },
+          notes: { type: "array", items: { type: "string" }, description: "Durable free-form facts, e.g. 'requires UK-sovereign data residency'." },
+        },
+      }),
+    },
   ];
 }
 
 const CATEGORIES = buildMethodology().categories;
 
-function systemPrompt(project: ProjectDetails, threadsSummary: string): string {
+function systemPrompt(project: ProjectDetails, threadsSummary: string, memorySummary: string, signedIn: boolean): string {
   return `You are the Netify RFP advisor, an agentic assistant that guides a buyer from a vague business need to a market-ready SASE and SD-WAN RFP, and helps manage supplier clarifications. You work on RFP "${project.title}" (id ${project.id}, status ${project.status}).
+
+Buyer memory ${signedIn ? "(signed in, persistent across their RFPs)" : "(buyer not signed in, so memory is unavailable this session)"}: ${memorySummary}
+${signedIn ? "Use this memory to avoid re-asking what you already know. When you learn a durable preference (a vendor to favour or avoid, a compliance rule always in scope, region, operating model, risk tolerance, budget pattern), call remember so it persists. If remember reports a conflict with an existing saved value, do not overwrite it silently: tell the buyer what changed and ask which is correct." : "Encourage the buyer to sign in if they want their preferences remembered across projects, but never gate RFP building on it."}
 
 Operating rules:
 1. Proactive discovery. Do not wait passively. If the buyer's context is missing critical pieces (sector, site count, regions, compliance, operating model), ask for them before drafting questions. Ask one or two sharp questions at a time, not a long form.
@@ -186,6 +210,13 @@ export async function POST(req: Request, ctx: Ctx) {
     ? `Open supplier questions: ${openThreads.map((t) => `[${t.id}] ${t.vendor} (${t.category}): ${t.question}`).join(" | ")}.`
     : "No open supplier questions.";
 
+  // Buyer identity drives persistent memory. Reading and building stay open;
+  // memory simply activates when the buyer is signed in.
+  const session = await sessionFromRequest(req);
+  const buyerEmail = session?.email && session.role !== "supplier" ? session.email : null;
+  let memory: BuyerMemory | null = buyerEmail ? await getBuyerMemory(buyerEmail) : null;
+  const memSummary = buyerEmail ? memoryBrief(memory) : "Not signed in.";
+
   const client = new Anthropic();
   const messages: Anthropic.MessageParam[] = [...history];
   let narrative = "";
@@ -196,7 +227,7 @@ export async function POST(req: Request, ctx: Ctx) {
       const res = await client.messages.create({
         model: MODEL,
         max_tokens: 1024,
-        system: systemPrompt(project, threadsSummary),
+        system: systemPrompt(project, threadsSummary, memSummary, Boolean(buyerEmail)),
         tools: tools(),
         messages,
       });
@@ -282,6 +313,20 @@ export async function POST(req: Request, ctx: Ctx) {
               await saveThread({ ...t, buyer_answer: String(input.answer ?? ""), status: "answered", answered: Date.now() });
               out = { ok: true };
             } else out = { ok: false, error: "thread not found" };
+          } else if (tu.name === "remember") {
+            if (!buyerEmail) {
+              out = { ok: false, error: "Buyer is not signed in, so nothing was saved. Memory persists only for a signed-in buyer." };
+            } else {
+              const patch: Record<string, unknown> = {};
+              for (const k of ["organisation", "preferred_vendor_slugs", "avoided_vendor_slugs", "compliance_baseline", "regions", "organisation_size", "operating_model", "risk_tolerance", "budget_notes", "notes"]) {
+                if (input[k] !== undefined) patch[k] = input[k];
+              }
+              const { memory: updated, conflicts } = await learnBuyerMemory(buyerEmail, patch);
+              memory = updated;
+              out = conflicts.length
+                ? { ok: true, saved: true, conflicts, note: "Some values conflict with what is already saved and were NOT overwritten. Raise these with the buyer and confirm which is correct." }
+                : { ok: true, saved: true };
+            }
           }
         } catch (e) {
           out = { ok: false, error: e instanceof Error ? e.message : "tool error" };
