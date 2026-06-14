@@ -94,10 +94,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     } catch { setError("This RFP could not be loaded."); }
   }
 
-  async function startRfp() {
+  async function startRfp(buyer?: Record<string, unknown>) {
     setCreating(true); setError(null);
     try {
-      const res = await fetch("/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({}) });
+      const res = await fetch("/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buyer ? { buyer } : {}) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not start an RFP."); }
       const p = (await res.json()) as Project;
       setProject(p);
@@ -106,6 +106,29 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     } catch (e) { setError(e instanceof Error ? e.message : "Could not start an RFP."); }
     finally { setCreating(false); }
   }
+
+  // Prefill from the guided start (query carry-through): create the RFP with the
+  // captured buyer context and drop straight into manual mode so the sections show.
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (prefilled.current || initialId) return;
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("prefill") !== "1") return;
+    prefilled.current = true;
+    const buyer: Record<string, unknown> = {
+      sector: p.get("sector") || null,
+      organisation_size: p.get("org") || "any",
+      regions: (p.get("regions") ?? "").split(".").filter(Boolean),
+      compliance: (p.get("compliance") ?? "").split(".").filter(Boolean),
+      operating_model: p.get("model") || "any",
+      product_scope: p.get("scope") || "full_sase",
+      site_count: p.get("sites") ? Number(p.get("sites")) : null,
+      notes: p.get("notes") || "",
+    };
+    setMode("manual");
+    startRfp(buyer);
+    /* eslint-disable-next-line */
+  }, []);
 
   async function persist(updated: Project, regenerate = false) {
     setProject(updated);
@@ -327,7 +350,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           question maps to the Netify methodology and you can add your own with
           AI help.
         </p>
-        <button onClick={startRfp} disabled={creating} className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
+        <button onClick={() => startRfp()} disabled={creating} className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
           {creating ? "Starting..." : "Start my RFP"}
         </button>
         {error && <p className="mt-4 text-sm text-red-700">{error}</p>}

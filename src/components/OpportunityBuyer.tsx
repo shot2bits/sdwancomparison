@@ -27,6 +27,29 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   const lastTs = useRef(0);
 
   useEffect(() => { if (initialId) load(initialId); /* eslint-disable-next-line */ }, [initialId]);
+  // Prefill the post form from the guided start (query carry-through).
+  useEffect(() => {
+    if (initialId) return;
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("prefill") !== "1") return;
+    const validScopes = SCOPES.map((x) => x.key);
+    const scope = (p.get("scope") ?? "").split(".").filter((x) => validScopes.includes(x));
+    const regions = (p.get("regions") ?? "").split(".").filter(Boolean);
+    const engagement = p.get("engagement") === "auction" ? "auction" : "quote_room";
+    const summary = p.get("summary") ?? "";
+    const scopeLabel = scope.map((k) => SCOPES.find((x) => x.key === k)?.label ?? k).join(", ");
+    setForm((f) => ({
+      ...f,
+      scope: scope.length ? scope : f.scope,
+      regions: regions.length ? regions : f.regions,
+      sites: p.get("sites") ?? f.sites,
+      summary: summary || f.summary,
+      budget_note: p.get("budget") ?? f.budget_note,
+      title: summary ? summary.slice(0, 80) : scopeLabel ? `${scopeLabel} opportunity` : f.title,
+      engagement_type: engagement,
+    }));
+    /* eslint-disable-next-line */
+  }, []);
   useEffect(() => {
     if (!opp) return;
     const poll = setInterval(async () => {

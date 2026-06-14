@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import GuidedStart from "@/components/GuidedStart";
 import { getAllVendors, FEATURES, FEATURE_CATEGORIES } from "@/lib/vendors";
 import { SITE_URL, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -24,40 +25,24 @@ export default function Home() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(sc) }}
         />
       ))}
-      {/* Hero */}
-      <div className="grid md:grid-cols-12 gap-8 mb-20 fade-rise">
-        <div className="md:col-span-8">
-          <p className="eyebrow mb-4">SD-WAN and SASE research</p>
-          <h1 id="page-h1" className="display mb-6" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
-            A vendor-neutral comparison of {totalCount} SD-WAN and SASE platforms,
-            graded against a {featureCount}-feature evaluation framework.
-          </h1>
-          <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
-            Most vendor comparisons are written by vendors. This one is published by
-            Netify and grades each platform against the same {categoryCount} capability
-            categories, using only public source evidence.
-          </p>
-          <div className="flex items-center gap-6 flex-wrap">
-            <Link
-              href="/shortlist"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full"
-            >
-              Build your shortlist
-              <span aria-hidden="true">→</span>
-            </Link>
-            <Link
-              href="/vendors"
-              className="inline-flex items-center gap-2 px-5 py-3 border border-[var(--ink-900)] no-underline hover:bg-zinc-900 hover:text-white transition-colors rounded-full"
-            >
-              Browse {totalCount} vendors
-            </Link>
-            <a
-              href="https://netify.co.uk"
-              className="no-underline text-sm text-[var(--ink-500)] hover:text-[var(--accent)]"
-            >
-              About Netify ↗
-            </a>
-          </div>
+      {/* Hero: the single guided front door */}
+      <div className="mb-12 fade-rise">
+        <p className="eyebrow mb-4">SASE, SSE and SD-WAN marketplace</p>
+        <h1 id="page-h1" className="display mb-5" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
+          From a network need to competing offers, in one place.
+        </h1>
+        <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
+          Describe what you need and choose what to do with it: compare a shortlist of {totalCount}
+          {" "}graded vendors, run a reverse auction, open a live quote room, or build a formal RFP.
+          Vendor-neutral, graded against a {featureCount}-feature framework across {categoryCount} categories.
+          Browse and build without an account.
+        </p>
+        <GuidedStart />
+        <div className="flex items-center gap-6 flex-wrap mt-5 text-sm">
+          <Link href="/how-it-works" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">How it works</Link>
+          <Link href="/vendors" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">Browse {totalCount} vendors</Link>
+          <Link href="/for-suppliers" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">For vendors and providers</Link>
+          <a href="https://netify.co.uk" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">About Netify ↗</a>
         </div>
       </div>
 
