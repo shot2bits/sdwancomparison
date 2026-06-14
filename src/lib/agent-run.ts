@@ -224,6 +224,11 @@ export async function runAgentLoop(trigger: "cron" | "manual"): Promise<AgentRun
   } finally {
     report.llm_calls = RUN_MAX_LLM_CALLS - budget.llm;
     report.finished = Date.now();
+    // Emit a concise run summary so the outcome is observable in the runtime
+    // logs (no admin auth needed to confirm a scheduled run processed or skipped
+    // correctly). Supplier-facing sends are structurally impossible here, so a
+    // zero-send run is implied by the loop having no outbound path.
+    console.log(`[agent-run] ${trigger} ${report.id}: considered=${report.considered} processed=${report.processed} skipped=${report.skipped} deferred=${report.deferred} proposals=${report.proposals_created} digests=${report.digests_created} llm=${report.llm_calls} errors=${report.errors.length}${report.note ? ` note="${report.note}"` : ""}`);
     try { await saveRun(report); } catch { /* best effort */ }
     await releaseLock(RUN_LOCK, runToken);
   }
