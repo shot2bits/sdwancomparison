@@ -58,6 +58,7 @@ export const ProjectDetailsSchema = z.object({
   rfp_sections: z.array(RfpSectionSchema).default([]),
   invited_vendors: z.array(z.string()).default([]),
   share_token: z.string(), // suppliers use this to view and respond
+  manage_token: z.string().default(""), // buyer/agent credential for push actions (publish, invite); held by the creator
   methodology_version: z.string().default("2026.1"),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;

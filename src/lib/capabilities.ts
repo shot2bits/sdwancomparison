@@ -73,6 +73,15 @@ export const CAPABILITIES: Capability[] = [
     data: "/opportunities/board/data.json",
   },
   {
+    id: "publish_rfp",
+    title: "Publish an RFP to the curated supplier list",
+    description: "Invite the best-fit graded vendors to a built RFP and move it to published. Push action: reaches named suppliers, so it needs a buyer magic-link sign-in or the RFP manage_token. An authorised agent passes the manage_token (issued when it created the RFP) over REST or MCP.",
+    access: "identified",
+    page: "/rfp-builder",
+    api: "/api/rfp/[id]/publish",
+    mcp: "publish_rfp",
+  },
+  {
     id: "supplier_respond",
     title: "Respond and bid as a supplier",
     description: "A verified supplier reads invitations and the board and submits comments, bids and structured pricing. Identity required: a domain-verified magic-link sign-in for people, or a per-supplier token for an agent.",

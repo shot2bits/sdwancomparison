@@ -15,7 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
 type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
 type Buyer = { organisation: string; sector: string | null; organisation_size: string; site_count: number | null; regions: string[]; compliance: string[]; operating_model: string; product_scope: string };
-type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; methodology_version: string };
+type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string };
 
 const STATUS_FLOW = ["draft", "review", "published", "qa", "evaluation"];
 const SCOPES = [
@@ -60,6 +60,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [publishing, setPublishing] = useState(false);
+  const [publishMsg, setPublishMsg] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   // AI custom question composer
@@ -314,6 +316,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const res = await fetch(`/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, action, body }) });
       if (res.ok) { refreshConnections(); setMsgDraft({ ...msgDraft, [slug]: "" }); }
     } catch { /* ignore */ }
+  }
+
+  async function publishToCurated() {
+    if (!project || publishing) return;
+    setPublishing(true); setPublishMsg(null); setError(null);
+    try {
+      const res = await fetch(`/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: project.manage_token }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Could not publish.");
+      setProject({ ...project, status: data.status ?? "published" });
+      setPublishMsg(`Published. Invited ${data.invited?.length ?? 0} curated suppliers, each with a private portal link.`);
+      refreshConnections();
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
+    finally { setPublishing(false); }
   }
 
   function copySupplierLink(token: string) {
@@ -588,11 +604,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       </div>
       {/* Suppliers: two-sided marketplace */}
       <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
           <h2 className="text-lg">Suppliers</h2>
-          <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit suppliers</button>
+          <div className="flex gap-2">
+            <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit suppliers</button>
+            <button onClick={publishToCurated} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : project.status === "published" ? "Re-publish to curated list" : "Publish to curated suppliers"}</button>
+          </div>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3">Suppliers are the graded vendors and providers from the Netify marketplace. Invite them to engage, then message, request a demo or request contact details. Each invite gives the supplier a private portal link.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3">Suppliers are the graded vendors and providers from the Netify marketplace. Publish to invite the best-fit curated set at once, or invite individually, then message, request a demo or request contact details. Publishing reaches named suppliers, so it uses your RFP credential (held automatically here; agents pass the manage_token over the API or MCP). Each invite gives the supplier a private portal link.</p>
+        {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
 
         {suggestions && suggestions.length > 0 && (
           <div className="mb-4">

@@ -35,6 +35,7 @@ export async function POST(req: Request) {
     rfp_sections: synthesiseSections(buyer),
     invited_vendors: [],
     share_token: newId("tok"),
+    manage_token: newId("mtok"),
     methodology_version: "2026.1",
   });
   const saved = await saveProject(project);

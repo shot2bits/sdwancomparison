@@ -6,8 +6,10 @@
  * machine-callable object, not just a web form.
  */
 
-import { getProjectByToken, getProject, listResponses, saveResponse, getConnectionByToken, newId, kvConfigured } from "@/lib/rfp-store";
-import { addMessage } from "@/lib/rfp-connect";
+import { getProjectByToken, getProject, saveProject, listResponses, saveResponse, getConnectionByToken, newId, kvConfigured } from "@/lib/rfp-store";
+import { addMessage, inviteSupplier } from "@/lib/rfp-connect";
+import { buildShortlist } from "@/lib/shortlist-core";
+import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { resolveOpportunityToken, getOpportunity, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem, vendorName } from "@/lib/opportunity";
 import { RfpResponseSchema } from "@/lib/rfp-types";
@@ -48,6 +50,11 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
     name: "supplier_inbox",
     description: "For a supplier agent: read the buyer messages on a connection using the per-connection supplier token. Returns the RFP summary and the message thread.",
     inputSchema: { type: "object", properties: { supplier_token: { type: "string" } }, required: ["supplier_token"] },
+  },
+  {
+    name: "publish_rfp",
+    description: "For a buyer agent: publish an RFP to the curated supplier list. Invites the best-fit graded vendors and moves the RFP to published. Requires the rfp_id and the manage_token issued when the RFP was created (the buyer/agent credential for push actions).",
+    inputSchema: { type: "object", properties: { rfp_id: { type: "string" }, manage_token: { type: "string" }, shortlist_size: { type: "integer", minimum: 3, maximum: 12 } }, required: ["rfp_id", "manage_token"] },
   },
   {
     name: "list_opportunities",
@@ -114,6 +121,28 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     return { count: opportunities.length, opportunities };
   }
   if (!kvConfigured()) return { error: "RFP storage not configured." };
+
+  // Buyer agent: publish an RFP to the curated supplier list using the manage_token.
+  if (name === "publish_rfp") {
+    const project = await getProject(String(args.rfp_id ?? ""));
+    if (!project) return { error: "RFP not found." };
+    if (!project.manage_token || args.manage_token !== project.manage_token) return { error: "Invalid manage_token for this RFP." };
+    const size = Math.min(Math.max(Number(args.shortlist_size ?? 8), 3), 12);
+    const result = buildShortlist(getShortlistDataset(), {
+      sector: project.buyer.sector ?? null,
+      organisation_size: project.buyer.organisation_size ?? "any",
+      service_model: project.buyer.operating_model ?? "any",
+      required_regions: project.buyer.regions ?? [],
+      shortlist_size: size,
+    }, FEATURE_NAMES);
+    const invited: string[] = [];
+    for (const v of result.shortlist) {
+      const r = await inviteSupplier(project.id, v.slug, `You are invited to respond to the RFP "${project.title}".`);
+      if (!("error" in r)) invited.push(r.vendor_name);
+    }
+    await saveProject({ ...project, status: "published", invited_vendors: Array.from(new Set([...project.invited_vendors, ...result.shortlist.map((v) => v.slug)])) });
+    return { ok: true, status: "published", invited };
+  }
   // Opportunity supplier-agent tools use a per-supplier opportunity token.
   if (name === "opportunity_inbox" || name === "opportunity_respond") {
     const otoken = String(args.opportunity_token ?? "");
