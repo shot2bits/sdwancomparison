@@ -82,6 +82,8 @@ export const AUDIT_ACTIONS = [
   "goal_set", "goal_update",
   "bid_review", "propose_action", "approve_action", "reject_action", "execute_action",
   "risk_flag",
+  // Slice 2 run loop
+  "run_start", "run_inspect", "run_propose", "run_skip", "run_noop", "run_deferred", "run_error", "run_complete",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -166,3 +168,64 @@ export const RiskFlagSchema = z.object({
   recommendation: z.string().default(""), // recommended next action (not auto-run in Slice 1)
 }).strict();
 export type RiskFlag = z.infer<typeof RiskFlagSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Slice 2: time-driven run loop (digest + run report)                 */
+/* ------------------------------------------------------------------ */
+
+// Budgets and windows. Constants, not config, so behaviour is predictable.
+export const RUN_MAX_RFPS = 25;                       // RFPs processed per run
+export const RUN_MAX_PROPOSALS_PER_RFP = 5;           // new proposals per RFP per run
+export const RUN_MAX_LLM_CALLS = 12;                  // digest-summary LLM calls per run
+export const RUN_SOFT_DEADLINE_MS = 50_000;           // stop starting new RFPs after this
+export const RUN_LOCK_TTL_MS = 240_000;               // whole-run lock (4 min)
+export const RFP_LOCK_TTL_MS = 120_000;               // per-RFP lock (2 min)
+export const DIGEST_COOLDOWN_MS = 12 * 60 * 60 * 1000; // min interval between digests per RFP
+export const STALE_APPROVAL_MS = 5 * 24 * 60 * 60 * 1000; // pending proposal age that warrants a nudge
+export const DEADLINE_WINDOW_MS = 72 * 60 * 60 * 1000; // "deadline approaching" window
+export const MAX_OPEN_PROPOSALS_PER_SUPPLIER_PER_RFP = 3;
+// Quiet hours, Europe/London. Governs (future) buyer notifications, not computation.
+export const QUIET_START_HOUR = 21;
+export const QUIET_END_HOUR = 7;
+
+export const DIGEST_ITEM_KINDS = ["deadline_risk", "missing_bids", "pending_gap", "weak_answer", "stale_approval"] as const;
+export type DigestItemKind = (typeof DIGEST_ITEM_KINDS)[number];
+
+export const DigestItemSchema = z.object({
+  kind: z.enum(DIGEST_ITEM_KINDS),
+  severity: z.enum(["info", "warn", "high"]).default("info"),
+  message: z.string(),
+  recommendation: z.string().default(""),
+  ref: z.string().default(""), // related approval id, vendor slug, etc.
+}).strict();
+export type DigestItem = z.infer<typeof DigestItemSchema>;
+
+export const DigestSchema = z.object({
+  id: z.string(),
+  rfp_id: z.string(),
+  rfp_title: z.string().default(""),
+  created: z.number(),
+  run_id: z.string().default(""),
+  summary: z.string().default(""),       // deterministic, optionally LLM-phrased
+  llm_used: z.boolean().default(false),
+  items: z.array(DigestItemSchema).default([]),
+  proposal_ids: z.array(z.string()).default([]),
+}).strict();
+export type Digest = z.infer<typeof DigestSchema>;
+
+export const AgentRunSchema = z.object({
+  id: z.string(),
+  trigger: z.enum(["cron", "manual"]).default("cron"),
+  started: z.number(),
+  finished: z.number().default(0),
+  considered: z.number().default(0),   // active-goal RFPs found
+  processed: z.number().default(0),    // RFPs fully inspected
+  skipped: z.number().default(0),      // ineligible (no goal, cooldown, locked, not open)
+  deferred: z.number().default(0),     // hit budget/soft-deadline, left for next run
+  proposals_created: z.number().default(0),
+  digests_created: z.number().default(0),
+  llm_calls: z.number().default(0),
+  note: z.string().default(""),        // e.g. "another run in progress"
+  errors: z.array(z.string()).default([]),
+}).strict();
+export type AgentRun = z.infer<typeof AgentRunSchema>;

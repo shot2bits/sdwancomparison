@@ -21,6 +21,8 @@ type Approval = {
 };
 type Audit = { id: string; action: string; actor: string; summary: string; rationale: string; ts: number };
 type Risk = { id: string; summary: string; rationale: string; ts: number };
+type DigestItem = { kind: string; severity: string; message: string; recommendation: string };
+type Digest = { id: string; created: number; summary: string; llm_used: boolean; items: DigestItem[]; proposal_ids: string[] };
 
 const card = "rounded-md border border-[var(--ink-200,#e5e5e5)] p-4";
 const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -35,6 +37,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [audit, setAudit] = useState<Audit[]>([]);
   const [risks, setRisks] = useState<Risk[]>([]);
+  const [digests, setDigests] = useState<Digest[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string>("");
 
@@ -60,6 +63,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
       setReviews(a.reviews ?? []);
       setAudit(a.audit ?? []);
       setRisks(a.risks ?? []);
+      setDigests(a.digests ?? []);
     } finally {
       setLoading(false);
     }
@@ -117,6 +121,26 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
         </div>
         <button onClick={saveGoal} disabled={busy === "goal"} className="mt-3 inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-60">{busy === "goal" ? "Saving…" : goal ? "Update goal" : "Set goal"}</button>
       </section>
+
+      {/* Agent digest (run-loop output) */}
+      {digests.length > 0 && (
+        <section className={card}>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-semibold">Agent digest</h3>
+            <span className="text-xs text-[var(--ink-500)]">{new Date(digests[0].created).toLocaleString("en-GB")}</span>
+          </div>
+          <p className="text-sm text-[var(--ink-700)] mb-3">{digests[0].summary}</p>
+          <ul className="space-y-2">
+            {digests[0].items.map((it, i) => (
+              <li key={i} className={`text-sm border-l-2 pl-3 ${it.severity === "high" ? "border-red-500" : it.severity === "warn" ? "border-amber-500" : "border-[var(--ink-300,#ccc)]"}`}>
+                <p className="font-medium">{it.message}</p>
+                {it.recommendation && <p className="text-[var(--ink-600)]">{it.recommendation}</p>}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-[var(--ink-500)] mt-3">The agent monitors this RFP between your visits. It recommends and drafts, but never contacts a supplier without your approval.</p>
+        </section>
+      )}
 
       {/* Risks */}
       {risks.length > 0 && (

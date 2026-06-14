@@ -2,7 +2,7 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, getConnection, kvConfigured } from "@/lib/rfp-store";
 import { sessionFromRequest } from "@/lib/auth";
 import { inviteSupplier, addMessage } from "@/lib/rfp-connect";
-import { listApprovals, getApproval, setApprovalStatus, listReviews, listAudit, recordAudit } from "@/lib/agent-store";
+import { listApprovals, getApproval, setApprovalStatus, listReviews, listAudit, listDigests, recordAudit } from "@/lib/agent-store";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -13,10 +13,11 @@ export async function GET(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
-  const [approvals, reviews, audit] = await Promise.all([listApprovals(id), listReviews(id), listAudit(id)]);
+  const [approvals, reviews, audit, digests] = await Promise.all([listApprovals(id), listReviews(id), listAudit(id), listDigests(id)]);
   return Response.json({
     approvals,
     reviews,
+    digests,
     audit: audit.slice(0, 100),
     risks: audit.filter((a) => a.action === "risk_flag").slice(0, 20),
   }, { headers: cors });

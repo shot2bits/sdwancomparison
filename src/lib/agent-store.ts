@@ -9,12 +9,16 @@
  *   rfp:{id}:reviews     -> BidReview[]      (newest first)
  */
 
-import { kvConfigured, kvGetJson, kvSetJson, newId } from "@/lib/rfp-store";
+import { kvConfigured, kvGetJson, kvSetJson, kvRaw, newId } from "@/lib/rfp-store";
 import {
   ProcurementGoalSchema, ApprovalItemSchema, AuditEntrySchema, BidReviewSchema,
+  DigestSchema, AgentRunSchema,
   APPROVAL_TTL_MS,
   type ProcurementGoal, type ApprovalItem, type AuditEntry, type BidReview, type AuditAction,
+  type Digest, type AgentRun,
 } from "@/lib/agent-types";
+
+const ACTIVE_GOALS_KEY = "agent:goals:active";
 
 /* ---- Goal ---- */
 
@@ -29,7 +33,17 @@ export async function getGoal(rfpId: string): Promise<ProcurementGoal | null> {
 export async function saveGoal(goal: ProcurementGoal): Promise<ProcurementGoal> {
   const parsed = ProcurementGoalSchema.parse({ ...goal, updated: Date.now() });
   await kvSetJson(`rfp:${parsed.rfp_id}:goal`, parsed);
+  // Maintain the active-goal index the run loop iterates. Only 'active' goals
+  // are eligible; pausing/achieving/cancelling removes the RFP from the loop.
+  if (parsed.status === "active") await kvRaw(["SADD", ACTIVE_GOALS_KEY, parsed.rfp_id]);
+  else await kvRaw(["SREM", ACTIVE_GOALS_KEY, parsed.rfp_id]);
   return parsed;
+}
+
+/** RFP ids with an active procurement goal (the run loop's candidate set). */
+export async function listActiveGoalRfpIds(): Promise<string[]> {
+  if (!kvConfigured()) return [];
+  return ((await kvRaw(["SMEMBERS", ACTIVE_GOALS_KEY])) as string[]) ?? [];
 }
 
 export async function upsertGoal(rfpId: string, patch: Partial<ProcurementGoal>): Promise<ProcurementGoal> {
@@ -131,4 +145,74 @@ export async function saveReview(review: BidReview): Promise<BidReview> {
   if (idx >= 0) all[idx] = parsed; else all.unshift(parsed);
   await kvSetJson(`rfp:${parsed.rfp_id}:reviews`, all.slice(0, 100));
   return parsed;
+}
+
+/* ------------------------------------------------------------------ */
+/* Locks (code-enforced, TTL self-release)                             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Acquire a lock with SET NX PX. Returns a token if acquired, null if held by
+ * someone else. The PX TTL guarantees a crashed run never wedges the lock.
+ */
+export async function acquireLock(key: string, ttlMs: number): Promise<string | null> {
+  if (!kvConfigured()) return null;
+  const token = newId("lock");
+  const res = await kvRaw(["SET", key, token, "NX", "PX", ttlMs]);
+  return res === "OK" || res === "ok" ? token : null;
+}
+
+/** Release a lock only if we still own it (value match), so we never delete a
+ *  lock that already expired and was re-acquired by another run. */
+export async function releaseLock(key: string, token: string): Promise<void> {
+  if (!kvConfigured()) return;
+  const current = (await kvRaw(["GET", key])) as string | null;
+  if (current === token) await kvRaw(["DEL", key]);
+}
+
+/** Force-clear a lock (admin escape hatch). */
+export async function forceClearLock(key: string): Promise<void> {
+  if (!kvConfigured()) return;
+  await kvRaw(["DEL", key]);
+}
+
+/* ------------------------------------------------------------------ */
+/* Digests (buyer-facing run output)                                   */
+/* ------------------------------------------------------------------ */
+
+export async function listDigests(rfpId: string): Promise<Digest[]> {
+  return (await kvGetJson<Digest[]>(`rfp:${rfpId}:digests`)) ?? [];
+}
+
+export async function lastDigestAt(rfpId: string): Promise<number> {
+  const all = await listDigests(rfpId);
+  return all.length ? all[0].created : 0;
+}
+
+export async function saveDigest(digest: Digest): Promise<Digest> {
+  const parsed = DigestSchema.parse(digest);
+  const all = await listDigests(parsed.rfp_id);
+  all.unshift(parsed);
+  await kvSetJson(`rfp:${parsed.rfp_id}:digests`, all.slice(0, 30));
+  return parsed;
+}
+
+/* ------------------------------------------------------------------ */
+/* Run reports                                                         */
+/* ------------------------------------------------------------------ */
+
+export async function saveRun(run: AgentRun): Promise<AgentRun> {
+  const parsed = AgentRunSchema.parse(run);
+  await kvSetJson(`agent:run:${parsed.id}`, parsed);
+  await kvRaw(["LPUSH", "agent:runs", parsed.id]);
+  await kvRaw(["LTRIM", "agent:runs", 0, 199]);
+  return parsed;
+}
+
+export async function listRuns(limit = 20): Promise<AgentRun[]> {
+  if (!kvConfigured()) return [];
+  const ids = ((await kvRaw(["LRANGE", "agent:runs", 0, limit - 1])) as string[]) ?? [];
+  const out: AgentRun[] = [];
+  for (const id of ids) { const r = await kvGetJson<AgentRun>(`agent:run:${id}`); if (r) out.push(r); }
+  return out;
 }

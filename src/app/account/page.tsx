@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import BuyerMemoryPanel from "@/components/BuyerMemoryPanel";
+import BuyerDigests from "@/components/BuyerDigests";
 
 export const metadata: Metadata = { title: "Your account and agent memory", robots: { index: false, follow: false } };
 
@@ -12,6 +13,12 @@ export default function AccountPage() {
         <p className="text-sm text-[var(--ink-600)]">Transparent and editable. The agent uses this to avoid re-asking what it already knows, and carries it across all your RFPs.</p>
       </div>
       <BuyerMemoryPanel />
+
+      <div className="mt-12 mb-6">
+        <h2 className="text-xl mb-1">Agent digests</h2>
+        <p className="text-sm text-[var(--ink-600)]">What the agent found while monitoring your live RFPs, with recommended next actions. It drafts and recommends; it never contacts a supplier without your approval.</p>
+      </div>
+      <BuyerDigests />
     </div>
   );
 }
