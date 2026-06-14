@@ -59,10 +59,10 @@ function envAdminEmails(): string[] {
 }
 
 /**
- * Default admin until ADMIN_EMAILS is set in Vercel. Keep this short and
- * replace it by setting ADMIN_EMAILS (comma separated) in the project.
+ * Default admins. Overridable by setting ADMIN_EMAILS (comma separated) in the
+ * project env, which takes precedence when present.
  */
-const DEFAULT_ADMIN_EMAILS = ["tnuprovider@gmail.com"];
+const DEFAULT_ADMIN_EMAILS = ["support@netify.com"];
 
 export function adminEmails(): string[] {
   const env = envAdminEmails();
