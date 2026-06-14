@@ -50,6 +50,12 @@ export default function SideNav() {
             </div>
           </div>
         ))}
+        {session?.authenticated && (session.role === "supplier" || session.role === "netify") && (
+          <div>
+            <p className="eyebrow px-3 mb-1.5">My account</p>
+            <div className="space-y-0.5"><Link href="/supplier" className={linkCls("/supplier")}>Supplier dashboard</Link></div>
+          </div>
+        )}
         {session?.authenticated && session.admin && (
           <div>
             <p className="eyebrow px-3 mb-1.5">Admin</p>

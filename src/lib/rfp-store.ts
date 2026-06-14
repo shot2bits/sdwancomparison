@@ -239,10 +239,27 @@ export async function listPublicOpportunities(): Promise<PublicOpportunity[]> {
     .sort((a, b) => b.last_activity - a.last_activity);
 }
 
-/** Per-supplier access token for an opportunity. */
+/** Per-supplier access token for an opportunity. Also indexes the invite by vendor. */
 export async function inviteToOpportunity(oppId: string, vendorSlug: string): Promise<string> {
   const token = newId("otok");
   await kv(["SET", `opp:tok:${token}`, JSON.stringify({ opp_id: oppId, vendor_slug: vendorSlug })]);
+  await kv(["SADD", `vendor:opps:${vendorSlug}`, oppId]);
+  return token;
+}
+
+/** Opportunity ids a vendor has been invited to. */
+export async function listInvitedOpportunityIds(vendorSlug: string): Promise<string[]> {
+  if (!kvConfigured()) return [];
+  return ((await kv(["SMEMBERS", `vendor:opps:${vendorSlug}`])) as string[]) ?? [];
+}
+
+/** Stable per-vendor room token for an opportunity (reused, not regenerated). */
+export async function getOrCreateOpportunityToken(oppId: string, vendorSlug: string): Promise<string> {
+  const key = `opp:vtok:${oppId}:${vendorSlug}`;
+  const existing = (await kv(["GET", key])) as string | null;
+  if (existing) return existing;
+  const token = await inviteToOpportunity(oppId, vendorSlug);
+  await kv(["SET", key, token]);
   return token;
 }
 
