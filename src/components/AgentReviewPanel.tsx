@@ -24,6 +24,10 @@ type Risk = { id: string; summary: string; rationale: string; ts: number };
 
 const card = "rounded-md border border-[var(--ink-200,#e5e5e5)] p-4";
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+// The RFP mutation credential is held client-side (the server strips it from
+// open reads). A signed-in buyer is authorised by session; an anonymous buyer
+// who created the RFP in this browser carries the token here.
+const readManageToken = (rfpId: string) => (typeof window !== "undefined" ? localStorage.getItem(`netify_mtok_${rfpId}`) || "" : "");
 
 export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
   const [goal, setGoal] = useState<Goal | null>(null);
@@ -68,7 +72,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
     try {
       const res = await fetch(`/api/rfp/${rfpId}/goal`, {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ outcome, must_have: mustHave.split(",").map((s) => s.trim()).filter(Boolean), targets: { min_bids: Number(minBids) } }),
+        body: JSON.stringify({ outcome, must_have: mustHave.split(",").map((s) => s.trim()).filter(Boolean), targets: { min_bids: Number(minBids) }, manage_token: readManageToken(rfpId) }),
       });
       const data = await res.json();
       if (data.goal) setGoal(data.goal);
@@ -81,7 +85,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
     try {
       const res = await fetch(`/api/rfp/${rfpId}/approvals`, {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action, approval_id: item.id, edited_question: editedQuestion }),
+        body: JSON.stringify({ action, approval_id: item.id, edited_question: editedQuestion, manage_token: readManageToken(rfpId) }),
       });
       const data = await res.json();
       if (data.error) { alert(data.error); return; }

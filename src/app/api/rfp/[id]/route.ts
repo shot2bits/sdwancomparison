@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getProject, saveProject, kvConfigured } from "@/lib/rfp-store";
+import { getProject, saveProject, publicProject, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark } from "@/lib/rfp-store";
@@ -18,7 +18,8 @@ export async function GET(req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
-  return Response.json(project, { headers: cors });
+  // Open read: never expose the manage_token credential to anyone with the id.
+  return Response.json(publicProject(project), { headers: cors });
 }
 
 /** Full update (the agent and the UI both PUT the whole ProjectDetails). */

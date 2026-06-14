@@ -89,10 +89,27 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   useEffect(() => { fetch("/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
+  // The manage_token is the RFP's mutation/push credential. The server strips it
+  // from open reads (GET, agent), so we hold it client-side after creation and
+  // re-attach it whenever the server hands back a stripped project. This keeps
+  // publish, save, goal and approvals working without the credential ever being
+  // discoverable by someone who only knows the RFP id.
+  const manageToken = useRef<string>("");
+  const mtokKey = (id: string) => `netify_mtok_${id}`;
+  function applyProject(p: Project) {
+    let tok = p.manage_token || manageToken.current;
+    if (!tok && typeof window !== "undefined") tok = localStorage.getItem(mtokKey(p.id)) || "";
+    if (tok) {
+      manageToken.current = tok;
+      try { localStorage.setItem(mtokKey(p.id), tok); } catch { /* private mode, keep in ref */ }
+    }
+    setProject({ ...p, manage_token: tok });
+  }
+
   async function loadProject(id: string) {
     try {
       const res = await fetch(`/api/rfp/${id}`);
-      if (res.ok) setProject((await res.json()) as Project);
+      if (res.ok) applyProject((await res.json()) as Project);
       else setError("This RFP could not be loaded.");
     } catch { setError("This RFP could not be loaded."); }
   }
@@ -103,7 +120,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const res = await fetch("/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buyer ? { buyer } : {}) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not start an RFP."); }
       const p = (await res.json()) as Project;
-      setProject(p);
+      applyProject(p); // create returns the full token; persist it client-side
       window.history.replaceState(null, "", `/rfp-builder/${p.id}`);
       setMessages([{ role: "assistant", content: "Let's build your RFP. What sector are you in, roughly how many sites, which regions, and any compliance obligations (for example UK GDPR, PCI DSS, IEC 62443)? You can also just pick a scope and delivery model under Build it myself." }]);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not start an RFP."); }
@@ -136,8 +153,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function persist(updated: Project, regenerate = false) {
     setProject(updated);
     try {
-      const res = await fetch(`/api/rfp/${updated.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...updated, regenerate }) });
-      if (res.ok && regenerate) setProject((await res.json()) as Project);
+      // updated carries the manage_token from client state, which the gated PUT
+      // requires; the response keeps the token (access proven), so re-apply it.
+      const res = await fetch(`/api/rfp/${updated.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...updated, manage_token: manageToken.current || updated.manage_token, regenerate }) });
+      if (res.ok && regenerate) applyProject((await res.json()) as Project);
     } catch { /* optimistic */ }
   }
 
@@ -164,7 +183,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const res = await fetch(`/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }), signal: ctrl.signal });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error ?? `The advisor could not respond (${res.status}).`); }
       const data = (await res.json()) as { narrative?: string; project?: Project };
-      if (data.project) setProject(data.project);
+      if (data.project) applyProject(data.project); // agent response is token-stripped; re-attach
       if (data.narrative) setMessages([...next, { role: "assistant", content: data.narrative }]);
       else setMessages([...next, { role: "assistant", content: "Done. Review the sections below, or tell me what to change." }]);
     } catch (e) {

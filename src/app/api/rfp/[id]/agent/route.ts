@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getProject, saveProject, listThreads, saveThread, kvConfigured } from "@/lib/rfp-store";
+import { getProject, saveProject, publicProject, listThreads, saveThread, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema, RFP_STATUSES, type ProjectDetails, type RfpSection } from "@/lib/rfp-types";
 import {
   METHODOLOGY_VERSION,
@@ -341,7 +341,10 @@ export async function POST(req: Request, ctx: Ctx) {
       if (parsed.success) project = await saveProject(parsed.data);
     }
 
-    return Response.json({ narrative, project }, { headers: cors });
+    // Strip the manage_token: the agent endpoint is open, so the project it
+    // returns must not leak the mutation credential. The buyer's client keeps
+    // the token it received at creation.
+    return Response.json({ narrative, project: publicProject(project) }, { headers: cors });
   } catch (err) {
     console.error("rfp agent error:", err);
     return Response.json({ error: "Advisor request failed." }, { status: 502, headers: cors });

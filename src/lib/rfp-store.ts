@@ -85,6 +85,17 @@ export async function saveProject(p: ProjectDetails): Promise<ProjectDetails> {
   return parsed;
 }
 
+/**
+ * Project projection safe for open/unauthenticated reads: the manage_token is
+ * the credential for push and mutation actions, so it must never be served to a
+ * caller who has only the RFP id. It is returned only at creation time and from
+ * the gated PUT (where the caller has already proven access). Everywhere else,
+ * responses pass through this.
+ */
+export function publicProject(p: ProjectDetails): ProjectDetails {
+  return { ...p, manage_token: "" };
+}
+
 export async function getProject(id: string): Promise<ProjectDetails | null> {
   const data = await getJson<ProjectDetails>(`rfp:${id}`);
   if (!data) return null;
