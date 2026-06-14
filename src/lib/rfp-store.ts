@@ -216,7 +216,15 @@ export async function getOpportunity(id: string): Promise<Opportunity | null> {
   const data = await getJson<Opportunity>(`opp:${id}`);
   if (!data) return null;
   const parsed = OpportunitySchema.safeParse(data);
-  return parsed.success ? parsed.data : null;
+  if (!parsed.success) return null;
+  const opp = parsed.data;
+  // Lazy close: a timed auction past its deadline is closed on next read.
+  if (opp.status === "open" && opp.engagement_type === "auction" && opp.auction_format === "timed" && opp.deadline && opp.deadline < Date.now()) {
+    const closed = { ...opp, status: "closed" as const };
+    await setJson(`opp:${id}`, { ...closed, updated: Date.now() });
+    return closed;
+  }
+  return opp;
 }
 
 export async function listOpportunities(): Promise<Opportunity[]> {

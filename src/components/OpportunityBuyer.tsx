@@ -2,8 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FeedView, type FeedItem } from "@/components/OpportunityFeed";
+import BidComparison from "@/components/BidComparison";
 
-type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; buyer_token: string; invited: string[]; feed: FeedItem[]; awarded_vendor_slug: string | null };
+type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; buyer_token: string; invited: string[]; feed: FeedItem[]; awarded_vendor_slug: string | null; engagement_type?: string; auction_format?: string; deadline?: number | null };
+
+function deadlineText(opp: { engagement_type?: string; auction_format?: string; deadline?: number | null; status: string }): string | null {
+  if (opp.engagement_type !== "auction" || opp.auction_format !== "timed" || !opp.deadline) return null;
+  if (opp.status !== "open") return "Auction closed";
+  const diff = opp.deadline - Date.now();
+  if (diff <= 0) return "Closing";
+  const h = Math.round(diff / 3_600_000);
+  return h < 48 ? `Closes in ${h}h` : `Closes in ${Math.round(h / 24)}d`;
+}
 type Suggestion = { rank: number; slug: string; name: string; score: number };
 
 const SCOPES = [
@@ -175,9 +185,15 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2">
-        <p className="eyebrow mb-1">Live opportunity room <span className="text-emerald-700">● live</span></p>
+        <p className="eyebrow mb-1">{opp.engagement_type === "auction" ? "Reverse auction" : "Live opportunity room"} <span className="text-emerald-700">● live</span></p>
         <h1 className="text-2xl mb-1">{opp.title}</h1>
-        <p className="text-sm text-[var(--ink-500)] mb-4">Scope: {opp.scope.join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""} · {opp.status}{opp.awarded_vendor_slug ? ` · awarded to ${opp.awarded_vendor_slug}` : ""}</p>
+        <p className="text-sm text-[var(--ink-500)] mb-4">Scope: {opp.scope.join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""} · {opp.status}{deadlineText(opp) ? ` · ${deadlineText(opp)}` : ""}{opp.awarded_vendor_slug ? ` · awarded to ${opp.awarded_vendor_slug}` : ""}</p>
+        {opp.engagement_type === "auction" && (
+          <div className="mb-6 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+            <p className="font-semibold mb-3">Bid comparison</p>
+            <BidComparison feed={feed} onAward={opp.status === "open" ? (slug) => buyerAction("award", `Awarded to ${slug}.`, slug) : undefined} />
+          </div>
+        )}
         <FeedView items={feed} />
         {opp.status === "open" && (
           <div className="mt-4 flex gap-2">

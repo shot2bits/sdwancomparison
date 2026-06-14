@@ -3,7 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import { FeedView, type FeedItem } from "@/components/OpportunityFeed";
 
-type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; feed: FeedItem[] };
+type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; feed: FeedItem[]; engagement_type?: string; auction_format?: string; deadline?: number | null };
+
+function deadlineText(opp: { engagement_type?: string; auction_format?: string; deadline?: number | null; status: string }): string | null {
+  if (opp.engagement_type !== "auction" || opp.auction_format !== "timed" || !opp.deadline) return null;
+  if (opp.status !== "open") return "Auction closed";
+  const diff = opp.deadline - Date.now();
+  if (diff <= 0) return "Closing";
+  const h = Math.round(diff / 3_600_000);
+  return h < 48 ? `Closes in ${h}h` : `Closes in ${Math.round(h / 24)}d`;
+}
 
 export default function OpportunitySupplier({ token }: { token: string }) {
   const [opp, setOpp] = useState<Opp | null>(null);
@@ -54,9 +63,10 @@ export default function OpportunitySupplier({ token }: { token: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <p className="eyebrow mb-1">Live opportunity · {vendor}</p>
+        <p className="eyebrow mb-1">{opp.engagement_type === "auction" ? "Reverse auction" : "Live opportunity"} · {vendor}</p>
         <h1 className="text-2xl mb-1">{opp.title}</h1>
-        <p className="text-sm text-[var(--ink-500)]">Scope: {opp.scope.join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""}{opp.regions.length ? ` · ${opp.regions.join(", ")}` : ""} · {opp.status}</p>
+        <p className="text-sm text-[var(--ink-500)]">Scope: {opp.scope.join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""}{opp.regions.length ? ` · ${opp.regions.join(", ")}` : ""} · {opp.status}{deadlineText(opp) ? ` · ${deadlineText(opp)}` : ""}</p>
+        {opp.engagement_type === "auction" && opp.status === "open" && <p className="text-sm text-amber-700 mt-1">Competitive auction: submit your best price. The buyer compares ranked bids.</p>}
         {opp.summary && <p className="text-sm text-[var(--ink-700)] mt-2">{opp.summary}</p>}
         {(opp.budget_note || opp.timeline_note) && <p className="text-sm text-[var(--ink-500)] mt-1">{opp.budget_note}{opp.budget_note && opp.timeline_note ? " · " : ""}{opp.timeline_note}</p>}
         <p className="text-xs text-emerald-700 mt-2">● Live, updates every few seconds</p>
