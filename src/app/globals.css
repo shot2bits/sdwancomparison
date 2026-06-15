@@ -2,15 +2,16 @@
 
 :root {
   /* Surfaces and ink — warm editorial palette */
-  --ink-900: #1a1612;
-  --ink-700: #3d3530;
-  --ink-500: #6b6760;
-  --ink-300: #a8a29e;
-  --ink-200: #d6d1c9;
-  --ink-100: #ebe6dd;
-  --paper-base: #faf8f3;
-  --paper-raised: #f5f1e8;
-  --paper-card: #fffefc;
+  /* Neutral light palette, matched to netify.co.uk (white surfaces, zinc ink) */
+  --ink-900: #18181b;
+  --ink-700: #3f3f46;
+  --ink-500: #71717a;
+  --ink-300: #a1a1aa;
+  --ink-200: #e4e4e7;
+  --ink-100: #f4f4f5;
+  --paper-base: #ffffff;
+  --paper-raised: #f4f4f5;
+  --paper-card: #ffffff;
 
   /* Accent — deep teal, used sparingly for links and headlines */
   --accent: #b45309;
@@ -182,9 +183,8 @@ h3 {
 
 /* Subtle paper texture using SVG noise — adds editorial atmosphere without distraction */
 .paper-texture {
-  background-image:
-    radial-gradient(at 0% 0%, rgba(13, 82, 70, 0.03) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(180, 83, 9, 0.025) 0px, transparent 50%);
+  /* Cleared to match the flat white background of netify.co.uk. */
+  background-image: none;
 }
 
 /* Capability matrix table */
