@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getProject, listResponses, saveResponse, newId, kvConfigured } from "@/lib/rfp-store";
+import { getProject, listResponses, saveResponse, hasAcceptedNda, newId, kvConfigured } from "@/lib/rfp-store";
 import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { recordCompletenessSample } from "@/lib/rfp-store";
@@ -44,6 +44,14 @@ export async function POST(req: Request, ctx: Ctx) {
   const session = await sessionFromRequest(req);
   const gate = await requireClaimedSupplierFor(session, slug ?? "__unmatched__", cors);
   if (gate) return gate;
+  // NDA gate: if the buyer requires an NDA, the responding organisation must
+  // have a recorded acceptance of the current version before they can respond.
+  if (!(await hasAcceptedNda(project, body.vendor))) {
+    return Response.json(
+      { error: "This RFP requires you to accept the buyer's NDA before responding.", nda_required: true },
+      { status: 403, headers: cors },
+    );
+  }
   const existing = (await listResponses(id)).find((r) => r.vendor === body.vendor);
   const response = RfpResponseSchema.parse({
     id: existing?.id ?? newId("resp"),

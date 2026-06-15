@@ -48,6 +48,22 @@ export const BuyerContextSchema = z.object({
 }).strict();
 export type BuyerContext = z.infer<typeof BuyerContextSchema>;
 
+/**
+ * NDA gate. When required, a supplier must record an acceptance of the buyer's
+ * NDA (click-to-accept with an audit record) before the full RFP detail and the
+ * response form unlock. `version` is bumped whenever the buyer changes the NDA
+ * text or link, which forces suppliers to re-accept the current terms.
+ */
+export const NdaConfigSchema = z.object({
+  required: z.boolean().default(false),
+  source: z.enum(["template", "buyer"]).default("template"), // Netify standard template, or the buyer's own
+  text: z.string().default(""),  // the NDA wording the supplier accepts
+  link: z.string().default(""),  // optional link to the buyer's NDA document
+  version: z.number().int().min(1).default(1),
+  updated: z.number().default(0),
+}).strict();
+export type NdaConfig = z.infer<typeof NdaConfigSchema>;
+
 export const ProjectDetailsSchema = z.object({
   id: z.string(),
   created: z.number(),
@@ -60,8 +76,50 @@ export const ProjectDetailsSchema = z.object({
   share_token: z.string(), // suppliers use this to view and respond
   manage_token: z.string().default(""), // buyer/agent credential for push actions (publish, invite); held by the creator
   methodology_version: z.string().default("2026.1"),
+  nda: NdaConfigSchema.default({ required: false, source: "template", text: "", link: "", version: 1, updated: 0 }), // defaulted so RFPs created before NDAs still validate
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
+
+/**
+ * A supplier's click-to-accept of the buyer's NDA. This is the audit record:
+ * who accepted (organisation + signatory + email), which NDA version, when, and
+ * the request fingerprint. One acceptance per organisation per RFP (re-accepting
+ * a new version overwrites the prior record, keeping the latest version).
+ */
+export const NdaAcceptanceSchema = z.object({
+  id: z.string(),
+  rfp_id: z.string(),
+  vendor: z.string().min(1),                 // organisation name as the supplier entered it
+  vendor_slug: z.string().nullable().default(null),
+  signatory_name: z.string().min(1),         // typed name of the person accepting
+  email: z.string().default(""),             // from the signed-in session, if any
+  nda_version: z.number().int().min(1).default(1),
+  accepted: z.number(),
+  ip: z.string().default(""),
+  user_agent: z.string().default(""),
+}).strict();
+export type NdaAcceptance = z.infer<typeof NdaAcceptanceSchema>;
+
+/** Netify standard mutual NDA, offered to buyers who don't have their own. */
+export const NETIFY_NDA_TEMPLATE = `MUTUAL NON-DISCLOSURE AGREEMENT
+
+This agreement is between the buyer organisation that issued this RFP ("Discloser") and the responding supplier organisation ("Recipient"), together the "Parties".
+
+1. Purpose. The Parties wish to exchange confidential information so the Recipient can assess and respond to the Discloser's SASE / SD-WAN requirement.
+
+2. Confidential Information. Any non-public information disclosed through this RFP, including the Discloser's requirements, site and network details, commercial information, pricing and any response, whether marked confidential or not, that a reasonable person would treat as confidential.
+
+3. Obligations. The Recipient will: (a) use the Confidential Information only to assess and respond to this RFP; (b) not disclose it to any third party except employees and professional advisers who need it and are bound by equivalent confidentiality obligations; and (c) protect it with at least the same care it uses for its own confidential information.
+
+4. Exclusions. Obligations do not apply to information that is or becomes public through no fault of the Recipient, was lawfully known before disclosure, is independently developed, or is required to be disclosed by law (with notice to the Discloser where lawful).
+
+5. Term. Confidentiality obligations continue for three (3) years from acceptance.
+
+6. No licence. No intellectual property right or licence is granted by disclosure.
+
+7. Governing law. This agreement is governed by the laws of England and Wales.
+
+By accepting, the Recipient confirms it has authority to bind its organisation to these terms.`;
 
 /** Supplier clarification thread (the Q&A loop). */
 export const RfpThreadSchema = z.object({

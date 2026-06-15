@@ -11,11 +11,14 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { NETIFY_NDA_TEMPLATE } from "@/lib/rfp-types";
 
 type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
 type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
 type Buyer = { organisation: string; sector: string | null; organisation_size: string; site_count: number | null; regions: string[]; compliance: string[]; operating_model: string; product_scope: string };
-type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string };
+type Nda = { required: boolean; source: "template" | "buyer"; text: string; link: string; version: number; updated: number };
+type NdaAcceptance = { id: string; vendor: string; signatory_name: string; email: string; nda_version: number; accepted: number };
+type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string; nda?: Nda };
 
 const STATUS_FLOW = ["draft", "review", "published", "qa", "evaluation"];
 const SCOPES = [
@@ -81,11 +84,38 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [bankOpen, setBankOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
   const [msgDraft, setMsgDraft] = useState<Record<string, string>>({});
+  const [ndaAccepts, setNdaAccepts] = useState<NdaAcceptance[]>([]);
+
+  const nda: Nda = project?.nda ?? { required: false, source: "template", text: "", link: "", version: 1, updated: 0 };
+
+  /** Persist an NDA change. Editing the wording, link or source bumps the
+   *  version so any prior supplier acceptances no longer satisfy the gate and
+   *  suppliers are asked to re-accept the current terms. */
+  async function updateNda(patch: Partial<Nda>) {
+    if (!project) return;
+    const next: Nda = { ...nda, ...patch };
+    const termsChanged = patch.text !== undefined && patch.text !== nda.text
+      || patch.link !== undefined && patch.link !== nda.link
+      || patch.source !== undefined && patch.source !== nda.source;
+    if (termsChanged) next.version = nda.version + 1;
+    if (patch.required && !nda.text && next.source === "template") next.text = NETIFY_NDA_TEMPLATE;
+    next.updated = Date.now();
+    await persist({ ...project, nda: next });
+  }
+
+  async function refreshNdaAccepts() {
+    if (!project) return;
+    try {
+      const r = await fetch(`/api/rfp/${project.id}/nda?acceptances=1`);
+      if (r.ok) { const d = await r.json(); setNdaAccepts(d.acceptances ?? []); }
+    } catch { /* non-fatal */ }
+  }
 
   useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
   useEffect(() => { fetch("/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
+  useEffect(() => { if (project?.nda?.required) refreshNdaAccepts(); /* eslint-disable-next-line */ }, [project?.id, project?.nda?.required, project?.nda?.version]);
   useEffect(() => { fetch("/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
@@ -645,6 +675,60 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         </div>
       </div>
+      {/* NDA: optional gate before suppliers see the full RFP */}
+      <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
+        <h2 className="text-lg mb-2">Confidentiality (NDA)</h2>
+        <label className="flex items-start gap-2 text-sm text-[var(--ink-700)] mb-3">
+          <input type="checkbox" checked={nda.required} onChange={(e) => updateNda({ required: e.target.checked })} className="mt-1" />
+          <span>Require suppliers to accept an NDA before they can see the full RFP and respond. Suppliers see only a short scope summary until they accept.</span>
+        </label>
+
+        {nda.required && (
+          <div className="space-y-4 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+            <div className="flex flex-wrap gap-4 text-sm">
+              <label className="flex items-center gap-2">
+                <input type="radio" name="nda_source" checked={nda.source === "template"} onChange={() => updateNda({ source: "template", text: NETIFY_NDA_TEMPLATE })} />
+                Use the Netify standard mutual NDA
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="radio" name="nda_source" checked={nda.source === "buyer"} onChange={() => updateNda({ source: "buyer" })} />
+                Use our own NDA
+              </label>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">NDA wording {nda.source === "buyer" ? "(paste your NDA text)" : "(editable copy of the Netify template)"}</label>
+              <textarea value={nda.text} onChange={(e) => updateNda({ text: e.target.value })} rows={8} placeholder="Paste your NDA wording here, or link to it below." className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-xs font-mono" />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium block mb-1">Link to your NDA document (optional)</label>
+              <input value={nda.link} onChange={(e) => updateNda({ link: e.target.value })} placeholder="https://…" className="w-full max-w-lg border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
+            </div>
+
+            <p className="text-xs text-[var(--ink-500)]">Current version: v{nda.version}. Changing the wording, link or source bumps the version, so suppliers who accepted earlier are asked to re-accept the new terms.</p>
+
+            <div>
+              <p className="eyebrow mb-2">Suppliers who have accepted ({ndaAccepts.length})</p>
+              {ndaAccepts.length === 0 ? (
+                <p className="text-sm text-[var(--ink-500)]">No acceptances yet.</p>
+              ) : (
+                <ul className="text-sm space-y-1">
+                  {ndaAccepts.map((a) => (
+                    <li key={a.id} className="flex flex-wrap gap-x-3 text-[var(--ink-700)]">
+                      <span className="font-medium">{a.vendor}</span>
+                      <span>signed by {a.signatory_name}</span>
+                      {a.email && <span className="text-[var(--ink-500)]">{a.email}</span>}
+                      <span className="text-[var(--ink-500)]">v{a.nda_version} · {new Date(a.accepted).toLocaleString("en-GB")}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* Suppliers: two-sided marketplace */}
       <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
         <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">

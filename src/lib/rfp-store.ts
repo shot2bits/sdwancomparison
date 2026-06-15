@@ -14,9 +14,11 @@ import {
   ProjectDetailsSchema,
   RfpThreadSchema,
   RfpResponseSchema,
+  NdaAcceptanceSchema,
   type ProjectDetails,
   type RfpThread,
   type RfpResponse,
+  type NdaAcceptance,
 } from "@/lib/rfp-types";
 
 const URL_ENV = process.env.KV_REST_API_URL;
@@ -139,6 +141,40 @@ export async function saveResponse(r: RfpResponse): Promise<RfpResponse> {
   else responses.push(parsed);
   await setJson(`rfp:${parsed.rfp_id}:responses`, responses);
   return parsed;
+}
+
+/* ---- NDA acceptances ---- */
+
+export async function listNdaAcceptances(rfpId: string): Promise<NdaAcceptance[]> {
+  return (await getJson<NdaAcceptance[]>(`rfp:${rfpId}:nda`)) ?? [];
+}
+
+/** Record (or overwrite) one organisation's NDA acceptance for an RFP. */
+export async function saveNdaAcceptance(a: NdaAcceptance): Promise<NdaAcceptance> {
+  const parsed = NdaAcceptanceSchema.parse(a);
+  const all = await listNdaAcceptances(parsed.rfp_id);
+  const idx = all.findIndex((x) => x.vendor.trim().toLowerCase() === parsed.vendor.trim().toLowerCase());
+  if (idx >= 0) all[idx] = parsed;
+  else all.push(parsed);
+  await setJson(`rfp:${parsed.rfp_id}:nda`, all);
+  return parsed;
+}
+
+export async function getNdaAcceptance(rfpId: string, vendor: string): Promise<NdaAcceptance | null> {
+  const v = vendor.trim().toLowerCase();
+  return (await listNdaAcceptances(rfpId)).find((x) => x.vendor.trim().toLowerCase() === v) ?? null;
+}
+
+/**
+ * Whether a given organisation may see the full RFP and respond. True when the
+ * RFP has no NDA requirement, or when the organisation has a recorded acceptance
+ * of the current NDA version. A blank vendor is treated as not-yet-accepted.
+ */
+export async function hasAcceptedNda(project: ProjectDetails, vendor: string): Promise<boolean> {
+  if (!project.nda?.required) return true;
+  if (!vendor.trim()) return false;
+  const accept = await getNdaAcceptance(project.id, vendor);
+  return Boolean(accept && accept.nda_version >= project.nda.version);
 }
 
 /* ------------------------------------------------------------------ */

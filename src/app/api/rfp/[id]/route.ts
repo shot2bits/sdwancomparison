@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getProject, saveProject, publicProject, kvConfigured } from "@/lib/rfp-store";
+import { getProject, saveProject, publicProject, hasAcceptedNda, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark } from "@/lib/rfp-store";
@@ -18,6 +18,36 @@ export async function GET(req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+
+  // Supplier lens: when read as a supplier and the buyer requires an NDA that
+  // this organisation has not yet accepted, withhold the questions and return a
+  // scope-only teaser. The hard gate is the respond route; this keeps the detail
+  // out of the supplier UI until they accept. Buyer/agent reads omit `as` and
+  // get the full project (manage_token always stripped).
+  const url = new URL(req.url);
+  if (url.searchParams.get("as") === "supplier" && project.nda.required) {
+    const vendor = (url.searchParams.get("vendor") ?? "").trim();
+    if (!(await hasAcceptedNda(project, vendor))) {
+      const pub = publicProject(project);
+      return Response.json(
+        {
+          ...pub,
+          rfp_sections: [], // redacted until the NDA is accepted
+          nda_required: true,
+          teaser: {
+            sector: project.buyer.sector,
+            organisation_size: project.buyer.organisation_size,
+            product_scope: project.buyer.product_scope,
+            operating_model: project.buyer.operating_model,
+            region_count: project.buyer.regions.length,
+            question_count: project.rfp_sections.filter((s) => s.included).reduce((n, s) => n + s.questions.length, 0),
+          },
+        },
+        { headers: cors },
+      );
+    }
+  }
+
   // Open read: never expose the manage_token credential to anyone with the id.
   return Response.json(publicProject(project), { headers: cors });
 }
