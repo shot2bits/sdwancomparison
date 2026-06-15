@@ -62,7 +62,7 @@ function envAdminEmails(): string[] {
  * Default admins. Overridable by setting ADMIN_EMAILS (comma separated) in the
  * project env, which takes precedence when present.
  */
-const DEFAULT_ADMIN_EMAILS = ["support@netify.com"];
+const DEFAULT_ADMIN_EMAILS = ["support@netify.com", "hyelland@netify.com"];
 
 export function adminEmails(): string[] {
   const env = envAdminEmails();
