@@ -387,13 +387,26 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   if (!project) {
     return (
-      <div className="rounded-2xl border border-[var(--ink-900)] p-8 text-center">
-        <h2 className="text-xl mb-2">Start a SASE, SSE and SD-WAN RFP</h2>
-        <p className="text-[var(--ink-700)] mb-5 max-w-xl mx-auto">
-          Build it conversationally with the AI agent, or pick your scope and
-          delivery model and select from researched questions. Either way, every
-          question maps to the Netify methodology and you can add your own with
-          AI help.
+      <div className="rounded-2xl border border-[var(--ink-900)] p-8">
+        <h2 className="text-xl mb-2">Start your RFP</h2>
+        <p className="text-[var(--ink-700)] mb-5 max-w-2xl">
+          An <strong>RFP</strong> (request for proposal) is the set of questions you send to suppliers so you can compare them fairly. This tool helps you write one for SASE, SSE or SD-WAN, invite the right suppliers, and compare their replies. It takes about four steps:
+        </p>
+        <div className="grid sm:grid-cols-4 gap-3 mb-6 max-w-3xl">
+          {[
+            ["1. Describe", "Your sector, number of sites, regions and any rules you must meet."],
+            ["2. Build questions", "We draft them for you. Add or remove any you like."],
+            ["3. Invite suppliers", "Send your RFP to the best-fit vendors in one click."],
+            ["4. Compare replies", "We flag any answers that need a closer look."],
+          ].map(([t, d]) => (
+            <div key={t} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3">
+              <p className="text-sm font-medium">{t}</p>
+              <p className="text-xs text-[var(--ink-600,#555)] mt-0.5">{d}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-[var(--ink-600,#555)] mb-5 max-w-2xl">
+          Two ways to build it, and you can switch between them at any time: <strong>AI agent</strong> (chat in plain English and it writes the RFP for you) or <strong>Build it myself</strong> (pick the questions by hand, with AI help when you want it). Nothing is sent to any supplier until you choose to invite them.
         </p>
         <button onClick={() => startRfp()} disabled={creating} className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
           {creating ? "Starting..." : "Start my RFP"}
@@ -405,6 +418,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   return (
     <div>
+      {/* Plain-language guide to the whole flow */}
+      <div className="mb-6 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-3 text-xs leading-relaxed text-[var(--ink-600,#555)]">
+        <span className="font-medium text-[var(--ink-800)]">How this works.</span> An RFP is the list of questions you send to suppliers. <strong>1.</strong> Set the basics below. <strong>2.</strong> Build your questions, by chatting to the AI agent or picking them yourself. <strong>3.</strong> Invite suppliers further down the page. <strong>4.</strong> Load and compare their replies. Everything saves automatically as you go, and nothing reaches a supplier until you invite them.
+      </div>
+
+      <p className="eyebrow mb-2">Step 1 — the basics</p>
       {/* Top bar: scope, model, mode, lifecycle */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-6 pb-5 border-b border-[var(--ink-300,#ccc)]">
         <div>
@@ -446,15 +465,19 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
       </div>
 
-      <div className="flex gap-2 mb-6">
+      <p className="eyebrow mb-2">Step 2 — build your questions</p>
+      <div className="flex gap-2 mb-1">
         <button onClick={() => setMode("agent")} className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${mode === "agent" ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>AI agent</button>
         <button onClick={() => setMode("manual")} className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${mode === "manual" ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>Build it myself</button>
       </div>
+      <p className="text-xs text-[var(--ink-500)] mb-6">{mode === "agent" ? "Chat in plain English and the assistant writes and edits your RFP for you. You can switch to Build it myself at any time, your work is kept." : "Pick questions by hand from the researched libraries, with AI help when you want it. You can switch to AI agent at any time, your work is kept."}</p>
 
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Left: agent or library depending on mode */}
         {mode === "agent" ? (
           <div className="flex flex-col">
+            <p className="eyebrow mb-2">Talk to the AI agent</p>
+            <p className="text-xs text-[var(--ink-500)] mb-2">Describe your needs in plain English. The agent writes and edits the questions, which appear in your RFP on the right.</p>
             <div ref={scroller} className="flex-1 max-h-[26rem] overflow-y-auto space-y-3 border border-[var(--ink-300,#ccc)] rounded-sm p-4 bg-white">
               {messages.map((m, i) => (
                 <div key={i} className={`text-sm whitespace-pre-wrap ${m.role === "user" ? "text-[var(--ink-500)]" : "text-[var(--ink-800)] border-l-2 border-[var(--accent)] pl-3"}`}>
@@ -470,6 +493,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         ) : (
           <div className="space-y-5">
+            <p className="eyebrow">Pick your questions</p>
+            <p className="text-xs text-[var(--ink-500)] -mt-3">Add questions from any of these, in any order. Each one you add appears in your RFP on the right. Tools: the AI research tool, the Netify question bank, your own AI-drafted question, or the full methodology library.</p>
             {/* AI expert research tool */}
             <div className="border border-[var(--ink-900)] rounded-sm p-4 bg-amber-50">
               <p className="eyebrow mb-2">AI expert research tool</p>
@@ -589,11 +614,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
         {/* Right: live RFP preview */}
         <div>
-          <div className="flex items-baseline justify-between mb-2">
-            <h2 className="text-lg">{project.title}</h2>
-            <span className="text-xs text-[var(--ink-500)]">{STATUS_FLOW.join(" → ")}</span>
-          </div>
-          <p className="text-sm text-[var(--ink-500)] mb-4">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.join(", ") || "none set"}.</p>
+          <p className="eyebrow mb-2">Your RFP so far (updates live)</p>
+          <h2 className="text-lg mb-1">{project.title}</h2>
+          <p className="text-sm text-[var(--ink-500)] mb-1">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.join(", ") || "none set"}.</p>
+          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">Stage: <span className="uppercase">{project.status}</span> — an RFP moves through {STATUS_FLOW.join(" → ")} as you publish and suppliers respond.</p>
           <div className="space-y-3">
             {project.rfp_sections.filter((s) => s.included).map((s) => {
               const active = s.questions.filter((q) => q.priority !== "optional");
@@ -630,7 +654,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <button onClick={publishToCurated} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : project.status === "published" ? "Re-publish to curated list" : "Publish to curated suppliers"}</button>
           </div>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3">Suppliers are the graded vendors and providers from the Netify marketplace. Publish to invite the best-fit curated set at once, or invite individually, then message, request a demo or request contact details. Publishing reaches named suppliers, so it uses your RFP credential (held automatically here; agents pass the manage_token over the API or MCP). Each invite gives the supplier a private portal link.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Publish to curated suppliers</strong> invites that whole set in one go. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
 
         {suggestions && suggestions.length > 0 && (
@@ -683,7 +707,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <h2 className="text-lg">Evaluate supplier responses</h2>
           <button onClick={loadEvaluations} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Load responses</button>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3">Supplier answers are cross-checked against Netify&#39;s independent capability grades. Claims that exceed the evidence are flagged for you to probe.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 4.</strong> Once suppliers reply, click <strong>Load responses</strong>. Their answers are cross-checked against Netify&#39;s independent capability grades, and any claim that goes beyond the evidence is flagged for you to question.</p>
         {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">No responses yet. Share the supplier link and publish the RFP.</p>}
         {evaluations && evaluations.map((ev) => (
           <details key={ev.vendor} className="border border-[var(--ink-300,#ccc)] rounded-sm mb-2">
