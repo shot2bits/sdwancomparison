@@ -353,7 +353,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             <select
               value={input.intent}
               onChange={(e) => set("intent", e.target.value as ShortlistInput["intent"])}
-              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white"
+              className="select-field"
             >
               <option value="none">No specific priority</option>
               {INTENT_KEYS.map((i) => (
@@ -469,7 +469,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             <select
               value={input.max_deployment_speed}
               onChange={(e) => set("max_deployment_speed", e.target.value as ShortlistInput["max_deployment_speed"])}
-              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white"
+              className="select-field"
             >
               {(["any", "hours", "days", "weeks", "months"] as const).map((s) => (
                 <option key={s} value={s}>{SPEED_LABELS[s]}</option>
@@ -481,7 +481,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             <select
               value={input.weight_preset}
               onChange={(e) => set("weight_preset", e.target.value as ShortlistInput["weight_preset"])}
-              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white"
+              className="select-field"
             >
               {Object.entries(PRESET_LABELS).map(([k, label]) => (
                 <option key={k} value={k}>{label}</option>

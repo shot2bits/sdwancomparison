@@ -345,7 +345,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
-      setPublishMsg(`Published. Invited ${data.invited?.length ?? 0} curated suppliers, each with a private portal link.`);
+      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. They now appear under "Suppliers" below, each with a private link you can copy or send — suppliers don't need an account, they respond via that link. Their replies show under "Evaluate supplier responses".`);
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
     finally { setPublishing(false); }

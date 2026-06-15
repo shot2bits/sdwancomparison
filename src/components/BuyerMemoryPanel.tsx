@@ -12,9 +12,9 @@ type Memory = {
   updated: number;
 };
 
-const SIZES = ["any", "large_global_enterprise", "mid_market", "small_business"];
-const MODELS = ["any", "managed", "co_managed", "diy"];
-const RISKS = ["unknown", "low", "medium", "high"];
+const SIZES: [string, string][] = [["any", "No preference"], ["large_global_enterprise", "Large global enterprise"], ["mid_market", "Mid-market"], ["small_business", "Small business"]];
+const MODELS: [string, string][] = [["any", "No preference"], ["managed", "Fully managed"], ["co_managed", "Co-managed"], ["diy", "DIY / self-managed"]];
+const RISKS: [string, string][] = [["unknown", "Unknown"], ["low", "Low"], ["medium", "Medium"], ["high", "High"]];
 const field = "w-full rounded border border-[var(--ink-300,#ccc)] p-2 text-sm";
 
 export default function BuyerMemoryPanel() {
@@ -75,13 +75,13 @@ export default function BuyerMemoryPanel() {
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="text-sm">Organisation<input className={field} value={mem.organisation} onChange={(e) => set("organisation", e.target.value)} /></label>
         <label className="text-sm">Organisation size
-          <select className={field} value={mem.organisation_size} onChange={(e) => set("organisation_size", e.target.value)}>{SIZES.map((s) => <option key={s} value={s}>{s}</option>)}</select>
+          <select className={field} value={mem.organisation_size} onChange={(e) => set("organisation_size", e.target.value)}>{SIZES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
         </label>
         <label className="text-sm">Operating model
-          <select className={field} value={mem.operating_model} onChange={(e) => set("operating_model", e.target.value)}>{MODELS.map((s) => <option key={s} value={s}>{s}</option>)}</select>
+          <select className={field} value={mem.operating_model} onChange={(e) => set("operating_model", e.target.value)}>{MODELS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
         </label>
         <label className="text-sm">Risk tolerance
-          <select className={field} value={mem.risk_tolerance} onChange={(e) => set("risk_tolerance", e.target.value)}>{RISKS.map((s) => <option key={s} value={s}>{s}</option>)}</select>
+          <select className={field} value={mem.risk_tolerance} onChange={(e) => set("risk_tolerance", e.target.value)}>{RISKS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
         </label>
       </div>
 

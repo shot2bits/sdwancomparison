@@ -8,7 +8,7 @@
  * feeding the new multi-path engine.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const NEEDS = [
@@ -16,7 +16,6 @@ const NEEDS = [
   { key: "sd_wan", label: "SD-WAN" },
   { key: "sse", label: "SSE" },
   { key: "sase", label: "Full SASE" },
-  { key: "managed_service", label: "Managed service" },
 ];
 
 const SECTORS = [
@@ -56,8 +55,27 @@ export default function GuidedStart() {
   const router = useRouter();
   const [s, setS] = useState<Sel>(INITIAL);
 
+  // Remember the form across navigation, so opening an outcome and coming back
+  // never loses what the user entered.
+  useEffect(() => { try { const raw = sessionStorage.getItem("netify_guided_start"); if (raw) setS({ ...INITIAL, ...JSON.parse(raw) }); } catch { /* ignore */ } }, []);
+  useEffect(() => { try { sessionStorage.setItem("netify_guided_start", JSON.stringify(s)); } catch { /* ignore */ } }, [s]);
+
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const features = useMemo(() => [...s.sdwan, ...s.sase], [s.sdwan, s.sase]);
+
+  // Build a readable summary from the chips, so the auction/quote summary is
+  // populated from the main form even when no free-text description was typed.
+  function summarise(): string {
+    const parts: string[] = [];
+    const needs = s.needs.map((n) => NEEDS.find((x) => x.key === n)?.label).filter(Boolean) as string[];
+    if (needs.length) parts.push(needs.join(", "));
+    if (s.sites) parts.push(`${s.sites} sites`);
+    if (s.regions.length) parts.push(s.regions.map((r) => REGIONS.find(([k]) => k === r)?.[1]).filter(Boolean).join(", "));
+    if (s.sector) { const l = SECTORS.find(([k]) => k === s.sector)?.[1]; if (l) parts.push(l); }
+    if (s.delivery !== "any") { const l = DELIVERY.find(([k]) => k === s.delivery)?.[1]; if (l) parts.push(l); }
+    if (s.compliance.length) parts.push(s.compliance.map((c) => COMPLIANCE.find(([k]) => k === c)?.[1]).filter(Boolean).join(", "));
+    return parts.filter(Boolean).join(". ");
+  }
 
   function productScope(): string {
     if (s.needs.includes("sase")) return "full_sase";
@@ -86,7 +104,8 @@ export default function GuidedStart() {
       if (s.needs.length) p.set("scope", s.needs.join("."));
       if (s.regions.length) p.set("regions", s.regions.join("."));
       if (sites != null) p.set("sites", String(sites));
-      if (s.description) p.set("summary", s.description);
+      const summary = s.description.trim() || summarise();
+      if (summary) p.set("summary", summary);
       if (s.budget) p.set("budget", s.budget);
       if (s.sector) p.set("sector", s.sector);
       router.push(`/opportunities?${p.toString()}`);
