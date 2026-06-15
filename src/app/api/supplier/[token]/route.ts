@@ -1,7 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getConnectionByToken, getProject, kvConfigured } from "@/lib/rfp-store";
 import { addMessage } from "@/lib/rfp-connect";
-import { sessionFromRequest, requireSupplierFor } from "@/lib/auth";
+import { sessionFromRequest, requireClaimedSupplierFor } from "@/lib/auth";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ token: string }> };
@@ -38,7 +38,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const conn = await getConnectionByToken(token);
   if (!conn) return Response.json({ error: "Connection not found." }, { status: 404, headers: cors });
   const session = await sessionFromRequest(req);
-  const gate = requireSupplierFor(session, conn.vendor_slug, cors);
+  const gate = await requireClaimedSupplierFor(session, conn.vendor_slug, cors);
   if (gate) return gate;
   let body: { action?: string; body?: string; payload?: Record<string, string> };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }

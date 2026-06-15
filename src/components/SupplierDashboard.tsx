@@ -16,6 +16,8 @@ export default function SupplierDashboard() {
   const [session, setSession] = useState<Session | null>(null);
   const [data, setData] = useState<{ invited: Opp[]; open: Opp[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [claim, setClaim] = useState<{ status: string; vendor_slug: string | null } | null>(null);
+  const [claiming, setClaiming] = useState(false);
 
   useEffect(() => { fetch("/api/auth/session").then((r) => r.json()).then(setSession).catch(() => setSession({ authenticated: false })); }, []);
 
@@ -26,7 +28,23 @@ export default function SupplierDashboard() {
     setData({ invited: d.invited ?? [], open: d.open ?? [] });
   }, []);
 
-  useEffect(() => { if (session?.authenticated && session.role !== "buyer") load(); }, [session, load]);
+  useEffect(() => {
+    if (session?.authenticated && session.role !== "buyer") {
+      load();
+      fetch("/api/supplier/claim").then((r) => r.json()).then((d) => setClaim({ status: d.status, vendor_slug: d.vendor_slug })).catch(() => {});
+    }
+  }, [session, load]);
+
+  async function claimProfile() {
+    setClaiming(true); setError(null);
+    try {
+      const r = await fetch("/api/supplier/claim", { method: "POST" });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error ?? "Could not submit claim.");
+      setClaim({ status: d.status, vendor_slug: d.vendor_slug ?? session?.vendor_slug ?? null });
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not submit claim."); }
+    finally { setClaiming(false); }
+  }
 
   if (session && (!session.authenticated || session.role === "buyer")) {
     return (
@@ -65,6 +83,22 @@ export default function SupplierDashboard() {
         <p className="text-lg font-semibold">{slug ? vendorTitle(slug) : "Netify (relay)"}</p>
         <p className="text-sm text-[var(--ink-600)]">{session.email}{session.admin ? " · admin" : ""}</p>
         {slug && <Link href={`/vendors/${slug}`} className="inline-block mt-3 text-sm underline">View your public profile</Link>}
+
+        {/* Profile claim status */}
+        {session.role === "netify" ? (
+          <p className="mt-4 text-sm rounded-sm bg-[var(--ink-100,#f0f0f0)] px-3 py-2 text-[var(--ink-700)]">Netify staff: you can act on behalf of any supplier. No claim needed.</p>
+        ) : slug && claim ? (
+          claim.status === "approved" ? (
+            <p className="mt-4 text-sm rounded-sm bg-emerald-50 px-3 py-2 text-emerald-800">✓ Profile claimed and verified. You can bid, quote and respond as {vendorTitle(slug)}.</p>
+          ) : claim.status === "pending" ? (
+            <p className="mt-4 text-sm rounded-sm bg-amber-50 px-3 py-2 text-amber-800">Claim submitted, awaiting Netify approval. You can browse opportunities, but you cannot bid or respond until your claim is approved.</p>
+          ) : (
+            <div className="mt-4 rounded-sm bg-[var(--ink-100,#f0f0f0)] px-3 py-3">
+              <p className="text-sm text-[var(--ink-700)] mb-2">{claim.status === "rejected" ? "Your previous claim was declined. You can submit a new claim or contact Netify." : `This profile is not yet claimed. Claim ${vendorTitle(slug)} to bid, quote and respond as your company. Netify verifies and approves claims.`}</p>
+              <button onClick={claimProfile} disabled={claiming} className="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 transition-colors disabled:opacity-50">{claiming ? "Submitting..." : `Claim this profile`}</button>
+            </div>
+          )
+        ) : null}
       </div>
 
       {!slug ? (

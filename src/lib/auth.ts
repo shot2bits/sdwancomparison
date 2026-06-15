@@ -4,7 +4,7 @@
  * stay open; only identity-asserting writes consult requireSupplier.
  */
 
-import { getSession, type AuthSession } from "@/lib/rfp-store";
+import { getSession, getVendorClaim, type AuthSession } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const SESSION_COOKIE = "netify_session";
@@ -64,5 +64,37 @@ export function requireSupplierFor(session: AuthSession | null, vendorSlug: stri
   }
   if (session.role === "netify") return null; // Netify relay can act for any vendor
   if (session.role === "supplier" && session.vendor_slug === vendorSlug) return null;
+  return Response.json({ error: "Your sign-in does not match this supplier.", auth_required: true }, { status: 403, headers: cors });
+}
+
+/**
+ * Gate a supplier write, with the profile-claim requirement on top of identity.
+ * A Netify relay session may act for any vendor (Netify staff/admin). A supplier
+ * session may act only for its own domain-verified vendor AND only once that
+ * vendor profile has an admin-approved claim. Until the claim is approved the
+ * supplier can sign in and browse but cannot bid, quote or respond. Reads never
+ * call this.
+ */
+export async function requireClaimedSupplierFor(
+  session: AuthSession | null,
+  vendorSlug: string,
+  cors: Record<string, string>,
+): Promise<Response | null> {
+  if (!session) {
+    return Response.json({ error: "Sign in as this supplier to respond.", auth_required: true }, { status: 401, headers: cors });
+  }
+  if (session.role === "netify") return null; // Netify relay/admin acts for any vendor
+  if (session.role === "supplier" && session.vendor_slug === vendorSlug) {
+    const claim = await getVendorClaim(vendorSlug);
+    if (claim && claim.status === "approved") return null;
+    return Response.json(
+      {
+        error: "Claim your company profile and wait for Netify to approve it before acting as this supplier.",
+        claim_required: true,
+        claim_status: claim?.status ?? "unclaimed",
+      },
+      { status: 403, headers: cors },
+    );
+  }
   return Response.json({ error: "Your sign-in does not match this supplier.", auth_required: true }, { status: 403, headers: cors });
 }

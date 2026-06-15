@@ -11,6 +11,8 @@ import {
   removeBlocklistDomain,
   listPendingRequests,
   clearPendingRequest,
+  listVendorClaims,
+  decideVendorClaim,
 } from "@/lib/rfp-store";
 import {
   isAdminEmail,
@@ -38,12 +40,13 @@ export async function GET(req: Request) {
   const auth = await requireAdmin(req, cors);
   if (auth instanceof Response) return auth;
 
-  const [sessions, effective, overrides, blocklistExtra, pending] = await Promise.all([
+  const [sessions, effective, overrides, blocklistExtra, pending, claims] = await Promise.all([
     listSessions(),
     effectiveVendorDomains(),
     getVendorDomainOverrides(),
     getBlocklistExtra(),
     listPendingRequests(),
+    listVendorClaims(),
   ]);
 
   const vendors = Object.keys(effective)
@@ -58,6 +61,7 @@ export async function GET(req: Request) {
       vendors,
       blocklist: { builtin_count: FREE_EMAIL_DOMAINS.size, custom: blocklistExtra },
       pending,
+      claims,
     },
     { headers: cors },
   );
@@ -115,6 +119,14 @@ export async function POST(req: Request) {
         await clearPendingRequest(domain);
         if (body.block === true) await addBlocklistDomain(domain);
         return Response.json({ ok: true }, { headers: cors });
+      }
+      case "approve_claim":
+      case "reject_claim": {
+        const slug = String(body.slug ?? "");
+        if (!slug) return Response.json({ error: "slug required." }, { status: 422, headers: cors });
+        const c = await decideVendorClaim(slug, action === "approve_claim", auth.email);
+        if (!c) return Response.json({ error: "No claim found for that vendor." }, { status: 404, headers: cors });
+        return Response.json({ ok: true, claim: c }, { headers: cors });
       }
       default:
         return Response.json({ error: "Unknown action." }, { status: 422, headers: cors });

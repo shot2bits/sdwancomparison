@@ -442,6 +442,70 @@ export async function clearPendingRequest(domain: string): Promise<void> {
   await kv(["SREM", "auth:index:pending", d]);
 }
 
+/* ------------------------------------------------------------------ */
+/* Vendor profile claims (supplier ownership, Netify-admin approved)   */
+/* ------------------------------------------------------------------ */
+
+export type VendorClaim = {
+  slug: string;
+  status: "pending" | "approved" | "rejected";
+  email: string;
+  domain: string;
+  requested: number;
+  decided?: number;
+  decided_by?: string;
+};
+
+export async function getVendorClaim(slug: string): Promise<VendorClaim | null> {
+  if (!kvConfigured() || !slug) return null;
+  return getJson<VendorClaim>(`vendor:claim:${slug}`);
+}
+
+export async function listVendorClaims(): Promise<VendorClaim[]> {
+  if (!kvConfigured()) return [];
+  const slugs = ((await kv(["SMEMBERS", "vendor:claims:index"])) as string[]) ?? [];
+  const out: VendorClaim[] = [];
+  for (const s of slugs) {
+    const c = await getJson<VendorClaim>(`vendor:claim:${s}`);
+    if (c) out.push(c);
+    else await kv(["SREM", "vendor:claims:index", s]);
+  }
+  return out.sort((a, b) => b.requested - a.requested);
+}
+
+/** A domain-verified supplier requests to claim their vendor profile. An
+ *  already-approved claim is returned unchanged (idempotent); otherwise a
+ *  fresh pending claim is recorded for an admin to approve. */
+export async function requestVendorClaim(slug: string, email: string, domain: string): Promise<VendorClaim> {
+  const existing = await getVendorClaim(slug);
+  if (existing && existing.status === "approved") return existing;
+  const claim: VendorClaim = {
+    slug,
+    status: "pending",
+    email: email.toLowerCase(),
+    domain: domain.toLowerCase(),
+    requested: Date.now(),
+  };
+  await setJson(`vendor:claim:${slug}`, claim);
+  await kv(["SADD", "vendor:claims:index", slug]);
+  return claim;
+}
+
+/** Admin approves or rejects a pending claim. */
+export async function decideVendorClaim(slug: string, approve: boolean, adminEmail: string): Promise<VendorClaim | null> {
+  const existing = await getVendorClaim(slug);
+  if (!existing) return null;
+  const updated: VendorClaim = {
+    ...existing,
+    status: approve ? "approved" : "rejected",
+    decided: Date.now(),
+    decided_by: adminEmail.toLowerCase(),
+  };
+  await setJson(`vendor:claim:${slug}`, updated);
+  await kv(["SADD", "vendor:claims:index", slug]);
+  return updated;
+}
+
 /* Buyer RFP ownership index (optional account) */
 export async function indexRfpForBuyer(email: string, rfpId: string): Promise<void> {
   await kv(["SADD", `buyer:${email.toLowerCase()}:rfps`, rfpId]);

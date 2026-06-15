@@ -7,12 +7,14 @@ type SessionInfo = { authenticated: boolean; role?: string; email?: string; admi
 type AdminSession = { token: string; role: string; email: string; vendor_slug: string | null; created: number; expires: number };
 type VendorRow = { slug: string; domains: string[]; customised: boolean };
 type Pending = { domain: string; email: string; created: number; count: number };
+type Claim = { slug: string; status: "pending" | "approved" | "rejected"; email: string; domain: string; requested: number; decided?: number; decided_by?: string };
 type Overview = {
   admin_email: string;
   sessions: AdminSession[];
   vendors: VendorRow[];
   blocklist: { builtin_count: number; custom: string[] };
   pending: Pending[];
+  claims: Claim[];
 };
 
 function when(ms: number): string {
@@ -88,6 +90,31 @@ export default function AdminClient() {
           <div className="space-y-3">
             {data.pending.map((p) => (
               <PendingRow key={p.domain} p={p} vendors={data.vendors} busy={busy} act={act} when={when} btn={btn} btnAmber={btnAmber} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Profile claims */}
+      <section className={card}>
+        <h2 className={h2}>Profile claims</h2>
+        <p className={sub}>Suppliers claiming ownership of their company profile. Approve to let that company bid, quote and respond as the vendor; reject to revoke. Netify staff can act for any supplier regardless of claim status.</p>
+        {data.claims.length === 0 ? (
+          <p className="text-sm text-[var(--ink-500)]">No profile claims yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {data.claims.map((c) => (
+              <div key={c.slug} className="flex flex-wrap items-center gap-2 border-b border-[var(--ink-100,#f0f0f0)] pb-3">
+                <span className="text-sm">
+                  <strong>{c.slug}</strong>{" "}
+                  <span className={c.status === "approved" ? "text-emerald-700" : c.status === "pending" ? "text-amber-700" : "text-red-700"}>{c.status}</span>{" "}
+                  <span className="text-[var(--ink-500)]">({c.email}, {c.domain}, {when(c.requested)})</span>
+                </span>
+                <div className="flex items-center gap-2 ml-auto">
+                  {c.status !== "approved" && <button className={btnAmber} disabled={busy} onClick={() => act({ action: "approve_claim", slug: c.slug })}>Approve</button>}
+                  {c.status !== "rejected" && <button className={btn} disabled={busy} onClick={() => act({ action: "reject_claim", slug: c.slug })}>Reject</button>}
+                </div>
+              </div>
             ))}
           </div>
         )}

@@ -3,7 +3,7 @@ import { getProject, listResponses, saveResponse, newId, kvConfigured } from "@/
 import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { recordCompletenessSample } from "@/lib/rfp-store";
-import { sessionFromRequest, requireSupplierFor } from "@/lib/auth";
+import { sessionFromRequest, requireClaimedSupplierFor } from "@/lib/auth";
 import { getGoal } from "@/lib/agent-store";
 import { reviewBid } from "@/lib/bid-review";
 
@@ -42,7 +42,7 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!body.vendor) return Response.json({ error: "vendor is required." }, { status: 422, headers: cors });
   const slug = matchVendorSlug(body.vendor);
   const session = await sessionFromRequest(req);
-  const gate = requireSupplierFor(session, slug ?? "__unmatched__", cors);
+  const gate = await requireClaimedSupplierFor(session, slug ?? "__unmatched__", cors);
   if (gate) return gate;
   const existing = (await listResponses(id)).find((r) => r.vendor === body.vendor);
   const response = RfpResponseSchema.parse({
