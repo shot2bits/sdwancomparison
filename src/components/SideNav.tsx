@@ -13,6 +13,18 @@ import { usePathname } from "next/navigation";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null; admin?: boolean };
 
+// Global brand nav, identical to the netify.co.uk master menu and the Insights
+// blog, so the primary navigation is the same on every Netify property. These
+// point at the marketing site (and the blog for Learning); the product's own
+// sections follow below.
+const MASTER: { label: string; href: string }[] = [
+  { label: "Resell", href: "https://netify.co.uk/resell/bt-business-services/" },
+  { label: "Marketplace", href: "https://netify.co.uk/marketplace/" },
+  { label: "Calculators", href: "https://netify.co.uk/tools/" },
+  { label: "Sectors", href: "https://netify.co.uk/sd-wan-for-healthcare/" },
+  { label: "Learning", href: "https://insights.netify.co.uk/" },
+];
+
 const SECTIONS: { title: string; links: { label: string; href: string }[] }[] = [
   { title: "Start", links: [{ label: "Start here", href: "/" }, { label: "How it works", href: "/how-it-works" }] },
   { title: "Compare", links: [{ label: "Shortlist builder", href: "/shortlist" }, { label: "All vendors", href: "/vendors" }] },
@@ -42,14 +54,26 @@ export default function SideNav() {
     <div className="flex flex-col h-full">
       <Link href="/" className="display text-xl font-semibold tracking-tight no-underline text-[var(--ink-900)] px-3 mb-6 mt-1">Netify</Link>
       <nav className="flex-1 space-y-5 overflow-y-auto">
-        {SECTIONS.map((s) => (
-          <div key={s.title}>
-            <p className="eyebrow px-3 mb-1.5">{s.title}</p>
-            <div className="space-y-0.5">
-              {s.links.map((l) => <Link key={l.href} href={l.href} className={linkCls(l.href)}>{l.label}</Link>)}
-            </div>
+        <div>
+          <p className="eyebrow px-3 mb-1.5">Netify</p>
+          <div className="space-y-0.5">
+            {MASTER.map((l) => (
+              <a key={l.href} href={l.href} className="block rounded-md px-3 py-1.5 text-sm no-underline text-[var(--ink-700)] transition-colors hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]">
+                {l.label}<span className="text-[var(--ink-400,#9ca3af)]"> ↗</span>
+              </a>
+            ))}
           </div>
-        ))}
+        </div>
+        <div className="space-y-5 border-t border-[var(--ink-200,#e5e5e5)] pt-5">
+          {SECTIONS.map((s) => (
+            <div key={s.title}>
+              <p className="eyebrow px-3 mb-1.5">{s.title}</p>
+              <div className="space-y-0.5">
+                {s.links.map((l) => <Link key={l.href} href={l.href} className={linkCls(l.href)}>{l.label}</Link>)}
+              </div>
+            </div>
+          ))}
+        </div>
         {session?.authenticated && (session.role === "supplier" || session.role === "netify") && (
           <div>
             <p className="eyebrow px-3 mb-1.5">My account</p>
