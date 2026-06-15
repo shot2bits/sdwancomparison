@@ -89,6 +89,42 @@ export const CAPABILITIES: Capability[] = [
     page: "/for-suppliers",
     mcp: "opportunity_inbox, opportunity_respond, get_rfp, respond_to_rfp",
   },
+  // Supervised agentic layer. These need buyer identity (a magic-link session or
+  // the RFP manage_token). The agent remembers, holds a goal, reviews bids and
+  // monitors, but every supplier-facing action is approval-gated, never sent
+  // automatically.
+  {
+    id: "buyer_memory",
+    title: "Remember buyer context across RFPs",
+    description: "For a signed-in buyer, persist durable preferences across projects: preferred and avoided vendors, compliance baseline, regions, organisation size, risk tolerance, budget patterns and past RFP outcomes. Additive and conflict-safe, transparent and editable by the buyer. The RFP advisor reads it to avoid re-asking and writes durable facts back.",
+    access: "identified",
+    page: "/account",
+    api: "/api/buyer/memory",
+  },
+  {
+    id: "procurement_goal",
+    title: "Set a standing procurement goal",
+    description: "Attach a standing outcome to an RFP (must-haves, response deadline, minimum bids). The agent reviews incoming bids against it and the monitoring digest tracks progress. Needs a buyer session or the RFP manage_token.",
+    access: "identified",
+    page: "/rfp-builder",
+    api: "/api/rfp/[id]/goal",
+  },
+  {
+    id: "review_supplier_bid",
+    title: "Agent review of incoming supplier bids",
+    description: "When a supplier submits a bid, the agent reviews it automatically without a buyer prompt: deterministic evidence checks (required-question coverage, hedging detection, compliance must-have coverage via the regulation engine) kept separate from an LLM quality judgement, a cross-check of the supplier's claim against Netify's independent vendor grade with overreach flagged, and drafted clarification questions. Clarifications are queued for buyer approval; nothing is sent automatically.",
+    access: "identified",
+    page: "/rfp-builder",
+    api: "/api/rfp/[id]/approvals",
+  },
+  {
+    id: "monitor_and_digest",
+    title: "Monitor live RFPs and recommend next actions",
+    description: "On a schedule, the agent reviews live RFPs with an active goal and writes a buyer-only digest of recommended next actions (deadline risk, missing bids, weak answers, pending gaps, stale approvals). Supervised: it recommends and drafts only, never contacts a supplier, every run is audited and reports zero outbound sends. Approve any drafted action via the approvals surface.",
+    access: "identified",
+    page: "/rfp-builder",
+    api: "/api/agent/run, /api/rfp/[id]/approvals",
+  },
 ];
 
 export function capabilitiesDocument() {
@@ -97,7 +133,7 @@ export function capabilitiesDocument() {
     name: "Netify SASE and SD-WAN marketplace capabilities",
     url: `${SITE_URL}/capabilities.json`,
     description:
-      "Agent-readable catalogue of what the marketplace can do. Open capabilities need no identity and can be driven anonymously by an AI agent (they are pull-based). Identified capabilities are push actions that reach named suppliers and accept either a human magic-link sign-in or an agent token. Browsing, building an RFP and posting to the board are always open.",
+      "Agent-readable catalogue of what the marketplace can do. Open capabilities need no identity and can be driven anonymously by an AI agent (they are pull-based). Identified capabilities require a buyer or supplier identity: either push actions that reach named suppliers, or the supervised agentic layer (persistent buyer memory, a standing procurement goal, automatic agent review of incoming bids, and scheduled monitoring that recommends next actions). In the agentic layer the agent remembers, plans, reviews and monitors, but every supplier-facing action is queued for human approval and never sent automatically. Browsing, building an RFP and posting to the board are always open.",
     access_model: {
       open: "No identity required. Pull-based: results and board posts are discovered by suppliers, not pushed at them. Fully usable by anonymous agents.",
       identified: "Reaches named suppliers (push). Accepts a human magic-link sign-in or an agent token, so an authorised agent can also perform it.",
