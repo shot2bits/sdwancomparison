@@ -54,6 +54,28 @@ const INITIAL: Sel = { needs: ["sase"], sector: null, regions: ["uk_ireland"], p
 export default function GuidedStart() {
   const router = useRouter();
   const [s, setS] = useState<Sel>(INITIAL);
+  const [parsing, setParsing] = useState(false);
+  const [parseErr, setParseErr] = useState<string | null>(null);
+  const [parsed, setParsed] = useState(false);
+
+  // Read the free-text description and tick the matching chips, so the buyer
+  // does not have to enter the same context twice. Best-effort: anything the
+  // model cannot map is left for the buyer to set by hand.
+  async function autofill() {
+    if (!s.description.trim() || parsing) return;
+    setParsing(true); setParseErr(null); setParsed(false);
+    try {
+      const r = await fetch("/api/guided/parse", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ description: s.description }) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error ?? "Could not auto-fill.");
+      setS((prev) => ({ ...prev, ...(d.fields as Partial<Sel>) }));
+      setParsed(true);
+    } catch (e) {
+      setParseErr(e instanceof Error ? e.message : "Could not auto-fill.");
+    } finally {
+      setParsing(false);
+    }
+  }
 
   // Remember the form across navigation, so opening an outcome and coming back
   // never loses what the user entered.
@@ -142,6 +164,18 @@ export default function GuidedStart() {
           placeholder="e.g. SD-WAN and SASE for 40 UK retail sites, PCI DSS, moving off MPLS, fully managed."
           className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-sm"
         />
+        <div className="mt-2 flex items-center gap-3 flex-wrap">
+          <button
+            onClick={autofill}
+            disabled={parsing || !s.description.trim()}
+            className="px-4 py-1.5 text-sm rounded-full border border-[var(--ink-900)] hover:bg-[var(--ink-900)] hover:text-white transition-colors disabled:opacity-50"
+          >
+            {parsing ? "Reading your description..." : "Auto-fill the options below"}
+          </button>
+          <span className="text-xs text-[var(--ink-500)]">Optional. We read your description and tick the matching options for you. You can change anything afterwards.</span>
+        </div>
+        {parsed && !parseErr && <p className="mt-2 text-xs text-emerald-700">Filled in what we could read. Check the options below and adjust anything.</p>}
+        {parseErr && <p className="mt-2 text-xs text-red-700">{parseErr}</p>}
       </div>
 
       <div className="space-y-5">

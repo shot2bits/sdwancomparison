@@ -19,6 +19,7 @@ import {
   buildComparison,
   INTENT_KEYS,
   INTENT_LABELS,
+  INTENT_PRESETS,
   ORG_SIZE_KEYS,
   ORG_SIZE_LABELS,
   SECTOR_KEYS,
@@ -487,6 +488,12 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                 <option key={k} value={k}>{label}</option>
               ))}
             </select>
+            {input.intent !== "none" && INTENT_PRESETS[input.intent]?.weight_preset && input.weight_preset === "balanced" && (
+              <p className="mt-1.5 text-xs text-[var(--ink-500)]">
+                Following your priority ({INTENT_LABELS[input.intent]}), this is weighted{" "}
+                {PRESET_LABELS[INTENT_PRESETS[input.intent].weight_preset!].toLowerCase()}. Pick a profile to override.
+              </p>
+            )}
           </div>
         </section>
 
