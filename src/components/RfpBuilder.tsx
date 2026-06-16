@@ -65,6 +65,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [elapsed, setElapsed] = useState(0);
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
+  const [manageCopied, setManageCopied] = useState(false);
   const scroller = useRef<HTMLDivElement>(null);
 
   // AI custom question composer
@@ -277,7 +278,13 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project) return;
     try {
       const res = await fetch(`/api/rfp/${project.id}/compliance`);
-      if (res.ok) setCoverage((await res.json()) as { rows: CoverageRow[]; gaps: CoverageRow[]; clauses: ClausePack[] });
+      // The API returns the rows array under `coverage`; older/alternative shapes
+      // may use `rows`. Normalise to { rows, gaps, clauses } with array fallbacks
+      // so a missing field can never crash the render (e.g. coverage.rows.filter).
+      if (res.ok) {
+        const d = (await res.json()) as { coverage?: CoverageRow[]; rows?: CoverageRow[]; gaps?: CoverageRow[]; clauses?: ClausePack[] };
+        setCoverage({ rows: d.coverage ?? d.rows ?? [], gaps: d.gaps ?? [], clauses: d.clauses ?? [] });
+      }
     } catch { /* ignore */ }
   }
 
@@ -375,10 +382,19 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
-      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. They now appear under "Suppliers" below, each with a private link you can copy or send — suppliers don't need an account, they respond via that link. Their replies show under "Evaluate supplier responses".`);
+      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, click "Load responses" under "Evaluate supplier responses" to read and compare them. There's no separate account or portal — this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
     finally { setPublishing(false); }
+  }
+
+  // The buyer's own way back in. There is no account: this page (the RFP id URL,
+  // with the manage token held in localStorage) is the buyer's dashboard, so we
+  // surface it as a copyable, bookmarkable link.
+  function copyManageLink() {
+    if (!project) return;
+    navigator.clipboard.writeText(`${window.location.origin}/rfp-builder/${project.id}`);
+    setManageCopied(true); setTimeout(() => setManageCopied(false), 2000);
   }
 
   function copySupplierLink(token: string) {
@@ -739,6 +755,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         </div>
         <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Publish to curated suppliers</strong> invites that whole set in one go. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
+        <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed — this page is your dashboard. Bookmark or copy this link to come back any time and track supplier replies.</span>
+          <code className="text-xs text-[var(--ink-600,#555)] break-all">{`${typeof window !== "undefined" ? window.location.origin : ""}/rfp-builder/${project.id}`}</code>
+          <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
+        </div>
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
 
         {suggestions && suggestions.length > 0 && (

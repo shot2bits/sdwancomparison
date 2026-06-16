@@ -154,7 +154,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
 
           {form.engagement_type === "auction" && (
             <div className="grid sm:grid-cols-2 gap-3">
-              <select value={form.auction_format} onChange={(e) => setForm({ ...form, auction_format: e.target.value })} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm">
+              <select value={form.auction_format} onChange={(e) => setForm({ ...form, auction_format: e.target.value })} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm bg-white">
                 <option value="open">Open-ended (pick anytime)</option>
                 <option value="timed">Timed (closes on a deadline)</option>
               </select>
@@ -165,7 +165,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           )}
 
           <div className="grid sm:grid-cols-2 gap-3">
-            <select value={form.eligibility} onChange={(e) => setForm({ ...form, eligibility: e.target.value })} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm">
+            <select value={form.eligibility} onChange={(e) => setForm({ ...form, eligibility: e.target.value })} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm bg-white">
               <option value="invited">Invite-only (you pick the vendors)</option>
               <option value="open">Open to any matching verified vendor</option>
             </select>

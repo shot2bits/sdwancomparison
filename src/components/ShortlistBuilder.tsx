@@ -588,9 +588,11 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                 {curatedPairUrl && (
                   <a
                     href={curatedPairUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
                   >
-                    Permanent comparison page
+                    Permanent comparison page ↗
                   </a>
                 )}
                 <button

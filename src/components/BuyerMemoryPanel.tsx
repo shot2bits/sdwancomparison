@@ -86,10 +86,10 @@ export default function BuyerMemoryPanel() {
       </div>
 
       <label className="block text-sm">Regions (comma-separated)<input className={field} value={mem.regions.join(", ")} onChange={(e) => set("regions", arr(e.target.value))} /></label>
-      <label className="block text-sm">Compliance always in scope<input className={field} value={mem.compliance_baseline.join(", ")} onChange={(e) => set("compliance_baseline", arr(e.target.value))} placeholder="uk_gdpr, pci_dss, dora" /></label>
+      <label className="block text-sm">Compliance always in scope<input className={field} value={mem.compliance_baseline.join(", ")} onChange={(e) => set("compliance_baseline", arr(e.target.value))} placeholder="e.g. UK GDPR, PCI DSS, DORA" /></label>
       <div className="grid sm:grid-cols-2 gap-4">
-        <label className="text-sm">Preferred vendors<input className={field} value={mem.preferred_vendor_slugs.join(", ")} onChange={(e) => set("preferred_vendor_slugs", arr(e.target.value))} placeholder="cato-networks" /></label>
-        <label className="text-sm">Avoid vendors<input className={field} value={mem.avoided_vendor_slugs.join(", ")} onChange={(e) => set("avoided_vendor_slugs", arr(e.target.value))} /></label>
+        <label className="text-sm">Preferred vendors<input className={field} value={mem.preferred_vendor_slugs.join(", ")} onChange={(e) => set("preferred_vendor_slugs", arr(e.target.value))} placeholder="e.g. Cato Networks, Zscaler" /></label>
+        <label className="text-sm">Avoid vendors<input className={field} value={mem.avoided_vendor_slugs.join(", ")} onChange={(e) => set("avoided_vendor_slugs", arr(e.target.value))} placeholder="e.g. incumbent to replace" /></label>
       </div>
       <label className="block text-sm">Budget notes<input className={field} value={mem.budget_notes} onChange={(e) => set("budget_notes", e.target.value)} placeholder="Cost-sensitive; expect 15-20% saving on current spend." /></label>
       <label className="block text-sm">Durable notes (comma-separated)<input className={field} value={mem.notes.join(", ")} onChange={(e) => set("notes", arr(e.target.value))} placeholder="UK-sovereign data residency required" /></label>

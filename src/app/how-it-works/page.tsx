@@ -71,6 +71,22 @@ const FAQS = [
   ["Is pricing public?", "No. The need is public so vendors can find it, but bid and quote amounts are private to the buyer who posted."],
 ];
 
+// A plain-English walk-through of what actually happens, told through one
+// concrete buyer, so the page explains the experience rather than just listing
+// what the tool can do.
+const STORY_INTRO =
+  "Here is the honest version. Buying SASE or SD-WAN usually means chasing five vendors, sitting through five pitches, and trying to line up five sets of answers that never quite match. Netify turns that around. You describe your network once, in plain English, and the providers who want your business come back to you with answers you can actually put side by side.";
+
+const STORY_STEPS = [
+  { step: "1", title: "Describe it once", body: "Say you run IT for a 40-site retailer, you are moving off MPLS, you need PCI DSS, and you would rather it was fully managed. Type that one sentence, or tick a few boxes. That is the whole brief, and you only give it once." },
+  { step: "2", title: "Pick how you want to hear back", body: "Just researching? Get a graded shortlist in seconds. Want prices? Run a reverse auction. In a hurry? Open a live quote room and watch replies come in. Running a formal process? Let the AI agent build you a full RFP. Same brief, four different doors, and you can use more than one." },
+  { step: "3", title: "The vendors come to you", body: "Verified providers see your need and respond, with a quote, an answer to your questions, or a request for a demo. You are not on the phone repeating yourself five times; everything lands in one place where you can keep track of it." },
+  { step: "4", title: "Compare like for like, then award", body: "Every vendor is graded independently by Netify against the same 40-feature framework. So when a supplier claims something, you can see whether the public evidence backs it up. You compare on substance rather than sales decks, then award the work." },
+];
+
+const STORY_OUTRO =
+  "Nothing is hidden behind a login. You can browse all 30+ vendors, build a shortlist, and even draft an RFP without an account. Vendors sign in only to bid, and only with a verified work email, so the responses you get come from real organisations. Your requirements are visible so the right vendors can find them; the prices they quote stay private to you.";
+
 export default function HowItWorksPage() {
   const schemas = [
     getOrganizationSchema(),
@@ -112,6 +128,20 @@ export default function HowItWorksPage() {
         <h1 id="page-h1" className="mb-4">From a network need to competing offers, without the cold-calling.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Netify is a vendor-neutral marketplace for SASE, SSE and SD-WAN. Describe what you need and get comparable, competing responses from 30+ verified providers, graded independently against a 40-feature methodology. Browse and build without an account; sign in only to bid.</p>
       </div>
+
+      <section className="mb-14 max-w-3xl">
+        <h2 className="text-2xl font-semibold mb-4">What actually happens</h2>
+        <p className="text-[var(--ink-700)] mb-6">{STORY_INTRO}</p>
+        <ol className="space-y-4 mb-6">
+          {STORY_STEPS.map((s) => (
+            <li key={s.step} className="flex gap-4">
+              <span className="flex-none w-8 h-8 rounded-full bg-amber-500 text-zinc-950 font-semibold flex items-center justify-center">{s.step}</span>
+              <div><p className="font-medium">{s.title}</p><p className="text-sm text-[var(--ink-700)]">{s.body}</p></div>
+            </li>
+          ))}
+        </ol>
+        <p className="text-[var(--ink-700)]">{STORY_OUTRO}</p>
+      </section>
 
       <section className="mb-14">
         <h2 className="text-2xl font-semibold mb-1">Four ways to use it</h2>
