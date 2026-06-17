@@ -460,6 +460,20 @@ export async function recordPendingRequest(email: string, domain: string): Promi
   await kv(["SADD", "auth:index:pending", d]);
 }
 
+/**
+ * Record that an email has completed sign-in for a role, and report whether this
+ * is the first time. Backed by SADD, which returns 1 only when the member is new
+ * to the set, so first-time detection is atomic and race-free. Keyed by
+ * role+email so a person who later signs in under a different role is still seen
+ * as a new sign-up for that role. Used to fire the one-off new-sign-up alert.
+ */
+export async function markSignupSeen(email: string, role: "supplier" | "buyer" | "netify"): Promise<boolean> {
+  if (!kvConfigured()) return false;
+  const member = `${role}:${email.toLowerCase()}`;
+  const added = (await kv(["SADD", "auth:index:signups", member])) as number;
+  return added === 1;
+}
+
 export async function listPendingRequests(): Promise<PendingRequest[]> {
   if (!kvConfigured()) return [];
   const domains = ((await kv(["SMEMBERS", "auth:index:pending"])) as string[]) ?? [];

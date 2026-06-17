@@ -54,6 +54,37 @@ export async function sendMagicLink(email: string, token: string, role: string):
 }
 
 /**
+ * Notify the Netify team when a buyer or supplier signs in for the first time.
+ * Best effort via Resend (same transport as the magic link). The destination is
+ * SIGNUP_NOTIFY_EMAIL, defaulting to support@netify.com. The email address and
+ * status (Buyer or Supplier) are in the subject, as requested. Netify staff
+ * sign-ins are internal and never reported. Returns whether an email was sent.
+ */
+export async function notifyNewSignup(email: string, role: "supplier" | "buyer" | "netify"): Promise<boolean> {
+  if (role !== "buyer" && role !== "supplier") return false;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false;
+  const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
+  const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
+  const status = role === "supplier" ? "Supplier" : "Buyer";
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to,
+        subject: `New ${status} sign-up: ${email}`,
+        html: `<p>A new ${status.toLowerCase()} has signed in to the Netify marketplace for the first time.</p><p><strong>Email:</strong> ${email}<br/><strong>Status:</strong> ${status}</p>`,
+      }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Gate an identity-asserting supplier write. The session must be a supplier
  * for that exact vendor, or a Netify relay session. Returns null when allowed,
  * or a Response (403/401) when blocked. Reads never call this.

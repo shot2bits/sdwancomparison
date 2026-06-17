@@ -1,5 +1,5 @@
-import { consumeMagicToken, createSession, kvConfigured } from "@/lib/rfp-store";
-import { sessionCookieHeader } from "@/lib/auth";
+import { consumeMagicToken, createSession, kvConfigured, markSignupSeen } from "@/lib/rfp-store";
+import { sessionCookieHeader, notifyNewSignup } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -11,6 +11,14 @@ export async function POST(req: Request) {
   const payload = body.token ? await consumeMagicToken(body.token) : null;
   if (!payload) return Response.json({ error: "This sign-in link is invalid or has expired." }, { status: 401 });
   const session = await createSession(payload);
+  // Alert the Netify team the first time a buyer or supplier signs in. Best
+  // effort and never blocks sign-in: a notification failure must not stop a
+  // legitimate user getting their session.
+  try {
+    if ((payload.role === "buyer" || payload.role === "supplier") && (await markSignupSeen(payload.email, payload.role))) {
+      await notifyNewSignup(payload.email, payload.role);
+    }
+  } catch { /* non-fatal */ }
   return Response.json(
     { ok: true, role: session.role, email: session.email, vendor_slug: session.vendor_slug },
     { headers: { "set-cookie": sessionCookieHeader(session.token) } },
