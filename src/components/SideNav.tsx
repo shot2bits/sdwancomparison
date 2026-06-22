@@ -27,7 +27,28 @@ const MASTER: { label: string; href: string }[] = [
 
 const SECTIONS: { title: string; links: { label: string; href: string }[] }[] = [
   { title: "Start", links: [{ label: "Start here", href: "/" }, { label: "How it works", href: "/how-it-works" }] },
-  { title: "Compare", links: [{ label: "Shortlist builder", href: "/shortlist" }, { label: "All vendors", href: "/vendors" }] },
+  { title: "Compare", links: [
+    { label: "Shortlist builder", href: "/shortlist" },
+    { label: "All vendors", href: "/vendors" },
+    { label: "Best for healthcare", href: "/best/sd-wan-sase-providers-for-healthcare" },
+    { label: "Best for financial services", href: "/best/sd-wan-sase-providers-for-financial-services" },
+    { label: "Best for retail", href: "/best/sd-wan-sase-providers-for-retail" },
+    { label: "Best for government", href: "/best/sd-wan-sase-providers-for-government" },
+  ] },
+  { title: "Popular vendors", links: [
+    { label: "Palo Alto Networks", href: "/vendors/palo-alto-networks" },
+    { label: "Zscaler", href: "/vendors/zscaler" },
+    { label: "Fortinet", href: "/vendors/fortinet" },
+    { label: "Check Point", href: "/vendors/check-point" },
+    { label: "BT Business", href: "/vendors/bt-business" },
+    { label: "Versa Networks", href: "/vendors/versa-networks" },
+  ] },
+  { title: "Alternatives", links: [
+    { label: "Colt alternatives", href: "/alternatives/colt-technology-services" },
+    { label: "Versa alternatives", href: "/alternatives/versa-networks" },
+    { label: "GTT alternatives", href: "/alternatives/gtt" },
+    { label: "Juniper alternatives", href: "/alternatives/juniper-networks" },
+  ] },
   { title: "Engage", links: [{ label: "Opportunity board", href: "/opportunities/board" }, { label: "Post a need", href: "/opportunities" }, { label: "RFP builder", href: "/rfp-builder" }] },
   { title: "Suppliers", links: [{ label: "For vendors and providers", href: "/for-suppliers" }] },
 ];
