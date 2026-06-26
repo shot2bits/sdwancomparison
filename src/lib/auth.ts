@@ -44,7 +44,7 @@ export async function sendMagicLink(email: string, token: string, role: string):
       body: JSON.stringify({
         from, to: email,
         subject: "Your Netify marketplace sign-in link",
-        html: `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a> (valid for 20 minutes).</p><p>If you did not request this, ignore this email.</p>`,
+        html: `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p><p>If you did not request this, ignore this email.</p>`,
       }),
     });
     return true;

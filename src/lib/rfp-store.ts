@@ -347,7 +347,7 @@ export type AuthSession = {
   expires: number;
 };
 
-const MAGIC_TTL_MS = 20 * 60 * 1000;       // 20 minutes
+const MAGIC_TTL_MS = 60 * 60 * 1000;       // 60 minutes (tolerates slow email delivery)
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export async function createMagicToken(payload: { role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null }): Promise<string> {
