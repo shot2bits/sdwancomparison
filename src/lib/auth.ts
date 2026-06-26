@@ -6,6 +6,8 @@
 
 import { getSession, getVendorClaim, type AuthSession } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
+import { isAdminEmail, emailDomain } from "@/lib/access-control";
+import { isNetifyDomain } from "@/lib/vendor-domains";
 
 export const SESSION_COOKIE = "netify_session";
 
@@ -62,6 +64,10 @@ export async function sendMagicLink(email: string, token: string, role: string):
  */
 export async function notifyNewSignup(email: string, role: "supplier" | "buyer" | "netify"): Promise<boolean> {
   if (role !== "buyer" && role !== "supplier") return false;
+  // Skip our own people: admins and anyone on a Netify domain are internal
+  // (and the admin console signs them in as "buyer"), so they are not real
+  // marketplace sign-ups and would only be noise.
+  if (isAdminEmail(email) || isNetifyDomain(emailDomain(email) ?? "")) return false;
   const key = process.env.RESEND_API_KEY;
   if (!key) return false;
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
