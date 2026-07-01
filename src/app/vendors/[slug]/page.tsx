@@ -133,7 +133,7 @@ export default async function VendorPage({ params }: Props) {
               <a href={vendor.website} target="_blank" rel="noopener" className="no-underline">
                 {vendor.website.replace(/^https?:\/\//, "").split("/")[0]} ↗
               </a>
-              <a href={`/alternatives/${vendor.slug}`} className="no-underline">
+              <a href={`/sase/alternatives/${vendor.slug}`} className="no-underline">
                 {vendor.name} alternatives
               </a>
               <span className="text-[var(--ink-500)]">

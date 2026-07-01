@@ -27,7 +27,7 @@ export default function BuyerMemoryPanel() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/buyer/memory");
+        const res = await fetch("/sase/api/buyer/memory");
         if (res.status === 401) { setNeedsAuth(true); return; }
         const data = await res.json();
         if (data.memory) setMem(data.memory);
@@ -45,7 +45,7 @@ export default function BuyerMemoryPanel() {
     if (!mem) return;
     setSaving(true);
     try {
-      const res = await fetch("/api/buyer/memory", {
+      const res = await fetch("/sase/api/buyer/memory", {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({
           organisation: mem.organisation, organisation_size: mem.organisation_size,
@@ -63,7 +63,7 @@ export default function BuyerMemoryPanel() {
   if (loading) return <p className="text-sm text-[var(--ink-500)]">Loading…</p>;
   if (needsAuth) return (
     <div className="rounded-md border border-[var(--ink-200,#e5e5e5)] p-5">
-      <p className="text-sm">Sign in with your work email to see and edit what the agent remembers about you. Memory is private to you and never shared across buyers. <a href="/for-suppliers" className="underline">Sign in</a></p>
+      <p className="text-sm">Sign in with your work email to see and edit what the agent remembers about you. Memory is private to you and never shared across buyers. <a href="/sase/for-suppliers" className="underline">Sign in</a></p>
     </div>
   );
   if (!mem) return <p className="text-sm text-[var(--ink-500)]">No memory available.</p>;

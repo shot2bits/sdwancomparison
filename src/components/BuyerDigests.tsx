@@ -11,7 +11,7 @@ export default function BuyerDigests() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/buyer/digests");
+      const res = await fetch("/sase/api/buyer/digests");
       if (res.status === 401) { setNeedsAuth(true); return; }
       const d = await res.json();
       setDigests(d.digests ?? []);
@@ -31,7 +31,7 @@ export default function BuyerDigests() {
       {digests.map((d) => (
         <div key={d.id} className="rounded-md border border-[var(--ink-200,#e5e5e5)] p-4">
           <div className="flex items-center justify-between mb-1">
-            <a href={`/rfp-builder/${d.rfp_id}/review`} className="font-medium underline">{d.rfp_title || d.rfp_id}</a>
+            <a href={`/sase/rfp-builder/${d.rfp_id}/review`} className="font-medium underline">{d.rfp_title || d.rfp_id}</a>
             <span className="text-xs text-[var(--ink-500)]">{new Date(d.created).toLocaleString("en-GB")}</span>
           </div>
           <p className="text-sm text-[var(--ink-700)] mb-2">{d.summary}</p>

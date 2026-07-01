@@ -19,5 +19,5 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!body.vendor_slug) return Response.json({ error: "vendor_slug is required." }, { status: 422, headers: cors });
   const r = await inviteSupplierToOpportunity(opp, body.vendor_slug);
   if ("error" in r) return Response.json(r, { status: 422, headers: cors });
-  return Response.json({ token: r.token, supplier_url: `/opportunities/supplier/${r.token}`, opportunity: r.opp }, { headers: cors });
+  return Response.json({ token: r.token, supplier_url: `/sase/opportunities/supplier/${r.token}`, opportunity: r.opp }, { headers: cors });
 }

@@ -64,7 +64,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     if (!opp) return;
     const poll = setInterval(async () => {
       try {
-        const res = await fetch(`/api/opportunity/${opp.id}/feed?since=${lastTs.current}`);
+        const res = await fetch(`/sase/api/opportunity/${opp.id}/feed?since=${lastTs.current}`);
         if (res.ok) { const d = await res.json(); if (d.items?.length) { setFeed((prev) => [...prev, ...d.items]); lastTs.current = Math.max(lastTs.current, ...d.items.map((f: FeedItem) => f.created)); } }
       } catch { /* ignore */ }
     }, 5000);
@@ -72,7 +72,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   }, [opp?.id]);
 
   async function load(id: string) {
-    try { const res = await fetch(`/api/opportunity/${id}`); if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); } }
+    try { const res = await fetch(`/sase/api/opportunity/${id}`); if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); } }
     catch { setError("Could not load."); }
   }
 
@@ -80,7 +80,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     setError(null);
     if (!form.title.trim() || form.scope.length === 0) { setError("Add a title and at least one scope."); return; }
     try {
-      const res = await fetch("/api/opportunity", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+      const res = await fetch("/sase/api/opportunity", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
         ...form,
         sites: form.sites ? Number(form.sites) : null,
         deadline: form.engagement_type === "auction" && form.auction_format === "timed" && form.deadline ? form.deadline : null,
@@ -88,13 +88,13 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not post."); }
       const o = (await res.json()) as Opp;
       setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created));
-      window.history.replaceState(null, "", `/opportunities/${o.id}`);
+      window.history.replaceState(null, "", `/sase/opportunities/${o.id}`);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not post."); }
   }
 
   async function suggest() {
     try {
-      const res = await fetch("/api/openapi/build_sase_shortlist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sector: sector || null, required_regions: form.regions, shortlist_size: 8 }) });
+      const res = await fetch("/sase/api/openapi/build_sase_shortlist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sector: sector || null, required_regions: form.regions, shortlist_size: 8 }) });
       if (res.ok) setSuggestions(((await res.json()) as { shortlist: Suggestion[] }).shortlist);
     } catch { /* ignore */ }
   }
@@ -102,7 +102,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   async function invite(slug: string) {
     if (!opp) return;
     try {
-      const res = await fetch(`/api/opportunity/${opp.id}/invite`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, buyer_token: opp.buyer_token }) });
+      const res = await fetch(`/sase/api/opportunity/${opp.id}/invite`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, buyer_token: opp.buyer_token }) });
       if (res.ok) { const d = await res.json(); setOpp(d.opportunity); navigator.clipboard.writeText(`${window.location.origin}${d.supplier_url}`); setCopied(slug); setTimeout(() => setCopied(null), 2500); }
     } catch { /* ignore */ }
   }
@@ -110,7 +110,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   async function buyerAction(action: string, body: string, award_slug?: string) {
     if (!opp) return;
     try {
-      const res = await fetch(`/api/opportunity/${opp.id}/buyer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ buyer_token: opp.buyer_token, action, body, award_slug }) });
+      const res = await fetch(`/sase/api/opportunity/${opp.id}/buyer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ buyer_token: opp.buyer_token, action, body, award_slug }) });
       if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); setComment(""); }
     } catch { /* ignore */ }
   }

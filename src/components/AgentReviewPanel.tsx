@@ -50,8 +50,8 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
     setLoading(true);
     try {
       const [g, a] = await Promise.all([
-        fetch(`/api/rfp/${rfpId}/goal`).then((r) => r.json()),
-        fetch(`/api/rfp/${rfpId}/approvals`).then((r) => r.json()),
+        fetch(`/sase/api/rfp/${rfpId}/goal`).then((r) => r.json()),
+        fetch(`/sase/api/rfp/${rfpId}/approvals`).then((r) => r.json()),
       ]);
       if (g.goal) {
         setGoal(g.goal);
@@ -74,7 +74,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
   async function saveGoal() {
     setBusy("goal");
     try {
-      const res = await fetch(`/api/rfp/${rfpId}/goal`, {
+      const res = await fetch(`/sase/api/rfp/${rfpId}/goal`, {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ outcome, must_have: mustHave.split(",").map((s) => s.trim()).filter(Boolean), targets: { min_bids: Number(minBids) }, manage_token: readManageToken(rfpId) }),
       });
@@ -87,7 +87,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
   async function decide(item: Approval, action: "approve" | "reject", editedQuestion?: string) {
     setBusy(item.id);
     try {
-      const res = await fetch(`/api/rfp/${rfpId}/approvals`, {
+      const res = await fetch(`/sase/api/rfp/${rfpId}/approvals`, {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ action, approval_id: item.id, edited_question: editedQuestion, manage_token: readManageToken(rfpId) }),
       });

@@ -64,7 +64,7 @@ export default async function ForSuppliersPage() {
         <div>
           <h2 className="text-2xl font-semibold mb-4">Sign in to bid</h2>
           <SignIn role="supplier" prompt="Sign in with your work email to bid and quote. We verify your domain against the listed supplier." />
-          <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? Your AI agent can read open opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/api/mcp">/api/mcp</a>.</p>
+          <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? Your AI agent can read open opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/sase/api/mcp">/api/mcp</a>.</p>
         </div>
       </section>
 

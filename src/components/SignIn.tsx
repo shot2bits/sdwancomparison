@@ -12,12 +12,12 @@ export default function SignIn({ role, prompt }: { role: "supplier" | "buyer"; p
   const [devLink, setDevLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => { fetch("/api/auth/session").then((r) => r.json()).then(setSession).catch(() => {}); }, []);
+  useEffect(() => { fetch("/sase/api/auth/session").then((r) => r.json()).then(setSession).catch(() => {}); }, []);
 
   async function request() {
     setError(null); setSent(null); setDevLink(null);
     try {
-      const res = await fetch("/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role }) });
+      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not send a link.");
       setSent(data.message ?? "Check your inbox for a sign-in link.");
@@ -26,7 +26,7 @@ export default function SignIn({ role, prompt }: { role: "supplier" | "buyer"; p
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/sase/api/auth/logout", { method: "POST" });
     setSession({ authenticated: false });
   }
 

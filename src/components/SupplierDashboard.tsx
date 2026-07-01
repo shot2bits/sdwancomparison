@@ -19,10 +19,10 @@ export default function SupplierDashboard() {
   const [claim, setClaim] = useState<{ status: string; vendor_slug: string | null } | null>(null);
   const [claiming, setClaiming] = useState(false);
 
-  useEffect(() => { fetch("/api/auth/session").then((r) => r.json()).then(setSession).catch(() => setSession({ authenticated: false })); }, []);
+  useEffect(() => { fetch("/sase/api/auth/session").then((r) => r.json()).then(setSession).catch(() => setSession({ authenticated: false })); }, []);
 
   const load = useCallback(async () => {
-    const r = await fetch("/api/supplier/opportunities");
+    const r = await fetch("/sase/api/supplier/opportunities");
     if (!r.ok) { if (r.status !== 401 && r.status !== 403) setError("Could not load opportunities."); return; }
     const d = await r.json();
     setData({ invited: d.invited ?? [], open: d.open ?? [] });
@@ -31,14 +31,14 @@ export default function SupplierDashboard() {
   useEffect(() => {
     if (session?.authenticated && session.role !== "buyer") {
       load();
-      fetch("/api/supplier/claim").then((r) => r.json()).then((d) => setClaim({ status: d.status, vendor_slug: d.vendor_slug })).catch(() => {});
+      fetch("/sase/api/supplier/claim").then((r) => r.json()).then((d) => setClaim({ status: d.status, vendor_slug: d.vendor_slug })).catch(() => {});
     }
   }, [session, load]);
 
   async function claimProfile() {
     setClaiming(true); setError(null);
     try {
-      const r = await fetch("/api/supplier/claim", { method: "POST" });
+      const r = await fetch("/sase/api/supplier/claim", { method: "POST" });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? "Could not submit claim.");
       setClaim({ status: d.status, vendor_slug: d.vendor_slug ?? session?.vendor_slug ?? null });

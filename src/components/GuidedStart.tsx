@@ -65,7 +65,7 @@ export default function GuidedStart() {
     if (!s.description.trim() || parsing) return;
     setParsing(true); setParseErr(null); setParsed(false);
     try {
-      const r = await fetch("/api/guided/parse", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ description: s.description }) });
+      const r = await fetch("/sase/api/guided/parse", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ description: s.description }) });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? "Could not auto-fill.");
       setS((prev) => ({ ...prev, ...(d.fields as Partial<Sel>) }));

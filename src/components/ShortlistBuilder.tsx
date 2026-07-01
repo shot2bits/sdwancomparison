@@ -167,7 +167,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
 
   function printUrl(): string {
     const qs = encodeScenario(input);
-    return `/shortlist/print${qs ? `?${qs}` : ""}`;
+    return `/sase/shortlist/print${qs ? `?${qs}` : ""}`;
   }
 
   async function askAgent() {
@@ -178,7 +178,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     setChatBusy(true);
     setChatError(null);
     try {
-      const res = await fetch("/api/agent", {
+      const res = await fetch("/sase/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ messages: nextMessages, current_input: input }),
@@ -231,7 +231,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     const hit = COMPARE_PAIRS.find(
       (p) => (p.a === x && p.b === y) || (p.a === y && p.b === x),
     );
-    return hit ? `/compare/${hit.slug}` : null;
+    return hit ? `/sase/compare/${hit.slug}` : null;
   }, [activeComparison]);
 
   async function submitLead(e: React.FormEvent) {
@@ -240,7 +240,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     setLeadState("busy");
     try {
       const qs = encodeScenario(input);
-      const res = await fetch("/api/lead", {
+      const res = await fetch("/sase/api/lead", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -765,7 +765,7 @@ function VendorCard({
         <div>
           <p className="eyebrow mb-1">No. {v.rank} · Score {v.score}</p>
           <h3 className="text-lg mb-1">
-            <a href={`/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+            <a href={`/sase/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
               {v.name}
             </a>
           </h3>

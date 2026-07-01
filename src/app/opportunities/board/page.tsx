@@ -99,7 +99,7 @@ export default async function OpportunityBoardPage() {
         </div>
       )}
 
-      <p className="mt-10 text-sm text-[var(--ink-500)]">Machine-readable board: <a className="underline" href="/opportunities/board/data.json">/opportunities/board/data.json</a>. Agents can read open opportunities and bid via the marketplace MCP at <a className="underline" href="/api/mcp">/api/mcp</a>. Pricing amounts stay private to the posting buyer.</p>
+      <p className="mt-10 text-sm text-[var(--ink-500)]">Machine-readable board: <a className="underline" href="/sase/opportunities/board/data.json">/opportunities/board/data.json</a>. Agents can read open opportunities and bid via the marketplace MCP at <a className="underline" href="/sase/api/mcp">/api/mcp</a>. Pricing amounts stay private to the posting buyer.</p>
     </div>
   );
 }

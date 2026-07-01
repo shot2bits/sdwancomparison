@@ -30,10 +30,10 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   useEffect(() => {
     (async () => {
       try {
-        const ndaRes = await fetch(`/api/rfp/${id}/nda`).then((r) => r.json()).catch(() => null);
+        const ndaRes = await fetch(`/sase/api/rfp/${id}/nda`).then((r) => r.json()).catch(() => null);
         if (ndaRes?.nda) setNda(ndaRes.nda);
         await loadProject("");
-        const tr = await fetch(`/api/rfp/${id}/thread`).then((r) => r.json()).catch(() => ({ threads: [] }));
+        const tr = await fetch(`/sase/api/rfp/${id}/thread`).then((r) => r.json()).catch(() => ({ threads: [] }));
         setThreads(tr.threads ?? []);
       } catch {
         setError("This RFP could not be loaded.");
@@ -44,7 +44,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
 
   async function loadProject(forVendor: string) {
     const qs = `?as=supplier${forVendor.trim() ? `&vendor=${encodeURIComponent(forVendor.trim())}` : ""}`;
-    const res = await fetch(`/api/rfp/${id}${qs}`);
+    const res = await fetch(`/sase/api/rfp/${id}${qs}`);
     if (!res.ok) { setError("This RFP could not be found."); return; }
     const p = (await res.json()) as Project;
     setProject(p);
@@ -55,7 +55,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   async function checkVendor(name: string) {
     if (!nda?.required || !name.trim()) return;
     try {
-      const r = await fetch(`/api/rfp/${id}/nda?vendor=${encodeURIComponent(name.trim())}`).then((x) => x.json());
+      const r = await fetch(`/sase/api/rfp/${id}/nda?vendor=${encodeURIComponent(name.trim())}`).then((x) => x.json());
       if (r?.accepted) { setAccepted(true); await loadProject(name); }
     } catch { /* non-fatal */ }
   }
@@ -66,7 +66,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
     if (!signatory.trim()) { setError("Enter the full name of the person accepting."); return; }
     if (!agree) { setError("Tick the box to confirm you have read and agree to the NDA."); return; }
     try {
-      const res = await fetch(`/api/rfp/${id}/nda`, {
+      const res = await fetch(`/sase/api/rfp/${id}/nda`, {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ vendor, signatory_name: signatory, agree: true }),
       });
@@ -81,7 +81,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
     if (!vendor.trim()) { setError("Enter your organisation name first."); return; }
     setError(null);
     try {
-      const res = await fetch(`/api/rfp/${id}/respond`, {
+      const res = await fetch(`/sase/api/rfp/${id}/respond`, {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ vendor, answers, submit: submitFinal }),
       });
@@ -96,7 +96,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
     if (!vendor.trim() || !question.trim()) { setError("Enter your organisation name and a question."); return; }
     setError(null);
     try {
-      const res = await fetch(`/api/rfp/${id}/thread`, {
+      const res = await fetch(`/sase/api/rfp/${id}/thread`, {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ vendor, question }),
       });

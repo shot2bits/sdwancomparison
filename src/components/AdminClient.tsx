@@ -30,11 +30,11 @@ export default function AdminClient() {
   const [newBlock, setNewBlock] = useState("");
   const [vendorFilter, setVendorFilter] = useState("");
 
-  useEffect(() => { fetch("/api/auth/session").then((r) => r.json()).then(setSession).catch(() => setSession({ authenticated: false })); }, []);
+  useEffect(() => { fetch("/sase/api/auth/session").then((r) => r.json()).then(setSession).catch(() => setSession({ authenticated: false })); }, []);
 
   const load = useCallback(async () => {
     setError(null);
-    const r = await fetch("/api/admin");
+    const r = await fetch("/sase/api/admin");
     if (r.status === 401 || r.status === 403) { setData(null); return; }
     if (!r.ok) { setError("Could not load admin data."); return; }
     const d = (await r.json()) as Overview;
@@ -47,7 +47,7 @@ export default function AdminClient() {
   async function act(payload: Record<string, unknown>) {
     setBusy(true); setError(null);
     try {
-      const r = await fetch("/api/admin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+      const r = await fetch("/sase/api/admin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
       if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error ?? "Action failed."); }
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : "Action failed."); }

@@ -29,7 +29,7 @@ export default function PartnerWorkspace() {
   const [busy, setBusy] = useState("");
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/partner");
+    const res = await fetch("/sase/api/partner");
     if (res.status === 401) { setNeedsAuth(true); setLoading(false); return; }
     const d = await res.json();
     setWs(d as Workspace);
@@ -57,7 +57,7 @@ export default function PartnerWorkspace() {
       <section className={card}>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold">Partner digest</h3>
-          <button onClick={async () => { setBusy("digest"); await fetch("/api/partner/digest", { method: "POST" }); await load(); setBusy(""); }} disabled={busy === "digest"} className="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-60">{busy === "digest" ? "Generating…" : "Generate partner digest"}</button>
+          <button onClick={async () => { setBusy("digest"); await fetch("/sase/api/partner/digest", { method: "POST" }); await load(); setBusy(""); }} disabled={busy === "digest"} className="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-60">{busy === "digest" ? "Generating…" : "Generate partner digest"}</button>
         </div>
         {ws.digests[0] ? (
           <div>
@@ -85,8 +85,8 @@ export default function PartnerWorkspace() {
                 <p className="text-xs text-[var(--ink-600)] mb-1">Why: {a.rationale}</p>
                 {a.payload.body && <p className="text-sm whitespace-pre-wrap bg-[var(--ink-50,#fafafa)] rounded p-2 my-2">{a.payload.body}</p>}
                 <div className="flex gap-2">
-                  <button onClick={async () => { setBusy(a.id); await fetch("/api/partner/approvals", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "approve", approval_id: a.id }) }); await load(); setBusy(""); }} disabled={busy === a.id} className="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-60">Approve</button>
-                  <button onClick={async () => { setBusy(a.id); await fetch("/api/partner/approvals", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "reject", approval_id: a.id }) }); await load(); setBusy(""); }} disabled={busy === a.id} className="rounded-full border border-[var(--ink-300,#ccc)] px-4 py-1.5 text-sm hover:bg-[var(--ink-100,#f5f5f5)] disabled:opacity-60">Reject</button>
+                  <button onClick={async () => { setBusy(a.id); await fetch("/sase/api/partner/approvals", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "approve", approval_id: a.id }) }); await load(); setBusy(""); }} disabled={busy === a.id} className="rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-60">Approve</button>
+                  <button onClick={async () => { setBusy(a.id); await fetch("/sase/api/partner/approvals", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "reject", approval_id: a.id }) }); await load(); setBusy(""); }} disabled={busy === a.id} className="rounded-full border border-[var(--ink-300,#ccc)] px-4 py-1.5 text-sm hover:bg-[var(--ink-100,#f5f5f5)] disabled:opacity-60">Reject</button>
                 </div>
               </li>
             ))}
@@ -142,7 +142,7 @@ function MemoryPanel({ memory, onSaved, busy, setBusy }: { memory: Memory; onSav
   const arr = (v: string) => v.split(",").map((s) => s.trim()).filter(Boolean);
   async function save() {
     setBusy("memory");
-    await fetch("/api/partner/memory", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
+    await fetch("/sase/api/partner/memory", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({
       company_name: m.company_name, orca_status: m.orca_status, orca_code_on_file: m.orca_code_on_file,
       monthly_opportunity_target: Number(m.monthly_opportunity_target), sales_capacity: m.sales_capacity, margin_or_commission_goal: m.margin_or_commission_goal,
       target_customer_type: m.target_customer_type, preferred_sectors: m.preferred_sectors, broadband_focus: m.broadband_focus, preferred_addons: m.preferred_addons, blockers: m.blockers, notes: m.notes,
@@ -177,7 +177,7 @@ function GoalPanel({ goal, onSaved, busy, setBusy }: { goal: Goal; onSaved: () =
   const [count, setCount] = useState(goal?.targets.opportunity_count ?? 0);
   async function save() {
     setBusy("goal");
-    await fetch("/api/partner/goal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ outcome, kind, opportunity_count: Number(count) }) });
+    await fetch("/sase/api/partner/goal", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ outcome, kind, opportunity_count: Number(count) }) });
     await onSaved(); setBusy("");
   }
   return (
@@ -206,7 +206,7 @@ function Assistant({ onDone }: { onDone: () => void }) {
     const next = [...messages, { role: "user" as const, content: prompt }];
     setMessages(next); setPrompt(""); setBusy(true);
     try {
-      const res = await fetch("/api/partner/agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }) });
+      const res = await fetch("/sase/api/partner/agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }) });
       const d = await res.json();
       setMessages([...next, { role: "assistant", content: d.narrative || d.error || "Done." }]);
       await onDone(); // refresh artefacts/tasks/approvals

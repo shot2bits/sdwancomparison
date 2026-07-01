@@ -27,7 +27,7 @@ export default function VerifyClient() {
     if (!token) return;
     setState("working");
     try {
-      const r = await fetch("/api/auth/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }) });
+      const r = await fetch("/sase/api/auth/verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }) });
       const d = await r.json();
       if (r.ok) { setState("done"); setInfo(d); } else setState("error");
     } catch { setState("error"); }

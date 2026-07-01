@@ -26,7 +26,7 @@ export default function SupplierPortal({ token }: { token: string }) {
 
   async function load() {
     try {
-      const res = await fetch(`/api/supplier/${token}`);
+      const res = await fetch(`/sase/api/supplier/${token}`);
       if (!res.ok) { setError("This connection could not be found."); return; }
       const data = (await res.json()) as { connection: Conn; rfp: Rfp | null };
       setConn(data.connection); setRfp(data.rfp);
@@ -36,7 +36,7 @@ export default function SupplierPortal({ token }: { token: string }) {
   async function post(action: string, body: string, payload: Record<string, string> = {}) {
     setError(null); setNotice(null);
     try {
-      const res = await fetch(`/api/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, body, payload }) });
+      const res = await fetch(`/sase/api/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action, body, payload }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not send."); }
       setConn((await res.json()) as Conn);
       setNotice("Sent.");

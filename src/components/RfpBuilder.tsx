@@ -107,17 +107,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function refreshNdaAccepts() {
     if (!project) return;
     try {
-      const r = await fetch(`/api/rfp/${project.id}/nda?acceptances=1`);
+      const r = await fetch(`/sase/api/rfp/${project.id}/nda?acceptances=1`);
       if (r.ok) { const d = await r.json(); setNdaAccepts(d.acceptances ?? []); }
     } catch { /* non-fatal */ }
   }
 
   useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
-  useEffect(() => { fetch("/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
+  useEffect(() => { fetch("/sase/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
   useEffect(() => { if (project?.nda?.required) refreshNdaAccepts(); /* eslint-disable-next-line */ }, [project?.id, project?.nda?.required, project?.nda?.version]);
-  useEffect(() => { fetch("/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
+  useEffect(() => { fetch("/sase/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
   // The manage_token is the RFP's mutation/push credential. The server strips it
@@ -139,7 +139,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   async function loadProject(id: string) {
     try {
-      const res = await fetch(`/api/rfp/${id}`);
+      const res = await fetch(`/sase/api/rfp/${id}`);
       if (res.ok) applyProject((await res.json()) as Project);
       else setError("This RFP could not be loaded.");
     } catch { setError("This RFP could not be loaded."); }
@@ -148,11 +148,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function startRfp(buyer?: Record<string, unknown>) {
     setCreating(true); setError(null);
     try {
-      const res = await fetch("/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buyer ? { buyer } : {}) });
+      const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buyer ? { buyer } : {}) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not start an RFP."); }
       const p = (await res.json()) as Project;
       applyProject(p); // create returns the full token; persist it client-side
-      window.history.replaceState(null, "", `/rfp-builder/${p.id}`);
+      window.history.replaceState(null, "", `/sase/rfp-builder/${p.id}`);
       setMessages([{ role: "assistant", content: "Let's build your RFP. What sector are you in, roughly how many sites, which regions, and any compliance obligations (for example UK GDPR, PCI DSS, IEC 62443)? You can also just pick a scope and delivery model under Build it myself." }]);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not start an RFP."); }
     finally { setCreating(false); }
@@ -186,7 +186,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     try {
       // updated carries the manage_token from client state, which the gated PUT
       // requires; the response keeps the token (access proven), so re-apply it.
-      const res = await fetch(`/api/rfp/${updated.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...updated, manage_token: manageToken.current || updated.manage_token, regenerate }) });
+      const res = await fetch(`/sase/api/rfp/${updated.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...updated, manage_token: manageToken.current || updated.manage_token, regenerate }) });
       if (res.ok && regenerate) applyProject((await res.json()) as Project);
     } catch { /* optimistic */ }
   }
@@ -211,7 +211,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     const ctrl = new AbortController();
     const timeout = setTimeout(() => ctrl.abort(), 115000);
     try {
-      const res = await fetch(`/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }), signal: ctrl.signal });
+      const res = await fetch(`/sase/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }), signal: ctrl.signal });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error ?? `The advisor could not respond (${res.status}).`); }
       const data = (await res.json()) as { narrative?: string; project?: Project };
       if (data.project) applyProject(data.project); // agent response is token-stripped; re-attach
@@ -247,7 +247,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project || !intent.trim() || drafting) return;
     setDrafting(true); setError(null); setDraft(null);
     try {
-      const res = await fetch(`/api/rfp/${project.id}/draft-question`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ intent }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/draft-question`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ intent }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not draft."); }
       const data = (await res.json()) as { question: RfpQuestion & { category: string } };
       setDraft(data.question);
@@ -277,7 +277,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function refreshCoverage() {
     if (!project) return;
     try {
-      const res = await fetch(`/api/rfp/${project.id}/compliance`);
+      const res = await fetch(`/sase/api/rfp/${project.id}/compliance`);
       // The API returns the rows array under `coverage`; older/alternative shapes
       // may use `rows`. Normalise to { rows, gaps, clauses } with array fallbacks
       // so a missing field can never crash the render (e.g. coverage.rows.filter).
@@ -292,7 +292,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project || !topic.trim() || researching) return;
     setResearching(true); setError(null); setResearchSet(null);
     try {
-      const res = await fetch(`/api/rfp/${project.id}/research`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ topic, count: 4 }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/research`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ topic, count: 4 }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not research."); }
       setResearchSet((await res.json()) as { analysis: string; questions: (RfpQuestion & { category: string })[] });
     } catch (e) { setError(e instanceof Error ? e.message : "Could not research."); }
@@ -325,7 +325,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function loadEvaluations() {
     if (!project) return;
     try {
-      const res = await fetch(`/api/rfp/${project.id}/evaluation`);
+      const res = await fetch(`/sase/api/rfp/${project.id}/evaluation`);
       if (res.ok) setEvaluations(((await res.json()) as { evaluations: Evaluation[] }).evaluations);
     } catch { /* ignore */ }
   }
@@ -333,7 +333,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function refreshConnections() {
     if (!project) return;
     try {
-      const res = await fetch(`/api/rfp/${project.id}/connect`);
+      const res = await fetch(`/sase/api/rfp/${project.id}/connect`);
       if (res.ok) setConnections(((await res.json()) as { connections: Connection[] }).connections);
     } catch { /* ignore */ }
   }
@@ -341,7 +341,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function suggestSuppliers() {
     if (!project) return;
     try {
-      const res = await fetch("/api/openapi/build_sase_shortlist", {
+      const res = await fetch("/sase/api/openapi/build_sase_shortlist", {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({
           sector: project.buyer.sector ?? null,
@@ -361,7 +361,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function inviteSupplier(slug: string, intro: string) {
     if (!project) return;
     try {
-      const res = await fetch(`/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, intro }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, intro }) });
       if (res.ok) refreshConnections();
     } catch { /* ignore */ }
   }
@@ -369,7 +369,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function connectAction(slug: string, action: string, body: string) {
     if (!project) return;
     try {
-      const res = await fetch(`/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, action, body }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, action, body }) });
       if (res.ok) { refreshConnections(); setMsgDraft({ ...msgDraft, [slug]: "" }); }
     } catch { /* ignore */ }
   }
@@ -378,7 +378,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project || publishing) return;
     setPublishing(true); setPublishMsg(null); setError(null);
     try {
-      const res = await fetch(`/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: project.manage_token }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: project.manage_token }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });

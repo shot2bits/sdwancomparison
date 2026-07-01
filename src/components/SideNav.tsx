@@ -58,11 +58,11 @@ export default function SideNav() {
   const [session, setSession] = useState<Session | null>(null);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => { fetch("/api/auth/session").then((r) => r.json()).then(setSession).catch(() => setSession({ authenticated: false })); }, []);
+  useEffect(() => { fetch("/sase/api/auth/session").then((r) => r.json()).then(setSession).catch(() => setSession({ authenticated: false })); }, []);
   useEffect(() => { setOpen(false); }, [pathname]);
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    await fetch("/sase/api/auth/logout", { method: "POST" }).catch(() => {});
     setSession({ authenticated: false });
   }
 

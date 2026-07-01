@@ -27,7 +27,7 @@ export default function OpportunitySupplier({ token }: { token: string }) {
     let active = true;
     (async () => {
       try {
-        const res = await fetch(`/api/opportunity/supplier/${token}`);
+        const res = await fetch(`/sase/api/opportunity/supplier/${token}`);
         if (!res.ok) { setError("This opportunity link is invalid."); return; }
         const data = await res.json();
         if (!active) return;
@@ -37,7 +37,7 @@ export default function OpportunitySupplier({ token }: { token: string }) {
     })();
     const poll = setInterval(async () => {
       try {
-        const res = await fetch(`/api/opportunity/${opp?.id ?? ""}/feed?since=${lastTs.current}`);
+        const res = await fetch(`/sase/api/opportunity/${opp?.id ?? ""}/feed?since=${lastTs.current}`);
         if (res.ok && opp) {
           const d = await res.json();
           if (d.items?.length) { setFeed((prev) => [...prev, ...d.items]); lastTs.current = Math.max(lastTs.current, ...d.items.map((f: FeedItem) => f.created)); }
@@ -50,7 +50,7 @@ export default function OpportunitySupplier({ token }: { token: string }) {
   async function post(type: string, body: string, pricing?: object) {
     setError(null);
     try {
-      const res = await fetch(`/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing }) });
+      const res = await fetch(`/sase/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.auth_required ? "Please sign in above with your supplier work email first." : (e.error ?? "Could not send.")); }
       const updated = (await res.json()) as Opp;
       setFeed(updated.feed); lastTs.current = Math.max(0, ...updated.feed.map((f) => f.created));
