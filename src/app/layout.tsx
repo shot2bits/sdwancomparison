@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   description:
     "Vendor-neutral SD-WAN and SASE comparison covering 30 platforms and managed providers against a 40-feature evaluation framework. Published by Netify.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://netify.co.uk/sase"),
+  metadataBase: new URL("https://netify.co.uk/sase"),
   openGraph: {
     type: "website",
     siteName: "Netify Vendor Comparison",

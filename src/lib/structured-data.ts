@@ -4,7 +4,7 @@
  */
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://netify.co.uk/sase";
+  "https://netify.co.uk/sase";
 
 export function getOrganizationSchema() {
   return {
