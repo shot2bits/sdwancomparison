@@ -57,7 +57,7 @@ export default async function VendorPage({ params }: Props) {
     "@type": "WebPage",
     name: `${vendor.name}: SD-WAN and SASE capability profile`,
     description: vendor.evidence_summary,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://sase.netify.co.uk"}/vendors/${vendor.slug}`,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://netify.co.uk/sase"}/vendors/${vendor.slug}`,
     dateModified: vendor.last_verified,
     about: {
       "@type": "Organization",
