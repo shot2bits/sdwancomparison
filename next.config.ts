@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         has: [{ type: "host", value: "app.netify.co.uk" }],
-        destination: "https://netify.co.uk/sase/rfp-builder",
+        destination: "https://netify.co.uk/sase/rfp-builder/",
         permanent: true,
         basePath: false,
       },
