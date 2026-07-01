@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description: `The strongest SD-WAN and SASE alternatives to ${vendor.name} in 2026, ranked by Netify's 40-feature evidence matrix with scores and caveats.`,
-    alternates: { canonical: `${SITE_URL}/alternatives/${slug}` },
+    alternates: { canonical: `${SITE_URL}/alternatives/${slug}/` },
     openGraph: {
       title: `Top ${vendor.name} alternatives (2026)`,
       description: `The strongest SD-WAN and SASE alternatives to ${vendor.name}, ranked by evidence.`,

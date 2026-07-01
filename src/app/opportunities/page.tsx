@@ -9,7 +9,7 @@ const OVERLAY = "/opportunities?prefill=1&engagement=quote_room&scope=sd_wan.sse
 export const metadata: Metadata = {
   title: "Post a live SASE & SD-WAN opportunity | Netify",
   description: "Post a network opportunity, from underlay circuits to full SASE, and have graded suppliers reply in real time with comments and indicative pricing.",
-  alternates: { canonical: `${SITE_URL}/opportunities` },
+  alternates: { canonical: `${SITE_URL}/opportunities/` },
   openGraph: { title: "Post a live SASE & SD-WAN opportunity", description: "Graded suppliers reply in real time with comments and pricing.", url: `${SITE_URL}/opportunities`, type: "website", locale: "en_GB" },
 };
 

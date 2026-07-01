@@ -6,7 +6,7 @@ import { featureList } from "@/lib/capabilities";
 export const metadata: Metadata = {
   title: "How the Netify SASE & SD-WAN marketplace works",
   description: "Four ways to buy SASE, SSE and SD-WAN: compare a shortlist, run a reverse auction, open a live quote room, or build a structured RFP. Vendor-neutral and open.",
-  alternates: { canonical: `${SITE_URL}/how-it-works` },
+  alternates: { canonical: `${SITE_URL}/how-it-works/` },
   openGraph: { title: "How the Netify marketplace works", description: "Research, reverse auction, live quote room or structured RFP. Vendor-neutral and open to browse.", url: `${SITE_URL}/how-it-works`, type: "website", locale: "en_GB" },
 };
 

@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description: `${c.names[a]} vs ${c.names[b]} compared feature by feature: 40 graded capabilities plus regions, clouds, AI and resilience. Scores, wins and caveats.`,
-    alternates: { canonical: `${SITE_URL}/compare/${pair}` },
+    alternates: { canonical: `${SITE_URL}/compare/${pair}/` },
     openGraph: {
       title: `${c.names[a]} vs ${c.names[b]} (2026)`,
       description: `Feature by feature comparison on the Netify evidence matrix.`,

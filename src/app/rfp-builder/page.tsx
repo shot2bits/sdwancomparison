@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "SASE & SD-WAN RFP Builder: AI Agent (2026)",
   description:
     "Build a market-ready SASE and SD-WAN RFP with an AI agent: requirement synthesis, methodology-backed questions, vendor suggestions and supplier Q&A.",
-  alternates: { canonical: `${SITE_URL}/rfp-builder` },
+  alternates: { canonical: `${SITE_URL}/rfp-builder/` },
   openGraph: {
     title: "SASE & SD-WAN RFP Builder: AI Agent (2026)",
     description: "From a vague business need to a market-ready RFP, guided by an AI agent backed by the Netify evaluation methodology.",

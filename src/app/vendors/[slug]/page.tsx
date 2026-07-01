@@ -8,6 +8,7 @@ import {
   STATUS_LABELS,
   STATUS_DESCRIPTIONS,
 } from "@/lib/vendors";
+import { SITE_URL } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -25,12 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title,
       description,
-      alternates: { canonical: `/vendors/${slug}` },
+      alternates: { canonical: `${SITE_URL}/vendors/${slug}/` },
       openGraph: {
         title,
         description,
         type: "article",
-        url: `/vendors/${slug}`,
+        url: `${SITE_URL}/vendors/${slug}/`,
       },
     };
   } catch {

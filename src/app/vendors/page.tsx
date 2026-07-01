@@ -10,7 +10,7 @@ import {
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
-  alternates: { canonical: "/vendors" },
+  alternates: { canonical: `${SITE_URL}/vendors/` },
   title: "SD-WAN and SASE vendor comparison: all 30 vendors",
   description:
     "Side-by-side comparison of 30 SD-WAN and SASE platforms and managed providers, grouped by category and graded against a 40-feature evaluation framework.",

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "For SASE & SD-WAN vendors and providers | Netify marketplace",
   description: "Win SASE, SSE, SD-WAN, circuit and managed service work. See open buyer opportunities, sign in with a verified work email, and bid. Agents can bid over MCP.",
-  alternates: { canonical: `${SITE_URL}/for-suppliers` },
+  alternates: { canonical: `${SITE_URL}/for-suppliers/` },
   openGraph: { title: "For vendors and providers", description: "See open buyer opportunities and bid. Domain-verified sign-in.", url: `${SITE_URL}/for-suppliers`, type: "website", locale: "en_GB" },
 };
 

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Best SD-WAN and SASE Providers (2026): Build a Shortlist",
   description:
     "The best SD-WAN and SASE providers and vendors for 2026, ranked from 30 evidence-graded platforms. Filter by sector and features or ask the AI advisor.",
-  alternates: { canonical: `${SITE_URL}/shortlist` },
+  alternates: { canonical: `${SITE_URL}/shortlist/` },
   openGraph: {
     title: "Best SD-WAN and SASE Providers (2026): Build a Shortlist",
     description:
