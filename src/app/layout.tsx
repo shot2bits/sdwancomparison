@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 // Footer mega-nav. Mirrors the netify.co.uk footer (components/site-footer.tsx
 // + lib/home-content.ts) so the SASE app carries the same trust/authority and
-// commercial links. SASE-app-native routes use relative paths; everything that
+// commercial links. SASE-app-native links carry the /sase basePath explicitly (plain anchors miss Next basePath); everything that
 // lives on the marketing site uses absolute https://netify.co.uk URLs; the
 // editorial blog uses its Ghost subdomain. Keep labels in sync with the main
 // site's footer.
@@ -37,10 +37,10 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
   {
     title: "Platform",
     links: [
-      { label: "How It Works", href: "/how-it-works" },
-      { label: "SASE & SD-WAN RFP Builder", href: "/rfp-builder" },
-      { label: "SD-WAN Shortlist Builder", href: "/shortlist" },
-      { label: "All vendors", href: "/vendors" },
+      { label: "How It Works", href: "/sase/how-it-works/" },
+      { label: "SASE & SD-WAN RFP Builder", href: "/sase/rfp-builder/" },
+      { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
+      { label: "All vendors", href: "/sase/vendors/" },
     ],
   },
   {
@@ -69,7 +69,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Insights & Guidance",
     links: [
       { label: "Blog & Articles", href: "https://netify.co.uk/insights/" },
-      { label: "SD-WAN Shortlist Builder", href: "/shortlist" },
+      { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
       { label: "Netify Resources", href: "https://netify.co.uk/resources/" },
       { label: "Healthcare Trust & Evidence", href: "https://netify.co.uk/healthcare-trust-and-evidence/" },
       { label: "Vendor Comparison Index", href: "https://netify.co.uk/vendor-comparison/" },
