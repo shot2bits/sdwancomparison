@@ -40,7 +40,10 @@ export default async function RfpProjectOrPathPage({ params }: Props) {
             <p className="eyebrow mb-2">Agentic RFP builder</p>
             <h1 className="text-2xl">Your SASE and SD-WAN RFP</h1>
           </div>
-          <Link href={`/rfp-builder/${id}/review`} className="flex-none inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-4 py-1.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">Agent review and approvals →</Link>
+          <div className="flex flex-none flex-wrap gap-2">
+            <Link href={`/rfp-builder/${id}/preview`} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Preview &amp; download →</Link>
+            <Link href={`/rfp-builder/${id}/review`} className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-4 py-1.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">Agent review and approvals →</Link>
+          </div>
         </div>
         <RfpBuilder initialId={id} />
       </div>
