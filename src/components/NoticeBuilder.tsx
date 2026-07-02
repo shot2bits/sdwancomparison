@@ -144,6 +144,46 @@ export default function NoticeBuilder() {
         response_mode: p.get("engagement") === "auction" ? "reverse_auction" : d.response_mode,
       }));
     }
+    // Clone an existing public notice (or sample) as a starting template.
+    // Only public projection fields are used; anything private never reaches
+    // this endpoint. Buyer identity is intentionally NOT cloned.
+    const cloneId = p.get("clone");
+    if (cloneId && /^[A-Za-z0-9_-]+$/.test(cloneId)) {
+      (async () => {
+        try {
+          const res = await fetch(`/sase/opportunities/${cloneId}/data.json`);
+          if (!res.ok) return;
+          const data = (await res.json()) as { opportunity?: Partial<PublicOpportunity> };
+          const o = data.opportunity;
+          if (!o) return;
+          const toDate = (ms?: number | null) => (ms ? new Date(ms).toISOString().slice(0, 10) : "");
+          setDraft((d) => ({
+            ...d,
+            title: o.title ? `${o.title}` : d.title,
+            scope: Array.isArray(o.scope) ? o.scope : d.scope,
+            buyer_sector: o.buyer_sector ?? d.buyer_sector,
+            buyer_size_band: o.buyer_size_band ?? d.buyer_size_band,
+            sites: o.sites != null ? String(o.sites) : d.sites,
+            users_band: o.users_band ?? d.users_band,
+            remote_users_band: o.remote_users_band ?? d.remote_users_band,
+            regions: Array.isArray(o.regions) && o.regions.length ? o.regions : d.regions,
+            cloud_platforms: Array.isArray(o.cloud_platforms) ? o.cloud_platforms : d.cloud_platforms,
+            summary: o.summary ?? d.summary,
+            current_environment: o.current_environment ?? d.current_environment,
+            desired_outcomes: o.desired_outcomes ?? d.desired_outcomes,
+            compliance_requirements: Array.isArray(o.compliance_requirements) ? o.compliance_requirements : d.compliance_requirements,
+            evidence_requested: Array.isArray(o.evidence_requested) ? o.evidence_requested : d.evidence_requested,
+            evaluation_priorities: Array.isArray(o.evaluation_priorities) ? o.evaluation_priorities : d.evaluation_priorities,
+            response_mode: (o.response_mode as ResponseMode) ?? d.response_mode,
+            timeline_note: o.timeline_note ?? d.timeline_note,
+            go_live_target: toDate(o.go_live_target) || d.go_live_target,
+            // Deliberately not cloned: buyer_org, visibility choices, deadlines
+            // (dates rarely transfer), AI summary/assumptions (regenerate).
+          }));
+          track("post_project_started", { conversionSource: "clone", sourceOpportunityId: cloneId });
+        } catch { /* start blank */ }
+      })();
+    }
     setLoaded(true);
     track("post_project_started");
   }, []);

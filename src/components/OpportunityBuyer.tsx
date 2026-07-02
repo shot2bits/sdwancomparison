@@ -76,6 +76,21 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     // time); the API no longer returns buyer_token to arbitrary viewers.
     let btok = "";
     try { btok = localStorage.getItem(`opp_btok_${id}`) ?? ""; } catch { /* ignore */ }
+    // Account-based recovery: no local token (new device, cleared cache) but
+    // possibly signed in — /api/opportunity/mine returns this buyer's tokens.
+    if (!btok) {
+      try {
+        const mineRes = await fetch("/sase/api/opportunity/mine");
+        if (mineRes.ok) {
+          const mine = (await mineRes.json()) as { opportunities: { id: string; buyer_token: string }[] };
+          const match = mine.opportunities.find((o) => o.id === id);
+          if (match) {
+            btok = match.buyer_token;
+            try { localStorage.setItem(`opp_btok_${id}`, btok); } catch { /* ignore */ }
+          }
+        }
+      } catch { /* viewer mode */ }
+    }
     try {
       const res = await fetch(`/sase/api/opportunity/${id}${btok ? `?buyer_token=${encodeURIComponent(btok)}` : ""}`);
       if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); }
@@ -218,7 +233,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           <p className="eyebrow mb-2">Respond to this opportunity</p>
           <p className="text-sm text-[var(--ink-600)] mb-3">Suppliers sign in with a verified work email to submit comments, pricing or clarification questions. Pricing stays private to the buyer.</p>
           <a href="/sase/for-suppliers/" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Sign in to respond</a>
-          <p className="text-xs text-[var(--ink-500)] mt-3">Posted this opportunity yourself? Open this page in the browser you published from, or use the manage link from your confirmation.</p>
+          <p className="text-xs text-[var(--ink-500)] mt-3">Posted this opportunity yourself? Sign in with the email you published with and reload this page — your manage controls will be restored automatically.</p>
         </div>
       ) : (
       <div>

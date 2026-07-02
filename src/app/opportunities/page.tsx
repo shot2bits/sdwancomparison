@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MyOpportunities from "@/components/MyOpportunities";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -65,6 +66,8 @@ export default function OpportunitiesPage() {
           only to publish, and supplier pricing stays private to you.
         </p>
       </div>
+
+      <MyOpportunities />
 
       <div className="mb-12 grid gap-4 sm:grid-cols-2">
         {CARDS.map((c) => (
