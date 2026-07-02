@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import SideNav from "@/components/SideNav";
+import TopNav from "@/components/TopNav";
 import "./globals.css";
 
 // Inter matches the main netify.co.uk site (SF Pro approximation),
@@ -67,7 +68,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
   {
     title: "Insights & Guidance",
     links: [
-      { label: "Blog & Articles", href: "https://insights.netify.co.uk/" },
+      { label: "Blog & Articles", href: "https://netify.co.uk/insights/" },
       { label: "SD-WAN Shortlist Builder", href: "/shortlist" },
       { label: "Netify Resources", href: "https://netify.co.uk/resources/" },
       { label: "Healthcare Trust & Evidence", href: "https://netify.co.uk/healthcare-trust-and-evidence/" },
@@ -100,6 +101,10 @@ export default function RootLayout({
   return (
     <html lang="en-GB" className={inter.variable}>
       <body className="paper-texture min-h-screen">
+        {/* TopNav = global zone switcher (SASE Marketplace / Buy BT /
+            Resell BT + global pages). SideNav = SASE-zone deep nav,
+            desktop only; mobile deep nav is TopNav's drawer. */}
+        <TopNav />
         <SideNav />
         <div className="lg:pl-60 min-h-screen flex flex-col">
           <main className="flex-1">{children}</main>
