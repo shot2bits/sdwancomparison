@@ -67,7 +67,7 @@ const REGULATIONS = [
 ];
 type CoverageRow = { regulation: string; label: string; feature_id: string; covered: boolean };
 type ClausePack = { regulation: string; label: string; clauses: string[] };
-type Evaluation = { vendor: string; vendor_slug: string | null; answered: number; total: number; flags: number; checks: { question: string; answer: string; grade_label: string; flag: string; note: string }[] };
+type Evaluation = { vendor: string; vendor_slug: string | null; answered: number; total: number; flags: number; red_flags?: number; missing_evidence?: number; weighted_coverage?: number; checks: { question: string; answer: string; grade_label: string; flag: string; note: string }[] };
 type Benchmark = { available: boolean; total_rfps?: number; top_mandatory_questions?: { name: string; count: number }[]; median_response_completeness?: number | null };
 type ConnMsg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
 type Connection = { vendor_slug: string; vendor_name: string; token: string; status: string; messages: ConnMsg[] };
@@ -1013,14 +1013,16 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <details key={ev.vendor} className="border border-[var(--ink-300,#ccc)] rounded-sm mb-2">
             <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer">
               {ev.vendor} · {ev.answered}/{ev.total} answered
-              {ev.flags > 0 && <span className="ml-2 text-amber-700">{ev.flags} claim{ev.flags > 1 ? "s" : ""} to verify</span>}
+              {typeof ev.weighted_coverage === "number" && <span className="ml-2 text-[var(--ink-500)]">{Math.round(ev.weighted_coverage * 100)}% weighted coverage</span>}
+              {(ev.red_flags ?? 0) > 0 && <span className="ml-2 text-red-700">{ev.red_flags} red flag{(ev.red_flags ?? 0) > 1 ? "s" : ""}</span>}
+              {ev.flags > 0 && <span className="ml-2 text-amber-700">{ev.flags} item{ev.flags > 1 ? "s" : ""} to verify</span>}
             </summary>
             <div className="px-4 pb-3 space-y-2">
               {ev.checks.filter((c) => c.flag !== "supported").map((c, i) => (
                 <div key={i} className="text-sm">
                   <p className="font-medium text-[var(--ink-800)]">{c.question}</p>
                   <p className="text-[var(--ink-600,#555)]">Answer: {c.answer || "(none)"}</p>
-                  <p className={`text-xs mt-0.5 ${c.flag === "claim_exceeds_evidence" ? "text-amber-700" : "text-[var(--ink-500)]"}`}>{c.note}</p>
+                  <p className={`text-xs mt-0.5 ${c.flag === "red_flag" ? "text-red-700" : c.flag === "claim_exceeds_evidence" || c.flag === "missing_evidence" ? "text-amber-700" : "text-[var(--ink-500)]"}`}>{c.note}</p>
                 </div>
               ))}
             </div>
