@@ -19,7 +19,11 @@ export default function OpportunitySupplier({ token }: { token: string }) {
   const [vendor, setVendor] = useState<string>("");
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [comment, setComment] = useState("");
+  const [links, setLinks] = useState("");
   const [price, setPrice] = useState({ model: "per_site_monthly", amount: "", unit_note: "", notes: "" });
+
+  // Split the evidence-links field into clean https URLs (server re-validates).
+  const parseLinks = () => links.split(/[\s,]+/).map((l) => l.trim()).filter((l) => /^https?:\/\//i.test(l)).slice(0, 5);
   const [error, setError] = useState<string | null>(null);
   const lastTs = useRef(0);
 
@@ -50,10 +54,11 @@ export default function OpportunitySupplier({ token }: { token: string }) {
   async function post(type: string, body: string, pricing?: object) {
     setError(null);
     try {
-      const res = await fetch(`/sase/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing }) });
+      const res = await fetch(`/sase/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing, links: parseLinks() }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.auth_required ? "Please sign in above with your supplier work email first." : (e.error ?? "Could not send.")); }
       const updated = (await res.json()) as Opp;
       setFeed(updated.feed); lastTs.current = Math.max(0, ...updated.feed.map((f) => f.created));
+      setLinks("");
     } catch (e) { setError(e instanceof Error ? e.message : "Could not send."); }
   }
 
@@ -100,6 +105,16 @@ export default function OpportunitySupplier({ token }: { token: string }) {
               <input value={price.notes} onChange={(e) => setPrice({ ...price, notes: e.target.value })} placeholder="Notes" className="border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
             </div>
             <button onClick={() => post("pricing", "Indicative pricing submitted.", { model: price.model, amount: price.amount ? Number(price.amount) : null, currency: "GBP", unit_note: price.unit_note, notes: price.notes })} className="mt-2 px-4 py-2 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Submit pricing</button>
+          </div>
+          <div>
+            <p className="eyebrow mb-2">Evidence links (optional)</p>
+            <input
+              value={links}
+              onChange={(e) => setLinks(e.target.value)}
+              placeholder="https:// links to case studies, SLA schedules, certifications — up to 5, comma or space separated"
+              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm"
+            />
+            <p className="text-xs text-[var(--ink-500)] mt-1">Attached to your next comment, interest registration or pricing submission. Buyers weight evidenced responses higher.</p>
           </div>
         </div>
       ) : <p className="text-sm text-[var(--ink-500)]">This opportunity is {opp.status}.</p>}

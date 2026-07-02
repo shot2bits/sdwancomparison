@@ -61,6 +61,10 @@ export const FeedItemSchema = z.object({
   type: z.enum(FEED_TYPES).default("comment"),
   body: z.string().default(""),
   pricing: PricingSchema.nullable().default(null),
+  // Evidence links (URLs to case studies, SLA schedules, certifications…).
+  // URL-based rather than uploads: no blob storage needed, and buyers can
+  // verify sources. Defaulted for pre-existing feed items.
+  links: z.array(z.string()).default([]),
   created: z.number(),
 }).strict();
 export type FeedItem = z.infer<typeof FeedItemSchema>;

@@ -33,11 +33,11 @@ export async function POST(req: Request, ctx: Ctx) {
   const session = await sessionFromRequest(req);
   const gate = await requireClaimedSupplierFor(session, ref.vendor_slug, cors);
   if (gate) return gate;
-  let body: { type?: string; body?: string; pricing?: Pricing };
+  let body: { type?: string; body?: string; pricing?: Pricing; links?: string[] };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const allowed = ["comment", "pricing", "interest", "decline"];
   const type = (allowed.includes(body.type ?? "") ? body.type : "comment") as "comment" | "pricing" | "interest" | "decline";
   const name = vendorName(ref.vendor_slug) ?? ref.vendor_slug;
-  const updated = await addFeedItem(opp, "supplier", ref.vendor_slug, name, type, body.body ?? "", type === "pricing" ? (body.pricing ?? null) : null);
+  const updated = await addFeedItem(opp, "supplier", ref.vendor_slug, name, type, body.body ?? "", type === "pricing" ? (body.pricing ?? null) : null, body.links ?? []);
   return Response.json(updated, { headers: cors });
 }

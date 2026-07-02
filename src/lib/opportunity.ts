@@ -9,6 +9,16 @@ export function vendorName(slug: string): string | null {
   return getShortlistDataset().find((v) => v.slug === slug)?.name ?? null;
 }
 
+/** Keep only plausible http(s) evidence links; cap count and length. */
+export function sanitiseLinks(links: unknown): string[] {
+  if (!Array.isArray(links)) return [];
+  return links
+    .filter((l): l is string => typeof l === "string")
+    .map((l) => l.trim())
+    .filter((l) => /^https?:\/\/[^\s]+$/i.test(l) && l.length <= 300)
+    .slice(0, 5);
+}
+
 export async function addFeedItem(
   opp: Opportunity,
   actorType: "buyer" | "supplier",
@@ -17,11 +27,12 @@ export async function addFeedItem(
   type: FeedType,
   body: string,
   pricing: Pricing | null = null,
+  links: string[] = [],
 ): Promise<Opportunity> {
   const t: FeedType = (FEED_TYPES as readonly string[]).includes(type) ? type : "comment";
   const item: FeedItem = {
     id: newId("feed"), actor_type: actorType, actor_slug: actorSlug, actor_name: actorName,
-    type: t, body, pricing: pricing ? PricingSchema.parse(pricing) : null, created: Date.now(),
+    type: t, body, pricing: pricing ? PricingSchema.parse(pricing) : null, links: sanitiseLinks(links), created: Date.now(),
   };
   const status = t === "award" ? "awarded" : t === "closed" ? "closed" : opp.status;
   const saved = await saveOpportunity({ ...opp, status, feed: [...opp.feed, item] });

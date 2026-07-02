@@ -3,7 +3,7 @@
 /** Shared live feed renderer for the opportunity room. */
 
 type Pricing = { model: string; amount: number | null; currency: string; unit_note: string; notes: string };
-export type FeedItem = { id: string; actor_type: "buyer" | "supplier"; actor_slug: string | null; actor_name: string; type: string; body: string; pricing: Pricing | null; created: number };
+export type FeedItem = { id: string; actor_type: "buyer" | "supplier"; actor_slug: string | null; actor_name: string; type: string; body: string; pricing: Pricing | null; links?: string[]; created: number };
 
 const TYPE_LABEL: Record<string, string> = {
   post: "Opportunity", comment: "Comment", pricing: "Pricing", interest: "Registered interest", decline: "Declined", award: "Awarded", closed: "Closed",
@@ -27,6 +27,17 @@ export function FeedView({ items }: { items: FeedItem[] }) {
               {" "}{PRICE_MODEL[f.pricing.model] ?? f.pricing.model}
               {f.pricing.unit_note ? ` · ${f.pricing.unit_note}` : ""}
               {f.pricing.notes ? ` · ${f.pricing.notes}` : ""}
+            </p>
+          )}
+          {(f.links?.length ?? 0) > 0 && (
+            <p className="text-xs mt-1.5 text-[var(--ink-600)]">
+              Evidence:{" "}
+              {(f.links ?? []).map((l, i) => (
+                <span key={l}>
+                  {i > 0 && " · "}
+                  <a href={l} target="_blank" rel="noopener noreferrer nofollow" className="underline break-all">{l.replace(/^https?:\/\//, "").slice(0, 60)}</a>
+                </span>
+              ))}
             </p>
           )}
         </div>

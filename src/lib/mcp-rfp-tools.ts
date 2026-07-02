@@ -72,7 +72,7 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
   },
   {
     name: "opportunity_respond",
-    description: "For a supplier agent: respond to a live opportunity. type is comment, interest, pricing or decline. For pricing include amount, model (per_site_monthly, per_user_monthly, total_monthly, one_off, indicative), currency and notes.",
+    description: "For a supplier agent: respond to a live opportunity. type is comment, interest, pricing or decline. For pricing include amount, model (per_site_monthly, per_user_monthly, total_monthly, one_off, indicative), currency and notes. Optionally attach up to 5 evidence links (https URLs to case studies, SLA schedules, certifications) via links.",
     inputSchema: {
       type: "object",
       properties: {
@@ -80,6 +80,7 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
         type: { type: "string", enum: ["comment", "interest", "pricing", "decline"] },
         body: { type: "string" },
         pricing: { type: "object" },
+        links: { type: "array", items: { type: "string" }, description: "Up to 5 https evidence URLs." },
       },
       required: ["opportunity_token", "type"],
     },
@@ -273,13 +274,13 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     const opp = await getOpportunity(ref.opp_id);
     if (!opp) return { error: "Opportunity not found." };
     if (name === "opportunity_inbox") {
-      return { title: opp.title, scope: opp.scope, sites: opp.sites, regions: opp.regions, summary: opp.summary, status: opp.status, feed: opp.feed.map((f) => ({ actor: f.actor_name, type: f.type, body: f.body, pricing: f.pricing, created: f.created })) };
+      return { title: opp.title, scope: opp.scope, sites: opp.sites, regions: opp.regions, summary: opp.summary, status: opp.status, feed: opp.feed.map((f) => ({ actor: f.actor_name, type: f.type, body: f.body, pricing: f.pricing, links: f.links, created: f.created })) };
     }
     if (opp.status !== "open") return { error: "Opportunity is not open." };
     const t = String(args.type ?? "comment");
     const allowed = ["comment", "interest", "pricing", "decline"];
     const name2 = vendorName(ref.vendor_slug) ?? ref.vendor_slug;
-    const updated = await addFeedItem(opp, "supplier", ref.vendor_slug, name2, (allowed.includes(t) ? t : "comment") as never, String(args.body ?? ""), t === "pricing" ? ((args.pricing ?? null) as never) : null);
+    const updated = await addFeedItem(opp, "supplier", ref.vendor_slug, name2, (allowed.includes(t) ? t : "comment") as never, String(args.body ?? ""), t === "pricing" ? ((args.pricing ?? null) as never) : null, (args.links ?? []) as string[]);
     return { ok: true, status: updated.status };
   }
 
