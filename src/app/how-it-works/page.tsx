@@ -67,7 +67,7 @@ const FEATURES = [
 const FAQS = [
   ["Why not just cold-call vendors?", "One posting reaches every matching verified vendor at once and brings comparable responses back to you, instead of repeating the same conversation many times."],
   ["Why not just prompt a generic AI to write an RFP?", "A generic prompt cannot see Netify's independent vendor grades, the 386-question analyst bank, the compliance maps, or run a live competitive process with real suppliers. This does."],
-  ["Do I have to sign in?", "No. Researching, building an RFP, posting a need and reading the board are open. Only submitting a bid or asserting a supplier identity needs a domain-verified sign-in."],
+  ["Do I have to sign in?", "Not to explore. Researching, building an RFP, drafting and previewing a project notice, and reading the board are all open. Signing in is needed to publish a notice, download the final RFP, or respond as a supplier — your draft is carried through sign-in, nothing is lost."],
   ["Is pricing public?", "No. The need is public so vendors can find it, but bid and quote amounts are private to the buyer who posted."],
 ];
 

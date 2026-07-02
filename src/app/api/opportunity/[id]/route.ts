@@ -1,5 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getOpportunity, kvConfigured } from "@/lib/rfp-store";
+import { maskedFeed } from "@/lib/opportunity";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -27,13 +28,15 @@ export async function GET(req: Request, ctx: Ctx) {
 
   if (isOwner) return Response.json(opp, { headers: cors });
 
-  // Viewer projection: full notice + feed for the room, minus secrets. The
-  // buyer name is masked when the notice is anonymous.
+  // Viewer projection: full notice + feed for the room, minus secrets.
+  // Pricing amounts are masked (private to the buyer) and the buyer name is
+  // masked when the notice is anonymous.
   const { buyer_token: _bt, owner_email: _oe, ...rest } = opp;
   const viewer = {
     ...rest,
     buyer_org: opp.buyer_visibility === "anonymous" ? "" : opp.buyer_org,
     buyer_token: "", // shape-compatible for older clients; never the real token
+    feed: maskedFeed(opp),
   };
   return Response.json(viewer, { headers: cors });
 }

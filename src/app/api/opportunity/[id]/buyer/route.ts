@@ -1,6 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getOpportunity, kvConfigured } from "@/lib/rfp-store";
-import { addFeedItem } from "@/lib/opportunity";
+import { addFeedItem, buyerActorName } from "@/lib/opportunity";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -16,7 +16,8 @@ export async function POST(req: Request, ctx: Ctx) {
   let body: { buyer_token?: string; action?: string; body?: string; award_slug?: string };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   if (body.buyer_token !== opp.buyer_token) return Response.json({ error: "Not authorised." }, { status: 403, headers: cors });
-  const name = opp.buyer_org || "Buyer";
+  // Never sign feed posts with the organisation name on an anonymous notice.
+  const name = buyerActorName(opp);
   if (body.action === "award" && body.award_slug) {
     const updated = await addFeedItem({ ...opp, awarded_vendor_slug: body.award_slug }, "buyer", null, name, "award", body.body || `Awarded to ${body.award_slug}.`);
     return Response.json(updated, { headers: cors });

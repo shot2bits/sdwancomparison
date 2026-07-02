@@ -64,7 +64,10 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     if (!opp) return;
     const poll = setInterval(async () => {
       try {
-        const res = await fetch(`/sase/api/opportunity/${opp.id}/feed?since=${lastTs.current}`);
+        // Owners include their token so pricing amounts stay visible to them;
+        // viewers poll without it and receive the masked feed.
+        const btok = opp.buyer_token ? `&buyer_token=${encodeURIComponent(opp.buyer_token)}` : "";
+        const res = await fetch(`/sase/api/opportunity/${opp.id}/feed?since=${lastTs.current}${btok}`);
         if (res.ok) { const d = await res.json(); if (d.items?.length) { setFeed((prev) => [...prev, ...d.items]); lastTs.current = Math.max(lastTs.current, ...d.items.map((f: FeedItem) => f.created)); } }
       } catch { /* ignore */ }
     }, 5000);

@@ -51,7 +51,7 @@ A machine-readable capability catalogue is served at ${SITE_URL}/capabilities.js
 
 ## Access model
 
-Reference and discovery surfaces are open and ungated for AI engines and agents: the methodology, the question bank, the shortlist data, vendor profiles, published RFPs and opportunities, and the MCP read tools. Building an RFP needs no login. Identity-asserting supplier writes (responding, pricing, sharing contact) require a domain-verified sign-in; supplier AI agents authenticate with their issued per-supplier token instead.
+Reference and discovery surfaces are open and ungated for AI engines and agents: the methodology, the question bank, the shortlist data, vendor profiles, published RFPs and opportunities, and the MCP read tools. Building an RFP and drafting/previewing a project notice need no login; agents can also draft and validate notices statelessly over MCP (draft_opportunity_notice, validate_opportunity_notice). Publishing a notice to the board, downloading the final RFP document and saving to an account require a magic-link buyer sign-in (drafts carry through the gate). Identity-asserting supplier writes (responding, pricing, sharing contact) require a domain-verified sign-in; supplier AI agents authenticate with their issued per-supplier token instead. Pricing amounts are never public: they are visible only to the posting buyer, and each supplier sees only its own figures.
 
 ## Agent-to-agent RFP
 

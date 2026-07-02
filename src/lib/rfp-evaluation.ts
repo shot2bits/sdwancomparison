@@ -61,17 +61,22 @@ const extendedById = new Map(saseExtendedQuestions().map((q) => [q.question_id, 
 
 /**
  * Does the answer match a known red-flag pattern for this question?
- * Deliberately conservative: the whole phrase, or all of its significant
- * tokens, must appear. A red flag is a prompt for the buyer to dig, not an
- * automatic disqualification.
+ * Deliberately conservative to avoid false accusations: both sides are
+ * normalised (lowercase, punctuation collapsed to spaces) and the whole
+ * phrase must appear contiguously. "VPN-only access model" therefore matches
+ * "our vpn only access model", but an answer that merely contains the common
+ * words "access" and "model" somewhere does not. A red flag is a prompt for
+ * the buyer to dig, never an automatic disqualification.
  */
+function normalisePhrase(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
 function matchRedFlag(answer: string, redFlags: string[]): string | null {
-  const a = answer.toLowerCase();
+  const a = ` ${normalisePhrase(answer)} `;
   for (const rf of redFlags) {
-    const phrase = rf.toLowerCase();
-    if (a.includes(phrase)) return rf;
-    const tokens = phrase.split(/[^a-z0-9]+/).filter((t) => t.length > 3);
-    if (tokens.length >= 2 && tokens.every((t) => a.includes(t))) return rf;
+    const phrase = normalisePhrase(rf);
+    if (phrase && a.includes(` ${phrase} `)) return rf;
   }
   return null;
 }

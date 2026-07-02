@@ -9,6 +9,35 @@ export function vendorName(slug: string): string | null {
   return getShortlistDataset().find((v) => v.slug === slug)?.name ?? null;
 }
 
+/**
+ * Feed privacy masking. The marketplace promise is "pricing stays private to
+ * the posting buyer" — so pricing AMOUNTS are only ever returned to the buyer
+ * (proven by buyer_token). Everyone else — public room viewers, other
+ * suppliers, supplier agents — sees that pricing was submitted, never the
+ * figures. A supplier does see its own submitted amounts. Anonymous buyers'
+ * organisation names are masked in feed actor names everywhere public.
+ */
+export function maskFeedItem(f: FeedItem, opts: { anonymousBuyer: boolean; ownVendorSlug?: string | null }): FeedItem {
+  const own = Boolean(opts.ownVendorSlug && f.actor_slug === opts.ownVendorSlug);
+  return {
+    ...f,
+    actor_name: opts.anonymousBuyer && f.actor_type === "buyer" ? "Buyer" : f.actor_name,
+    pricing: f.pricing && !own
+      ? { ...f.pricing, amount: null, unit_note: "", notes: "Pricing details are private to the buyer." }
+      : f.pricing,
+  };
+}
+
+export function maskedFeed(opp: Opportunity, ownVendorSlug: string | null = null): FeedItem[] {
+  const anonymousBuyer = opp.buyer_visibility === "anonymous";
+  return opp.feed.map((f) => maskFeedItem(f, { anonymousBuyer, ownVendorSlug }));
+}
+
+/** Buyer actor name for feed posts: never the organisation name when anonymous. */
+export function buyerActorName(opp: Opportunity): string {
+  return opp.buyer_visibility === "anonymous" ? "Buyer" : (opp.buyer_org || "Buyer");
+}
+
 /** Keep only plausible http(s) evidence links; cap count and length. */
 export function sanitiseLinks(links: unknown): string[] {
   if (!Array.isArray(links)) return [];

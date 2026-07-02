@@ -183,6 +183,8 @@ export default function NoticeBuilder() {
           track("post_project_started", { conversionSource: "clone", sourceOpportunityId: cloneId });
         } catch { /* start blank */ }
       })();
+      setLoaded(true);
+      return; // clone path fires its own started event above
     }
     setLoaded(true);
     track("post_project_started");

@@ -11,7 +11,7 @@ import { addMessage, inviteSupplier } from "@/lib/rfp-connect";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { resolveOpportunityToken, getOpportunity, listPublicOpportunities } from "@/lib/rfp-store";
-import { addFeedItem, vendorName } from "@/lib/opportunity";
+import { addFeedItem, vendorName, maskedFeed } from "@/lib/opportunity";
 import { RfpResponseSchema, BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { toPublicOpportunity } from "@/lib/opportunity-types";
@@ -275,7 +275,11 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     const opp = await getOpportunity(ref.opp_id);
     if (!opp) return { error: "Opportunity not found." };
     if (name === "opportunity_inbox") {
-      return { title: opp.title, scope: opp.scope, sites: opp.sites, regions: opp.regions, summary: opp.summary, status: opp.status, feed: opp.feed.map((f) => ({ actor: f.actor_name, type: f.type, body: f.body, pricing: f.pricing, links: f.links, created: f.created })) };
+      // Pricing amounts are private to the buyer: this supplier agent sees its
+      // own figures; other suppliers' amounts are masked. Anonymous buyer names
+      // are masked too.
+      const feed = maskedFeed(opp, ref.vendor_slug);
+      return { title: opp.title, scope: opp.scope, sites: opp.sites, regions: opp.regions, summary: opp.summary, status: opp.status, feed: feed.map((f) => ({ actor: f.actor_name, type: f.type, body: f.body, pricing: f.pricing, links: f.links, answers: f.answers, created: f.created })) };
     }
     if (opp.status !== "open") return { error: "Opportunity is not open." };
     const t = String(args.type ?? "comment");

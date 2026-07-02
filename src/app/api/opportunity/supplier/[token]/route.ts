@@ -1,6 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { resolveOpportunityToken, getOpportunity, kvConfigured } from "@/lib/rfp-store";
-import { addFeedItem, vendorName } from "@/lib/opportunity";
+import { addFeedItem, vendorName, maskedFeed } from "@/lib/opportunity";
 import type { Pricing } from "@/lib/opportunity-types";
 import { sessionFromRequest, requireClaimedSupplierFor } from "@/lib/auth";
 
@@ -8,7 +8,14 @@ export const runtime = "nodejs";
 type Ctx = { params: Promise<{ token: string }> };
 export async function OPTIONS(req: Request) { return preflight(req); }
 
-/** Supplier reads the opportunity and its live feed by token. */
+/**
+ * Supplier reads the opportunity and its live feed by token.
+ *
+ * Security: never return the buyer's credentials (buyer_token, owner_email)
+ * to a supplier. Pricing amounts are private to the buyer: this supplier
+ * sees its own submitted figures, other suppliers' amounts are masked.
+ * Anonymous buyers' names are masked in the feed.
+ */
 export async function GET(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
@@ -17,7 +24,14 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!ref) return Response.json({ error: "Invalid token." }, { status: 404, headers: cors });
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
-  return Response.json({ opportunity: opp, vendor_slug: ref.vendor_slug, vendor_name: vendorName(ref.vendor_slug) }, { headers: cors });
+  const { buyer_token: _bt, owner_email: _oe, ...rest } = opp;
+  const supplierView = {
+    ...rest,
+    buyer_token: "",
+    buyer_org: opp.buyer_visibility === "anonymous" ? "" : opp.buyer_org,
+    feed: maskedFeed(opp, ref.vendor_slug),
+  };
+  return Response.json({ opportunity: supplierView, vendor_slug: ref.vendor_slug, vendor_name: vendorName(ref.vendor_slug) }, { headers: cors });
 }
 
 /** Supplier posts to the feed: comment, register interest, submit pricing, or decline. */
@@ -44,5 +58,13 @@ export async function POST(req: Request, ctx: Ctx) {
     body.links ?? [],
     type === "response" ? (body.answers ?? {}) : {},
   );
-  return Response.json(updated, { headers: cors });
+  // Same masking as the GET: never return buyer credentials or other
+  // suppliers' pricing amounts in the post-action snapshot.
+  const { buyer_token: _bt2, owner_email: _oe2, ...rest2 } = updated;
+  return Response.json({
+    ...rest2,
+    buyer_token: "",
+    buyer_org: updated.buyer_visibility === "anonymous" ? "" : updated.buyer_org,
+    feed: maskedFeed(updated, ref.vendor_slug),
+  }, { headers: cors });
 }
