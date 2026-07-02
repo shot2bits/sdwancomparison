@@ -19,6 +19,24 @@ const nextConfig: NextConfig = {
   // proxied request is served 200 directly. The public URL still always carries
   // the slash (the parent site enforces it), so there is no duplicate exposure.
   skipTrailingSlashRedirect: true,
+  // Vercel injects `X-Robots-Tag: noindex` on *.vercel.app hosts (its
+  // deployment-URL anti-indexing measure). The main site's /sase/* rewrite
+  // targets sasecomparison-netifymarketplace.vercel.app, so that header was
+  // leaking through the proxy and noindexing EVERY page under
+  // netify.co.uk/sase/* (found via Screaming Frog, 2026-07-02). Setting our
+  // own X-Robots-Tag stops the platform injection. Pages that must stay out
+  // of the index (opportunity rooms, admin, auth) set meta robots noindex,
+  // which still wins: crawlers honour the most restrictive signal.
+  // Duplicate-content exposure on the raw .vercel.app host is handled by the
+  // canonicals, which all point at https://netify.co.uk/sase/*.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "index, follow" }],
+      },
+    ];
+  },
   async redirects() {
     return [
       // Retire the sase.netify.co.uk subdomain: 301 every path on the old host

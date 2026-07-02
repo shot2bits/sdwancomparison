@@ -245,7 +245,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           ...lead,
-          shortlist_url: `${window.location.origin}/shortlist${qs ? `?${qs}` : ""}`,
+          // Must include the /sase basePath — origin alone points at the main
+          // site and 404s (same class of bug as Harry's supplier link).
+          shortlist_url: `${window.location.origin}/sase/shortlist${qs ? `?${qs}` : ""}`,
           criteria_summary: result.criteria_summary,
           top_vendors: result.shortlist.slice(0, 10).map((v) => `${v.rank}. ${v.name} (${v.score})`),
         }),

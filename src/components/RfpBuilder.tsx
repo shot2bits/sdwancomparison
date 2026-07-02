@@ -21,13 +21,35 @@ type NdaAcceptance = { id: string; vendor: string; signatory_name: string; email
 type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string; nda?: Nda };
 
 const STATUS_FLOW = ["draft", "review", "published", "qa", "evaluation"];
-const SCOPES = [
-  { key: "full_sase", label: "Full SASE (SD-WAN + security)" },
-  { key: "sse_only", label: "SSE only (security service edge)" },
-  { key: "sdwan_only", label: "SD-WAN only" },
-  { key: "single_vendor_sase", label: "Single-vendor SASE" },
-  { key: "best_of_breed", label: "Best-of-breed (SSE + SD-WAN)" },
-];
+// Scope restructured per Harry's UX feedback (2026-07-02): the old flat list
+// ("Full SASE" / "Single-vendor SASE" / "Best-of-breed") overlapped and read
+// as crossover. The UI now asks two things — WHAT you are buying (SD-WAN /
+// SSE / SASE) and, for SASE, the VENDOR APPROACH (no preference / unified
+// single-vendor / best-of-breed). The persisted `product_scope` values and
+// the question engine are unchanged; this is a pure presentation mapping:
+//   SD-WAN            → sdwan_only
+//   SSE               → sse_only
+//   SASE + no pref    → full_sase
+//   SASE + unified    → single_vendor_sase
+//   SASE + best-of-breed → best_of_breed
+const SCOPE_PRODUCTS = [
+  { key: "sdwan", label: "SD-WAN" },
+  { key: "sse", label: "SSE (security service edge)" },
+  { key: "sase", label: "SASE (SD-WAN + security)" },
+] as const;
+const SASE_APPROACHES = [
+  { key: "full_sase", label: "No preference" },
+  { key: "single_vendor_sase", label: "Unified (single vendor)" },
+  { key: "best_of_breed", label: "Best-of-breed (mix vendors)" },
+] as const;
+const scopeToProduct = (scope: string) =>
+  scope === "sdwan_only" ? "sdwan" : scope === "sse_only" ? "sse" : "sase";
+const productToScope = (product: string, currentScope: string) => {
+  if (product === "sdwan") return "sdwan_only";
+  if (product === "sse") return "sse_only";
+  // switching to SASE: keep an existing SASE approach, else default
+  return ["full_sase", "single_vendor_sase", "best_of_breed"].includes(currentScope) ? currentScope : "full_sase";
+};
 const MODELS = [
   { key: "any", label: "Any" },
   { key: "managed", label: "Fully managed" },
@@ -391,14 +413,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // The buyer's own way back in. There is no account: this page (the RFP id URL,
   // with the manage token held in localStorage) is the buyer's dashboard, so we
   // surface it as a copyable, bookmarkable link.
+  // NB: every absolute URL built here MUST include the /sase basePath —
+  // window.location.origin alone produces netify.co.uk/rfp-builder/…, which is
+  // the MAIN site and 404s (bug found by Harry, 2026-07-02).
   function copyManageLink() {
     if (!project) return;
-    navigator.clipboard.writeText(`${window.location.origin}/rfp-builder/${project.id}`);
+    navigator.clipboard.writeText(`${window.location.origin}/sase/rfp-builder/${project.id}`);
     setManageCopied(true); setTimeout(() => setManageCopied(false), 2000);
   }
 
   function copySupplierLink(token: string) {
-    navigator.clipboard.writeText(`${window.location.origin}/rfp-builder/supplier/${token}`);
+    navigator.clipboard.writeText(`${window.location.origin}/sase/rfp-builder/supplier/${token}`);
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
 
@@ -424,7 +449,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   async function copyShare() {
     if (!project) return;
-    const url = `${window.location.origin}/rfp-builder/${project.id}/respond?token=${project.share_token}`;
+    const url = `${window.location.origin}/sase/rfp-builder/${project.id}/respond?token=${project.share_token}`;
     await navigator.clipboard.writeText(url);
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
@@ -464,20 +489,44 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   return (
     <div>
-      {/* Plain-language guide to the whole flow */}
+      {/* Plain-language guide to the whole flow. Steps on separate lines per
+          Harry's UX feedback (2026-07-02) — the inline run-on was hard to scan. */}
       <div className="mb-6 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-3 text-xs leading-relaxed text-[var(--ink-600,#555)]">
-        <span className="font-medium text-[var(--ink-800)]">How this works.</span> An RFP is the list of questions you send to suppliers. <strong>1.</strong> Set the basics below. <strong>2.</strong> Build your questions, by chatting to the AI agent or picking them yourself. <strong>3.</strong> Invite suppliers further down the page. <strong>4.</strong> Load and compare their replies. Everything saves automatically as you go, and nothing reaches a supplier until you invite them.
+        <p className="mb-1.5"><span className="font-medium text-[var(--ink-800)]">How this works.</span> An RFP is the list of questions you send to suppliers.</p>
+        <ol className="list-none m-0 p-0 space-y-0.5">
+          <li><strong>1.</strong> Set the basics below.</li>
+          <li><strong>2.</strong> Build your questions, by chatting to the AI agent or picking them yourself.</li>
+          <li><strong>3.</strong> Invite suppliers further down the page.</li>
+          <li><strong>4.</strong> Load and compare their replies.</li>
+        </ol>
+        <p className="mt-1.5 mb-0">Everything saves automatically as you go, and nothing reaches a supplier until you invite them.</p>
       </div>
 
       <p className="eyebrow mb-2">Step 1 — the basics</p>
       {/* Top bar: scope, model, mode, lifecycle */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-6 pb-5 border-b border-[var(--ink-300,#ccc)]">
         <div>
-          <p className="eyebrow mb-1">Scope</p>
-          <select value={project.buyer.product_scope} onChange={(e) => setScope(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white">
-            {SCOPES.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+          <p className="eyebrow mb-1">What are you buying?</p>
+          <select
+            value={scopeToProduct(project.buyer.product_scope)}
+            onChange={(e) => setScope(productToScope(e.target.value, project.buyer.product_scope))}
+            className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white"
+          >
+            {SCOPE_PRODUCTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
           </select>
         </div>
+        {scopeToProduct(project.buyer.product_scope) === "sase" && (
+          <div>
+            <p className="eyebrow mb-1">Vendor approach</p>
+            <select
+              value={project.buyer.product_scope}
+              onChange={(e) => setScope(e.target.value)}
+              className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white"
+            >
+              {SASE_APPROACHES.map((a) => <option key={a.key} value={a.key}>{a.label}</option>)}
+            </select>
+          </div>
+        )}
         <div>
           <p className="eyebrow mb-1">Delivery model</p>
           <select value={project.buyer.operating_model} onChange={(e) => setModel(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white">
@@ -757,7 +806,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Publish to curated suppliers</strong> invites that whole set in one go. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed — this page is your dashboard. Bookmark or copy this link to come back any time and track supplier replies.</span>
-          <code className="text-xs text-[var(--ink-600,#555)] break-all">{`${typeof window !== "undefined" ? window.location.origin : ""}/rfp-builder/${project.id}`}</code>
+          <code className="text-xs text-[var(--ink-600,#555)] break-all">{`${typeof window !== "undefined" ? window.location.origin : ""}/sase/rfp-builder/${project.id}`}</code>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
         </div>
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
