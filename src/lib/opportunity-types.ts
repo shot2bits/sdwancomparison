@@ -1,12 +1,29 @@
 /**
- * Live opportunity ("tender room"): a buyer posts a need, from just underlay
- * circuits to full SASE, and graded suppliers reply in near real time with
- * comments and pricing. One unified activity feed everyone in the room sees.
+ * Opportunity / project notice: a buyer publishes a structured project notice
+ * (procurement-notice style) describing a need, from underlay circuits to full
+ * SASE. Suppliers browse in the clear and sign in to respond. Each opportunity
+ * also carries the live activity feed ("room") for comments and pricing.
+ *
+ * Backwards compatibility: every field added for the project-notice model has
+ * a zod default, so opportunities stored before the notice rebuild still parse.
  */
 
 import { z } from "zod";
 
-export const OPP_SCOPES = ["underlay_circuits", "sd_wan", "sse", "sase", "managed_service"] as const;
+export const OPP_SCOPES = [
+  "underlay_circuits",
+  "sd_wan",
+  "sse",
+  "sase",
+  "managed_service",
+  "firewall_fwaas",
+  "ztna",
+  "swg",
+  "casb",
+  "connectivity",
+  "managed_security",
+  "not_sure",
+] as const;
 export type OppScope = (typeof OPP_SCOPES)[number];
 
 export const OPP_SCOPE_LABELS: Record<OppScope, string> = {
@@ -15,6 +32,13 @@ export const OPP_SCOPE_LABELS: Record<OppScope, string> = {
   sse: "SSE",
   sase: "Full SASE",
   managed_service: "Managed service",
+  firewall_fwaas: "Firewall / FWaaS",
+  ztna: "ZTNA",
+  swg: "Secure web gateway",
+  casb: "CASB",
+  connectivity: "Connectivity",
+  managed_security: "Managed security",
+  not_sure: "Not sure yet",
 };
 
 export const PricingSchema = z.object({
@@ -55,6 +79,31 @@ export type EngagementType = (typeof ENGAGEMENT_TYPES)[number];
 export const AUCTION_FORMATS = ["open", "timed"] as const;
 export type AuctionFormat = (typeof AUCTION_FORMATS)[number];
 
+/**
+ * What the buyer is asking suppliers for. Presentation-level intent that sits
+ * on top of the engagement mechanics (quote_room / auction feeds).
+ */
+export const RESPONSE_MODES = [
+  "indicative_pricing",
+  "discovery_calls",
+  "written_responses",
+  "quote_room",
+  "reverse_auction",
+  "shortlist",
+  "full_rfp",
+] as const;
+export type ResponseMode = (typeof RESPONSE_MODES)[number];
+
+export const RESPONSE_MODE_LABELS: Record<ResponseMode, string> = {
+  indicative_pricing: "Indicative pricing",
+  discovery_calls: "Discovery calls",
+  written_responses: "Written responses",
+  quote_room: "Quote room",
+  reverse_auction: "Reverse auction",
+  shortlist: "Netify-assisted shortlist",
+  full_rfp: "Full RFP responses",
+};
+
 /** open = any verified vendor matching scope may bid; invited = only invited slugs. */
 export const ELIGIBILITY_TYPES = ["open", "invited"] as const;
 export type Eligibility = (typeof ELIGIBILITY_TYPES)[number];
@@ -62,6 +111,10 @@ export type Eligibility = (typeof ELIGIBILITY_TYPES)[number];
 /** public = listed on the crawlable board; unlisted = reachable only by token. */
 export const VISIBILITY_TYPES = ["public", "unlisted"] as const;
 export type Visibility = (typeof VISIBILITY_TYPES)[number];
+
+/** named = buyer organisation shown publicly; anonymous = sector/size shown, name withheld. */
+export const BUYER_VISIBILITY_TYPES = ["named", "anonymous"] as const;
+export type BuyerVisibility = (typeof BUYER_VISIBILITY_TYPES)[number];
 
 export const OpportunitySchema = z.object({
   id: z.string(),
@@ -86,13 +139,37 @@ export const OpportunitySchema = z.object({
   buyer_token: z.string(),       // buyer manage token
   invited: z.array(z.string()).default([]),  // vendor slugs invited
   feed: z.array(FeedItemSchema).default([]),
+
+  /* --- Project notice fields (2026 marketplace rebuild). All defaulted. --- */
+  buyer_visibility: z.enum(BUYER_VISIBILITY_TYPES).default("named"),
+  buyer_sector: z.string().default(""),
+  buyer_size_band: z.string().default(""),
+  users_band: z.string().default(""),
+  remote_users_band: z.string().default(""),
+  cloud_platforms: z.array(z.string()).default([]),
+  current_environment: z.string().default(""),
+  desired_outcomes: z.string().default(""),
+  compliance_requirements: z.array(z.string()).default([]),
+  evidence_requested: z.array(z.string()).default([]),
+  evaluation_priorities: z.array(z.string()).default([]),
+  response_mode: z.enum(RESPONSE_MODES).default("quote_room"),
+  response_deadline: z.number().nullable().default(null),   // epoch ms
+  decision_target: z.number().nullable().default(null),     // epoch ms
+  go_live_target: z.number().nullable().default(null),      // epoch ms
+  ai_summary: z.string().default(""),
+  ai_assumptions: z.array(z.string()).default([]),
+  ai_gap_flags: z.array(z.string()).default([]),
+  methodology_version: z.string().default(""),
+  owner_email: z.string().default(""), // publishing account (private, never in public projection)
 }).strict();
 export type Opportunity = z.infer<typeof OpportunitySchema>;
 
 /**
- * Public projection of an opportunity for the crawlable board and agent reads.
- * The need is public; commercial pricing amounts stay buyer-only. We expose
- * that bids exist and how many, never the figures.
+ * Public projection of an opportunity for the crawlable board, the public
+ * notice page, data.json feeds and agent reads. The need is public; commercial
+ * pricing amounts, contact details, buyer tokens and (for anonymous notices)
+ * the buyer name stay private. We expose that bids exist and how many, never
+ * the figures.
  */
 export type PublicOpportunity = {
   id: string;
@@ -115,9 +192,29 @@ export type PublicOpportunity = {
   bid_count: number;       // number of pricing submissions, no amounts
   comment_count: number;
   last_activity: number;
+  // Project notice fields
+  buyer_visibility: BuyerVisibility;
+  buyer_sector: string;
+  buyer_size_band: string;
+  users_band: string;
+  remote_users_band: string;
+  cloud_platforms: string[];
+  current_environment: string;
+  desired_outcomes: string;
+  compliance_requirements: string[];
+  evidence_requested: string[];
+  evaluation_priorities: string[];
+  response_mode: ResponseMode;
+  response_deadline: number | null;
+  decision_target: number | null;
+  go_live_target: number | null;
+  ai_summary: string;
+  ai_assumptions: string[];
+  ai_gap_flags: string[];
+  methodology_version: string;
 };
 
-/** Strip an opportunity to its public projection (no pricing amounts, no tokens). */
+/** Strip an opportunity to its public projection (no pricing amounts, no tokens, no contact). */
 export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
   const bids = o.feed.filter((f) => f.type === "pricing").length;
   const comments = o.feed.filter((f) => f.type === "comment").length;
@@ -126,7 +223,8 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     id: o.id,
     created: o.created,
     updated: o.updated,
-    buyer_org: o.buyer_org,
+    // Anonymous notices never leak the organisation name to any public surface.
+    buyer_org: o.buyer_visibility === "anonymous" ? "" : o.buyer_org,
     title: o.title,
     scope: o.scope,
     sites: o.sites,
@@ -143,5 +241,24 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     bid_count: bids,
     comment_count: comments,
     last_activity: last,
+    buyer_visibility: o.buyer_visibility,
+    buyer_sector: o.buyer_sector,
+    buyer_size_band: o.buyer_size_band,
+    users_band: o.users_band,
+    remote_users_band: o.remote_users_band,
+    cloud_platforms: o.cloud_platforms,
+    current_environment: o.current_environment,
+    desired_outcomes: o.desired_outcomes,
+    compliance_requirements: o.compliance_requirements,
+    evidence_requested: o.evidence_requested,
+    evaluation_priorities: o.evaluation_priorities,
+    response_mode: o.response_mode,
+    response_deadline: o.response_deadline,
+    decision_target: o.decision_target,
+    go_live_target: o.go_live_target,
+    ai_summary: o.ai_summary,
+    ai_assumptions: o.ai_assumptions,
+    ai_gap_flags: o.ai_gap_flags,
+    methodology_version: o.methodology_version,
   };
 }

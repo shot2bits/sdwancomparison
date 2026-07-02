@@ -72,7 +72,14 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   }, [opp?.id]);
 
   async function load(id: string) {
-    try { const res = await fetch(`/sase/api/opportunity/${id}`); if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); } }
+    // Prove ownership with the locally stored buyer token (set at publish
+    // time); the API no longer returns buyer_token to arbitrary viewers.
+    let btok = "";
+    try { btok = localStorage.getItem(`opp_btok_${id}`) ?? ""; } catch { /* ignore */ }
+    try {
+      const res = await fetch(`/sase/api/opportunity/${id}${btok ? `?buyer_token=${encodeURIComponent(btok)}` : ""}`);
+      if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); }
+    }
     catch { setError("Could not load."); }
   }
 
@@ -87,8 +94,9 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
       }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not post."); }
       const o = (await res.json()) as Opp;
+      try { localStorage.setItem(`opp_btok_${o.id}`, o.buyer_token); } catch { /* ignore */ }
       setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created));
-      window.history.replaceState(null, "", `/sase/opportunities/${o.id}`);
+      window.history.replaceState(null, "", `/sase/opportunities/${o.id}/room`);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not post."); }
   }
 
@@ -182,6 +190,9 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     );
   }
 
+  // Buyer controls only render for the owner (real buyer_token present).
+  const isOwner = Boolean(opp.buyer_token);
+
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2">
@@ -195,13 +206,21 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           </div>
         )}
         <FeedView items={feed} />
-        {opp.status === "open" && (
+        {opp.status === "open" && isOwner && (
           <div className="mt-4 flex gap-2">
             <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Post a comment to all suppliers" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
             <button onClick={() => buyerAction("comment", comment)} disabled={!comment} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
           </div>
         )}
       </div>
+      {!isOwner ? (
+        <div>
+          <p className="eyebrow mb-2">Respond to this opportunity</p>
+          <p className="text-sm text-[var(--ink-600)] mb-3">Suppliers sign in with a verified work email to submit comments, pricing or clarification questions. Pricing stays private to the buyer.</p>
+          <a href="/sase/for-suppliers/" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Sign in to respond</a>
+          <p className="text-xs text-[var(--ink-500)] mt-3">Posted this opportunity yourself? Open this page in the browser you published from, or use the manage link from your confirmation.</p>
+        </div>
+      ) : (
       <div>
         <p className="eyebrow mb-2">Invite suppliers</p>
         <div className="flex gap-2 mb-2">
@@ -234,6 +253,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
         )}
         <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a supplier copies their private room link. Suppliers reply live with comments and pricing.</p>
       </div>
+      )}
     </div>
   );
 }

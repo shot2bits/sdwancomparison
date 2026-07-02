@@ -49,14 +49,35 @@ export default function RfpBuilderPage() {
       ))}
       <div className="mb-10 max-w-3xl">
         <p className="eyebrow mb-3">Agentic RFP builder</p>
-        <h1 id="page-h1" className="mb-4">From a business need to a market-ready SASE and SD-WAN RFP.</h1>
+        <h1 id="page-h1" className="mb-4">Post a SASE or SD-WAN project, build an RFP, and invite verified providers.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          Describe your estate in plain language. The AI agent synthesises your
-          requirements, drafts questions mapped to the Netify SASE Methodology
-          v{m.version}, suggests best-fit vendors from the marketplace, and
-          manages supplier questions from draft through to evaluation.
+          Start with a short project notice or create a full RFP. Netify helps you structure
+          the requirement, publish it to the right suppliers and compare responses — with
+          questions mapped to the Netify SASE Methodology v{m.version}.
         </p>
       </div>
+
+      {/* Four buyer paths. The full RFP is one route, not the only route. */}
+      <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <a href="/sase/opportunities/new/" className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
+          <h2 className="text-base font-semibold mb-1">Post a project</h2>
+          <p className="text-sm text-[var(--ink-700)]">Publish a short opportunity notice in minutes. Best for early pricing, discovery calls or supplier interest.</p>
+        </a>
+        <a href="#build" className="block rounded-sm border border-amber-500 bg-amber-50 p-5 no-underline text-inherit transition-colors hover:bg-amber-100">
+          <h2 className="text-base font-semibold mb-1">Build a full RFP</h2>
+          <p className="text-sm text-[var(--ink-700)]">Create a structured SASE, SSE or SD-WAN RFP using Netify&apos;s question bank and AI gap checking.</p>
+        </a>
+        <a href="/sase/opportunities/board/" className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
+          <h2 className="text-base font-semibold mb-1">Browse opportunities</h2>
+          <p className="text-sm text-[var(--ink-700)]">See open SASE, SSE and SD-WAN projects on the marketplace.</p>
+        </a>
+        <a href="/sase/rfp-builder/start/" className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
+          <h2 className="text-base font-semibold mb-1">Not sure?</h2>
+          <p className="text-sm text-[var(--ink-700)]">Answer a few questions and Netify will recommend the right route.</p>
+        </a>
+      </div>
+
+      <div id="build" />
       <RfpBuilder />
     </div>
   );
