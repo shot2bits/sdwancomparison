@@ -30,6 +30,8 @@ export async function GET() {
     { loc: `${SITE_URL}/rfp-builder/sase`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/sd-wan`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/sse`, priority: "0.9" },
+    { loc: `${SITE_URL}/rfp-builder/questions`, priority: "0.9" },
+    { loc: `${SITE_URL}/rfp-builder/sample-rfp`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities/new`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities/board`, priority: "0.9" },

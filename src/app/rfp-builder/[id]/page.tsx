@@ -134,8 +134,8 @@ export default async function RfpProjectOrPathPage({ params }: Props) {
       <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 text-sm text-[var(--ink-600)]">
         <p className="eyebrow mb-2">Methodology and citations</p>
         <p>
-          Questions cite the <a href="https://netify.co.uk/sd-wan/question-bank/" className="underline">Netify question bank</a>,{" "}
-          <a href="https://netify.co.uk/sd-wan/sample-rfp/" className="underline">sample RFP outline</a> and{" "}
+          Questions cite the <Link href="/rfp-builder/questions" className="underline">Netify question bank</Link>,{" "}
+          <Link href="/rfp-builder/sample-rfp" className="underline">sample RFP</Link> and{" "}
           <a href="https://netify.co.uk/methodology/" className="underline">research methodology</a>. Machine-readable bank:{" "}
           <a href="/sase/question-bank.json" className="underline">/question-bank.json</a>. Other paths:{" "}
           {RFP_PATHS.filter((x) => x.slug !== p.slug).map((x, i) => (

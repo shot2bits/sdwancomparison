@@ -190,8 +190,8 @@ export default function NoticeView({
       {/* 10. Related resources */}
       <Section title="Related Netify resources">
         <ul className="list-disc space-y-1 pl-5 text-sm">
-          <li><a href="https://netify.co.uk/sd-wan/question-bank/" className="underline">SD-WAN buyer question bank</a></li>
-          <li><a href="https://netify.co.uk/sd-wan/sample-rfp/" className="underline">Sample RFP outline</a></li>
+          <li><Link href="/rfp-builder/questions" className="underline">Netify RFP question bank</Link></li>
+          <li><Link href="/rfp-builder/sample-rfp" className="underline">Sample RFP</Link></li>
           <li><Link href="/shortlist" className="underline">Shortlist builder</Link></li>
           <li><Link href="/vendors" className="underline">Vendor profiles</Link></li>
           <li><a href="https://netify.co.uk/methodology/" className="underline">Netify research methodology</a></li>

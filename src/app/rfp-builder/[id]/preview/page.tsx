@@ -148,7 +148,7 @@ export default async function RfpPreviewPage({ params }: Props) {
           <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 text-xs text-[var(--ink-600)]">
             <p className="eyebrow mb-2">Provenance and review</p>
             <p className="mb-1">Question sources: Netify question bank v{BANK_VERSION} and the extended SASE canonical bank ({SASE_EXTENDED_BANK.question_bank_version}), plus buyer-specific questions generated from the project context. Per-question provenance is carried in the rationale lines.</p>
-            <p className="mb-1">Canonical methodology: <a href="https://netify.co.uk/methodology/" className="underline">netify.co.uk/methodology</a> · Question bank: <a href="https://netify.co.uk/sd-wan/question-bank/" className="underline">netify.co.uk/sd-wan/question-bank</a></p>
+            <p className="mb-1">Canonical methodology: <a href="https://netify.co.uk/methodology/" className="underline">netify.co.uk/methodology</a> · Question bank: <Link href={`/rfp-builder/questions`} className="underline">/sase/rfp-builder/questions</Link></p>
             <p><strong>Human review required.</strong> This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing to suppliers.</p>
           </section>
         </article>

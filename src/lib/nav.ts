@@ -74,8 +74,8 @@ export const SECTIONS: NavSection[] = [
     links: [
       { label: "RFP builder", href: "/rfp-builder" },
       { label: "SD-WAN RFI Builder", href: "https://netify.co.uk/sd-wan-rfi-builder-app/" },
-      { label: "Sample RFP", href: "https://netify.co.uk/sd-wan/sample-rfp/" },
-      { label: "Question bank", href: "https://netify.co.uk/sd-wan/question-bank/" },
+      { label: "Sample RFP", href: "/rfp-builder/sample-rfp" },
+      { label: "Question bank", href: "/rfp-builder/questions" },
     ],
   },
   {
