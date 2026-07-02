@@ -77,6 +77,14 @@ export default function RfpBuilderPage() {
         </a>
       </div>
 
+      <p className="mb-12 -mt-8 text-sm text-[var(--ink-600)]">
+        Know your route already? Jump straight to{" "}
+        <a href="/sase/rfp-builder/sase/" className="underline">the SASE RFP path</a>,{" "}
+        <a href="/sase/rfp-builder/sd-wan/" className="underline">the SD-WAN RFP path</a> or{" "}
+        <a href="/sase/rfp-builder/sse/" className="underline">the SSE RFP path</a> — each explains scope, shows sample
+        questions from the bank and starts the builder preloaded.
+      </p>
+
       <div id="build" />
       <RfpBuilder />
     </div>

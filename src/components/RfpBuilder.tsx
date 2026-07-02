@@ -220,6 +220,45 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   useEffect(() => {
     if (prefilled.current || initialId) return;
     const p = new URLSearchParams(window.location.search);
+
+    // Start from a published project notice: seed the RFP's buyer context
+    // from the notice's PUBLIC projection (data.json), so the buyer never
+    // types the same estate twice. Notice scope → product_scope; regions and
+    // compliance carried over; summary/environment/outcomes become notes.
+    const fromOpp = p.get("from_opportunity");
+    if (fromOpp && /^[A-Za-z0-9_-]+$/.test(fromOpp)) {
+      prefilled.current = true;
+      (async () => {
+        try {
+          const res = await fetch(`/sase/opportunities/${fromOpp}/data.json`);
+          const data = res.ok ? ((await res.json()) as { opportunity?: Record<string, unknown> }) : {};
+          const o = (data.opportunity ?? {}) as {
+            scope?: string[]; buyer_sector?: string; buyer_size_band?: string; sites?: number | null;
+            regions?: string[]; compliance_requirements?: string[]; summary?: string;
+            current_environment?: string; desired_outcomes?: string; title?: string;
+          };
+          const scopeArr = o.scope ?? [];
+          const product_scope = scopeArr.includes("sase") ? "full_sase" : scopeArr.includes("sse") ? "sse_only" : scopeArr.includes("sd_wan") ? "sdwan_only" : "full_sase";
+          const buyer: Record<string, unknown> = {
+            sector: o.buyer_sector || null,
+            organisation_size: o.buyer_size_band === "large_global" ? "large_global_enterprise" : o.buyer_size_band === "enterprise" || o.buyer_size_band === "mid_market" ? "mid_market" : o.buyer_size_band === "small" ? "small_business" : "any",
+            site_count: typeof o.sites === "number" ? o.sites : null,
+            regions: (o.regions ?? []).map((r) => (r === "asia_pacific" ? "apac" : r)),
+            compliance: o.compliance_requirements ?? [],
+            operating_model: scopeArr.includes("managed_service") || scopeArr.includes("managed_security") ? "managed" : "any",
+            product_scope,
+            notes: [o.title, o.summary, o.current_environment && `Current environment: ${o.current_environment}`, o.desired_outcomes && `Desired outcomes: ${o.desired_outcomes}`, `Source: project notice ${fromOpp}`].filter(Boolean).join("\n\n"),
+          };
+          setMode("manual");
+          startRfp(buyer);
+        } catch {
+          setMode("manual");
+          startRfp();
+        }
+      })();
+      return;
+    }
+
     if (p.get("prefill") !== "1") return;
     prefilled.current = true;
     const buyer: Record<string, unknown> = {
