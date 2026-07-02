@@ -12,7 +12,11 @@ import { buildShortlist } from "@/lib/shortlist-core";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { resolveOpportunityToken, getOpportunity, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem, vendorName } from "@/lib/opportunity";
-import { RfpResponseSchema } from "@/lib/rfp-types";
+import { RfpResponseSchema, BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
+import { synthesiseSections } from "@/lib/rfp-methodology";
+import { toPublicOpportunity } from "@/lib/opportunity-types";
+import { getSampleNotice } from "@/lib/sample-notices";
+import { normaliseNoticeDraft } from "@/lib/notice-validate";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -94,6 +98,51 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
       required: ["supplier_token", "body"],
     },
   },
+  {
+    name: "get_opportunity",
+    description: "Fetch one public opportunity notice by id: the full public projection (scope, buyer context, timeline, evidence requested, evaluation priorities, AI summary) plus its canonical notice URL and data.json URL. Sample notices are served with is_sample true. Never includes pricing amounts, buyer contact details or tokens. Open read.",
+    inputSchema: { type: "object", properties: { id: { type: "string", description: "Opportunity id from list_opportunities, or a sample notice slug." } }, required: ["id"] },
+  },
+  {
+    name: "draft_opportunity_notice",
+    description: "For a buyer agent: turn rough project fields into a normalised, publish-ready project notice draft. Validates every value against the marketplace catalogues (invalid values are dropped and reported), and returns the draft plus completeness gaps. Stateless and public: nothing is stored. Publishing requires the buyer to sign in at /opportunities/new (the draft fields map 1:1 onto the wizard).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        summary: { type: "string", description: "Plain-English description of the need." },
+        scope: { type: "array", items: { type: "string" }, description: "underlay_circuits, sd_wan, sse, sase, managed_service, firewall_fwaas, ztna, swg, casb, connectivity, managed_security, not_sure" },
+        buyer_org: { type: "string" },
+        buyer_visibility: { type: "string", enum: ["named", "anonymous"] },
+        buyer_sector: { type: "string" },
+        buyer_size_band: { type: "string" },
+        sites: { type: "integer" },
+        users_band: { type: "string" },
+        regions: { type: "array", items: { type: "string" } },
+        cloud_platforms: { type: "array", items: { type: "string" } },
+        current_environment: { type: "string" },
+        desired_outcomes: { type: "string" },
+        compliance_requirements: { type: "array", items: { type: "string" } },
+        evidence_requested: { type: "array", items: { type: "string" } },
+        evaluation_priorities: { type: "array", items: { type: "string" } },
+        response_mode: { type: "string", enum: ["indicative_pricing", "discovery_calls", "written_responses", "quote_room", "reverse_auction", "shortlist", "full_rfp"] },
+        response_deadline: { type: "string", description: "ISO date" },
+        decision_target: { type: "string" },
+        go_live_target: { type: "string" },
+      },
+      required: ["summary"],
+    },
+  },
+  {
+    name: "validate_opportunity_notice",
+    description: "For a buyer agent: check a project notice draft for completeness before publishing. Returns a 0-1 completeness score, critical gaps (blockers for a useful notice) and recommended gaps (improve supplier response quality). Deterministic, stateless, public.",
+    inputSchema: { type: "object", properties: { draft: { type: "object", description: "The notice draft fields (same shape as draft_opportunity_notice input)." } }, required: ["draft"] },
+  },
+  {
+    name: "generate_rfp_from_opportunity",
+    description: "For a buyer agent: create a draft RFP seeded from a public opportunity notice (scope, sector, estate, compliance and background carried over; methodology sections synthesised). Returns rfp_id, manage_token (KEEP SECRET - it is the buyer credential for publish/invite), share_token, and the builder/preview URLs. Downloading the final document and publishing to suppliers require the buyer to sign in.",
+    inputSchema: { type: "object", properties: { opportunity_id: { type: "string" }, title: { type: "string", description: "Optional RFP title; defaults to the notice title." } }, required: ["opportunity_id"] },
+  },
 ] as const;
 
 export const RFP_TOOL_NAMES: Set<string> = new Set(MCP_RFP_TOOL_DEFINITIONS.map((t) => t.name as string));
@@ -118,9 +167,81 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     let opportunities = await listPublicOpportunities();
     const scope = typeof args.scope === "string" ? args.scope : null;
     if (scope) opportunities = opportunities.filter((o) => o.scope.includes(scope as never));
-    return { count: opportunities.length, opportunities };
+    return {
+      count: opportunities.length,
+      opportunities: opportunities.map((o) => ({ ...o, notice_url: `${SITE_URL}/opportunities/${o.id}/`, data_url: `${SITE_URL}/opportunities/${o.id}/data.json` })),
+    };
+  }
+
+  // Stateless public buyer-agent tools: no storage required.
+  if (name === "draft_opportunity_notice") {
+    const { notice, validation } = normaliseNoticeDraft(args);
+    return {
+      notice,
+      validation,
+      how_to_publish: `Publishing requires sign-in. Take the buyer to ${SITE_URL}/opportunities/new/ — the wizard fields map 1:1 onto this draft, drafting and preview are open, and the draft is only stored when the buyer publishes.`,
+    };
+  }
+  if (name === "validate_opportunity_notice") {
+    const draft = (args.draft ?? {}) as Record<string, unknown>;
+    const { validation } = normaliseNoticeDraft(draft);
+    return validation;
+  }
+
+  // Public notice read: works for sample notices even without storage.
+  if (name === "get_opportunity") {
+    const id = String(args.id ?? "");
+    const sample = getSampleNotice(id);
+    if (sample) {
+      return { is_sample: true, note: "Sample project notice: a worked example, not a live opportunity.", opportunity: sample, notice_url: `${SITE_URL}/opportunities/${id}/`, data_url: `${SITE_URL}/opportunities/${id}/data.json` };
+    }
+    if (!kvConfigured()) return { error: "Opportunity not found." };
+    const opp = await getOpportunity(id);
+    if (!opp || opp.visibility !== "public") return { error: "Opportunity not found." };
+    return {
+      is_sample: false,
+      opportunity: toPublicOpportunity(opp),
+      notice_url: `${SITE_URL}/opportunities/${id}/`,
+      data_url: `${SITE_URL}/opportunities/${id}/data.json`,
+      how_to_respond: "Suppliers sign in with a verified work email, or agents use opportunity_respond with a per-supplier opportunity token. Pricing stays private to the buyer.",
+    };
   }
   if (!kvConfigured()) return { error: "RFP storage not configured." };
+
+  // Buyer agent: seed a draft RFP from a public opportunity notice.
+  if (name === "generate_rfp_from_opportunity") {
+    const oppId = String(args.opportunity_id ?? "");
+    const source = getSampleNotice(oppId) ?? (await (async () => { const o = await getOpportunity(oppId); return o && o.visibility === "public" ? toPublicOpportunity(o) : null; })());
+    if (!source) return { error: "Opportunity not found." };
+    const scopeArr = source.scope as string[];
+    const buyer = BuyerContextSchema.parse({
+      sector: source.buyer_sector || null,
+      organisation_size: source.buyer_size_band === "large_global" ? "large_global_enterprise" : source.buyer_size_band === "enterprise" || source.buyer_size_band === "mid_market" ? "mid_market" : source.buyer_size_band === "small" ? "small_business" : "any",
+      site_count: source.sites,
+      regions: source.regions.map((r) => (r === "asia_pacific" ? "apac" : r)),
+      compliance: source.compliance_requirements,
+      operating_model: scopeArr.includes("managed_service") || scopeArr.includes("managed_security") ? "managed" : "any",
+      product_scope: scopeArr.includes("sase") ? "full_sase" : scopeArr.includes("sse") ? "sse_only" : scopeArr.includes("sd_wan") ? "sdwan_only" : "full_sase",
+      notes: [source.title, source.summary, source.current_environment && `Current environment: ${source.current_environment}`, source.desired_outcomes && `Desired outcomes: ${source.desired_outcomes}`, `Source: project notice ${oppId}`].filter(Boolean).join("\n\n"),
+    });
+    const id = newId("rfp");
+    const project = ProjectDetailsSchema.parse({
+      id, created: Date.now(), updated: Date.now(), status: "draft",
+      title: String(args.title ?? "") || `RFP: ${source.title}`,
+      buyer, rfp_sections: synthesiseSections(buyer), invited_vendors: [],
+      share_token: newId("tok"), manage_token: newId("mtok"), methodology_version: "2026.1",
+    });
+    const saved = await saveProject(project);
+    return {
+      rfp_id: saved.id,
+      manage_token: saved.manage_token,
+      share_token: saved.share_token,
+      builder_url: `${SITE_URL}/rfp-builder/${saved.id}/`,
+      preview_url: `${SITE_URL}/rfp-builder/${saved.id}/preview/`,
+      sections: saved.rfp_sections.filter((s) => s.included).map((s) => ({ category: s.category, questions: s.questions.length })),
+      note: "manage_token is the buyer credential for publish/invite - keep it secret. Downloading the final document and publishing to suppliers require buyer sign-in.",
+    };
+  }
 
   // Buyer agent: publish an RFP to the curated supplier list using the manage_token.
   if (name === "publish_rfp") {
