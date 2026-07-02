@@ -3,7 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { FeedView, type FeedItem } from "@/components/OpportunityFeed";
 
-type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; feed: FeedItem[]; engagement_type?: string; auction_format?: string; deadline?: number | null };
+type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; feed: FeedItem[]; engagement_type?: string; auction_format?: string; deadline?: number | null; evidence_requested?: string[] };
+
+const EVIDENCE_LABELS: Record<string, string> = {
+  sector_references: "Sector references at similar scale",
+  coverage_evidence: "Coverage / PoP evidence for the buyer's regions",
+  security_certifications: "Security certifications and attestations",
+  sla_schedule: "SLA schedule and service credits",
+  migration_plan: "Migration approach and plan outline",
+  support_model: "Support model and escalation path",
+  pricing_structure: "Pricing structure and rate card",
+  case_studies: "Case studies with measurable outcomes",
+};
 
 function deadlineText(opp: { engagement_type?: string; auction_format?: string; deadline?: number | null; status: string }): string | null {
   if (opp.engagement_type !== "auction" || opp.auction_format !== "timed" || !opp.deadline) return null;
@@ -21,6 +32,8 @@ export default function OpportunitySupplier({ token }: { token: string }) {
   const [comment, setComment] = useState("");
   const [links, setLinks] = useState("");
   const [price, setPrice] = useState({ model: "per_site_monthly", amount: "", unit_note: "", notes: "" });
+  const [structured, setStructured] = useState<Record<string, string>>({});
+  const [structuredSummary, setStructuredSummary] = useState("");
 
   // Split the evidence-links field into clean https URLs (server re-validates).
   const parseLinks = () => links.split(/[\s,]+/).map((l) => l.trim()).filter((l) => /^https?:\/\//i.test(l)).slice(0, 5);
@@ -51,10 +64,10 @@ export default function OpportunitySupplier({ token }: { token: string }) {
     return () => { active = false; clearInterval(poll); };
   }, [token, opp?.id]);
 
-  async function post(type: string, body: string, pricing?: object) {
+  async function post(type: string, body: string, pricing?: object, answers?: Record<string, string>) {
     setError(null);
     try {
-      const res = await fetch(`/sase/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing, links: parseLinks() }) });
+      const res = await fetch(`/sase/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing, answers, links: parseLinks() }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.auth_required ? "Please sign in above with your supplier work email first." : (e.error ?? "Could not send.")); }
       const updated = (await res.json()) as Opp;
       setFeed(updated.feed); lastTs.current = Math.max(0, ...updated.feed.map((f) => f.created));
@@ -86,10 +99,44 @@ export default function OpportunitySupplier({ token }: { token: string }) {
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={2} className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" placeholder="Your comment or question" />
             <div className="mt-2 flex gap-2 flex-wrap">
               <button onClick={() => { post("comment", comment); setComment(""); }} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors">Comment</button>
+              <button onClick={() => { post("question", comment || "Could you clarify the requirement?"); setComment(""); }} disabled={!comment} className="px-4 py-2 text-sm border border-sky-600 text-sky-800 rounded-full hover:bg-sky-50 transition-colors disabled:opacity-50">Ask clarification question</button>
               <button onClick={() => post("interest", comment || "We are interested and would like to participate.")} className="px-4 py-2 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Register interest</button>
               <button onClick={() => post("decline", comment || "Thank you, we are declining.")} className="px-4 py-2 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Decline</button>
             </div>
           </div>
+
+          {(opp.evidence_requested?.length ?? 0) > 0 && (
+            <div>
+              <p className="eyebrow mb-2">Structured response</p>
+              <p className="text-xs text-[var(--ink-500)] mb-3">The buyer asked for the following evidence. Answer each point (add links in the evidence field below) — structured responses are easier for the buyer to score.</p>
+              <div className="space-y-3">
+                <textarea value={structuredSummary} onChange={(e) => setStructuredSummary(e.target.value)} rows={2} className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" placeholder="Response summary — why you fit this requirement" />
+                {(opp.evidence_requested ?? []).map((k) => (
+                  <div key={k}>
+                    <p className="text-xs font-medium text-[var(--ink-700)] mb-1">{EVIDENCE_LABELS[k] ?? k.replace(/_/g, " ")}</p>
+                    <textarea
+                      value={structured[k] ?? ""}
+                      onChange={(e) => setStructured((s) => ({ ...s, [k]: e.target.value }))}
+                      rows={2}
+                      className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm"
+                      placeholder="Your answer for this point"
+                    />
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    const answers = Object.fromEntries(Object.entries(structured).filter(([, v]) => v.trim()));
+                    post("response", structuredSummary || "Structured response submitted.", undefined, answers);
+                    setStructured({}); setStructuredSummary("");
+                  }}
+                  disabled={!structuredSummary.trim() && Object.values(structured).every((v) => !v.trim())}
+                  className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50"
+                >
+                  Submit structured response
+                </button>
+              </div>
+            </div>
+          )}
           <div>
             <p className="eyebrow mb-2">Submit pricing</p>
             <div className="grid sm:grid-cols-4 gap-2">

@@ -19,6 +19,16 @@ export function sanitiseLinks(links: unknown): string[] {
     .slice(0, 5);
 }
 
+/** Cap and clean a structured-answers map (evidence key → answer text). */
+export function sanitiseAnswers(answers: unknown): Record<string, string> {
+  if (!answers || typeof answers !== "object" || Array.isArray(answers)) return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(answers as Record<string, unknown>).slice(0, 20)) {
+    if (typeof v === "string" && v.trim()) out[k.slice(0, 80)] = v.slice(0, 2000);
+  }
+  return out;
+}
+
 export async function addFeedItem(
   opp: Opportunity,
   actorType: "buyer" | "supplier",
@@ -28,11 +38,12 @@ export async function addFeedItem(
   body: string,
   pricing: Pricing | null = null,
   links: string[] = [],
+  answers: Record<string, string> = {},
 ): Promise<Opportunity> {
   const t: FeedType = (FEED_TYPES as readonly string[]).includes(type) ? type : "comment";
   const item: FeedItem = {
     id: newId("feed"), actor_type: actorType, actor_slug: actorSlug, actor_name: actorName,
-    type: t, body, pricing: pricing ? PricingSchema.parse(pricing) : null, links: sanitiseLinks(links), created: Date.now(),
+    type: t, body, pricing: pricing ? PricingSchema.parse(pricing) : null, links: sanitiseLinks(links), answers: sanitiseAnswers(answers), created: Date.now(),
   };
   const status = t === "award" ? "awarded" : t === "closed" ? "closed" : opp.status;
   const saved = await saveOpportunity({ ...opp, status, feed: [...opp.feed, item] });

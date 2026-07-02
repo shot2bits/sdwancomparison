@@ -50,7 +50,7 @@ export const PricingSchema = z.object({
 }).strict();
 export type Pricing = z.infer<typeof PricingSchema>;
 
-export const FEED_TYPES = ["post", "comment", "pricing", "interest", "decline", "award", "closed"] as const;
+export const FEED_TYPES = ["post", "comment", "pricing", "interest", "decline", "award", "closed", "response", "question"] as const;
 export type FeedType = (typeof FEED_TYPES)[number];
 
 export const FeedItemSchema = z.object({
@@ -65,6 +65,10 @@ export const FeedItemSchema = z.object({
   // URL-based rather than uploads: no blob storage needed, and buyers can
   // verify sources. Defaulted for pre-existing feed items.
   links: z.array(z.string()).default([]),
+  // Structured response answers: evidence-request key (see notice-options
+  // EVIDENCE_OPTIONS) or free label → the supplier's answer text. Used by
+  // the "response" feed type; empty for everything else.
+  answers: z.record(z.string(), z.string()).default({}),
   created: z.number(),
 }).strict();
 export type FeedItem = z.infer<typeof FeedItemSchema>;

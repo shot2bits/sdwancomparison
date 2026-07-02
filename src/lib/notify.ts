@@ -23,6 +23,8 @@ const ACTIVITY_LABELS: Partial<Record<FeedType, string>> = {
   pricing: "submitted indicative pricing on",
   interest: "registered interest in",
   decline: "declined",
+  response: "submitted a structured response to",
+  question: "asked a clarification question on",
 };
 
 export async function notifyBuyerOfSupplierActivity(
