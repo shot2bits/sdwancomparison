@@ -2,6 +2,7 @@
 
 import { getOpportunity, saveOpportunity, inviteToOpportunity, resolveOpportunityToken, newId } from "@/lib/rfp-store";
 import { getShortlistDataset } from "@/lib/vendors";
+import { notifyBuyerOfSupplierActivity } from "@/lib/notify";
 import { FEED_TYPES, PricingSchema, type FeedItem, type FeedType, type Opportunity, type Pricing } from "@/lib/opportunity-types";
 
 export function vendorName(slug: string): string | null {
@@ -23,7 +24,13 @@ export async function addFeedItem(
     type: t, body, pricing: pricing ? PricingSchema.parse(pricing) : null, created: Date.now(),
   };
   const status = t === "award" ? "awarded" : t === "closed" ? "closed" : opp.status;
-  return saveOpportunity({ ...opp, status, feed: [...opp.feed, item] });
+  const saved = await saveOpportunity({ ...opp, status, feed: [...opp.feed, item] });
+  // Single choke point for buyer notifications: every supplier post — via the
+  // web room or the MCP — lands here. Best effort and rate-limited inside.
+  if (actorType === "supplier") {
+    try { await notifyBuyerOfSupplierActivity(saved, actorName, t); } catch { /* never blocks the post */ }
+  }
+  return saved;
 }
 
 export async function inviteSupplierToOpportunity(opp: Opportunity, vendorSlug: string): Promise<{ token: string; opp: Opportunity } | { error: string }> {

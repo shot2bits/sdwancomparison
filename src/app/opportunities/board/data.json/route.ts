@@ -1,4 +1,4 @@
-import { listPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
+import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -11,7 +11,9 @@ export const dynamic = "force-dynamic";
  * separate arrays so agents never mistake worked examples for real demand.
  */
 export async function GET() {
-  const opportunities = kvConfigured() ? await listPublicOpportunities() : [];
+  const [opportunities, archived] = kvConfigured()
+    ? await Promise.all([listPublicOpportunities(), listArchivedPublicOpportunities(12)])
+    : [[], []];
   return Response.json({
     "@context": "https://schema.org",
     title: "Live SASE, SSE and SD-WAN opportunity board",
@@ -21,6 +23,11 @@ export async function GET() {
     methodology_version: "sase-marketplace-2026.1",
     count: opportunities.length,
     opportunities: opportunities.map((o) => ({
+      ...o,
+      notice_url: `${SITE_URL}/opportunities/${o.id}/`,
+      data_url: `${SITE_URL}/opportunities/${o.id}/data.json`,
+    })),
+    archived: archived.map((o) => ({
       ...o,
       notice_url: `${SITE_URL}/opportunities/${o.id}/`,
       data_url: `${SITE_URL}/opportunities/${o.id}/data.json`,

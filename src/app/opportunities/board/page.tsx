@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
+import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
+import { OPP_SCOPE_LABELS, type OppScope } from "@/lib/opportunity-types";
 import BoardList from "@/components/BoardList";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
@@ -16,7 +17,9 @@ export const metadata: Metadata = {
 };
 
 export default async function OpportunityBoardPage() {
-  const opps = kvConfigured() ? await listPublicOpportunities() : [];
+  const [opps, archived] = kvConfigured()
+    ? await Promise.all([listPublicOpportunities(), listArchivedPublicOpportunities(12)])
+    : [[], []];
   const schemas = [
     getOrganizationSchema(),
     getBreadcrumbSchema("Opportunity board", "/opportunities/board"),
@@ -51,6 +54,28 @@ export default async function OpportunityBoardPage() {
       </div>
 
       <BoardList opps={opps} />
+
+      {archived.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-lg font-semibold mb-1">Recently closed and awarded</h2>
+          <p className="text-sm text-[var(--ink-600)] mb-4">Completed opportunities stay visible so suppliers can gauge marketplace activity. Outcomes only — no responses or pricing.</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {archived.map((o) => (
+              <Link key={o.id} href={`/opportunities/${o.id}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit opacity-80 transition-opacity hover:opacity-100">
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+                  <span className={`rounded-full px-2 py-0.5 font-medium uppercase tracking-wide ${o.status === "awarded" ? "bg-emerald-50 text-emerald-700" : "bg-[var(--ink-100,#f0f0f0)] text-[var(--ink-500)]"}`}>
+                    {o.status === "awarded" ? "Awarded" : "Closed"}
+                  </span>
+                </div>
+                <h3 className="text-base font-semibold leading-snug mb-1">{o.title}</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {o.scope.map((s) => <span key={s} className="rounded-full border border-[var(--ink-200,#e5e5e5)] px-2 py-0.5 text-xs text-[var(--ink-600)]">{OPP_SCOPE_LABELS[s as OppScope] ?? s}</span>)}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-12">
         <h2 className="text-lg font-semibold mb-1">Sample notices</h2>

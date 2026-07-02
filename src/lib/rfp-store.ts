@@ -306,6 +306,20 @@ export async function listPublicOpportunities(): Promise<PublicOpportunity[]> {
     .sort((a, b) => b.last_activity - a.last_activity);
 }
 
+/**
+ * Archive: recently closed and awarded public opportunities. Kept visible so
+ * suppliers can gauge marketplace activity and outcome pages stay citable;
+ * same public projection as the live board.
+ */
+export async function listArchivedPublicOpportunities(limit = 12): Promise<PublicOpportunity[]> {
+  const all = await listOpportunities();
+  return all
+    .filter((o) => (o.status === "closed" || o.status === "awarded") && o.visibility === "public")
+    .map(toPublicOpportunity)
+    .sort((a, b) => b.updated - a.updated)
+    .slice(0, limit);
+}
+
 /** Per-supplier access token for an opportunity. Also indexes the invite by vendor. */
 export async function inviteToOpportunity(oppId: string, vendorSlug: string): Promise<string> {
   const token = newId("otok");
