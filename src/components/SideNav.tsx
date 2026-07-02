@@ -32,8 +32,21 @@ export default function SideNav() {
     setSession({ authenticated: false });
   }
 
+  // Active = the SINGLE longest matching href (exact or true sub-path), so
+  // e.g. on /opportunities/board only "Opportunity board" lights, not
+  // "Post a need" (/opportunities) as well.
+  const path = pathname.replace(/\/$/, "");
+  const matches = (href: string) => {
+    if (isExternal(href)) return false;
+    const base = href.replace(/\/$/, "");
+    if (base === "") return path === "";
+    return path === base || path.startsWith(`${base}/`);
+  };
+  const activeHref = [...SECTIONS.flatMap((s) => s.links.map((l) => l.href)), "/supplier", "/admin"]
+    .filter(matches)
+    .sort((a, b) => b.length - a.length)[0];
   const linkCls = (href: string) => {
-    const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+    const active = href === activeHref;
     return `block rounded-md px-3 py-1.5 text-sm no-underline transition-colors ${active ? "bg-amber-500/15 text-[var(--ink-900)] font-medium" : "text-[var(--ink-700)] hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]"}`;
   };
   const extCls =

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SupplierDashboard from "@/components/SupplierDashboard";
 
 export const metadata: Metadata = {
-  title: "Supplier dashboard | Netify marketplace",
+  title: "Supplier dashboard",
   description: "Your supplier home: opportunities to bid on, invitations and your profile.",
   robots: { index: false, follow: false },
 };

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import OpportunityBuyer from "@/components/OpportunityBuyer";
 
-export const metadata: Metadata = { title: "Live opportunity room | Netify", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Live opportunity room", robots: { index: false, follow: false } };
 type Props = { params: Promise<{ id: string }> };
 
 export default async function OpportunityRoomPage({ params }: Props) {

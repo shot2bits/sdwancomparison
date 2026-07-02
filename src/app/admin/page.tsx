@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import AdminClient from "@/components/AdminClient";
 
 export const metadata: Metadata = {
-  title: "Marketplace admin | Netify",
+  title: "Marketplace admin",
   description: "Internal Netify marketplace administration.",
   robots: { index: false, follow: false },
 };

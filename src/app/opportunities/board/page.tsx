@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Live SASE, SSE & SD-WAN opportunity board | Netify",
+  title: "Live SASE, SSE & SD-WAN opportunity board",
   description: "Open SASE, SSE, SD-WAN, circuit and managed service opportunities from buyers. Verified vendors bid and quote. Public board, browse without signing in.",
   alternates: { canonical: `${SITE_URL}/opportunities/board/` },
   openGraph: { title: "Live SASE and SD-WAN opportunity board", description: "Open buyer opportunities; verified vendors bid and quote.", url: `${SITE_URL}/opportunities/board`, type: "website", locale: "en_GB" },
