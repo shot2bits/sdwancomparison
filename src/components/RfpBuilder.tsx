@@ -72,6 +72,27 @@ type Benchmark = { available: boolean; total_rfps?: number; top_mandatory_questi
 type ConnMsg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
 type Connection = { vendor_slug: string; vendor_name: string; token: string; status: string; messages: ConnMsg[] };
 type Suggestion = { rank: number; slug: string; name: string; score: number };
+type ExtendedBankQuestion = {
+  question_id: string;
+  category_id: string;
+  question: string;
+  answer_type: string;
+  evidence_required: string[];
+  mandatory_for: string[];
+  optional_for: string[];
+  weighting_hint: string;
+  why_it_matters: string;
+  red_flag_answers: string[];
+  follow_up_questions: string[];
+};
+
+/** Buyer sector keys (question-bank packs) → extended-bank sector slugs. */
+const EXT_SECTOR_MAP: Record<string, string> = {
+  financial_services: "financial-services",
+  retail_ecommerce: "retail",
+  manufacturing: "manufacturing",
+  healthcare: "healthcare",
+};
 
 export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [project, setProject] = useState<Project | null>(null);
@@ -103,7 +124,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [evaluations, setEvaluations] = useState<Evaluation[] | null>(null);
   const [benchmark, setBenchmark] = useState<Benchmark | null>(null);
   const [connections, setConnections] = useState<Connection[]>([]);
-  const [bank, setBank] = useState<{ version: string; canonical: { id: string; category: string; text: string }[]; sector_packs: Record<string, { label: string; sections: { title: string; questions: { id: string; text: string; buyer_lens: string; supplier_lens: string; netify_note: string }[] }[] }> } | null>(null);
+  const [bank, setBank] = useState<{
+    version: string;
+    canonical: { id: string; category: string; text: string }[];
+    sector_packs: Record<string, { label: string; sections: { title: string; questions: { id: string; text: string; buyer_lens: string; supplier_lens: string; netify_note: string }[] }[] }>;
+    // Extended SASE canonical bank (recovered from the Base44 app): richer
+    // procurement metadata per question. Optional so cached copies of
+    // question-bank.json without it keep working.
+    sase_extended?: {
+      version: string;
+      category_labels: Record<string, string>;
+      count: number;
+      questions: ExtendedBankQuestion[];
+    };
+  } | null>(null);
   const [bankOpen, setBankOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
   const [msgDraft, setMsgDraft] = useState<Record<string, string>>({});
@@ -340,6 +374,38 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     sec.included = true;
     if (!sec.questions.some((x) => x.id === q.id)) {
       sec.questions.push({ id: q.id, feature_id: "custom", text: q.text, evidence_requested: "", rationale: q.buyer_lens ? `Buyer lens: ${q.buyer_lens}` : "Netify question bank", priority: "recommended", source: "bank", buyer_lens: q.buyer_lens, supplier_lens: q.supplier_lens, mandatory: false, weight: 3 } as RfpQuestion);
+    }
+    persist({ ...project, rfp_sections: sections });
+  }
+
+  /**
+   * Add an extended-bank question, carrying its procurement metadata into the
+   * RFP: evidence checklist, why-it-matters rationale, weighting, and
+   * mandatory flag when the buyer's sector is in the question's mandatory_for.
+   */
+  function addExtendedQuestion(categoryLabel: string, q: ExtendedBankQuestion) {
+    if (!project) return;
+    const sections = [...project.rfp_sections];
+    let sec = sections.find((s) => s.category === categoryLabel);
+    if (!sec) { sec = { category: categoryLabel, included: true, questions: [] }; sections.push(sec); }
+    sec.included = true;
+    if (!sec.questions.some((x) => x.id === q.question_id)) {
+      const buyerSectorSlug = project.buyer.sector ? EXT_SECTOR_MAP[project.buyer.sector] ?? "" : "";
+      const mandatory = Boolean(buyerSectorSlug && q.mandatory_for.includes(buyerSectorSlug));
+      const weight = q.weighting_hint === "high" ? 5 : q.weighting_hint === "low" ? 2 : 3;
+      sec.questions.push({
+        id: q.question_id,
+        feature_id: "custom",
+        text: q.question,
+        evidence_requested: q.evidence_required.join("; "),
+        rationale: q.why_it_matters,
+        priority: mandatory ? "required" : "recommended",
+        source: "bank",
+        buyer_lens: q.red_flag_answers.length ? `Red flags: ${q.red_flag_answers.join("; ")}` : "",
+        supplier_lens: q.follow_up_questions.length ? `Likely follow-ups: ${q.follow_up_questions.join(" ")}` : "",
+        mandatory,
+        weight,
+      } as RfpQuestion);
     }
     persist({ ...project, rfp_sections: sections });
   }
@@ -619,7 +685,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                   <span className="eyebrow">Netify question bank (v{bank.version})</span>
                   <span aria-hidden="true">{bankOpen ? "−" : "+"}</span>
                 </button>
-                <p className="text-xs text-[var(--ink-500)] mt-1">Analyst-written questions with buyer and supplier lenses. The matching sector pack is suggested first.</p>
+                <p className="text-xs text-[var(--ink-500)] mt-1">Analyst-written questions with buyer and supplier lenses. The matching sector pack is suggested first; the SASE canonical bank below carries evidence checklists, weighting and red-flag answers for each question.</p>
                 {bankOpen && (
                   <div className="mt-3 space-y-2 max-h-96 overflow-y-auto">
                     {project.buyer.sector && bank.sector_packs[project.buyer.sector] && (
@@ -642,17 +708,58 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                         ))}
                       </div>
                     )}
-                    <details className="border border-[var(--ink-200,#e5e5e5)] rounded-sm">
-                      <summary className="px-3 py-1.5 text-sm font-medium cursor-pointer">SASE canonical set ({bank.canonical.length})</summary>
-                      <div className="px-3 pb-2 space-y-2">
-                        {bank.canonical.map((q) => (
-                          <div key={q.id} className="text-sm border-b border-[var(--ink-100,#f1f1f1)] pb-2">
-                            <p><span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-1">{q.category}</span>{q.text}</p>
-                            <button onClick={() => addBankQuestion(q.category, { id: q.id, text: q.text, buyer_lens: "", supplier_lens: "" })} className="mt-1 px-2.5 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
-                          </div>
-                        ))}
-                      </div>
-                    </details>
+                    {bank.sase_extended ? (
+                      /* Extended SASE canonical bank: grouped by category with
+                         evidence, weighting, red flags and follow-ups. */
+                      Object.entries(
+                        bank.sase_extended.questions.reduce<Record<string, ExtendedBankQuestion[]>>((acc, q) => {
+                          (acc[q.category_id] = acc[q.category_id] ?? []).push(q);
+                          return acc;
+                        }, {}),
+                      ).map(([catId, qs]) => {
+                        const label = bank.sase_extended?.category_labels[catId] ?? catId;
+                        const buyerSectorSlug = project.buyer.sector ? EXT_SECTOR_MAP[project.buyer.sector] ?? "" : "";
+                        return (
+                          <details key={catId} className="border border-[var(--ink-200,#e5e5e5)] rounded-sm">
+                            <summary className="px-3 py-1.5 text-sm font-medium cursor-pointer">{label} ({qs.length})</summary>
+                            <div className="px-3 pb-2 space-y-3">
+                              {qs.map((q) => {
+                                const mandatoryHere = Boolean(buyerSectorSlug && q.mandatory_for.includes(buyerSectorSlug));
+                                return (
+                                  <div key={q.question_id} className="text-sm border-b border-[var(--ink-100,#f1f1f1)] pb-2">
+                                    <p className="flex flex-wrap items-center gap-1.5">
+                                      <span className={`rounded-full px-1.5 py-0 text-[10px] font-medium uppercase tracking-wide ${q.weighting_hint === "high" ? "bg-amber-100 text-amber-800" : "bg-[var(--ink-100,#f0f0f0)] text-[var(--ink-500)]"}`}>{q.weighting_hint}</span>
+                                      {mandatoryHere && <span className="rounded-full bg-red-50 px-1.5 py-0 text-[10px] font-medium uppercase tracking-wide text-red-700">Mandatory for your sector</span>}
+                                    </p>
+                                    <p className="mt-1">{q.question}</p>
+                                    <p className="text-xs text-[var(--ink-500)] mt-0.5">{q.why_it_matters}</p>
+                                    {q.evidence_required.length > 0 && (
+                                      <p className="text-xs text-[var(--ink-600)] mt-0.5">Evidence: {q.evidence_required.join("; ")}</p>
+                                    )}
+                                    {q.red_flag_answers.length > 0 && (
+                                      <p className="text-xs text-red-700 mt-0.5">Red flags: {q.red_flag_answers.join("; ")}</p>
+                                    )}
+                                    <button onClick={() => addExtendedQuestion(label, q)} className="mt-1 px-2.5 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add with evidence checklist</button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </details>
+                        );
+                      })
+                    ) : (
+                      <details className="border border-[var(--ink-200,#e5e5e5)] rounded-sm">
+                        <summary className="px-3 py-1.5 text-sm font-medium cursor-pointer">SASE canonical set ({bank.canonical.length})</summary>
+                        <div className="px-3 pb-2 space-y-2">
+                          {bank.canonical.map((q) => (
+                            <div key={q.id} className="text-sm border-b border-[var(--ink-100,#f1f1f1)] pb-2">
+                              <p><span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-1">{q.category}</span>{q.text}</p>
+                              <button onClick={() => addBankQuestion(q.category, { id: q.id, text: q.text, buyer_lens: "", supplier_lens: "" })} className="mt-1 px-2.5 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    )}
                   </div>
                 )}
               </div>
