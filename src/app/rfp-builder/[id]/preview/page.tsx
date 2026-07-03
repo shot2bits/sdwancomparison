@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getProject, getSession, kvConfigured } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
-import { includedSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel } from "@/lib/rfp-document";
+import { includedSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel, buyerProfileSentence } from "@/lib/rfp-document";
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import PrintButton from "@/components/PrintButton";
 import SignIn from "@/components/SignIn";
@@ -15,18 +15,22 @@ export const dynamic = "force-dynamic";
 /**
  * Server-rendered RFP preview: the draft as the finished document — cover,
  * background, sections with evidence and weighting, evidence checklist,
- * scoring matrix, submission instructions and provenance appendix. The
- * preview is open (same exposure as the id-scoped API read) so buyers see
- * full value before the gate; downloading the document requires sign-in.
- * Private workspace content: always noindexed.
+ * scoring matrix, submission instructions and provenance appendix.
+ *
+ * Owner-only. The builder links here with ?manage={manage_token} so anonymous
+ * drafts keep working; the owning account gets in by session alone. Anyone
+ * else (including a supplier who trimmed a share link down to the id) sees a
+ * sign-in panel, not the document. Suppliers read the RFP through their
+ * response link instead. Private workspace content: always noindexed.
  */
 
 export const metadata: Metadata = { title: "RFP preview", robots: { index: false, follow: false } };
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ manage?: string }> };
 
-export default async function RfpPreviewPage({ params }: Props) {
+export default async function RfpPreviewPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { manage } = await searchParams;
   if (!kvConfigured()) notFound();
   const project = await getProject(id);
   if (!project) notFound();
@@ -34,6 +38,31 @@ export default async function RfpPreviewPage({ params }: Props) {
   const jar = await cookies();
   const session = await getSession(jar.get(SESSION_COOKIE)?.value ?? null);
   const signedIn = Boolean(session);
+
+  const tokenOk = Boolean(project.manage_token) && manage === project.manage_token;
+  const sessionOwner =
+    Boolean(session) &&
+    (session?.role === "netify" ||
+      (session?.role === "buyer" && Boolean(project.owner_email) && session.email.toLowerCase() === project.owner_email.toLowerCase()));
+  if (!tokenOk && !sessionOwner) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-24">
+        <p className="eyebrow mb-2">RFP preview</p>
+        <h1 className="mb-3 text-2xl">This preview is private to the buyer</h1>
+        <p className="mb-6 text-sm text-[var(--ink-600)]">
+          The RFP preview and download belong to the buyer who created the RFP. If that is you, open the preview from
+          your builder page (it carries your private key), or sign in with the email you used when creating it.
+          If you are a supplier, the buyer&apos;s invitation contains your response link — that is where you read the
+          RFP and reply.
+        </p>
+        <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this RFP." /></div>
+        <p className="text-sm"><Link href="/rfp-builder" className="underline">Go to the RFP builder</Link></p>
+      </div>
+    );
+  }
+
+  // Carry the manage key through preview links so the anonymous-owner flow survives navigation.
+  const keyQs = tokenOk && manage ? `?manage=${encodeURIComponent(manage)}` : "";
 
   const sections = includedSections(project);
   const stats = sectionStats(project);
@@ -64,13 +93,14 @@ export default async function RfpPreviewPage({ params }: Props) {
             </div>
           </header>
 
-          {/* Background */}
-          {project.buyer.notes.trim() && (
-            <section className="mb-8">
-              <h2 className="mb-2 text-lg font-semibold">Project background</h2>
+          {/* Background: synthesised buyer profile + any free-text notes */}
+          <section className="mb-8">
+            <h2 className="mb-2 text-lg font-semibold">Project background</h2>
+            <p className="mb-2 text-sm text-[var(--ink-800)]">{buyerProfileSentence(project)}</p>
+            {project.buyer.notes.trim() && (
               <p className="whitespace-pre-line text-sm text-[var(--ink-800)]">{project.buyer.notes.trim()}</p>
-            </section>
-          )}
+            )}
+          </section>
 
           {/* Sections */}
           {sections.map((s) => (
@@ -161,7 +191,7 @@ export default async function RfpPreviewPage({ params }: Props) {
                 <>
                   <p className="mb-1 text-sm font-medium">Download this RFP</p>
                   <p className="mb-4 text-sm text-[var(--ink-600)]">Signed in as {session?.email}. Download the document, or print to PDF.</p>
-                  <a href={`/sase/rfp-builder/${id}/preview/download`} className="mb-2 inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
+                  <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}`} className="mb-2 inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
                     Download RFP (Markdown)
                   </a>
                   <PrintButton />
@@ -180,8 +210,8 @@ export default async function RfpPreviewPage({ params }: Props) {
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 text-sm">
               <p className="eyebrow mb-2">Next steps</p>
               <ul className="space-y-1.5">
-                <li><Link href={`/rfp-builder/${id}`} className="underline">Keep editing in the builder</Link></li>
-                <li><Link href={`/rfp-builder/${id}/review`} className="underline">Agent review and approvals</Link></li>
+                <li><Link href={`/rfp-builder/${id}${keyQs}`} className="underline">Keep editing in the builder</Link></li>
+                <li><Link href={`/rfp-builder/${id}/review${keyQs}`} className="underline">Agent review and approvals</Link></li>
                 <li><Link href="/opportunities/new" className="underline">Publish a companion project notice</Link></li>
               </ul>
             </div>

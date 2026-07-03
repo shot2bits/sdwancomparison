@@ -39,6 +39,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
   const [risks, setRisks] = useState<Risk[]>([]);
   const [digests, setDigests] = useState<Digest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notOwner, setNotOwner] = useState(false);
   const [busy, setBusy] = useState<string>("");
 
   // Goal form state
@@ -48,11 +49,28 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
 
   const load = useCallback(async () => {
     setLoading(true);
+    // Adopt a manage key carried from the builder (?manage=…) so the owner
+    // gate holds across pages and devices, then keep it out of the URL bar.
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const fromUrl = sp.get("manage");
+      if (fromUrl) {
+        try { localStorage.setItem(`netify_mtok_${rfpId}`, fromUrl); } catch { /* private mode */ }
+        sp.delete("manage");
+        const rest = sp.toString();
+        window.history.replaceState(null, "", `${window.location.pathname}${rest ? `?${rest}` : ""}`);
+      }
+    }
+    const headers: Record<string, string> = {};
+    const tok = readManageToken(rfpId);
+    if (tok) headers["x-manage-token"] = tok;
     try {
-      const [g, a] = await Promise.all([
-        fetch(`/sase/api/rfp/${rfpId}/goal`).then((r) => r.json()),
-        fetch(`/sase/api/rfp/${rfpId}/approvals`).then((r) => r.json()),
+      const [gRes, aRes] = await Promise.all([
+        fetch(`/sase/api/rfp/${rfpId}/goal`, { headers }),
+        fetch(`/sase/api/rfp/${rfpId}/approvals`, { headers }),
       ]);
+      if (gRes.status === 401 || aRes.status === 401) { setNotOwner(true); return; }
+      const [g, a] = await Promise.all([gRes.json(), aRes.json()]);
       if (g.goal) {
         setGoal(g.goal);
         setOutcome(g.goal.outcome ?? "");
@@ -101,6 +119,19 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
 
   if (loading) return <p className="text-sm text-[var(--ink-500)]">Loading agent review…</p>;
 
+  if (notOwner) {
+    return (
+      <div className={card}>
+        <h3 className="font-semibold mb-1">This review area is private to the buyer</h3>
+        <p className="text-sm text-[var(--ink-600)]">
+          Bid reviews, goals and approvals belong to the buyer who created this RFP. If that is you, open this page
+          from your builder (the Agent review button carries your private key), or sign in with the email you used
+          when creating the RFP. Suppliers respond via their response link instead.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Goal */}
@@ -112,7 +143,8 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium mb-1">Must-haves (comma-separated)</label>
-            <input value={mustHave} onChange={(e) => setMustHave(e.target.value)} placeholder="pci_dss, f30_zero_trust_network_access" className="w-full rounded border border-[var(--ink-300,#ccc)] p-2 text-sm" />
+            <input value={mustHave} onChange={(e) => setMustHave(e.target.value)} placeholder="e.g. PCI DSS, zero trust network access, 24/7 UK support" className="w-full rounded border border-[var(--ink-300,#ccc)] p-2 text-sm" />
+            <p className="mt-1 text-xs text-[var(--ink-500)]">Plain English is fine — each one is matched against your compliance obligations, the methodology features and the supplier&apos;s answers.</p>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Minimum bids wanted</label>

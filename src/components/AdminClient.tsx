@@ -8,6 +8,11 @@ type AdminSession = { token: string; role: string; email: string; vendor_slug: s
 type VendorRow = { slug: string; domains: string[]; customised: boolean };
 type Pending = { domain: string; email: string; created: number; count: number };
 type Claim = { slug: string; status: "pending" | "approved" | "rejected"; email: string; domain: string; requested: number; decided?: number; decided_by?: string };
+type OppRow = {
+  id: string; title: string; status: string; visibility: string; scope: string[];
+  buyer_org: string; buyer_visibility: string; owner_email: string; source_rfp_id: string;
+  created: number; bid_count: number;
+};
 type Overview = {
   admin_email: string;
   sessions: AdminSession[];
@@ -15,6 +20,7 @@ type Overview = {
   blocklist: { builtin_count: number; custom: string[] };
   pending: Pending[];
   claims: Claim[];
+  opportunities: OppRow[];
 };
 
 function when(ms: number): string {
@@ -116,6 +122,48 @@ export default function AdminClient() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </section>
+
+      {/* Opportunity board moderation */}
+      <section className={card}>
+        <h2 className={h2}>Opportunity board ({(data.opportunities ?? []).length})</h2>
+        <p className={sub}>Every notice, including closed and unlisted ones. Remove permanently deletes a notice — the public page 404s and supplier room links stop working. Use it when something inappropriate or commercially sensitive was posted by mistake.</p>
+        {(data.opportunities ?? []).length === 0 ? (
+          <p className="text-sm text-[var(--ink-500)]">No opportunities posted yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="text-left text-[var(--ink-500)] border-b border-[var(--ink-200,#e5e5e5)]">
+                <th className="py-2 pr-4">Title</th><th className="py-2 pr-4">Status</th><th className="py-2 pr-4">Posted by</th><th className="py-2 pr-4">Bids</th><th className="py-2 pr-4">Created</th><th className="py-2"></th>
+              </tr></thead>
+              <tbody>
+                {(data.opportunities ?? []).map((o) => (
+                  <tr key={o.id} className="border-b border-[var(--ink-100,#f0f0f0)]">
+                    <td className="py-2 pr-4">
+                      <a href={`/sase/opportunities/${o.id}/`} className="underline" target="_blank" rel="noreferrer">{o.title || o.id}</a>
+                      {o.source_rfp_id && <span className="ml-2 rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 text-xs">from RFP</span>}
+                    </td>
+                    <td className="py-2 pr-4">{o.status}{o.visibility !== "public" && <span className="text-[var(--ink-500)]"> · {o.visibility}</span>}</td>
+                    <td className="py-2 pr-4 text-[var(--ink-500)]">{o.owner_email || o.buyer_org || "anonymous"}</td>
+                    <td className="py-2 pr-4">{o.bid_count}</td>
+                    <td className="py-2 pr-4 text-[var(--ink-500)]">{when(o.created)}</td>
+                    <td className="py-2">
+                      <button
+                        className={btn}
+                        disabled={busy}
+                        onClick={() => {
+                          if (window.confirm(`Permanently remove "${o.title || o.id}" from the board? This cannot be undone.`)) {
+                            act({ action: "delete_opportunity", id: o.id });
+                          }
+                        }}
+                      >Remove</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

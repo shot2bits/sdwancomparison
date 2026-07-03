@@ -93,7 +93,7 @@ export default async function OpportunityNoticePage({ params }: Props) {
                   Sign in to respond
                 </Link>
               )}
-              <Link href="/for-suppliers" className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] transition-colors hover:bg-[var(--ink-100,#f5f5f5)]">
+              <Link href="/for-suppliers#register" className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] transition-colors hover:bg-[var(--ink-100,#f5f5f5)]">
                 Register as a verified supplier
               </Link>
             </div>

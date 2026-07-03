@@ -25,6 +25,8 @@ export async function POST(req: Request) {
   }
   const buyer = BuyerContextSchema.parse(body.buyer ?? {});
   const id = newId("rfp");
+  const session = await sessionFromRequest(req);
+  const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
   const project = ProjectDetailsSchema.parse({
     id,
     created: Date.now(),
@@ -36,12 +38,12 @@ export async function POST(req: Request) {
     invited_vendors: [],
     share_token: newId("tok"),
     manage_token: newId("mtok"),
+    owner_email: ownerEmail,
     methodology_version: "2026.1",
   });
   const saved = await saveProject(project);
-  const session = await sessionFromRequest(req);
-  if (session && (session.role === "buyer" || session.role === "netify")) {
-    try { await indexRfpForBuyer(session.email, saved.id); } catch { /* best effort */ }
+  if (ownerEmail) {
+    try { await indexRfpForBuyer(ownerEmail, saved.id); } catch { /* best effort */ }
   }
   return Response.json(saved, { headers: cors });
 }

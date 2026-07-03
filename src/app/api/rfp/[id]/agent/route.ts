@@ -12,6 +12,7 @@ import { buildShortlist } from "@/lib/shortlist-core";
 import { inviteSupplier } from "@/lib/rfp-connect";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { sessionFromRequest } from "@/lib/auth";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { getBuyerMemory, learnBuyerMemory, memoryBrief, type BuyerMemory } from "@/lib/buyer-memory";
 
 export const runtime = "nodejs";
@@ -160,7 +161,7 @@ Buyer memory ${signedIn ? "(signed in, persistent across their RFPs)" : "(buyer 
 ${signedIn ? "Use this memory to avoid re-asking what you already know. When you learn a durable preference (a vendor to favour or avoid, a compliance rule always in scope, region, operating model, risk tolerance, budget pattern), call remember so it persists. If remember reports a conflict with an existing saved value, do not overwrite it silently: tell the buyer what changed and ask which is correct." : "Encourage the buyer to sign in if they want their preferences remembered across projects, but never gate RFP building on it."}
 
 Operating rules:
-1. Proactive discovery. Do not wait passively. If the buyer's context is missing critical pieces (sector, site count, regions, compliance, operating model), ask for them before drafting questions. Ask one or two sharp questions at a time, not a long form.
+1. Proactive discovery. Do not wait passively. If the buyer's context is missing critical pieces (sector, site count, regions, compliance, operating model), ask for them before drafting questions. Ask one or two sharp questions at a time, not a long form. Be direct and concrete: ask what their current infrastructure is (WAN, firewalls, remote access), what they want to keep versus replace, and what is driving the change. As soon as you know the sector, name the regulations that usually apply to it (for example retail: PCI DSS v4.0 and UK GDPR; healthcare: UK GDPR and DSPT; finance: FCA rules, EU DORA; manufacturing/OT: IEC 62443) and ask the buyer to confirm or add to them, then reflect the sector in the questions you add (sector-specific risks, sites, seasonality, OT estates and so on).
 2. Methodology enforcement. Every question you add must map to the canonical SASE Methodology v${METHODOLOGY_VERSION}. Use feature ids. Never invent a question outside the framework.
 3. Always cite. When you add or justify a question, state the reason and the methodology reference, for example: "Adding the TLS inspection question (f31_secure_web_gateway) because you flagged healthcare compliance, per SASE Methodology v${METHODOLOGY_VERSION}."
 4. Dynamic state. You have full tool access to this RFP. When the buyer asks to change focus ("make it more cloud-security focused"), call set_section_focus or add_question directly rather than only describing the change.
@@ -190,12 +191,18 @@ export async function POST(req: Request, ctx: Ctx) {
   let project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
 
-  let body: { messages?: { role: "user" | "assistant"; content: string }[]; prompt?: string };
+  let body: { messages?: { role: "user" | "assistant"; content: string }[]; prompt?: string; manage_token?: string };
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors });
   }
+
+  // The advisor holds full tool access to this RFP (it can rewrite context,
+  // sections and questions), so it is owner-only. Without this, anyone who saw
+  // the id in a supplier link could rewrite the buyer's RFP through the chat.
+  const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
+  if (!access.ok) return ownerRequired("The RFP advisor", cors);
 
   const history: Anthropic.MessageParam[] = (body.messages ?? [])
     .filter((m) => m && typeof m.content === "string" && m.content.trim())

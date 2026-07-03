@@ -95,7 +95,7 @@ export async function saveProject(p: ProjectDetails): Promise<ProjectDetails> {
  * responses pass through this.
  */
 export function publicProject(p: ProjectDetails): ProjectDetails {
-  return { ...p, manage_token: "" };
+  return { ...p, manage_token: "", owner_email: "" };
 }
 
 export async function getProject(id: string): Promise<ProjectDetails | null> {
@@ -318,6 +318,33 @@ export async function listArchivedPublicOpportunities(limit = 12): Promise<Publi
     .map(toPublicOpportunity)
     .sort((a, b) => b.updated - a.updated)
     .slice(0, limit);
+}
+
+/**
+ * Admin removal of an opportunity (moderation: inappropriate or sensitive
+ * content posted by mistake). Hard delete: the notice, its board membership,
+ * its per-vendor room tokens and the vendor invite indexes all go, so the
+ * public page 404s and no supplier token resurrects it. Any linked RFP is
+ * untouched (rfp:{id}:board_opp map is cleared so a re-publish relists).
+ */
+export async function deleteOpportunity(id: string): Promise<boolean> {
+  const opp = await getJson<Opportunity>(`opp:${id}`);
+  if (!opp) return false;
+  const parsed = OpportunitySchema.safeParse(opp);
+  const invited = parsed.success ? parsed.data.invited : [];
+  for (const slug of invited) {
+    const vtokKey = `opp:vtok:${id}:${slug}`;
+    const token = (await kv(["GET", vtokKey])) as string | null;
+    if (token) await kv(["DEL", `opp:tok:${token}`]);
+    await kv(["DEL", vtokKey]);
+    await kv(["SREM", `vendor:opps:${slug}`, id]);
+  }
+  if (parsed.success && parsed.data.source_rfp_id) {
+    await kv(["DEL", `rfp:${parsed.data.source_rfp_id}:board_opp`]);
+  }
+  await kv(["SREM", "opps", id]);
+  await kv(["DEL", `opp:${id}`]);
+  return true;
 }
 
 /** Per-supplier access token for an opportunity. Also indexes the invite by vendor. */

@@ -88,6 +88,26 @@ export function modelLabel(p: ProjectDetails): string {
   return MODEL_LABELS[p.buyer.operating_model] ?? p.buyer.operating_model;
 }
 
+/**
+ * A synthesised buyer-profile sentence for the background section, so the
+ * document always reflects the stated sector, estate and obligations even
+ * when the buyer wrote no free-text notes (Harry's testing feedback,
+ * 03/07/2026: "the generated RFP doesn't mention my sector").
+ */
+export function buyerProfileSentence(p: ProjectDetails): string {
+  const b = p.buyer;
+  const bits: string[] = [];
+  const sector = b.sector ? b.sector.replace(/_/g, " ") : "";
+  bits.push(sector ? `The buyer is a ${sector} organisation` : "The buyer is an organisation");
+  if (b.site_count != null) bits.push(`operating ${b.site_count} site${b.site_count === 1 ? "" : "s"}`);
+  if (b.regions.length) bits.push(`across ${b.regions.join(", ").replace(/_/g, " ")}`);
+  let s = bits.join(" ") + ".";
+  s += ` The requirement covers ${scopeLabel(p)}, delivered as ${modelLabel(p).toLowerCase()}.`;
+  if (b.compliance.length) s += ` Responses must address the buyer's stated obligations: ${b.compliance.join(", ").replace(/_/g, " ").toUpperCase()}.`;
+  if (sector) s += ` Suppliers should tailor answers, references and evidence to the ${sector} sector.`;
+  return s;
+}
+
 /** The full RFP as markdown — used by the gated download. */
 export function buildRfpMarkdown(p: ProjectDetails): string {
   const sections = includedSections(p);
@@ -109,9 +129,11 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
   L.push(`| Methodology | Netify SASE Methodology v${p.methodology_version} |`);
   L.push(`| Question bank | Netify question bank v${BANK_VERSION} / ${SASE_EXTENDED_BANK.question_bank_version} |`, "");
 
-  // Background
+  // Background: always present — the synthesised buyer profile keeps the
+  // sector/estate context in the document even without free-text notes.
+  L.push(`## Project background`, "", buyerProfileSentence(p), "");
   if (p.buyer.notes.trim()) {
-    L.push(`## Project background`, "", p.buyer.notes.trim(), "");
+    L.push(p.buyer.notes.trim(), "");
   }
 
   // Sections

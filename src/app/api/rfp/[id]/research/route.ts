@@ -4,6 +4,7 @@ import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { buildMethodology, METHODOLOGY_VERSION } from "@/lib/rfp-methodology";
 import { REGULATIONS } from "@/lib/rfp-compliance";
 import { FEATURE_CATEGORIES, getShortlistDataset } from "@/lib/vendors";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 
 export const runtime = "nodejs";
 const MODEL = "claude-sonnet-4-6";
@@ -29,8 +30,15 @@ export async function POST(req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const project = kvConfigured() ? await getProject(id) : null;
 
-  let body: { topic?: string; count?: number };
+  let body: { topic?: string; count?: number; manage_token?: string };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
+
+  // When the id resolves to a real RFP, this tool tailors output with the
+  // buyer's private context (and burns AI budget), so it is owner-only.
+  if (project) {
+    const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
+    if (!access.ok) return ownerRequired("The AI research tool", cors);
+  }
   const topic = (body.topic ?? "").toString().slice(0, 600);
   if (!topic.trim()) return Response.json({ error: "Give a topic to research." }, { status: 400, headers: cors });
   const count = Math.max(2, Math.min(8, Number(body.count ?? 4)));

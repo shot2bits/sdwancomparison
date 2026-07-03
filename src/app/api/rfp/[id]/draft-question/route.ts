@@ -3,6 +3,7 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { buildMethodology, METHODOLOGY_VERSION } from "@/lib/rfp-methodology";
 import { FEATURE_CATEGORIES } from "@/lib/vendors";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 
 export const runtime = "nodejs";
 const MODEL = "claude-sonnet-4-6";
@@ -28,11 +29,18 @@ export async function POST(req: Request, ctx: Ctx) {
   // Project is optional context; helper works without KV too.
   const project = kvConfigured() ? await getProject(id) : null;
 
-  let body: { intent?: string };
+  let body: { intent?: string; manage_token?: string };
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors });
+  }
+
+  // When the id resolves to a real RFP, the helper tailors output with the
+  // buyer's private context (and burns AI budget), so it is owner-only.
+  if (project) {
+    const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
+    if (!access.ok) return ownerRequired("The AI question helper", cors);
   }
   const intent = (body.intent ?? "").toString().slice(0, 1000);
   if (!intent.trim()) return Response.json({ error: "Describe what you want to ask." }, { status: 400, headers: cors });

@@ -3,6 +3,18 @@ import { getProject, getNdaAcceptance, saveNdaAcceptance, listNdaAcceptances, ha
 import { NdaAcceptanceSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { sessionFromRequest } from "@/lib/auth";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
+
+/** Share-token check for supplier-side NDA reads/accepts. */
+function shareTokenOk(req: Request, shareToken: string, bodyToken?: string): boolean {
+  if (!shareToken) return false;
+  if (bodyToken && bodyToken === shareToken) return true;
+  try {
+    return new URL(req.url).searchParams.get("token") === shareToken;
+  } catch {
+    return false;
+  }
+}
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -30,15 +42,18 @@ export async function GET(req: Request, ctx: Ctx) {
 
   const url = new URL(req.url);
 
-  // Buyer/Netify can pull the acceptance audit trail.
+  // The RFP's owner can pull the acceptance audit trail.
   if (url.searchParams.get("acceptances")) {
-    const session = await sessionFromRequest(req);
-    if (session?.role !== "buyer" && session?.role !== "netify") {
-      return Response.json({ error: "Sign in as the buyer to see acceptances.", auth_required: true }, { status: 401, headers: cors });
-    }
+    const access = await requireRfpOwner(req, project);
+    if (!access.ok) return ownerRequired("Reading NDA acceptances", cors);
     return Response.json({ nda: ndaPublic(project.nda), acceptances: await listNdaAcceptances(id) }, { headers: cors });
   }
 
+  // Supplier status read: needs the share token from the response link (or the owner).
+  if (!shareTokenOk(req, project.share_token)) {
+    const access = await requireRfpOwner(req, project);
+    if (!access.ok) return ownerRequired("Reading the NDA status", cors);
+  }
   const vendor = (url.searchParams.get("vendor") ?? "").trim();
   const accepted = await hasAcceptedNda(project, vendor);
   const acceptance = vendor ? await getNdaAcceptance(id, vendor) : null;
@@ -54,11 +69,15 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   if (!project.nda.required) return Response.json({ error: "This RFP has no NDA requirement." }, { status: 409, headers: cors });
 
-  let body: { vendor?: string; signatory_name?: string; agree?: boolean };
+  let body: { vendor?: string; signatory_name?: string; agree?: boolean; token?: string };
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors });
+  }
+  // Accepting is a supplier action performed from the response link.
+  if (!shareTokenOk(req, project.share_token, body.token)) {
+    return Response.json({ error: "Accepting the NDA needs the response link token. Open this RFP via your supplier link and try again." }, { status: 401, headers: cors });
   }
   const vendor = (body.vendor ?? "").trim();
   const signatory = (body.signatory_name ?? "").trim();

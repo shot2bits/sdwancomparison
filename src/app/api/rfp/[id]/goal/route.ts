@@ -1,6 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured } from "@/lib/rfp-store";
-import { sessionFromRequest } from "@/lib/auth";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { getGoal, upsertGoal, recordAudit } from "@/lib/agent-store";
 import { GoalTargetsSchema, type ProcurementGoal } from "@/lib/agent-types";
 
@@ -8,18 +8,24 @@ export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
 export async function OPTIONS(req: Request) { return preflight(req); }
 
-/** Read the standing procurement goal for an RFP. Open to read. */
+/** Read the standing procurement goal for an RFP. Owner-only: the goal states
+ *  the buyer's negotiating position (budget posture, must-haves, bid targets),
+ *  which is exactly what a responding supplier must not see. */
 export async function GET(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
+  const project = await getProject(id);
+  if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+  const access = await requireRfpOwner(req, project);
+  if (!access.ok) return ownerRequired("Reading the procurement goal", cors);
   return Response.json({ goal: await getGoal(id) }, { headers: cors });
 }
 
 /**
  * Set or update the goal. The goal drives autonomous behaviour, so writing it
- * needs identity: a buyer/Netify session OR the RFP manage_token (agents use
- * the token). Reading stays open.
+ * is owner-only: the manage_token (agents and the creating browser) or the
+ * owning buyer's session. A plain buyer session is not enough.
  */
 export async function POST(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
@@ -31,12 +37,9 @@ export async function POST(req: Request, ctx: Ctx) {
   let body: Partial<ProcurementGoal> & { manage_token?: string } = {};
   try { body = await req.json(); } catch { /* optional */ }
 
-  const session = await sessionFromRequest(req);
-  const sessionOk = session?.role === "buyer" || session?.role === "netify";
-  const tokenOk = Boolean(project.manage_token) && body.manage_token === project.manage_token;
-  if (!sessionOk && !tokenOk) {
-    return Response.json({ error: "Setting a procurement goal needs identity. Sign in, or pass the RFP manage_token.", auth_required: true }, { status: 401, headers: cors });
-  }
+  const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
+  if (!access.ok) return ownerRequired("Setting the procurement goal", cors);
+  const sessionOk = !access.viaToken;
 
   const patch: Partial<ProcurementGoal> = {};
   if (typeof body.outcome === "string") patch.outcome = body.outcome.slice(0, 2000);

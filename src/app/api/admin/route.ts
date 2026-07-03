@@ -13,6 +13,8 @@ import {
   clearPendingRequest,
   listVendorClaims,
   decideVendorClaim,
+  listOpportunities,
+  deleteOpportunity,
 } from "@/lib/rfp-store";
 import {
   isAdminEmail,
@@ -40,13 +42,14 @@ export async function GET(req: Request) {
   const auth = await requireAdmin(req, cors);
   if (auth instanceof Response) return auth;
 
-  const [sessions, effective, overrides, blocklistExtra, pending, claims] = await Promise.all([
+  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities] = await Promise.all([
     listSessions(),
     effectiveVendorDomains(),
     getVendorDomainOverrides(),
     getBlocklistExtra(),
     listPendingRequests(),
     listVendorClaims(),
+    listOpportunities(),
   ]);
 
   const vendors = Object.keys(effective)
@@ -62,6 +65,21 @@ export async function GET(req: Request) {
       blocklist: { builtin_count: FREE_EMAIL_DOMAINS.size, custom: blocklistExtra },
       pending,
       claims,
+      // Moderation view: every notice on (or off) the board, including closed
+      // and unlisted ones, so anything inappropriate can be removed.
+      opportunities: opportunities.slice(0, 200).map((o) => ({
+        id: o.id,
+        title: o.title,
+        status: o.status,
+        visibility: o.visibility,
+        scope: o.scope,
+        buyer_org: o.buyer_org,
+        buyer_visibility: o.buyer_visibility,
+        owner_email: o.owner_email,
+        source_rfp_id: o.source_rfp_id,
+        created: o.created,
+        bid_count: o.feed.filter((f) => f.type === "pricing").length,
+      })),
     },
     { headers: cors },
   );
@@ -118,6 +136,13 @@ export async function POST(req: Request) {
         if (!domain) return Response.json({ error: "domain required." }, { status: 422, headers: cors });
         await clearPendingRequest(domain);
         if (body.block === true) await addBlocklistDomain(domain);
+        return Response.json({ ok: true }, { headers: cors });
+      }
+      case "delete_opportunity": {
+        const id = String(body.id ?? "");
+        if (!id) return Response.json({ error: "id required." }, { status: 422, headers: cors });
+        const removed = await deleteOpportunity(id);
+        if (!removed) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
         return Response.json({ ok: true }, { headers: cors });
       }
       case "approve_claim":

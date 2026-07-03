@@ -6,6 +6,7 @@ import { recordCompletenessSample } from "@/lib/rfp-store";
 import { sessionFromRequest, requireClaimedSupplierFor } from "@/lib/auth";
 import { getGoal } from "@/lib/agent-store";
 import { reviewBid } from "@/lib/bid-review";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -15,11 +16,17 @@ export async function OPTIONS(req: Request) {
   return preflight(req);
 }
 
-/** List supplier responses (buyer evaluation view). */
+/** List supplier responses (buyer evaluation view). Owner-only: this is every
+ *  supplier's full submission, including commercial answers — the single most
+ *  sensitive read on the RFP. */
 export async function GET(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
+  const project = await getProject(id);
+  if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+  const access = await requireRfpOwner(req, project);
+  if (!access.ok) return ownerRequired("Reading supplier responses", cors);
   return Response.json({ responses: await listResponses(id) }, { headers: cors });
 }
 

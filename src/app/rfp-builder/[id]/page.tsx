@@ -32,18 +32,15 @@ export default async function RfpProjectOrPathPage({ params }: Props) {
   const p = getRfpPath(id);
 
   if (!p) {
-    // Private builder workspace (existing behaviour).
+    // Private builder workspace. The Preview/Agent-review buttons live inside
+    // RfpBuilder (client) so they can carry the owner's manage key — server
+    // markup cannot know it, and without the key those owner-gated pages
+    // refuse anonymous owners.
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <p className="eyebrow mb-2">Agentic RFP builder</p>
-            <h1 className="text-2xl">Your SASE and SD-WAN RFP</h1>
-          </div>
-          <div className="flex flex-none flex-wrap gap-2">
-            <Link href={`/rfp-builder/${id}/preview`} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Preview &amp; download →</Link>
-            <Link href={`/rfp-builder/${id}/review`} className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-4 py-1.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">Agent review and approvals →</Link>
-          </div>
+        <div className="mb-8">
+          <p className="eyebrow mb-2">Agentic RFP builder</p>
+          <h1 className="text-2xl">Your SASE and SD-WAN RFP</h1>
         </div>
         <RfpBuilder initialId={id} />
       </div>
@@ -84,9 +81,13 @@ export default async function RfpProjectOrPathPage({ params }: Props) {
         <h1 id="page-h1" className="mb-4">{p.title}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{p.intro}</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <a href={builderHref} className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Start this RFP</a>
+          <a href={builderHref} className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Start in the RFP Builder</a>
           <Link href="/opportunities/new" className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">Just need pricing? Post a project instead</Link>
         </div>
+        <p className="mt-3 text-xs text-[var(--ink-500)]">
+          This opens the main RFP Builder with the {p.label} scope preloaded — the same builder every path uses, so you
+          can still change scope, delivery model and questions there.
+        </p>
       </div>
 
       <div className="mb-12 grid gap-8 lg:grid-cols-2">

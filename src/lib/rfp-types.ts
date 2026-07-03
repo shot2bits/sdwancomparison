@@ -75,6 +75,7 @@ export const ProjectDetailsSchema = z.object({
   invited_vendors: z.array(z.string()).default([]),
   share_token: z.string(), // suppliers use this to view and respond
   manage_token: z.string().default(""), // buyer/agent credential for push actions (publish, invite); held by the creator
+  owner_email: z.string().default(""), // buyer account that owns this RFP (private, never in public projection); empty for anonymous drafts
   methodology_version: z.string().default("2026.1"),
   nda: NdaConfigSchema.default({ required: false, source: "template", text: "", link: "", version: 1, updated: 0 }), // defaulted so RFPs created before NDAs still validate
 }).strict();

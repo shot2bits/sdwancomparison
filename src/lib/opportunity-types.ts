@@ -169,6 +169,10 @@ export const OpportunitySchema = z.object({
   ai_gap_flags: z.array(z.string()).default([]),
   methodology_version: z.string().default(""),
   owner_email: z.string().default(""), // publishing account (private, never in public projection)
+  // When the notice was auto-listed from a published full RFP, the source RFP
+  // id. Public flag only ("this buyer issued a full RFP"); the RFP's private
+  // respond link is never exposed here.
+  source_rfp_id: z.string().default(""),
 }).strict();
 export type Opportunity = z.infer<typeof OpportunitySchema>;
 
@@ -220,6 +224,7 @@ export type PublicOpportunity = {
   ai_assumptions: string[];
   ai_gap_flags: string[];
   methodology_version: string;
+  has_full_rfp?: boolean; // true when this notice was listed from a published full RFP (optional: sample fixtures omit it)
 };
 
 /** Strip an opportunity to its public projection (no pricing amounts, no tokens, no contact). */
@@ -268,5 +273,6 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     ai_assumptions: o.ai_assumptions,
     ai_gap_flags: o.ai_gap_flags,
     methodology_version: o.methodology_version,
+    has_full_rfp: Boolean(o.source_rfp_id),
   };
 }

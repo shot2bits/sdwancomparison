@@ -1,6 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
-import { listBuyerRfpIds, getProject, kvConfigured } from "@/lib/rfp-store";
+import { listBuyerRfpIds, getProject, saveProject, kvConfigured } from "@/lib/rfp-store";
 
 export const runtime = "nodejs";
 export async function OPTIONS(req: Request) { return preflight(req); }
@@ -17,7 +17,13 @@ export async function GET(req: Request) {
   const rfps = [];
   for (const id of ids) {
     const p = await getProject(id);
-    if (p) rfps.push({ id: p.id, title: p.title, status: p.status, updated: p.updated });
+    if (!p) continue;
+    // Backfill: RFPs indexed to this account before owner_email existed adopt
+    // it now, so the account keeps working as the owner credential everywhere.
+    if (!p.owner_email && session.role === "buyer") {
+      try { await saveProject({ ...p, owner_email: session.email }); } catch { /* best effort */ }
+    }
+    rfps.push({ id: p.id, title: p.title, status: p.status, updated: p.updated });
   }
   return Response.json({ rfps: rfps.sort((a, b) => b.updated - a.updated) }, { headers: cors });
 }

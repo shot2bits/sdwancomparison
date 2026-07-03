@@ -14,7 +14,8 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { getVendor, STATUS_LABELS } from "@/lib/vendors";
-import { regulation } from "@/lib/rfp-compliance";
+import { regulation, REGULATIONS } from "@/lib/rfp-compliance";
+import { buildMethodology } from "@/lib/rfp-methodology";
 import { newId } from "@/lib/rfp-store";
 import { saveReview, proposeApproval, recordAudit } from "@/lib/agent-store";
 import type { ProcurementGoal } from "@/lib/agent-types";
@@ -34,6 +35,36 @@ const AFFIRMATIVE = /\b(yes|fully|native|natively|supported|out of the box|inclu
 
 function answeredText(resp: RfpResponse, qid: string): string {
   return (resp.answers[qid] ?? "").trim();
+}
+
+/**
+ * Buyers type must-haves in plain English ("PCI DSS", "zero trust network
+ * access"), not machine keys. Resolve a raw must-have to a compliance key or
+ * methodology feature id where possible; otherwise return it unchanged so the
+ * existing question-id/free-text matching still applies.
+ */
+export function resolveMustHave(raw: string): string {
+  const t = raw.trim();
+  if (!t) return t;
+  if (regulation(t)) return t; // already a compliance key
+  const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const underscored = squash(t).replace(/ /g, "_");
+  if (regulation(underscored)) return underscored; // "PCI DSS" -> pci_dss
+  const tt = squash(t);
+  // Compliance by label ("PCI DSS v4.0", "EU DORA"…)
+  const reg = REGULATIONS.find((r) => {
+    const label = squash(r.label);
+    return label === tt || label.includes(tt) || tt.includes(squash(r.key));
+  });
+  if (reg && tt.length >= 3) return reg.key;
+  // Methodology features by id or name ("zero trust network access" -> f30_…)
+  const feats = buildMethodology().features;
+  if (feats.some((f) => f.feature_id === t)) return t;
+  const hit =
+    feats.find((f) => squash(f.feature_name) === tt) ??
+    (tt.length >= 6 ? feats.find((f) => squash(f.feature_name).includes(tt) || tt.includes(squash(f.feature_name))) : undefined);
+  if (hit) return hit.feature_id;
+  return t;
 }
 
 function requiredQuestions(project: ProjectDetails): { q: RfpQuestion; category: string }[] {
@@ -74,7 +105,8 @@ function evidenceLayer(project: ProjectDetails, resp: RfpResponse, goal: Procure
       if (!s.included) continue;
       for (const q of s.questions) if (answeredText(resp, q.id).length > 0) answeredFeatures.add(q.feature_id);
     }
-    for (const mh of goal.must_have) {
+    for (const raw of goal.must_have) {
+      const mh = resolveMustHave(raw);
       const reg = regulation(mh);
       if (reg) {
         const feats = reg.required_features;
@@ -93,7 +125,7 @@ function evidenceLayer(project: ProjectDetails, resp: RfpResponse, goal: Procure
         const answered = matched ? answeredText(resp, matched.q.id).length > 0 : answeredFeatures.has(mh);
         checks.push({
           key: `must_have:${mh}`,
-          label: `Must-have addressed: ${mh}`,
+          label: `Must-have addressed: ${raw}${mh !== raw ? ` (${mh})` : ""}`,
           pass: answered,
           detail: matched
             ? (answered ? "Answered." : "Not answered in this bid.")

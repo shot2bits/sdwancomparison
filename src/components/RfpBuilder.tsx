@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NETIFY_NDA_TEMPLATE } from "@/lib/rfp-types";
+import SignIn from "@/components/SignIn";
 
 type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
 type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
@@ -100,6 +101,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [mode, setMode] = useState<"agent" | "manual">("agent");
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  // True when the server refused the workspace read: this browser holds no
+  // manage token and the session (if any) does not own the RFP. Renders the
+  // "private workspace" gate instead of the builder.
+  const [notOwner, setNotOwner] = useState(false);
+  // Board-listing outcome from the last publish (listed, or why not).
+  const [boardNote, setBoardNote] = useState<{ listed: boolean; url?: string; reason?: string } | null>(null);
 
   // agent chat
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
@@ -163,12 +170,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function refreshNdaAccepts() {
     if (!project) return;
     try {
-      const r = await fetch(`/sase/api/rfp/${project.id}/nda?acceptances=1`);
+      const r = await fetch(`/sase/api/rfp/${project.id}/nda?acceptances=1`, { headers: authHeaders() });
       if (r.ok) { const d = await r.json(); setNdaAccepts(d.acceptances ?? []); }
     } catch { /* non-fatal */ }
   }
 
   useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
+  // Tell the landing page an RFP is underway so the big path cards collapse
+  // and stop competing with the builder (Harry's feedback, 03/07/2026).
+  useEffect(() => {
+    if (project?.id && typeof window !== "undefined") window.dispatchEvent(new Event("netify:rfp-active"));
+  }, [project?.id]);
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
   useEffect(() => { fetch("/sase/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
@@ -190,15 +202,56 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       manageToken.current = tok;
       try { localStorage.setItem(mtokKey(p.id), tok); } catch { /* private mode, keep in ref */ }
     }
+    setNotOwner(false);
     setProject({ ...p, manage_token: tok });
   }
 
+  /** The owner credential, attached to every workspace API call. */
+  function authHeaders(): Record<string, string> {
+    return manageToken.current ? { "x-manage-token": manageToken.current } : {};
+  }
+
   async function loadProject(id: string) {
+    // Adopt a manage key carried in the URL (the buyer's private cross-device
+    // link is /rfp-builder/{id}?manage={token}), then hide it from the bar.
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const fromUrl = sp.get("manage");
+      if (fromUrl) {
+        manageToken.current = fromUrl;
+        try { localStorage.setItem(mtokKey(id), fromUrl); } catch { /* private mode */ }
+        sp.delete("manage");
+        const rest = sp.toString();
+        window.history.replaceState(null, "", `${window.location.pathname}${rest ? `?${rest}` : ""}`);
+      } else if (!manageToken.current) {
+        manageToken.current = localStorage.getItem(mtokKey(id)) || "";
+      }
+    }
     try {
-      const res = await fetch(`/sase/api/rfp/${id}`);
+      const res = await fetch(`/sase/api/rfp/${id}`, { headers: authHeaders() });
       if (res.ok) applyProject((await res.json()) as Project);
+      else if (res.status === 401) setNotOwner(true);
       else setError("This RFP could not be loaded.");
     } catch { setError("This RFP could not be loaded."); }
+  }
+
+  /** The agent's first message. Direct discovery questions, and sector-aware:
+   *  when the sector is already known (path prefill, notice carry-through) it
+   *  names the regulations that usually apply and asks the buyer to confirm,
+   *  per Harry's testing feedback (03/07/2026). */
+  function openingMessage(buyer?: Record<string, unknown>): string {
+    const sector = typeof buyer?.sector === "string" ? buyer.sector : "";
+    const SECTOR_OPENERS: Record<string, { label: string; regs: string }> = {
+      retail_ecommerce: { label: "retail", regs: "PCI DSS v4.0 (card payments) and UK GDPR" },
+      financial_services: { label: "financial services", regs: "FCA operational resilience rules, EU DORA (if you operate in the EU) and UK GDPR" },
+      healthcare: { label: "healthcare", regs: "UK GDPR and the NHS Data Security and Protection Toolkit" },
+      manufacturing: { label: "manufacturing", regs: "IEC 62443 for OT/plant networks and UK GDPR" },
+    };
+    const s = SECTOR_OPENERS[sector];
+    if (s) {
+      return `Let's build your RFP. You're in ${s.label}, so ${s.regs} will likely apply. Shall I include those, and are there any other obligations I'm missing? Then tell me about your current infrastructure: what WAN, firewalls and remote access do you run today, what do you want to keep, and what's driving the change?`;
+    }
+    return "Let's build your RFP. Start with your current infrastructure: what WAN, firewalls and remote access do you run today, and what do you want to keep versus replace? Then your sector, rough site count, regions and any compliance obligations (for example UK GDPR, PCI DSS, IEC 62443) — once I know the sector I'll suggest the regulations that usually apply. You can also just pick a scope and delivery model under Build it myself.";
   }
 
   async function startRfp(buyer?: Record<string, unknown>) {
@@ -209,7 +262,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const p = (await res.json()) as Project;
       applyProject(p); // create returns the full token; persist it client-side
       window.history.replaceState(null, "", `/sase/rfp-builder/${p.id}`);
-      setMessages([{ role: "assistant", content: "Let's build your RFP. What sector are you in, roughly how many sites, which regions, and any compliance obligations (for example UK GDPR, PCI DSS, IEC 62443)? You can also just pick a scope and delivery model under Build it myself." }]);
+      setMessages([{ role: "assistant", content: openingMessage(buyer) }]);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not start an RFP."); }
     finally { setCreating(false); }
   }
@@ -283,6 +336,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       // requires; the response keeps the token (access proven), so re-apply it.
       const res = await fetch(`/sase/api/rfp/${updated.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...updated, manage_token: manageToken.current || updated.manage_token, regenerate }) });
       if (res.ok && regenerate) applyProject((await res.json()) as Project);
+      // A refused save must be loud, not silent: without this, a viewer who is
+      // not the owner sees edits "work" locally and then vanish on reload.
+      if (res.status === 401) setError("Changes aren't saving: only this RFP's owner can edit. Sign in with the email that created it, or reopen your private builder link.");
     } catch { /* optimistic */ }
   }
 
@@ -306,7 +362,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     const ctrl = new AbortController();
     const timeout = setTimeout(() => ctrl.abort(), 115000);
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next }), signal: ctrl.signal });
+      const res = await fetch(`/sase/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next, manage_token: manageToken.current || project.manage_token }), signal: ctrl.signal });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error ?? `The advisor could not respond (${res.status}).`); }
       const data = (await res.json()) as { narrative?: string; project?: Project };
       if (data.project) applyProject(data.project); // agent response is token-stripped; re-attach
@@ -342,7 +398,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project || !intent.trim() || drafting) return;
     setDrafting(true); setError(null); setDraft(null);
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/draft-question`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ intent }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/draft-question`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ intent, manage_token: manageToken.current || project.manage_token }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not draft."); }
       const data = (await res.json()) as { question: RfpQuestion & { category: string } };
       setDraft(data.question);
@@ -372,7 +428,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function refreshCoverage() {
     if (!project) return;
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/compliance`);
+      const res = await fetch(`/sase/api/rfp/${project.id}/compliance`, { headers: authHeaders() });
       // The API returns the rows array under `coverage`; older/alternative shapes
       // may use `rows`. Normalise to { rows, gaps, clauses } with array fallbacks
       // so a missing field can never crash the render (e.g. coverage.rows.filter).
@@ -387,7 +443,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project || !topic.trim() || researching) return;
     setResearching(true); setError(null); setResearchSet(null);
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/research`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ topic, count: 4 }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/research`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ topic, count: 4, manage_token: manageToken.current || project.manage_token }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not research."); }
       setResearchSet((await res.json()) as { analysis: string; questions: (RfpQuestion & { category: string })[] });
     } catch (e) { setError(e instanceof Error ? e.message : "Could not research."); }
@@ -452,7 +508,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function loadEvaluations() {
     if (!project) return;
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/evaluation`);
+      const res = await fetch(`/sase/api/rfp/${project.id}/evaluation`, { headers: authHeaders() });
       if (res.ok) setEvaluations(((await res.json()) as { evaluations: Evaluation[] }).evaluations);
     } catch { /* ignore */ }
   }
@@ -460,7 +516,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function refreshConnections() {
     if (!project) return;
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/connect`);
+      const res = await fetch(`/sase/api/rfp/${project.id}/connect`, { headers: authHeaders() });
       if (res.ok) setConnections(((await res.json()) as { connections: Connection[] }).connections);
     } catch { /* ignore */ }
   }
@@ -488,7 +544,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function inviteSupplier(slug: string, intro: string) {
     if (!project) return;
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, intro }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, intro, manage_token: manageToken.current || project.manage_token }) });
       if (res.ok) refreshConnections();
     } catch { /* ignore */ }
   }
@@ -496,20 +552,21 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function connectAction(slug: string, action: string, body: string) {
     if (!project) return;
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, action, body }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/connect`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, action, body, manage_token: manageToken.current || project.manage_token }) });
       if (res.ok) { refreshConnections(); setMsgDraft({ ...msgDraft, [slug]: "" }); }
     } catch { /* ignore */ }
   }
 
   async function publishToCurated() {
     if (!project || publishing) return;
-    setPublishing(true); setPublishMsg(null); setError(null);
+    setPublishing(true); setPublishMsg(null); setError(null); setBoardNote(null);
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: project.manage_token }) });
+      const res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: manageToken.current || project.manage_token }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
       setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, click "Load responses" under "Evaluate supplier responses" to read and compare them. There's no separate account or portal — this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
+      if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
     finally { setPublishing(false); }
@@ -523,7 +580,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // the MAIN site and 404s (bug found by Harry, 2026-07-02).
   function copyManageLink() {
     if (!project) return;
-    navigator.clipboard.writeText(`${window.location.origin}/sase/rfp-builder/${project.id}`);
+    // The private link carries the manage key so it works from any device or
+    // browser. Without the key, the workspace read is refused (owner-only).
+    const key = manageToken.current || project.manage_token || "";
+    navigator.clipboard.writeText(`${window.location.origin}/sase/rfp-builder/${project.id}${key ? `?manage=${key}` : ""}`);
     setManageCopied(true); setTimeout(() => setManageCopied(false), 2000);
   }
 
@@ -560,6 +620,28 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }
 
   const activeCount = useMemo(() => project ? project.rfp_sections.reduce((n, s) => n + (s.included ? s.questions.filter((q) => q.priority !== "optional").length : 0), 0) : 0, [project]);
+
+  // Owner links to the server-rendered preview/review pages carry the manage
+  // key, so the anonymous-owner flow works across those (owner-gated) pages.
+  const keyQs = manageToken.current ? `?manage=${manageToken.current}` : "";
+
+  if (notOwner) {
+    return (
+      <div className="rounded-2xl border border-[var(--ink-900)] p-8 max-w-2xl">
+        <p className="eyebrow mb-2">Private workspace</p>
+        <h2 className="text-xl mb-2">This RFP belongs to another buyer</h2>
+        <p className="text-sm text-[var(--ink-700)] mb-4">
+          The builder is the buyer&apos;s private workspace: only the person who created this RFP can read or edit it here.
+        </p>
+        <ul className="list-disc pl-5 text-sm text-[var(--ink-700)] space-y-1.5 mb-5">
+          <li><strong>Invited to respond as a supplier?</strong> Use the response link from your invitation (it ends <code>/respond?token=…</code>) — that page shows you the RFP and takes your answers.</li>
+          <li><strong>Is this your RFP?</strong> Sign in below with the email you used when you created it, or reopen the private builder link you bookmarked (it carries your key).</li>
+        </ul>
+        <div className="mb-5"><SignIn role="buyer" prompt="Sign in with the email that created this RFP." /></div>
+        <p className="text-sm"><a href="/sase/rfp-builder/" className="underline">Or start your own RFP</a></p>
+      </div>
+    );
+  }
 
   if (!project) {
     return (
@@ -660,6 +742,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-xs text-[var(--ink-500)] uppercase tracking-wide">{project.status} · {activeCount} questions</span>
+          <a href={`/sase/rfp-builder/${project.id}/preview${keyQs}`} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors no-underline">Preview &amp; download</a>
+          <a href={`/sase/rfp-builder/${project.id}/review${keyQs}`} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors no-underline">Agent review</a>
           <button onClick={exportMarkdown} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Export</button>
           <button onClick={copyShare} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{copied ? "Copied" : "Supplier link"}</button>
         </div>
@@ -951,11 +1035,23 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
         <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Publish to curated suppliers</strong> invites that whole set in one go. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed — this page is your dashboard. Bookmark or copy this link to come back any time and track supplier replies.</span>
-          <code className="text-xs text-[var(--ink-600,#555)] break-all">{`${typeof window !== "undefined" ? window.location.origin : ""}/sase/rfp-builder/${project.id}`}</code>
+          <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed — this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track supplier replies. Don&apos;t share it: suppliers get their own links.</span>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
         </div>
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
+        {boardNote && (
+          boardNote.listed ? (
+            <p className="text-sm text-emerald-700 mb-3">
+              Also listed on the <a href="/sase/opportunities/board/" className="underline">public opportunity board</a>
+              {boardNote.url ? <> — <a href={boardNote.url} className="underline">view the public notice</a></> : null}. The notice shows scope and sector only; your questions, pricing and contact details stay private.
+            </p>
+          ) : (
+            <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">
+              <p className="mb-2"><strong>Not on the public board yet.</strong> {boardNote.reason ?? "Sign in to list this RFP on the public opportunity board."} Signing in also lets you recover this RFP from any device via My account.</p>
+              <SignIn role="buyer" prompt="Sign in with your work email, then publish again to list on the board." />
+            </div>
+          )
+        )}
 
         {suggestions && suggestions.length > 0 && (
           <div className="mb-4">

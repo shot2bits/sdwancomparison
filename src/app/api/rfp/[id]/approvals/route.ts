@@ -1,6 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, getConnection, kvConfigured } from "@/lib/rfp-store";
-import { sessionFromRequest } from "@/lib/auth";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { inviteSupplier, addMessage } from "@/lib/rfp-connect";
 import { listApprovals, getApproval, setApprovalStatus, listReviews, listAudit, listDigests, recordAudit } from "@/lib/agent-store";
 
@@ -8,11 +8,17 @@ export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
 export async function OPTIONS(req: Request) { return preflight(req); }
 
-/** Buyer view: pending proposals, bid reviews and the audit trail. Open to read. */
+/** Buyer view: pending proposals, bid reviews and the audit trail. Owner-only:
+ *  bid reviews score named suppliers against each other, which no supplier
+ *  (or stranger with the id) should be able to read. */
 export async function GET(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
+  const project = await getProject(id);
+  if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+  const access = await requireRfpOwner(req, project);
+  if (!access.ok) return ownerRequired("Reading agent reviews and approvals", cors);
   const [approvals, reviews, audit, digests] = await Promise.all([listApprovals(id), listReviews(id), listAudit(id), listDigests(id)]);
   return Response.json({
     approvals,
@@ -39,12 +45,9 @@ export async function POST(req: Request, ctx: Ctx) {
   let body: { action?: "approve" | "reject"; approval_id?: string; edited_question?: string; manage_token?: string } = {};
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
 
-  const session = await sessionFromRequest(req);
-  const sessionOk = session?.role === "buyer" || session?.role === "netify";
-  const tokenOk = Boolean(project.manage_token) && body.manage_token === project.manage_token;
-  if (!sessionOk && !tokenOk) {
-    return Response.json({ error: "Approving an action needs identity. Sign in, or pass the RFP manage_token.", auth_required: true }, { status: 401, headers: cors });
-  }
+  const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
+  if (!access.ok) return ownerRequired("Approving an action", cors);
+  const sessionOk = !access.viaToken;
   if (!body.approval_id || !body.action) return Response.json({ error: "approval_id and action are required." }, { status: 422, headers: cors });
 
   const item = await getApproval(id, body.approval_id);

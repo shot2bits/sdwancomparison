@@ -26,26 +26,31 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // Every supplier-side call carries the share token from the response link:
+  // the server refuses reads on the bare id (the id alone must grant nothing).
+  const tokenQs = `token=${encodeURIComponent(token)}`;
+
   // Initial load: NDA config + a redacted (supplier-lens) project view.
   useEffect(() => {
     (async () => {
+      if (!token) { setError("This response link is incomplete. Use the full link from your invitation (it ends /respond?token=…)."); return; }
       try {
-        const ndaRes = await fetch(`/sase/api/rfp/${id}/nda`).then((r) => r.json()).catch(() => null);
+        const ndaRes = await fetch(`/sase/api/rfp/${id}/nda?${tokenQs}`).then((r) => r.json()).catch(() => null);
         if (ndaRes?.nda) setNda(ndaRes.nda);
         await loadProject("");
-        const tr = await fetch(`/sase/api/rfp/${id}/thread`).then((r) => r.json()).catch(() => ({ threads: [] }));
+        const tr = await fetch(`/sase/api/rfp/${id}/thread?${tokenQs}`).then((r) => r.json()).catch(() => ({ threads: [] }));
         setThreads(tr.threads ?? []);
       } catch {
         setError("This RFP could not be loaded.");
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, token]);
 
   async function loadProject(forVendor: string) {
-    const qs = `?as=supplier${forVendor.trim() ? `&vendor=${encodeURIComponent(forVendor.trim())}` : ""}`;
+    const qs = `?${tokenQs}${forVendor.trim() ? `&vendor=${encodeURIComponent(forVendor.trim())}` : ""}`;
     const res = await fetch(`/sase/api/rfp/${id}${qs}`);
-    if (!res.ok) { setError("This RFP could not be found."); return; }
+    if (!res.ok) { setError("This RFP could not be found. Check you are using the full response link from your invitation."); return; }
     const p = (await res.json()) as Project;
     setProject(p);
   }
@@ -55,7 +60,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   async function checkVendor(name: string) {
     if (!nda?.required || !name.trim()) return;
     try {
-      const r = await fetch(`/sase/api/rfp/${id}/nda?vendor=${encodeURIComponent(name.trim())}`).then((x) => x.json());
+      const r = await fetch(`/sase/api/rfp/${id}/nda?${tokenQs}&vendor=${encodeURIComponent(name.trim())}`).then((x) => x.json());
       if (r?.accepted) { setAccepted(true); await loadProject(name); }
     } catch { /* non-fatal */ }
   }
@@ -68,7 +73,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
     try {
       const res = await fetch(`/sase/api/rfp/${id}/nda`, {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ vendor, signatory_name: signatory, agree: true }),
+        body: JSON.stringify({ vendor, signatory_name: signatory, agree: true, token }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not record acceptance."); }
       setAccepted(true);
@@ -98,7 +103,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
     try {
       const res = await fetch(`/sase/api/rfp/${id}/thread`, {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ vendor, question }),
+        body: JSON.stringify({ vendor, question, token }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not send."); }
       const t = (await res.json()) as Thread;

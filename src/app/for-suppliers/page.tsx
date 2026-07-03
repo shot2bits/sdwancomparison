@@ -62,8 +62,16 @@ export default async function ForSuppliersPage() {
           <p className="text-xs text-[var(--ink-500)] mt-4">Sign-in verifies your email domain against your organisation in the marketplace. If your domain is not yet recognised, the request is queued for the Netify team to approve. Free and personal email addresses are not accepted.</p>
         </div>
         <div>
-          <h2 className="text-2xl font-semibold mb-4">Sign in to bid</h2>
-          <SignIn role="supplier" prompt="Sign in with your work email to bid and quote. We verify your domain against the listed supplier." />
+          <h2 id="register" className="text-2xl font-semibold mb-4">Register or sign in to bid</h2>
+          <SignIn role="supplier" prompt="Enter your work email. Registering and signing in are the same step: we verify your domain and email you a sign-in link." />
+          <div className="mt-4 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 text-sm text-[var(--ink-700)]">
+            <p className="font-medium mb-1">How verification works</p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li><strong>Your organisation is already listed</strong> (graded vendor or provider): your work-email domain matches the profile and the sign-in link arrives straight away.</li>
+              <li><strong>Domain not recognised yet</strong> (new provider, MSP or a different domain): your request is queued for the Netify team. Once approved — usually within one working day — your sign-in link is emailed and you can bid on any open opportunity.</li>
+              <li><strong>No listed profile at all?</strong> The same queue covers you: the Netify team reviews new suppliers and links your domain to a new or claimed profile. You can also email <a className="underline" href="mailto:support@netify.com">support@netify.com</a> with your company name and website to speed it up.</li>
+            </ul>
+          </div>
           <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? Your AI agent can read open opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/sase/api/mcp">/api/mcp</a>.</p>
         </div>
       </section>

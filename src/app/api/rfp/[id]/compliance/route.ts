@@ -1,6 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { complianceCoverage, clausesFor } from "@/lib/rfp-compliance";
+import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -9,13 +10,16 @@ export async function OPTIONS(req: Request) {
   return preflight(req);
 }
 
-/** Compliance coverage matrix and clause pack for the RFP's selected regulations. */
+/** Compliance coverage matrix and clause pack for the RFP's selected
+ *  regulations. Owner-only: it maps the buyer's regulatory exposure and gaps. */
 export async function GET(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+  const access = await requireRfpOwner(req, project);
+  if (!access.ok) return ownerRequired("Reading the compliance matrix", cors);
 
   const active = project.rfp_sections
     .filter((s) => s.included)
