@@ -38,10 +38,14 @@ export const ZONE_LINKS: NavLink[] = [
 ];
 
 // ── Top bar: global pages (never in the sidebar). ──────────────────────────
+// "Sign in" is the account entry point for buyers, suppliers and admins —
+// previously none of those areas was reachable from the menu (Harry's
+// retest, 03/07/2026). /account signs buyers in and signposts the rest.
 export const GLOBAL_LINKS: NavLink[] = [
   { label: "Insights", href: "https://netify.co.uk/insights/" },
   { label: "About", href: "https://netify.co.uk/about-netify/" },
   { label: "Contact", href: "https://netify.co.uk/contact/" },
+  { label: "Sign in", href: "/account" },
 ];
 
 export const NAV_CTA: NavLink = { label: "Build RFP", href: "/rfp-builder" };
@@ -122,6 +126,19 @@ export const SECTIONS: NavSection[] = [
   },
   {
     title: "Suppliers",
-    links: [{ label: "For vendors and providers", href: "/for-suppliers" }],
+    links: [
+      { label: "For vendors and providers", href: "/for-suppliers" },
+      { label: "Supplier dashboard", href: "/supplier" },
+    ],
+  },
+  {
+    title: "Your account",
+    // Discoverable entry points for every role (Harry's retest, 03/07/2026:
+    // supplier/admin areas were unreachable without knowing the URL). Each
+    // page gates itself; the admin console is harmless to expose.
+    links: [
+      { label: "Sign in / my account", href: "/account" },
+      { label: "Netify admin", href: "/admin" },
+    ],
   },
 ];

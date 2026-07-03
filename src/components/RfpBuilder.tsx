@@ -57,6 +57,17 @@ const MODELS = [
   { key: "co_managed", label: "Co-managed" },
   { key: "diy", label: "DIY / self-managed" },
 ];
+// Sector select for Step 1. Sector always mattered to generation (agent
+// opener, sector packs, document background) but was invisible in the UI, so
+// sector-preloaded links looked like they had done nothing (Harry's retest,
+// 03/07/2026). Keys match the question-bank sector packs.
+const SECTORS = [
+  { key: "", label: "Any / not sure" },
+  { key: "healthcare", label: "Healthcare" },
+  { key: "retail_ecommerce", label: "Retail & e-commerce" },
+  { key: "financial_services", label: "Financial services" },
+  { key: "manufacturing", label: "Manufacturing" },
+];
 const REGULATIONS = [
   { key: "uk_gdpr", label: "UK GDPR / DUAA" },
   { key: "pci_dss", label: "PCI DSS v4.0" },
@@ -352,6 +363,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   async function setModel(model: string) {
     if (!project) return;
     await persist({ ...project, buyer: { ...project.buyer, operating_model: model } }, true);
+  }
+
+  async function setSector(sector: string) {
+    if (!project) return;
+    await persist({ ...project, buyer: { ...project.buyer, sector: sector || null } }, true);
   }
 
   async function send() {
@@ -718,6 +734,16 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <p className="eyebrow mb-1">Delivery model</p>
           <select value={project.buyer.operating_model} onChange={(e) => setModel(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white">
             {MODELS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <p className="eyebrow mb-1">Sector</p>
+          <select value={project.buyer.sector ?? ""} onChange={(e) => setSector(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white">
+            {SECTORS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+            {/* Preserve a sector the agent captured outside the preset list */}
+            {project.buyer.sector && !SECTORS.some((s) => s.key === project.buyer.sector) && (
+              <option value={project.buyer.sector}>{project.buyer.sector.replace(/_/g, " ")}</option>
+            )}
           </select>
         </div>
         <div className="w-full order-last basis-full">

@@ -90,11 +90,16 @@ export default function RfpBuilderPage() {
           and shows sample questions from the bank, then starts this same builder preloaded for that scope. There is one
           builder; the paths just set it up for you.
         </p>
-        <p className="mb-12 text-sm text-[var(--ink-600)]">
-          Just want a shortlist of suited vendors, without a formal RFP process? Use the{" "}
-          <a href="/sase/shortlist/" className="underline">shortlist builder</a> — grade the market against your
-          requirement in a couple of minutes, then post a project or build an RFP only if you need one.
-        </p>
+        <div className="mb-12 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-4">
+          <p className="text-sm text-[var(--ink-700)] m-0 max-w-2xl">
+            <strong>Just want a shortlist of suited vendors?</strong> Skip the formal process: grade the market against
+            your requirement in a couple of minutes with the shortlist builder, then post a project or build an RFP only
+            if you need one.
+          </p>
+          <a href="/sase/shortlist/" className="inline-flex items-center rounded-full border border-[var(--ink-900)] px-4 py-2 text-sm no-underline text-[var(--ink-900)] transition-colors hover:bg-[var(--ink-900)] hover:text-white">
+            Build a shortlist →
+          </a>
+        </div>
       </RfpBuilderPathCards>
 
       <div id="build" />

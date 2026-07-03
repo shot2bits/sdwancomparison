@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import BuyerMemoryPanel from "@/components/BuyerMemoryPanel";
 import BuyerDigests from "@/components/BuyerDigests";
 import MyOpportunities from "@/components/MyOpportunities";
 import MyRfps from "@/components/MyRfps";
+import SignIn from "@/components/SignIn";
 
 export const metadata: Metadata = { title: "Your account: opportunities, RFPs and agent memory", robots: { index: false, follow: false } };
 
 /**
  * Buyer account hub: everything tied to the signed-in account in one place —
  * published opportunities (with room recovery), saved RFPs, agent memory and
- * digests. The opportunity/RFP panels render nothing when empty or signed
- * out, so the page degrades gracefully.
+ * digests. This page is also the nav's "Sign in" destination, so it carries
+ * the sign-in box itself (SignIn shows "signed in as…" once authenticated)
+ * and points suppliers and admins at their own areas — previously neither
+ * was reachable from the menu at all (Harry's retest, 03/07/2026).
  */
 export default function AccountPage() {
   return (
@@ -19,6 +23,14 @@ export default function AccountPage() {
         <p className="eyebrow mb-2">Your account</p>
         <h1 className="text-2xl mb-1">Your marketplace activity</h1>
         <p className="text-sm text-[var(--ink-600)]">Opportunities you have published, RFPs you have saved, and what the agent remembers — all tied to your signed-in email, recoverable from any device.</p>
+      </div>
+
+      <div className="mb-8">
+        <SignIn role="buyer" prompt="Sign in with your work email to recover your opportunities and RFPs on this device." />
+        <p className="mt-3 text-xs text-[var(--ink-500)]">
+          Supplier? <Link href="/for-suppliers#register" className="underline">Register or sign in to bid</Link> · your dashboard is at{" "}
+          <Link href="/supplier" className="underline">Supplier area</Link>. Netify staff: <Link href="/admin" className="underline">admin console</Link>.
+        </p>
       </div>
 
       <MyOpportunities />
