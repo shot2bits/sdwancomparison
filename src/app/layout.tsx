@@ -105,14 +105,12 @@ export default function RootLayout({
   return (
     <html lang="en-GB" className={inter.variable}>
       <body className="paper-texture min-h-screen">
-        {/* Accessibility skip link: invisible until keyboard-focused, and
-            positioned above the nav without covering it when shown. (The
-            always-visible overlapping variant Harry saw on mobile is the old
-            site's theme, not this app.) */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-14 focus:z-[60] focus:rounded-full focus:bg-amber-500 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-zinc-950 focus:no-underline"
-        >
+        {/* Accessibility skip link: invisible until keyboard-focused, then a
+            fixed amber pill just below the top bar. Styled by .skip-link in
+            globals.css (owning every property) after Tailwind's not-sr-only
+            reset put the focused link underneath the nav bar — the overlap
+            in Harry's retest screenshot, 03/07/2026. */}
+        <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
         {/* TopNav = global zone switcher (SASE Marketplace / Buy BT /

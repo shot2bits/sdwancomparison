@@ -270,3 +270,39 @@ a:focus-visible {
   outline: 2px solid #f59e0b;
   outline-offset: 2px;
 }
+
+/* Accessibility skip link. Hand-rolled rather than Tailwind's
+   sr-only/not-sr-only pair: not-sr-only resets `position` and, being later
+   in the utility sheet, beat the focus:fixed placement — the focused link
+   dropped into document flow underneath the fixed top bar and overlapped the
+   menu items (Harry's retest screenshot, 03/07/2026). These rules own every
+   property that matters, so utility order can't misplace it again. */
+.skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link:focus {
+  position: fixed;
+  top: 3.75rem; /* clear of the 48px sticky top bar */
+  left: 0.75rem;
+  z-index: 60;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  overflow: visible;
+  clip: auto;
+  background: #f59e0b;
+  color: #09090b;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}

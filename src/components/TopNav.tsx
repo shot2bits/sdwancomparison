@@ -98,20 +98,23 @@ export default function TopNav() {
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
+        {/* Mobile/tablet hamburger. Shown up to lg (not md): the SideNav deep
+            menu only exists from lg, so between md and lg (iPad portrait —
+            Harry's retest screenshot, 03/07/2026) the drawer is the ONLY way
+            to reach the deep nav. Below md it also carries the zone links. */}
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="md:hidden rounded-md border border-[var(--ink-300,#d4d4d8)] px-3 py-1.5 text-sm"
+          className="lg:hidden rounded-md border border-[var(--ink-300,#d4d4d8)] px-3 py-1.5 text-sm"
           aria-label="Open menu"
         >
           Menu
         </button>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile/tablet drawer */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-[var(--paper-base,#fff)] md:hidden">
+        <div className="fixed inset-0 z-50 bg-[var(--paper-base,#fff)] lg:hidden">
           <div className="flex h-12 items-center justify-between border-b border-[var(--ink-200)] px-6">
             <Link
               href="/"
