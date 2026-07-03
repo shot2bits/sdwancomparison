@@ -71,20 +71,26 @@ export const SECTIONS: NavSection[] = [
   },
   {
     title: "Build an RFP",
+    // The old-site SD-WAN RFI Builder link was removed here: it redirects to
+    // this RFP Builder anyway, so listing both read as two competing tools
+    // (Harry's evaluation, 03/07/2026).
     links: [
       { label: "RFP builder", href: "/rfp-builder" },
-      { label: "SD-WAN RFI Builder", href: "https://netify.co.uk/sd-wan-rfi-builder-app/" },
       { label: "Sample RFP", href: "/rfp-builder/sample-rfp" },
       { label: "Question bank", href: "/rfp-builder/questions" },
     ],
   },
   {
     title: "By sector",
+    // Vendor-neutral, consistent routing (Harry's evaluation, 03/07/2026):
+    // every sector starts the RFP Builder preloaded for that sector — the
+    // agent opens with the sector's usual regulations. The old-site sector
+    // articles stay live for search, just not in the app's nav.
     links: [
-      { label: "Healthcare", href: "https://netify.co.uk/sd-wan-for-healthcare/" },
-      { label: "Financial services", href: "https://netify.co.uk/sd-wan-sase-for-financial-services/" },
-      { label: "Retail", href: "https://netify.co.uk/sd-wan-sase-for-retail/" },
-      { label: "Manufacturing", href: "https://netify.co.uk/sd-wan-sase-for-manufacturing/" },
+      { label: "Healthcare", href: "/rfp-builder?prefill=1&sector=healthcare" },
+      { label: "Financial services", href: "/rfp-builder?prefill=1&sector=financial_services" },
+      { label: "Retail", href: "/rfp-builder?prefill=1&sector=retail_ecommerce" },
+      { label: "Manufacturing", href: "/rfp-builder?prefill=1&sector=manufacturing" },
     ],
   },
   {

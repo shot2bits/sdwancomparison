@@ -82,13 +82,18 @@ export default function RfpBuilderPage() {
           </a>
         </div>
 
-        <p className="mb-12 -mt-8 text-sm text-[var(--ink-600)]">
+        <p className="mb-3 -mt-8 text-sm text-[var(--ink-600)]">
           Know your route already? Read about{" "}
           <a href="/sase/rfp-builder/sase/" className="underline">the SASE RFP path</a>,{" "}
           <a href="/sase/rfp-builder/sd-wan/" className="underline">the SD-WAN RFP path</a> or{" "}
           <a href="/sase/rfp-builder/sse/" className="underline">the SSE RFP path</a> — each explains what&apos;s in scope
           and shows sample questions from the bank, then starts this same builder preloaded for that scope. There is one
           builder; the paths just set it up for you.
+        </p>
+        <p className="mb-12 text-sm text-[var(--ink-600)]">
+          Just want a shortlist of suited vendors, without a formal RFP process? Use the{" "}
+          <a href="/sase/shortlist/" className="underline">shortlist builder</a> — grade the market against your
+          requirement in a couple of minutes, then post a project or build an RFP only if you need one.
         </p>
       </RfpBuilderPathCards>
 

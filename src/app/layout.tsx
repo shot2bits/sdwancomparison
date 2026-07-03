@@ -59,11 +59,14 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
   },
   {
     title: "RFP Building by Sector",
+    // Vendor-neutral routing (Harry's evaluation, 03/07/2026): every sector
+    // starts the in-app RFP Builder preloaded for that sector, instead of a
+    // mixed bag of old-site articles and BT-specific content.
     links: [
-      { label: "Healthcare & Pharma", href: "https://netify.co.uk/sd-wan-for-healthcare/" },
-      { label: "Retail & E-commerce", href: "https://netify.co.uk/sd-wan-sase-for-retail/" },
-      { label: "Financial Services", href: "https://netify.co.uk/sd-wan-sase-for-financial-services/" },
-      { label: "Manufacturing", href: "https://netify.co.uk/sd-wan-sase-for-manufacturing/" },
+      { label: "Healthcare & Pharma", href: "/sase/rfp-builder/?prefill=1&sector=healthcare" },
+      { label: "Retail & E-commerce", href: "/sase/rfp-builder/?prefill=1&sector=retail_ecommerce" },
+      { label: "Financial Services", href: "/sase/rfp-builder/?prefill=1&sector=financial_services" },
+      { label: "Manufacturing", href: "/sase/rfp-builder/?prefill=1&sector=manufacturing" },
     ],
   },
   {
@@ -102,6 +105,16 @@ export default function RootLayout({
   return (
     <html lang="en-GB" className={inter.variable}>
       <body className="paper-texture min-h-screen">
+        {/* Accessibility skip link: invisible until keyboard-focused, and
+            positioned above the nav without covering it when shown. (The
+            always-visible overlapping variant Harry saw on mobile is the old
+            site's theme, not this app.) */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-14 focus:z-[60] focus:rounded-full focus:bg-amber-500 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-zinc-950 focus:no-underline"
+        >
+          Skip to main content
+        </a>
         {/* TopNav = global zone switcher (SASE Marketplace / Buy BT /
             Resell BT + global pages). SideNav = SASE-zone deep nav,
             desktop only; mobile deep nav is TopNav's drawer. */}
@@ -110,7 +123,7 @@ export default function RootLayout({
         {/* Commercial event tracking: Vercel Web Analytics + GA4. */}
         <NetifyEvents />
         <div className="lg:pl-60 min-h-screen flex flex-col">
-          <main className="flex-1">{children}</main>
+          <main id="main-content" className="flex-1">{children}</main>
 
           <footer className="border-t border-[var(--ink-200)] mt-24">
             <div className="max-w-6xl mx-auto px-6 py-16">

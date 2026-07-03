@@ -43,7 +43,19 @@ const QUESTIONS = [
   },
 ];
 
-function recommend(a: Answer): { path: string; href: string; cta: string; why: string } {
+function recommend(a: Answer): { path: string; href: string; cta: string; why: string; secondary?: { label: string; href: string } } {
+  // Unsure across the board: don't push a form at someone who can't fill it
+  // in yet. Route to a human conversation, with background reading as the
+  // soft option (Harry's evaluation, 03/07/2026).
+  if (a.formality === "unsure" && a.knowledge === "vague") {
+    return {
+      path: "Talk it through with Netify",
+      href: "mailto:support@netify.com?subject=Help%20scoping%20a%20SASE%20%2F%20SD-WAN%20project",
+      cta: "Email the Netify team",
+      why: "Your requirement and your process are both still taking shape, so a short conversation beats any form: the Netify team will help you frame the problem, then point you at a project notice, a shortlist or a full RFP. If you'd rather read up first, the Insights blog covers SASE and SD-WAN buying end to end.",
+      secondary: { label: "Browse the Insights blog", href: "https://netify.co.uk/insights/" },
+    };
+  }
   if (a.formality === "formal" || a.urgency === "responses") {
     return {
       path: "Build a full RFP",
@@ -104,7 +116,12 @@ export default function RouteDiagnosis() {
           <p className="eyebrow mb-1">Recommended route</p>
           <p className="text-lg font-semibold mb-1">{rec.path}</p>
           <p className="text-sm text-[var(--ink-700)] mb-4">{rec.why}</p>
-          <a href={rec.href} className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">{rec.cta}</a>
+          <div className="flex flex-wrap items-center gap-3">
+            <a href={rec.href} className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">{rec.cta}</a>
+            {rec.secondary && (
+              <a href={rec.secondary.href} className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] transition-colors hover:bg-[var(--ink-100,#f5f5f5)]">{rec.secondary.label}</a>
+            )}
+          </div>
           <p className="mt-3 text-xs text-[var(--ink-500)]">
             All routes stay open: <a href="/sase/opportunities/new/" className="underline">post a project</a> ·{" "}
             <a href="/sase/rfp-builder/" className="underline">build an RFP</a> ·{" "}

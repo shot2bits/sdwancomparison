@@ -64,12 +64,17 @@ export default function VendorsPage() {
           evaluation matrix. Click any vendor to see the full capability profile,
           evidence sources, key differentiators and watch-outs.
         </p>
-        <p className="text-sm text-[var(--ink-500)] mt-3">
-          These pages are research profiles: evidence grades, scores and
-          rankings. For company directories, certifications and direct RFP
-          submission, use the{" "}
-          <a href="https://netify.co.uk/marketplace/">Netify Marketplace</a>.
-        </p>
+        <div className="mt-4 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-3 text-sm text-[var(--ink-600)]">
+          <p>
+            <strong className="text-[var(--ink-800)]">Same vendors, two different pages.</strong> This index is the{" "}
+            <strong className="text-[var(--ink-800)]">research view</strong>: independent capability grades against the
+            40-feature framework, with evidence sources and watch-outs — it powers the{" "}
+            <Link href="/shortlist" className="underline">shortlist builder</Link> and RFP evaluation. The{" "}
+            <a href="https://netify.co.uk/marketplace/" className="underline">Netify Marketplace</a> is the{" "}
+            <strong className="text-[var(--ink-800)]">commercial directory</strong>: company profiles, accreditations
+            and contact routes. Compare capabilities here; engage companies there.
+          </p>
+        </div>
       </div>
 
       {/* Jump nav */}
