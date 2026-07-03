@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import SideNav from "@/components/SideNav";
 import TopNav from "@/components/TopNav";
+import NetifyEvents from "@/components/NetifyEvents";
 import "./globals.css";
 
 // Inter matches the main netify.co.uk site (SF Pro approximation),
@@ -106,6 +107,8 @@ export default function RootLayout({
             desktop only; mobile deep nav is TopNav's drawer. */}
         <TopNav />
         <SideNav />
+        {/* Commercial event tracking: Vercel Web Analytics + GA4. */}
+        <NetifyEvents />
         <div className="lg:pl-60 min-h-screen flex flex-col">
           <main className="flex-1">{children}</main>
 
