@@ -127,6 +127,13 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [publishing, setPublishing] = useState(false);
   const [publishMsg, setPublishMsg] = useState<string | null>(null);
   const [manageCopied, setManageCopied] = useState(false);
+  // Publish requires a verified sign-in on top of the manage token: when the
+  // server answers 401 sign_in_required, render the inline sign-in panel.
+  const [publishAuthNeeded, setPublishAuthNeeded] = useState(false);
+  // "Email me my draft link" capture state (come back later without an account).
+  const [draftEmail, setDraftEmail] = useState("");
+  const [emailingLink, setEmailingLink] = useState(false);
+  const [draftLinkNote, setDraftLinkNote] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
 
   // AI custom question composer
@@ -575,10 +582,16 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   async function publishToCurated() {
     if (!project || publishing) return;
-    setPublishing(true); setPublishMsg(null); setError(null); setBoardNote(null);
+    setPublishing(true); setPublishMsg(null); setError(null); setBoardNote(null); setPublishAuthNeeded(false);
     try {
       const res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: manageToken.current || project.manage_token }) });
       const data = await res.json().catch(() => ({}));
+      // Publishing requires a verified work-email sign-in on top of the
+      // manage token: render the inline sign-in panel, not a dead error.
+      if (res.status === 401 && (data.error === "sign_in_required" || data.auth_required)) {
+        setPublishAuthNeeded(true);
+        return;
+      }
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
       setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, click "Load responses" under "Evaluate supplier responses" to read and compare them. There's no separate account or portal — this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
@@ -603,29 +616,40 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     setManageCopied(true); setTimeout(() => setManageCopied(false), 2000);
   }
 
+  /** Email the buyer their private draft link (the email-link capture route). */
+  async function emailDraftLink() {
+    if (!project || !draftEmail.trim() || emailingLink) return;
+    setEmailingLink(true); setDraftLinkNote(null);
+    try {
+      const res = await fetch(`/sase/api/rfp/${project.id}/email-link`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: draftEmail.trim(), manage_token: manageToken.current || project.manage_token }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Could not send the link.");
+      setDraftLinkNote(data.emailed ? "Sent. Your private draft link is on its way to your inbox." : "Saved, but email sending is not configured; use Copy my link instead.");
+      setDraftEmail("");
+    } catch (e) { setDraftLinkNote(e instanceof Error ? e.message : "Could not send the link."); }
+    finally { setEmailingLink(false); }
+  }
+
   function copySupplierLink(token: string) {
     navigator.clipboard.writeText(`${window.location.origin}/sase/rfp-builder/supplier/${token}`);
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
 
-  function exportMarkdown() {
+  /**
+   * Export runs through the gated document flow: the preview download route
+   * requires a signed-in owner, so the old client-side Blob export (which
+   * bypassed that gate) is gone. Signed-in owners go straight to the .md
+   * download; signed-out owners land on the preview page's sign-in panel.
+   */
+  async function exportDocument() {
     if (!project) return;
-    const lines = [`# ${project.title}`, "", `Methodology v${project.methodology_version}. Scope: ${project.buyer.product_scope}. Delivery: ${project.buyer.operating_model}.`, ""];
-    for (const s of project.rfp_sections.filter((x) => x.included)) {
-      const active = s.questions.filter((q) => q.priority !== "optional");
-      if (!active.length) continue;
-      lines.push(`## ${s.category}`, "");
-      active.forEach((q, i) => {
-        lines.push(`${i + 1}. ${q.mandatory ? "[MANDATORY] " : ""}${q.text}`);
-        lines.push(`   Evidence: ${q.evidence_requested}`);
-        lines.push("");
-      });
-    }
-    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `rfp-${project.id}.md`;
-    a.click();
+    const qs = manageToken.current ? `?manage=${manageToken.current}` : "";
+    try {
+      const r = await fetch("/sase/api/auth/session");
+      const d = r.ok ? ((await r.json()) as { authenticated?: boolean }) : { authenticated: false };
+      if (d.authenticated) { window.location.href = `/sase/rfp-builder/${project.id}/preview/download${qs}`; return; }
+    } catch { /* fall through to the gated preview page */ }
+    window.location.href = `/sase/rfp-builder/${project.id}/preview${qs}`;
   }
 
   async function copyShare() {
@@ -770,7 +794,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <span className="text-xs text-[var(--ink-500)] uppercase tracking-wide">{project.status} · {activeCount} questions</span>
           <a href={`/sase/rfp-builder/${project.id}/preview${keyQs}`} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors no-underline">Preview &amp; download</a>
           <a href={`/sase/rfp-builder/${project.id}/review${keyQs}`} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors no-underline">Agent review</a>
-          <button onClick={exportMarkdown} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Export</button>
+          <button onClick={exportDocument} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Export</button>
           <button onClick={copyShare} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{copied ? "Copied" : "Supplier link"}</button>
         </div>
       </div>
@@ -1063,8 +1087,19 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed — this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track supplier replies. Don&apos;t share it: suppliers get their own links.</span>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
+          <span className="flex items-center gap-1.5">
+            <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder="you@company.com" className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm" />
+            <button onClick={emailDraftLink} disabled={emailingLink || !draftEmail.trim()} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors disabled:opacity-50">{emailingLink ? "Sending..." : "Email me this link"}</button>
+          </span>
+          {draftLinkNote && <span className="text-xs text-[var(--ink-600,#555)] basis-full">{draftLinkNote}</span>}
         </div>
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
+        {publishAuthNeeded && (
+          <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">
+            <p className="mb-2"><strong>One step before your RFP goes out.</strong> Publishing sends this RFP to suppliers, so it needs a verified work email. Sign in below, then press Publish again — your draft is exactly as you left it.</p>
+            <SignIn role="buyer" prompt="Sign in with your work email to publish and invite suppliers." />
+          </div>
+        )}
         {boardNote && (
           boardNote.listed ? (
             <p className="text-sm text-emerald-700 mb-3">
