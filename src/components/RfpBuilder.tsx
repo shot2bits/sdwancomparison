@@ -710,6 +710,13 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           {creating ? "Starting..." : "Start my RFP"}
         </button>
         {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
+        <div className="mt-6 pt-5 border-t border-[var(--ink-200,#e5e5e5)] max-w-2xl">
+          <p className="text-sm font-medium mb-1">Not ready for a full RFP?</p>
+          <p className="text-sm text-[var(--ink-600,#555)]">
+            An RFI gathers supplier information before you commit to formal requirements. Use it to shortlist vendors, then convert the work into an RFP.{" "}
+            <a href="https://netify.co.uk/sd-wan-rfi-builder-app/" className="underline">Start with an RFI instead</a>.
+          </p>
+        </div>
       </div>
     );
   }

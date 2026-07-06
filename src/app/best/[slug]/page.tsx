@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
-import { buildShortlist, encodeScenario } from "@/lib/shortlist-core";
+import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -45,6 +45,8 @@ export default async function BestPage({ params }: Props) {
 
   const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
+  const sector = page.input.sector;
+  const sectorLabel = sector ? SECTOR_LABELS[sector].toLowerCase() : null;
 
   const itemListSchema = {
     "@context": "https://schema.org",
@@ -152,6 +154,23 @@ export default async function BestPage({ params }: Props) {
           </Link>
         </div>
       </div>
+
+      {sector && sectorLabel ? (
+        <section className="mb-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5">
+          <p className="eyebrow mb-2">Next step</p>
+          <h2 className="text-xl mb-2">Issue this shortlist as a real RFP</h2>
+          <p className="text-sm text-[var(--ink-700)] mb-4 max-w-2xl">
+            Send a structured {sectorLabel} RFP to the vendors on this page and compare their responses side by side. Free to build and publish. No sign in needed to start.
+          </p>
+          <Link
+            href={`/rfp-builder?prefill=1&sector=${sector}`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
+          >
+            Start a {sectorLabel} RFP
+            <span aria-hidden="true">→</span>
+          </Link>
+        </section>
+      ) : null}
 
       <ol className="space-y-6 list-none p-0">
         {result.shortlist.map((v) => (
