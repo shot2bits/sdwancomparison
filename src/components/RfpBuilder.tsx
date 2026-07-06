@@ -194,6 +194,45 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }
 
   useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
+
+  // Publish auto-resume (Harry's feedback, 06/07/2026). Two paths back from
+  // the sign-in round trip: (a) the amber panel is still on screen because the
+  // magic link opened in another tab, so poll the session and continue the
+  // moment it exists; (b) this page reloaded, so a stored intent flag brings
+  // the panel back and the same poll completes the publish.
+  const resuming = useRef(false);
+  useEffect(() => {
+    if (!project) return;
+    let flagged = false;
+    try { flagged = localStorage.getItem(`rfp_pending_publish_${project.id}`) === "1"; } catch { /* ignore */ }
+    if (flagged && project.status !== "published" && !publishAuthNeeded) setPublishAuthNeeded(true);
+    /* eslint-disable-next-line */
+  }, [project?.id]);
+  useEffect(() => {
+    if (!publishAuthNeeded || publishing) return;
+    const t = window.setInterval(async () => {
+      if (resuming.current) return;
+      try {
+        const r = await fetch("/sase/api/auth/session");
+        const d = r.ok ? ((await r.json()) as { authenticated?: boolean }) : { authenticated: false };
+        if (d.authenticated) {
+          resuming.current = true;
+          window.clearInterval(t);
+          await publishToCurated();
+          resuming.current = false;
+        }
+      } catch { /* keep polling */ }
+    }, 3000);
+    return () => window.clearInterval(t);
+    /* eslint-disable-next-line */
+  }, [publishAuthNeeded, publishing]);
+
+  // Responses appear without a manual click once the RFP is published
+  // (Harry's feedback, 06/07/2026). The button remains as a refresh.
+  useEffect(() => {
+    if (project?.status === "published" && evaluations === null) loadEvaluations();
+    /* eslint-disable-next-line */
+  }, [project?.status]);
   // Tell the landing page an RFP is underway so the big path cards collapse
   // and stop competing with the builder (Harry's feedback, 03/07/2026).
   useEffect(() => {
@@ -590,11 +629,16 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       // manage token: render the inline sign-in panel, not a dead error.
       if (res.status === 401 && (data.error === "sign_in_required" || data.auth_required)) {
         setPublishAuthNeeded(true);
+        // Remember the intent so publishing resumes automatically after the
+        // sign-in round trip, even if the magic link replaced this page
+        // (Harry's publish-resume feedback, 06/07/2026).
+        try { localStorage.setItem(`rfp_pending_publish_${project.id}`, "1"); } catch { /* ignore */ }
         return;
       }
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
-      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, click "Load responses" under "Evaluate supplier responses" to read and compare them. There's no separate account or portal — this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
+      try { localStorage.removeItem(`rfp_pending_publish_${project.id}`); } catch { /* ignore */ }
+      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal — this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
@@ -1103,8 +1147,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
         {publishAuthNeeded && (
           <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">
-            <p className="mb-2"><strong>One step before your RFP goes out.</strong> Publishing sends this RFP to suppliers, so it needs a verified work email. Sign in below, then press Publish again — your draft is exactly as you left it.</p>
+            <p className="mb-2"><strong>One step before your RFP goes out.</strong> Publishing sends this RFP to suppliers, so it needs a verified work email. Sign in below and publishing continues automatically. Your draft is exactly as you left it.</p>
             <SignIn role="buyer" prompt="Sign in with your work email to publish and invite suppliers." />
+            <button onClick={publishToCurated} disabled={publishing} className="mt-2 px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : "Signed in already? Publish now"}</button>
           </div>
         )}
         {boardNote && (
@@ -1169,10 +1214,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg">Evaluate supplier responses</h2>
-          <button onClick={loadEvaluations} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Load responses</button>
+          <button onClick={loadEvaluations} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Refresh responses</button>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 4.</strong> Once suppliers reply, click <strong>Load responses</strong>. Their answers are cross-checked against Netify&#39;s independent capability grades, and any claim that goes beyond the evidence is flagged for you to question.</p>
-        {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">No responses yet. Share the supplier link and publish the RFP.</p>}
+        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 4.</strong> Supplier replies appear here once the RFP is published. Their answers are cross-checked against Netify&#39;s independent capability grades, and any claim that goes beyond the evidence is flagged for you to question. Refresh responses checks for new replies.</p>
+        {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">{project.status === "published" ? "No responses yet. Invited suppliers reply through their private links, and replies appear here automatically." : "No responses yet. Publish the RFP to invite suppliers, or share the supplier link."}</p>}
         {evaluations && evaluations.map((ev) => (
           <details key={ev.vendor} className="border border-[var(--ink-300,#ccc)] rounded-sm mb-2">
             <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer">
