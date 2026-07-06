@@ -5,6 +5,7 @@ import SignIn from "@/components/SignIn";
 
 type SessionInfo = { authenticated: boolean; role?: string; email?: string; admin?: boolean };
 type AdminSession = { token: string; role: string; email: string; vendor_slug: string | null; created: number; expires: number };
+type UserRow = { email: string; roles: string[]; sessions: number };
 type VendorRow = { slug: string; domains: string[]; customised: boolean };
 type Pending = { domain: string; email: string; created: number; count: number };
 type Claim = { slug: string; status: "pending" | "approved" | "rejected"; email: string; domain: string; requested: number; decided?: number; decided_by?: string };
@@ -16,6 +17,7 @@ type OppRow = {
 type Overview = {
   admin_email: string;
   sessions: AdminSession[];
+  users: UserRow[];
   vendors: VendorRow[];
   blocklist: { builtin_count: number; custom: string[] };
   pending: Pending[];
@@ -31,6 +33,7 @@ export default function AdminClient() {
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [newBlock, setNewBlock] = useState("");
@@ -51,10 +54,14 @@ export default function AdminClient() {
   useEffect(() => { if (session?.authenticated && session.admin) load(); }, [session, load]);
 
   async function act(payload: Record<string, unknown>) {
-    setBusy(true); setError(null);
+    setBusy(true); setError(null); setNotice(null);
     try {
       const r = await fetch("/sase/api/admin", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-      if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error ?? "Action failed."); }
+      const d = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!r.ok) throw new Error(typeof d.error === "string" ? d.error : "Action failed.");
+      if (payload.action === "delete_user") {
+        setNotice(`Deleted ${String(payload.email)}. Sessions revoked: ${Number(d.sessions_deleted ?? 0)}, RFPs deleted: ${Number(d.rfps_deleted ?? 0)}, board notices deleted: ${Number(d.opportunities_deleted ?? 0)}.`);
+      }
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : "Action failed."); }
     finally { setBusy(false); }
@@ -85,6 +92,7 @@ export default function AdminClient() {
     <div className="space-y-8">
       <p className="text-sm text-[var(--ink-600)]">Signed in as <strong>{data.admin_email}</strong>. <button onClick={load} className="underline" disabled={busy}>Refresh</button></p>
       {error && <p className="text-sm text-red-700">{error}</p>}
+      {notice && <p className="text-sm text-emerald-700">{notice}</p>}
 
       {/* Pending access requests */}
       <section className={card}>
@@ -196,6 +204,21 @@ export default function AdminClient() {
         )}
       </section>
 
+      {/* Registered users */}
+      <section className={card}>
+        <h2 className={h2}>Registered users ({(data.users ?? []).length})</h2>
+        <p className={sub}>Everyone who has completed a first sign-in. Deleting an account removes the sign-up record and revokes its sessions, so the same email can sign up again as a brand-new user. Tick the box to also erase their RFPs and board notices. Admin rights come from the admin email list, so deleting an admin account does not remove admin access.</p>
+        {(data.users ?? []).length === 0 ? (
+          <p className="text-sm text-[var(--ink-500)]">No registered users yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {(data.users ?? []).map((u) => (
+              <UserAccountRow key={u.email} u={u} busy={busy} act={act} btn={btn} btnAmber={btnAmber} />
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* Vendor domains */}
       <section className={card}>
         <h2 className={h2}>Supplier email domains</h2>
@@ -257,6 +280,55 @@ function PendingRow({ p, vendors, busy, act, when, btn, btnAmber }: {
         <button className={btn} disabled={busy} onClick={() => act({ action: "reject_pending", domain: p.domain })}>Reject</button>
         <button className={btn} disabled={busy} onClick={() => act({ action: "reject_pending", domain: p.domain, block: true })}>Reject + block</button>
       </div>
+    </div>
+  );
+}
+
+function UserAccountRow({ u, busy, act, btn, btnAmber }: {
+  u: UserRow; busy: boolean;
+  act: (payload: Record<string, unknown>) => void;
+  btn: string; btnAmber: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [withRfps, setWithRfps] = useState(false);
+  const ready = confirmText.trim().toLowerCase() === u.email.toLowerCase();
+  return (
+    <div className="border-b border-[var(--ink-100,#f0f0f0)] pb-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm">
+          <strong>{u.email}</strong>{" "}
+          <span className="text-[var(--ink-500)]">({u.roles.join(", ")} · {u.sessions} active session{u.sessions === 1 ? "" : "s"})</span>
+        </span>
+        {!open && (
+          <div className="flex items-center gap-2 ml-auto">
+            <button className={btn} disabled={busy} onClick={() => { setOpen(true); setConfirmText(""); setWithRfps(false); }}>Delete account…</button>
+          </div>
+        )}
+      </div>
+      {open && (
+        <div className="mt-3 max-w-xl space-y-3 rounded-sm border border-red-300 p-3">
+          <p className="text-sm text-red-700">This deletes the account record for <strong>{u.email}</strong> and signs it out everywhere. It cannot be undone. Type the email to confirm.</p>
+          <input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="Type the email to confirm"
+            className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm"
+          />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={withRfps} onChange={(e) => setWithRfps(e.target.checked)} />
+            Also delete their RFPs and board notices
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              className={btnAmber}
+              disabled={busy || !ready}
+              onClick={() => { act({ action: "delete_user", email: u.email, confirm: confirmText.trim(), delete_rfps: withRfps }); setOpen(false); setConfirmText(""); }}
+            >Delete</button>
+            <button className={btn} disabled={busy} onClick={() => { setOpen(false); setConfirmText(""); setWithRfps(false); }}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
