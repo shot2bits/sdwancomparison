@@ -1,10 +1,11 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getProject, saveProject, kvConfigured, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson } from "@/lib/rfp-store";
+import { getProject, saveProject, kvConfigured, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { inviteSupplier } from "@/lib/rfp-connect";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
+import { emailDomain } from "@/lib/access-control";
 import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
@@ -74,10 +75,55 @@ async function listOnBoard(p: ProjectDetails, ownerEmail: string): Promise<{ opp
 }
 
 /**
+ * Publish notifications, best effort: an internal lead alert to the Netify
+ * team and a confirmation to the buyer. Sent with the auth transport (Resend,
+ * no-reply sender); failures never fail the publish, matching /api/lead.
+ */
+async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[]) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return;
+  const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
+  const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
+  const rfpUrl = `${SITE_URL}/rfp-builder/${p.id}/`;
+  const supplierNames = invited.map((v) => v.name).join("\n");
+  const org = [
+    p.buyer.sector && `Sector: ${p.buyer.sector.replace(/_/g, " ")}`,
+    p.buyer.organisation_size && p.buyer.organisation_size !== "any" && `Size: ${p.buyer.organisation_size.replace(/_/g, " ")}`,
+    p.buyer.site_count && `Sites: ${p.buyer.site_count}`,
+    p.buyer.regions.length > 0 && `Regions: ${p.buyer.regions.join(", ")}`,
+  ].filter(Boolean).join("<br/>");
+
+  const send = (payload: Record<string, unknown>) =>
+    fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+  // Internal lead alert
+  await send({
+    from,
+    to,
+    reply_to: ownerEmail,
+    subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} suppliers`,
+    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Suppliers auto-selected:</strong></p><pre>${supplierNames}</pre><p><a href="${rfpUrl}">Open the RFP</a></p>`,
+  });
+
+  // Confirmation to the buyer
+  await send({
+    from,
+    to: ownerEmail,
+    subject: "Your Netify RFP has been published",
+    html: `<p>Hello,</p><p>Your RFP "${p.title}" has been published to ${invited.length} curated suppliers on the Netify marketplace.</p><p>What happens next: the Netify team brokers the introductions, gathers supplier responses against your question set, and emails you as responses arrive. There is nothing further you need to do.</p><p><a href="${rfpUrl}">Open your RFP workspace</a></p><p>Netify research team</p>`,
+  });
+}
+
+/**
  * Publish an RFP: invite the best-fit graded vendors, move the RFP to
- * published and — when the owner is signed in — list it on the public
- * opportunity board. Owner-only (manage_token or the owning account); a
- * plain buyer session is not enough.
+ * published, list it on the public opportunity board and notify the Netify
+ * team and the buyer. Requires the RFP owner (manage_token or the owning
+ * account) AND a verified buyer/netify session: publishing reaches named
+ * suppliers, so possession of the draft alone is no longer enough.
  */
 export async function POST(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
@@ -91,6 +137,22 @@ export async function POST(req: Request, ctx: Ctx) {
 
   const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
   if (!access.ok) return ownerRequired("Publishing this RFP", cors);
+
+  // Hard identity gate: signed-out owners and agents get a machine-readable
+  // handoff instead of a silent token-only publish. Drafting stays open; the
+  // manage_token remains the ownership proof, the session is the identity.
+  const sessionEmail = access.session && (access.session.role === "buyer" || access.session.role === "netify") ? access.session.email : "";
+  if (!sessionEmail) {
+    return Response.json(
+      {
+        error: "sign_in_required",
+        auth_required: true,
+        message: "Publishing sends this RFP to suppliers, so it needs a verified work email. Open the builder, sign in and publish again; your draft is untouched.",
+        sign_in_url: `${SITE_URL}/rfp-builder/${project.id}/`,
+      },
+      { status: 401, headers: cors },
+    );
+  }
 
   const size = Math.min(Math.max(Number(body.shortlist_size ?? 8), 3), 12);
   const result = buildShortlist(getShortlistDataset(), {
@@ -107,24 +169,27 @@ export async function POST(req: Request, ctx: Ctx) {
     if (!("error" in r)) invited.push({ slug: v.slug, name: r.vendor_name, supplier_url: `${SITE_URL}/rfp-builder/${project.id}/respond?token=${project.share_token}` });
   }
 
-  const published = await saveProject({ ...project, status: "published", invited_vendors: Array.from(new Set([...project.invited_vendors, ...invited.map((i) => i.slug)])) });
-
-  // Public board listing needs an accountable identity, so it happens only for
-  // a signed-in owner (matching the notice publisher's login-to-publish rule).
-  // Token-only publishes (agents, logged-out buyers) still invite the curated
-  // list, and the response says why the board listing was skipped.
-  let board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
-  const sessionEmail = access.session && (access.session.role === "buyer" || access.session.role === "netify") ? access.session.email : "";
-  if (sessionEmail) {
-    try {
-      const listed = await listOnBoard(published, sessionEmail);
-      board = { listed: true, ...listed };
-    } catch {
-      board = { listed: false, reason: "Board listing failed; try re-publishing." };
-    }
-  } else {
-    board = { listed: false, reason: "Sign in to also list this RFP on the public opportunity board. Publishing while signed out invites the curated suppliers only." };
+  // Publish is the strongest identity-capture moment: adopt ownership onto
+  // the signed-in account when the RFP has no owner yet (mirrors the PUT
+  // adopt-ownership rule), so the RFP appears under the buyer's account.
+  const ownerEmail = project.owner_email || sessionEmail;
+  const published = await saveProject({ ...project, status: "published", owner_email: ownerEmail, invited_vendors: Array.from(new Set([...project.invited_vendors, ...invited.map((i) => i.slug)])) });
+  if (!project.owner_email) {
+    try { await indexRfpForBuyer(sessionEmail, published.id); } catch { /* best effort */ }
   }
+
+  // The sign-in gate guarantees an accountable identity, so every publish
+  // also lists the RFP on the public opportunity board.
+  let board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
+  try {
+    const listed = await listOnBoard(published, sessionEmail);
+    board = { listed: true, ...listed };
+  } catch {
+    board = { listed: false, reason: "Board listing failed; try re-publishing." };
+  }
+
+  // Notifications are best effort and never block the publish.
+  try { await sendPublishEmails(published, ownerEmail, invited); } catch { /* best effort */ }
 
   return Response.json({ ok: true, status: published.status, invited, criteria: result.criteria_summary, board }, { headers: cors });
 }
