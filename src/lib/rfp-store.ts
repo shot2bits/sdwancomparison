@@ -605,3 +605,87 @@ export async function listBuyerRfpIds(email: string): Promise<string[]> {
   if (!kvConfigured()) return [];
   return ((await kv(["SMEMBERS", `buyer:${email.toLowerCase()}:rfps`])) as string[]) ?? [];
 }
+
+/* ------------------------------------------------------------------ */
+/* Admin account deletion (registered users) */
+/* ------------------------------------------------------------------ */
+
+export type SignupRecord = { email: string; roles: string[] };
+
+/** Registered users, parsed from the signups index (members are "role:email"). */
+export async function listSignups(): Promise<SignupRecord[]> {
+  if (!kvConfigured()) return [];
+  const members = ((await kv(["SMEMBERS", "auth:index:signups"])) as string[]) ?? [];
+  const byEmail = new Map<string, Set<string>>();
+  for (const member of members) {
+    const sep = member.indexOf(":");
+    if (sep <= 0) continue;
+    const email = member.slice(sep + 1).toLowerCase();
+    const roles = byEmail.get(email) ?? new Set<string>();
+    roles.add(member.slice(0, sep));
+    byEmail.set(email, roles);
+  }
+  return Array.from(byEmail.entries())
+    .map(([email, roles]) => ({ email, roles: Array.from(roles).sort() }))
+    .sort((a, b) => a.email.localeCompare(b.email));
+}
+
+export type DeleteUserSummary = { sessions_deleted: number; rfps_deleted: number; opportunities_deleted: number };
+
+/**
+ * Admin deletion of a registered user, so an account can be erased on
+ * request or reset for a fresh end-to-end test. Removes the sign-up record
+ * for every role and revokes all live sessions for the email; the next
+ * sign-in then behaves as a brand-new sign-up. With deleteRfps, also hard
+ * deletes every RFP owned by the email - the record, share-token lookup,
+ * threads, responses, NDA acceptances, supplier connections and their
+ * token lookups - plus any board opportunity published from it (via
+ * deleteOpportunity, which mirrors this cleanup for notices). Admin rights
+ * come from the admin email list, not KV, so they are unaffected.
+ */
+export async function deleteUser(email: string, opts: { deleteRfps: boolean }): Promise<DeleteUserSummary> {
+  const target = email.trim().toLowerCase();
+  const summary: DeleteUserSummary = { sessions_deleted: 0, rfps_deleted: 0, opportunities_deleted: 0 };
+  if (!target) return summary;
+
+  // Sign-up records: one signups-index member per role.
+  for (const role of ["supplier", "buyer", "netify"]) {
+    await kv(["SREM", "auth:index:signups", `${role}:${target}`]);
+  }
+
+  // Every live session for the email.
+  for (const s of await listSessions()) {
+    if (s.email.toLowerCase() !== target) continue;
+    await deleteSession(s.token);
+    summary.sessions_deleted += 1;
+  }
+
+  // Optionally cascade into the RFPs owned by the email, found via the
+  // buyer ownership index and checked against the stored owner_email.
+  if (opts.deleteRfps) {
+    const opportunities = await listOpportunities();
+    for (const id of await listBuyerRfpIds(target)) {
+      const project = await getJson<ProjectDetails>(`rfp:${id}`);
+      if (!project) { await kv(["SREM", `buyer:${target}:rfps`, id]); continue; }
+      if ((project.owner_email ?? "").toLowerCase() !== target) continue;
+      for (const o of opportunities) {
+        if (o.source_rfp_id !== id) continue;
+        if (await deleteOpportunity(o.id)) summary.opportunities_deleted += 1;
+      }
+      for (const c of await listConnections(id)) {
+        await kv(["DEL", `rfp:conn:${c.token}`]);
+      }
+      if (project.share_token) await kv(["DEL", `rfp:token:${project.share_token}`]);
+      await kv(["DEL", `rfp:${id}:connections`]);
+      await kv(["DEL", `rfp:${id}:threads`]);
+      await kv(["DEL", `rfp:${id}:responses`]);
+      await kv(["DEL", `rfp:${id}:nda`]);
+      await kv(["DEL", `rfp:${id}:board_opp`]);
+      await kv(["DEL", `rfp:${id}`]);
+      await kv(["SREM", `buyer:${target}:rfps`, id]);
+      summary.rfps_deleted += 1;
+    }
+  }
+
+  return summary;
+}
