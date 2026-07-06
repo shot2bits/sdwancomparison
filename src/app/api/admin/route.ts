@@ -15,6 +15,8 @@ import {
   decideVendorClaim,
   listOpportunities,
   deleteOpportunity,
+  listSignups,
+  deleteUser,
 } from "@/lib/rfp-store";
 import {
   isAdminEmail,
@@ -42,7 +44,7 @@ export async function GET(req: Request) {
   const auth = await requireAdmin(req, cors);
   if (auth instanceof Response) return auth;
 
-  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities] = await Promise.all([
+  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities, signups] = await Promise.all([
     listSessions(),
     effectiveVendorDomains(),
     getVendorDomainOverrides(),
@@ -50,6 +52,7 @@ export async function GET(req: Request) {
     listPendingRequests(),
     listVendorClaims(),
     listOpportunities(),
+    listSignups(),
   ]);
 
   const vendors = Object.keys(effective)
@@ -61,6 +64,11 @@ export async function GET(req: Request) {
       ok: true,
       admin_email: auth.email,
       sessions: sessions.map((s) => ({ token: s.token, role: s.role, email: s.email, vendor_slug: s.vendor_slug, created: s.created, expires: s.expires })),
+      users: signups.map((u) => ({
+        email: u.email,
+        roles: u.roles,
+        sessions: sessions.filter((s) => s.email.toLowerCase() === u.email).length,
+      })),
       vendors,
       blocklist: { builtin_count: FREE_EMAIL_DOMAINS.size, custom: blocklistExtra },
       pending,
@@ -152,6 +160,16 @@ export async function POST(req: Request) {
         const c = await decideVendorClaim(slug, action === "approve_claim", auth.email);
         if (!c) return Response.json({ error: "No claim found for that vendor." }, { status: 404, headers: cors });
         return Response.json({ ok: true, claim: c }, { headers: cors });
+      }
+      case "delete_user": {
+        const email = String(body.email ?? "").trim().toLowerCase();
+        const confirm = String(body.confirm ?? "").trim().toLowerCase();
+        if (!email) return Response.json({ error: "email required." }, { status: 422, headers: cors });
+        if (!confirm || confirm !== email) {
+          return Response.json({ error: "confirm must match the account email exactly." }, { status: 422, headers: cors });
+        }
+        const summary = await deleteUser(email, { deleteRfps: body.delete_rfps === true });
+        return Response.json({ ok: true, ...summary }, { headers: cors });
       }
       default:
         return Response.json({ error: "Unknown action." }, { status: 422, headers: cors });
