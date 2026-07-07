@@ -53,8 +53,9 @@ export default function RfpBuilderPage() {
         <h1 id="page-h1" className="mb-4">Post a SASE or SD-WAN project, build an RFP, and invite verified providers.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           Start with a short project notice or create a full RFP. Netify helps you structure
-          the requirement, publish it to the right suppliers and compare responses — with
-          questions mapped to the Netify SASE Methodology v{m.version}.
+          the requirement, publish it to the right suppliers and compare responses, with
+          questions mapped to the{" "}
+          <a href="https://netify.co.uk/methodology/" className="underline">Netify SASE Methodology v{m.version}</a>.
         </p>
       </div>
 
@@ -86,7 +87,7 @@ export default function RfpBuilderPage() {
           Know your route already? Read about{" "}
           <a href="/sase/rfp-builder/sase/" className="underline">the SASE RFP path</a>,{" "}
           <a href="/sase/rfp-builder/sd-wan/" className="underline">the SD-WAN RFP path</a> or{" "}
-          <a href="/sase/rfp-builder/sse/" className="underline">the SSE RFP path</a> — each explains what&apos;s in scope
+          <a href="/sase/rfp-builder/sse/" className="underline">the SSE RFP path</a>. Each explains what&apos;s in scope
           and shows sample questions from the bank, then starts this same builder preloaded for that scope. There is one
           builder; the paths just set it up for you.
         </p>

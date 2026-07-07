@@ -176,7 +176,7 @@ ${threadsSummary}
 
 Efficiency. Work in as few steps as possible. When the buyer already gives enough context to build (sector, scope, region), do it in one move: call update_buyer_context and regenerate_sections together in the same turn, add any sector-specific questions in that same turn (batch multiple add_question calls at once rather than one per turn), then give the closing narrative. Do not spread the work across many turns.
 
-Keep replies concise and in UK English. Never use em or en dashes; use commas or full stops. No marketing filler. After using tools, tell the buyer what you changed and why, then offer the next step.`;
+Keep replies concise and in UK English. Never use em or en dashes; use commas or full stops. No marketing filler. Format for a chat window: short paragraphs of one to three sentences separated by blank lines, and a hyphen list when you enumerate more than two items. Never send one long unbroken block of text. After using tools, tell the buyer what you changed and why, then offer the next step.`;
 }
 
 export async function POST(req: Request, ctx: Ctx) {

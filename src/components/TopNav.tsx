@@ -74,15 +74,29 @@ export default function TopNav() {
                 </li>
               );
             })}
-            <li aria-hidden="true" className="mx-2 h-4 w-px bg-[var(--ink-300,#d4d4d8)]" />
+            {/* Global pages sit lg+ only: at md–lg the zones + CTA + Menu
+                already fill the bar (they overflowed and clipped the Menu
+                button — Harry's Testing 1); the drawer carries these links
+                there. Internal links use next/link so the /sase basePath is
+                applied (plain anchors miss it). */}
+            <li aria-hidden="true" className="mx-2 hidden h-4 w-px bg-[var(--ink-300,#d4d4d8)] lg:block" />
             {GLOBAL_LINKS.map((l) => (
-              <li key={l.href}>
-                <a
-                  href={l.href}
-                  className="inline-flex items-center px-3 py-1.5 text-[13px] tracking-tight text-[var(--ink-500)] no-underline transition-colors hover:text-[var(--ink-900)]"
-                >
-                  {l.label}
-                </a>
+              <li key={l.href} className="hidden lg:list-item">
+                {isExternal(l.href) ? (
+                  <a
+                    href={l.href}
+                    className="inline-flex items-center whitespace-nowrap px-3 py-1.5 text-[13px] tracking-tight text-[var(--ink-500)] no-underline transition-colors hover:text-[var(--ink-900)]"
+                  >
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link
+                    href={l.href}
+                    className="inline-flex items-center whitespace-nowrap px-3 py-1.5 text-[13px] tracking-tight text-[var(--ink-500)] no-underline transition-colors hover:text-[var(--ink-900)]"
+                  >
+                    {l.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -105,7 +119,7 @@ export default function TopNav() {
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="lg:hidden rounded-md border border-[var(--ink-300,#d4d4d8)] px-3 py-1.5 text-sm"
+          className="lg:hidden shrink-0 rounded-md border border-[var(--ink-300,#d4d4d8)] px-3 py-1.5 text-sm"
           aria-label="Open menu"
         >
           Menu
@@ -181,14 +195,20 @@ export default function TopNav() {
               ))}
             </div>
 
-            {/* Global pages */}
+            {/* Global pages. Internal links use next/link for the basePath. */}
             <div className="mt-6 border-t border-[var(--ink-200)] pt-6">
               <ul className="space-y-2 list-none m-0 p-0">
                 {GLOBAL_LINKS.map((l) => (
                   <li key={l.href}>
-                    <a href={l.href} className="block py-1 text-base font-medium text-[var(--ink-900)] no-underline">
-                      {l.label}
-                    </a>
+                    {!isExternal(l.href) ? (
+                      <Link href={l.href} onClick={() => setMobileOpen(false)} className="block py-1 text-base font-medium text-[var(--ink-900)] no-underline">
+                        {l.label}
+                      </Link>
+                    ) : (
+                      <a href={l.href} className="block py-1 text-base font-medium text-[var(--ink-900)] no-underline">
+                        {l.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

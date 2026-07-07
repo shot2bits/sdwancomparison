@@ -118,6 +118,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [notOwner, setNotOwner] = useState(false);
   // Board-listing outcome from the last publish (listed, or why not).
   const [boardNote, setBoardNote] = useState<{ listed: boolean; url?: string; reason?: string } | null>(null);
+  // Feedback for every question-add outcome (added / merged / duplicate) —
+  // silent no-ops read as "the button is broken" (Harry's Testing 1).
+  const [addMsg, setAddMsg] = useState<string | null>(null);
+  const addMsgTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function flashAddMsg(msg: string) {
+    setAddMsg(msg);
+    if (addMsgTimer.current) clearTimeout(addMsgTimer.current);
+    addMsgTimer.current = setTimeout(() => setAddMsg(null), 6000);
+  }
+  // "Write your own question" (no AI) composer state.
+  const [ownText, setOwnText] = useState("");
+  const [ownEvidence, setOwnEvidence] = useState("");
+  const [ownCategory, setOwnCategory] = useState("Custom requirements");
+  // Click-to-edit RFP title.
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState("");
 
   // agent chat
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
@@ -306,9 +322,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     };
     const s = SECTOR_OPENERS[sector];
     if (s) {
-      return `Let's build your RFP. You're in ${s.label}, so ${s.regs} will likely apply. Shall I include those, and are there any other obligations I'm missing? Then tell me about your current infrastructure: what WAN, firewalls and remote access do you run today, what do you want to keep, and what's driving the change?`;
+      return `Let's build your RFP. You're in ${s.label}, so ${s.regs} will likely apply. Shall I include those, and are there any other obligations I'm missing?\n\nThen tell me about your current infrastructure: what WAN, firewalls and remote access do you run today, what do you want to keep, and what's driving the change?`;
     }
-    return "Let's build your RFP. Start with your current infrastructure: what WAN, firewalls and remote access do you run today, and what do you want to keep versus replace? Then your sector, rough site count, regions and any compliance obligations (for example UK GDPR, PCI DSS, IEC 62443) — once I know the sector I'll suggest the regulations that usually apply. You can also just pick a scope and delivery model under Build it myself.";
+    return "Let's build your RFP. Start with your current infrastructure: what WAN, firewalls and remote access do you run today, and what do you want to keep versus replace? Then your sector, rough site count, regions and any compliance obligations (for example UK GDPR, PCI DSS, IEC 62443). Once I know the sector I'll suggest the regulations that usually apply.\n\nYou can also just pick a scope and delivery model under Build it myself.";
   }
 
   async function startRfp(buyer?: Record<string, unknown>) {
@@ -468,16 +484,75 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     finally { setDrafting(false); }
   }
 
-  function addDraft() {
-    if (!project || !draft) return;
-    const { category, ...q } = draft;
-    const sections = [...project.rfp_sections];
+  /**
+   * Insert a question, or activate the matching hidden methodology question.
+   * Fixes "clicking Add no longer adds anything" (Harry's Testing 1,
+   * 03/07/2026): AI research/drafted questions reuse the id q_<feature_id>,
+   * and the synthesised base sections already hold that id as an invisible
+   * priority-"optional" question — so the old duplicate guard silently
+   * swallowed the add. Now a hidden duplicate is upgraded in place with the
+   * tailored wording, a visible duplicate says where it already sits, and
+   * every outcome reports itself instead of doing nothing.
+   */
+  function upsertQuestion(category: string, q: RfpQuestion) {
+    if (!project) return;
+    const sections = project.rfp_sections.map((s) => ({ ...s, questions: [...s.questions] }));
+    // The same id can live in a different section (its methodology category), so search all of them.
+    for (const s of sections) {
+      const idx = s.questions.findIndex((x) => x.id === q.id);
+      if (idx >= 0) {
+        const existing = s.questions[idx];
+        if (existing.priority === "optional") {
+          s.questions[idx] = {
+            ...existing,
+            text: q.text || existing.text,
+            evidence_requested: q.evidence_requested || existing.evidence_requested,
+            rationale: q.rationale || existing.rationale,
+            priority: q.priority === "optional" ? "recommended" : q.priority,
+            mandatory: existing.mandatory || q.mandatory,
+            weight: Math.max(existing.weight, q.weight),
+            buyer_lens: q.buyer_lens || existing.buyer_lens,
+            supplier_lens: q.supplier_lens || existing.supplier_lens,
+          };
+          s.included = true;
+          persist({ ...project, rfp_sections: sections });
+          flashAddMsg(`Added to "${s.category}" with your tailored wording (it covers the same ground as a library question, so the two were merged).`);
+        } else {
+          flashAddMsg(`Already in your RFP under "${s.category}", so it wasn't added twice.`);
+        }
+        return;
+      }
+    }
     let sec = sections.find((s) => s.category === category);
     if (!sec) { sec = { category, included: true, questions: [] }; sections.push(sec); }
     sec.included = true;
-    if (!sec.questions.some((x) => x.id === q.id)) sec.questions.push({ ...q, priority: q.priority === "optional" ? "recommended" : q.priority });
+    sec.questions.push({ ...q, priority: q.priority === "optional" ? "recommended" : q.priority });
     persist({ ...project, rfp_sections: sections });
+    flashAddMsg(`Added to "${category}".`);
+  }
+
+  function addDraft() {
+    if (!project || !draft) return;
+    const { category, ...q } = draft;
+    upsertQuestion(category, q as RfpQuestion);
     setDraft(null); setIntent("");
+  }
+
+  /** Add a question the buyer wrote themselves — no AI involved. */
+  function addOwnQuestion() {
+    if (!project || !ownText.trim()) return;
+    upsertQuestion(ownCategory, {
+      id: `q_own_${Date.now().toString(36)}`,
+      feature_id: "custom",
+      text: ownText.trim(),
+      evidence_requested: ownEvidence.trim(),
+      rationale: "Buyer-written question.",
+      priority: "recommended",
+      source: "custom",
+      mandatory: false,
+      weight: 3,
+    } as RfpQuestion);
+    setOwnText(""); setOwnEvidence("");
   }
 
   async function toggleRegulation(key: string) {
@@ -515,24 +590,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   function addResearchQuestion(q: RfpQuestion & { category: string }) {
     if (!project) return;
     const { category, ...rest } = q;
-    const sections = [...project.rfp_sections];
-    let sec = sections.find((s) => s.category === category);
-    if (!sec) { sec = { category, included: true, questions: [] }; sections.push(sec); }
-    sec.included = true;
-    if (!sec.questions.some((x) => x.id === rest.id)) sec.questions.push({ ...rest, priority: "recommended" });
-    persist({ ...project, rfp_sections: sections });
+    upsertQuestion(category, rest as RfpQuestion);
   }
 
   function addBankQuestion(category: string, q: { id: string; text: string; buyer_lens: string; supplier_lens: string }) {
     if (!project) return;
-    const sections = [...project.rfp_sections];
-    let sec = sections.find((s) => s.category === category);
-    if (!sec) { sec = { category, included: true, questions: [] }; sections.push(sec); }
-    sec.included = true;
-    if (!sec.questions.some((x) => x.id === q.id)) {
-      sec.questions.push({ id: q.id, feature_id: "custom", text: q.text, evidence_requested: "", rationale: q.buyer_lens ? `Buyer lens: ${q.buyer_lens}` : "Netify question bank", priority: "recommended", source: "bank", buyer_lens: q.buyer_lens, supplier_lens: q.supplier_lens, mandatory: false, weight: 3 } as RfpQuestion);
-    }
-    persist({ ...project, rfp_sections: sections });
+    upsertQuestion(category, { id: q.id, feature_id: "custom", text: q.text, evidence_requested: "", rationale: q.buyer_lens ? `Buyer lens: ${q.buyer_lens}` : "Netify question bank", priority: "recommended", source: "bank", buyer_lens: q.buyer_lens, supplier_lens: q.supplier_lens, mandatory: false, weight: 3 } as RfpQuestion);
   }
 
   /**
@@ -542,29 +605,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
    */
   function addExtendedQuestion(categoryLabel: string, q: ExtendedBankQuestion) {
     if (!project) return;
-    const sections = [...project.rfp_sections];
-    let sec = sections.find((s) => s.category === categoryLabel);
-    if (!sec) { sec = { category: categoryLabel, included: true, questions: [] }; sections.push(sec); }
-    sec.included = true;
-    if (!sec.questions.some((x) => x.id === q.question_id)) {
-      const buyerSectorSlug = project.buyer.sector ? EXT_SECTOR_MAP[project.buyer.sector] ?? "" : "";
-      const mandatory = Boolean(buyerSectorSlug && q.mandatory_for.includes(buyerSectorSlug));
-      const weight = q.weighting_hint === "high" ? 5 : q.weighting_hint === "low" ? 2 : 3;
-      sec.questions.push({
-        id: q.question_id,
-        feature_id: "custom",
-        text: q.question,
-        evidence_requested: q.evidence_required.join("; "),
-        rationale: q.why_it_matters,
-        priority: mandatory ? "required" : "recommended",
-        source: "bank",
-        buyer_lens: q.red_flag_answers.length ? `Red flags: ${q.red_flag_answers.join("; ")}` : "",
-        supplier_lens: q.follow_up_questions.length ? `Likely follow-ups: ${q.follow_up_questions.join(" ")}` : "",
-        mandatory,
-        weight,
-      } as RfpQuestion);
-    }
-    persist({ ...project, rfp_sections: sections });
+    const buyerSectorSlug = project.buyer.sector ? EXT_SECTOR_MAP[project.buyer.sector] ?? "" : "";
+    const mandatory = Boolean(buyerSectorSlug && q.mandatory_for.includes(buyerSectorSlug));
+    const weight = q.weighting_hint === "high" ? 5 : q.weighting_hint === "low" ? 2 : 3;
+    upsertQuestion(categoryLabel, {
+      id: q.question_id,
+      feature_id: "custom",
+      text: q.question,
+      evidence_requested: q.evidence_required.join("; "),
+      rationale: q.why_it_matters,
+      priority: mandatory ? "required" : "recommended",
+      source: "bank",
+      buyer_lens: q.red_flag_answers.length ? `Red flags: ${q.red_flag_answers.join("; ")}` : "",
+      supplier_lens: q.follow_up_questions.length ? `Likely follow-ups: ${q.follow_up_questions.join(" ")}` : "",
+      mandatory,
+      weight,
+    } as RfpQuestion);
   }
 
   async function loadEvaluations() {
@@ -638,7 +694,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
       try { localStorage.removeItem(`rfp_pending_publish_${project.id}`); } catch { /* ignore */ }
-      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal — this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
+      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
@@ -718,7 +774,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           The builder is the buyer&apos;s private workspace: only the person who created this RFP can read or edit it here.
         </p>
         <ul className="list-disc pl-5 text-sm text-[var(--ink-700)] space-y-1.5 mb-5">
-          <li><strong>Invited to respond as a supplier?</strong> Use the response link from your invitation (it ends <code>/respond?token=…</code>) — that page shows you the RFP and takes your answers.</li>
+          <li><strong>Invited to respond as a supplier?</strong> Use the response link from your invitation (it ends <code>/respond?token=…</code>). That page shows you the RFP and takes your answers.</li>
           <li><strong>Is this your RFP?</strong> Sign in below with the email you used when you created it, or reopen the private builder link you bookmarked (it carries your key).</li>
         </ul>
         <div className="mb-5"><SignIn role="buyer" prompt="Sign in with the email that created this RFP." /></div>
@@ -757,8 +813,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <div className="mt-6 pt-5 border-t border-[var(--ink-200,#e5e5e5)] max-w-2xl">
           <p className="text-sm font-medium mb-1">Not ready for a full RFP?</p>
           <p className="text-sm text-[var(--ink-600,#555)]">
-            An RFI gathers supplier information before you commit to formal requirements. Use it to shortlist vendors, then convert the work into an RFP.{" "}
-            <a href="https://netify.co.uk/sd-wan-rfi-builder-app/" className="underline">Start with an RFI instead</a>.
+            Do what an RFI does, the marketplace way: post a short project notice describing your need, gather supplier
+            interest, information and indicative pricing, then turn the notice into a full RFP when you&apos;re ready.{" "}
+            <a href="/sase/opportunities/new/" className="underline">Post a project notice instead</a>.
           </p>
         </div>
       </div>
@@ -780,7 +837,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <p className="mt-1.5 mb-0">Everything saves automatically as you go, and nothing reaches a supplier until you invite them.</p>
       </div>
 
-      <p className="eyebrow mb-2">Step 1 — the basics</p>
+      <p className="eyebrow mb-2">Step 1: the basics</p>
+      <p className="-mt-1 mb-3 text-xs text-[var(--ink-500)]">All optional. Set what you know; the AI agent fills in the rest as you chat, and you can change any of it later.</p>
       {/* Top bar: scope, model, mode, lifecycle */}
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-6 pb-5 border-b border-[var(--ink-300,#ccc)]">
         <div>
@@ -850,7 +908,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
       </div>
 
-      <p className="eyebrow mb-2">Step 2 — build your questions</p>
+      <p className="eyebrow mb-2">Step 2: build your questions</p>
       <div className="flex gap-2 mb-1">
         <button onClick={() => setMode("agent")} className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${mode === "agent" ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>AI agent</button>
         <button onClick={() => setMode("manual")} className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${mode === "manual" ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] hover:border-[var(--ink-900)]"}`}>Build it myself</button>
@@ -864,10 +922,21 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <p className="eyebrow mb-2">Talk to the AI agent</p>
             <p className="text-xs text-[var(--ink-500)] mb-2">Describe your needs in plain English. The agent writes and edits the questions, which appear in your RFP on the right.</p>
             <div ref={scroller} className="flex-1 max-h-[26rem] overflow-y-auto space-y-3 border border-[var(--ink-300,#ccc)] rounded-sm p-4 bg-white">
+              {/* Chat bubbles: labelled and visually distinct per speaker —
+                  the old thin accent border read as "a block of text" and
+                  didn't separate agent from buyer (Harry's Testing 1). */}
               {messages.map((m, i) => (
-                <div key={i} className={`text-sm whitespace-pre-wrap ${m.role === "user" ? "text-[var(--ink-500)]" : "text-[var(--ink-800)] border-l-2 border-[var(--accent)] pl-3"}`}>
-                  {m.role === "user" ? `You: ${m.content}` : m.content}
-                </div>
+                m.role === "user" ? (
+                  <div key={i} className="ml-8 rounded-lg rounded-tr-none border border-amber-200 bg-amber-50 px-3 py-2">
+                    <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">You</p>
+                    <p className="text-sm whitespace-pre-wrap text-[var(--ink-800)] m-0">{m.content}</p>
+                  </div>
+                ) : (
+                  <div key={i} className="mr-8 rounded-lg rounded-tl-none border border-[var(--ink-200,#e5e5e5)] bg-white px-3 py-2">
+                    <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--ink-500)]">Netify agent</p>
+                    <p className="text-sm whitespace-pre-wrap text-[var(--ink-800)] m-0">{m.content}</p>
+                  </div>
+                )
               ))}
               {busy && <p className="text-sm text-[var(--ink-500)]">Drafting your RFP: synthesising requirements and building sections. This usually takes 20 to 40 seconds{elapsed > 0 ? ` (${elapsed}s)` : ""}.</p>}
             </div>
@@ -879,29 +948,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         ) : (
           <div className="space-y-5">
             <p className="eyebrow">Pick your questions</p>
-            <p className="text-xs text-[var(--ink-500)] -mt-3">Add questions from any of these, in any order. Each one you add appears in your RFP on the right. Tools: the AI research tool, the Netify question bank, your own AI-drafted question, or the full methodology library.</p>
-            {/* AI expert research tool */}
-            <div className="border border-[var(--ink-900)] rounded-sm p-4 bg-amber-50">
-              <p className="eyebrow mb-2">AI expert research tool</p>
-              <p className="text-xs text-[var(--ink-600,#555)] mb-2">Give a topic. The expert drafts a themed set of cited questions, grounded in the methodology, the live vendor matrix and your selected regulations, and writes questions that separate strong vendors from weak ones.</p>
-              <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. ransomware containment for OT, or DORA exit and subcontracting terms" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
-              <button onClick={research} disabled={researching || !topic.trim()} className="mt-2 px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{researching ? "Researching..." : "Research and draft a set"}</button>
-              {researchSet && (
-                <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
-                  <p className="text-sm text-[var(--ink-700)] italic mb-2">{researchSet.analysis}</p>
-                  <div className="space-y-2">
-                    {researchSet.questions.map((q) => (
-                      <div key={q.id} className="text-sm border border-[var(--ink-200,#e5e5e5)] rounded-sm p-2 bg-white">
-                        <p className="font-medium">{q.text}</p>
-                        <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>
-                        <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-0.5">{q.rationale} · {q.category}</p>
-                        <button onClick={() => addResearchQuestion(q)} className="mt-1 px-3 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <p className="text-xs text-[var(--ink-500)] -mt-3">Add questions from any of these, in any order. Each one you add appears in your RFP on the right. Hand-pick from the Netify question bank and the methodology library, write your own, or bring in the AI research tool when you want it.</p>
+            {addMsg && <p className="rounded-sm border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{addMsg}</p>}
             {/* Netify question bank browser */}
             {bank && (
               <div className="border border-[var(--ink-300,#ccc)] rounded-sm p-4">
@@ -988,17 +1036,51 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 )}
               </div>
             )}
-            {/* AI custom question composer */}
+            {/* Write your own question — no AI required, AI drafting optional */}
             <div className="border border-[var(--ink-900)] rounded-sm p-4">
-              <p className="eyebrow mb-2">Add your own question with AI</p>
-              <textarea value={intent} onChange={(e) => setIntent(e.target.value)} rows={2} placeholder="Describe what you want to ask, e.g. how they isolate unmanaged contractor laptops on the plant network." className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
-              <button onClick={draftQuestion} disabled={drafting || !intent.trim()} className="mt-2 px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{drafting ? "Drafting..." : "Draft with AI"}</button>
-              {draft && (
-                <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3 text-sm">
-                  <p className="font-medium">{draft.text}</p>
-                  <p className="text-xs text-[var(--ink-500)] mt-1">Evidence: {draft.evidence_requested}</p>
-                  <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-1">{draft.rationale} · {draft.category} · {draft.source}</p>
-                  <button onClick={addDraft} className="mt-2 px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add to RFP</button>
+              <p className="eyebrow mb-2">Write your own question</p>
+              <p className="text-xs text-[var(--ink-500)] mb-2">Type it exactly as you want suppliers to see it. No AI involved unless you ask for a draft below.</p>
+              <textarea value={ownText} onChange={(e) => setOwnText(e.target.value)} rows={2} placeholder="Your question, e.g. Describe how you would migrate our 12 warehouse sites with no downtime during trading hours." className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <input value={ownEvidence} onChange={(e) => setOwnEvidence(e.target.value)} placeholder="Evidence to request (optional)" className="flex-1 min-w-[12rem] border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
+                <select value={ownCategory} onChange={(e) => setOwnCategory(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white">
+                  {Array.from(new Set(["Custom requirements", ...project.rfp_sections.map((s) => s.category)])).map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <button onClick={addOwnQuestion} disabled={!ownText.trim()} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Add to RFP</button>
+              </div>
+              <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
+                <p className="text-xs text-[var(--ink-500)] mb-2">Prefer a hand? Describe the intent and the AI drafts a well-formed version with evidence and methodology mapping, for you to review before adding.</p>
+                <textarea value={intent} onChange={(e) => setIntent(e.target.value)} rows={2} placeholder="e.g. how they isolate unmanaged contractor laptops on the plant network." className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+                <button onClick={draftQuestion} disabled={drafting || !intent.trim()} className="mt-2 px-4 py-2 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors disabled:opacity-50">{drafting ? "Drafting..." : "Draft with AI"}</button>
+                {draft && (
+                  <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3 text-sm">
+                    <p className="font-medium">{draft.text}</p>
+                    <p className="text-xs text-[var(--ink-500)] mt-1">Evidence: {draft.evidence_requested}</p>
+                    <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-1">{draft.rationale} · {draft.category} · {draft.source}</p>
+                    <button onClick={addDraft} className="mt-2 px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add to RFP</button>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* AI expert research tool */}
+            <div className="border border-[var(--ink-900)] rounded-sm p-4 bg-amber-50">
+              <p className="eyebrow mb-2">AI expert research tool</p>
+              <p className="text-xs text-[var(--ink-600,#555)] mb-2">Give a topic. The expert drafts a themed set of cited questions, grounded in the methodology, the live vendor matrix and your selected regulations, and writes questions that separate strong vendors from weak ones.</p>
+              <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. ransomware containment for OT, or DORA exit and subcontracting terms" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+              <button onClick={research} disabled={researching || !topic.trim()} className="mt-2 px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{researching ? "Researching..." : "Research and draft a set"}</button>
+              {researchSet && (
+                <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
+                  <p className="text-sm text-[var(--ink-700)] italic mb-2">{researchSet.analysis}</p>
+                  <div className="space-y-2">
+                    {researchSet.questions.map((q) => (
+                      <div key={q.id} className="text-sm border border-[var(--ink-200,#e5e5e5)] rounded-sm p-2 bg-white">
+                        <p className="font-medium">{q.text}</p>
+                        <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>
+                        <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-0.5">{q.rationale} · {q.category}</p>
+                        <button onClick={() => addResearchQuestion(q)} className="mt-1 px-3 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -1041,9 +1123,28 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         {/* Right: live RFP preview */}
         <div>
           <p className="eyebrow mb-2">Your RFP so far (updates live)</p>
-          <h2 className="text-lg mb-1">{project.title}</h2>
+          {editingTitle ? (
+            <input
+              autoFocus
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onBlur={() => { setEditingTitle(false); const t = titleDraft.trim(); if (t && t !== project.title) persist({ ...project, title: t }); }}
+              onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); if (e.key === "Escape") setEditingTitle(false); }}
+              className="mb-1 w-full border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-lg font-medium"
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => { setTitleDraft(project.title); setEditingTitle(true); }}
+              title="Click to rename this RFP"
+              className="group mb-1 flex items-baseline gap-2 text-left"
+            >
+              <h2 className="text-lg m-0">{project.title}</h2>
+              <span className="text-xs text-[var(--ink-400,#9ca3af)] underline decoration-dotted group-hover:text-[var(--ink-700)]">rename</span>
+            </button>
+          )}
           <p className="text-sm text-[var(--ink-500)] mb-1">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.join(", ") || "none set"}.</p>
-          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">Stage: <span className="uppercase">{project.status}</span> — an RFP moves through {STATUS_FLOW.join(" → ")} as you publish and suppliers respond.</p>
+          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and suppliers respond.</p>
           <div className="space-y-3">
             {project.rfp_sections.filter((s) => s.included).map((s) => {
               const active = s.questions.filter((q) => q.priority !== "optional");
@@ -1136,7 +1237,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
         <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Publish to curated suppliers</strong> invites that whole set in one go. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed — this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track supplier replies. Don&apos;t share it: suppliers get their own links.</span>
+          <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed: this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track supplier replies. Don&apos;t share it: suppliers get their own links.</span>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
           <span className="flex items-center gap-1.5">
             <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder="you@company.com" className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm" />
@@ -1156,7 +1257,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           boardNote.listed ? (
             <p className="text-sm text-emerald-700 mb-3">
               Also listed on the <a href="/sase/opportunities/board/" className="underline">public opportunity board</a>
-              {boardNote.url ? <> — <a href={boardNote.url} className="underline">view the public notice</a></> : null}. The notice shows scope and sector only; your questions, pricing and contact details stay private.
+              {boardNote.url ? <>: <a href={boardNote.url} className="underline">view the public notice</a></> : null}. The notice shows scope and sector only; your questions, pricing and contact details stay private.
             </p>
           ) : (
             <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">
