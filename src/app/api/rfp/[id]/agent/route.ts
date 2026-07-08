@@ -277,7 +277,16 @@ export async function POST(req: Request, ctx: Ctx) {
             dirty = true;
             out = { ok: true, product_scope: sc, sections: project.rfp_sections.map((s) => s.category) };
           } else if (tu.name === "draft_custom_question") {
-            const cat = String(input.category);
+            // The model sometimes omits category despite the schema; String(undefined)
+            // is the literal "undefined", which became a real section heading
+            // (Harry's retest, 08/07/2026). Accept a known category, keep a
+            // meaningful free-text one, and default everything else.
+            const rawCat = typeof input.category === "string" ? input.category.trim() : "";
+            const cat = (CATEGORIES as readonly string[]).includes(rawCat)
+              ? rawCat
+              : rawCat && !["undefined", "null", "custom"].includes(rawCat.toLowerCase())
+                ? rawCat
+                : "Custom requirements";
             const fid = String(input.feature_id ?? "").trim();
             const pr = (["required", "recommended", "optional"].includes(String(input.priority)) ? String(input.priority) : "recommended") as "required" | "recommended" | "optional";
             const sections: RfpSection[] = project.rfp_sections.length ? [...project.rfp_sections] : synthesiseSections(project.buyer);

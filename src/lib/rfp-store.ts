@@ -98,11 +98,35 @@ export function publicProject(p: ProjectDetails): ProjectDetails {
   return { ...p, manage_token: "", owner_email: "" };
 }
 
+/**
+ * Heal section categories on read: an agent tool bug briefly stored the
+ * literal string "undefined" as a section heading (Harry's retest,
+ * 08/07/2026). Bad names fold into "Custom requirements" (merging with an
+ * existing section of that name), so stored RFPs self-repair on next load
+ * and the fix persists on next save.
+ */
+function healSectionCategories(p: ProjectDetails): ProjectDetails {
+  const bad = (c: string) => !c || !c.trim() || ["undefined", "null"].includes(c.trim().toLowerCase());
+  if (!p.rfp_sections.some((s) => bad(s.category))) return p;
+  const sections = [] as ProjectDetails["rfp_sections"];
+  for (const s of p.rfp_sections) {
+    const name = bad(s.category) ? "Custom requirements" : s.category;
+    const existing = sections.find((x) => x.category === name);
+    if (existing) {
+      for (const q of s.questions) if (!existing.questions.some((x) => x.id === q.id)) existing.questions.push(q);
+      existing.included = existing.included || s.included;
+    } else {
+      sections.push({ ...s, category: name });
+    }
+  }
+  return { ...p, rfp_sections: sections };
+}
+
 export async function getProject(id: string): Promise<ProjectDetails | null> {
   const data = await getJson<ProjectDetails>(`rfp:${id}`);
   if (!data) return null;
   const parsed = ProjectDetailsSchema.safeParse(data);
-  return parsed.success ? parsed.data : null;
+  return parsed.success ? healSectionCategories(parsed.data) : null;
 }
 
 export async function getProjectByToken(token: string): Promise<ProjectDetails | null> {

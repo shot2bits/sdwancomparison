@@ -496,6 +496,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
    */
   function upsertQuestion(category: string, q: RfpQuestion) {
     if (!project) return;
+    // Guard against unusable section names ("", "undefined") ever becoming
+    // headings — the agent-tool variant of this bug reached Harry's live RFP.
+    if (!category || !category.trim() || ["undefined", "null"].includes(category.trim().toLowerCase())) {
+      category = "Custom requirements";
+    }
     const sections = project.rfp_sections.map((s) => ({ ...s, questions: [...s.questions] }));
     // The same id can live in a different section (its methodology category), so search all of them.
     for (const s of sections) {
@@ -1044,7 +1049,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input value={ownEvidence} onChange={(e) => setOwnEvidence(e.target.value)} placeholder="Evidence to request (optional)" className="flex-1 min-w-[12rem] border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
                 <select value={ownCategory} onChange={(e) => setOwnCategory(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white">
-                  {Array.from(new Set(["Custom requirements", ...project.rfp_sections.map((s) => s.category)])).map((c) => <option key={c} value={c}>{c}</option>)}
+                  {Array.from(new Set(["Custom requirements", ...project.rfp_sections.map((s) => s.category)]))
+                    .filter((c) => c && c.trim() && !["undefined", "null"].includes(c.trim().toLowerCase()))
+                    .map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <button onClick={addOwnQuestion} disabled={!ownText.trim()} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Add to RFP</button>
               </div>

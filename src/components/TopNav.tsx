@@ -15,12 +15,16 @@
  */
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ZONE_LINKS, GLOBAL_LINKS, NAV_CTA, SECTIONS, isExternal } from "@/lib/nav";
 
 export default function TopNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Portal target only exists client-side; render the drawer after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const pathname = usePathname();
 
   useEffect(() => setMobileOpen(false), [pathname]);
@@ -126,9 +130,13 @@ export default function TopNav() {
         </button>
       </div>
 
-      {/* Mobile/tablet drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-[var(--paper-base,#fff)] lg:hidden">
+      {/* Mobile/tablet drawer. Rendered in a portal on <body> with an explicit
+          opaque background: inside the sticky header the drawer inherited the
+          header's stacking context and its background failed to cover the
+          page, so nav items painted interleaved with page content on narrow
+          viewports (Harry's retest screenshot, 08/07/2026). */}
+      {mobileOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[100] overflow-hidden bg-white lg:hidden" style={{ backgroundColor: "#ffffff" }}>
           <div className="flex h-12 items-center justify-between border-b border-[var(--ink-200)] px-6">
             <Link
               href="/"
@@ -224,7 +232,8 @@ export default function TopNav() {
               </Link>
             </div>
           </nav>
-        </div>
+        </div>,
+        document.body,
       )}
     </header>
   );
