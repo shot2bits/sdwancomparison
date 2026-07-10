@@ -170,6 +170,41 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     return `/sase/shortlist/print${qs ? `?${qs}` : ""}`;
   }
 
+  /**
+   * Shortlist → RFP handoff. Carries the current scenario into the RFP
+   * Builder through its EXISTING prefill contract (prefill=1 + sector/org/
+   * model/regions/notes, the same params the /best pages and sector nav
+   * links use), so no new schema is needed. The ranked candidates and the
+   * criteria summary travel in `notes`, which the builder stores as buyer
+   * context and feeds to generation. Region keys map asia_pacific → apac,
+   * mirroring the project-notice carry-through in RfpBuilder.
+   */
+  function rfpUrl(): string {
+    const p = new URLSearchParams();
+    p.set("prefill", "1");
+    if (input.sector) p.set("sector", input.sector);
+    if (input.organisation_size !== "any") p.set("org", input.organisation_size);
+    if (input.service_model !== "any") p.set("model", input.service_model);
+    if (input.required_regions.length) {
+      p.set(
+        "regions",
+        input.required_regions.map((r) => (r === "asia_pacific" ? "apac" : r)).join("."),
+      );
+    }
+    const top = result.shortlist.slice(0, 10).map((v) => `${v.rank}. ${v.name} (${v.score})`);
+    const scenario = encodeScenario(input);
+    const notes = [
+      "Candidate shortlist built with the Netify shortlist builder:",
+      top.length ? `${top.join("; ")}.` : "",
+      isDefaultView ? "" : `Criteria: ${result.criteria_summary}`,
+      scenario ? `Scenario: /sase/shortlist?${scenario}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+    if (top.length) p.set("notes", notes);
+    return `/sase/rfp-builder/?${p.toString()}`;
+  }
+
   async function askAgent() {
     if (!chatPrompt.trim() || chatBusy) return;
     const nextMessages = [...chatMessages, { role: "user" as const, content: chatPrompt }];
@@ -640,6 +675,12 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             >
               Download PDF
             </a>
+            <a
+              href={rfpUrl()}
+              className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors"
+            >
+              Generate my RFP
+            </a>
           </div>
         </div>
         <p className="text-sm text-[var(--ink-500)] mb-6">
@@ -687,6 +728,28 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         )}
 
         <p className="mt-8 text-xs text-[var(--ink-500)]">{result.methodology_note}</p>
+
+        {/* Shortlist → RFP handoff: the explicit next step after building a
+            shortlist. Same destination as the header button; both carry the
+            scenario through the builder's existing prefill params. */}
+        <section className="mt-12 border border-[var(--ink-900)] rounded-sm p-6">
+          <p className="eyebrow mb-2">Next step</p>
+          <h3 className="text-lg mb-2">Turn this shortlist into an RFP</h3>
+          <p className="text-sm text-[var(--ink-700)] mb-4">
+            Send a structured SASE or SD-WAN RFP to the providers ranked above
+            and compare their responses side by side. Your sector, regions,
+            operating model and ranked candidates carry across, and you refine
+            the questions before anything is published. Free to build. No sign
+            in needed to start.
+          </p>
+          <a
+            href={rfpUrl()}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm no-underline hover:bg-amber-400 transition-colors"
+          >
+            Generate my RFP
+            <span aria-hidden="true">→</span>
+          </a>
+        </section>
 
         {/* Email capture */}
         <section className="mt-12 border border-[var(--ink-900)] rounded-sm p-6">

@@ -24,6 +24,14 @@ export type BestPage = {
   h1: string;
   intro: string;
   faqs: { q: string; a: string }[];
+  /**
+   * When a full buyer guide for this topic exists on the main site, its
+   * absolute URL. The ranked list stays live (it is the guide's data source
+   * via data.json) but consolidates search and citation equity onto the
+   * guide: the canonical points there and the page links to it, so exactly
+   * one URL competes for the topic.
+   */
+  canonicalOverride?: string;
 };
 
 const YEAR = "2026";
@@ -130,7 +138,12 @@ export const BEST_PAGES: BestPage[] = [
   intentPage("cost_saving", "cost-saving", "Typical moves include replacing MPLS with broadband and internet underlays, local breakout and flexible commercial terms."),
   intentPage("mpls_migration", "mpls-migration", "Typical projects run MPLS and SD-WAN side by side during transition, with managed last-mile and dynamic path control."),
   intentPage("rapid_deployment", "rapid-deployment", "Typical needs include cloud-delivered onboarding, zero-touch provisioning and cellular options for instant connectivity."),
-  intentPage("remote_workforce", "remote-and-hybrid-work", "Typical needs include ZTNA for private apps, secure web access for any location and consistent policy off-network."),
+  {
+    ...intentPage("remote_workforce", "remote-and-hybrid-work", "Typical needs include ZTNA for private apps, secure web access for any location and consistent policy off-network."),
+    // Full hybrid & remote work buyer guide on the main site (July 2026).
+    // This page remains its live ranking source; equity consolidates there.
+    canonicalOverride: "https://netify.co.uk/sd-wan-sase-for-hybrid-remote-work/",
+  },
   intentPage("security_consolidation", "security-consolidation", "Typical goals include collapsing point security products into a single SASE platform with one policy and one console."),
   intentPage("global_expansion", "global-expansion", "Typical needs include private backbones, regional breakout, data residency control and coverage into new markets."),
 ];

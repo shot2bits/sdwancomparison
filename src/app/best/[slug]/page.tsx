@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: page.metaTitle,
     description: page.metaDescription,
-    alternates: { canonical: `${SITE_URL}/best/${page.slug}/` },
+    alternates: { canonical: page.canonicalOverride ?? `${SITE_URL}/best/${page.slug}/` },
     openGraph: {
       title: page.metaTitle,
       description: page.metaDescription,
@@ -154,6 +154,22 @@ export default async function BestPage({ params }: Props) {
           </Link>
         </div>
       </div>
+
+      {page.canonicalOverride && (
+        <section className="mb-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5">
+          <p className="eyebrow mb-2">Full buyer guide</p>
+          <p className="text-sm text-[var(--ink-700)]">
+            This live ranking also powers the full buyer guide, which adds an
+            interactive shortlist tool, procurement guidance and FAQs:{" "}
+            <a
+              href={page.canonicalOverride}
+              className="underline underline-offset-2 hover:text-[var(--accent)]"
+            >
+              {page.canonicalOverride.replace(/^https:\/\//, "").replace(/\/$/, "")}
+            </a>
+          </p>
+        </section>
+      )}
 
       {sector && sectorLabel ? (
         <section className="mb-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5">
