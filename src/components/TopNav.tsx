@@ -105,11 +105,27 @@ export default function TopNav() {
   const menuLinks = (i: number): HTMLAnchorElement[] =>
     Array.from(panelRefs.current[i]?.querySelectorAll("a") ?? []);
 
+  // ArrowDown on a closed trigger: the panel is still display:none when the
+  // same-tick focus() runs (focus on a hidden element is silently ignored),
+  // so defer the focus to an effect that runs AFTER React commits the open
+  // state. If the menu is already open, focus the first link directly.
+  const pendingFocus = useRef<number | null>(null);
+  useEffect(() => {
+    if (openIndex !== null && pendingFocus.current === openIndex) {
+      pendingFocus.current = null;
+      menuLinks(openIndex)[0]?.focus();
+    }
+  }, [openIndex]);
+
   const onTriggerKeyDown = (e: React.KeyboardEvent, i: number) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setOpenIndex(i);
-      requestAnimationFrame(() => menuLinks(i)[0]?.focus());
+      if (openIndex === i) {
+        menuLinks(i)[0]?.focus();
+      } else {
+        pendingFocus.current = i;
+        setOpenIndex(i);
+      }
     }
   };
   const onPanelKeyDown = (e: React.KeyboardEvent, i: number) => {
