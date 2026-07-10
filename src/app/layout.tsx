@@ -30,10 +30,10 @@ export const metadata: Metadata = {
 
 // Footer mega-nav. Mirrors the netify.co.uk footer (components/site-footer.tsx
 // + lib/home-content.ts) so the SASE app carries the same trust/authority and
-// commercial links. SASE-app-native links carry the /sase basePath explicitly (plain anchors miss Next basePath); everything that
-// lives on the marketing site uses absolute https://netify.co.uk URLs; the
-// editorial blog uses its Ghost subdomain. Keep labels in sync with the main
-// site's footer.
+// commercial links. ALL hrefs are ROOT-RELATIVE full public paths (2026-07-10
+// nav spec): in-app links carry the /sase prefix explicitly (plain anchors
+// miss Next's basePath); marketing-site links are root-relative and resolve
+// on the public host. Keep labels in sync with the main site's footer.
 const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
     title: "Platform",
@@ -47,14 +47,14 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
   {
     title: "Resell",
     links: [
-      { label: "BT Business portfolio", href: "https://netify.co.uk/resell/bt-business-services/" },
-      { label: "BT Business Broadband", href: "https://netify.co.uk/resell/bt-business-broadband/" },
-      { label: "BT Business Internet (BTnet)", href: "https://netify.co.uk/resell/bt-business-internet/" },
-      { label: "BT Cloud Voice", href: "https://netify.co.uk/resell/bt-hosted-voip/" },
-      { label: "BT Cloud Security", href: "https://netify.co.uk/resell/bt-cloud-security/" },
-      { label: "BT SD-WAN", href: "https://netify.co.uk/resell/bt-sd-wan/" },
-      { label: "BT SASE", href: "https://netify.co.uk/resell/bt-sase/" },
-      { label: "Virgin Media Business", href: "https://netify.co.uk/resell/virgin-media-business/" },
+      { label: "BT Business portfolio", href: "/resell/bt-business-services/" },
+      { label: "BT Business Broadband", href: "/resell/bt-business-broadband/" },
+      { label: "BT Business Internet (BTnet)", href: "/resell/bt-business-internet/" },
+      { label: "BT Cloud Voice", href: "/resell/bt-hosted-voip/" },
+      { label: "BT Cloud Security", href: "/resell/bt-cloud-security/" },
+      { label: "BT SD-WAN", href: "/resell/bt-sd-wan/" },
+      { label: "BT SASE", href: "/resell/bt-sase/" },
+      { label: "Virgin Media Business", href: "/resell/virgin-media-business/" },
     ],
   },
   {
@@ -72,27 +72,27 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
   {
     title: "Insights & Guidance",
     links: [
-      { label: "Blog & Articles", href: "https://netify.co.uk/insights/" },
+      { label: "Blog & Articles", href: "/insights/" },
       { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
-      { label: "Netify Resources", href: "https://netify.co.uk/resources/" },
-      { label: "Healthcare Trust & Evidence", href: "https://netify.co.uk/healthcare-trust-and-evidence/" },
-      { label: "Vendor Comparison Index", href: "https://netify.co.uk/vendor-comparison/" },
-      { label: "Research Methodology", href: "https://netify.co.uk/methodology/" },
+      { label: "Netify Resources", href: "/resources/" },
+      { label: "Healthcare Trust & Evidence", href: "/healthcare-trust-and-evidence/" },
+      { label: "Vendor Comparison Index", href: "/vendor-comparison/" },
+      { label: "Research Methodology", href: "/methodology/" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About Us", href: "https://netify.co.uk/about-netify/" },
-      { label: "How Netify Works", href: "https://netify.co.uk/about-netify-marketplace/" },
-      { label: "How Netify makes money", href: "https://netify.co.uk/how-netify-makes-money/" },
-      { label: "Editorial Policy & Corrections", href: "https://netify.co.uk/editorial-policy/" },
-      { label: "Our Team", href: "https://netify.co.uk/staff-list/" },
-      { label: "Netify Authors", href: "https://netify.co.uk/author-list/" },
-      { label: "Contact Us", href: "https://netify.co.uk/contact/" },
-      { label: "Privacy Policy", href: "https://netify.co.uk/privacy-policy/" },
-      { label: "Cookie Policy", href: "https://netify.co.uk/cookie-policy/" },
-      { label: "Terms and Conditions", href: "https://netify.co.uk/terms-conditions/" },
+      { label: "About Us", href: "/about-netify/" },
+      { label: "How Netify Works", href: "/about-netify-marketplace/" },
+      { label: "How Netify makes money", href: "/how-netify-makes-money/" },
+      { label: "Editorial Policy & Corrections", href: "/editorial-policy/" },
+      { label: "Our Team", href: "/staff-list/" },
+      { label: "Netify Authors", href: "/author-list/" },
+      { label: "Contact Us", href: "/contact/" },
+      { label: "Privacy Policy", href: "/privacy-policy/" },
+      { label: "Cookie Policy", href: "/cookie-policy/" },
+      { label: "Terms and Conditions", href: "/terms-conditions/" },
     ],
   },
 ];

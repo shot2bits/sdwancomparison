@@ -1,23 +1,27 @@
 "use client";
 
 /**
- * Contextual sidebar — deep navigation within the SASE zone only.
+ * Contextual sidebar — "SASE Platform" (2026-07-10 dropdown-spec version).
  *
- * Restructured 2026-07-02 (menu-redesign-plan.md): cross-zone links (the old
- * "NETIFY" master group: Resell / Calculators / Sectors / Learning) moved to
- * the top bar (TopNav.tsx), which is now the only place a visitor switches
- * between Netify's three zones. This sidebar carries the SASE zone's groups,
- * defined once in src/lib/nav.ts and shared with the mobile drawer.
+ * Groups come from src/lib/nav.ts (single source of truth, shared with the
+ * drawer in TopNav). Visible header names the section per spec. The ↗ icon
+ * is computed via isCrossApp() and lands on exactly the "Elsewhere on
+ * Netify" links (the only cross-app hrefs here).
  *
- * Desktop only (hidden lg:flex) — mobile navigation is TopNav's hamburger
- * drawer. Session-aware footer unchanged: supplier/admin areas surface only
- * once signed in.
+ * /sase/admin is NOT in public navigation (2026-07-10 spec — it had been
+ * exposed publicly since Harry's 03/07 retest round): the admin console link
+ * renders only for an authenticated admin session. The session-aware footer
+ * (sign out / supplier prompt) is unchanged. Desktop-only (lg+); below lg
+ * the deep nav lives in TopNav's drawer.
  */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SECTIONS, NAV_CTA, isExternal } from "@/lib/nav";
+import {
+  SECTIONS, SIDEBAR_HEADER, NAV_CTA, CURRENT_APP,
+  isCrossApp, appOf, toAppHref,
+} from "@/lib/nav";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null; admin?: boolean };
 
@@ -32,64 +36,68 @@ export default function SideNav() {
     setSession({ authenticated: false });
   }
 
-  // Active = the SINGLE longest matching href (exact or true sub-path), so
-  // e.g. on /opportunities/board only "Opportunity board" lights, not
-  // "Post a need" (/opportunities) as well.
+  // Single best active match (exact or true sub-path, longest wins), compared
+  // against the in-app pathname (basePath already stripped by Next).
   const path = pathname.replace(/\/$/, "");
   const matches = (href: string) => {
-    if (isExternal(href)) return false;
-    const base = href.replace(/\/$/, "");
+    if (href.includes("?")) return false; // prefill links are actions, not pages
+    if (appOf(href) !== "sase") return false;
+    const base = toAppHref(href).replace(/\/$/, "");
     if (base === "") return path === "";
     return path === base || path.startsWith(`${base}/`);
   };
-  const activeHref = [...SECTIONS.flatMap((s) => s.links.map((l) => l.href)), "/supplier", "/admin"]
+  const activeHref = [...SECTIONS.flatMap((s) => s.links.map((l) => l.href)), "/sase/admin/"]
     .filter(matches)
     .sort((a, b) => b.length - a.length)[0];
-  const linkCls = (href: string) => {
-    const active = href === activeHref;
-    return `block rounded-md px-3 py-1.5 text-sm no-underline transition-colors ${active ? "bg-amber-500/15 text-[var(--ink-900)] font-medium" : "text-[var(--ink-700)] hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]"}`;
+
+  const linkCls = (href: string) =>
+    `block rounded-md px-3 py-1.5 text-sm no-underline transition-colors ${
+      href === activeHref
+        ? "bg-amber-500/15 text-[var(--ink-900)] font-medium"
+        : "text-[var(--ink-700)] hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]"
+    }`;
+
+  const renderLink = (l: { label: string; href: string }, sectionTitle: string) => {
+    const cross = isCrossApp(l.href, CURRENT_APP);
+    const inner = (
+      <>
+        {l.label}
+        {cross && <span aria-hidden="true" className="text-[var(--ink-400,#9ca3af)]"> ↗</span>}
+      </>
+    );
+    return appOf(l.href) === "sase" ? (
+      <Link key={`${sectionTitle}-${l.href}`} href={toAppHref(l.href)} className={linkCls(l.href)}>{inner}</Link>
+    ) : (
+      <a key={`${sectionTitle}-${l.href}`} href={l.href} className={linkCls(l.href)}>{inner}</a>
+    );
   };
-  const extCls =
-    "block rounded-md px-3 py-1.5 text-sm no-underline text-[var(--ink-700)] transition-colors hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]";
 
   return (
-    // Desktop only — mobile nav lives in TopNav's drawer. top-12 clears the
-    // sticky 48px top bar.
     <aside className="hidden lg:flex fixed left-0 top-12 bottom-0 w-60 flex-col border-r border-[var(--ink-200)] bg-[var(--paper-raised,#f4f4f5)]/60 px-3 py-5 z-20">
-      <p className="px-3 mb-4 text-[13px] font-semibold tracking-tight text-[var(--ink-900)]">SASE Marketplace</p>
-      <nav className="flex-1 space-y-5 overflow-y-auto" aria-label="Section">
+      {/* Visible section header (spec) */}
+      <p className="px-3 mb-4 text-[13px] font-semibold tracking-tight text-[var(--ink-900)]">{SIDEBAR_HEADER}</p>
+      <nav className="flex-1 space-y-5 overflow-y-auto" aria-label={SIDEBAR_HEADER}>
         {SECTIONS.map((s) => (
           <div key={s.title}>
             <p className="eyebrow px-3 mb-1.5">{s.title}</p>
-            <div className="space-y-0.5">
-              {s.links.map((l) =>
-                isExternal(l.href) ? (
-                  <a key={l.href} href={l.href} className={extCls}>
-                    {l.label}<span className="text-[var(--ink-400,#9ca3af)]"> ↗</span>
-                  </a>
-                ) : (
-                  <Link key={l.href} href={l.href} className={linkCls(l.href)}>{l.label}</Link>
-                ),
-              )}
-            </div>
+            <div className="space-y-0.5">{s.links.map((l) => renderLink(l, s.title))}</div>
           </div>
         ))}
-        {session?.authenticated && (session.role === "supplier" || session.role === "netify") && (
-          <div>
-            <p className="eyebrow px-3 mb-1.5">My account</p>
-            <div className="space-y-0.5"><Link href="/supplier" className={linkCls("/supplier")}>Supplier dashboard</Link></div>
-          </div>
-        )}
+        {/* Admin console: session-gated, never public (spec) */}
         {session?.authenticated && session.admin && (
           <div>
             <p className="eyebrow px-3 mb-1.5">Admin</p>
-            <div className="space-y-0.5"><Link href="/admin" className={linkCls("/admin")}>Admin console</Link></div>
+            <div className="space-y-0.5">
+              <Link href="/admin" className={linkCls("/sase/admin/")}>Admin console</Link>
+            </div>
           </div>
         )}
       </nav>
 
       <div className="pt-4 mt-4 border-t border-[var(--ink-200,#e5e5e5)] space-y-2">
-        <Link href={NAV_CTA.href} className="block text-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Build an RFP</Link>
+        <Link href={toAppHref(NAV_CTA.href)} className="block text-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
+          {NAV_CTA.label}
+        </Link>
         {session === null ? null : session.authenticated ? (
           <div className="px-3 text-xs text-[var(--ink-600)]">
             <p className="truncate">{session.email}{session.vendor_slug ? ` · ${session.vendor_slug}` : session.admin ? " · admin" : ""}</p>

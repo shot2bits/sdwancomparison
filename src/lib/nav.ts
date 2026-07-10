@@ -1,21 +1,21 @@
 /**
- * Navigation config — single source of truth for TopNav + SideNav.
+ * Navigation config — single source of truth for TopNav + SideNav (this app).
  *
- * Unified with the main site (netify-bt-broadband-reseller lib/nav.ts) per
- * menu-redesign-plan.md, 2026-07-02. Netify's navigation is split into three
- * zones: SASE Marketplace / Buy BT / Resell BT. This entire app IS the SASE
- * zone, so:
+ * 2026-07-10 dropdown spec, rebased onto the 8 July main (Harry's testing
+ * rounds). Mirrors the marketing site's lib/nav.ts so both deployments render
+ * an identical top bar. Rules:
  *
- *   • TopNav (TopNav.tsx)   = zone switching + global pages. "SASE
- *     Marketplace" is always the active zone here. No dropdowns — the top
- *     menu never repeats sidebar content.
- *   • SideNav (SideNav.tsx) = deep navigation within the SASE zone only.
- *     The old "NETIFY" master group (Resell/Calculators/Sectors/Learning)
- *     is gone: cross-zone links live in the top bar now.
- *
- * URL policy: in-app routes are relative (basePath /sase is applied by
- * next.config). Anything on the marketing site is absolute
- * https://netify.co.uk/… . All URLs verified against the live sitemap.
+ * • Every internal link is ROOT-RELATIVE. Cross-app (marketing) links are
+ *   root-relative plain <a> — correct on the public host netify.co.uk (the
+ *   subdomains 301 there; the raw .vercel.app host is proxy-origin only).
+ * • Hrefs are stored as FULL PUBLIC PATHS (/sase/... for in-app routes);
+ *   renderers strip the /sase basePath via toAppHref() before next/link.
+ * • One canonical RFP Builder URL: /sase/rfp-builder/ (trailing slash —
+ *   matches canonicals + sitemap; skipTrailingSlashRedirect → no redirects).
+ * • ↗ appears if and only if a link crosses between this app and the
+ *   marketing site — computed via isCrossApp(), never hard-coded.
+ * • /sase/admin is NOT in public navigation (spec). The admin console link
+ *   renders only for an authenticated admin session (SideNav).
  */
 
 export interface NavLink {
@@ -23,122 +23,178 @@ export interface NavLink {
   href: string;
 }
 
+export interface NavGroup {
+  label: string;
+  href?: string;
+  items?: NavLink[];
+}
+
 export interface NavSection {
   title: string;
   links: NavLink[];
 }
 
-export const isExternal = (href: string) => href.startsWith("http");
+export type AppNamespace = "sase" | "marketing";
 
-// ── Top bar: the three zones. This app is the SASE zone (active). ──────────
-export const ZONE_LINKS: NavLink[] = [
-  { label: "SASE Marketplace", href: "/" },
-  { label: "Buy BT", href: "https://netify.co.uk/bt-fortinet-meraki/" },
-  { label: "Resell BT", href: "https://netify.co.uk/resell/bt-business-services/" },
+export function appOf(href: string): AppNamespace {
+  const path = href.split(/[?#]/)[0];
+  return path === "/sase" || path === "/sase/" || path.startsWith("/sase/") ? "sase" : "marketing";
+}
+
+export function isCrossApp(href: string, currentApp: AppNamespace): boolean {
+  return appOf(href) !== currentApp;
+}
+
+/** This entire deployment is the /sase app. */
+export const CURRENT_APP: AppNamespace = "sase";
+
+/** Strip the /sase basePath for next/link (which re-applies it). Keeps query
+ *  strings and trailing slashes intact. */
+export function toAppHref(href: string): string {
+  if (href === "/sase" || href === "/sase/") return "/";
+  return href.startsWith("/sase/") ? href.slice("/sase".length) : href;
+}
+
+// ── TOP MENU (identical to the marketing site's) ────────────────────────────
+export const TOP_MENU: NavGroup[] = [
+  {
+    label: "Compare & Shortlist",
+    href: "/sase/",
+    items: [
+      { label: "Marketplace", href: "/sase/" },
+      { label: "Shortlist builder", href: "/sase/shortlist/" },
+      { label: "All vendors", href: "/sase/vendors/" },
+      { label: "Best by sector", href: "/sase/best/" },
+      { label: "Vendor comparison hub", href: "/vendor-comparison/" },
+    ],
+  },
+  {
+    label: "RFP Builder",
+    href: "/sase/rfp-builder/",
+    items: [
+      { label: "Build an RFP", href: "/sase/rfp-builder/" },
+      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
+      { label: "Question bank", href: "/sase/rfp-builder/questions/" },
+      { label: "RFP for Healthcare", href: "/sase/rfp-builder/?prefill=1&sector=healthcare" },
+      { label: "RFP for Financial services", href: "/sase/rfp-builder/?prefill=1&sector=financial_services" },
+      { label: "RFP for Retail", href: "/sase/rfp-builder/?prefill=1&sector=retail_ecommerce" },
+      { label: "RFP for Manufacturing", href: "/sase/rfp-builder/?prefill=1&sector=manufacturing" },
+    ],
+  },
+  {
+    label: "BT Solutions",
+    href: "/resell/bt-business-services/",
+    items: [
+      { label: "Buy BT", href: "/bt-fortinet-meraki/" },
+      { label: "Resell BT", href: "/resell/bt-business-services/" },
+      { label: "Become a BT reseller", href: "/go/bt-reseller-application/" },
+      { label: "Cloud Voice pricing calculator", href: "/tools/bt-cloud-voice-pricing-calculator/" },
+      { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/" },
+      { label: "Leased line cost calculator", href: "/bt-leased-line-cost-calculator-tool/" },
+    ],
+  },
+  { label: "Insights", href: "/insights/" },
+  {
+    label: "About",
+    href: "/about-netify/",
+    items: [
+      { label: "About Netify", href: "/about-netify/" },
+      { label: "Contact", href: "/contact/" },
+    ],
+  },
 ];
 
-// ── Top bar: global pages (never in the sidebar). ──────────────────────────
-// "Sign in" is the account entry point for buyers, suppliers and admins —
-// previously none of those areas was reachable from the menu (Harry's
-// retest, 03/07/2026). /account signs buyers in and signposts the rest.
-export const GLOBAL_LINKS: NavLink[] = [
-  { label: "Insights", href: "https://netify.co.uk/insights/" },
-  { label: "About", href: "https://netify.co.uk/about-netify/" },
-  { label: "Contact", href: "https://netify.co.uk/contact/" },
-  { label: "Sign in", href: "/account" },
-];
+export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
+export const NAV_CTA: NavLink = { label: "Build an RFP", href: "/sase/rfp-builder/" };
 
-export const NAV_CTA: NavLink = { label: "Build RFP", href: "/rfp-builder" };
+// ── SIDEBAR — "SASE Platform" (this app's contextual deep nav) ──────────────
+export const SIDEBAR_HEADER = "SASE Platform";
 
-// ── Sidebar: deep nav within the SASE zone. ────────────────────────────────
-// Mirrors the main site's SASE sidebar groups (Start / Compare / Build an
-// RFP / By sector), then the app-native groups that only exist here.
 export const SECTIONS: NavSection[] = [
   {
     title: "Start",
     links: [
-      { label: "Start here", href: "/" },
-      { label: "How it works", href: "/how-it-works" },
-      { label: "Methodology", href: "https://netify.co.uk/methodology/" },
+      { label: "Start here", href: "/sase/" },
+      { label: "How it works", href: "/sase/how-it-works/" },
     ],
   },
   {
     title: "Compare",
     links: [
-      { label: "All providers", href: "https://netify.co.uk/marketplace/" },
-      { label: "Shortlist builder", href: "/shortlist" },
-      { label: "All vendors", href: "/vendors" },
-      { label: "Best by sector", href: "/best" },
-      { label: "Vendor comparison hub", href: "https://netify.co.uk/vendor-comparison/" },
-      { label: "SD-WAN research hub", href: "https://netify.co.uk/sd-wan/" },
+      { label: "Shortlist builder", href: "/sase/shortlist/" },
+      { label: "All vendors", href: "/sase/vendors/" },
+      { label: "Best by sector", href: "/sase/best/" },
     ],
   },
   {
     title: "Build an RFP",
-    // The old-site SD-WAN RFI Builder link was removed here: it redirects to
-    // this RFP Builder anyway, so listing both read as two competing tools
-    // (Harry's evaluation, 03/07/2026).
     links: [
-      { label: "RFP builder", href: "/rfp-builder" },
-      { label: "Sample RFP", href: "/rfp-builder/sample-rfp" },
-      { label: "Question bank", href: "/rfp-builder/questions" },
+      { label: "RFP builder", href: "/sase/rfp-builder/" },
+      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
+      { label: "Question bank", href: "/sase/rfp-builder/questions/" },
     ],
   },
   {
     title: "By sector",
-    // Vendor-neutral, consistent routing (Harry's evaluation, 03/07/2026):
-    // every sector starts the RFP Builder preloaded for that sector — the
-    // agent opens with the sector's usual regulations. The old-site sector
-    // articles stay live for search, just not in the app's nav.
+    // Every sector starts the RFP Builder preloaded for that sector — the
+    // agent opens with the sector's usual regulations (Harry's evaluation,
+    // 03/07/2026). The marketing sector articles stay live for search.
     links: [
-      { label: "Healthcare", href: "/rfp-builder?prefill=1&sector=healthcare" },
-      { label: "Financial services", href: "/rfp-builder?prefill=1&sector=financial_services" },
-      { label: "Retail", href: "/rfp-builder?prefill=1&sector=retail_ecommerce" },
-      { label: "Manufacturing", href: "/rfp-builder?prefill=1&sector=manufacturing" },
+      { label: "Healthcare", href: "/sase/rfp-builder/?prefill=1&sector=healthcare" },
+      { label: "Financial services", href: "/sase/rfp-builder/?prefill=1&sector=financial_services" },
+      { label: "Retail", href: "/sase/rfp-builder/?prefill=1&sector=retail_ecommerce" },
+      { label: "Manufacturing", href: "/sase/rfp-builder/?prefill=1&sector=manufacturing" },
     ],
   },
   {
     title: "Popular vendors",
     links: [
-      { label: "Palo Alto Networks", href: "/vendors/palo-alto-networks" },
-      { label: "Zscaler", href: "/vendors/zscaler" },
-      { label: "Fortinet", href: "/vendors/fortinet" },
-      { label: "Check Point", href: "/vendors/check-point" },
-      { label: "BT Business", href: "/vendors/bt-business" },
-      { label: "Versa Networks", href: "/vendors/versa-networks" },
+      { label: "Palo Alto Networks", href: "/sase/vendors/palo-alto-networks/" },
+      { label: "Zscaler", href: "/sase/vendors/zscaler/" },
+      { label: "Fortinet", href: "/sase/vendors/fortinet/" },
+      { label: "Check Point", href: "/sase/vendors/check-point/" },
+      { label: "BT Business", href: "/sase/vendors/bt-business/" },
+      { label: "Versa Networks", href: "/sase/vendors/versa-networks/" },
     ],
   },
   {
     title: "Alternatives",
     links: [
-      { label: "Colt alternatives", href: "/alternatives/colt-technology-services" },
-      { label: "Versa alternatives", href: "/alternatives/versa-networks" },
-      { label: "GTT alternatives", href: "/alternatives/gtt" },
-      { label: "Juniper alternatives", href: "/alternatives/juniper-networks" },
+      { label: "Colt alternatives", href: "/sase/alternatives/colt-technology-services/" },
+      { label: "Versa alternatives", href: "/sase/alternatives/versa-networks/" },
+      { label: "GTT alternatives", href: "/sase/alternatives/gtt/" },
+      { label: "Juniper alternatives", href: "/sase/alternatives/juniper-networks/" },
     ],
   },
   {
     title: "Engage",
     links: [
-      { label: "Opportunity board", href: "/opportunities/board" },
-      { label: "Post a need", href: "/opportunities" },
+      { label: "Opportunity board", href: "/sase/opportunities/board/" },
+      { label: "Post a need", href: "/sase/opportunities/" },
     ],
   },
   {
     title: "Suppliers",
     links: [
-      { label: "For vendors and providers", href: "/for-suppliers" },
-      { label: "Supplier dashboard", href: "/supplier" },
+      { label: "For vendors and providers", href: "/sase/for-suppliers/" },
+      { label: "Supplier dashboard", href: "/sase/supplier/" },
     ],
   },
   {
     title: "Your account",
-    // Discoverable entry points for every role (Harry's retest, 03/07/2026:
-    // supplier/admin areas were unreachable without knowing the URL). Each
-    // page gates itself; the admin console is harmless to expose.
+    // Sign-in entry point for buyers and suppliers (Harry's retest,
+    // 03/07/2026). The admin console is deliberately NOT here — it must not
+    // appear in public navigation (2026-07-10 spec); SideNav renders it only
+    // for an authenticated admin session.
+    links: [{ label: "Sign in / my account", href: "/sase/account/" }],
+  },
+  {
+    title: "Elsewhere on Netify",
     links: [
-      { label: "Sign in / my account", href: "/account" },
-      { label: "Netify admin", href: "/admin" },
+      { label: "All providers", href: "/marketplace/" },
+      { label: "Vendor comparison hub", href: "/vendor-comparison/" },
+      { label: "SD-WAN research hub", href: "/sd-wan/" },
+      { label: "Methodology", href: "/methodology/" },
     ],
   },
 ];
