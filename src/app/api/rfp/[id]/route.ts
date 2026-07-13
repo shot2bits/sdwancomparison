@@ -2,7 +2,7 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, saveProject, publicProject, hasAcceptedNda, kvConfigured } from "@/lib/rfp-store";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
-import { recordRfpBenchmark, indexRfpForBuyer } from "@/lib/rfp-store";
+import { recordRfpBenchmark, recordDemandSample, indexRfpForBuyer } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 
 export const runtime = "nodejs";
@@ -137,6 +137,9 @@ export async function PUT(req: Request, ctx: Ctx) {
   if (existing.status !== "published" && saved.status === "published") {
     const mandatory = saved.rfp_sections.flatMap((s) => s.questions.filter((q) => q.mandatory && q.feature_id !== "custom").map((q) => q.feature_id));
     try { await recordRfpBenchmark(saved.buyer.sector, mandatory); } catch { /* best effort */ }
+    // Demand flywheel for the cost/TCO page: anonymised, month-bucketed,
+    // real BuyerContext fields only. Never blocks the publish.
+    try { await recordDemandSample(saved.buyer, mandatory); } catch { /* best effort */ }
   }
   return Response.json(saved, { headers: cors });
 }

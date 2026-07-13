@@ -19,6 +19,7 @@ import {
   type RfpThread,
   type RfpResponse,
   type NdaAcceptance,
+  type BuyerContext,
 } from "@/lib/rfp-types";
 
 const URL_ENV = process.env.KV_REST_API_URL;
@@ -248,6 +249,118 @@ export async function recordCompletenessSample(ratio: number): Promise<void> {
   b.response_completeness_samples = [...b.response_completeness_samples, Math.max(0, Math.min(1, ratio))].slice(-500);
   b.updated = Date.now();
   await setJson("rfp:benchmark", b);
+}
+
+/* ------------------------------------------------------------------ */
+/* Demand flywheel: month-bucketed anonymised aggregates feeding the   */
+/* cost/TCO demand-stats endpoint (Phase 1, cost build, July 2026).    */
+/* Records ONLY fields that exist on BuyerContext, plus mandatory      */
+/* methodology feature ids, at the moment an RFP transitions to        */
+/* published. No identity, no free text, no organisation names, no     */
+/* timestamps finer than the calendar-month bucket. The endpoint that  */
+/* reads this applies the n >= 20 suppression gate; this recorder      */
+/* stores counters only.                                               */
+/* ------------------------------------------------------------------ */
+
+export type DemandBucket = {
+  samples: number;
+  operating_model: Record<string, number>;
+  product_scope: Record<string, number>;
+  regions: Record<string, number>;
+  site_bands: Record<string, number>;
+  mandatory_security_features: Record<string, number>;
+  updated: number;
+};
+
+function emptyDemandBucket(): DemandBucket {
+  return {
+    samples: 0,
+    operating_model: {},
+    product_scope: {},
+    regions: {},
+    site_bands: {},
+    mandatory_security_features: {},
+    updated: 0,
+  };
+}
+
+/** Security-relevant feature ids from the 40-feature methodology matrix. */
+const SECURITY_FEATURE_IDS = new Set([
+  "f27_integrated_next_generation_firewall",
+  "f28_full_sase_platform",
+  "f29_sse_ecosystem_integration",
+  "f30_zero_trust_network_access",
+  "f31_secure_web_gateway",
+  "f32_casb_capability",
+  "f33_data_loss_prevention",
+  "f34_remote_user_access",
+  "f35_soc_siem_soar_integration",
+]);
+
+/** Site counts are stored as bands only, never exact figures. */
+function siteBand(count: number | null): string | null {
+  if (count == null || count < 1) return null;
+  if (count <= 5) return "1 to 5";
+  if (count <= 25) return "6 to 25";
+  if (count <= 100) return "26 to 100";
+  if (count <= 500) return "101 to 500";
+  return "more than 500";
+}
+
+function demandBucketKey(d: Date = new Date()): string {
+  return `rfp:demand:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Record an anonymised publish-time sample. Best effort, never throws. */
+export async function recordDemandSample(
+  buyer: BuyerContext,
+  mandatoryFeatureIds: string[],
+): Promise<void> {
+  if (!kvConfigured()) return;
+  const key = demandBucketKey();
+  const b = (await getJson<DemandBucket>(key)) ?? emptyDemandBucket();
+  const bump = (rec: Record<string, number>, k: string) => {
+    rec[k] = (rec[k] ?? 0) + 1;
+  };
+  b.samples += 1;
+  if (buyer.operating_model) bump(b.operating_model, buyer.operating_model);
+  if (buyer.product_scope) bump(b.product_scope, buyer.product_scope);
+  for (const r of buyer.regions ?? []) bump(b.regions, r);
+  const sb = siteBand(buyer.site_count);
+  if (sb) bump(b.site_bands, sb);
+  for (const fid of new Set(mandatoryFeatureIds)) {
+    if (SECURITY_FEATURE_IDS.has(fid)) bump(b.mandatory_security_features, fid);
+  }
+  b.updated = Date.now();
+  await setJson(key, b);
+}
+
+/**
+ * Merged aggregate across the three most recent calendar-month buckets,
+ * approximating a rolling 90-day window (the endpoint states this basis).
+ */
+export async function getDemandAggregate(): Promise<DemandBucket> {
+  const merged = emptyDemandBucket();
+  if (!kvConfigured()) return merged;
+  const now = new Date();
+  for (let i = 0; i < 3; i++) {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+    const b = await getJson<DemandBucket>(demandBucketKey(d));
+    if (!b) continue;
+    merged.samples += b.samples ?? 0;
+    const pairs: [Record<string, number>, Record<string, number> | undefined][] = [
+      [merged.operating_model, b.operating_model],
+      [merged.product_scope, b.product_scope],
+      [merged.regions, b.regions],
+      [merged.site_bands, b.site_bands],
+      [merged.mandatory_security_features, b.mandatory_security_features],
+    ];
+    for (const [dst, src] of pairs) {
+      for (const [k, v] of Object.entries(src ?? {})) dst[k] = (dst[k] ?? 0) + v;
+    }
+    merged.updated = Math.max(merged.updated, b.updated ?? 0);
+  }
+  return merged;
 }
 
 /* ------------------------------------------------------------------ */

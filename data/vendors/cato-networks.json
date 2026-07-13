@@ -77,8 +77,8 @@
     "Customer does not own the underlay; circuits sourced separately, so multi-supplier coordination remains.",
     "Less mature than incumbents for very large multinational deployments with heavy legacy MPLS estates."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-13",
+  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP. pop_count corrected to 100 on 2026-07-13: catonetworks.com Global Private Backbone page states 100+ PoPs worldwide.",
   "deployment_speed": "hours",
   "regions": {
     "uk_ireland": "yes",
@@ -145,7 +145,7 @@
     "chromeos": "partial",
     "agentless": "yes"
   },
-  "pop_count": 85,
+  "pop_count": 100,
   "sla_availability_pct": 99.999,
   "support_model": {
     "follow_the_sun_24x7": "yes",
