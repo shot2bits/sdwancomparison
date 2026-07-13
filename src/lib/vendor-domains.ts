@@ -47,7 +47,7 @@ export function isNetifyDomain(domain: string): boolean {
   return NETIFY_DOMAINS.includes(domain.toLowerCase());
 }
 
-const FREE_WEBMAIL = new Set(["gmail.com", "outlook.com", "hotmail.com", "yahoo.com", "icloud.com", "aol.com", "proton.me", "gmx.com", "live.com", "msn.com"]);
-export function isBusinessDomain(domain: string): boolean {
-  return !FREE_WEBMAIL.has(domain.toLowerCase());
-}
+// NOTE: the free/consumer webmail blocklist lives in lib/access-control.ts
+// (FREE_EMAIL_DOMAINS, plus live KV extras from the admin console). A second
+// FREE_WEBMAIL set that used to sit here (behind an unused isBusinessDomain
+// helper) was removed so there is exactly one list to maintain.

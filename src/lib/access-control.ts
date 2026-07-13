@@ -24,7 +24,25 @@ export const FREE_EMAIL_DOMAINS: ReadonlySet<string> = new Set([
   // Mainstream consumer webmail
   "gmail.com", "googlemail.com",
   "outlook.com", "hotmail.com", "hotmail.co.uk", "live.com", "live.co.uk", "msn.com", "windowslive.com",
+  // Microsoft consumer regional variants - all are the same free Outlook
+  // service, so every ccTLD Microsoft issues mailboxes on is blocked too
+  "outlook.co.uk", "outlook.ie", "outlook.de", "outlook.fr", "outlook.es", "outlook.it", "outlook.pt",
+  "outlook.at", "outlook.be", "outlook.cz", "outlook.dk", "outlook.gr", "outlook.hu", "outlook.lv",
+  "outlook.sk", "outlook.com.au", "outlook.co.nz", "outlook.co.il", "outlook.in", "outlook.jp",
+  "outlook.kr", "outlook.my", "outlook.ph", "outlook.sa", "outlook.sg", "outlook.co.th",
+  "outlook.com.tr", "outlook.com.vn", "outlook.com.br", "outlook.com.ar", "outlook.cl",
+  "hotmail.fr", "hotmail.de", "hotmail.it", "hotmail.es", "hotmail.be", "hotmail.nl", "hotmail.ca",
+  "hotmail.se", "hotmail.no", "hotmail.dk", "hotmail.fi", "hotmail.gr", "hotmail.co.jp",
+  "hotmail.co.il", "hotmail.com.tr", "hotmail.com.br", "hotmail.com.ar", "hotmail.com.mx", "hotmail.cl",
+  "live.fr", "live.de", "live.it", "live.es", "live.nl", "live.be", "live.ie", "live.at",
+  "live.se", "live.dk", "live.no", "live.fi", "live.ca", "live.com.au", "live.com.ar", "live.com.mx",
+  "live.jp", "live.cn", "live.in", "live.hk", "live.com.sg", "live.com.pt",
   "yahoo.com", "yahoo.co.uk", "ymail.com", "rocketmail.com",
+  // Yahoo regional variants
+  "yahoo.fr", "yahoo.de", "yahoo.it", "yahoo.es", "yahoo.ie", "yahoo.ca", "yahoo.at", "yahoo.be",
+  "yahoo.nl", "yahoo.se", "yahoo.dk", "yahoo.no", "yahoo.fi", "yahoo.pl", "yahoo.pt", "yahoo.gr",
+  "yahoo.ro", "yahoo.ch", "yahoo.com.au", "yahoo.co.nz", "yahoo.co.in", "yahoo.in", "yahoo.co.jp",
+  "yahoo.com.br", "yahoo.com.ar", "yahoo.com.mx", "yahoo.com.sg", "yahoo.com.hk", "yahoo.com.tw",
   "icloud.com", "me.com", "mac.com",
   "aol.com", "aim.com",
   "proton.me", "protonmail.com", "pm.me",
@@ -43,6 +61,8 @@ export const FREE_EMAIL_DOMAINS: ReadonlySet<string> = new Set([
   "libero.it", "virgilio.it", "alice.it",
   "naver.com", "hanmail.net", "daum.net", "qq.com", "163.com", "126.com", "sina.com",
   "rediffmail.com",
+  "mail.ru", "bk.ru", "inbox.ru", "list.ru", "rambler.ru",
+  "seznam.cz", "wp.pl", "onet.pl", "interia.pl", "o2.pl",
   // Disposable / throwaway
   "mailinator.com", "guerrillamail.com", "10minutemail.com", "trashmail.com",
   "yopmail.com", "temp-mail.org", "tempmail.com", "getnada.com", "dispostable.com",
