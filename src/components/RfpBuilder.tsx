@@ -385,7 +385,66 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       return;
     }
 
-    if (p.get("prefill") !== "1") return;
+    const prefillParam = p.get("prefill");
+    if (!prefillParam) return;
+
+    // Cost estimator handoff: ?prefill=<base64url JSON of the estimator
+    // inputs> (users, sites, regions, securityDepth, deliveryModel,
+    // termYears). Only fields with a matching intake field are mapped;
+    // extras (termYears) are ignored. The legacy ?prefill=1 form with
+    // individual query params (shortlist and sector links) is unchanged.
+    if (prefillParam !== "1") {
+      try {
+        const b64 = prefillParam.replace(/-/g, "+").replace(/_/g, "/");
+        const est = JSON.parse(atob(b64 + "=".repeat((4 - (b64.length % 4)) % 4))) as {
+          users?: number;
+          sites?: number;
+          regions?: string[];
+          securityDepth?: string;
+          deliveryModel?: string;
+        };
+        const REGION_MAP: Record<string, string[]> = {
+          "uk-europe": ["uk_ireland", "europe"],
+          "north-america": ["north_america"],
+          apac: ["asia_pacific"],
+          "middle-east-africa": ["middle_east_africa"],
+          latam: ["latin_america"],
+        };
+        const regions = (est.regions ?? []).flatMap((r) => REGION_MAP[r] ?? []);
+        const orgSize =
+          typeof est.users === "number"
+            ? est.users >= 5000
+              ? "large_global_enterprise"
+              : est.users >= 500
+                ? "mid_market"
+                : "small_business"
+            : "any";
+        const buyer: Record<string, unknown> = {
+          sector: null,
+          organisation_size: orgSize,
+          regions,
+          compliance: [],
+          operating_model:
+            est.deliveryModel === "managed"
+              ? "managed"
+              : est.deliveryModel === "co-managed"
+                ? "co_managed"
+                : est.deliveryModel === "diy"
+                  ? "diy"
+                  : "any",
+          product_scope: est.securityDepth === "sse-only" ? "sse_only" : "full_sase",
+          site_count: typeof est.sites === "number" ? est.sites : null,
+          notes: "Prefilled from the SASE cost estimator (Netify SASE Methodology v2026.1).",
+        };
+        prefilled.current = true;
+        setMode("manual");
+        startRfp(buyer);
+      } catch {
+        /* malformed prefill payloads are ignored; the builder starts clean */
+      }
+      return;
+    }
+
     prefilled.current = true;
     const buyer: Record<string, unknown> = {
       sector: p.get("sector") || null,

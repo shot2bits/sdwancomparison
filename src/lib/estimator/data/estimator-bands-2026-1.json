@@ -1,0 +1,168 @@
+{
+  "methodologyVersion": "2026.1",
+  "currency": "GBP",
+  "assumptionReviewRequired": true,
+  "reviewNote": "Every band below is a Netify methodology assumption requiring sign-off by Robert Sturt and Harry Yelland before production. Bands are deliberately wide: the estimator communicates order of magnitude and cost-driver shape, never a quote.",
+  "disclaimer": "Indicative bands from the Netify SASE Methodology v2026.1 calibration, not vendor quotes.",
+  "perUserMonthly": {
+    "baseNetworking": {
+      "low": 3,
+      "high": 8,
+      "basis": "Blended SD-WAN-as-component and access licensing per user per month across observed market range at list, mid-scale."
+    },
+    "securityByDepth": {
+      "sse-only": {
+        "low": 3,
+        "high": 9,
+        "basis": "SWG, CASB, ZTNA core bundle per user per month."
+      },
+      "full-sase": {
+        "low": 5,
+        "high": 13,
+        "basis": "SSE plus SD-WAN component, FWaaS and unified policy per user per month."
+      },
+      "full-sase-plus-advanced": {
+        "low": 8,
+        "high": 19,
+        "basis": "Full SASE plus DLP, DEM and advanced threat, commonly premium-tier."
+      }
+    }
+  },
+  "volumeMultiplierByUsers": [
+    {
+      "maxUsers": 500,
+      "low": 1.05,
+      "high": 1.15,
+      "basis": "Sub-500 seats rarely reach programme pricing; narrow negotiation spread, market spread carried in per-user bands."
+    },
+    {
+      "maxUsers": 2500,
+      "low": 0.9,
+      "high": 1.0,
+      "basis": "First enterprise discount break."
+    },
+    {
+      "maxUsers": 10000,
+      "low": 0.75,
+      "high": 0.85,
+      "basis": "Volume programme range."
+    },
+    {
+      "maxUsers": 250000,
+      "low": 0.6,
+      "high": 0.7,
+      "basis": "Large-enterprise negotiated range."
+    }
+  ],
+  "perSiteMonthly": {
+    "low": 60,
+    "high": 180,
+    "basis": "Edge device amortisation, site licence and site-level support per site per month; excludes underlay circuits."
+  },
+  "additionalRegionLoadingPct": {
+    "low": 3,
+    "high": 8,
+    "perRegionBeyondFirst": true,
+    "capPct": 24,
+    "basis": "PoP spread, data residency handling and regional support loading applied to the licence and site subtotal."
+  },
+  "bandwidthLoadingPct": {
+    "managed": {
+      "low": 4,
+      "high": 10
+    },
+    "co-managed": {
+      "low": 5,
+      "high": 12
+    },
+    "diy": {
+      "low": 6,
+      "high": 15
+    },
+    "basis": "Traffic-linked exposure (overage, bursts) as a share of subtotal; DIY carries the monitoring burden so holds the widest exposure."
+  },
+  "deliveryFeePctOfSubtotal": {
+    "managed": {
+      "low": 15,
+      "high": 30,
+      "basis": "Single accountable managed service running networking and security end to end."
+    },
+    "co-managed": {
+      "low": 8,
+      "high": 18,
+      "basis": "Provider runs infrastructure, buyer keeps policy control."
+    },
+    "diy": {
+      "low": 0,
+      "high": 0,
+      "basis": "No external management fee. Internal 24x7 NOC and SOC staffing cost is real but out of scope for an external-spend estimate.",
+      "internalOpsNote": "DIY figures exclude internal staffing, which is typically the largest DIY cost."
+    }
+  },
+  "implementationOneOff": {
+    "perUser": {
+      "low": 2,
+      "high": 6
+    },
+    "perSite": {
+      "low": 150,
+      "high": 600
+    },
+    "minimum": {
+      "low": 5000,
+      "high": 15000
+    },
+    "deliveryMultiplier": {
+      "managed": {
+        "low": 0.8,
+        "high": 1.0,
+        "basis": "Onboarding partly bundled into the managed service."
+      },
+      "co-managed": {
+        "low": 0.9,
+        "high": 1.15
+      },
+      "diy": {
+        "low": 1.1,
+        "high": 1.4,
+        "basis": "Self-run discovery, policy migration and phased rollout commonly overrun."
+      }
+    },
+    "basis": "Discovery, identity integration, policy migration and phased rollout, charged once and amortised over the contract term for the monthly view."
+  },
+  "hiddenRecurringLoadingPct": {
+    "managed": {
+      "low": 4,
+      "high": 8,
+      "basis": "Log retention, overage and renewal uplift exposure; managed contracts bundle more upfront."
+    },
+    "co-managed": {
+      "low": 5,
+      "high": 10
+    },
+    "diy": {
+      "low": 6,
+      "high": 12
+    }
+  },
+  "termMultiplier": {
+    "1": {
+      "low": 1.0,
+      "high": 1.05
+    },
+    "3": {
+      "low": 0.9,
+      "high": 1.0
+    },
+    "5": {
+      "low": 0.85,
+      "high": 0.95
+    },
+    "basis": "Multi-year commitment discount range applied to recurring charges."
+  },
+  "rounding": {
+    "monthlyNearest": 50,
+    "tcoNearest": 1000,
+    "basis": "Bands are rounded so output never implies quote-level precision."
+  }
+}
