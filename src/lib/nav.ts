@@ -62,6 +62,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Build an RFP", href: "/sase/rfp-builder/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
+      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "RFP for Healthcare", href: "/sase/rfp-builder/?prefill=1&sector=healthcare" },
       { label: "RFP for Financial services", href: "/sase/rfp-builder/?prefill=1&sector=financial_services" },
       { label: "RFP for Retail", href: "/sase/rfp-builder/?prefill=1&sector=retail_ecommerce" },
