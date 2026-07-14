@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import GuidedStart from "@/components/GuidedStart";
+import HomeHeroForm from "@/components/HomeHeroForm";
 import { getAllVendors, FEATURES, FEATURE_CATEGORIES } from "@/lib/vendors";
 import { SITE_URL, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -28,19 +29,30 @@ export default function Home() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(sc) }}
         />
       ))}
-      {/* Hero: the single guided front door */}
+      {/* Hero: one action, Shiply-style. The form is the explanation. */}
       <div className="mb-12 fade-rise">
         <p className="eyebrow mb-4">SASE, SSE and SD-WAN marketplace</p>
         <h1 id="page-h1" className="display mb-5" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
-          From a network need to competing offers, in one place.
+          Get competing bids from SASE and SD-WAN suppliers.
         </h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
-          Describe what you need and choose what to do with it: compare a shortlist of {totalCount}
-          {" "}graded vendors, run a reverse auction, open a live quote room, or build a formal RFP.
-          Vendor-neutral, graded against a {featureCount}-feature framework across {categoryCount} categories.
-          Browse and build without an account.
+          Describe your project in about two minutes. Netify builds the RFP for you and publishes
+          it to a curated list of verified vendors and managed service providers. Bids come back
+          in one place, priced privately to you.
         </p>
-        <GuidedStart />
+        <HomeHeroForm />
+        <ol className="mt-8 mb-0 flex list-none flex-wrap items-center gap-x-2 gap-y-1 p-0 text-sm text-[var(--ink-600)]">
+          <li>1. Describe your project</li>
+          <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
+          <li>2. Netify builds the RFP</li>
+          <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
+          <li>3. Publish to curated suppliers</li>
+          <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
+          <li className="font-medium text-[var(--ink-900)]">4. Compare the bids</li>
+        </ol>
+        <p className="mt-3 text-sm text-[var(--ink-500)]">
+          {totalCount} verified vendors and MSPs, graded against a {featureCount}-feature framework across {categoryCount} categories. Methodology v2026.1.
+        </p>
         <div className="flex items-center gap-6 flex-wrap mt-5 text-sm">
           <Link href="/how-it-works" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">How it works</Link>
           <Link href="/vendors" className="no-underline text-[var(--ink-700)] hover:text-[var(--accent)]">Browse {totalCount} vendors</Link>
@@ -48,6 +60,13 @@ export default function Home() {
           <a href="https://netify.co.uk" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">About Netify ↗</a>
         </div>
       </div>
+
+      {/* The four-route chooser, demoted below the single action */}
+      <section className="mb-16">
+        <h2 className="text-xl font-semibold mb-1">Prefer to pick your own route?</h2>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Researching rather than buying, or after prices without a full RFP? Tell Netify what you need and it recommends the right path: shortlist, reverse auction, live quote room or formal RFP.</p>
+        <GuidedStart />
+      </section>
 
       <hr className="rule mb-16" />
 

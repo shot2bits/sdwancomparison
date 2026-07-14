@@ -100,12 +100,21 @@ export default function DescribeWizard() {
   const started = useRef(false);
 
   // Pre-answer from entry links (?scope=sdwan&sector=healthcare), editable.
+  // The homepage hero form carries ?title=, which answers step one: land
+  // straight on scope with the title set (Back shows it, still editable).
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     const s = p.get("scope");
     if (s && SCOPES.some((x) => x.key === s)) setScope(s);
     const sec = p.get("sector");
     if (sec && SECTORS.some((x) => x.key === sec)) setSector(sec);
+    const t = (p.get("title") ?? "").trim();
+    if (t.length >= 8) {
+      setTitle(t.slice(0, 120));
+      setStep(1);
+      started.current = true;
+      fireNetifyEvent("describe_started", { from: "hero" });
+    }
   }, []);
 
   // Live supplier match: refreshed whenever scope, regions or model change.
