@@ -72,7 +72,7 @@ export default async function OpportunityNoticePage({ params }: Props) {
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <NoticeView opportunity={notice} isSample={isSample} />
+          <NoticeView notice={notice} isSample={isSample} />
         </div>
 
         <aside>
