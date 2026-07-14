@@ -82,21 +82,24 @@ export function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const current = activeHref(pathname, NAV_GROUPS);
 
+  // Styling matched to Robert's signed-off mockup (14 July): 11px labels
+  // with 0.07em tracking, 12.5px rows at a 1.9 line rhythm, and the active
+  // page as a solid soft-amber pill rather than a translucent wash.
   const itemCls = (href: string) =>
-    `flex items-center rounded-md px-3 py-[3px] text-[12.5px] leading-5 no-underline transition-colors ${
+    `flex items-center rounded-md px-2 py-[2px] text-[12.5px] leading-[1.9] no-underline transition-colors ${
       href === current
-        ? "bg-amber-500/15 text-[var(--ink-900)] font-medium"
+        ? "bg-amber-100 text-[var(--ink-900)] font-medium"
         : "text-[var(--ink-600,#71717a)] hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]"
     }`;
 
   return (
     <div>
       {NAV_GROUPS.map((group) => (
-        <div key={group.label} className="mb-4">
-          <p className="mb-1 px-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-400,#9ca3af)]">
+        <div key={group.label} className="mb-3">
+          <p className="mb-1 px-2 text-[11px] font-medium uppercase tracking-[0.07em] text-[var(--ink-400,#9ca3af)]">
             {group.label}
           </p>
-          <div className="space-y-px">
+          <div>
             {(group.items ?? []).map((l) => (
               <NavAnchor
                 key={l.href}
@@ -127,7 +130,7 @@ export default function SideNav() {
   const accountActive = pathname.replace(/\/$/, "") === "/account";
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-12 bottom-0 w-60 flex-col border-r border-[var(--ink-200)] bg-[var(--paper-raised,#f4f4f5)]/60 px-3 py-4 z-20">
+    <aside className="hidden lg:flex fixed left-0 top-12 bottom-0 w-60 flex-col border-r border-[var(--ink-200)] bg-white px-3 py-4 z-20">
       <nav className="flex-1 overflow-y-auto" aria-label="Primary">
         <NavList />
         {/* Session-gated: never public */}

@@ -43,6 +43,10 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
       { label: "All vendors", href: "/sase/vendors/" },
+      { label: "Best by sector", href: "/sase/best/" },
+      { label: "Question bank", href: "/sase/rfp-builder/questions/" },
+      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
+      { label: "Open opportunities", href: "/sase/opportunities/board/" },
     ],
   },
   {
@@ -64,10 +68,10 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     // starts the in-app RFP Builder preloaded for that sector, instead of a
     // mixed bag of old-site articles and BT-specific content.
     links: [
-      { label: "Healthcare & Pharma", href: "/sase/rfp-builder/?prefill=1&sector=healthcare" },
-      { label: "Retail & E-commerce", href: "/sase/rfp-builder/?prefill=1&sector=retail_ecommerce" },
-      { label: "Financial Services", href: "/sase/rfp-builder/?prefill=1&sector=financial_services" },
-      { label: "Manufacturing", href: "/sase/rfp-builder/?prefill=1&sector=manufacturing" },
+      { label: "Healthcare & Pharma", href: "/sase/rfp-builder/new/?sector=healthcare" },
+      { label: "Retail & E-commerce", href: "/sase/rfp-builder/new/?sector=retail_ecommerce" },
+      { label: "Financial Services", href: "/sase/rfp-builder/new/?sector=financial_services" },
+      { label: "Manufacturing", href: "/sase/rfp-builder/new/?sector=manufacturing" },
     ],
   },
   {
@@ -75,6 +79,8 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     links: [
       { label: "Blog & Articles", href: "/insights/" },
       { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
+      { label: "SD-WAN Research Hub", href: "/sd-wan/" },
+      { label: "All Providers Directory", href: "/marketplace/" },
       { label: "Netify Resources", href: "/resources/" },
       { label: "Healthcare Trust & Evidence", href: "/healthcare-trust-and-evidence/" },
       { label: "Vendor Comparison Index", href: "/vendor-comparison/" },

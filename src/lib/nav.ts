@@ -43,85 +43,58 @@ export function toAppHref(href: string): string {
   return href.startsWith("/sase/") ? href.slice("/sase".length) : href;
 }
 
-// ── Task-first groups (2026-07-14, Robert's direction) ──────────────────────
-// The sidebar leads with the buyer funnel (start, resume, browse), then the
-// research surface, then suppliers; content sections follow. This deliberately
-// stops mirroring the marketing site's nav: the app is a workflow, not a
-// directory. Every previous link is preserved for internal linking, except
-// the four ?prefill sector entries (query-string CTAs, not pages — they live
-// on the sector and best-for pages instead).
+// ── Capability-named groups (2026-07-14, Robert's mockup sign-off) ─────────
+// Search arrivals land on SASE RFP, SD-WAN providers, sector pages and the
+// like, so menu items carry the arrival vocabulary as specific creation
+// actions ("Create your SASE RFP"), grouped by outcome. Creation clusters
+// first (GET QUOTES, BY SECTOR), research after, suppliers last. Sector
+// actions open the Describe wizard with the sector pre-answered. Links that
+// left the sidebar (vendor profiles, alternatives, BT tools, corporate) live
+// in the footer and research pages, keeping their internal-link equity.
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Get quotes",
     items: [
-      { label: "Start a project", href: "/sase/rfp-builder/new/" },
+      { label: "Create your SASE RFP", href: "/sase/rfp-builder/sase/" },
+      { label: "Create your SD-WAN RFP", href: "/sase/rfp-builder/sd-wan/" },
+      { label: "Create your SSE RFP", href: "/sase/rfp-builder/sse/" },
+      { label: "Create your SASE & SD-WAN RFI", href: "/sase/opportunities/new/" },
       { label: "Your projects", href: "/sase/account/" },
-      { label: "Publish an RFI", href: "/sase/opportunities/" },
-      { label: "Open projects board", href: "/sase/opportunities/board/" },
-      { label: "How it works", href: "/sase/how-it-works/" },
     ],
   },
   {
-    label: "Research the market",
+    label: "By sector",
     items: [
-      { label: "RFP Builder overview", href: "/sase/rfp-builder/" },
+      { label: "Create your Healthcare SASE RFP", href: "/sase/rfp-builder/new/?sector=healthcare" },
+      { label: "Create your Retail SASE RFP", href: "/sase/rfp-builder/new/?sector=retail_ecommerce" },
+      { label: "Create your Manufacturing SASE RFP", href: "/sase/rfp-builder/new/?sector=manufacturing" },
+      { label: "Create your Financial Services SASE RFP", href: "/sase/rfp-builder/new/?sector=financial_services" },
+      { label: "All sector guides", href: "/sase/best/" },
+    ],
+  },
+  {
+    label: "Compare providers",
+    items: [
+      { label: "SASE providers", href: "/sase/vendors/" },
+      { label: "SD-WAN providers", href: "/sd-wan/" },
+      { label: "Managed service providers", href: "/marketplace/" },
       { label: "Shortlist builder", href: "/sase/shortlist/" },
-      { label: "All vendors", href: "/sase/vendors/" },
-      { label: "Best by sector", href: "/sase/best/" },
-      { label: "Vendor comparison hub", href: "/vendor-comparison/" },
+      { label: "Vendor comparisons", href: "/vendor-comparison/" },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
-      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
     ],
   },
   {
     label: "For suppliers",
     items: [
-      { label: "Respond to projects", href: "/sase/for-suppliers/" },
-      { label: "Supplier dashboard", href: "/sase/supplier/" },
-    ],
-  },
-  {
-    label: "Popular vendors",
-    items: [
-      { label: "Palo Alto Networks", href: "/sase/vendors/palo-alto-networks/" },
-      { label: "Zscaler", href: "/sase/vendors/zscaler/" },
-      { label: "Fortinet", href: "/sase/vendors/fortinet/" },
-      { label: "Check Point", href: "/sase/vendors/check-point/" },
-      { label: "BT Business", href: "/sase/vendors/bt-business/" },
-      { label: "Versa Networks", href: "/sase/vendors/versa-networks/" },
-    ],
-  },
-  {
-    label: "Alternatives",
-    items: [
-      { label: "Colt alternatives", href: "/sase/alternatives/colt-technology-services/" },
-      { label: "Versa alternatives", href: "/sase/alternatives/versa-networks/" },
-      { label: "GTT alternatives", href: "/sase/alternatives/gtt/" },
-      { label: "Juniper alternatives", href: "/sase/alternatives/juniper-networks/" },
-    ],
-  },
-  {
-    label: "BT solutions",
-    items: [
-      { label: "Buy BT", href: "/bt-fortinet-meraki/" },
-      { label: "Resell BT", href: "/resell/bt-business-services/" },
-      { label: "Become a BT reseller", href: "/go/bt-reseller-application/" },
-      { label: "Cloud Voice pricing calculator", href: "/tools/bt-cloud-voice-pricing-calculator/" },
-      { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/" },
-      { label: "Leased line cost calculator", href: "/bt-leased-line-cost-calculator-tool/" },
-      { label: "How to buy BT Cloud Voice", href: "/insights/how-to-buy-bt-cloud-voice/" },
-    ],
-  },
-  {
-    label: "More from Netify",
-    items: [
-      { label: "Insights", href: "/insights/" },
-      { label: "All providers", href: "/marketplace/" },
-      { label: "SD-WAN research hub", href: "/sd-wan/" },
-      { label: "Methodology", href: "/methodology/" },
-      { label: "About Netify", href: "/about-netify/" },
-      { label: "Contact", href: "/contact/" },
+      { label: "Open opportunities", href: "/sase/opportunities/board/" },
+      { label: "Supplier sign-in", href: "/sase/supplier/" },
     ],
   },
 ];
@@ -130,7 +103,10 @@ export const NAV_GROUPS: NavGroup[] = [
 export const APP_GROUPS: NavGroup[] = [];
 
 export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
-export const NAV_CTA: NavLink = { label: "Build an RFP", href: "/sase/rfp-builder/" };
+// One universal CTA everywhere (navigation architecture, 14 July 2026):
+// the top bar, drawer and sidebar all say Start a project and open the
+// Describe wizard. "Build an RFP" as a competing entry CTA is retired.
+export const NAV_CTA: NavLink = { label: "Start a project", href: "/sase/rfp-builder/new/" };
 
 // ── Active-link + auto-open helpers (pathname is basePath-stripped here) ────
 const norm = (p: string) => p.replace(/\/$/, "");
