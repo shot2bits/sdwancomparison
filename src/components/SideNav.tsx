@@ -1,16 +1,18 @@
 "use client";
 
 /**
- * App-style accordion sidebar — the navigation (2026-07-10 v3).
+ * Flat task-first sidebar (2026-07-14, Robert's direction, replacing the v3
+ * accordion he disliked): every link is always visible under a small
+ * uppercase group label, no expand/collapse. Groups are ordered by buyer
+ * intent in lib/nav.ts (Get quotes, Research the market, For suppliers,
+ * then content). Tighter type scale: 11px labels, 12.5px links.
  *
- * Each menu item expands in place (WAI-ARIA disclosure: button +
- * aria-expanded + aria-controls; Enter/Space toggle natively). Multi-expand;
- * the current page's section opens automatically without closing sections
- * the visitor opened. Shared NAV_GROUPS mirror the marketing site; this
- * app's own sections (APP_GROUPS) follow under a divider.
+ * "Your projects" carries a session-aware badge (drafts not yet published,
+ * or live count) so a buyer's unfinished work follows them on every page —
+ * the UI's answer to "they sign up and exit".
  *
- * AccordionNav is shared with TopNav's mobile drawer. /sase/admin stays out
- * of public nav — the admin console link renders only for an authenticated
+ * NavList is shared with TopNav's mobile drawer. /sase/admin stays out of
+ * public nav — the admin console link renders only for an authenticated
  * admin session. Session footer (sign out / supplier prompt) unchanged.
  */
 
@@ -18,20 +20,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  NAV_GROUPS, APP_GROUPS, NAV_CTA, CURRENT_APP,
-  isCrossApp, appOf, toAppHref, activeHref, groupIsCurrent, type NavGroup, type NavLink,
+  NAV_GROUPS, NAV_CTA, CURRENT_APP,
+  isCrossApp, appOf, toAppHref, activeHref, type NavLink,
 } from "@/lib/nav";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null; admin?: boolean };
 
-const ALL_GROUPS = [...NAV_GROUPS, ...APP_GROUPS];
-
-function NavAnchor({ link, className, onNavigate }: { link: NavLink; className: string; onNavigate?: () => void }) {
+function NavAnchor({ link, className, onNavigate, badge }: { link: NavLink; className: string; onNavigate?: () => void; badge?: React.ReactNode }) {
   const cross = isCrossApp(link.href, CURRENT_APP);
   const inner = (
     <>
-      {link.label}
-      {cross && <span aria-hidden="true" className="text-[var(--ink-400,#9ca3af)]"> ↗</span>}
+      <span className="truncate">{link.label}</span>
+      {badge}
+      {cross && <span aria-hidden="true" className="ml-1 text-[var(--ink-400,#9ca3af)]">↗</span>}
     </>
   );
   return appOf(link.href) === "sase" ? (
@@ -41,82 +42,66 @@ function NavAnchor({ link, className, onNavigate }: { link: NavLink; className: 
   );
 }
 
-export function AccordionNav({ onNavigate, idPrefix = "nav" }: { onNavigate?: () => void; idPrefix?: string }) {
-  const pathname = usePathname();
-  const current = activeHref(pathname, ALL_GROUPS);
-
-  const [open, setOpen] = useState<Set<string>>(
-    () => new Set(ALL_GROUPS.filter((g) => groupIsCurrent(pathname, g)).map((g) => g.label)),
-  );
+/**
+ * Session-aware status for the "Your projects" link: unpublished drafts in
+ * amber (the state we want resolved), otherwise the live count in green.
+ * Renders nothing signed out or with no RFPs, so the public nav is clean.
+ */
+function ProjectsBadge() {
+  const [counts, setCounts] = useState<{ drafts: number; live: number } | null>(null);
   useEffect(() => {
-    setOpen((prev) => {
-      const next = new Set(prev);
-      ALL_GROUPS.forEach((g) => { if (groupIsCurrent(pathname, g)) next.add(g.label); });
-      return next;
-    });
-  }, [pathname]);
+    fetch("/sase/api/rfp/mine")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { rfps?: { status: string }[] } | null) => {
+        if (!d?.rfps) return;
+        const live = d.rfps.filter((r) => r.status === "published").length;
+        setCounts({ drafts: d.rfps.length - live, live });
+      })
+      .catch(() => {});
+  }, []);
+  if (!counts || (counts.drafts === 0 && counts.live === 0)) return null;
+  return counts.drafts > 0 ? (
+    <span className="ml-2 shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-900">
+      {counts.drafts} draft{counts.drafts === 1 ? "" : "s"}
+    </span>
+  ) : (
+    <span className="ml-2 shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-900">
+      {counts.live} live
+    </span>
+  );
+}
 
-  const toggle = (label: string) =>
-    setOpen((prev) => {
-      const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
-      return next;
-    });
+export function NavList({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+  const current = activeHref(pathname, NAV_GROUPS);
 
   const itemCls = (href: string) =>
-    `block rounded-md px-3 py-1.5 text-[13px] no-underline transition-colors ${
+    `flex items-center rounded-md px-3 py-[3px] text-[12.5px] leading-5 no-underline transition-colors ${
       href === current
         ? "bg-amber-500/15 text-[var(--ink-900)] font-medium"
         : "text-[var(--ink-600,#71717a)] hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]"
     }`;
 
-  const renderGroup = (group: NavGroup, gi: number, prefix: string) => {
-    if (!group.items?.length) {
-      return (
-        <NavAnchor
-          key={group.label}
-          link={{ label: group.label, href: group.href! }}
-          onNavigate={onNavigate}
-          className="flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-[var(--ink-900)] no-underline transition-colors hover:bg-[var(--ink-100,#f3f3f3)]"
-        />
-      );
-    }
-    const isOpen = open.has(group.label);
-    const panelId = `${idPrefix}-${prefix}-${gi}`;
-    return (
-      <div key={group.label}>
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={panelId}
-          onClick={() => toggle(group.label)}
-          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-[var(--ink-900)] bg-transparent border-0 cursor-pointer transition-colors hover:bg-[var(--ink-100,#f3f3f3)]"
-        >
-          <span className="flex-1">{group.label}</span>
-          <span
-            aria-hidden="true"
-            className={`text-[11px] text-[var(--ink-400,#9ca3af)] transition-transform duration-200 inline-block ${isOpen ? "rotate-180" : ""}`}
-          >
-            ▾
-          </span>
-        </button>
-        <div id={panelId} hidden={!isOpen}>
-          <div className="ml-3 border-l border-[var(--ink-200,#e5e5e5)] pl-2 py-1 space-y-0.5">
-            {group.items.map((l) => (
-              <NavAnchor key={l.href} link={l} onNavigate={onNavigate} className={itemCls(l.href)} />
+  return (
+    <div>
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label} className="mb-4">
+          <p className="mb-1 px-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-400,#9ca3af)]">
+            {group.label}
+          </p>
+          <div className="space-y-px">
+            {(group.items ?? []).map((l) => (
+              <NavAnchor
+                key={l.href}
+                link={l}
+                onNavigate={onNavigate}
+                className={itemCls(l.href)}
+                badge={l.href === "/sase/account/" ? <ProjectsBadge /> : undefined}
+              />
             ))}
           </div>
         </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="space-y-0.5">
-      {NAV_GROUPS.map((g, i) => renderGroup(g, i, "core"))}
-      <div aria-hidden="true" className="my-3 border-t border-[var(--ink-200,#e5e5e5)]" />
-      {APP_GROUPS.map((g, i) => renderGroup(g, i, "app"))}
+      ))}
     </div>
   );
 }
@@ -137,12 +122,12 @@ export default function SideNav() {
   return (
     <aside className="hidden lg:flex fixed left-0 top-12 bottom-0 w-60 flex-col border-r border-[var(--ink-200)] bg-[var(--paper-raised,#f4f4f5)]/60 px-3 py-4 z-20">
       <nav className="flex-1 overflow-y-auto" aria-label="Primary">
-        <AccordionNav idPrefix="side" />
+        <NavList />
         {/* Session-gated: never public */}
         {session?.authenticated && session.admin && (
           <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
-            <p className="eyebrow px-3 mb-1.5">Admin</p>
-            <Link href="/admin" className="block rounded-md px-3 py-1.5 text-[13px] no-underline text-[var(--ink-600,#71717a)] hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]">
+            <p className="mb-1 px-3 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--ink-400,#9ca3af)]">Admin</p>
+            <Link href="/admin" className="block rounded-md px-3 py-[3px] text-[12.5px] leading-5 no-underline text-[var(--ink-600,#71717a)] hover:bg-[var(--ink-100,#f3f3f3)] hover:text-[var(--ink-900)]">
               Admin console
             </Link>
           </div>

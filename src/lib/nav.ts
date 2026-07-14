@@ -5,10 +5,10 @@
  * item expands in place (multi-expand; the current page's section opens
  * automatically). Top bar = logo + Sign in + Build an RFP only.
  *
- * NAV_GROUPS mirrors the marketing site's lib/nav.ts exactly; APP_GROUPS are
- * this app's own sections, appended below a divider. Rules carried over:
- * root-relative full-public-path hrefs (renderers strip /sase via toAppHref
- * for next/link), trailing slashes, canonical /sase/rfp-builder/, computed ↗,
+ * NAV_GROUPS is ordered by buyer intent (funnel first), no longer a mirror of
+ * the marketing site's nav. Rules carried over: root-relative full-public-path
+ * hrefs (renderers strip /sase via toAppHref for next/link), trailing slashes,
+ * canonical /sase/rfp-builder/, computed ↗ for cross-app links,
  * /sase/admin never in public nav (session-gated in SideNav).
  */
 
@@ -43,56 +43,44 @@ export function toAppHref(href: string): string {
   return href.startsWith("/sase/") ? href.slice("/sase".length) : href;
 }
 
-// ── Shared groups (identical to the marketing site) ─────────────────────────
+// ── Task-first groups (2026-07-14, Robert's direction) ──────────────────────
+// The sidebar leads with the buyer funnel (start, resume, browse), then the
+// research surface, then suppliers; content sections follow. This deliberately
+// stops mirroring the marketing site's nav: the app is a workflow, not a
+// directory. Every previous link is preserved for internal linking, except
+// the four ?prefill sector entries (query-string CTAs, not pages — they live
+// on the sector and best-for pages instead).
 export const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Compare & Shortlist",
+    label: "Get quotes",
     items: [
-      { label: "Marketplace", href: "/sase/" },
+      { label: "Start a project", href: "/sase/rfp-builder/new/" },
+      { label: "Your projects", href: "/sase/account/" },
+      { label: "Post a project notice", href: "/sase/opportunities/" },
+      { label: "Open projects board", href: "/sase/opportunities/board/" },
       { label: "How it works", href: "/sase/how-it-works/" },
+    ],
+  },
+  {
+    label: "Research the market",
+    items: [
+      { label: "RFP Builder overview", href: "/sase/rfp-builder/" },
       { label: "Shortlist builder", href: "/sase/shortlist/" },
       { label: "All vendors", href: "/sase/vendors/" },
       { label: "Best by sector", href: "/sase/best/" },
       { label: "Vendor comparison hub", href: "/vendor-comparison/" },
-    ],
-  },
-  {
-    label: "RFP Builder",
-    items: [
-      { label: "Build an RFP", href: "/sase/rfp-builder/" },
-      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
+      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
-      { label: "RFP for Healthcare", href: "/sase/rfp-builder/?prefill=1&sector=healthcare" },
-      { label: "RFP for Financial services", href: "/sase/rfp-builder/?prefill=1&sector=financial_services" },
-      { label: "RFP for Retail", href: "/sase/rfp-builder/?prefill=1&sector=retail_ecommerce" },
-      { label: "RFP for Manufacturing", href: "/sase/rfp-builder/?prefill=1&sector=manufacturing" },
     ],
   },
   {
-    label: "BT Solutions",
+    label: "For suppliers",
     items: [
-      { label: "Buy BT", href: "/bt-fortinet-meraki/" },
-      { label: "Resell BT", href: "/resell/bt-business-services/" },
-      { label: "Become a BT reseller", href: "/go/bt-reseller-application/" },
-      { label: "Cloud Voice pricing calculator", href: "/tools/bt-cloud-voice-pricing-calculator/" },
-      { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/" },
-      { label: "Leased line cost calculator", href: "/bt-leased-line-cost-calculator-tool/" },
-      { label: "How to buy BT Cloud Voice", href: "/insights/how-to-buy-bt-cloud-voice/" },
+      { label: "Respond to projects", href: "/sase/for-suppliers/" },
+      { label: "Supplier dashboard", href: "/sase/supplier/" },
     ],
   },
-  { label: "Insights", href: "/insights/" },
-  {
-    label: "About",
-    items: [
-      { label: "About Netify", href: "/about-netify/" },
-      { label: "Contact", href: "/contact/" },
-    ],
-  },
-];
-
-// ── This app's own sections (appended under a divider) ──────────────────────
-export const APP_GROUPS: NavGroup[] = [
   {
     label: "Popular vendors",
     items: [
@@ -114,28 +102,32 @@ export const APP_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "Engage",
+    label: "BT solutions",
     items: [
-      { label: "Opportunity board", href: "/sase/opportunities/board/" },
-      { label: "Post a need", href: "/sase/opportunities/" },
+      { label: "Buy BT", href: "/bt-fortinet-meraki/" },
+      { label: "Resell BT", href: "/resell/bt-business-services/" },
+      { label: "Become a BT reseller", href: "/go/bt-reseller-application/" },
+      { label: "Cloud Voice pricing calculator", href: "/tools/bt-cloud-voice-pricing-calculator/" },
+      { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/" },
+      { label: "Leased line cost calculator", href: "/bt-leased-line-cost-calculator-tool/" },
+      { label: "How to buy BT Cloud Voice", href: "/insights/how-to-buy-bt-cloud-voice/" },
     ],
   },
   {
-    label: "Suppliers",
+    label: "More from Netify",
     items: [
-      { label: "For vendors and providers", href: "/sase/for-suppliers/" },
-      { label: "Supplier dashboard", href: "/sase/supplier/" },
-    ],
-  },
-  {
-    label: "Elsewhere on Netify",
-    items: [
+      { label: "Insights", href: "/insights/" },
       { label: "All providers", href: "/marketplace/" },
       { label: "SD-WAN research hub", href: "/sd-wan/" },
       { label: "Methodology", href: "/methodology/" },
+      { label: "About Netify", href: "/about-netify/" },
+      { label: "Contact", href: "/contact/" },
     ],
   },
 ];
+
+/** Retained for compatibility; all groups now live in NAV_GROUPS. */
+export const APP_GROUPS: NavGroup[] = [];
 
 export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
 export const NAV_CTA: NavLink = { label: "Build an RFP", href: "/sase/rfp-builder/" };

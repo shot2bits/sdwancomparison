@@ -3,8 +3,8 @@
 /**
  * MINIMAL TOP BAR (2026-07-10 v3) — logo + Sign in + Build an RFP only.
  *
- * Navigation lives in the accordion sidebar (SideNav.tsx). Below lg the
- * hamburger opens a drawer with the SAME AccordionNav, portaled to <body>
+ * Navigation lives in the flat sidebar (SideNav.tsx NavList). Below lg the
+ * hamburger opens a drawer with the SAME NavList, portaled to <body>
  * with an explicit opaque background (July fix: inside the sticky header the
  * drawer's background failed to cover the page). Esc closes; body scroll
  * locks while open.
@@ -15,7 +15,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SIGN_IN, NAV_CTA, toAppHref } from "@/lib/nav";
-import { AccordionNav } from "@/components/SideNav";
+import { NavList } from "@/components/SideNav";
 
 export default function TopNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function TopNav() {
             </button>
           </div>
           <nav aria-label="Primary (mobile)" className="h-[calc(100dvh-3rem)] overflow-y-auto px-4 py-4">
-            <AccordionNav idPrefix="drawer" onNavigate={() => setMobileOpen(false)} />
+            <NavList onNavigate={() => setMobileOpen(false)} />
             <div className="mt-6 border-t border-[var(--ink-200)] pt-5 pb-8 space-y-3">
               <Link href={toAppHref(SIGN_IN.href)} onClick={() => setMobileOpen(false)} className="block px-3 text-sm font-medium text-[var(--ink-900)] no-underline">
                 {accountLabel}
