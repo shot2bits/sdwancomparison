@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import NoticeView from "@/components/NoticeView";
 import { getOpportunity, kvConfigured } from "@/lib/rfp-store";
 import { toPublicOpportunity, type PublicOpportunity } from "@/lib/opportunity-types";
-import { getSampleNotice } from "@/lib/sample-notices";
+import { getSampleNotice } from "@/lib/sample-opportunities";
 import { getNoticeSchema } from "@/lib/notice-schema";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 
@@ -16,8 +16,8 @@ type Props = { params: Promise<{ id: string }> };
 /**
  * Public project notice page. Server-rendered so every public opportunity is
  * crawlable and citable: procurement-notice layout, JSON-LD, canonical URL and
- * a machine-readable twin at ./data.json. Sample notices (worked examples)
- * share this route and are clearly labelled. Unlisted notices render but are
+ * a machine-readable twin at ./data.json. Sample opportunities (worked examples)
+ * share this route and are clearly labelled. Unlisted opportunities render but are
  * noindexed; the interactive room lives at ./room.
  */
 
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await loadNotice(id);
   if (!data) return { title: "Opportunity not found", robots: { index: false, follow: false } };
   const { notice, isSample, visibility } = data;
-  const title = isSample ? `Sample project notice: ${notice.title}` : notice.title;
+  const title = isSample ? `Sample RFI: ${notice.title}` : notice.title;
   const description = (notice.ai_summary || notice.summary).slice(0, 158);
   return {
     title,
@@ -72,7 +72,7 @@ export default async function OpportunityNoticePage({ params }: Props) {
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <NoticeView notice={notice} isSample={isSample} />
+          <NoticeView opportunity={notice} isSample={isSample} />
         </div>
 
         <aside>
@@ -102,8 +102,8 @@ export default async function OpportunityNoticePage({ params }: Props) {
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
               <p className="text-sm font-medium mb-1">Buyers</p>
               <ul className="space-y-2 text-sm">
-                <li><Link href={`/opportunities/new?clone=${id}`} className="underline">Post a similar project</Link> (prefills this notice as your template)</li>
-                <li><a href={`/sase/rfp-builder/?from_opportunity=${id}`} className="underline">Turn this into a full RFP</a> (carries this notice into the builder)</li>
+                <li><Link href={`/opportunities/new?clone=${id}`} className="underline">Post a similar project</Link> (prefills this opportunity as your template)</li>
+                <li><a href={`/sase/rfp-builder/?from_opportunity=${id}`} className="underline">Turn this into a full RFP</a> (carries this opportunity into the builder)</li>
                 <li><Link href="/shortlist" className="underline">Request a Netify shortlist</Link></li>
               </ul>
               {!isSample && (

@@ -96,7 +96,7 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
       {opps.length === 0 ? (
         <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-8 text-center">
           <p className="text-[var(--ink-700)]">No open opportunities right now.</p>
-          <p className="text-sm text-[var(--ink-500)] mt-1">Be the first: <Link href="/opportunities/new" className="underline">post a project</Link> and invite verified vendors to bid.</p>
+          <p className="text-sm text-[var(--ink-500)] mt-1">Be the first: <Link href="/opportunities/new" className="underline">publish an RFI</Link> and invite verified vendors to bid.</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-8 text-center">

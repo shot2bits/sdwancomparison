@@ -3,7 +3,7 @@ import Link from "next/link";
 import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { OPP_SCOPE_LABELS, type OppScope } from "@/lib/opportunity-types";
 import BoardList from "@/components/BoardList";
-import { SAMPLE_NOTICES } from "@/lib/sample-notices";
+import { SAMPLE_NOTICES } from "@/lib/sample-opportunities";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
 export const runtime = "nodejs";
@@ -48,7 +48,7 @@ export default async function OpportunityBoardPage() {
         <h1 id="page-h1" className="mb-4">Open SASE, SSE and SD-WAN opportunities</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Buyers post a need, from underlay circuits to appliances, cloud security or a full managed SASE rollout. Verified vendors bid and quote. Browsing is open to everyone; you sign in only to submit a bid.</p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/opportunities/new" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Post a project</Link>
+          <Link href="/opportunities/new" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Publish an RFI</Link>
           <Link href="/for-suppliers" className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">For vendors and providers</Link>
         </div>
       </div>
@@ -78,8 +78,8 @@ export default async function OpportunityBoardPage() {
       )}
 
       <div className="mt-12">
-        <h2 className="text-lg font-semibold mb-1">Sample notices</h2>
-        <p className="text-sm text-[var(--ink-600)] mb-4">Worked examples of what a published project notice looks like. Not live opportunities.</p>
+        <h2 className="text-lg font-semibold mb-1">Sample opportunities</h2>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Worked examples of what a published RFI looks like. Not live opportunities.</p>
         <div className="grid gap-4 sm:grid-cols-3">
           {SAMPLE_NOTICES.map((s) => (
             <Link key={s.slug} href={`/opportunities/${s.slug}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
@@ -91,7 +91,7 @@ export default async function OpportunityBoardPage() {
         </div>
       </div>
 
-      <p className="mt-10 text-sm text-[var(--ink-500)]">Machine-readable board: <a className="underline" href="/sase/opportunities/board/data.json">/opportunities/board/data.json</a>. Each notice also has its own feed at /opportunities/&lt;id&gt;/data.json. Agents can read open opportunities and respond via the marketplace MCP at <a className="underline" href="/sase/api/mcp">/api/mcp</a>. Pricing amounts stay private to the posting buyer.</p>
+      <p className="mt-10 text-sm text-[var(--ink-500)]">Machine-readable board: <a className="underline" href="/sase/opportunities/board/data.json">/opportunities/board/data.json</a>. Each opportunity also has its own feed at /opportunities/&lt;id&gt;/data.json. Agents can read open opportunities and respond via the marketplace MCP at <a className="underline" href="/sase/api/mcp">/api/mcp</a>. Pricing amounts stay private to the posting buyer.</p>
     </div>
   );
 }

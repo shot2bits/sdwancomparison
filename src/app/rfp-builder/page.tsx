@@ -52,7 +52,7 @@ export default function RfpBuilderPage() {
         <p className="eyebrow mb-3">Agentic RFP builder</p>
         <h1 id="page-h1" className="mb-4">Post a SASE or SD-WAN project, build an RFP, and invite verified providers.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          Start with a short project notice or create a full RFP. Netify helps you structure
+          Start with a short RFI or create a full RFP. Netify helps you structure
           the requirement, publish it to the right suppliers and compare responses, with
           questions mapped to the{" "}
           <a href="https://netify.co.uk/methodology/" className="underline">Netify SASE Methodology v{m.version}</a>.
@@ -65,8 +65,8 @@ export default function RfpBuilderPage() {
       <RfpBuilderPathCards>
         <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <a href="/sase/opportunities/new/" className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
-            <h2 className="text-base font-semibold mb-1">Post a project</h2>
-            <p className="text-sm text-[var(--ink-700)]">Publish a short opportunity notice in minutes. Best for early pricing, discovery calls or supplier interest.</p>
+            <h2 className="text-base font-semibold mb-1">Publish an RFI</h2>
+            <p className="text-sm text-[var(--ink-700)]">Publish a short RFI in minutes. Best for early pricing, discovery calls or supplier interest.</p>
           </a>
           <a href="/sase/rfp-builder/new/" className="relative block rounded-sm border border-amber-500 bg-amber-50 p-5 no-underline text-inherit transition-colors hover:bg-amber-100">
             <span className="absolute -top-2.5 left-4 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-950">Fastest route</span>

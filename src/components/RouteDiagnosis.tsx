@@ -2,10 +2,10 @@
 
 /**
  * RouteDiagnosis: three quick questions that route a buyer to the right path —
- * post a project notice, build a full RFP, or start with a shortlist. Pure
+ * publish an RFI, build a full RFP, or start with a shortlist. Pure
  * client logic, no AI call: the routing rules are simple enough that a model
  * adds latency without adding judgement. Guardrail from the rebuild spec:
- * never force a full RFP when a notice is enough.
+ * never force a full RFP when an RFI is enough.
  */
 
 import { useState } from "react";
@@ -52,7 +52,7 @@ function recommend(a: Answer): { path: string; href: string; cta: string; why: s
       path: "Talk it through with Netify",
       href: "mailto:support@netify.com?subject=Help%20scoping%20a%20SASE%20%2F%20SD-WAN%20project",
       cta: "Email the Netify team",
-      why: "Your requirement and your process are both still taking shape, so a short conversation beats any form: the Netify team will help you frame the problem, then point you at a project notice, a shortlist or a full RFP. If you'd rather read up first, the Insights blog covers SASE and SD-WAN buying end to end.",
+      why: "Your requirement and your process are both still taking shape, so a short conversation beats any form: the Netify team will help you frame the problem, then point you at an RFI, a shortlist or a full RFP. If you'd rather read up first, the Insights blog covers SASE and SD-WAN buying end to end.",
       secondary: { label: "Browse the Insights blog", href: "https://netify.co.uk/insights/" },
     };
   }
@@ -69,14 +69,14 @@ function recommend(a: Answer): { path: string; href: string; cta: string; why: s
       path: "Start with a shortlist",
       href: "/sase/shortlist/",
       cta: "Build a shortlist",
-      why: "Your requirement is defined enough to grade vendors against it. Build a shortlist from Netify's evidence-graded dataset, then post a project or RFP to engage them.",
+      why: "Your requirement is defined enough to grade vendors against it. Build a shortlist from Netify's evidence-graded dataset, then publish an RFI or RFP to engage them.",
     };
   }
   return {
-    path: "Post a project notice",
+    path: "Publish an RFI",
     href: "/sase/opportunities/new/",
-    cta: "Post a project",
-    why: "A short public notice gets you pricing, interest and discovery calls without writing a full RFP. If the responses justify it, you can turn the notice into a full RFP later — nothing is wasted.",
+    cta: "Publish an RFI",
+    why: "A short RFI gets you pricing, interest and discovery calls without writing a full RFP. If the responses justify it, you can turn the RFI into a full RFP later — nothing is wasted.",
   };
 }
 
@@ -123,7 +123,7 @@ export default function RouteDiagnosis() {
             )}
           </div>
           <p className="mt-3 text-xs text-[var(--ink-500)]">
-            All routes stay open: <a href="/sase/opportunities/new/" className="underline">post a project</a> ·{" "}
+            All routes stay open: <a href="/sase/opportunities/new/" className="underline">publish an RFI</a> ·{" "}
             <a href="/sase/rfp-builder/" className="underline">build an RFP</a> ·{" "}
             <a href="/sase/shortlist/" className="underline">build a shortlist</a> ·{" "}
             <a href="/sase/opportunities/board/" className="underline">browse the board</a>

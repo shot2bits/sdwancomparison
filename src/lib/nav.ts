@@ -56,7 +56,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Start a project", href: "/sase/rfp-builder/new/" },
       { label: "Your projects", href: "/sase/account/" },
-      { label: "Post a project notice", href: "/sase/opportunities/" },
+      { label: "Publish an RFI", href: "/sase/opportunities/" },
       { label: "Open projects board", href: "/sase/opportunities/board/" },
       { label: "How it works", href: "/sase/how-it-works/" },
     ],

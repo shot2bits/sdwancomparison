@@ -144,7 +144,7 @@ export default function NoticeBuilder() {
         response_mode: p.get("engagement") === "auction" ? "reverse_auction" : d.response_mode,
       }));
     }
-    // Clone an existing public notice (or sample) as a starting template.
+    // Clone an existing public RFI page (or sample) as a starting template.
     // Only public projection fields are used; anything private never reaches
     // this endpoint. Buyer identity is intentionally NOT cloned.
     const cloneId = p.get("clone");
@@ -207,7 +207,7 @@ export default function NoticeBuilder() {
     return {
       id: "preview", created: now, updated: now, last_activity: now,
       buyer_org: draft.buyer_visibility === "anonymous" ? "" : draft.buyer_org,
-      title: draft.title || "Untitled project notice",
+      title: draft.title || "Untitled RFI",
       scope: draft.scope.filter((s): s is OppScope => (OPP_SCOPES as readonly string[]).includes(s)),
       sites: draft.sites ? Number(draft.sites) || null : null,
       regions: draft.regions,
@@ -495,7 +495,7 @@ export default function NoticeBuilder() {
                   <span className="block text-xs text-[var(--ink-600)]">
                     {m === "indicative_pricing" && "Fast budget signals. Suppliers reply with indicative pricing, private to you."}
                     {m === "discovery_calls" && "Short calls with matching suppliers to explore the requirement."}
-                    {m === "written_responses" && "Structured written replies against your notice."}
+                    {m === "written_responses" && "Structured written replies against your RFI."}
                     {m === "reverse_auction" && "Suppliers compete on price; bids are ranked."}
                     {m === "shortlist" && "Netify builds you a graded shortlist from the marketplace."}
                     {m === "full_rfp" && "You plan to issue a full RFP; suppliers register interest now."}
@@ -572,7 +572,7 @@ export default function NoticeBuilder() {
           <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
             <p className="text-sm font-medium mb-1">Improve this brief before publishing</p>
             <p className="text-sm text-[var(--ink-600)] mb-4">
-              The AI tidies your notice, writes a supplier-facing summary, flags missing information and suggests evidence to request.
+              The AI tidies your RFI, writes a supplier-facing summary, flags missing information and suggests evidence to request.
               It never invents facts: anything inferred is listed as an assumption you can review.
             </p>
             {!improve && (
@@ -592,7 +592,7 @@ export default function NoticeBuilder() {
                   <p className="text-sm whitespace-pre-line">{improve.summary}</p>
                 </div>
                 <div>
-                  <p className="eyebrow mb-1">AI-readable summary (shown on the notice)</p>
+                  <p className="eyebrow mb-1">AI-readable summary (shown on the RFI)</p>
                   <p className="text-sm">{improve.ai_summary}</p>
                 </div>
                 {improve.gaps.length > 0 && (
@@ -610,7 +610,7 @@ export default function NoticeBuilder() {
                 {improve.recommend_full_rfp && (
                   <p className="rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <strong>Consider a full RFP.</strong> {improve.recommend_reason}{" "}
-                    <a href="/sase/rfp-builder/" className="underline">Open the RFP Builder</a> — you can start it from this notice later, too.
+                    <a href="/sase/rfp-builder/" className="underline">Open the RFP Builder</a> — you can start it from this RFI later, too.
                   </p>
                 )}
                 <div className="flex gap-3">
@@ -621,7 +621,7 @@ export default function NoticeBuilder() {
             )}
           </div>
           {!improve && (
-            <button type="button" onClick={next} className="text-sm underline text-[var(--ink-600)]">Skip AI improvement and preview the notice</button>
+            <button type="button" onClick={next} className="text-sm underline text-[var(--ink-600)]">Skip AI improvement and preview the RFI</button>
           )}
         </div>
       )}
@@ -637,7 +637,7 @@ export default function NoticeBuilder() {
                 <>
                   <p className="text-sm font-medium mb-1">Ready to publish?</p>
                   <p className="text-sm text-[var(--ink-600)] mb-4">
-                    Publishing creates a public notice page, lists it on the opportunity board and opens your private response room.
+                    Publishing creates a public RFI page page, lists it on the opportunity board and opens your private response room.
                     Supplier pricing stays private to you.
                   </p>
                   <button type="button" onClick={publish} disabled={publishing} className="w-full px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">

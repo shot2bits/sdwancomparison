@@ -8,12 +8,12 @@ const UNDERLAY = "/opportunities/new?prefill=1&engagement=quote_room&scope=under
 const OVERLAY = "/opportunities/new?prefill=1&engagement=quote_room&scope=sd_wan.sse.sase&summary=" + encodeURIComponent("Quick pricing request: overlay SD-WAN, SSE and SASE. Please quote a managed solution and indicative pricing.");
 
 export const metadata: Metadata = {
-  title: "Post a SASE or SD-WAN Project Notice: Supplier Interest",
+  title: "Publish a SASE or SD-WAN RFI: Supplier Interest",
   description:
-    "Post a short SASE or SD-WAN project notice: what you need, where and by when. Verified suppliers respond with interest and indicative pricing. Draft in the clear; sign in only to publish.",
+    "Publish a short SASE or SD-WAN RFI: what you need, where and by when. Verified suppliers respond with interest and indicative pricing. Draft in the clear; sign in only to publish.",
   alternates: { canonical: `${SITE_URL}/opportunities/` },
   openGraph: {
-    title: "Post a SASE or SD-WAN Project Notice: Supplier Interest",
+    title: "Publish a SASE or SD-WAN RFI: Supplier Interest",
     description: "A short public listing of what you need. Verified suppliers respond; pricing stays private.",
     url: `${SITE_URL}/opportunities`,
     type: "website",
@@ -24,9 +24,9 @@ export const metadata: Metadata = {
 const CARDS = [
   {
     href: "/opportunities/new",
-    title: "Post a project",
-    body: "Publish a short opportunity notice in minutes. Use this when you need pricing, discovery calls or supplier interest before writing a full RFP.",
-    cta: "Start a project notice",
+    title: "Publish an RFI",
+    body: "Publish a short RFI in minutes. Use this when you need pricing, discovery calls or supplier interest before writing a full RFP.",
+    cta: "Start an RFI",
     primary: true,
   },
   {
@@ -46,7 +46,7 @@ const CARDS = [
   {
     href: "/rfp-builder/start",
     title: "Not sure?",
-    body: "Answer a few questions and Netify will recommend whether to post a project, build an RFP or start with a shortlist.",
+    body: "Answer a few questions and Netify will recommend whether to publish an RFI, build an RFP or start with a shortlist.",
     cta: "Get a recommendation",
     primary: false,
   },
@@ -58,10 +58,10 @@ export default function OpportunitiesPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {schemas.map((s, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />)}
       <div className="mb-10 max-w-3xl">
-        <p className="eyebrow mb-3">Post a project notice</p>
-        <h1 id="page-h1" className="mb-4">Post a SASE or SD-WAN project notice and gather supplier interest.</h1>
+        <p className="eyebrow mb-3">Publish an RFI</p>
+        <h1 id="page-h1" className="mb-4">Publish a SASE or SD-WAN RFI and gather supplier interest.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          A project notice is a short public listing: what you need, where and by when. Verified suppliers
+          An RFI (request for information) is a short public listing: what you need, where and by when. Verified suppliers
           respond with interest and indicative pricing, and you never write a full document. Draft in the
           clear, sign in only to publish, and pricing stays private to you. Need the complete RFP instead?
           The RFP Builder creates one from your answers in about two minutes.
@@ -86,17 +86,17 @@ export default function OpportunitiesPage() {
 
       <div className="mb-12 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
         <p className="eyebrow mb-1">Quick pricing request</p>
-        <p className="text-sm text-[var(--ink-700)] mb-3">Need a fast indicative price? Tap one and we prefill the notice for you to review, preview and publish. Verified suppliers then pick it up and quote.</p>
+        <p className="text-sm text-[var(--ink-700)] mb-3">Need a fast indicative price? Tap one and we prefill the RFI for you to review, preview and publish. Verified suppliers then pick it up and quote.</p>
         <div className="flex flex-wrap gap-3">
           <Link href={UNDERLAY} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Request underlay pricing (circuits)</Link>
           <Link href={OVERLAY} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Request overlay pricing (SD-WAN / SASE)</Link>
         </div>
-        <p className="text-xs text-[var(--ink-500)] mt-3">Public notices appear on the <Link href="/opportunities/board" className="underline">public board</Link>. Pricing you receive stays private to you. You can post anonymously.</p>
+        <p className="text-xs text-[var(--ink-500)] mt-3">Published RFIs appear on the <Link href="/opportunities/board" className="underline">public board</Link>. Pricing you receive stays private to you. You can post anonymously.</p>
       </div>
 
       <div className="mb-4">
-        <h2 className="text-lg font-semibold mb-1">What a published notice looks like</h2>
-        <p className="text-sm text-[var(--ink-600)] mb-4">Three worked examples — the same structure your notice will have.</p>
+        <h2 className="text-lg font-semibold mb-1">What a published RFI looks like</h2>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Three worked examples — the same structure your RFI will have.</p>
         <div className="grid gap-4 sm:grid-cols-3">
           {SAMPLE_NOTICES.map((s) => (
             <Link key={s.slug} href={`/opportunities/${s.slug}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">

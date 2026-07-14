@@ -1,7 +1,7 @@
 /**
  * NoticeView: the public project notice, laid out like a clear procurement
  * notice. Pure presentational and server-safe: used by the server-rendered
- * public notice page, the sample notice pages and the client-side wizard
+ * public opportunity page, the sample notice pages and the client-side wizard
  * preview, so what the buyer previews is exactly what gets published.
  */
 
@@ -151,7 +151,7 @@ export default function NoticeView({
           <li>
             Response mode: <strong>{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</strong>.
           </li>
-          <li>Browsing this notice is open to everyone. Responding requires supplier sign-in with a verified work email.</li>
+          <li>Browsing this opportunity is open to everyone. Responding requires supplier sign-in with a verified work email.</li>
           <li>Pricing submitted by suppliers is private to the buyer and never shown publicly.</li>
           {o.eligibility === "invited" && <li>This opportunity is invite-only: the buyer selects which suppliers may respond.</li>}
           {o.evidence_requested.length > 0 && (

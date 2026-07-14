@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * MyOpportunities: the signed-in buyer's published notices, recovered by
+ * MyOpportunities: the signed-in buyer's published opportunities, recovered by
  * account rather than browser. Fetches /api/opportunity/mine (session
  * required), re-seeds the local manage tokens so rooms open with buyer
  * controls on this device, and links to each room. Renders nothing when
@@ -52,7 +52,7 @@ export default function MyOpportunities() {
   return (
     <div className="mb-12 rounded-sm border border-emerald-300 bg-emerald-50/50 p-5">
       <p className="eyebrow mb-1">Your opportunities</p>
-      <p className="text-sm text-[var(--ink-600)] mb-3">Signed in — manage responses, invite suppliers or close a notice from its room.</p>
+      <p className="text-sm text-[var(--ink-600)] mb-3">Signed in — manage responses, invite suppliers or close an opportunity from its room.</p>
       <div className="space-y-2">
         {mine.map((o) => (
           <div key={o.id} className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-white px-4 py-2.5">

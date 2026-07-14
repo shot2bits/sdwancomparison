@@ -379,8 +379,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (prefilled.current || initialId) return;
     const p = new URLSearchParams(window.location.search);
 
-    // Start from a published project notice: seed the RFP's buyer context
-    // from the notice's PUBLIC projection (data.json), so the buyer never
+    // Start from a published RFI: seed the RFP's buyer context
+    // from the RFI's PUBLIC projection (data.json), so the buyer never
     // types the same estate twice. Notice scope → product_scope; regions and
     // compliance carried over; summary/environment/outcomes become notes.
     const fromOpp = p.get("from_opportunity");
@@ -405,7 +405,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             compliance: o.compliance_requirements ?? [],
             operating_model: scopeArr.includes("managed_service") || scopeArr.includes("managed_security") ? "managed" : "any",
             product_scope,
-            notes: [o.title, o.summary, o.current_environment && `Current environment: ${o.current_environment}`, o.desired_outcomes && `Desired outcomes: ${o.desired_outcomes}`, `Source: project notice ${fromOpp}`].filter(Boolean).join("\n\n"),
+            notes: [o.title, o.summary, o.current_environment && `Current environment: ${o.current_environment}`, o.desired_outcomes && `Desired outcomes: ${o.desired_outcomes}`, `Source: RFI ${fromOpp}`].filter(Boolean).join("\n\n"),
           };
           setMode("manual");
           startRfp(buyer);
@@ -910,9 +910,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <div className="mt-6 pt-5 border-t border-[var(--ink-200,#e5e5e5)] max-w-2xl">
           <p className="text-sm font-medium mb-1">Not ready for a full RFP?</p>
           <p className="text-sm text-[var(--ink-600,#555)]">
-            Do what an RFI does, the marketplace way: post a short project notice describing your need, gather supplier
-            interest, information and indicative pricing, then turn the notice into a full RFP when you&apos;re ready.{" "}
-            <a href="/sase/opportunities/new/" className="underline">Post a project notice instead</a>.
+            Do what an RFI does, the marketplace way: post a short RFI describing your need, gather supplier
+            interest, information and indicative pricing, then turn the RFI into a full RFP when you&apos;re ready.{" "}
+            <a href="/sase/opportunities/new/" className="underline">Publish an RFI instead</a>.
           </p>
         </div>
       </div>
@@ -1399,7 +1399,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           boardNote.listed ? (
             <p className="text-sm text-emerald-700 mb-3">
               Also listed on the <a href="/sase/opportunities/board/" className="underline">public opportunity board</a>
-              {boardNote.url ? <>: <a href={boardNote.url} className="underline">view the public notice</a></> : null}. The notice shows scope and sector only; your questions, pricing and contact details stay private.
+              {boardNote.url ? <>: <a href={boardNote.url} className="underline">view the public RFI page</a></> : null}. The notice shows scope and sector only; your questions, pricing and contact details stay private.
             </p>
           ) : (
             <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">

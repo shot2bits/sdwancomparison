@@ -76,7 +76,7 @@ export default function AdminClient() {
       const d = (await r.json().catch(() => ({}))) as Record<string, unknown>;
       if (!r.ok) throw new Error(typeof d.error === "string" ? d.error : "Action failed.");
       if (payload.action === "delete_user") {
-        setNotice(`Deleted ${String(payload.email)}. Sessions revoked: ${Number(d.sessions_deleted ?? 0)}, RFPs deleted: ${Number(d.rfps_deleted ?? 0)}, board notices deleted: ${Number(d.opportunities_deleted ?? 0)}.`);
+        setNotice(`Deleted ${String(payload.email)}. Sessions revoked: ${Number(d.sessions_deleted ?? 0)}, RFPs deleted: ${Number(d.rfps_deleted ?? 0)}, board opportunities deleted: ${Number(d.opportunities_deleted ?? 0)}.`);
       }
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : "Action failed."); }
@@ -218,7 +218,7 @@ export default function AdminClient() {
       {/* Opportunity board moderation */}
       <section className={card}>
         <h2 className={h2}>Opportunity board ({(data.opportunities ?? []).length})</h2>
-        <p className={sub}>Every notice, including closed and unlisted ones. Remove permanently deletes a notice — the public page 404s and supplier room links stop working. Use it when something inappropriate or commercially sensitive was posted by mistake.</p>
+        <p className={sub}>Every notice, including closed and unlisted ones. Remove permanently deletes an opportunity — the public page 404s and supplier room links stop working. Use it when something inappropriate or commercially sensitive was posted by mistake.</p>
         {(data.opportunities ?? []).length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No opportunities posted yet.</p>
         ) : (
@@ -288,7 +288,7 @@ export default function AdminClient() {
       {/* Registered users */}
       <section className={card}>
         <h2 className={h2}>Registered users ({(data.users ?? []).length})</h2>
-        <p className={sub}>Everyone who has completed a first sign-in. Deleting an account removes the sign-up record and revokes its sessions, so the same email can sign up again as a brand-new user. Tick the box to also erase their RFPs and board notices. Admin rights come from the admin email list, so deleting an admin account does not remove admin access.</p>
+        <p className={sub}>Everyone who has completed a first sign-in. Deleting an account removes the sign-up record and revokes its sessions, so the same email can sign up again as a brand-new user. Tick the box to also erase their RFPs and board opportunities. Admin rights come from the admin email list, so deleting an admin account does not remove admin access.</p>
         {(data.users ?? []).length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No registered users yet.</p>
         ) : (
@@ -432,7 +432,7 @@ function UserAccountRow({ u, busy, act, btn, btnAmber }: {
           />
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={withRfps} onChange={(e) => setWithRfps(e.target.checked)} />
-            Also delete their RFPs and board notices
+            Also delete their RFPs and board opportunities
           </label>
           <div className="flex items-center gap-2">
             <button
