@@ -120,7 +120,7 @@ export async function GET(req: Request) {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${resendKey}`, "content-type": "application/json" },
-        body: JSON.stringify({ from, to: owner, subject, text, html }),
+        body: JSON.stringify({ from, to: owner, reply_to: "support@netify.com", subject, text, html }),
       });
       if (!res.ok) { skipped.send_failed += 1; continue; }
       await kvSetJson(flagKey, now);
