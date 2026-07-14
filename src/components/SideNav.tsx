@@ -50,14 +50,21 @@ function NavAnchor({ link, className, onNavigate, badge }: { link: NavLink; clas
 function ProjectsBadge() {
   const [counts, setCounts] = useState<{ drafts: number; live: number } | null>(null);
   useEffect(() => {
-    fetch("/sase/api/rfp/mine")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d: { rfps?: { status: string }[] } | null) => {
-        if (!d?.rfps) return;
-        const live = d.rfps.filter((r) => r.status === "published").length;
-        setCounts({ drafts: d.rfps.length - live, live });
-      })
-      .catch(() => {});
+    const load = () =>
+      fetch("/sase/api/rfp/mine")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d: { rfps?: { status: string }[] } | null) => {
+          if (!d?.rfps) return;
+          const live = d.rfps.filter((r) => r.status === "published").length;
+          setCounts({ drafts: d.rfps.length - live, live });
+        })
+        .catch(() => {});
+    load();
+    // The account page claims this browser's drafts after the badge's first
+    // fetch, so it broadcasts when the list changes and the badge reloads
+    // (Robert's screenshot, 14 July: badge said 1 draft beside a list of 6).
+    window.addEventListener("netify:rfps-changed", load);
+    return () => window.removeEventListener("netify:rfps-changed", load);
   }, []);
   if (!counts || (counts.drafts === 0 && counts.live === 0)) return null;
   return counts.drafts > 0 ? (

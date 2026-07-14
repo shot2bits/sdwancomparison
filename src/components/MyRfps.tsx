@@ -41,7 +41,12 @@ export default function MyRfps() {
     const load = () =>
       fetch("/sase/api/rfp/mine")
         .then((r) => (r.ok ? r.json() : null))
-        .then((d) => { if (d?.rfps) setRfps(d.rfps as Rfp[]); })
+        .then((d) => {
+          if (!d?.rfps) return;
+          setRfps(d.rfps as Rfp[]);
+          // Tell listeners (the sidebar Your projects badge) the list moved.
+          try { window.dispatchEvent(new Event("netify:rfps-changed")); } catch { /* ignore */ }
+        })
         .catch(() => {});
     // Claim any anonymous drafts this browser built before listing, so a
     // buyer who drafted first and signed in later still sees their work here.
