@@ -68,10 +68,10 @@ export default function RfpBuilderPage() {
             <h2 className="text-base font-semibold mb-1">Post a project</h2>
             <p className="text-sm text-[var(--ink-700)]">Publish a short opportunity notice in minutes. Best for early pricing, discovery calls or supplier interest.</p>
           </a>
-          <a href="#build" className="relative block rounded-sm border border-amber-500 bg-amber-50 p-5 no-underline text-inherit transition-colors hover:bg-amber-100">
-            <span className="absolute -top-2.5 left-4 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-950">You&apos;re here</span>
-            <h2 className="text-base font-semibold mb-1">Build a full RFP</h2>
-            <p className="text-sm text-[var(--ink-700)]">Create a structured SASE, SSE or SD-WAN RFP using Netify&apos;s question bank and AI gap checking. Start below on this page.</p>
+          <a href="/sase/rfp-builder/new/" className="relative block rounded-sm border border-amber-500 bg-amber-50 p-5 no-underline text-inherit transition-colors hover:bg-amber-100">
+            <span className="absolute -top-2.5 left-4 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-950">Fastest route</span>
+            <h2 className="text-base font-semibold mb-1">Start your project</h2>
+            <p className="text-sm text-[var(--ink-700)]">Describe it in two minutes. Netify builds the full RFP from its question bank and shows which verified suppliers match before you publish.</p>
           </a>
           <a href="/sase/opportunities/board/" className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
             <h2 className="text-base font-semibold mb-1">Browse opportunities</h2>

@@ -50,6 +50,16 @@ function readConsent(): { analytics: boolean; marketing: boolean } {
   }
 }
 
+/**
+ * Fire a named commercial event into both sinks (Vercel Web Analytics +
+ * GA4). Exported so flow components (Describe wizard, builder, publish)
+ * can report spec events directly; the delegated listeners below cover
+ * generic clicks. Safe to call anywhere client-side.
+ */
+export function fireNetifyEvent(name: string, data: Record<string, string> = {}): void {
+  fire(name, data);
+}
+
 function fire(name: string, data: Record<string, string> = {}): void {
   const payload: Record<string, string> = {
     path: window.location.pathname,

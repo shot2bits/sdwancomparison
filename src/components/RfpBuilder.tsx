@@ -13,6 +13,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NETIFY_NDA_TEMPLATE } from "@/lib/rfp-types";
 import SignIn from "@/components/SignIn";
+import { fireNetifyEvent } from "@/components/NetifyEvents";
 
 type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
 type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
@@ -242,6 +243,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     return () => window.clearInterval(t);
     /* eslint-disable-next-line */
   }, [publishAuthNeeded, publishing]);
+
+  // Generate handoff from the Describe wizard (?welcome=generated): show the
+  // document-first banner, land in manual mode so the assembled document is
+  // the first thing seen, report rfp_generated once, then clean the param so
+  // refreshes do not re-report. Flow spec, 14 July 2026.
+  const [generatedWelcome, setGeneratedWelcome] = useState(false);
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (p.get("welcome") !== "generated") return;
+    setGeneratedWelcome(true);
+    setMode("manual");
+    fireNetifyEvent("rfp_generated");
+    p.delete("welcome");
+    const qs = p.toString();
+    window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
+  }, []);
 
   // Responses appear without a manual click once the RFP is published
   // (Harry's feedback, 06/07/2026). The button remains as a refresh.
@@ -757,6 +774,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       }
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
+      fireNetifyEvent("rfp_published", { invited: String(data.invited?.length ?? 0) });
       try { localStorage.removeItem(`rfp_pending_publish_${project.id}`); } catch { /* ignore */ }
       setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
@@ -886,8 +904,28 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     );
   }
 
+  const includedSections = project.rfp_sections.filter((s) => s.included);
+  const includedQuestionCount = includedSections.reduce((n, s) => n + s.questions.length, 0);
+
   return (
     <div>
+      {/* Generate moment: the Describe wizard hands off here. Document-first
+          framing so the buyer reviews and trims rather than builds. */}
+      {generatedWelcome && (
+        <div className="mb-6 rounded-sm border border-emerald-300 bg-emerald-50 p-4">
+          <p className="text-base font-semibold mb-1">Here is your RFP: {project.title}</p>
+          <p className="text-sm text-[var(--ink-700)] mb-3">
+            {includedQuestionCount} questions across {includedSections.length} sections, assembled from the Netify
+            question bank (Methodology v{project.methodology_version}) around what you described. Review and trim
+            anything below, then choose who sees it. Nothing reaches a supplier until you publish or invite them.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <a href="#suppliers" className="inline-flex items-center px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors">Choose who sees it</a>
+            <button onClick={() => setGeneratedWelcome(false)} className="text-sm underline text-[var(--ink-600,#555)]">Dismiss</button>
+          </div>
+        </div>
+      )}
+
       {/* Plain-language guide to the whole flow. Steps on separate lines per
           Harry's UX feedback (2026-07-02) — the inline run-on was hard to scan. */}
       <div className="mb-6 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-3 text-xs leading-relaxed text-[var(--ink-600,#555)]">
@@ -1293,7 +1331,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       </section>
 
       {/* Suppliers: two-sided marketplace */}
-      <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
+      <section id="suppliers" className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
         <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
           <h2 className="text-lg">Suppliers</h2>
           <div className="flex gap-2">

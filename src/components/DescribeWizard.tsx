@@ -1,0 +1,341 @@
+"use client";
+
+/**
+ * DescribeWizard: the front door of the Describe, Generate, Publish flow
+ * (docs/netify-rfp-flow-spec-2026-07-14.md). Five micro-steps, one decision
+ * per screen, with a live supplier-match panel so the value proposition is
+ * shown as a dataset fact while the buyer types. No server draft exists
+ * until the final step completes, which also stops CTA landings inflating
+ * the draft count. On completion it creates the RFP (title + buyer context),
+ * stores the manage token under the builder's key and hands off to
+ * /rfp-builder/{id}?welcome=generated for the Generate moment.
+ */
+
+import { useEffect, useRef, useState } from "react";
+import { fireNetifyEvent } from "@/components/NetifyEvents";
+import { REGIONS, SITES_BANDS, USERS_BANDS, SECTORS } from "@/lib/notice-options";
+
+const SCOPES = [
+  { key: "sdwan", label: "SD-WAN", sub: "Replace or refresh the wide area network" },
+  { key: "sse", label: "SSE", sub: "Security service edge: SWG, ZTNA, CASB" },
+  { key: "sase", label: "Full SASE", sub: "SD-WAN and cloud security together" },
+  { key: "managed", label: "Managed service", sub: "A provider runs it end to end" },
+  { key: "unsure", label: "Not sure yet", sub: "Netify recommends the right scope" },
+] as const;
+
+const CURRENT_STACK = [
+  { key: "mpls", label: "MPLS circuits" },
+  { key: "sdwan_incumbent", label: "Existing SD-WAN" },
+  { key: "firewalls", label: "On-site firewalls" },
+  { key: "vpn", label: "Remote-access VPN" },
+  { key: "internet_only", label: "Internet-only WAN" },
+  { key: "none", label: "None of these" },
+] as const;
+
+const DRIVERS = [
+  { key: "contract_end", label: "Contract ending" },
+  { key: "cost", label: "Cost reduction" },
+  { key: "security", label: "Security improvement" },
+  { key: "growth", label: "Growth or new sites" },
+  { key: "performance", label: "Performance problems" },
+  { key: "cloud", label: "Cloud migration" },
+] as const;
+
+const TIMELINES = [
+  { key: "asap", label: "As soon as possible" },
+  { key: "3m", label: "Within 3 months" },
+  { key: "6m", label: "3 to 6 months" },
+  { key: "12m", label: "6 to 12 months" },
+  { key: "research", label: "Researching for now" },
+] as const;
+
+const MODELS = [
+  { key: "any", label: "No preference" },
+  { key: "managed", label: "Fully managed" },
+  { key: "co_managed", label: "Co-managed" },
+  { key: "diy", label: "In-house (DIY)" },
+] as const;
+
+const COMPLIANCE = [
+  { key: "uk_gdpr", label: "UK GDPR" },
+  { key: "pci_dss", label: "PCI DSS" },
+  { key: "iso_27001", label: "ISO 27001" },
+  { key: "dora", label: "EU DORA" },
+  { key: "nis2", label: "EU NIS2" },
+  { key: "iec_62443", label: "IEC 62443 (OT)" },
+] as const;
+
+/** Wizard scope key → persisted product_scope + delivery model default. */
+function scopeToBuyer(scope: string): { product_scope: string; operating_model?: string } {
+  if (scope === "sdwan") return { product_scope: "sdwan_only" };
+  if (scope === "sse") return { product_scope: "sse_only" };
+  if (scope === "managed") return { product_scope: "full_sase", operating_model: "managed" };
+  return { product_scope: "full_sase" };
+}
+
+/** Representative site count for the question engine from the public band. */
+const SITE_COUNT_FOR_BAND: Record<string, number> = {
+  "1-5": 5, "6-20": 20, "21-50": 50, "51-200": 125, "200+": 250,
+};
+
+type Match = { count: number; total: number; names: string[] };
+
+export default function DescribeWizard() {
+  const [step, setStep] = useState(0);
+  const [title, setTitle] = useState("");
+  const [scope, setScope] = useState("");
+  const [sites, setSites] = useState("");
+  const [users, setUsers] = useState("");
+  const [regions, setRegions] = useState<string[]>([]);
+  const [stack, setStack] = useState<string[]>([]);
+  const [drivers, setDrivers] = useState<string[]>([]);
+  const [timeline, setTimeline] = useState("");
+  const [model, setModel] = useState("any");
+  const [sector, setSector] = useState("");
+  const [compliance, setCompliance] = useState<string[]>([]);
+  const [match, setMatch] = useState<Match | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const started = useRef(false);
+
+  // Pre-answer from entry links (?scope=sdwan&sector=healthcare), editable.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const s = p.get("scope");
+    if (s && SCOPES.some((x) => x.key === s)) setScope(s);
+    const sec = p.get("sector");
+    if (sec && SECTORS.some((x) => x.key === sec)) setSector(sec);
+  }, []);
+
+  // Live supplier match: refreshed whenever scope, regions or model change.
+  useEffect(() => {
+    if (!scope || scope === "unsure") { setMatch(null); return; }
+    const q = new URLSearchParams({ scope: scope === "managed" ? "sase" : scope, regions: regions.join("."), model: scope === "managed" ? "managed" : model });
+    const t = window.setTimeout(() => {
+      fetch(`/sase/api/rfp/match?${q.toString()}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => { if (d && typeof d.count === "number") setMatch(d); })
+        .catch(() => {});
+    }, 250);
+    return () => window.clearTimeout(t);
+  }, [scope, regions, model]);
+
+  function markStarted() {
+    if (started.current) return;
+    started.current = true;
+    fireNetifyEvent("describe_started");
+  }
+
+  function advance(next: number, stepName: string) {
+    fireNetifyEvent("describe_step", { step: stepName });
+    setStep(next);
+  }
+
+  const toggle = (list: string[], set: (v: string[]) => void, key: string) => {
+    markStarted();
+    set(list.includes(key) ? list.filter((k) => k !== key) : [...list, key]);
+  };
+
+  async function create() {
+    if (creating) return;
+    setCreating(true); setError(null);
+    const scoped = scopeToBuyer(scope);
+    const noteParts: string[] = [];
+    if (stack.length && !stack.includes("none")) noteParts.push(`Current estate: ${stack.map((k) => CURRENT_STACK.find((c) => c.key === k)?.label ?? k).join(", ")}.`);
+    if (drivers.length) noteParts.push(`Drivers: ${drivers.map((k) => DRIVERS.find((d) => d.key === k)?.label ?? k).join(", ")}.`);
+    if (timeline) noteParts.push(`Timeline: ${TIMELINES.find((t) => t.key === timeline)?.label ?? timeline}.`);
+    if (users) noteParts.push(`Users: ${USERS_BANDS.find((u) => u.key === users)?.label ?? users}.`);
+    if (scope === "unsure") noteParts.push("Buyer is unsure of scope; recommend the right approach in responses.");
+    const buyer = {
+      sector: sector || null,
+      site_count: SITE_COUNT_FOR_BAND[sites] ?? null,
+      regions,
+      compliance,
+      operating_model: scoped.operating_model ?? model,
+      product_scope: scoped.product_scope,
+      notes: noteParts.join(" "),
+    };
+    try {
+      const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer }) });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
+      const p = (await res.json()) as { id: string; manage_token?: string };
+      if (p.manage_token) { try { localStorage.setItem(`netify_mtok_${p.id}`, p.manage_token); } catch { /* private mode */ } }
+      fireNetifyEvent("describe_completed", { scope: scope || "unset" });
+      window.location.assign(`/sase/rfp-builder/${p.id}/?welcome=generated`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not create your project.");
+      setCreating(false);
+    }
+  }
+
+  const card = "w-full text-left rounded-sm border p-4 transition-colors";
+  const idle = "border-[var(--ink-200,#e5e5e5)] hover:border-[var(--ink-400,#999)]";
+  const active = "border-amber-500 bg-amber-50";
+  const chip = "px-3.5 py-1.5 text-sm rounded-full border transition-colors";
+  const nextBtn = "px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50";
+  const backBtn = "px-4 py-2 text-sm underline text-[var(--ink-600,#555)]";
+
+  const STEP_COUNT = 6;
+  const heading = (t: string, sub: string) => (
+    <div className="mb-5">
+      <p className="eyebrow mb-2">Step {step + 1} of {STEP_COUNT}</p>
+      <h2 className="text-xl mb-1">{t}</h2>
+      <p className="text-sm text-[var(--ink-600,#555)]">{sub}</p>
+    </div>
+  );
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="max-w-xl">
+        {step === 0 && (
+          <div>
+            {heading("What are you buying?", "One line is enough. This becomes your project title, and suppliers see it first.")}
+            <input
+              value={title}
+              onChange={(e) => { markStarted(); setTitle(e.target.value); }}
+              onKeyDown={(e) => { if (e.key === "Enter" && title.trim().length >= 8) advance(1, "title"); }}
+              placeholder="e.g. Managed SD-WAN for 40 UK retail sites"
+              className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-base"
+              autoFocus
+            />
+            <div className="mt-5 flex items-center gap-3">
+              <button onClick={() => advance(1, "title")} disabled={title.trim().length < 8} className={nextBtn}>Continue</button>
+              <span className="text-xs text-[var(--ink-500)]">Free for buyers. No sign-in until you publish.</span>
+            </div>
+          </div>
+        )}
+
+        {step === 1 && (
+          <div>
+            {heading("What is in scope?", "Pick the closest fit. You can refine it later.")}
+            <div className="space-y-2">
+              {SCOPES.map((s) => (
+                <button key={s.key} onClick={() => { markStarted(); setScope(s.key); advance(2, "scope"); }} className={`${card} ${scope === s.key ? active : idle}`}>
+                  <span className="block text-sm font-semibold">{s.label}</span>
+                  <span className="block text-sm text-[var(--ink-600,#555)]">{s.sub}</span>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setStep(0)} className={`${backBtn} mt-4`}>Back</button>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div>
+            {heading("How big is the estate?", "Bands are fine. Suppliers use this to size their response.")}
+            <p className="text-sm font-medium mb-2">Sites</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {SITES_BANDS.map((b) => (
+                <button key={b.key} onClick={() => { markStarted(); setSites(b.key); }} className={`${chip} ${sites === b.key ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{b.label}</button>
+              ))}
+            </div>
+            <p className="text-sm font-medium mb-2">Users</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {USERS_BANDS.map((b) => (
+                <button key={b.key} onClick={() => { markStarted(); setUsers(b.key); }} className={`${chip} ${users === b.key ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{b.label}</button>
+              ))}
+            </div>
+            <p className="text-sm font-medium mb-2">Regions</p>
+            <div className="flex flex-wrap gap-2">
+              {REGIONS.map((r) => (
+                <button key={r.key} onClick={() => toggle(regions, setRegions, r.key)} className={`${chip} ${regions.includes(r.key) ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{r.label}</button>
+              ))}
+            </div>
+            <div className="mt-5 flex items-center gap-3">
+              <button onClick={() => advance(3, "estate")} disabled={!sites || regions.length === 0} className={nextBtn}>Continue</button>
+              <button onClick={() => setStep(1)} className={backBtn}>Back</button>
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div>
+            {heading("What do you run today, and why change?", "Pick everything that applies.")}
+            <p className="text-sm font-medium mb-2">Today</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {CURRENT_STACK.map((c) => (
+                <button key={c.key} onClick={() => toggle(stack, setStack, c.key)} className={`${chip} ${stack.includes(c.key) ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{c.label}</button>
+              ))}
+            </div>
+            <p className="text-sm font-medium mb-2">Driving the change</p>
+            <div className="flex flex-wrap gap-2">
+              {DRIVERS.map((d) => (
+                <button key={d.key} onClick={() => toggle(drivers, setDrivers, d.key)} className={`${chip} ${drivers.includes(d.key) ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{d.label}</button>
+              ))}
+            </div>
+            <div className="mt-5 flex items-center gap-3">
+              <button onClick={() => advance(4, "context")} className={nextBtn}>Continue</button>
+              <button onClick={() => setStep(2)} className={backBtn}>Back</button>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div>
+            {heading("When do you need it, and who runs it?", "Rough is fine. Suppliers plan their response around this.")}
+            <p className="text-sm font-medium mb-2">Timescale</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {TIMELINES.map((t) => (
+                <button key={t.key} onClick={() => { markStarted(); setTimeline(t.key); }} className={`${chip} ${timeline === t.key ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{t.label}</button>
+              ))}
+            </div>
+            <p className="text-sm font-medium mb-2">Delivery model</p>
+            <div className="flex flex-wrap gap-2">
+              {MODELS.map((m) => (
+                <button key={m.key} onClick={() => { markStarted(); setModel(m.key); }} className={`${chip} ${model === m.key ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{m.label}</button>
+              ))}
+            </div>
+            <div className="mt-5 flex items-center gap-3">
+              <button onClick={() => advance(5, "timeline")} className={nextBtn}>Continue</button>
+              <button onClick={() => setStep(3)} className={backBtn}>Back</button>
+            </div>
+          </div>
+        )}
+
+        {step === 5 && (
+          <div>
+            {heading("Anything else that shapes the RFP?", "Optional. Skip it and Netify still builds the full document.")}
+            <p className="text-sm font-medium mb-2">Sector</p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {SECTORS.map((s) => (
+                <button key={s.key} onClick={() => { markStarted(); setSector(sector === s.key ? "" : s.key); }} className={`${chip} ${sector === s.key ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{s.label}</button>
+              ))}
+            </div>
+            <p className="text-sm font-medium mb-2">Compliance</p>
+            <div className="flex flex-wrap gap-2">
+              {COMPLIANCE.map((c) => (
+                <button key={c.key} onClick={() => toggle(compliance, setCompliance, c.key)} className={`${chip} ${compliance.includes(c.key) ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{c.label}</button>
+              ))}
+            </div>
+            {error && <p className="text-sm text-red-700 mt-4">{error}</p>}
+            <div className="mt-5 flex items-center gap-3">
+              <button onClick={create} disabled={creating} className={nextBtn}>{creating ? "Building your RFP..." : "Build my RFP"}</button>
+              <button onClick={() => setStep(4)} className={backBtn}>Back</button>
+            </div>
+            <p className="mt-3 text-xs text-[var(--ink-500)]">Netify assembles the complete document from its question bank (Methodology v2026.1). You review and trim before anything is shared.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Live supplier match: the value proposition as a dataset fact. */}
+      <aside className="lg:pt-14">
+        <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-4 sticky top-6">
+          {match && match.count > 0 ? (
+            <>
+              <p className="text-2xl font-semibold mb-1">{match.count}</p>
+              <p className="text-sm text-[var(--ink-700)] mb-3">verified suppliers on the Netify marketplace match this project so far.</p>
+              <p className="text-xs text-[var(--ink-500)] mb-1">Including:</p>
+              <p className="text-sm text-[var(--ink-700)]">{match.names.slice(0, 6).join(", ")}{match.count > 6 ? " and more" : ""}.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold mb-1">Who sees this?</p>
+              <p className="text-sm text-[var(--ink-600,#555)]">As you answer, this panel shows how many verified vendors and managed providers match your project. Publishing is always your explicit choice.</p>
+            </>
+          )}
+          <p className="mt-3 text-xs text-[var(--ink-500)]">Responses come back structured against your questions. Pricing stays private to you.</p>
+        </div>
+      </aside>
+    </div>
+  );
+}
