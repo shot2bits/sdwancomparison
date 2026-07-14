@@ -48,7 +48,7 @@ export async function POST(req: Request) {
   if (!admin && isAcademicDomain(domain) && !(await isBuyerAllowedDomain(domain))) {
     try { await recordPendingRequest(email, domain, role); } catch { /* best effort */ }
     return Response.json(
-      { ok: true, message: "Thanks — academic and research addresses are reviewed before access, because the marketplace supports commercial procurement. The Netify team will check your request (usually within one working day) and email your sign-in link once approved. The question bank, methodology and sample RFP pages are open to read meanwhile." },
+      { ok: true, message: "Thanks. Academic and research addresses are reviewed before access, because the marketplace supports commercial procurement. The Netify team will check your request (usually within one working day) and email your sign-in link once approved. The question bank, methodology and sample RFP pages are open to read meanwhile." },
       { headers: cors },
     );
   }
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         if (!admin) {
           try { await recordPendingRequest(email, domain); } catch { /* best effort */ }
           return Response.json(
-            { ok: true, message: "Thanks — your registration request is queued. Your email domain isn't yet linked to a supplier profile, so the Netify team will review it (usually within one working day) and email your sign-in link once approved. No need to do anything else." },
+            { ok: true, message: "Thanks. Your registration request is queued. Your email domain isn't yet linked to a supplier profile, so the Netify team will review it (usually within one working day) and email your sign-in link once approved. No need to do anything else." },
             { headers: cors },
           );
         }
