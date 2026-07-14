@@ -11,13 +11,16 @@ import { useEffect, useState } from "react";
  * show a button and only exchange the token on a real user click, which
  * scanners do not perform.
  *
- * After sign-in this page is NOT a dead end (Robert's 13 July screenshot):
- * buyer sessions claim any draft RFPs held in this browser's localStorage
- * (manage tokens prove creation, POST /api/rfp/claim), then everyone is sent
- * somewhere useful — the ?return= path the sign-in was requested from, the
- * claimed draft, the account hub, or the opportunity board for suppliers.
- * The builder's pending-publish flag then auto-resumes a publish that was
- * interrupted by the sign-in requirement.
+ * States (Harry's testing, 14 July 2026):
+ *  - Visiting with no token while signed in: a signed-in screen with account
+ *    and builder buttons, never a misleading "expired" error.
+ *  - Visiting with no token signed out, or with a dead token: the error
+ *    offers a Return to sign in route instead of dead-ending.
+ *  - After Confirm sign-in: buyer sessions claim this browser's draft RFPs
+ *    (manage tokens prove creation, POST /api/rfp/claim), a note is handed
+ *    to the destination via sessionStorage (same tab), and the person is
+ *    redirected: the ?return= path the sign-in came from, else the claimed
+ *    draft, else the account hub, or the board for suppliers.
  */
 
 /** Same-app absolute paths only (basePath /sase), so the redirect can never leave the app. */
@@ -41,18 +44,27 @@ function localDrafts(): { id: string; manage_token: string }[] {
   return out.slice(0, 25);
 }
 
+const BTN = "inline-flex items-center px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors no-underline";
+const BTN_GHOST = "inline-flex items-center px-5 py-2.5 border border-[var(--ink-900)] rounded-full text-[var(--ink-900)] no-underline hover:bg-[var(--ink-900)] hover:text-white transition-colors";
+
 export default function VerifyClient() {
   const [token, setToken] = useState<string | null>(null);
-  const [state, setState] = useState<"loading" | "ready" | "working" | "done" | "error">("loading");
-  const [info, setInfo] = useState<{ role?: string; vendor_slug?: string | null }>({});
+  const [state, setState] = useState<"loading" | "ready" | "working" | "done" | "signed_in" | "error">("loading");
+  const [info, setInfo] = useState<{ role?: string; vendor_slug?: string | null; email?: string }>({});
   const [claimedCount, setClaimedCount] = useState(0);
   const [dest, setDest] = useState<string>("/sase/account/");
 
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("token");
-    if (!t) { setState("error"); return; }
-    setToken(t);
-    setState("ready");
+    if (t) { setToken(t); setState("ready"); return; }
+    // No token: someone navigated here directly. Recognise an existing
+    // session rather than showing a misleading "expired" error.
+    fetch("/sase/api/auth/session")
+      .then((r) => r.json())
+      .then((d: { authenticated?: boolean; role?: string; email?: string; vendor_slug?: string | null }) => {
+        if (d?.authenticated) { setInfo(d); setState("signed_in"); } else { setState("error"); }
+      })
+      .catch(() => setState("error"));
   }, []);
 
   async function confirm() {
@@ -88,17 +100,52 @@ export default function VerifyClient() {
             ? `/sase/rfp-builder/${claimed[0].id}/`
             : "/sase/account/");
 
+      // Hand a persistent note to the destination (same tab, sessionStorage),
+      // so the confirmation survives the redirect (Harry: the flash message
+      // alone was easy to miss).
+      try { sessionStorage.setItem("netify_signin_note", JSON.stringify({ claimed: claimed.length })); } catch { /* ignore */ }
+
       setClaimedCount(claimed.length);
       setDest(to);
       setInfo(d);
       setState("done");
-      window.setTimeout(() => { window.location.assign(to); }, 1600);
+      window.setTimeout(() => { window.location.assign(to); }, 2500);
     } catch { setState("error"); }
   }
 
   if (state === "loading") return <p className="text-[var(--ink-500)]">Loading...</p>;
 
-  if (state === "error") return <p className="text-red-700">This sign-in link is invalid or has expired. Request a new one.</p>;
+  if (state === "signed_in") {
+    return (
+      <div>
+        <h1 className="text-xl mb-2">You are signed in{info.email ? ` as ${info.email}` : ""}.</h1>
+        <p className="text-[var(--ink-700)] mb-5">
+          {info.role === "supplier"
+            ? `Supplier access${info.vendor_slug ? ` for ${info.vendor_slug}` : ""}. Browse open projects and respond from the board.`
+            : "Your RFPs and projects are saved to your account."}
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          {info.role === "supplier" ? (
+            <a href="/sase/opportunities/board/" className={BTN}>Browse open projects</a>
+          ) : (
+            <>
+              <a href="/sase/account/" className={BTN}>Go to my account</a>
+              <a href="/sase/rfp-builder/new/" className={BTN_GHOST}>Start a project</a>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <div>
+        <p className="text-red-700 mb-5">This sign-in link is invalid or has expired. Request a new one.</p>
+        <a href="/sase/account/" className={BTN}>Return to sign in</a>
+      </div>
+    );
+  }
 
   if (state === "done") {
     const supplier = info.role === "supplier";
@@ -115,7 +162,7 @@ export default function VerifyClient() {
               ? "Taking you back to your RFP..."
               : "Taking you to your account..."}
         </p>
-        <a href={dest} className="inline-block px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors no-underline">Continue</a>
+        <a href={dest} className={BTN}>Continue</a>
       </div>
     );
   }

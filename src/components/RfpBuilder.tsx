@@ -260,6 +260,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
   }, []);
 
+  // Sign-in confirmation carried over the verify redirect (sessionStorage,
+  // same tab). A persistent strip replaces the flash message Harry missed:
+  // it confirms the session, the claimed drafts and what happens next.
+  const [signinNote, setSigninNote] = useState<number | null>(null);
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("netify_signin_note");
+      if (!raw) return;
+      sessionStorage.removeItem("netify_signin_note");
+      const d = JSON.parse(raw) as { claimed?: number };
+      setSigninNote(typeof d.claimed === "number" ? d.claimed : 0);
+    } catch { /* ignore */ }
+  }, []);
+
   // Responses appear without a manual click once the RFP is published
   // (Harry's feedback, 06/07/2026). The button remains as a refresh.
   useEffect(() => {
@@ -909,6 +923,21 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   return (
     <div>
+      {/* Sign-in confirmation strip: persists after the verify redirect so
+          the buyer sees what happened (session, claimed drafts, next step). */}
+      {signinNote !== null && (
+        <div className="mb-6 rounded-sm border border-emerald-300 bg-emerald-50 p-3 text-sm text-[var(--ink-800)]">
+          <strong>You are signed in.</strong>{" "}
+          {signinNote > 0
+            ? (signinNote === 1 ? "Your draft RFP is saved to your account." : `${signinNote} draft RFPs are saved to your account.`)
+            : "Your work here saves to your account."}{" "}
+          {project.status === "published"
+            ? "This RFP is published; supplier responses appear below as they arrive."
+            : "When you are ready, publish below to invite suppliers."}
+          <button onClick={() => setSigninNote(null)} className="ml-2 underline">Dismiss</button>
+        </div>
+      )}
+
       {/* Generate moment: the Describe wizard hands off here. Document-first
           framing so the buyer reviews and trims rather than builds. */}
       {generatedWelcome && (

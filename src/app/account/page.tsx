@@ -29,7 +29,7 @@ export default function AccountPage() {
         <SignIn role="buyer" prompt="Sign in with your work email to recover your opportunities and RFPs on this device." />
         <p className="mt-3 text-xs text-[var(--ink-500)]">
           Supplier? <Link href="/for-suppliers#register" className="underline">Register or sign in to bid</Link> · your dashboard is at{" "}
-          <Link href="/supplier" className="underline">Supplier area</Link>. Netify staff: <Link href="/admin" className="underline">admin console</Link>.
+          <Link href="/supplier" className="underline">Supplier area</Link>.
         </p>
       </div>
 

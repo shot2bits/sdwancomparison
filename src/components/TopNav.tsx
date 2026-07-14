@@ -23,6 +23,20 @@ export default function TopNav() {
   useEffect(() => setMounted(true), []);
   const pathname = usePathname();
 
+  // Session-aware label (Harry, 14 July 2026: the bar said "Sign in" while
+  // signed in). Re-checked on route change so it flips after the magic-link
+  // round trip without a hard refresh. Same destination either way: /account.
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    let live = true;
+    fetch("/sase/api/auth/session")
+      .then((r) => r.json())
+      .then((d: { authenticated?: boolean }) => { if (live) setSignedIn(!!d?.authenticated); })
+      .catch(() => { if (live) setSignedIn(false); });
+    return () => { live = false; };
+  }, [pathname]);
+  const accountLabel = signedIn ? "My account" : SIGN_IN.label;
+
   useEffect(() => setMobileOpen(false), [pathname]);
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -44,7 +58,7 @@ export default function TopNav() {
 
         <div className="flex items-center gap-4">
           <Link href={toAppHref(SIGN_IN.href)} className="inline-flex items-center whitespace-nowrap text-[13px] tracking-tight text-[var(--ink-700)] no-underline transition-colors hover:text-[var(--ink-900)]">
-            {SIGN_IN.label}
+            {accountLabel}
           </Link>
           <Link href={toAppHref(NAV_CTA.href)} className="hidden sm:inline-flex items-center whitespace-nowrap rounded-full bg-amber-500 px-5 py-1.5 text-[13px] font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
             {NAV_CTA.label}
@@ -75,7 +89,7 @@ export default function TopNav() {
             <AccordionNav idPrefix="drawer" onNavigate={() => setMobileOpen(false)} />
             <div className="mt-6 border-t border-[var(--ink-200)] pt-5 pb-8 space-y-3">
               <Link href={toAppHref(SIGN_IN.href)} onClick={() => setMobileOpen(false)} className="block px-3 text-sm font-medium text-[var(--ink-900)] no-underline">
-                {SIGN_IN.label}
+                {accountLabel}
               </Link>
               <Link href={toAppHref(NAV_CTA.href)} onClick={() => setMobileOpen(false)} className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-3 text-sm font-medium text-zinc-950 no-underline">
                 {NAV_CTA.label}
