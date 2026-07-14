@@ -24,12 +24,18 @@ export async function OPTIONS(req: Request) { return preflight(req); }
 export async function POST(req: Request) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
-  let body: { email?: string; role?: string };
+  let body: { email?: string; role?: string; return_to?: string };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const email = (body.email ?? "").trim().toLowerCase();
   const role = body.role === "supplier" ? "supplier" : "buyer";
   const domain = emailDomain(email);
   if (!domain) return Response.json({ error: "Enter a valid email." }, { status: 422, headers: cors });
+
+  // Where the sign-in was requested from, carried through the magic link so
+  // the verify page can send the person straight back afterwards. Same-app
+  // absolute paths only (basePath /sase), so the link can never point off-site.
+  const rawReturn = typeof body.return_to === "string" ? body.return_to : "";
+  const returnTo = rawReturn.length <= 400 && /^\/sase\/[\w\-/.~%?=&]*$/.test(rawReturn) ? rawReturn : "";
 
   const admin = isAdminEmail(email);
 
@@ -74,8 +80,8 @@ export async function POST(req: Request) {
   }
 
   const token = await createMagicToken({ role: resolvedRole, email, vendor_slug });
-  const sent = await sendMagicLink(email, token, resolvedRole);
+  const sent = await sendMagicLink(email, token, resolvedRole, returnTo);
   // In preview without Resend configured, return the link so it is testable.
-  const devLink = sent ? undefined : `${SITE_URL}/auth/verify?token=${token}`;
+  const devLink = sent ? undefined : `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
   return Response.json({ ok: true, emailed: sent, dev_link: devLink, role: resolvedRole, vendor_slug }, { headers: cors });
 }

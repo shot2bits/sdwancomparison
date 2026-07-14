@@ -19,14 +19,40 @@ const STATUS_LABELS: Record<string, string> = {
   evaluation: "Evaluation",
 };
 
+/** Draft manage tokens the builder saved in this browser (netify_mtok_{id}). */
+function localDrafts(): { id: string; manage_token: string }[] {
+  const out: { id: string; manage_token: string }[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const k = localStorage.key(i) ?? "";
+      if (!k.startsWith("netify_mtok_")) continue;
+      const id = k.slice("netify_mtok_".length);
+      const manage_token = localStorage.getItem(k) ?? "";
+      if (id && manage_token) out.push({ id, manage_token });
+    }
+  } catch { /* private mode */ }
+  return out.slice(0, 25);
+}
+
 export default function MyRfps() {
   const [rfps, setRfps] = useState<Rfp[] | null>(null);
 
   useEffect(() => {
-    fetch("/sase/api/rfp/mine")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d?.rfps) setRfps(d.rfps as Rfp[]); })
-      .catch(() => {});
+    const load = () =>
+      fetch("/sase/api/rfp/mine")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => { if (d?.rfps) setRfps(d.rfps as Rfp[]); })
+        .catch(() => {});
+    // Claim any anonymous drafts this browser built before listing, so a
+    // buyer who drafted first and signed in later still sees their work here.
+    const drafts = localDrafts();
+    if (drafts.length > 0) {
+      fetch("/sase/api/rfp/claim", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ drafts }) })
+        .catch(() => {})
+        .then(load);
+    } else {
+      load();
+    }
   }, []);
 
   if (!rfps || rfps.length === 0) return null;

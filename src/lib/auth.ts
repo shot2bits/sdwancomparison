@@ -34,9 +34,12 @@ export async function sessionFromRequest(req: Request): Promise<AuthSession | nu
 }
 
 /** Send a magic sign-in link via Resend (best effort). Returns whether an email was sent. */
-export async function sendMagicLink(email: string, token: string, role: string): Promise<boolean> {
+export async function sendMagicLink(email: string, token: string, role: string, returnTo = ""): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
-  const link = `${SITE_URL}/auth/verify?token=${token}`;
+  // returnTo is validated by the caller (same-app absolute path only); it
+  // rides the link so the verify page can send the person back where the
+  // sign-in was requested instead of dead-ending.
+  const link = `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
   if (!key) return false;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   try {

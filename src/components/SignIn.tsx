@@ -17,7 +17,10 @@ export default function SignIn({ role, prompt }: { role: "supplier" | "buyer"; p
   async function request() {
     setError(null); setSent(null); setDevLink(null);
     try {
-      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role }) });
+      // Where sign-in was requested from: carried through the magic link so
+      // the verify page can send the person straight back here afterwards.
+      const return_to = window.location.pathname + window.location.search;
+      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not send a link.");
       setSent(data.message ?? "Check your inbox for a sign-in link.");
