@@ -8,13 +8,13 @@ const UNDERLAY = "/opportunities/new?prefill=1&engagement=quote_room&scope=under
 const OVERLAY = "/opportunities/new?prefill=1&engagement=quote_room&scope=sd_wan.sse.sase&summary=" + encodeURIComponent("Quick pricing request: overlay SD-WAN, SSE and SASE. Please quote a managed solution and indicative pricing.");
 
 export const metadata: Metadata = {
-  title: "Post a SASE or SD-WAN project, build an RFP, invite providers",
+  title: "Post a SASE or SD-WAN Project Notice: Supplier Interest",
   description:
-    "Start with a short project notice or create a full RFP. Netify helps you structure the requirement, publish it to verified suppliers and compare responses. Draft in the clear; sign in only to publish.",
+    "Post a short SASE or SD-WAN project notice: what you need, where and by when. Verified suppliers respond with interest and indicative pricing. Draft in the clear; sign in only to publish.",
   alternates: { canonical: `${SITE_URL}/opportunities/` },
   openGraph: {
-    title: "Post a SASE or SD-WAN project, build an RFP, invite providers",
-    description: "Short project notice or full RFP. Verified suppliers respond; pricing stays private.",
+    title: "Post a SASE or SD-WAN Project Notice: Supplier Interest",
+    description: "A short public listing of what you need. Verified suppliers respond; pricing stays private.",
     url: `${SITE_URL}/opportunities`,
     type: "website",
     locale: "en_GB",
@@ -30,10 +30,10 @@ const CARDS = [
     primary: true,
   },
   {
-    href: "/rfp-builder",
+    href: "/rfp-builder/new",
     title: "Build a full RFP",
-    body: "Create a structured SASE, SSE or SD-WAN RFP using Netify's question bank, evidence prompts and AI gap checking.",
-    cta: "Open the RFP Builder",
+    body: "Describe your project in two minutes and Netify builds the complete RFP from its question bank for you to review and publish.",
+    cta: "Start your project",
     primary: false,
   },
   {
@@ -58,12 +58,13 @@ export default function OpportunitiesPage() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       {schemas.map((s, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />)}
       <div className="mb-10 max-w-3xl">
-        <p className="eyebrow mb-3">Live marketplace</p>
-        <h1 id="page-h1" className="mb-4">Post a SASE or SD-WAN project, build an RFP, and invite verified providers.</h1>
+        <p className="eyebrow mb-3">Post a project notice</p>
+        <h1 id="page-h1" className="mb-4">Post a SASE or SD-WAN project notice and gather supplier interest.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          Start with a short project notice or create a full RFP. Netify helps you structure the requirement,
-          publish it to the right suppliers and compare responses. Draft everything in the clear — you sign in
-          only to publish, and supplier pricing stays private to you.
+          A project notice is a short public listing: what you need, where and by when. Verified suppliers
+          respond with interest and indicative pricing, and you never write a full document. Draft in the
+          clear, sign in only to publish, and pricing stays private to you. Need the complete RFP instead?
+          The RFP Builder creates one from your answers in about two minutes.
         </p>
       </div>
 

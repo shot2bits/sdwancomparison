@@ -78,13 +78,30 @@ const CATEGORY_MEMBERS: Record<CostCategoryId, { label: string; slugs: string[] 
 };
 
 /**
- * Category descriptors, verbatim from the copy file. Populated when
- * FINAL_PAGE_COPY_sase_cost_tco.md is supplied; endpoints omit the fields
- * until then (never invented).
+ * Category descriptors, verbatim from the copy file (Table 4 of
+ * "Affordable SASE for Global Enterprise Networks: A Cost and TCO Guide",
+ * Harry Yelland, reviewed by Abigail Sturt 30 June 2026; supplied 14 July).
  */
 const CATEGORY_DESCRIPTORS: Partial<
   Record<CostCategoryId, { typicalCommercialModel: string; bestFitProfile: string }>
-> = {};
+> = {
+  "unified-single-vendor": {
+    typicalCommercialModel: "Per-user, platform-bundled licensing",
+    bestFitProfile: "Organisations prioritising converged simplicity and lower operating cost",
+  },
+  "enterprise-mega-vendors": {
+    typicalCommercialModel: "Tiered, feature-depth-led licensing",
+    bestFitProfile: "Large estates needing the deepest available feature set",
+  },
+  "cloud-platform-vendors": {
+    typicalCommercialModel: "Per-user with modular security add-ons",
+    bestFitProfile: "Organisations prioritising global edge reach and predictable entry pricing",
+  },
+  "telco-carrier-managed": {
+    typicalCommercialModel: "Managed service, often bundled with connectivity",
+    bestFitProfile: "Global estates wanting one accountable managed provider",
+  },
+};
 
 /**
  * Vendors with marketplace pages but no dataset record. Name and URL come
