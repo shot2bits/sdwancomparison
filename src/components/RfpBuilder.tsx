@@ -150,7 +150,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [publishAuthNeeded, setPublishAuthNeeded] = useState(false);
   // Live supplier match for the publish panel: the same public endpoint the
   // Describe wizard uses, so both quote the same marketplace numbers.
-  const [matchInfo, setMatchInfo] = useState<{ count: number; total: number } | null>(null);
+  const [matchInfo, setMatchInfo] = useState<{ count: number; total: number; names: string[] } | null>(null);
   // Slim sticky publish bar: dismissible per session so it never nags.
   const [stickyGone, setStickyGone] = useState(false);
   const publishPanelRef = useRef<HTMLElement | null>(null);
@@ -262,7 +262,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     let gone = false;
     fetch(`/sase/api/rfp/match?${new URLSearchParams({ scope: matchScope, regions: matchRegions, model: matchModel })}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!gone && d && typeof d.count === "number") setMatchInfo({ count: d.count, total: d.total ?? 0 }); })
+      .then((d) => { if (!gone && d && typeof d.count === "number") setMatchInfo({ count: d.count, total: d.total ?? 0, names: Array.isArray(d.names) ? d.names : [] }); })
       .catch(() => { /* panel copy falls back to unnumbered */ });
     return () => { gone = true; };
     /* eslint-disable-next-line */
@@ -1038,13 +1038,24 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <p className="text-base font-semibold mb-1">
               Publish this RFP{matchInfo && matchInfo.count > 0 ? ` to ${matchInfo.count} matched supplier${matchInfo.count === 1 ? "" : "s"}` : " to matched suppliers"}
             </p>
-            <p className="text-sm text-[var(--ink-700)] mb-3">
-              Your RFP does nothing until suppliers can see it. Publishing emails each matched supplier a private link to read your requirements and reply through a structured response form, so answers arrive comparable side by side. Your contact details stay private: replies land on this page and you decide who to speak to.
+            {matchInfo && matchInfo.names.length > 0 && (
+              <p className="text-sm text-[var(--ink-700)] mb-2">
+                <strong>{matchInfo.names.slice(0, 3).join(", ")}</strong>
+                {matchInfo.count > 3 ? ` and ${matchInfo.count - 3} more fit what you described.` : " fit what you described."}
+              </p>
+            )}
+            <p className="text-sm text-[var(--ink-700)] mb-2">
+              This is the fastest way to test your requirements against the market: competing bids and structured responses from verified vendors and managed service providers, without speaking to a single salesperson. Suppliers never see your email or phone number. Every conversation starts in this app, on your terms, only when you choose.
+            </p>
+            <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
+              {["Indicative pricing, private to you", "Demo requests", "Proof-of-concept scoping", "In-app supplier messaging", "Evidence and documents", "Independent response scoring"].map((c) => (
+                <span key={c} className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[var(--ink-700)]">{c}</span>
+              ))}
             </p>
             <ol className="text-sm text-[var(--ink-700)] mb-3 space-y-1 list-decimal list-inside">
-              <li><strong>Publish.</strong> Matched suppliers are invited{matchInfo && matchInfo.count > 0 ? ` (${matchInfo.count} fit what you described)` : ""}. Until then, nothing has been shared.</li>
-              <li><strong>Responses arrive here.</strong> Structured answers to your {includedQuestionCount} questions, with evidence where you asked for it.</li>
-              <li><strong>Compare and shortlist.</strong> Responses are scored against your questions under Evaluate supplier responses.</li>
+              <li><strong>Publish.</strong> Each matched supplier gets a private link to your {includedQuestionCount} questions. Until then, your RFP is invisible to the market and nothing has been shared.</li>
+              <li><strong>Responses arrive here.</strong> Structured, comparable answers with pricing kept private to you.</li>
+              <li><strong>Compare and choose.</strong> Replies are scored against your questions; message suppliers, request demos, collateral or a proof of concept from this page.</li>
             </ol>
             {publishAuthNeeded && (
               <div className="mb-3 rounded-sm border border-amber-400 bg-white p-3 text-sm text-[var(--ink-800)]">
@@ -1054,9 +1065,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             )}
             <div className="flex flex-wrap items-center gap-3">
               <button onClick={() => publishToCurated("panel")} disabled={publishing} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
-                {publishing ? "Publishing..." : matchInfo && matchInfo.count > 0 ? `Publish to ${matchInfo.count} suppliers` : "Publish to suppliers"}
+                {publishing ? "Publishing..." : matchInfo && matchInfo.count > 0 ? `Publish and invite ${matchInfo.count} suppliers` : "Publish and invite suppliers"}
               </button>
-              <span className="text-xs text-[var(--ink-600,#555)]">Free, one click, nothing shared until you press it. Prefer control? <a href="#suppliers" className="underline">Invite suppliers one at a time</a>.</span>
+              <span className="text-xs text-[var(--ink-600,#555)]">Free, no obligation to award, nothing shared until you press it. <a href="https://netify.co.uk/how-netify-makes-money/" className="underline">How Netify makes money</a>. Prefer control? <a href="#suppliers" className="underline">Invite suppliers one at a time</a>.</span>
             </div>
             {publishMsg && <p className="mt-2 text-sm text-emerald-700">{publishMsg}</p>}
           </div>
@@ -1547,6 +1558,21 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <button onClick={loadEvaluations} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Refresh responses</button>
         </div>
         <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 4.</strong> Supplier replies appear here once the RFP is published. Their answers are cross-checked against Netify&#39;s independent capability grades, and any claim that goes beyond the evidence is flagged for you to question. Refresh responses checks for new replies.</p>
+        {!published && (
+          <div className="mb-3">
+            <p className="text-sm text-[var(--ink-700)] mb-2"><strong>This is what you are publishing for.</strong> Each response arrives structured like this, ready to compare:</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[0, 1].map((i) => (
+                <div key={i} className="rounded-sm border border-dashed border-[var(--ink-300,#ccc)] bg-[var(--paper-base)] p-3 text-sm text-[var(--ink-400,#9ca3af)]">
+                  <p className="font-medium mb-1">Supplier response · locked until you publish</p>
+                  <p>Answers to your {includedQuestionCount} questions · graded coverage</p>
+                  <p>Pricing, private to you · evidence documents · demo availability</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-2 text-sm"><a href="#publish" className="underline">Publish to unlock responses</a></p>
+          </div>
+        )}
         {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">{project.status === "published" ? "No responses yet. Invited suppliers reply through their private links, and replies appear here automatically." : "No responses yet. Publish the RFP to invite suppliers, or share the supplier link."}</p>}
         {evaluations && evaluations.map((ev) => (
           <details key={ev.vendor} className="border border-[var(--ink-300,#ccc)] rounded-sm mb-2">
@@ -1589,7 +1615,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {!published && !stickyGone && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-300 bg-white/95 backdrop-blur px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
-            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> publish{matchInfo && matchInfo.count > 0 ? ` to ${matchInfo.count} matched suppliers` : " to matched suppliers"} so responses can start arriving.</span>
+            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> publish{matchInfo && matchInfo.count > 0 ? ` to ${matchInfo.count} matched suppliers` : " to matched suppliers"}. Competing bids, no sales calls.</span>
             <span className="flex items-center gap-2">
               <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : "Publish"}</button>
               <button onClick={() => { setStickyGone(true); try { sessionStorage.setItem(`rfp_publish_bar_${project.id}`, "1"); } catch { /* ignore */ } }} aria-label="Hide publish bar" className="text-sm text-[var(--ink-500)] underline">Hide</button>
