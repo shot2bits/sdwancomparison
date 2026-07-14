@@ -65,10 +65,10 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "By sector",
     items: [
-      { label: "Create your Healthcare SASE RFP", href: "/sase/rfp-builder/new/?sector=healthcare" },
-      { label: "Create your Retail SASE RFP", href: "/sase/rfp-builder/new/?sector=retail_ecommerce" },
-      { label: "Create your Manufacturing SASE RFP", href: "/sase/rfp-builder/new/?sector=manufacturing" },
-      { label: "Create your Financial Services SASE RFP", href: "/sase/rfp-builder/new/?sector=financial_services" },
+      { label: "Create Healthcare RFP", href: "/sase/rfp-builder/new/?sector=healthcare" },
+      { label: "Create Retail RFP", href: "/sase/rfp-builder/new/?sector=retail_ecommerce" },
+      { label: "Create Manufacturing RFP", href: "/sase/rfp-builder/new/?sector=manufacturing" },
+      { label: "Create Financial Services RFP", href: "/sase/rfp-builder/new/?sector=financial_services" },
       { label: "All sector guides", href: "/sase/best/" },
     ],
   },
