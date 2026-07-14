@@ -100,6 +100,18 @@ export function isFreeEmailDomainStatic(domain: string): boolean {
 }
 
 /**
+ * Academic and research institution domains (added 14 July 2026 after a
+ * kaist.ac.kr signup). The marketplace supports commercial procurement;
+ * academic addresses are rejected with a tailored message. Suffix-based,
+ * not a list: .edu, .edu.<cc> and .ac.<cc> (ox.ac.uk, kaist.ac.kr,
+ * tsinghua.edu.cn, mit.edu). Admin allowlist emails remain exempt via the
+ * caller, as with the free-webmail policy.
+ */
+export function isAcademicDomain(domain: string): boolean {
+  return /(\.edu|\.edu\.[a-z]{2,3}|\.ac\.[a-z]{2,3})$/.test(domain.toLowerCase());
+}
+
+/**
  * Live blocked check: compiled blocklist plus any domains added from the
  * admin console. Falls back to the static set if KV is unavailable.
  */

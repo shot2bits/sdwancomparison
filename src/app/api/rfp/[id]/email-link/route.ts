@@ -1,7 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured, kvGetJson, kvSetJson } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
-import { isBlockedDomainLive, isAdminEmail, emailDomain } from "@/lib/access-control";
+import { isBlockedDomainLive, isAcademicDomain, isAdminEmail, emailDomain } from "@/lib/access-control";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const runtime = "nodejs";
@@ -69,9 +69,9 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!domain) return Response.json({ error: "Enter a valid email." }, { status: 422, headers: cors });
 
   // Same business-only identity policy as sign-in (admins exempt).
-  if (!isAdminEmail(email) && (await isBlockedDomainLive(domain))) {
+  if (!isAdminEmail(email) && (isAcademicDomain(domain) || (await isBlockedDomainLive(domain)))) {
     return Response.json(
-      { error: "Please use your organisation email. Free and personal email addresses are not accepted." },
+      { error: "Please use your organisation email. Free, personal and academic email addresses are not accepted." },
       { status: 422, headers: cors },
     );
   }

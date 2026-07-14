@@ -3,6 +3,7 @@ import { createMagicToken, kvConfigured, recordPendingRequest } from "@/lib/rfp-
 import { sendMagicLink } from "@/lib/auth";
 import {
   isBlockedDomainLive,
+  isAcademicDomain,
   vendorForEmailDomainLive,
   isNetifyDomainLive,
   isAdminEmail,
@@ -33,6 +34,12 @@ export async function POST(req: Request) {
   const admin = isAdminEmail(email);
 
   // Business-only identity policy, enforced for every role. Admins are exempt.
+  if (!admin && isAcademicDomain(domain)) {
+    return Response.json(
+      { error: "The Netify marketplace supports commercial procurement, so academic and research email addresses are not accepted. The question bank, methodology and sample RFP pages are open to read without an account." },
+      { status: 422, headers: cors },
+    );
+  }
   if (!admin && (await isBlockedDomainLive(domain))) {
     return Response.json(
       { error: "Please use your organisation email. Free and personal email addresses are not accepted." },
