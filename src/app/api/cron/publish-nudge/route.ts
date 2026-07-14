@@ -1,4 +1,5 @@
 import { getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, listAllRfpIds } from "@/lib/rfp-store";
+import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
 import { matchSuppliers } from "@/lib/supplier-match";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -22,7 +23,6 @@ export const maxDuration = 60;
 
 const QUIET_MS = 48 * 60 * 60 * 1000;
 const MAX_SENDS_PER_RUN = 40;
-const OPTOUT_KEY = "email:optout";
 
 function cronAuthorised(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
@@ -36,7 +36,7 @@ function matchParamsFor(p: { buyer: { product_scope: string; operating_model: st
   return { scope, regions: p.buyer.regions ?? [], model };
 }
 
-function emailBodies(title: string, count: number, link: string) {
+function emailBodies(title: string, count: number, link: string, unsubUrl: string) {
   const matchLine = count > 0
     ? `${count} vendors and managed service providers on the Netify marketplace currently match what you described.`
     : "Verified vendors and managed service providers on the Netify marketplace are matched to what you described.";
@@ -57,7 +57,7 @@ function emailBodies(title: string, count: number, link: string) {
     `Publish your RFP: ${link}`,
     "The link is private to you. Suppliers never see your email address or phone number.",
     "Netify",
-    "You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits. To opt out, reply with the word unsubscribe.",
+    `You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits.\nUnsubscribe: ${unsubUrl}`,
   ].join("\n\n");
   const html = [
     `<p>You built the RFP "<strong>${title}</strong>" on the Netify marketplace but have not published it yet. Until you publish, no supplier can see it and nothing is shared.</p>`,
@@ -67,7 +67,7 @@ function emailBodies(title: string, count: number, link: string) {
     `<p><a href="${link}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Publish your RFP</a></p>`,
     `<p>The link is private to you. Suppliers never see your email address or phone number.</p>`,
     `<p>Netify</p>`,
-    `<p style="font-size:12px;color:#666;">You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits. To opt out, reply with the word unsubscribe.</p>`,
+    `<p style="font-size:12px;color:#666;">You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits. <a href="${unsubUrl}" style="color:#666;">Unsubscribe</a></p>`,
   ].join("");
   return { text, html };
 }
@@ -82,8 +82,7 @@ export async function GET(req: Request) {
   if (!resendKey && !dry) return Response.json({ error: "RESEND_API_KEY not configured." }, { status: 503 });
 
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
-  const optout = (await kvGetJson<string[]>(OPTOUT_KEY)) ?? [];
-  const optoutSet = new Set(optout.map((e) => e.toLowerCase()));
+  const optoutSet = await getOptouts();
   const now = Date.now();
 
   const ids = await listAllRfpIds();
@@ -115,12 +114,21 @@ export async function GET(req: Request) {
 
     if (dry) { sent += 1; continue; }
 
-    const { text, html } = emailBodies(title, match.count, link);
+    const unsubUrl = `${SITE_URL}/api/email/unsubscribe?e=${encodeURIComponent(owner)}&t=${signUnsubscribe(owner)}`;
+    const { text, html } = emailBodies(title, match.count, link, unsubUrl);
     try {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { authorization: `Bearer ${resendKey}`, "content-type": "application/json" },
-        body: JSON.stringify({ from, to: owner, reply_to: "support@netify.com", subject, text, html }),
+        body: JSON.stringify({
+          from,
+          to: owner,
+          reply_to: "support@netify.com",
+          subject,
+          text,
+          html,
+          headers: { "List-Unsubscribe": `<${unsubUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+        }),
       });
       if (!res.ok) { skipped.send_failed += 1; continue; }
       await kvSetJson(flagKey, now);
