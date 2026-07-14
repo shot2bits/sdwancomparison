@@ -21,6 +21,9 @@ import {
   getProjectsBulk,
   kvMgetJson,
   listDraftLinkLeads,
+  getBuyerAllowlist,
+  addBuyerAllowDomain,
+  getRejectStats,
 } from "@/lib/rfp-store";
 import {
   isAdminEmail,
@@ -48,7 +51,7 @@ export async function GET(req: Request) {
   const auth = await requireAdmin(req, cors);
   if (auth instanceof Response) return auth;
 
-  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities, signups, rfpIds, leads] = await Promise.all([
+  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities, signups, rfpIds, leads, buyerAllowlist, rejectStats] = await Promise.all([
     listSessions(),
     effectiveVendorDomains(),
     getVendorDomainOverrides(),
@@ -59,6 +62,8 @@ export async function GET(req: Request) {
     listSignups(),
     listAllRfpIds(),
     listDraftLinkLeads(),
+    getBuyerAllowlist(),
+    getRejectStats(),
   ]);
 
   const vendors = Object.keys(effective)
@@ -124,6 +129,8 @@ export async function GET(req: Request) {
       funnel,
       rfps,
       draft_link_leads: leads.slice(0, 50),
+      buyer_allowlist: buyerAllowlist,
+      reject_stats: rejectStats,
       // Moderation view: every notice on (or off) the board, including closed
       // and unlisted ones, so anything inappropriate can be removed.
       opportunities: opportunities.slice(0, 200).map((o) => ({
@@ -187,6 +194,16 @@ export async function POST(req: Request) {
         const effective = await effectiveVendorDomains();
         const merged = Array.from(new Set([...(effective[slug] ?? []), domain]));
         await setVendorDomainOverride(slug, merged);
+        await clearPendingRequest(domain);
+        return Response.json({ ok: true }, { headers: cors });
+      }
+      case "approve_pending_buyer": {
+        // Academic (or other reviewed) domain approved for BUYER sign-in:
+        // allowlist it and clear the queue entry. The requester signs in
+        // normally from then on.
+        const domain = String(body.domain ?? "").trim().toLowerCase();
+        if (!domain) return Response.json({ error: "domain required." }, { status: 422, headers: cors });
+        await addBuyerAllowDomain(domain);
         await clearPendingRequest(domain);
         return Response.json({ ok: true }, { headers: cors });
       }

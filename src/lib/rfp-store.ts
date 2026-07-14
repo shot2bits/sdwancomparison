@@ -625,17 +625,73 @@ export async function removeBlocklistDomain(domain: string): Promise<string[]> {
 /* Pending supplier access requests                                    */
 /* ------------------------------------------------------------------ */
 
-export type PendingRequest = { domain: string; email: string; created: number; count: number };
+export type PendingRequest = { domain: string; email: string; created: number; count: number; role?: "supplier" | "buyer" };
 
 /** Record (or bump) a pending request, keyed by domain so it cannot flood. */
-export async function recordPendingRequest(email: string, domain: string): Promise<void> {
+export async function recordPendingRequest(email: string, domain: string, role: "supplier" | "buyer" = "supplier"): Promise<void> {
   const d = domain.toLowerCase();
   const existing = await getJson<PendingRequest>(`auth:pending:${d}`);
   const entry: PendingRequest = existing
-    ? { ...existing, email, count: existing.count + 1 }
-    : { domain: d, email: email.toLowerCase(), created: Date.now(), count: 1 };
+    ? { ...existing, email, count: existing.count + 1, role: existing.role ?? role }
+    : { domain: d, email: email.toLowerCase(), created: Date.now(), count: 1, role };
   await setJson(`auth:pending:${d}`, entry);
   await kv(["SADD", "auth:index:pending", d]);
+}
+
+/* ------------------------------------------------------------------ */
+/* Buyer domain allowlist (admin-approved academic and edge domains)   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Domains an admin has approved for BUYER sign-in despite the automatic
+ * policy (academic suffixes today). Harry's UEA point, decided 14 July
+ * 2026: a university IT team is a legitimate buyer, so academic domains
+ * queue as pending requests and land here on approval instead of being
+ * hard-blocked.
+ */
+export async function getBuyerAllowlist(): Promise<string[]> {
+  if (!kvConfigured()) return [];
+  return (((await kv(["SMEMBERS", "auth:buyer_allow"])) as string[]) ?? []).sort();
+}
+
+export async function addBuyerAllowDomain(domain: string): Promise<void> {
+  await kv(["SADD", "auth:buyer_allow", domain.toLowerCase()]);
+}
+
+export async function isBuyerAllowedDomain(domain: string): Promise<boolean> {
+  if (!kvConfigured()) return false;
+  return ((await kv(["SISMEMBER", "auth:buyer_allow", domain.toLowerCase()])) as number) === 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Auto-reject counters (domain-only, GDPR-safe)                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Rejected sign-in attempts as monthly per-domain counters. No email
+ * addresses are stored, only "{reason}:{domain}" hash fields, so the log
+ * holds no personal data (Harry's request with his own GDPR caveat,
+ * decided 14 July 2026: domain-only counts).
+ */
+export async function recordRejectedAttempt(domain: string, reason: "webmail" | "academic"): Promise<void> {
+  if (!kvConfigured()) return;
+  const month = new Date().toISOString().slice(0, 7);
+  try { await kv(["HINCRBY", `auth:rejects:${month}`, `${reason}:${domain.toLowerCase()}`, 1]); } catch { /* best effort */ }
+}
+
+export type RejectStat = { domain: string; reason: string; count: number };
+
+export async function getRejectStats(): Promise<{ month: string; entries: RejectStat[] }> {
+  const month = new Date().toISOString().slice(0, 7);
+  if (!kvConfigured()) return { month, entries: [] };
+  const raw = ((await kv(["HGETALL", `auth:rejects:${month}`])) as string[]) ?? [];
+  const entries: RejectStat[] = [];
+  for (let i = 0; i + 1 < raw.length; i += 2) {
+    const sep = raw[i].indexOf(":");
+    if (sep <= 0) continue;
+    entries.push({ reason: raw[i].slice(0, sep), domain: raw[i].slice(sep + 1), count: Number(raw[i + 1]) || 0 });
+  }
+  return { month, entries: entries.sort((a, b) => b.count - a.count) };
 }
 
 /**

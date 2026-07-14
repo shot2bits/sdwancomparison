@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { createMagicToken, kvConfigured, recordPendingRequest } from "@/lib/rfp-store";
+import { createMagicToken, kvConfigured, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
 import { sendMagicLink } from "@/lib/auth";
 import {
   isBlockedDomainLive,
@@ -40,13 +40,20 @@ export async function POST(req: Request) {
   const admin = isAdminEmail(email);
 
   // Business-only identity policy, enforced for every role. Admins are exempt.
-  if (!admin && isAcademicDomain(domain)) {
+  //
+  // Academic and research domains queue for admin approval instead of hard
+  // blocking (Harry's UEA point, decided 14 July 2026): a university IT team
+  // is a legitimate SASE buyer, while student sign-ups get filtered by the
+  // review. Approved domains land on the buyer allowlist and sign in freely.
+  if (!admin && isAcademicDomain(domain) && !(await isBuyerAllowedDomain(domain))) {
+    try { await recordPendingRequest(email, domain, role); } catch { /* best effort */ }
     return Response.json(
-      { error: "The Netify marketplace supports commercial procurement, so academic and research email addresses are not accepted. The question bank, methodology and sample RFP pages are open to read without an account." },
-      { status: 422, headers: cors },
+      { ok: true, message: "Thanks — academic and research addresses are reviewed before access, because the marketplace supports commercial procurement. The Netify team will check your request (usually within one working day) and email your sign-in link once approved. The question bank, methodology and sample RFP pages are open to read meanwhile." },
+      { headers: cors },
     );
   }
   if (!admin && (await isBlockedDomainLive(domain))) {
+    try { await recordRejectedAttempt(domain, "webmail"); } catch { /* best effort */ }
     return Response.json(
       { error: "Please use your organisation email. Free and personal email addresses are not accepted." },
       { status: 422, headers: cors },

@@ -7,7 +7,7 @@ type SessionInfo = { authenticated: boolean; role?: string; email?: string; admi
 type AdminSession = { token: string; role: string; email: string; vendor_slug: string | null; created: number; expires: number };
 type UserRow = { email: string; roles: string[]; sessions: number };
 type VendorRow = { slug: string; domains: string[]; customised: boolean };
-type Pending = { domain: string; email: string; created: number; count: number };
+type Pending = { domain: string; email: string; created: number; count: number; role?: "supplier" | "buyer" };
 type Claim = { slug: string; status: "pending" | "approved" | "rejected"; email: string; domain: string; requested: number; decided?: number; decided_by?: string };
 type OppRow = {
   id: string; title: string; status: string; visibility: string; scope: string[];
@@ -37,6 +37,8 @@ type Overview = {
   funnel?: Funnel;
   rfps?: RfpRow[];
   draft_link_leads?: DraftLead[];
+  buyer_allowlist?: string[];
+  reject_stats?: { month: string; entries: { domain: string; reason: string; count: number }[] };
 };
 
 function when(ms: number): string {
@@ -337,6 +339,29 @@ export default function AdminClient() {
             ))}
           </div>
         )}
+        {(data.buyer_allowlist ?? []).length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-semibold mb-1">Approved buyer domains (academic review)</p>
+            <div className="flex flex-wrap gap-2">
+              {(data.buyer_allowlist ?? []).map((d) => (
+                <span key={d} className="inline-flex items-center text-sm border border-emerald-300 rounded-full px-3 py-1">{d}</span>
+              ))}
+            </div>
+          </div>
+        )}
+        {(data.reject_stats?.entries ?? []).length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-semibold mb-1">Auto-rejected sign-ins, {data.reject_stats?.month}</p>
+            <p className="text-xs text-[var(--ink-500)] mb-2">Domain counts only; no email addresses are stored, so there is no personal data here.</p>
+            <div className="flex flex-wrap gap-2">
+              {(data.reject_stats?.entries ?? []).slice(0, 30).map((e) => (
+                <span key={`${e.reason}:${e.domain}`} className="inline-flex items-center gap-1 text-sm border border-[var(--ink-300,#ccc)] rounded-full px-3 py-1">
+                  {e.domain} <span className="text-[var(--ink-500)]">x{e.count}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );
@@ -348,14 +373,25 @@ function PendingRow({ p, vendors, busy, act, when, btn, btnAmber }: {
   when: (ms: number) => string; btn: string; btnAmber: string;
 }) {
   const [slug, setSlug] = useState(vendors[0]?.slug ?? "");
+  const buyer = p.role === "buyer";
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-[var(--ink-100,#f0f0f0)] pb-3">
-      <span className="text-sm"><strong>{p.domain}</strong> <span className="text-[var(--ink-500)]">({p.email}, {p.count}x, {when(p.created)})</span></span>
+      <span className="text-sm">
+        <strong>{p.domain}</strong>{" "}
+        {buyer && <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 text-xs">buyer, academic review</span>}{" "}
+        <span className="text-[var(--ink-500)]">({p.email}, {p.count}x, {when(p.created)})</span>
+      </span>
       <div className="flex items-center gap-2 ml-auto">
-        <select value={slug} onChange={(e) => setSlug(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm">
-          {vendors.map((v) => <option key={v.slug} value={v.slug}>{v.slug}</option>)}
-        </select>
-        <button className={btnAmber} disabled={busy || !slug} onClick={() => act({ action: "approve_pending", domain: p.domain, slug })}>Approve</button>
+        {buyer ? (
+          <button className={btnAmber} disabled={busy} onClick={() => act({ action: "approve_pending_buyer", domain: p.domain })}>Approve buyer domain</button>
+        ) : (
+          <>
+            <select value={slug} onChange={(e) => setSlug(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm">
+              {vendors.map((v) => <option key={v.slug} value={v.slug}>{v.slug}</option>)}
+            </select>
+            <button className={btnAmber} disabled={busy || !slug} onClick={() => act({ action: "approve_pending", domain: p.domain, slug })}>Approve</button>
+          </>
+        )}
         <button className={btn} disabled={busy} onClick={() => act({ action: "reject_pending", domain: p.domain })}>Reject</button>
         <button className={btn} disabled={busy} onClick={() => act({ action: "reject_pending", domain: p.domain, block: true })}>Reject + block</button>
       </div>
