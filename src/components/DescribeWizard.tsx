@@ -13,6 +13,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import FlowStageStrip from "@/components/FlowStageStrip";
 import { REGIONS, SITES_BANDS, USERS_BANDS, SECTORS } from "@/lib/notice-options";
 
 const SCOPES = [
@@ -184,8 +185,20 @@ export default function DescribeWizard() {
     </div>
   );
 
+  // Walkthrough line per step: what this answer does, and what follows.
+  const STRIP: { now: string; next: string }[] = [
+    { now: "You are naming your project. Suppliers see this title first.", next: "Four quick questions about scope, estate and timing." },
+    { now: "Choosing what is in scope, so the right supplier types match.", next: "Estate size and regions." },
+    { now: "Sizing the estate. Suppliers use this to shape their response.", next: "What you run today, and why change." },
+    { now: "Capturing today's setup and the drivers. This becomes the RFP background.", next: "Timescale and delivery model." },
+    { now: "Setting the timescale and who runs the service day to day.", next: "Optional extras, then Netify builds your RFP." },
+    { now: "Optional detail that sharpens the compliance questions.", next: "Netify assembles your complete RFP to review. Nothing is shared with anyone yet." },
+  ];
+
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+    <div>
+      <FlowStageStrip stage="describe" now={STRIP[step].now} next={STRIP[step].next} />
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="max-w-xl">
         {step === 0 && (
           <div>
@@ -336,6 +349,7 @@ export default function DescribeWizard() {
           <p className="mt-3 text-xs text-[var(--ink-500)]">Responses come back structured against your questions. Pricing stays private to you.</p>
         </div>
       </aside>
+      </div>
     </div>
   );
 }

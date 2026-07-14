@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NETIFY_NDA_TEMPLATE } from "@/lib/rfp-types";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import FlowStageStrip, { type FlowStage } from "@/components/FlowStageStrip";
 
 type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
 type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
@@ -921,8 +922,21 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const includedSections = project.rfp_sections.filter((s) => s.included);
   const includedQuestionCount = includedSections.reduce((n, s) => n + s.questions.length, 0);
 
+  // Walkthrough strip: where the buyer is and what happens next, from real
+  // state. Draft or review = reviewing the document with publish ahead;
+  // published and beyond = responses arriving.
+  const published = project.status !== "draft" && project.status !== "review";
+  const stripStage: FlowStage = published ? "responses" : "review";
+  const stripNow = published
+    ? `Your RFP is live. ${connections.length > 0 ? `${connections.length} invited supplier${connections.length === 1 ? "" : "s"} hold` : "Invited suppliers hold"} private response links, and replies land on this page.`
+    : `You are reviewing your draft RFP: ${includedQuestionCount} questions across ${includedSections.length} sections. Add, remove or reword anything.`;
+  const stripNext = published
+    ? "Responses are scored against your questions under Evaluate supplier responses below. We also email you when activity arrives."
+    : "Publish under Suppliers below. Each matched supplier is emailed a private response link; nothing is shared until then.";
+
   return (
     <div>
+      <FlowStageStrip stage={stripStage} now={stripNow} next={stripNext} />
       {/* Sign-in confirmation strip: persists after the verify redirect so
           the buyer sees what happened (session, claimed drafts, next step). */}
       {signinNote !== null && (
@@ -955,18 +969,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
       )}
 
-      {/* Plain-language guide to the whole flow. Steps on separate lines per
-          Harry's UX feedback (2026-07-02) — the inline run-on was hard to scan. */}
-      <div className="mb-6 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-3 text-xs leading-relaxed text-[var(--ink-600,#555)]">
-        <p className="mb-1.5"><span className="font-medium text-[var(--ink-800)]">How this works.</span> An RFP is the list of questions you send to suppliers.</p>
-        <ol className="list-none m-0 p-0 space-y-0.5">
-          <li><strong>1.</strong> Set the basics below.</li>
-          <li><strong>2.</strong> Build your questions, by chatting to the AI agent or picking them yourself.</li>
-          <li><strong>3.</strong> Invite suppliers further down the page.</li>
-          <li><strong>4.</strong> Load and compare their replies.</li>
-        </ol>
-        <p className="mt-1.5 mb-0">Everything saves automatically as you go, and nothing reaches a supplier until you invite them.</p>
-      </div>
+      {/* The FlowStageStrip above carries orientation (where you are, what
+          happens next) from live state, replacing the old static "How this
+          works" box. One line of reassurance stays. */}
+      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a supplier until you publish or invite them.</p>
 
       <p className="eyebrow mb-2">Step 1: the basics</p>
       <p className="-mt-1 mb-3 text-xs text-[var(--ink-500)]">All optional. Set what you know; the AI agent fills in the rest as you chat, and you can change any of it later.</p>
