@@ -744,6 +744,81 @@ export async function listBuyerRfpIds(email: string): Promise<string[]> {
 }
 
 /* ------------------------------------------------------------------ */
+/* Admin funnel: every RFP, bulk reads and draft-link captures         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Every stored RFP id, including anonymous drafts that belong to no account.
+ * There is no global RFP index (only the per-buyer sets), so this scans the
+ * primary records. RFP ids come from newId("rfp"), so primary keys look like
+ * rfp:rfp_xxx while subkeys (responses, threads, connections, nda, board_opp,
+ * contact_email, draftlink_last) carry a second colon after the id and are
+ * filtered out. Cursor-based SCAN, capped defensively; the admin console is
+ * the only caller.
+ */
+export async function listAllRfpIds(): Promise<string[]> {
+  if (!kvConfigured()) return [];
+  const ids: string[] = [];
+  let cursor = "0";
+  for (let i = 0; i < 50; i += 1) {
+    const res = (await kv(["SCAN", cursor, "MATCH", "rfp:rfp_*", "COUNT", 1000])) as [string, string[]];
+    cursor = String(res?.[0] ?? "0");
+    for (const key of res?.[1] ?? []) {
+      const rest = key.slice("rfp:".length);
+      if (!rest.includes(":")) ids.push(rest);
+    }
+    if (cursor === "0") break;
+  }
+  return ids;
+}
+
+/** Batched MGET of JSON values; null for missing or unparseable entries. */
+export async function kvMgetJson<T>(keys: string[]): Promise<(T | null)[]> {
+  if (!kvConfigured() || keys.length === 0) return [];
+  const out: (T | null)[] = [];
+  for (let i = 0; i < keys.length; i += 100) {
+    const raw = (await kv(["MGET", ...keys.slice(i, i + 100)])) as (string | null)[];
+    for (const item of raw ?? []) {
+      if (item == null) { out.push(null); continue; }
+      try { out.push(JSON.parse(item) as T); } catch { out.push(null); }
+    }
+  }
+  return out;
+}
+
+/** Bulk project load with the same validation and healing as getProject. */
+export async function getProjectsBulk(ids: string[]): Promise<ProjectDetails[]> {
+  const raw = await kvMgetJson<ProjectDetails>(ids.map((id) => `rfp:${id}`));
+  const out: ProjectDetails[] = [];
+  for (const item of raw) {
+    if (!item) continue;
+    const parsed = ProjectDetailsSchema.safeParse(item);
+    if (parsed.success) out.push(healSectionCategories(parsed.data));
+  }
+  return out;
+}
+
+export type DraftLinkLead = { rfp_id: string; email: string; ts: number };
+
+/**
+ * "Email me my draft link" captures, newest first (LPUSH writes to the head).
+ * These are buyers who typed a work email on a draft but may never have
+ * completed a sign-in, so they sit one funnel stage before account creation.
+ */
+export async function listDraftLinkLeads(): Promise<DraftLinkLead[]> {
+  if (!kvConfigured()) return [];
+  const raw = ((await kv(["LRANGE", "rfp_draftlink_leads", 0, 199])) as string[]) ?? [];
+  const out: DraftLinkLead[] = [];
+  for (const item of raw) {
+    try {
+      const p = JSON.parse(item) as DraftLinkLead;
+      if (p && p.rfp_id && p.email) out.push(p);
+    } catch { /* skip malformed */ }
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------------ */
 /* Admin account deletion (registered users) */
 /* ------------------------------------------------------------------ */
 

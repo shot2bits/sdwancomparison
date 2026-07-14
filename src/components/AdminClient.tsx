@@ -14,6 +14,17 @@ type OppRow = {
   buyer_org: string; buyer_visibility: string; owner_email: string; source_rfp_id: string;
   created: number; bid_count: number;
 };
+type Funnel = {
+  buyer_accounts: number; accounts_with_rfp: number; rfps_total: number;
+  rfps_account_owned: number; rfps_anonymous: number; rfps_published: number;
+  supplier_responses: number; draft_link_captures: number;
+};
+type RfpRow = {
+  id: string; title: string; status: string; owner_email: string | null; contact_email: string | null;
+  organisation: string | null; sector: string | null; scope: string; sections: number; questions: number;
+  invited_vendors: number; responses: number; created: number; updated: number;
+};
+type DraftLead = { rfp_id: string; email: string; ts: number };
 type Overview = {
   admin_email: string;
   sessions: AdminSession[];
@@ -23,6 +34,9 @@ type Overview = {
   pending: Pending[];
   claims: Claim[];
   opportunities: OppRow[];
+  funnel?: Funnel;
+  rfps?: RfpRow[];
+  draft_link_leads?: DraftLead[];
 };
 
 function when(ms: number): string {
@@ -93,6 +107,71 @@ export default function AdminClient() {
       <p className="text-sm text-[var(--ink-600)]">Signed in as <strong>{data.admin_email}</strong>. <button onClick={load} className="underline" disabled={busy}>Refresh</button></p>
       {error && <p className="text-sm text-red-700">{error}</p>}
       {notice && <p className="text-sm text-emerald-700">{notice}</p>}
+
+      {/* Buyer funnel: the four stages that matter */}
+      {data.funnel && (
+        <section className={card}>
+          <h2 className={h2}>Buyer funnel</h2>
+          <p className={sub}>Sign up, create an RFP, publish to the marketplace, get supplier responses. Everything below feeds one of these four numbers.</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-4">
+            {([
+              ["Buyer accounts", data.funnel.buyer_accounts],
+              ["Accounts with an RFP", data.funnel.accounts_with_rfp],
+              ["RFPs published", data.funnel.rfps_published],
+              ["Supplier responses", data.funnel.supplier_responses],
+            ] as const).map(([label, value]) => (
+              <div key={label} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3 text-center">
+                <div className="text-2xl font-semibold">{value}</div>
+                <div className="text-xs text-[var(--ink-500)]">{label}</div>
+              </div>
+            ))}
+          </div>
+          <p className={sub}>
+            {data.funnel.rfps_total} RFPs stored in total: {data.funnel.rfps_account_owned} owned by accounts, {data.funnel.rfps_anonymous} anonymous drafts with no account attached.{" "}
+            {data.funnel.draft_link_captures} draft-link email capture{data.funnel.draft_link_captures === 1 ? "" : "s"} (buyers who typed an email to save a draft, one stage before sign-up).
+          </p>
+          {(data.rfps ?? []).length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead><tr className="text-left text-[var(--ink-500)] border-b border-[var(--ink-200,#e5e5e5)]">
+                  <th className="py-2 pr-4">RFP</th><th className="py-2 pr-4">Who</th><th className="py-2 pr-4">Status</th><th className="py-2 pr-4">Questions</th><th className="py-2 pr-4">Invited</th><th className="py-2 pr-4">Responses</th><th className="py-2 pr-4">Updated</th>
+                </tr></thead>
+                <tbody>
+                  {(data.rfps ?? []).slice(0, 60).map((r) => (
+                    <tr key={r.id} className="border-b border-[var(--ink-100,#f0f0f0)]">
+                      <td className="py-2 pr-4">
+                        <a href={`/sase/rfp-builder/${r.id}/`} className="underline" target="_blank" rel="noreferrer">{r.title || r.id}</a>
+                        {r.organisation && <span className="ml-2 text-xs text-[var(--ink-500)]">{r.organisation}</span>}
+                      </td>
+                      <td className="py-2 pr-4 text-[var(--ink-500)]">
+                        {r.owner_email ?? (r.contact_email ? `${r.contact_email} (capture)` : "anonymous")}
+                      </td>
+                      <td className="py-2 pr-4">{r.status}</td>
+                      <td className="py-2 pr-4">{r.questions}<span className="text-[var(--ink-500)]"> in {r.sections}</span></td>
+                      <td className="py-2 pr-4">{r.invited_vendors}</td>
+                      <td className="py-2 pr-4">{r.responses}</td>
+                      <td className="py-2 pr-4 text-[var(--ink-500)]">{when(r.updated)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {(data.rfps ?? []).length > 60 && <p className="mt-2 text-xs text-[var(--ink-500)]">Showing the 60 most recently updated of {(data.rfps ?? []).length}.</p>}
+            </div>
+          )}
+          {(data.draft_link_leads ?? []).length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-1">Draft-link email captures</h3>
+              <div className="flex flex-wrap gap-2">
+                {(data.draft_link_leads ?? []).map((l, i) => (
+                  <span key={`${l.rfp_id}-${i}`} className="inline-flex items-center gap-1 rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs">
+                    {l.email} · {when(l.ts)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Pending access requests */}
       <section className={card}>

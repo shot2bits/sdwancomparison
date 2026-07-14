@@ -17,6 +17,10 @@ import {
   deleteOpportunity,
   listSignups,
   deleteUser,
+  listAllRfpIds,
+  getProjectsBulk,
+  kvMgetJson,
+  listDraftLinkLeads,
 } from "@/lib/rfp-store";
 import {
   isAdminEmail,
@@ -44,7 +48,7 @@ export async function GET(req: Request) {
   const auth = await requireAdmin(req, cors);
   if (auth instanceof Response) return auth;
 
-  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities, signups] = await Promise.all([
+  const [sessions, effective, overrides, blocklistExtra, pending, claims, opportunities, signups, rfpIds, leads] = await Promise.all([
     listSessions(),
     effectiveVendorDomains(),
     getVendorDomainOverrides(),
@@ -53,11 +57,55 @@ export async function GET(req: Request) {
     listVendorClaims(),
     listOpportunities(),
     listSignups(),
+    listAllRfpIds(),
+    listDraftLinkLeads(),
   ]);
 
   const vendors = Object.keys(effective)
     .sort()
     .map((slug) => ({ slug, domains: effective[slug], customised: Object.prototype.hasOwnProperty.call(overrides, slug) }));
+
+  // Buyer funnel: every RFP (anonymous drafts included), with the draft-link
+  // email captures and supplier response counts, so the console answers
+  // "signup, create, publish, responses" at a glance.
+  const projects = await getProjectsBulk(rfpIds);
+  const contacts = await kvMgetJson<string>(projects.map((p) => `rfp:${p.id}:contact_email`));
+  const publishedProjects = projects.filter((p) => p.status === "published");
+  const responseLists = await kvMgetJson<unknown[]>(publishedProjects.map((p) => `rfp:${p.id}:responses`));
+  const responsesByRfp = new Map<string, number>();
+  publishedProjects.forEach((p, i) => responsesByRfp.set(p.id, Array.isArray(responseLists[i]) ? responseLists[i]!.length : 0));
+
+  const rfps = projects
+    .map((p, i) => ({
+      id: p.id,
+      title: p.title,
+      status: p.status,
+      owner_email: p.owner_email || null,
+      contact_email: contacts[i] ?? null,
+      organisation: p.buyer.organisation || null,
+      sector: p.buyer.sector,
+      scope: p.buyer.product_scope,
+      sections: p.rfp_sections.filter((s) => s.included).length,
+      questions: p.rfp_sections.filter((s) => s.included).reduce((n, s) => n + s.questions.length, 0),
+      invited_vendors: p.invited_vendors.length,
+      responses: responsesByRfp.get(p.id) ?? 0,
+      created: p.created,
+      updated: p.updated,
+    }))
+    .sort((a, b) => b.updated - a.updated)
+    .slice(0, 200);
+
+  const owned = projects.filter((p) => p.owner_email);
+  const funnel = {
+    buyer_accounts: signups.filter((u) => u.roles.includes("buyer")).length,
+    accounts_with_rfp: new Set(owned.map((p) => p.owner_email.toLowerCase())).size,
+    rfps_total: projects.length,
+    rfps_account_owned: owned.length,
+    rfps_anonymous: projects.length - owned.length,
+    rfps_published: publishedProjects.length,
+    supplier_responses: Array.from(responsesByRfp.values()).reduce((n, c) => n + c, 0),
+    draft_link_captures: leads.length,
+  };
 
   return Response.json(
     {
@@ -73,6 +121,9 @@ export async function GET(req: Request) {
       blocklist: { builtin_count: FREE_EMAIL_DOMAINS.size, custom: blocklistExtra },
       pending,
       claims,
+      funnel,
+      rfps,
+      draft_link_leads: leads.slice(0, 50),
       // Moderation view: every notice on (or off) the board, including closed
       // and unlisted ones, so anything inappropriate can be removed.
       opportunities: opportunities.slice(0, 200).map((o) => ({
