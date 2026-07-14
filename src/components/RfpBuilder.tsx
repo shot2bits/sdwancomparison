@@ -1034,12 +1034,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         ) : (
           <div>
-            <p className="eyebrow mb-1">Next step</p>
-            <p className="text-base font-semibold mb-1">
+            <p className="eyebrow mb-1.5">Next step</p>
+            <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
               Publish this RFP{matchInfo && matchInfo.count > 0 ? ` to ${matchInfo.count} matched supplier${matchInfo.count === 1 ? "" : "s"}` : " to matched suppliers"}
-            </p>
+            </h2>
             {matchInfo && matchInfo.names.length > 0 && (
-              <p className="text-sm text-[var(--ink-700)] mb-2">
+              <p className="text-base text-[var(--ink-800)] leading-snug mb-3">
                 <strong>{matchInfo.names.slice(0, 3).join(", ")}</strong>
                 {matchInfo.count > 3 ? ` and ${matchInfo.count - 3} more fit what you described.` : " fit what you described."}
               </p>
