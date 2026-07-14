@@ -1045,10 +1045,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               </p>
             )}
             <p className="text-sm text-[var(--ink-700)] mb-2">
-              This is the fastest way to test your requirements against the market: competing bids and structured responses from verified vendors and managed service providers, without speaking to a single salesperson. Suppliers never see your email or phone number. Every conversation starts in this app, on your terms, only when you choose.
+              This is the fastest and simplest way to see whether your requirements match the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. Suppliers never see your email or phone number. Every conversation starts in this app, on your terms, only when you choose.
             </p>
             <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
-              {["Indicative pricing, private to you", "Demo requests", "Proof-of-concept scoping", "In-app supplier messaging", "Evidence and documents", "Independent response scoring"].map((c) => (
+              {["Indicative pricing, private to you", "Demo requests", "Proof-of-concept scoping", "Message vendors and managed providers in-app", "Evidence, documents and PDF collateral", "Sales and account contact, when you choose", "Independent response scoring"].map((c) => (
                 <span key={c} className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[var(--ink-700)]">{c}</span>
               ))}
             </p>

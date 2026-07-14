@@ -1,6 +1,7 @@
 {
   "crons": [
-    { "path": "/api/agent/run", "schedule": "0 8 * * *" },
-    { "path": "/api/agent/run", "schedule": "0 15 * * *" }
+    { "path": "/sase/api/agent/run", "schedule": "0 8 * * *" },
+    { "path": "/sase/api/agent/run", "schedule": "0 15 * * *" },
+    { "path": "/sase/api/cron/publish-nudge", "schedule": "0 9 * * *" }
   ]
 }

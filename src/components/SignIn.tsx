@@ -53,6 +53,7 @@ export default function SignIn({ role, prompt }: { role: "supplier" | "buyer"; p
       {sent && <p className="text-sm text-emerald-700 mt-2">{sent}</p>}
       {devLink && <p className="text-xs text-[var(--ink-500)] mt-1">Preview link (email not configured): <a className="underline" href={devLink}>sign in</a></p>}
       {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+      <p className="text-xs text-[var(--ink-500)] mt-2">We only email you about your RFPs, opportunities and RFP Builder and Marketplace features and benefits. No third-party marketing, and you can opt out at any time.</p>
     </div>
   );
 }
