@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import NoticeView from "@/components/NoticeView";
 import { getOpportunity, kvConfigured } from "@/lib/rfp-store";
 import { toPublicOpportunity, type PublicOpportunity } from "@/lib/opportunity-types";
-import { getSampleNotice } from "@/lib/sample-opportunities";
+import { getSampleNotice } from "@/lib/sample-notices";
 import { getNoticeSchema } from "@/lib/notice-schema";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema } from "@/lib/structured-data";
 

@@ -67,7 +67,7 @@ export default function NoticeView({
     <article className="max-w-3xl">
       {isSample && (
         <p className="mb-4 rounded-sm border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          <strong>Sample project notice.</strong> A worked example showing what a published notice looks like — not a live opportunity.{" "}
+          <strong>Sample RFI.</strong> A worked example showing what a published RFI looks like — not a live opportunity.{" "}
           <Link href="/opportunities/new" className="underline">Post your own project</Link>.
         </p>
       )}

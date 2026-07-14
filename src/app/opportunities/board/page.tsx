@@ -3,7 +3,7 @@ import Link from "next/link";
 import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { OPP_SCOPE_LABELS, type OppScope } from "@/lib/opportunity-types";
 import BoardList from "@/components/BoardList";
-import { SAMPLE_NOTICES } from "@/lib/sample-opportunities";
+import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
 export const runtime = "nodejs";
