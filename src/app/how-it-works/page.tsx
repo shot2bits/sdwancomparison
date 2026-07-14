@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 import { featureList } from "@/lib/capabilities";
+import HowItWorksDiagram from "@/components/HowItWorksDiagram";
 
 export const metadata: Metadata = {
   title: "How the Netify SASE & SD-WAN marketplace works",
@@ -128,6 +129,8 @@ export default function HowItWorksPage() {
         <h1 id="page-h1" className="mb-4">From a network need to competing offers, without the cold-calling.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Netify is a vendor-neutral marketplace for SASE, SSE and SD-WAN. Describe what you need and get comparable, competing responses from 30+ verified providers, graded independently against a 40-feature methodology. Browse and build without an account; sign in only to bid.</p>
       </div>
+
+      <HowItWorksDiagram />
 
       <section className="mb-14 max-w-3xl">
         <h2 className="text-2xl font-semibold mb-4">What actually happens</h2>
