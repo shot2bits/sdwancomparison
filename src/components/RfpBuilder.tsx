@@ -919,8 +919,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     );
   }
 
-  const includedSections = project.rfp_sections.filter((s) => s.included);
-  const includedQuestionCount = includedSections.reduce((n, s) => n + s.questions.length, 0);
+  // Counts must match the DRAFT chip exactly (Harry, 14 July: banner said 40
+  // questions while the chip said 12). Active = included sections, questions
+  // above the invisible "optional" pool; sections = those with active content.
+  const includedSections = project.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
+  const includedQuestionCount = activeCount;
 
   // Walkthrough strip: where the buyer is and what happens next, from real
   // state. Draft or review = reviewing the document with publish ahead;

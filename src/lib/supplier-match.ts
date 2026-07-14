@@ -40,11 +40,15 @@ function scopeMatches(scope: "sdwan" | "sse" | "sase" | "any", category: string,
   return cat.includes("sase") || group === "cloud_native_sase" || group === "sse_platforms" || group === "global_managed_providers";
 }
 
-/** A region counts as covered unless the dataset marks it absent. */
+/**
+ * A region counts as covered unless the dataset marks it absent or unknown.
+ * Partial and partner-delivered coverage still count (real coverage for most
+ * buyers), but "unknown" is not evidence and never matches.
+ */
 function regionCovered(value: unknown): boolean {
   if (typeof value !== "string") return false;
   const v = value.toLowerCase();
-  return v !== "" && v !== "no" && v !== "none";
+  return v !== "" && v !== "no" && v !== "none" && v !== "unknown";
 }
 
 export function matchSuppliers(opts: { scope?: string; regions?: string[]; model?: string }): MatchResult {

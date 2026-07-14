@@ -118,9 +118,12 @@ export default function DescribeWizard() {
   }, []);
 
   // Live supplier match: refreshed whenever scope, regions or model change.
+  // The current model state always drives the query (Harry, 14 July: picking
+  // the Managed service scope used to freeze the model, so the step-four
+  // buttons changed nothing and the count looked stuck).
   useEffect(() => {
     if (!scope || scope === "unsure") { setMatch(null); return; }
-    const q = new URLSearchParams({ scope: scope === "managed" ? "sase" : scope, regions: regions.join("."), model: scope === "managed" ? "managed" : model });
+    const q = new URLSearchParams({ scope: scope === "managed" ? "sase" : scope, regions: regions.join("."), model });
     const t = window.setTimeout(() => {
       fetch(`/sase/api/rfp/match?${q.toString()}`)
         .then((r) => (r.ok ? r.json() : null))
@@ -232,7 +235,7 @@ export default function DescribeWizard() {
             {heading("What is in scope?", "Pick the closest fit. You can refine it later.")}
             <div className="space-y-2">
               {SCOPES.map((s) => (
-                <button key={s.key} onClick={() => { markStarted(); setScope(s.key); advance(2, "scope"); }} className={`${card} ${scope === s.key ? active : idle}`}>
+                <button key={s.key} onClick={() => { markStarted(); setScope(s.key); if (s.key === "managed") setModel("managed"); advance(2, "scope"); }} className={`${card} ${scope === s.key ? active : idle}`}>
                   <span className="block text-sm font-semibold">{s.label}</span>
                   <span className="block text-sm text-[var(--ink-600,#555)]">{s.sub}</span>
                 </button>
@@ -345,7 +348,12 @@ export default function DescribeWizard() {
           {match && match.count > 0 ? (
             <>
               <p className="text-2xl font-semibold mb-1">{match.count}</p>
-              <p className="text-sm text-[var(--ink-700)] mb-3">verified suppliers on the Netify marketplace match this project so far.</p>
+              <p className="text-sm text-[var(--ink-700)] mb-1">verified suppliers on the Netify marketplace match this project so far.</p>
+              <p className="mb-3 text-xs text-[var(--ink-500)]">
+                Matching on: {SCOPES.find((s) => s.key === scope)?.label ?? scope}
+                {" · "}{MODELS.find((m) => m.key === model)?.label ?? model}
+                {regions.length > 0 ? ` · ${regions.length} region${regions.length === 1 ? "" : "s"}` : ""}
+              </p>
               <p className="text-xs text-[var(--ink-500)] mb-1">Including:</p>
               <p className="text-sm text-[var(--ink-700)]">{match.names.slice(0, 6).join(", ")}{match.count > 6 ? " and more" : ""}.</p>
             </>
