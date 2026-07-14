@@ -61,10 +61,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* The four-route chooser, demoted below the single action */}
+      {/* Alternate routes, demoted below the single action. The formal RFP
+          route lives in the hero box above only (Harry's overlap review). */}
       <section className="mb-16">
-        <h2 className="text-xl font-semibold mb-1">Prefer to pick your own route?</h2>
-        <p className="text-sm text-[var(--ink-600)] mb-4">Researching rather than buying, or after prices without a full RFP? Tell Netify what you need and it recommends the right path: shortlist, reverse auction, live quote room or formal RFP.</p>
+        <h2 className="text-xl font-semibold mb-1">Not ready for a full RFP?</h2>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Three other ways to use the marketplace: research a graded shortlist, run a reverse auction on price, or open a live quote room for fast indicative pricing. Describe your need once and it carries into whichever you pick.</p>
         <GuidedStart />
       </section>
 

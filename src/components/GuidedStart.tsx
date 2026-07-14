@@ -1,11 +1,13 @@
 "use client";
 
 /**
- * The single guided front door. One place to describe a need and refine it with
- * quick-build chips, then choose an outcome. Whatever the buyer enters is carried
- * through to the chosen path (shortlist, auction, quote room or RFP) so they never
- * re-enter context. Modelled on the clarity of the original app's guided entry,
- * feeding the new multi-path engine.
+ * The alternate-routes chooser: describe a need with quick-build chips, then
+ * pick shortlist, reverse auction or live quote room. Whatever the buyer
+ * enters is carried through to the chosen path so they never re-enter
+ * context. The formal RFP route was removed on 14 July 2026 (Harry's overlap
+ * review, Robert's decision): the homepage hero box owns that job and feeds
+ * the Describe wizard, so this component covers only the other three ways
+ * to buy.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -44,7 +46,6 @@ const OUTCOMES = [
   { key: "shortlist", title: "Compare a shortlist", when: "Understand the market", body: "A ranked, graded shortlist of matching vendors. No sign-in." },
   { key: "auction", title: "Run a reverse auction", when: "Get competitive prices", body: "Verified vendors compete on price. Open-ended or timed." },
   { key: "quote_room", title: "Open a live quote room", when: "Fast indicative quotes", body: "Post and watch suppliers reply live with quotes." },
-  { key: "rfp", title: "Build a formal RFP", when: "Run a rigorous procurement", body: "Methodology-backed questions, compliance and evaluation." },
 ];
 
 type Sel = { needs: string[]; sector: string | null; regions: string[]; project: "new" | "migration" | null; orgSize: string | null; delivery: string; sdwan: string[]; sase: string[]; compliance: string[]; sites: string; budget: string; description: string };
@@ -99,13 +100,6 @@ export default function GuidedStart() {
     return parts.filter(Boolean).join(". ");
   }
 
-  function productScope(): string {
-    if (s.needs.includes("sase")) return "full_sase";
-    if (s.needs.includes("sse")) return "sse_only";
-    if (s.needs.includes("sd_wan") || s.needs.includes("underlay_circuits")) return "sdwan_only";
-    return "full_sase";
-  }
-
   function go(outcome: string) {
     const sites = s.sites ? Number(s.sites) : null;
     if (outcome === "shortlist") {
@@ -119,32 +113,18 @@ export default function GuidedStart() {
       router.push(`/shortlist?${p.toString()}`);
       return;
     }
-    if (outcome === "auction" || outcome === "quote_room") {
-      const p = new URLSearchParams();
-      p.set("prefill", "1");
-      p.set("engagement", outcome === "auction" ? "auction" : "quote_room");
-      if (s.needs.length) p.set("scope", s.needs.join("."));
-      if (s.regions.length) p.set("regions", s.regions.join("."));
-      if (sites != null) p.set("sites", String(sites));
-      const summary = s.description.trim() || summarise();
-      if (summary) p.set("summary", summary);
-      if (s.budget) p.set("budget", s.budget);
-      if (s.sector) p.set("sector", s.sector);
-      router.push(`/opportunities?${p.toString()}`);
-      return;
-    }
-    // rfp
+    // auction or quote_room: both land on the project-notice wizard prefilled.
     const p = new URLSearchParams();
     p.set("prefill", "1");
-    if (s.sector) p.set("sector", s.sector);
-    if (s.orgSize) p.set("org", s.orgSize);
+    p.set("engagement", outcome === "auction" ? "auction" : "quote_room");
+    if (s.needs.length) p.set("scope", s.needs.join("."));
     if (s.regions.length) p.set("regions", s.regions.join("."));
-    if (s.compliance.length) p.set("compliance", s.compliance.join("."));
     if (sites != null) p.set("sites", String(sites));
-    if (s.delivery !== "any") p.set("model", s.delivery);
-    p.set("scope", productScope());
-    if (s.description) p.set("notes", s.description);
-    router.push(`/rfp-builder?${p.toString()}`);
+    const summary = s.description.trim() || summarise();
+    if (summary) p.set("summary", summary);
+    if (s.budget) p.set("budget", s.budget);
+    if (s.sector) p.set("sector", s.sector);
+    router.push(`/opportunities?${p.toString()}`);
   }
 
   const chip = (active: boolean) =>
@@ -225,7 +205,7 @@ export default function GuidedStart() {
 
       <div className="mt-8">
         <p className="eyebrow mb-3">Step 2: choose what to do with it</p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-3">
           {OUTCOMES.map((o) => (
             <button key={o.key} onClick={() => go(o.key)} className="text-left rounded-sm border border-[var(--ink-300,#ccc)] p-4 hover:border-amber-500 hover:bg-amber-50 transition-colors">
               <span className="block text-sm font-semibold mb-0.5">{o.title}</span>
