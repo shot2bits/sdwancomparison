@@ -91,6 +91,12 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Netify Research",
+    items: [
+      { label: "SASE cost and TCO guide", href: "/insights/sase-cost-tco-global-enterprise/" },
+    ],
+  },
+  {
     label: "For suppliers",
     items: [
       { label: "Open opportunities", href: "/sase/opportunities/board/" },
