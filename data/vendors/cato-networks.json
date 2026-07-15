@@ -8,7 +8,7 @@
     "https://www.catonetworks.com/platform/global-private-backbone/",
     "https://support.catonetworks.com/hc/en-us/articles/34177185210013-Private-PoP-Overview-for-Customers"
   ],
-  "evidence_summary": "Cato sources evidence a cloud-native private backbone spanning 85+ PoPs and Private PoP option; SASE/SD-WAN is core platform positioning.",
+  "evidence_summary": "Cato sources evidence a cloud-native private backbone spanning 100+ PoPs and Private PoP option; SASE/SD-WAN is core platform positioning.",
   "cost_model": "Quote-based subscription; typically site/user/bandwidth/security bundle based.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
@@ -64,7 +64,7 @@
   },
   "key_differentiators": [
     "Single converged platform with no policy or log fragmentation across SD-WAN and security functions.",
-    "85+ PoP global private backbone reduces internet variability and provides predictable performance for SaaS-heavy traffic.",
+    "100+ PoP global private backbone reduces internet variability and provides predictable performance for SaaS-heavy traffic.",
     "Strong story for organisations consolidating multiple point solutions onto one operational platform."
   ],
   "best_fit_for": [
@@ -158,7 +158,7 @@
   },
   "marketplace_url": "https://netify.co.uk/marketplace/cato-networks/",
   "profile": {
-    "platform_architecture": "Cato built SASE as a cloud service from day one: the Cato SASE Cloud runs on a private global backbone of 85+ PoPs connected by SLA-backed tier-1 carrier links, with thin Cato Socket edges at sites and a single-pass processing engine in every PoP. All traffic, site and remote user alike, is processed once in the nearest PoP under one policy. Orchestration is a single multi-tenant console with no separate controllers to run.",
+    "platform_architecture": "Cato built SASE as a cloud service from day one: the Cato SASE Cloud runs on a private global backbone of 100+ PoPs connected by SLA-backed tier-1 carrier links, with thin Cato Socket edges at sites and a single-pass processing engine in every PoP. All traffic, site and remote user alike, is processed once in the nearest PoP under one policy. Orchestration is a single multi-tenant console with no separate controllers to run.",
     "security_sase": "The full security stack is native and converged: NGFW, SWG, CASB, DLP, ZTNA, IPS and anti-malware execute in the same pass with shared context, and real-time machine learning models score traffic inline. There is no policy fragmentation between SD-WAN and security because they are one platform. Depth in specialist areas like enterprise DLP trails the dedicated leaders slightly; coherence across the whole stack is the compensating strength.",
     "service_support_channel": "Cato sells direct and through partners with managed and co-managed options; UK channel presence has grown steadily and several MSPs wrap Cato with local support and underlay. Deployment speed is a signature: sites typically come online in hours once circuits exist. Support runs 24x7 from Cato with named success management on enterprise contracts.",
     "commercials_verdict": "Subscription pricing per site bandwidth and per user for remote access, quote based and generally mid-market friendly. The Netify verdict: shortlist Cato when you want true single-vendor SASE with the least operational surface, global sites that need a predictable middle mile without MPLS, and a deployment measured in days. Buyers needing best-of-breed depth per security category or full underlay ownership should weigh the trade-offs."
@@ -166,7 +166,7 @@
   "vendor_faqs": [
     {
       "q": "What does the Cato private backbone actually give me?",
-      "a": "Your traffic rides Cato's SLA-backed core between 85+ PoPs instead of the public internet middle mile, which stabilises latency and loss between regions, notably into and out of Asia and across the Atlantic, without buying MPLS."
+      "a": "Your traffic rides Cato's SLA-backed core between 100+ PoPs instead of the public internet middle mile, which stabilises latency and loss between regions, notably into and out of Asia and across the Atlantic, without buying MPLS."
     },
     {
       "q": "How fast is a Cato deployment really?",
