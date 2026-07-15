@@ -21,7 +21,7 @@ type RfpSection = { category: string; included: boolean; questions: RfpQuestion[
 type Buyer = { organisation: string; sector: string | null; organisation_size: string; site_count: number | null; regions: string[]; compliance: string[]; operating_model: string; product_scope: string };
 type Nda = { required: boolean; source: "template" | "buyer"; text: string; link: string; version: number; updated: number };
 type NdaAcceptance = { id: string; vendor: string; signatory_name: string; email: string; nda_version: number; accepted: number };
-type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string; nda?: Nda };
+type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string; nda?: Nda; response_deadline?: number };
 
 const STATUS_FLOW = ["draft", "review", "published", "qa", "evaluation"];
 // Scope restructured per Harry's UX feedback (2026-07-02): the old flat list
@@ -84,7 +84,7 @@ type ClausePack = { regulation: string; label: string; clauses: string[] };
 type Evaluation = { vendor: string; vendor_slug: string | null; answered: number; total: number; flags: number; red_flags?: number; missing_evidence?: number; weighted_coverage?: number; checks: { question: string; answer: string; grade_label: string; flag: string; note: string }[] };
 type Benchmark = { available: boolean; total_rfps?: number; top_mandatory_questions?: { name: string; count: number }[]; median_response_completeness?: number | null };
 type ConnMsg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
-type Connection = { vendor_slug: string; vendor_name: string; token: string; status: string; messages: ConnMsg[] };
+type Connection = { vendor_slug: string; vendor_name: string; token: string; status: string; messages: ConnMsg[]; viewed_at?: number };
 type Suggestion = { rank: number; slug: string; name: string; score: number };
 type ExtendedBankQuestion = {
   question_id: string;
@@ -1047,7 +1047,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <div>
             <p className="text-base font-semibold mb-1">Submitted. Your RFP is with your suppliers now.</p>
             <p className="text-sm text-[var(--ink-700)]">
-              {connections.length > 0 ? `${connections.length} supplier${connections.length === 1 ? " holds a" : "s hold"} private response link${connections.length === 1 ? "" : "s"}.` : "Invited suppliers hold private response links."}{" "}
+              {connections.length > 0 ? `${connections.filter((c) => c.viewed_at).length} of ${connections.length} suppliers have viewed your RFP.` : "Invited suppliers hold private response links."}{" "}
+              {project.response_deadline ? `Responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left). ` : ""}
               Structured responses land on this page and are scored under Evaluate supplier responses below. We email you when activity arrives, and you can invite more suppliers at any time under Suppliers.
             </p>
           </div>
@@ -1077,7 +1078,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               </p>
             )}
             <p className="text-sm text-[var(--ink-700)] mb-2">
-              This is the fastest and simplest way to see whether your requirements match the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. Suppliers never see your email or phone number. Every conversation starts in this app, on your terms, only when you choose.
+              This is the fastest and simplest way to see whether your requirements match the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. Suppliers never see your email or phone number, and your data is only shared with a vetted account manager from each vendor or managed service provider. Every conversation starts in this app, on your terms, only when you choose.
             </p>
             <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
               {["Indicative pricing, private to you", "Demo requests", "Proof-of-concept scoping", "Message vendors and managed providers in-app", "Evidence, documents and PDF collateral", "Sales and account contact, when you choose", "Independent response scoring"].map((c) => (
@@ -1553,12 +1554,50 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         )}
 
         {connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No suppliers invited yet.</p>}
+        {connections.length > 0 && (
+          <p className="mb-2 text-sm text-[var(--ink-700)]">
+            <strong>{connections.filter((c) => c.viewed_at).length} of {connections.length}</strong> suppliers have viewed your RFP
+            {connections.filter((c) => c.status === "declined").length > 0 ? ` · ${connections.filter((c) => c.status === "declined").length} declined` : ""}
+            {project.response_deadline ? ` · responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left)` : ""}.
+          </p>
+        )}
+        {(() => {
+          const HINTS: Record<string, string> = {
+            out_of_region: "Consider widening the supplier set or checking your region selections match where you need delivery.",
+            sector_not_served: "Your sector filter may be narrowing the match; sector context in the background section helps suppliers self-qualify.",
+            scope_unclear: "Add a sentence or two to the project background: current estate, what is changing and why.",
+            commercially_unattractive: "Consider adding budget context or site counts so suppliers can size the opportunity.",
+            no_capacity: "Timing, not fit. Re-send to the remaining matches or extend your deadline.",
+            other: "Read the supplier's note below for the detail.",
+          };
+          const declines = connections
+            .filter((c) => c.status === "declined")
+            .map((c) => {
+              const m = [...c.messages].reverse().find((x) => x.type === "decline");
+              return { reason: String(m?.payload?.reason ?? "other"), note: m?.body ?? "" };
+            });
+          if (declines.length === 0) return null;
+          return (
+            <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm">
+              <p className="mb-1 font-medium text-[var(--ink-800)]">Why suppliers declined, and what would improve this RFP</p>
+              <ul className="space-y-1 text-[var(--ink-700)]">
+                {declines.map((d, i) => (
+                  <li key={i}>
+                    {d.reason.replace(/_/g, " ")}: {HINTS[d.reason] ?? HINTS.other}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
         <div className="space-y-3">
           {connections.map((c) => (
             <details key={c.vendor_slug} className="border border-[var(--ink-300,#ccc)] rounded-sm">
               <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer flex justify-between">
                 <span>{c.vendor_name}</span>
-                <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">{c.status}</span>
+                <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">
+                  {c.viewed_at ? "viewed · " : ""}{c.status}
+                </span>
               </summary>
               <div className="px-4 pb-3">
                 <div className="space-y-2 my-2">

@@ -192,7 +192,7 @@ export default function DescribeWizard() {
       if (!id) {
         // Consent wording version stamped onto submitted RFPs. Bump when the
         // agreement copy on step 6 changes materially.
-        const consent = submit ? { version: "submit-agreement v1, 15 July 2026", agreed_at: Date.now(), flow: "wizard_submit" } : undefined;
+        const consent = submit ? { version: "submit-agreement v2, 15 July 2026", agreed_at: Date.now(), flow: "wizard_submit" } : undefined;
         const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer, consent }) });
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
         const p = (await res.json()) as { id: string; manage_token?: string };
@@ -423,7 +423,8 @@ export default function DescribeWizard() {
               <strong>Generate your RFP and submit it to the marketplace.</strong> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched
               vendors and managed service providers, who review your requirements and make contact through this app.
               Your contact details are never shown to suppliers; conversations start only when you reply. You can edit
-              your RFP after submitting and suppliers always see the latest version. We only email you about your RFPs,
+              your RFP after submitting and suppliers always see the latest version. Your data is only shared with a
+              vetted account manager from each vendor or managed service provider. We only email you about your RFPs,
               opportunities and RFP Builder and Marketplace features. No third-party marketing.{" "}
               <a href="https://netify.co.uk/privacy-policy/" className="underline" target="_blank" rel="noreferrer">Privacy policy</a>.
             </p>

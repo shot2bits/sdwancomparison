@@ -40,6 +40,11 @@ export async function POST(req: Request, ctx: Ctx) {
   if (project.status !== "published" && project.status !== "qa") {
     return Response.json({ error: "This RFP is not open for responses." }, { status: 409, headers: cors });
   }
+  // Response window: submissions close at the deadline set when the buyer
+  // submitted to the marketplace (deal room slice 1, 15 July 2026).
+  if (project.response_deadline && Date.now() > project.response_deadline) {
+    return Response.json({ error: "The response window for this RFP has closed." }, { status: 409, headers: cors });
+  }
   let body: { vendor?: string; answers?: Record<string, string>; submit?: boolean };
   try {
     body = await req.json();

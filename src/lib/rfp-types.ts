@@ -82,6 +82,9 @@ export const ProjectDetailsSchema = z.object({
   // wording version the buyer agreed to and when they pressed the button.
   // Absent on drafts created before 15 July 2026 or via the review-first path.
   consent: z.object({ version: z.string(), agreed_at: z.number(), flow: z.string() }).optional(),
+  // Response window: suppliers can respond until this time (set at submit,
+  // default 14 days). The respond API enforces it; both sides see the timer.
+  response_deadline: z.number().optional(),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
 
@@ -191,5 +194,10 @@ export const SupplierConnectionSchema = z.object({
   messages: z.array(ConnectionMessageSchema).default([]),
   created: z.number(),
   updated: z.number(),
+  // Deal room slice 1 (15 July 2026): first time the supplier opened their
+  // private link (buyer sees "3 of 5 viewed"), and when the admin forwarded
+  // the link during the brokered phase before supplier registration.
+  viewed_at: z.number().optional(),
+  forwarded_at: z.number().optional(),
 }).strict();
 export type SupplierConnection = z.infer<typeof SupplierConnectionSchema>;

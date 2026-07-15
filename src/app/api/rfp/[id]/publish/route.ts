@@ -173,7 +173,10 @@ export async function POST(req: Request, ctx: Ctx) {
   // the signed-in account when the RFP has no owner yet (mirrors the PUT
   // adopt-ownership rule), so the RFP appears under the buyer's account.
   const ownerEmail = project.owner_email || sessionEmail;
-  const published = await saveProject({ ...project, status: "published", owner_email: ownerEmail, invited_vendors: Array.from(new Set([...project.invited_vendors, ...invited.map((i) => i.slug)])) });
+  // Response window: 14 days by default from the moment of submission,
+  // preserved on re-sends so the clock never quietly restarts.
+  const responseDeadline = project.response_deadline ?? Date.now() + 14 * 86400000;
+  const published = await saveProject({ ...project, status: "published", owner_email: ownerEmail, response_deadline: responseDeadline, invited_vendors: Array.from(new Set([...project.invited_vendors, ...invited.map((i) => i.slug)])) });
   if (!project.owner_email) {
     try { await indexRfpForBuyer(sessionEmail, published.id); } catch { /* best effort */ }
   }

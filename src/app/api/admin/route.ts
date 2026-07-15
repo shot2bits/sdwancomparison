@@ -24,7 +24,11 @@ import {
   getBuyerAllowlist,
   addBuyerAllowDomain,
   getRejectStats,
+  listConnections,
+  getConnection,
+  saveConnection,
 } from "@/lib/rfp-store";
+import { SITE_URL } from "@/lib/structured-data";
 import {
   isAdminEmail,
   effectiveVendorDomains,
@@ -100,6 +104,31 @@ export async function GET(req: Request) {
     .sort((a, b) => b.updated - a.updated)
     .slice(0, 200);
 
+  // Brokering queue (deal room slice 1): until suppliers register, the Netify
+  // team delivers the private response links. Recent published RFPs with per
+  // supplier link, viewed and forwarded state, newest first.
+  const brokerSource = publishedProjects
+    .filter((p) => !(p.owner_email ?? "").toLowerCase().endsWith("@netify.com"))
+    .sort((a, b) => b.updated - a.updated)
+    .slice(0, 25);
+  const brokerConns = await Promise.all(brokerSource.map((p) => listConnections(p.id)));
+  const broker_queue = brokerSource.map((p, i) => ({
+    rfp_id: p.id,
+    title: p.title,
+    owner_email: p.owner_email || null,
+    sector: p.buyer.sector,
+    response_deadline: p.response_deadline ?? null,
+    updated: p.updated,
+    suppliers: (brokerConns[i] ?? []).map((c) => ({
+      vendor_slug: c.vendor_slug,
+      vendor_name: c.vendor_name,
+      status: c.status,
+      viewed_at: c.viewed_at ?? null,
+      forwarded_at: c.forwarded_at ?? null,
+      respond_url: `${SITE_URL}/rfp-builder/supplier/${c.token}`,
+    })),
+  }));
+
   const owned = projects.filter((p) => p.owner_email);
   const funnel = {
     buyer_accounts: signups.filter((u) => u.roles.includes("buyer")).length,
@@ -127,6 +156,7 @@ export async function GET(req: Request) {
       pending,
       claims,
       funnel,
+      broker_queue,
       rfps,
       draft_link_leads: leads.slice(0, 50),
       buyer_allowlist: buyerAllowlist,
@@ -228,6 +258,17 @@ export async function POST(req: Request) {
         const c = await decideVendorClaim(slug, action === "approve_claim", auth.email);
         if (!c) return Response.json({ error: "No claim found for that vendor." }, { status: 404, headers: cors });
         return Response.json({ ok: true, claim: c }, { headers: cors });
+      }
+      case "mark_forwarded": {
+        // Brokering queue: record that the team delivered a supplier's
+        // private link during the pre-registration phase.
+        const rfpId = String(body.rfp_id ?? "");
+        const vendorSlug = String(body.vendor_slug ?? "");
+        if (!rfpId || !vendorSlug) return Response.json({ error: "rfp_id and vendor_slug required." }, { status: 422, headers: cors });
+        const conn = await getConnection(rfpId, vendorSlug);
+        if (!conn) return Response.json({ error: "Connection not found." }, { status: 404, headers: cors });
+        const saved = await saveConnection({ ...conn, forwarded_at: Date.now() });
+        return Response.json({ ok: true, forwarded_at: saved.forwarded_at }, { headers: cors });
       }
       case "delete_user": {
         const email = String(body.email ?? "").trim().toLowerCase();

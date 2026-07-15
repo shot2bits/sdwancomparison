@@ -35,11 +35,15 @@ type Overview = {
   claims: Claim[];
   opportunities: OppRow[];
   funnel?: Funnel;
+  broker_queue?: BrokerRfp[];
   rfps?: RfpRow[];
   draft_link_leads?: DraftLead[];
   buyer_allowlist?: string[];
   reject_stats?: { month: string; entries: { domain: string; reason: string; count: number }[] };
 };
+
+type BrokerSupplier = { vendor_slug: string; vendor_name: string; status: string; viewed_at: number | null; forwarded_at: number | null; respond_url: string };
+type BrokerRfp = { rfp_id: string; title: string; owner_email: string | null; sector: string | null; response_deadline: number | null; updated: number; suppliers: BrokerSupplier[] };
 
 function when(ms: number): string {
   return new Date(ms).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -109,6 +113,34 @@ export default function AdminClient() {
       <p className="text-sm text-[var(--ink-600)]">Signed in as <strong>{data.admin_email}</strong>. <button onClick={load} className="underline" disabled={busy}>Refresh</button></p>
       {error && <p className="text-sm text-red-700">{error}</p>}
       {notice && <p className="text-sm text-emerald-700">{notice}</p>}
+
+      {/* Brokering queue: until suppliers register, the team delivers the
+          private response links. Copy, send, mark forwarded. */}
+      {(data.broker_queue ?? []).length > 0 && (
+        <section className={card}>
+          <h2 className={h2}>Brokering queue</h2>
+          <p className={sub}>Every published RFP with its supplier links. Copy the link, send it to the supplier contact, then mark it forwarded so the team can see delivery state at a glance.</p>
+          <div className="space-y-4">
+            {(data.broker_queue ?? []).map((b) => (
+              <div key={b.rfp_id} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3">
+                <p className="text-sm font-medium">
+                  {b.title} <span className="text-[var(--ink-500)] font-normal">· {b.owner_email ?? "anonymous"}{b.sector ? ` · ${b.sector}` : ""}{b.response_deadline ? ` · closes ${when(b.response_deadline)}` : ""}</span>
+                </p>
+                <ul className="mt-2 space-y-1 text-sm">
+                  {b.suppliers.map((s) => (
+                    <li key={s.vendor_slug} className="flex flex-wrap items-center gap-2">
+                      <span className="min-w-40">{s.vendor_name}</span>
+                      <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">{s.forwarded_at ? "forwarded" : "not forwarded"}{s.viewed_at ? " · viewed" : ""} · {s.status}</span>
+                      <button className={btn} onClick={() => { navigator.clipboard.writeText(s.respond_url).catch(() => {}); setNotice(`Link copied for ${s.vendor_name}.`); }}>Copy link</button>
+                      {!s.forwarded_at && <button className={btnAmber} disabled={busy} onClick={() => act({ action: "mark_forwarded", rfp_id: b.rfp_id, vendor_slug: s.vendor_slug })}>Mark forwarded</button>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Buyer funnel: the four stages that matter */}
       {data.funnel && (

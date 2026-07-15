@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getConnectionByToken, getProject, kvConfigured } from "@/lib/rfp-store";
+import { getConnectionByToken, getProject, kvConfigured, saveConnection } from "@/lib/rfp-store";
 import { addMessage } from "@/lib/rfp-connect";
 import { sessionFromRequest, requireClaimedSupplierFor } from "@/lib/auth";
 
@@ -13,8 +13,13 @@ export async function GET(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { token } = await ctx.params;
-  const conn = await getConnectionByToken(token);
+  let conn = await getConnectionByToken(token);
   if (!conn) return Response.json({ error: "Connection not found." }, { status: 404, headers: cors });
+  // Viewed receipt: stamp the first open of the private link so the buyer
+  // sees "3 of 5 suppliers have viewed your RFP" (deal room slice 1).
+  if (!conn.viewed_at) {
+    try { conn = await saveConnection({ ...conn, viewed_at: Date.now() }); } catch { /* best effort */ }
+  }
   const project = await getProject(conn.rfp_id);
   return Response.json({
     connection: conn,
@@ -23,6 +28,7 @@ export async function GET(req: Request, ctx: Ctx) {
       product_scope: project.buyer.product_scope, operating_model: project.buyer.operating_model,
       regions: project.buyer.regions, compliance: project.buyer.compliance,
       question_count: project.rfp_sections.filter((s) => s.included).reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0),
+      response_deadline: project.response_deadline,
     } : null,
   }, { headers: cors });
 }

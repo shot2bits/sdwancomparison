@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 type Msg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
 type Conn = { vendor_name: string; status: string; messages: Msg[] };
-type Rfp = { title: string; status: string; sector: string | null; product_scope: string; operating_model: string; question_count: number };
+type Rfp = { title: string; status: string; sector: string | null; product_scope: string; operating_model: string; question_count: number; response_deadline?: number };
 
 const TYPE_LABEL: Record<string, string> = {
   intro: "Introduction", message: "Message", demo_request: "Demo requested", demo_response: "Demo proposal",
@@ -18,6 +18,7 @@ export default function SupplierPortal({ token }: { token: string }) {
   const [conn, setConn] = useState<Conn | null>(null);
   const [rfp, setRfp] = useState<Rfp | null>(null);
   const [reply, setReply] = useState("");
+  const [declineReason, setDeclineReason] = useState("");
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -53,6 +54,13 @@ export default function SupplierPortal({ token }: { token: string }) {
         <h1 className="text-2xl mb-1">{conn.vendor_name}</h1>
         {rfp && <p className="text-sm text-[var(--ink-500)]">RFP: {rfp.title} · {rfp.status} · {rfp.question_count} questions · scope {rfp.product_scope} · {rfp.operating_model}{rfp.sector ? ` · ${rfp.sector}` : ""}</p>}
         <p className="text-sm text-[var(--ink-500)] mt-1">Connection status: {conn.status}</p>
+        {rfp?.response_deadline && (
+          <p className={`mt-1 text-sm ${rfp.response_deadline < Date.now() ? "text-red-700" : "text-[var(--ink-700)]"}`}>
+            {rfp.response_deadline < Date.now()
+              ? `The response window closed on ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`
+              : `Responses close ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(1, Math.ceil((rfp.response_deadline - Date.now()) / 86400000))} day${Math.ceil((rfp.response_deadline - Date.now()) / 86400000) === 1 ? "" : "s"} left).`}
+          </p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -74,7 +82,28 @@ export default function SupplierPortal({ token }: { token: string }) {
           <div className="mt-2 flex gap-2 flex-wrap">
             <button onClick={() => { post("message", reply); setReply(""); }} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors">Send message</button>
             <button onClick={() => { post("demo_response", reply || "We can offer a demo. Proposed times to follow."); setReply(""); }} className="px-4 py-2 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Propose a demo</button>
-            <button onClick={() => post("decline", reply || "Thank you, we are declining this opportunity.")} className="px-4 py-2 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Decline</button>
+          </div>
+        </div>
+        <div>
+          <p className="eyebrow mb-2">Not the right opportunity?</p>
+          <p className="mb-2 text-xs text-[var(--ink-500)]">Declining takes ten seconds and helps the buyer improve their RFP. Your reason is shared with the buyer without your name attached to it beyond this connection.</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <select value={declineReason} onChange={(e) => setDeclineReason(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm bg-white">
+              <option value="">Reason for declining...</option>
+              <option value="out_of_region">Outside our regions</option>
+              <option value="sector_not_served">We do not serve this sector</option>
+              <option value="scope_unclear">Scope or requirements unclear</option>
+              <option value="commercially_unattractive">Commercially unattractive</option>
+              <option value="no_capacity">No capacity right now</option>
+              <option value="other">Other</option>
+            </select>
+            <button
+              onClick={() => { if (declineReason) { post("decline", reply || "Thank you, we are declining this opportunity.", { reason: declineReason }); setReply(""); } }}
+              disabled={!declineReason}
+              className="px-4 py-2 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)] disabled:opacity-50"
+            >
+              Decline with reason
+            </button>
           </div>
         </div>
         <div>
