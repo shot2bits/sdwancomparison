@@ -108,7 +108,12 @@ export async function GET(req: Request) {
   // team delivers the private response links. Recent published RFPs with per
   // supplier link, viewed and forwarded state, newest first.
   const brokerSource = publishedProjects
-    .filter((p) => !(p.owner_email ?? "").toLowerCase().endsWith("@netify.com"))
+    .filter((p) => {
+      const owner = (p.owner_email ?? "").toLowerCase();
+      // Accountable, recent publishes only: the new submit flow always has
+      // an owner, so ownerless test-era publishes stay out of the queue.
+      return owner !== "" && !owner.endsWith("@netify.com") && Date.now() - p.updated < 30 * 86400000;
+    })
     .sort((a, b) => b.updated - a.updated)
     .slice(0, 25);
   const brokerConns = await Promise.all(brokerSource.map((p) => listConnections(p.id)));
