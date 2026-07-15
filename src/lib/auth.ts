@@ -42,15 +42,22 @@ export async function sendMagicLink(email: string, token: string, role: string, 
   const link = `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
   if (!key) return false;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
+  // Consent-at-generate flow: when the sign-in was requested from the
+  // wizard's agreement step, the click IS the submission, so the email says
+  // so plainly instead of reading as a generic sign-in (informed act rule,
+  // 15 July 2026).
+  const isSubmission = returnTo.includes("welcome=submitting");
+  const subject = isSubmission
+    ? "Confirm and submit your RFP to your matched suppliers"
+    : "Your Netify marketplace sign-in link";
+  const html = isSubmission
+    ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched suppliers, who review your requirements and make contact through the Netify app. Your contact details are never shown to suppliers, and you can edit the RFP afterwards; suppliers always see the latest version.</p><p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
+    : `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p><p>If you did not request this, ignore this email.</p>`;
   try {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        from, to: email,
-        subject: "Your Netify marketplace sign-in link",
-        html: `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p><p>If you did not request this, ignore this email.</p>`,
-      }),
+      body: JSON.stringify({ from, to: email, subject, html }),
     });
     return true;
   } catch {

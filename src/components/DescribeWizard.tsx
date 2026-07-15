@@ -187,7 +187,10 @@ export default function DescribeWizard() {
     try {
       let id = createdId;
       if (!id) {
-        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer }) });
+        // Consent wording version stamped onto submitted RFPs. Bump when the
+        // agreement copy on step 6 changes materially.
+        const consent = submit ? { version: "submit-agreement v1, 15 July 2026", agreed_at: Date.now(), flow: "wizard_submit" } : undefined;
+        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer, consent }) });
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
         const p = (await res.json()) as { id: string; manage_token?: string };
         if (p.manage_token) { try { localStorage.setItem(`netify_mtok_${p.id}`, p.manage_token); } catch { /* private mode */ } }

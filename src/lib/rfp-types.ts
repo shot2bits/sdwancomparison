@@ -78,6 +78,10 @@ export const ProjectDetailsSchema = z.object({
   owner_email: z.string().default(""), // buyer account that owns this RFP (private, never in public projection); empty for anonymous drafts
   methodology_version: z.string().default("2026.1"),
   nda: NdaConfigSchema.default({ required: false, source: "template", text: "", link: "", version: 1, updated: 0 }), // defaulted so RFPs created before NDAs still validate
+  // Consent record for the wizard's submit-to-marketplace agreement: which
+  // wording version the buyer agreed to and when they pressed the button.
+  // Absent on drafts created before 15 July 2026 or via the review-first path.
+  consent: z.object({ version: z.string(), agreed_at: z.number(), flow: z.string() }).optional(),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
 

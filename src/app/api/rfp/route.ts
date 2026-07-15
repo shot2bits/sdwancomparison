@@ -17,13 +17,20 @@ export async function POST(req: Request) {
   if (!kvConfigured()) {
     return Response.json({ error: new KvNotConfiguredError().message }, { status: 503, headers: cors });
   }
-  let body: { title?: string; buyer?: unknown } = {};
+  let body: { title?: string; buyer?: unknown; consent?: { version?: unknown; agreed_at?: unknown; flow?: unknown } } = {};
   try {
     body = await req.json();
   } catch {
     // empty body is fine: starts a blank draft
   }
   const buyer = BuyerContextSchema.parse(body.buyer ?? {});
+  // Consent record from the wizard's agreement step: stored verbatim-shaped
+  // (version, timestamp, flow) so there is always an answer to "what did
+  // this buyer agree to and when". Only accepted in the expected shape.
+  const consent =
+    body.consent && typeof body.consent.version === "string" && typeof body.consent.agreed_at === "number" && typeof body.consent.flow === "string"
+      ? { version: body.consent.version, agreed_at: body.consent.agreed_at, flow: body.consent.flow }
+      : undefined;
   const id = newId("rfp");
   const session = await sessionFromRequest(req);
   const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
@@ -40,6 +47,7 @@ export async function POST(req: Request) {
     manage_token: newId("mtok"),
     owner_email: ownerEmail,
     methodology_version: "2026.1",
+    consent,
   });
   const saved = await saveProject(project);
   if (ownerEmail) {
