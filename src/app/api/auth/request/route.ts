@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { createMagicToken, kvConfigured, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
+import { createMagicToken, kvConfigured, kvGetJson, kvSetJson, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
 import { sendMagicLink } from "@/lib/auth";
 import {
   isBlockedDomainLive,
@@ -24,7 +24,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
 export async function POST(req: Request) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
-  let body: { email?: string; role?: string; return_to?: string };
+  let body: { email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const email = (body.email ?? "").trim().toLowerCase();
   const role = body.role === "supplier" ? "supplier" : "buyer";
@@ -87,6 +87,17 @@ export async function POST(req: Request) {
   }
 
   const token = await createMagicToken({ role: resolvedRole, email, vendor_slug });
+  // Optional marketing consent from the wizard agreement step: explicit,
+  // unticked by default, recorded only when the sign-in link actually goes
+  // out to a domain that passed the business-only policy.
+  if (body.marketing_opt_in === true) {
+    try {
+      const key = "email:marketing_optin";
+      const list = (await kvGetJson<string[]>(key)) ?? [];
+      if (!list.includes(email)) { list.push(email); await kvSetJson(key, list); }
+    } catch { /* best effort */ }
+  }
+
   const sent = await sendMagicLink(email, token, resolvedRole, returnTo);
   // In preview without Resend configured, return the link so it is testable.
   const devLink = sent ? undefined : `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;

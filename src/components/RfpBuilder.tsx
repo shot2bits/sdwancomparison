@@ -296,12 +296,23 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // the first thing seen, report rfp_generated once, then clean the param so
   // refreshes do not re-report. Flow spec, 14 July 2026.
   const [generatedWelcome, setGeneratedWelcome] = useState(false);
+  // Consent-at-generate handoff (?welcome=submitting): the buyer agreed at
+  // the wizard's final step that generating submits to their matched
+  // suppliers. The pending-publish flag drives the auto-resume; this state
+  // only tailors the copy while the magic-link round trip completes.
+  const [submitFlow, setSubmitFlow] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
-    if (p.get("welcome") !== "generated") return;
-    setGeneratedWelcome(true);
+    const w = p.get("welcome");
+    if (w !== "generated" && w !== "submitting") return;
+    if (w === "generated") setGeneratedWelcome(true);
+    if (w === "submitting") {
+      setSubmitFlow(true);
+      try { setPendingEmail(sessionStorage.getItem("netify_pending_email") ?? ""); } catch { /* ignore */ }
+    }
     setMode("manual");
-    fireNetifyEvent("rfp_generated");
+    fireNetifyEvent("rfp_generated", { flow: w === "submitting" ? "submit" : "review" });
     p.delete("welcome");
     const qs = p.toString();
     window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
@@ -822,7 +833,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     fireNetifyEvent("publish_click", { source });
     setPublishing(true); setPublishMsg(null); setError(null); setBoardNote(null); setPublishAuthNeeded(false);
     try {
-      const res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: manageToken.current || project.manage_token }) });
+      // Wizard-submit publishes carry options set at the agreement step
+      // (invite cap 5, matched suppliers only, marketing opt-in).
+      let publishOpts: Record<string, unknown> = {};
+      try { publishOpts = JSON.parse(localStorage.getItem(`rfp_publish_opts_${project.id}`) ?? "{}") as Record<string, unknown>; } catch { /* ignore */ }
+      const res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: manageToken.current || project.manage_token, ...publishOpts }) });
       const data = await res.json().catch(() => ({}));
       // Publishing requires a verified work-email sign-in on top of the
       // manage token: render the inline sign-in panel, not a dead error.
@@ -837,7 +852,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
       fireNetifyEvent("rfp_published", { invited: String(data.invited?.length ?? 0) });
-      try { localStorage.removeItem(`rfp_pending_publish_${project.id}`); } catch { /* ignore */ }
+      try {
+        localStorage.removeItem(`rfp_pending_publish_${project.id}`);
+        localStorage.removeItem(`rfp_publish_opts_${project.id}`);
+        sessionStorage.removeItem("netify_pending_email");
+      } catch { /* ignore */ }
       setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
@@ -1059,7 +1078,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </ol>
             {publishAuthNeeded && (
               <div className="mb-3 rounded-sm border border-amber-400 bg-white p-3 text-sm text-[var(--ink-800)]">
-                <p className="mb-2"><strong>One step before your RFP goes out.</strong> Publishing sends this RFP to suppliers, so it needs a verified work email. Sign in and publishing continues automatically. Your draft is exactly as you left it.</p>
+                {submitFlow ? (
+                  <p className="mb-2"><strong>Almost done.</strong> Click the link we emailed{pendingEmail ? ` to ${pendingEmail}` : " you"} and your RFP goes to your matched suppliers automatically. Wrong address, or no email? Use the form below.</p>
+                ) : (
+                  <p className="mb-2"><strong>One step before your RFP goes out.</strong> Publishing sends this RFP to suppliers, so it needs a verified work email. Sign in and publishing continues automatically. Your draft is exactly as you left it.</p>
+                )}
                 <SignIn role="buyer" prompt="Sign in with your work email to publish and invite suppliers." />
               </div>
             )}

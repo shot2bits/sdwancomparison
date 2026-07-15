@@ -83,6 +83,12 @@ type Match = { count: number; total: number; names: string[] };
 
 export default function DescribeWizard() {
   const [step, setStep] = useState(0);
+  // Agreement step (consent-at-generate, Robert's decisions 15 July 2026):
+  // generating and submitting to the marketplace are one agreed action.
+  const [email, setEmail] = useState("");
+  const [optIn, setOptIn] = useState(false);
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [scope, setScope] = useState("");
   const [sites, setSites] = useState("");
@@ -149,7 +155,17 @@ export default function DescribeWizard() {
     set(list.includes(key) ? list.filter((k) => k !== key) : [...list, key]);
   };
 
-  async function create() {
+  // The agreement step needs to know whether a session already exists (a
+  // signed-in buyer skips the email field and submission fires immediately).
+  useEffect(() => {
+    if (step !== 6 || authed !== null) return;
+    fetch("/sase/api/auth/session")
+      .then((r) => (r.ok ? r.json() : { authenticated: false }))
+      .then((d: { authenticated?: boolean }) => setAuthed(!!d.authenticated))
+      .catch(() => setAuthed(false));
+  }, [step, authed]);
+
+  async function create(submit: boolean) {
     if (creating) return;
     setCreating(true); setError(null);
     const scoped = scopeToBuyer(scope);
@@ -169,12 +185,44 @@ export default function DescribeWizard() {
       notes: noteParts.join(" "),
     };
     try {
-      const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer }) });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
-      const p = (await res.json()) as { id: string; manage_token?: string };
-      if (p.manage_token) { try { localStorage.setItem(`netify_mtok_${p.id}`, p.manage_token); } catch { /* private mode */ } }
-      fireNetifyEvent("describe_completed", { scope: scope || "unset" });
-      window.location.assign(`/sase/rfp-builder/${p.id}/?welcome=generated`);
+      let id = createdId;
+      if (!id) {
+        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer }) });
+        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
+        const p = (await res.json()) as { id: string; manage_token?: string };
+        if (p.manage_token) { try { localStorage.setItem(`netify_mtok_${p.id}`, p.manage_token); } catch { /* private mode */ } }
+        id = p.id;
+        setCreatedId(p.id);
+        fireNetifyEvent("describe_completed", { scope: scope || "unset" });
+      }
+
+      if (!submit) {
+        window.location.assign(`/sase/rfp-builder/${id}/?welcome=generated`);
+        return;
+      }
+
+      // Submit path: record the agreed publish options, then either rely on
+      // the live session or send the magic link. The builder's auto-resume
+      // completes the publish the moment the session exists.
+      try {
+        localStorage.setItem(`rfp_pending_publish_${id}`, "1");
+        localStorage.setItem(`rfp_publish_opts_${id}`, JSON.stringify({ shortlist_size: 5, list_on_board: false, marketing_opt_in: optIn }));
+      } catch { /* private mode: the builder panel still offers publish */ }
+      fireNetifyEvent("submit_agreed", { matched: String(Math.min(5, match?.count ?? 0)), opt_in: optIn ? "1" : "0" });
+
+      if (!authed) {
+        const ar = await fetch("/sase/api/auth/request", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: `/sase/rfp-builder/${id}/?welcome=submitting`, marketing_opt_in: optIn }),
+        });
+        if (!ar.ok) {
+          const e = (await ar.json().catch(() => ({}))) as { error?: string; message?: string };
+          throw new Error(e.message ?? e.error ?? "That email address could not be used. Please use your work email.");
+        }
+        try { sessionStorage.setItem("netify_pending_email", email.trim()); } catch { /* ignore */ }
+      }
+      window.location.assign(`/sase/rfp-builder/${id}/?welcome=submitting`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not create your project.");
       setCreating(false);
@@ -204,7 +252,8 @@ export default function DescribeWizard() {
     { now: "Sizing the estate. Suppliers use this to shape their response.", next: "What you run today, and why change." },
     { now: "Capturing today's setup and the drivers. This becomes the RFP background.", next: "Timescale and delivery model." },
     { now: "Setting the timescale and who runs the service day to day.", next: "Optional extras, then Netify builds your RFP." },
-    { now: "Optional detail that sharpens the compliance questions.", next: "Netify assembles your complete RFP to review. Nothing is shared with anyone yet." },
+    { now: "Optional detail that sharpens the compliance questions.", next: "The agreement: generate your RFP and submit it to your matched suppliers." },
+    { now: "The agreement: your RFP generates and goes to your matched suppliers, who make contact through this app.", next: "Netify builds the document and submits it. You can review and refine afterwards; suppliers always see the latest version." },
   ];
 
   return (
@@ -225,7 +274,7 @@ export default function DescribeWizard() {
             />
             <div className="mt-5 flex items-center gap-3">
               <button onClick={() => advance(1, "title")} disabled={title.trim().length < 8} className={nextBtn}>Continue</button>
-              <span className="text-xs text-[var(--ink-500)]">Free for buyers. No sign-in until you publish.</span>
+              <span className="text-xs text-[var(--ink-500)]">Free for buyers. No sign-in until you submit to suppliers.</span>
             </div>
           </div>
         )}
@@ -332,12 +381,64 @@ export default function DescribeWizard() {
                 <button key={c.key} onClick={() => toggle(compliance, setCompliance, c.key)} className={`${chip} ${compliance.includes(c.key) ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{c.label}</button>
               ))}
             </div>
-            {error && <p className="text-sm text-red-700 mt-4">{error}</p>}
             <div className="mt-5 flex items-center gap-3">
-              <button onClick={create} disabled={creating} className={nextBtn}>{creating ? "Building your RFP..." : "Build my RFP"}</button>
+              <button onClick={() => setStep(6)} className={nextBtn}>Continue</button>
               <button onClick={() => setStep(4)} className={backBtn}>Back</button>
             </div>
-            <p className="mt-3 text-xs text-[var(--ink-500)]">Netify assembles the complete document from its question bank (Methodology v2026.1). You review and trim before anything is shared.</p>
+            <p className="mt-3 text-xs text-[var(--ink-500)]">One step left: agree the submission and Netify assembles the complete document from its question bank (Methodology v2026.1).</p>
+          </div>
+        )}
+
+        {step === 6 && (
+          <div>
+            {heading("Generate and submit to the marketplace", "Built for UK and North American businesses with national or global network requirements.")}
+            {match && match.count > 0 && (
+              <p className="mb-3 text-sm text-[var(--ink-700)]">
+                Going to: <strong>{match.names.slice(0, Math.min(5, match.count)).join(", ")}</strong>.
+                {match.count > 5 ? ` ${match.count - 5} more match; you can add them after submitting.` : " You can add more after submitting."}
+              </p>
+            )}
+            {authed === true ? (
+              <p className="mb-3 text-sm text-emerald-700">You are signed in, so submission fires as soon as your RFP is generated.</p>
+            ) : (
+              <div className="mb-3">
+                <label className="text-sm font-medium block mb-1">Work email</label>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="you@yourcompany.com"
+                  className="w-full max-w-md border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-base"
+                />
+                <p className="mt-1 text-xs text-[var(--ink-500)]">Business addresses only. We send a sign-in link; click it and your RFP submits automatically.</p>
+              </div>
+            )}
+            <p className="mb-3 text-sm text-[var(--ink-700)]">
+              <strong>Generate your RFP and submit it to the marketplace.</strong> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched
+              vendors and managed service providers, who review your requirements and make contact through this app.
+              Your contact details are never shown to suppliers; conversations start only when you reply. You can edit
+              your RFP after submitting and suppliers always see the latest version. We only email you about your RFPs,
+              opportunities and RFP Builder and Marketplace features. No third-party marketing.{" "}
+              <a href="https://netify.co.uk/privacy-policy/" className="underline" target="_blank" rel="noreferrer">Privacy policy</a>.
+            </p>
+            <label className="mb-4 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
+              <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5" />
+              <span>Email me about new Netify features and research (optional).</span>
+            </label>
+            {error && <p className="text-sm text-red-700 mb-3">{error}</p>}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => create(true)}
+                disabled={creating || (authed !== true && !email.includes("@"))}
+                className={nextBtn}
+              >
+                {creating ? "Submitting..." : `Generate and submit to your ${Math.min(5, match?.count ?? 5) || 5} matched suppliers`}
+              </button>
+              <button onClick={() => setStep(5)} className={backBtn}>Back</button>
+            </div>
+            <button onClick={() => create(false)} disabled={creating} className="mt-3 block text-[11px] text-[var(--ink-500)] underline">
+              Generate only, review first
+            </button>
           </div>
         )}
       </div>

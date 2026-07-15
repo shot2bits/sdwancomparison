@@ -132,7 +132,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
 
-  let body: { manage_token?: string; shortlist_size?: number } = {};
+  let body: { manage_token?: string; shortlist_size?: number; list_on_board?: boolean; marketing_opt_in?: boolean } = {};
   try { body = await req.json(); } catch { /* body optional */ }
 
   const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
@@ -178,14 +178,30 @@ export async function POST(req: Request, ctx: Ctx) {
     try { await indexRfpForBuyer(sessionEmail, published.id); } catch { /* best effort */ }
   }
 
-  // The sign-in gate guarantees an accountable identity, so every publish
-  // also lists the RFP on the public opportunity board.
+  // The sign-in gate guarantees an accountable identity, so a publish also
+  // lists the RFP on the public opportunity board unless the caller opted
+  // for matched suppliers only (the wizard-submit default, 15 July 2026).
   let board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
-  try {
-    const listed = await listOnBoard(published, sessionEmail);
-    board = { listed: true, ...listed };
-  } catch {
-    board = { listed: false, reason: "Board listing failed; try re-publishing." };
+  if (body.list_on_board === false) {
+    board = { listed: false, reason: "Matched suppliers only; not listed on the public board." };
+  } else {
+    try {
+      const listed = await listOnBoard(published, sessionEmail);
+      board = { listed: true, ...listed };
+    } catch {
+      board = { listed: false, reason: "Board listing failed; try re-publishing." };
+    }
+  }
+
+  // Optional marketing consent captured at the agreement step rides the
+  // publish call so it is recorded against the verified session identity.
+  if (body.marketing_opt_in === true) {
+    try {
+      const key = "email:marketing_optin";
+      const list = (await kvGetJson<string[]>(key)) ?? [];
+      const addr = sessionEmail.toLowerCase();
+      if (!list.includes(addr)) { list.push(addr); await kvSetJson(key, list); }
+    } catch { /* best effort */ }
   }
 
   // Notifications are best effort and never block the publish.
