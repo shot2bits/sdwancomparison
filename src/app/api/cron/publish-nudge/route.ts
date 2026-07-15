@@ -49,22 +49,22 @@ function emailBodies(title: string, count: number, link: string, unsubUrl: strin
     "Independent scoring of every response",
   ];
   const text = [
-    `You built the RFP "${title}" on the Netify marketplace but have not published it yet. Until you publish, no supplier can see it and nothing is shared.`,
+    `You built the RFP "${title}" on the Netify marketplace but have not submitted it yet. Until you submit, no supplier can see it and nothing is shared.`,
     matchLine,
-    "Publishing invites each matched supplier to respond through a structured form, so you receive comparable bids without speaking to a single salesperson. It is the fastest and simplest way to see whether your requirements match the market.",
-    "What publishing gets you:",
+    "Submitting invites each matched supplier to respond through a structured form, so you receive comparable bids without speaking to a single salesperson. It is the fastest and simplest way to see whether your requirements match the market.",
+    "What submitting gets you:",
     ...benefits.map((b) => `- ${b}`),
-    `Publish your RFP: ${link}`,
+    `Submit your RFP: ${link}`,
     "The link is private to you. Suppliers never see your email address or phone number.",
     "Netify",
     `You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits.\nUnsubscribe: ${unsubUrl}`,
   ].join("\n\n");
   const html = [
-    `<p>You built the RFP "<strong>${title}</strong>" on the Netify marketplace but have not published it yet. Until you publish, no supplier can see it and nothing is shared.</p>`,
+    `<p>You built the RFP "<strong>${title}</strong>" on the Netify marketplace but have not submitted it yet. Until you submit, no supplier can see it and nothing is shared.</p>`,
     `<p>${matchLine}</p>`,
-    `<p>Publishing invites each matched supplier to respond through a structured form, so you receive comparable bids <strong>without speaking to a single salesperson</strong>. It is the fastest and simplest way to see whether your requirements match the market.</p>`,
-    `<p>What publishing gets you:</p><ul>${benefits.map((b) => `<li>${b}</li>`).join("")}</ul>`,
-    `<p><a href="${link}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Publish your RFP</a></p>`,
+    `<p>Submitting invites each matched supplier to respond through a structured form, so you receive comparable bids <strong>without speaking to a single salesperson</strong>. It is the fastest and simplest way to see whether your requirements match the market.</p>`,
+    `<p>What submitting gets you:</p><ul>${benefits.map((b) => `<li>${b}</li>`).join("")}</ul>`,
+    `<p><a href="${link}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Submit your RFP</a></p>`,
     `<p>The link is private to you. Suppliers never see your email address or phone number.</p>`,
     `<p>Netify</p>`,
     `<p style="font-size:12px;color:#666;">You are receiving this one-off reminder because you created an RFP with this address on netify.co.uk. We only send email relating to your RFPs, opportunities and RFP Builder and Marketplace features and benefits. <a href="${unsubUrl}" style="color:#666;">Unsubscribe</a></p>`,
@@ -109,7 +109,7 @@ export async function GET(req: Request) {
     const title = p.title?.trim() || "Untitled RFP";
     const link = `${SITE_URL}/rfp-builder/${p.id}?manage=${encodeURIComponent(p.manage_token ?? "")}#publish`;
     const subject = match.count > 0
-      ? `${match.count} suppliers match your RFP. Publish to invite them`
+      ? `${match.count} suppliers match your RFP. Submit to invite them`
       : "Your Netify RFP is one step from supplier bids";
 
     if (dry) { sent += 1; continue; }

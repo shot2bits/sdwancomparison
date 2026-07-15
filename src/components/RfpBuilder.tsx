@@ -857,7 +857,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         localStorage.removeItem(`rfp_publish_opts_${project.id}`);
         sessionStorage.removeItem("netify_pending_email");
       } catch { /* ignore */ }
-      setPublishMsg(`Published, and invited ${data.invited?.length ?? 0} best-fit suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
+      setPublishMsg(`Submitted to ${data.invited?.length ?? 0} matched suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
@@ -1001,7 +1001,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     : `You are reviewing your draft RFP: ${includedQuestionCount} questions across ${includedSections.length} sections. Add, remove or reword anything.`;
   const stripNext = published
     ? "Responses are scored against your questions under Evaluate supplier responses below. We also email you when activity arrives."
-    : `publish${matchInfo && matchInfo.count > 0 ? `, so your ${matchInfo.count} matched suppliers can respond` : ", so matched suppliers can respond"}. Nothing is shared until you press publish in the panel below.`;
+    : `submit${matchInfo && matchInfo.count > 0 ? `, so your ${matchInfo.count} matched suppliers can respond` : ", so matched suppliers can respond"}. Nothing is shared until you press submit in the panel below.`;
 
   return (
     <div className={!published && !stickyGone ? "pb-16" : undefined}>
@@ -1016,7 +1016,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             : "Your work here saves to your account."}{" "}
           {project.status === "published"
             ? "This RFP is published; supplier responses appear below as they arrive."
-            : "When you are ready, publish below to invite suppliers."}
+            : "When you are ready, submit below to invite your matched suppliers."}
           <button onClick={() => setSigninNote(null)} className="ml-2 underline">Dismiss</button>
         </div>
       )}
@@ -1029,10 +1029,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <p className="text-sm text-[var(--ink-700)] mb-3">
             {includedQuestionCount} questions across {includedSections.length} sections, assembled from the Netify
             question bank (Methodology v{project.methodology_version}) around what you described. Review and trim
-            anything below, then choose who sees it. Nothing reaches a supplier until you publish or invite them.
+            anything below, then choose who sees it. Nothing reaches a supplier until you submit or invite them.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <a href="#publish" onClick={() => setGeneratedWelcome(false)} className="inline-flex items-center px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors">Publish to suppliers</a>
+            <a href="#publish" onClick={() => setGeneratedWelcome(false)} className="inline-flex items-center px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors">Submit to suppliers</a>
             <button onClick={() => setGeneratedWelcome(false)} className="text-sm underline text-[var(--ink-600,#555)]">Review first</button>
           </div>
         </div>
@@ -1045,17 +1045,30 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       <section id="publish" ref={publishPanelRef} className={`mb-6 rounded-sm border p-4 ${published ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
         {published ? (
           <div>
-            <p className="text-base font-semibold mb-1">Published. Your RFP is with suppliers now.</p>
+            <p className="text-base font-semibold mb-1">Submitted. Your RFP is with your suppliers now.</p>
             <p className="text-sm text-[var(--ink-700)]">
               {connections.length > 0 ? `${connections.length} supplier${connections.length === 1 ? " holds a" : "s hold"} private response link${connections.length === 1 ? "" : "s"}.` : "Invited suppliers hold private response links."}{" "}
               Structured responses land on this page and are scored under Evaluate supplier responses below. We email you when activity arrives, and you can invite more suppliers at any time under Suppliers.
             </p>
           </div>
+        ) : submitFlow && publishAuthNeeded ? (
+          <div>
+            <p className="eyebrow mb-1.5">Final step</p>
+            <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
+              Almost done: confirm your submission
+            </h2>
+            <p className="text-sm text-[var(--ink-700)] mb-3">
+              Click the link we emailed{pendingEmail ? ` to ${pendingEmail}` : " you"} and your RFP goes to your matched
+              suppliers automatically, exactly as you agreed. Wrong address, or no email after a minute? Use the form below.
+            </p>
+            <SignIn role="buyer" prompt="Sign in with your work email to complete the submission." />
+            {publishMsg && <p className="mt-2 text-sm text-emerald-700">{publishMsg}</p>}
+          </div>
         ) : (
           <div>
             <p className="eyebrow mb-1.5">Next step</p>
             <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
-              Publish this RFP{matchInfo && matchInfo.count > 0 ? ` to ${matchInfo.count} matched supplier${matchInfo.count === 1 ? "" : "s"}` : " to matched suppliers"}
+              Submit this RFP{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched supplier${matchInfo.count === 1 ? "" : "s"}` : " to your matched suppliers"}
             </h2>
             {matchInfo && matchInfo.names.length > 0 && (
               <p className="text-base text-[var(--ink-800)] leading-snug mb-3">
@@ -1072,23 +1085,19 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               ))}
             </p>
             <ol className="text-sm text-[var(--ink-700)] mb-3 space-y-1 list-decimal list-inside">
-              <li><strong>Publish.</strong> Each matched supplier gets a private link to your {includedQuestionCount} questions. Until then, your RFP is invisible to the market and nothing has been shared.</li>
+              <li><strong>Submit.</strong> Each matched supplier gets a private link to your {includedQuestionCount} questions. Until then, your RFP is invisible to the market and nothing has been shared.</li>
               <li><strong>Responses arrive here.</strong> Structured, comparable answers with pricing kept private to you.</li>
               <li><strong>Compare and choose.</strong> Replies are scored against your questions; message suppliers, request demos, collateral or a proof of concept from this page.</li>
             </ol>
             {publishAuthNeeded && (
               <div className="mb-3 rounded-sm border border-amber-400 bg-white p-3 text-sm text-[var(--ink-800)]">
-                {submitFlow ? (
-                  <p className="mb-2"><strong>Almost done.</strong> Click the link we emailed{pendingEmail ? ` to ${pendingEmail}` : " you"} and your RFP goes to your matched suppliers automatically. Wrong address, or no email? Use the form below.</p>
-                ) : (
-                  <p className="mb-2"><strong>One step before your RFP goes out.</strong> Publishing sends this RFP to suppliers, so it needs a verified work email. Sign in and publishing continues automatically. Your draft is exactly as you left it.</p>
-                )}
-                <SignIn role="buyer" prompt="Sign in with your work email to publish and invite suppliers." />
+                <p className="mb-2"><strong>One step before your RFP goes out.</strong> Submitting sends this RFP to suppliers, so it needs a verified work email. Sign in and the submission continues automatically. Your draft is exactly as you left it.</p>
+                <SignIn role="buyer" prompt="Sign in with your work email to submit to your matched suppliers." />
               </div>
             )}
             <div className="flex flex-wrap items-center gap-3">
               <button onClick={() => publishToCurated("panel")} disabled={publishing} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
-                {publishing ? "Publishing..." : matchInfo && matchInfo.count > 0 ? `Publish and invite ${matchInfo.count} suppliers` : "Publish and invite suppliers"}
+                {publishing ? "Submitting..." : matchInfo && matchInfo.count > 0 ? `Submit to your ${matchInfo.count} matched suppliers` : "Submit to your matched suppliers"}
               </button>
               <span className="text-xs text-[var(--ink-600,#555)]">Free, no obligation to award, nothing shared until you press it. <a href="https://netify.co.uk/how-netify-makes-money/" className="underline">How Netify makes money</a>. Prefer control? <a href="#suppliers" className="underline">Invite suppliers one at a time</a>.</span>
             </div>
@@ -1100,7 +1109,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {/* The FlowStageStrip above carries orientation (where you are, what
           happens next) from live state, replacing the old static "How this
           works" box. One line of reassurance stays. */}
-      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a supplier until you publish or invite them.</p>
+      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a supplier until you submit or invite them.</p>
 
       <p className="eyebrow mb-2">Step 1: the basics</p>
       <p className="-mt-1 mb-3 text-xs text-[var(--ink-500)]">All optional. Set what you know; the AI agent fills in the rest as you chat, and you can change any of it later.</p>
@@ -1499,10 +1508,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <h2 className="text-lg">Suppliers</h2>
           <div className="flex gap-2">
             <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit suppliers</button>
-            <button onClick={() => publishToCurated("suppliers")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : project.status === "published" ? "Re-publish to curated list" : "Publish to curated suppliers"}</button>
+            <button onClick={() => publishToCurated("suppliers")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : project.status === "published" ? "Re-send to your matched suppliers" : "Submit to your matched suppliers"}</button>
           </div>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Publish to curated suppliers</strong> invites that whole set in one go. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Submit to your matched suppliers</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed: this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track supplier replies. Don&apos;t share it: suppliers get their own links.</span>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
@@ -1514,7 +1523,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
         {publishAuthNeeded && (
-          <p className="mb-3 text-sm text-[var(--ink-700)]"><strong>Sign-in needed to publish:</strong> use the <a href="#publish" className="underline">publish panel at the top of this page</a>; publishing continues automatically once you are signed in.</p>
+          <p className="mb-3 text-sm text-[var(--ink-700)]"><strong>Sign-in needed to submit:</strong> use the <a href="#publish" className="underline">panel at the top of this page</a>; the submission continues automatically once you are signed in.</p>
         )}
         {boardNote && (
           boardNote.listed ? (
@@ -1635,12 +1644,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
       {/* Slim sticky publish bar: keeps the next step visible on a long page.
           Session-dismissible; gone for good once the RFP is published. */}
-      {!published && !stickyGone && (
+      {!published && !stickyGone && !submitFlow && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-300 bg-white/95 backdrop-blur px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
-            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> publish{matchInfo && matchInfo.count > 0 ? ` to ${matchInfo.count} matched suppliers` : " to matched suppliers"}. Competing bids, no sales calls.</span>
+            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> submit{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched suppliers` : " to your matched suppliers"}. Competing bids, no sales calls.</span>
             <span className="flex items-center gap-2">
-              <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : "Publish"}</button>
+              <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : "Submit"}</button>
               <button onClick={() => { setStickyGone(true); try { sessionStorage.setItem(`rfp_publish_bar_${project.id}`, "1"); } catch { /* ignore */ } }} aria-label="Hide publish bar" className="text-sm text-[var(--ink-500)] underline">Hide</button>
             </span>
           </div>

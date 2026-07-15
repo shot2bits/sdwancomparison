@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import DescribeWizard from "@/components/DescribeWizard";
+import WizardSupportingContent from "@/components/WizardSupportingContent";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -54,28 +55,32 @@ export default function NewProjectPage() {
         <h1 id="page-h1" className="mb-4">Describe your SASE or SD-WAN project in two minutes.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           Answer five quick questions and Netify assembles a complete RFP from its question bank,
-          shows which verified suppliers match, and lets you publish to the marketplace when you
-          are ready. Free for buyers, and nothing is shared until you choose to publish.
+          shows which verified suppliers match, and submits it to the marketplace when you agree
+          the final step. Free for buyers, and nothing is shared until you agree the submission.
         </p>
       </div>
       <DescribeWizard />
 
       {/* Server-rendered context below the wizard, so this page carries the
           same substance for crawlers and AI engines that the interaction
-          carries for people. */}
+          carries for people. Hidden client-side once the wizard starts, so
+          the flow never reads as repeating itself (Harry, 15 July 2026). */}
+      <WizardSupportingContent>
       <section className="mt-16 max-w-3xl">
         <h2 className="text-xl font-semibold mb-2">What happens after you describe the project</h2>
         <p className="text-sm text-[var(--ink-700)] mb-3">
           Netify assembles a complete RFP from its question bank (Methodology v2026.1), tailored to
-          your scope, estate, regions and compliance answers. You review and trim the document, then
-          publish it. Publishing emails each matched vendor and managed service provider a private
-          response link; suppliers do not need an account to reply. Responses come back structured
-          against your questions and are scored side by side. Bid amounts stay private to you.
+          your scope, estate, regions and compliance answers. The final step is the agreement: your
+          RFP is generated and submitted to your matched vendors and managed service providers, each
+          of whom receives a private response link; suppliers do not need an account to reply.
+          Responses come back structured against your questions and are scored side by side. Bid
+          amounts stay private to you.
         </p>
         <p className="text-sm text-[var(--ink-700)]">
-          Nothing is shared with any supplier until you choose to publish, and no account is needed
-          to build. One business-email sign-in is required at the publish step, which also saves the
-          RFP to your account.
+          Nothing is shared with any supplier until you agree the submission at the final step, and
+          no account is needed to build. One business-email sign-in confirms the submission, which
+          also saves the RFP to your account. Prefer to review first? A generate-only option sits
+          under the submit button.
         </p>
       </section>
 
@@ -90,6 +95,7 @@ export default function NewProjectPage() {
           at <a href="https://netify.co.uk/methodology/" className="underline">netify.co.uk/methodology</a>.
         </p>
       </section>
+      </WizardSupportingContent>
     </div>
   );
 }

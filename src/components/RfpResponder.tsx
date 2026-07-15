@@ -174,7 +174,10 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
       )}
 
       {/* Full detail + response form — only once unlocked (or no NDA required) */}
-      {!locked && open && project.rfp_sections.filter((s) => s.included).map((s) => {
+      {!locked && open && project.rfp_sections
+        .map((sec) => ({ ...sec, questions: sec.questions.filter((q) => q.priority !== "optional") }))
+        .filter((s) => s.included && s.questions.length > 0)
+        .map((s) => {
         const active = s.questions.filter((q) => q.priority !== "optional");
         if (!active.length) return null;
         return (

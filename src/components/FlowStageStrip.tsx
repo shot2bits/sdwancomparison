@@ -18,7 +18,7 @@
 const STAGES = [
   { key: "describe", label: "Describe" },
   { key: "review", label: "Review your RFP" },
-  { key: "publish", label: "Publish" },
+  { key: "publish", label: "Submit" },
   { key: "responses", label: "Supplier responses" },
 ] as const;
 

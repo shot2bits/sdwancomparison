@@ -33,7 +33,14 @@ const MODEL_LABELS: Record<string, string> = {
 };
 
 export function includedSections(p: ProjectDetails): RfpSection[] {
-  return p.rfp_sections.filter((s) => s.included && s.questions.length > 0);
+  // The document carries the ACTIVE question set: the same rule as the
+  // builder's count chip (included sections, questions not marked optional).
+  // The synthesised bank seeds every RFP with an invisible priority-optional
+  // pool for the browser UI; exporting it made the downloaded document say
+  // 40 questions while the builder said 12 (Harry's retest, 15 July 2026).
+  return p.rfp_sections
+    .map((s) => ({ ...s, questions: s.questions.filter((q) => q.priority !== "optional") }))
+    .filter((s) => s.included && s.questions.length > 0);
 }
 
 export function sectionStats(p: ProjectDetails): SectionStats[] {

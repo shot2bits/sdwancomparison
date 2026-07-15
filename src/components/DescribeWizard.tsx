@@ -143,6 +143,9 @@ export default function DescribeWizard() {
     if (started.current) return;
     started.current = true;
     fireNetifyEvent("describe_started");
+    // Hide the page's supporting explainer sections once the person is in
+    // the flow (WizardSupportingContent listens; crawlers still see them).
+    try { window.dispatchEvent(new Event("netify:describe-started")); } catch { /* ignore */ }
   }
 
   function advance(next: number, stepName: string) {
@@ -239,7 +242,7 @@ export default function DescribeWizard() {
   const nextBtn = "px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50";
   const backBtn = "px-4 py-2 text-sm underline text-[var(--ink-600,#555)]";
 
-  const STEP_COUNT = 6;
+  const STEP_COUNT = 7;
   const heading = (t: string, sub: string) => (
     <div className="mb-5">
       <p className="eyebrow mb-2">Step {step + 1} of {STEP_COUNT}</p>
