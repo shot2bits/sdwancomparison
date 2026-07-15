@@ -982,11 +982,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     : `You are reviewing your draft RFP: ${includedQuestionCount} questions across ${includedSections.length} sections. Add, remove or reword anything.`;
   const stripNext = published
     ? "Responses are scored against your questions under Evaluate supplier responses below. We also email you when activity arrives."
-    : "Publish in the panel below: each matched supplier is emailed a private response link, and nothing is shared until you press publish.";
+    : `publish${matchInfo && matchInfo.count > 0 ? `, so your ${matchInfo.count} matched suppliers can respond` : ", so matched suppliers can respond"}. Nothing is shared until you press publish in the panel below.`;
 
   return (
     <div className={!published && !stickyGone ? "pb-16" : undefined}>
-      <FlowStageStrip stage={stripStage} now={stripNow} next={stripNext} />
+      <FlowStageStrip stage={stripStage} now={stripNow} next={stripNext} numberNext={!published} />
       {/* Sign-in confirmation strip: persists after the verify redirect so
           the buyer sees what happened (session, claimed drafts, next step). */}
       {signinNote !== null && (
