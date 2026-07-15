@@ -193,7 +193,12 @@ export default function DescribeWizard() {
         // Consent wording version stamped onto submitted RFPs. Bump when the
         // agreement copy on step 6 changes materially.
         const consent = submit ? { version: "submit-agreement v2, 15 July 2026", agreed_at: Date.now(), flow: "wizard_submit" } : undefined;
-        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer, consent }) });
+        // Submit intent carried on the draft itself (server-side), so the
+        // "Confirm and submit" magic link completes the submission whichever
+        // device it is opened on. The localStorage copy below remains the
+        // same-browser fast path.
+        const pending_submit = submit ? { shortlist_size: 5, list_on_board: false, marketing_opt_in: optIn } : undefined;
+        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer, consent, pending_submit }) });
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
         const p = (await res.json()) as { id: string; manage_token?: string };
         if (p.manage_token) { try { localStorage.setItem(`netify_mtok_${p.id}`, p.manage_token); } catch { /* private mode */ } }

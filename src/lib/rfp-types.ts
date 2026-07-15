@@ -82,6 +82,15 @@ export const ProjectDetailsSchema = z.object({
   // wording version the buyer agreed to and when they pressed the button.
   // Absent on drafts created before 15 July 2026 or via the review-first path.
   consent: z.object({ version: z.string(), agreed_at: z.number(), flow: z.string() }).optional(),
+  // Submit intent from the wizard's agreement step, carried server-side so
+  // the magic-link click completes the submission on any device. Cleared by
+  // the publish core the moment it executes.
+  pending_submit: z.object({
+    shortlist_size: z.number().optional(),
+    list_on_board: z.boolean().optional(),
+    marketing_opt_in: z.boolean().optional(),
+    requested_at: z.number(),
+  }).optional(),
   // Response window: suppliers can respond until this time (set at submit,
   // default 14 days). The respond API enforces it; both sides see the timer.
   response_deadline: z.number().optional(),

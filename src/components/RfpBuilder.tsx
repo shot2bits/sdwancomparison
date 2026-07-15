@@ -830,6 +830,30 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
 
   async function publishToCurated(source: string = "suppliers") {
     if (!project || publishing) return;
+    // The verify endpoint may have already completed the submission
+    // server-side (the wizard's pending_submit rides the draft and executes
+    // on the magic-link click). Check before firing a second publish from
+    // the sign-in resume, which would duplicate the notification emails.
+    if (source === "signin_resume") {
+      try {
+        const r = await fetch(`/sase/api/rfp/${project.id}`, { headers: authHeaders() });
+        if (r.ok) {
+          const fresh = (await r.json()) as Project;
+          if (fresh.status === "published") {
+            applyProject(fresh);
+            try {
+              localStorage.removeItem(`rfp_pending_publish_${project.id}`);
+              localStorage.removeItem(`rfp_publish_opts_${project.id}`);
+              sessionStorage.removeItem("netify_pending_email");
+            } catch { /* ignore */ }
+            setPublishAuthNeeded(false);
+            setPublishMsg("Submitted. Your RFP is with your matched suppliers now; their responses will appear under \"Evaluate supplier responses\" below.");
+            refreshConnections();
+            return;
+          }
+        }
+      } catch { /* fall through to the normal publish */ }
+    }
     fireNetifyEvent("publish_click", { source });
     setPublishing(true); setPublishMsg(null); setError(null); setBoardNote(null); setPublishAuthNeeded(false);
     try {
