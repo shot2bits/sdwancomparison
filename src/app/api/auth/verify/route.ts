@@ -1,4 +1,4 @@
-import { consumeMagicToken, createSession, kvConfigured, markSignupSeen } from "@/lib/rfp-store";
+import { consumeMagicToken, createSession, kvConfigured, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
 import { sessionCookieHeader, notifyNewSignup } from "@/lib/auth";
 
 export const runtime = "nodejs";
@@ -11,6 +11,21 @@ export async function POST(req: Request) {
   const payload = body.token ? await consumeMagicToken(body.token) : null;
   if (!payload) return Response.json({ error: "This sign-in link is invalid or has expired." }, { status: 401 });
   const session = await createSession(payload);
+  // Server-side draft claim: if this sign-in link was requested from a
+  // specific draft, attach it to the verified email now. Device-independent,
+  // unlike the localStorage claim on the account page: the person who pressed
+  // the wizard's submit button gets their draft whichever device they open
+  // the email on. Never claims over an existing owner and never blocks
+  // sign-in.
+  try {
+    if (payload.rfp_id && payload.role !== "supplier") {
+      const project = await getProject(payload.rfp_id);
+      if (project && !project.owner_email) {
+        project.owner_email = payload.email;
+        await saveProject(project);
+      }
+    }
+  } catch { /* non-fatal */ }
   // Alert the Netify team the first time a buyer or supplier signs in. Best
   // effort and never blocks sign-in: a notification failure must not stop a
   // legitimate user getting their session.

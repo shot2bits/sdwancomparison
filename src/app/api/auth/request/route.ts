@@ -86,7 +86,14 @@ export async function POST(req: Request) {
     }
   }
 
-  const token = await createMagicToken({ role: resolvedRole, email, vendor_slug });
+  // If the sign-in was requested from a specific draft (the wizard's submit
+  // step or a builder page), carry the RFP id inside the magic token so the
+  // verify endpoint can claim the draft server-side. This makes ownership
+  // survive the common cross-device pattern: build on the desktop, open the
+  // sign-in email on the phone, where localStorage-based claiming cannot see
+  // the draft.
+  const rfpIdMatch = returnTo.match(/\/rfp-builder\/(rfp_[a-z0-9]+)/i);
+  const token = await createMagicToken({ role: resolvedRole, email, vendor_slug, rfp_id: rfpIdMatch ? rfpIdMatch[1] : null });
   // Optional marketing consent from the wizard agreement step: explicit,
   // unticked by default, recorded only when the sign-in link actually goes
   // out to a domain that passed the business-only policy.

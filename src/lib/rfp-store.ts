@@ -528,18 +528,18 @@ export type AuthSession = {
 const MAGIC_TTL_MS = 60 * 60 * 1000;       // 60 minutes (tolerates slow email delivery)
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-export async function createMagicToken(payload: { role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null }): Promise<string> {
+export async function createMagicToken(payload: { role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null; rfp_id?: string | null }): Promise<string> {
   const token = newId("magic");
   await kv(["SET", `auth:magic:${token}`, JSON.stringify({ ...payload, created: Date.now(), expires: Date.now() + MAGIC_TTL_MS })]);
   await kv(["PEXPIRE", `auth:magic:${token}`, MAGIC_TTL_MS]);
   return token;
 }
 
-export async function consumeMagicToken(token: string): Promise<{ role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null } | null> {
-  const data = await getJson<{ role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null; expires: number }>(`auth:magic:${token}`);
+export async function consumeMagicToken(token: string): Promise<{ role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null; rfp_id: string | null } | null> {
+  const data = await getJson<{ role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null; rfp_id?: string | null; expires: number }>(`auth:magic:${token}`);
   if (!data || data.expires < Date.now()) return null;
   await kv(["DEL", `auth:magic:${token}`]);
-  return { role: data.role, email: data.email, vendor_slug: data.vendor_slug };
+  return { role: data.role, email: data.email, vendor_slug: data.vendor_slug, rfp_id: data.rfp_id ?? null };
 }
 
 export async function createSession(payload: { role: "supplier" | "buyer" | "netify"; email: string; vendor_slug: string | null }): Promise<AuthSession> {
