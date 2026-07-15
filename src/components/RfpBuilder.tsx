@@ -1645,6 +1645,99 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         )}
         {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">{project.status === "published" ? "No responses yet. Invited suppliers reply through their private links, and replies appear here automatically." : "No responses yet. Publish the RFP to invite suppliers, or share the supplier link."}</p>}
+        {/* Scoring surface (deal room slice 2): executive summary and a
+            side-by-side matrix generated deterministically from the
+            evaluation data, decline reasons and the response window, with
+            methodology provenance. No model call: every sentence traces to
+            a number on this page. */}
+        {evaluations && evaluations.length > 0 && (() => {
+          const ranked = [...evaluations].sort((a, b) => (b.weighted_coverage ?? b.answered / Math.max(1, b.total)) - (a.weighted_coverage ?? a.answered / Math.max(1, a.total)));
+          const pct = (ev: Evaluation) => Math.round((ev.weighted_coverage ?? ev.answered / Math.max(1, ev.total)) * 100);
+          const leader = ranked[0];
+          const declined = connections.filter((c) => c.status === "declined");
+          const pendingSuppliers = connections.filter((c) => c.status !== "declined" && !evaluations.some((ev) => ev.vendor_slug === c.vendor_slug));
+          const flagged = ranked.filter((ev) => (ev.red_flags ?? 0) > 0 || ev.flags > 0);
+          const evidenceGaps = ranked.filter((ev) => (ev.missing_evidence ?? 0) > 0);
+          const sentences: string[] = [];
+          sentences.push(`${leader.vendor} leads on weighted coverage at ${pct(leader)}%, answering ${leader.answered} of ${leader.total} questions.`);
+          if (ranked.length > 1) sentences.push(`${ranked.slice(1).map((ev) => `${ev.vendor} ${pct(ev)}%`).join(", ")} follow${ranked.length === 2 ? "s" : ""}.`);
+          if (flagged.length > 0) sentences.push(`Claims to verify: ${flagged.map((ev) => `${ev.vendor} (${(ev.red_flags ?? 0) > 0 ? `${ev.red_flags} red flag${(ev.red_flags ?? 0) === 1 ? "" : "s"}` : `${ev.flags} item${ev.flags === 1 ? "" : "s"}`})`).join(", ")}; ask each to substantiate before shortlisting.`);
+          if (evidenceGaps.length > 0) sentences.push(`Evidence gaps: ${evidenceGaps.map((ev) => `${ev.vendor} (${ev.missing_evidence})`).join(", ")}; request documents through the message thread.`);
+          if (declined.length > 0) sentences.push(`${declined.length} supplier${declined.length === 1 ? "" : "s"} declined; reasons and improvement hints are under Suppliers above.`);
+          if (pendingSuppliers.length > 0 && project.response_deadline && project.response_deadline > Date.now()) sentences.push(`${pendingSuppliers.length} invited supplier${pendingSuppliers.length === 1 ? " has" : "s have"} not yet responded; the window closes ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`);
+          return (
+            <div className="mb-4">
+              <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3">
+                <p className="eyebrow mb-1">Executive summary</p>
+                <p className="text-sm text-[var(--ink-800)]">{sentences.join(" ")}</p>
+                <p className="mt-1 text-xs text-[var(--ink-500)]">Generated from the response evaluations, Netify capability grades (Methodology v{project.methodology_version}) and this RFP&apos;s response window. Every figure appears in the matrix and per-supplier detail below.</p>
+              </div>
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[480px] border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-[var(--ink-300,#ccc)] text-left text-[var(--ink-500)]">
+                      <th className="py-2 pr-4 font-medium">Metric</th>
+                      {ranked.map((ev) => <th key={ev.vendor} className="py-2 pr-4 font-medium text-[var(--ink-800)]">{ev.vendor}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-[var(--ink-100,#f0f0f0)]">
+                      <td className="py-2 pr-4 text-[var(--ink-600,#555)]">Questions answered</td>
+                      {ranked.map((ev) => <td key={ev.vendor} className="py-2 pr-4">{ev.answered}/{ev.total}</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--ink-100,#f0f0f0)]">
+                      <td className="py-2 pr-4 text-[var(--ink-600,#555)]">Weighted coverage</td>
+                      {ranked.map((ev) => <td key={ev.vendor} className="py-2 pr-4 font-medium">{pct(ev)}%</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--ink-100,#f0f0f0)]">
+                      <td className="py-2 pr-4 text-[var(--ink-600,#555)]">Red flags</td>
+                      {ranked.map((ev) => <td key={ev.vendor} className={`py-2 pr-4 ${(ev.red_flags ?? 0) > 0 ? "text-red-700" : ""}`}>{ev.red_flags ?? 0}</td>)}
+                    </tr>
+                    <tr className="border-b border-[var(--ink-100,#f0f0f0)]">
+                      <td className="py-2 pr-4 text-[var(--ink-600,#555)]">Items to verify</td>
+                      {ranked.map((ev) => <td key={ev.vendor} className={`py-2 pr-4 ${ev.flags > 0 ? "text-amber-700" : ""}`}>{ev.flags}</td>)}
+                    </tr>
+                    <tr>
+                      <td className="py-2 pr-4 text-[var(--ink-600,#555)]">Missing evidence</td>
+                      {ranked.map((ev) => <td key={ev.vendor} className="py-2 pr-4">{ev.missing_evidence ?? 0}</td>)}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              {ranked.length > 0 && ranked[0].checks.length > 0 && (
+                <details className="mt-3 rounded-sm border border-[var(--ink-200,#e5e5e5)]">
+                  <summary className="cursor-pointer px-4 py-2.5 text-sm font-medium">Question-by-question grades</summary>
+                  <div className="overflow-x-auto px-4 pb-3">
+                    <table className="w-full min-w-[560px] border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-[var(--ink-300,#ccc)] text-left text-[var(--ink-500)]">
+                          <th className="py-1.5 pr-3 font-medium">Question</th>
+                          {ranked.map((ev) => <th key={ev.vendor} className="py-1.5 pr-3 font-medium text-[var(--ink-800)]">{ev.vendor}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ranked[0].checks.map((row, qi) => (
+                          <tr key={qi} className="border-b border-[var(--ink-100,#f0f0f0)] align-top">
+                            <td className="py-1.5 pr-3 text-[var(--ink-700)]">{row.question}</td>
+                            {ranked.map((ev) => {
+                              const cell = ev.checks.find((c) => c.question === row.question);
+                              return (
+                                <td key={ev.vendor} className={`py-1.5 pr-3 ${cell?.flag ? "text-amber-800" : "text-[var(--ink-700)]"}`}>
+                                  {cell ? `${cell.grade_label}${cell.flag ? " ⚑" : ""}` : "—"}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className="mt-1 text-[11px] text-[var(--ink-500)]">⚑ marks answers where the claim goes beyond Netify&apos;s independent evidence; the note is in the per-supplier detail below.</p>
+                  </div>
+                </details>
+              )}
+            </div>
+          );
+        })()}
         {evaluations && evaluations.map((ev) => (
           <details key={ev.vendor} className="border border-[var(--ink-300,#ccc)] rounded-sm mb-2">
             <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer">
