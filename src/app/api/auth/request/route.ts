@@ -24,7 +24,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
 export async function POST(req: Request) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
-  let body: { email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean };
+  let body: { email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean; attribution?: { ref?: unknown; landing?: unknown } | null };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const email = (body.email ?? "").trim().toLowerCase();
   const role = body.role === "supplier" ? "supplier" : "buyer";
@@ -93,7 +93,19 @@ export async function POST(req: Request) {
   // sign-in email on the phone, where localStorage-based claiming cannot see
   // the draft.
   const rfpIdMatch = returnTo.match(/\/rfp-builder\/(rfp_[a-z0-9]+)/i);
-  const token = await createMagicToken({ role: resolvedRole, email, vendor_slug, rfp_id: rfpIdMatch ? rfpIdMatch[1] : null });
+  // Sign-up attribution, carried through the magic link so the new-sign-up
+  // alert can say where the person came from: client-captured first touch
+  // (original referrer + landing path, sessionStorage), the page hosting the
+  // sign-in form (Referer header) and the country Vercel resolved. Strings
+  // capped; everything optional and best effort.
+  const cap = (v: unknown, n: number) => (typeof v === "string" ? v.slice(0, n) : "");
+  const attr = {
+    ref: cap(body.attribution?.ref, 300),
+    landing: cap(body.attribution?.landing, 300),
+    page: cap(req.headers.get("referer"), 300),
+    country: cap(req.headers.get("x-vercel-ip-country"), 8),
+  };
+  const token = await createMagicToken({ role: resolvedRole, email, vendor_slug, rfp_id: rfpIdMatch ? rfpIdMatch[1] : null, attr });
   // Optional marketing consent from the wizard agreement step: explicit,
   // unticked by default, recorded only when the sign-in link actually goes
   // out to a domain that passed the business-only policy.

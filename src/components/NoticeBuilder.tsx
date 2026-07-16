@@ -9,6 +9,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import NoticeView from "@/components/NoticeView";
+import { firstTouch } from "@/components/NetifyEvents";
 import { track } from "@/lib/analytics";
 import {
   OPP_SCOPES,
@@ -362,7 +363,7 @@ export default function NoticeBuilder() {
       const res = await fetch("/sase/api/auth/request", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, role: "buyer" }),
+        body: JSON.stringify({ email, role: "buyer", attribution: firstTouch() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not send the sign-in link.");

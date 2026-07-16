@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { fireNetifyEvent } from "@/components/NetifyEvents";
+import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
 import FlowStageStrip from "@/components/FlowStageStrip";
 import { REGIONS, SITES_BANDS, USERS_BANDS, SECTORS } from "@/lib/notice-options";
 
@@ -225,7 +225,7 @@ export default function DescribeWizard() {
         const ar = await fetch("/sase/api/auth/request", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: `/sase/rfp-builder/${id}/?welcome=submitting`, marketing_opt_in: optIn }),
+          body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: `/sase/rfp-builder/${id}/?welcome=submitting`, marketing_opt_in: optIn, attribution: firstTouch() }),
         });
         if (!ar.ok) {
           const e = (await ar.json().catch(() => ({}))) as { error?: string; message?: string };

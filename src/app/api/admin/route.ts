@@ -98,6 +98,12 @@ export async function GET(req: Request) {
       questions: p.rfp_sections.filter((s) => s.included).reduce((n, s) => n + s.questions.length, 0),
       invited_vendors: p.invited_vendors.length,
       responses: responsesByRfp.get(p.id) ?? 0,
+      // Funnel diagnostics: consented = the wizard agreement was signed;
+      // pending_submit = submit was pressed but the magic link has not been
+      // clicked yet (verify clears it on execution). A draft stuck with
+      // pending_submit true is a buyer lost at the email step.
+      consented: Boolean(p.consent),
+      pending_submit: Boolean(p.pending_submit),
       created: p.created,
       updated: p.updated,
     }))

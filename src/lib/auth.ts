@@ -72,7 +72,11 @@ export async function sendMagicLink(email: string, token: string, role: string, 
  * status (Buyer or Supplier) are in the subject, as requested. Netify staff
  * sign-ins are internal and never reported. Returns whether an email was sent.
  */
-export async function notifyNewSignup(email: string, role: "supplier" | "buyer" | "netify"): Promise<boolean> {
+export async function notifyNewSignup(
+  email: string,
+  role: "supplier" | "buyer" | "netify",
+  context?: { attr?: { ref: string; landing: string; page: string; country: string } | null; rfp_attached?: boolean },
+): Promise<boolean> {
   if (role !== "buyer" && role !== "supplier") return false;
   // Skip our own people: admins and anyone on a Netify domain are internal
   // (and the admin console signs them in as "buyer"), so they are not real
@@ -83,6 +87,19 @@ export async function notifyNewSignup(email: string, role: "supplier" | "buyer" 
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const status = role === "supplier" ? "Supplier" : "Buyer";
+  // Attribution block (16 July 2026): every sign-up alert states where the
+  // person came from and whether an RFP draft is attached, so a qualified
+  // buyer and a wandering sign-in are distinguishable at a glance.
+  const a = context?.attr;
+  const lines = [
+    `<strong>Email:</strong> ${email}`,
+    `<strong>Status:</strong> ${status}`,
+    role === "buyer" ? `<strong>RFP draft attached:</strong> ${context?.rfp_attached ? "Yes (claimed at sign-in)" : "No, signed in without a draft"}` : "",
+    a?.country ? `<strong>Country:</strong> ${a.country}` : "",
+    a?.ref ? `<strong>Arrived from:</strong> ${a.ref}` : `<strong>Arrived from:</strong> no referrer (direct, bookmark or an AI assistant link)`,
+    a?.landing ? `<strong>Landing page:</strong> ${a.landing}` : "",
+    a?.page ? `<strong>Signed in from:</strong> ${a.page}` : "",
+  ].filter(Boolean).join("<br/>");
   try {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -91,7 +108,7 @@ export async function notifyNewSignup(email: string, role: "supplier" | "buyer" 
         from,
         to,
         subject: `New ${status} sign-up: ${email}`,
-        html: `<p>A new ${status.toLowerCase()} has signed in to the Netify marketplace for the first time.</p><p><strong>Email:</strong> ${email}<br/><strong>Status:</strong> ${status}</p>`,
+        html: `<p>A new ${status.toLowerCase()} has signed in to the Netify marketplace for the first time.</p><p>${lines}</p>`,
       }),
     });
     return true;

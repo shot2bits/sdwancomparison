@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { firstTouch } from "@/components/NetifyEvents";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null };
 
@@ -20,7 +21,7 @@ export default function SignIn({ role, prompt }: { role: "supplier" | "buyer"; p
       // Where sign-in was requested from: carried through the magic link so
       // the verify page can send the person straight back here afterwards.
       const return_to = window.location.pathname + window.location.search;
-      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to }) });
+      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, attribution: firstTouch() }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not send a link.");
       setSent(data.message ?? "Check your inbox for a sign-in link.");
@@ -54,6 +55,11 @@ export default function SignIn({ role, prompt }: { role: "supplier" | "buyer"; p
       {devLink && <p className="text-xs text-[var(--ink-500)] mt-1">Preview link (email not configured): <a className="underline" href={devLink}>sign in</a></p>}
       {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
       <p className="text-xs text-[var(--ink-500)] mt-2">We only email you about your RFPs, opportunities and RFP Builder and Marketplace features and benefits. No third-party marketing, and you can opt out at any time.</p>
+      {role === "buyer" && (
+        <p className="text-xs text-[var(--ink-500)] mt-1">
+          Netify is the SASE and SD-WAN procurement marketplace for UK and North American businesses. Looking for Netlify website hosting (netlify.com) or Netify network intelligence (netify.ai)? Those are separate companies.
+        </p>
+      )}
     </div>
   );
 }

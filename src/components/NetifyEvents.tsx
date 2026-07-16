@@ -60,6 +60,26 @@ export function fireNetifyEvent(name: string, data: Record<string, string> = {})
   fire(name, data);
 }
 
+/**
+ * First-touch attribution for sign-up quality: the original referrer and
+ * landing path, captured once per browser session (16 July 2026, Robert's
+ * question about whether sign-ups are mistaken-identity traffic).
+ * sessionStorage only: no cookie, nothing persistent, nothing
+ * consent-bearing. Read by the sign-in flows and carried through the magic
+ * link so the new-sign-up alert can say where the person actually arrived
+ * from.
+ */
+export function firstTouch(): { ref: string; landing: string } | null {
+  try {
+    const raw = sessionStorage.getItem("netify_first_touch");
+    if (!raw) return null;
+    const t = JSON.parse(raw) as { ref?: string; landing?: string };
+    return { ref: t.ref ?? "", landing: t.landing ?? "" };
+  } catch {
+    return null;
+  }
+}
+
 function fire(name: string, data: Record<string, string> = {}): void {
   const payload: Record<string, string> = {
     path: window.location.pathname,
@@ -81,6 +101,18 @@ function fire(name: string, data: Record<string, string> = {}): void {
 
 export default function NetifyEvents() {
   useEffect(() => {
+    // First-touch attribution capture, once per browser session (see
+    // firstTouch above). Must run before anything else so a visitor who
+    // signs in on their landing page still gets attributed.
+    try {
+      if (!sessionStorage.getItem("netify_first_touch")) {
+        sessionStorage.setItem(
+          "netify_first_touch",
+          JSON.stringify({ ref: document.referrer || "", landing: window.location.pathname + window.location.search, at: Date.now() }),
+        );
+      }
+    } catch { /* private mode */ }
+
     // Vercel Web Analytics: official queue shim + script, idempotent.
     if (!document.querySelector('script[data-netify-va]')) {
       if (typeof window.va !== 'function') {

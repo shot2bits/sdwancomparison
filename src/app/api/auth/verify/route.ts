@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   // legitimate user getting their session.
   try {
     if ((payload.role === "buyer" || payload.role === "supplier") && (await markSignupSeen(payload.email, payload.role))) {
-      await notifyNewSignup(payload.email, payload.role);
+      await notifyNewSignup(payload.email, payload.role, { attr: payload.attr, rfp_attached: Boolean(payload.rfp_id) });
     }
   } catch { /* non-fatal */ }
   return Response.json(
