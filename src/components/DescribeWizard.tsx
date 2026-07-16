@@ -380,8 +380,11 @@ export default function DescribeWizard() {
                 prefills there. The create API emails the draft link
                 immediately, so the address gets value the moment it is
                 given. */}
+            {/* Completion-framed, not exit-framed (Robert, 16 July): the
+                promise is the finished document, a reward that only exists
+                if they generate. No "come back later" language anywhere. */}
             <div className="mt-5 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3 max-w-md">
-              <p className="text-sm font-medium mb-1">Optional: get a link to this RFP by email</p>
+              <p className="text-sm font-medium mb-1">Optional: email me the finished RFP</p>
               <input
                 value={email}
                 onChange={(e) => { markStarted(); setEmail(e.target.value); }}
@@ -389,7 +392,7 @@ export default function DescribeWizard() {
                 placeholder="you@yourcompany.com"
                 className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm"
               />
-              <p className="mt-1.5 text-xs text-[var(--ink-500)]">Business email. We send your RFP link and one reminder if you do not finish. No marketing.</p>
+              <p className="mt-1.5 text-xs text-[var(--ink-500)]">Business email. We send your document link once it generates, plus one follow-up. No marketing.</p>
             </div>
             <div className="mt-5 flex items-center gap-3">
               <button onClick={() => advance(5, "timeline")} className={nextBtn}>Continue</button>

@@ -50,8 +50,8 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
         from,
         to: email,
         reply_to: "support@netify.com",
-        subject: "Your Netify RFP draft link",
-        html: `<p>Here is the link back to your RFP draft "${p.title}". It works on any device and carries your private manage key, so keep it to yourself.</p><p><a href="${link}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Review and submit your RFP</a></p><p>Submitting sends it to your matched suppliers, who respond through the app. Pricing stays private to you and there are no sales calls until you choose.</p><p>If you did not request this, ignore this email.</p>`,
+        subject: "Your Netify RFP is ready",
+        html: `<p>Your RFP "${p.title}" is generated and ready to review. The link below works on any device and carries your private manage key, so keep it to yourself.</p><p><a href="${link}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Review and submit your RFP</a></p><p>Submitting sends it to your matched suppliers, who respond through the app. Pricing stays private to you and there are no sales calls until you choose.</p><p>If you did not request this, ignore this email.</p>`,
       }),
     });
   } catch { /* best effort */ }
