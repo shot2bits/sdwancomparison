@@ -59,9 +59,11 @@ export default function PricingPortalPage() {
           every bid as pending until pricing lands, and each price is private to you.
         </p>
         <p className="text-[var(--ink-700)]">
-          Firm bids are brokered through the Netify team today and answered directly by verified
-          suppliers as provider self-serve rolls out. Nothing about your contacts or prices is
-          public: the open version of an estate shows shape and bid statuses only.
+          When a provider returns pricing, they update it directly in your pricing room: no PDF
+          attachments, no phone tag, just the number, the unit and the term, side by side with
+          every other bid. The portal alerts you the moment each price becomes available, so the
+          hard work happens while you get on with your day. Nothing about your contacts or prices
+          is public: the open version of an estate shows shape and bid statuses only.
         </p>
       </section>
 

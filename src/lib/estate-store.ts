@@ -75,7 +75,7 @@ export function indicativeBands(e: Estate): IndicativeBand[] {
   const failoverShare = e.sites.filter((s) => s.failover_circuit.type !== "none").length / siteCount;
 
   return chosen.map((v) => {
-    const carrier = /managed|carrier/i.test(v.category) && !/cloud-native/i.test(v.category);
+    const carrier = /carrier|global/i.test(v.category) && /managed/i.test(v.category) && !/cloud-native/i.test(v.category);
     if (carrier) {
       const base: [number, number] = [280, 520];
       const bwScale = Math.min(2.2, 0.7 + avgBandwidth / 800);

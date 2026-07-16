@@ -51,5 +51,37 @@ export async function POST(req: Request, ctx: Ctx) {
   const bids = [...estate.bids];
   bids[idx] = parsed.data;
   const saved = await saveEstate({ ...estate, bids });
+
+  // The portal's promise: the buyer hears the moment pricing lands. Best
+  // effort, never blocks the bid write. Sent only when the buyer left an
+  // alert address at submission; the link carries their private manage key.
+  try {
+    const to = saved.contact_email;
+    const key = process.env.RESEND_API_KEY;
+    if (to && key) {
+      const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
+      const room = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://netify.co.uk/sase"}/pricing/?estate=${saved.id}&manage=${saved.manage_token}`;
+      const vendor = parsed.data.vendor_name || slug;
+      const receivedCount = saved.bids.filter((b) => b.status === "received").length;
+      const subject = parsed.data.status === "received"
+        ? `${vendor} has priced your estate`
+        : `${vendor} has declined to bid`;
+      const line = parsed.data.status === "received"
+        ? `<p><strong>${vendor}</strong> has just priced your estate directly in your Netify pricing room. That is ${receivedCount} of ${saved.bids.length} providers priced so far.</p>`
+        : `<p><strong>${vendor}</strong> has declined to bid${parsed.data.reason ? ` (${parsed.data.reason})` : ""}. The rest of your providers are still in play.</p>`;
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+        body: JSON.stringify({
+          from,
+          to,
+          reply_to: "support@netify.com",
+          subject,
+          html: `${line}<p><a href="${room}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Open your pricing room</a></p><p>Every price is private to you. Providers never see each other's numbers or your site contacts, and there are no sales calls until you choose.</p><p style="font-size:12px;color:#666;">You receive these alerts because you asked to be told when pricing lands on this estate. The link carries your private manage key, so keep it to yourself.</p>`,
+        }),
+      });
+    }
+  } catch { /* best effort */ }
+
   return Response.json({ ok: true, bid: { vendor_slug: slug, status: parsed.data.status } , bids_total: saved.bids.length }, { headers: cors });
 }

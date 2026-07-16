@@ -47,6 +47,7 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
   const [chosen, setChosen] = useState<string[]>([]);
   const [estate, setEstate] = useState<Estate | null>(null);
   const [bands, setBands] = useState<Band[]>([]);
+  const [alertEmail, setAlertEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -100,7 +101,7 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
     if (!estate) return;
     setBusy(true); setError(null);
     try {
-      const r = await fetch(`/sase/api/estate/${estate.id}/submit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: estate.manage_token }) });
+      const r = await fetch(`/sase/api/estate/${estate.id}/submit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: estate.manage_token, contact_email: alertEmail.trim().includes("@") ? alertEmail.trim() : undefined }) });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? "Could not submit for bids.");
       setEstate(d.estate as Estate);
@@ -249,9 +250,26 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
           <div className="mt-5 rounded-sm border border-dashed border-[var(--ink-300,#ccc)] p-4 text-xs text-[var(--ink-600)]">
             Where these numbers come from: the Netify cost model v0 produces ranges from each provider&apos;s public value tier and your estate shape. They are bands, not quotes, and ordering is by Netify evidence, never by fees. Firm pricing comes only from the providers and stays private to you.
           </div>
-          <div className="mt-5 flex items-center gap-4 flex-wrap">
-            <button onClick={submitForBids} disabled={busy} className={amber}>{busy ? "Submitting…" : `Submit for firm bids from ${estate.vendor_slugs.length > 0 ? estate.vendor_slugs.length : 5} providers →`}</button>
-            <span className="text-xs text-[var(--ink-500)]">One submission. Pending bids appear immediately; pricing stays private to you.</span>
+
+          <div className="mt-5 rounded-sm bg-zinc-900 text-white p-5">
+            <p className="text-lg font-semibold mb-2">Now let the providers do the hard work</p>
+            <ol className="text-sm space-y-1.5 mb-4 opacity-95">
+              <li>1. Submit once. Each provider prices your estate directly in this portal, against your actual sites.</li>
+              <li>2. We tell you the moment every price lands. No chasing, no inbox tennis, no sales calls.</li>
+              <li>3. Compare the market side by side and choose. Every price stays private to you.</li>
+            </ol>
+            <div className="flex gap-3 items-center flex-wrap">
+              <input
+                value={alertEmail}
+                onChange={(e) => setAlertEmail(e.target.value)}
+                type="email"
+                placeholder="you@yourcompany.com"
+                className="border border-zinc-600 bg-zinc-800 text-white rounded-sm p-2.5 text-sm w-64 placeholder-zinc-400"
+                aria-label="Email for pricing alerts"
+              />
+              <button onClick={submitForBids} disabled={busy} className={amber}>{busy ? "Submitting…" : `Submit and alert me as pricing lands →`}</button>
+            </div>
+            <p className="text-xs opacity-70 mt-2">Business email, used only for pricing alerts on this estate. Skip it and the room still fills; you just check back yourself.</p>
           </div>
           {error && <p className="text-sm text-red-700 mt-3">{error}</p>}
         </div>
@@ -279,15 +297,15 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
                       {b.note && <span className="block text-xs text-[var(--ink-600)] max-w-xs">{b.note}</span>}
                     </>
                   ) : b.status === "pending" ? (
-                    <span className="text-xs text-[var(--ink-500)]">provider notified · bids typically land within days</span>
+                    <span className="text-xs text-[var(--ink-500)]">provider notified · they price your estate directly here · you&apos;ll hear the moment it lands</span>
                   ) : null}
                 </span>
               </div>
             ))}
           </div>
           <p className="text-xs text-[var(--ink-500)] mt-4">
-            This page updates itself as pricing lands. Keep the private room link safe: it carries your manage key.
-            Every price is private to you; providers never see each other&apos;s numbers or your site contacts.
+            Providers price your estate directly in this portal, and this page updates itself as each price lands{estate.bids.length > 0 ? ", with an email alert the moment it does" : ""}. Keep the private room link safe: it carries your manage key.
+            Every price is private to you; providers never see each other&apos;s numbers or your site contacts, and there are no sales calls until you choose.
           </p>
         </div>
       )}
