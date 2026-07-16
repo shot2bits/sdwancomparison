@@ -3,6 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
 import bestEditorial from "@data/best-editorial.json";
+
+type EditorialPage = { intro?: string; faqs?: { q: string; a: string }[] };
+type EditorialVendor = { commentary: string[]; watch_out?: string };
+type Editorial = Record<string, Record<string, EditorialVendor> & { _page?: EditorialPage }>;
+const EDITORIAL = bestEditorial as unknown as Editorial;
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
@@ -41,8 +46,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BestPage({ params }: Props) {
   const { slug } = await params;
-  const page = getBestPage(slug);
-  if (!page) notFound();
+  const base = getBestPage(slug);
+  if (!base) notFound();
+  // Writer-authored page copy (Harry, June 2026): intro and FAQ answers
+  // override the template text where a rewrite exists, so the visible prose
+  // and the FAQPage JSON-LD stay in step.
+  const pageOverride = EDITORIAL[base.slug]?._page;
+  const page = {
+    ...base,
+    intro: pageOverride?.intro ?? base.intro,
+    faqs: pageOverride?.faqs && pageOverride.faqs.length >= 3 ? pageOverride.faqs : base.faqs,
+  };
 
   const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
@@ -194,7 +208,7 @@ export default async function BestPage({ params }: Props) {
           // Writer-authored sector commentary (Harry, June 2026, applied July
           // 2026): keyed by vendor within each page so rankings stay live.
           // Falls back to the vendor dataset one-liner where absent.
-          const ed = (bestEditorial as Record<string, Record<string, { commentary: string[]; watch_out?: string }>>)[page.slug]?.[v.slug];
+          const ed = EDITORIAL[page.slug]?.[v.slug] as EditorialVendor | undefined;
           return (
           <li
             key={v.slug}

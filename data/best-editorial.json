@@ -69,6 +69,23 @@
     "ADEM - digital experience management - is also relevant to clinical application prioritisation. It doesn't only route Epic or PACS traffic with priority; it provides visibility into whether that prioritisation translates into acceptable performance at the point of use, which is the difference between confirming QoS is configured and confirming a radiologist's PACS viewer actually performs."
    ],
    "watch_out": "That capability comes at a price point noticeably higher than firewall-led SD-WAN vendors, and the commercial model needs careful scoping across users, bandwidth, locations and term. For a healthcare network with a large number of smaller sites - community clinics, GP practices, diagnostic centres - the per-site economics of Prisma's security depth may not stack up the same way as for a smaller number of large acute hospitals where security requirements are highest. This is worth modelling against the actual site mix rather than an estate-wide average."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of healthcare sector capability, scored against the Netify 40 feature evaluation matrix (plus the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in this sector include clinical application performance, site resilience for 24x7 care settings and patient data protection - so the weighting reflects that.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for healthcare?",
+     "a": "The leading providers for healthcare are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this healthcare ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed healthcare sector evidence are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the healthcare filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-financial-services": {
@@ -141,6 +158,23 @@
     "ADEM - digital experience management - adds something most of the others on this list don't have in the same way. It's not just that latency-sensitive traffic gets prioritised through dynamic path selection, but that there's visibility into whether that prioritisation is actually delivering the latency a trading desk needs. Confirming a policy is configured and confirming a SWIFT message is arriving within tolerance are two different things, and ADEM is built to show the second one."
    ],
    "watch_out": "all of this comes at a price point that's noticeably higher than firewall-led SD-WAN vendors, and the commercial model needs careful scoping across users, bandwidth, locations and term. For a large retail branch network, where the segmentation needs at each branch are fairly standard, Prisma's full depth may not be proportionate at every site in the way it would be for a trading floor or data centre. Worth modelling the economics against the actual mix of sites rather than an average across the whole estate."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of financial services sector capability, scored against the Netify 40 feature evaluation matrix (plus the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in this sector include protecting cardholder data for PCI-DSS, prioritising latency-sensitive traffic (such as trading feeds, SWIFT messaging and core banking ledgers), segmenting ATMs, branch tellers, corporate office traffic and remote wealth management devices, and connectivity to AWS, Azure or Google Cloud without adding policy fragmentation or backhaul delay.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for financial services?",
+     "a": "The leading providers for financial services are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this financial services ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed financial services sector evidence are excluded from this ranking - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the financial services filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-retail": {
@@ -208,6 +242,23 @@
     "Days, not weeks. That's the deployment timeline for Aryaka, and it's the main reason it suits retailers with fast-moving store opening programmes, temporary locations, or franchise rollouts where waiting months for connectivity simply isn't workable. WAN optimisation helps cloud POS and inventory applications perform well even over imperfect connections, and integrated SSE supports PCI-DSS segmentation without requiring much on-site kit."
    ],
    "watch_out": "Aryaka's PoP footprint and partner network are smaller than the larger SASE vendors, so before committing to a large rollout it's worth checking that coverage actually lines up with where the stores are. Local access and cellular backup availability should ideally be confirmed site by site - for retailers where an hour of downtime is an hour of lost sales, that kind of upfront checking pays for itself."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of retail sector capability, scored against the Netify 40 feature evaluation matrix (plus the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in this sector include rapid store rollout, PCI DSS segmentation, cellular backup and centralised management across estates (that can run into hundreds or thousands of sites).",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for retail and e-commerce?",
+     "a": "The leading providers for retail and e-commerce are listed in the ranking above, each graded on public evidence of sector capability - things like case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this retail and e-commerce ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed retail and e-commerce sector evidence are excluded from this ranking - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you layer your own operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the retail and e-commerce filter. Every combination you set up generates a shareable URL, so it's easy to revisit later or send to a colleague."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-manufacturing": {
@@ -279,6 +330,23 @@
     "Cloud on-ramp performance into European cloud regions is also more direct as a result of that network ownership."
    ],
    "watch_out": "outside Europe, Colt's global delivery depth is less developed than the largest carriers. A manufacturer with plants in Asia or the Americas has those sites outside Colt's primary strength, and local network coverage, cellular backup and field support at those locations need assessing separately rather than assumed to match the European standard. For a manufacturing estate that spans multiple continents, Colt's European strengths need to be weighed against what a different provider would offer for the non-European portion."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of manufacturing sector capability, scored against the Netify 40 feature evaluation matrix (plus the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in this sector include OT and IoT network segmentation, plant and factory floor connectivity, global site coverage across production and distribution facilities, and MPLS migration to SD-WAN.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for manufacturing?",
+     "a": "The leading providers for manufacturing are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this manufacturing ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed manufacturing sector evidence are excluded from this ranking - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you layer your own operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the retail and e-commerce filter. Every combination you set up generates a shareable URL, so it's easy to revisit later or send to a colleague."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-energy-and-utilities": {
@@ -349,6 +417,23 @@
     "Deployment in days rather than months is also a genuine advantage for utilities bringing new generation assets online quickly or extending coverage to remote field locations on short timelines."
    ],
    "watch_out": "Aryaka's PoP footprint is smaller than the hyperscale SASE vendors. For a utility with assets in remote or less common locations - offshore facilities, rural generation sites, secondary industrial regions - coverage needs checking against the actual site list. Satellite integration options and local technical assistance for critical infrastructure environments should also be confirmed before deployment, not after."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of energy and utilities sector capability, scored against Netify’s matrix of the 40 most important SD-WAN and SASE features (as well as the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in the energy and utilities sector include IT/OT convergence and industrial security, NERC CIP and NIS2 compliance readiness, remote site resilience across satellite and cellular underlays, and always-on availability for critical operational environments (such as substations, pipelines and generation assets).",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for energy and utilities?",
+     "a": "The leading providers for energy and utilities are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this energy and utilities ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed energy and utilities sector evidence are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the energy and utilities filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-government": {
@@ -415,6 +500,23 @@
     "Vodafone Business is well positioned for public sector WAN modernisation where agencies need flexible connectivity across municipal offices, remote workers and field-based operations - the integrated fixed and mobile access portfolio covers that mix in a way that separate fixed and cellular suppliers typically don't. Managed security capabilities contribute to Zero Trust adoption and policy consistency across distributed government environments, and hybrid WAN migration strategies can maintain continuity of citizen services throughout the transition."
    ],
    "watch_out": "the underlying platform varies by region - VeloCloud in the UK, others elsewhere - and for any deployment that spans more than one region, that variation needs examining explicitly. Compliance reporting, sovereign hosting, security controls and operational governance can all look different across those regional service models, and the procurement complexity that creates isn't always visible until agencies are already mid-contract."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of government and public sector capability, scored against Netify’s matrix of the 40 most important SD-WAN and SASE features (as well as the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in this sector include sovereign data residency, certified security and framework procurement routes, multi-agency logical segmentation, legacy MPLS migration and mandated Zero Trust Architecture programmes.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for government and public sector?",
+     "a": "The leading providers for government and public sector are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this government and public sector ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed government and public sector evidence are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the government and public sector filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-education": {
@@ -481,6 +583,23 @@
     "WAN optimisation improves performance for cloud-based learning applications, and integrated security controls support content filtering, safeguarding and campus segmentation. The reduced on-site infrastructure footprint also helps institutions keep operational overheads down."
    ],
    "watch_out": "Aryaka's PoP footprint is smaller than the hyperscale SASE vendors, so coverage needs confirming against the institution's actual geographic footprint before committing. For universities with international campuses or research sites in less common locations, a gap in PoP coverage is a more disruptive finding post-deployment than pre-deployment."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of education sector capability, scored against Netify’s matrix of the 40 most important SD-WAN and SASE features (alongside the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in this sector include student safeguarding and CIPA/KCSIE compliance, application prioritisation for online learning and digital examinations during peak demand, multi-tenant campus segmentation between student, staff, research and administrative networks and budget-led commercial models that work within education funding cycles.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for education?",
+     "a": "The leading providers for education are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this education ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed education sector evidence are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the education filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-transport-and-logistics": {
@@ -547,6 +666,23 @@
     "Aryaka's private global core network and managed-first operating model compress deployment timelines to days, which matters for logistics operators bringing new distribution facilities online quickly or extending coverage to operational sites that can't wait for a months-long deployment programme. WAN optimisation built into the private backbone improves responsiveness for transportation management systems, inventory applications and shipment tracking platforms, and integrated security supports segmentation between operational environments and corporate services."
    ],
    "watch_out": "Aryaka's PoP footprint is smaller than the hyperscale SASE vendors, and for logistics operators with assets in remote locations, non-standard transportation corridors or heavily industrial sites, coverage needs confirming against the actual geographic profile before deployment. Ruggedized edge hardware options for networking equipment operating in vibration-prone, dust-heavy or non-climate-controlled environments should also be validated - discovering a gap there after deployment is more disruptive in a logistics context than in a standard office environment."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of transport and logistics sector capability, scored against Netify’s matrix of the 40 most important SD-WAN and SASE features (as well as the likes of regional coverage, cloud support, AI and resilience capabilities). Typical drivers in this sector include vehicle and vessel connectivity with session persistence across cellular underlays, supply chain IoT and cold-chain segmentation, application prioritisation for WMS, ELD and fleet management systems, and wide-area site coverage across ports, depots, warehouses and distribution hubs.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for transport and logistics?",
+     "a": "The leading providers for transport and logistics are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this transport and logistics ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed transport and logistics sector evidence are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the transport and logistics filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-professional-services": {
@@ -614,6 +750,23 @@
     "As part of this, WAN optimisation improves responsiveness for cloud-based document management platforms, collaboration suites and enterprise SaaS applications, and centralised management keeps policy consistent as the estate grows."
    ],
    "watch_out": "We would recommend that firms with extensive international operations validate application performance, local support capabilities and cloud access consistency for each region before committing, given that Aryaka's PoP footprint is smaller than the hyperscale SASE vendors. A PoP coverage gap at a location where a partner or client expects the same service standard as the firm's main offices is a harder problem to solve after deployment than before it."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of professional services sector capability, scored against the Netify 40 feature evaluation matrix (plus the likes of regional coverage, cloud support, AI and resilience capabilities). We typically see organisations in this sector needing capabilities such as client confidentiality, secure SaaS application access (for hybrid and remote workforces), rapid M&A integration (for newly acquired offices) and consistent security policy across multi-office and multi-jurisdiction estates.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for professional services?",
+     "a": "The leading providers for professional services are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this professional services ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed professional services sector evidence are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the professional services filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-hospitality": {
@@ -683,6 +836,23 @@
     "Aryaka's private global core network and managed-first approach bring deployment timelines down to days, meaning newly opened properties, acquisitions and temporary hospitality venues can be connected and operational quickly - all without a lengthy on-site engineering programme at each location. WAN optimisation improves access to cloud-based PMS, booking engines and collaboration tools, and managed security services support guest network separation and distributed PCI-DSS protection."
    ],
    "watch_out": "We would recommend that hospitality operators assess PoP coverage carefully against their specific geographic footprint before committing, given that Aryaka's PoP footprint is smaller than the hyperscale SASE vendors and performance in remote resort destinations and international expansion markets may not always match what closer-coverage locations receive. Insufficient regional presence can affect guest experience and application responsiveness in ways that are difficult to remediate post-deployment."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers with public evidence of hospitality and leisure sector capability, scored against the Netify 40 feature evaluation matrix (plus the likes of regional coverage, cloud support, AI and resilience capabilities). We typically see organisations in this sector needing capabilities such as guest and corporate network segmentation, PCI-DSS protection, application prioritisation for PMS and reservation platforms, as well as rapid onboarding of new properties and franchise acquisitions.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers are strongest for hospitality and leisure?",
+     "a": "The leading providers for hospitality and leisure are listed in the ranking above, each graded on public evidence of sector capability - the likes of case studies, dedicated offerings and certifications - alongside the same 40 technical and service features used across our wider comparison."
+    },
+    {
+     "q": "How is this hospitality and leisure ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without confirmed hospitality and leisure sector evidence are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I adjust this shortlist for my own requirements?",
+     "a": "Yes - the interactive shortlist builder lets you add your operating model, regions, clouds, security features, AI requirements and deployment ceiling on top of the hospitality and leisure filter. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  },
  "sd-wan-sase-providers-for-large-global-enterprises": {
@@ -748,6 +918,23 @@
     "Aryaka's private global core network is their primary differentiator, unlike other managed vendors on the market that deliver SD-WAN over public internet paths, Aryaka's private backbone provides greater resilience and performance, which is ideal for large global enterprises where application performance across long-haul international routes is a persistent challenge. Meanwhile, WAN optimisation built into that backbone improves responsiveness for cloud and SaaS applications across dispersed global sites, and rapid deployment (days rather than months) suits enterprises running active acquisition programmes."
    ],
    "watch_out": "Aryaka's PoP footprint is smaller than the hyperscale SASE vendors, and for a large global enterprise with operations in less-served locations, coverage needs confirming against the actual site list before programme commitment. A gap at a material site is a more significant finding at global enterprise scale than it would be in a smaller deployment."
+  },
+  "_page": {
+   "intro": "Our ranked shortlist below covers SD-WAN and SASE providers positioned for large global enterprise organisations, scored against the Netify 40 feature evaluation matrix (plus the likes of regional coverage, cloud support, AI and resilience capabilities). We typically see large global enterprises needing capabilities such as consistent policy enforcement across hundreds of sites, always-on managed operations with follow-the-sun support, MPLS migration at scale, as well as the governance and audit visibility that multi-country estates require.",
+   "faqs": [
+    {
+     "q": "Which SD-WAN and SASE providers fit large global enterprise organisations best?",
+     "a": "Our ranking has been designed to list providers for large global enterprise buyers, ordered by how we evaluate them against the Netify 40 feature matrix, with each graded based on public evidence, dedicated enterprise offerings and commercial models."
+    },
+    {
+     "q": "How is this ranking calculated?",
+     "a": "To ensure the integrity of our rankings, providers without evidence of fit for this organisation size are excluded from this list - with the remainder being scored on a weighted average across 40 capability features (with the same engine powering our interactive shortlist builder, MCP tool and this page to provide reproducible results)."
+    },
+    {
+     "q": "Can I refine this list?",
+     "a": "Yes - the interactive shortlist builder lets you layer sector, regions, security features, operating model and deployment speed on top of this view. Every configuration is a shareable URL, so you can come back to it or pass it on to colleagues later."
+    }
+   ]
   }
  }
 }
