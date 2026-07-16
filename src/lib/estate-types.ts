@@ -30,7 +30,7 @@ export const SiteSchema = z.object({
   id: z.string().default(""),
   name: z.string().max(80).default("Site"),
   site_type: z.enum(["hq", "branch", "data_centre", "warehouse", "retail", "other"]).default("branch"),
-  address: AddressSchema.default({}),
+  address: AddressSchema.default({ line1: "", line2: "", city: "", region: "", postal_code: "", country: "United Kingdom" }),
   contact_name: z.string().max(80).default(""),
   contact_phone: z.string().max(40).default(""),
   users: z.number().int().min(0).max(100000).default(0),
