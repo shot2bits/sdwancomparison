@@ -88,6 +88,27 @@ const STORY_STEPS = [
 const STORY_OUTRO =
   "Nothing is hidden behind a login. You can browse all 30+ vendors, build a shortlist, and even draft an RFP without an account. Vendors sign in only to bid, and only with a verified work email, so the responses you get come from real organisations. Your requirements are visible so the right vendors can find them; the prices they quote stay private to you.";
 
+// Writer-authored explainers (Harry, June 2026 rewrite): how the research,
+// vetting and agent layers actually work. Applied 16 July 2026.
+const UNDER_THE_BONNET = [
+  {
+    title: "How the scoring works",
+    body: "Here at Netify we score every vendor against the same feature matrix, grouped across six capability categories (service delivery and operating model, network architecture and transport, gateway and PoP design, security and SASE capability, operations and assurance, and automation), with each feature scored against publicly available sources. We do not allow vendors to pay to influence scores or where they land. The raw scores drive our shortlist rankings and they're the same data the Netify RFP agent uses. The grades are indicative rather than contractual (the likes of deployment ceiling, regional coverage and AI capability can all change between research cycles), so we'd always recommend confirming specifics via a structured RFP, something our platform can generate and issue on your behalf.",
+  },
+  {
+    title: "How vendor verification works",
+    body: "Vendors can browse the opportunity board without signing in, the same as buyers. To actually submit a bid or quote, suppliers sign in with a verified work email, and our experts manually process and vet each one against real-world experience before access is granted.",
+  },
+  {
+    title: "How the AI advisor and RFP agent work",
+    body: "The AI advisor on the shortlist page maps plain-language descriptions onto the same filter and scoring engine used by the manual controls, with access to the Netify vendor grades, our bank of 386 questions and compliance maps. So when it sets filters or drafts RFP questions, it's drawing on the same research that underpins the rankings.",
+  },
+  {
+    title: "Agent-to-agent (MCP)",
+    body: "The opportunity board publishes a machine-readable feed at /opportunities/board/data.json. Vendors' AI agents can read open opportunities using the list_opportunities tool and submit bids via opportunity_respond, all over the public MCP endpoint at /api/mcp. This isn't a bolt-on: it's the same interface the Netify advisor uses internally, so the board is genuinely open to both human and agent access without any separate integration work.",
+  },
+];
+
 export default function HowItWorksPage() {
   const schemas = [
     getOrganizationSchema(),
@@ -127,7 +148,7 @@ export default function HowItWorksPage() {
       <div className="mb-12 max-w-3xl">
         <p className="eyebrow mb-3">How it works</p>
         <h1 id="page-h1" className="mb-4">From a network need to competing offers, without the cold-calling.</h1>
-        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Netify is a vendor-neutral marketplace for SASE, SSE and SD-WAN. Describe what you need and get comparable, competing responses from 30+ verified providers, graded independently against a 40-feature methodology. Browse and build without an account; sign in only to bid.</p>
+        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Netify is a vendor-neutral marketplace for SASE, SSE and SD-WAN. Describe what you need and get comparable, competing responses from more than 30 verified providers, graded independently against 40 of the most important capabilities. Browse and build without an account; sign in only to bid.</p>
       </div>
 
       <HowItWorksDiagram />
@@ -184,6 +205,18 @@ export default function HowItWorksPage() {
             ))}
           </ol>
           <Link href="/for-suppliers" className="mt-5 inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-4 py-1.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">For vendors and providers</Link>
+        </div>
+      </section>
+
+      <section className="mb-14 max-w-3xl">
+        <h2 className="text-2xl font-semibold mb-5">How the research behind it works</h2>
+        <div className="space-y-6">
+          {UNDER_THE_BONNET.map((s) => (
+            <div key={s.title}>
+              <h3 className="text-lg font-semibold mb-1">{s.title}</h3>
+              <p className="text-sm text-[var(--ink-700)]">{s.body}</p>
+            </div>
+          ))}
         </div>
       </section>
 

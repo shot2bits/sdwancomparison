@@ -44,7 +44,7 @@ export default function AccountPage() {
 
       <div className="mt-12 mb-6">
         <h2 className="text-xl mb-1">Agent digests</h2>
-        <p className="text-sm text-[var(--ink-600)]">What the agent found while monitoring your live RFPs, with recommended next actions. It drafts and recommends; it never contacts a supplier without your approval.</p>
+        <p className="text-sm text-[var(--ink-600)]">The following recommendations have been made based on what our agent has monitored from your live RFPs. Please note: our agent will never contact a supplier without your approval.</p>
       </div>
       <BuyerDigests />
     </div>
