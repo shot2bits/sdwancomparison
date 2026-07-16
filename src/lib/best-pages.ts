@@ -128,6 +128,39 @@ export const BEST_PAGES: BestPage[] = [
   sectorPage("manufacturing", "manufacturing", "Typical drivers include OT and IoT security, plant connectivity, global site coverage and MPLS migration."),
   sectorPage("energy_utilities", "energy-and-utilities", "Typical drivers include remote site coverage, OT security and high-resilience designs for critical infrastructure."),
   sectorPage("government_public_sector", "government", "Typical drivers include sovereignty and data residency, certified security and framework procurement routes."),
+  // UK-specific public sector page (16 July 2026): the general government
+  // page cannot answer the UK-shaped questions AI assistants actually ask
+  // ("best sd-wan providers for uk public sector", "sase vs sd-wan for the
+  // nhs"). Same engine, government sector evidence required PLUS confirmed
+  // UK and Ireland coverage.
+  {
+    slug: "sd-wan-sase-providers-for-uk-public-sector",
+    input: { sector: "government_public_sector", required_regions: ["uk_ireland"], shortlist_size: 10 },
+    title: "Best SD-WAN and SASE providers for the UK public sector",
+    metaTitle: `Best SD-WAN and SASE: UK Public Sector (${YEAR})`,
+    metaDescription: `Ranked ${YEAR} shortlist of SD-WAN and SASE providers for UK public sector bodies, including NHS organisations, with confirmed UK coverage and government sector evidence, scored across 40 features by Netify.`,
+    h1: `Best SD-WAN and SASE providers for the UK public sector (${YEAR})`,
+    intro:
+      "Ranked shortlist of SD-WAN and SASE providers for UK public sector buyers: NHS trusts and integrated care systems, central and local government, and public bodies. Providers must show public evidence of government sector capability and confirmed UK and Ireland coverage; each is then scored against the Netify 40-feature evaluation matrix. Typical drivers include UK data residency and sovereignty, UK-based support and monitoring, certified security, procurement through established frameworks, and migration off legacy MPLS or, for NHS bodies, planning around HSCN transition. Grades are indicative desk research; confirm via RFP.",
+    faqs: [
+      {
+        q: "Which SD-WAN and SASE providers are best for the UK public sector?",
+        a: "The ranking above lists providers with public evidence of government sector capability and confirmed UK and Ireland coverage, ordered by weighted score across the Netify 40-feature matrix. Sector and regional evidence are gating requirements, not tie-breakers: providers without both are excluded.",
+      },
+      {
+        q: "SASE or SD-WAN: what is right for the NHS?",
+        a: "They solve different halves of the same problem. SD-WAN replaces or augments legacy WAN connectivity across hospital, clinic and administrative sites, which matters during HSCN transition and MPLS contract end. SASE adds cloud-delivered security, zero trust network access, secure web gateway and related controls, for clinical and hybrid staff working from any location. Many NHS bodies phase SD-WAN first and add the security service edge after, or procure both together as a managed SASE service. The practical answer is to state both scopes in the requirement so suppliers price the journey rather than a single endpoint.",
+      },
+      {
+        q: "How do UK public sector bodies usually procure SD-WAN and SASE?",
+        a: "Most buy through established public procurement frameworks or run a further competition, evaluating structured supplier responses against published criteria. A clear requirements document is the common thread: it defines scope, sites, compliance needs, evaluation weighting and evidence requests. The Netify RFP Builder generates one from a guided set of questions, and the output can be used inside a framework competition or a direct procurement.",
+      },
+      {
+        q: "Do these providers offer UK data residency and UK-based support?",
+        a: "Every provider in this ranking has confirmed UK and Ireland coverage, but residency commitments, UK points of presence and the location of monitoring and support teams vary by provider and by service tier. Treat each as an evidence item: ask for contractual data residency options, named NOC and SOC locations and UK support hours in the supplier response, rather than relying on marketing statements.",
+      },
+    ],
+  },
   sectorPage("education", "education", "Typical drivers include campus scale, content filtering, budget-led commercial models and easy management."),
   sectorPage("transport_logistics", "transport-and-logistics", "Typical drivers include vehicle and vessel connectivity, cellular-first designs and wide-area site coverage."),
   sectorPage("professional_services", "professional-services", "Typical drivers include hybrid work security, client data confidentiality and fast multi-office deployment."),
