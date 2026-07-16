@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
+import bestEditorial from "@data/best-editorial.json";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
@@ -189,7 +190,12 @@ export default async function BestPage({ params }: Props) {
       ) : null}
 
       <ol className="space-y-6 list-none p-0">
-        {result.shortlist.map((v) => (
+        {result.shortlist.map((v) => {
+          // Writer-authored sector commentary (Harry, June 2026, applied July
+          // 2026): keyed by vendor within each page so rankings stay live.
+          // Falls back to the vendor dataset one-liner where absent.
+          const ed = (bestEditorial as Record<string, Record<string, { commentary: string[]; watch_out?: string }>>)[page.slug]?.[v.slug];
+          return (
           <li
             key={v.slug}
             id={`rank-${v.rank}-${v.slug}`}
@@ -204,11 +210,17 @@ export default async function BestPage({ params }: Props) {
             <p className="text-sm text-[var(--ink-500)] mb-2">
               {v.category} · Typical deployment: {v.deployment_speed}
             </p>
-            <p className="text-sm text-[var(--ink-700)] mb-2">{v.key_differentiators[0]}</p>
+            {ed && ed.commentary.length > 0 ? (
+              ed.commentary.map((para, pi) => (
+                <p key={pi} className="text-sm text-[var(--ink-700)] mb-2">{para}</p>
+              ))
+            ) : (
+              <p className="text-sm text-[var(--ink-700)] mb-2">{v.key_differentiators[0]}</p>
+            )}
             {v.gaps.length > 0 && (
               <p className="text-sm text-[var(--ink-500)]">Evidence caveats: {v.gaps.join("; ")}</p>
             )}
-            <p className="text-sm text-[var(--ink-700)] mt-1">Watch out: {v.watch_outs[0]}</p>
+            <p className="text-sm text-[var(--ink-700)] mt-1">Watch out: {ed?.watch_out ?? v.watch_outs[0]}</p>
             <a
               href={v.marketplace_url ?? "https://netify.co.uk/marketplace/"}
               target="_blank"
@@ -218,7 +230,8 @@ export default async function BestPage({ params }: Props) {
               Contact {v.name} via Netify ↗
             </a>
           </li>
-        ))}
+          );
+        })}
       </ol>
 
       <p className="mt-8 text-xs text-[var(--ink-500)]">{result.methodology_note}</p>
