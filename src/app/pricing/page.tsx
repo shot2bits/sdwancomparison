@@ -49,46 +49,46 @@ export default function PricingPortalPage() {
     <div>
       {schemas.map((s, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />)}
 
-      <div className="bg-[#13294b] text-white">
+      <div className="bg-amber-50 border-b border-amber-200">
         <div className="max-w-5xl mx-auto px-6 pt-16 pb-12">
-          <p className="text-amber-400 text-sm font-semibold tracking-wide uppercase mb-4">Compare pricing</p>
-          <h1 className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl mb-5" style={{ color: "#fff" }}>
+          <p className="text-amber-700 text-sm font-semibold tracking-wide uppercase mb-4">Compare pricing</p>
+          <h1 className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl mb-5">
             Your network, priced by the market.
           </h1>
-          <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mb-3">
+          <p className="text-lg sm:text-xl text-[var(--ink-700)] max-w-2xl mb-3">
             List your sites once and 30+ verified SD-WAN and SASE providers compete for your
             business. Indicative pricing in seconds. Firm bids in your private room. Alerts the
             moment each price lands.
           </p>
-          <p className="text-base text-blue-200 max-w-2xl mb-8 font-medium">
+          <p className="text-base text-[var(--ink-800)] max-w-2xl mb-8 font-medium">
             One submission replaces five sales calls. The hard work is done for you.
           </p>
           <a href="#estate-builder" className="inline-flex items-center rounded-full bg-amber-500 px-8 py-3.5 text-base font-semibold text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
             Price my sites →
           </a>
-          <p className="text-xs text-blue-300 mt-4">Free to compare. No sign-in for your estimate. No obligation to award.</p>
+          <p className="text-xs text-[var(--ink-500)] mt-4">Free to compare. No sign-in for your estimate. No obligation to award.</p>
 
           <div className="flex flex-wrap items-center gap-2.5 mt-6">
-            <span className="text-sm text-blue-200 font-medium">Built for businesses in:</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-800 bg-[#0d1f3a] px-3.5 py-1.5 text-sm text-white"><span aria-hidden="true">🇬🇧</span> United Kingdom</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-800 bg-[#0d1f3a] px-3.5 py-1.5 text-sm text-white"><span aria-hidden="true">🇺🇸</span> United States</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-800 bg-[#0d1f3a] px-3.5 py-1.5 text-sm text-white"><span aria-hidden="true">🇨🇦</span> Canada</span>
-            <span className="text-sm text-blue-300">with national or global site requirements</span>
+            <span className="text-sm text-[var(--ink-600)] font-medium">Built for businesses in:</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-white px-3.5 py-1.5 text-sm text-[var(--ink-800)]"><span aria-hidden="true">🇬🇧</span> United Kingdom</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-white px-3.5 py-1.5 text-sm text-[var(--ink-800)]"><span aria-hidden="true">🇺🇸</span> United States</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-white px-3.5 py-1.5 text-sm text-[var(--ink-800)]"><span aria-hidden="true">🇨🇦</span> Canada</span>
+            <span className="text-sm text-[var(--ink-500)]">with national or global site requirements</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-12 border-t border-blue-900 pt-8">
-            <div><p className="text-3xl font-bold text-white">30+</p><p className="text-sm text-blue-200">verified providers competing<sup>1</sup></p></div>
-            <div><p className="text-3xl font-bold text-white">40</p><p className="text-sm text-blue-200">evidence-graded capabilities per provider</p></div>
-            <div><p className="text-3xl font-bold text-white">386</p><p className="text-sm text-blue-200">analyst questions behind the scores</p></div>
-            <div><p className="text-3xl font-bold text-white">£0</p><p className="text-sm text-blue-200">to compare, always</p></div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-12 border-t border-amber-200 pt-8">
+            <div><p className="text-3xl font-bold">30+</p><p className="text-sm text-[var(--ink-600)]">verified providers competing<sup>1</sup></p></div>
+            <div><p className="text-3xl font-bold">40</p><p className="text-sm text-[var(--ink-600)]">evidence-graded capabilities per provider</p></div>
+            <div><p className="text-3xl font-bold">386</p><p className="text-sm text-[var(--ink-600)]">analyst questions behind the scores</p></div>
+            <div><p className="text-3xl font-bold">£0</p><p className="text-sm text-[var(--ink-600)]">to compare, always</p></div>
           </div>
-          <p className="text-[11px] text-blue-300 mt-4">
+          <p className="text-[11px] text-[var(--ink-500)] mt-4">
             <sup>1</sup> Netify marketplace dataset, July 2026. Vendors cannot pay to influence scores or where they land; ordering follows Netify evidence scores.
           </p>
         </div>
       </div>
 
-      <div className="bg-amber-50 border-y border-amber-200">
+      <div className="bg-white border-b border-[var(--ink-200,#e5e5e5)]">
         <div className="max-w-5xl mx-auto px-6 py-6 grid sm:grid-cols-3 gap-6">
           <div className="flex gap-3 items-start">
             <span className="flex-none w-8 h-8 rounded-full bg-amber-500 text-zinc-950 font-bold flex items-center justify-center">1</span>
