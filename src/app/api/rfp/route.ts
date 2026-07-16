@@ -15,8 +15,14 @@ import { SITE_URL } from "@/lib/structured-data";
  * existing draft-link leads list, and sends the private manage link
  * immediately so the address receives value the moment it is given. The
  * business-only email policy applies; webmail addresses are simply ignored.
+ *
+ * sendEmail is false on the wizard-submit path (Robert's concern, 16 July):
+ * the "Confirm and submit" magic link must be the only email in the inbox at
+ * that moment, so the courtesy draft link is stored but not sent. It goes
+ * out only on the review-first path, where the buyer has already generated
+ * and the risk is losing them entirely, not distracting them.
  */
-async function attachContactEmail(p: { id: string; title: string; manage_token: string }, raw: string) {
+async function attachContactEmail(p: { id: string; title: string; manage_token: string }, raw: string, sendEmail: boolean) {
   const email = raw.trim().toLowerCase();
   const domain = emailDomain(email);
   if (!domain || (await isBlockedDomainLive(domain))) return;
@@ -33,9 +39,9 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
     }
   } catch { /* best effort */ }
   const key = process.env.RESEND_API_KEY;
-  if (!key) return;
+  if (!key || !sendEmail) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
-  const link = `${SITE_URL}/rfp-builder/${p.id}/?manage=${p.manage_token}`;
+  const link = `${SITE_URL}/rfp-builder/${p.id}/?manage=${p.manage_token}#publish`;
   try {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -45,7 +51,7 @@ async function attachContactEmail(p: { id: string; title: string; manage_token: 
         to: email,
         reply_to: "support@netify.com",
         subject: "Your Netify RFP draft link",
-        html: `<p>Here is the link back to your RFP draft "${p.title}".</p><p><a href="${link}">Reopen your draft</a> on any device. The link carries your private manage key, so keep it to yourself.</p><p>When you are ready, submit the RFP and your matched suppliers respond through the app. Pricing stays private to you.</p><p>If you did not request this, ignore this email.</p>`,
+        html: `<p>Here is the link back to your RFP draft "${p.title}". It works on any device and carries your private manage key, so keep it to yourself.</p><p><a href="${link}" style="display:inline-block;background:#f59e0b;color:#111;padding:10px 18px;border-radius:999px;text-decoration:none;font-weight:600;">Review and submit your RFP</a></p><p>Submitting sends it to your matched suppliers, who respond through the app. Pricing stays private to you and there are no sales calls until you choose.</p><p>If you did not request this, ignore this email.</p>`,
       }),
     });
   } catch { /* best effort */ }
@@ -120,8 +126,10 @@ export async function POST(req: Request) {
     try { await indexRfpForBuyer(ownerEmail, saved.id); } catch { /* best effort */ }
   }
   // Optional early-capture email from the wizard: never blocks creation.
+  // The courtesy email is skipped when a submit is pending, so the confirm
+  // magic link is the only email in the inbox at that moment.
   if (typeof body.contact_email === "string" && body.contact_email.includes("@")) {
-    try { await attachContactEmail({ id: saved.id, title: saved.title, manage_token: saved.manage_token }, body.contact_email); } catch { /* best effort */ }
+    try { await attachContactEmail({ id: saved.id, title: saved.title, manage_token: saved.manage_token }, body.contact_email, !pendingSubmit); } catch { /* best effort */ }
   }
   return Response.json(saved, { headers: cors });
 }
