@@ -155,8 +155,8 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
   },
   {
     name: "estate_submit",
-    description: "Pricing portal: submit an estate for firm bids. Seeds a pending bid with each chosen provider (or a matched default set); the room then shows pending pricing until providers respond. Requires the manage_token.",
-    inputSchema: { type: "object", properties: { estate_id: { type: "string" }, manage_token: { type: "string" } }, required: ["estate_id", "manage_token"] },
+    description: "Pricing portal: submit an estate for firm bids. Indicative pricing is open; submission is the identity-and-terms moment. Requires the manage_token plus the buyer's business_name, first_name, last_name and a BUSINESS contact_email (webmail rejected), and accept_terms true, confirming the buyer agrees that invited providers populate pricing directly in the portal and may contact them with clarifying questions. Seeds a pending bid per chosen provider; poll estate_bid_status for pricing.",
+    inputSchema: { type: "object", properties: { estate_id: { type: "string" }, manage_token: { type: "string" }, business_name: { type: "string" }, first_name: { type: "string" }, last_name: { type: "string" }, contact_email: { type: "string" }, accept_terms: { type: "boolean", description: "Must be true; set only with the buyer's explicit agreement to the terms." } }, required: ["estate_id", "manage_token", "business_name", "first_name", "last_name", "contact_email", "accept_terms"] },
   },
   {
     name: "estate_bid_status",
@@ -209,8 +209,31 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
       if (!owner) return { error: "Manage key required." };
       if (estate.sites.length === 0) return { error: "Add at least one site before submitting." };
       if (estate.status === "submitted") return { estate, note: "Already submitted; bids unchanged." };
-      const saved = await saveEstate(seedBids(estate));
-      return { estate: saved, bids_seeded: saved.bids.length };
+      const { PRICING_TERMS_VERSION, PRICING_TERMS_TEXT } = await import("@/lib/estate-types");
+      const businessName = String(args.business_name ?? "").trim();
+      const firstName = String(args.first_name ?? "").trim();
+      const lastName = String(args.last_name ?? "").trim();
+      const email = String(args.contact_email ?? "").trim().toLowerCase();
+      if (!businessName || !firstName || !lastName || !email.includes("@")) {
+        return { error: "Submission needs business_name, first_name, last_name and a business contact_email. Indicative pricing stays open without them.", terms_version: PRICING_TERMS_VERSION, terms_text: PRICING_TERMS_TEXT };
+      }
+      const { isBlockedDomainLive, emailDomain } = await import("@/lib/access-control");
+      const domain = emailDomain(email);
+      if (!domain || (await isBlockedDomainLive(domain))) {
+        return { error: "Business email required: free and personal email addresses are not accepted." };
+      }
+      if (args.accept_terms !== true) {
+        return { error: "accept_terms must be true, set only with the buyer's explicit agreement.", terms_version: PRICING_TERMS_VERSION, terms_text: PRICING_TERMS_TEXT };
+      }
+      const saved = await saveEstate(seedBids({
+        ...estate,
+        business_name: businessName,
+        first_name: firstName,
+        last_name: lastName,
+        contact_email: email,
+        consent: { version: PRICING_TERMS_VERSION, agreed_at: Date.now() },
+      }));
+      return { estate: saved, bids_seeded: saved.bids.length, terms_version: PRICING_TERMS_VERSION };
     }
     // estate_bid_status
     return {

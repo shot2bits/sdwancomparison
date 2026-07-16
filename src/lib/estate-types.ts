@@ -77,9 +77,22 @@ export const EstateSchema = z.object({
   bids: z.array(BidSchema).default([]),
   owner_email: z.string().default(""),
   contact_email: z.string().default(""),
+  business_name: z.string().max(120).default(""),
+  first_name: z.string().max(60).default(""),
+  last_name: z.string().max(60).default(""),
+  consent: z.object({ version: z.string(), agreed_at: z.number() }).nullable().default(null),
   submitted_at: z.number().nullable().default(null),
 });
 export type Estate = z.infer<typeof EstateSchema>;
+
+/**
+ * The submission agreement. Indicative pricing is in the clear and needs
+ * nothing; firm pricing is the identity moment. Bump the version when the
+ * wording changes materially (same discipline as the RFP submit agreement).
+ */
+export const PRICING_TERMS_VERSION = "pricing-terms v1, 16 July 2026";
+export const PRICING_TERMS_TEXT =
+  "I agree that the providers invited to bid will populate pricing directly in this portal and that a vetted account manager from each may contact me with questions about my requirement. My details are shared only with those providers; pricing stays private to me and there is no obligation to award.";
 
 export type IndicativeBand = {
   vendor_slug: string;

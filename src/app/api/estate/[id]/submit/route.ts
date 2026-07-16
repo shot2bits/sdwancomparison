@@ -1,18 +1,20 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { kvConfigured } from "@/lib/rfp-store";
+import { isBlockedDomainLive, emailDomain } from "@/lib/access-control";
 import { getEstate, saveEstate, seedBids } from "@/lib/estate-store";
+import { PRICING_TERMS_VERSION, PRICING_TERMS_TEXT } from "@/lib/estate-types";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
 export async function OPTIONS(req: Request) { return preflight(req); }
 
 /**
- * Submit an estate for bids: bid rows are seeded pending for the chosen
- * providers and the room starts showing pending pricing immediately.
- * v1 (branch): manage-key gated. Before release this gains the same
- * verified-identity gate as RFP publishing, since bids reach named
- * suppliers. Bids are brokered by the Netify team until supplier
- * self-serve lands (deal room phase B).
+ * Submit an estate for firm bids. Indicative pricing upstream is in the
+ * clear and needs nothing; THIS is the identity-and-terms moment:
+ * business name, first and last name, a business email (webmail rejected),
+ * and explicit acceptance that invited providers populate pricing directly
+ * in the portal and may contact the buyer with clarifying questions.
+ * The consent record (version + timestamp) is stored on the estate.
  */
 export async function POST(req: Request, ctx: Ctx) {
   const cors = corsHeaders(req);
@@ -20,7 +22,15 @@ export async function POST(req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const estate = await getEstate(id);
   if (!estate) return Response.json({ error: "Estate not found." }, { status: 404, headers: cors });
-  let body: { manage_token?: string; contact_email?: string } = {};
+
+  let body: {
+    manage_token?: string;
+    business_name?: string;
+    first_name?: string;
+    last_name?: string;
+    contact_email?: string;
+    accept_terms?: boolean;
+  } = {};
   try { body = await req.json(); } catch { /* token can come via query */ }
   const url = new URL(req.url);
   const token = String(body.manage_token ?? url.searchParams.get("manage") ?? "");
@@ -29,9 +39,35 @@ export async function POST(req: Request, ctx: Ctx) {
   if (estate.status === "submitted") {
     return Response.json({ estate, note: "Already submitted; bids unchanged." }, { headers: cors });
   }
-  const withEmail = typeof body.contact_email === "string" && body.contact_email.includes("@")
-    ? { ...estate, contact_email: body.contact_email.trim().toLowerCase() }
-    : estate;
-  const saved = await saveEstate(seedBids(withEmail));
-  return Response.json({ estate: saved, bids_seeded: saved.bids.length }, { headers: cors });
+
+  const businessName = String(body.business_name ?? "").trim();
+  const firstName = String(body.first_name ?? "").trim();
+  const lastName = String(body.last_name ?? "").trim();
+  const email = String(body.contact_email ?? "").trim().toLowerCase();
+  if (!businessName || !firstName || !lastName || !email.includes("@")) {
+    return Response.json(
+      { error: "Submitting for firm pricing needs your business name, first name, last name and business email. Indicative pricing stays open without them.", terms_version: PRICING_TERMS_VERSION, terms_text: PRICING_TERMS_TEXT },
+      { status: 422, headers: cors },
+    );
+  }
+  const domain = emailDomain(email);
+  if (!domain || (await isBlockedDomainLive(domain))) {
+    return Response.json({ error: "Please use your organisation email. Free and personal email addresses are not accepted." }, { status: 422, headers: cors });
+  }
+  if (body.accept_terms !== true) {
+    return Response.json(
+      { error: "Please accept the submission terms.", terms_version: PRICING_TERMS_VERSION, terms_text: PRICING_TERMS_TEXT },
+      { status: 422, headers: cors },
+    );
+  }
+
+  const saved = await saveEstate(seedBids({
+    ...estate,
+    business_name: businessName,
+    first_name: firstName,
+    last_name: lastName,
+    contact_email: email,
+    consent: { version: PRICING_TERMS_VERSION, agreed_at: Date.now() },
+  }));
+  return Response.json({ estate: saved, bids_seeded: saved.bids.length, terms_version: PRICING_TERMS_VERSION }, { headers: cors });
 }

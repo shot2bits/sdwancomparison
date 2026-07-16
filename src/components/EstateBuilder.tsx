@@ -48,6 +48,10 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
   const [estate, setEstate] = useState<Estate | null>(null);
   const [bands, setBands] = useState<Band[]>([]);
   const [alertEmail, setAlertEmail] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -101,7 +105,7 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
     if (!estate) return;
     setBusy(true); setError(null);
     try {
-      const r = await fetch(`/sase/api/estate/${estate.id}/submit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: estate.manage_token, contact_email: alertEmail.trim().includes("@") ? alertEmail.trim() : undefined }) });
+      const r = await fetch(`/sase/api/estate/${estate.id}/submit`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: estate.manage_token, business_name: businessName.trim(), first_name: firstName.trim(), last_name: lastName.trim(), contact_email: alertEmail.trim(), accept_terms: agreed }) });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? "Could not submit for bids.");
       setEstate(d.estate as Estate);
@@ -255,21 +259,27 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
             <p className="text-lg font-semibold mb-2">Now let the providers do the hard work</p>
             <ol className="text-sm space-y-1.5 mb-4 opacity-95">
               <li>1. Submit once. Each provider prices your estate directly in this portal, against your actual sites.</li>
-              <li>2. We tell you the moment every price lands. No chasing, no inbox tennis, no sales calls.</li>
+              <li>2. We tell you the moment every price lands. No chasing, no inbox tennis.</li>
               <li>3. Compare the market side by side and choose. Every price stays private to you.</li>
             </ol>
-            <div className="flex gap-3 items-center flex-wrap">
-              <input
-                value={alertEmail}
-                onChange={(e) => setAlertEmail(e.target.value)}
-                type="email"
-                placeholder="you@yourcompany.com"
-                className="border border-zinc-600 bg-zinc-800 text-white rounded-sm p-2.5 text-sm w-64 placeholder-zinc-400"
-                aria-label="Email for pricing alerts"
-              />
-              <button onClick={submitForBids} disabled={busy} className={amber}>{busy ? "Submitting…" : `Submit and alert me as pricing lands →`}</button>
+            <div className="grid gap-3 sm:grid-cols-2 max-w-2xl">
+              <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Business name" aria-label="Business name" className="border border-zinc-600 bg-zinc-800 text-white rounded-sm p-2.5 text-sm placeholder-zinc-400" />
+              <input value={alertEmail} onChange={(e) => setAlertEmail(e.target.value)} type="email" placeholder="Business email" aria-label="Business email" className="border border-zinc-600 bg-zinc-800 text-white rounded-sm p-2.5 text-sm placeholder-zinc-400" />
+              <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" aria-label="First name" className="border border-zinc-600 bg-zinc-800 text-white rounded-sm p-2.5 text-sm placeholder-zinc-400" />
+              <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" aria-label="Last name" className="border border-zinc-600 bg-zinc-800 text-white rounded-sm p-2.5 text-sm placeholder-zinc-400" />
             </div>
-            <p className="text-xs opacity-70 mt-2">Business email, used only for pricing alerts on this estate. Skip it and the room still fills; you just check back yourself.</p>
+            <label className="flex items-start gap-2.5 text-xs opacity-90 mt-3 max-w-2xl cursor-pointer">
+              <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5" />
+              <span>I agree that the providers invited to bid will populate pricing directly in this portal and that a vetted account manager from each may contact me with questions about my requirement. My details are shared only with those providers; pricing stays private to me and there is no obligation to award.</span>
+            </label>
+            <div className="mt-4">
+              <button
+                onClick={submitForBids}
+                disabled={busy || !agreed || !businessName.trim() || !firstName.trim() || !lastName.trim() || !alertEmail.includes("@")}
+                className={amber}
+              >{busy ? "Submitting…" : "Submit and alert me as pricing lands →"}</button>
+            </div>
+            <p className="text-xs opacity-70 mt-2">Business email only. Your indicative estimate above stays open to everyone; these details unlock firm pricing and are shared only with the providers you invite.</p>
           </div>
           {error && <p className="text-sm text-red-700 mt-3">{error}</p>}
         </div>
