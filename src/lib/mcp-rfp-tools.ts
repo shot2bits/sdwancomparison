@@ -143,6 +143,26 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
     description: "For a buyer agent: create a draft RFP seeded from a public opportunity notice (scope, sector, estate, compliance and background carried over; methodology sections synthesised). Returns rfp_id, manage_token (KEEP SECRET - it is the buyer credential for publish/invite), share_token, and the builder/preview URLs. Downloading the final document and publishing to suppliers require the buyer to sign in.",
     inputSchema: { type: "object", properties: { opportunity_id: { type: "string" }, title: { type: "string", description: "Optional RFP title; defaults to the notice title." } }, required: ["opportunity_id"] },
   },
+  {
+    name: "estate_create",
+    description: "Pricing portal: create a site estate for SD-WAN/SASE pricing comparison. Sites carry name, international address (line1/line2/city/region/postal_code/country), local contact name and phone (kept private), users, primary_circuit and failover_circuit ({type: fttp|ethernet|broadband|wireless_5g|satellite|none, bandwidth_mbps}). Also set service_model (managed|co_managed|diy), sase_elements (sdwan,ztna,swg,casb,fwaas,dlp,remote_access) and optional vendor_slugs from the Netify marketplace. Returns the estate, the manage_token (KEEP SECRET) and instant indicative pricing bands marked illustrative.",
+    inputSchema: { type: "object", properties: { sites: { type: "array", description: "Array of site objects as described." }, service_model: { type: "string" }, sase_elements: { type: "array", items: { type: "string" } }, vendor_slugs: { type: "array", items: { type: "string" } } }, required: ["sites"] },
+  },
+  {
+    name: "estate_get",
+    description: "Pricing portal: read an estate. With manage_token: full record, indicative bands and private bid values. Without: the public shape (site count, countries, users, bid statuses) with contacts and prices stripped.",
+    inputSchema: { type: "object", properties: { estate_id: { type: "string" }, manage_token: { type: "string" } }, required: ["estate_id"] },
+  },
+  {
+    name: "estate_submit",
+    description: "Pricing portal: submit an estate for firm bids. Seeds a pending bid with each chosen provider (or a matched default set); the room then shows pending pricing until providers respond. Requires the manage_token.",
+    inputSchema: { type: "object", properties: { estate_id: { type: "string" }, manage_token: { type: "string" } }, required: ["estate_id", "manage_token"] },
+  },
+  {
+    name: "estate_bid_status",
+    description: "Pricing portal: poll bid statuses for an estate (pending, received, declined per provider). With manage_token, received bids include the private price, unit and term; without it, statuses only.",
+    inputSchema: { type: "object", properties: { estate_id: { type: "string" }, manage_token: { type: "string" } }, required: ["estate_id"] },
+  },
 ] as const;
 
 export const RFP_TOOL_NAMES: Set<string> = new Set(MCP_RFP_TOOL_DEFINITIONS.map((t) => t.name as string));
@@ -160,6 +180,48 @@ function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProje
 }
 
 export async function callRfpTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+  // Pricing portal estate tools (feat/pricing-portal): fully agent-drivable.
+  if (name === "estate_create" || name === "estate_get" || name === "estate_submit" || name === "estate_bid_status") {
+    if (!kvConfigured()) return { error: "Storage not configured." };
+    const { newEstate, saveEstate, getEstate, indicativeBands, seedBids } = await import("@/lib/estate-store");
+    const { toPublicEstate } = await import("@/lib/estate-types");
+    if (name === "estate_create") {
+      try {
+        const estate = await saveEstate(newEstate(args));
+        return {
+          estate,
+          manage_token_warning: "KEEP the manage_token SECRET: it authorises updates, submission and private price reads.",
+          indicative: indicativeBands(estate),
+          illustrative: true,
+          portal_url: `${SITE_URL}/pricing/`,
+          next: "Call estate_submit with the manage_token to request firm bids; poll estate_bid_status for pending and received pricing.",
+        };
+      } catch { return { error: "Invalid estate payload." }; }
+    }
+    const id = String(args.estate_id ?? "");
+    const estate = await getEstate(id);
+    if (!estate) return { error: "Estate not found." };
+    const owner = String(args.manage_token ?? "") === estate.manage_token;
+    if (name === "estate_get") {
+      return owner ? { estate, indicative: indicativeBands(estate), illustrative: true } : { estate: toPublicEstate(estate), public: true };
+    }
+    if (name === "estate_submit") {
+      if (!owner) return { error: "Manage key required." };
+      if (estate.sites.length === 0) return { error: "Add at least one site before submitting." };
+      if (estate.status === "submitted") return { estate, note: "Already submitted; bids unchanged." };
+      const saved = await saveEstate(seedBids(estate));
+      return { estate: saved, bids_seeded: saved.bids.length };
+    }
+    // estate_bid_status
+    return {
+      estate_id: estate.id,
+      status: estate.status,
+      bids: estate.bids.map((b) => owner
+        ? b
+        : { vendor_slug: b.vendor_slug, vendor_name: b.vendor_name, status: b.status, at: b.at }),
+    };
+  }
+
   // name validated against RFP_TOOL_NAMES by the caller
   // Public board read: open, no token. Safe before the storage guard.
   if (name === "list_opportunities") {
