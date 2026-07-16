@@ -13,6 +13,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
+import WizardProgressRail, { WizardProgressBar } from "@/components/WizardProgressRail";
 import FlowStageStrip from "@/components/FlowStageStrip";
 import { REGIONS, SITES_BANDS, USERS_BANDS, SECTORS } from "@/lib/notice-options";
 
@@ -277,6 +278,7 @@ export default function DescribeWizard() {
       <FlowStageStrip stage="describe" now={STRIP[step].now} next={STRIP[step].next} />
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="max-w-xl">
+        <div className="lg:hidden mb-5"><WizardProgressBar step={step} count={STEP_COUNT} /></div>
         {step === 0 && (
           <div>
             {heading("What are you buying?", "One line is enough. This becomes your project title, and suppliers see it first.")}
@@ -473,6 +475,7 @@ export default function DescribeWizard() {
 
       {/* Live supplier match: the value proposition as a dataset fact. */}
       <aside className="lg:pt-14">
+        <div className="hidden lg:block mb-4"><WizardProgressRail step={step} count={STEP_COUNT} /></div>
         <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-4 sticky top-6">
           {match && match.count > 0 ? (
             <>
