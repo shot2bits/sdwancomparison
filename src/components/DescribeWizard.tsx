@@ -198,7 +198,11 @@ export default function DescribeWizard() {
         // device it is opened on. The localStorage copy below remains the
         // same-browser fast path.
         const pending_submit = submit ? { shortlist_size: 5, list_on_board: false, marketing_opt_in: optIn } : undefined;
-        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer, consent, pending_submit }) });
+        // Early-capture email (optional field on the timeline step, same
+        // state as the agreement step): attached to the draft so the buyer
+        // gets their link immediately and the reminder cron can reach them.
+        const contact_email = email.trim().includes("@") ? email.trim() : undefined;
+        const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: title.trim(), buyer, consent, pending_submit, contact_email }) });
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
         const p = (await res.json()) as { id: string; manage_token?: string };
         if (p.manage_token) { try { localStorage.setItem(`netify_mtok_${p.id}`, p.manage_token); } catch { /* private mode */ } }
@@ -369,6 +373,23 @@ export default function DescribeWizard() {
               {MODELS.map((m) => (
                 <button key={m.key} onClick={() => { markStarted(); setModel(m.key); }} className={`${chip} ${model === m.key ? "border-amber-500 bg-amber-50" : "border-[var(--ink-300,#ccc)] hover:bg-[var(--ink-100,#f5f5f5)]"}`}>{m.label}</button>
               ))}
+            </div>
+            {/* Optional early email (16 July 2026): the single biggest funnel
+                leak was drafts nobody could reach. Strictly optional, no
+                gating, shares the same state as the agreement step so it
+                prefills there. The create API emails the draft link
+                immediately, so the address gets value the moment it is
+                given. */}
+            <div className="mt-5 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3 max-w-md">
+              <p className="text-sm font-medium mb-1">Optional: get a link to this RFP by email</p>
+              <input
+                value={email}
+                onChange={(e) => { markStarted(); setEmail(e.target.value); }}
+                type="email"
+                placeholder="you@yourcompany.com"
+                className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm"
+              />
+              <p className="mt-1.5 text-xs text-[var(--ink-500)]">Business email. We send your RFP link and one reminder if you do not finish. No marketing.</p>
             </div>
             <div className="mt-5 flex items-center gap-3">
               <button onClick={() => advance(5, "timeline")} className={nextBtn}>Continue</button>

@@ -1,4 +1,4 @@
-import { getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, listAllRfpIds } from "@/lib/rfp-store";
+import { getProjectsBulk, kvConfigured, kvGetJson, kvMgetJson, kvSetJson, listAllRfpIds } from "@/lib/rfp-store";
 import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
 import { matchSuppliers } from "@/lib/supplier-match";
 import { SITE_URL } from "@/lib/structured-data";
@@ -87,16 +87,23 @@ export async function GET(req: Request) {
 
   const ids = await listAllRfpIds();
   const projects = await getProjectsBulk(ids);
+  // Early-capture contact emails (the wizard's optional field): drafts with
+  // no owner become reachable through the address the buyer volunteered for
+  // exactly this purpose ("your RFP link and one reminder if you do not
+  // finish"). Fetched in one MGET so the loop stays cheap.
+  const contacts = await kvMgetJson<string>(projects.map((p) => `rfp:${p.id}:contact_email`));
+  const contactByIndex = new Map<number, string>();
+  projects.forEach((_, i) => { const c = (contacts[i] ?? "").toLowerCase().trim(); if (c) contactByIndex.set(i, c); });
 
   let considered = 0;
   let sent = 0;
   const skipped = { published: 0, anonymous: 0, internal: 0, recent: 0, already_nudged: 0, opted_out: 0, send_failed: 0 };
 
-  for (const p of projects) {
+  for (const [idx, p] of projects.entries()) {
     if (sent >= MAX_SENDS_PER_RUN) break;
     considered += 1;
     if (p.status !== "draft" && p.status !== "review") { skipped.published += 1; continue; }
-    const owner = (p.owner_email ?? "").toLowerCase().trim();
+    const owner = ((p.owner_email ?? "").toLowerCase().trim()) || (contactByIndex.get(idx) ?? "");
     if (!owner) { skipped.anonymous += 1; continue; }
     if (owner.endsWith("@netify.com")) { skipped.internal += 1; continue; }
     if (optoutSet.has(owner)) { skipped.opted_out += 1; continue; }
