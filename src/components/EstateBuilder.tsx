@@ -195,7 +195,13 @@ export default function EstateBuilder({ vendors }: { vendors: VendorLite[] }) {
               )}
             </div>
           ))}
-          <button className="text-sm font-medium text-amber-700" onClick={() => setSites((s) => [...s, blankSite(s.length + 1)])}>+ Add another site</button>
+          <button
+            className="w-full rounded-sm border-2 border-dashed border-amber-400 bg-amber-50 hover:bg-amber-100 transition-colors py-4 text-base font-semibold text-amber-800"
+            onClick={() => setSites((s) => [...s, blankSite(s.length + 1)])}
+          >
+            + Add another site
+            <span className="block text-xs font-normal text-amber-700 mt-0.5">Every site sharpens your estimate and your bids</span>
+          </button>
 
           <div className="mt-6">
             <p className="text-sm font-medium mb-2">Service model</p>
