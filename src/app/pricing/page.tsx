@@ -68,6 +68,14 @@ export default function PricingPortalPage() {
           </a>
           <p className="text-xs text-blue-300 mt-4">Free to compare. No sign-in for your estimate. No obligation to award.</p>
 
+          <div className="flex flex-wrap items-center gap-2.5 mt-6">
+            <span className="text-sm text-blue-200 font-medium">Built for businesses in:</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-800 bg-[#0d1f3a] px-3.5 py-1.5 text-sm text-white"><span aria-hidden="true">🇬🇧</span> United Kingdom</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-800 bg-[#0d1f3a] px-3.5 py-1.5 text-sm text-white"><span aria-hidden="true">🇺🇸</span> United States</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-800 bg-[#0d1f3a] px-3.5 py-1.5 text-sm text-white"><span aria-hidden="true">🇨🇦</span> Canada</span>
+            <span className="text-sm text-blue-300">with national or global site requirements</span>
+          </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-12 border-t border-blue-900 pt-8">
             <div><p className="text-3xl font-bold text-white">30+</p><p className="text-sm text-blue-200">verified providers competing<sup>1</sup></p></div>
             <div><p className="text-3xl font-bold text-white">40</p><p className="text-sm text-blue-200">evidence-graded capabilities per provider</p></div>
