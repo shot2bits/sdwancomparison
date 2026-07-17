@@ -71,8 +71,12 @@ export default function NewProjectPage() {
           <rect x="542" y="128" width="40" height="14" rx="7" fill="#fde68a" />
           <circle cx="330" cy="48" r="20" fill="#ffffff" /><circle cx="352" cy="42" r="15" fill="#ffffff" /><circle cx="312" cy="54" r="13" fill="#ffffff" />
         </svg>
-        <div aria-hidden="true" className="absolute right-4 top-4 z-20 hidden max-w-[200px] rotate-6 rounded-xl border-[3px] border-zinc-900 bg-amber-400 px-4 py-2.5 text-center text-[13px] font-extrabold leading-snug sm:block">
-          No sales calls until you reply
+        <div className="absolute right-6 top-6 z-20 hidden max-w-[260px] items-start gap-3 rounded-lg border border-amber-300 bg-white px-4 py-3 sm:flex">
+          <span aria-hidden="true" className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">✓</span>
+          <span>
+            <span className="block text-[13.5px] font-semibold leading-snug text-[#13294b]">No sales calls until you reply</span>
+            <span className="mt-0.5 block text-[12px] leading-snug text-[var(--ink-600,#555)]">Suppliers respond in the app; you choose who to speak with.</span>
+          </span>
         </div>
         <div className="relative z-10 p-6 sm:p-10">
           <div className="max-w-md rounded-2xl border border-[#f3e8d8] bg-[#fffbf5] p-6 sm:p-7">
