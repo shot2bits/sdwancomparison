@@ -77,7 +77,7 @@ export default function NewProjectPage() {
         <div className="relative z-10 p-6 sm:p-10">
           <div className="max-w-md rounded-2xl border border-[#f3e8d8] bg-[#fffbf5] p-6 sm:p-7">
             <p className="eyebrow mb-2">Start your project</p>
-            <h1 id="page-h1" className="mb-3 text-[26px] font-extrabold leading-[1.1] tracking-tight text-[#13294b] sm:text-[30px]">
+            <h1 id="page-h1" className="mb-3 text-[26px] leading-[1.1] text-[#13294b] sm:text-[30px]">
               Compare SASE &amp; SD-WAN across 30+ vendors and service providers
             </h1>
             <p id="page-subhead" className="mb-5 text-[15px] text-[var(--ink-700)]">
