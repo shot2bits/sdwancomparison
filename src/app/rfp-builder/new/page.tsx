@@ -15,12 +15,12 @@ import {
 export const metadata: Metadata = {
   title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
   description:
-    "Describe your SASE or SD-WAN project in two minutes. Netify builds the full RFP from its question bank and shows which verified suppliers match before you publish.",
+    "One two-minute brief and five verified SASE or SD-WAN suppliers respond with structured answers and private pricing. Free for buyers, no sales calls until you reply.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/new/` },
   openGraph: {
     title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
     description:
-      "Five quick questions, then Netify assembles a complete RFP you review, trim and publish to verified vendors and managed providers.",
+      "One two-minute brief and five verified SASE or SD-WAN suppliers respond with structured answers and private pricing. Free for buyers, no sales calls until you reply.",
     url: `${SITE_URL}/rfp-builder/new/`,
     type: "website",
     locale: "en_GB",
@@ -52,12 +52,22 @@ export default function NewProjectPage() {
       ))}
       <div className="mb-10 max-w-3xl">
         <p className="eyebrow mb-3">Start your project</p>
-        <h1 id="page-h1" className="mb-4">Describe your SASE or SD-WAN project in two minutes.</h1>
+        <h1 id="page-h1" className="mb-4">One two-minute brief. Five verified SASE and SD-WAN suppliers respond.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           Answer five quick questions and Netify assembles a complete RFP from its question bank,
-          shows which verified suppliers match, and submits it to the marketplace when you agree
-          the final step. Free for buyers, and nothing is shared until you agree the submission.
+          matches you to verified vendors and managed service providers, and submits it when you
+          agree the final step. Suppliers respond in the app with structured answers and pricing
+          that stays private to you. One submission replaces five sales calls.
         </p>
+        {/* CTM-style offer ticks (Robert, 17 July 2026): the deal in one
+            glance before any question is asked. Server-rendered so agents and
+            crawlers read the offer, not just the form. */}
+        <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Free for buyers</li>
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No sales calls until you reply</li>
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing private to you</li>
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No obligation to award</li>
+        </ul>
       </div>
       <DescribeWizard />
 

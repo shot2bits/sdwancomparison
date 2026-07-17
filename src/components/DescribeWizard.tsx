@@ -193,7 +193,7 @@ export default function DescribeWizard() {
       if (!id) {
         // Consent wording version stamped onto submitted RFPs. Bump when the
         // agreement copy on step 6 changes materially.
-        const consent = submit ? { version: "submit-agreement v2, 15 July 2026", agreed_at: Date.now(), flow: "wizard_submit" } : undefined;
+        const consent = submit ? { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "wizard_submit" } : undefined;
         // Submit intent carried on the draft itself (server-side), so the
         // "Confirm and submit" magic link completes the submission whichever
         // device it is opened on. The localStorage copy below remains the
@@ -442,13 +442,23 @@ export default function DescribeWizard() {
                 <p className="mt-1 text-xs text-[var(--ink-500)]">Business addresses only. We send a sign-in link; click it and your RFP submits automatically.</p>
               </div>
             )}
-            <p className="mb-3 text-sm text-[var(--ink-700)]">
-              <strong>Generate your RFP and submit it to the marketplace.</strong> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched
-              vendors and managed service providers, who review your requirements and make contact through this app.
-              Your contact details are never shown to suppliers; conversations start only when you reply. You can edit
-              your RFP after submitting and suppliers always see the latest version. Your data is only shared with a
-              vetted account manager from each vendor or managed service provider. We only email you about your RFPs,
-              opportunities and RFP Builder and Marketplace features. No third-party marketing.{" "}
+            {/* The quote-reveal moment, compare-the-market style (Robert,
+                17 July 2026): what submitting buys you, in four scannable
+                lines, before the legal detail. */}
+            <div className="mb-4 rounded-sm border border-emerald-200 bg-emerald-50/60 p-4">
+              <p className="text-sm font-semibold mb-2">What you get when you submit</p>
+              <ul className="space-y-1.5 text-sm text-[var(--ink-700)]">
+                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched suppliers, each with a private response link</li>
+                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Structured responses come back in this app, side by side against your questions</li>
+                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing stays private to you; suppliers never see each other</li>
+                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> You stay anonymous until you reply; your contact details are never shown to suppliers</li>
+              </ul>
+            </div>
+            <p className="mb-3 text-xs text-[var(--ink-600,#555)]">
+              Suppliers make contact only through this app and conversations start when you reply. You can edit
+              your RFP after submitting and suppliers always see the latest version. Your data goes only to a
+              vetted account manager at each matched vendor or managed service provider. We only email you about
+              your RFPs, opportunities and RFP Builder and Marketplace features. No third-party marketing.{" "}
               <a href="https://netify.co.uk/privacy-policy/" className="underline" target="_blank" rel="noreferrer">Privacy policy</a>.
             </p>
             <label className="mb-4 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
@@ -466,6 +476,7 @@ export default function DescribeWizard() {
               </button>
               <button onClick={() => setStep(5)} className={backBtn}>Back</button>
             </div>
+            <p className="mt-2 text-xs text-[var(--ink-600,#555)]">Free and no obligation to award. You choose who to speak with.</p>
             <button onClick={() => create(false)} disabled={creating} className="mt-3 block text-[11px] text-[var(--ink-500)] underline">
               Generate only, review first
             </button>
