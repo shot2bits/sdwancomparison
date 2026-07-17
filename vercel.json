@@ -4,6 +4,7 @@
     { "path": "/sase/api/agent/run", "schedule": "0 15 * * *" },
     { "path": "/sase/api/cron/publish-nudge", "schedule": "0 9 * * *" },
     { "path": "/sase/api/cron/deadlines", "schedule": "30 8 * * *" },
-    { "path": "/sase/api/cron/daily-digest", "schedule": "30 6 * * *" }
+    { "path": "/sase/api/cron/daily-digest", "schedule": "30 6 * * *" },
+    { "path": "/sase/api/cron/account-activation", "schedule": "0 * * * *" }
   ]
 }
