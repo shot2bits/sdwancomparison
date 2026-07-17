@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import DescribeWizard from "@/components/DescribeWizard";
 import WizardSupportingContent from "@/components/WizardSupportingContent";
 import {
@@ -50,26 +51,69 @@ export default function NewProjectPage() {
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
-      <div className="mb-10 max-w-3xl">
-        <p className="eyebrow mb-3">Start your project</p>
-        <h1 id="page-h1" className="mb-4">One two-minute brief. Five verified SASE and SD-WAN suppliers respond.</h1>
-        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          Answer five quick questions and Netify assembles a complete RFP from its question bank,
-          matches you to verified vendors and managed service providers, and submits it when you
-          agree the final step. Suppliers respond in the app with structured answers and pricing
-          that stays private to you. One submission replaces five sales calls.
-        </p>
-        {/* CTM-style offer ticks (Robert, 17 July 2026): the deal in one
-            glance before any question is asked. Server-rendered so agents and
-            crawlers read the offer, not just the form. */}
-        <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
-          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Free for buyers</li>
-          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No sales calls until you reply</li>
-          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing private to you</li>
-          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No obligation to award</li>
-        </ul>
+      {/* Mockup B hero (Robert's pick, 17 July 2026): floating cream offer
+          card over an illustrated amber scene, footnoted claim, promise
+          sticker, jump-to strip. Sentence case throughout, site font
+          untouched, all server-rendered so the offer is in the HTML for
+          crawlers and agents. */}
+      <div className="relative mb-6 overflow-hidden rounded-md border border-amber-200 bg-amber-50">
+        <svg viewBox="0 0 640 190" preserveAspectRatio="xMaxYMax slice" aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-32 w-full sm:h-40">
+          <path d="M0 152 L640 152 L640 190 L0 190 Z" fill="#e7e5e4" />
+          <circle cx="376" cy="122" r="7" fill="#13294b" />
+          <circle cx="470" cy="96" r="7" fill="#13294b" />
+          <circle cx="562" cy="118" r="7" fill="#13294b" />
+          <path d="M383 118 Q425 74 463 93" stroke="#f59e0b" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d="M477 94 Q520 78 556 113" stroke="#f59e0b" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <rect x="356" y="132" width="40" height="10" rx="5" fill="#fde68a" />
+          <rect x="450" y="106" width="40" height="36" rx="8" fill="#ffffff" stroke="#e5e2da" />
+          <rect x="457" y="114" width="26" height="5" rx="2.5" fill="#e7e5e4" />
+          <rect x="457" y="124" width="18" height="5" rx="2.5" fill="#10b981" />
+          <rect x="542" y="128" width="40" height="14" rx="7" fill="#fde68a" />
+          <circle cx="330" cy="48" r="20" fill="#ffffff" /><circle cx="352" cy="42" r="15" fill="#ffffff" /><circle cx="312" cy="54" r="13" fill="#ffffff" />
+        </svg>
+        <div aria-hidden="true" className="absolute right-4 top-4 z-20 hidden max-w-[200px] rotate-6 rounded-xl border-[3px] border-zinc-900 bg-amber-400 px-4 py-2.5 text-center text-[13px] font-extrabold leading-snug sm:block">
+          No sales calls until you reply
+        </div>
+        <div className="relative z-10 p-6 sm:p-10">
+          <div className="max-w-md rounded-2xl border border-[#f3e8d8] bg-[#fffbf5] p-6 sm:p-7">
+            <p className="eyebrow mb-2">SASE &amp; SD-WAN RFP</p>
+            <h1 id="page-h1" className="mb-3 text-[27px] font-extrabold leading-[1.08] tracking-tight text-[#13294b] sm:text-[31px]">
+              One brief. Five verified SASE and SD-WAN suppliers respond.
+            </h1>
+            <p id="page-subhead" className="mb-5 text-[15px] text-[var(--ink-700)]">
+              Two minutes to describe your project. Structured answers and{" "}
+              <strong>private pricing</strong> come back side by side.<sup>1</sup>
+            </p>
+            <a href="#describe-wizard" className="inline-flex items-center rounded-lg bg-[#13294b] px-7 py-3 text-[15px] font-semibold text-white no-underline transition-colors hover:bg-[#1e3a5f]">
+              Start my brief
+            </a>
+            <p className="mt-4 flex items-start gap-1.5 text-[12.5px] text-[var(--ink-700)]">
+              <span aria-hidden="true" className="font-bold text-emerald-600">✓</span>
+              <span><strong>30+ verified providers</strong> · Methodology v2026.1 · £0 for buyers</span>
+            </p>
+            <p className="mt-1.5 flex items-start gap-1.5 text-[12.5px] text-[var(--ink-700)] sm:hidden">
+              <span aria-hidden="true" className="font-bold text-emerald-600">✓</span>
+              <span>No sales calls until you reply</span>
+            </p>
+          </div>
+          <p className="mt-4 max-w-2xl text-[11px] text-[var(--ink-600,#555)]">
+            1. Up to five matched suppliers per submission, with more available after submitting.
+            Free for buyers with no obligation to award. Netify marketplace dataset, July 2026.
+            Vendors cannot pay to influence scores or matching.
+          </p>
+        </div>
       </div>
-      <DescribeWizard />
+
+      <div className="mb-10 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-md border border-[var(--ink-200,#e5e5e5)] bg-white px-5 py-3 text-[13px]">
+        <span className="font-bold text-[#13294b]">Jump to...</span>
+        <a className="underline" href="https://netify.co.uk/insights/sase-cost-tco-global-enterprise/">How much does SASE and SD-WAN cost?</a>
+        <Link className="underline" href="/how-it-works/">How do supplier responses work?</Link>
+        <Link className="underline" href="/rfp-builder/sample-rfp/">What does the RFP include?</Link>
+      </div>
+
+      <div id="describe-wizard" className="scroll-mt-6">
+        <DescribeWizard />
+      </div>
 
       {/* Server-rendered context below the wizard, so this page carries the
           same substance for crawlers and AI engines that the interaction
