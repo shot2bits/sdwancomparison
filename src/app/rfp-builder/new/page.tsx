@@ -16,12 +16,12 @@ import {
 export const metadata: Metadata = {
   title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
   description:
-    "One two-minute brief and five verified SASE or SD-WAN suppliers respond with structured answers and private pricing. Free for buyers, no sales calls until you reply.",
+    "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched suppliers respond with structured answers and private pricing.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/new/` },
   openGraph: {
     title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
     description:
-      "One two-minute brief and five verified SASE or SD-WAN suppliers respond with structured answers and private pricing. Free for buyers, no sales calls until you reply.",
+      "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched suppliers respond with structured answers and private pricing.",
     url: `${SITE_URL}/rfp-builder/new/`,
     type: "website",
     locale: "en_GB",
@@ -76,20 +76,20 @@ export default function NewProjectPage() {
         </div>
         <div className="relative z-10 p-6 sm:p-10">
           <div className="max-w-md rounded-2xl border border-[#f3e8d8] bg-[#fffbf5] p-6 sm:p-7">
-            <p className="eyebrow mb-2">SASE &amp; SD-WAN RFP</p>
-            <h1 id="page-h1" className="mb-3 text-[27px] font-extrabold leading-[1.08] tracking-tight text-[#13294b] sm:text-[31px]">
-              One brief. Five verified SASE and SD-WAN suppliers respond.
+            <p className="eyebrow mb-2">Start your project</p>
+            <h1 id="page-h1" className="mb-3 text-[26px] font-extrabold leading-[1.1] tracking-tight text-[#13294b] sm:text-[30px]">
+              Compare SASE &amp; SD-WAN across 30+ vendors and service providers
             </h1>
             <p id="page-subhead" className="mb-5 text-[15px] text-[var(--ink-700)]">
-              Two minutes to describe your project. Structured answers and{" "}
-              <strong>private pricing</strong> come back side by side.<sup>1</sup>
+              One two-minute brief and your five best-matched suppliers respond with structured
+              answers and <strong>private pricing</strong>, side by side.<sup>1</sup>
             </p>
             <a href="#describe-wizard" className="inline-flex items-center rounded-lg bg-[#13294b] px-7 py-3 text-[15px] font-semibold text-white no-underline transition-colors hover:bg-[#1e3a5f]">
               Start my brief
             </a>
             <p className="mt-4 flex items-start gap-1.5 text-[12.5px] text-[var(--ink-700)]">
               <span aria-hidden="true" className="font-bold text-emerald-600">✓</span>
-              <span><strong>30+ verified providers</strong> · Methodology v2026.1 · £0 for buyers</span>
+              <span><strong>Scored across 40 evidence-graded capabilities</strong> · Methodology v2026.1 · £0 for buyers</span>
             </p>
             <p className="mt-1.5 flex items-start gap-1.5 text-[12.5px] text-[var(--ink-700)] sm:hidden">
               <span aria-hidden="true" className="font-bold text-emerald-600">✓</span>
