@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
 import { BEST_PAGES } from "@/lib/best-pages";
-import { FEATURES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST, getShortlistDataset } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import {
   SITE_URL,
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function ShortlistPage() {
   const vendors = getShortlistDataset();
-  const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category }));
+  const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
 
   const schemas = [
     getOrganizationSchema(),
@@ -40,6 +40,23 @@ export default function ShortlistPage() {
     getShortlistWebApplicationSchema(),
     getShortlistDatasetSchema(vendors.length, features.length),
     getShortlistFaqSchema(SHORTLIST_FAQS),
+    // The 40 capability definitions as a DefinedTermSet, mirroring the
+    // visible glossary below so AI engines can quote a row's meaning
+    // rather than guessing it from the label (Robert, 17 July 2026).
+    {
+      "@context": "https://schema.org",
+      "@type": "DefinedTermSet",
+      "@id": `${SITE_URL}/shortlist/#capability-definitions`,
+      name: "Netify SD-WAN and SASE capability definitions",
+      description: "One-sentence definitions of the 40 evidence-graded capabilities used across the Netify shortlist builder, vendor profiles and ranked comparisons.",
+      hasDefinedTerm: FEATURES.map((f) => ({
+        "@type": "DefinedTerm",
+        "@id": `${SITE_URL}/shortlist/#${f.id}`,
+        name: f.name,
+        description: f.description,
+        inDefinedTermSet: `${SITE_URL}/shortlist/#capability-definitions`,
+      })),
+    },
   ];
 
   return (
@@ -88,6 +105,34 @@ export default function ShortlistPage() {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* The 40 capabilities, defined. Server-rendered and indexable: one
+          fact-checked sentence per capability, derived from the grading
+          definitions in data/feature-definitions.json, so buyers and AI
+          engines read what each row measures rather than guessing from the
+          label. Mirrored in the DefinedTermSet JSON-LD above and served in
+          /shortlist/data.json for agents. */}
+      <section className="mt-20" id="capability-definitions">
+        <p className="eyebrow mb-3">Definitions</p>
+        <h2 className="mb-2">The 40 capabilities, defined</h2>
+        <p className="text-sm text-[var(--ink-600,#555)] mb-6 max-w-3xl">
+          Every provider is graded against the same 40 capabilities. One sentence on what each row
+          measures; grades reflect public evidence, so always confirm via RFP.
+        </p>
+        {FEATURE_CATEGORIES_LIST.map((cat) => (
+          <div key={cat} className="mb-6">
+            <h3 className="text-base font-medium mb-2">{cat}</h3>
+            <dl className="space-y-2 max-w-3xl">
+              {FEATURES.filter((f) => f.category === cat).map((f) => (
+                <div key={f.id} id={f.id}>
+                  <dt className="text-sm font-medium inline">{f.name}.</dt>{" "}
+                  <dd className="text-sm text-[var(--ink-700)] inline">{f.description}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
       </section>
 
       <section className="mt-20 max-w-3xl">

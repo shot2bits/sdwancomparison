@@ -51,7 +51,7 @@ export default function CompareTable({ comparison }: { comparison: ComparisonRes
   );
 }
 
-function Group({ group, slugs }: { group: { name: string; rows: { key: string; label: string; grades: Record<string, string> }[] }; slugs: string[] }) {
+function Group({ group, slugs }: { group: { name: string; rows: { key: string; label: string; description?: string; grades: Record<string, string> }[] }; slugs: string[] }) {
   return (
     <>
       <tr>
@@ -61,7 +61,9 @@ function Group({ group, slugs }: { group: { name: string; rows: { key: string; l
       </tr>
       {group.rows.map((row) => (
         <tr key={row.key} className="border-b border-[var(--ink-200,#e5e5e5)]">
-          <td className="py-1.5 pr-3 text-[var(--ink-700)]">{row.label}</td>
+          <td className="py-1.5 pr-3 text-[var(--ink-700)]" title={row.description || undefined}>
+            {row.label}
+          </td>
           {slugs.map((s) => (
             <td key={s} className="py-1.5 px-3">
               <span

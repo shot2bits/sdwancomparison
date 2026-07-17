@@ -39,7 +39,7 @@ import {
   type VendorVerdict,
 } from "@/lib/shortlist-core";
 
-type FeatureMeta = { id: string; name: string; category: string };
+type FeatureMeta = { id: string; name: string; category: string; description?: string };
 
 type Props = {
   vendors: ShortlistVendor[];
@@ -585,13 +585,13 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
                           <button
                             key={f.id}
                             onClick={() => cycleFeature(f.id)}
-                            title={
+                            title={`${f.description ? `${f.description} ` : ""}${
                               st === "off"
                                 ? "Click: require this"
                                 : st === "required"
                                   ? "Required. Click: prefer instead"
                                   : "Preferred. Click: clear"
-                            }
+                            }`}
                             className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                               st === "required"
                                 ? "bg-amber-500 text-zinc-950 border-amber-500 font-medium"

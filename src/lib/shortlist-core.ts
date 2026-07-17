@@ -782,6 +782,8 @@ export function decodeScenario(
 export type CompareRow = {
   key: string;
   label: string;
+  /** One-sentence definition of what the row measures, where available. */
+  description?: string;
   grades: Record<string, CapabilityStatus | string>;
 };
 
@@ -807,7 +809,7 @@ export type ComparisonResult = {
 export function buildComparison(
   vendors: ShortlistVendor[],
   slugs: string[],
-  featureMeta: { id: string; name: string; category: string }[],
+  featureMeta: { id: string; name: string; category: string; description?: string }[],
 ): ComparisonResult | null {
   const chosen = slugs
     .map((s) => vendors.find((v) => v.slug === s))
@@ -828,6 +830,7 @@ export function buildComparison(
         .map((f) => ({
           key: f.id,
           label: f.name,
+          description: f.description,
           grades: Object.fromEntries(chosen.map((v) => [v.slug, v.capabilities[f.id] ?? "unknown"])),
         })),
     });

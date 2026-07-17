@@ -11,6 +11,8 @@ export type FeatureDefinition = {
   category: string;
   name: string;
   definition: string;
+  /** One-sentence buyer-readable definition, surfaced on pages and machine feeds. */
+  description: string;
   rfp_question: string;
   rfp_evidence_requested: string;
 };
