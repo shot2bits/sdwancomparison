@@ -15,14 +15,14 @@ import {
 } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
-  title: "Best SD-WAN and SASE Providers (2026): Build a Shortlist",
+  title: "Best SD-WAN and SASE Providers (2026): Compare the Market, Build a Shortlist",
   description:
-    "The best SD-WAN and SASE providers and vendors for 2026, ranked from 30 evidence-graded platforms. Filter by sector and features or ask the AI advisor.",
+    "Compare the SASE and SD-WAN UK and North American market: 30 evidence-graded providers, ranked. Build a shortlist by filters or AI advisor, then publish an RFP within minutes.",
   alternates: { canonical: `${SITE_URL}/shortlist/` },
   openGraph: {
-    title: "Best SD-WAN and SASE Providers (2026): Build a Shortlist",
+    title: "Best SD-WAN and SASE Providers (2026): Compare the Market, Build a Shortlist",
     description:
-      "Build a bespoke SASE and SD-WAN shortlist from 30 graded providers, by hand or with the AI advisor.",
+      "Compare the SASE and SD-WAN UK and North American market from 30 graded providers, then publish an RFP within minutes.",
     url: `${SITE_URL}/shortlist`,
     type: "website",
     locale: "en_GB",
@@ -58,6 +58,14 @@ export default function ShortlistPage() {
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           {SHORTLIST_INTRO.subhead}
         </p>
+        {/* The offer in one glance (Robert, 17 July 2026), server-rendered
+            so agents and crawlers read it alongside the ranking data. */}
+        <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Free for buyers</li>
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No sales calls until you reply</li>
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing private to you</li>
+          <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No obligation to award</li>
+        </ul>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written and reviewed by the Netify research team, last verified and
           graded in June 2026.

@@ -680,7 +680,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               href={rfpUrl()}
               className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors"
             >
-              Generate my RFP
+              Publish an RFP →
             </a>
           </div>
         </div>
