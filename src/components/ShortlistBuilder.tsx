@@ -899,21 +899,24 @@ function ShortlistBridge({ names, personalised, href }: { names: string[]; perso
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const headline =
+  const recipients =
     names.length >= 2
-      ? `Get ${names.slice(0, -1).join(", ")} and ${names[names.length - 1]} to bid for your business`
+      ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`
       : names.length === 1
-        ? `Get ${names[0]} to bid for your business`
-        : "Get your best-matched suppliers to bid for your business";
+        ? names[0]
+        : "";
 
   return (
     <section className="mt-8 rounded-md border border-amber-300 bg-amber-50 p-6">
       <p className="eyebrow mb-2 text-amber-800">Your shortlist, priced</p>
-      <h3 className="mb-2 text-xl text-[#13294b]">{headline}</h3>
+      <h3 className="mb-2 text-xl text-[#13294b]">Create and publish an RFP in minutes</h3>
       <p className="mb-4 max-w-2xl text-sm text-[var(--ink-700)]">
-        One two-minute brief goes to {personalised ? "the vendors you just shortlisted" : "your top-ranked vendors"}.
-        They respond in the app with structured answers and <strong>private pricing</strong>, side
-        by side against your questions.
+        Compare SASE &amp; SD-WAN across 30+ vendors and service providers.
+        {recipients
+          ? ` Your brief goes to ${personalised ? "the vendors you just shortlisted" : "your top-ranked vendors"}, including ${recipients}, who`
+          : " Your brief goes to your best-matched suppliers, who"}{" "}
+        respond in the app with structured answers and <strong>private pricing</strong>, side by
+        side against your questions.
       </p>
       <div className="mb-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-[var(--ink-700)]">
         <span><span aria-hidden="true" className="font-bold text-emerald-600">✓</span> Free for buyers</span>
