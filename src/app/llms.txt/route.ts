@@ -9,7 +9,7 @@ export async function GET() {
   ).join("\n");
   const vendors = getAllVendorSlugs().join(", ");
   const bestPages = BEST_PAGES.map(
-    (p) => `- ${"${SITE_URL}"}/best/${"${p.slug}"} : ${"${p.title}"} (ranked top 10, ItemList schema, JSON twin at /best/${"${p.slug}"}/data.json)`,
+    (p) => `- ${SITE_URL}/best/${p.slug} : ${p.title} (ranked top 10, ItemList schema, JSON twin at /best/${p.slug}/data.json)`,
   ).join("\n");
 
   const body = `# Netify SASE and SD-WAN Shortlist Builder
