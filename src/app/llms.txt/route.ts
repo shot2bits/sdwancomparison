@@ -55,7 +55,7 @@ Reference and discovery surfaces are open and ungated for AI engines and agents:
 
 ## Agent-to-agent RFP
 
-The RFP builder is agent-callable. Supplier AI agents can fetch and respond to a published RFP over the MCP server using its share token. MCP tools: get_rfp, list_rfp_questions, respond_to_rfp, get_rfp_status, supplier_inbox, supplier_reply. Buyers and suppliers (the graded marketplace vendors) connect and message asynchronously; a supplier agent can read its inbox and reply, share contact details or propose a demo over MCP. This makes a Netify RFP a machine-readable, machine-respondable object, not just a web form.
+The RFP builder is agent-callable. Supplier AI agents can fetch and respond to a published RFP over the MCP server using its share token. MCP tools: get_rfp, list_rfp_questions, get_rfp_evidence_draft, respond_to_rfp, get_rfp_status, supplier_inbox, supplier_reply. get_rfp_evidence_draft returns Netify's pre-drafted Evidence Response for the named vendor: answers drafted from Netify's public capability grades with the grade and evaluation date stated per line, gaps and every pricing question left blank for the supplier, so a supplier agent starts from an evidence-grounded draft rather than a blank form. Buyers and suppliers (the graded marketplace vendors) connect and message asynchronously; a supplier agent can read its inbox and reply, share contact details or propose a demo over MCP. This makes a Netify RFP a machine-readable, machine-respondable object, not just a web form.
 
 ## Programmatic access
 

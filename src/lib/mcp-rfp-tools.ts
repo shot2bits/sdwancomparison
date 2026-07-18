@@ -30,6 +30,19 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
     inputSchema: { type: "object", properties: { token: { type: "string" } }, required: ["token"] },
   },
   {
+    name: "get_rfp_evidence_draft",
+    description:
+      "Netify's pre-drafted Evidence Response for an invited supplier: answers drafted from Netify's public-evidence capability grades for that vendor (grade and evaluation date stated in every line), gaps and all pricing questions left blank for the supplier. Provide the share token and the supplier organisation name. Review and edit before submitting via respond_to_rfp.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        token: { type: "string", description: "The RFP share token issued to invited suppliers." },
+        vendor: { type: "string", description: "The supplier organisation name or Netify vendor slug." },
+      },
+      required: ["token", "vendor"],
+    },
+  },
+  {
     name: "respond_to_rfp",
     description: "Submit or update a supplier's answers to an RFP. Provide the share token, your organisation name, and an answers map of question id to response text. Set submit true to finalise.",
     inputSchema: {
@@ -327,6 +340,17 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     const p = await getProjectByToken(token);
     if (!p) return { error: "RFP not found for that token." };
     return { sections: activeQuestions(p) };
+  }
+  if (name === "get_rfp_evidence_draft") {
+    const p = await getProjectByToken(token);
+    if (!p) return { error: "RFP not found for that token." };
+    const vendorRef = String(args.vendor ?? "").trim();
+    if (!vendorRef) return { error: "vendor is required (organisation name or Netify vendor slug)." };
+    const { buildEvidenceDraft } = await import("@/lib/evidence-response");
+    return {
+      ...buildEvidenceDraft(p, vendorRef),
+      next: "Review and edit every draft, add pricing, then submit via respond_to_rfp with the same token and an answers map keyed by question_id.",
+    };
   }
   if (name === "get_rfp_status") {
     const p = await getProjectByToken(token);

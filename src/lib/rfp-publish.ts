@@ -147,6 +147,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       `<p>Hello,</p><p>Your RFP "${p.title}" has been published to ${invited.length} curated suppliers on the Netify marketplace. Their responses arrive side by side in your workspace, and pricing stays private to you.</p>` +
       bandBlock +
       (invited.length ? `<p><strong>Going to:</strong> ${invited.map((v) => v.name).join(", ")}.</p>` : "") +
+      `<p>To make replying fast, each invited supplier starts from a response Netify pre-drafted from its public-evidence evaluation of that vendor. They confirm, correct and add their pricing; capabilities Netify could not evidence are left blank for them to answer.</p>` +
       gapsBlock +
       `<p><strong>Your document:</strong> download your RFP as Word or PDF from your workspace to circulate internally.</p>` +
       `<p><a href="${rfpUrl}">Open your RFP workspace</a></p>` +
@@ -174,7 +175,11 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
 
   const invited: { slug: string; name: string; supplier_url: string }[] = [];
   for (const v of result.shortlist) {
-    const r = await inviteSupplier(project.id, v.slug, `You are invited to respond to the RFP "${project.title}".`);
+    const r = await inviteSupplier(
+      project.id,
+      v.slug,
+      `You are invited to respond to the RFP "${project.title}". Netify has pre-drafted evidence answers for your organisation from its public capability evaluation; open your response link, review the draft, correct anything and add your pricing. Most of the writing is already done.`,
+    );
     if (!("error" in r)) invited.push({ slug: v.slug, name: r.vendor_name, supplier_url: `${SITE_URL}/rfp-builder/${project.id}/respond?token=${project.share_token}` });
   }
 

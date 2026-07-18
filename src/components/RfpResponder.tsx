@@ -12,6 +12,16 @@ type Teaser = { sector: string | null; organisation_size: string; product_scope:
 type Project = { id: string; title: string; status: string; rfp_sections: Section[]; nda_required?: boolean; teaser?: Teaser };
 type Nda = { required: boolean; source: string; text: string; link: string; version: number };
 type Thread = { id: string; vendor: string; category: string; question: string; status: string; buyer_answer: string };
+type EvidenceDraft = {
+  available: boolean;
+  reason?: string;
+  vendor_name?: string;
+  evaluated?: string;
+  coverage?: { drafted: number; needs_input: number; total: number };
+  answers?: { question_id: string; draft: string; needs_input: boolean; note: string }[];
+  company_note?: string;
+  provenance?: string[];
+};
 
 export default function RfpResponder({ id, token }: { id: string; token: string }) {
   const [project, setProject] = useState<Project | null>(null);
@@ -25,6 +35,11 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   const [question, setQuestion] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  // The Evidence Response: Netify's pre-drafted answers for this vendor,
+  // fetched once the supplier names their organisation. Apply fills only
+  // empty answer boxes; typed text is never overwritten.
+  const [evidence, setEvidence] = useState<EvidenceDraft | null>(null);
+  const [draftApplied, setDraftApplied] = useState(false);
 
   // Every supplier-side call carries the share token from the response link:
   // the server refuses reads on the bare id (the id alone must grant nothing).
@@ -58,11 +73,37 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   // When the supplier names their organisation, re-check whether they've already
   // accepted the NDA (e.g. on a return visit) and, if so, load the full detail.
   async function checkVendor(name: string) {
+    if (name.trim()) fetchEvidence(name.trim());
     if (!nda?.required || !name.trim()) return;
     try {
       const r = await fetch(`/sase/api/rfp/${id}/nda?${tokenQs}&vendor=${encodeURIComponent(name.trim())}`).then((x) => x.json());
       if (r?.accepted) { setAccepted(true); await loadProject(name); }
     } catch { /* non-fatal */ }
+  }
+
+  /** Fetch Netify's Evidence Response draft for this organisation. */
+  async function fetchEvidence(name: string) {
+    try {
+      const r = await fetch(`/sase/api/rfp/${id}/evidence-draft?${tokenQs}&vendor=${encodeURIComponent(name)}`);
+      if (!r.ok) return;
+      const d = (await r.json()) as EvidenceDraft;
+      setEvidence(d);
+      setDraftApplied(false);
+    } catch { /* the panel simply stays absent */ }
+  }
+
+  /** Apply the draft to EMPTY answer boxes only; typed answers are never overwritten. */
+  function applyEvidenceDraft() {
+    if (!evidence?.answers) return;
+    setAnswers((prev) => {
+      const next = { ...prev };
+      for (const a of evidence.answers ?? []) {
+        if (a.draft && !(next[a.question_id] ?? "").trim()) next[a.question_id] = a.draft;
+      }
+      return next;
+    });
+    setDraftApplied(true);
+    setNotice("Netify's evidence draft has been applied to the empty answers. Review and edit every one, add your pricing, then save or submit.");
   }
 
   async function acceptNda() {
@@ -171,6 +212,42 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
             <p className="text-xs text-[var(--ink-500)]">We record your organisation, the name above, the date and time, and a request fingerprint as proof of acceptance.</p>
           </div>
         </section>
+      )}
+
+      {/* The Evidence Response: Netify pre-drafts what its dataset already
+          evidences for this vendor, so responding is editing, not writing.
+          Empty boxes only; pricing never drafted; provenance in every line. */}
+      {!locked && open && evidence?.available && evidence.coverage && (
+        <section className="rounded-sm border border-emerald-300 bg-emerald-50 p-5">
+          <p className="eyebrow mb-1">Netify evidence response</p>
+          <h2 className="text-lg mb-1">
+            {evidence.coverage.drafted} of {evidence.coverage.total} answers are pre-drafted for {evidence.vendor_name}
+          </h2>
+          <p className="text-sm text-[var(--ink-700)] mb-2">
+            Netify has drafted these from its public-evidence evaluation of {evidence.vendor_name} (last verified {evidence.evaluated}),
+            grades only, nothing invented. Grades below Yes are drafted with their qualifier stated. {evidence.coverage.needs_input} answers
+            are left blank for you, including every pricing and commercial question, which Netify never pre-drafts. Nothing is submitted
+            until you press Submit.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={applyEvidenceDraft}
+              disabled={draftApplied}
+              className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-full text-sm hover:bg-emerald-500 transition-colors disabled:opacity-50"
+            >
+              {draftApplied ? "Draft applied" : "Apply the draft to empty answers"}
+            </button>
+            <span className="text-xs text-[var(--ink-600,#555)]">Review and edit every answer before submitting. Typed answers are never overwritten.</span>
+          </div>
+          {evidence.company_note && (
+            <p className="mt-3 text-xs text-[var(--ink-600,#555)]">
+              <strong>Positioning from Netify&rsquo;s evaluation, reusable in your opening statement:</strong> {evidence.company_note}
+            </p>
+          )}
+        </section>
+      )}
+      {!locked && open && evidence && !evidence.available && vendor.trim() && (
+        <p className="text-xs text-[var(--ink-500)]">{evidence.reason}</p>
       )}
 
       {/* Full detail + response form — only once unlocked (or no NDA required) */}
