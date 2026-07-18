@@ -45,6 +45,32 @@ export default function NewProjectPage() {
         { "@type": "HowToStep", position: 4, name: "Compare the bids", text: "Structured responses come back scored against your questions. Pricing stays private to the buyer." },
       ],
     },
+    // The action affordance for assistants and agents (18 July 2026): this
+    // page IS the "create an RFP" entry point, machine-stated. The
+    // urlTemplate documents the supported prefill parameters, so an
+    // assistant can hand a buyer a link with their context already loaded.
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "@id": `${SITE_URL}/rfp-builder/new/#app`,
+      name: "Netify SASE & SD-WAN RFP Builder",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+      url: `${SITE_URL}/rfp-builder/new/`,
+      potentialAction: {
+        "@type": "CreateAction",
+        name: "Create and publish a SASE, SSE or SD-WAN RFP",
+        description:
+          "Answer seven questions; Netify assembles a complete RFP from its question bank (Methodology v2026.1) and submits it to matched, verified suppliers. Drafting is open; publishing requires a business email sign-in. Publishing returns a Netify Market Report: an indicative price band, gap check and the RFP as Word and PDF.",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/rfp-builder/new/?scope={scope}&sector={sector}`,
+          description: "Optional prefill: scope one of sdwan|sse|sase; sector one of healthcare|retail_ecommerce|financial_services|manufacturing.",
+          actionPlatform: ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"],
+        },
+      },
+    },
   ];
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">

@@ -1,5 +1,5 @@
 import { getProject, kvConfigured } from "@/lib/rfp-store";
-import { buildRfpMarkdown } from "@/lib/rfp-document";
+import { buildRfpMarkdown, buildRfpHtml } from "@/lib/rfp-document";
 import { sessionFromRequest } from "@/lib/auth";
 import { requireRfpOwner } from "@/lib/rfp-access";
 
@@ -32,6 +32,27 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     );
   }
 
+  // Format selection (18 July 2026, publish-value work): the publish reward
+  // is a document the buyer can circulate internally, so Word ships alongside
+  // markdown. ?format=doc serves styled HTML as application/msword — Word
+  // opens it natively, no new dependencies. ?format=print serves the same
+  // document inline with an auto print dialogue (the browser-native save as
+  // PDF path). Default stays markdown for existing links and agents.
+  const format = new URL(req.url).searchParams.get("format");
+  if (format === "doc") {
+    return new Response(buildRfpHtml(project), {
+      headers: {
+        "content-type": "application/msword",
+        "content-disposition": `attachment; filename="netify-rfp-${id}.doc"`,
+        "cache-control": "no-store",
+      },
+    });
+  }
+  if (format === "print") {
+    return new Response(buildRfpHtml(project, { autoPrint: true }), {
+      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+    });
+  }
   const markdown = buildRfpMarkdown(project);
   return new Response(markdown, {
     headers: {

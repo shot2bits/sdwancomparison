@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { createMagicToken, kvConfigured, kvGetJson, kvSetJson, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
+import { createMagicToken, kvConfigured, kvGetJson, kvSetJson, kvRaw, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
 import { sendMagicLink } from "@/lib/auth";
 import {
   isBlockedDomainLive,
@@ -117,8 +117,21 @@ export async function POST(req: Request) {
     } catch { /* best effort */ }
   }
 
-  const sent = await sendMagicLink(email, token, resolvedRole, returnTo);
+  // Same-screen 6-digit code (18 July 2026): corporate link scanners and
+  // cross-device email opening break magic links for real buyers (observed in
+  // the stuck-at-email cohort). The code maps to the SAME magic token, so
+  // consuming it inherits everything the link does — draft claim, pending
+  // submit, session. 15 minute expiry, 5 attempts, one code per email.
+  let code: string | undefined;
+  try {
+    code = String(Math.floor(100000 + Math.random() * 900000));
+    const codeKey = `auth:code:${email}`;
+    await kvSetJson(codeKey, { token, code, attempts: 0, expires: Date.now() + 15 * 60 * 1000 });
+    await kvRaw(["PEXPIRE", codeKey, 15 * 60 * 1000]);
+  } catch { code = undefined; /* code is an enhancement; the link still works */ }
+
+  const sent = await sendMagicLink(email, token, resolvedRole, returnTo, code);
   // In preview without Resend configured, return the link so it is testable.
   const devLink = sent ? undefined : `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
-  return Response.json({ ok: true, emailed: sent, dev_link: devLink, role: resolvedRole, vendor_slug }, { headers: cors });
+  return Response.json({ ok: true, emailed: sent, dev_link: devLink, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
 }

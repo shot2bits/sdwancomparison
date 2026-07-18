@@ -187,3 +187,82 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
 
   return L.join("\n");
 }
+
+/**
+ * The full RFP as a self-contained HTML document. Two consumers:
+ *  - the Word download (.doc): Word opens styled HTML natively, so the buyer
+ *    gets a formatted document with zero new dependencies;
+ *  - the print view: the same HTML plus an auto-open print dialogue, which is
+ *    the browser-native "save as PDF" path.
+ * Content mirrors buildRfpMarkdown exactly; only the container differs.
+ */
+export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; autoPrint?: boolean }): string {
+  const sections = includedSections(p);
+  const stats = sectionStats(p);
+  const evidence = evidenceChecklist(p);
+  const generated = new Date().toISOString().slice(0, 10);
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const coverRows: [string, string][] = [
+    ["Scope", scopeLabel(p)],
+    ["Delivery model", modelLabel(p)],
+  ];
+  if (p.buyer.sector) coverRows.push(["Sector", p.buyer.sector.replace(/_/g, " ")]);
+  if (p.buyer.site_count != null) coverRows.push(["Sites", String(p.buyer.site_count)]);
+  if (p.buyer.regions.length) coverRows.push(["Regions", p.buyer.regions.join(", ").replace(/_/g, " ")]);
+  if (p.buyer.compliance.length) coverRows.push(["Compliance", p.buyer.compliance.join(", ").replace(/_/g, " ").toUpperCase()]);
+  coverRows.push(["Methodology", `Netify SASE Methodology v${p.methodology_version}`]);
+  coverRows.push(["Question bank", `Netify question bank v${BANK_VERSION} / ${SASE_EXTENDED_BANK.question_bank_version}`]);
+
+  const B: string[] = [];
+  if (opts?.watermark) B.push(`<p class="watermark">${esc(opts.watermark)}</p>`);
+  B.push(`<h1>${esc(p.title)}</h1>`);
+  B.push(`<p class="meta">Request for Proposal · Generated ${generated} via the Netify RFP Builder (netify.co.uk/sase/rfp-builder/)</p>`);
+  B.push(`<table>${coverRows.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>`);
+
+  B.push(`<h2>Project background</h2><p>${esc(buyerProfileSentence(p))}</p>`);
+  if (p.buyer.notes.trim()) B.push(`<p>${esc(p.buyer.notes.trim())}</p>`);
+
+  for (const s of sections) {
+    B.push(`<h2>${esc(s.category)}</h2><ol>`);
+    for (const q of s.questions) {
+      B.push(`<li><p>${q.mandatory ? `<strong>[MANDATORY]</strong> ` : ""}${esc(q.text)}</p><ul>`);
+      if (q.evidence_requested) B.push(`<li>Evidence required: ${esc(q.evidence_requested)}</li>`);
+      if (q.rationale) B.push(`<li>Why this matters: ${esc(q.rationale)}</li>`);
+      B.push(`<li>Weighting: ${q.weight}/5${q.priority === "required" ? " (required)" : ""}</li></ul></li>`);
+    }
+    B.push(`</ol>`);
+  }
+
+  if (evidence.length) {
+    B.push(`<h2>Evidence checklist</h2><p>Suppliers should return the following artefacts with their response:</p><ul>`);
+    for (const e of evidence) B.push(`<li>☐ ${esc(e.item)} (${e.questionIds.length} ${e.questionIds.length === 1 ? "question" : "questions"})</li>`);
+    B.push(`</ul>`);
+  }
+
+  B.push(`<h2>Scoring approach</h2><p>Responses are scored per question (1–5) multiplied by the question weighting. Mandatory questions are pass/fail gates: a failed mandatory excludes the response regardless of score. Section weighting below reflects the sum of question weights.</p>`);
+  B.push(`<table><tr><th>Section</th><th>Questions</th><th>Mandatory</th><th>Weight share</th></tr>${stats.map((st) => `<tr><td>${esc(st.category)}</td><td>${st.questionCount}</td><td>${st.mandatoryCount}</td><td>${(st.weightShare * 100).toFixed(0)}%</td></tr>`).join("")}</table>`);
+
+  B.push(`<h2>Submission instructions</h2><ul>`);
+  B.push(`<li>Respond through the Netify marketplace response link provided with this RFP (structured answers per question, evidence uploads, private pricing).</li>`);
+  B.push(`<li>Answer every question; mark any exception explicitly rather than omitting it.</li>`);
+  B.push(`<li>Pricing submitted through the marketplace stays private to the buyer.</li>`);
+  if (p.nda.required) B.push(`<li>An NDA must be accepted before the full requirement detail and response form unlock.</li>`);
+  B.push(`</ul>`);
+
+  B.push(`<h2>Appendix: provenance and review</h2><ul>`);
+  B.push(`<li>Question sources: Netify question bank v${BANK_VERSION} and the extended SASE canonical bank (${SASE_EXTENDED_BANK.question_bank_version}), plus buyer-specific questions generated from the context above.</li>`);
+  B.push(`<li>Buyer inputs: scope, sector, estate profile, compliance and notes as recorded in the project background.</li>`);
+  B.push(`<li>Canonical methodology: https://netify.co.uk/methodology/ · Question bank: https://netify.co.uk/sase/rfp-builder/questions/</li>`);
+  B.push(`<li><strong>Human review required.</strong> This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing to suppliers.</li>`);
+  B.push(`</ul>`);
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>${esc(p.title)}</title><style>
+  body{font-family:Calibri,Arial,sans-serif;color:#1a1a1a;max-width:800px;margin:2em auto;padding:0 1.5em;line-height:1.5}
+  h1{font-size:22pt;margin-bottom:4pt}h2{font-size:14pt;margin-top:18pt;border-bottom:1px solid #d4af37;padding-bottom:3pt}
+  .meta{color:#555;font-size:10pt}.watermark{color:#b00;font-weight:bold;letter-spacing:2px;font-size:10pt}
+  table{border-collapse:collapse;margin:10pt 0;width:100%}th,td{border:1px solid #ccc;padding:5pt 8pt;text-align:left;font-size:10.5pt}th{background:#f5f1e6}
+  ol>li{margin-bottom:8pt}ul{font-size:10.5pt}p{font-size:11pt}
+  @media print{body{margin:0.5em auto}}
+  </style></head><body>${B.join("")}${opts?.autoPrint ? `<script>window.print()</script>` : ""}</body></html>`;
+}

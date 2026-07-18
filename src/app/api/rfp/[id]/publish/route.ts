@@ -46,11 +46,11 @@ export async function POST(req: Request, ctx: Ctx) {
     );
   }
 
-  const { published, invited, criteria, board } = await executePublish(project, sessionEmail, {
+  const { published, invited, criteria, board, market_report } = await executePublish(project, sessionEmail, {
     shortlist_size: body.shortlist_size,
     list_on_board: body.list_on_board,
     marketing_opt_in: body.marketing_opt_in,
   });
 
-  return Response.json({ ok: true, status: published.status, invited, criteria, board }, { headers: cors });
+  return Response.json({ ok: true, status: published.status, invited, criteria, board, market_report }, { headers: cors });
 }

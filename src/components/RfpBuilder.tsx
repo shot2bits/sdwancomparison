@@ -22,6 +22,16 @@ type Buyer = { organisation: string; sector: string | null; organisation_size: s
 type Nda = { required: boolean; source: "template" | "buyer"; text: string; link: string; version: number; updated: number };
 type NdaAcceptance = { id: string; vendor: string; signatory_name: string; email: string; nda_version: number; accepted: number };
 type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string; nda?: Nda; response_deadline?: number };
+/** The instant publish reward, mirrored from lib/market-report (server). */
+type MarketReportT = {
+  matched: { count: number; names: string[] };
+  estimate: { monthly_band_gbp: [number, number]; three_year_tco_band_gbp: [number, number]; methodology_version: string; disclaimer: string } | null;
+  assumptions: string[];
+  gaps: string[];
+  document: { sections: number; questions: number };
+  analyst_note: string;
+};
+const fmtBand = (b: [number, number]) => `£${b[0].toLocaleString("en-GB")} to £${b[1].toLocaleString("en-GB")}`;
 
 const STATUS_FLOW = ["draft", "review", "published", "qa", "evaluation"];
 // Scope restructured per Harry's UX feedback (2026-07-02): the old flat list
@@ -151,6 +161,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // Live supplier match for the publish panel: the same public endpoint the
   // Describe wizard uses, so both quote the same marketplace numbers.
   const [matchInfo, setMatchInfo] = useState<{ count: number; total: number; names: string[] } | null>(null);
+  // The Market Report: the instant publish reward (price band, matched
+  // suppliers, gaps, downloads). Set from the publish response, or fetched
+  // when a published RFP loads.
+  const [marketReport, setMarketReport] = useState<MarketReportT | null>(null);
   // Slim sticky publish bar: dismissible per session so it never nags.
   const [stickyGone, setStickyGone] = useState(false);
   const publishPanelRef = useRef<HTMLElement | null>(null);
@@ -336,8 +350,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // (Harry's feedback, 06/07/2026). The button remains as a refresh.
   useEffect(() => {
     if (project?.status === "published" && evaluations === null) loadEvaluations();
+    if (project?.status === "published" && marketReport === null) loadMarketReport();
     /* eslint-disable-next-line */
   }, [project?.status]);
+
+  /** Fetch the Market Report for a published RFP (owner-gated, deterministic). */
+  async function loadMarketReport() {
+    if (!project) return;
+    try {
+      const qs = manageToken.current ? `?manage=${manageToken.current}` : "";
+      const r = await fetch(`/sase/api/rfp/${project.id}/report${qs}`, { headers: authHeaders() });
+      if (r.ok) {
+        const d = (await r.json()) as { market_report?: MarketReportT };
+        if (d.market_report) setMarketReport(d.market_report);
+      }
+    } catch { /* the panel simply stays absent */ }
+  }
   // Tell the landing page an RFP is underway so the big path cards collapse
   // and stop competing with the builder (Harry's feedback, 03/07/2026).
   useEffect(() => {
@@ -849,6 +877,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             setPublishAuthNeeded(false);
             setPublishMsg("Submitted. Your RFP is with your matched suppliers now; their responses will appear under \"Evaluate supplier responses\" below.");
             refreshConnections();
+            loadMarketReport();
             return;
           }
         }
@@ -875,6 +904,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       }
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
+      if (data.market_report) setMarketReport(data.market_report as MarketReportT);
       fireNetifyEvent("rfp_published", { invited: String(data.invited?.length ?? 0) });
       try {
         localStorage.removeItem(`rfp_pending_publish_${project.id}`);
@@ -1075,6 +1105,39 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               {project.response_deadline ? `Responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left). ` : ""}
               Structured responses land on this page and are scored under Evaluate supplier responses below. We email you when activity arrives, and you can invite more suppliers at any time under Suppliers.
             </p>
+            {/* The Market Report: the instant publish reward (18 July 2026).
+                Price band from the TCO methodology with its assumptions
+                stated, gaps as facts about the document, and the document
+                downloads the buyer can circulate internally. */}
+            {marketReport && (
+              <div className="mt-3 rounded-sm border border-emerald-300 bg-white p-4">
+                <p className="text-sm font-semibold mb-2">Your Netify Market Report</p>
+                {marketReport.estimate && (
+                  <p className="text-sm text-[var(--ink-800)] mb-1">
+                    Indicative market price band: <strong>{fmtBand(marketReport.estimate.monthly_band_gbp)} per month</strong>
+                    {" · "}3-year TCO <strong>{fmtBand(marketReport.estimate.three_year_tco_band_gbp)}</strong>
+                    <span className="text-xs text-[var(--ink-500)]"> (Netify TCO Methodology {marketReport.estimate.methodology_version}; a modelled band from your estate profile, not a quote — supplier responses give you the real numbers)</span>
+                  </p>
+                )}
+                {marketReport.assumptions.length > 0 && (
+                  <p className="text-xs text-[var(--ink-500)] mb-2">Band assumptions: {marketReport.assumptions.join(" ")}</p>
+                )}
+                {marketReport.gaps.length > 0 && (
+                  <div className="mb-2 text-sm">
+                    <p className="font-medium mb-0.5">Gaps worth closing (edit below any time; suppliers always see the latest version):</p>
+                    <ul className="list-disc list-inside space-y-0.5 text-[var(--ink-700)]">
+                      {marketReport.gaps.map((g) => <li key={g}>{g}</li>)}
+                    </ul>
+                  </div>
+                )}
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <a href={`/sase/rfp-builder/${project.id}/preview/download?format=doc${manageToken.current ? `&manage=${manageToken.current}` : ""}`} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">Download as Word</a>
+                  <a href={`/sase/rfp-builder/${project.id}/preview/download?format=print${manageToken.current ? `&manage=${manageToken.current}` : ""}`} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] bg-white px-4 py-1.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)] transition-colors">Print / save as PDF</a>
+                  <a href={`/sase/rfp-builder/${project.id}/preview/download${manageToken.current ? `?manage=${manageToken.current}` : ""}`} className="text-xs underline text-[var(--ink-600,#555)]">Markdown</a>
+                </div>
+                <p className="mt-2 text-xs text-[var(--ink-600,#555)]">{marketReport.analyst_note}</p>
+              </div>
+            )}
           </div>
         ) : submitFlow && publishAuthNeeded ? (
           <div>
@@ -1087,6 +1150,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               suppliers automatically, exactly as you agreed. Wrong address, or no email after a minute? Use the form below.
             </p>
             <SignIn role="buyer" prompt="Sign in with your work email to complete the submission." />
+            <CodeEntry defaultEmail={pendingEmail} onVerified={() => publishToCurated("signin_resume")} />
             {publishMsg && <p className="mt-2 text-sm text-emerald-700">{publishMsg}</p>}
           </div>
         ) : (
@@ -1118,6 +1182,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               <div className="mb-3 rounded-sm border border-amber-400 bg-white p-3 text-sm text-[var(--ink-800)]">
                 <p className="mb-2"><strong>One step before your RFP goes out.</strong> Submitting sends this RFP to suppliers, so it needs a verified work email. Sign in and the submission continues automatically. Your draft is exactly as you left it.</p>
                 <SignIn role="buyer" prompt="Sign in with your work email to submit to your matched suppliers." />
+                <CodeEntry defaultEmail={pendingEmail} onVerified={() => publishToCurated("signin_resume")} />
               </div>
             )}
             <div className="flex flex-wrap items-center gap-3">
@@ -1811,6 +1876,72 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Same-screen 6-digit code entry (18 July 2026): the email carries a code as
+ * well as the link, so a buyer whose corporate mail scanner eats links, or
+ * who reads the email on their phone, can finish on the screen they are
+ * already on. Verifying the code sets the session cookie server-side; the
+ * caller then resumes the publish exactly as the link path does.
+ */
+function CodeEntry({ defaultEmail, onVerified }: { defaultEmail: string; onVerified: () => void }) {
+  const [addr, setAddr] = useState(defaultEmail);
+  const [code, setCode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { if (defaultEmail && !addr) setAddr(defaultEmail); /* eslint-disable-next-line */ }, [defaultEmail]);
+  async function submit() {
+    const c = code.trim();
+    const e = addr.trim();
+    if (busy || c.length !== 6 || !e.includes("@")) return;
+    setBusy(true); setErr(null);
+    try {
+      const r = await fetch("/sase/api/auth/verify", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ code: c, email: e }),
+      });
+      const d = (await r.json().catch(() => ({}))) as { error?: string };
+      if (!r.ok) throw new Error(d.error ?? "That code did not work.");
+      onVerified();
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : "That code did not work.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3">
+      <p className="text-sm mb-1.5"><strong>Or type the 6-digit code from the email</strong> — quicker than finding the link, and it works even if your company scans links:</p>
+      <div className="flex flex-wrap items-center gap-2">
+        {!defaultEmail && (
+          <input
+            value={addr}
+            onChange={(ev) => setAddr(ev.target.value)}
+            type="email"
+            placeholder="you@yourcompany.com"
+            className="border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm"
+            aria-label="Work email the code was sent to"
+          />
+        )}
+        <input
+          value={code}
+          onChange={(ev) => setCode(ev.target.value.replace(/\D/g, "").slice(0, 6))}
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          placeholder="123456"
+          className="w-28 border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm tracking-[0.3em] text-center"
+          aria-label="6-digit code from the email"
+          onKeyDown={(ev) => { if (ev.key === "Enter") submit(); }}
+        />
+        <button onClick={submit} disabled={busy || code.trim().length !== 6 || !addr.trim().includes("@")} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
+          {busy ? "Checking..." : "Confirm with code"}
+        </button>
+      </div>
+      {err && <p className="mt-1.5 text-sm text-red-700">{err}</p>}
     </div>
   );
 }

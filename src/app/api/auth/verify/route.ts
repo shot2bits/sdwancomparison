@@ -1,15 +1,39 @@
-import { consumeMagicToken, createSession, kvConfigured, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
+import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
 import { executePublish } from "@/lib/rfp-publish";
 import { sessionCookieHeader, notifyNewSignup } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-/** Exchange a magic token for a session cookie. */
+/**
+ * Resolve a same-screen 6-digit code to its magic token (18 July 2026).
+ * The code is an alternative carrier for the SAME token the email link holds,
+ * so consuming it inherits draft claim, pending submit and session creation.
+ * 5 attempts, then the code is destroyed; expiry checked server-side.
+ */
+async function tokenFromCode(email: string, code: string): Promise<string | null> {
+  const codeKey = `auth:code:${email.trim().toLowerCase()}`;
+  const rec = await kvGetJson<{ token: string; code: string; attempts: number; expires: number }>(codeKey);
+  if (!rec || !rec.code || Date.now() > rec.expires) return null;
+  if (rec.attempts >= 5) { await kvRaw(["DEL", codeKey]); return null; }
+  if (rec.code === code) {
+    await kvRaw(["DEL", codeKey]); // single use, like the link
+    return rec.token;
+  }
+  await kvSetJson(codeKey, { ...rec, attempts: rec.attempts + 1 });
+  return null;
+}
+
+/** Exchange a magic token (or a same-screen code) for a session cookie. */
 export async function POST(req: Request) {
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503 });
-  let body: { token?: string };
+  let body: { token?: string; code?: string; email?: string };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400 }); }
-  const payload = body.token ? await consumeMagicToken(body.token) : null;
+  let token = body.token ?? null;
+  if (!token && body.code && body.email) {
+    token = await tokenFromCode(body.email, body.code.trim());
+    if (!token) return Response.json({ error: "That code is not right or has expired. Check the 6 digits in the email, or click the email link instead." }, { status: 401 });
+  }
+  const payload = token ? await consumeMagicToken(token) : null;
   if (!payload) return Response.json({ error: "This sign-in link is invalid or has expired." }, { status: 401 });
   const session = await createSession(payload);
   // Server-side draft claim and submit: if this sign-in link was requested

@@ -5,6 +5,7 @@ import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
 import { emailDomain } from "@/lib/access-control";
 import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
+import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
 /**
@@ -26,6 +27,8 @@ export type PublishResult = {
   invited: { slug: string; name: string; supplier_url: string }[];
   criteria: string;
   board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
+  /** The instant publish reward: matched suppliers, price band, gaps. Never late because it is synchronous. */
+  market_report: MarketReport;
 };
 
 /** Map the RFP's product scope + operating model onto board scope tags. */
@@ -94,7 +97,7 @@ async function listOnBoard(p: ProjectDetails, ownerEmail: string): Promise<{ opp
  * team and a confirmation to the buyer. Sent with the auth transport (Resend,
  * no-reply sender); failures never fail the publish, matching /api/lead.
  */
-async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[]) {
+async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[], report?: MarketReport) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
@@ -124,12 +127,30 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
     html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Suppliers auto-selected:</strong></p><pre>${supplierNames}</pre><p><a href="${rfpUrl}">Open the RFP</a></p>`,
   });
 
-  // Confirmation to the buyer
+  // Confirmation to the buyer, carrying the Market Report (18 July 2026):
+  // the publish reward stated in the email itself — price band, matched
+  // suppliers, gaps and the document downloads — so the value survives even
+  // if the buyer never returns to the app.
+  const bandBlock = report?.estimate
+    ? `<p><strong>Your indicative market price band</strong> (Netify TCO Methodology ${report.estimate.methodology_version}):<br/>` +
+      `Monthly: <strong>${formatBandGBP(report.estimate.monthly_band_gbp)}</strong> · 3-year TCO: <strong>${formatBandGBP(report.estimate.three_year_tco_band_gbp)}</strong></p>` +
+      (report.assumptions.length ? `<p style="font-size:12px;color:#555">Band assumptions: ${report.assumptions.join(" ")}</p>` : "")
+    : "";
+  const gapsBlock = report && report.gaps.length
+    ? `<p><strong>Gaps worth closing</strong> (edit your RFP any time; suppliers always see the latest version):</p><ul>${report.gaps.map((g) => `<li>${g}</li>`).join("")}</ul>`
+    : "";
   await send({
     from,
     to: ownerEmail,
-    subject: "Your Netify RFP has been published",
-    html: `<p>Hello,</p><p>Your RFP "${p.title}" has been published to ${invited.length} curated suppliers on the Netify marketplace.</p><p>What happens next: the Netify team brokers the introductions, gathers supplier responses against your question set, and emails you as responses arrive. There is nothing further you need to do.</p><p><a href="${rfpUrl}">Open your RFP workspace</a></p><p>Netify research team</p>`,
+    subject: "Your RFP is live — here is your Netify Market Report",
+    html:
+      `<p>Hello,</p><p>Your RFP "${p.title}" has been published to ${invited.length} curated suppliers on the Netify marketplace. Their responses arrive side by side in your workspace, and pricing stays private to you.</p>` +
+      bandBlock +
+      (invited.length ? `<p><strong>Going to:</strong> ${invited.map((v) => v.name).join(", ")}.</p>` : "") +
+      gapsBlock +
+      `<p><strong>Your document:</strong> download your RFP as Word or PDF from your workspace to circulate internally.</p>` +
+      `<p><a href="${rfpUrl}">Open your RFP workspace</a></p>` +
+      `<p>${report?.analyst_note ?? "A Netify analyst reviews every published RFP."}</p><p>Netify research team</p>`,
   });
 }
 
@@ -202,8 +223,26 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     } catch { /* best effort */ }
   }
 
-  // Notifications are best effort and never block the publish.
-  try { await sendPublishEmails(published, ownerEmail, invited); } catch { /* best effort */ }
+  // The Market Report: synchronous, deterministic, the buyer's instant
+  // reward for publishing. Built after the save so it reflects the published
+  // state. A report failure must never fail a publish.
+  let market_report: MarketReport;
+  try {
+    market_report = buildMarketReport(published);
+  } catch {
+    market_report = {
+      generated_at: Date.now(),
+      matched: { count: invited.length, names: invited.map((i) => i.name) },
+      estimate: null,
+      assumptions: [],
+      gaps: [],
+      document: { sections: 0, questions: 0 },
+      analyst_note: "A Netify analyst reviews every published RFP and follows up where a human read adds value.",
+    };
+  }
 
-  return { published, invited, criteria: result.criteria_summary, board };
+  // Notifications are best effort and never block the publish.
+  try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
+
+  return { published, invited, criteria: result.criteria_summary, board, market_report };
 }

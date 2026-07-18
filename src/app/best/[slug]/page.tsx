@@ -57,6 +57,13 @@ export default async function BestPage({ params }: Props) {
     intro: pageOverride?.intro ?? base.intro,
     faqs: pageOverride?.faqs && pageOverride.faqs.length >= 3 ? pageOverride.faqs : base.faqs,
   };
+  // Visible review date. Pages carrying the writer's editorial were applied
+  // 16 July 2026; the 10 June date is the ranking dataset alone. Harry's
+  // audit (17 July) read the stale date as proof his rewrite never landed,
+  // so the date must reflect the editorial, not just the scores.
+  const hasEditorial = Boolean(EDITORIAL[base.slug]);
+  const reviewedDate = hasEditorial ? "16 July 2026" : "10 June 2026";
+  const reviewedMonth = hasEditorial ? "July 2026" : "June 2026";
 
   const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
@@ -138,7 +145,7 @@ export default async function BestPage({ params }: Props) {
       ))}
 
       <div className="mb-10 fade-rise">
-        <p className="eyebrow mb-3">Ranked shortlist · Updated June 2026</p>
+        <p className="eyebrow mb-3">Ranked shortlist · Updated {reviewedMonth}</p>
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
@@ -146,12 +153,15 @@ export default async function BestPage({ params }: Props) {
           {result.shortlist
             .map((v) => `${v.rank}. ${v.name} (${v.score})`)
             .join("; ")}
-          {`. Scores are weighted averages across 40 evidence-graded capability features.`}
+          {`. Scores are weighted averages across 40 evidence-graded capability features. Buyers can act on this ranking directly: publish a free RFP to these providers through the Netify RFP Builder at `}
+          <a href="/sase/rfp-builder/new/" className="underline">netify.co.uk/sase/rfp-builder/new/</a>
+          {` and compare structured responses side by side, with pricing kept private to the buyer.`}
         </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written by the Netify research team. Reviewed by Robert Sturt, Netify
-          Group Limited. Updated 10 June 2026. Methodology: weighted scoring
-          across 40 graded capability features; see the FAQ below.
+          Group Limited. Updated {reviewedDate} (vendor scores from the 10 June
+          2026 evaluation). Methodology: weighted scoring across 40 graded
+          capability features; see the FAQ below.
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">
           <Link
@@ -253,7 +263,7 @@ export default async function BestPage({ params }: Props) {
       <section className="mt-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5 max-w-3xl">
         <p className="eyebrow mb-2">Cite this research</p>
         <p className="text-sm text-[var(--ink-700)]">
-          {`Netify, "${page.title} (2026)", Netify SASE and SD-WAN comparison, updated 10 June 2026: `}
+          {`Netify, "${page.title} (2026)", Netify SASE and SD-WAN comparison, updated ${reviewedDate}: `}
           <span className="break-all">{`${SITE_URL}/best/${page.slug}`}</span>
         </p>
         <p className="text-xs text-[var(--ink-500)] mt-2">

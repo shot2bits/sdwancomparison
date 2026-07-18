@@ -34,7 +34,7 @@ export async function sessionFromRequest(req: Request): Promise<AuthSession | nu
 }
 
 /** Send a magic sign-in link via Resend (best effort). Returns whether an email was sent. */
-export async function sendMagicLink(email: string, token: string, role: string, returnTo = ""): Promise<boolean> {
+export async function sendMagicLink(email: string, token: string, role: string, returnTo = "", code?: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   // returnTo is validated by the caller (same-app absolute path only); it
   // rides the link so the verify page can send the person back where the
@@ -50,9 +50,15 @@ export async function sendMagicLink(email: string, token: string, role: string, 
   const subject = isSubmission
     ? "Confirm and submit your RFP to your matched suppliers"
     : "Your Netify marketplace sign-in link";
+  // The same-screen code block: entering the code on the page the person is
+  // already on has the same effect as clicking the link (same token), which
+  // rescues corporate link-scanner and cross-device breakage.
+  const codeBlock = code
+    ? `<p>On a different device, or the button not working? Enter this code on the Netify page you were on instead:</p><p style="font-size:26px;letter-spacing:6px;font-weight:bold">${code}</p><p style="font-size:12px;color:#555">The code is valid for 15 minutes and does exactly what the button does.</p>`
+    : "";
   const html = isSubmission
-    ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched suppliers, who review your requirements and make contact through the Netify app. Your contact details are never shown to suppliers, and you can edit the RFP afterwards; suppliers always see the latest version.</p><p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
-    : `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p><p>If you did not request this, ignore this email.</p>`;
+    ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched suppliers, who review your requirements and make contact through the Netify app. Your contact details are never shown to suppliers, and you can edit the RFP afterwards; suppliers always see the latest version.</p>${codeBlock}<p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
+    : `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p>${codeBlock}<p>If you did not request this, ignore this email.</p>`;
   try {
     await fetch("https://api.resend.com/emails", {
       method: "POST",
