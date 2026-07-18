@@ -60,7 +60,36 @@ export default function MyRfps() {
     }
   }, []);
 
-  if (!rfps || rfps.length === 0) return null;
+  // Signed out (or still loading): render nothing, as before.
+  if (!rfps) return null;
+
+  // Signed in with an empty account: the launchpad, not an empty room.
+  // r.wade@dadesigngroup.com (18 July 2026) signed in from the homepage,
+  // landed here, saw a blank page and left. A fresh account must sell the
+  // first action and what it pays out.
+  if (rfps.length === 0) {
+    return (
+      <div className="mb-10 rounded-sm border border-amber-300 bg-amber-50 p-5">
+        <h2 className="text-xl mb-1">Your account is ready. Here is what it does.</h2>
+        <p className="text-sm text-[var(--ink-700)] mb-3 max-w-2xl">
+          Describe your project once and Netify assembles a complete SASE or SD-WAN RFP from its question
+          bank, in about two minutes. Publishing is free and pays out instantly: an indicative market price
+          band for your estate, your document as Word and PDF, and structured responses from your matched
+          suppliers, side by side, with pricing private to you. You stay anonymous until you reply, and a
+          Netify analyst reviews every published RFP.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/rfp-builder/new" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">
+            Start your first RFP
+          </Link>
+          <Link href="/shortlist" className="text-sm underline text-[var(--ink-700)]">
+            Not ready? Compare the market first
+          </Link>
+        </div>
+        <p className="mt-2 text-xs text-[var(--ink-600,#555)]">No obligation to award and no sales calls until you reply.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-10">
