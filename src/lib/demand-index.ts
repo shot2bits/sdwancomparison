@@ -165,8 +165,9 @@ async function compute(): Promise<DemandIndex> {
         created: p.created ?? 0,
         updated: p.updated ?? 0,
         status: p.status ?? "draft",
-        sector: p.sector ?? "unspecified",
-        scope: p.product_scope ?? "full_sase",
+        // sector and product_scope live on the buyer context, not the root.
+        sector: p.buyer?.sector ?? "unspecified",
+        scope: p.buyer?.product_scope ?? "full_sase",
       });
     }
   }
