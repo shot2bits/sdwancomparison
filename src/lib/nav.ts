@@ -88,6 +88,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
+      { label: "AI assistant connector", href: "/sase/connector/" },
     ],
   },
   {
