@@ -169,6 +169,26 @@ export default function ConnectorPage() {
         </div>
       </section>
 
+      <section className="mt-10">
+        <h2 className="text-xl mb-2">The BT companion server</h2>
+        <p className="max-w-3xl text-sm text-[var(--ink-700)] mb-3">
+          Netify is also a BT Authorised Partner (since 2012), and BT reselling and buying has its own server.
+          Add it alongside the marketplace endpoint and your assistant can state the reseller programme facts,
+          model commission scenarios, check eligibility, price BT Cloud Voice from published list prices, and,
+          with your explicit consent, request the confidential rate card or start a reseller application on
+          your behalf. Commission percentages are never stated by any tool; the rate card arrives in writing
+          from a partner manager, usually within one working day.
+        </p>
+        <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-3">
+          <code className="block overflow-x-auto text-xs">https://netify.co.uk/api/mcp/</code>
+        </div>
+        <p className="mt-2 text-xs text-[var(--ink-500)]">
+          17 tools: programme facts, commission and BTnet scenario modelling, eligibility check, vendor reviews,
+          Cloud Voice quotes, and the consented rate card and application requests. Same protocol, same
+          no-authentication model.
+        </p>
+      </section>
+
       <section className="mt-10 max-w-3xl">
         <h2 className="text-xl mb-2">Privacy and safety, plainly</h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm text-[var(--ink-700)]">
