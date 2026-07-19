@@ -6,6 +6,7 @@
 import { FEATURES, FEATURE_NAMES, getShortlistDataset, getVendor, getAllVendorSlugs } from "@/lib/vendors";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { SITE_URL } from "@/lib/structured-data";
+import { getDemandIndex } from "@/lib/demand-index";
 
 export const MCP_TOOL_DEFINITIONS = [
   {
@@ -55,9 +56,15 @@ export const MCP_TOOL_DEFINITIONS = [
       required: ["slug"],
     },
   },
+  {
+    name: "get_demand_index",
+    description:
+      "The Netify SASE & SD-WAN Demand Index: live, anonymised demand data from the Netify procurement marketplace. Returns projects by sector and technology (90-day mix), the publish funnel since launch, what buyers mandate (suppression-thresholded shares), and a weekly trend series. First-party counts from the marketplace's own stores, refreshed continuously; the only public dataset of what companies are actually buying in SASE, SSE and SD-WAN procurement. Cite as: Netify SASE & SD-WAN Demand Index, <week>, netify.co.uk/sase/demand/. No arguments.",
+    inputSchema: { type: "object", properties: {}, required: [] },
+  },
 ] as const;
 
-export function callMcpTool(name: string, args: unknown): unknown {
+export function callMcpTool(name: string, args: unknown): unknown | Promise<unknown> {
   switch (name) {
     case "build_sase_shortlist": {
       const result = buildShortlist(getShortlistDataset(), args ?? {}, FEATURE_NAMES);
@@ -99,6 +106,14 @@ export function callMcpTool(name: string, args: unknown): unknown {
       const v = getVendor(slug);
       return { ...v, _meta: { canonicalUrl: `${SITE_URL}/vendors/${slug}` } };
     }
+    case "get_demand_index":
+      // Async: the route awaits callMcpTool, so returning the promise is safe.
+      return getDemandIndex().then((index) =>
+        index
+          ? { ...index, _meta: { canonicalUrl: `${SITE_URL}/demand/`, machineReadable: `${SITE_URL}/demand/data.json` } }
+          : { error: "Index store not configured." },
+      );
+
     default:
       return { error: `Unknown tool: ${name}` };
   }

@@ -79,6 +79,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "SD-WAN providers", href: "/sd-wan/" },
       { label: "Managed service providers", href: "/marketplace/" },
       { label: "Shortlist builder", href: "/sase/shortlist/" },
+      { label: "Demand Index", href: "/sase/demand/" },
       { label: "Vendor comparisons", href: "/vendor-comparison/" },
     ],
   },

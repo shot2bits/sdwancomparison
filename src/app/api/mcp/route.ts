@@ -113,7 +113,7 @@ export async function POST(req: Request) {
         ? await callCostTool(name, args)
         : RFP_TOOL_NAMES.has(name)
           ? await callRfpTool(name, args)
-          : callMcpTool(name, args);
+          : await callMcpTool(name, args);
       // Audit fix (19 July 2026): handlers signal failure as { error: ... }.
       // Surface that as isError so agents can branch without parsing prose.
       const failed = !!result && typeof result === "object" && (result as Record<string, unknown>).error != null;

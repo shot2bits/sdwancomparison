@@ -35,6 +35,7 @@ export async function GET() {
     { loc: `${SITE_URL}/rfp-builder/sample-rfp`, priority: "0.9" },
     { loc: `${SITE_URL}/cost-estimator`, priority: "0.8" },
     { loc: `${SITE_URL}/connector`, priority: "0.8" },
+    { loc: `${SITE_URL}/demand`, priority: "0.8" },
     { loc: `${SITE_URL}/opportunities`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities/new`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities/board`, priority: "0.9" },
