@@ -156,6 +156,7 @@ export default function NewProjectPage() {
         <a className="underline" href="https://netify.co.uk/insights/sase-cost-tco-global-enterprise/">How much does SASE and SD-WAN cost?</a>
         <Link className="underline" href="/how-it-works/">How do supplier responses work?</Link>
         <Link className="underline" href="/rfp-builder/sample-rfp/">What does the RFP include?</Link>
+        <Link className="underline" href="/connector/">Can my AI assistant do this for me?</Link>
       </div>
 
       <div id="describe-wizard" className="scroll-mt-6">

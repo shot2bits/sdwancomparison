@@ -50,6 +50,12 @@ export default function Home() {
           <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
           <li className="font-medium text-[var(--ink-900)]">4. Compare the bids</li>
         </ol>
+        <p className="mt-4 text-sm text-[var(--ink-600)]">
+          <span className="mr-1.5 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-800">New</span>
+          Netify now works inside Claude, ChatGPT and Copilot: your AI assistant can compare the 30 vendors,
+          estimate costs and draft your RFP for you.{" "}
+          <Link href="/connector" className="underline">Connect your assistant</Link>
+        </p>
         <p className="mt-3 text-sm text-[var(--ink-500)]">
           {totalCount} verified vendors and MSPs, graded against a {featureCount}-feature framework across {categoryCount} categories. Methodology v2026.1.
         </p>

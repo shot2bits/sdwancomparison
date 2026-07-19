@@ -47,6 +47,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "Open opportunities", href: "/sase/opportunities/board/" },
+      { label: "AI assistant connector", href: "/sase/connector/" },
     ],
   },
   {
