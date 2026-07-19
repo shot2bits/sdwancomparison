@@ -183,8 +183,9 @@ export default function ConnectorPage() {
           <code className="block overflow-x-auto text-xs">https://netify.co.uk/api/mcp/</code>
         </div>
         <p className="mt-2 text-xs text-[var(--ink-500)]">
-          17 tools: programme facts, commission and BTnet scenario modelling, eligibility check, vendor reviews,
-          Cloud Voice quotes, and the consented rate card and application requests. Same protocol, same
+          19 tools: programme facts, commission and BTnet scenario modelling, eligibility check, vendor reviews,
+          Cloud Voice quotes, the BT One Phone replacement adviser (path recommendation, honest feature mapping
+          and indicative pricing), and the consented rate card and application requests. Same protocol, same
           no-authentication model.
         </p>
       </section>
