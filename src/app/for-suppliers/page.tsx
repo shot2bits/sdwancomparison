@@ -72,7 +72,7 @@ export default async function ForSuppliersPage() {
               <li><strong>No listed profile at all?</strong> The same queue covers you: the Netify team reviews new suppliers and links your domain to a new or claimed profile. You can also email <a className="underline" href="mailto:support@netify.com">support@netify.com</a> with your company name and website to speed it up.</li>
             </ul>
           </div>
-          <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? Your AI agent can read open opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/sase/api/mcp">/api/mcp</a>.</p>
+          <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? Your AI agent can read open opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/sase/api/mcp/">/sase/api/mcp/</a>.</p>
         </div>
       </section>
 

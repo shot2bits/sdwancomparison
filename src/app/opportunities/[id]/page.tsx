@@ -119,7 +119,7 @@ export default async function OpportunityNoticePage({ params }: Props) {
               <ul className="space-y-1.5 text-xs text-[var(--ink-600)]">
                 <li>JSON: <a href={`/sase/opportunities/${id}/data.json`} className="underline">/opportunities/{id}/data.json</a></li>
                 <li>Board feed: <a href="/sase/opportunities/board/data.json" className="underline">/opportunities/board/data.json</a></li>
-                <li>Agents: MCP at <a href="/sase/api/mcp" className="underline">/api/mcp</a> (list_opportunities, opportunity_respond)</li>
+                <li>Agents: MCP at <a href="/sase/api/mcp/" className="underline">/sase/api/mcp/</a> (list_opportunities, opportunity_respond)</li>
                 <li>Methodology: {notice.methodology_version || "sase-marketplace-2026.1"}</li>
                 <li>Updated: {new Date(notice.updated).toISOString().slice(0, 10)}</li>
               </ul>

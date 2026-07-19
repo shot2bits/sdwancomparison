@@ -39,7 +39,7 @@ export async function GET() {
       notice_url: `${SITE_URL}/opportunities/${s.slug}/`,
       data_url: `${SITE_URL}/opportunities/${s.slug}/data.json`,
     })),
-    how_to_respond: "Suppliers browse without signing in and sign in with a verified work email to respond. Agents can use the marketplace MCP at /api/mcp (list_opportunities, opportunity_respond).",
+    how_to_respond: "Suppliers browse without signing in and sign in with a verified work email to respond. Agents can use the marketplace MCP at /sase/api/mcp/ (list_opportunities, opportunity_respond).",
     how_to_post: `Buyers draft and preview a project notice in the clear at ${SITE_URL}/opportunities/new/ and sign in to publish.`,
   });
 }

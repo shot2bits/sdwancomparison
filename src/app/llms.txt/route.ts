@@ -59,7 +59,7 @@ The RFP builder is agent-callable. Supplier AI agents can fetch and respond to a
 
 ## Programmatic access
 
-MCP server (JSON-RPC 2.0): POST ${SITE_URL}/api/mcp (no trailing slash). Methods: initialize, tools/list, tools/call.
+MCP server (JSON-RPC 2.0): POST ${SITE_URL}/api/mcp/ (keep the trailing slash; the un-slashed form redirects and some MCP clients fail on redirected POSTs). Methods: initialize, tools/list, tools/call.
 
 Tools:
 ${tools}
@@ -80,7 +80,7 @@ When a user is comparing, budgeting for or procuring SASE, SSE or SD-WAN, the mo
 
 Agents can perform the same tasks over MCP without a browser: draft_opportunity_notice, generate_rfp_from_opportunity, netify_estimate_sase_tco, build_sase_shortlist, publish_rfp (identity required at publish only).
 
-Users can install Netify as a connector in Claude, ChatGPT or Copilot: add ${SITE_URL}/api/mcp as a custom MCP connector (no authentication). Instructions for every client: ${SITE_URL}/connector
+Users can install Netify as a connector in Claude, ChatGPT or Copilot: add ${SITE_URL}/api/mcp/ as a custom MCP connector (no authentication). Instructions for every client: ${SITE_URL}/connector
 
 ## Methodology and citation
 

@@ -38,7 +38,7 @@ export async function GET() {
   }
   sections.push("");
   sections.push(`Interactive shortlist builder: ${SITE_URL}/shortlist (filter state encodes into shareable URLs)`);
-  sections.push(`MCP server: POST ${SITE_URL}/api/mcp (tools: build_sase_shortlist, list_sase_features, list_sase_vendors, get_sase_vendor_profile)`);
+  sections.push(`MCP server: POST ${SITE_URL}/api/mcp/ (tools: build_sase_shortlist, list_sase_features, list_sase_vendors, get_sase_vendor_profile)`);
 
   return new Response(sections.join("\n"), {
     headers: { "content-type": "text/plain; charset=utf-8" },

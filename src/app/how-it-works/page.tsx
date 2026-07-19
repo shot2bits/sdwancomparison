@@ -105,7 +105,7 @@ const UNDER_THE_BONNET = [
   },
   {
     title: "Agent-to-agent (MCP)",
-    body: "The opportunity board publishes a machine-readable feed at /opportunities/board/data.json. Vendors' AI agents can read open opportunities using the list_opportunities tool and submit bids via opportunity_respond, all over the public MCP endpoint at /api/mcp. This isn't a bolt-on: it's the same interface the Netify advisor uses internally, so the board is genuinely open to both human and agent access without any separate integration work.",
+    body: "The opportunity board publishes a machine-readable feed at /opportunities/board/data.json. Vendors' AI agents can read open opportunities using the list_opportunities tool and submit bids via opportunity_respond, all over the public MCP endpoint at /sase/api/mcp/. This isn't a bolt-on: it's the same interface the Netify advisor uses internally, so the board is genuinely open to both human and agent access without any separate integration work.",
   },
 ];
 

@@ -192,7 +192,7 @@ export default function NewProjectPage() {
           Agents can run this flow programmatically: <code className="text-[13px]">GET /sase/api/rfp/match</code> returns
           the live supplier match for a scope, region set and delivery model; <code className="text-[13px]">POST /sase/api/rfp</code> creates
           a draft RFP from a title and buyer context and returns the manage token; the Netify MCP
-          server at <code className="text-[13px]">/sase/api/mcp</code> exposes the full toolset for drafting, validating and
+          server at <code className="text-[13px]">/sase/api/mcp/</code> exposes the full toolset for drafting, validating and
           publishing on a buyer&apos;s behalf. The methodology behind the generated questions is served
           at <a href="https://netify.co.uk/methodology/" className="underline">netify.co.uk/methodology</a>.
         </p>

@@ -268,7 +268,7 @@ export default async function BestPage({ params }: Props) {
         </p>
         <p className="text-xs text-[var(--ink-500)] mt-2">
           Machine-readable version: {`${SITE_URL}/best/${page.slug}/data.json`} ·
-          Programmatic access: POST {`${SITE_URL}/api/mcp`} (tool: build_sase_shortlist)
+          Programmatic access: POST {`${SITE_URL}/api/mcp/`} (tool: build_sase_shortlist)
         </p>
       </section>
 

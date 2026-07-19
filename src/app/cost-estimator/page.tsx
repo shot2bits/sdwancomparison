@@ -104,7 +104,7 @@ export default function Page() {
             The estimator is machine-callable: POST{" "}
             <code className="text-sm">/sase/api/cost/estimate</code> or use the{" "}
             <code className="text-sm">netify_estimate_sase_tco</code> MCP tool at{" "}
-            <code className="text-sm">/sase/api/mcp</code>. The full cost and TCO research bundle,
+            <code className="text-sm">/sase/api/mcp/</code>. The full cost and TCO research bundle,
             including provider categories generated from the live marketplace dataset, is at{" "}
             <a
               href="/sase/api/cost/data.json"

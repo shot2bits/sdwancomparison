@@ -100,7 +100,7 @@ export default function QuestionBankPage() {
           <p><span className="text-[var(--ink-500)]">Canonical URL:</span> /sase/rfp-builder/questions/</p>
           <p><span className="text-[var(--ink-500)]">Machine-readable:</span> <a href="/sase/question-bank.json" className="underline">/question-bank.json</a></p>
         </div>
-        <p className="mt-3 text-xs text-[var(--ink-500)]">Licence: public methodology. Reuse permitted with attribution to Netify and the canonical URL. Agents can also read the bank over the marketplace MCP at <a href="/sase/api/mcp" className="underline">/api/mcp</a>.</p>
+        <p className="mt-3 text-xs text-[var(--ink-500)]">Licence: public methodology. Reuse permitted with attribution to Netify and the canonical URL. Agents can also read the bank over the marketplace MCP at <a href="/sase/api/mcp/" className="underline">/sase/api/mcp/</a>.</p>
       </div>
 
       {/* Extended canonical bank, in full */}

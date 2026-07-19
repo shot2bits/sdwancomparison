@@ -12,7 +12,7 @@ export async function GET() {
       title: "Netify SASE & SD-WAN Marketplace",
       description:
         "Compare 30 evidence-graded SASE and SD-WAN vendors, build ranked shortlists, estimate cost and TCO bands, create and publish RFPs to matched verified suppliers, and respond to RFPs as a supplier. Research, drafting and estimating need no authentication; actions that reach named suppliers are token-gated.",
-      endpoint: `${SITE_URL}/api/mcp`,
+      endpoint: `${SITE_URL}/api/mcp/`,
       transport: "streamable-http",
       protocolVersions: ["2025-06-18", "2025-03-26", "2024-11-05"],
       authentication: { type: "none", notes: "Write actions are token-gated per tool; publishing requires buyer sign-in on the website." },

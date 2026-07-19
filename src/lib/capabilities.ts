@@ -93,11 +93,11 @@ export const CAPABILITIES: Capability[] = [
     id: "agent_notice_tools",
     title: "Agent: draft, validate and read project notices; seed an RFP",
     description: "Public MCP tools for buyer agents: draft_opportunity_notice normalises rough fields into a publish-ready draft with completeness gaps; validate_opportunity_notice scores a draft deterministically; get_opportunity returns one notice's full public projection; generate_rfp_from_opportunity seeds a draft RFP from a public notice.",
-    access: "open", page: "/opportunities/board", api: "/api/mcp", mcp: "draft_opportunity_notice, validate_opportunity_notice, get_opportunity, generate_rfp_from_opportunity", data: "/opportunities/board/data.json",
+    access: "open", page: "/opportunities/board", api: "/api/mcp/", mcp: "draft_opportunity_notice, validate_opportunity_notice, get_opportunity, generate_rfp_from_opportunity", data: "/opportunities/board/data.json",
     status: "live", capabilityType: "compute", accessLevel: "public",
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "none",
-    evidence: "POST /api/mcp tools/call with these tool names; draft/validate are stateless and store nothing.",
+    evidence: "POST /api/mcp/ tools/call with these tool names; draft/validate are stateless and store nothing.",
     boundaries: "Public tools expose only public projections: never pricing amounts, buyer contact details or tokens. Publishing a notice and downloading a final RFP remain sign-in gated for humans.",
   },
   {
@@ -212,7 +212,7 @@ export function capabilitiesDocument() {
       invocableByExternalAgent: "true if an external agent can call it directly (with any stated credential)",
       humanSupervision: "none | required | approval-gated",
     },
-    mcp_endpoint: `${SITE_URL}/api/mcp`,
+    mcp_endpoint: `${SITE_URL}/api/mcp/`,
     capabilities: CAPABILITIES.map((c) => ({
       ...c,
       page: c.page ? `${SITE_URL}${c.page}` : null,

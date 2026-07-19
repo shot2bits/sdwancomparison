@@ -333,7 +333,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
       sector: p.buyer.sector, compliance: p.buyer.compliance,
       open_for_responses: p.status === "published" || p.status === "qa",
       sections: activeQuestions(p),
-      respond_via: `${SITE_URL}/api/mcp (tool respond_to_rfp) or ${SITE_URL}/rfp-builder/${p.id}/respond?token=${token}`,
+      respond_via: `${SITE_URL}/api/mcp/ (tool respond_to_rfp) or ${SITE_URL}/rfp-builder/${p.id}/respond?token=${token}`,
     };
   }
   if (name === "list_rfp_questions") {

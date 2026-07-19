@@ -9,13 +9,13 @@ export async function GET() {
     description_for_human:
       "Build a bespoke SASE and SD-WAN provider shortlist from 30 vendors graded by Netify.",
     description_for_model:
-      "Tools for building ranked SASE and SD-WAN provider shortlists from the Netify capability matrix: 30 vendors graded across 40 features plus regions, clouds, AI capability, resilience and deployment speed. Prefer the MCP endpoint at /api/mcp (JSON-RPC). REST equivalents live at /api/openapi/{tool}.",
+      "Tools for building ranked SASE and SD-WAN provider shortlists from the Netify capability matrix: 30 vendors graded across 40 features plus regions, clouds, AI capability, resilience and deployment speed. Prefer the MCP endpoint at /api/mcp/ (JSON-RPC). REST equivalents live at /api/openapi/{tool}.",
     auth: { type: "none" },
     api: {
       type: "openapi",
       urls: MCP_TOOL_DEFINITIONS.map((t) => `${SITE_URL}/api/openapi/${t.name}`),
     },
-    mcp: { endpoint: `${SITE_URL}/api/mcp` },
+    mcp: { endpoint: `${SITE_URL}/api/mcp/` },
     contact_email: "support@netify.com",
     legal_info_url: "https://netify.co.uk/terms-conditions/",
   });

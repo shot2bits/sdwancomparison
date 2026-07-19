@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
 };
 
-const ENDPOINT = `${SITE_URL}/api/mcp`;
+const ENDPOINT = `${SITE_URL}/api/mcp/`;
 
 const TOOL_GROUPS: { name: string; blurb: string; tools: string[] }[] = [
   {
@@ -85,7 +85,7 @@ export default function ConnectorPage() {
       "@type": "HowTo",
       name: "How to add Netify to Claude, ChatGPT or Copilot",
       step: [
-        { "@type": "HowToStep", position: 1, name: "Copy the endpoint", text: `Copy ${ENDPOINT} (no trailing slash).` },
+        { "@type": "HowToStep", position: 1, name: "Copy the endpoint", text: `Copy ${ENDPOINT} exactly, including the trailing slash.` },
         { "@type": "HowToStep", position: 2, name: "Add a custom connector", text: "In your assistant's connector or app settings, add a custom remote MCP server and paste the endpoint. Authentication: none." },
         { "@type": "HowToStep", position: 3, name: "Ask a procurement question", text: "Ask for a ranked SASE shortlist, a cost band for your estate, or a drafted RFP. Publishing hands you a Netify link to sign in and confirm." },
       ],
