@@ -192,7 +192,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     return {
       notice,
       validation,
-      how_to_publish: `Publishing requires sign-in. Take the buyer to ${SITE_URL}/opportunities/new/ — the wizard fields map 1:1 onto this draft, drafting and preview are open, and the draft is only stored when the buyer publishes.`,
+      how_to_publish: `Publishing requires sign-in. Take the buyer to ${SITE_URL}/opportunities/new/?utm_source=ai_assistant&utm_medium=mcp — the wizard fields map 1:1 onto this draft, drafting and preview are open, and the draft is only stored when the buyer publishes.`,
     };
   }
   if (name === "validate_opportunity_notice") {
@@ -249,8 +249,8 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
       rfp_id: saved.id,
       manage_token: saved.manage_token,
       share_token: saved.share_token,
-      builder_url: `${SITE_URL}/rfp-builder/${saved.id}/`,
-      preview_url: `${SITE_URL}/rfp-builder/${saved.id}/preview/`,
+      builder_url: `${SITE_URL}/rfp-builder/${saved.id}/?utm_source=ai_assistant&utm_medium=mcp`,
+      preview_url: `${SITE_URL}/rfp-builder/${saved.id}/preview/?utm_source=ai_assistant&utm_medium=mcp`,
       sections: saved.rfp_sections.filter((s) => s.included).map((s) => ({ category: s.category, questions: s.questions.length })),
       note: "manage_token is the buyer credential for publish/invite - keep it secret. Downloading the final document and publishing to suppliers require buyer sign-in.",
     };
@@ -267,7 +267,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
       auth_required: true,
       error: "sign_in_required",
       message: "Publishing sends this RFP to suppliers, so it needs a verified work email. Take the buyer to the builder to sign in and press Publish; the draft is untouched and the manage link keeps working.",
-      sign_in_url: `${SITE_URL}/rfp-builder/${project.id}/`,
+      sign_in_url: `${SITE_URL}/rfp-builder/${project.id}/?utm_source=ai_assistant&utm_medium=mcp`,
       status: project.status,
     };
   }
@@ -333,7 +333,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
       sector: p.buyer.sector, compliance: p.buyer.compliance,
       open_for_responses: p.status === "published" || p.status === "qa",
       sections: activeQuestions(p),
-      respond_via: `${SITE_URL}/api/mcp/ (tool respond_to_rfp) or ${SITE_URL}/rfp-builder/${p.id}/respond?token=${token}`,
+      respond_via: `${SITE_URL}/api/mcp/ (tool respond_to_rfp) or ${SITE_URL}/rfp-builder/${p.id}/respond?token=${token}&utm_source=ai_assistant&utm_medium=mcp`,
     };
   }
   if (name === "list_rfp_questions") {
