@@ -4,6 +4,8 @@ import { MCP_COST_TOOL_DEFINITIONS, COST_TOOL_NAMES, callCostTool } from "@/lib/
 import { TOOL_ANNOTATIONS, SERVER_INSTRUCTIONS } from "@/lib/mcp-annotations";
 import { SITE_URL } from "@/lib/structured-data";
 
+const PLAIN_TOOL_NAMES = new Set<string>(MCP_TOOL_DEFINITIONS.map((t) => t.name));
+
 /**
  * MCP server: JSON-RPC 2.0 over Streamable HTTP (stateless).
  * Canonical endpoint: /api/mcp (no trailing slash; this app does not use
@@ -102,13 +104,22 @@ export async function POST(req: Request) {
     case "tools/call": {
       const name = body.params?.name ?? "";
       const args = (body.params?.arguments ?? {}) as Record<string, unknown>;
+      // Audit fix (19 July 2026): unknown tools are a protocol error, not a
+      // 200 result an agent has to text-parse.
+      if (!COST_TOOL_NAMES.has(name) && !RFP_TOOL_NAMES.has(name) && !PLAIN_TOOL_NAMES.has(name)) {
+        return rpcError(body.id, -32602, `Unknown tool: ${name}`);
+      }
       const result = COST_TOOL_NAMES.has(name)
         ? await callCostTool(name, args)
         : RFP_TOOL_NAMES.has(name)
           ? await callRfpTool(name, args)
           : callMcpTool(name, args);
+      // Audit fix (19 July 2026): handlers signal failure as { error: ... }.
+      // Surface that as isError so agents can branch without parsing prose.
+      const failed = !!result && typeof result === "object" && (result as Record<string, unknown>).error != null;
       return rpcResult(body.id, {
         content: [{ type: "text", text: JSON.stringify(result) }],
+        ...(failed ? { isError: true } : {}),
       }, protocol);
     }
     case "ping":
