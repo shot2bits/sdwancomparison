@@ -51,7 +51,7 @@ function regionCovered(value: unknown): boolean {
   return v !== "" && v !== "no" && v !== "none" && v !== "unknown";
 }
 
-export function matchSuppliers(opts: { scope?: string; regions?: string[]; model?: string }): MatchResult {
+export function matchSuppliers(opts: { scope?: string; regions?: string[]; model?: string; preferred_regions?: string[] }): MatchResult {
   const scope = normaliseScope(opts.scope ?? "any");
   const regions = (opts.regions ?? []).filter(Boolean);
   const model = (opts.model ?? "any").toLowerCase();
@@ -71,7 +71,24 @@ export function matchSuppliers(opts: { scope?: string; regions?: string[]; model
     return true;
   });
 
-  const names = matched.map((v) => v.name).sort((a, b) => a.localeCompare(b));
+  // Display order (20 July 2026): when a regional signal exists, the eight
+  // names shown lead with the strongest coverage for it (yes above partial
+  // above the rest) instead of a bare alphabetical slice. Counts unchanged.
+  const rankRegions = [...(opts.preferred_regions ?? []), ...regions];
+  const bandFor = (v: (typeof matched)[number]): number => {
+    let best = 0;
+    const coverage = (v.regions ?? {}) as Record<string, unknown>;
+    for (const r of rankRegions) {
+      const g = String(coverage[r] ?? "").toLowerCase();
+      if (g === "yes") best = Math.max(best, 2);
+      else if (g === "partial" || g === "partner_integrated") best = Math.max(best, 1);
+    }
+    return best;
+  };
+  const names = matched
+    .slice()
+    .sort((a, b) => (rankRegions.length ? bandFor(b) - bandFor(a) : 0) || a.name.localeCompare(b.name))
+    .map((v) => v.name);
   return {
     count: matched.length,
     total: all.length,

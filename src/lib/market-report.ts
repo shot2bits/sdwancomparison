@@ -12,6 +12,7 @@
 
 import { estimate, type EstimateResult } from "@/lib/estimator/engine";
 import { matchSuppliers } from "@/lib/supplier-match";
+import { regionHintFromEmail } from "@/lib/region-hint";
 import { includedSections } from "@/lib/rfp-document";
 import { USERS_BANDS } from "@/lib/notice-options";
 import type { ProjectDetails } from "@/lib/rfp-types";
@@ -19,7 +20,7 @@ import type { ProjectDetails } from "@/lib/rfp-types";
 export type MarketReport = {
   generated_at: number;
   /** Matched supplier names/count from the dataset (same engine as the wizard panel). */
-  matched: { count: number; names: string[] };
+  matched: { count: number; names: string[]; region_assumption?: string };
   /** Indicative price band, or null when the estate cannot be banded honestly. */
   estimate: {
     monthly_band_gbp: [number, number];
@@ -133,16 +134,23 @@ function gapChecks(p: ProjectDetails): string[] {
 }
 
 export function buildMarketReport(p: ProjectDetails): MarketReport {
+  const statedRegions = (p.buyer.regions ?? []).filter(Boolean);
+  const regionHint = statedRegions.length === 0 ? regionHintFromEmail(p.owner_email) : null;
   const matched = matchSuppliers({
     scope: p.buyer.product_scope,
-    regions: p.buyer.regions,
+    regions: statedRegions,
     model: p.buyer.operating_model,
+    ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
   });
   const { result, assumptions } = estimateForProject(p);
   const sections = includedSections(p);
   return {
     generated_at: Date.now(),
-    matched: { count: matched.count, names: matched.names },
+    matched: {
+      count: matched.count,
+      names: matched.names,
+      ...(regionHint ? { region_assumption: regionHint.assumption } : {}),
+    },
     estimate: result
       ? {
           monthly_band_gbp: result.monthlyBandGBP,

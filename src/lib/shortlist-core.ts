@@ -231,6 +231,11 @@ export const ShortlistInputSchema = z.object({
   required_features: z.array(z.string()).default([]),
   preferred_features: z.array(z.string()).default([]),
   required_regions: z.array(z.enum(REGION_KEYS)).default([]),
+  /** Soft regional preference (20 July 2026): weights the score exactly like
+   *  required_regions but never gates anyone out. Used by the publish path
+   *  when the buyer stated no regions and a hint exists (email TLD),
+   *  always declared to the buyer as a labelled assumption. */
+  preferred_regions: z.array(z.enum(REGION_KEYS)).default([]),
   required_clouds: z.array(z.enum(CLOUD_KEYS)).default([]),
   ai_requirements: z.array(z.enum(AI_KEYS)).default([]),
   disaster_recovery_required: z.boolean().default(false),
@@ -384,6 +389,9 @@ export function describeCriteria(input: ShortlistInput, featureNames: Record<str
   }
   if (input.required_regions.length > 0) {
     parts.push(`Regions: ${input.required_regions.map((r) => REGION_LABELS[r]).join(", ")}`);
+  }
+  if (input.preferred_regions.length > 0) {
+    parts.push(`Region weighting (assumed): ${input.preferred_regions.map((r) => REGION_LABELS[r]).join(", ")}`);
   }
   if (input.required_clouds.length > 0) {
     parts.push(`Clouds: ${input.required_clouds.map((c) => CLOUD_LABELS[c]).join(", ")}`);
@@ -618,6 +626,12 @@ export function buildShortlist(
     }
     // Extended dimensions contribute when the buyer asked about them
     for (const r of input.required_regions) {
+      weighted += REGION_FIT_POINTS[v.regions[r]] * 4;
+      weightTotal += 4;
+    }
+    // Soft preference: same regional weighting, no gate (see schema note).
+    for (const r of input.preferred_regions) {
+      if (input.required_regions.includes(r)) continue;
       weighted += REGION_FIT_POINTS[v.regions[r]] * 4;
       weightTotal += 4;
     }

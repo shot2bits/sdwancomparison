@@ -1,5 +1,6 @@
 import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer } from "@/lib/rfp-store";
 import { inviteSupplier } from "@/lib/rfp-connect";
+import { regionHintFromEmail } from "@/lib/region-hint";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
@@ -124,7 +125,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
     to,
     reply_to: ownerEmail,
     subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} suppliers`,
-    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Suppliers auto-selected:</strong></p><pre>${supplierNames}</pre><p><a href="${rfpUrl}">Open the RFP</a></p>`,
+    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Suppliers auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}<p><a href="${rfpUrl}">Open the RFP</a></p>`,
   });
 
   // Confirmation to the buyer, carrying the Market Report (18 July 2026):
@@ -147,6 +148,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       `<p>Hello,</p><p>Your RFP "${p.title}" has been published to ${invited.length} curated suppliers on the Netify marketplace. Their responses arrive side by side in your workspace, and pricing stays private to you.</p>` +
       bandBlock +
       (invited.length ? `<p><strong>Going to:</strong> ${invited.map((v) => v.name).join(", ")}.</p>` : "") +
+      (report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : "") +
       `<p>To make replying fast, each invited supplier starts from a response Netify pre-drafted from its public-evidence evaluation of that vendor. They confirm, correct and add their pricing; capabilities Netify could not evidence are left blank for them to answer.</p>` +
       gapsBlock +
       `<p><strong>Your document:</strong> download your RFP as Word or PDF from your workspace to circulate internally.</p>` +
@@ -165,11 +167,17 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
  */
 export async function executePublish(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
   const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
+  // Region hint (20 July 2026, the ministry lesson): when the buyer stated no
+  // regions, weight the ranking by the email's country TLD. Never filters;
+  // declared to the buyer as an assumption in the confirmation email.
+  const statedRegions = (project.buyer.regions ?? []).filter(Boolean);
+  const regionHint = statedRegions.length === 0 ? regionHintFromEmail(project.owner_email || sessionEmail) : null;
   const result = buildShortlist(getShortlistDataset(), {
     sector: project.buyer.sector ?? null,
     organisation_size: project.buyer.organisation_size ?? "any",
     service_model: project.buyer.operating_model ?? "any",
-    required_regions: project.buyer.regions ?? [],
+    required_regions: statedRegions,
+    ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
     shortlist_size: size,
   }, FEATURE_NAMES);
 
