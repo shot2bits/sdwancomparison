@@ -108,6 +108,10 @@ export default function DescribeWizard() {
   const [match, setMatch] = useState<Match | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Vendors named for evaluation via ?vendors= (20 July 2026, the agentic
+  // evaluation kits). Pinned into the invite list at publish, capped at 5,
+  // validated server-side against the marketplace dataset.
+  const [pinnedVendors, setPinnedVendors] = useState<string[]>([]);
   const started = useRef(false);
 
   // Pre-answer from entry links (?scope=sdwan&sector=healthcare), editable.
@@ -119,6 +123,8 @@ export default function DescribeWizard() {
     if (s && SCOPES.some((x) => x.key === s)) setScope(s);
     const sec = p.get("sector");
     if (sec && SECTORS.some((x) => x.key === sec)) setSector(sec);
+    const v = (p.get("vendors") ?? "").trim();
+    if (v) setPinnedVendors(v.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean).slice(0, 5));
     const t = (p.get("title") ?? "").trim();
     if (t.length >= 8) {
       setTitle(t.slice(0, 120));
@@ -147,7 +153,7 @@ export default function DescribeWizard() {
   function markStarted() {
     if (started.current) return;
     started.current = true;
-    fireNetifyEvent("describe_started");
+    fireNetifyEvent("describe_started", pinnedVendors.length ? { vendors: pinnedVendors.join(",") } : {});
     // Hide the page's supporting explainer sections once the person is in
     // the flow (WizardSupportingContent listens; crawlers still see them).
     try { window.dispatchEvent(new Event("netify:describe-started")); } catch { /* ignore */ }
@@ -183,6 +189,7 @@ export default function DescribeWizard() {
     if (timeline) noteParts.push(`Timeline: ${TIMELINES.find((t) => t.key === timeline)?.label ?? timeline}.`);
     if (users) noteParts.push(`Users: ${USERS_BANDS.find((u) => u.key === users)?.label ?? users}.`);
     if (scope === "unsure") noteParts.push("Buyer is unsure of scope; recommend the right approach in responses.");
+    if (pinnedVendors.length) noteParts.push(`Vendors named for evaluation: ${pinnedVendors.join(", ")}.`);
     const buyer = {
       sector: sector || null,
       site_count: SITE_COUNT_FOR_BAND[sites] ?? null,
@@ -190,6 +197,7 @@ export default function DescribeWizard() {
       compliance,
       operating_model: scoped.operating_model ?? model,
       product_scope: scoped.product_scope,
+      pinned_vendors: pinnedVendors,
       notes: noteParts.join(" "),
     };
     try {

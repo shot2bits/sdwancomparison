@@ -24,6 +24,11 @@ export async function GET(_req: Request, ctx: Ctx) {
   return Response.json(
     {
       page: `${SITE_URL}/alternatives/${slug}`,
+      evaluate: {
+        description: "Create a structured RFP that pre-loads this vendor for an evidence-graded evaluation against alternatives. Free; matched suppliers respond side by side.",
+        url: `${SITE_URL}/rfp-builder/new/?vendors=${vendor.slug}&utm_source=ai_assistant&utm_medium=twin`,
+        mcp_tools: ["score_vendor_fit", "generate_rfp_from_opportunity"],
+      },
       title: `Top ${vendor.name} alternatives (2026)`,
       subject_vendor: { slug: vendor.slug, name: vendor.name, watch_outs: vendor.watch_outs },
       result,

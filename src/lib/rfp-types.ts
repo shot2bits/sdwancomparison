@@ -44,6 +44,9 @@ export const BuyerContextSchema = z.object({
   compliance: z.array(z.string()).default([]),
   operating_model: z.string().default("any"),
   product_scope: z.enum(PRODUCT_SCOPES).default("full_sase"),
+  /** Vendors the buyer named for evaluation (?vendors= prefill). Pinned
+   *  into the publish invite list; validated against dataset slugs, max 5. */
+  pinned_vendors: z.array(z.string()).default([]),
   notes: z.string().default(""),
 }).strict();
 export type BuyerContext = z.infer<typeof BuyerContextSchema>;

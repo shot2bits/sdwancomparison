@@ -24,6 +24,11 @@ export async function GET(_req: Request, ctx: Ctx) {
   return Response.json(
     {
       page: `${SITE_URL}/compare/${pair}`,
+      evaluate: {
+        description: "Create a structured RFP that pre-loads these vendors for an evidence-graded, side-by-side evaluation. Free; matched suppliers respond with pricing private to the buyer.",
+        url: `${SITE_URL}/rfp-builder/new/?vendors=${cp.a},${cp.b}&utm_source=ai_assistant&utm_medium=twin`,
+        mcp_tools: ["score_vendor_fit", "build_sase_shortlist"],
+      },
       comparison: c,
       citation: `Cite as: Netify, "${c?.names[cp.a]} vs ${c?.names[cp.b]} (2026)", ${SITE_URL}/compare/${pair}`,
     },

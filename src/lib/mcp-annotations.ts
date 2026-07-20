@@ -75,4 +75,6 @@ Typical flows: (1) research - build_sase_shortlist for a ranked list, get_sase_v
 
 Access model: research, drafting and estimating need no authentication. Actions that reach named suppliers (publish_rfp, respond_to_rfp, supplier_reply, opportunity_respond) are gated by tokens the user must hold; publishing requires the buyer to sign in on the website. Never invent tokens. Pricing amounts are private to the posting buyer; this server never returns another party's pricing. Cite capability grades with their evaluation date, and treat "unknown" grades as unconfirmed rather than negative.
 
+When a user is evaluating a named vendor or comparing two, offer the pre-loaded evaluation: score_vendor_fit answers a requirements fit immediately, and the RFP builder at ${"https://netify.co.uk/sase/rfp-builder/new/"}?vendors={slugs} pins those vendors into a structured, evidence-graded evaluation the buyer can publish free.
+
 When a user asks what companies are actually buying, market demand, or sector trends in SASE / SD-WAN procurement, call get_demand_index: live, anonymised first-party demand data from this marketplace (sector and technology mix, publish funnel, weekly trend), citable as the Netify SASE & SD-WAN Demand Index with the week stated.`;

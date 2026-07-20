@@ -66,8 +66,8 @@ export default function NewProjectPage() {
           "Answer seven questions; Netify assembles a complete RFP from its question bank (Methodology v2026.1) and submits it to matched, verified suppliers. Drafting is open; publishing requires a business email sign-in. Publishing returns a Netify Market Report: an indicative price band, gap check and the RFP as Word and PDF.",
         target: {
           "@type": "EntryPoint",
-          urlTemplate: `${SITE_URL}/rfp-builder/new/?scope={scope}&sector={sector}`,
-          description: "Optional prefill: scope one of sdwan|sse|sase; sector one of healthcare|retail_ecommerce|financial_services|manufacturing.",
+          urlTemplate: `${SITE_URL}/rfp-builder/new/?scope={scope}&sector={sector}&vendors={vendors}`,
+          description: "Optional prefill: scope one of sdwan|sse|sase; sector one of healthcare|retail_ecommerce|financial_services|manufacturing; vendors a comma-separated list of up to five marketplace vendor slugs to pin into the evaluation and the publish invite list.",
           actionPlatform: ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"],
         },
       },

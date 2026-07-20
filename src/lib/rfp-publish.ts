@@ -98,6 +98,11 @@ async function listOnBoard(p: ProjectDetails, ownerEmail: string): Promise<{ opp
  * team and a confirmation to the buyer. Sent with the auth transport (Resend,
  * no-reply sender); failures never fail the publish, matching /api/lead.
  */
+function pinnedNoteFor(p: ProjectDetails): string {
+  const pins = (p.buyer.pinned_vendors ?? []).filter(Boolean);
+  return pins.length ? `<p><em>Includes the vendor${pins.length === 1 ? "" : "s"} you named for evaluation: ${pins.join(", ")}.</em></p>` : "";
+}
+
 async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[], report?: MarketReport) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return;
@@ -125,7 +130,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
     to,
     reply_to: ownerEmail,
     subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} suppliers`,
-    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Suppliers auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}<p><a href="${rfpUrl}">Open the RFP</a></p>`,
+    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Suppliers auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}${pinnedNoteFor(p)}<p><a href="${rfpUrl}">Open the RFP</a></p>`,
   });
 
   // Confirmation to the buyer, carrying the Market Report (18 July 2026):
@@ -149,6 +154,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       bandBlock +
       (invited.length ? `<p><strong>Going to:</strong> ${invited.map((v) => v.name).join(", ")}.</p>` : "") +
       (report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : "") +
+      pinnedNoteFor(p) +
       `<p>To make replying fast, each invited supplier starts from a response Netify pre-drafted from its public-evidence evaluation of that vendor. They confirm, correct and add their pricing; capabilities Netify could not evidence are left blank for them to answer.</p>` +
       gapsBlock +
       `<p><strong>Your document:</strong> download your RFP as Word or PDF from your workspace to circulate internally.</p>` +
@@ -181,8 +187,12 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     shortlist_size: size,
   }, FEATURE_NAMES);
 
+  // Buyer-named vendors are always invited (explicit intent beats inference),
+  // capped upstream at five; the ranked shortlist fills the remainder.
+  const pinSlugs = (project.buyer.pinned_vendors ?? []).filter(Boolean);
+  const inviteSlugs = [...new Set([...pinSlugs, ...result.shortlist.map((v) => v.slug)])].slice(0, Math.max(size, pinSlugs.length));
   const invited: { slug: string; name: string; supplier_url: string }[] = [];
-  for (const v of result.shortlist) {
+  for (const v of inviteSlugs.map((slug) => ({ slug }))) {
     const r = await inviteSupplier(
       project.id,
       v.slug,

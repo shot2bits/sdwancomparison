@@ -1,5 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
+import { getAllVendorSlugs } from "@/lib/vendors";
 import { BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { sessionFromRequest } from "@/lib/auth";
@@ -82,6 +83,11 @@ export async function POST(req: Request) {
     // empty body is fine: starts a blank draft
   }
   const buyer = BuyerContextSchema.parse(body.buyer ?? {});
+  // Pins must be real marketplace vendors; anything else is dropped, cap 5.
+  if (buyer.pinned_vendors.length) {
+    const valid = new Set(getAllVendorSlugs());
+    buyer.pinned_vendors = buyer.pinned_vendors.filter((s) => valid.has(s)).slice(0, 5);
+  }
   // Consent record from the wizard's agreement step: stored verbatim-shaped
   // (version, timestamp, flow) so there is always an answer to "what did
   // this buyer agree to and when". Only accepted in the expected shape.
