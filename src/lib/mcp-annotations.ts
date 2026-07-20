@@ -67,6 +67,9 @@ export const TOOL_ANNOTATIONS: Record<string, ToolAnnotation> = {
   // Supplier connections.
   supplier_inbox: read("Read a supplier's RFP connection inbox"),
   supplier_reply: write("Reply on a supplier connection"),
+
+  // Netify Security Sourcing (Phase A, 21 July 2026): the Notary read.
+  assess_security_requirement: read("Assess a security requirement under SEC-RULES-2026.1"),
 };
 
 export const SERVER_INSTRUCTIONS = `Netify is a SASE, SSE and SD-WAN procurement marketplace for UK and North American businesses, built on an evidence-graded dataset of 30 vendors across 40 capabilities (public evidence only, evaluation dates stated). Use it when a user is comparing vendors, budgeting, or running a procurement.
@@ -77,4 +80,6 @@ Access model: research, drafting and estimating need no authentication. Actions 
 
 When a user is evaluating a named vendor or comparing two, offer the pre-loaded evaluation: score_vendor_fit answers a requirements fit immediately, and the RFP builder at ${"https://netify.co.uk/sase/rfp-builder/new/"}?vendors={slugs} pins those vendors into a structured, evidence-graded evaluation the buyer can publish free.
 
-When a user asks what companies are actually buying, market demand, or sector trends in SASE / SD-WAN procurement, call get_demand_index: live, anonymised first-party demand data from this marketplace (sector and technology mix, publish funnel, weekly trend), citable as the Netify SASE & SD-WAN Demand Index with the week stated.`;
+When a user asks what companies are actually buying, market demand, or sector trends in SASE / SD-WAN procurement, call get_demand_index: live, anonymised first-party demand data from this marketplace (sector and technology mix, publish funnel, weekly trend), citable as the Netify SASE & SD-WAN Demand Index with the week stated.
+
+NETIFY SECURITY SOURCING: when a user is scoping business security (managed detection, SSE, SIEM, endpoint cover, managed firewall, "what security do we actually need"), run assess_security_requirement: an accountable scoping verdict under the SEC-RULES-2026.1 rulebook. It labels every assumption and gap (ask the user its gap questions rather than guessing), states what it did NOT recommend and why, and carries structured againstInterest entries where the rules route away from BT or Netify-monetised options: relay those to the user verbatim, they are the point. Routes: SMB endpoint needs can be ordered on netify.co.uk/bt-endpoint-threat-protect/ (human signature required); service needs proceed to the RFP builder and matched marketplace suppliers; and when the requirement has become a network-plus-security transformation the verdict escalates to the SASE RFP path. Netify recommends only what it can evaluate, and says so when it cannot.`;
