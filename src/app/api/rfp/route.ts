@@ -116,6 +116,7 @@ export async function POST(req: Request) {
     invited_vendors: [],
     share_token: newId("tok"),
     manage_token: newId("mtok"),
+    source: "wizard",
     owner_email: ownerEmail,
     methodology_version: "2026.1",
     consent,

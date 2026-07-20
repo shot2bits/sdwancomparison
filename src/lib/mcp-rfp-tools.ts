@@ -242,7 +242,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
       id, created: Date.now(), updated: Date.now(), status: "draft",
       title: String(args.title ?? "") || `RFP: ${source.title}`,
       buyer, rfp_sections: synthesiseSections(buyer), invited_vendors: [],
-      share_token: newId("tok"), manage_token: newId("mtok"), methodology_version: "2026.1",
+      share_token: newId("tok"), manage_token: newId("mtok"), source: "mcp", methodology_version: "2026.1",
     });
     const saved = await saveProject(project);
     return {

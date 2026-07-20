@@ -350,15 +350,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // (Harry's feedback, 06/07/2026). The button remains as a refresh.
   useEffect(() => {
     if (project?.status === "published" && evaluations === null) loadEvaluations();
-    if (project?.status === "published" && marketReport === null) loadMarketReport();
+    if (marketReport === null && project) loadMarketReport();
     /* eslint-disable-next-line */
-  }, [project?.status]);
+  }, [project?.status, project?.id]);
 
-  /** Fetch the Market Report for a published RFP (owner-gated, deterministic). */
+  /** Fetch the Market Report (owner-gated). Published RFPs get the full
+   *  report; drafts get the tiered preview (20 July 2026, the draft-pool
+   *  fix). Resolves the manage token itself so the first render can fetch
+   *  before the restore effect has run. */
   async function loadMarketReport() {
     if (!project) return;
     try {
-      const qs = manageToken.current ? `?manage=${manageToken.current}` : "";
+      let tok = manageToken.current || "";
+      if (!tok && typeof window !== "undefined") {
+        tok = localStorage.getItem(mtokKey(project.id)) || new URLSearchParams(window.location.search).get("manage") || "";
+      }
+      const qs = tok ? `?manage=${tok}` : "";
       const r = await fetch(`/sase/api/rfp/${project.id}/report${qs}`, { headers: authHeaders() });
       if (r.ok) {
         const d = (await r.json()) as { market_report?: MarketReportT };
@@ -370,7 +377,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // and stop competing with the builder (Harry's feedback, 03/07/2026).
   useEffect(() => {
     if (project?.id && typeof window !== "undefined") window.dispatchEvent(new Event("netify:rfp-active"));
+    // Continue-your-draft pointer (20 July 2026): the return path for
+    // anonymous drafts. Id only; the manage token stays in its own key.
+    if (project?.id && typeof window !== "undefined") {
+      try { localStorage.setItem("netify_last_draft", JSON.stringify({ id: project.id, title: project.title, at: Date.now() })); } catch { /* private mode */ }
+    }
   }, [project?.id]);
+  const previewSeen = useRef(false);
+  useEffect(() => {
+    if (marketReport && project && project.status !== "published" && !previewSeen.current) {
+      previewSeen.current = true;
+      fireNetifyEvent("report_preview_view", {});
+    }
+    /* eslint-disable-next-line */
+  }, [marketReport, project?.status]);
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
   useEffect(() => { fetch("/sase/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
@@ -941,7 +961,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       const res = await fetch(`/sase/api/rfp/${project.id}/email-link`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: draftEmail.trim(), manage_token: manageToken.current || project.manage_token }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Could not send the link.");
-      setDraftLinkNote(data.emailed ? "Sent. Your private draft link is on its way to your inbox." : "Saved, but email sending is not configured; use Copy my link instead.");
+      setDraftLinkNote(data.emailed ? "Sent. Your report and private draft link are on their way to your inbox." : "Saved, but email sending is not configured; use Copy my link instead.");
+      fireNetifyEvent("draft_claimed", {});
       setDraftEmail("");
     } catch (e) { setDraftLinkNote(e instanceof Error ? e.message : "Could not send the link."); }
     finally { setEmailingLink(false); }
@@ -1109,7 +1130,31 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 Price band from the TCO methodology with its assumptions
                 stated, gaps as facts about the document, and the document
                 downloads the buyer can circulate internally. */}
-            {marketReport && (
+            {marketReport && project.status !== "published" && (
+              <div className="mt-3 rounded-sm border border-amber-300 bg-white p-4">
+                <p className="text-sm font-semibold mb-1">Your Market Report preview</p>
+                <p className="text-sm text-[var(--ink-800)] mb-1">
+                  <strong>{marketReport.matched.count} matched supplier{marketReport.matched.count === 1 ? "" : "s"}</strong> on the marketplace for this project
+                  {marketReport.matched.names.length > 0 ? <> including {marketReport.matched.names.join(", ")}</> : null}.
+                </p>
+                {marketReport.estimate && (
+                  <p className="text-sm text-[var(--ink-800)] mb-1">
+                    Indicative market band: <strong>{fmtBand(marketReport.estimate.monthly_band_gbp)} per month</strong>
+                    {" · "}3-year TCO <strong>{fmtBand(marketReport.estimate.three_year_tco_band_gbp)}</strong>
+                  </p>
+                )}
+                {marketReport.gaps.length > 0 && (
+                  <p className="text-xs text-[var(--ink-600,#555)] mb-2">Gap check: {marketReport.gaps[0]}</p>
+                )}
+                <p className="text-xs text-[var(--ink-500)] mb-2">The full supplier list, complete gap detail, your document as Word and PDF, and delivery to these suppliers unlock when you publish. Publishing is free.</p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder="you@company.com" className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm" />
+                  <button onClick={emailDraftLink} disabled={emailingLink || !draftEmail.trim()} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{emailingLink ? "Sending..." : "Email me this report and my draft link"}</button>
+                  {draftLinkNote && <span className="text-xs text-[var(--ink-600,#555)] basis-full">{draftLinkNote}</span>}
+                </div>
+              </div>
+            )}
+            {marketReport && project.status === "published" && (
               <div className="mt-3 rounded-sm border border-emerald-300 bg-white p-4">
                 <p className="text-sm font-semibold mb-2">Your Netify Market Report</p>
                 {marketReport.estimate && (

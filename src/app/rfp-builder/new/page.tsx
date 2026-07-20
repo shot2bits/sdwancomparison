@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import DescribeWizard from "@/components/DescribeWizard";
+import ContinueDraftBanner from "@/components/ContinueDraftBanner";
 import WizardSupportingContent from "@/components/WizardSupportingContent";
 import {
   SITE_URL,
@@ -160,7 +161,8 @@ export default function NewProjectPage() {
       </div>
 
       <div id="describe-wizard" className="scroll-mt-6">
-        <DescribeWizard />
+        <ContinueDraftBanner />
+      <DescribeWizard />
       </div>
 
       {/* Server-rendered context below the wizard, so this page carries the

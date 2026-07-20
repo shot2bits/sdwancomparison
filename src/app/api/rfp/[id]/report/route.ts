@@ -22,7 +22,28 @@ export async function GET(req: Request, ctx: Ctx) {
   const access = await requireRfpOwner(req, project);
   if (!access.ok) return ownerRequired("Reading this RFP's market report", cors);
   if (project.status !== "published") {
-    return Response.json({ error: "The market report generates when the RFP is published.", status: project.status }, { status: 409, headers: cors });
+    // Draft preview (20 July 2026, the draft-pool fix): the publish payout
+    // shown before identity, tiered so publishing still unlocks the rest.
+    // 52 of last week's 61 drafts were anonymous ghosts; the preview is the
+    // value moment that earns the email.
+    const full = buildMarketReport(project);
+    const preview = {
+      ...full,
+      matched: {
+        count: full.matched.count,
+        names: full.matched.names.slice(0, 3),
+        ...(full.matched.region_assumption ? { region_assumption: full.matched.region_assumption } : {}),
+      },
+      gaps: full.gaps.length > 1
+        ? [full.gaps[0], `Plus ${full.gaps.length - 1} more gap${full.gaps.length - 1 === 1 ? "" : "s"}, shown in full when you publish.`]
+        : full.gaps,
+    };
+    return Response.json({
+      ok: true,
+      preview: true,
+      market_report: preview,
+      unlocked_at_publish: "The full supplier list, complete gap detail, the Word and PDF documents and delivery to your matched suppliers unlock when you publish. Publishing is free.",
+    }, { headers: cors });
   }
   return Response.json({ ok: true, market_report: buildMarketReport(project) }, { headers: cors });
 }
