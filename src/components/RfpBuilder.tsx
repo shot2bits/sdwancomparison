@@ -380,7 +380,16 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     // Continue-your-draft pointer (20 July 2026): the return path for
     // anonymous drafts. Id only; the manage token stays in its own key.
     if (project?.id && typeof window !== "undefined") {
-      try { localStorage.setItem("netify_last_draft", JSON.stringify({ id: project.id, title: project.title, at: Date.now() })); } catch { /* private mode */ }
+      try {
+        if (project.status === "draft" || project.status === "review") {
+          localStorage.setItem("netify_last_draft", JSON.stringify({ id: project.id, title: project.title, at: Date.now() }));
+        } else {
+          // Published projects are not "a draft in progress"; clear the
+          // pointer so the start-page banner never mislabels them.
+          const raw = localStorage.getItem("netify_last_draft");
+          if (raw && (JSON.parse(raw) as { id?: string }).id === project.id) localStorage.removeItem("netify_last_draft");
+        }
+      } catch { /* private mode */ }
     }
   }, [project?.id]);
   const previewSeen = useRef(false);
