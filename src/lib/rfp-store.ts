@@ -21,6 +21,7 @@ import {
   type NdaAcceptance,
   type BuyerContext,
 } from "@/lib/rfp-types";
+import { assertHistoryExtends } from "@/lib/project-machine";
 
 const URL_ENV = process.env.KV_REST_API_URL;
 const TOKEN_ENV = process.env.KV_REST_API_TOKEN;
@@ -83,6 +84,12 @@ export function newId(prefix: string): string {
 
 export async function saveProject(p: ProjectDetails): Promise<ProjectDetails> {
   const parsed = ProjectDetailsSchema.parse({ ...p, updated: Date.now() });
+  // Append-only tamper guard (Phase B step 1, 21 July 2026; Constitution
+  // Article 9, spec 1.4): a write may never shrink or rewrite the recorded
+  // history. One stored read per save; pre-engine records (empty histories
+  // on both sides) pass untouched, so every existing flow is unaffected.
+  const existing = await getJson<ProjectDetails>(`rfp:${parsed.id}`);
+  if (existing) assertHistoryExtends(existing.history ?? [], parsed.history ?? []);
   await setJson(`rfp:${parsed.id}`, parsed);
   await kv(["SET", `rfp:token:${parsed.share_token}`, parsed.id]);
   return parsed;

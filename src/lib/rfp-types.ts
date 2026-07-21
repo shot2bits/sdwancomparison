@@ -67,6 +67,64 @@ export const NdaConfigSchema = z.object({
 }).strict();
 export type NdaConfig = z.infer<typeof NdaConfigSchema>;
 
+/* ------------------------------------------------------------------ */
+/* Procurement engine layer (Phase B step 1, 21 July 2026).            */
+/* The Project is the RFP record promoted to a constitutional object:  */
+/* engine label, immutable verdict artefacts, append-only history and  */
+/* an explicit consent ledger. All fields optional/defaulted so every  */
+/* existing record validates unchanged (spec 1.2).                     */
+/* ------------------------------------------------------------------ */
+
+export const ENGINE_IDS = ["security_sourcing"] as const;
+export type EngineId = (typeof ENGINE_IDS)[number];
+
+export const PROJECT_PHASE = [
+  "scoping", "scoped", "drafting", "drafted", "published", "qa",
+  "evaluation", "awarded", "transacting", "complete", "closed",
+] as const;
+export type ProjectPhase = (typeof PROJECT_PHASE)[number];
+
+/** Immutable verdict artefact: stored verbatim, versioned, never edited.
+ *  Re-scoping appends the next version (Articles 3 and 9). */
+export const ProjectVerdictSchema = z.object({
+  version: z.number().int().min(1),
+  verdict: z.unknown(),          // e.g. SecurityScopeVerdict, verbatim
+  input_digest: z.string(),      // provable identity of the input (Article 3)
+  created_at: z.number(),
+  via: z.enum(["web", "mcp", "handoff"]),
+}).strict();
+export type ProjectVerdict = z.infer<typeof ProjectVerdictSchema>;
+
+export const ProjectEngineDataSchema = z.object({
+  verdicts: z.array(ProjectVerdictSchema).default([]),
+  requirement: z.unknown().optional(), // engine input as last submitted
+}).strict();
+export type ProjectEngineData = z.infer<typeof ProjectEngineDataSchema>;
+
+/** One append-only history entry. detail never carries private figures
+ *  (Article 15); consent-bearing events set consent: true (Article 13). */
+export const ProjectHistoryEventSchema = z.object({
+  at: z.number(),
+  actor: z.enum(["buyer", "assistant", "supplier", "netify", "system"]),
+  actor_ref: z.string().default(""),
+  via: z.enum(["web", "mcp", "admin", "cron", "system"]),
+  event: z.string(),             // dot-namespaced, spec 1.6
+  detail: z.record(z.string(), z.unknown()).default({}),
+  consent: z.boolean().optional(),
+}).strict();
+export type ProjectHistoryEvent = z.infer<typeof ProjectHistoryEventSchema>;
+
+/** The consent ledger: what was agreed, by whom, via which client, with
+ *  the consent line shown recorded verbatim (Article 13). */
+export const ProjectConsentSchema = z.object({
+  at: z.number(),
+  action: z.string(),            // e.g. "create", "publish"
+  granted_by: z.string(),        // buyer email
+  via: z.enum(["web", "mcp"]),
+  text: z.string(),              // the exact consent wording shown
+}).strict();
+export type ProjectConsent = z.infer<typeof ProjectConsentSchema>;
+
 export const ProjectDetailsSchema = z.object({
   id: z.string(),
   created: z.number(),
@@ -100,6 +158,13 @@ export const ProjectDetailsSchema = z.object({
   // Response window: suppliers can respond until this time (set at submit,
   // default 14 days). The respond API enforces it; both sides see the timer.
   response_deadline: z.number().optional(),
+  // Procurement engine layer (Phase B step 1): optional on every record so
+  // pre-engine projects validate unchanged; absent means pre-engine.
+  engine: z.enum(ENGINE_IDS).optional(),
+  engine_data: ProjectEngineDataSchema.optional(),
+  phase: z.enum(PROJECT_PHASE).optional(),
+  history: z.array(ProjectHistoryEventSchema).default([]),
+  consents: z.array(ProjectConsentSchema).default([]),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
 
