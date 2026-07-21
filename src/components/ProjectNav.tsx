@@ -25,15 +25,28 @@ export default function ProjectNav({
   engine: boolean;
 }) {
   const qs = manage ? `?manage=${encodeURIComponent(manage)}` : "";
-  const items: Array<{ key: ProjectTab; label: string; href: string }> = [
-    { key: "overview", label: "Overview", href: `/project/${id}${qs}` },
-    ...(engine ? [{ key: "assessment" as const, label: "Assessment", href: `/project/${id}/assessment${qs}` }] : []),
-    { key: "rfp", label: "RFP", href: `/rfp-builder/${id}${qs}` },
-    { key: "preview", label: "Preview", href: `/rfp-builder/${id}/preview${qs}` },
-    { key: "story", label: "Story", href: `/project/${id}/story${qs}` },
-    { key: "timeline", label: "Timeline", href: `/project/${id}/timeline${qs}` },
-    { key: "review", label: "Review & responses", href: `/rfp-builder/${id}/review${qs}` },
-  ];
+  // Engine tabs follow the notice-first journey (Robert, 21 July 2026): the
+  // requirement page IS the product, so it carries the buyer's name for it,
+  // and the RFP Builder leaves the tab bar (it remains reachable as the
+  // labelled escape hatch on Overview). A buyer landed in the builder still
+  // sees the bar with "Requirement" marked active.
+  const items: Array<{ key: ProjectTab; label: string; href: string }> = engine
+    ? [
+        { key: "overview", label: "Overview", href: `/project/${id}${qs}` },
+        { key: "assessment", label: "Assessment", href: `/project/${id}/assessment${qs}` },
+        { key: "preview", label: "Requirement", href: `/rfp-builder/${id}/preview${qs}` },
+        { key: "story", label: "Story", href: `/project/${id}/story${qs}` },
+        { key: "timeline", label: "Timeline", href: `/project/${id}/timeline${qs}` },
+        { key: "review", label: "Review & responses", href: `/rfp-builder/${id}/review${qs}` },
+      ]
+    : [
+        { key: "overview", label: "Overview", href: `/project/${id}${qs}` },
+        { key: "rfp", label: "RFP", href: `/rfp-builder/${id}${qs}` },
+        { key: "preview", label: "Preview", href: `/rfp-builder/${id}/preview${qs}` },
+        { key: "story", label: "Story", href: `/project/${id}/story${qs}` },
+        { key: "timeline", label: "Timeline", href: `/project/${id}/timeline${qs}` },
+        { key: "review", label: "Review & responses", href: `/rfp-builder/${id}/review${qs}` },
+      ];
   return (
     <nav aria-label="Project" className="mb-6 border-b border-[var(--ink-200,#e5e5e5)]">
       <ul className="m-0 flex list-none flex-wrap gap-x-5 gap-y-1 p-0 text-sm">

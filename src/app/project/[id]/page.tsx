@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { getProject, getSession, listResponses, listSignoffs, kvConfigured } from "@/lib/rfp-store";
+import { getProject, getSession, listResponses, listSignoffs, kvConfigured, kvGetJson } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
 import { projectHealth, type HealthTone } from "@/lib/project-health";
@@ -13,6 +13,7 @@ import { includedSections } from "@/lib/rfp-document";
 import { PROJECT_PHASE } from "@/lib/rfp-types";
 import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
 import ProjectNav from "@/components/ProjectNav";
+import EngineFlowGuide from "@/components/EngineFlowGuide";
 import GapActions from "@/components/GapActions";
 import SignIn from "@/components/SignIn";
 
@@ -115,6 +116,9 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
   const history = project.history ?? [];
   const recent = history.slice(-5).reverse();
   const phaseIdx = PROJECT_PHASE.indexOf(phase);
+  const isPublished = phase === "published" || phaseIdx > PROJECT_PHASE.indexOf("published");
+  const invitedCount = (project.invited_vendors ?? []).length;
+  const boardOppId = engine && isPublished ? await kvGetJson<string>(`rfp:${id}:board_opp`) : null;
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
@@ -139,17 +143,41 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      {/* Phase strip: the machine's phases, current position marked. */}
-      <ol className="mb-8 flex list-none flex-wrap items-center gap-x-1.5 gap-y-1 p-0 text-xs" aria-label="Procurement phases">
-        {PROJECT_PHASE.filter((p) => p !== "closed").map((p, i) => (
-          <li key={p} className="flex items-center gap-1.5">
-            {i > 0 && <span aria-hidden className="text-[var(--ink-300,#ccc)]">→</span>}
-            <span className={p === phase ? "rounded-full bg-[var(--ink-900,#111)] px-2 py-0.5 font-medium text-white" : PROJECT_PHASE.indexOf(p) < phaseIdx ? "text-[var(--ink-700)]" : "text-[var(--ink-400,#9ca3af)]"}>
-              {PHASE_LABELS[p] ?? p}
-            </span>
-          </li>
-        ))}
-      </ol>
+      {/* Engine projects get the three-act flow guide (goal: a published
+          requirement); legacy projects keep the machine's phase strip. */}
+      {engine ? (
+        <EngineFlowGuide published={isPublished} gapCount={gaps.length} invitedCount={invitedCount} responseCount={responses.length} />
+      ) : (
+        <ol className="mb-8 flex list-none flex-wrap items-center gap-x-1.5 gap-y-1 p-0 text-xs" aria-label="Procurement phases">
+          {PROJECT_PHASE.filter((p) => p !== "closed").map((p, i) => (
+            <li key={p} className="flex items-center gap-1.5">
+              {i > 0 && <span aria-hidden className="text-[var(--ink-300,#ccc)]">→</span>}
+              <span className={p === phase ? "rounded-full bg-[var(--ink-900,#111)] px-2 py-0.5 font-medium text-white" : PROJECT_PHASE.indexOf(p) < phaseIdx ? "text-[var(--ink-700)]" : "text-[var(--ink-400,#9ca3af)]"}>
+                {PHASE_LABELS[p] ?? p}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {/* Published: the live board listing, front and centre. */}
+      {engine && isPublished && (
+        <div className="mb-6 rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4">
+          <p className="m-0 text-sm font-semibold text-emerald-900">Your requirement is live on the Netify board</p>
+          <p className="m-0 mt-0.5 text-sm text-emerald-900">
+            {invitedCount} supplier{invitedCount === 1 ? "" : "s"} invited, {responses.length} response{responses.length === 1 ? "" : "s"} so far. The public listing is anonymous; suppliers sign in to see the full requirement, and your identity stays private until you reply.
+          </p>
+          <p className="m-0 mt-2 text-sm">
+            {boardOppId && (
+              <>
+                <Link href={`/opportunities/${boardOppId}`} className="font-medium underline">View your live board listing</Link>
+                <span className="mx-2 text-emerald-700/40">·</span>
+              </>
+            )}
+            <Link href={`/rfp-builder/${id}/review${qs}`} className="underline">Review responses</Link>
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         {engine && (
@@ -180,30 +208,57 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
           </section>
         )}
 
-        <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
-          <p className="eyebrow mb-1">Current RFP</p>
-          <p className="m-0 text-sm text-[var(--ink-800)]">
-            {latestArtefact
-              ? `Version ${latestArtefact.version}: ${questionCount} questions${infoCount ? ` plus ${infoCount} information items` : ""}.`
-              : questionCount
-                ? `${questionCount} questions.`
-                : "Not yet drafted."}
-          </p>
-          <p className="m-0 mt-1.5 text-xs text-[var(--ink-600,#555)]">
-            Opens in the Netify RFP builder with your assessment carried through; you review and refine there before anything goes to suppliers.
-          </p>
-          <p className="m-0 mt-2 text-sm">
-            <Link href={`/rfp-builder/${id}${qs}`} className="underline">Review and edit</Link>
-            <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
-            <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline">Preview</Link>
-          </p>
-        </section>
+        {engine ? (
+          <section className={`rounded-sm border p-4 sm:col-span-2 ${isPublished ? "border-[var(--ink-200,#e5e5e5)]" : "border-2 border-amber-400"}`}>
+            <p className="eyebrow mb-1">Your statement of requirements</p>
+            <p className="m-0 text-sm text-[var(--ink-800)]">
+              {latestArtefact
+                ? `Version ${latestArtefact.version}: ${questionCount} questions${infoCount ? ` plus ${infoCount} information items` : ""}, generated from your assessment.`
+                : "Not yet generated from your assessment."}
+            </p>
+            <p className="m-0 mt-1.5 text-xs text-[var(--ink-600,#555)]">
+              This is the page suppliers see and respond to. Review it, adjust what is in scope, then publish it to the board.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Link
+                href={`/rfp-builder/${id}/preview${qs}`}
+                className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-950 no-underline transition-colors hover:bg-amber-400"
+              >
+                {isPublished ? "View your requirement →" : "Preview and publish →"}
+              </Link>
+              {project.share_token && (
+                <Link href={`/rfp-builder/${id}/respond?token=${encodeURIComponent(project.share_token)}`} className="text-sm underline">
+                  View as suppliers will see it
+                </Link>
+              )}
+            </div>
+          </section>
+        ) : (
+          <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+            <p className="eyebrow mb-1">Current RFP</p>
+            <p className="m-0 text-sm text-[var(--ink-800)]">
+              {latestArtefact
+                ? `Version ${latestArtefact.version}: ${questionCount} questions${infoCount ? ` plus ${infoCount} information items` : ""}.`
+                : questionCount
+                  ? `${questionCount} questions.`
+                  : "Not yet drafted."}
+            </p>
+            <p className="m-0 mt-1.5 text-xs text-[var(--ink-600,#555)]">
+              Opens in the Netify RFP builder with your assessment carried through; you review and refine there before anything goes to suppliers.
+            </p>
+            <p className="m-0 mt-2 text-sm">
+              <Link href={`/rfp-builder/${id}${qs}`} className="underline">Review and edit</Link>
+              <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
+              <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline">Preview</Link>
+            </p>
+          </section>
+        )}
 
         {engine && (
           <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
-            <p className="eyebrow mb-1">Outstanding gaps</p>
+            <p className="eyebrow mb-1">Before you publish</p>
             {gaps.length === 0 ? (
-              <p className="m-0 text-sm text-[var(--ink-800)]">None. Publication is not blocked by scoping gaps.</p>
+              <p className="m-0 text-sm text-[var(--ink-800)]">No open scoping gaps. Nothing blocks publication.</p>
             ) : (
               <>
                 <p className="m-0 mb-2 text-sm text-[var(--ink-800)]">
@@ -235,9 +290,15 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
             </ul>
           )}
           <p className="m-0 mt-2 text-sm">
-            <Link href={`/rfp-builder/${id}${qs}`} className="underline">
-              {phase === "drafted" ? "Publish from the builder" : "Open the builder"}
-            </Link>
+            {engine ? (
+              <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline">
+                {isPublished ? "View your published requirement" : "Preview and publish your requirement"}
+              </Link>
+            ) : (
+              <Link href={`/rfp-builder/${id}${qs}`} className="underline">
+                {phase === "drafted" ? "Publish from the builder" : "Open the builder"}
+              </Link>
+            )}
           </p>
           {phase === "drafted" && <ApprovalRequest projectId={id} manage={tokenOk ? manage : undefined} />}
         </section>
@@ -250,6 +311,19 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
           <p className="m-0 mt-2 text-sm"><Link href={`/rfp-builder/${id}/review${qs}`} className="underline">Review and compare</Link></p>
         </section>
       </div>
+
+      {/* The RFP Builder as a deliberate escape hatch, never the main road
+          (Robert's copy, verbatim, 21 July 2026). */}
+      {engine && (
+        <div className="mt-6 rounded-sm border border-dashed border-[var(--ink-300,#ccc)] p-3.5">
+          <p className="m-0 text-xs text-[var(--ink-600,#555)]">
+            Prefer to create an RFP?{" "}
+            <Link href={`/rfp-builder/${id}${qs}`} className="underline">Try the RFP Builder</Link>. Note: Using the Netify
+            Marketplace &lsquo;publish project&rsquo; feature is a much simpler method to understand which vendors and providers
+            are fit for your business.
+          </p>
+        </div>
+      )}
 
       {/* Activity: the record, humanised (shared with Story and Timeline). */}
       <section className="mt-8">

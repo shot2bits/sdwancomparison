@@ -52,7 +52,9 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
             21 July 2026: clicking RFP from the project was a one-way door;
             the browser back button was the only route home). Same bar as
             every project surface, the RFP tab active. */}
-        {isEngine && <ProjectNav id={id} manage={manage} active="rfp" engine />}
+        {/* The builder is the escape hatch off the engine journey; the bar
+            marks Requirement so the way back to the goal stays visible. */}
+        {isEngine && <ProjectNav id={id} manage={manage} active="preview" engine />}
         <div className="mb-8">
           <p className="eyebrow mb-2">{isEngine ? "Security Sourcing" : "Agentic RFP builder"}</p>
           <h1 className="text-2xl">{isEngine ? "Your Security Sourcing RFP" : "Your SASE and SD-WAN RFP"}</h1>
