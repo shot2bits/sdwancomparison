@@ -8,6 +8,7 @@ import { documentSections, sectionStats, evidenceChecklist, scopeLabel, modelLab
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import PrintButton from "@/components/PrintButton";
 import SignIn from "@/components/SignIn";
+import ProjectNav from "@/components/ProjectNav";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,6 +72,11 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
+      {project.engine === "security_sourcing" && (
+        <div className="print:hidden">
+          <ProjectNav id={id} manage={tokenOk && manage ? manage : undefined} active="preview" engine />
+        </div>
+      )}
       <nav className="mb-6 text-sm text-[var(--ink-500)] print:hidden">
         <Link href={`/rfp-builder/${id}`} className="underline">← Back to the builder</Link>
       </nav>

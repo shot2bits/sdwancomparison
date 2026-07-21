@@ -3,6 +3,7 @@ import Link from "next/link";
 import RfpBuilder from "@/components/RfpBuilder";
 import { RFP_PATHS, getRfpPath } from "@/lib/rfp-paths";
 import { getProject } from "@/lib/rfp-store";
+import ProjectNav from "@/components/ProjectNav";
 import { saseExtendedQuestions, EXTENDED_CATEGORY_LABELS, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -14,7 +15,7 @@ import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchem
  * 2. /rfp-builder/{rfp id} — the private, noindexed builder workspace.
  */
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ manage?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -28,8 +29,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function RfpProjectOrPathPage({ params }: Props) {
+export default async function RfpProjectOrPathPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { manage } = await searchParams;
   const p = getRfpPath(id);
 
   if (!p) {
@@ -46,6 +48,11 @@ export default async function RfpProjectOrPathPage({ params }: Props) {
     const isEngine = proj?.engine === "security_sourcing";
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
+        {/* The project navigation renders on the builder too (Robert,
+            21 July 2026: clicking RFP from the project was a one-way door;
+            the browser back button was the only route home). Same bar as
+            every project surface, the RFP tab active. */}
+        {isEngine && <ProjectNav id={id} manage={manage} active="rfp" engine />}
         <div className="mb-8">
           <p className="eyebrow mb-2">{isEngine ? "Security Sourcing" : "Agentic RFP builder"}</p>
           <h1 className="text-2xl">{isEngine ? "Your Security Sourcing RFP" : "Your SASE and SD-WAN RFP"}</h1>
