@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from "react";
 
-type Q = { id: string; text: string; evidence_requested: string; priority: string; buyer_lens?: string; supplier_lens?: string };
+type Q = { id: string; text: string; evidence_requested: string; priority: string; source?: string; buyer_lens?: string; supplier_lens?: string };
 type Section = { category: string; included: boolean; questions: Q[] };
 type Teaser = { sector: string | null; organisation_size: string; product_scope: string; operating_model: string; region_count: number; question_count: number };
 type Project = { id: string; title: string; status: string; rfp_sections: Section[]; nda_required?: boolean; teaser?: Teaser };
@@ -250,16 +250,32 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
         <p className="text-xs text-[var(--ink-500)]">{evidence.reason}</p>
       )}
 
-      {/* Full detail + response form — only once unlocked (or no NDA required) */}
+      {/* Full detail + response form — only once unlocked (or no NDA required).
+          Optional-priority items are the buyer's informational content (scope
+          statements, exclusions with reasons, provenance): rendered read-only
+          so suppliers see them, never as inputs, never counted or scored. */}
       {!locked && open && project.rfp_sections
-        .map((sec) => ({ ...sec, questions: sec.questions.filter((q) => q.priority !== "optional") }))
         .filter((s) => s.included && s.questions.length > 0)
         .map((s) => {
+        // custom + optional = authored information (scope, exclusions,
+        // provenance); bank/methodology + optional = the invisible browser
+        // pool, which never renders (Harry's retest, 15 July 2026).
+        const info = s.questions.filter((q) => q.priority === "optional" && q.source === "custom");
         const active = s.questions.filter((q) => q.priority !== "optional");
-        if (!active.length) return null;
+        if (!active.length && !info.length) return null;
         return (
           <section key={s.category}>
             <h2 className="text-lg mb-3">{s.category}</h2>
+            {info.length > 0 && (
+              <div className="mb-4 space-y-2">
+                {info.map((q) => (
+                  <div key={q.id} className="border-l-2 border-[var(--ink-300,#ccc)] pl-3">
+                    <p className="text-xs uppercase tracking-wide text-[var(--ink-500)]">For information — no response required</p>
+                    <p className="text-sm text-[var(--ink-700)]">{q.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="space-y-4">
               {active.map((q) => (
                 <div key={q.id}>

@@ -267,10 +267,12 @@ export function SecuritySourcingAdvisor() {
 
             {created ? (
               <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5">
-                <p className="text-sm font-semibold text-emerald-900">Your project is created.</p>
+                <p className="text-sm font-semibold text-emerald-900">Your project is created and your RFP is drafted.</p>
                 <p className="mt-1 text-sm text-emerald-800">
-                  The verdict is attached as its first record. Continue into the builder to create the
-                  right RFP; sign in there to keep it and to publish when ready.
+                  The verdict is attached as its first record, and the RFP has been generated from it:
+                  question bank sections for each capability you need, with what was excluded and why
+                  recorded in the document. Review and edit it in the builder; sign in there to keep it
+                  and to publish when ready.
                 </p>
                 <a href={created.builderPath} className="mt-3 inline-flex items-center rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white no-underline hover:bg-emerald-700">
                   Continue to your RFP

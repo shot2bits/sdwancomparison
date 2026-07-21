@@ -20,6 +20,7 @@ import {
   type SecurityScopeVerdict,
 } from "@/lib/security/rulebook";
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
+import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 
 export const CREATE_CONSENT_TEXT =
@@ -105,6 +106,8 @@ export async function buildSecurityProject(
     consent: true,
   });
 
+  const via = input.via === "mcp" ? "mcp" : "web";
+
   project = {
     ...project,
     engine_data: {
@@ -114,10 +117,11 @@ export async function buildSecurityProject(
           verdict,
           input_digest: verdict.inputDigest,
           created_at: now,
-          via: input.via === "mcp" ? "mcp" : "web",
+          via,
         },
       ],
       requirement: input.requirement,
+      artefacts: [],
     },
   };
 
@@ -128,6 +132,48 @@ export async function buildSecurityProject(
     via: input.via,
     event: "verdict.attached",
     detail: { version: 1, rulebookVersion: verdict.rulebookVersion, confidence: verdict.confidence },
+  });
+
+  // Step 3: generation happens INSIDE creation (adapter, not a page). The
+  // buyer's next click lands in the EXISTING RFP Builder with the document
+  // already populated; there is no generation UI anywhere. Deterministic
+  // from the verdict (Article 3); the snapshot keeps v1 recoverable
+  // (Article 9; acceptance check 8).
+  const sections = generateRfpSections(verdict);
+  const askCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+  const infoCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority === "optional").length, 0);
+  project = {
+    ...project,
+    rfp_sections: sections,
+    engine_data: {
+      ...project.engine_data!,
+      artefacts: [
+        {
+          version: 1,
+          kind: "rfp_sections" as const,
+          input_digest: verdict.inputDigest,
+          created_at: now,
+          via,
+          sections_snapshot: sections,
+        },
+      ],
+    },
+  };
+
+  project = advanceProject(project, {
+    at: now + 2,
+    actor: "system", // the adapter generates; the buyer edits afterwards
+    actor_ref: "generate-rfp",
+    via: input.via,
+    event: "rfp.generated",
+    detail: {
+      artefact_version: 1,
+      sections: sections.length,
+      questions: askCount,
+      informational_items: infoCount,
+      verdict_digest: verdict.inputDigest,
+      open_gaps: verdict.gaps.length,
+    },
   });
 
   return { project, verdict };

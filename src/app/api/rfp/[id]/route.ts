@@ -115,6 +115,16 @@ export async function PUT(req: Request, ctx: Ctx) {
     try { await indexRfpForBuyer(access.session.email, existing.id); } catch { /* best effort */ }
   }
 
+  // Engine records: the document is generated from the project's verdict by
+  // its own engine adapter, never by the legacy SASE synthesis (which would
+  // replace the security sections wholesale). One truth per engine.
+  if (regenerate && existing.engine) {
+    return Response.json(
+      { error: "This project's document is generated from its scoping verdict. Re-scope through Security Sourcing (a new verdict regenerates the document); the legacy scope regeneration does not apply here." },
+      { status: 409, headers: cors },
+    );
+  }
+
   // Regenerate methodology sections from buyer context, preserving custom and mandatory choices.
   if (regenerate) {
     const custom = existing.rfp_sections.flatMap((s) => s.questions.filter((q) => q.source === "custom").map((q) => ({ category: s.category, q })));
@@ -133,7 +143,15 @@ export async function PUT(req: Request, ctx: Ctx) {
   if (!parsed.success) {
     return Response.json({ error: "Invalid RFP shape.", issues: parsed.error.issues.slice(0, 5) }, { status: 422, headers: cors });
   }
-  const saved = await saveProject(parsed.data);
+  let saved;
+  try {
+    saved = await saveProject(parsed.data);
+  } catch (e) {
+    // Write-gate refusals (append-only history, phase/status consistency,
+    // protected transparency content) surface as a clear 409 naming what to
+    // restore; the builder keeps the buyer's unsaved edits on screen.
+    return Response.json({ error: (e as Error).message }, { status: 409, headers: cors });
+  }
   if (existing.status !== "published" && saved.status === "published") {
     const mandatory = saved.rfp_sections.flatMap((s) => s.questions.filter((q) => q.mandatory && q.feature_id !== "custom").map((q) => q.feature_id));
     try { await recordRfpBenchmark(saved.buyer.sector, mandatory); } catch { /* best effort */ }

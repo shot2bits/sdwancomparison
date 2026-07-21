@@ -43,6 +43,27 @@ export function includedSections(p: ProjectDetails): RfpSection[] {
     .filter((s) => s.included && s.questions.length > 0);
 }
 
+/**
+ * An information item: buyer/engine-authored content that travels WITH the
+ * document but asks nothing of suppliers (scope statements, exclusions with
+ * reasons, the against-interest record, provenance). Distinct by source from
+ * the invisible priority-optional bank pool above: custom + optional is
+ * authored content; bank/methodology + optional is browser stock and stays
+ * out of documents. Information items are never counted, weighted or scored
+ * (includedSections, sectionStats and rfp-evaluation all exclude optional).
+ */
+export function isInformationItem(q: { priority: string; source: string }): boolean {
+  return q.priority === "optional" && q.source === "custom";
+}
+
+/** The RENDERED document: the active question set plus information items.
+ *  Used by preview and downloads; counters and scoring keep includedSections. */
+export function documentSections(p: ProjectDetails): RfpSection[] {
+  return p.rfp_sections
+    .map((s) => ({ ...s, questions: s.questions.filter((q) => q.priority !== "optional" || isInformationItem(q)) }))
+    .filter((s) => s.included && s.questions.length > 0);
+}
+
 export function sectionStats(p: ProjectDetails): SectionStats[] {
   const sections = includedSections(p);
   const grand = sections.reduce((n, s) => n + s.questions.reduce((m, q) => m + q.weight, 0), 0) || 1;
@@ -117,7 +138,7 @@ export function buyerProfileSentence(p: ProjectDetails): string {
 
 /** The full RFP as markdown — used by the gated download. */
 export function buildRfpMarkdown(p: ProjectDetails): string {
-  const sections = includedSections(p);
+  const sections = documentSections(p);
   const stats = sectionStats(p);
   const evidence = evidenceChecklist(p);
   const generated = new Date().toISOString().slice(0, 10);
@@ -143,10 +164,19 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
     L.push(p.buyer.notes.trim(), "");
   }
 
-  // Sections
+  // Sections. Information items (custom + optional: scope statements,
+  // exclusions, the against-interest record, provenance) render first,
+  // unnumbered and without scoring furniture; they ask nothing of suppliers.
   for (const s of sections) {
     L.push(`## ${s.category}`, "");
-    s.questions.forEach((q, i) => {
+    const info = s.questions.filter((q) => isInformationItem(q));
+    const ask = s.questions.filter((q) => !isInformationItem(q));
+    for (const q of info) {
+      L.push(`> For information (no response required): ${q.text}`);
+      if (q.rationale) L.push(`> Why this is recorded: ${q.rationale}`);
+      L.push("");
+    }
+    ask.forEach((q, i) => {
       L.push(`${i + 1}. ${q.mandatory ? "**[MANDATORY]** " : ""}${q.text}`);
       if (q.evidence_requested) L.push(`   - Evidence required: ${q.evidence_requested}`);
       if (q.rationale) L.push(`   - Why this matters: ${q.rationale}`);
@@ -197,7 +227,7 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
  * Content mirrors buildRfpMarkdown exactly; only the container differs.
  */
 export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; autoPrint?: boolean }): string {
-  const sections = includedSections(p);
+  const sections = documentSections(p);
   const stats = sectionStats(p);
   const evidence = evidenceChecklist(p);
   const generated = new Date().toISOString().slice(0, 10);
@@ -224,14 +254,22 @@ export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; aut
   if (p.buyer.notes.trim()) B.push(`<p>${esc(p.buyer.notes.trim())}</p>`);
 
   for (const s of sections) {
-    B.push(`<h2>${esc(s.category)}</h2><ol>`);
-    for (const q of s.questions) {
-      B.push(`<li><p>${q.mandatory ? `<strong>[MANDATORY]</strong> ` : ""}${esc(q.text)}</p><ul>`);
-      if (q.evidence_requested) B.push(`<li>Evidence required: ${esc(q.evidence_requested)}</li>`);
-      if (q.rationale) B.push(`<li>Why this matters: ${esc(q.rationale)}</li>`);
-      B.push(`<li>Weighting: ${q.weight}/5${q.priority === "required" ? " (required)" : ""}</li></ul></li>`);
+    B.push(`<h2>${esc(s.category)}</h2>`);
+    const info = s.questions.filter((q) => isInformationItem(q));
+    const ask = s.questions.filter((q) => !isInformationItem(q));
+    for (const q of info) {
+      B.push(`<blockquote><p><em>For information (no response required):</em> ${esc(q.text)}</p>${q.rationale ? `<p><em>Why this is recorded:</em> ${esc(q.rationale)}</p>` : ""}</blockquote>`);
     }
-    B.push(`</ol>`);
+    if (ask.length) {
+      B.push(`<ol>`);
+      for (const q of ask) {
+        B.push(`<li><p>${q.mandatory ? `<strong>[MANDATORY]</strong> ` : ""}${esc(q.text)}</p><ul>`);
+        if (q.evidence_requested) B.push(`<li>Evidence required: ${esc(q.evidence_requested)}</li>`);
+        if (q.rationale) B.push(`<li>Why this matters: ${esc(q.rationale)}</li>`);
+        B.push(`<li>Weighting: ${q.weight}/5${q.priority === "required" ? " (required)" : ""}</li></ul></li>`);
+      }
+      B.push(`</ol>`);
+    }
   }
 
   if (evidence.length) {

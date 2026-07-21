@@ -95,9 +95,24 @@ export const ProjectVerdictSchema = z.object({
 }).strict();
 export type ProjectVerdict = z.infer<typeof ProjectVerdictSchema>;
 
+/** One generated-document version (Phase B step 3): a snapshot of the
+ *  sections the adapter produced from a verdict, so every generation
+ *  remains recoverable (Article 9; acceptance check 8). The live,
+ *  editable document stays rfp_sections; snapshots are the Record. */
+export const ProjectArtefactSchema = z.object({
+  version: z.number().int().min(1),
+  kind: z.literal("rfp_sections"),
+  input_digest: z.string(),      // the verdict digest this was generated from
+  created_at: z.number(),
+  via: z.enum(["web", "mcp", "handoff"]),
+  sections_snapshot: z.array(RfpSectionSchema),
+}).strict();
+export type ProjectArtefact = z.infer<typeof ProjectArtefactSchema>;
+
 export const ProjectEngineDataSchema = z.object({
   verdicts: z.array(ProjectVerdictSchema).default([]),
   requirement: z.unknown().optional(), // engine input as last submitted
+  artefacts: z.array(ProjectArtefactSchema).default([]),
 }).strict();
 export type ProjectEngineData = z.infer<typeof ProjectEngineDataSchema>;
 

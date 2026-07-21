@@ -616,7 +616,18 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       if (res.ok && regenerate) applyProject((await res.json()) as Project);
       // A refused save must be loud, not silent: without this, a viewer who is
       // not the owner sees edits "work" locally and then vanish on reload.
-      if (res.status === 401) setError("Changes aren't saving: only this RFP's owner can edit. Sign in with the email that created it, or reopen your private builder link.");
+      if (res.status === 401) {
+        setError("Changes aren't saving: only this RFP's owner can edit. Sign in with the email that created it, or reopen your private builder link.");
+      } else if (!res.ok) {
+        // Guard refusals (409: protected content, append-only record) and
+        // shape errors arrive with a message naming exactly what to restore.
+        // Local state keeps every unsaved edit, so nothing is lost: fix the
+        // named item and the next save carries all of it.
+        const e = await res.json().catch(() => ({} as { error?: string }));
+        setError(e.error ?? `This save was refused (${res.status}). Your edits are still here; adjust and try again.`);
+      } else if (res.ok) {
+        setError(null);
+      }
     } catch { /* optimistic */ }
   }
 

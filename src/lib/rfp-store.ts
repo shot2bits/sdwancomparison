@@ -21,6 +21,7 @@ import {
   type NdaAcceptance,
   type BuyerContext,
 } from "@/lib/rfp-types";
+import { assertEngineArtefactsIntact } from "@/lib/security/generate-rfp";
 import { assertHistoryExtends, assertPhaseStatusConsistent } from "@/lib/project-machine";
 
 const URL_ENV = process.env.KV_REST_API_URL;
@@ -93,8 +94,20 @@ export async function saveProject(p: ProjectDetails): Promise<ProjectDetails> {
   // Step 1.1 closure: on engine records, status may only move via the
   // machine; a legacy path mutating it directly is refused here.
   assertPhaseStatusConsistent(parsed);
+  // Step 3: on security engine records the Record is append-only and the
+  // generated transparency items (against-interest, exclusions, provenance)
+  // must survive every edit verbatim. Narrow by design: ordinary content
+  // stays freely editable; a refusal names the exact items to restore.
+  if (existing) assertEngineArtefactsIntact(existing, parsed);
   await setJson(`rfp:${parsed.id}`, parsed);
   await kv(["SET", `rfp:token:${parsed.share_token}`, parsed.id]);
+  // Test-mode records self-expire, enforced HERE at the single write path:
+  // a plain SET clears any TTL, so without this a later edit would quietly
+  // make a test project durable (step 3; review target 4 stays true).
+  if (parsed.test) {
+    await kv(["EXPIRE", `rfp:${parsed.id}`, "7200"]);
+    await kv(["EXPIRE", `rfp:token:${parsed.share_token}`, "7200"]);
+  }
   return parsed;
 }
 

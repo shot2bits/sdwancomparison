@@ -38,10 +38,13 @@ export async function runCreateProjectTests(): Promise<CreateTestResult> {
     const { project, verdict } = await buildSecurityProject({
       requirement: F1_REQUIREMENT, via: "web", ids: IDS, now: 1_700_000_000_000,
     });
-    if (project.phase !== "scoped") throw new Error(`phase ${project.phase}, want scoped`);
-    if (project.status !== "draft") throw new Error("legacy status not synced to draft");
+    // Step 3: generation happens inside creation, so the project arrives in
+    // the existing builder at drafted with the document populated.
+    if (project.phase !== "drafted") throw new Error(`phase ${project.phase}, want drafted`);
+    if (project.status !== "review") throw new Error("legacy status not synced to review");
+    if ((project.rfp_sections?.length ?? 0) === 0) throw new Error("no generated sections");
     const events = (project.history ?? []).map((h) => h.event);
-    if (events.join(",") !== "project.created,verdict.attached") throw new Error(`history [${events}]`);
+    if (events.join(",") !== "project.created,verdict.attached,rfp.generated") throw new Error(`history [${events}]`);
     if (project.consents?.[0]?.text !== CREATE_CONSENT_TEXT) throw new Error("consent wording not recorded verbatim");
     if (project.consents?.[0]?.action !== "create") throw new Error("consent action wrong");
     const stored = project.engine_data?.verdicts?.[0];
@@ -67,7 +70,7 @@ export async function runCreateProjectTests(): Promise<CreateTestResult> {
       requirement: F1_REQUIREMENT, via: "mcp", ids: IDS, test: true, now: 1_700_000_000_000,
     });
     if (project.test !== true) throw new Error("test flag missing");
-    if (project.phase !== "scoped") throw new Error("test project not scoped");
+    if (project.phase !== "drafted") throw new Error("test project not drafted");
   });
 
   await throws("low-confidence input is refused identically for every client", async () => {
@@ -80,7 +83,9 @@ export async function runCreateProjectTests(): Promise<CreateTestResult> {
     });
     const attach = project.history?.find((h) => h.event === "verdict.attached");
     if (!attach) throw new Error("no verdict.attached transition event: phase was not set by advanceProject");
-    if ((project.history ?? []).length !== 2) throw new Error("unexpected extra history");
+    const gen = project.history?.find((h) => h.event === "rfp.generated");
+    if (!gen) throw new Error("no rfp.generated transition event: drafted was not reached via the machine");
+    if ((project.history ?? []).length !== 3) throw new Error("unexpected extra history");
   });
 
   return r;

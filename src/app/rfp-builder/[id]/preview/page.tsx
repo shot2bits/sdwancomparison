@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getProject, getSession, kvConfigured } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
-import { includedSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel, buyerProfileSentence } from "@/lib/rfp-document";
+import { documentSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel, buyerProfileSentence } from "@/lib/rfp-document";
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import PrintButton from "@/components/PrintButton";
 import SignIn from "@/components/SignIn";
@@ -64,7 +64,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
   // Carry the manage key through preview links so the anonymous-owner flow survives navigation.
   const keyQs = tokenOk && manage ? `?manage=${encodeURIComponent(manage)}` : "";
 
-  const sections = includedSections(project);
+  const sections = documentSections(project);
   const stats = sectionStats(project);
   const evidence = evidenceChecklist(project);
   const totalQuestions = sections.reduce((n, s) => n + s.questions.length, 0);
@@ -111,11 +111,14 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
                   <li key={q.id}>
                     <p>
                       {q.mandatory && <span className="mr-1.5 rounded-full bg-red-50 px-1.5 py-0 text-[10px] font-medium uppercase tracking-wide text-red-700">Mandatory</span>}
+                      {q.priority === "optional" && <span className="mr-1.5 rounded-full bg-[var(--ink-100,#f3f4f6)] px-1.5 py-0 text-[10px] font-medium uppercase tracking-wide text-[var(--ink-600)]">For information</span>}
                       {q.text}
                     </p>
                     {q.evidence_requested && <p className="mt-0.5 text-xs text-[var(--ink-600)]">Evidence required: {q.evidence_requested}</p>}
                     {q.rationale && <p className="mt-0.5 text-xs text-[var(--ink-500)]">Why this matters: {q.rationale}</p>}
-                    <p className="mt-0.5 text-xs text-[var(--ink-400,#9ca3af)]">Weighting {q.weight}/5{q.priority === "required" ? " · required" : ""}</p>
+                    {/* Informational items carry no scoring furniture: they are
+                        never answered, counted or weighted. */}
+                    {q.priority !== "optional" && <p className="mt-0.5 text-xs text-[var(--ink-400,#9ca3af)]">Weighting {q.weight}/5{q.priority === "required" ? " · required" : ""}</p>}
                   </li>
                 ))}
               </ol>

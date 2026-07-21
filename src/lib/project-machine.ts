@@ -96,6 +96,31 @@ const hasPublishConsent: Guard = (p) => {
     : "published requires a recorded publish consent (spec 1.3; Article 13)";
 };
 
+/**
+ * Gap gate (Phase B step 3, acceptance check 7): on engine records a draft
+ * may carry open scoping gaps, but publication may not. Each gap in the
+ * LATEST verdict must be answered (a re-scope attaches a new verdict
+ * without the gap) or individually accepted with recorded consent
+ * (consents[] action "accept_gap:{field}", Article 13). Legacy records
+ * pass untouched.
+ */
+const securityGapsClosed: Guard = (p) => {
+  if (p.engine !== "security_sourcing") return null;
+  const latest = (p.engine_data?.verdicts ?? []).slice(-1)[0]?.verdict as
+    | { gaps?: Array<{ field: string; question: string }> }
+    | undefined;
+  const gaps = latest?.gaps ?? [];
+  const accepted = new Set(
+    (p.consents ?? [])
+      .filter((c) => c.action.startsWith("accept_gap:"))
+      .map((c) => c.action.slice("accept_gap:".length)),
+  );
+  const open = gaps.filter((g) => !accepted.has(g.field));
+  return open.length === 0
+    ? null
+    : `publication requires every scoping gap to be answered or individually accepted with recorded consent; open: ${open.map((g) => `${g.field} ("${g.question}")`).join("; ")} (acceptance check 7; Article 13)`;
+};
+
 const evaluationOpen: Guard = (_p, e) => {
   const submitted = Number(e.detail?.submitted_responses ?? 0);
   const deadline = e.detail?.deadline_passed === true;
@@ -140,7 +165,7 @@ export const PROJECT_TRANSITIONS: Transition[] = [
   { from: ["scoped"], to: "drafted", event: "rfp.generated", guard: hasSections },
   { from: ["scoped"], to: "drafting", event: "rfp.edited" },
   { from: ["drafting"], to: "drafted", event: "rfp.generated", guard: hasSections },
-  { from: ["drafted"], to: "published", event: "publish.live", guard: hasPublishConsent },
+  { from: ["drafted"], to: "published", event: "publish.live", guard: (p, e) => hasPublishConsent(p, e) ?? securityGapsClosed(p, e) },
   { from: ["published"], to: "qa", event: "clarification.asked" },
   { from: ["published", "qa"], to: "evaluation", event: "evaluation.opened", guard: evaluationOpen },
   { from: ["evaluation"], to: "awarded", event: "award.decided", guard: hasPreferredSupplier },
