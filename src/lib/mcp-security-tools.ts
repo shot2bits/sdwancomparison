@@ -12,6 +12,7 @@ import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/secur
 import { createSecurityProject } from "@/lib/security/persist-project";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { generateRfpSections } from "@/lib/security/generate-rfp";
+import { buildRescopedProject, rescopeConsentText } from "@/lib/security/rescope-project";
 import { getProject, saveProject } from "@/lib/rfp-store";
 import { projectPhase, advanceProject, recordProjectEvent, openSecurityGaps } from "@/lib/project-machine";
 import type { ProjectDetails, ProjectHistoryEvent } from "@/lib/rfp-types";
@@ -223,10 +224,42 @@ const GENERATE_RFP_DEFINITION = {
   },
 } as const;
 
+const RESCOPE_DEFINITION = {
+  name: "rescope_security_project",
+  description:
+    "Re-scope a Security Sourcing project when the buyer's estate or situation has changed (more users, an acquisition, a new compliance obligation, answering an open gap). Runs the assessment on the updated requirement server-side, attaches Verdict v(n+1) and regenerates the RFP as version m+1; EVERY EARLIER VERSION STAYS IN THE PROJECT RECORD and the project story shows what changed. CONSENT REQUIRED: only call with the buyer's explicit agreement in this conversation; the recorded consent wording (returned as consent_text on refusal) states the version consequence. If the document has buyer edits since the last generation, the tool refuses unless replace_edits_consent: true is passed with the buyer's explicit agreement (their edits are replaced; earlier versions remain recoverable). Refuses at low confidence with the gap questions. Owner-gated: requires project_id and manage_token. Only before publication.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      project_id: { type: "string" },
+      manage_token: { type: "string" },
+      requirement: { type: "object", description: "The updated requirement: the same shape assess_security_requirement takes." },
+      consent: { type: "boolean", description: "Must be true: the buyer's explicit agreement to re-scope." },
+      replace_edits_consent: { type: "boolean", description: "Required only when the document has buyer edits: explicit agreement that regeneration replaces them." },
+    },
+    required: ["project_id", "manage_token", "requirement", "consent"],
+  },
+  outputSchema: {
+    type: "object",
+    required: ["rescoped"],
+    properties: {
+      rescoped: { type: "boolean" },
+      project_id: { type: "string" },
+      verdict_version: { type: "number" },
+      artefact_version: { type: "number" },
+      open_gaps: { type: "number" },
+      verdict: { type: "object", description: "The new SecurityScopeVerdict, verbatim." },
+      builder_url: { type: "string" },
+      note: { type: "string" },
+    },
+  },
+} as const;
+
 export const SECURITY_TOOL_DEFINITIONS_ALL = [
   ...MCP_SECURITY_TOOL_DEFINITIONS,
   CREATE_PROJECT_DEFINITION,
   GENERATE_RFP_DEFINITION,
+  RESCOPE_DEFINITION,
   GET_STATUS_DEFINITION,
 ] as const;
 
@@ -334,7 +367,7 @@ export async function callSecurityTool(
         // publication the machine refuses: published documents do not
         // silently change under suppliers (one truth, Article 17).
         updated = projectPhase(updated) === "drafted" ? recordProjectEvent(updated, event) : advanceProject(updated, event);
-        updated = await saveProject(updated);
+        updated = await saveProject(updated, { engineWrite: true });
       } catch (e) {
         return { error: (e as Error).message };
       }
@@ -353,6 +386,46 @@ export async function callSecurityTool(
         note: verdict.gaps.length
           ? "Draft generated. Publication will require each open gap to be answered (re-scope) or individually accepted by the buyer."
           : "Draft generated from the latest verdict.",
+      };
+    }
+    case "rescope_security_project": {
+      const id = String(args?.project_id ?? "");
+      const token = String(args?.manage_token ?? "");
+      if (!id || !token) return { error: "project_id and manage_token are required." };
+      const project = await getProject(id);
+      if (!project || project.manage_token !== token) {
+        return { error: "Unknown project or wrong credential." };
+      }
+      if (!args?.requirement || typeof args.requirement !== "object") {
+        return { error: "requirement is required: the updated estate and situation." };
+      }
+      if (args?.consent !== true) {
+        return { error: "Consent is required: pass consent: true only with the buyer's explicit agreement in this conversation.", consent_text: rescopeConsentText(project) };
+      }
+      let result;
+      try {
+        result = await buildRescopedProject({
+          project,
+          requirement: args.requirement as SecurityRequirementInput,
+          via: "mcp",
+          actorRef: "rescope_security_project",
+          replaceEdits: args?.replace_edits_consent === true,
+        });
+        result.project = await saveProject(result.project, { engineWrite: true });
+      } catch (e) {
+        return { error: (e as Error).message };
+      }
+      const verdicts = result.project.engine_data?.verdicts ?? [];
+      const artefacts = result.project.engine_data?.artefacts ?? [];
+      return {
+        rescoped: true,
+        project_id: id,
+        verdict_version: verdicts[verdicts.length - 1]?.version,
+        artefact_version: artefacts[artefacts.length - 1]?.version,
+        open_gaps: result.verdict.gaps.length,
+        verdict: result.verdict,
+        builder_url: `${SITE_URL}/rfp-builder/${id}`,
+        note: "Earlier verdict and document versions stay in the project record; the story shows what changed.",
       };
     }
     case "get_security_project_status": {

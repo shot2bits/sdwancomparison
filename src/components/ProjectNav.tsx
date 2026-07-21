@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 
-export type ProjectTab = "overview" | "assessment" | "rfp" | "preview" | "review" | "story" | "timeline";
+export type ProjectTab = "overview" | "assessment" | "rfp" | "preview" | "review" | "story" | "timeline" | "rescope";
 
 export default function ProjectNav({
   id,

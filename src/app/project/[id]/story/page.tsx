@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { getProject, getSession, kvConfigured } from "@/lib/rfp-store";
+import { getProject, getSession, listResponses, kvConfigured } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { buildStory } from "@/lib/project-story";
+import { projectHealth } from "@/lib/project-health";
+import { openSecurityGaps } from "@/lib/project-machine";
 import ProjectNav from "@/components/ProjectNav";
 import SignIn from "@/components/SignIn";
 
@@ -56,6 +58,21 @@ export default async function ProjectStoryPage({ params, searchParams }: Props) 
   const s = buildStory(project);
   const engine = project.engine === "security_sourcing";
 
+  // D3.1 (Robert's tweak): the executive landing. What happened, where are
+  // we, anything to worry about, in five seconds, before the evidence.
+  // Every line derives from the same one-truth helpers as everywhere else.
+  const responses = await listResponses(id);
+  const health = projectHealth(project, { responseCount: responses.length });
+  const gaps = engine ? openSecurityGaps(project) : [];
+  const latestChapter = s.verdictChapters[s.verdictChapters.length - 1];
+  const keyDecisions: string[] = [
+    ...(latestChapter?.excluded ?? []).map((e) => `${e.label} excluded`),
+    ...s.decisions.filter((c) => c.action.startsWith("accept_gap:")).map((c) => `Gap accepted: ${c.action.slice("accept_gap:".length)}`),
+    ...s.decisions.filter((c) => c.action.startsWith("rescope")).map(() => "Project re-scoped"),
+    ...s.decisions.filter((c) => c.action.startsWith("approve_publish:")).map((c) => `Approved by ${c.action.slice("approve_publish:".length)}`),
+  ];
+  const risks = gaps.length > 0 ? `${gaps.length} open scoping gap${gaps.length === 1 ? "" : "s"}` : "None";
+
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       <p className="eyebrow mb-1">Project</p>
@@ -66,6 +83,38 @@ export default async function ProjectStoryPage({ params, searchParams }: Props) 
       </p>
 
       <ProjectNav id={id} manage={tokenOk ? manage : undefined} active="story" engine={engine} />
+
+      {/* Project summary (D3.1): the executive landing before the evidence. */}
+      <section className="mb-8 rounded-2xl border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-5">
+        <p className="eyebrow mb-3">Project summary</p>
+        <div className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <p className="m-0 text-xs font-medium uppercase tracking-wide text-[var(--ink-500)]">Status</p>
+            <p className="m-0 mt-0.5 font-medium text-[var(--ink-900,#111)]">{health.label}</p>
+          </div>
+          <div>
+            <p className="m-0 text-xs font-medium uppercase tracking-wide text-[var(--ink-500)]">Current verdict</p>
+            <p className="m-0 mt-0.5 text-[var(--ink-800)]">{latestChapter ? `v${latestChapter.version}` : "None"}</p>
+          </div>
+          <div>
+            <p className="m-0 text-xs font-medium uppercase tracking-wide text-[var(--ink-500)]">Current RFP</p>
+            <p className="m-0 mt-0.5 text-[var(--ink-800)]">{s.documentVersions.length ? `v${s.documentVersions[s.documentVersions.length - 1].version}` : "None"}</p>
+          </div>
+          <div>
+            <p className="m-0 text-xs font-medium uppercase tracking-wide text-[var(--ink-500)]">Outstanding risks</p>
+            <p className="m-0 mt-0.5 text-[var(--ink-800)]">{risks}</p>
+          </div>
+        </div>
+        {keyDecisions.length > 0 && (
+          <div className="mt-4">
+            <p className="m-0 text-xs font-medium uppercase tracking-wide text-[var(--ink-500)]">Key decisions</p>
+            <ul className="m-0 mt-1 list-disc pl-5 text-sm text-[var(--ink-800)]">
+              {keyDecisions.slice(0, 5).map((d, i) => <li key={i}>{d}</li>)}
+              {keyDecisions.length > 5 && <li>and {keyDecisions.length - 5} more in the decisions ledger below</li>}
+            </ul>
+          </div>
+        )}
+      </section>
 
       <div className="mb-6">
         <a href={`/sase/project/${id}/story/download${qs}`} className="inline-flex items-center rounded-full border border-[var(--ink-900,#111)] px-4 py-1.5 text-sm no-underline hover:bg-[var(--ink-900,#111)] hover:text-white transition-colors">

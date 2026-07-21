@@ -72,6 +72,7 @@ export const TOOL_ANNOTATIONS: Record<string, ToolAnnotation> = {
   assess_security_requirement: read("Assess a security requirement under SEC-RULES-2026.1"),
   create_security_project: write("Create a Security Sourcing project (consented); the RFP document is generated at creation"),
   generate_security_rfp: write("Regenerate a Security Sourcing RFP from its latest verdict (owner-gated; refuses over buyer edits without force)"),
+  rescope_security_project: write("Re-scope a Security Sourcing project: verdict v(n+1) + regenerated RFP, earlier versions kept (consented, owner-gated)"),
   get_security_project_status: read("Read a Security Sourcing project's status"),
 };
 

@@ -58,21 +58,37 @@ const inputCls =
 const chipCls = (on: boolean) =>
   `cursor-pointer rounded-full border px-3 py-1 text-xs font-medium ${on ? "border-amber-500 bg-amber-50 text-amber-900" : "border-zinc-300 bg-white text-zinc-600 hover:border-amber-300"}`;
 
-export function SecuritySourcingAdvisor() {
-  const [users, setUsers] = useState("");
-  const [sites, setSites] = useState("");
-  const [computers, setComputers] = useState("");
-  const [mobiles, setMobiles] = useState("");
-  const [servers, setServers] = useState("");
-  const [sector, setSector] = useState("");
-  const [cloud, setCloud] = useState<string[]>([]);
-  const [special, setSpecial] = useState<Array<"chromebook" | "epos">>([]);
-  const [existingSecurity, setExistingSecurity] = useState("");
-  const [existingNetwork, setExistingNetwork] = useState("");
-  const [drivers, setDrivers] = useState<SecurityDriver[]>([]);
-  const [compliance, setCompliance] = useState<string[]>([]);
-  const [soc, setSoc] = useState<"" | "none" | "business_hours" | "twenty_four_seven">("");
+/** Re-scope mode (Phase D4): the SAME form and the SAME live verdict,
+ *  pre-filled from the project's stored requirement, submitting to the
+ *  re-scope endpoint with the version-consequence confirmation. One form
+ *  for creation and re-scope (Article 21: repeat the pattern). */
+export interface RescopeMode {
+  projectId: string;
+  manage: string;
+  confirmationSentence: string;
+  edited: boolean;
+  consentText: string;
+  replaceEditsText: string;
+}
+
+export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: SecurityRequirementInput; rescope?: RescopeMode } = {}) {
+  const s0 = (n: number | undefined) => (typeof n === "number" ? String(n) : "");
+  const l0 = (xs: string[] | undefined) => (xs ?? []).join(", ");
+  const [users, setUsers] = useState(s0(initial?.estate?.users));
+  const [sites, setSites] = useState(s0(initial?.estate?.sites));
+  const [computers, setComputers] = useState(s0(initial?.estate?.devices?.computers));
+  const [mobiles, setMobiles] = useState(s0(initial?.estate?.devices?.mobiles));
+  const [servers, setServers] = useState(s0(initial?.estate?.devices?.servers));
+  const [sector, setSector] = useState(initial?.organisation?.sector ?? "");
+  const [cloud, setCloud] = useState<string[]>(initial?.estate?.cloud ?? []);
+  const [special, setSpecial] = useState<Array<"chromebook" | "epos">>(initial?.estate?.specialDevices ?? []);
+  const [existingSecurity, setExistingSecurity] = useState(l0(initial?.estate?.existingSecurity));
+  const [existingNetwork, setExistingNetwork] = useState(l0(initial?.estate?.existingNetwork));
+  const [drivers, setDrivers] = useState<SecurityDriver[]>(initial?.drivers ?? []);
+  const [compliance, setCompliance] = useState<string[]>(initial?.constraints?.complianceRequirements ?? []);
+  const [soc, setSoc] = useState<"" | "none" | "business_hours" | "twenty_four_seven">(initial?.constraints?.inHouseSocCapacity ?? "");
   const [consent, setConsent] = useState(false);
+  const [replaceEdits, setReplaceEdits] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
   const [created, setCreated] = useState<{ builderPath: string; projectId: string } | null>(null);
@@ -114,9 +130,31 @@ export function SecuritySourcingAdvisor() {
 
   async function createProject() {
     if (creating || !consent) return;
+    if (rescope?.edited && !replaceEdits) return;
     setCreating(true);
     setCreateError("");
     try {
+      if (rescope) {
+        // Re-scope (D4): same core semantics, existing project.
+        const resp = await fetch(`/api/security-sourcing/project/${rescope.projectId}/rescope`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            requirement,
+            manage_token: rescope.manage,
+            consent: true,
+            ...(rescope.edited ? { replace_edits_consent: replaceEdits } : {}),
+          }),
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (resp.ok && data.rescoped) {
+          const manage = rescope.manage ? `?manage=${encodeURIComponent(rescope.manage)}` : "";
+          setCreated({ builderPath: `/sase/project/${rescope.projectId}${manage}`, projectId: rescope.projectId });
+        } else {
+          setCreateError(data.error || "Could not re-scope the project; try again.");
+        }
+        return;
+      }
       const resp = await fetch("/api/security-sourcing/project", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -272,12 +310,13 @@ export function SecuritySourcingAdvisor() {
 
             {created ? (
               <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5">
-                <p className="text-sm font-semibold text-emerald-900">Your project is created and your RFP is drafted.</p>
+                <p className="text-sm font-semibold text-emerald-900">
+                  {rescope ? "Project re-scoped: a new verdict and a new RFP version are on the record." : "Your project is created and your RFP is drafted."}
+                </p>
                 <p className="mt-1 text-sm text-emerald-800">
-                  The verdict is attached as its first record, and the RFP has been generated from it:
-                  question bank sections for each capability you need, with what was excluded and why
-                  recorded in the document. Your project home shows the assessment, the document, any
-                  open gaps and what happens next; sign in there to keep it and to publish when ready.
+                  {rescope
+                    ? "The earlier verdict and document versions stay in the project record; the story shows exactly what changed."
+                    : "The verdict is attached as its first record, and the RFP has been generated from it: question bank sections for each capability you need, with what was excluded and why recorded in the document. Your project home shows the assessment, the document, any open gaps and what happens next; sign in there to keep it and to publish when ready."}
                 </p>
                 <a href={created.builderPath} className="mt-3 inline-flex items-center rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white no-underline hover:bg-emerald-700">
                   Open your project
@@ -285,23 +324,32 @@ export function SecuritySourcingAdvisor() {
               </div>
             ) : (
               <div className="rounded-2xl border-2 border-amber-400 bg-white p-5">
-                <p className="text-sm font-semibold text-zinc-950">Create your Security Sourcing project</p>
+                <p className="text-sm font-semibold text-zinc-950">{rescope ? "Re-scope this project" : "Create your Security Sourcing project"}</p>
+                {rescope && (
+                  <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{rescope.confirmationSentence}</p>
+                )}
                 <label className="mt-3 flex items-start gap-2 text-sm text-zinc-700">
                   <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
-                  <span>{CREATE_CONSENT_TEXT}</span>
+                  <span>{rescope ? rescope.consentText : CREATE_CONSENT_TEXT}</span>
                 </label>
+                {rescope?.edited && (
+                  <label className="mt-2 flex items-start gap-2 text-sm text-zinc-700">
+                    <input type="checkbox" checked={replaceEdits} onChange={(e) => setReplaceEdits(e.target.checked)} className="mt-0.5" />
+                    <span>{rescope.replaceEditsText}</span>
+                  </label>
+                )}
                 {createError && <p className="mt-2 text-sm text-rose-600">{createError}</p>}
                 <button
                   type="button"
                   onClick={createProject}
-                  disabled={!consent || creating || verdict.confidence === "low"}
+                  disabled={!consent || creating || verdict.confidence === "low" || (rescope?.edited === true && !replaceEdits)}
                   className="mt-3 inline-flex items-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {creating ? "Creating…" : "Create project and build the RFP"}
+                  {creating ? (rescope ? "Re-scoping…" : "Creating…") : rescope ? "Re-scope this project" : "Create project and build the RFP"}
                 </button>
                 {verdict.confidence === "low" && (
                   <p className="mt-2 text-xs text-zinc-500">
-                    Answer the questions above first: a project is not created on guesswork.
+                    Answer the questions above first: a {rescope ? "re-scope" : "project"} is not recorded on guesswork.
                   </p>
                 )}
               </div>

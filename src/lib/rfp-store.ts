@@ -83,7 +83,10 @@ export function newId(prefix: string): string {
 
 /* ---- ProjectDetails ---- */
 
-export async function saveProject(p: ProjectDetails): Promise<ProjectDetails> {
+export async function saveProject(
+  p: ProjectDetails,
+  opts: { engineWrite?: boolean } = {},
+): Promise<ProjectDetails> {
   const parsed = ProjectDetailsSchema.parse({ ...p, updated: Date.now() });
   // Append-only tamper guard (Phase B step 1, 21 July 2026; Constitution
   // Article 9, spec 1.4): a write may never shrink or rewrite the recorded
@@ -98,7 +101,9 @@ export async function saveProject(p: ProjectDetails): Promise<ProjectDetails> {
   // generated transparency items (against-interest, exclusions, provenance)
   // must survive every edit verbatim. Narrow by design: ordinary content
   // stays freely editable; a refusal names the exact items to restore.
-  if (existing) assertEngineArtefactsIntact(existing, parsed);
+  // D4: only engine flows (engineWrite) may attach new verdicts or
+  // document versions; the generic PUT cannot.
+  if (existing) assertEngineArtefactsIntact(existing, parsed, opts);
   await setJson(`rfp:${parsed.id}`, parsed);
   await kv(["SET", `rfp:token:${parsed.share_token}`, parsed.id]);
   // Test-mode records self-expire, enforced HERE at the single write path:

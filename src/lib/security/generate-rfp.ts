@@ -193,7 +193,11 @@ export class ProtectedContentError extends Error {}
  * missing item so the buyer can restore it without losing other work;
  * the builder keeps unsaved edits on screen (saves are optimistic).
  */
-export function assertEngineArtefactsIntact(existing: ProjectDetails, next: ProjectDetails): void {
+export function assertEngineArtefactsIntact(
+  existing: ProjectDetails,
+  next: ProjectDetails,
+  opts: { engineWrite?: boolean } = {},
+): void {
   if (existing.engine !== "security_sourcing") return;
 
   // The Record is append-only (Article 9): verdicts and artefact
@@ -219,9 +223,22 @@ export function assertEngineArtefactsIntact(existing: ProjectDetails, next: Proj
     }
   }
 
-  // Transparency items: only checked once a document has been generated.
-  if (exA.length === 0) return;
-  const stored = exV[exV.length - 1]?.verdict as SecurityScopeVerdict | undefined;
+  // The Record accretes only through the engine (D4 hardening): a client
+  // edit may never ATTACH verdicts or document versions, because appended
+  // entries define what the transparency guard protects. Server flows
+  // (creation, re-scope, regeneration) pass engineWrite; the generic PUT
+  // does not, closing the door on forged appends relaxing protection.
+  if (!opts.engineWrite && (nxV.length > exV.length || nxA.length > exA.length)) {
+    throw new ProtectedContentError("Verdicts and document versions are attached by the Security Sourcing engine (creation, re-scope, regeneration), not by editing. Re-scope the project to attach a new version.");
+  }
+
+  // Transparency items: only checked once a document has been generated,
+  // against the latest verdict on the record being written. For client
+  // edits that verdict equals the stored one (growth is refused above);
+  // for engine writes it is the newly attested version, which is exactly
+  // what the regenerated document must carry.
+  if (nxA.length === 0) return;
+  const stored = nxV[nxV.length - 1]?.verdict as SecurityScopeVerdict | undefined;
   if (!stored || !Array.isArray(stored.againstInterest)) return;
 
   const byId = new Map<string, { text: string; priority: string; sectionIncluded: boolean }>();

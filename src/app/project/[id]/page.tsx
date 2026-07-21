@@ -155,7 +155,15 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
             <p className="m-0 text-sm text-[var(--ink-800)]">
               {verdict ? `Confidence ${verdict.confidence}. ${verdict.summary.recommended.length} required, ${verdict.summary.conditional.length} conditional, ${verdict.summary.not_recommended.length} excluded.` : "No verdict on record."}
             </p>
-            <p className="m-0 mt-2 text-sm"><Link href={`/project/${id}/assessment${qs}`} className="underline">View the assessment</Link></p>
+            <p className="m-0 mt-2 text-sm">
+              <Link href={`/project/${id}/assessment${qs}`} className="underline">View the assessment</Link>
+              {["scoping", "scoped", "drafting", "drafted"].includes(phase) && (
+                <>
+                  <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
+                  <Link href={`/project/${id}/rescope${qs}`} className="underline">Re-scope</Link>
+                </>
+              )}
+            </p>
           </section>
         )}
 
@@ -193,7 +201,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
             ) : (
               <>
                 <p className="m-0 mb-2 text-sm text-[var(--ink-800)]">
-                  {gaps.length} to answer or accept before publication. Re-scoping to answer them arrives on this page shortly; accepting records the decision now.
+                  {gaps.length} to answer or accept before publication. <Link href={`/project/${id}/rescope${qs}`} className="underline">Answer by re-scoping</Link> (a new verdict and document version, earlier versions kept), or accept below to record the decision.
                 </p>
                 <GapActions projectId={id} manage={tokenOk ? manage : undefined} gaps={gaps} />
               </>

@@ -217,10 +217,14 @@ export async function runGenerateRfpTests(): Promise<GenerateTestResult> {
     if (JSON.stringify(art.sections_snapshot) !== JSON.stringify(project.rfp_sections)) throw new Error("snapshot differs from the live document at generation");
     if (art.input_digest !== verdict.inputDigest) throw new Error("artefact does not record its verdict digest");
 
-    // Regeneration appends v2 (as the tool does); the guard accepts it.
+    // Regeneration appends v2 (as the tool does, on the engine path);
+    // the guard accepts it there and refuses the same append from a
+    // client edit (D4: the Record accretes only through the engine).
     const regen = clone(project);
     regen.engine_data = { ...regen.engine_data!, artefacts: [...(regen.engine_data!.artefacts ?? []), { ...clone(art), version: 2, created_at: NOW + 20 }] };
-    assertEngineArtefactsIntact(project, regen);
+    assertEngineArtefactsIntact(project, regen, { engineWrite: true });
+    try { assertEngineArtefactsIntact(project, regen); throw new Error("client artefact append was not refused"); }
+    catch (e) { if (!(e as Error).message.includes("Security Sourcing engine")) throw new Error("append refusal wrong"); }
 
     // Rewriting v1 in place is refused.
     const tamper = clone(project);
