@@ -194,6 +194,8 @@ const NON_TRANSITION_EVENTS: Record<string, ProjectPhase[]> = {
   "rfp.generated": ["drafted"], // regeneration to v(n+1)
   "publish.consented": ["drafted"],
   "publish.approved": ["drafted"],
+  "approval.requested": ["drafted"], // D5: approval lite
+  "approval.declined": ["drafted"],
   "invite.sent": ["published", "qa", "evaluation"],
   "nda.accepted": ["published", "qa", "evaluation"],
   "clarification.asked": ["qa", "evaluation"],

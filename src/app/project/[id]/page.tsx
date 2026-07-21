@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { getProject, getSession, listResponses, kvConfigured } from "@/lib/rfp-store";
+import { getProject, getSession, listResponses, listSignoffs, kvConfigured } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
 import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
 import { projectHealth, type HealthTone } from "@/lib/project-health";
+import { signoffHealthContext } from "@/lib/project-approvals";
 import { humaniseEvent } from "@/lib/project-story";
+import ApprovalRequest from "@/components/ApprovalRequest";
 import { includedSections } from "@/lib/rfp-document";
 import { PROJECT_PHASE } from "@/lib/rfp-types";
 import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
@@ -96,7 +98,8 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
   const phase = projectPhase(project);
   const engine = project.engine === "security_sourcing";
   const responses = await listResponses(id);
-  const health = projectHealth(project, { responseCount: responses.length });
+  const signoffs = await listSignoffs(id);
+  const health = projectHealth(project, { responseCount: responses.length, approvals: signoffHealthContext(signoffs) });
 
   const verdictEntry = (project.engine_data?.verdicts ?? []).slice(-1)[0];
   const verdict = verdictEntry?.verdict as SecurityScopeVerdict | undefined;
@@ -216,11 +219,24 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
               ? `Published. ${(project.invited_vendors ?? []).length} suppliers invited.`
               : "Not yet published. Publishing invites matched suppliers; pricing stays private to you."}
           </p>
+          {signoffs.length > 0 && (
+            <ul className="m-0 mt-2 list-none space-y-1 p-0 text-xs text-[var(--ink-700)]">
+              {signoffs.map((a, i) => (
+                <li key={i}>
+                  {a.role} ({a.name}):{" "}
+                  {a.decision === "approved" ? <span className="text-emerald-700">approved</span>
+                    : a.decision === "declined" ? <span className="text-amber-700">declined{a.note ? ` ("${a.note}")` : ""}</span>
+                    : <span className="text-[var(--ink-500)]">awaiting decision</span>}
+                </li>
+              ))}
+            </ul>
+          )}
           <p className="m-0 mt-2 text-sm">
             <Link href={`/rfp-builder/${id}${qs}`} className="underline">
               {phase === "drafted" ? "Publish from the builder" : "Open the builder"}
             </Link>
           </p>
+          {phase === "drafted" && <ApprovalRequest projectId={id} manage={tokenOk ? manage : undefined} />}
         </section>
 
         <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">

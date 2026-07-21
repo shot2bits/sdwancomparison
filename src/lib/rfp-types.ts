@@ -116,6 +116,25 @@ export const ProjectEngineDataSchema = z.object({
 }).strict();
 export type ProjectEngineData = z.infer<typeof ProjectEngineDataSchema>;
 
+/** One human sign-off request (D5, approval lite): request, decide,
+ *  record. Named "signoff" in code because rfp:{id}:approvals and
+ *  listApprovals already belong to the agent proposal queue (deal room
+ *  slice 1); the buyer-facing wording remains "approval". Lives in the
+ *  rfp:{id}:signoffs sub-collection (never phase or history); the token
+ *  is the approver's purpose-scoped credential: read the document and
+ *  decide, nothing else. */
+export const ProjectSignoffSchema = z.object({
+  token: z.string(),
+  name: z.string(),
+  role: z.string(),           // free text: "CISO", "Legal"
+  email: z.string(),
+  requested_at: z.number(),
+  decided_at: z.number().optional(),
+  decision: z.enum(["approved", "declined"]).optional(),
+  note: z.string().optional(),
+}).strict();
+export type ProjectSignoff = z.infer<typeof ProjectSignoffSchema>;
+
 /** One append-only history entry. detail never carries private figures
  *  (Article 15); consent-bearing events set consent: true (Article 13). */
 export const ProjectHistoryEventSchema = z.object({

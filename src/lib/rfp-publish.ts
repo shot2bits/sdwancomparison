@@ -1,4 +1,6 @@
-import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer } from "@/lib/rfp-store";
+import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs } from "@/lib/rfp-store";
+import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
+import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED_ACTION, ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { inviteSupplier } from "@/lib/rfp-connect";
 import { regionHintFromEmail } from "@/lib/region-hint";
 import { buildShortlist } from "@/lib/shortlist-core";
@@ -21,7 +23,15 @@ export type PublishOpts = {
   shortlist_size?: number;
   list_on_board?: boolean;
   marketing_opt_in?: boolean;
+  /** D5 (Robert's amendment): publishing after a declined approval is
+   *  allowed only as an intentional, recorded decision. */
+  acknowledge_declined_approval?: boolean;
 };
+
+/** Thrown when a declined approval requires the explicit confirmation. */
+export class DeclinedApprovalError extends Error {
+  code = "declined_approval" as const;
+}
 
 export type PublishResult = {
   published: ProjectDetails;
@@ -208,14 +218,62 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // Response window: 14 days by default from the moment of submission,
   // preserved on re-sends so the clock never quietly restarts.
   const responseDeadline = project.response_deadline ?? Date.now() + 14 * 86400000;
-  const published = await saveProject({
-    ...project,
-    status: "published",
-    owner_email: ownerEmail,
-    response_deadline: responseDeadline,
-    invited_vendors: Array.from(new Set([...project.invited_vendors, ...invited.map((i) => i.slug)])),
-    pending_submit: undefined,
-  });
+
+  // D5 decision gate (Robert's amendment): a declined approval never
+  // vetoes, but publishing against it must be an intentional, recorded
+  // decision. The confirmation wording is recorded verbatim as consent.
+  const signoffs = await listSignoffs(project.id);
+  let working: ProjectDetails = project;
+  if (
+    opts.acknowledge_declined_approval === true &&
+    signoffs.some((a) => a.decision === "declined") &&
+    !(working.consents ?? []).some((c) => c.action === PUBLISH_DESPITE_DECLINED_ACTION)
+  ) {
+    working = {
+      ...working,
+      consents: [
+        ...(working.consents ?? []),
+        { at: Date.now(), action: PUBLISH_DESPITE_DECLINED_ACTION, granted_by: ownerEmail, via: "web" as const, text: declinedConfirmationText(signoffs) },
+      ],
+    };
+  }
+  const gate = publishDecisionGate(signoffs, working.consents);
+  if (gate.blocked) throw new DeclinedApprovalError(gate.confirmationText);
+
+  const mergedInvited = Array.from(new Set([...project.invited_vendors, ...invited.map((i) => i.slug)]));
+  let published: ProjectDetails;
+  if (project.engine) {
+    // Engine records publish THROUGH THE MACHINE (the legacy direct
+    // status write is refused by the write gate for engine records, by
+    // design): publish consent recorded verbatim, then the drafted to
+    // published transition with its guards (consent + the gap gate).
+    const now = Date.now();
+    let p: ProjectDetails = {
+      ...working,
+      owner_email: ownerEmail,
+      response_deadline: responseDeadline,
+      invited_vendors: mergedInvited,
+      pending_submit: undefined,
+    };
+    if (!(p.consents ?? []).some((c) => c.action === "publish")) {
+      p = {
+        ...p,
+        consents: [...(p.consents ?? []), { at: now, action: "publish", granted_by: ownerEmail, via: "web" as const, text: ENGINE_PUBLISH_CONSENT_TEXT }],
+      };
+      p = recordProjectEvent(p, { at: now, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.consented", detail: {}, consent: true });
+    }
+    p = advanceProject(p, { at: now + 1, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.live", detail: { invited: invited.length } });
+    published = await saveProject(p);
+  } else {
+    published = await saveProject({
+      ...working,
+      status: "published",
+      owner_email: ownerEmail,
+      response_deadline: responseDeadline,
+      invited_vendors: mergedInvited,
+      pending_submit: undefined,
+    });
+  }
   if (!project.owner_email) {
     try { await indexRfpForBuyer(sessionEmail, published.id); } catch { /* best effort */ }
   }

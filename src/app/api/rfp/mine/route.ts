@@ -1,8 +1,9 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
-import { listBuyerRfpIds, getProject, saveProject, listResponses, kvConfigured } from "@/lib/rfp-store";
+import { listBuyerRfpIds, getProject, saveProject, listResponses, listSignoffs, kvConfigured } from "@/lib/rfp-store";
 import { projectPhase } from "@/lib/project-machine";
 import { projectHealth } from "@/lib/project-health";
+import { signoffHealthContext } from "@/lib/project-approvals";
 
 export const runtime = "nodejs";
 export async function OPTIONS(req: Request) { return preflight(req); }
@@ -34,7 +35,13 @@ export async function GET(req: Request) {
     if (["published", "qa", "evaluation", "awarded", "transacting", "complete"].includes(phase)) {
       try { responseCount = (await listResponses(p.id)).length; } catch { /* count stays 0 */ }
     }
-    const health = projectHealth(p, { responseCount });
+    // Approval state matters pre-publication only (bounded reads), and the
+    // list must agree with the Project Home (one truth for health).
+    let approvals: Array<{ decision?: "approved" | "declined" }> = [];
+    if (phase === "drafted") {
+      try { approvals = signoffHealthContext(await listSignoffs(p.id)); } catch { /* absent */ }
+    }
+    const health = projectHealth(p, { responseCount, approvals });
     rfps.push({ id: p.id, title: p.title, status: p.status, updated: p.updated, phase, responses: responseCount, health });
   }
   return Response.json({ rfps: rfps.sort((a, b) => b.updated - a.updated) }, { headers: cors });

@@ -930,8 +930,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       // (invite cap 5, matched suppliers only, marketing opt-in).
       let publishOpts: Record<string, unknown> = {};
       try { publishOpts = JSON.parse(localStorage.getItem(`rfp_publish_opts_${project.id}`) ?? "{}") as Record<string, unknown>; } catch { /* ignore */ }
-      const res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: manageToken.current || project.manage_token, ...publishOpts }) });
-      const data = await res.json().catch(() => ({}));
+      let res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: manageToken.current || project.manage_token, ...publishOpts }) });
+      let data = await res.json().catch(() => ({}));
+      // D5 (approval lite): a declined approval never vetoes, but
+      // publishing against it is an intentional decision, confirmed here
+      // in the approver's words and recorded verbatim on the project.
+      if (res.status === 409 && (data as { requires_decline_confirmation?: boolean }).requires_decline_confirmation) {
+        const confirmed = window.confirm(`${String((data as { confirmation_text?: string }).confirmation_text ?? "An approver declined.")}\n\nPress OK to publish anyway; this confirmation is recorded on the permanent project record.`);
+        if (!confirmed) {
+          setError(String((data as { confirmation_text?: string }).confirmation_text ?? "Publication needs your explicit confirmation after the declined approval."));
+          return;
+        }
+        res = await fetch(`/sase/api/rfp/${project.id}/publish`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ manage_token: manageToken.current || project.manage_token, ...publishOpts, acknowledge_declined_approval: true }) });
+        data = await res.json().catch(() => ({}));
+      }
       // Publishing requires a verified work-email sign-in on top of the
       // manage token: render the inline sign-in panel, not a dead error.
       if (res.status === 401 && (data.error === "sign_in_required" || data.auth_required)) {

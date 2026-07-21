@@ -20,6 +20,8 @@ import {
   type RfpResponse,
   type NdaAcceptance,
   type BuyerContext,
+  ProjectSignoffSchema,
+  type ProjectSignoff,
 } from "@/lib/rfp-types";
 import { assertEngineArtefactsIntact } from "@/lib/security/generate-rfp";
 import { assertHistoryExtends, assertPhaseStatusConsistent } from "@/lib/project-machine";
@@ -165,6 +167,21 @@ export async function getProjectByToken(token: string): Promise<ProjectDetails |
 }
 
 /* ---- Threads ---- */
+
+/** D5 approval lite: the SIGNOFF sub-collection (rfp:{id}:signoffs;
+ *  "approvals" already belongs to the agent proposal queue). Like every
+ *  sub-collection it carries no phase and no history; decisions are
+ *  mirrored onto the project record as events and consents through the
+ *  single write gate. Test-mode keys expire with the project. */
+export async function listSignoffs(rfpId: string): Promise<ProjectSignoff[]> {
+  const raw = (await getJson<unknown[]>(`rfp:${rfpId}:signoffs`)) ?? [];
+  return raw.map((a) => ProjectSignoffSchema.parse(a));
+}
+
+export async function saveSignoffs(rfpId: string, signoffs: ProjectSignoff[], opts: { test?: boolean } = {}): Promise<void> {
+  await setJson(`rfp:${rfpId}:signoffs`, signoffs.map((a) => ProjectSignoffSchema.parse(a)));
+  if (opts.test) await kv(["EXPIRE", `rfp:${rfpId}:signoffs`, "7200"]);
+}
 
 export async function listThreads(rfpId: string): Promise<RfpThread[]> {
   return (await getJson<RfpThread[]>(`rfp:${rfpId}:threads`)) ?? [];

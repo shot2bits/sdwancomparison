@@ -1,7 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
-import { executePublish } from "@/lib/rfp-publish";
+import { executePublish, DeclinedApprovalError } from "@/lib/rfp-publish";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const runtime = "nodejs";
@@ -46,11 +46,27 @@ export async function POST(req: Request, ctx: Ctx) {
     );
   }
 
-  const { published, invited, criteria, board, market_report } = await executePublish(project, sessionEmail, {
-    shortlist_size: body.shortlist_size,
-    list_on_board: body.list_on_board,
-    marketing_opt_in: body.marketing_opt_in,
-  });
+  let result;
+  try {
+    result = await executePublish(project, sessionEmail, {
+      shortlist_size: body.shortlist_size,
+      list_on_board: body.list_on_board,
+      marketing_opt_in: body.marketing_opt_in,
+      acknowledge_declined_approval: body.acknowledge_declined_approval === true,
+    });
+  } catch (e) {
+    // D5: a declined approval requires the explicit confirmation; the
+    // machine's own refusals (open gaps, missing consent) surface with
+    // their reasons instead of a blank 500.
+    if (e instanceof DeclinedApprovalError) {
+      return Response.json(
+        { error: e.message, requires_decline_confirmation: true, confirmation_text: e.message },
+        { status: 409, headers: cors },
+      );
+    }
+    return Response.json({ error: (e as Error).message }, { status: 409, headers: cors });
+  }
+  const { published, invited, criteria, board, market_report } = result;
 
   return Response.json({ ok: true, status: published.status, invited, criteria, board, market_report }, { headers: cors });
 }
