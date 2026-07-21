@@ -10,7 +10,8 @@ import { SECURITY_FIXTURES } from "./fixtures";
 import { assessSecurityRequirement, type SecurityScopeVerdict } from "./rulebook";
 import { generateRfpSections, protectedTransparencyItems, assertEngineArtefactsIntact, TRANSPARENCY_CATEGORY } from "./generate-rfp";
 import { buildSecurityProject } from "./create-project";
-import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
+import { advanceProject, recordProjectEvent, openSecurityGaps } from "@/lib/project-machine";
+import { projectHealth } from "@/lib/project-health";
 import { includedSections, documentSections, sectionStats } from "@/lib/rfp-document";
 import { QUESTION_BANK } from "@/lib/rfp-question-bank";
 import type { ProjectDetails } from "@/lib/rfp-types";
@@ -246,6 +247,54 @@ export async function runGenerateRfpTests(): Promise<GenerateTestResult> {
     // Weight-share table sums only scored questions.
     const stats = sectionStats(project);
     if (stats.some((st) => st.category === TRANSPARENCY_CATEGORY)) throw new Error("transparency section entered the scoring table");
+  });
+
+  /* D0: the supplier lens: same truth, supplier phrasing, tamper-pointless. */
+  await ok("D0: information items carry a supplier lens; protected text is untouched", async () => {
+    const { project, verdict } = await projectFor("F2");
+    const info = flatQ(project).filter((q) => q.priority === "optional" && q.source === "custom");
+    for (const q of info.filter((x) => x.id.startsWith("tr_ai_") || x.id.startsWith("tr_excl_") || x.id === "tr_versions" || x.id.startsWith("tr_cond_"))) {
+      if (!q.supplier_lens.trim()) throw new Error(`${q.id}: no supplier lens`);
+      if (q.supplier_lens === q.text) throw new Error(`${q.id}: lens duplicates the audit wording`);
+    }
+    const ai = info.find((q) => q.id === "tr_ai_endpoint");
+    if (!ai || !/no .* response is requested/i.test(ai.supplier_lens)) throw new Error("endpoint lens does not tell suppliers not to respond");
+    // The lens rides on unprotected presentation: adding it changed no
+    // protected text, so the guard still recognises the generated set.
+    const expected = protectedTransparencyItems(verdict);
+    for (const p of expected) {
+      const item = flatQ(project).find((q) => q.id === p.id);
+      if (!item || item.text !== p.text) throw new Error(`${p.id}: protected text drifted with the lens`);
+    }
+  });
+
+  /* D1: procurement health: pure, and always agreeing with the gate. */
+  await ok("D1: health derives from the record and matches the publish gate", async () => {
+    const { project } = await projectFor("F2");
+    const h = projectHealth(project, { responseCount: 0 });
+    const gaps = openSecurityGaps(project);
+    // A gap-clear twin of the record (identical when there are no gaps):
+    // acceptance consents mirror exactly what the accept-gap route records.
+    const clear: ProjectDetails = {
+      ...project,
+      consents: [
+        ...(project.consents ?? []),
+        ...gaps.map((g) => ({ at: NOW + 30, action: `accept_gap:${g.field}`, granted_by: "b@x.com", via: "web" as const, text: `I accept proceeding without answering: "${g.question}"` })),
+      ],
+    };
+    if (gaps.length > 0) {
+      if (h.label !== "Waiting for gap acceptance" || h.tone !== "amber") throw new Error(`gappy drafted project not amber: ${h.label}`);
+      if (openSecurityGaps(clear).length !== 0) throw new Error("gate and health disagree after acceptance");
+    }
+    const h2 = projectHealth(clear, { responseCount: 0 });
+    if (h2.label !== "Ready to publish" || h2.tone !== "green") throw new Error(`gap-clear drafted project not green/ready: ${h2.label}`);
+    // Published states: waiting vs arriving.
+    const pub: ProjectDetails = { ...clear, phase: "published", status: "published" };
+    if (projectHealth(pub, { responseCount: 0 }).label !== "Waiting for suppliers") throw new Error("published+0 not waiting");
+    if (projectHealth(pub, { responseCount: 2 }).tone !== "green") throw new Error("published+2 not green");
+    // Approval states (D5 context arrives later; the function is ready).
+    const withDecline = projectHealth(clear, { responseCount: 0, approvals: [{ decision: "declined" }] });
+    if (withDecline.label !== "Approval declined") throw new Error("declined approval not surfaced");
   });
 
   /* Condition 2 (approval): protected set is exactly the constitutional set. */

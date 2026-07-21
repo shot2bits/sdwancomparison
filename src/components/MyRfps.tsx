@@ -104,7 +104,7 @@ export default function MyRfps() {
             </div>
             <div className="flex shrink-0 gap-2">
               <Link href={`/rfp-builder/${r.id}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
-              <Link href={`/rfp-builder/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open builder</Link>
+              <Link href={`/project/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
             </div>
           </div>
         ))}

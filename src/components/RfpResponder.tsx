@@ -271,7 +271,9 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
                 {info.map((q) => (
                   <div key={q.id} className="border-l-2 border-[var(--ink-300,#ccc)] pl-3">
                     <p className="text-xs uppercase tracking-wide text-[var(--ink-500)]">For information — no response required</p>
-                    <p className="text-sm text-[var(--ink-700)]">{q.text}</p>
+                    {/* Supplier lens (D0): same truth, supplier phrasing; the
+                        fallback to the audit wording makes tampering pointless. */}
+                    <p className="text-sm text-[var(--ink-700)]">{q.supplier_lens?.trim() || q.text}</p>
                   </div>
                 ))}
               </div>

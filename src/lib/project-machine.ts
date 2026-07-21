@@ -104,8 +104,12 @@ const hasPublishConsent: Guard = (p) => {
  * (consents[] action "accept_gap:{field}", Article 13). Legacy records
  * pass untouched.
  */
-const securityGapsClosed: Guard = (p) => {
-  if (p.engine !== "security_sourcing") return null;
+/** Open gaps on an engine record: the latest verdict's gaps minus those
+ *  individually accepted in the consent ledger. ONE truth for the publish
+ *  guard, the Project Home tiles, project health and the status tool
+ *  (Article 17): they must never disagree about what is open. */
+export function openSecurityGaps(p: ProjectDetails): Array<{ field: string; question: string }> {
+  if (p.engine !== "security_sourcing") return [];
   const latest = (p.engine_data?.verdicts ?? []).slice(-1)[0]?.verdict as
     | { gaps?: Array<{ field: string; question: string }> }
     | undefined;
@@ -115,7 +119,11 @@ const securityGapsClosed: Guard = (p) => {
       .filter((c) => c.action.startsWith("accept_gap:"))
       .map((c) => c.action.slice("accept_gap:".length)),
   );
-  const open = gaps.filter((g) => !accepted.has(g.field));
+  return gaps.filter((g) => !accepted.has(g.field));
+}
+
+const securityGapsClosed: Guard = (p) => {
+  const open = openSecurityGaps(p);
   return open.length === 0
     ? null
     : `publication requires every scoping gap to be answered or individually accepted with recorded consent; open: ${open.map((g) => `${g.field} ("${g.question}")`).join("; ")} (acceptance check 7; Article 13)`;

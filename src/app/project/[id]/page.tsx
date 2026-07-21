@@ -1,0 +1,259 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { getProject, getSession, listResponses, kvConfigured } from "@/lib/rfp-store";
+import { SESSION_COOKIE } from "@/lib/auth";
+import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
+import { projectHealth, type HealthTone } from "@/lib/project-health";
+import { includedSections } from "@/lib/rfp-document";
+import { PROJECT_PHASE } from "@/lib/rfp-types";
+import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
+import ProjectNav from "@/components/ProjectNav";
+import GapActions from "@/components/GapActions";
+import SignIn from "@/components/SignIn";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+/**
+ * The Project Home (Phase D1): the buyer's front door and the permanent
+ * navigation root. A container VIEW over the existing record, never an
+ * editor: every tile reads fields that already exist and links out to the
+ * existing surfaces. The one write on this screen is gap acceptance, which
+ * records consent + history through the single write gate.
+ *
+ * One home for every project (Article 17): engine records render the full
+ * set of tiles; legacy records render the same layout with the engine
+ * tiles absent and phase derived from status. Private workspace: noindex.
+ */
+
+export const metadata: Metadata = { title: "Project", robots: { index: false, follow: false } };
+
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ manage?: string }> };
+
+const TONE_STYLES: Record<HealthTone, string> = {
+  green: "border-emerald-300 bg-emerald-50 text-emerald-900",
+  amber: "border-amber-400 bg-amber-50 text-amber-900",
+  red: "border-red-300 bg-red-50 text-red-900",
+  yellow: "border-yellow-300 bg-yellow-50 text-yellow-900",
+  neutral: "border-[var(--ink-300,#ccc)] bg-[var(--paper-base,#faf9f7)] text-[var(--ink-800)]",
+};
+
+const TONE_DOT: Record<HealthTone, string> = {
+  green: "bg-emerald-500",
+  amber: "bg-amber-500",
+  red: "bg-red-500",
+  yellow: "bg-yellow-400",
+  neutral: "bg-[var(--ink-400,#9ca3af)]",
+};
+
+const PHASE_LABELS: Record<string, string> = {
+  scoping: "Scoping", scoped: "Scoped", drafting: "Drafting", drafted: "Drafted",
+  published: "Published", qa: "Clarifications", evaluation: "Evaluation",
+  awarded: "Awarded", transacting: "Transacting", complete: "Complete", closed: "Closed",
+};
+
+const EVENT_LABELS: Record<string, (d: Record<string, unknown> | undefined) => string> = {
+  "project.created": () => "Project created",
+  "verdict.attached": (d) => `Verdict v${d?.version ?? "?"} attached`,
+  "rfp.generated": (d) => `RFP generated (version ${d?.artefact_version ?? "?"}${typeof d?.questions === "number" ? `, ${d.questions} questions` : ""})`,
+  "rfp.edited": () => "RFP edited",
+  "requirement.updated": (d) => (d?.accepted === true ? `Gap accepted: ${d?.gap_field ?? ""}` : "Requirement updated"),
+  "publish.consented": () => "Publish consent recorded",
+  "publish.approved": () => "Approval recorded",
+  "publish.live": () => "Published to the marketplace",
+  "invite.sent": () => "Suppliers invited",
+  "response.submitted": () => "Supplier response submitted",
+  "evaluation.opened": () => "Evaluation opened",
+  "award.decided": () => "Award decided",
+};
+
+function humanise(event: string, detail?: Record<string, unknown>): string {
+  return EVENT_LABELS[event]?.(detail) ?? event.replace(/[._]/g, " ");
+}
+
+export default async function ProjectHomePage({ params, searchParams }: Props) {
+  const { id } = await params;
+  const { manage } = await searchParams;
+  if (!kvConfigured()) notFound();
+  const project = await getProject(id);
+  if (!project) notFound();
+
+  const jar = await cookies();
+  const session = await getSession(jar.get(SESSION_COOKIE)?.value ?? null);
+  const tokenOk = Boolean(project.manage_token) && manage === project.manage_token;
+  const sessionOwner =
+    Boolean(session) &&
+    (session?.role === "netify" ||
+      (session?.role === "buyer" && Boolean(project.owner_email) && session.email.toLowerCase() === project.owner_email.toLowerCase()));
+
+  if (!tokenOk && !sessionOwner) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-24">
+        <p className="eyebrow mb-2">Project</p>
+        <h1 className="mb-3 text-2xl">This project is private to the buyer</h1>
+        <p className="mb-6 text-sm text-[var(--ink-600)]">
+          Open it from your builder link (it carries your private key), or sign in with the email that created it.
+          Suppliers respond through the invitation link instead.
+        </p>
+        <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this project." /></div>
+        <p className="text-sm"><Link href="/rfp-builder" className="underline">Go to the RFP builder</Link></p>
+      </div>
+    );
+  }
+
+  const qs = tokenOk && manage ? `?manage=${encodeURIComponent(manage)}` : "";
+  const phase = projectPhase(project);
+  const engine = project.engine === "security_sourcing";
+  const responses = await listResponses(id);
+  const health = projectHealth(project, { responseCount: responses.length });
+
+  const verdictEntry = (project.engine_data?.verdicts ?? []).slice(-1)[0];
+  const verdict = verdictEntry?.verdict as SecurityScopeVerdict | undefined;
+  const artefacts = project.engine_data?.artefacts ?? [];
+  const latestArtefact = artefacts[artefacts.length - 1];
+  const gaps = engine ? openSecurityGaps(project) : [];
+  const scored = includedSections(project);
+  const questionCount = scored.reduce((n, s) => n + s.questions.length, 0);
+  const infoCount = project.rfp_sections.reduce(
+    (n, s) => n + s.questions.filter((q) => q.priority === "optional" && q.source === "custom").length,
+    0,
+  );
+  const history = project.history ?? [];
+  const recent = history.slice(-5).reverse();
+  const phaseIdx = PROJECT_PHASE.indexOf(phase);
+
+  return (
+    <div className="mx-auto max-w-4xl px-6 py-10">
+      <p className="eyebrow mb-1">Project</p>
+      <div className="mb-1 flex flex-wrap items-center gap-3">
+        <h1 className="m-0 text-2xl">{project.title || "Untitled project"}</h1>
+        <span className="rounded-full border border-[var(--ink-300,#ccc)] px-2 py-0.5 text-xs text-[var(--ink-700)]">{PHASE_LABELS[phase] ?? phase}</span>
+        {project.test && <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800">TEST</span>}
+      </div>
+      <p className="mb-5 text-sm text-[var(--ink-600)]">
+        Everything about this procurement starts here: the assessment, the document, publication, responses and the record of every decision.
+      </p>
+
+      <ProjectNav id={id} manage={tokenOk ? manage : undefined} active="overview" engine={engine} />
+
+      {/* Procurement health: the one thing a busy buyer looks at. */}
+      <div className={`mb-6 flex items-start gap-3 rounded-2xl border-2 p-4 ${TONE_STYLES[health.tone]}`}>
+        <span aria-hidden className={`mt-1 inline-block h-3 w-3 shrink-0 rounded-full ${TONE_DOT[health.tone]}`} />
+        <div>
+          <p className="m-0 text-sm font-semibold">{health.label}</p>
+          <p className="m-0 mt-0.5 text-sm">{health.detail}</p>
+        </div>
+      </div>
+
+      {/* Phase strip: the machine's phases, current position marked. */}
+      <ol className="mb-8 flex list-none flex-wrap items-center gap-x-1.5 gap-y-1 p-0 text-xs" aria-label="Procurement phases">
+        {PROJECT_PHASE.filter((p) => p !== "closed").map((p, i) => (
+          <li key={p} className="flex items-center gap-1.5">
+            {i > 0 && <span aria-hidden className="text-[var(--ink-300,#ccc)]">→</span>}
+            <span className={p === phase ? "rounded-full bg-[var(--ink-900,#111)] px-2 py-0.5 font-medium text-white" : PROJECT_PHASE.indexOf(p) < phaseIdx ? "text-[var(--ink-700)]" : "text-[var(--ink-400,#9ca3af)]"}>
+              {PHASE_LABELS[p] ?? p}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {engine && (
+          <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+            <p className="eyebrow mb-1">Assessment</p>
+            <p className="m-0 text-sm text-[var(--ink-800)]">
+              {verdict ? `Confidence ${verdict.confidence}. ${verdict.summary.recommended.length} required, ${verdict.summary.conditional.length} conditional, ${verdict.summary.not_recommended.length} excluded.` : "No verdict on record."}
+            </p>
+            <p className="m-0 mt-2 text-sm"><Link href={`/project/${id}/assessment${qs}`} className="underline">View the assessment</Link></p>
+          </section>
+        )}
+
+        {engine && (
+          <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+            <p className="eyebrow mb-1">Current verdict</p>
+            <p className="m-0 text-sm text-[var(--ink-800)]">
+              {verdictEntry ? `Version ${verdictEntry.version}, ${new Date(verdictEntry.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.` : "None."}
+            </p>
+            {verdictEntry && <p className="m-0 mt-1 break-all text-xs text-[var(--ink-500)]">Digest {String(verdictEntry.input_digest).slice(0, 16)}…</p>}
+          </section>
+        )}
+
+        <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+          <p className="eyebrow mb-1">Current RFP</p>
+          <p className="m-0 text-sm text-[var(--ink-800)]">
+            {latestArtefact
+              ? `Version ${latestArtefact.version}: ${questionCount} questions${infoCount ? ` plus ${infoCount} information items` : ""}.`
+              : questionCount
+                ? `${questionCount} questions.`
+                : "Not yet drafted."}
+          </p>
+          <p className="m-0 mt-2 text-sm">
+            <Link href={`/rfp-builder/${id}${qs}`} className="underline">Review and edit</Link>
+            <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
+            <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline">Preview</Link>
+          </p>
+        </section>
+
+        {engine && (
+          <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+            <p className="eyebrow mb-1">Outstanding gaps</p>
+            {gaps.length === 0 ? (
+              <p className="m-0 text-sm text-[var(--ink-800)]">None. Publication is not blocked by scoping gaps.</p>
+            ) : (
+              <>
+                <p className="m-0 mb-2 text-sm text-[var(--ink-800)]">
+                  {gaps.length} to answer or accept before publication. Re-scoping to answer them arrives on this page shortly; accepting records the decision now.
+                </p>
+                <GapActions projectId={id} manage={tokenOk ? manage : undefined} gaps={gaps} />
+              </>
+            )}
+          </section>
+        )}
+
+        <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+          <p className="eyebrow mb-1">Publication</p>
+          <p className="m-0 text-sm text-[var(--ink-800)]">
+            {phase === "published" || phaseIdx > PROJECT_PHASE.indexOf("published")
+              ? `Published. ${(project.invited_vendors ?? []).length} suppliers invited.`
+              : "Not yet published. Publishing invites matched suppliers; pricing stays private to you."}
+          </p>
+          <p className="m-0 mt-2 text-sm">
+            <Link href={`/rfp-builder/${id}${qs}`} className="underline">
+              {phase === "drafted" ? "Publish from the builder" : "Open the builder"}
+            </Link>
+          </p>
+        </section>
+
+        <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
+          <p className="eyebrow mb-1">Supplier responses</p>
+          <p className="m-0 text-sm text-[var(--ink-800)]">
+            {responses.length === 0 ? "No responses yet." : `${responses.length} response${responses.length === 1 ? "" : "s"} received.`}
+          </p>
+          <p className="m-0 mt-2 text-sm"><Link href={`/rfp-builder/${id}/review${qs}`} className="underline">Review and compare</Link></p>
+        </section>
+      </div>
+
+      {/* Activity: the record, humanised. Full story arrives with D3. */}
+      <section className="mt-8">
+        <p className="eyebrow mb-2">Activity</p>
+        {recent.length === 0 ? (
+          <p className="text-sm text-[var(--ink-600)]">No recorded events yet.</p>
+        ) : (
+          <ul className="m-0 list-none space-y-1.5 p-0">
+            {recent.map((h, i) => (
+              <li key={`${h.at}-${i}`} className="flex flex-wrap items-baseline gap-x-3 text-sm">
+                <span className="tabular-nums text-xs text-[var(--ink-500)]">
+                  {new Date(h.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="text-[var(--ink-800)]">{humanise(h.event, h.detail as Record<string, unknown> | undefined)}</span>
+                <span className="text-xs text-[var(--ink-400,#9ca3af)]">{h.actor}{h.via ? ` · ${h.via}` : ""}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}

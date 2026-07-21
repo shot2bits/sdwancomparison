@@ -13,7 +13,7 @@ import { createSecurityProject } from "@/lib/security/persist-project";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { getProject, saveProject } from "@/lib/rfp-store";
-import { projectPhase, advanceProject, recordProjectEvent } from "@/lib/project-machine";
+import { projectPhase, advanceProject, recordProjectEvent, openSecurityGaps } from "@/lib/project-machine";
 import type { ProjectDetails, ProjectHistoryEvent } from "@/lib/rfp-types";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -366,12 +366,7 @@ export async function callSecurityTool(
       const latest = project.engine_data?.verdicts?.slice(-1)[0];
       const v = latest?.verdict as SecurityScopeVerdict | undefined;
       const arts = project.engine_data?.artefacts ?? [];
-      const acceptedGaps = new Set(
-        (project.consents ?? [])
-          .filter((c) => c.action.startsWith("accept_gap:"))
-          .map((c) => c.action.slice("accept_gap:".length)),
-      );
-      const openGaps = (v?.gaps ?? []).filter((g) => !acceptedGaps.has(g.field)).length;
+      const openGaps = openSecurityGaps(project).length;
       return {
         found: true,
         phase: projectPhase(project),

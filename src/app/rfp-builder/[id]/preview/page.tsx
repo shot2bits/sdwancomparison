@@ -213,6 +213,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 text-sm">
               <p className="eyebrow mb-2">Next steps</p>
               <ul className="space-y-1.5">
+                <li><Link href={`/project/${id}${keyQs}`} className="underline">Project home</Link></li>
                 <li><Link href={`/rfp-builder/${id}${keyQs}`} className="underline">Keep editing in the builder</Link></li>
                 <li><Link href={`/rfp-builder/${id}/review${keyQs}`} className="underline">Agent review and approvals</Link></li>
                 <li><Link href="/opportunities/new" className="underline">Publish a companion project notice</Link></li>

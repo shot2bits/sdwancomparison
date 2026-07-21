@@ -124,7 +124,12 @@ export function SecuritySourcingAdvisor() {
       });
       const data = await resp.json().catch(() => ({}));
       if (resp.ok && data.project?.id) {
-        setCreated({ builderPath: data.builder_path, projectId: data.project.id });
+        // Land on the Project Home (Phase D1): the Project is the container,
+        // the builder is one surface inside it. The manage key travels so
+        // anonymous drafts keep working. Raw anchor below, so the basePath
+        // is explicit (the previous builder link was missing it too).
+        const manage = data.project?.manage_token ? `?manage=${encodeURIComponent(data.project.manage_token)}` : "";
+        setCreated({ builderPath: `/sase/project/${data.project.id}${manage}`, projectId: data.project.id });
       } else {
         setCreateError(data.error || "Could not create the project; try again.");
       }
@@ -271,11 +276,11 @@ export function SecuritySourcingAdvisor() {
                 <p className="mt-1 text-sm text-emerald-800">
                   The verdict is attached as its first record, and the RFP has been generated from it:
                   question bank sections for each capability you need, with what was excluded and why
-                  recorded in the document. Review and edit it in the builder; sign in there to keep it
-                  and to publish when ready.
+                  recorded in the document. Your project home shows the assessment, the document, any
+                  open gaps and what happens next; sign in there to keep it and to publish when ready.
                 </p>
                 <a href={created.builderPath} className="mt-3 inline-flex items-center rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white no-underline hover:bg-emerald-700">
-                  Continue to your RFP
+                  Open your project
                 </a>
               </div>
             ) : (

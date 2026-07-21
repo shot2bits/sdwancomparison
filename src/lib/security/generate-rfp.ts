@@ -44,8 +44,12 @@ export const CAPABILITY_LABELS: Record<CapabilityId, string> = {
 const label = (id: CapabilityId) => CAPABILITY_LABELS[id] ?? id;
 
 /** An informational line in the existing question shape: the platform's
- *  own non-response tier. Never an input, never counted, never scored. */
-function statement(id: string, text: string, rationale: string): RfpQuestion {
+ *  own non-response tier. Never an input, never counted, never scored.
+ *  supplierLens (D0): the same constitutional truth phrased for the
+ *  audience that quotes. The respond view prefers it and falls back to
+ *  text, so blanking it simply shows the audit wording: tampering with
+ *  the projection achieves nothing. text stays the protected field. */
+function statement(id: string, text: string, rationale: string, supplierLens = ""): RfpQuestion {
   return {
     id,
     feature_id: "custom",
@@ -55,7 +59,7 @@ function statement(id: string, text: string, rationale: string): RfpQuestion {
     priority: "optional",
     source: "custom",
     buyer_lens: "",
-    supplier_lens: "",
+    supplier_lens: supplierLens,
     mandatory: false,
     weight: 1,
   };
@@ -112,21 +116,37 @@ export function generateRfpSections(v: SecurityScopeVerdict): RfpSection[] {
       `tr_cond_${c.id}`,
       `Conditional capability: ${label(c.id)}. ${c.reasoning}`,
       `Recommended (not required) under ${v.rulebookVersion}; rules: ${c.firedRules.join(", ") || "none"}. The buyer decides whether to keep this in scope.`,
+      `Conditional: if ${label(c.id)} questions appear in this document, respond to them; the buyer decided to keep this capability in scope.`,
     ));
   }
 
   const protectedItems = protectedTransparencyItems(v);
   for (const p of protectedItems) {
     const isVersions = p.id === "tr_versions";
-    const cap = p.id.startsWith("tr_ai_") ? v.capabilities.find((c) => `tr_ai_${c.id}` === p.id) : undefined;
+    const isAi = p.id.startsWith("tr_ai_");
+    const cap = isAi ? v.capabilities.find((c) => `tr_ai_${c.id}` === p.id) : undefined;
+    // Supplier lens (D0): composed deterministically from the same verdict.
+    let lens = "";
+    if (isVersions) {
+      lens = "This RFP was generated under a versioned methodology; respond to the questions as asked.";
+    } else if (isAi) {
+      const e = v.againstInterest.find((x) => `tr_ai_${x.capabilityId}` === p.id);
+      const capLabel = e ? label(e.capabilityId) : "This capability";
+      lens = `No ${capLabel.toLowerCase()} response is requested in this RFP.${e?.evidence ? ` Existing provision: ${e.evidence}.` : ""}`;
+    } else {
+      const n = v.summary.not_recommended.find((x) => `tr_excl_${x.capabilityId}` === p.id);
+      const capLabel = n ? label(n.capabilityId) : "This capability";
+      lens = `${capLabel} is excluded from this RFP. Do not include it in your response or pricing.`;
+    }
     info.push(statement(
       p.id,
       p.text,
       isVersions
         ? "Provenance (Article 3): the verdict digest makes this document independently checkable."
-        : p.id.startsWith("tr_ai_")
+        : isAi
           ? `Against-interest record (Article 14): the rulebook routed away from a Netify-monetised option${cap ? `; rules: ${cap.firedRules.join(", ")}` : ""}.`
           : `Exclusion with reason (Article 6): recorded so suppliers do not quote for it and the buyer knows why.`,
+      lens,
     ));
   }
 
@@ -135,6 +155,7 @@ export function generateRfpSections(v: SecurityScopeVerdict): RfpSection[] {
       "tr_gaps",
       `Open scoping gaps: ${v.gaps.map((g) => g.question).join(" ")} This draft may proceed, but publication requires each gap to be answered (re-scope) or individually accepted by the buyer.`,
       "Gap handling (acceptance check 7): drafts tolerate gaps; publication does not.",
+      "Some scoping details were accepted as open by the buyer. Answer the questions as asked and state your assumptions where relevant.",
     ));
   }
 
