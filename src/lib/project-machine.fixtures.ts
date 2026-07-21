@@ -14,6 +14,7 @@ import {
   advanceProject,
   recordProjectEvent,
   assertHistoryExtends,
+  assertPhaseStatusConsistent,
   projectPhase,
   PROJECT_TRANSITIONS,
   STATUS_FOR_PHASE,
@@ -263,6 +264,22 @@ export function runProjectMachineTests(): MachineTestResult {
     for (const phase of PROJECT_PHASE) {
       if (!STATUS_FOR_PHASE[phase]) throw new Error(`no status mapping for ${phase}`);
     }
+  });
+
+  /* ---- Step 1.1 closure: phase/status consistency gate ---- */
+  throws("engine record with legacy-mutated status is refused at the gate", () => {
+    const p = baseProject({ phase: "drafted", status: "published" }); // publish core wrote status directly
+    assertPhaseStatusConsistent(p);
+  });
+  ok("engine record advanced by the machine passes the gate", () => {
+    let p = advanceProject(withVerdict(baseProject()), ev("verdict.attached"));
+    assertPhaseStatusConsistent(p);
+    p = advanceProject(withSections(p), ev("rfp.generated"));
+    assertPhaseStatusConsistent(p);
+  });
+  ok("pre-engine records pass the gate whatever their status", () => {
+    const legacy = { ...baseProject({ status: "published" }), engine: undefined, phase: undefined, engine_data: undefined } as ProjectDetails;
+    assertPhaseStatusConsistent(legacy);
   });
 
   return r;

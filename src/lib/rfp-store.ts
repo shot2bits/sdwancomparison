@@ -21,7 +21,7 @@ import {
   type NdaAcceptance,
   type BuyerContext,
 } from "@/lib/rfp-types";
-import { assertHistoryExtends } from "@/lib/project-machine";
+import { assertHistoryExtends, assertPhaseStatusConsistent } from "@/lib/project-machine";
 
 const URL_ENV = process.env.KV_REST_API_URL;
 const TOKEN_ENV = process.env.KV_REST_API_TOKEN;
@@ -90,6 +90,9 @@ export async function saveProject(p: ProjectDetails): Promise<ProjectDetails> {
   // on both sides) pass untouched, so every existing flow is unaffected.
   const existing = await getJson<ProjectDetails>(`rfp:${parsed.id}`);
   if (existing) assertHistoryExtends(existing.history ?? [], parsed.history ?? []);
+  // Step 1.1 closure: on engine records, status may only move via the
+  // machine; a legacy path mutating it directly is refused here.
+  assertPhaseStatusConsistent(parsed);
   await setJson(`rfp:${parsed.id}`, parsed);
   await kv(["SET", `rfp:token:${parsed.share_token}`, parsed.id]);
   return parsed;

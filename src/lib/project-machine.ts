@@ -242,6 +242,26 @@ export function recordProjectEvent(p: ProjectDetails, e: ProjectHistoryEvent): P
 }
 
 /**
+ * Phase/status consistency gate for engine records (step 1.1 closure from
+ * the three-question review, 21 July 2026): legacy code paths set the
+ * legacy `status` directly (the publish core, historically the wizard).
+ * That is fine for pre-engine records, but on an engine record it would
+ * desync the machine's phase from the status every consumer reads. This
+ * assertion runs inside saveProject, so ANY path that mutates status on an
+ * engine record without advanceProject is refused at the single write
+ * gate, fail-closed, until that path is wired through the machine.
+ */
+export function assertPhaseStatusConsistent(p: ProjectDetails): void {
+  if (!p.engine || !p.phase) return; // pre-engine records unaffected
+  const expected = STATUS_FOR_PHASE[p.phase];
+  if (p.status !== expected) {
+    throw new ProjectHistoryError(
+      `engine record status "${p.status}" does not match phase "${p.phase}" (expected "${expected}"); phase changes go through advanceProject only`,
+    );
+  }
+}
+
+/**
  * The append-only tamper test used by saveProject (spec 1.4): the next
  * history must extend the previous one exactly. Shorter, or divergent in
  * the shared prefix, is a violation and the write is refused.
