@@ -40,7 +40,7 @@ export default function NewProjectPage() {
       name: "How to get competing SASE and SD-WAN supplier bids on Netify",
       totalTime: "PT2M",
       step: [
-        { "@type": "HowToStep", position: 1, name: "Describe your project", text: "Give the project a title, then answer five quick questions on scope, estate size, regions, current setup and timescale. No account is needed." },
+        { "@type": "HowToStep", position: 1, name: "Describe your project", text: "Pick what you are buying, then answer five quick questions on estate size, regions, current setup, timescale and optional compliance. Netify drafts the project title for you. No account is needed." },
         { "@type": "HowToStep", position: 2, name: "Review the generated RFP", text: "Netify assembles a complete RFP from its question bank (Methodology v2026.1). You review, trim and tailor the document." },
         { "@type": "HowToStep", position: 3, name: "Publish to matched suppliers", text: "Publishing emails each matched vendor and managed service provider a private response link. One sign-in with a business email is required at this point." },
         { "@type": "HowToStep", position: 4, name: "Compare the bids", text: "Structured responses come back scored against your questions. Pricing stays private to the buyer." },
@@ -63,7 +63,7 @@ export default function NewProjectPage() {
         "@type": "CreateAction",
         name: "Create and publish a SASE, SSE or SD-WAN RFP",
         description:
-          "Answer seven questions; Netify assembles a complete RFP from its question bank (Methodology v2026.1) and submits it to matched, verified suppliers. Drafting is open; publishing requires a business email sign-in. Publishing returns a Netify Market Report: an indicative price band, gap check and the RFP as Word and PDF.",
+          "Answer six questions, the first a single click; Netify assembles a complete RFP from its question bank (Methodology v2026.1) and submits it to matched, verified suppliers. Drafting is open; publishing requires a business email sign-in. Publishing returns a Netify Market Report: an indicative price band, gap check and the RFP as Word and PDF.",
         target: {
           "@type": "EntryPoint",
           urlTemplate: `${SITE_URL}/rfp-builder/new/?scope={scope}&sector={sector}&vendors={vendors}`,

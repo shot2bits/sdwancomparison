@@ -172,38 +172,25 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   }
 
   /**
-   * Shortlist → RFP handoff. Carries the current scenario into the RFP
-   * Builder through its EXISTING prefill contract (prefill=1 + sector/org/
-   * model/regions/notes, the same params the /best pages and sector nav
-   * links use), so no new schema is needed. The ranked candidates and the
-   * criteria summary travel in `notes`, which the builder stores as buyer
-   * context and feeds to generation. Region keys map asia_pacific → apac,
-   * mirroring the project-notice carry-through in RfpBuilder.
+   * Shortlist → RFP handoff. Conversion rework (21 July 2026, Robert's build
+   * order): the destination is now the Describe wizard, not the deep
+   * builder's prefill=1 landing, because the old target silently minted an
+   * anonymous draft on arrival and asked nothing the visitor was ready to
+   * answer (the bridge was seen 464 times in 30 days and clicked zero).
+   * The wizard opens on one-click scope cards, and this URL carries the
+   * shortlist's context through the wizard's documented entry contract:
+   * the top three ranked vendors pinned into evaluation and the publish
+   * invite list (?vendors=), the sector, and scope=managed when the
+   * operating-model filter says a provider should run it.
    */
   function rfpUrl(): string {
     const p = new URLSearchParams();
-    p.set("prefill", "1");
     if (input.sector) p.set("sector", input.sector);
-    if (input.organisation_size !== "any") p.set("org", input.organisation_size);
-    if (input.service_model !== "any") p.set("model", input.service_model);
-    if (input.required_regions.length) {
-      p.set(
-        "regions",
-        input.required_regions.map((r) => (r === "asia_pacific" ? "apac" : r)).join("."),
-      );
-    }
-    const top = result.shortlist.slice(0, 10).map((v) => `${v.rank}. ${v.name} (${v.score})`);
-    const scenario = encodeScenario(input);
-    const notes = [
-      "Candidate shortlist built with the Netify shortlist builder:",
-      top.length ? `${top.join("; ")}.` : "",
-      isDefaultView ? "" : `Criteria: ${result.criteria_summary}`,
-      scenario ? `Scenario: /sase/shortlist?${scenario}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-    if (top.length) p.set("notes", notes);
-    return `/sase/rfp-builder/?${p.toString()}`;
+    if (input.service_model === "managed") p.set("scope", "managed");
+    const slugs = result.shortlist.slice(0, 3).map((v) => v.slug).filter(Boolean);
+    if (slugs.length) p.set("vendors", slugs.join(","));
+    const qs = p.toString();
+    return `/sase/rfp-builder/new/${qs ? `?${qs}` : ""}`;
   }
 
   async function askAgent() {
@@ -680,7 +667,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               href={rfpUrl()}
               className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors"
             >
-              Publish an RFP →
+              Get competing bids →
             </a>
           </div>
         </div>
@@ -909,7 +896,7 @@ function ShortlistBridge({ names, personalised, href }: { names: string[]; perso
   return (
     <section className="mt-8 rounded-md border border-amber-300 bg-amber-50 p-6">
       <p className="eyebrow mb-2 text-amber-800">Your shortlist, priced</p>
-      <h3 className="mb-2 text-xl text-[#13294b]">Create and publish an RFP in minutes</h3>
+      <h3 className="mb-2 text-xl text-[#13294b]">Invite these vendors to bid, in about two minutes</h3>
       <p className="mb-4 max-w-2xl text-sm text-[var(--ink-700)]">
         Compare SASE &amp; SD-WAN across 30+ vendors and service providers.
         {recipients
@@ -934,8 +921,9 @@ function ShortlistBridge({ names, personalised, href }: { names: string[]; perso
         <a href="/sase/how-it-works/" className="text-[13px] text-[#1e3a5f] underline">How supplier responses work</a>
       </div>
       <p className="mt-3 text-[11.5px] text-[var(--ink-500)]">
-        Your shortlist carries over; add or remove suppliers before anything is sent. Nothing is
-        shared with any supplier until you agree the submission.
+        One click to start, about two minutes to finish. Your shortlist carries over; add or remove
+        suppliers before anything is sent. Nothing is shared with any supplier until you agree the
+        submission.
       </p>
     </section>
   );
