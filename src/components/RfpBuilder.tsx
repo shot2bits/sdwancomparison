@@ -1102,16 +1102,19 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     <div className={!published && !stickyGone ? "pb-16" : undefined}>
       {/* Phase D1: the Project is the navigation root; the builder is one
           surface inside it. Breadcrumb back to the container. */}
-      {project && (
-        <p className="mb-2 text-xs">
-          <a
-            href={`/sase/project/${project.id}${(manageToken.current || project.manage_token) ? `?manage=${encodeURIComponent(manageToken.current || project.manage_token)}` : ""}`}
-            className="text-[var(--ink-600,#555)] underline hover:text-[var(--ink-900,#111)]"
-          >
-            ← Project home
-          </a>
-        </p>
-      )}
+      {project && (() => {
+        const homeTok = manageToken.current || project.manage_token || "";
+        return (
+          <p className="mb-2 text-xs">
+            <a
+              href={`/sase/project/${project.id}${homeTok ? `?manage=${encodeURIComponent(homeTok)}` : ""}`}
+              className="text-[var(--ink-600,#555)] underline hover:text-[var(--ink-900,#111)]"
+            >
+              ← Project home
+            </a>
+          </p>
+        );
+      })()}
       <FlowStageStrip stage={stripStage} now={stripNow} next={stripNext} numberNext={!published} />
       {/* Sign-in confirmation strip: persists after the verify redirect so
           the buyer sees what happened (session, claimed drafts, next step). */}
