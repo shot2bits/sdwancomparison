@@ -192,15 +192,33 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
           </section>
         </article>
 
-        {/* Download gate */}
+        {/* Action rail. The marketplace action leads and the download follows
+            (Robert, 21 July 2026): the old order made "Download as Word" the
+            loudest button on the page, which invited the buyer to take the
+            document and end the process. The document stays free to take;
+            the room's primary voice now argues for responses. */}
         <aside className="print:hidden">
           <div className="sticky top-6 space-y-4">
+            <div className="rounded-sm border-2 border-amber-400 bg-amber-50/40 p-5">
+              <p className="mb-1 text-sm font-semibold">Get responses, not just a document</p>
+              <p className="mb-3 text-sm text-[var(--ink-700)]">
+                Submitting to the marketplace turns this document into competing bids: structured supplier
+                responses side by side, pricing private to you, and your Netify Market Report the moment you
+                submit. Downloading alone ends the process here.
+              </p>
+              <Link
+                href={project.engine === "security_sourcing" ? `/project/${id}${keyQs}` : `/rfp-builder/${id}${keyQs}`}
+                className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400"
+              >
+                {project.engine === "security_sourcing" ? "Continue in your project and publish" : "Submit to your matched suppliers"}
+              </Link>
+            </div>
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
               {signedIn ? (
                 <>
                   <p className="mb-1 text-sm font-medium">Download this RFP</p>
-                  <p className="mb-4 text-sm text-[var(--ink-600)]">Signed in as {session?.email}. Download the document, or print to PDF.</p>
-                  <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}${keyQs ? "&" : "?"}format=doc`} className="mb-2 inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
+                  <p className="mb-4 text-sm text-[var(--ink-600)]">Signed in as {session?.email}. The document is yours either way; downloading shares nothing with suppliers.</p>
+                  <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}${keyQs ? "&" : "?"}format=doc`} className="mb-2 inline-flex w-full items-center justify-center rounded-full border border-zinc-400 px-5 py-2.5 text-sm font-medium text-zinc-800 no-underline transition-colors hover:bg-zinc-100">
                     Download as Word (.doc)
                   </a>
                   <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}`} className="mb-2 inline-flex w-full items-center justify-center rounded-full border border-zinc-400 px-5 py-2.5 text-sm font-medium text-zinc-800 no-underline transition-colors hover:bg-zinc-100">
