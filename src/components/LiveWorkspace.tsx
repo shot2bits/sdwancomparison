@@ -47,7 +47,7 @@ import { diagramModel } from "@/lib/workspace/diagram";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
 import SignIn from "@/components/SignIn";
 import CodeEntry from "@/components/CodeEntry";
-import { fireNetifyEvent } from "@/components/NetifyEvents";
+import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
 
 /* ------------------------------------------------------------------ */
 /* Constants                                                           */
@@ -144,6 +144,81 @@ function FactSpan({ fact, text, onToggle }: { fact: WorkspaceFact; text: string;
   );
 }
 
+/** Save-lite (spec section 4): appears once the draft first becomes
+ *  useful. Email and company, one line, the existing magic-link machinery;
+ *  the draft stays exactly where it is. Company never enters a project
+ *  object in W0 (published notices are anonymous); it rides only on the
+ *  lead capture. */
+function SaveLite({ facts, onDone, onDismiss }: { facts: number; onDone: (email: string) => void; onDismiss: () => void }) {
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const send = async () => {
+    if (busy || !email.includes("@")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/sase/api/auth/request", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: "/sase/workspace/", attribution: firstTouch() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Could not send a link.");
+      // Capture rides behind the successful link, best effort.
+      void fetch("/sase/api/workspace/save-lite", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), company: company.trim(), facts }),
+      }).catch(() => {});
+      onDone(email.trim());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not send a link.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-4 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-raised,#f4f4f5)] p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-[var(--ink-700)]">Want to keep this draft?</span>
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          placeholder="you@yourcompany.com"
+          className="w-52 rounded-sm border border-[var(--ink-300,#ccc)] bg-white px-2 py-1.5 text-sm focus:border-amber-500 focus:outline-none"
+          aria-label="Work email"
+        />
+        <input
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          placeholder="Company"
+          className="w-40 rounded-sm border border-[var(--ink-300,#ccc)] bg-white px-2 py-1.5 text-sm focus:border-amber-500 focus:outline-none"
+          aria-label="Company"
+        />
+        <button
+          type="button"
+          onClick={() => void send()}
+          disabled={busy || !email.includes("@")}
+          className="rounded-full bg-amber-500 px-3.5 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:opacity-50"
+        >
+          {busy ? "Sending…" : "Email me a sign-in link"}
+        </button>
+        <button type="button" onClick={onDismiss} className="text-xs text-[var(--ink-500)] underline hover:text-[var(--ink-900)]">
+          Not now
+        </button>
+      </div>
+      <p className="m-0 mt-1.5 text-xs text-[var(--ink-500)]">
+        The draft stays right here either way; the link signs you in on any device so publishing later is one click.
+        Work email only, and we only email you about your own projects.
+      </p>
+      {error && <p className="m-0 mt-1.5 text-xs text-red-700">{error}</p>}
+    </div>
+  );
+}
+
 /** An open blank: the one thing only the buyer can answer, answerable in
  *  place. Chips for vocabularies, a small input for numbers and text. */
 function GapControl({ gap, onAnswer }: { gap: BriefGap; onAnswer: (gap: BriefGap, value: string, label?: string) => void }) {
@@ -209,6 +284,9 @@ export default function LiveWorkspace() {
   const [added, setAdded] = useState<string[]>([]);
   const [restored, setRestored] = useState(false);
   const [testMode, setTestMode] = useState(false);
+  const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
+  const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
+  const [signedIn, setSignedIn] = useState(false);
 
   // Signature state
   const [consentCreate, setConsentCreate] = useState(false);
@@ -291,13 +369,31 @@ export default function LiveWorkspace() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ---- Persist the draft locally until save-lite arrives ---- */
+  /* ---- Persist the draft locally; save-lite adds the account claim ---- */
   useEffect(() => {
     if (!started || published) return;
     try {
       window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, ts: Date.now() }));
     } catch { /* best effort */ }
   }, [facts, added, removed, started, published]);
+
+  /* ---- Session check: the signed-in never see save-lite ---- */
+  useEffect(() => {
+    fetch("/sase/api/auth/session")
+      .then((r) => r.json())
+      .then((s: { authenticated?: boolean }) => setSignedIn(Boolean(s.authenticated)))
+      .catch(() => {});
+  }, []);
+
+  /* ---- Save-lite trigger: the draft's first useful moment ---- */
+  useEffect(() => {
+    if (saveLite !== "hidden" || signedIn || published || created) return;
+    const useful = Boolean(verdict) || standing(facts).length >= 3;
+    if (started && useful) {
+      setSaveLite("shown");
+      ev("workspace_save_lite_shown", { facts: standing(facts).length });
+    }
+  }, [saveLite, signedIn, published, created, verdict, facts, started]);
 
   /* ---- The extraction cycle ---- */
   const runCycle = useCallback(
@@ -656,6 +752,28 @@ export default function LiveWorkspace() {
           <button type="button" onClick={startAfresh} className="underline hover:text-[var(--ink-900)]">
             Start afresh
           </button>
+        </p>
+      )}
+
+      {/* ---- Save-lite: email, company, continue ---- */}
+      {saveLite === "shown" && (
+        <SaveLite
+          facts={meter.total}
+          onDone={(email) => {
+            setSaveLite("sent");
+            setSaveLiteSentTo(email);
+            ev("workspace_save_lite_sent", { facts: meter.total });
+          }}
+          onDismiss={() => {
+            setSaveLite("dismissed");
+            ev("workspace_save_lite_dismissed", {});
+          }}
+        />
+      )}
+      {saveLite === "sent" && (
+        <p className="mt-3 text-xs text-emerald-700">
+          Sign-in link sent to {saveLiteSentTo}. The draft stays right here; opening the link signs you in on any
+          device.
         </p>
       )}
 

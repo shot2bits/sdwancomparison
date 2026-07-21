@@ -21,7 +21,7 @@ import {
   type WorkspaceFact,
 } from "./draft";
 import { diagramModel } from "./diagram";
-import { deterministicExtract } from "./extract";
+import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
 import { assessSecurityRequirement } from "@/lib/security/rulebook";
 
 export interface WorkspaceTestResult { pass: number; fail: number; failures: string[] }
@@ -211,6 +211,28 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     const out = deterministicExtract("We had a phishing incident last month, 200 staff");
     expect(out.some((u) => u.path === "drivers" && String(u.value) === "incident"), "incident heard");
     expect(!out.some((u) => u.path === "drivers" && String(u.value) === "ransomware_concern"), "no stretch to ransomware");
+  });
+
+  /* ---- Union merge (slice 3, from the live under-extraction finding) ---- */
+  await ok("union: the model wins per path, the deterministic rail fills omissions", () => {
+    const model: FieldUpdate[] = [
+      { path: "estate.sites", value: 6, provenance: "stated", quote: "6 sites" },
+      { path: "drivers", value: ["incident"], provenance: "stated", quote: "incident" },
+    ];
+    const det: FieldUpdate[] = [
+      { path: "estate.sites", value: 7, provenance: "stated", quote: "7 sites" }, // conflict: model wins
+      { path: "estate.users", value: 300, provenance: "stated", quote: "300 staff" }, // omission: filled
+      { path: "drivers", value: ["incident"], provenance: "stated", quote: "incident" }, // duplicate: dropped
+      { path: "drivers", value: ["renewal"], provenance: "stated", quote: "renewal" }, // new value: added
+      { path: "procurement.buying", value: "sdwan", provenance: "stated", quote: "need SD-WAN" }, // omission: filled
+    ];
+    const merged = unionUpdates(model, det);
+    const sites = merged.filter((u) => u.path === "estate.sites");
+    expect(sites.length === 1 && sites[0].value === 6, "model's sites value stands alone");
+    expect(merged.some((u) => u.path === "estate.users" && u.value === 300), "users filled from the rail");
+    expect(merged.some((u) => u.path === "procurement.buying" && u.value === "sdwan"), "buying filled from the rail");
+    const driverVals = merged.filter((u) => u.path === "drivers").flatMap((u) => u.value as string[]);
+    expect(driverVals.join(",") === "incident,renewal", `drivers union wrong: ${driverVals.join(",")}`);
   });
 
   return r;

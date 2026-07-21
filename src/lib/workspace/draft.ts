@@ -18,6 +18,7 @@ import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/secur
 import { humaniseSecurityCodes } from "@/lib/security/labels";
 import {
   applyUpdates,
+  LIST_FACT_PATHS,
   WORKSPACE_SECTORS,
   type AllowedPath,
   type BuyingId,
@@ -40,15 +41,9 @@ export interface WorkspaceFact extends FieldUpdate {
   cycle: number;
 }
 
-/** Paths that accumulate values; everything else holds one value. */
-const LIST_PATHS: ReadonlySet<string> = new Set([
-  "organisation.regions",
-  "estate.cloud",
-  "estate.existingSecurity",
-  "estate.existingNetwork",
-  "drivers",
-  "constraints.complianceRequirements",
-]);
+/** Paths that accumulate values; everything else holds one value (one
+ *  truth with the extraction layer's union merge). */
+const LIST_PATHS = LIST_FACT_PATHS;
 
 const norm = (v: unknown) => String(v).trim().toLowerCase();
 

@@ -277,7 +277,11 @@ export function deterministicExtract(text: string): FieldUpdate[] {
 /* ------------------------------------------------------------------ */
 
 const MODEL = "claude-haiku-4-5-20251001";
-const TIMEOUT_MS = 6000;
+/** 9s, raised from 6s on live evidence (21 July): warm full-sentence calls
+ *  measured 3.1 to 4.4s, but cold calls tripped 6s and fell back. The
+ *  deterministic rail still catches anything slower, so the page never
+ *  stalls; the budget just stops surrendering the model on cold starts. */
+const TIMEOUT_MS = 9000;
 
 const SYSTEM_PROMPT = `You extract structured procurement facts from a buyer's free-text description of their business and security/network need. Output ONLY a JSON object, no prose, of the shape {"fields":[{"path":string,"value":any,"quote":string|null,"reason":string|null}]}.
 Rules:
@@ -342,11 +346,54 @@ async function modelExtract(text: string, notes: string[]): Promise<FieldUpdate[
 /* The public entry: model-first with the deterministic safety net     */
 /* ------------------------------------------------------------------ */
 
+/** Paths that accumulate values; everything else holds one value. Shared
+ *  with the draft model's fact ledger. */
+export const LIST_FACT_PATHS: ReadonlySet<string> = new Set([
+  "organisation.regions",
+  "estate.cloud",
+  "estate.existingSecurity",
+  "estate.existingNetwork",
+  "drivers",
+  "constraints.complianceRequirements",
+]);
+
+/**
+ * Union of the model's proposals and the deterministic parse (21 July live
+ * finding: model-first-REPLACES lost facts the regex rail hears, a live
+ * run missed "300 staff" and a stated SD-WAN buying intent). The model
+ * wins per path where both speak; the deterministic parse fills what the
+ * model omitted. Provenance travels per update either way, so nothing is
+ * relabelled by the merge.
+ */
+export function unionUpdates(model: FieldUpdate[], det: FieldUpdate[]): FieldUpdate[] {
+  const scalarCovered = new Set(model.filter((u) => !LIST_FACT_PATHS.has(u.path)).map((u) => u.path));
+  const listCovered = new Map<string, Set<string>>();
+  for (const u of model) {
+    if (!LIST_FACT_PATHS.has(u.path) || !Array.isArray(u.value)) continue;
+    const seen = listCovered.get(u.path) ?? new Set<string>();
+    for (const v of u.value as unknown[]) seen.add(String(v).toLowerCase());
+    listCovered.set(u.path, seen);
+  }
+  const extra: FieldUpdate[] = [];
+  for (const u of det) {
+    if (!LIST_FACT_PATHS.has(u.path)) {
+      if (!scalarCovered.has(u.path)) extra.push(u);
+      continue;
+    }
+    const seen = listCovered.get(u.path);
+    const vals = (Array.isArray(u.value) ? u.value : [u.value]).filter((v) => !seen?.has(String(v).toLowerCase()));
+    if (vals.length) extra.push({ ...u, value: vals });
+  }
+  return [...model, ...extra];
+}
+
 export async function extractRequirement(text: string, base: SecurityRequirementInput = {}): Promise<ExtractResult> {
   const notes: string[] = [];
+  const det = deterministicExtract(text);
   const modelUpdates = await modelExtract(text, notes);
-  const updates = modelUpdates && modelUpdates.length > 0 ? modelUpdates : deterministicExtract(text);
-  const engine = modelUpdates && modelUpdates.length > 0 ? "model" : "deterministic_fallback";
+  const modelSpoke = Boolean(modelUpdates && modelUpdates.length > 0);
+  const updates = modelSpoke ? unionUpdates(modelUpdates!, det) : det;
+  const engine = modelSpoke ? "model" : "deterministic_fallback";
   return {
     requirement: applyUpdates(base, updates),
     updates,

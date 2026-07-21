@@ -112,9 +112,11 @@ export const APP_GROUPS: NavGroup[] = [];
 
 export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
 // One universal CTA everywhere (navigation architecture, 14 July 2026):
-// the top bar, drawer and sidebar all say Start a project and open the
-// Describe wizard. "Build an RFP" as a competing entry CTA is retired.
-export const NAV_CTA: NavLink = { label: "Start a project", href: "/sase/rfp-builder/new/" };
+// the top bar, drawer and sidebar all say Start a project. Since 21 July
+// 2026 (W0 slice 3) it opens the Live Sourcing Workspace, the one door
+// for security, SASE and SD-WAN; the Describe wizard remains reachable
+// from the Get quotes group and the workspace's builder link.
+export const NAV_CTA: NavLink = { label: "Start a project", href: "/sase/workspace/" };
 
 // ── Active-link + auto-open helpers (pathname is basePath-stripped here) ────
 const norm = (p: string) => p.replace(/\/$/, "");
