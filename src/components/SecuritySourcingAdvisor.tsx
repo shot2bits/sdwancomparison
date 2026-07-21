@@ -32,8 +32,53 @@ const DRIVERS: Array<{ id: SecurityDriver; label: string }> = [
   { id: "ransomware_concern", label: "Ransomware concern" },
 ];
 
-const CLOUDS = ["m365", "google", "aws", "azure", "other_saas"];
-const COMPLIANCE = ["iso27001", "pci_dss", "cyber_essentials_plus", "fca", "nhs_dspt"];
+/** Human-readable labels for internal values (Harry's QA F7): the chips keep
+ *  their internal values so the rulebook contract is unchanged; only what
+ *  the buyer reads changes. */
+const CLOUDS: Array<[string, string]> = [
+  ["m365", "Microsoft 365"],
+  ["google", "Google Workspace"],
+  ["aws", "AWS"],
+  ["azure", "Azure"],
+  ["other_saas", "Other SaaS"],
+];
+const COMPLIANCE: Array<[string, string]> = [
+  ["iso27001", "ISO 27001"],
+  ["pci_dss", "PCI DSS"],
+  ["cyber_essentials_plus", "Cyber Essentials Plus"],
+  ["fca", "FCA regulated"],
+  ["nhs_dspt", "NHS DSPT"],
+];
+
+/** Sector as a controlled list (Harry's QA F8, Robert approved): the same
+ *  sector set the marketplace's invite-suppliers flow already uses, stored
+ *  as the readable label so titles and documents read naturally, with Other
+ *  revealing free text so the rulebook's string contract is unchanged. */
+const SECTOR_OPTIONS = [
+  "Healthcare & pharma",
+  "Financial services",
+  "Retail & e-commerce",
+  "Manufacturing",
+  "Energy & utilities",
+  "Government & public sector",
+  "Education",
+  "Transport & logistics",
+  "Professional services",
+  "Hospitality & leisure",
+];
+
+/** Numeric estate field with inline validation (Harry's QA F2): non-numeric
+ *  entries used to look accepted on screen and silently vanish downstream,
+ *  leaving the buyer told they have a gap in a field they believed filled. */
+function NumField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) {
+  const bad = value.trim() !== "" && !Number.isFinite(Number(value.trim()));
+  return (
+    <label className="text-xs font-medium text-zinc-600">{label}
+      <input value={value} onChange={(e) => onChange(e.target.value)} inputMode="numeric" placeholder={placeholder} className={inputCls + (bad ? " border-amber-500" : "")} />
+      {bad && <span className="mt-1 block text-[11px] font-medium text-amber-700">Numbers only. This entry is ignored until corrected.</span>}
+    </label>
+  );
+}
 
 const NEEDED_STYLE: Record<string, string> = {
   required: "border-emerald-300 bg-emerald-50 text-emerald-900",
@@ -189,30 +234,33 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
       <div className="rounded-2xl border border-zinc-200 bg-zinc-50/60 p-5">
         <p className="text-sm font-semibold text-zinc-900">Your estate and situation</p>
         <div className="mt-3 grid grid-cols-2 gap-3">
-          <label className="text-xs font-medium text-zinc-600">Staff
-            <input value={users} onChange={(e) => setUsers(e.target.value)} inputMode="numeric" placeholder="e.g. 120" className={inputCls} />
-          </label>
-          <label className="text-xs font-medium text-zinc-600">Sites (0 = fully remote)
-            <input value={sites} onChange={(e) => setSites(e.target.value)} inputMode="numeric" placeholder="e.g. 3" className={inputCls} />
-          </label>
-          <label className="text-xs font-medium text-zinc-600">Computers
-            <input value={computers} onChange={(e) => setComputers(e.target.value)} inputMode="numeric" placeholder="0" className={inputCls} />
-          </label>
-          <label className="text-xs font-medium text-zinc-600">Mobiles
-            <input value={mobiles} onChange={(e) => setMobiles(e.target.value)} inputMode="numeric" placeholder="0" className={inputCls} />
-          </label>
-          <label className="text-xs font-medium text-zinc-600">Servers
-            <input value={servers} onChange={(e) => setServers(e.target.value)} inputMode="numeric" placeholder="0" className={inputCls} />
-          </label>
+          <NumField label="Staff" value={users} onChange={setUsers} placeholder="e.g. 120" />
+          <NumField label="Sites (0 = fully remote)" value={sites} onChange={setSites} placeholder="e.g. 3" />
+          <NumField label="Computers" value={computers} onChange={setComputers} placeholder="0" />
+          <NumField label="Mobiles" value={mobiles} onChange={setMobiles} placeholder="0" />
+          <NumField label="Servers" value={servers} onChange={setServers} placeholder="0" />
           <label className="text-xs font-medium text-zinc-600">Sector (optional)
-            <input value={sector} onChange={(e) => setSector(e.target.value)} placeholder="e.g. retail" className={inputCls} />
+            <select
+              value={SECTOR_OPTIONS.includes(sector) ? sector : sector ? "__other" : ""}
+              onChange={(e) => setSector(e.target.value === "__other" ? " " : e.target.value)}
+              className={inputCls}
+            >
+              <option value="">Not stated</option>
+              {SECTOR_OPTIONS.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+              <option value="__other">Other (type it in)</option>
+            </select>
+            {!SECTOR_OPTIONS.includes(sector) && sector !== "" && (
+              <input value={sector.trim() === "" ? "" : sector} onChange={(e) => setSector(e.target.value || " ")} placeholder="Your sector" className={inputCls} />
+            )}
           </label>
         </div>
 
         <p className="mt-4 text-xs font-medium text-zinc-600">Cloud platforms</p>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {CLOUDS.map((c) => (
-            <button key={c} type="button" onClick={() => setCloud(toggle(cloud, c))} className={chipCls(cloud.includes(c))}>{c}</button>
+          {CLOUDS.map(([c, label]) => (
+            <button key={c} type="button" onClick={() => setCloud(toggle(cloud, c))} className={chipCls(cloud.includes(c))}>{label}</button>
           ))}
         </div>
 
@@ -239,8 +287,8 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
 
         <p className="mt-4 text-xs font-medium text-zinc-600">Compliance regimes</p>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {COMPLIANCE.map((c) => (
-            <button key={c} type="button" onClick={() => setCompliance(toggle(compliance, c))} className={chipCls(compliance.includes(c))}>{c}</button>
+          {COMPLIANCE.map(([c, label]) => (
+            <button key={c} type="button" onClick={() => setCompliance(toggle(compliance, c))} className={chipCls(compliance.includes(c))}>{label}</button>
           ))}
         </div>
 
@@ -259,7 +307,11 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
             <div className="rounded-2xl border border-zinc-200 bg-white p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-zinc-900">The verdict</p>
-                <span className="rounded-full border border-zinc-300 bg-zinc-50 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-600">
+                <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                  verdict.confidence === "high" ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                  : verdict.confidence === "medium" ? "border-sky-300 bg-sky-50 text-sky-800"
+                  : "border-amber-300 bg-amber-50 text-amber-800"
+                }`}>
                   {verdict.rulebookVersion} · confidence {verdict.confidence}
                 </span>
               </div>
@@ -293,7 +345,7 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
 
             {verdict.againstInterest.length > 0 && (
               <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Said against our own interest</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Said against Netify&apos;s own interest</p>
                 <ul className="mt-2 space-y-1.5 text-sm text-emerald-900">
                   {verdict.againstInterest.map((a, i) => (
                     <li key={i}>{a.statement}</li>

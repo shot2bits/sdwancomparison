@@ -13,6 +13,11 @@ export type SectionStats = {
   category: string;
   questionCount: number;
   mandatoryCount: number;
+  /** Questions with priority "required" (weighting emphasis). Distinct from
+   *  mandatory, which is a pass/fail gate; Harry's QA F3 showed the table
+   *  reading "Mandatory 0" beside inline "required" labels with nothing
+   *  explaining that these are two different things. */
+  requiredCount: number;
   totalWeight: number;
   weightShare: number; // 0..1 of the whole RFP
 };
@@ -73,6 +78,7 @@ export function sectionStats(p: ProjectDetails): SectionStats[] {
       category: s.category,
       questionCount: s.questions.length,
       mandatoryCount: s.questions.filter((q) => q.mandatory).length,
+      requiredCount: s.questions.filter((q) => q.priority === "required").length,
       totalWeight,
       weightShare: totalWeight / grand,
     };
@@ -194,9 +200,9 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
 
   // Scoring
   L.push(`## Scoring approach`, "");
-  L.push(`Responses are scored per question (1–5) multiplied by the question weighting. Mandatory questions are pass/fail gates: a failed mandatory excludes the response regardless of score. Section weighting below reflects the sum of question weights.`, "");
-  L.push(`| Section | Questions | Mandatory | Weight share |`, `| --- | --- | --- | --- |`);
-  for (const st of stats) L.push(`| ${st.category} | ${st.questionCount} | ${st.mandatoryCount} | ${(st.weightShare * 100).toFixed(0)}% |`);
+  L.push(`Responses are scored per question (1–5) multiplied by the question weighting. Questions marked required carry the highest weighting but are still scored. Mandatory questions are a separate, stricter class: pass/fail gates, marked [MANDATORY] inline, where a fail excludes the response regardless of score. A section can therefore show required questions while containing no mandatory gates. Section weighting below reflects the sum of question weights.`, "");
+  L.push(`| Section | Questions | Required | Mandatory (pass/fail) | Weight share |`, `| --- | --- | --- | --- | --- |`);
+  for (const st of stats) L.push(`| ${st.category} | ${st.questionCount} | ${st.requiredCount} | ${st.mandatoryCount} | ${(st.weightShare * 100).toFixed(0)}% |`);
   L.push("");
 
   // Submission
@@ -278,8 +284,8 @@ export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; aut
     B.push(`</ul>`);
   }
 
-  B.push(`<h2>Scoring approach</h2><p>Responses are scored per question (1–5) multiplied by the question weighting. Mandatory questions are pass/fail gates: a failed mandatory excludes the response regardless of score. Section weighting below reflects the sum of question weights.</p>`);
-  B.push(`<table><tr><th>Section</th><th>Questions</th><th>Mandatory</th><th>Weight share</th></tr>${stats.map((st) => `<tr><td>${esc(st.category)}</td><td>${st.questionCount}</td><td>${st.mandatoryCount}</td><td>${(st.weightShare * 100).toFixed(0)}%</td></tr>`).join("")}</table>`);
+  B.push(`<h2>Scoring approach</h2><p>Responses are scored per question (1–5) multiplied by the question weighting. Questions marked required carry the highest weighting but are still scored. Mandatory questions are a separate, stricter class: pass/fail gates, marked [MANDATORY] inline, where a fail excludes the response regardless of score. A section can therefore show required questions while containing no mandatory gates. Section weighting below reflects the sum of question weights.</p>`);
+  B.push(`<table><tr><th>Section</th><th>Questions</th><th>Required</th><th>Mandatory (pass/fail)</th><th>Weight share</th></tr>${stats.map((st) => `<tr><td>${esc(st.category)}</td><td>${st.questionCount}</td><td>${st.requiredCount}</td><td>${st.mandatoryCount}</td><td>${(st.weightShare * 100).toFixed(0)}%</td></tr>`).join("")}</table>`);
 
   B.push(`<h2>Submission instructions</h2><ul>`);
   B.push(`<li>Respond through the Netify marketplace response link provided with this RFP (structured answers per question, evidence uploads, private pricing).</li>`);

@@ -189,6 +189,9 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
                 ? `${questionCount} questions.`
                 : "Not yet drafted."}
           </p>
+          <p className="m-0 mt-1.5 text-xs text-[var(--ink-600,#555)]">
+            Opens in the Netify RFP builder with your assessment carried through; you review and refine there before anything goes to suppliers.
+          </p>
           <p className="m-0 mt-2 text-sm">
             <Link href={`/rfp-builder/${id}${qs}`} className="underline">Review and edit</Link>
             <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>

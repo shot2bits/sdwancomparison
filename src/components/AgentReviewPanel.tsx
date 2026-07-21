@@ -89,15 +89,25 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // Saved confirmation (Harry's QA F12: pressing "Set goal" gave no visible
+  // acknowledgement, so the buyer could not tell the goal was active).
+  const [goalSavedAt, setGoalSavedAt] = useState<number | null>(null);
+
   async function saveGoal() {
     setBusy("goal");
+    setGoalSavedAt(null);
     try {
+      // Normalise before sending (Harry's QA F13): the stepper accepted
+      // strings like "0340"; parse to an integer and keep it in 1..20 so
+      // what is saved is what a buyer could plausibly mean.
+      const bids = Math.min(20, Math.max(1, Math.round(Number(minBids)) || 1));
+      setMinBids(bids);
       const res = await fetch(`/sase/api/rfp/${rfpId}/goal`, {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ outcome, must_have: mustHave.split(",").map((s) => s.trim()).filter(Boolean), targets: { min_bids: Number(minBids) }, manage_token: readManageToken(rfpId) }),
+        body: JSON.stringify({ outcome, must_have: mustHave.split(",").map((s) => s.trim()).filter(Boolean), targets: { min_bids: bids }, manage_token: readManageToken(rfpId) }),
       });
       const data = await res.json();
-      if (data.goal) setGoal(data.goal);
+      if (data.goal) { setGoal(data.goal); setGoalSavedAt(Date.now()); }
       else if (data.auth_required) alert("Sign in as a buyer to set the procurement goal.");
     } finally { setBusy(""); }
   }
@@ -151,7 +161,19 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
             <input type="number" min={0} max={20} value={minBids} onChange={(e) => setMinBids(Number(e.target.value))} className="w-28 rounded border border-[var(--ink-300,#ccc)] p-2 text-sm" />
           </div>
         </div>
-        <button onClick={saveGoal} disabled={busy === "goal"} className="mt-3 inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-60">{busy === "goal" ? "Saving…" : goal ? "Update goal" : "Set goal"}</button>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <button onClick={saveGoal} disabled={busy === "goal"} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-sm font-medium text-zinc-950 hover:bg-amber-400 disabled:opacity-60">{busy === "goal" ? "Saving…" : goal ? "Update goal" : "Set goal"}</button>
+          {goalSavedAt && <span className="text-sm font-medium text-emerald-700">Goal saved. Every incoming bid is reviewed against it.</span>}
+        </div>
+        {goal && (
+          <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-3 text-sm text-[var(--ink-800)]">
+            <p className="m-0 font-medium text-emerald-900">Active goal</p>
+            <p className="m-0 mt-1">{goal.outcome || "No outcome text."}</p>
+            <p className="m-0 mt-1 text-xs text-[var(--ink-600,#555)]">
+              Must-haves: {(goal.must_have ?? []).length ? (goal.must_have ?? []).join("; ") : "none stated"} · Minimum bids wanted: {goal.targets?.min_bids ?? 1}
+            </p>
+          </div>
+        )}
       </section>
 
       {/* Agent digest (run-loop output) */}

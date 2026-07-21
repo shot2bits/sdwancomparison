@@ -22,12 +22,30 @@ import { CAPABILITY_LABELS } from "@/lib/security/generate-rfp";
 
 /* ---------------- shared event humanisation (one truth) ---------------- */
 
+/** Readable labels for gap field keys (Harry's QA F14: the activity feed
+ *  showed "Gap accepted: estate.users" instead of the question the buyer
+ *  actually accepted). Question text mirrors SEC-RULES-2026.1's gap
+ *  questions in the rulebook, which is the source of truth for these keys;
+ *  rendering only, history stays exactly as recorded (Article 9). */
+export const GAP_FIELD_LABELS: Record<string, string> = {
+  drivers: "What is prompting this?",
+  "estate.existingSecurity": "What security tooling do you already run?",
+  "estate.users": "How many staff, computers, mobiles and servers?",
+  "constraints.inHouseSocCapacity": "What in-house security operations cover do you have?",
+  "constraints.complianceRequirements": "Which compliance regimes apply?",
+};
+
+export function gapLabel(field: string): string {
+  const q = GAP_FIELD_LABELS[field];
+  return q ? `${q} (${field})` : field;
+}
+
 const EVENT_LABELS: Record<string, (d: Record<string, unknown> | undefined) => string> = {
   "project.created": () => "Project created",
   "verdict.attached": (d) => `Verdict v${d?.version ?? "?"} attached`,
   "rfp.generated": (d) => `RFP generated (version ${d?.artefact_version ?? "?"}${typeof d?.questions === "number" ? `, ${d.questions} questions` : ""})`,
   "rfp.edited": () => "RFP edited",
-  "requirement.updated": (d) => (d?.accepted === true ? `Gap accepted: ${d?.gap_field ?? ""}` : "Requirement updated"),
+  "requirement.updated": (d) => (d?.accepted === true ? `Gap accepted: ${gapLabel(String(d?.gap_field ?? ""))}` : "Requirement updated"),
   "publish.consented": () => "Publish consent recorded",
   "publish.approved": () => "Approval recorded",
   "approval.requested": () => "Approval requested",

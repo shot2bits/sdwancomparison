@@ -29,7 +29,7 @@ export default function Page() {
         Assess your security requirement
       </h1>
       <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-zinc-700">
-        Answer what you know below. The assessment runs Netify&rsquo;s published security rulebook:
+        Provide what you know of your estate and situation; every field is optional. The assessment runs Netify&rsquo;s published security rulebook:
         every recommendation carries its reasoning and evidence, missing information becomes
         questions rather than guesses, and the things we do not recommend are explained, including
         when the honest answer earns Netify nothing. From the verdict you can create your project,

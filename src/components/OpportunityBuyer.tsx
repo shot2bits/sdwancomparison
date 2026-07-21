@@ -223,7 +223,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
             <BidComparison feed={feed} onAward={opp.status === "open" ? (slug) => buyerAction("award", `Awarded to ${slug}.`, slug) : undefined} />
           </div>
         )}
-        <FeedView items={feed} />
+        <FeedView items={feed} buyerLabel={isOwner ? "You (the buyer)" : undefined} />
         {opp.status === "open" && isOwner && (
           <div className="mt-4 flex gap-2">
             <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Post a comment to all suppliers" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />

@@ -25,13 +25,17 @@ const PRICE_MODEL: Record<string, string> = {
   per_site_monthly: "per site / month", per_user_monthly: "per user / month", total_monthly: "total / month", one_off: "one-off", indicative: "indicative",
 };
 
-export function FeedView({ items }: { items: FeedItem[] }) {
+export function FeedView({ items, buyerLabel }: { items: FeedItem[]; buyerLabel?: string }) {
+  // buyerLabel (Harry's QA F16): in the buyer's own signed-in management view,
+  // buyer-authored entries used to render as the same anonymous "Buyer" an
+  // outside visitor sees; the owner view passes a label that says whose
+  // comment it is. Public and supplier views pass nothing and are unchanged.
   return (
     <div className="space-y-3">
       {items.map((f) => (
         <div key={f.id} className={`rounded-sm p-3 border ${f.type === "question" ? "bg-sky-50 border-sky-200" : f.actor_type === "buyer" ? "bg-amber-50 border-amber-200" : "border-[var(--ink-300,#ccc)]"}`}>
           <p className="text-xs uppercase tracking-wide text-[var(--ink-500)] mb-1">
-            {f.actor_name} · {TYPE_LABEL[f.type] ?? f.type} · {new Date(f.created).toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
+            {f.actor_type === "buyer" && buyerLabel ? buyerLabel : f.actor_name} · {TYPE_LABEL[f.type] ?? f.type} · {new Date(f.created).toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
           </p>
           {f.body && <p className="text-sm text-[var(--ink-800)]">{f.body}</p>}
           {f.type === "question" && <p className="text-xs text-sky-700 mt-1">Buyer: reply with a comment to answer this clarification question.</p>}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import RfpBuilder from "@/components/RfpBuilder";
 import { RFP_PATHS, getRfpPath } from "@/lib/rfp-paths";
+import { getProject } from "@/lib/rfp-store";
 import { saseExtendedQuestions, EXTENDED_CATEGORY_LABELS, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -36,11 +37,25 @@ export default async function RfpProjectOrPathPage({ params }: Props) {
     // RfpBuilder (client) so they can carry the owner's manage key — server
     // markup cannot know it, and without the key those owner-gated pages
     // refuse anonymous owners.
+    //
+    // Engine-aware header (Harry's QA F4/F15): a Security Sourcing project
+    // used to land here under "Your SASE and SD-WAN RFP" with no explanation
+    // of the hand-off. The header reads the project's engine flag only; no
+    // private matter is rendered server-side.
+    const proj = await getProject(id).catch(() => null);
+    const isEngine = proj?.engine === "security_sourcing";
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="mb-8">
-          <p className="eyebrow mb-2">Agentic RFP builder</p>
-          <h1 className="text-2xl">Your SASE and SD-WAN RFP</h1>
+          <p className="eyebrow mb-2">{isEngine ? "Security Sourcing" : "Agentic RFP builder"}</p>
+          <h1 className="text-2xl">{isEngine ? "Your Security Sourcing RFP" : "Your SASE and SD-WAN RFP"}</h1>
+          {isEngine && (
+            <p className="mt-2 max-w-2xl text-sm text-[var(--ink-600,#555)]">
+              Generated from your security assessment and opened here, in the Netify RFP builder, for review.
+              Refine the document as you need; your project home keeps the assessment, story and timeline
+              alongside it, and nothing goes to suppliers until you publish.
+            </p>
+          )}
         </div>
         <RfpBuilder initialId={id} />
       </div>

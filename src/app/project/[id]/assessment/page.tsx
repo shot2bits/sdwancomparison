@@ -107,7 +107,7 @@ export default async function ProjectAssessmentPage({ params, searchParams }: Pr
 
       {verdict.againstInterest.length > 0 && (
         <section className="mb-6 rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4">
-          <p className="eyebrow mb-2 text-emerald-900">Said against our own interest</p>
+          <p className="eyebrow mb-2 text-emerald-900">Said against Netify&apos;s own interest</p>
           <ul className="m-0 list-none space-y-2 p-0">
             {verdict.againstInterest.map((a, i) => (
               <li key={i} className="text-sm text-emerald-900">{a.statement}</li>

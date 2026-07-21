@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import NoticeView from "@/components/NoticeView";
+import OpportunityOwnerBanner from "@/components/OpportunityOwnerBanner";
 import { getOpportunity, kvConfigured } from "@/lib/rfp-store";
 import { toPublicOpportunity, type PublicOpportunity } from "@/lib/opportunity-types";
 import { getSampleNotice } from "@/lib/sample-notices";
@@ -69,6 +70,8 @@ export default async function OpportunityNoticePage({ params }: Props) {
         {" / "}
         {isSample ? "Sample notice" : "Notice"}
       </nav>
+
+      {!isSample && <OpportunityOwnerBanner id={id} />}
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2">

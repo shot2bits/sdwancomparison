@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getProject, getSession, listResponses, kvConfigured } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
-import { buildStory } from "@/lib/project-story";
+import { buildStory, gapLabel } from "@/lib/project-story";
 import { projectHealth } from "@/lib/project-health";
 import { openSecurityGaps } from "@/lib/project-machine";
 import ProjectNav from "@/components/ProjectNav";
@@ -67,7 +67,7 @@ export default async function ProjectStoryPage({ params, searchParams }: Props) 
   const latestChapter = s.verdictChapters[s.verdictChapters.length - 1];
   const keyDecisions: string[] = [
     ...(latestChapter?.excluded ?? []).map((e) => `${e.label} excluded`),
-    ...s.decisions.filter((c) => c.action.startsWith("accept_gap:")).map((c) => `Gap accepted: ${c.action.slice("accept_gap:".length)}`),
+    ...s.decisions.filter((c) => c.action.startsWith("accept_gap:")).map((c) => `Gap accepted: ${gapLabel(c.action.slice("accept_gap:".length))}`),
     ...s.decisions.filter((c) => c.action.startsWith("rescope")).map(() => "Project re-scoped"),
     ...s.decisions.filter((c) => c.action.startsWith("approve_publish:")).map((c) => `Approved by ${c.action.slice("approve_publish:".length)}`),
   ];

@@ -41,13 +41,57 @@ export interface BuiltSecurityProject {
   verdict: SecurityScopeVerdict;
 }
 
-function titleFor(req: SecurityRequirementInput): string {
+/** A sector only enters titles and the buyer profile when it reads as one.
+ *  Harry's QA (21 July 2026, F1): typing "66" produced the permanent title
+ *  "Security sourcing for 66" while the market report correctly treated the
+ *  same value as no sector at all. The guard lives engine-side so every
+ *  client (page, API, MCP) gets the same behaviour (Article 17). */
+export function usableSector(req: SecurityRequirementInput): string | null {
   const sector = req.organisation?.sector?.trim();
+  return sector && /[a-zA-Z]/.test(sector) ? sector : null;
+}
+
+function titleFor(req: SecurityRequirementInput): string {
+  const sector = usableSector(req);
   const users = req.estate?.users;
   const parts = ["Security sourcing"];
   if (sector) parts.push(`for ${sector}`);
   if (typeof users === "number" && users > 0) parts.push(`(${users} users)`);
   return parts.join(" ");
+}
+
+/** The legacy buyer profile, mapped from the security requirement so the
+ *  generated document's background reflects what was actually entered
+ *  (Harry's QA F5: compliance, drivers and SOC cover were vanishing and the
+ *  background read as unfilled boilerplate). One mapping serves every
+ *  downstream surface that composes from p.buyer. */
+function buyerFrom(req: SecurityRequirementInput): Record<string, unknown> {
+  const sector = usableSector(req);
+  const sites = req.estate?.sites;
+  const notes: string[] = [];
+  const users = req.estate?.users;
+  if (typeof users === "number" && users > 0) notes.push(`Staff: ${users}.`);
+  const DRIVER_LABELS: Record<string, string> = {
+    incident: "an incident (had or ongoing)",
+    audit: "an audit",
+    compliance: "compliance obligations",
+    renewal: "a contract renewal",
+    growth: "growth or change",
+    consolidation: "consolidating point tools",
+    ransomware_concern: "ransomware concern",
+  };
+  if (req.drivers?.length) notes.push(`Drivers: ${req.drivers.map((d) => DRIVER_LABELS[d] ?? d).join(", ")}.`);
+  const soc = req.constraints?.inHouseSocCapacity;
+  if (soc) notes.push(`In-house security operations cover: ${soc === "twenty_four_seven" ? "24/7" : soc.replace(/_/g, " ")}.`);
+  if (req.estate?.specialDevices?.length) notes.push(`Special devices: ${req.estate.specialDevices.map((s) => (s === "epos" ? "EPOS tills" : "Chromebooks")).join(", ")}.`);
+  if (req.estate?.existingSecurity?.length) notes.push(`Existing security tooling: ${req.estate.existingSecurity.join(", ")}.`);
+  if (req.estate?.existingNetwork?.length) notes.push(`Network estate: ${req.estate.existingNetwork.join(", ")}.`);
+  return {
+    ...(sector ? { sector } : {}),
+    ...(typeof sites === "number" && sites > 0 ? { site_count: sites } : {}),
+    compliance: req.constraints?.complianceRequirements ?? [],
+    notes: notes.join(" "),
+  };
 }
 
 export async function buildSecurityProject(
@@ -72,7 +116,7 @@ export async function buildSecurityProject(
     updated: now,
     status: "draft",
     title: titleFor(input.requirement),
-    buyer: {},
+    buyer: buyerFrom(input.requirement),
     rfp_sections: [],
     invited_vendors: [],
     share_token: input.ids.shareToken,

@@ -194,7 +194,10 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
                 <>
                   <p className="mb-1 text-sm font-medium">Download this RFP</p>
                   <p className="mb-4 text-sm text-[var(--ink-600)]">Signed in as {session?.email}. Download the document, or print to PDF.</p>
-                  <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}`} className="mb-2 inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
+                  <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}${keyQs ? "&" : "?"}format=doc`} className="mb-2 inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
+                    Download as Word (.doc)
+                  </a>
+                  <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}`} className="mb-2 inline-flex w-full items-center justify-center rounded-full border border-zinc-400 px-5 py-2.5 text-sm font-medium text-zinc-800 no-underline transition-colors hover:bg-zinc-100">
                     Download RFP (Markdown)
                   </a>
                   <PrintButton />
