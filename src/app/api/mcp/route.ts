@@ -1,7 +1,7 @@
 import { MCP_TOOL_DEFINITIONS, callMcpTool } from "@/lib/mcp-tools";
 import { MCP_RFP_TOOL_DEFINITIONS, RFP_TOOL_NAMES, callRfpTool } from "@/lib/mcp-rfp-tools";
 import { MCP_COST_TOOL_DEFINITIONS, COST_TOOL_NAMES, callCostTool } from "@/lib/mcp-cost-tools";
-import { MCP_SECURITY_TOOL_DEFINITIONS, SECURITY_TOOL_NAMES, callSecurityTool } from "@/lib/mcp-security-tools";
+import { SECURITY_TOOL_DEFINITIONS_ALL, SECURITY_TOOL_NAMES, callSecurityTool } from "@/lib/mcp-security-tools";
 import { TOOL_ANNOTATIONS, SERVER_INSTRUCTIONS } from "@/lib/mcp-annotations";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -62,7 +62,7 @@ function rpcError(id: string | number | null | undefined, code: number, message:
 
 /** Serve-time merge of titles and behaviour annotations onto the tool definitions. */
 function annotatedTools() {
-  return [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...MCP_SECURITY_TOOL_DEFINITIONS].map((t) => {
+  return [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL].map((t) => {
     const extra = TOOL_ANNOTATIONS[t.name as string];
     return extra ? { ...t, title: extra.title, annotations: extra.annotations } : t;
   });

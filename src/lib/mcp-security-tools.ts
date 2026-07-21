@@ -8,7 +8,12 @@
  */
 
 import { assessSecurityRequirement, RULEBOOK_VERSION } from "@/lib/security/rulebook";
-import type { SecurityRequirementInput } from "@/lib/security/rulebook";
+import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/security/rulebook";
+import { createSecurityProject } from "@/lib/security/persist-project";
+import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
+import { getProject } from "@/lib/rfp-store";
+import { projectPhase } from "@/lib/project-machine";
+import { SITE_URL } from "@/lib/structured-data";
 
 export const MCP_SECURITY_TOOL_DEFINITIONS = [
   {
@@ -123,8 +128,74 @@ export const MCP_SECURITY_TOOL_DEFINITIONS = [
   },
 ] as const;
 
+const CREATE_PROJECT_DEFINITION = {
+  name: "create_security_project",
+  description:
+    `Create a Netify Security Sourcing Project from a requirement: runs the ${RULEBOOK_VERSION} assessment server-side, attaches the verdict as the project's first immutable artefact, and returns the project with its builder link so the buyer can create the right RFP and obtain responses from matched providers. CONSENT REQUIRED: only call with the buyer's explicit agreement in this conversation; pass consent: true to confirm, and show the buyer the recorded consent wording (returned as consent_text). Creates an anonymous draft claimable when the buyer signs in; no emails are sent and no supplier is contacted until the buyer publishes. The returned manage_token is the creator's credential: hand it to the buyer with the builder link. TEST MODE for integration developers: pass test: true for a two-hour self-expiring project with no side effects.`,
+  inputSchema: {
+    type: "object",
+    properties: {
+      requirement: { type: "object", description: "The same shape assess_security_requirement takes: organisation, estate, drivers, constraints." },
+      consent: { type: "boolean", description: "Must be true: the buyer's explicit agreement to create the project." },
+      test: { type: "boolean", description: "Integration testing: self-expires in two hours, no side effects." },
+    },
+    required: ["requirement", "consent"],
+  },
+  outputSchema: {
+    type: "object",
+    required: ["created", "project_id", "phase", "builder_url", "verdict"],
+    properties: {
+      created: { type: "boolean" },
+      project_id: { type: "string" },
+      phase: { type: "string" },
+      builder_url: { type: "string" },
+      manage_token: { type: "string", description: "Creator credential; give it to the buyer with the link." },
+      verdict: { type: "object", description: "The attached SecurityScopeVerdict, verbatim." },
+      consent_text: { type: "string", description: "The consent wording recorded verbatim on the project." },
+      test: { type: "boolean" },
+      note: { type: "string" },
+    },
+  },
+} as const;
+
+const GET_STATUS_DEFINITION = {
+  name: "get_security_project_status",
+  description:
+    "Read a Security Sourcing Project's status: phase, title, history length, latest verdict summary and next steps. Owner-gated: requires the project id AND its manage_token (the creator credential returned at creation). Read only.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      project_id: { type: "string" },
+      manage_token: { type: "string" },
+    },
+    required: ["project_id", "manage_token"],
+  },
+  outputSchema: {
+    type: "object",
+    required: ["found"],
+    properties: {
+      found: { type: "boolean" },
+      phase: { type: "string" },
+      status: { type: "string" },
+      title: { type: "string" },
+      history_length: { type: "number" },
+      verdict_version: { type: "number" },
+      confidence: { type: "string" },
+      summary: { type: "object" },
+      builder_url: { type: "string" },
+      test: { type: "boolean" },
+    },
+  },
+} as const;
+
+export const SECURITY_TOOL_DEFINITIONS_ALL = [
+  ...MCP_SECURITY_TOOL_DEFINITIONS,
+  CREATE_PROJECT_DEFINITION,
+  GET_STATUS_DEFINITION,
+] as const;
+
 export const SECURITY_TOOL_NAMES = new Set<string>(
-  MCP_SECURITY_TOOL_DEFINITIONS.map((t) => t.name),
+  SECURITY_TOOL_DEFINITIONS_ALL.map((t) => t.name),
 );
 
 export async function callSecurityTool(
@@ -134,6 +205,55 @@ export async function callSecurityTool(
   switch (name) {
     case "assess_security_requirement":
       return assessSecurityRequirement((args ?? {}) as SecurityRequirementInput);
+    case "create_security_project": {
+      const requirement = args?.requirement;
+      if (!requirement || typeof requirement !== "object") {
+        return { error: "requirement is required: the same shape assess_security_requirement takes." };
+      }
+      if (args?.consent !== true) {
+        return { error: "Consent is required: pass consent: true only with the buyer's explicit agreement in this conversation.", consent_text: CREATE_CONSENT_TEXT };
+      }
+      const { project, verdict, builderPath } = await createSecurityProject({
+        requirement: requirement as SecurityRequirementInput,
+        via: "mcp",
+        test: args?.test === true,
+      });
+      return {
+        created: true,
+        project_id: project.id,
+        phase: projectPhase(project),
+        builder_url: `${SITE_URL}${builderPath}`,
+        manage_token: project.manage_token,
+        verdict,
+        consent_text: CREATE_CONSENT_TEXT,
+        ...(project.test ? { test: true } : {}),
+        note: project.test
+          ? "Test project: self-expires in two hours, no emails, no side effects."
+          : "Anonymous draft created; the buyer claims it by signing in from the builder link. No supplier is contacted until the buyer publishes.",
+      };
+    }
+    case "get_security_project_status": {
+      const id = String(args?.project_id ?? "");
+      const token = String(args?.manage_token ?? "");
+      if (!id || !token) return { error: "project_id and manage_token are required." };
+      const project = await getProject(id);
+      if (!project || project.manage_token !== token) {
+        return { found: false, note: "Unknown project or wrong credential." };
+      }
+      const latest = project.engine_data?.verdicts?.slice(-1)[0];
+      const v = latest?.verdict as SecurityScopeVerdict | undefined;
+      return {
+        found: true,
+        phase: projectPhase(project),
+        status: project.status,
+        title: project.title,
+        history_length: (project.history ?? []).length,
+        ...(latest ? { verdict_version: latest.version } : {}),
+        ...(v ? { confidence: v.confidence, summary: v.summary } : {}),
+        builder_url: `${SITE_URL}/rfp-builder/${project.id}`,
+        ...(project.test ? { test: true } : {}),
+      };
+    }
     default:
       return { error: `Unknown security tool: ${name}` };
   }

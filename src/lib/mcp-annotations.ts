@@ -68,8 +68,10 @@ export const TOOL_ANNOTATIONS: Record<string, ToolAnnotation> = {
   supplier_inbox: read("Read a supplier's RFP connection inbox"),
   supplier_reply: write("Reply on a supplier connection"),
 
-  // Netify Security Sourcing (Phase A, 21 July 2026): the Notary read.
+  // Netify Security Sourcing (Phase A + B, 21 July 2026).
   assess_security_requirement: read("Assess a security requirement under SEC-RULES-2026.1"),
+  create_security_project: write("Create a Security Sourcing project (consented)"),
+  get_security_project_status: read("Read a Security Sourcing project's status"),
 };
 
 export const SERVER_INSTRUCTIONS = `Netify is a SASE, SSE and SD-WAN procurement marketplace for UK and North American businesses, built on an evidence-graded dataset of 30 vendors across 40 capabilities (public evidence only, evaluation dates stated). Use it when a user is comparing vendors, budgeting, or running a procurement.

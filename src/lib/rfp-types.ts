@@ -165,6 +165,10 @@ export const ProjectDetailsSchema = z.object({
   phase: z.enum(PROJECT_PHASE).optional(),
   history: z.array(ProjectHistoryEventSchema).default([]),
   consents: z.array(ProjectConsentSchema).default([]),
+  /** Integration-test record (spec 1.7): expires in two hours, sends no
+   *  emails, joins no buyer index or moderation queue, and is excluded
+   *  from telemetry funnels. */
+  test: z.boolean().optional(),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
 
