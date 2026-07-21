@@ -30,6 +30,8 @@ export default function ProjectNav({
     ...(engine ? [{ key: "assessment" as const, label: "Assessment", href: `/project/${id}/assessment${qs}` }] : []),
     { key: "rfp", label: "RFP", href: `/rfp-builder/${id}${qs}` },
     { key: "preview", label: "Preview", href: `/rfp-builder/${id}/preview${qs}` },
+    { key: "story", label: "Story", href: `/project/${id}/story${qs}` },
+    { key: "timeline", label: "Timeline", href: `/project/${id}/timeline${qs}` },
     { key: "review", label: "Review & responses", href: `/rfp-builder/${id}/review${qs}` },
   ];
   return (

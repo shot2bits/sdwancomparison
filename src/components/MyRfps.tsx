@@ -9,7 +9,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type Rfp = { id: string; title: string; status: string; updated: number };
+type Health = { tone: string; label: string; detail: string };
+type Rfp = { id: string; title: string; status: string; updated: number; phase?: string; responses?: number; health?: Health };
 
 const STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
@@ -17,6 +18,27 @@ const STATUS_LABELS: Record<string, string> = {
   published: "Published",
   qa: "Supplier Q&A",
   evaluation: "Evaluation",
+};
+
+/** Phase D2: the buyer's desk. Groups derive from the machine's phase
+ *  (served by the mine API, computed with projectPhase, one truth);
+ *  legacy rows without a phase fall back to their status. */
+const GROUPS: Array<{ key: string; label: string; phases: string[] }> = [
+  { key: "drafting", label: "Drafting", phases: ["scoping", "scoped", "drafting", "drafted"] },
+  { key: "published", label: "Published", phases: ["published", "qa"] },
+  { key: "evaluating", label: "Evaluating", phases: ["evaluation"] },
+  { key: "awarded", label: "Awarded and beyond", phases: ["awarded", "transacting", "complete"] },
+  { key: "closed", label: "Closed", phases: ["closed"] },
+];
+
+const STATUS_TO_PHASE: Record<string, string> = {
+  draft: "drafting", review: "drafted", published: "published", qa: "qa", evaluation: "evaluation",
+};
+
+const DOT: Record<string, string> = {
+  green: "bg-emerald-500", amber: "bg-amber-500", red: "bg-red-500",
+  yellow: "bg-yellow-400", blue: "bg-sky-500", purple: "bg-purple-500",
+  neutral: "bg-[var(--ink-400,#9ca3af)]",
 };
 
 /** Draft manage tokens the builder saved in this browser (netify_mtok_{id}). */
@@ -91,22 +113,37 @@ export default function MyRfps() {
     );
   }
 
+  const phaseOf = (r: Rfp) => r.phase ?? STATUS_TO_PHASE[r.status] ?? "drafting";
+  const grouped = GROUPS.map((g) => ({ ...g, rows: rfps.filter((r) => g.phases.includes(phaseOf(r))) })).filter((g) => g.rows.length > 0);
+
   return (
     <div className="mb-10">
-      <h2 className="text-xl mb-1">Your RFPs</h2>
-      <p className="text-sm text-[var(--ink-600)] mb-3">Saved to your account — open the builder, or preview and download the document.</p>
-      <div className="space-y-2">
-        {rfps.map((r) => (
-          <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-[var(--ink-200,#e5e5e5)] px-4 py-2.5">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{r.title}</p>
-              <p className="text-xs text-[var(--ink-500)]">{STATUS_LABELS[r.status] ?? r.status} · updated {new Date(r.updated).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</p>
+      <h2 className="text-xl mb-1">Your projects</h2>
+      <p className="text-sm text-[var(--ink-600)] mb-4">Grouped by stage. Open a project for its assessment, document, gaps, publication and responses in one place.</p>
+      <div className="space-y-6">
+        {grouped.map((g) => (
+          <section key={g.key}>
+            <p className="eyebrow mb-2">{g.label} · {g.rows.length}</p>
+            <div className="space-y-2">
+              {g.rows.map((r) => (
+                <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-sm border border-[var(--ink-200,#e5e5e5)] px-4 py-2.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{r.title}</p>
+                    <p className="flex items-center gap-1.5 text-xs text-[var(--ink-500)]">
+                      {r.health && <span aria-hidden className={`inline-block h-2 w-2 rounded-full ${DOT[r.health.tone] ?? DOT.neutral}`} />}
+                      <span>{r.health?.label ?? STATUS_LABELS[r.status] ?? r.status}</span>
+                      <span>· updated {new Date(r.updated).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+                      {typeof r.responses === "number" && r.responses > 0 && <span>· {r.responses} response{r.responses === 1 ? "" : "s"}</span>}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Link href={`/rfp-builder/${r.id}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
+                    <Link href={`/project/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex shrink-0 gap-2">
-              <Link href={`/rfp-builder/${r.id}/preview`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Preview</Link>
-              <Link href={`/project/${r.id}`} className="rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950 no-underline hover:bg-amber-400">Open project</Link>
-            </div>
-          </div>
+          </section>
         ))}
       </div>
     </div>

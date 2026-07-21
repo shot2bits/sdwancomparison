@@ -48,10 +48,16 @@ export async function runGenerateRfpTests(): Promise<GenerateTestResult> {
       const b = JSON.stringify(generateRfpSections(v));
       if (a !== b) throw new Error(`${id}: two generations differ`);
     }
+    // Two SEPARATE creations: identical modulo each verdict's own
+    // generatedAt attestation (Article 3 defines identity by the input
+    // digest; generatedAt records WHEN, not WHAT, and legitimately
+    // differs across creations). Everything else must be byte-identical.
     const p1 = await projectFor("F2");
     const p2 = await projectFor("F2");
-    if (JSON.stringify(p1.project.rfp_sections) !== JSON.stringify(p2.project.rfp_sections)) {
-      throw new Error("F2: creation-time generation not deterministic");
+    if (p1.verdict.inputDigest !== p2.verdict.inputDigest) throw new Error("F2: digests differ across creations");
+    const norm = (sections: unknown, at: string) => JSON.stringify(sections).split(at).join("GENERATED_AT");
+    if (norm(p1.project.rfp_sections, p1.verdict.generatedAt) !== norm(p2.project.rfp_sections, p2.verdict.generatedAt)) {
+      throw new Error("F2: creation-time generation differs beyond the attestation timestamp");
     }
   });
 
@@ -283,15 +289,19 @@ export async function runGenerateRfpTests(): Promise<GenerateTestResult> {
       ],
     };
     if (gaps.length > 0) {
-      if (h.label !== "Waiting for gap acceptance" || h.tone !== "amber") throw new Error(`gappy drafted project not amber: ${h.label}`);
+      if (h.label !== "Action required" || h.tone !== "amber") throw new Error(`gappy drafted project not amber action-required: ${h.label}`);
       if (openSecurityGaps(clear).length !== 0) throw new Error("gate and health disagree after acceptance");
     }
     const h2 = projectHealth(clear, { responseCount: 0 });
-    if (h2.label !== "Ready to publish" || h2.tone !== "green") throw new Error(`gap-clear drafted project not green/ready: ${h2.label}`);
-    // Published states: waiting vs arriving.
+    if (h2.label !== "Ready for publication" || h2.tone !== "green") throw new Error(`gap-clear drafted project not green/ready: ${h2.label}`);
+    // Published states: awaiting vs arriving; evaluation and completion.
     const pub: ProjectDetails = { ...clear, phase: "published", status: "published" };
-    if (projectHealth(pub, { responseCount: 0 }).label !== "Waiting for suppliers") throw new Error("published+0 not waiting");
+    if (projectHealth(pub, { responseCount: 0 }).label !== "Awaiting supplier responses") throw new Error("published+0 not awaiting");
     if (projectHealth(pub, { responseCount: 2 }).tone !== "green") throw new Error("published+2 not green");
+    const evalp: ProjectDetails = { ...clear, phase: "evaluation", status: "evaluation" };
+    if (projectHealth(evalp, { responseCount: 3 }).label !== "Evaluating bids") throw new Error("evaluation not evaluating-bids");
+    const done: ProjectDetails = { ...clear, phase: "complete", status: "evaluation" };
+    if (projectHealth(done).label !== "Procurement complete") throw new Error("complete not procurement-complete");
     // Approval states (D5 context arrives later; the function is ready).
     const withDecline = projectHealth(clear, { responseCount: 0, approvals: [{ decision: "declined" }] });
     if (withDecline.label !== "Approval declined") throw new Error("declined approval not surfaced");

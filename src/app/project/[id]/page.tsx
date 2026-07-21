@@ -6,6 +6,7 @@ import { getProject, getSession, listResponses, kvConfigured } from "@/lib/rfp-s
 import { SESSION_COOKIE } from "@/lib/auth";
 import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
 import { projectHealth, type HealthTone } from "@/lib/project-health";
+import { humaniseEvent } from "@/lib/project-story";
 import { includedSections } from "@/lib/rfp-document";
 import { PROJECT_PHASE } from "@/lib/rfp-types";
 import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
@@ -37,6 +38,8 @@ const TONE_STYLES: Record<HealthTone, string> = {
   amber: "border-amber-400 bg-amber-50 text-amber-900",
   red: "border-red-300 bg-red-50 text-red-900",
   yellow: "border-yellow-300 bg-yellow-50 text-yellow-900",
+  blue: "border-sky-300 bg-sky-50 text-sky-900",
+  purple: "border-purple-300 bg-purple-50 text-purple-900",
   neutral: "border-[var(--ink-300,#ccc)] bg-[var(--paper-base,#faf9f7)] text-[var(--ink-800)]",
 };
 
@@ -45,6 +48,8 @@ const TONE_DOT: Record<HealthTone, string> = {
   amber: "bg-amber-500",
   red: "bg-red-500",
   yellow: "bg-yellow-400",
+  blue: "bg-sky-500",
+  purple: "bg-purple-500",
   neutral: "bg-[var(--ink-400,#9ca3af)]",
 };
 
@@ -54,24 +59,8 @@ const PHASE_LABELS: Record<string, string> = {
   awarded: "Awarded", transacting: "Transacting", complete: "Complete", closed: "Closed",
 };
 
-const EVENT_LABELS: Record<string, (d: Record<string, unknown> | undefined) => string> = {
-  "project.created": () => "Project created",
-  "verdict.attached": (d) => `Verdict v${d?.version ?? "?"} attached`,
-  "rfp.generated": (d) => `RFP generated (version ${d?.artefact_version ?? "?"}${typeof d?.questions === "number" ? `, ${d.questions} questions` : ""})`,
-  "rfp.edited": () => "RFP edited",
-  "requirement.updated": (d) => (d?.accepted === true ? `Gap accepted: ${d?.gap_field ?? ""}` : "Requirement updated"),
-  "publish.consented": () => "Publish consent recorded",
-  "publish.approved": () => "Approval recorded",
-  "publish.live": () => "Published to the marketplace",
-  "invite.sent": () => "Suppliers invited",
-  "response.submitted": () => "Supplier response submitted",
-  "evaluation.opened": () => "Evaluation opened",
-  "award.decided": () => "Award decided",
-};
-
-function humanise(event: string, detail?: Record<string, unknown>): string {
-  return EVENT_LABELS[event]?.(detail) ?? event.replace(/[._]/g, " ");
-}
+// Event humanisation is shared with the Story and Timeline (one truth):
+// src/lib/project-story.ts humaniseEvent.
 
 export default async function ProjectHomePage({ params, searchParams }: Props) {
   const { id } = await params;
@@ -235,23 +224,30 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
         </section>
       </div>
 
-      {/* Activity: the record, humanised. Full story arrives with D3. */}
+      {/* Activity: the record, humanised (shared with Story and Timeline). */}
       <section className="mt-8">
         <p className="eyebrow mb-2">Activity</p>
         {recent.length === 0 ? (
           <p className="text-sm text-[var(--ink-600)]">No recorded events yet.</p>
         ) : (
-          <ul className="m-0 list-none space-y-1.5 p-0">
-            {recent.map((h, i) => (
-              <li key={`${h.at}-${i}`} className="flex flex-wrap items-baseline gap-x-3 text-sm">
-                <span className="tabular-nums text-xs text-[var(--ink-500)]">
-                  {new Date(h.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                </span>
-                <span className="text-[var(--ink-800)]">{humanise(h.event, h.detail as Record<string, unknown> | undefined)}</span>
-                <span className="text-xs text-[var(--ink-400,#9ca3af)]">{h.actor}{h.via ? ` · ${h.via}` : ""}</span>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="m-0 list-none space-y-1.5 p-0">
+              {recent.map((h, i) => (
+                <li key={`${h.at}-${i}`} className="flex flex-wrap items-baseline gap-x-3 text-sm">
+                  <span className="tabular-nums text-xs text-[var(--ink-500)]">
+                    {new Date(h.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  <span className="text-[var(--ink-800)]">{humaniseEvent(h.event, h.detail as Record<string, unknown> | undefined)}</span>
+                  <span className="text-xs text-[var(--ink-400,#9ca3af)]">{h.actor}{h.via ? ` · ${h.via}` : ""}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-sm">
+              <Link href={`/project/${id}/story${qs}`} className="underline">Full story</Link>
+              <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
+              <Link href={`/project/${id}/timeline${qs}`} className="underline">Timeline</Link>
+            </p>
+          </>
         )}
       </section>
     </div>

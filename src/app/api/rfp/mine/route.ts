@@ -1,6 +1,8 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { sessionFromRequest } from "@/lib/auth";
-import { listBuyerRfpIds, getProject, saveProject, kvConfigured } from "@/lib/rfp-store";
+import { listBuyerRfpIds, getProject, saveProject, listResponses, kvConfigured } from "@/lib/rfp-store";
+import { projectPhase } from "@/lib/project-machine";
+import { projectHealth } from "@/lib/project-health";
 
 export const runtime = "nodejs";
 export async function OPTIONS(req: Request) { return preflight(req); }
@@ -23,7 +25,17 @@ export async function GET(req: Request) {
     if (!p.owner_email && session.role === "buyer") {
       try { await saveProject({ ...p, owner_email: session.email }); } catch { /* best effort */ }
     }
-    rfps.push({ id: p.id, title: p.title, status: p.status, updated: p.updated });
+    // Phase D2: phase and health per row, computed server-side with the
+    // same functions the Project Home and the publish gate use (one truth).
+    // Response counts are read only for post-publication rows (bounded set)
+    // and only the COUNT is returned, never response bodies.
+    const phase = projectPhase(p);
+    let responseCount = 0;
+    if (["published", "qa", "evaluation", "awarded", "transacting", "complete"].includes(phase)) {
+      try { responseCount = (await listResponses(p.id)).length; } catch { /* count stays 0 */ }
+    }
+    const health = projectHealth(p, { responseCount });
+    rfps.push({ id: p.id, title: p.title, status: p.status, updated: p.updated, phase, responses: responseCount, health });
   }
   return Response.json({ rfps: rfps.sort((a, b) => b.updated - a.updated) }, { headers: cors });
 }
