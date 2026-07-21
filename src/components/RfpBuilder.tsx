@@ -1245,6 +1245,24 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <CodeEntry defaultEmail={pendingEmail} onVerified={() => publishToCurated("signin_resume")} />
             {publishMsg && <p className="mt-2 text-sm text-emerald-700">{publishMsg}</p>}
           </div>
+        ) : includedQuestionCount === 0 ? (
+          /* Honest empty state (Harry's QA, RFP Builder F1/F2): the panel
+             used to pitch "22 matched suppliers fit what you described" and
+             offer a live Submit against an RFP with zero questions. Nothing
+             is matched against nothing; the submit step unlocks with content,
+             and the server refuses regardless. */
+          <div>
+            <p className="eyebrow mb-1.5">Next step</p>
+            <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">Give your RFP content before it goes anywhere</h2>
+            <p className="text-sm text-[var(--ink-700)] mb-2">
+              This RFP has no questions yet, so there is nothing for suppliers to respond to and submission stays
+              locked. Set what you know in step 1 and the agent generates your question set; your matched suppliers
+              appear here once the RFP has content.
+            </p>
+            <p className="text-xs text-[var(--ink-600,#555)]">
+              Prefer the guided route? <a href="/sase/rfp-builder/new/" className="underline">Start from the two-minute brief</a>.
+            </p>
+          </div>
         ) : (
           <div>
             <p className="eyebrow mb-1.5">Next step</p>

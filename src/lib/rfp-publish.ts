@@ -58,8 +58,12 @@ async function listOnBoard(p: ProjectDetails, ownerEmail: string): Promise<{ opp
   const existingId = await kvGetJson<string>(mapKey);
   const existing = existingId ? await getOpportunity(existingId) : null;
 
-  const questionCount = p.rfp_sections.filter((s) => s.included).reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
-  const sectionCount = p.rfp_sections.filter((s) => s.included).length;
+  // Count only sections that actually carry active questions (Harry's QA,
+  // RFP Builder F3: the notice said "across 5 sections" while the document
+  // rendered 2, because included-but-empty sections were being counted).
+  const activeSections = p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
+  const questionCount = activeSections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+  const sectionCount = activeSections.length;
   const summary =
     `The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, ` +
     `Netify SASE Methodology v${p.methodology_version}). Suppliers respond to the RFP question set with evidence; ` +
@@ -182,6 +186,20 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
  * stored instruction.
  */
 export async function executePublish(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
+  // Minimum-content gate (Harry's QA, RFP Builder F2): submit was live at
+  // zero questions, one click from dispatching an empty requirement to real
+  // supplier contacts. The gate is server-side so every client (the page,
+  // the MCP publish tools, and the verify path's pending_submit) refuses
+  // identically (Article 17).
+  const activeQuestionCount = project.rfp_sections
+    .filter((s) => s.included)
+    .reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+  if (activeQuestionCount === 0) {
+    throw new Error(
+      "This RFP has no questions yet, so there is nothing for suppliers to respond to. Describe your project and generate the question set first; nothing has been sent.",
+    );
+  }
+
   const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
   // Region hint (20 July 2026, the ministry lesson): when the buyer stated no
   // regions, weight the ranking by the email's country TLD. Never filters;

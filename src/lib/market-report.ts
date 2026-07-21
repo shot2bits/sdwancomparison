@@ -74,20 +74,45 @@ function usersBandFromNotes(notes: string): string | null {
 function estimateForProject(p: ProjectDetails): { result: EstimateResult | null; assumptions: string[] } {
   const assumptions: string[] = [];
 
-  // Users: from the wizard band via notes, else a stated assumption.
+  // Users, in order of evidence quality (Harry's QA, RFP Builder F4: two
+  // unrelated projects produced byte-identical bands because both fell to
+  // the same defaults while the report was billed as "yours"):
+  // 1. the security engine's stated estate, 2. a "Staff: N." note from
+  // engine creation, 3. the wizard's users band in notes, 4. an assumed
+  // default that is now loudly labelled as the market baseline.
+  const engineEstate = (p.engine_data as unknown as { requirement?: { estate?: { users?: number } } } | undefined)?.requirement?.estate;
+  const staffNote = (p.buyer.notes ?? "").match(/Staff:\s*(\d+)\./);
   const bandKey = usersBandFromNotes(p.buyer.notes ?? "");
   let users: number;
-  if (bandKey && USERS_FOR_BAND[bandKey]) {
+  let usersAssumed = false;
+  if (typeof engineEstate?.users === "number" && engineEstate.users > 0) {
+    users = engineEstate.users;
+    assumptions.push(`User count taken from your security assessment (${users} users).`);
+  } else if (staffNote) {
+    users = Number(staffNote[1]);
+    assumptions.push(`User count taken from your stated staff figure (${users} users).`);
+  } else if (bandKey && USERS_FOR_BAND[bandKey]) {
     users = USERS_FOR_BAND[bandKey];
     assumptions.push(`User count banded as ${bandKey.replace(/_/g, " ")} (modelled at ${users} users).`);
   } else {
     users = 250;
+    usersAssumed = true;
     assumptions.push("User count not provided; the band assumes 250 users. Rerun with your own numbers in the cost estimator.");
   }
 
   // Sites: the wizard already stores a representative count.
   const sites = p.buyer.site_count && p.buyer.site_count > 0 ? p.buyer.site_count : 5;
-  if (!p.buyer.site_count) assumptions.push("Site count not provided; the band assumes 5 sites.");
+  const sitesAssumed = !(p.buyer.site_count && p.buyer.site_count > 0);
+  if (sitesAssumed) assumptions.push("Site count not provided; the band assumes 5 sites.");
+
+  // When both estate dimensions are assumed, the figures are the Netify
+  // market baseline, not a project-specific estimate; say so first and
+  // plainly rather than letting identical bands masquerade as personal.
+  if (usersAssumed && sitesAssumed) {
+    assumptions.unshift(
+      "Baseline band: no estate size was provided, so these figures are the Netify market baseline for a typical mid-market estate (250 users, 5 sites), not an estimate of your project. Add your users and sites for a band of your own.",
+    );
+  }
 
   // Regions: mapped; unmapped or empty falls back to UK & Europe.
   const mapped = Array.from(new Set((p.buyer.regions ?? []).map((r) => REGION_MAP[r]).filter(Boolean)));
