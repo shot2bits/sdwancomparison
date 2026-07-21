@@ -1,28 +1,29 @@
 import type { Metadata } from "next";
 import PositionWorkspace from "@/components/PositionWorkspace";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
-import { RULEBOOK_VERSION } from "@/lib/security/rulebook";
 
 /**
- * /workspace/ (public path /sase/workspace/): the Live Sourcing Workspace,
- * the one door for security, SASE and SD-WAN buying (W0, spec v1.3
- * section 3). Server-rendered intro so the page is indexable and citable;
- * the workspace itself is a client island over the extraction, rulebook,
- * diagram and fit organs.
- *
- * Constitutional traceability: serves the Marketplace (publish is the
- * payout), the Matrix (evidence-graded fit), the Notary (consent at
- * signature), the Record (the project object), the Observatory (cycle
- * events) and the Mandate (the same loop is the MCP contract).
+ * /workspace/ (public path /sase/workspace/): the Position surface, P2.
+ * Robert's correction (21 July, on seeing P1 live): the workspace must not
+ * be a panel embedded in a webpage with menus and standard text, and it is
+ * not dark mode. So this page TAKES OVER the viewport: a fixed, opaque,
+ * paper-light surface above the site chrome, owning its own scroll. The
+ * order of comprehension is his: the promise (his headline, verbatim), the
+ * machine behind it (his paragraph, verbatim), the one obvious input, then
+ * the living market below. Server-rendered so the H1, answer block and
+ * JSON-LD stay fully indexable; the workspace itself is the client island.
  */
 
+const TITLE =
+  "Imagine describing your SASE and SD-WAN requirements once, then watching the world's leading suppliers compete for your business";
+
 export const metadata: Metadata = {
-  title: "Imagine describing your SASE and SD-WAN requirements once, then watching the world's leading suppliers compete for your business",
+  title: TITLE,
   description:
     "Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement of Requirements automatically.",
   alternates: { canonical: `${SITE_URL}/workspace/` },
   openGraph: {
-    title: "Imagine describing your SASE and SD-WAN requirements once, then watching the world's leading suppliers compete for your business",
+    title: TITLE,
     description:
       "Describe your requirements in a single sentence; Netify has already mapped the thousands of follow-up questions technology buyers ask AI, and builds your Statement of Requirements automatically.",
     url: `${SITE_URL}/workspace/`,
@@ -31,8 +32,6 @@ export const metadata: Metadata = {
   },
 };
 
-/** WebApplication JSON-LD (W0 slice 4): the workspace as a named, citable,
- *  free tool, following the shortlist's schema convention. */
 function getWorkspaceWebApplicationSchema() {
   return {
     "@context": "https://schema.org",
@@ -57,48 +56,64 @@ export default function Page() {
     getSpeakableSchema("/workspace/"),
   ];
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+    <div className="fixed inset-0 z-[70] overflow-y-auto overscroll-contain bg-[#fbfaf8]">
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
-      <p className="eyebrow mb-2">Netify marketplace · rulebook {RULEBOOK_VERSION}</p>
-      <h1 id="page-h1" className="mb-3 text-3xl leading-tight sm:text-4xl">
-        Imagine describing your SASE and SD-WAN requirements once, then watching the world&rsquo;s leading suppliers
-        compete for your business.
-      </h1>
-      {/* Extractable answer block (Robert's copy, verbatim, 21 July 2026). */}
-      <p id="page-subhead" className="max-w-2xl text-[15px] leading-relaxed text-[var(--ink-700,#3f3f46)]">
-        Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the
-        thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
-        of Requirements automatically.
-      </p>
+      <main className="mx-auto max-w-5xl px-4 pb-20 pt-5 sm:px-6">
+        {/* The only chrome: a wordmark and two quiet exits. */}
+        <header className="mb-10 flex items-baseline justify-between">
+          <a href="/" className="text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
+            <span className="mr-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900 align-[-4px] text-[13px] font-bold text-white">N</span>
+            Netify
+          </a>
+          <span className="flex gap-5 text-[12.5px] text-zinc-500">
+            <a href="/sase/opportunities/board/" className="no-underline hover:text-zinc-900">The board</a>
+            <a href="/sase/account/" className="no-underline hover:text-zinc-900">My account</a>
+          </span>
+        </header>
 
-      <PositionWorkspace />
+        {/* The promise, verbatim, then the machine behind it, verbatim. */}
+        <h1
+          id="page-h1"
+          className="mx-auto mb-4 max-w-3xl text-center text-[28px] font-semibold leading-[1.15] tracking-tight text-zinc-950 sm:text-[36px]"
+        >
+          Imagine describing your SASE and SD-WAN requirements once, then watching the world&rsquo;s leading suppliers
+          compete for your business.
+        </h1>
+        <p id="page-subhead" className="mx-auto mb-2 max-w-2xl text-center text-[15px] leading-relaxed text-zinc-600">
+          Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the
+          thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
+          of Requirements automatically.
+        </p>
 
-      {/* Below the workspace: the honest boundary and the delegation case. */}
-      <section className="mt-16 max-w-2xl border-t border-[var(--ink-200,#e5e5e5)] pt-6">
-        <h2 className="mb-2 text-lg font-semibold">Why publish here rather than paste an AI draft into email</h2>
-        <p className="mb-3 text-sm leading-relaxed text-[var(--ink-700,#3f3f46)]">
-          An AI assistant can draft a requirement document. It cannot publish an anonymous notice to Netify&rsquo;s
-          opportunity board, invite suppliers graded against a 40-feature evaluation, gather structured responses with
-          private pricing, or hold your identity back until you choose to reply. This page does both halves: the
-          drafting and the market.
-        </p>
-        <h2 className="mb-2 mt-6 text-lg font-semibold">The two rules the draft is built on</h2>
-        <p className="mb-3 text-sm leading-relaxed text-[var(--ink-700,#3f3f46)]">
-          Nothing on this page simulates liveness: supplier entries show real capability grades with their evaluation
-          dates, and nothing pretends to be live activity. And every claim carries provenance: a solid underline is
-          your words, a dotted underline is a named Netify inference, and anything assumed publishes labelled as an
-          assumption. Recommendations that route away from what Netify earns from are recorded and shown, because the
-          verdict is worth more than the transaction.
-        </p>
-        <h2 className="mb-2 mt-6 text-lg font-semibold">Prefer the structured builder</h2>
-        <p className="text-sm leading-relaxed text-[var(--ink-700,#3f3f46)]">
-          The <a href="/sase/rfp-builder/" className="underline">RFP Builder</a> remains available for a
-          question-by-question build, and everything you publish from here opens in the same project workspace:
-          responses side by side, pricing private to you.
-        </p>
-      </section>
-    </main>
+        <PositionWorkspace />
+
+        {/* Below the market: the honest boundary and the delegation case. */}
+        <section className="mx-auto mt-20 max-w-2xl border-t border-zinc-200 pt-6">
+          <h2 className="mb-2 text-lg font-semibold text-zinc-900">Why publish here rather than paste an AI draft into email</h2>
+          <p className="mb-3 text-sm leading-relaxed text-zinc-600">
+            An AI assistant can draft a requirement document. It cannot publish an anonymous notice to Netify&rsquo;s
+            opportunity board, invite suppliers graded against a 40-feature evaluation, gather structured responses with
+            private pricing, or hold your identity back until you choose to reply. This page does both halves: the
+            drafting and the market.
+          </p>
+          <h2 className="mb-2 mt-6 text-lg font-semibold text-zinc-900">The two rules this surface is built on</h2>
+          <p className="mb-3 text-sm leading-relaxed text-zinc-600">
+            Nothing here simulates liveness: supplier entries show real capability grades with their evaluation dates,
+            breath marks only a genuinely open notice, and a quiet market shows quietly. And every claim carries
+            provenance: your words, a named inference, dated evidence, or a labelled assumption. Recommendations that
+            route away from what Netify earns from are recorded and shown, because the verdict is worth more than the
+            transaction.
+          </p>
+          <h2 className="mb-2 mt-6 text-lg font-semibold text-zinc-900">Prefer the structured builder</h2>
+          <p className="text-sm leading-relaxed text-zinc-600">
+            The <a href="/sase/rfp-builder/" className="underline">RFP Builder</a> remains available for a
+            question-by-question build, and everything you publish from here opens in the same project workspace:
+            responses side by side, pricing private to you.
+          </p>
+        </section>
+      </main>
+    </div>
   );
 }
