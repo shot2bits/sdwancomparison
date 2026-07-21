@@ -42,12 +42,20 @@ export async function POST(req: Request) {
   const session = await sessionFromRequest(req);
   const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
 
-  const { project, verdict, builderPath } = await createSecurityProject({
-    requirement: body.requirement,
-    ownerEmail,
-    via: "web",
-    test: body.test === true,
-  });
+  let created;
+  try {
+    created = await createSecurityProject({
+      requirement: body.requirement,
+      ownerEmail,
+      via: "web",
+      test: body.test === true,
+    });
+  } catch (e) {
+    // Core refusals (low confidence with the gap questions) return as a
+    // clear 400, identical in substance to the tool's structured error.
+    return Response.json({ error: (e as Error).message }, { status: 400, headers: cors });
+  }
+  const { project, verdict, builderPath } = created;
 
   // manage_token is returned at creation only (existing convention): the
   // creator holds the push credential; public reads never see it.

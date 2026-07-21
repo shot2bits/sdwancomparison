@@ -213,11 +213,20 @@ export async function callSecurityTool(
       if (args?.consent !== true) {
         return { error: "Consent is required: pass consent: true only with the buyer's explicit agreement in this conversation.", consent_text: CREATE_CONSENT_TEXT };
       }
-      const { project, verdict, builderPath } = await createSecurityProject({
-        requirement: requirement as SecurityRequirementInput,
-        via: "mcp",
-        test: args?.test === true,
-      });
+      let created;
+      try {
+        created = await createSecurityProject({
+          requirement: requirement as SecurityRequirementInput,
+          via: "mcp",
+          test: args?.test === true,
+        });
+      } catch (e) {
+        // The core refuses (for example low confidence, with the gap
+        // questions in the message); surface it as a structured error so
+        // every client hears the same reason (Article 17).
+        return { error: (e as Error).message };
+      }
+      const { project, verdict, builderPath } = created;
       return {
         created: true,
         project_id: project.id,
