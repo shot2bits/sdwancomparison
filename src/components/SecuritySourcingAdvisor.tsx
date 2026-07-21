@@ -135,8 +135,9 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
     setCreateError("");
     try {
       if (rescope) {
-        // Re-scope (D4): same core semantics, existing project.
-        const resp = await fetch(`/api/security-sourcing/project/${rescope.projectId}/rescope`, {
+        // Re-scope (D4): same core semantics, existing project. Raw fetch
+        // needs the basePath explicitly, like raw anchors.
+        const resp = await fetch(`/sase/api/security-sourcing/project/${rescope.projectId}/rescope`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -155,7 +156,11 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
         }
         return;
       }
-      const resp = await fetch("/api/security-sourcing/project", {
+      // Raw fetch needs the basePath explicitly: without it this posted to
+      // the apex, not this app, and the page's create button silently
+      // failed (latent since step 2; every live review probed the API
+      // directly, and Robert's real-button cadence caught it).
+      const resp = await fetch("/sase/api/security-sourcing/project", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ requirement, consent: true }),
