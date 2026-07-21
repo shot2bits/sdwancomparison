@@ -7,6 +7,7 @@
  */
 
 import { saveProject, newId, indexRfpForBuyer, kvRaw } from "@/lib/rfp-store";
+import { getAllVendorSlugs } from "@/lib/vendors";
 import { buildSecurityProject, type CreateSecurityProjectInput } from "@/lib/security/create-project";
 import type { ProjectDetails } from "@/lib/rfp-types";
 import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
@@ -23,7 +24,11 @@ export async function createSecurityProject(
   input: Omit<CreateSecurityProjectInput, "ids">,
 ): Promise<CreatedSecurityProject> {
   const ids = { id: newId("rfp"), shareToken: newId("tok"), manageToken: newId("mtok") };
-  const { project, verdict } = await buildSecurityProject({ ...input, ids });
+  // Pins must be real marketplace vendors; anything else is dropped, cap 5
+  // (the same rule the wizard's create route applies).
+  const valid = new Set(getAllVendorSlugs());
+  const preferredVendors = (input.preferredVendors ?? []).filter((s) => valid.has(s)).slice(0, 5);
+  const { project, verdict } = await buildSecurityProject({ ...input, ids, preferredVendors });
   const saved = await saveProject(project);
 
   if (saved.test) {

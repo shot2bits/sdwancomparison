@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   if (!kvConfigured()) {
     return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   }
-  let body: { requirement?: SecurityRequirementInput; consent?: boolean; test?: boolean } = {};
+  let body: { requirement?: SecurityRequirementInput; consent?: boolean; test?: boolean; preferred_vendors?: string[] } = {};
   try {
     body = await req.json();
   } catch {
@@ -49,6 +49,9 @@ export async function POST(req: Request) {
       ownerEmail,
       via: "web",
       test: body.test === true,
+      ...(Array.isArray(body.preferred_vendors)
+        ? { preferredVendors: body.preferred_vendors.filter((s): s is string => typeof s === "string") }
+        : {}),
     });
   } catch (e) {
     // Core refusals (low confidence with the gap questions) return as a

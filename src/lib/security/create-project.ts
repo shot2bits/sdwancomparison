@@ -32,6 +32,11 @@ export interface CreateSecurityProjectInput {
   ownerEmail?: string; // from an authenticated session, if present
   via: "web" | "mcp";
   test?: boolean;
+  /** Marketplace vendor slugs the buyer explicitly pinned (the workspace's
+   *  add-a-supplier control). Validated against the dataset and capped at
+   *  five by the I/O layer (this core stays pure); pinned vendors are
+   *  always invited at publish, exactly as wizard pins are. */
+  preferredVendors?: string[];
   ids: { id: string; shareToken: string; manageToken: string }; // injected so the core stays pure
   now?: number;
 }
@@ -118,13 +123,14 @@ export async function buildSecurityProject(
     );
   }
 
+  const pins = (input.preferredVendors ?? []).filter(Boolean).slice(0, 5);
   let project = ProjectDetailsSchema.parse({
     id: input.ids.id,
     created: now,
     updated: now,
     status: "draft",
     title: titleFor(input.requirement),
-    buyer: buyerFrom(input.requirement),
+    buyer: { ...buyerFrom(input.requirement), ...(pins.length ? { pinned_vendors: pins } : {}) },
     rfp_sections: [],
     invited_vendors: [],
     share_token: input.ids.shareToken,

@@ -61,6 +61,18 @@ const CLOUD_IDS = ["m365", "google", "aws", "azure", "other_saas"];
 const NETWORK_IDS = ["btnet", "bt_broadband", "mpls", "sdwan", "vpn", "leased_line", "broadband"];
 const REGION_IDS = ["uk", "ie", "eu", "us", "apac", "me"];
 
+/** What the buyer is BUYING (W0 slice 2): the workspace serves security,
+ *  SASE and SD-WAN through one surface, so the loop needs to hear the
+ *  difference between what an organisation HAS (estate.existingNetwork)
+ *  and what it SEEKS. These two paths are workspace-level facts: they
+ *  steer the surface and the publish route, and they never enter
+ *  SecurityRequirementInput, whose shape stays exactly the engine's
+ *  contract (applyUpdates ignores them by design). */
+export const BUYING_IDS = ["managed_security", "sase", "sdwan", "sse"] as const;
+export type BuyingId = (typeof BUYING_IDS)[number];
+export const OPERATING_MODEL_IDS = ["managed", "co_managed", "diy"] as const;
+export type OperatingModelId = (typeof OPERATING_MODEL_IDS)[number];
+
 const ALLOWED_PATHS = [
   "organisation.sector",
   "organisation.sizeBand",
@@ -75,6 +87,8 @@ const ALLOWED_PATHS = [
   "constraints.inHouseSocCapacity",
   "constraints.timeline",
   "constraints.budgetBand",
+  "procurement.buying",
+  "procurement.operatingModel",
 ] as const;
 export type AllowedPath = (typeof ALLOWED_PATHS)[number];
 
@@ -133,6 +147,14 @@ function validate(path: string, value: unknown, notes: string[]): { path: Allowe
       const s = clean(value, 80);
       return /[a-zA-Z0-9]{2,}/.test(s) ? { path: p, value: s } : null;
     }
+    case "procurement.buying": {
+      const s = clean(value, 24).toLowerCase().replace(/[\s-]+/g, "_");
+      return (BUYING_IDS as readonly string[]).includes(s) ? { path: p, value: s } : null;
+    }
+    case "procurement.operatingModel": {
+      const s = clean(value, 24).toLowerCase().replace(/[\s-]+/g, "_");
+      return (OPERATING_MODEL_IDS as readonly string[]).includes(s) ? { path: p, value: s } : null;
+    }
   }
 }
 
@@ -160,6 +182,11 @@ export function applyUpdates(base: SecurityRequirementInput, updates: FieldUpdat
       case "constraints.inHouseSocCapacity": r.constraints!.inHouseSocCapacity = u.value as SocCapacity; break;
       case "constraints.timeline": r.constraints!.timeline = u.value as string; break;
       case "constraints.budgetBand": r.constraints!.budgetBand = u.value as string; break;
+      case "procurement.buying":
+      case "procurement.operatingModel":
+        // Workspace-level facts: they steer the surface and the publish
+        // route; the requirement object stays exactly the engine's shape.
+        break;
     }
   }
   return r;
@@ -221,6 +248,27 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   if (/24\/7|24x7|around.the.clock|twenty.four/.test(t)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7");
   else if (/nobody watching|no out.of.hours|no overnight|no soc\b|no security team/.test(t)) say("constraints.inHouseSocCapacity", "none", "no out-of-hours cover");
 
+  // What they are BUYING (distinct from what they have). Seeking verbs near
+  // a product term read as procurement intent; security service terms are
+  // strong enough on their own because they are not estate descriptions.
+  const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|moving to|migrat\\w+ to|replace \\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
+  const buyRe = (term: string) => new RegExp(`${seek}[^.!?]{0,60}\\b${term}|\\b${term}\\b[^.!?]{0,30}(?:rollout|roll-out|project|procurement|tender|rfp)`);
+  if (/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/.test(t)) {
+    say("procurement.buying", "managed_security", "managed security");
+  } else if (buyRe("sase").test(t)) say("procurement.buying", "sase", "SASE");
+  else if (buyRe("sse|security service edge|secure service edge").test(t)) say("procurement.buying", "sse", "SSE");
+  else if (buyRe("sd-?wan").test(t)) {
+    say("procurement.buying", "sdwan", "SD-WAN");
+    // The SD-WAN mention was a purchase intent, so it is not evidence of
+    // the estate: withdraw the blanket existing-network claim above.
+    const i = out.findIndex((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
+    if (i >= 0) out.splice(i, 1);
+  }
+
+  if (/fully managed|managed service|manage it for us|no in.house it|outsourced?/.test(t)) say("procurement.operatingModel", "managed", "managed service");
+  else if (/co-?managed/.test(t)) say("procurement.operatingModel", "co_managed", "co-managed");
+  else if (/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/.test(t)) say("procurement.operatingModel", "diy", "self-managed");
+
   return out;
 }
 
@@ -234,7 +282,9 @@ const TIMEOUT_MS = 6000;
 const SYSTEM_PROMPT = `You extract structured procurement facts from a buyer's free-text description of their business and security/network need. Output ONLY a JSON object, no prose, of the shape {"fields":[{"path":string,"value":any,"quote":string|null,"reason":string|null}]}.
 Rules:
 - Allowed paths, exactly: ${ALLOWED_PATHS.join(", ")}.
-- Enumerations: drivers ${DRIVER_IDS.join("|")}; constraints.inHouseSocCapacity ${SOC_IDS.join("|")}; constraints.complianceRequirements ${COMPLIANCE_IDS.join("|")}; estate.cloud ${CLOUD_IDS.join("|")}; estate.existingNetwork ${NETWORK_IDS.join("|")}; organisation.regions ${REGION_IDS.join("|")}; organisation.sector one of ${WORKSPACE_SECTORS.join("; ")} (or the buyer's own words if none fits).
+- Enumerations: drivers ${DRIVER_IDS.join("|")}; constraints.inHouseSocCapacity ${SOC_IDS.join("|")}; constraints.complianceRequirements ${COMPLIANCE_IDS.join("|")}; estate.cloud ${CLOUD_IDS.join("|")}; estate.existingNetwork ${NETWORK_IDS.join("|")}; organisation.regions ${REGION_IDS.join("|")}; organisation.sector one of ${WORKSPACE_SECTORS.join("; ")} (or the buyer's own words if none fits); procurement.buying ${BUYING_IDS.join("|")}; procurement.operatingModel ${OPERATING_MODEL_IDS.join("|")}.
+- procurement.buying is what they SEEK to buy (managed_security covers MDR, SOC, SIEM, MSSP and managed security services); estate.existingNetwork and estate.existingSecurity are what they already HAVE. Never confuse the two.
+- Drivers are exact meanings, not intensities: "incident" only for an actual or ongoing incident (phishing, breach, compromise); "ransomware_concern" only when the buyer names ransomware. Do not escalate one into the other.
 - "quote": if the buyer literally said it, copy their exact words (a short verbatim substring). If you inferred it, set quote to null and give a one-line "reason".
 - Never invent facts. Omit what the text does not support. Fewer, correct fields beat many guesses.`;
 
