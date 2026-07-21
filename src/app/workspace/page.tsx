@@ -17,14 +17,14 @@ import { RULEBOOK_VERSION } from "@/lib/security/rulebook";
  */
 
 export const metadata: Metadata = {
-  title: "Start a Project: Describe Your SD-WAN, SASE or Security Requirement in One Sentence",
+  title: "Imagine describing your SASE and SD-WAN requirements once, then watching the world's leading suppliers compete for your business",
   description:
-    "Describe your requirement in a sentence and watch the statement of requirements write itself, with every claim marked as your words or Netify's inference. Correct it by tapping, then sign once to publish to matched, evaluated suppliers.",
+    "Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement of Requirements automatically.",
   alternates: { canonical: `${SITE_URL}/workspace/` },
   openGraph: {
-    title: "Start a Project: the Netify Live Sourcing Workspace",
+    title: "Imagine describing your SASE and SD-WAN requirements once, then watching the world's leading suppliers compete for your business",
     description:
-      "One sentence in, a publishable statement of requirements out: provenance on every claim, a network diagram drawn from your estate, evaluated supplier fit and one signature to publish.",
+      "Describe your requirements in a single sentence; Netify has already mapped the thousands of follow-up questions technology buyers ask AI, and builds your Statement of Requirements automatically.",
     url: `${SITE_URL}/workspace/`,
     type: "website",
     locale: "en_GB",
@@ -63,14 +63,14 @@ export default function Page() {
       ))}
       <p className="eyebrow mb-2">Netify marketplace · rulebook {RULEBOOK_VERSION}</p>
       <h1 id="page-h1" className="mb-3 text-3xl leading-tight sm:text-4xl">
-        Where you go when you need to buy SD-WAN, SASE or managed security
+        Imagine describing your SASE and SD-WAN requirements once, then watching the world&rsquo;s leading suppliers
+        compete for your business.
       </h1>
-      {/* Extractable answer block: what this page does, in under 80 words. */}
+      {/* Extractable answer block (Robert's copy, verbatim, 21 July 2026). */}
       <p id="page-subhead" className="max-w-2xl text-[15px] leading-relaxed text-[var(--ink-700,#3f3f46)]">
-        Describe your requirement in one sentence. The workspace drafts your statement of requirements as you type,
-        marks every claim as your words or Netify&rsquo;s named inference, draws your network, and lists evaluated
-        suppliers with real evaluation dates. One signature publishes it: an anonymous notice on the open board, the
-        full brief to matched signed-in suppliers. Free to draft, no sign-in until you publish.
+        Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the
+        thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
+        of Requirements automatically.
       </p>
 
       <PositionWorkspace />
