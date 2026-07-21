@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NETIFY_NDA_TEMPLATE } from "@/lib/rfp-types";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
 import FlowStageStrip, { type FlowStage } from "@/components/FlowStageStrip";
 
 type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
@@ -1365,6 +1366,18 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               );
             })}
           </div>
+          {/* Regimes carried from the security assessment that sit outside
+              this builder's own list (Harry's retest NF2): they used to
+              vanish from the chips and make Coverage read "0/0" as if
+              nothing was picked up. They are shown here explicitly; the
+              generated security sections carry their obligations. */}
+          {project.buyer.compliance.some((c) => !REGULATIONS.some((r) => r.key === c)) && (
+            <p className="mt-2 text-xs text-[var(--ink-600,#555)]">
+              Carried from your security assessment:{" "}
+              <strong>{project.buyer.compliance.filter((c) => !REGULATIONS.some((r) => r.key === c)).map((c) => securityCodeLabel(c)).join(", ")}</strong>
+              {" "}(addressed by your generated security sections).
+            </p>
+          )}
           {coverage && project.buyer.compliance.length > 0 && (
             <div className="mt-2 text-xs text-[var(--ink-600,#555)]">
               Coverage: {coverage.rows.filter((r) => r.covered).length}/{coverage.rows.length} obligations have an active question.
@@ -1532,7 +1545,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                   <div className="mt-3 border-t border-[var(--ink-200,#e5e5e5)] pt-3 text-sm">
                     <p className="font-medium">{draft.text}</p>
                     <p className="text-xs text-[var(--ink-500)] mt-1">Evidence: {draft.evidence_requested}</p>
-                    <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-1">{draft.rationale} · {draft.category} · {draft.source}</p>
+                    <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-1">{humaniseSecurityCodes(draft.rationale)} · {draft.category} · {draft.source}</p>
                     <button onClick={addDraft} className="mt-2 px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add to RFP</button>
                   </div>
                 )}
@@ -1552,7 +1565,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                       <div key={q.id} className="text-sm border border-[var(--ink-200,#e5e5e5)] rounded-sm p-2 bg-white">
                         <p className="font-medium">{q.text}</p>
                         <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>
-                        <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-0.5">{q.rationale} · {q.category}</p>
+                        <p className="text-xs text-[var(--ink-400,#9ca3af)] italic mt-0.5">{humaniseSecurityCodes(q.rationale)} · {q.category}</p>
                         <button onClick={() => addResearchQuestion(q)} className="mt-1 px-3 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
                       </div>
                     ))}
@@ -1619,7 +1632,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               <span className="text-xs text-[var(--ink-400,#9ca3af)] underline decoration-dotted group-hover:text-[var(--ink-700)]">rename</span>
             </button>
           )}
-          <p className="text-sm text-[var(--ink-500)] mb-1">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.join(", ") || "none set"}.</p>
+          <p className="text-sm text-[var(--ink-500)] mb-1">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.map((c) => securityCodeLabel(c)).join(", ") || "none set"}.</p>
           <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and suppliers respond.</p>
           <div className="space-y-3">
             {project.rfp_sections.filter((s) => s.included).map((s) => {
@@ -1638,7 +1651,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                         {q.evidence_requested && <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>}
                         {q.buyer_lens && <p className="text-xs text-[var(--ink-500)] mt-0.5">Buyer: {q.buyer_lens}</p>}
                         {q.supplier_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5">Supplier: {q.supplier_lens}</p>}
-                        {!q.buyer_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5 italic">{q.rationale}</p>}
+                        {!q.buyer_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5 italic">{humaniseSecurityCodes(q.rationale)}</p>}
                       </div>
                     ))}
                   </div>

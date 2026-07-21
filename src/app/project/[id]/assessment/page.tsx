@@ -6,6 +6,7 @@ import { getProject, getSession, kvConfigured } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
 import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
 import { CAPABILITY_LABELS } from "@/lib/security/generate-rfp";
+import { humaniseSecurityCodes } from "@/lib/security/labels";
 import type { CapabilityId } from "@/lib/security/rulebook";
 import ProjectNav from "@/components/ProjectNav";
 import SignIn from "@/components/SignIn";
@@ -84,7 +85,7 @@ export default async function ProjectAssessmentPage({ params, searchParams }: Pr
                 {label(c.id)}
                 <span className="ml-2 rounded-full border border-[var(--ink-300,#ccc)] px-2 py-0.5 text-xs font-normal text-[var(--ink-700)]">{NEEDED_LABELS[c.needed] ?? c.needed}</span>
               </p>
-              <p className="m-0 mt-1 text-sm text-[var(--ink-700)]">{c.reasoning}</p>
+              <p className="m-0 mt-1 text-sm text-[var(--ink-700)]">{humaniseSecurityCodes(c.reasoning)}</p>
               {c.firedRules.length > 0 && <p className="m-0 mt-1 text-xs text-[var(--ink-500)]">Rules: {c.firedRules.join(", ")}</p>}
             </li>
           ))}
@@ -97,8 +98,8 @@ export default async function ProjectAssessmentPage({ params, searchParams }: Pr
           <ul className="m-0 list-none space-y-2 p-0">
             {verdict.summary.not_recommended.map((n) => (
               <li key={n.capabilityId} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3 text-sm text-[var(--ink-800)]">
-                <span className="font-medium">{label(n.capabilityId)}:</span> {n.reason}
-                {n.alternative && <span className="text-[var(--ink-600)]"> {n.alternative}</span>}
+                <span className="font-medium">{label(n.capabilityId)}:</span> {humaniseSecurityCodes(n.reason)}
+                {n.alternative && <span className="text-[var(--ink-600)]"> {humaniseSecurityCodes(n.alternative)}</span>}
               </li>
             ))}
           </ul>

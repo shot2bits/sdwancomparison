@@ -86,10 +86,18 @@ function buyerFrom(req: SecurityRequirementInput): Record<string, unknown> {
   if (req.estate?.specialDevices?.length) notes.push(`Special devices: ${req.estate.specialDevices.map((s) => (s === "epos" ? "EPOS tills" : "Chromebooks")).join(", ")}.`);
   if (req.estate?.existingSecurity?.length) notes.push(`Existing security tooling: ${req.estate.existingSecurity.join(", ")}.`);
   if (req.estate?.existingNetwork?.length) notes.push(`Network estate: ${req.estate.existingNetwork.join(", ")}.`);
+  // Bridge the engine's compliance vocabulary to the builder's where a
+  // direct equivalent exists (Harry's retest NF2: iso27001 vs iso_27001
+  // meant even ISO 27001 never lit the builder's compliance chip and
+  // Coverage read as if nothing was picked up). Regimes without a builder
+  // equivalent (Cyber Essentials Plus, FCA, NHS DSPT) carry through
+  // unchanged and render explicitly on the builder's compliance step.
+  const COMPLIANCE_KEY_BRIDGE: Record<string, string> = { iso27001: "iso_27001" };
+  const compliance = (req.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_KEY_BRIDGE[c] ?? c);
   return {
     ...(sector ? { sector } : {}),
     ...(typeof sites === "number" && sites > 0 ? { site_count: sites } : {}),
-    compliance: req.constraints?.complianceRequirements ?? [],
+    compliance,
     notes: notes.join(" "),
   };
 }

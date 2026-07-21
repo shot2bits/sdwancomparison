@@ -21,6 +21,7 @@ import {
   type SecurityDriver,
 } from "@/lib/security/rulebook";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
+import { humaniseSecurityCodes } from "@/lib/security/labels";
 
 const DRIVERS: Array<{ id: SecurityDriver; label: string }> = [
   { id: "incident", label: "We had (or have) an incident" },
@@ -322,8 +323,8 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
                       <span className="text-sm font-semibold">{CAP_LABEL[c.id] ?? c.id}</span>
                       <span className="text-[11px] font-semibold uppercase tracking-wide">{c.needed.replace("_", " ")}</span>
                     </div>
-                    <p className="mt-1 text-sm leading-relaxed">{c.reasoning}</p>
-                    {c.routeDetail && <p className="mt-1 text-xs opacity-80">{c.routeDetail}</p>}
+                    <p className="mt-1 text-sm leading-relaxed">{humaniseSecurityCodes(c.reasoning)}</p>
+                    {c.routeDetail && <p className="mt-1 text-xs opacity-80">{humaniseSecurityCodes(c.routeDetail)}</p>}
                   </div>
                 ))}
               </div>
@@ -335,8 +336,8 @@ export function SecuritySourcingAdvisor({ initial, rescope }: { initial?: Securi
                 <ul className="mt-2 space-y-2 text-sm text-zinc-700">
                   {verdict.summary.not_recommended.map((n) => (
                     <li key={n.capabilityId}>
-                      <span className="font-medium text-zinc-900">{CAP_LABEL[n.capabilityId] ?? n.capabilityId}:</span> {n.reason}
-                      {n.alternative && <span className="text-zinc-600"> {n.alternative}</span>}
+                      <span className="font-medium text-zinc-900">{CAP_LABEL[n.capabilityId] ?? n.capabilityId}:</span> {humaniseSecurityCodes(n.reason)}
+                      {n.alternative && <span className="text-zinc-600"> {humaniseSecurityCodes(n.alternative)}</span>}
                     </li>
                   ))}
                 </ul>
