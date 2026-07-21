@@ -24,7 +24,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
 
-  let body: { manage_token?: string; shortlist_size?: number; list_on_board?: boolean; marketing_opt_in?: boolean } = {};
+  let body: { manage_token?: string; shortlist_size?: number; list_on_board?: boolean; marketing_opt_in?: boolean; acknowledge_declined_approval?: boolean } = {};
   try { body = await req.json(); } catch { /* body optional */ }
 
   const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
