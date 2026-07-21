@@ -55,7 +55,7 @@ function baseProject(overrides: Partial<ProjectDetails> = {}): ProjectDetails {
     history: [],
     consents: [],
     engine: "security_sourcing",
-    engine_data: { verdicts: [], requirement: undefined },
+    engine_data: { verdicts: [], requirement: undefined, artefacts: [] },
     phase: "scoping",
     ...overrides,
   } as ProjectDetails;
@@ -66,6 +66,7 @@ const withVerdict = (p: ProjectDetails): ProjectDetails => ({
   engine_data: {
     verdicts: [{ version: 1, verdict: { ok: true }, input_digest: "d".repeat(64), created_at: clock, via: "web" }],
     requirement: {},
+    artefacts: [],
   },
 });
 
