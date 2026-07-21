@@ -2,6 +2,7 @@ import { MCP_TOOL_DEFINITIONS, callMcpTool } from "@/lib/mcp-tools";
 import { MCP_RFP_TOOL_DEFINITIONS, RFP_TOOL_NAMES, callRfpTool } from "@/lib/mcp-rfp-tools";
 import { MCP_COST_TOOL_DEFINITIONS, COST_TOOL_NAMES, callCostTool } from "@/lib/mcp-cost-tools";
 import { SECURITY_TOOL_DEFINITIONS_ALL, SECURITY_TOOL_NAMES, callSecurityTool } from "@/lib/mcp-security-tools";
+import { WORKSPACE_TOOL_DEFINITIONS, WORKSPACE_TOOL_NAMES, callWorkspaceTool } from "@/lib/mcp-workspace-tools";
 import { TOOL_ANNOTATIONS, SERVER_INSTRUCTIONS } from "@/lib/mcp-annotations";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -62,7 +63,7 @@ function rpcError(id: string | number | null | undefined, code: number, message:
 
 /** Serve-time merge of titles and behaviour annotations onto the tool definitions. */
 function annotatedTools() {
-  return [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL].map((t) => {
+  return [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL, ...WORKSPACE_TOOL_DEFINITIONS].map((t) => {
     const extra = TOOL_ANNOTATIONS[t.name as string];
     return extra ? { ...t, title: extra.title, annotations: extra.annotations } : t;
   });
@@ -107,16 +108,18 @@ export async function POST(req: Request) {
       const args = (body.params?.arguments ?? {}) as Record<string, unknown>;
       // Audit fix (19 July 2026): unknown tools are a protocol error, not a
       // 200 result an agent has to text-parse.
-      if (!COST_TOOL_NAMES.has(name) && !RFP_TOOL_NAMES.has(name) && !PLAIN_TOOL_NAMES.has(name) && !SECURITY_TOOL_NAMES.has(name)) {
+      if (!COST_TOOL_NAMES.has(name) && !RFP_TOOL_NAMES.has(name) && !PLAIN_TOOL_NAMES.has(name) && !SECURITY_TOOL_NAMES.has(name) && !WORKSPACE_TOOL_NAMES.has(name)) {
         return rpcError(body.id, -32602, `Unknown tool: ${name}`);
       }
-      const result = SECURITY_TOOL_NAMES.has(name)
-        ? await callSecurityTool(name, args)
-        : COST_TOOL_NAMES.has(name)
-          ? await callCostTool(name, args)
-          : RFP_TOOL_NAMES.has(name)
-            ? await callRfpTool(name, args)
-            : await callMcpTool(name, args);
+      const result = WORKSPACE_TOOL_NAMES.has(name)
+        ? await callWorkspaceTool(name, args)
+        : SECURITY_TOOL_NAMES.has(name)
+          ? await callSecurityTool(name, args)
+          : COST_TOOL_NAMES.has(name)
+            ? await callCostTool(name, args)
+            : RFP_TOOL_NAMES.has(name)
+              ? await callRfpTool(name, args)
+              : await callMcpTool(name, args);
       // Audit fix (19 July 2026): handlers signal failure as { error: ... }.
       // Surface that as isError so agents can branch without parsing prose.
       const failed = !!result && typeof result === "object" && (result as Record<string, unknown>).error != null;

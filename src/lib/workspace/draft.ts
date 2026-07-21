@@ -636,3 +636,44 @@ export function briefModel(opts: {
     openGaps: allOpenGaps,
   };
 }
+
+/**
+ * The living brief flattened to plain text: the SAME composed document the
+ * page renders, for agents reading over MCP (Mandate: a person and an
+ * agent hold the same artefact). Provenance survives flattening: each fact
+ * carries [stated] or [inferred], struck facts render struck, and blanks
+ * render as the questions they are.
+ */
+export function briefText(model: BriefModel): string {
+  const lines: string[] = [`# ${model.title}`, ""];
+  for (const b of model.blocks) {
+    if (b.heading) lines.push(`## ${b.heading}`);
+    for (const p of b.paras) {
+      const text = p
+        .map((s) => {
+          if (s.kind === "text") return s.text;
+          if (s.kind === "fact") {
+            const mark = s.fact.provenance === "stated" ? "stated" : "inferred";
+            return s.fact.struck ? `~~${s.text}~~ [struck out]` : `${s.text} [${mark}]`;
+          }
+          return `____ (${s.gap.question})`;
+        })
+        .join("");
+      lines.push(text);
+    }
+    for (const m of b.margin ?? []) {
+      lines.push(`> ${m.tone === "against_interest" ? "Against Netify's own interest: " : `${m.title}: `}${m.body}`);
+    }
+    lines.push("");
+  }
+  if (model.assumptions.length) {
+    lines.push("## Working assumptions (published labelled as assumptions)");
+    for (const a of model.assumptions) lines.push(`- ${a} [assumed]`);
+    lines.push("");
+  }
+  if (model.openGaps.length) {
+    lines.push("## Open questions only the buyer can answer");
+    for (const g of model.openGaps) lines.push(`- ${g.question}`);
+  }
+  return lines.join("\n").trim();
+}

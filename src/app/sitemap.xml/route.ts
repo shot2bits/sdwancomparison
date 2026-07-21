@@ -25,6 +25,7 @@ export async function GET() {
     { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
     { loc: `${SITE_URL}/for-suppliers`, priority: "0.8" },
     { loc: `${SITE_URL}/shortlist`, priority: "1.0" },
+    { loc: `${SITE_URL}/workspace/`, priority: "1.0" },
     { loc: `${SITE_URL}/rfp-builder`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/new`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/start`, priority: "0.8" },

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import LiveWorkspace from "@/components/LiveWorkspace";
-import { SITE_URL } from "@/lib/structured-data";
+import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 import { RULEBOOK_VERSION } from "@/lib/security/rulebook";
 
 /**
@@ -31,15 +31,42 @@ export const metadata: Metadata = {
   },
 };
 
+/** WebApplication JSON-LD (W0 slice 4): the workspace as a named, citable,
+ *  free tool, following the shortlist's schema convention. */
+function getWorkspaceWebApplicationSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "@id": `${SITE_URL}/workspace/#webapplication`,
+    name: "Netify Live Sourcing Workspace",
+    url: `${SITE_URL}/workspace/`,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    description:
+      "Describe an SD-WAN, SASE or managed security requirement in one sentence and the statement of requirements assembles itself, with provenance on every claim, a network diagram drawn from the stated estate, rulebook-assessed scope and evidence-graded supplier fit. One signature publishes an anonymous notice to the open board and the full brief to matched signed-in suppliers.",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+    provider: { "@id": `${SITE_URL}/#organization` },
+  };
+}
+
 export default function Page() {
+  const schemas = [
+    getWorkspaceWebApplicationSchema(),
+    getOrganizationSchema(),
+    getBreadcrumbSchema("Start a project", "/workspace/"),
+    getSpeakableSchema("/workspace/"),
+  ];
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+      {schemas.map((s, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
+      ))}
       <p className="eyebrow mb-2">Netify marketplace · rulebook {RULEBOOK_VERSION}</p>
-      <h1 className="mb-3 text-3xl leading-tight sm:text-4xl">
+      <h1 id="page-h1" className="mb-3 text-3xl leading-tight sm:text-4xl">
         Where you go when you need to buy SD-WAN, SASE or managed security
       </h1>
       {/* Extractable answer block: what this page does, in under 80 words. */}
-      <p className="max-w-2xl text-[15px] leading-relaxed text-[var(--ink-700,#3f3f46)]">
+      <p id="page-subhead" className="max-w-2xl text-[15px] leading-relaxed text-[var(--ink-700,#3f3f46)]">
         Describe your requirement in one sentence. The workspace drafts your statement of requirements as you type,
         marks every claim as your words or Netify&rsquo;s named inference, draws your network, and lists evaluated
         suppliers with real evaluation dates. One signature publishes it: an anonymous notice on the open board, the

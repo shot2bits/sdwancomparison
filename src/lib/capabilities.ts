@@ -79,6 +79,18 @@ export const CAPABILITIES: Capability[] = [
     boundaries: "Creates a private RFP draft. Does not invite, notify or contact any supplier.",
   },
   {
+    id: "live_sourcing_workspace",
+    title: "Draft a sourcing requirement from one sentence",
+    description:
+      "The Live Sourcing Workspace: describe an SD-WAN, SASE or managed security need in plain words and the statement of requirements assembles itself, every claim carrying provenance (the buyer's words, a named inference, or a labelled assumption), with a deterministic network diagram, the security rulebook's verdict where in scope, and evidence-graded supplier fit with real evaluation dates. One signature publishes: anonymous notice on the open board, full brief to matched signed-in suppliers.",
+    access: "open", page: "/workspace", api: "/api/workspace/extract, /api/workspace/fit", mcp: "workspace_cycle", data: "/methodology.json",
+    status: "live", capabilityType: "draft", accessLevel: "public",
+    requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
+    invocableByExternalAgent: true, humanSupervision: "none",
+    evidence: "POST /api/workspace/extract returns provenance-marked field updates; workspace_cycle returns the same loop's output including the assembled brief.",
+    boundaries: "Drafting and fit are open and side-effect free. Publishing requires the buyer's recorded consent and a verified work email; no supplier is contacted before that signature. Provenance is never dropped: inferences and assumptions stay labelled all the way to the published notice.",
+  },
+  {
     id: "post_opportunity",
     title: "Post a project notice to the public board",
     description: "Draft and preview a project notice in the clear (staged wizard, AI improvement, exact public preview); publishing requires a signed-in buyer session so every notice is tied to an accountable business identity. Verified suppliers discover and respond.",
