@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import LiveWorkspace from "@/components/LiveWorkspace";
+import PositionWorkspace from "@/components/PositionWorkspace";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 import { RULEBOOK_VERSION } from "@/lib/security/rulebook";
 
@@ -73,7 +73,7 @@ export default function Page() {
         full brief to matched signed-in suppliers. Free to draft, no sign-in until you publish.
       </p>
 
-      <LiveWorkspace />
+      <PositionWorkspace />
 
       {/* Below the workspace: the honest boundary and the delegation case. */}
       <section className="mt-16 max-w-2xl border-t border-[var(--ink-200,#e5e5e5)] pt-6">
