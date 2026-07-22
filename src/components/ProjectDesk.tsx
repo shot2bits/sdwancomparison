@@ -76,10 +76,10 @@ const WORKSPACE_AGREEMENT_TEXT =
   "Publish this requirement: Netify lists an anonymous notice visible to signed-in suppliers and invites the best-fit evaluated suppliers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
 
 const SEEDS: Array<{ label: string; text: string }> = [
-  { label: "Managed SIEM, UK", text: "We need a managed SIEM service in the UK. " },
-  { label: "Managed SOC and MDR", text: "We are an SME looking for a managed SOC and MDR. " },
-  { label: "MSSP for mid-market", text: "We are a mid-market business looking for an MSSP. " },
-  { label: "SD-WAN with zero trust", text: "We need SD-WAN with zero trust integration. " },
+  { label: "Healthcare: replace MPLS across 12 UK sites", text: "We are a healthcare provider replacing MPLS across 12 UK sites with a fully managed service." },
+  { label: "Retail: PCI DSS SD-WAN for 500 stores", text: "We are a retailer needing SD-WAN across 500 stores. PCI DSS applies." },
+  { label: "Manufacturing: managed SASE with OT security", text: "We are a manufacturer looking for managed SASE covering IT and OT security." },
+  { label: "Global enterprise: zero trust SASE consolidation", text: "We are a global enterprise consolidating to SASE with zero trust access." },
 ];
 
 type MarketVendor = { slug: string; name: string; category: string; last_verified: string; yes_count: number; scopes: string[] };
@@ -660,6 +660,16 @@ export default function ProjectDesk() {
         : null;
   const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGaps.length === 0 || consentGaps) : consentCreate;
   const ready = !signLocked && started && (securityScope ? Boolean(verdict) : true);
+  /* The publish bar names the first real lock in the gate's own order;
+   * it never invents a percentage (the conversion pass, 23 Jul). */
+  const publishBarLock =
+    facts.length === 0
+      ? "Say one sentence about the organisation and publishing unlocks."
+      : securityScope && (!verdict || verdict.confidence === "low")
+        ? "Answer the open questions on the position first: nothing publishes on guesswork."
+        : !securityScope && !buying
+          ? "Choose what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
+          : "It unlocks when the position holds enough truth to stand on.";
 
   /* ---- The artefact, with the notes appended honestly ---- */
   const artefactText = useCallback(() => {
@@ -877,6 +887,35 @@ export default function ProjectDesk() {
     [factsBySection, notedBySection, gapsBySection],
   );
 
+  /* Micro-reactivity (the conversion pass, 23 Jul): when a section first
+   * turns live (example ink giving way to stated or inferred), one amber
+   * ring breathes out around it, once. The first computation only records
+   * the baseline, so a restored draft never fires a page of rings. */
+  const prevLiveRef = useRef<Set<string> | null>(null);
+  const [liveRing, setLiveRing] = useState<Set<string>>(() => new Set());
+  const ringTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => {
+    const now = new Set(TAXONOMY.filter((s) => sectionLive(s.key)).map((s) => s.key));
+    if (prevLiveRef.current === null) {
+      prevLiveRef.current = now;
+      return;
+    }
+    const prev = prevLiveRef.current;
+    const fresh = [...now].filter((k) => !prev.has(k));
+    prevLiveRef.current = now;
+    if (!fresh.length) return;
+    setLiveRing((s) => new Set([...s, ...fresh]));
+    const t = setTimeout(() => {
+      setLiveRing((s) => {
+        const n = new Set(s);
+        for (const k of fresh) n.delete(k);
+        return n;
+      });
+    }, 1500);
+    ringTimers.current.push(t);
+  }, [sectionLive]);
+  useEffect(() => () => { for (const t of ringTimers.current) clearTimeout(t); }, []);
+
   const factFor = useCallback(
     (item: TaxonomyItem): WorkspaceFact | undefined => {
       if (!item.path) return undefined;
@@ -1009,13 +1048,15 @@ export default function ProjectDesk() {
         .pd-ink{animation:pdink 1.1s ease forwards}
         @keyframes pdbreath{0%,100%{opacity:.45}50%{opacity:1}}
         .pd-breath{animation:pdbreath 3.4s ease-in-out infinite}
-        .pd-move{transition:transform .9s cubic-bezier(.22,1,.36,1)}
+        .pd-move{transition:transform .6s cubic-bezier(.34,1.56,.64,1)}
         @keyframes pdemerge{from{opacity:0}}
         .pd-emerge{animation:pdemerge .9s ease}
-        @media(prefers-reduced-motion:reduce){.pd-move{transition:none}.pd-emerge{animation:none}.pd-breath{animation:none}}
+        @media(prefers-reduced-motion:reduce){.pd-move{transition:none}.pd-emerge{animation:none}.pd-breath{animation:none}.pd-live-in{animation:none}}
         .pd-cols{column-count:1;column-gap:2.5rem}
         @media(min-width:768px){.pd-cols{column-count:2}}
         .pd-sec{break-inside:avoid}
+        @keyframes pdlivein{0%{box-shadow:0 0 0 2px rgba(245,158,11,.55)}100%{box-shadow:0 0 0 2px rgba(245,158,11,0)}}
+        .pd-live-in{animation:pdlivein 1.4s ease forwards;border-radius:8px}
       `}</style>
 
       {/* ---- The one line in: the page's one control, framed as such ---- */}
@@ -1063,7 +1104,8 @@ export default function ProjectDesk() {
                   onClick={() => {
                     setInput(s.text);
                     ev("workspace_seed", { seed: s.label });
-                    inputRef.current?.focus();
+                    firstKeyAt.current = Date.now();
+                    void runCycle(s.text, { fromEnter: true });
                   }}
                   className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-zinc-600 transition-colors hover:border-amber-500 hover:text-zinc-900"
                 >
@@ -1235,7 +1277,7 @@ export default function ProjectDesk() {
                 <g
                   key={b.slug}
                   className="pd-move pd-emerge"
-                  style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: faded ? 0.16 : dim ? 0.38 : 1, transition: "transform .9s cubic-bezier(.22,1,.36,1), opacity .25s" }}
+                  style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: faded ? 0.16 : dim ? 0.38 : 1, transition: "transform .6s cubic-bezier(.34,1.56,.64,1), opacity .25s" }}
                   role="button"
                   tabIndex={0}
                   aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}
@@ -1419,7 +1461,7 @@ export default function ProjectDesk() {
               const optionValueIds = new Set(sec.items.filter((i) => i.path).map((i) => factId(i.path as AllowedPath, i.value)));
               const looseFacts = secFacts.filter((f) => !optionValueIds.has(f.id));
               return (
-                <section key={sec.key} id={`sec-${sec.key}`} className="pd-sec mb-5" style={{ scrollMarginTop: "70px" }}>
+                <section key={sec.key} id={`sec-${sec.key}`} className={`pd-sec mb-5${liveRing.has(sec.key) ? " pd-live-in" : ""}`} style={{ scrollMarginTop: "70px" }}>
                   <h3
                     className="mb-1.5 flex items-baseline justify-between border-b border-zinc-200 pb-1 uppercase"
                     style={{ fontSize: "10.5px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".12em", color: "#71717a" }}
@@ -1514,20 +1556,50 @@ export default function ProjectDesk() {
           </div>
 
           {/* ---- The signature: where the document ends ---- */}
-          <div className="mt-2 border-t border-zinc-200 pt-3">
+          <div id="pd-signature" className="mt-2 border-t border-zinc-200 pt-3" style={{ scrollMarginTop: "70px" }}>
             {!published && !created?.test && (
               <div className={ready ? "rounded-lg border-2 border-amber-300 bg-white p-4" : ""}>
                 {ready ? (
                   <>
                     <p className="m-0 mb-1 text-[9px] font-semibold uppercase tracking-[.14em] text-amber-700">The signature</p>
                     <p className="m-0 mb-2 text-[14px] italic leading-relaxed text-zinc-900">This position is ready to meet the market.</p>
-                    <p className="m-0 mb-2 text-[10.5px] leading-relaxed text-zinc-500">
-                      One publish, two views: an anonymous notice visible to signed-in suppliers
-                      {requirement.organisation?.sector ? ` (${requirement.organisation.sector}` : ""}
-                      {usersBandLabel(requirement.estate?.users) ? `${requirement.organisation?.sector ? ", " : "("}${usersBandLabel(requirement.estate?.users)}` : ""}
-                      {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users) ? ", no name, no contacts)" : ""}
-                      , and the full position to matched signed-in suppliers. Assumptions publish labelled as assumptions; example content never publishes at all.
-                    </p>
+                    {/* The privacy strip (the conversion pass, 23 Jul): the same
+                        facts the old paragraph carried, under one quiet shield. */}
+                    <div className="mb-2 flex items-start gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-2">
+                      <svg width="14" height="16" viewBox="0 0 14 16" className="mt-[1px] shrink-0" aria-hidden="true">
+                        <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#a16207" strokeWidth="1.3" />
+                        <path d="M4.6 8 L6.4 9.8 L9.6 6.2" fill="none" stroke="#a16207" strokeWidth="1.3" strokeLinecap="round" />
+                      </svg>
+                      <p className="m-0 text-[10.5px] leading-relaxed text-zinc-600">
+                        <span className="font-semibold text-zinc-800">The public notice is anonymous.</span> It carries no name and no contacts
+                        {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
+                          ? ` (it reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
+                          : ""}
+                        , shows only to signed-in suppliers, and the full position goes only to matched suppliers. Assumptions publish labelled as assumptions; example content never publishes at all.
+                      </p>
+                    </div>
+                    {/* Three facts about where this goes, each from live data,
+                        none invented. */}
+                    <div className="mb-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+                      <div className="rounded-md border border-zinc-200 bg-white px-2.5 py-2">
+                        <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-zinc-900">
+                          {fitSlugs.length > 0 ? fitSlugs.length : market?.counts.vendors ?? "Evaluated"}
+                        </p>
+                        <p className="m-0 mt-0.5 text-[9.5px] leading-snug text-zinc-500">
+                          {fitSlugs.length > 0
+                            ? `evaluated supplier${fitSlugs.length === 1 ? "" : "s"} currently in the running, evidence graded with dates`
+                            : "suppliers on the curated market, evidence graded with dates"}
+                        </p>
+                      </div>
+                      <div className="rounded-md border border-zinc-200 bg-white px-2.5 py-2">
+                        <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-zinc-900">Anonymous</p>
+                        <p className="m-0 mt-0.5 text-[9.5px] leading-snug text-zinc-500">sector and size only; your identity and contacts never publish</p>
+                      </div>
+                      <div className="rounded-md border border-zinc-200 bg-white px-2.5 py-2">
+                        <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-zinc-900">Yours to close</p>
+                        <p className="m-0 mt-0.5 text-[9.5px] leading-snug text-zinc-500">the notice closes from your project record whenever you choose</p>
+                      </div>
+                    </div>
                     {/* Slice three (the reference concept): the notice inherits
                         your standing facts exactly as written, shown before you
                         sign, with what stays private beside it. */}
@@ -1575,7 +1647,7 @@ export default function ProjectDesk() {
                       disabled={!consentsOk || Boolean(signStage)}
                       className="mt-1 w-full rounded-full bg-amber-500 px-5 py-2.5 text-[13px] font-bold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
                     >
-                      {signStage ?? (testMode ? "Sign · create the test position" : "Sign · publish · let the market compete")}
+                      {signStage ?? (testMode ? "Sign · create the test position" : "Sign and publish your opportunity to the board")}
                     </button>
                     {signError && <p className="m-0 mt-1.5 text-[11px] text-red-600">{signError}</p>}
                     {needAuth && (
@@ -1668,7 +1740,7 @@ export default function ProjectDesk() {
                   return (
                     <p key={v.slug} className={`m-0 mb-0.5 text-[9.5px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
                       {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
-                      {v.name} — {mv.label}: {gradeWord(mv.grade) || "no longer required"}
+                      {v.name} · {mv.label}: {gradeWord(mv.grade) || "no longer required"}
                       {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
                     </p>
                   );
@@ -1820,6 +1892,49 @@ export default function ProjectDesk() {
           </div>
         </div>
       </div>
+
+      {/* ---- The publish bar (the conversion pass, 23 Jul): the same gate
+              the signature enforces, carried with you as you work. It names
+              the first real lock in the gate's own words, counts only the
+              suppliers the live fit actually holds, and never invents a
+              percentage. Amber is the market's colour; nothing pulses here
+              because nothing here is a live notice. ---- */}
+      {booted && started && !published && !created?.test && (
+        <div className="fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-auto sm:right-5 sm:w-[330px]">
+          <div className={`rounded-xl border bg-white/95 p-3 shadow-[0_8px_30px_-12px_rgba(24,24,27,.35)] backdrop-blur ${ready ? "border-amber-400" : "border-zinc-200"}`}>
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="m-0 text-[11px] font-semibold text-zinc-900">{ready ? "Ready to publish" : "Not ready to publish yet"}</p>
+              {ready && <span className="rounded-full bg-amber-100 px-1.5 py-[1px] text-[8.5px] font-semibold uppercase tracking-[.08em] text-amber-800">unlocked</span>}
+            </div>
+            <p className="m-0 mt-0.5 text-[10px] leading-relaxed text-zinc-500">
+              {ready
+                ? "The notice goes out anonymous: no name, no contacts, visible to signed-in suppliers only."
+                : publishBarLock}
+            </p>
+            {(fitSlugs.length > 0 || market) && (
+              <p className="m-0 mt-1 text-[10px] text-zinc-600">
+                {fitSlugs.length > 0
+                  ? `${fitSlugs.length} evaluated supplier${fitSlugs.length === 1 ? "" : "s"} currently in the running`
+                  : `${market?.counts.vendors} evaluated suppliers on the curated market`}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                ev("workspace_publish_bar_cta", { ready: ready ? 1 : 0 });
+                document.getElementById("pd-signature")?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              className={`mt-2 w-full rounded-full px-4 py-1.5 text-[11px] font-bold transition-colors ${
+                ready
+                  ? "bg-amber-500 text-zinc-950 hover:bg-amber-400"
+                  : "border border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
+              }`}
+            >
+              {ready ? "Publish the anonymous notice" : "See what remains"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ---- The destination: where the finished position goes (below the desk so the document stays the hero, Robert 23 Jul)
               (the reference concept made live, Robert's word, 23 Jul; every
