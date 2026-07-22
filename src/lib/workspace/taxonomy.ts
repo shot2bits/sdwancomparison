@@ -108,7 +108,7 @@ export const TAXONOMY: TaxonomySection[] = [
       { id: "net-leased", label: "Leased lines", path: "estate.existingNetwork", value: "leased_line", why: ENGINE },
       { id: "net-broadband", label: "Broadband", path: "estate.existingNetwork", value: "broadband", why: ENGINE },
       { id: "cl-m365", label: "Microsoft 365", path: "estate.cloud", value: "m365", why: ENGINE, exampleTick: true },
-      { id: "cl-azure", label: "Azure", path: "estate.cloud", value: "azure", why: ENGINE },
+      { id: "cl-azure", label: "Azure", path: "estate.cloud", value: "azure", why: ENGINE, exampleTick: true },
       { id: "cl-aws", label: "AWS", path: "estate.cloud", value: "aws", why: ENGINE },
       { id: "cl-google", label: "Google Workspace", path: "estate.cloud", value: "google", why: ENGINE },
       { id: "net-cell", label: "4G or 5G backup", path: null, why: FEATURES , want: "cellular" },
@@ -139,10 +139,10 @@ export const TAXONOMY: TaxonomySection[] = [
     exampleNote: "example content",
     paths: ["constraints.complianceRequirements"],
     items: [
-      { id: "c-iso", label: "ISO 27001", path: "constraints.complianceRequirements", value: "iso27001", why: RULEBOOK, exampleTick: true },
+      { id: "c-iso", label: "ISO 27001", path: "constraints.complianceRequirements", value: "iso27001", why: RULEBOOK },
       { id: "c-cep", label: "Cyber Essentials Plus", path: "constraints.complianceRequirements", value: "cyber_essentials_plus", why: RULEBOOK },
       { id: "c-dspt", label: "NHS DSPT", path: "constraints.complianceRequirements", value: "nhs_dspt", why: RULEBOOK },
-      { id: "c-pci", label: "PCI DSS", path: "constraints.complianceRequirements", value: "pci_dss", why: RULEBOOK },
+      { id: "c-pci", label: "PCI DSS", path: "constraints.complianceRequirements", value: "pci_dss", why: RULEBOOK, exampleTick: true },
       { id: "c-fca", label: "FCA obligations", path: "constraints.complianceRequirements", value: "fca", why: RULEBOOK },
       { id: "c-nis2", label: "NIS2", path: "constraints.complianceRequirements", value: "nis2", why: RULEBOOK },
       { id: "c-gdpr", label: "GDPR", path: "constraints.complianceRequirements", value: "uk_gdpr", why: RULEBOOK },
@@ -238,9 +238,9 @@ export const TAXONOMY: TaxonomySection[] = [
  *  before the journey. NEVER enter the ledger; retire when the section holds
  *  a real fact (the example law). */
 export const ORGANISATION_EXAMPLES: Array<{ k: string; v: string }> = [
-  { k: "Industry", v: "Healthcare" },
-  { k: "Users", v: "450" },
-  { k: "Sites", v: "12" },
+  { k: "Industry", v: "Retail" },
+  { k: "Users", v: "1,900" },
+  { k: "Sites", v: "42" },
   { k: "Countries", v: "UK" },
 ];
 
