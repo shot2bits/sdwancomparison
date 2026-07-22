@@ -193,6 +193,10 @@ export default function ProjectDesk() {
   const [vendorCard, setVendorCard] = useState<MarketVendor | null>(null);
   const [artefactOpen, setArtefactOpen] = useState(false);
   const [restored, setRestored] = useState(false);
+  /** True once the mount effect has decided between draft, link and the
+   *  pristine example, so pre-start controls never flash before a
+   *  restore (Robert, 23 Jul: the button flashed then vanished). */
+  const [booted, setBooted] = useState(false);
   const [testMode, setTestMode] = useState(false);
   const [flash, setFlash] = useState<Set<string>>(new Set());
 
@@ -324,6 +328,7 @@ export default function ProjectDesk() {
       firstKeyAt.current = Date.now();
       void runCycle(q, { fromLink: true });
     }
+    setBooted(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1013,8 +1018,10 @@ export default function ProjectDesk() {
         .pd-sec{break-inside:avoid}
       `}</style>
 
-      {/* ---- The one line in ---- */}
-      <div className="mx-auto w-[min(720px,100%)] text-center">
+      {/* ---- The one line in: the page's one control, framed as such ---- */}
+      <div className="mx-auto w-[min(760px,100%)]">
+        <div className="rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.04),0_12px_32px_-18px_rgba(24,24,27,.18)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_1px_0_rgba(245,158,11,.15),0_16px_40px_-18px_rgba(180,83,9,.22)]">
+        <p className="m-0 mb-1.5 text-[9.5px] font-semibold uppercase tracking-[.16em] text-zinc-400">Start here · one sentence is enough</p>
         <div className="flex items-center gap-2 border-b-2 border-zinc-300 px-1 py-2 focus-within:border-amber-500">
           <input
             ref={inputRef}
@@ -1039,7 +1046,7 @@ export default function ProjectDesk() {
           {busy && <span aria-live="polite" className="text-zinc-700">Reading…</span>}
           {!busy && started && engineUsed === "deterministic_fallback" && <span>Read without the model this turn; everything still works.</span>}
           {cycleError && <span className="text-red-600">{cycleError}</span>}
-          {!started && !busy && (
+          {booted && !started && !busy && (
             <>
               <button
                 type="button"
@@ -1073,6 +1080,7 @@ export default function ProjectDesk() {
           )}
           {testMode && <span className="font-medium text-amber-700">Test mode: signing creates a self-expiring test position and never touches the live board.</span>}
         </div>
+        </div>
         {published && (
           <p className="m-0 mt-3 text-[13px] text-zinc-700">
             <span className="text-[15px] italic">Live. The market answers here.</span>{" "}
@@ -1083,6 +1091,47 @@ export default function ProjectDesk() {
             <a href={`/sase/project/${created?.id}${created?.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`} className="underline">your position&rsquo;s record</a>
           </p>
         )}
+      </div>
+
+
+      {/* ---- The listing in formation (Robert, 23 Jul: the opportunity
+              listing returns to the top): the notice as the market will see
+              it, updating with every sentence. Example-labelled until the
+              buyer starts; anonymous always; never publishes by itself. ---- */}
+      <div className="mx-auto mt-5 w-[min(760px,100%)]">
+        <div className={`rounded-xl border p-4 ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="m-0 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
+              {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />Live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
+            </p>
+            <span className={`rounded-full px-2 py-[1px] text-[9px] font-semibold uppercase tracking-[.08em] ${started ? "bg-zinc-100 text-zinc-500" : "border border-amber-200 bg-amber-50 text-amber-800"}`}>
+              {published ? "genuinely open" : started ? "updating as you speak" : "make it yours"}
+            </span>
+          </div>
+          <p className={`m-0 mt-1.5 text-[15px] font-semibold leading-snug ${started ? "text-zinc-900" : "text-zinc-400"}`}>
+            {started ? publishTitle : "SASE and SD-WAN transformation · UK retailer"}
+          </p>
+          <p className={`m-0 mt-1 text-[11.5px] leading-relaxed ${started ? "text-zinc-600" : "text-zinc-400"}`}>
+            {started
+              ? [
+                  requirement.organisation?.sector ?? null,
+                  usersBandLabel(requirement.estate?.users) ?? null,
+                  typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : null,
+                  buying ? ({ sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>)[buying] ?? buying : null,
+                  opModel === "managed" ? "fully managed" : opModel === "co_managed" ? "co-managed" : null,
+                  (requirement.organisation?.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join(", ") || null,
+                  (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") || null,
+                ].filter(Boolean).join(" · ") || "your first sentence starts this listing"
+              : "Retail · 1,900 users · 42 sites · the UK · SASE and SD-WAN · fully managed · PCI DSS"}
+          </p>
+          <p className="m-0 mt-1.5 text-[9.5px] text-zinc-400">
+            {published && published.boardId
+              ? (<>your notice is live: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
+              : started
+              ? "anonymous on publish: no name, no contacts until you choose · nothing is sent without your signature"
+              : "example content · becomes yours as you speak or touch the document below · never publishes"}
+          </p>
+        </div>
       </div>
 
       {/* ---- The Netify SASE Constellation: the market takes position ---- */}
