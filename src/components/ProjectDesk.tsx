@@ -55,6 +55,7 @@ import {
   type WorkspaceFact,
 } from "@/lib/workspace/draft";
 import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, type TaxonomyItem } from "@/lib/workspace/taxonomy";
+import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
 import { diagramModel } from "@/lib/workspace/diagram";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
 import SignIn from "@/components/SignIn";
@@ -120,6 +121,20 @@ const WANT_BY_ITEM: Record<string, string> = (() => {
   return out;
 })();
 
+/** Item lookup for earned-question answers: an answer lands through the
+ *  desk's own click machinery, never a parallel write path. */
+const ITEM_BY_ID: Record<string, { item: TaxonomyItem; section: string }> = (() => {
+  const out: Record<string, { item: TaxonomyItem; section: string }> = {};
+  for (const s of TAXONOMY) for (const i of s.items) out[i.id] = { item: i, section: s.key };
+  return out;
+})();
+
+/** One line of evidence for the question's quiet provenance tooltip. */
+const evidenceLine = (q: EarnedQuestion): string =>
+  q.evidence
+    .map((e) => ("citations" in e ? `"${e.query}" · ${e.citations} AI citations` : `"${e.query}"`))
+    .join(" · ");
+
 const ev = (name: string, data: Record<string, string | number> = {}) => {
   const flat: Record<string, string> = { surface: "desk" };
   for (const [k, v] of Object.entries(data)) flat[k] = String(v);
@@ -163,6 +178,7 @@ export default function ProjectDesk() {
 
   const [moveNow, setMoveNow] = useState<Record<string, Move>>({});
   const [moveLog, setMoveLog] = useState<MoveLogEntry[]>([]);
+  const [dismissedQ, setDismissedQ] = useState<string[]>([]);
 
   const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
   const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
@@ -257,7 +273,7 @@ export default function ProjectDesk() {
         if (raw) {
           const saved = JSON.parse(raw) as {
             facts?: WorkspaceFact[]; added?: string[]; removed?: string[];
-            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; ts?: number;
+            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; ts?: number;
           };
           if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && ((saved.facts?.length ?? 0) > 0 || (saved.noted?.length ?? 0) > 0)) {
             base = saved.facts ?? [];
@@ -266,6 +282,7 @@ export default function ProjectDesk() {
             setNoted(saved.noted ?? []);
             setReceipts(saved.receipts ?? []);
             setMoveLog(saved.moveLog ?? []);
+            setDismissedQ(saved.dismissedQ ?? []);
             receiptId.current = Math.max(0, ...(saved.receipts ?? []).map((r) => r.id));
             setRestored(true);
           }
@@ -289,9 +306,9 @@ export default function ProjectDesk() {
   useEffect(() => {
     if (!started || published) return;
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, ts: Date.now() }));
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, ts: Date.now() }));
     } catch { /* best effort */ }
-  }, [facts, added, removed, noted, receipts, moveLog, started, published]);
+  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, started, published]);
 
   /* ---- The extraction cycle (the same organ), now with the receipt ---- */
   const runCycle = useCallback(
@@ -745,6 +762,38 @@ export default function ProjectDesk() {
     return map;
   }, [unansweredGaps]);
 
+  /* ---- P3.4: the earned questions (13.14/13.16). The desk shows at most
+     two at once (minimum necessary); weight decides which two. ---- */
+  const earnedShown = useMemo(() => {
+    const notedIds = noted.map((n) => n.id);
+    return earnedQuestions(requirement, buying, opModel, notedIds, dismissedQ).slice(0, 2);
+  }, [requirement, buying, opModel, noted, dismissedQ]);
+  const earnedBySection = useMemo(() => {
+    const map = new Map<string, EarnedQuestion[]>();
+    for (const q of earnedShown) map.set(q.section, [...(map.get(q.section) ?? []), q]);
+    return map;
+  }, [earnedShown]);
+
+  const answerEarned = useCallback(
+    (q: EarnedQuestion, answer: QuestionAnswer, value?: string) => {
+      if (answer.kind === "items") {
+        for (const id of answer.itemIds) {
+          const e = ITEM_BY_ID[id];
+          if (e) clickItem(e.item, e.section);
+        }
+      } else if (answer.kind === "note") {
+        setNoted((ns) => (ns.some((n) => n.id === `qn-${q.id}`) ? ns : [...ns, { id: `qn-${q.id}`, label: answer.text, section: q.section }]));
+        crewLog(`Listener: your answer, kept with your position: ${answer.text}`, "you");
+      } else if (answer.kind === "path" && value && value.trim()) {
+        applyMerge([{ path: answer.path, value: value.trim(), provenance: "stated", quote: value.trim() }], "answer");
+        crewLog(`Listener: your answer, in your words: "${value.trim()}"`, "you");
+      }
+      setDismissedQ((d) => (d.includes(q.id) ? d : [...d, q.id]));
+      ev("workspace_earned_answered", { q: q.id, kind: answer.kind });
+    },
+    [clickItem, applyMerge, crewLog],
+  );
+
   const notedBySection = useMemo(() => {
     const map = new Map<string, NotedItem[]>();
     for (const n of noted) map.set(n.section, [...(map.get(n.section) ?? []), n]);
@@ -991,6 +1040,13 @@ export default function ProjectDesk() {
                   {/* Questions render in place, inside the conversation they interrupt */}
                   {secGaps.map((g) => (
                     <GapLine key={g.key} gap={g} onAnswer={answerGap} />
+                  ))}
+
+                  {/* Earned questions (13.14): summoned only by the buyer's
+                      own facts, each carrying the AI-search evidence that
+                      earned its place. */}
+                  {(earnedBySection.get(sec.key) ?? []).map((q) => (
+                    <EarnedQuestionLine key={q.id} q={q} onAnswer={answerEarned} onDismiss={() => { setDismissedQ((d) => [...d, q.id]); ev("workspace_earned_dismissed", { q: q.id }); }} />
                   ))}
                 </section>
               );
@@ -1420,6 +1476,59 @@ function OrganisationFields(props: {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** An earned question (13.14): amber, in place, with its evidence quietly
+ *  attached. Answers land through the desk's own machinery. */
+function EarnedQuestionLine(props: {
+  q: EarnedQuestion;
+  onAnswer: (q: EarnedQuestion, answer: QuestionAnswer, value?: string) => void;
+  onDismiss: () => void;
+}) {
+  const { q } = props;
+  const [val, setVal] = useState("");
+  const textOpt = q.options.find((o) => o.answer.kind === "path");
+  return (
+    <div className="py-[3px]" title={evidenceLine(q)}>
+      <div className="flex items-baseline gap-2 text-[12.5px] leading-snug text-amber-700">
+        <span className="inline-block w-3 flex-none text-center text-[11px] font-bold">?</span>
+        <span className="italic">{q.question}</span>
+        <button type="button" onClick={props.onDismiss} className="ml-auto text-[10px] text-zinc-400 hover:text-zinc-900" title="Not relevant to this project">✕</button>
+      </div>
+      <div className="ml-5 mt-1 flex flex-wrap items-center gap-1.5">
+        {q.options.filter((o) => o.answer.kind !== "path").map((o) => (
+          <button
+            key={o.label}
+            type="button"
+            onClick={() => props.onAnswer(q, o.answer)}
+            className="rounded-full border border-zinc-300 bg-white px-2.5 py-0.5 text-[10.5px] text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
+          >
+            {o.label}
+          </button>
+        ))}
+        {textOpt && textOpt.answer.kind === "path" && (
+          <>
+            <input
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && val.trim() && props.onAnswer(q, textOpt.answer, val)}
+              placeholder={textOpt.answer.placeholder}
+              className="w-36 border-b border-dashed border-zinc-400 bg-transparent px-1 py-0.5 text-[12px] text-zinc-900 outline-none focus:border-amber-500"
+              aria-label={q.question}
+            />
+            <button
+              type="button"
+              onClick={() => val.trim() && props.onAnswer(q, textOpt.answer, val)}
+              className="rounded-full border border-zinc-300 px-2 py-0.5 text-[10px] text-zinc-600 hover:border-amber-500"
+            >
+              Set
+            </button>
+          </>
+        )}
+        <span className="text-[9px] text-zinc-400">asked by real buyers · hover for the evidence</span>
+      </div>
     </div>
   );
 }

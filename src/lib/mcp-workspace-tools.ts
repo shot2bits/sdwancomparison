@@ -14,6 +14,7 @@ import { extractRequirement } from "@/lib/workspace/extract";
 import type { BuyingId, FieldUpdate, OperatingModelId } from "@/lib/workspace/extract";
 import { briefModel, briefText, mergeUpdates, type WorkspaceFact } from "@/lib/workspace/draft";
 import { workspaceFit } from "@/lib/workspace/fit";
+import { earnedQuestions } from "@/lib/workspace/questions";
 import { assessSecurityRequirement, RULEBOOK_VERSION } from "@/lib/security/rulebook";
 import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/security/rulebook";
 import { SITE_URL } from "@/lib/structured-data";
@@ -68,6 +69,21 @@ const CYCLE_DEFINITION = {
       },
       verdict: { type: "object" },
       fit: { type: "object" },
+      earned_questions: {
+        type: "array",
+        description:
+          "Follow-up questions the desk would ask, each EARNED by a fact in this requirement (the earned-question law: no trigger, no question) and carrying the AI-search evidence that earned its place. Relay them to the buyer.",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            question: { type: "string" },
+            section: { type: "string" },
+            options: { type: "array", items: { type: "string" } },
+            evidence: { type: "array" },
+          },
+        },
+      },
       brief: { type: "string" },
       workspace_url: { type: "string" },
       notes: { type: "array", items: { type: "string" } },
@@ -148,6 +164,17 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
     // security requirement whose verdict includes SSE; it is never an MSSP
     // ranking in disguise).
     ...(fit ? { fit: { scope: fitBuying, ...fit, directory: undefined } } : {}),
+    // P3.4 parity (one truth, three doors): the same earned follow-up
+    // questions the desk asks, each summoned by the buyer's own facts and
+    // carrying the AI-search evidence that earned its place. Relay them;
+    // never invent questions of your own where these stand.
+    earned_questions: earnedQuestions(result.requirement, buying, operatingModel ?? null, [], []).map((q) => ({
+      id: q.id,
+      question: q.question,
+      section: q.section,
+      options: q.options.map((o) => o.label),
+      evidence: q.evidence,
+    })),
     brief,
     workspace_url: `${SITE_URL}/workspace/?q=${encodeURIComponent(text.slice(0, 400))}`,
     notes: result.notes,

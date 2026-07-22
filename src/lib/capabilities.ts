@@ -83,7 +83,7 @@ export const CAPABILITIES: Capability[] = [
     title: "Draft a sourcing requirement from one sentence",
     description:
       "The Live Sourcing Workspace: describe an SD-WAN, SASE or managed security need in plain words and the statement of requirements assembles itself, every claim carrying provenance (the buyer's words, a named inference, or a labelled assumption), with a deterministic network diagram, the security rulebook's verdict where in scope, and evidence-graded supplier fit with real evaluation dates. One signature publishes: anonymous notice on the open board, full brief to matched signed-in suppliers.",
-    access: "open", page: "/workspace", api: "/api/workspace/extract, /api/workspace/fit", mcp: "workspace_cycle", data: "/methodology.json",
+    access: "open", page: "/workspace", api: "/api/workspace/extract, /api/workspace/fit", mcp: "workspace_cycle", data: "/methodology.json, /workspace/questions.json",
     status: "live", capabilityType: "draft", accessLevel: "public",
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "none",

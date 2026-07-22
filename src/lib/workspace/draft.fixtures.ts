@@ -23,6 +23,7 @@ import {
 import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
 import { buildChecks, workspaceFit } from "./fit";
+import { earnedQuestions, publishedQuestionSet } from "./questions";
 import { assessSecurityRequirement } from "@/lib/security/rulebook";
 
 export interface WorkspaceTestResult { pass: number; fail: number; failures: string[] }
@@ -326,6 +327,40 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(out.some((u) => u.path === "procurement.buying" && u.value === "sase"), "the SASE they seek lands as buying");
     expect(out.some((u) => u.path === "estate.existingNetwork" && (u.value as string[]).includes("sdwan")), "the SD-WAN being replaced is estate they hold");
     expect(out.some((u) => u.path === "procurement.operatingModel" && u.value === "managed"), "fully managed lands");
+  });
+
+  /* ---- P3.4: the earned-question law (spec 13.14/13.16) ---- */
+  await ok("no trigger, no question: an empty desk asks nothing, ever", () => {
+    expect(earnedQuestions({}, null, null, [], []).length === 0, "the empty desk earns no questions");
+  });
+
+  await ok("questions are earned by facts, suppressed by answers, and honour dismissal", () => {
+    const req = { organisation: { sector: "Financial services" }, estate: {}, drivers: [], constraints: {} };
+    const q1 = earnedQuestions(req, null, null, [], []);
+    expect(q1.some((q) => q.id === "q-fca"), "financial services earns the FCA question");
+    const answered = { ...req, constraints: { complianceRequirements: ["fca"] } };
+    expect(!earnedQuestions(answered, null, null, [], []).some((q) => q.id === "q-fca"), "a standing FCA fact suppresses it");
+    expect(!earnedQuestions(req, null, null, [], ["q-fca"]).some((q) => q.id === "q-fca"), "a dismissal is permanent");
+  });
+
+  await ok("the Opposite Test on triggers: the wrong sector never summons the question", () => {
+    const retail = { organisation: { sector: "Retail & e-commerce" }, estate: {}, drivers: [], constraints: {} };
+    const qs = earnedQuestions(retail, null, null, [], []);
+    expect(!qs.some((q) => q.id === "q-fca" || q.id === "q-dspt"), "retail earns neither FCA nor DSPT");
+    const ukOnly = { organisation: { regions: ["uk", "ie"] }, estate: {}, drivers: [], constraints: {} };
+    expect(!earnedQuestions(ukOnly, null, null, [], []).some((q) => q.id === "q-residency"), "UK and Ireland alone never earn the residency question");
+    const global = { organisation: { regions: ["uk", "eu"] }, estate: {}, drivers: [], constraints: {} };
+    expect(earnedQuestions(global, null, null, [], []).some((q) => q.id === "q-residency"), "a region beyond the UK earns it");
+  });
+
+  await ok("every published question carries its trigger and its evidence (the furniture has receipts)", () => {
+    const set = publishedQuestionSet();
+    expect(set.length >= 8, "the set is published in full");
+    for (const q of set) {
+      expect(typeof (q as { earned_by?: string }).earned_by === "string" && (q as { earned_by: string }).earned_by.length > 10, `${q.id} names what earns it`);
+      expect(q.evidence.length > 0 && q.evidence.every((e) => e.query.length > 3), `${q.id} carries real evidence`);
+      expect(q.options.length > 0, `${q.id} is answerable`);
+    }
   });
 
   /* ---- P3.3: feature-level fit under Article 14 (spec 13.7, 13.13) ---- */
