@@ -907,20 +907,6 @@ export default function ProjectDesk() {
     return constellation(items, sceneRanked, SCENE.cx, SCENE.cy, 34, BAND);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marketRows, sceneRanked, fitSlugs.join(",")]);
-  /** Names are the identity, so they may never overlap: a deterministic
-   *  vertical step per label where boxes would collide. */
-  const labelDy = useMemo(() => {
-    const byS = new Map(marketRows.shown.map((v) => [v.slug, v]));
-    return labelOffsets(
-      sceneBodies.map((b) => {
-        const v = byS.get(b.slug);
-        const name = v ? (v.name.length > 22 ? `${v.name.slice(0, 21)}…` : v.name) : b.slug;
-        const anchorEnd = b.x > SCENE.w - 120 ? true : b.x < 120 ? false : Math.cos((b.angle * Math.PI) / 180) < 0;
-        return { slug: b.slug, x: b.x, y: b.y, anchorEnd, len: name.length };
-      }),
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sceneBodies, marketRows]);
   const fitBySlug = useMemo(
     () => new Map((fit?.suppliers ?? []).map((s) => [s.slug, s])),
     [fit],
@@ -932,6 +918,31 @@ export default function ProjectDesk() {
     [sceneRanked, fit],
   );
   const capById = useMemo(() => new Map(capNodes.map((c) => [c.id, c])), [capNodes]);
+  /** Names are the identity, so they may never overlap anything: one
+   *  deterministic pass where every label (vendor and capability) avoids
+   *  every other label AND every body, diamond and the centre. Bodies
+   *  never move for labels: positions are the truth, names the furniture. */
+  const sceneLabels = useMemo(() => {
+    const byS = new Map(marketRows.shown.map((v) => [v.slug, v]));
+    const obstacles = [
+      { id: "__you", x: SCENE.cx, y: SCENE.cy, half: 12 },
+      ...sceneBodies.map((b) => ({ id: b.slug, x: b.x, y: b.y, half: 9 })),
+      ...capNodes.map((c) => ({ id: c.id, x: c.x, y: c.y, half: 6 })),
+    ];
+    const capItems = capNodes.map((c) => {
+      const above = c.y <= SCENE.cy;
+      const label = c.label.length > 30 ? `${c.label.slice(0, 29)}…` : c.label;
+      return { slug: c.id, x: c.x, y: above ? c.y - 11 : c.y + 11, anchor: "middle" as const, len: label.length };
+    });
+    const vendorItems = sceneBodies.map((b) => {
+      const v = byS.get(b.slug);
+      const name = v ? (v.name.length > 22 ? `${v.name.slice(0, 21)}…` : v.name) : b.slug;
+      const anchorEnd = b.x > SCENE.w - 120 ? true : b.x < 120 ? false : Math.cos((b.angle * Math.PI) / 180) < 0;
+      return { slug: b.slug, x: b.x, y: b.y, anchor: (anchorEnd ? "end" : "start") as "end" | "start", len: name.length, gap: 10 };
+    });
+    return labelOffsets([...capItems, ...vendorItems], obstacles);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneBodies, capNodes, marketRows]);
   /** Hover focus: a vendor slug or a capability id isolates its evidence. */
   const [focusV, setFocusV] = useState<string | null>(null);
   const [focusC, setFocusC] = useState<string | null>(null);
@@ -1115,7 +1126,7 @@ export default function ProjectDesk() {
                 >
                   <rect x={c.x - 3.2} y={c.y - 3.2} width={6.4} height={6.4} transform={`rotate(45 ${c.x} ${c.y})`} fill="#18181b" />
                   <text
-                    x={c.x} y={above ? c.y - 8 : c.y + 14}
+                    x={c.x} y={(above ? c.y - 8 : c.y + 14) + (sceneLabels[c.id] ?? 0)}
                     fontSize={8}
                     textAnchor="middle"
                     fill="#3f3f46"
@@ -1168,7 +1179,7 @@ export default function ProjectDesk() {
                   )}
                   <text
                     x={anchorEnd ? -(size + 5) : size + 5}
-                    y={3 + (labelDy[b.slug] ?? 0)}
+                    y={3 + (sceneLabels[b.slug] ?? 0)}
                     fontSize={9}
                     textAnchor={anchorEnd ? "end" : "start"}
                     fill={labelInk}

@@ -147,23 +147,49 @@ export function vendorHue(slug: string): string {
 /* Label placement: names are the identity, so they may never overlap  */
 /* ------------------------------------------------------------------ */
 
-export type LabelItem = { slug: string; x: number; y: number; anchorEnd: boolean; len: number };
+export type LabelItem = {
+  slug: string;
+  x: number;
+  y: number;
+  anchor: "start" | "end" | "middle";
+  len: number;
+  /** Distance from x to the text's near edge for start/end anchors (the
+   *  body's radius plus the gap the renderer uses). */
+  gap?: number;
+};
 
-/** Deterministic label de-collision: labels are placed in the given
- *  order; a label whose estimated box intersects an earlier one steps
- *  vertically (down, up, further down…) until clear. Pure, so the same
- *  scene always reads the same way. Returns a dy per slug. */
-export function labelOffsets(items: LabelItem[], fontW = 4.7, h = 11): Record<string, number> {
+/** A fixed thing a label must never cross: a body, a diamond, the centre.
+ *  The id lets a label ignore its own anchor. */
+export type LabelObstacle = { id: string; x: number; y: number; half: number };
+
+/** Deterministic label de-collision (Robert, 23 Jul: "the text cannot
+ *  bleed out, it must not overlap"): labels are placed in the given
+ *  order; a label whose estimated box intersects an earlier label OR any
+ *  obstacle steps vertically (down, up, further down…) until clear.
+ *  Bodies never move for labels: positions are the truth, names are the
+ *  furniture. Pure, so the same scene always reads the same way. */
+export function labelOffsets(
+  items: LabelItem[],
+  obstacles: LabelObstacle[] = [],
+  fontW = 4.7,
+  h = 11,
+): Record<string, number> {
   const placed: Array<{ x1: number; x2: number; y1: number; y2: number }> = [];
   const out: Record<string, number> = {};
   for (const it of items) {
-    const w = it.len * fontW + 10;
-    const x1 = it.anchorEnd ? it.x - w : it.x;
-    const x2 = it.anchorEnd ? it.x : it.x + w;
-    const hits = (yy: number) => placed.some((p) => x1 < p.x2 && x2 > p.x1 && yy - h / 2 < p.y2 && yy + h / 2 > p.y1);
+    const w = it.len * fontW + 6;
+    const g = it.gap ?? 0;
+    let x1: number, x2: number;
+    if (it.anchor === "middle") { x1 = it.x - w / 2; x2 = it.x + w / 2; }
+    else if (it.anchor === "end") { x2 = it.x - g; x1 = x2 - w; }
+    else { x1 = it.x + g; x2 = x1 + w; }
+    const obs = obstacles.filter((o) => o.id !== it.slug);
+    const hits = (yy: number) =>
+      placed.some((p) => x1 < p.x2 && x2 > p.x1 && yy - h / 2 < p.y2 && yy + h / 2 > p.y1) ||
+      obs.some((o) => x1 < o.x + o.half && x2 > o.x - o.half && yy - h / 2 < o.y + o.half && yy + h / 2 > o.y - o.half);
     let dy = 0;
     let step = 0;
-    while (step < 8 && hits(it.y + dy)) {
+    while (step < 10 && hits(it.y + dy)) {
       step++;
       dy = (step % 2 === 1 ? 1 : -1) * Math.ceil(step / 2) * h;
     }

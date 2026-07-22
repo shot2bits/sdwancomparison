@@ -525,11 +525,11 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(capabilityRing([], 380, 210, 92).length === 0, "no checks, no ring");
   });
 
-  await ok("labels never overlap: the de-collision pass is deterministic and only moves what collides", () => {
-    const items = [
-      { slug: "a", x: 300, y: 200, anchorEnd: true, len: 14 },
-      { slug: "b", x: 296, y: 204, anchorEnd: true, len: 16 }, // collides with a
-      { slug: "c", x: 600, y: 380, anchorEnd: false, len: 10 }, // clear
+  await ok("labels never overlap anything: labels avoid labels AND bodies, deterministically", () => {
+    const items: Array<{ slug: string; x: number; y: number; anchor: "start" | "end" | "middle"; len: number; gap?: number }> = [
+      { slug: "a", x: 300, y: 200, anchor: "end", len: 14, gap: 10 },
+      { slug: "b", x: 296, y: 204, anchor: "end", len: 16, gap: 10 }, // collides with a's label
+      { slug: "c", x: 600, y: 380, anchor: "start", len: 10, gap: 10 }, // clear
     ];
     const dy = labelOffsets(items);
     expect(dy.a === 0 && dy.c === 0, "clear labels stay put");
@@ -537,6 +537,25 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(JSON.stringify(labelOffsets(items)) === JSON.stringify(dy), "same scene, same offsets, always");
     const moved = { y1: items[1].y + dy.b - 5.5, y2: items[1].y + dy.b + 5.5 };
     expect(moved.y1 >= 200 + 5.5 || moved.y2 <= 200 - 5.5, "after the step the boxes are disjoint");
+    // A body sitting on a label's text forces the label aside (Robert's
+    // live screenshot: Palo Alto's body on Versa's name; Cato's name
+    // through Verizon's square). The label's OWN body never counts.
+    const withBody = labelOffsets(
+      [{ slug: "v", x: 300, y: 200, anchor: "start", len: 14, gap: 10 }],
+      [{ id: "other", x: 340, y: 202, half: 9 }, { id: "v", x: 300, y: 200, half: 9 }],
+    );
+    expect(withBody.v !== 0, "a foreign body on the text pushes the label aside");
+    const selfOnly = labelOffsets(
+      [{ slug: "v", x: 300, y: 200, anchor: "start", len: 14, gap: 10 }],
+      [{ id: "v", x: 300, y: 200, half: 9 }],
+    );
+    expect(selfOnly.v === 0, "a label never flees its own body");
+    // A centred capability label steps off a vendor body beneath it.
+    const cap = labelOffsets(
+      [{ slug: "cap:x", x: 400, y: 300, anchor: "middle", len: 20 }],
+      [{ id: "cap:x", x: 400, y: 289, half: 6 }, { id: "somebody", x: 410, y: 301, half: 9 }],
+    );
+    expect(cap["cap:x"] !== 0, "capability text steps off a body too");
   });
 
   await ok("the band's geometry keeps distance-is-fit under the ellipse", () => {
