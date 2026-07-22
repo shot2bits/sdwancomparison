@@ -40,9 +40,9 @@ function getWorkspaceWebApplicationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "@id": `${SITE_URL}/workspace/#webapplication`,
+    "@id": "https://netify.co.uk/#webapplication",
     name: "Netify Live Sourcing Workspace",
-    url: `${SITE_URL}/workspace/`,
+    url: "https://netify.co.uk/",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
-import { getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
+import { getOrganizationSchema } from "@/lib/structured-data";
 
 /**
  * /home/ (public path /sase/home/, served at netify.co.uk/ by the apex
@@ -56,11 +56,19 @@ function getHomeSchemas() {
       description:
         "A living Statement of Requirements for SD-WAN, SASE and managed security: the complete framework stands on screen from the first second and becomes yours as you describe your project in plain sentences. Provenance on every claim, evidence-graded supplier fit, and one human signature publishes an anonymous notice to the signed-in curated marketplace. Fully agent-accessible via MCP and llms.txt.",
       offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
-      provider: { "@id": `${APEX}/sase/#organization` },
+      provider: { "@id": `${APEX}/#organization` },
     },
-    getOrganizationSchema(),
-    getBreadcrumbSchema("Netify", "/home/"),
-    getSpeakableSchema("/home/"),
+    {
+      ...getOrganizationSchema(),
+      "@id": `${APEX}/#organization`,
+      url: `${APEX}/`,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SpeakableSpecification",
+      "@id": `${APEX}/#speakable`,
+      cssSelector: ["#page-h1", "#page-subhead"],
+    },
   ];
 }
 
