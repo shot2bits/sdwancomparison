@@ -94,14 +94,18 @@ export default async function OpportunityBoardPage() {
       )}
 
       <div className="mt-12">
-        <h2 className="text-lg font-semibold mb-1">Sample opportunities</h2>
-        <p className="text-sm text-[var(--ink-600)] mb-4">Worked examples of what a published RFI looks like. Not live opportunities.</p>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <h2 className="text-lg font-semibold mb-1">Worked examples</h2>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Three full-depth example procurements showing what a published notice looks like here. Illustrative only, never open for response, never counted as live demand.</p>
+        <div className="grid gap-4">
           {SAMPLE_NOTICES.map((s) => (
-            <Link key={s.slug} href={`/opportunities/${s.slug}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
-              <span className="mb-2 inline-block rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-[var(--ink-600)]">Sample</span>
-              <h3 className="text-sm font-semibold leading-snug mb-1">{s.title}</h3>
-              <p className="text-xs text-[var(--ink-600)] line-clamp-2">{s.summary}</p>
+            <Link key={s.slug} href={`/opportunities/${s.slug}`} className="block rounded-lg border border-[var(--ink-200,#e5e5e5)] bg-white p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
+              <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2">
+                <span className="inline-block rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-amber-800">Worked example · not open for response</span>
+                <span className="text-xs text-[var(--ink-500)]">{s.sites} sites · {s.users_band} users · {s.response_mode === "written_responses" ? "written responses" : "indicative pricing"}</span>
+              </div>
+              <h3 className="text-[15px] font-semibold leading-snug mb-1">{s.title}</h3>
+              <p className="text-[13px] leading-relaxed text-[var(--ink-600)] line-clamp-3">{s.summary}</p>
+              <p className="mt-1.5 text-xs text-[var(--ink-500)]">Compliance: {s.compliance_requirements.join(", ").replace(/_/g, " ").toUpperCase()}</p>
             </Link>
           ))}
         </div>
