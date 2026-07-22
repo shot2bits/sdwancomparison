@@ -30,6 +30,11 @@ export type TaxonomyItem = {
   /** Renders as a grey example demonstration tick until its section holds
    *  a real fact (the example law, 13.3/13.9). */
   exampleTick?: boolean;
+  /** The evidence law (13.19): the example shows its history. Renders as a
+   *  struck grey example line with this note until the section is live,
+   *  proving that rejected suggestions stay on the record. Never counts,
+   *  never publishes, retires with the section like every example. */
+  exampleStruck?: string;
   /** P3.3: a stable check id in the fit organ's WANT_CHECKS. A noted item
    *  carrying a want genuinely re-ranks the market with its reason and
    *  evidence date, because the 40-feature grid grades it. */
@@ -124,9 +129,9 @@ export const TAXONOMY: TaxonomySection[] = [
     exampleNote: "the SASE people actually buy",
     paths: ["estate.existingSecurity"],
     items: [
-      { id: "sse-ztna", label: "ZTNA", path: null, why: FEATURES , want: "ztna" },
+      { id: "sse-ztna", label: "ZTNA", path: null, why: FEATURES , want: "ztna", exampleTick: true },
       { id: "sse-swg", label: "SWG", path: null, why: FEATURES , want: "swg" },
-      { id: "sse-casb", label: "CASB", path: null, why: FEATURES , want: "casb" },
+      { id: "sse-casb", label: "CASB", path: null, why: FEATURES , want: "casb", exampleStruck: "suggested, then declined; kept on the record" },
       { id: "sse-fwaas", label: "FWaaS", path: null, why: FEATURES , want: "fwaas" },
       { id: "sse-dlp", label: "DLP", path: null, why: FEATURES , want: "dlp" },
       { id: "sse-dns", label: "DNS security", path: null, why: FEATURES },

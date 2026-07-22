@@ -1376,10 +1376,11 @@ export default function ProjectDesk() {
                   {sec.items.map((item) => {
                     const f = factFor(item);
                     const isNoted = secNoted.has(item.id);
-                    const state: "example" | "option" | "stated" | "inferred" | "struck" | "noted" =
+                    const state: "example" | "exampleStruck" | "option" | "stated" | "inferred" | "struck" | "noted" =
                       f ? (f.struck ? "struck" : f.provenance === "stated" ? "stated" : "inferred")
                         : isNoted ? "noted"
                         : item.exampleTick && !isLive ? "example"
+                        : item.exampleStruck && !isLive ? "exampleStruck"
                         : "option";
                     return (
                       <ItemLine
@@ -1747,24 +1748,24 @@ export default function ProjectDesk() {
 /** One line of the framework: the four truth classes as ink. */
 function ItemLine(props: {
   item: TaxonomyItem;
-  state: "example" | "option" | "stated" | "inferred" | "struck" | "noted";
+  state: "example" | "exampleStruck" | "option" | "stated" | "inferred" | "struck" | "noted";
   fact?: WorkspaceFact;
   flashing: boolean;
   disabled: boolean;
   onClick: () => void;
 }) {
   const { item, state, fact } = props;
-  const mark = state === "stated" || state === "inferred" || state === "noted" ? "✓" : state === "struck" ? "×" : state === "example" ? "✓" : "·";
+  const mark = state === "stated" || state === "inferred" || state === "noted" ? "✓" : state === "struck" || state === "exampleStruck" ? "×" : state === "example" ? "✓" : "·";
   const markCls =
     state === "stated" || state === "noted" ? "text-zinc-900"
     : state === "inferred" ? "text-zinc-700"
-    : state === "struck" ? "text-zinc-300"
+    : state === "struck" || state === "exampleStruck" ? "text-zinc-300"
     : state === "example" ? "text-zinc-300"
     : "text-zinc-300 group-hover:text-zinc-500";
   const labelCls =
     state === "stated" || state === "noted" ? "border-b border-zinc-900 text-zinc-900"
     : state === "inferred" ? "border-b border-dotted border-zinc-500 text-zinc-800"
-    : state === "struck" ? "text-zinc-300 line-through"
+    : state === "struck" || state === "exampleStruck" ? "text-zinc-300 line-through"
     : state === "example" ? "text-zinc-300"
     : "text-zinc-400 group-hover:text-zinc-700";
   return (
@@ -1778,6 +1779,7 @@ function ItemLine(props: {
       <span className={`mr-2 inline-block w-3 text-center text-[11px] ${markCls}`}>{mark}</span>
       <span className={labelCls}>{item.label}</span>
       {state === "example" && <span className="ml-2 text-[9px] text-zinc-300">example</span>}
+      {state === "exampleStruck" && <span className="ml-2 text-[9px] text-zinc-300">example · {item.exampleStruck}</span>}
       {state === "noted" && <span className="ml-2 text-[9.5px] text-zinc-500">noted with your position</span>}
       {state === "stated" && fact && (
         <span className="ml-2 text-[10px] text-zinc-500"><em>&ldquo;{fact.quote ?? item.label}&rdquo;</em></span>
