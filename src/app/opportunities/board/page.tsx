@@ -4,6 +4,9 @@ import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured 
 import { OPP_SCOPE_LABELS, type OppScope } from "@/lib/opportunity-types";
 import BoardList from "@/components/BoardList";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/rfp-store";
+import { SESSION_COOKIE } from "@/lib/auth";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
 export const runtime = "nodejs";
@@ -11,32 +14,29 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Live SASE, SSE & SD-WAN opportunity board",
-  description: "Open SASE, SSE, SD-WAN, circuit and managed service opportunities from buyers. Verified vendors bid and quote. Public board, browse without signing in.",
+  description: "Open SASE, SSE, SD-WAN, circuit and managed service opportunities from buyers. Listings are anonymous and visible to signed-in suppliers; verified vendors bid and quote.",
   alternates: { canonical: `${SITE_URL}/opportunities/board/` },
   openGraph: { title: "Live SASE and SD-WAN opportunity board", description: "Open buyer opportunities; verified vendors bid and quote.", url: `${SITE_URL}/opportunities/board`, type: "website", locale: "en_GB" },
 };
 
 export default async function OpportunityBoardPage() {
-  const [opps, archived] = kvConfigured()
+  // The regate (Robert, 23 Jul): listings are private to anonymous
+  // visitors and visible to the signed-in supply side. Counts stay
+  // public (an aggregate, not a listing); sample notices stay public
+  // (example class, clearly labelled).
+  const jar = await cookies();
+  const session = await getSession(jar.get(SESSION_COOKIE)?.value ?? null);
+  const signedIn = Boolean(session);
+  const [allOpps, allArchived] = kvConfigured()
     ? await Promise.all([listPublicOpportunities(), listArchivedPublicOpportunities(12)])
     : [[], []];
+  const opps = signedIn ? allOpps : [];
+  const archived = signedIn ? allArchived : [];
+  const openCount = allOpps.length;
   const schemas = [
     getOrganizationSchema(),
     getBreadcrumbSchema("Opportunity board", "/opportunities/board"),
     getSpeakableSchema("/opportunities/board"),
-    {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      "@id": `${SITE_URL}/opportunities/board/#board`,
-      name: "Live SASE and SD-WAN opportunities",
-      numberOfItems: opps.length,
-      itemListElement: opps.slice(0, 50).map((o, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        name: o.title,
-        url: `${SITE_URL}/opportunities/${o.id}`,
-      })),
-    },
   ];
 
   return (
@@ -53,7 +53,23 @@ export default async function OpportunityBoardPage() {
         </div>
       </div>
 
-      <BoardList opps={opps} />
+      {signedIn ? (
+        <BoardList opps={opps} />
+      ) : (
+        <div className="rounded-lg border border-zinc-200 bg-white p-5">
+          <p className="m-0 text-[14px] font-semibold text-zinc-900">
+            {openCount} opportunit{openCount === 1 ? "y is" : "ies are"} genuinely open on the board right now.
+          </p>
+          <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-zinc-600">
+            Listings are anonymous about the buyer and private to Netify&rsquo;s signed-in supplier community. Sign in
+            to see the open notices and respond; buyers publish from the workspace and stay anonymous until they choose
+            otherwise. The sample notices below show the shape of a listing.
+          </p>
+          <a href="/sase/account/?return_to=/sase/opportunities/board/" className="mt-3 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white no-underline hover:bg-black">
+            Supplier sign in
+          </a>
+        </div>
+      )}
 
       {archived.length > 0 && (
         <div className="mt-12">

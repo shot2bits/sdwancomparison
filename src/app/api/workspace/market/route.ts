@@ -9,6 +9,7 @@
  * Open, read-only, cacheable.
  */
 
+import { sessionFromRequest } from "@/lib/auth";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getAllVendors, getVendorGroup } from "@/lib/vendors";
 import { listPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
@@ -69,7 +70,9 @@ export async function GET(req: Request) {
       rulebook_version: RULEBOOK_VERSION,
       vendors,
       latest_evaluation: latest,
-      notices,
+      // The regate: anonymous callers get the honest COUNT (an aggregate)
+      // but never the listing itself; signed-in accounts see the notices.
+      notices: (await sessionFromRequest(req)) ? notices : [],
       counts: { vendors: vendors.length, notices: notices.length },
     },
     { headers: { ...cors, "cache-control": "public, max-age=120, stale-while-revalidate=600" } },

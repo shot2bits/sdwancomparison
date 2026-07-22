@@ -54,7 +54,7 @@ function getHomeSchemas() {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       description:
-        "A living Statement of Requirements for SD-WAN, SASE and managed security: the complete framework stands on screen from the first second and becomes yours as you describe your project in plain sentences. Provenance on every claim, evidence-graded supplier fit, and one human signature publishes an anonymous notice to the curated marketplace. Fully agent-accessible via MCP and llms.txt.",
+        "A living Statement of Requirements for SD-WAN, SASE and managed security: the complete framework stands on screen from the first second and becomes yours as you describe your project in plain sentences. Provenance on every claim, evidence-graded supplier fit, and one human signature publishes an anonymous notice to the signed-in curated marketplace. Fully agent-accessible via MCP and llms.txt.",
       offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
       provider: { "@id": `${APEX}/sase/#organization` },
     },

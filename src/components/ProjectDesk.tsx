@@ -73,7 +73,7 @@ const DRAFT_KEY = "netify_workspace_draft_v1";
 const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const WORKSPACE_AGREEMENT_TEXT =
-  "Publish this requirement: Netify lists an anonymous notice on the open board and invites the best-fit evaluated suppliers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
+  "Publish this requirement: Netify lists an anonymous notice visible to signed-in suppliers and invites the best-fit evaluated suppliers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
 
 const SEEDS: Array<{ label: string; text: string }> = [
   { label: "Managed SIEM, UK", text: "We need a managed SIEM service in the UK. " },
@@ -1113,7 +1113,7 @@ export default function ProjectDesk() {
           <g>
             <circle cx="240" cy="62" r="7" fill="#f59e0b" />
             <text x="240" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Published opportunity</text>
-            <text x="240" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">anonymous on the public board</text>
+            <text x="240" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">anonymous, to signed-in suppliers</text>
           </g>
           <g>
             <circle cx="455" cy="36" r="4.5" fill="#2a78d6" /><circle cx="486" cy="28" r="4.5" fill="#e34948" />
@@ -1540,7 +1540,7 @@ export default function ProjectDesk() {
                     <p className="m-0 mb-1 text-[9px] font-semibold uppercase tracking-[.14em] text-amber-700">The signature</p>
                     <p className="m-0 mb-2 text-[14px] italic leading-relaxed text-zinc-900">This position is ready to meet the market.</p>
                     <p className="m-0 mb-2 text-[10.5px] leading-relaxed text-zinc-500">
-                      One publish, two views: an anonymous notice on the open board
+                      One publish, two views: an anonymous notice visible to signed-in suppliers
                       {requirement.organisation?.sector ? ` (${requirement.organisation.sector}` : ""}
                       {usersBandLabel(requirement.estate?.users) ? `${requirement.organisation?.sector ? ", " : "("}${usersBandLabel(requirement.estate?.users)}` : ""}
                       {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users) ? ", no name, no contacts)" : ""}
