@@ -290,13 +290,18 @@ export default function ProjectDesk() {
 
         // The receipt rule (13.6): no clause vanishes silently. A clause no
         // update evidently touched is kept verbatim under Notes, unplaced.
-        const clauses = trimmed.split(/(?<=[.;!?])\s+/).map((c) => c.trim()).filter((c) => c.length > 10);
+        // Commas split too (P3.1.1): Robert's own rich sentence is one long
+        // comma list, and "5 global sites" must not hide inside a sentence
+        // its neighbours got credit for. Matching is normalised to letters
+        // and digits so quote-form drift (24x7 vs 24/7) never fakes a miss.
+        const norm = (s: unknown) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "");
+        const clauses = trimmed.split(/(?<=[.;!?])\s+|,\s+/).map((c) => c.trim()).filter((c) => c.length > 10);
         const touched = (clause: string) => {
-          const c = clause.toLowerCase();
+          const c = norm(clause);
           return updates.some((u) => {
-            if (u.quote && c.includes(u.quote.toLowerCase())) return true;
+            if (u.quote && norm(u.quote).length > 2 && c.includes(norm(u.quote))) return true;
             const vals = Array.isArray(u.value) ? u.value : [u.value];
-            return vals.some((v) => String(v).length > 1 && c.includes(String(v).toLowerCase()));
+            return vals.some((v) => norm(v).length > 1 && c.includes(norm(v)));
           });
         };
         const unplaced = clauses.filter((c) => !touched(c));
