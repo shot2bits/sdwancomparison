@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
+import MegaNav from "@/components/MegaNav";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 
 /**
@@ -64,18 +65,8 @@ export default function Page() {
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
-      <main className="mx-auto max-w-6xl px-4 pb-16 pt-5 sm:px-6">
-        {/* The only chrome: a wordmark and two quiet exits. */}
-        <header className="mb-7 flex items-baseline justify-between">
-          <a href="/" className="text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
-            <span className="mr-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900 align-[-4px] text-[13px] font-bold text-white">N</span>
-            Netify
-          </a>
-          <span className="flex gap-5 text-[12.5px] text-zinc-500">
-            <a href="/sase/opportunities/board/" className="no-underline hover:text-zinc-900">The board</a>
-            <a href="/sase/account/" className="no-underline hover:text-zinc-900">My account</a>
-          </span>
-        </header>
+      <MegaNav takeover />
+      <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6">
 
         {/* Robert's words, verbatim, rendered secondary (13.4): the document
             commands the viewport; the words recede but do not leave. */}

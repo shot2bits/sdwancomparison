@@ -116,7 +116,70 @@ export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
 // 2026 (W0 slice 3) it opens the Live Sourcing Workspace, the one door
 // for security, SASE and SD-WAN; the Describe wizard remains reachable
 // from the Get quotes group and the workspace's builder link.
-export const NAV_CTA: NavLink = { label: "Start a project", href: "/sase/workspace/" };
+export const NAV_CTA: NavLink = { label: "Start a project", href: "/" };
+
+/* ── The 2026 top navigation (Robert's spec, 24 Jul; his verdicts: one
+ * header everywhere, both repos, main as always). Five groups; every href
+ * verified against a real route in one of the two repos before it was
+ * allowed in; descriptions quiet and factual under the evidence law. ── */
+export type MegaItem = { label: string; href: string; desc: string };
+export type MegaGroup = {
+  label: string;
+  columns: 1 | 2;
+  items: MegaItem[];
+  footerLink?: { label: string; href: string };
+};
+
+export const MEGA_GROUPS: MegaGroup[] = [
+  {
+    label: "Solutions",
+    columns: 2,
+    items: [
+      { label: "Healthcare & pharma", href: "/sase/rfp-builder/new/?sector=healthcare", desc: "SASE and SD-WAN requirements mapped for healthcare trusts and pharma." },
+      { label: "Retail & e-commerce", href: "/sase/rfp-builder/new/?sector=retail_ecommerce", desc: "PCI DSS compliant architectures for multi-site retail estates." },
+      { label: "Manufacturing & OT", href: "/sase/rfp-builder/new/?sector=manufacturing", desc: "Secure SASE with IT and OT integration for industrial sites." },
+      { label: "Financial services", href: "/sase/rfp-builder/new/?sector=financial_services", desc: "Audited, low-latency network security frameworks for regulated finance." },
+    ],
+    footerLink: { label: "Browse all sector guides", href: "/sase/best/" },
+  },
+  {
+    label: "Compare & research",
+    columns: 2,
+    items: [
+      { label: "SASE providers directory", href: "/sase/vendors/", desc: "Evaluated vendor capability matrices, graded with dates." },
+      { label: "SD-WAN vendors", href: "/sd-wan/", desc: "Global and regional SD-WAN vendor profiles." },
+      { label: "Managed service providers", href: "/marketplace/", desc: "The curated MSP partner directory." },
+      { label: "Shortlist builder", href: "/sase/shortlist/", desc: "Build an interactive vendor shortlist." },
+      { label: "Vendor comparisons", href: "/vendor-comparison/", desc: "Head-to-head capability comparisons." },
+    ],
+  },
+  {
+    label: "Tools & intelligence",
+    columns: 1,
+    items: [
+      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership." },
+      { label: "Demand index", href: "/sase/demand/", desc: "Enterprise demand and vendor interest, measured." },
+      { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "The questions technology buyers ask AI, explorable." },
+      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/", desc: "A complete SASE Statement of Requirements to inspect." },
+      { label: "RFP Builder", href: "/sase/rfp-builder/", desc: "The question-by-question builder for SASE, SD-WAN and SSE." },
+      { label: "AI assistant connector", href: "/sase/connector/", desc: "Connect agents through llms.txt and MCP." },
+    ],
+  },
+  {
+    label: "Providers & ecosystem",
+    columns: 2,
+    items: [
+      { label: "Evaluated vendor directory", href: "/sase/vendors/", desc: "Direct vendor capability evaluations." },
+      { label: "BT Business portfolio", href: "/resell/bt-business-services/", desc: "BTnet, hosted VoIP and BT managed SASE." },
+      { label: "BT SD-WAN & SASE", href: "/resell/bt-sd-wan/", desc: "Enterprise BT network sourcing." },
+      { label: "Virgin Media Business", href: "/resell/virgin-media-business/", desc: "High-capacity internet and SD-WAN from VMB." },
+      { label: "For suppliers: the board", href: "/sase/opportunities/board/", desc: "Anonymous buyer notices, visible to the signed-in supplier community." },
+    ],
+  },
+];
+
+/** The board stands alone in the bar: one tap, no dropdown. */
+export const BOARD_LINK: NavLink = { label: "Opportunities board", href: "/sase/opportunities/board/" };
 
 // ── Active-link + auto-open helpers (pathname is basePath-stripped here) ────
 const norm = (p: string) => p.replace(/\/$/, "");

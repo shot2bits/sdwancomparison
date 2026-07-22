@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import SideNav from "@/components/SideNav";
-import TopNav from "@/components/TopNav";
+import MegaNav from "@/components/MegaNav";
 import NetifyEvents from "@/components/NetifyEvents";
 import "./globals.css";
 
@@ -121,14 +120,13 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        {/* TopNav = global zone switcher (SASE Marketplace / Buy BT /
-            Resell BT + global pages). SideNav = SASE-zone deep nav,
-            desktop only; mobile deep nav is TopNav's drawer. */}
-        <TopNav />
-        <SideNav />
+        {/* The 2026 top navigation (Robert's verdicts, 24 Jul): one header
+            everywhere; the sidebar retired with it and the canvas runs
+            full width. */}
+        <MegaNav />
         {/* Commercial event tracking: Vercel Web Analytics + GA4. */}
         <NetifyEvents />
-        <div className="lg:pl-60 min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col">
           <main id="main-content" className="flex-1">{children}</main>
 
           <footer className="border-t border-[var(--ink-200)] mt-24">

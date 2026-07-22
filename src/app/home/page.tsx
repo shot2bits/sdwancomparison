@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
+import MegaNav from "@/components/MegaNav";
 import { getOrganizationSchema } from "@/lib/structured-data";
 
 /**
@@ -79,29 +80,10 @@ export default function Page() {
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
-      <main className="mx-auto max-w-6xl px-4 pb-16 pt-5 sm:px-6">
-        {/* The front door's chrome: the wordmark, the two working exits, and
-            one quiet line into the rest of the estate. The homepage must
-            never hide the company. */}
-        <header className="mb-2 flex items-baseline justify-between">
-          <span className="text-[15px] font-semibold tracking-tight text-zinc-900">
-            <span className="mr-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900 align-[-4px] text-[13px] font-bold text-white">N</span>
-            Netify
-          </span>
-          <span className="flex gap-5 text-[12.5px] text-zinc-500">
-            <a href="/sase/opportunities/board/" className="no-underline hover:text-zinc-900">The board</a>
-            <a href="/sase/account/" className="no-underline hover:text-zinc-900">My account</a>
-          </span>
-        </header>
-        <p className="m-0 mb-6 text-[10.5px] text-zinc-400">
-          <a href="/sase/" className="no-underline hover:text-zinc-700">Comparisons and research</a>
-          <span className="mx-2">·</span>
-          <a href="/insights/" className="no-underline hover:text-zinc-700">Insights</a>
-          <span className="mx-2">·</span>
-          <a href="/resell/reseller-programmes/" className="no-underline hover:text-zinc-700">Reseller programmes</a>
-          <span className="mx-2">·</span>
-          <a href="/sase/rfp-builder/" className="no-underline hover:text-zinc-700">RFP Builder</a>
-        </p>
+      {/* One header everywhere (Robert, 24 Jul): the mega navigation IS
+          "the homepage must never hide the company", done properly. */}
+      <MegaNav takeover />
+      <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6">
 
         <h1
           id="page-h1"
