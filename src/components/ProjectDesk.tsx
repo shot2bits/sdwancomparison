@@ -186,7 +186,7 @@ export default function ProjectDesk() {
   const cycleRef = useRef(0);
   const receiptId = useRef(0);
   const factsRef = useRef<WorkspaceFact[]>([]);
-  const prevFitRef = useRef<{ order: string[]; matched: Map<string, Set<string>>; checkIds: Set<string> } | null>(null);
+  const prevFitRef = useRef<{ order: string[]; matched: Map<string, Set<string>>; checkIds: Set<string>; checkLabels: Map<string, string> } | null>(null);
 
   const crewLog = useCallback((text: string, cls?: "you" | "em") => {
     setCrew((c) => [...c.slice(-11), { t: stamp(), text, cls }]);
@@ -462,14 +462,18 @@ export default function ProjectDesk() {
                     evidencedQuietly += 1;
                     continue;
                   }
+                  // F-E: a withdrawal names WHAT was withdrawn (Article 14:
+                  // "requirement withdrawn" is not an explanation; "UK-based
+                  // support desk no longer required" is).
+                  const withdrawnLabel = !ev && lost.length ? (prev.checkLabels.get(lost[0]) ?? "a requirement") : null;
                   nowMoves[s.slug] = {
                     dir,
                     places: Math.abs(delta),
-                    label: ev ? ev.label : "a requirement was withdrawn",
+                    label: ev ? ev.label : withdrawnLabel ?? "a requirement",
                     grade: ev ? ev.grade : "",
                     date: s.last_verified,
                   };
-                  log.push({ slug: s.slug, at: stamp(), dir, text: ev ? `${ev.label}: ${gradeWord(ev.grade)}` : "a requirement was withdrawn" });
+                  log.push({ slug: s.slug, at: stamp(), dir, text: ev ? `${ev.label}: ${gradeWord(ev.grade)}` : `${withdrawnLabel ?? "a requirement"}: no longer required` });
                 }
                 setMoveNow(nowMoves);
                 if (log.length) setMoveLog((l) => [...l, ...log].slice(-40));
@@ -493,7 +497,12 @@ export default function ProjectDesk() {
             } else {
               crewLog(`Scout: ${d.count} of ${d.total} evaluated suppliers fit this scope · order is evidence against your checks`);
             }
-            prevFitRef.current = { order: newOrder, matched: newMatched, checkIds: newCheckIds };
+            prevFitRef.current = {
+              order: newOrder,
+              matched: newMatched,
+              checkIds: newCheckIds,
+              checkLabels: new Map((d.checks ?? []).map((c) => [c.id, c.label])),
+            };
           }
         })
         .catch(() => {});
@@ -1164,7 +1173,7 @@ export default function ProjectDesk() {
                     {mv && (
                       <p className={`m-0 mb-0.5 ml-[18px] text-[9.5px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
                         {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
-                        {mv.label}: {gradeWord(mv.grade) || "withdrawn"}
+                        {mv.label}: {gradeWord(mv.grade) || "no longer required"}
                         {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
                       </p>
                     )}

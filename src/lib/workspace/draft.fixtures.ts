@@ -271,6 +271,63 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect((req.constraints?.complianceRequirements ?? []).includes("nhs_dspt"), "the clicked fact feeds the requirement");
   });
 
+  /* ================================================================== */
+  /* THE OPPOSITE TEST and the four adversarial packs (Robert, 22 July: */
+  /* every parser change must correctly understand both the statement    */
+  /* and its opposite; these packs are permanent).                       */
+  /* ================================================================== */
+
+  await ok("Pack 1, Numbers: magnitudes multiply, separators parse, nonsense is omitted for the receipt", () => {
+    const at = (text: string, path: string) => deterministicExtract(text).find((u) => u.path === path);
+    expect(at("we have 20 users", "estate.users")?.value === 20, "20 users lands as 20");
+    expect(at("around 10k users", "estate.users")?.value === 10000, "10k lands as 10,000");
+    expect(at("about 2,000 users on site", "estate.users")?.value === 2000, "2,000 parses the separator");
+    expect(at("2 million users worldwide", "estate.users") === undefined, "2 million exceeds bounds and is OMITTED, never mangled to 2");
+    expect(at("we have 0 users right now", "estate.users") === undefined, "0 users fails the same validator the model faces");
+    expect(at("50 remote users need access", "estate.users")?.value === 50, "the describing-word window still works");
+  });
+
+  await ok("Pack 2, Negation: the Opposite Test on estate, model, compliance and drivers", () => {
+    const has = (text: string, path: string, value: string) =>
+      deterministicExtract(text).some((u) => u.path === path && (Array.isArray(u.value) ? (u.value as string[]).includes(value) : u.value === value));
+    // statement lands; its opposite must not
+    expect(has("We use MPLS across the estate", "estate.existingNetwork", "mpls"), "MPLS stated lands");
+    expect(!has("We do not use MPLS anywhere", "estate.existingNetwork", "mpls"), "negated MPLS never enters the ledger");
+    expect(!has("We have no MPLS anywhere, pure internet", "estate.existingNetwork", "mpls"), "no MPLS never enters the ledger");
+    expect(has("We want a fully managed service", "procurement.operatingModel", "managed"), "managed stated lands");
+    expect(!has("We do not want a fully managed service", "procurement.operatingModel", "managed"), "negated managed never enters the ledger");
+    expect(has("PCI applies to our stores", "constraints.complianceRequirements", "pci_dss"), "PCI stated lands");
+    expect(!has("PCI does not apply to us", "constraints.complianceRequirements", "pci_dss"), "PCI-does-not-apply never enters the ledger");
+    expect(has("We had an incident last month", "drivers", "incident"), "incident stated lands");
+    expect(!has("No incidents thankfully, just a renewal", "drivers", "incident"), "no-incidents never lands as incident");
+    expect(has("No incidents thankfully, just a renewal", "drivers", "renewal"), "the renewal beside the negation still lands");
+    // the guard must not over-suppress: a positive after a negated clause
+    expect(has("We do not have MPLS but we run SD-WAN across 12 sites", "estate.existingNetwork", "sdwan"), "SD-WAN after a negated MPLS still lands");
+    expect(!has("We do not have MPLS but we run SD-WAN across 12 sites", "estate.existingNetwork", "mpls"), "and the negated MPLS stays out");
+    // negative-phrased positives keep working
+    expect(has("there is no in-house IT so manage it for us", "procurement.operatingModel", "managed"), "no-in-house-IT still signals managed");
+    expect(has("nobody watching overnight, no out-of-hours cover", "constraints.inHouseSocCapacity", "none"), "no-out-of-hours still lands SOC none");
+  });
+
+  await ok("Pack 3, Geography: country names reach their regions instead of vanishing", () => {
+    const regions = (text: string) =>
+      deterministicExtract(text).filter((u) => u.path === "organisation.regions").flatMap((u) => u.value as string[]);
+    expect(regions("20 sites in France and Germany").includes("eu"), "France and Germany land as Europe");
+    expect(regions("offices in Dublin and the UK").includes("ie") && regions("offices in Dublin and the UK").includes("uk"), "Dublin is Ireland, the UK is the UK");
+    expect(regions("sites across Singapore and Australia").includes("apac"), "Singapore and Australia land as Asia Pacific");
+    expect(regions("teams in Northern Ireland").includes("uk") && !regions("teams in Northern Ireland").includes("ie"), "Northern Ireland is the UK, not Ireland");
+    expect(regions("expanding into Dubai").includes("me"), "Dubai lands as the Middle East");
+  });
+
+  await ok("Pack 4, Time and change: renewal, replacement and history read correctly", () => {
+    const out = deterministicExtract("Our MPLS contract renewal is in March 2027 and we want to replace Fortinet SD-WAN with fully managed SASE");
+    expect(out.some((u) => u.path === "drivers" && (u.value as string[]).includes("renewal")), "the renewal lands");
+    expect(out.some((u) => u.path === "estate.existingNetwork" && (u.value as string[]).includes("mpls")), "the MPLS they hold lands as estate");
+    expect(out.some((u) => u.path === "procurement.buying" && u.value === "sase"), "the SASE they seek lands as buying");
+    expect(out.some((u) => u.path === "estate.existingNetwork" && (u.value as string[]).includes("sdwan")), "the SD-WAN being replaced is estate they hold");
+    expect(out.some((u) => u.path === "procurement.operatingModel" && u.value === "managed"), "fully managed lands");
+  });
+
   /* ---- P3.3: feature-level fit under Article 14 (spec 13.7, 13.13) ---- */
   await ok("checks come only from graded homes; unknown wants are dropped, never invented", () => {
     const checks = buildChecks({ buying: "sase", regionKeys: ["uk_ireland"], model: "managed", clouds: ["aws", "nonsense"], mplsEstate: true, wants: ["s247", "made_up_want"] });

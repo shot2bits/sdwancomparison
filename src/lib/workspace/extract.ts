@@ -196,19 +196,55 @@ export function applyUpdates(base: SecurityRequirementInput, updates: FieldUpdat
 /* Deterministic parsers: the always-on baseline and the fallback      */
 /* ------------------------------------------------------------------ */
 
+/** The negation window (F-B, Robert's highest-priority verdict, 22 July:
+ *  "the ledger must never briefly say Fully managed when the buyer said the
+ *  opposite; the correction mechanism is not a licence to record something
+ *  known to be the opposite of what was said"). A match lands only when no
+ *  negator sits just before it or just after it. Conservative by design:
+ *  wrongly suppressing costs an omission the receipt catches; wrongly
+ *  landing records a lie. */
+function negatedAt(t: string, i: number, len: number): boolean {
+  const before = t.slice(Math.max(0, i - 28), i);
+  const after = t.slice(i + len, i + len + 26);
+  if (/\b(?:no|not|never|without|except|excluding|apart from|rather than|instead of|don'?t|doesn'?t|do not|does not|won'?t|wouldn'?t|isn'?t|aren'?t|can'?t|cannot|stopped using|moving (?:away|off)|moved (?:away|off))\s+(?:\w+\s+){0,2}$/.test(before)) return true;
+  if (/^\s{0,3}(?:is |are |was |were )?(?:not\b|no longer\b|never\b|doesn'?t\b|does not\b|isn'?t\b|aren'?t\b)/.test(after)) return true;
+  return false;
+}
+
 export function deterministicExtract(text: string): FieldUpdate[] {
   const t = ` ${text.toLowerCase()} `;
   const out: FieldUpdate[] = [];
-  const say = (path: AllowedPath, value: unknown, quote: string) => out.push({ path, value, provenance: "stated", quote });
-  const infer = (path: AllowedPath, value: unknown, reason: string) => out.push({ path, value, provenance: "inferred", reason });
+  const sink: string[] = []; // validator notes; omissions surface via the receipt
+  /** F-D (design integrity, Robert: "the validator exists so every path
+   *  reaches the same truth; the rail shouldn't be exempt"): every rail
+   *  statement passes the SAME validate() a model proposal passes. What
+   *  fails validation is omitted, and the receipt keeps the clause. */
+  const say = (path: AllowedPath, value: unknown, quote: string) => {
+    const ok = validate(path, value, sink);
+    if (ok) out.push({ path: ok.path, value: ok.value, provenance: "stated", quote });
+  };
+  const infer = (path: AllowedPath, value: unknown, reason: string) => {
+    const ok = validate(path, value, sink);
+    if (ok) out.push({ path: ok.path, value: ok.value, provenance: "inferred", reason });
+  };
+  /** A match that lands only outside the negation window. */
+  const hit = (re: RegExp): RegExpExecArray | null => {
+    const m = re.exec(t);
+    return m && !negatedAt(t, m.index, m[0].length) ? m : null;
+  };
 
-  // One describing word may sit between the number and its noun ("18 retail
-  // stores", "50 remote users"): the exact shape of Robert's own live
-  // sentence the rail missed on 21 July (the rich-sentence test, 13.10).
-  const users = /(\d{1,6})\s*(?:\w+\s+)?(?:users?|staff|employees?|people|seats?|heads)\b/.exec(t);
-  if (users) say("estate.users", Number(users[1]), users[0].trim());
-  const sites = /(\d{1,4})\s*(?:\w+\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?)\b/.exec(t);
-  if (sites) say("estate.sites", Number(sites[1]), sites[0].trim());
+  // Numbers (F-A, semantic integrity: 2, 2,000 and 2 million users are
+  // different procurements). Thousands separators parse; magnitude words
+  // multiply; one describing word may still sit between the number and its
+  // noun ("50 remote users"). A value outside the validator's bounds is
+  // OMITTED rather than mangled, so the clause lands in Notes, unplaced.
+  const NUM = "(\\d{1,3}(?:,\\d{3})+|\\d{1,7})\\s*(k\\b|thousand\\b|m\\b|million\\b)?";
+  const magnitude = (digits: string, mag: string | undefined): number =>
+    Math.round(Number(digits.replace(/,/g, "")) * (mag ? (mag.startsWith("k") || mag.startsWith("t") ? 1e3 : 1e6) : 1));
+  const users = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:users?|staff|employees?|people|seats?|heads)\\b`));
+  if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim());
+  const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?)\\b`));
+  if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim());
 
   const sectorMap: Array<[RegExp, (typeof WORKSPACE_SECTORS)[number]]> = [
     [/retail|e-?commerce|shops?\b|stores?\b/, "Retail & e-commerce"],
@@ -223,32 +259,52 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     [/energy|utilit/, "Energy & utilities"],
   ];
   for (const [re, sector] of sectorMap) {
-    const m = re.exec(t);
+    const m = hit(re);
     if (m) { infer("organisation.sector", sector, `"${m[0].trim()}" indicates this sector`); break; }
   }
 
-  if (/\buk\b|united kingdom|britain/.test(t)) say("organisation.regions", ["uk"], "UK");
-  if (/microsoft|m365|office ?365|\bo365\b/.test(t)) say("estate.cloud", ["m365"], "Microsoft");
-  if (/azure/.test(t)) say("estate.cloud", ["azure"], "Azure");
-  if (/google workspace|gsuite/.test(t)) say("estate.cloud", ["google"], "Google Workspace");
-  if (/\baws\b/.test(t)) say("estate.cloud", ["aws"], "AWS");
-  if (/sd-?wan/.test(t)) say("estate.existingNetwork", ["sdwan"], "SD-WAN");
-  if (/\bmpls\b/.test(t)) say("estate.existingNetwork", ["mpls"], "MPLS");
+  // Regions, including country names (F-C: "France and Germany" must not
+  // vanish inside a clause credited to other facts). The mapped region is
+  // stated with the country as its quote: operating there is their claim.
+  if (hit(/\buk\b|united kingdom|britain|northern ireland|\blondon\b/)) say("organisation.regions", ["uk"], "UK");
+  {
+    const ie = hit(/(?<!northern )ireland|\bdublin\b/);
+    if (ie) say("organisation.regions", ["ie"], ie[0].trim());
+  }
+  for (const [re, region] of [
+    [/\bfrance\b|\bgermany\b|\bspain\b|\bitaly\b|netherlands|\bholland\b|\bbelgium\b|\bpoland\b|\bportugal\b|\bsweden\b|\bdenmark\b|\baustria\b|switzerland|\bnorway\b|\bfinland\b|luxembourg|\beurope\b|\bemea\b/, "eu"],
+    [/\busa\b|\bu\.s\.\b|united states|north america|\bcanada\b/, "us"],
+    [/\baustralia\b|\bsingapore\b|\bjapan\b|\bindia\b|hong kong|\bmalaysia\b|new zealand|\bapac\b|asia pacific/, "apac"],
+    [/\buae\b|\bdubai\b|\bsaudi\b|\bqatar\b|\bbahrain\b|\bkuwait\b|\bisrael\b|south africa|\bnigeria\b|\bkenya\b|\begypt\b/, "me"],
+  ] as Array<[RegExp, string]>) {
+    const m = hit(re);
+    if (m) say("organisation.regions", [region], m[0].trim());
+  }
 
-  if (/incident|breach|phishing|attack|compromis|hacked/.test(t)) say("drivers", ["incident"], "incident");
-  if (/ransomware/.test(t)) say("drivers", ["ransomware_concern"], "ransomware");
-  if (/renewal|contract end|contract expir|contract is up|ends? in march|ends? in \w+ 20\d\d/.test(t)) say("drivers", ["renewal"], "contract renewal");
-  if (/audit/.test(t)) say("drivers", ["audit"], "audit");
-  if (/acquisition|merger|growing fast|expansion/.test(t)) say("drivers", ["growth"], "growth");
+  {
+    const m = hit(/microsoft|m365|office ?365|\bo365\b/);
+    if (m) say("estate.cloud", ["m365"], "Microsoft");
+  }
+  if (hit(/azure/)) say("estate.cloud", ["azure"], "Azure");
+  if (hit(/google workspace|gsuite/)) say("estate.cloud", ["google"], "Google Workspace");
+  if (hit(/\baws\b/)) say("estate.cloud", ["aws"], "AWS");
+  if (hit(/sd-?wan/)) say("estate.existingNetwork", ["sdwan"], "SD-WAN");
+  if (hit(/\bmpls\b/)) say("estate.existingNetwork", ["mpls"], "MPLS");
 
-  if (/iso ?27001/.test(t)) say("constraints.complianceRequirements", ["iso27001"], "ISO 27001");
-  if (/pci/.test(t)) say("constraints.complianceRequirements", ["pci_dss"], "PCI");
-  else if (/card payments|take cards|card-present/.test(t)) infer("constraints.complianceRequirements", ["pci_dss"], "card payments bring PCI DSS into scope");
-  if (/cyber essentials/.test(t)) say("constraints.complianceRequirements", ["cyber_essentials_plus"], "Cyber Essentials");
-  if (/nhs dspt|\bdspt\b/.test(t)) say("constraints.complianceRequirements", ["nhs_dspt"], "NHS DSPT");
-  if (/\bfca\b/.test(t)) say("constraints.complianceRequirements", ["fca"], "FCA");
+  if (hit(/incident|breach|phishing|attack|compromis|hacked/)) say("drivers", ["incident"], "incident");
+  if (hit(/ransomware/)) say("drivers", ["ransomware_concern"], "ransomware");
+  if (hit(/renewal|contract end|contract expir|contract is up|ends? in march|ends? in \w+ 20\d\d/)) say("drivers", ["renewal"], "contract renewal");
+  if (hit(/audit/)) say("drivers", ["audit"], "audit");
+  if (hit(/acquisition|merger|growing fast|expansion/)) say("drivers", ["growth"], "growth");
 
-  if (/24\/7|24x7|around.the.clock|twenty.four/.test(t)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7");
+  if (hit(/iso ?27001/)) say("constraints.complianceRequirements", ["iso27001"], "ISO 27001");
+  if (hit(/\bpci\b/)) say("constraints.complianceRequirements", ["pci_dss"], "PCI");
+  else if (hit(/card payments|take cards|card-present/)) infer("constraints.complianceRequirements", ["pci_dss"], "card payments bring PCI DSS into scope");
+  if (hit(/cyber essentials/)) say("constraints.complianceRequirements", ["cyber_essentials_plus"], "Cyber Essentials");
+  if (hit(/nhs dspt|\bdspt\b/)) say("constraints.complianceRequirements", ["nhs_dspt"], "NHS DSPT");
+  if (hit(/\bfca\b/)) say("constraints.complianceRequirements", ["fca"], "FCA");
+
+  if (hit(/24\/7|24x7|around.the.clock|twenty.four/)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7");
   else if (/nobody watching|no out.of.hours|no overnight|no soc\b|no security team/.test(t)) say("constraints.inHouseSocCapacity", "none", "no out-of-hours cover");
 
   // What they are BUYING (distinct from what they have). Seeking verbs near
@@ -256,11 +312,11 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   // strong enough on their own because they are not estate descriptions.
   const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|moving to|migrat\\w+ to|replace \\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
   const buyRe = (term: string) => new RegExp(`${seek}[^.!?]{0,60}\\b${term}|\\b${term}\\b[^.!?]{0,30}(?:rollout|roll-out|project|procurement|tender|rfp)`);
-  if (/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/.test(t)) {
+  if (hit(/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/)) {
     say("procurement.buying", "managed_security", "managed security");
-  } else if (buyRe("sase").test(t)) say("procurement.buying", "sase", "SASE");
-  else if (buyRe("sse|security service edge|secure service edge").test(t)) say("procurement.buying", "sse", "SSE");
-  else if (buyRe("sd-?wan").test(t)) {
+  } else if (hit(buyRe("sase"))) say("procurement.buying", "sase", "SASE");
+  else if (hit(buyRe("sse|security service edge|secure service edge"))) say("procurement.buying", "sse", "SSE");
+  else if (hit(buyRe("sd-?wan"))) {
     say("procurement.buying", "sdwan", "SD-WAN");
     // The SD-WAN mention was a purchase intent, so it is not evidence of
     // the estate: withdraw the blanket existing-network claim above.
@@ -268,9 +324,9 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     if (i >= 0) out.splice(i, 1);
   }
 
-  if (/fully managed|managed service|manage it for us|no in.house it|outsourced?/.test(t)) say("procurement.operatingModel", "managed", "managed service");
-  else if (/co-?managed/.test(t)) say("procurement.operatingModel", "co_managed", "co-managed");
-  else if (/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/.test(t)) say("procurement.operatingModel", "diy", "self-managed");
+  if (hit(/fully managed|managed service|manage it for us|no in.house it|outsourced?/)) say("procurement.operatingModel", "managed", "managed service");
+  else if (hit(/co-?managed/)) say("procurement.operatingModel", "co_managed", "co-managed");
+  else if (hit(/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/)) say("procurement.operatingModel", "diy", "self-managed");
 
   return out;
 }
