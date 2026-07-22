@@ -56,7 +56,7 @@ export const WORKSPACE_SECTORS = [
 
 const DRIVER_IDS: SecurityDriver[] = ["incident", "audit", "compliance", "renewal", "growth", "consolidation", "ransomware_concern"];
 const SOC_IDS: SocCapacity[] = ["none", "business_hours", "twenty_four_seven"];
-const COMPLIANCE_IDS = ["iso27001", "pci_dss", "cyber_essentials_plus", "fca", "nhs_dspt"];
+const COMPLIANCE_IDS = ["iso27001", "pci_dss", "cyber_essentials_plus", "fca", "nhs_dspt", "nis2", "uk_gdpr"];
 const CLOUD_IDS = ["m365", "google", "aws", "azure", "other_saas"];
 const NETWORK_IDS = ["btnet", "bt_broadband", "mpls", "sdwan", "vpn", "leased_line", "broadband"];
 const REGION_IDS = ["uk", "ie", "eu", "us", "apac", "me"];
@@ -302,6 +302,9 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   else if (hit(/card payments|take cards|card-present/)) infer("constraints.complianceRequirements", ["pci_dss"], "card payments bring PCI DSS into scope");
   if (hit(/cyber essentials/)) say("constraints.complianceRequirements", ["cyber_essentials_plus"], "Cyber Essentials");
   if (hit(/nhs dspt|\bdspt\b/)) say("constraints.complianceRequirements", ["nhs_dspt"], "NHS DSPT");
+  // Harry's 22 July finding: NIS2 named verbatim and silently dropped.
+  if (hit(/\bnis\s?2\b/)) say("constraints.complianceRequirements", ["nis2"], "NIS2");
+  if (hit(/\bgdpr\b/)) say("constraints.complianceRequirements", ["uk_gdpr"], "GDPR");
   if (hit(/\bfca\b/)) say("constraints.complianceRequirements", ["fca"], "FCA");
 
   if (hit(/24\/7|24x7|around.the.clock|twenty.four/)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7");

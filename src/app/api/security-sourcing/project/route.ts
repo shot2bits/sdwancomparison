@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   if (!kvConfigured()) {
     return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   }
-  let body: { requirement?: SecurityRequirementInput; consent?: boolean; test?: boolean; preferred_vendors?: string[] } = {};
+  let body: { custom_title?: string; requirement?: SecurityRequirementInput; consent?: boolean; test?: boolean; preferred_vendors?: string[] } = {};
   try {
     body = await req.json();
   } catch {
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
   try {
     created = await createSecurityProject({
       requirement: body.requirement,
+      ...(typeof body.custom_title === "string" ? { customTitle: body.custom_title } : {}),
       ownerEmail,
       via: "web",
       test: body.test === true,

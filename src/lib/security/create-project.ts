@@ -27,6 +27,10 @@ export const CREATE_CONSENT_TEXT =
   "Create my Security Sourcing project: Netify stores this requirement and scoping verdict so I can build and publish an RFP to matched suppliers. No supplier is contacted until I publish.";
 
 export interface CreateSecurityProjectInput {
+  /** Optional buyer-chosen project title (Harry's 22 Jul workflow gap:
+   *  rename before publish). Guarded like sectors: letters required,
+   *  length capped; falls back to the derived title otherwise. */
+  customTitle?: string;
   requirement: SecurityRequirementInput;
   contactEmail?: string;
   ownerEmail?: string; // from an authenticated session, if present
@@ -54,6 +58,12 @@ export interface BuiltSecurityProject {
 export function usableSector(req: SecurityRequirementInput): string | null {
   const sector = req.organisation?.sector?.trim();
   return sector && /[a-zA-Z]/.test(sector) ? sector : null;
+}
+
+/** A custom title only stands when it reads as one (letters, sane length). */
+function usableTitle(t: string | undefined): string | null {
+  const s = String(t ?? "").replace(/\s+/g, " ").trim().slice(0, 80);
+  return /[a-zA-Z]{3,}/.test(s) ? s : null;
 }
 
 function titleFor(req: SecurityRequirementInput): string {
@@ -129,7 +139,7 @@ export async function buildSecurityProject(
     created: now,
     updated: now,
     status: "draft",
-    title: titleFor(input.requirement),
+    title: usableTitle(input.customTitle) ?? titleFor(input.requirement),
     buyer: { ...buyerFrom(input.requirement), ...(pins.length ? { pinned_vendors: pins } : {}) },
     rfp_sections: [],
     invited_vendors: [],

@@ -92,6 +92,8 @@ export const TAXONOMY: TaxonomySection[] = [
       { id: "obj-overhead", label: "Reduce operational overhead", path: null, why: SEARCH },
       { id: "obj-zt", label: "Zero trust access", path: null, why: SEARCH , want: "ztna" },
       { id: "obj-cloudfirst", label: "Cloud-first networking", path: null, why: SEARCH },
+      { id: "obj-unified", label: "Single-vendor SASE platform", path: null, why: FEATURES, want: "unified" },
+      { id: "obj-bob", label: "Best-of-breed stack", path: null, why: FEATURES, want: "bob" },
     ],
   },
   {
@@ -142,8 +144,8 @@ export const TAXONOMY: TaxonomySection[] = [
       { id: "c-dspt", label: "NHS DSPT", path: "constraints.complianceRequirements", value: "nhs_dspt", why: RULEBOOK },
       { id: "c-pci", label: "PCI DSS", path: "constraints.complianceRequirements", value: "pci_dss", why: RULEBOOK },
       { id: "c-fca", label: "FCA obligations", path: "constraints.complianceRequirements", value: "fca", why: RULEBOOK },
-      { id: "c-nis2", label: "NIS2", path: null, why: SEARCH },
-      { id: "c-gdpr", label: "GDPR", path: null, why: SEARCH },
+      { id: "c-nis2", label: "NIS2", path: "constraints.complianceRequirements", value: "nis2", why: RULEBOOK },
+      { id: "c-gdpr", label: "GDPR", path: "constraints.complianceRequirements", value: "uk_gdpr", why: RULEBOOK },
     ],
   },
   {
@@ -261,4 +263,20 @@ export function sectionForGapKey(key: string): string {
 export function sectionForPath(path: AllowedPath): string {
   for (const s of TAXONOMY) if (s.paths.includes(path)) return s.key;
   return "organisation";
+}
+
+/** Harry's 22 July finding, generalised (the NIS2 class): a clause that
+ *  names an on-desk item which did NOT land must never be credited away
+ *  by its neighbours. Single-token labels only, matched on word
+ *  boundaries; multiword labels are too loose to claim. */
+export function unlandedMentions(clause: string, landedLabels: ReadonlySet<string>): string[] {
+  const out: string[] = [];
+  for (const s of TAXONOMY) {
+    for (const i of s.items) {
+      if (i.label.includes(" ") || i.label.length < 3) continue;
+      if (landedLabels.has(i.label)) continue;
+      if (new RegExp("\\b" + i.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b", "i").test(clause)) out.push(i.label);
+    }
+  }
+  return [...new Set(out)];
 }

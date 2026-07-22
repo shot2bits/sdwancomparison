@@ -172,6 +172,22 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
     ],
   },
   {
+    id: "q-sase-shape",
+    question: "One platform or best-of-breed: which shape of SASE are you buying?",
+    section: "objectives",
+    weight: 89,
+    earnedBy: (c) => c.buying === "sase" && !c.notedIds.includes("obj-unified") && !c.notedIds.includes("obj-bob"),
+    options: [
+      { label: "Single-vendor platform", answer: { kind: "items", itemIds: ["obj-unified"] } },
+      { label: "Best-of-breed stack", answer: { kind: "items", itemIds: ["obj-bob"] } },
+      { label: "Undecided, ask the market", answer: { kind: "dismiss" } },
+    ],
+    evidence: [
+      { source: "bing_ai_live", query: "Aryaka Networks vs Cato Networks SASE SD-WAN comparison", citations: 663, note: "platform-choice research; 55 to 63 percent citation share across the comparison family" },
+      { source: "bing_ai_live", query: "leading SASE products SD-WAN cloud security", citations: 420 },
+    ],
+  },
+  {
     id: "q-contract-end",
     question: "A renewal is driving this. When does the current contract end?",
     section: "commercial",
@@ -224,6 +240,7 @@ export function publishedQuestionSet() {
       q.id === "q-residency" ? "stated regions extend beyond the UK and Ireland" :
       q.id === "q-support" ? "a fully managed operating model is stated" :
       q.id === "q-sse-scope" ? "SASE is being bought and no SSE control is selected yet" :
+      q.id === "q-sase-shape" ? "SASE is being bought and neither platform shape is selected yet" :
       q.id === "q-contract-end" ? "a contract renewal is a stated driver" :
       "dual-circuit resilience: ten or more sites and a network service",
   }));

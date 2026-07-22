@@ -54,7 +54,7 @@ import {
   type BriefGap,
   type WorkspaceFact,
 } from "@/lib/workspace/draft";
-import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, type TaxonomyItem } from "@/lib/workspace/taxonomy";
+import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, unlandedMentions, type TaxonomyItem } from "@/lib/workspace/taxonomy";
 import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
 import { diagramModel } from "@/lib/workspace/diagram";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
@@ -129,6 +129,23 @@ const ITEM_BY_ID: Record<string, { item: TaxonomyItem; section: string }> = (() 
   return out;
 })();
 
+/** Validator notes, humanised for the crew (Harry's 22 Jul finding: raw
+ *  "Dropped estate.users: not a sensible number" is not buyer copy).
+ *  Display-side only; the API's notes stay verbatim. */
+const FIELD_PHRASES: Record<string, string> = {
+  "estate.users": "a user count",
+  "estate.sites": "a site count",
+};
+function humaniseNote(n: string): string {
+  const m = /^Dropped ([\w.]+): (.*)$/.exec(n);
+  if (m) {
+    const what = FIELD_PHRASES[m[1]] ?? "one detail";
+    return `couldn't read ${what} from that; say it plainly and I'll take your word`;
+  }
+  if (/^Dropped a proposal for unknown field/.test(n)) return "heard something without a home yet; kept in your notes";
+  return n;
+}
+
 /** One line of evidence for the question's quiet provenance tooltip. */
 const evidenceLine = (q: EarnedQuestion): string =>
   q.evidence
@@ -179,6 +196,8 @@ export default function ProjectDesk() {
   const [moveNow, setMoveNow] = useState<Record<string, Move>>({});
   const [moveLog, setMoveLog] = useState<MoveLogEntry[]>([]);
   const [dismissedQ, setDismissedQ] = useState<string[]>([]);
+  const [customTitle, setCustomTitle] = useState<string>("");
+  const [editingTitle, setEditingTitle] = useState(false);
 
   const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
   const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
@@ -203,6 +222,8 @@ export default function ProjectDesk() {
   const receiptId = useRef(0);
   const factsRef = useRef<WorkspaceFact[]>([]);
   const prevFitRef = useRef<{ order: string[]; matched: Map<string, Set<string>>; checkIds: Set<string>; checkLabels: Map<string, string> } | null>(null);
+  const notedRef = useRef<NotedItem[]>([]);
+  useEffect(() => { notedRef.current = noted; }, [noted]);
 
   const crewLog = useCallback((text: string, cls?: "you" | "em") => {
     setCrew((c) => [...c.slice(-11), { t: stamp(), text, cls }]);
@@ -273,7 +294,7 @@ export default function ProjectDesk() {
         if (raw) {
           const saved = JSON.parse(raw) as {
             facts?: WorkspaceFact[]; added?: string[]; removed?: string[];
-            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; ts?: number;
+            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; customTitle?: string; ts?: number;
           };
           if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && ((saved.facts?.length ?? 0) > 0 || (saved.noted?.length ?? 0) > 0)) {
             base = saved.facts ?? [];
@@ -283,6 +304,7 @@ export default function ProjectDesk() {
             setReceipts(saved.receipts ?? []);
             setMoveLog(saved.moveLog ?? []);
             setDismissedQ(saved.dismissedQ ?? []);
+            setCustomTitle(saved.customTitle ?? "");
             receiptId.current = Math.max(0, ...(saved.receipts ?? []).map((r) => r.id));
             setRestored(true);
           }
@@ -306,9 +328,9 @@ export default function ProjectDesk() {
   useEffect(() => {
     if (!started || published) return;
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, ts: Date.now() }));
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, customTitle, ts: Date.now() }));
     } catch { /* best effort */ }
-  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, started, published]);
+  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, customTitle, started, published]);
 
   /* ---- The extraction cycle (the same organ), now with the receipt ---- */
   const runCycle = useCallback(
@@ -337,7 +359,7 @@ export default function ProjectDesk() {
             u.provenance === "stated" ? "you" : undefined,
           );
         }
-        for (const n of (data.notes ?? []).slice(0, 2)) crewLog(`Listener: ${n}`);
+        for (const n of (data.notes ?? []).slice(0, 2)) crewLog(`Listener: ${humaniseNote(n)}`);
 
         // The receipt rule (13.6): no clause vanishes silently. A clause no
         // update evidently touched is kept verbatim under Notes, unplaced.
@@ -347,7 +369,20 @@ export default function ProjectDesk() {
         // and digits so quote-form drift (24x7 vs 24/7) never fakes a miss.
         const norm = (s: unknown) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "");
         const clauses = trimmed.split(/(?<=[.;!?])\s+|,\s+/).map((c) => c.trim()).filter((c) => c.length > 10);
+        // Landed labels for the mention guard (Harry's NIS2 finding): an
+        // on-desk item named in a clause must itself have landed, or the
+        // clause keeps its receipt regardless of what its neighbours earned.
+        const landedLabels = new Set<string>();
+        for (const s of TAXONOMY) {
+          for (const i of s.items) {
+            if (!i.path) continue;
+            const id = factId(i.path, i.value);
+            if (factsRef.current.some((f) => f.id === id && !f.struck && String(f.value) === String(i.value))) landedLabels.add(i.label);
+          }
+        }
+        for (const n of notedRef.current) landedLabels.add(n.label);
         const touched = (clause: string) => {
+          if (unlandedMentions(clause, landedLabels).length > 0) return false;
           const c = norm(clause);
           return updates.some((u) => {
             if (u.quote && norm(u.quote).length > 2 && c.includes(norm(u.quote))) return true;
@@ -647,7 +682,7 @@ export default function ProjectDesk() {
           const res = await fetch("/sase/api/security-sourcing/project", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ requirement, consent: true, preferred_vendors: pins, ...(testMode ? { test: true } : {}) }),
+            body: JSON.stringify({ requirement, consent: true, preferred_vendors: pins, ...(customTitle.trim() ? { custom_title: customTitle.trim() } : {}), ...(testMode ? { test: true } : {}) }),
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.project?.id) throw new Error(data.error || "Could not create the project; try again.");
@@ -666,7 +701,7 @@ export default function ProjectDesk() {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              title: brief.title,
+              title: publishTitle,
               buyer: {
                 sector: sectorKey,
                 site_count: requirement.estate?.sites ?? null,
@@ -718,6 +753,12 @@ export default function ProjectDesk() {
         const invited: string[] = Array.isArray(data.invited) ? data.invited.map((i: { slug: string }) => i.slug) : [];
         setPublished({ invited, boardId: data.board?.opportunity_id });
         setNeedAuth(false);
+        // Harry's 22 Jul finding: your own publish is a real event, so the
+        // market's notice count must move with it. Refetch past the cache.
+        fetch("/sase/api/workspace/market", { cache: "reload" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d: Market | null) => { if (d) setMarket(d); })
+          .catch(() => {});
         crewLog(`Registrar: signature recorded, verbatim · notice live on the board`, "em");
         crewLog(`Scout: ${invited.length} supplier${invited.length === 1 ? "" : "s"} invited · responses arrive against your position`);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
@@ -823,6 +864,12 @@ export default function ProjectDesk() {
     const latest = market?.latest_evaluation ?? "";
     const byS = new Map(vendors.map((v) => [v.slug, v]));
     const ordered: MarketVendor[] = [];
+    // Post-publish, invited suppliers float into view first (Harry's 22 Jul
+    // check: "8 invited" must be verifiable without scrolling).
+    for (const s of published?.invited ?? []) {
+      const v = byS.get(s);
+      if (v) { ordered.push(v); byS.delete(s); }
+    }
     for (const s of fitSlugs) {
       const v = byS.get(s);
       if (v) { ordered.push(v); byS.delete(s); }
@@ -834,10 +881,15 @@ export default function ProjectDesk() {
     const rest = [...byS.values()].sort((a, b) => (a.last_verified < b.last_verified ? 1 : -1));
     const all = [...ordered, ...rest];
     return { all, shown: all.slice(0, 12), latest, more: Math.max(0, all.length - 12) };
-  }, [market, fitSlugs, added]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [market, fitSlugs.join(","), added, published]);
 
   const invitedSet = new Set(published?.invited ?? []);
-  const title = started && facts.length > 0 ? brief.title : "Your project";
+  const autoTitle = started && facts.length > 0 ? brief.title : "Your project";
+  const title = customTitle.trim() || autoTitle;
+  /** The title that publishes (Harry's rename gap): the buyer's own name
+   *  when given, the derived one otherwise. */
+  const publishTitle = customTitle.trim() || brief.title;
 
   /** Suppliers the buyer has NAMED in their own retained words (quotes,
    *  receipts). A tag, never a rank change: naming is not evidence. */
@@ -944,10 +996,28 @@ export default function ProjectDesk() {
         {/* ============ THE PROJECT: the living Statement of Requirements ============ */}
         <div>
           <div className="flex items-baseline justify-between gap-3 border-b-2 border-zinc-900 pb-2">
-            <h2
-              className="m-0 tracking-tight"
-              style={{ fontSize: "19px", lineHeight: 1.3, fontWeight: 600, color: facts.length ? "#09090b" : "#a1a1aa" }}
-            >{title}</h2>
+            {editingTitle && !published ? (
+              <input
+                autoFocus
+                defaultValue={customTitle || (facts.length ? brief.title : "")}
+                onBlur={(e) => { setCustomTitle(e.target.value); setEditingTitle(false); }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { setCustomTitle((e.target as HTMLInputElement).value); setEditingTitle(false); ev("workspace_renamed", {}); }
+                  if (e.key === "Escape") setEditingTitle(false);
+                }}
+                placeholder="Name your project"
+                className="m-0 w-full border-b border-dashed border-zinc-400 bg-transparent tracking-tight outline-none focus:border-amber-500"
+                style={{ fontSize: "19px", lineHeight: 1.3, fontWeight: 600, color: "#09090b" }}
+                aria-label="Project title"
+              />
+            ) : (
+              <h2
+                className={`m-0 tracking-tight ${published ? "" : "cursor-text"}`}
+                style={{ fontSize: "19px", lineHeight: 1.3, fontWeight: 600, color: facts.length || customTitle.trim() ? "#09090b" : "#a1a1aa" }}
+                onClick={() => !published && setEditingTitle(true)}
+                title={published ? undefined : "Click to name your project"}
+              >{title}</h2>
+            )}
             <span className="whitespace-nowrap text-[9.5px] uppercase tracking-[.14em] text-zinc-400">Statement of Requirements · living</span>
           </div>
           <p className="m-0 mb-4 mt-1.5 text-[11.5px] text-zinc-500">

@@ -186,6 +186,8 @@ export const COMPLIANCE_LABELS: Record<string, string> = {
   cyber_essentials_plus: "Cyber Essentials Plus",
   fca: "FCA obligations",
   nhs_dspt: "NHS DSPT",
+  nis2: "NIS2",
+  uk_gdpr: "UK GDPR",
 };
 
 export const DRIVER_PHRASES: Record<string, string> = {

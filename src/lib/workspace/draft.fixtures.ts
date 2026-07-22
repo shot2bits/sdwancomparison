@@ -24,6 +24,8 @@ import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
 import { buildChecks, workspaceFit } from "./fit";
 import { earnedQuestions, publishedQuestionSet } from "./questions";
+import { unlandedMentions } from "./taxonomy";
+import { buildSecurityProject } from "@/lib/security/create-project";
 import { assessSecurityRequirement } from "@/lib/security/rulebook";
 
 export interface WorkspaceTestResult { pass: number; fail: number; failures: string[] }
@@ -327,6 +329,47 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(out.some((u) => u.path === "procurement.buying" && u.value === "sase"), "the SASE they seek lands as buying");
     expect(out.some((u) => u.path === "estate.existingNetwork" && (u.value as string[]).includes("sdwan")), "the SD-WAN being replaced is estate they hold");
     expect(out.some((u) => u.path === "procurement.operatingModel" && u.value === "managed"), "fully managed lands");
+  });
+
+  /* ---- Harry's 22 July round: NIS2, the mention guard, the rename ---- */
+  await ok("Harry's sentence: NIS2 named verbatim now lands beside ISO 27001", () => {
+    const out = deterministicExtract("meet ISO 27001 and NIS2 compliance requirements");
+    const vals = out.filter((u) => u.path === "constraints.complianceRequirements").flatMap((u) => u.value as string[]);
+    expect(vals.includes("iso27001") && vals.includes("nis2"), `want both, got ${vals.join(",")}`);
+    const g = deterministicExtract("we must meet GDPR across the group");
+    expect(g.some((u) => u.path === "constraints.complianceRequirements" && (u.value as string[]).includes("uk_gdpr")), "GDPR lands");
+    expect(!deterministicExtract("GDPR does not apply to us").some((u) => u.path === "constraints.complianceRequirements"), "negated GDPR stays out (Opposite Test)");
+  });
+
+  await ok("the mention guard: a clause naming an unlanded on-desk item is never credited away", () => {
+    const um = unlandedMentions("meet ISO 27001 and NIS2 compliance requirements", new Set(["ISO 27001"]));
+    expect(um.includes("NIS2"), "NIS2 mention detected as unlanded");
+    expect(unlandedMentions("meet ISO 27001 and NIS2 compliance requirements", new Set(["ISO 27001", "NIS2"])).length === 0, "landed mentions clear the guard");
+    expect(unlandedMentions("we like proper governance", new Set()).length === 0, "no false mentions from ordinary prose");
+  });
+
+  await ok("the rename: a usable custom title publishes, a garbage one falls back (create core)", async () => {
+    const base = {
+      requirement: {
+        organisation: { sector: "Retail & e-commerce" },
+        estate: { users: 120, sites: 6, existingSecurity: ["defender"] },
+        drivers: ["renewal" as const],
+        constraints: { inHouseSocCapacity: "none" as const, complianceRequirements: ["pci_dss"] },
+      },
+      via: "web" as const,
+      ids: { id: "t1", shareToken: "s1", manageToken: "m1" },
+    };
+    const named = await buildSecurityProject({ ...base, customTitle: "Manchester retail SASE refresh" });
+    expect(named.project.title === "Manchester retail SASE refresh", `custom title stands, got ${named.project.title}`);
+    const junk = await buildSecurityProject({ ...base, customTitle: "66" });
+    expect(junk.project.title !== "66" && junk.project.title.length > 5, "garbage falls back to the derived title");
+  });
+
+  await ok("the SASE-shape question is earned by buying SASE and suppressed by either choice", () => {
+    const req = { organisation: {}, estate: {}, drivers: [], constraints: {} };
+    expect(earnedQuestions(req, "sase", null, [], []).some((q) => q.id === "q-sase-shape"), "buying SASE earns it");
+    expect(!earnedQuestions(req, "sdwan", null, [], []).some((q) => q.id === "q-sase-shape"), "buying SD-WAN alone does not (Opposite Test)");
+    expect(!earnedQuestions(req, "sase", null, ["obj-unified"], []).some((q) => q.id === "q-sase-shape"), "a chosen shape suppresses it");
   });
 
   /* ---- P3.4: the earned-question law (spec 13.14/13.16) ---- */

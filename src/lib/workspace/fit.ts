@@ -92,6 +92,8 @@ const WANT_CHECKS: Record<string, { label: string; cap?: string; support?: strin
   remote: { label: "Remote user access", cap: "f34_remote_user_access" },
   migration: { label: "Migration and professional services", cap: "f05_professional_services_and_migration_support" },
   mplsmig: { label: "MPLS coexistence and migration", cap: "f16_mpls_coexistence_and_migration" },
+  unified: { label: "Single-vendor SASE platform", cap: "f28_full_sase_platform" },
+  bob: { label: "Best-of-breed SSE integration", cap: "f29_sse_ecosystem_integration" },
   s247: { label: "24x7 support", support: "follow_the_sun_24x7" },
   ukdesk: { label: "UK-based support desk", support: "uk_support_desk" },
   tam: { label: "Named engineer or TAM", support: "named_tam" },
