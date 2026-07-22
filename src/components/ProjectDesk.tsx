@@ -57,7 +57,7 @@ import {
 import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, unlandedMentions, type TaxonomyItem } from "@/lib/workspace/taxonomy";
 import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
 import { diagramModel } from "@/lib/workspace/diagram";
-import { constellation } from "@/lib/workspace/constellation";
+import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
 import SignIn from "@/components/SignIn";
 import CodeEntry from "@/components/CodeEntry";
@@ -887,25 +887,54 @@ export default function ProjectDesk() {
 
   const invitedSet = new Set(published?.invited ?? []);
 
-  /* The constellation (Robert, 23 Jul: the constellation returns as the
-   * market pane). Geometry is pure and shared with the fixtures: angle is
-   * a stable function of the slug (movement is radial only, Article 14),
-   * distance is fit rank when named checks exist, one honest ring before.
-   * Ink, amber and breath stay this component's channels. */
-  const SCENE = { w: 336, h: 268, cx: 168, cy: 132 };
+  /* The Netify SASE Constellation (Robert, 23 Jul: promoted to a named
+   * band on the main page). Geometry and colour are pure and shared with
+   * the fixtures: angle is a stable function of the slug (movement is
+   * radial only, Article 14), distance is fit rank when named checks
+   * exist, one honest ring before; colour follows the vendor, never its
+   * rank, from the validated palette that keeps amber (the market,
+   * invited) and emerald (advice) reserved. Capability nodes are the
+   * buyer's own named checks; evidence lines exist only where the dataset
+   * grades them. Ink recency, amber and breath stay this component's
+   * channels. */
+  const SCENE = { w: 760, h: 440, cx: 380, cy: 210 };
   const sceneRanked = Boolean(started && fitBuying && fitSlugs.length > 0);
   const sceneBodies = useMemo(() => {
     const items = marketRows.shown.map((v) => {
       const idx = fitSlugs.indexOf(v.slug);
       return { slug: v.slug, rank: sceneRanked && idx >= 0 ? idx : null };
     });
-    return constellation(items, sceneRanked, SCENE.cx, SCENE.cy);
+    return constellation(items, sceneRanked, SCENE.cx, SCENE.cy, 34, BAND);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marketRows, sceneRanked, fitSlugs.join(",")]);
+  /** Names are the identity, so they may never overlap: a deterministic
+   *  vertical step per label where boxes would collide. */
+  const labelDy = useMemo(() => {
+    const byS = new Map(marketRows.shown.map((v) => [v.slug, v]));
+    return labelOffsets(
+      sceneBodies.map((b) => {
+        const v = byS.get(b.slug);
+        const name = v ? (v.name.length > 22 ? `${v.name.slice(0, 21)}…` : v.name) : b.slug;
+        const anchorEnd = b.x > SCENE.w - 120 ? true : b.x < 120 ? false : Math.cos((b.angle * Math.PI) / 180) < 0;
+        return { slug: b.slug, x: b.x, y: b.y, anchorEnd, len: name.length };
+      }),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneBodies, marketRows]);
   const fitBySlug = useMemo(
     () => new Map((fit?.suppliers ?? []).map((s) => [s.slug, s])),
     [fit],
   );
+  /** The buyer's named checks as capability nodes on the inner ring. */
+  const capNodes = useMemo(
+    () => capabilityRing(sceneRanked ? fit?.checks ?? [] : [], SCENE.cx, SCENE.cy, 92, 0.78),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sceneRanked, fit],
+  );
+  const capById = useMemo(() => new Map(capNodes.map((c) => [c.id, c])), [capNodes]);
+  /** Hover focus: a vendor slug or a capability id isolates its evidence. */
+  const [focusV, setFocusV] = useState<string | null>(null);
+  const [focusC, setFocusC] = useState<string | null>(null);
 
   const autoTitle = started && facts.length > 0 ? brief.title : "Your project";
   const title = customTitle.trim() || autoTitle;
@@ -1014,6 +1043,150 @@ export default function ProjectDesk() {
             <a href={`/sase/project/${created?.id}${created?.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`} className="underline">your position&rsquo;s record</a>
           </p>
         )}
+      </div>
+
+      {/* ---- The Netify SASE Constellation: the market takes position ---- */}
+      <div className="mt-7 rounded-lg border border-zinc-200 bg-white p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <p className="m-0 text-[10.5px] font-semibold uppercase tracking-[.16em] text-zinc-900">
+            The Netify SASE Constellation
+          </p>
+          <p className="m-0 text-[10px] text-zinc-400">
+            distance is fit · every position computed from graded evidence · a supplier only moves on its own evidence
+          </p>
+        </div>
+        {marketRows.shown.length > 0 && (
+          <svg
+            viewBox={`0 0 ${SCENE.w} ${SCENE.h}`}
+            className="mt-1 block w-full"
+            role="img"
+            aria-label="The Netify SASE Constellation: suppliers positioned by evidence against your named requirements, capability lines where the dataset grades them"
+            onMouseLeave={() => { setFocusV(null); setFocusC(null); }}
+          >
+            {/* Evidence lines: vendor to capability, only where a grade exists.
+                Re-keyed on the fit order so a re-rank fades the layer in while
+                bodies glide (no line ever points at a stale position for long). */}
+            <g key={`lines:${fitSlugs.join(",")}:${capNodes.length}`} className="pd-emerge">
+              {capNodes.length > 0 && sceneBodies.map((b) => {
+                const fs = fitBySlug.get(b.slug);
+                if (!fs) return null;
+                const hue = vendorHue(b.slug);
+                return fs.matched.map((m) => {
+                  const cap = capById.get(m.id);
+                  if (!cap) return null;
+                  const focused = focusV === b.slug || focusC === m.id;
+                  const faded = (focusV !== null || focusC !== null) && !focused;
+                  const full = m.grade === "yes";
+                  return (
+                    <line
+                      key={`${b.slug}:${m.id}`}
+                      x1={b.x} y1={b.y} x2={cap.x} y2={cap.y}
+                      stroke={hue}
+                      strokeWidth={focused ? (full ? 1.9 : 1.5) : full ? 1.25 : 1}
+                      strokeDasharray={full ? undefined : "5 4"}
+                      opacity={faded ? 0.05 : focused ? 0.9 : 0.24}
+                      style={{ transition: "opacity .25s" }}
+                    />
+                  );
+                });
+              })}
+            </g>
+
+            {/* Your position, the centre. Breath only on a genuinely open notice. */}
+            <circle
+              cx={SCENE.cx} cy={SCENE.cy} r={7}
+              className={published ? "pd-breath" : undefined}
+              fill={started ? "#18181b" : "none"}
+              stroke={started ? "none" : "#a1a1aa"}
+              strokeDasharray={started ? undefined : "3 3"}
+            />
+            <text x={SCENE.cx} y={SCENE.cy + 20} fontSize={7.5} textAnchor="middle" fill="#a1a1aa" style={{ letterSpacing: ".12em" }}>YOU</text>
+
+            {/* Capability nodes: the requirements your own words created. */}
+            {capNodes.map((c) => {
+              const faded = (focusV !== null && !(fitBySlug.get(focusV)?.matched.some((m) => m.id === c.id))) || (focusC !== null && focusC !== c.id);
+              const above = c.y <= SCENE.cy;
+              return (
+                <g
+                  key={c.id}
+                  className="pd-emerge"
+                  style={{ opacity: faded ? 0.22 : 1, transition: "opacity .25s", cursor: "default" }}
+                  onMouseEnter={() => { setFocusC(c.id); setFocusV(null); }}
+                >
+                  <rect x={c.x - 3.2} y={c.y - 3.2} width={6.4} height={6.4} transform={`rotate(45 ${c.x} ${c.y})`} fill="#18181b" />
+                  <text
+                    x={c.x} y={above ? c.y - 8 : c.y + 14}
+                    fontSize={8}
+                    textAnchor="middle"
+                    fill="#3f3f46"
+                  >{c.label.length > 30 ? `${c.label.slice(0, 29)}…` : c.label}</text>
+                </g>
+              );
+            })}
+
+            {/* The suppliers: hue is the vendor, ink of the name is recency,
+                shape is what they are (circle a technology vendor, square a
+                managed provider), amber ring is invited. */}
+            {sceneBodies.map((b) => {
+              const v = marketRows.shown.find((s) => s.slug === b.slug);
+              if (!v) return null;
+              const isFit = shownFit.has(v.slug);
+              const bright = v.last_verified === marketRows.latest && marketRows.latest !== "";
+              const recent = !bright && marketRows.latest && daysBetween(v.last_verified, marketRows.latest) < 60;
+              const dim = started && fitBuying && !isFit;
+              const invited = invitedSet.has(v.slug);
+              const hue = vendorHue(v.slug);
+              const labelInk = bright ? "#18181b" : recent ? "#52525b" : "#a8a29e";
+              const size = bright || invited ? 5.5 : 4.8;
+              const provider = /provider/i.test(v.category);
+              const faded = (focusV !== null && focusV !== b.slug) || (focusC !== null && !(fitBySlug.get(b.slug)?.matched.some((m) => m.id === focusC)));
+              const anchorEnd = b.x > SCENE.w - 120 ? true : b.x < 120 ? false : Math.cos((b.angle * Math.PI) / 180) < 0;
+              const name = v.name.length > 22 ? `${v.name.slice(0, 21)}…` : v.name;
+              return (
+                <g
+                  key={b.slug}
+                  className="pd-move pd-emerge"
+                  style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: faded ? 0.16 : dim ? 0.38 : 1, transition: "transform .9s cubic-bezier(.22,1,.36,1), opacity .25s" }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}
+                  onClick={() => setVendorCard(v)}
+                  onKeyDown={(e) => { if (e.key === "Enter") setVendorCard(v); }}
+                  onMouseEnter={() => { setFocusV(b.slug); setFocusC(null); }}
+                >
+                  {invited && (
+                    <>
+                      <line x1={0} y1={0} x2={SCENE.cx - b.x} y2={SCENE.cy - b.y} stroke="#f59e0b" strokeWidth={1.3} opacity={0.5} />
+                      <circle r={size + 3.2} fill="none" stroke="#f59e0b" strokeWidth={1.4} className={published ? "pd-breath" : undefined} />
+                    </>
+                  )}
+                  {added.includes(v.slug) && <circle r={size + 3} fill="none" stroke="#a1a1aa" strokeWidth={0.8} />}
+                  {provider ? (
+                    <rect x={-size} y={-size} width={size * 2} height={size * 2} rx={1.5} fill={hue} />
+                  ) : (
+                    <circle r={size} fill={hue} />
+                  )}
+                  <text
+                    x={anchorEnd ? -(size + 5) : size + 5}
+                    y={3 + (labelDy[b.slug] ?? 0)}
+                    fontSize={9}
+                    textAnchor={anchorEnd ? "end" : "start"}
+                    fill={labelInk}
+                    style={namedSlugs.has(v.slug) ? { fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" } : undefined}
+                  >{name}</text>
+                </g>
+              );
+            })}
+          </svg>
+        )}
+        <p className="m-0 mt-1 text-[9.5px] leading-snug text-zinc-400">
+          {capNodes.length > 0 ? (
+            <>Diamonds are the requirements your own words created; a line exists only where Netify&rsquo;s dataset grades that supplier for that requirement (solid evidenced, dashed partial). Hover a supplier or a requirement to isolate its evidence. Circles are technology vendors, squares managed providers.</>
+          ) : (
+            <>Name what you need and the market takes position around it: your requirements appear here as points of gravity, with a line from every supplier the evidence supports. Circles are technology vendors, squares managed providers; no supplier is closer than the evidence puts it.</>
+          )}
+          {market?.latest_evaluation ? ` Evidence: Netify vendor dataset, live · latest evaluation ${fmtDate(market.latest_evaluation)}.` : ""}
+        </p>
       </div>
 
       {/* ---- The desk: the document and the responding organs ---- */}
@@ -1281,7 +1454,7 @@ export default function ProjectDesk() {
           {/* The market, live */}
           <div className="rounded-lg border border-zinc-200 bg-white p-3">
             <p className="m-0 mb-1 flex items-baseline justify-between text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
-              The market, live <span className="font-normal normal-case tracking-normal">distance is fit</span>
+              The market, live <span className="font-normal normal-case tracking-normal">movement is written</span>
             </p>
             <p className="m-0 mb-2 text-[10.5px] text-zinc-500">
               {market ? (
@@ -1292,70 +1465,10 @@ export default function ProjectDesk() {
                 </>
               ) : "Reaching the market…"}
             </p>
-            {marketRows.shown.length > 0 && (
-              <svg
-                viewBox={`0 0 ${SCENE.w} ${SCENE.h}`}
-                className="block w-full"
-                role="img"
-                aria-label="The market as a constellation around your position: distance is fit, ink is evaluation recency"
-              >
-                {/* Your position, the centre. Breath only on a genuinely open notice. */}
-                <circle
-                  cx={SCENE.cx}
-                  cy={SCENE.cy}
-                  r={6.5}
-                  className={published ? "pd-breath" : undefined}
-                  fill={started ? "#18181b" : "none"}
-                  stroke={started ? "none" : "#a1a1aa"}
-                  strokeDasharray={started ? undefined : "3 3"}
-                />
-                <text x={SCENE.cx} y={SCENE.cy + 18} fontSize={7} textAnchor="middle" fill="#a1a1aa" style={{ letterSpacing: ".12em" }}>YOU</text>
-                {sceneBodies.map((b) => {
-                  const v = marketRows.shown.find((s) => s.slug === b.slug);
-                  if (!v) return null;
-                  const isFit = shownFit.has(v.slug);
-                  const bright = v.last_verified === marketRows.latest && marketRows.latest !== "";
-                  const recent = !bright && marketRows.latest && daysBetween(v.last_verified, marketRows.latest) < 60;
-                  const dim = started && fitBuying && !isFit;
-                  const invited = invitedSet.has(v.slug);
-                  const ink = invited ? "#b45309" : bright ? "#18181b" : recent ? "#52525b" : "#a8a29e";
-                  const dot = invited ? "#f59e0b" : bright ? "#18181b" : recent ? "#52525b" : "#a8a29e";
-                  const size = bright || invited ? 5 : 4.3;
-                  const matchedN = fitBySlug.get(v.slug)?.matched.length ?? 0;
-                  const edgeW = sceneRanked && isFit ? Math.min(2.2, 0.5 + matchedN * 0.16) : 0.5;
-                  const cos = Math.cos((b.angle * Math.PI) / 180);
-                  const anchorEnd = b.x > SCENE.w - 88 ? true : b.x < 88 ? false : cos < 0;
-                  const name = v.name.length > 18 ? `${v.name.slice(0, 17)}…` : v.name;
-                  return (
-                    <g
-                      key={b.slug}
-                      className="pd-move pd-emerge"
-                      style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: dim ? 0.38 : 1 }}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}
-                      onClick={() => setVendorCard(v)}
-                      onKeyDown={(e) => { if (e.key === "Enter") setVendorCard(v); }}
-                    >
-                      {/* The thread to your position: thickness is capabilities met. */}
-                      <line x1={0} y1={0} x2={SCENE.cx - b.x} y2={SCENE.cy - b.y} stroke={invited ? "#f59e0b" : "#d4d4d8"} strokeWidth={edgeW} opacity={invited ? 0.55 : 0.6} />
-                      {added.includes(v.slug) && <circle r={size + 2.8} fill="none" stroke="#a1a1aa" strokeWidth={0.8} />}
-                      <circle r={size} fill={dot} className={invited && published ? "pd-breath" : undefined} />
-                      <text
-                        x={anchorEnd ? -(size + 4) : size + 4}
-                        y={2.8}
-                        fontSize={8.2}
-                        textAnchor={anchorEnd ? "end" : "start"}
-                        fill={ink}
-                        style={namedSlugs.has(v.slug) ? { fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" } : undefined}
-                      >{name}</text>
-                    </g>
-                  );
-                })}
-              </svg>
-            )}
             {/* Article 14: the movement explains itself beside the movement,
-                written, naming the supplier now that the scene has no rows. */}
+                written, naming the supplier. The scene itself is the Netify
+                SASE Constellation band above the document; this pane is its
+                written ledger. */}
             {marketRows.shown.some((v) => moveNow[v.slug]) && (
               <div className="mt-1 border-t border-zinc-100 pt-1">
                 {marketRows.shown.filter((v) => moveNow[v.slug]).map((v) => {
@@ -1374,8 +1487,8 @@ export default function ProjectDesk() {
               <p className="m-0 mt-1 text-[9.5px] text-zinc-400">and {marketRows.more} more evaluated suppliers, all in the running.</p>
             )}
             <p className="m-0 mt-1.5 text-[9px] leading-snug text-zinc-400">
-              Distance is fit against your named checks; ink is evaluation recency; a supplier only ever moves on its own
-              evidence, and every movement is written below the moment it happens. Touch any supplier for its record.
+              Every movement in the Constellation is written here the moment it happens, with its evidence and date.
+              Nothing moves without a truthful answer to &ldquo;what changed?&rdquo;. Touch any supplier in the scene for its record.
             </p>
             {vendorCard && (
               <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">

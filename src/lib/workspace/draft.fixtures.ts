@@ -20,7 +20,7 @@ import {
   wizardSectorKey,
   type WorkspaceFact,
 } from "./draft";
-import { constellation, slugAngle, RADIUS } from "./constellation";
+import { BAND, capabilityRing, constellation, labelOffsets, slugAngle, vendorHue, RADIUS, VENDOR_PALETTE } from "./constellation";
 import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
 import { buildChecks, workspaceFit } from "./fit";
@@ -494,6 +494,59 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(flat.every((b) => b.r === RADIUS.ring), "before evidence, every body sits on the same ring");
     const outsider = constellation([{ slug: "a1", rank: 0 }, { slug: "b2", rank: null }], true, 168, 132, 0);
     expect(outsider.find((b) => b.slug === "b2")!.r === RADIUS.outer, "outside the ranked set means the outer edge, not an invented rank");
+  });
+
+  await ok("constellation colour law: hue follows the vendor forever, amber and emerald stay reserved", () => {
+    expect(VENDOR_PALETTE.length === 9, "nine validated hues");
+    expect(!VENDOR_PALETTE.includes("#f59e0b") && !VENDOR_PALETTE.includes("#10b981"), "the reserved meanings are not vendor colours");
+    expect(VENDOR_PALETTE.every((h) => /^#[0-9a-f]{6}$/i.test(h)), "plain hex only");
+    expect(vendorHue("cato-networks") === vendorHue("cato-networks"), "same vendor, same hue, forever");
+    const slugs = ["cato-networks", "cisco", "fortinet", "palo-alto-networks", "versa-networks", "aryaka", "bt", "colt", "netskope", "zscaler"];
+    expect(new Set(slugs.map(vendorHue)).size >= 5, "the real market spreads across the palette");
+    for (const h of slugs.map(vendorHue)) expect(VENDOR_PALETTE.includes(h), "every hue comes from the validated palette");
+  });
+
+  await ok("capability ring: the buyer's checks sit in stable id order, evenly, or not at all", () => {
+    const checks = [
+      { id: "want:ukdesk", label: "UK-based support desk" },
+      { id: "buying:sase", label: "Full SASE platform" },
+      { id: "model:managed", label: "Fully managed service" },
+    ];
+    const a = capabilityRing(checks, 380, 210, 92, 0.78);
+    const b = capabilityRing([...checks].reverse(), 380, 210, 92, 0.78);
+    expect(JSON.stringify(a) === JSON.stringify(b), "arrival order never changes a seat");
+    expect(a[0].id === "buying:sase" && a[0].angle === -90, "id order, first seat at twelve o'clock");
+    const gaps = a.map((c, i) => ((a[(i + 1) % a.length].angle - c.angle + 360) % 360));
+    expect(gaps.every((g) => Math.abs(g - 120) < 0.001), "even spread");
+    for (const c of a) {
+      const dx = c.x - 380, dy = (c.y - 210) / 0.78;
+      expect(Math.abs(Math.hypot(dx, dy) - 92) < 0.001, "on the ring, squash honoured");
+    }
+    expect(capabilityRing([], 380, 210, 92).length === 0, "no checks, no ring");
+  });
+
+  await ok("labels never overlap: the de-collision pass is deterministic and only moves what collides", () => {
+    const items = [
+      { slug: "a", x: 300, y: 200, anchorEnd: true, len: 14 },
+      { slug: "b", x: 296, y: 204, anchorEnd: true, len: 16 }, // collides with a
+      { slug: "c", x: 600, y: 380, anchorEnd: false, len: 10 }, // clear
+    ];
+    const dy = labelOffsets(items);
+    expect(dy.a === 0 && dy.c === 0, "clear labels stay put");
+    expect(dy.b !== 0, "the colliding label steps aside");
+    expect(JSON.stringify(labelOffsets(items)) === JSON.stringify(dy), "same scene, same offsets, always");
+    const moved = { y1: items[1].y + dy.b - 5.5, y2: items[1].y + dy.b + 5.5 };
+    expect(moved.y1 >= 200 + 5.5 || moved.y2 <= 200 - 5.5, "after the step the boxes are disjoint");
+  });
+
+  await ok("the band's geometry keeps distance-is-fit under the ellipse", () => {
+    const bodies = constellation([{ slug: "a1", rank: 0 }, { slug: "a1x", rank: 5 }], true, 380, 210, 0, BAND);
+    expect(bodies[0].r < bodies[1].r, "better rank sits nearer in the band too");
+    const flat = constellation([{ slug: "a1", rank: null }], false, 380, 210, 0, BAND);
+    expect(flat[0].r === BAND.ring, "the honest ring at band scale");
+    for (const b of [...bodies, ...flat]) {
+      expect(Math.abs(b.y - 210) <= BAND.max * BAND.ky + 0.001, "the ellipse keeps every body inside the band's height");
+    }
   });
 
   await ok("constellation: separation is deterministic and radial, and bodies never collide unseen", () => {
