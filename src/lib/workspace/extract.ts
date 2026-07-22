@@ -202,9 +202,12 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   const say = (path: AllowedPath, value: unknown, quote: string) => out.push({ path, value, provenance: "stated", quote });
   const infer = (path: AllowedPath, value: unknown, reason: string) => out.push({ path, value, provenance: "inferred", reason });
 
-  const users = /(\d{1,6})\s*(?:users?|staff|employees?|people|seats?|heads)\b/.exec(t);
+  // One describing word may sit between the number and its noun ("18 retail
+  // stores", "50 remote users"): the exact shape of Robert's own live
+  // sentence the rail missed on 21 July (the rich-sentence test, 13.10).
+  const users = /(\d{1,6})\s*(?:\w+\s+)?(?:users?|staff|employees?|people|seats?|heads)\b/.exec(t);
   if (users) say("estate.users", Number(users[1]), users[0].trim());
-  const sites = /(\d{1,4})\s*(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?)\b/.exec(t);
+  const sites = /(\d{1,4})\s*(?:\w+\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?)\b/.exec(t);
   if (sites) say("estate.sites", Number(sites[1]), sites[0].trim());
 
   const sectorMap: Array<[RegExp, (typeof WORKSPACE_SECTORS)[number]]> = [

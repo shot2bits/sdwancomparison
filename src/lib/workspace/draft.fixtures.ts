@@ -207,6 +207,14 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(!has.some((u) => u.path === "procurement.buying" && u.value === "sdwan"), "existing SD-WAN is not a purchase");
   });
 
+  await ok("one describing word between number and noun still lands (18 retail stores, 50 remote users)", () => {
+    const out = deterministicExtract("We have 18 retail stores across the UK and 50 remote users");
+    expect(out.some((u) => u.path === "estate.sites" && u.value === 18), "18 retail stores heard as sites");
+    expect(out.some((u) => u.path === "estate.users" && u.value === 50), "50 remote users heard as users");
+    const alone = deterministicExtract("We have 18 retail stores");
+    expect(!alone.some((u) => u.path === "estate.users"), "stores never masquerade as users");
+  });
+
   await ok("a phishing incident stays an incident and never becomes ransomware concern", () => {
     const out = deterministicExtract("We had a phishing incident last month, 200 staff");
     expect(out.some((u) => u.path === "drivers" && String(u.value) === "incident"), "incident heard");
@@ -233,6 +241,49 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(merged.some((u) => u.path === "procurement.buying" && u.value === "sdwan"), "buying filled from the rail");
     const driverVals = merged.filter((u) => u.path === "drivers").flatMap((u) => u.value as string[]);
     expect(driverVals.join(",") === "incident,renewal", `drivers union wrong: ${driverVals.join(",")}`);
+  });
+
+  /* ---- The example law (P3.1, spec v1.5 section 13.3/13.9) ---- */
+  await ok("example content never enters the ledger: an empty desk derives an empty requirement", async () => {
+    // The taxonomy's example values (Healthcare, 450, 12, UK, the example
+    // ticks) are pure rendering; the ledger starts empty, so nothing
+    // publishes, counts, or feeds the verdict, fit or diagram.
+    const req = requirementFrom([]);
+    expect(!req.organisation?.sector, "no sector from an empty ledger");
+    expect(!req.estate?.sites && !req.estate?.users, "no estate numbers from an empty ledger");
+    expect((req.drivers ?? []).length === 0, "no drivers from an empty ledger");
+    const m = meterOf([], null);
+    expect(m.total === 0 && m.confirmed === 0, "the meter counts nothing on the empty desk");
+    const model = briefModel({ facts: [], verdict: null });
+    const text = JSON.stringify(model);
+    expect(!text.includes("Healthcare") && !text.includes("450"), "no example value leaks into the brief");
+    const dia = diagramModel(requirementFrom([]), null, null);
+    expect(dia.empty === true, "the diagram stays honestly empty");
+  });
+
+  await ok("a click is a stated fact: the taxonomy item lands with the buyer's touch as provenance", () => {
+    // clickItem's ledger write, exactly as the desk performs it.
+    const m = mergeUpdates([], [{ path: "constraints.complianceRequirements", value: "nhs_dspt", provenance: "stated", quote: "NHS DSPT" }], 1, "answer");
+    const f = m.facts.find((x) => x.id === "constraints.complianceRequirements:nhs_dspt");
+    expect(Boolean(f) && f!.provenance === "stated" && f!.source === "answer", "click lands stated via the answer source");
+    const req = requirementFrom(m.facts);
+    expect((req.constraints?.complianceRequirements ?? []).includes("nhs_dspt"), "the clicked fact feeds the requirement");
+  });
+
+  await ok("click grammar: strike on second touch, restore by touch (a stated act), never by re-inference", () => {
+    let m = mergeUpdates([], [{ path: "procurement.operatingModel", value: "managed", provenance: "stated", quote: "Fully managed" }], 1, "answer");
+    // second touch strikes (the desk calls toggleFact)
+    let facts2 = m.facts.map((f) => ({ ...f, struck: true }));
+    // a model re-inference must not resurrect
+    m = mergeUpdates(facts2, [{ path: "procurement.operatingModel", value: "managed", provenance: "inferred", reason: "again" }], 2, "extract");
+    expect(m.facts.find((f) => f.id === "procurement.operatingModel")!.struck === true, "re-inference never resurrects");
+    // a third touch (stated, answer source) restores
+    m = mergeUpdates(m.facts, [{ path: "procurement.operatingModel", value: "managed", provenance: "stated", quote: "Fully managed" }], 3, "answer");
+    expect(m.facts.find((f) => f.id === "procurement.operatingModel")!.struck === false, "the buyer's touch restores");
+    // clicking a different option corrects the scalar in place
+    m = mergeUpdates(m.facts, [{ path: "procurement.operatingModel", value: "co_managed", provenance: "stated", quote: "Co-managed" }], 4, "answer");
+    const om = m.facts.filter((f) => f.id === "procurement.operatingModel");
+    expect(om.length === 1 && om[0].value === "co_managed", "scalar click replaces, never duplicates");
   });
 
   return r;
