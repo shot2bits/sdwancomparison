@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PositionWorkspace from "@/components/PositionWorkspace";
+import { getAllVendors } from "@/lib/vendors";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 
 /**
@@ -49,6 +50,9 @@ function getWorkspaceWebApplicationSchema() {
 }
 
 export default function Page() {
+  // The moat is stated in specifics, and the specific is read from the
+  // dataset at render time so the prose can never drift from the truth.
+  const vendorCount = getAllVendors().length;
   const schemas = [
     getWorkspaceWebApplicationSchema(),
     getOrganizationSchema(),
@@ -86,17 +90,33 @@ export default function Page() {
           thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
           of Requirements automatically.
         </p>
+        {/* The bridge (22 July positioning review): Netify is the step after
+            the AI conversation, not a competitor to it. One quiet line. */}
+        <p id="page-bridge" className="mx-auto mb-2 max-w-2xl text-center text-[13.5px] leading-relaxed text-zinc-500">
+          Most technology buyers ask AI dozens of questions before they speak to a supplier. Netify begins where those
+          conversations end.
+        </p>
 
         <PositionWorkspace />
 
-        {/* Below the market: the honest boundary and the delegation case. */}
+        {/* Below the market: the separation from a writing tool, the moat in
+            specifics (the count is rendered from the dataset, never typed),
+            the rules, and the escape hatch. */}
         <section className="mx-auto mt-20 max-w-2xl border-t border-zinc-200 pt-6">
-          <h2 className="mb-2 text-lg font-semibold text-zinc-900">Why publish here rather than paste an AI draft into email</h2>
+          <h2 className="mb-2 text-lg font-semibold text-zinc-900">An AI assistant can write an RFP. It cannot run a market.</h2>
           <p className="mb-3 text-sm leading-relaxed text-zinc-600">
-            An AI assistant can draft a requirement document. It cannot publish an anonymous notice to Netify&rsquo;s
-            opportunity board, invite suppliers graded against a 40-feature evaluation, gather structured responses with
-            private pricing, or hold your identity back until you choose to reply. This page does both halves: the
-            drafting and the market.
+            ChatGPT can draft a requirement document. What it cannot do is grade suppliers against Netify&rsquo;s
+            40-feature evaluation framework, publish an anonymous notice to a live opportunity board, gather structured
+            supplier responses with pricing kept private to you, or hold your identity back until you choose to reply.
+            The writing is the start. The market is the product.
+          </p>
+          <h2 className="mb-2 mt-6 text-lg font-semibold text-zinc-900">What Netify holds that a general AI does not</h2>
+          <p className="mb-3 text-sm leading-relaxed text-zinc-600">
+            Evaluations of {vendorCount} suppliers against one 40-feature framework, each carrying the date it was last
+            verified. A versioned security rulebook applied identically in your browser and on the server. A live board
+            where breath marks only a genuinely open notice. And the mapped follow-up questions this engine was built
+            from. None of it is generated on the fly, which is exactly why suppliers can compete for your business
+            through it.
           </p>
           <h2 className="mb-2 mt-6 text-lg font-semibold text-zinc-900">The two rules this surface is built on</h2>
           <p className="mb-3 text-sm leading-relaxed text-zinc-600">
