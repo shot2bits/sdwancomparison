@@ -142,7 +142,7 @@ export default function MegaNav({ takeover = false }: { takeover?: boolean }) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-all duration-200">
+    <header style={{ backgroundColor: "rgba(255,255,255,0.94)" }} className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-all duration-200">
       <div className="mx-auto flex h-13 max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
         <a href="/" className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
           <span className="grid h-7 w-7 place-items-center rounded-md bg-zinc-950 text-sm font-bold text-white">N</span>
@@ -176,6 +176,7 @@ export default function MegaNav({ takeover = false }: { takeover?: boolean }) {
                   <Chevron open={open} />
                 </button>
                 <div
+                  style={{ backgroundColor: "rgba(255,255,255,0.97)" }}
                   className={`absolute top-full mt-1 rounded-2xl border border-zinc-200/90 bg-white/95 p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.12)] backdrop-blur-2xl transition-all duration-200 ease-out ${
                     gi >= 2 ? "right-0" : "left-0"
                   } ${group.columns === 2 ? "w-[540px]" : "w-[360px]"} ${
