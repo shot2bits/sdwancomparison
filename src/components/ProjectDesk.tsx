@@ -57,6 +57,7 @@ import {
 } from "@/lib/workspace/draft";
 import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, unlandedMentions, type TaxonomyItem } from "@/lib/workspace/taxonomy";
 import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
+import { deriveAreaState, refineConfirmed } from "@/lib/workspace/areas";
 import { diagramModel } from "@/lib/workspace/diagram";
 import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
@@ -820,6 +821,7 @@ export default function ProjectDesk() {
    *  gaps plus the earned questions currently standing, nothing invented. */
   const openQuestionCount = unansweredGaps.length + earnedShown.length;
 
+
   const answerEarned = useCallback(
     (q: EarnedQuestion, answer: QuestionAnswer, value?: string) => {
       if (answer.kind === "items") {
@@ -845,6 +847,22 @@ export default function ProjectDesk() {
     for (const n of noted) map.set(n.section, [...(map.get(n.section) ?? []), n]);
     return map;
   }, [noted]);
+
+  /** The areas (slice four): one derived state per section from actual
+   *  position data (the fixtured derivation), never presentation logic. */
+  const areaStates = useMemo(() => {
+    return TAXONOMY.map((sec) => {
+      const secFacts = factsBySection.get(sec.key) ?? [];
+      const oq = (gapsBySection.get(sec.key)?.length ?? 0) + (earnedBySection.get(sec.key)?.length ?? 0);
+      const notedN = (notedBySection.get(sec.key) ?? []).length;
+      const base = deriveAreaState({ facts: secFacts, openQuestions: oq, noted: notedN });
+      const state = refineConfirmed(sec.key, base, secFacts);
+      const standingN = secFacts.filter((f) => !f.struck).length;
+      const latestCycle = secFacts.reduce((m, f) => Math.max(m, f.cycle ?? 0), 0);
+      return { key: sec.key, title: sec.title, state, standingN, openQ: oq, notedN, latestCycle };
+    });
+  }, [factsBySection, gapsBySection, earnedBySection, notedBySection]);
+  const [areaDetail, setAreaDetail] = useState<string | null>(null);
 
   const sectionLive = useCallback(
     (key: string) =>
@@ -1298,6 +1316,66 @@ export default function ProjectDesk() {
         </div>
       )}
 
+      {/* ---- The areas: a second view of the same position (slice four).
+              Every state derives from the fixtured module, never styling. ---- */}
+      {started && (
+        <div className="mt-3 rounded-lg border border-zinc-200 bg-white px-5 py-2.5">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+            {areaStates.map((a) => {
+              const dot =
+                a.state === "confirmed" ? "bg-zinc-900" :
+                a.state === "stated" ? "border-[1.5px] border-zinc-600 bg-white" :
+                a.state === "suggested" ? "border-[1.5px] border-dotted border-amber-600 bg-white" :
+                a.state === "needs_attention" ? "bg-amber-500" :
+                a.state === "excluded" ? "border border-zinc-300 bg-white" :
+                "border border-zinc-200 bg-white";
+              const ink =
+                a.state === "example" ? "text-zinc-300" :
+                a.state === "needs_attention" || a.state === "suggested" ? "text-zinc-700" :
+                a.state === "excluded" ? "text-zinc-400 line-through" : "text-zinc-800";
+              return (
+                <button
+                  key={a.key}
+                  type="button"
+                  onClick={() => {
+                    setAreaDetail(areaDetail === a.key ? null : a.key);
+                    document.getElementById(`sec-${a.key}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }}
+                  className={`flex items-center gap-1.5 text-[11px] ${ink} hover:text-zinc-900`}
+                  aria-label={`${a.title}: ${a.state.replace("_", " ")}`}
+                >
+                  <span className={`inline-block h-[8px] w-[8px] rounded-full ${dot}`} />
+                  {a.title}
+                </button>
+              );
+            })}
+          </div>
+          {areaDetail && (() => {
+            const a = areaStates.find((x) => x.key === areaDetail);
+            if (!a) return null;
+            const infl: Record<string, string> = {
+              compliance: "shapes the security requirements and limits which suppliers are eligible",
+              opmodel: "decides managed service suitability across the market",
+              estate: "drives the migration plan and the coverage checks",
+              security: "becomes evidence checks for every supplier",
+              commercial: "its open decisions hold publication",
+              organisation: "sets the scale band suppliers are matched at",
+            };
+            return (
+              <p className="m-0 mt-1.5 border-t border-zinc-100 pt-1.5 text-[10.5px] leading-relaxed text-zinc-500" role="status">
+                <span className="font-semibold text-zinc-700">{a.title}</span>: {a.state.replace("_", " ")} ·{" "}
+                {a.standingN} standing fact{a.standingN === 1 ? "" : "s"}
+                {a.notedN > 0 ? `, ${a.notedN} noted` : ""}
+                {a.openQ > 0 ? `, ${a.openQ} unresolved` : ", nothing unresolved"}
+                {a.latestCycle > 0 ? ` · last changed cycle ${a.latestCycle}` : ""}
+                {infl[a.key] ? ` · this area ${infl[a.key]}` : ""}
+                {a.state === "needs_attention" && a.key === "commercial" ? " · answering here unblocks the gate" : ""}
+              </p>
+            );
+          })()}
+        </div>
+      )}
+
       {/* ---- The desk: the document and the responding organs ---- */}
       <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_336px]">
 
@@ -1359,7 +1437,7 @@ export default function ProjectDesk() {
               const optionValueIds = new Set(sec.items.filter((i) => i.path).map((i) => factId(i.path as AllowedPath, i.value)));
               const looseFacts = secFacts.filter((f) => !optionValueIds.has(f.id));
               return (
-                <section key={sec.key} className="pd-sec mb-5">
+                <section key={sec.key} id={`sec-${sec.key}`} className="pd-sec mb-5" style={{ scrollMarginTop: "70px" }}>
                   <h3
                     className="mb-1.5 flex items-baseline justify-between border-b border-zinc-200 pb-1 uppercase"
                     style={{ fontSize: "10.5px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".12em", color: "#71717a" }}
