@@ -28,6 +28,11 @@ export interface DiagramModel {
   edge: { label: string; proposed: boolean };
   core: string[];                   // existing network labels
   sites: { label: string; count: number | null; siteSquares: number; overflow: number };
+  /** Geography of the estate, named beside the one cluster (never a split).
+   *  Carried separately from the sites label so the figure can set it as
+   *  its own wrapped line: geography grows with the buyer's words and must
+   *  never push text over a box border (Robert, 23 Jul). */
+  regions: string[];
   staff: string | null;
   shields: string[];                // compliance regimes, badge row
   pins: DiagramPin[];
@@ -54,10 +59,7 @@ export function diagramModel(
     ) ||
     verdict?.pathRecommendation === "escalate_sase";
 
-  const sitesLabel =
-    sitesN === null
-      ? "Sites: not stated"
-      : `${sitesN} site${sitesN === 1 ? "" : "s"}${regions.length ? ` · ${regions.join(", ")}` : ""}`;
+  const sitesLabel = sitesN === null ? "Sites: not stated" : `${sitesN} site${sitesN === 1 ? "" : "s"}`;
 
   const squares = sitesN === null ? 0 : Math.min(sitesN, 8);
 
@@ -82,6 +84,7 @@ export function diagramModel(
     edge: sseInScope ? { label: "Secure service edge", proposed: true } : { label: "Internet", proposed: false },
     core,
     sites: { label: sitesLabel, count: sitesN, siteSquares: squares, overflow: sitesN !== null ? Math.max(0, sitesN - squares) : 0 },
+    regions,
     staff: usersN !== null ? `${usersN} staff` : null,
     shields,
     pins: pins.slice(0, 4),

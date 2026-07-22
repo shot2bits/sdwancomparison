@@ -57,6 +57,7 @@ import {
 import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, unlandedMentions, type TaxonomyItem } from "@/lib/workspace/taxonomy";
 import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
 import { diagramModel } from "@/lib/workspace/diagram";
+import { constellation } from "@/lib/workspace/constellation";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
 import SignIn from "@/components/SignIn";
 import CodeEntry from "@/components/CodeEntry";
@@ -885,6 +886,27 @@ export default function ProjectDesk() {
   }, [market, fitSlugs.join(","), added, published]);
 
   const invitedSet = new Set(published?.invited ?? []);
+
+  /* The constellation (Robert, 23 Jul: the constellation returns as the
+   * market pane). Geometry is pure and shared with the fixtures: angle is
+   * a stable function of the slug (movement is radial only, Article 14),
+   * distance is fit rank when named checks exist, one honest ring before.
+   * Ink, amber and breath stay this component's channels. */
+  const SCENE = { w: 336, h: 268, cx: 168, cy: 132 };
+  const sceneRanked = Boolean(started && fitBuying && fitSlugs.length > 0);
+  const sceneBodies = useMemo(() => {
+    const items = marketRows.shown.map((v) => {
+      const idx = fitSlugs.indexOf(v.slug);
+      return { slug: v.slug, rank: sceneRanked && idx >= 0 ? idx : null };
+    });
+    return constellation(items, sceneRanked, SCENE.cx, SCENE.cy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marketRows, sceneRanked, fitSlugs.join(",")]);
+  const fitBySlug = useMemo(
+    () => new Map((fit?.suppliers ?? []).map((s) => [s.slug, s])),
+    [fit],
+  );
+
   const autoTitle = started && facts.length > 0 ? brief.title : "Your project";
   const title = customTitle.trim() || autoTitle;
   /** The title that publishes (Harry's rename gap): the buyer's own name
@@ -920,6 +942,10 @@ export default function ProjectDesk() {
         .pd-ink{animation:pdink 1.1s ease forwards}
         @keyframes pdbreath{0%,100%{opacity:.45}50%{opacity:1}}
         .pd-breath{animation:pdbreath 3.4s ease-in-out infinite}
+        .pd-move{transition:transform .9s cubic-bezier(.22,1,.36,1)}
+        @keyframes pdemerge{from{opacity:0}}
+        .pd-emerge{animation:pdemerge .9s ease}
+        @media(prefers-reduced-motion:reduce){.pd-move{transition:none}.pd-emerge{animation:none}.pd-breath{animation:none}}
         .pd-cols{column-count:1;column-gap:2.5rem}
         @media(min-width:768px){.pd-cols{column-count:2}}
         .pd-sec{break-inside:avoid}
@@ -1255,64 +1281,101 @@ export default function ProjectDesk() {
           {/* The market, live */}
           <div className="rounded-lg border border-zinc-200 bg-white p-3">
             <p className="m-0 mb-1 flex items-baseline justify-between text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
-              The market, live <span className="font-normal normal-case tracking-normal">order is fit</span>
+              The market, live <span className="font-normal normal-case tracking-normal">distance is fit</span>
             </p>
             <p className="m-0 mb-2 text-[10.5px] text-zinc-500">
               {market ? (
                 <>
                   {market.counts.notices > 0 && <span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />}
-                  {market.counts.vendors} suppliers evaluated · {market.counts.notices} notice{market.counts.notices === 1 ? "" : "s"} genuinely open ·{" "}
+                  {market.counts.vendors} suppliers evaluated{market.latest_evaluation ? `, latest ${fmtDate(market.latest_evaluation)}` : ""} · {market.counts.notices} notice{market.counts.notices === 1 ? "" : "s"} genuinely open ·{" "}
                   <a href="/sase/opportunities/board/" className="underline hover:text-zinc-900">the board</a>
                 </>
               ) : "Reaching the market…"}
             </p>
-            <div>
-              {marketRows.shown.map((v) => {
-                const isFit = shownFit.has(v.slug);
-                const bright = v.last_verified === marketRows.latest && marketRows.latest !== "";
-                const recent = !bright && marketRows.latest && daysBetween(v.last_verified, marketRows.latest) < 60;
-                const dim = started && fitBuying && !isFit;
-                const mv = moveNow[v.slug];
-                return (
-                  <div key={v.slug}>
-                    <button
-                      type="button"
+            {marketRows.shown.length > 0 && (
+              <svg
+                viewBox={`0 0 ${SCENE.w} ${SCENE.h}`}
+                className="block w-full"
+                role="img"
+                aria-label="The market as a constellation around your position: distance is fit, ink is evaluation recency"
+              >
+                {/* Your position, the centre. Breath only on a genuinely open notice. */}
+                <circle
+                  cx={SCENE.cx}
+                  cy={SCENE.cy}
+                  r={6.5}
+                  className={published ? "pd-breath" : undefined}
+                  fill={started ? "#18181b" : "none"}
+                  stroke={started ? "none" : "#a1a1aa"}
+                  strokeDasharray={started ? undefined : "3 3"}
+                />
+                <text x={SCENE.cx} y={SCENE.cy + 18} fontSize={7} textAnchor="middle" fill="#a1a1aa" style={{ letterSpacing: ".12em" }}>YOU</text>
+                {sceneBodies.map((b) => {
+                  const v = marketRows.shown.find((s) => s.slug === b.slug);
+                  if (!v) return null;
+                  const isFit = shownFit.has(v.slug);
+                  const bright = v.last_verified === marketRows.latest && marketRows.latest !== "";
+                  const recent = !bright && marketRows.latest && daysBetween(v.last_verified, marketRows.latest) < 60;
+                  const dim = started && fitBuying && !isFit;
+                  const invited = invitedSet.has(v.slug);
+                  const ink = invited ? "#b45309" : bright ? "#18181b" : recent ? "#52525b" : "#a8a29e";
+                  const dot = invited ? "#f59e0b" : bright ? "#18181b" : recent ? "#52525b" : "#a8a29e";
+                  const size = bright || invited ? 5 : 4.3;
+                  const matchedN = fitBySlug.get(v.slug)?.matched.length ?? 0;
+                  const edgeW = sceneRanked && isFit ? Math.min(2.2, 0.5 + matchedN * 0.16) : 0.5;
+                  const cos = Math.cos((b.angle * Math.PI) / 180);
+                  const anchorEnd = b.x > SCENE.w - 88 ? true : b.x < 88 ? false : cos < 0;
+                  const name = v.name.length > 18 ? `${v.name.slice(0, 17)}…` : v.name;
+                  return (
+                    <g
+                      key={b.slug}
+                      className="pd-move pd-emerge"
+                      style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: dim ? 0.38 : 1 }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}
                       onClick={() => setVendorCard(v)}
-                      className={`flex w-full items-baseline gap-2 py-[3px] text-left text-[12px] leading-snug transition-opacity ${dim ? "opacity-40" : ""}`}
+                      onKeyDown={(e) => { if (e.key === "Enter") setVendorCard(v); }}
                     >
-                      <span
-                        className="inline-block flex-none rounded-full"
-                        style={{
-                          width: bright ? 9 : 8, height: bright ? 9 : 8,
-                          background: invitedSet.has(v.slug) ? "#f59e0b" : bright ? "#18181b" : recent ? "#52525b" : "#a8a29e",
-                        }}
-                      />
-                      <span className={bright || isFit ? "text-zinc-900" : "text-zinc-500"}>{v.name}</span>
-                      {added.includes(v.slug) && <span className="rounded-full bg-zinc-100 px-1.5 text-[8.5px] text-zinc-600">pinned</span>}
-                      {namedSlugs.has(v.slug) && <span className="rounded-full bg-zinc-100 px-1.5 text-[8.5px] text-zinc-600">named in your position</span>}
-                      {invitedSet.has(v.slug) && <span className="rounded-full bg-amber-100 px-1.5 text-[8.5px] text-amber-800">invited</span>}
-                      <span className="ml-auto whitespace-nowrap text-[9px] text-zinc-400">
-                        <span className="text-emerald-600">✓</span> {fmtDate(v.last_verified)}
-                      </span>
-                    </button>
-                    {/* Article 14: the movement explains itself beside the movement. */}
-                    {mv && (
-                      <p className={`m-0 mb-0.5 ml-[18px] text-[9.5px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
-                        {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
-                        {mv.label}: {gradeWord(mv.grade) || "no longer required"}
-                        {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-              {marketRows.more > 0 && (
-                <p className="m-0 mt-1 text-[9.5px] text-zinc-400">and {marketRows.more} more evaluated suppliers, all in the running.</p>
-              )}
-            </div>
+                      {/* The thread to your position: thickness is capabilities met. */}
+                      <line x1={0} y1={0} x2={SCENE.cx - b.x} y2={SCENE.cy - b.y} stroke={invited ? "#f59e0b" : "#d4d4d8"} strokeWidth={edgeW} opacity={invited ? 0.55 : 0.6} />
+                      {added.includes(v.slug) && <circle r={size + 2.8} fill="none" stroke="#a1a1aa" strokeWidth={0.8} />}
+                      <circle r={size} fill={dot} className={invited && published ? "pd-breath" : undefined} />
+                      <text
+                        x={anchorEnd ? -(size + 4) : size + 4}
+                        y={2.8}
+                        fontSize={8.2}
+                        textAnchor={anchorEnd ? "end" : "start"}
+                        fill={ink}
+                        style={namedSlugs.has(v.slug) ? { fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" } : undefined}
+                      >{name}</text>
+                    </g>
+                  );
+                })}
+              </svg>
+            )}
+            {/* Article 14: the movement explains itself beside the movement,
+                written, naming the supplier now that the scene has no rows. */}
+            {marketRows.shown.some((v) => moveNow[v.slug]) && (
+              <div className="mt-1 border-t border-zinc-100 pt-1">
+                {marketRows.shown.filter((v) => moveNow[v.slug]).map((v) => {
+                  const mv = moveNow[v.slug];
+                  return (
+                    <p key={v.slug} className={`m-0 mb-0.5 text-[9.5px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
+                      {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
+                      {v.name} — {mv.label}: {gradeWord(mv.grade) || "no longer required"}
+                      {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
+                    </p>
+                  );
+                })}
+              </div>
+            )}
+            {marketRows.more > 0 && (
+              <p className="m-0 mt-1 text-[9.5px] text-zinc-400">and {marketRows.more} more evaluated suppliers, all in the running.</p>
+            )}
             <p className="m-0 mt-1.5 text-[9px] leading-snug text-zinc-400">
-              Ink is evaluation recency; every date is a real evaluation (verified). Order is evidence against your named
-              checks, and nothing here ever moves without saying what changed.
+              Distance is fit against your named checks; ink is evaluation recency; a supplier only ever moves on its own
+              evidence, and every movement is written below the moment it happens. Touch any supplier for its record.
             </p>
             {vendorCard && (
               <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">

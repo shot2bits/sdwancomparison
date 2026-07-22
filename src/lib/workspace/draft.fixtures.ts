@@ -20,6 +20,7 @@ import {
   wizardSectorKey,
   type WorkspaceFact,
 } from "./draft";
+import { constellation, slugAngle, RADIUS } from "./constellation";
 import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
 import { buildChecks, workspaceFit } from "./fit";
@@ -179,7 +180,10 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
       null,
     );
     expect(d.sites.label.includes("40 sites"), "one cluster with the true count");
-    expect(d.sites.label.includes("the UK") && d.sites.label.includes("North America"), "regions named on the one cluster");
+    expect(d.regions.includes("the UK") && d.regions.includes("North America"), "regions named beside the one cluster");
+    expect(!d.sites.label.includes("the UK"), "geography never stretches the cluster label (the 23 Jul bleed)");
+    const geo = diagramModel({ organisation: { regions: ["eu"] } }, null, null);
+    expect(geo.regions.includes("Europe") && !geo.empty, "stated geography renders even before a site count");
   });
 
   await ok("the secure edge appears only with an SSE signal, labelled proposed", async () => {
@@ -467,6 +471,43 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     m = mergeUpdates(m.facts, [{ path: "procurement.operatingModel", value: "co_managed", provenance: "stated", quote: "Co-managed" }], 4, "answer");
     const om = m.facts.filter((f) => f.id === "procurement.operatingModel");
     expect(om.length === 1 && om[0].value === "co_managed", "scalar click replaces, never duplicates");
+  });
+
+  /* ---- The constellation's geometry laws (Robert, 23 Jul: the
+   *      constellation returns as the market pane) ---- */
+  await ok("constellation: angle is a stable function of the slug alone, so movement is radial only", () => {
+    expect(slugAngle("cato-networks") === slugAngle("cato-networks"), "same slug, same angle, forever");
+    const slugs = ["cato-networks", "cisco", "fortinet", "palo-alto-networks", "versa-networks", "aryaka", "bt", "colt"];
+    expect(new Set(slugs.map((s) => Math.round(slugAngle(s) / 12))).size >= 6, "the real market spreads around the circle");
+    const ranked = constellation(slugs.map((s, i) => ({ slug: s, rank: i })), true, 168, 132);
+    const reranked = constellation(slugs.map((s, i) => ({ slug: s, rank: slugs.length - 1 - i })), true, 168, 132);
+    for (const s of slugs) {
+      const a = ranked.find((b) => b.slug === s)!, b = reranked.find((x) => x.slug === s)!;
+      expect(a.angle === b.angle, `re-ranking never moves ${s} angularly`);
+    }
+  });
+
+  await ok("constellation: distance is fit rank; no checks means one honest ring", () => {
+    const ranked = constellation([{ slug: "a1", rank: 0 }, { slug: "b2", rank: 3 }], true, 168, 132, 0);
+    expect(ranked.find((b) => b.slug === "a1")!.r < ranked.find((b) => b.slug === "b2")!.r, "better rank sits nearer");
+    const flat = constellation([{ slug: "a1", rank: null }, { slug: "b2", rank: null }], false, 168, 132, 0);
+    expect(flat.every((b) => b.r === RADIUS.ring), "before evidence, every body sits on the same ring");
+    const outsider = constellation([{ slug: "a1", rank: 0 }, { slug: "b2", rank: null }], true, 168, 132, 0);
+    expect(outsider.find((b) => b.slug === "b2")!.r === RADIUS.outer, "outside the ranked set means the outer edge, not an invented rank");
+  });
+
+  await ok("constellation: separation is deterministic and radial, and bodies never collide unseen", () => {
+    const crowd = Array.from({ length: 12 }, (_, i) => ({ slug: `v${i}`, rank: i }));
+    const a = constellation(crowd, true, 168, 132);
+    const b = constellation(crowd, true, 168, 132);
+    expect(JSON.stringify(a) === JSON.stringify(b), "same input, same scene, always");
+    for (let i = 0; i < a.length; i++) {
+      expect(a[i].angle === slugAngle(a[i].slug), "separation never touches the angle");
+      for (let j = 0; j < i; j++) {
+        const gap = Math.hypot(a[i].x - a[j].x, a[i].y - a[j].y);
+        expect(gap >= 17 || a[i].r >= RADIUS.max, "min gap holds unless the scene is genuinely full");
+      }
+    }
   });
 
   return r;
