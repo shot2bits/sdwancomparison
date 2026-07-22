@@ -1804,10 +1804,10 @@ function OrganisationFields(props: {
     return xs[xs.length - 1];
   };
   const regions = facts.filter((f) => f.path === "organisation.regions");
-  const rows: Array<{ k: string; fact?: WorkspaceFact; facts?: WorkspaceFact[]; ex: string }> = [
+  const rows: Array<{ k: string; fact?: WorkspaceFact; facts?: WorkspaceFact[]; ex: string; was?: string }> = [
     { k: "Industry", fact: one("organisation.sector"), ex: ORGANISATION_EXAMPLES[0].v },
     { k: "Users", fact: one("estate.users"), ex: ORGANISATION_EXAMPLES[1].v },
-    { k: "Sites", fact: one("estate.sites"), ex: ORGANISATION_EXAMPLES[2].v },
+    { k: "Sites", fact: one("estate.sites"), ex: ORGANISATION_EXAMPLES[2].v, was: ORGANISATION_EXAMPLES[2].was },
     { k: "Countries", facts: regions, ex: ORGANISATION_EXAMPLES[3].v },
   ];
   return (
@@ -1818,7 +1818,10 @@ function OrganisationFields(props: {
           <div key={r.k} className="flex items-baseline gap-2 py-[3px] text-[13px] leading-snug">
             <span className="w-[72px] flex-none text-[11px] text-zinc-500">{r.k}</span>
             {fs.length === 0 ? (
-              <span className={isLive ? "text-[11px] text-zinc-300" : "text-zinc-300"}>{isLive ? "—" : r.ex}</span>
+              <span className={isLive ? "text-[11px] text-zinc-300" : "text-zinc-300"}>
+                {isLive ? "not stated" : r.ex}
+                {!isLive && r.was && <span className="ml-2 text-[9px] text-zinc-300">example · {r.was}</span>}
+              </span>
             ) : (
               <span className="flex flex-wrap items-baseline gap-x-2">
                 {fs.map((f) => (

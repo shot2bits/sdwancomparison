@@ -242,10 +242,10 @@ export const TAXONOMY: TaxonomySection[] = [
 /** Example field values for the Organisation section: the destination shown
  *  before the journey. NEVER enter the ledger; retire when the section holds
  *  a real fact (the example law). */
-export const ORGANISATION_EXAMPLES: Array<{ k: string; v: string }> = [
+export const ORGANISATION_EXAMPLES: Array<{ k: string; v: string; was?: string }> = [
   { k: "Industry", v: "Retail" },
   { k: "Users", v: "1,900" },
-  { k: "Sites", v: "42" },
+  { k: "Sites", v: "42", was: "corrected from 40; the assumption and the fix both kept" },
   { k: "Countries", v: "UK" },
 ];
 
