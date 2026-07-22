@@ -50,6 +50,7 @@ import {
   usersBandLabel,
   wizardRegions,
   wizardSectorKey,
+  COMPLIANCE_LABELS,
   REGION_LABELS,
   type BriefGap,
   type WorkspaceFact,
@@ -1466,6 +1467,28 @@ export default function ProjectDesk() {
                       {usersBandLabel(requirement.estate?.users) ? `${requirement.organisation?.sector ? ", " : "("}${usersBandLabel(requirement.estate?.users)}` : ""}
                       {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users) ? ", no name, no contacts)" : ""}
                       , and the full position to matched signed-in suppliers. Assumptions publish labelled as assumptions; example content never publishes at all.
+                    </p>
+                    {/* Slice three (the reference concept): the notice inherits
+                        your standing facts exactly as written, shown before you
+                        sign, with what stays private beside it. */}
+                    <p className="m-0 mb-1 text-[9.5px] font-semibold uppercase tracking-[.12em] text-zinc-400">The notice inherits</p>
+                    <p className="m-0 mb-1.5 text-[10.5px] leading-loose">
+                      {[
+                        typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : null,
+                        typeof requirement.estate?.users === "number" ? `${requirement.estate.users} users` : null,
+                        buying ? ({ sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>)[buying] ?? buying : null,
+                        opModel === "managed" ? "fully managed" : opModel === "co_managed" ? "co-managed" : null,
+                        (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join(", ")}` : null,
+                        (requirement.constraints?.complianceRequirements ?? []).length ? (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") : null,
+                      ].filter(Boolean).map((chip) => (
+                        <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-zinc-200 bg-white px-2 py-[1px] text-[10px] text-zinc-700">{chip}</span>
+                      ))}
+                      <span className="text-[9.5px] text-zinc-400">exactly as written, nothing retyped</span>
+                    </p>
+                    <p className="m-0 mb-2 text-[9.5px] leading-relaxed text-zinc-400">
+                      <span className="font-semibold text-zinc-500">Stays private:</span> your identity and contacts, your notes,
+                      {unansweredGaps.length > 0 ? ` ${unansweredGaps.length} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
+                      {" "}and anything you have struck from the record.
                     </p>
                     <label className="mb-1.5 flex items-start gap-2 text-[10.5px] leading-relaxed text-zinc-600">
                       <input type="checkbox" checked={consentCreate} onChange={(e) => setConsentCreate(e.target.checked)} className="mt-0.5" />
