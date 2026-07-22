@@ -21,6 +21,7 @@ import {
   type WorkspaceFact,
 } from "./draft";
 import { BAND, capabilityRing, constellation, labelOffsets, slugAngle, vendorHue, RADIUS, VENDOR_PALETTE } from "./constellation";
+import { deriveAreaState, deriveJourneyStates, refineConfirmed } from "./areas";
 import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
 import { buildChecks, workspaceFit } from "./fit";
@@ -580,6 +581,31 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
         expect(gap >= 17 || a[i].r >= RADIUS.max, "min gap holds unless the scene is genuinely full");
       }
     }
+  });
+
+  /* ---- The six-state area derivation (slice four's gate) ---- */
+  await ok("area states derive from real data with one honest priority", () => {
+    const st = (v: object) => ({ id: "x", path: "estate.sites", value: 5, provenance: "stated", ...v } as never);
+    expect(deriveAreaState({ facts: [], openQuestions: 0, noted: 0 }) === "example", "nothing landed means example");
+    expect(deriveAreaState({ facts: [st({})], openQuestions: 1, noted: 0 }) === "needs_attention", "an open question beats everything");
+    expect(deriveAreaState({ facts: [st({ provenance: "inferred" })], openQuestions: 0, noted: 0 }) === "suggested", "a standing inference awaits the buyer");
+    expect(deriveAreaState({ facts: [st({ struck: true })], openQuestions: 0, noted: 0 }) === "excluded", "only struck history means excluded, on the record");
+    expect(deriveAreaState({ facts: [st({ struck: true }), st({})], openQuestions: 0, noted: 0 }) === "stated", "Opposite: a standing fact beside a strike is stated, not excluded");
+    expect(deriveAreaState({ facts: [st({})], openQuestions: 0, noted: 0 }) === "stated", "the buyer's words land as stated");
+  });
+
+  await ok("confirmed is earned by full coverage in the buyer's words; journey states ride the sign chain", () => {
+    const sec = "compliance";
+    const f = (path: string) => ({ id: path, path, value: "x", provenance: "stated" } as never);
+    expect(refineConfirmed(sec, "stated", [f("constraints.complianceRequirements")]) === "confirmed", "every path covered in stated words");
+    expect(refineConfirmed("estate", "stated", [f("estate.existingNetwork")]) === "stated", "partial coverage stays stated");
+    expect(refineConfirmed(sec, "suggested" as never, []) === "suggested", "refinement never upgrades a non-stated state");
+    const j = deriveJourneyStates({ fitGraded: true, readyToSign: false, openQuestions: 2, published: false });
+    expect(j.evaluation === "ready" && j.publication === "example" && j.responses === "example", "journey from the real chain");
+    const j2 = deriveJourneyStates({ fitGraded: true, readyToSign: true, openQuestions: 2, published: false });
+    expect(j2.publication === "needs_attention", "open questions hold publication at needs attention");
+    const j3 = deriveJourneyStates({ fitGraded: true, readyToSign: true, openQuestions: 0, published: true });
+    expect(j3.publication === "ready" && j3.responses === "ready", "a real publish makes responses real");
   });
 
   return r;
