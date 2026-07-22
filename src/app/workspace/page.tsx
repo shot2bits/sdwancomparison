@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description:
     "Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement of Requirements automatically.",
-  alternates: { canonical: `${SITE_URL}/workspace/` },
+  alternates: { canonical: "https://netify.co.uk/" },
   openGraph: {
     title: TITLE,
     description:
