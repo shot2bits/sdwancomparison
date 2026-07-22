@@ -82,14 +82,43 @@ type MarketVendor = { slug: string; name: string; category: string; last_verifie
 type MarketNotice = { id: string; title: string; scope: string[]; sites: number | null; created: number };
 type Market = { rulebook_version: string; vendors: MarketVendor[]; latest_evaluation: string; notices: MarketNotice[]; counts: { vendors: number; notices: number } };
 
+type FitEvidence = { id: string; label: string; grade: string };
 type FitSupplier = {
   slug: string; name: string; category: string; last_verified: string;
   evidence_coverage_pct: number; yes_count: number; coverage: Record<string, string>;
+  matched: FitEvidence[]; missed: FitEvidence[];
 };
-type FitState = { mode: "graded" | "compiled"; count?: number; total?: number; note?: string; suppliers: FitSupplier[]; directory: Array<{ slug: string; name: string }> };
+type FitState = {
+  mode: "graded" | "compiled"; count?: number; total?: number; note?: string;
+  suppliers: FitSupplier[]; directory: Array<{ slug: string; name: string }>;
+  checks?: Array<{ id: string; label: string }>;
+};
 
 type NotedItem = { id: string; label: string; section: string };
 type Receipt = { id: number; text: string };
+
+/** Article 14 (spec 13.13): every visible movement answers "what changed".
+ *  The latest movement per supplier, and the append-only session log. */
+type Move = { dir: "up" | "down" | "hold"; places: number; label: string; grade: string; date: string };
+type MoveLogEntry = { slug: string; at: string; dir: "up" | "down" | "hold"; text: string };
+
+/** The dataset's grade words, humanised for the movement line. */
+const GRADE_WORDS: Record<string, string> = {
+  yes: "evidenced yes",
+  partial: "partial evidence",
+  partner_integrated: "via partner or integrated",
+  managed_service_dependent: "as a managed service",
+  not_primary: "not primary",
+  unknown: "not evidenced",
+};
+const gradeWord = (g: string) => GRADE_WORDS[g] ?? g;
+
+/** Taxonomy items that carry a want id (a real home in the fit checks). */
+const WANT_BY_ITEM: Record<string, string> = (() => {
+  const out: Record<string, string> = {};
+  for (const s of TAXONOMY) for (const i of s.items) if (i.want) out[i.id] = i.want;
+  return out;
+})();
 
 const ev = (name: string, data: Record<string, string | number> = {}) => {
   const flat: Record<string, string> = { surface: "desk" };
@@ -132,6 +161,9 @@ export default function ProjectDesk() {
   const [testMode, setTestMode] = useState(false);
   const [flash, setFlash] = useState<Set<string>>(new Set());
 
+  const [moveNow, setMoveNow] = useState<Record<string, Move>>({});
+  const [moveLog, setMoveLog] = useState<MoveLogEntry[]>([]);
+
   const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
   const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
   const [signedIn, setSignedIn] = useState(false);
@@ -154,6 +186,7 @@ export default function ProjectDesk() {
   const cycleRef = useRef(0);
   const receiptId = useRef(0);
   const factsRef = useRef<WorkspaceFact[]>([]);
+  const prevFitRef = useRef<{ order: string[]; matched: Map<string, Set<string>>; checkIds: Set<string> } | null>(null);
 
   const crewLog = useCallback((text: string, cls?: "you" | "em") => {
     setCrew((c) => [...c.slice(-11), { t: stamp(), text, cls }]);
@@ -224,7 +257,7 @@ export default function ProjectDesk() {
         if (raw) {
           const saved = JSON.parse(raw) as {
             facts?: WorkspaceFact[]; added?: string[]; removed?: string[];
-            noted?: NotedItem[]; receipts?: Receipt[]; ts?: number;
+            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; ts?: number;
           };
           if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && ((saved.facts?.length ?? 0) > 0 || (saved.noted?.length ?? 0) > 0)) {
             base = saved.facts ?? [];
@@ -232,6 +265,7 @@ export default function ProjectDesk() {
             setRemoved(saved.removed ?? []);
             setNoted(saved.noted ?? []);
             setReceipts(saved.receipts ?? []);
+            setMoveLog(saved.moveLog ?? []);
             receiptId.current = Math.max(0, ...(saved.receipts ?? []).map((r) => r.id));
             setRestored(true);
           }
@@ -255,9 +289,9 @@ export default function ProjectDesk() {
   useEffect(() => {
     if (!started || published) return;
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, ts: Date.now() }));
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, ts: Date.now() }));
     } catch { /* best effort */ }
-  }, [facts, added, removed, noted, receipts, started, published]);
+  }, [facts, added, removed, noted, receipts, moveLog, started, published]);
 
   /* ---- The extraction cycle (the same organ), now with the receipt ---- */
   const runCycle = useCallback(
@@ -375,18 +409,91 @@ export default function ProjectDesk() {
   const fitParams = useMemo(() => {
     if (!fitBuying) return null;
     const regions = (requirement.organisation?.regions ?? []).join(".");
-    return `buying=${fitBuying}&regions=${regions}&model=${opModel ?? "any"}&include=${added.join(",")}`;
-  }, [fitBuying, requirement, opModel, added]);
+    // P3.3: the requirement specifics the dataset genuinely grades become
+    // named checks; noted items with a want id re-rank the market for real.
+    const clouds = (requirement.estate?.cloud ?? []).filter((c) => ["aws", "azure", "google"].includes(c)).join(".");
+    const mpls = (requirement.estate?.existingNetwork ?? []).includes("mpls") ? "1" : "0";
+    const wants = [...new Set(noted.map((n) => WANT_BY_ITEM[n.id]).filter(Boolean))].sort().join(".");
+    return `buying=${fitBuying}&regions=${regions}&model=${opModel ?? "any"}&include=${added.join(",")}&clouds=${clouds}&mpls=${mpls}&wants=${wants}`;
+  }, [fitBuying, requirement, opModel, added, noted]);
   useEffect(() => {
     if (!fitParams) return;
     const ctrl = new AbortController();
     const timer = setTimeout(() => {
       fetch(`/sase/api/workspace/fit?${fitParams}`, { signal: ctrl.signal })
         .then((r) => (r.ok ? r.json() : null))
-        .then((d) => {
-          if (d && d.ok) {
-            setFit(d as FitState);
-            if (d.mode === "graded") crewLog(`Scout: ${d.count} of ${d.total} evaluated suppliers fit this scope · order is fit`);
+        .then((d: (FitState & { ok: boolean }) | null) => {
+          if (!d || !d.ok) return;
+          setFit(d as FitState);
+
+          /* Article 14: movement only ever renders with its truthful reason.
+             A supplier is a MOVER only when its own reality against the
+             requirement changed (a check it matches or misses was added or
+             withdrawn); suppliers displaced by others' movement carry no
+             marker, because nothing about them changed. First result is the
+             baseline: an initial layout is not a movement. */
+          if (d.mode === "graded") {
+            const newOrder = d.suppliers.map((s) => s.slug);
+            const newMatched = new Map(d.suppliers.map((s) => [s.slug, new Set(s.matched.map((m) => m.id))]));
+            const newCheckIds = new Set((d.checks ?? []).map((c) => c.id));
+            const prev = prevFitRef.current;
+            if (prev) {
+              const addedChecks = [...newCheckIds].filter((id) => !prev.checkIds.has(id));
+              const removedChecks = [...prev.checkIds].filter((id) => !newCheckIds.has(id));
+              if (addedChecks.length || removedChecks.length) {
+                const nowMoves: Record<string, Move> = {};
+                const log: MoveLogEntry[] = [];
+                let evidencedQuietly = 0;
+                for (const s of d.suppliers) {
+                  const gained = s.matched.filter((m) => addedChecks.includes(m.id));
+                  const failed = s.missed.filter((m) => addedChecks.includes(m.id));
+                  const lost = [...(prev.matched.get(s.slug) ?? [])].filter((id) => removedChecks.includes(id));
+                  if (!gained.length && !failed.length && !lost.length) continue;
+                  const pRank = prev.order.indexOf(s.slug);
+                  const nRank = newOrder.indexOf(s.slug);
+                  const delta = pRank < 0 ? 0 : pRank - nRank;
+                  const ev = failed[0] ?? gained[0];
+                  const dir: Move["dir"] = delta > 0 ? "up" : delta < 0 ? "down" : "hold";
+                  // A hold with the new check simply evidenced is not a
+                  // movement: it stays quiet per row (the crew states the
+                  // aggregate once). A hold that MISSES the new check is
+                  // signal and renders.
+                  if (dir === "hold" && !failed.length && !lost.length) {
+                    evidencedQuietly += 1;
+                    continue;
+                  }
+                  nowMoves[s.slug] = {
+                    dir,
+                    places: Math.abs(delta),
+                    label: ev ? ev.label : "a requirement was withdrawn",
+                    grade: ev ? ev.grade : "",
+                    date: s.last_verified,
+                  };
+                  log.push({ slug: s.slug, at: stamp(), dir, text: ev ? `${ev.label}: ${gradeWord(ev.grade)}` : "a requirement was withdrawn" });
+                }
+                setMoveNow(nowMoves);
+                if (log.length) setMoveLog((l) => [...l, ...log].slice(-40));
+                const riser = d.suppliers.find((s) => nowMoves[s.slug]?.dir === "up");
+                const faller = d.suppliers.find((s) => nowMoves[s.slug]?.dir === "down");
+                if (riser) {
+                  const m = nowMoves[riser.slug];
+                  crewLog(`Scout: ${riser.name} rises · ${m.label} ${gradeWord(m.grade)} · evaluated ${fmtDate(riser.last_verified)}`);
+                }
+                if (faller) {
+                  const m = nowMoves[faller.slug];
+                  crewLog(`Scout: ${faller.name} falls · ${m.label} ${gradeWord(m.grade)}`);
+                }
+                if (!riser && !faller && addedChecks.length && evidencedQuietly > 0) {
+                  // The quiet day, stated plainly: the check ran and the
+                  // order genuinely stood.
+                  const label = (d.checks ?? []).find((c) => c.id === addedChecks[0])?.label ?? "the new requirement";
+                  crewLog(`Scout: ${label} checked · ${evidencedQuietly} suppliers evidence it · the order stands`);
+                }
+              }
+            } else {
+              crewLog(`Scout: ${d.count} of ${d.total} evaluated suppliers fit this scope · order is evidence against your checks`);
+            }
+            prevFitRef.current = { order: newOrder, matched: newMatched, checkIds: newCheckIds };
           }
         })
         .catch(() => {});
@@ -674,6 +781,24 @@ export default function ProjectDesk() {
   const invitedSet = new Set(published?.invited ?? []);
   const title = started && facts.length > 0 ? brief.title : "Your project";
 
+  /** Suppliers the buyer has NAMED in their own retained words (quotes,
+   *  receipts). A tag, never a rank change: naming is not evidence. */
+  const namedSlugs = useMemo(() => {
+    const text = [
+      ...facts.map((f) => `${f.quote ?? ""} ${f.reason ?? ""}`),
+      ...receipts.map((r) => r.text),
+    ].join(" ").toLowerCase();
+    const out = new Set<string>();
+    if (text.trim())
+      for (const v of market?.vendors ?? []) {
+        const full = v.name.toLowerCase();
+        const first = full.split(/[\s/]+/)[0];
+        const hit = text.includes(full) || (first.length >= 4 && !["check", "orange"].includes(first) && new RegExp(`\\b${first}\\b`).test(text));
+        if (hit) out.add(v.slug);
+      }
+    return out;
+  }, [facts, receipts, market]);
+
   /* ------------------------------------------------------------------ */
   /* Render: the desk                                                    */
   /* ------------------------------------------------------------------ */
@@ -958,9 +1083,10 @@ export default function ProjectDesk() {
 
             {/* The four truth classes, stated once */}
             <p className="m-0 mt-3 text-[10px] leading-relaxed text-zinc-400">
-              <span className="text-zinc-300">grey</span> example, never publishes · <span className="border-b border-zinc-900 text-zinc-900">solid ink</span> stated, your words or your touch ·{" "}
+              <span className="text-zinc-300">grey</span> example, never publishes · <span className="italic text-zinc-600">&ldquo;quoted&rdquo;</span> captured, awaiting interpretation ·{" "}
+              <span className="border-b border-zinc-900 text-zinc-900">solid ink</span> stated, your words or your touch ·{" "}
               <span className="border-b border-dotted border-zinc-500 text-zinc-600">dotted</span> inferred, reason attached, one tap strikes ·{" "}
-              <span className="text-emerald-700">✓ dated</span> verified, evidence stands behind it. Strike anything; a strike is never overridden by re-inference, only by your own words.
+              <span className="text-emerald-700">✓ dated</span> verified, evidence stands behind it. Strike anything; a strike is never overridden by re-inference, only by your own words. Nothing on this desk moves without saying what changed.
             </p>
           </div>
         </div>
@@ -1011,27 +1137,38 @@ export default function ProjectDesk() {
                 const bright = v.last_verified === marketRows.latest && marketRows.latest !== "";
                 const recent = !bright && marketRows.latest && daysBetween(v.last_verified, marketRows.latest) < 60;
                 const dim = started && fitBuying && !isFit;
+                const mv = moveNow[v.slug];
                 return (
-                  <button
-                    key={v.slug}
-                    type="button"
-                    onClick={() => setVendorCard(v)}
-                    className={`flex w-full items-baseline gap-2 py-[3px] text-left text-[12px] leading-snug transition-opacity ${dim ? "opacity-40" : ""}`}
-                  >
-                    <span
-                      className="inline-block flex-none rounded-full"
-                      style={{
-                        width: bright ? 9 : 8, height: bright ? 9 : 8,
-                        background: invitedSet.has(v.slug) ? "#f59e0b" : bright ? "#18181b" : recent ? "#52525b" : "#a8a29e",
-                      }}
-                    />
-                    <span className={bright || isFit ? "text-zinc-900" : "text-zinc-500"}>{v.name}</span>
-                    {added.includes(v.slug) && <span className="rounded-full bg-zinc-100 px-1.5 text-[8.5px] text-zinc-600">pinned</span>}
-                    {invitedSet.has(v.slug) && <span className="rounded-full bg-amber-100 px-1.5 text-[8.5px] text-amber-800">invited</span>}
-                    <span className="ml-auto whitespace-nowrap text-[9px] text-zinc-400">
-                      <span className="text-emerald-600">✓</span> {fmtDate(v.last_verified)}
-                    </span>
-                  </button>
+                  <div key={v.slug}>
+                    <button
+                      type="button"
+                      onClick={() => setVendorCard(v)}
+                      className={`flex w-full items-baseline gap-2 py-[3px] text-left text-[12px] leading-snug transition-opacity ${dim ? "opacity-40" : ""}`}
+                    >
+                      <span
+                        className="inline-block flex-none rounded-full"
+                        style={{
+                          width: bright ? 9 : 8, height: bright ? 9 : 8,
+                          background: invitedSet.has(v.slug) ? "#f59e0b" : bright ? "#18181b" : recent ? "#52525b" : "#a8a29e",
+                        }}
+                      />
+                      <span className={bright || isFit ? "text-zinc-900" : "text-zinc-500"}>{v.name}</span>
+                      {added.includes(v.slug) && <span className="rounded-full bg-zinc-100 px-1.5 text-[8.5px] text-zinc-600">pinned</span>}
+                      {namedSlugs.has(v.slug) && <span className="rounded-full bg-zinc-100 px-1.5 text-[8.5px] text-zinc-600">named in your position</span>}
+                      {invitedSet.has(v.slug) && <span className="rounded-full bg-amber-100 px-1.5 text-[8.5px] text-amber-800">invited</span>}
+                      <span className="ml-auto whitespace-nowrap text-[9px] text-zinc-400">
+                        <span className="text-emerald-600">✓</span> {fmtDate(v.last_verified)}
+                      </span>
+                    </button>
+                    {/* Article 14: the movement explains itself beside the movement. */}
+                    {mv && (
+                      <p className={`m-0 mb-0.5 ml-[18px] text-[9.5px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
+                        {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
+                        {mv.label}: {gradeWord(mv.grade) || "withdrawn"}
+                        {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
+                      </p>
+                    )}
+                  </div>
                 );
               })}
               {marketRows.more > 0 && (
@@ -1039,16 +1176,54 @@ export default function ProjectDesk() {
               )}
             </div>
             <p className="m-0 mt-1.5 text-[9px] leading-snug text-zinc-400">
-              Ink is evaluation recency; every date is a real evaluation (verified). Order sharpens as your position grows.
+              Ink is evaluation recency; every date is a real evaluation (verified). Order is evidence against your named
+              checks, and nothing here ever moves without saying what changed.
             </p>
             {vendorCard && (
               <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
                 <button type="button" onClick={() => setVendorCard(null)} className="float-right text-zinc-400 hover:text-zinc-900">✕</button>
-                <p className="m-0 text-[12px] font-semibold text-zinc-900">{vendorCard.name}</p>
+                <p className="m-0 text-[12px] font-semibold text-zinc-900">
+                  {vendorCard.name}
+                  {namedSlugs.has(vendorCard.slug) && <span className="ml-1.5 rounded-full bg-zinc-200 px-1.5 text-[8.5px] font-normal text-zinc-600">named in your position</span>}
+                </p>
                 <p className="m-0 mt-0.5 text-[10px] text-zinc-500">{vendorCard.category}</p>
                 <p className="m-0 mt-1 text-[10px] leading-relaxed text-zinc-600">
                   Evaluated {fmtDate(vendorCard.last_verified)} · {vendorCard.yes_count} of 40 capabilities fully met.
                 </p>
+                {/* Article 14, the four answers: what changed, why it moved,
+                    what evidence, and the challenge. */}
+                {(() => {
+                  const fs = fit?.suppliers.find((s) => s.slug === vendorCard.slug);
+                  const mv = moveNow[vendorCard.slug];
+                  const hist = moveLog.filter((l) => l.slug === vendorCard.slug).slice(-4).reverse();
+                  return (
+                    <>
+                      {mv && (
+                        <div className="mt-1.5 border-t border-zinc-200 pt-1.5 text-[10px] leading-relaxed text-zinc-600">
+                          <p className="m-0"><b className="text-zinc-800">What changed:</b> your requirement {mv.grade ? "gained" : "withdrew"} {mv.label}.</p>
+                          <p className="m-0"><b className="text-zinc-800">Why it moved:</b> {mv.label} is {gradeWord(mv.grade) || "no longer checked"} for {vendorCard.name}.</p>
+                          <p className="m-0"><b className="text-zinc-800">Evidence:</b> evaluated {fmtDate(vendorCard.last_verified)}.</p>
+                        </div>
+                      )}
+                      {fs && (fs.matched.length > 0 || fs.missed.length > 0) && (
+                        <div className="mt-1.5 text-[9.5px] leading-relaxed text-zinc-500">
+                          {fs.matched.length > 0 && <p className="m-0">Evidences: {fs.matched.map((m) => m.label).join(", ")}.</p>}
+                          {fs.missed.length > 0 && <p className="m-0 text-zinc-400">Not evidenced: {fs.missed.map((m) => m.label).join(", ")}.</p>}
+                        </div>
+                      )}
+                      {hist.length > 0 && (
+                        <div className="mt-1.5 text-[9px] leading-relaxed text-zinc-400">
+                          {hist.map((h, i) => (
+                            <p key={i} className="m-0">{h.at} · {h.dir === "up" ? "rose" : h.dir === "down" ? "fell" : "held"} · {h.text}</p>
+                          ))}
+                        </div>
+                      )}
+                      <a href={`/sase/${vendorCard.slug}/`} className="mt-1 inline-block text-[10px] text-zinc-700 underline">
+                        Challenge it: compare the evidence
+                      </a>
+                    </>
+                  );
+                })()}
                 {!published && (
                   added.includes(vendorCard.slug) ? (
                     <button

@@ -22,6 +22,7 @@ import {
 } from "./draft";
 import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
+import { buildChecks, workspaceFit } from "./fit";
 import { assessSecurityRequirement } from "@/lib/security/rulebook";
 
 export interface WorkspaceTestResult { pass: number; fail: number; failures: string[] }
@@ -268,6 +269,53 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(Boolean(f) && f!.provenance === "stated" && f!.source === "answer", "click lands stated via the answer source");
     const req = requirementFrom(m.facts);
     expect((req.constraints?.complianceRequirements ?? []).includes("nhs_dspt"), "the clicked fact feeds the requirement");
+  });
+
+  /* ---- P3.3: feature-level fit under Article 14 (spec 13.7, 13.13) ---- */
+  await ok("checks come only from graded homes; unknown wants are dropped, never invented", () => {
+    const checks = buildChecks({ buying: "sase", regionKeys: ["uk_ireland"], model: "managed", clouds: ["aws", "nonsense"], mplsEstate: true, wants: ["s247", "made_up_want"] });
+    const ids = checks.map((c) => c.id);
+    expect(ids.includes("model:managed") && ids.includes("buying:sase"), "model and buying checks present");
+    expect(ids.includes("cloud:aws") && !ids.some((i) => i.includes("nonsense")), "aws checked, nonsense dropped");
+    expect(ids.includes("estate:mpls") && ids.includes("region:uk_ireland"), "estate and region checks present");
+    expect(ids.includes("want:s247") && !ids.some((i) => i.includes("made_up")), "known want checked, unknown dropped");
+  });
+
+  await ok("the order IS the evidence: totals descend, and every supplier carries its matched and missed checks", () => {
+    const r = workspaceFit({ buying: "sase", regions: ["uk"], model: "managed", clouds: ["aws"] });
+    expect(r.mode === "graded" && r.suppliers.length > 3, "graded list returned");
+    const w = (g: string) => (g === "yes" ? 2 : ["partial", "partner_integrated", "managed_service_dependent"].includes(g) ? 1 : 0);
+    const totals = r.suppliers.map((s) => s.matched.reduce((n, m) => n + w(m.grade), 0));
+    for (let i = 1; i < totals.length; i++) expect(totals[i] <= totals[i - 1], `evidence totals must descend: ${totals.join(",")}`);
+    const top = r.suppliers[0];
+    expect(top.matched.length > 0 && top.matched.every((m) => m.label.length > 1 && m.grade.length > 0), "reasons carry labels and verbatim grades");
+    expect(r.suppliers.every((s) => s.last_verified.length === 10), "every supplier carries its evidence date");
+    expect(r.checks.some((c) => c.label === "AWS on-ramp"), "the AWS check is named");
+  });
+
+  await ok("Article 14 pure: same inputs, same order; a new check displaces only across grade groups", () => {
+    const a1 = workspaceFit({ buying: "sase", regions: ["uk"], model: "managed" });
+    const a2 = workspaceFit({ buying: "sase", regions: ["uk"], model: "managed" });
+    expect(a1.suppliers.map((s) => s.slug).join(",") === a2.suppliers.map((s) => s.slug).join(","), "determinism: identical inputs give identical order");
+    const b = workspaceFit({ buying: "sase", regions: ["uk"], model: "managed", wants: ["s247"] });
+    const gradeOf = (r: typeof b, slug: string) => {
+      const s = r.suppliers.find((x) => x.slug === slug)!;
+      const hit = [...s.matched, ...s.missed].find((m) => m.id === "want:s247");
+      return hit ? (hit.grade === "yes" ? 2 : ["partial", "partner_integrated", "managed_service_dependent"].includes(hit.grade) ? 1 : 0) : 0;
+    };
+    // Within each s247 grade group, relative order is preserved: suppliers
+    // whose own reality did not differ never leapfrog each other.
+    const before = a1.suppliers.map((s) => s.slug);
+    for (const g of [0, 1, 2]) {
+      const beforeGroup = before.filter((s) => gradeOf(b, s) === g);
+      const afterGroup = b.suppliers.map((s) => s.slug).filter((s) => gradeOf(b, s) === g && before.includes(s));
+      expect(beforeGroup.filter((s) => afterGroup.includes(s)).join(",") === afterGroup.join(","), `stable within grade group ${g}`);
+    }
+  });
+
+  await ok("managed security stays compiled: the dataset boundary is stated, no ranking invented", () => {
+    const r = workspaceFit({ buying: "managed_security" });
+    expect(r.mode === "compiled" && "note" in r && r.note.includes("no ranking"), "boundary stated");
   });
 
   await ok("click grammar: strike on second touch, restore by touch (a stated act), never by re-inference", () => {

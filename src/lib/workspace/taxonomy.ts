@@ -30,6 +30,10 @@ export type TaxonomyItem = {
   /** Renders as a grey example demonstration tick until its section holds
    *  a real fact (the example law, 13.3/13.9). */
   exampleTick?: boolean;
+  /** P3.3: a stable check id in the fit organ's WANT_CHECKS. A noted item
+   *  carrying a want genuinely re-ranks the market with its reason and
+   *  evidence date, because the 40-feature grid grades it. */
+  want?: string;
 };
 
 export type TaxonomySection = {
@@ -83,10 +87,10 @@ export const TAXONOMY: TaxonomySection[] = [
       { id: "buy-sdwan", label: "Buying SD-WAN", path: "procurement.buying", value: "sdwan", why: ENGINE },
       { id: "buy-sse", label: "Buying SSE", path: "procurement.buying", value: "sse", why: ENGINE },
       { id: "buy-sec", label: "Buying managed security", path: "procurement.buying", value: "managed_security", why: ENGINE },
-      { id: "obj-mpls", label: "Replace legacy MPLS", path: null, why: SEARCH, exampleTick: true },
-      { id: "obj-remote", label: "Improve remote user experience", path: null, why: SEARCH, exampleTick: true },
+      { id: "obj-mpls", label: "Replace legacy MPLS", path: null, why: SEARCH, exampleTick: true , want: "mplsmig" },
+      { id: "obj-remote", label: "Improve remote user experience", path: null, why: SEARCH, exampleTick: true , want: "remote" },
       { id: "obj-overhead", label: "Reduce operational overhead", path: null, why: SEARCH },
-      { id: "obj-zt", label: "Zero trust access", path: null, why: SEARCH },
+      { id: "obj-zt", label: "Zero trust access", path: null, why: SEARCH , want: "ztna" },
       { id: "obj-cloudfirst", label: "Cloud-first networking", path: null, why: SEARCH },
     ],
   },
@@ -105,9 +109,9 @@ export const TAXONOMY: TaxonomySection[] = [
       { id: "cl-azure", label: "Azure", path: "estate.cloud", value: "azure", why: ENGINE },
       { id: "cl-aws", label: "AWS", path: "estate.cloud", value: "aws", why: ENGINE },
       { id: "cl-google", label: "Google Workspace", path: "estate.cloud", value: "google", why: ENGINE },
-      { id: "net-cell", label: "4G or 5G backup", path: null, why: FEATURES },
+      { id: "net-cell", label: "4G or 5G backup", path: null, why: FEATURES , want: "cellular" },
       { id: "net-dc", label: "Data centres", path: null, why: SEARCH },
-      { id: "net-remote", label: "Remote users", path: null, why: SEARCH },
+      { id: "net-remote", label: "Remote users", path: null, why: SEARCH , want: "remote" },
       { id: "net-bandwidth", label: "Bandwidth per site", path: null, why: SEARCH },
       { id: "net-circuits", label: "Circuit types", path: null, why: SEARCH },
     ],
@@ -118,11 +122,11 @@ export const TAXONOMY: TaxonomySection[] = [
     exampleNote: "the SASE people actually buy",
     paths: ["estate.existingSecurity"],
     items: [
-      { id: "sse-ztna", label: "ZTNA", path: null, why: FEATURES },
-      { id: "sse-swg", label: "SWG", path: null, why: FEATURES },
-      { id: "sse-casb", label: "CASB", path: null, why: FEATURES },
-      { id: "sse-fwaas", label: "FWaaS", path: null, why: FEATURES },
-      { id: "sse-dlp", label: "DLP", path: null, why: FEATURES },
+      { id: "sse-ztna", label: "ZTNA", path: null, why: FEATURES , want: "ztna" },
+      { id: "sse-swg", label: "SWG", path: null, why: FEATURES , want: "swg" },
+      { id: "sse-casb", label: "CASB", path: null, why: FEATURES , want: "casb" },
+      { id: "sse-fwaas", label: "FWaaS", path: null, why: FEATURES , want: "fwaas" },
+      { id: "sse-dlp", label: "DLP", path: null, why: FEATURES , want: "dlp" },
       { id: "sse-dns", label: "DNS security", path: null, why: FEATURES },
       { id: "sse-email", label: "Email security", path: null, why: FEATURES },
     ],
@@ -171,9 +175,9 @@ export const TAXONOMY: TaxonomySection[] = [
     exampleNote: "what good looks like",
     paths: ["constraints.inHouseSocCapacity"],
     items: [
-      { id: "s-247", label: "24x7 support", path: null, why: FEATURES, exampleTick: true },
-      { id: "s-uk", label: "UK-based support", path: null, why: SEARCH },
-      { id: "s-engineer", label: "Named engineer", path: null, why: SEARCH },
+      { id: "s-247", label: "24x7 support", path: null, why: FEATURES, exampleTick: true , want: "s247" },
+      { id: "s-uk", label: "UK-based support", path: null, why: SEARCH , want: "ukdesk" },
+      { id: "s-engineer", label: "Named engineer", path: null, why: SEARCH , want: "tam" },
       { id: "s-reviews", label: "Service reviews", path: null, why: SEARCH },
     ],
   },
@@ -195,7 +199,7 @@ export const TAXONOMY: TaxonomySection[] = [
     exampleNote: "example content",
     paths: [],
     items: [
-      { id: "ps-migration", label: "Migration", path: null, why: FEATURES },
+      { id: "ps-migration", label: "Migration", path: null, why: FEATURES , want: "migration" },
       { id: "ps-pm", label: "Project management", path: null, why: SEARCH },
       { id: "ps-training", label: "Training", path: null, why: SEARCH },
       { id: "ps-changes", label: "Change requests", path: null, why: SEARCH },

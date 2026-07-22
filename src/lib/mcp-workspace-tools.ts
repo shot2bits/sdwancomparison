@@ -125,7 +125,15 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
   );
   const fitBuying = buying && buying !== "managed_security" ? buying : sseSignal ? "sse" : "managed_security";
   const fit = includeFit
-    ? workspaceFit({ buying: fitBuying, regions: result.requirement.organisation?.regions ?? [], model: operatingModel ?? "any" })
+    ? workspaceFit({
+        buying: fitBuying,
+        regions: result.requirement.organisation?.regions ?? [],
+        model: operatingModel ?? "any",
+        // P3.3 parity: the agent's requirement drives the same named checks
+        // the page drives, so both read identical evidence (Article 17).
+        clouds: result.requirement.estate?.cloud ?? [],
+        mplsEstate: (result.requirement.estate?.existingNetwork ?? []).includes("mpls"),
+      })
     : undefined;
 
   return {

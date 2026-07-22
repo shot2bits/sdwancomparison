@@ -22,6 +22,10 @@ export async function GET(req: Request) {
     regions: (url.searchParams.get("regions") ?? "").split(".").filter(Boolean),
     model: url.searchParams.get("model") ?? "any",
     include: (url.searchParams.get("include") ?? "").split(",").filter(Boolean),
+    // P3.3: the requirement specifics the dataset genuinely grades.
+    clouds: (url.searchParams.get("clouds") ?? "").split(".").filter(Boolean),
+    mplsEstate: url.searchParams.get("mpls") === "1",
+    wants: (url.searchParams.get("wants") ?? "").split(".").filter(Boolean),
   });
   return Response.json(
     { ok: true, ...result },
