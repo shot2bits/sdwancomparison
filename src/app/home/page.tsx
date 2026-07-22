@@ -16,7 +16,7 @@ import { getOrganizationSchema } from "@/lib/structured-data";
 const APEX = "https://netify.co.uk";
 
 const TITLE =
-  "Imagine describing your SASE and SD-WAN requirements once, then watching the world's leading suppliers compete for your business";
+  "Imagine describing your SASE and SD-WAN requirements once, then watching the market build itself around you as the world's leading suppliers compete for your business";
 
 export const metadata: Metadata = {
   title: `Netify | ${TITLE}`,
@@ -108,8 +108,8 @@ export default function Page() {
           className="m-0 max-w-3xl tracking-tight"
           style={{ fontSize: "16.5px", lineHeight: 1.45, fontWeight: 600, color: "#27272a" }}
         >
-          Imagine describing your SASE and SD-WAN requirements once, then watching the world&rsquo;s leading suppliers
-          compete for your business.
+          Imagine describing your SASE and SD-WAN requirements once, then watching the market build itself around you as
+          the world&rsquo;s leading suppliers compete for your business.
         </h1>
         <p id="page-subhead" className="mb-0 mt-1 max-w-2xl text-[12.5px] leading-relaxed text-zinc-500">
           Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the

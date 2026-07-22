@@ -427,6 +427,72 @@ export default function ProjectDesk() {
     [busy, applyMerge, crewLog],
   );
 
+  /* ---- Voice, real (Robert's pick, 24 Jul): the browser's own speech
+   * recognition. The mic renders only where the engine exists; the wave
+   * marks only genuine listening (real liveness, the lawful kind); the
+   * words land in the input as they are heard and the cycle runs on the
+   * final result exactly as if typed. Nothing here pretends. ---- */
+  const [voiceState, setVoiceState] = useState<"idle" | "listening">("idle");
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const voiceRec = useRef<{ stop: () => void } | null>(null);
+  useEffect(() => {
+    const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+    if (w.SpeechRecognition || w.webkitSpeechRecognition) setVoiceSupported(true);
+    return () => { try { voiceRec.current?.stop(); } catch { /* gone */ } };
+  }, []);
+  const stopVoice = () => {
+    try { voiceRec.current?.stop(); } catch { /* already stopped */ }
+    setVoiceState("idle");
+  };
+  const startVoice = () => {
+    type SRCtor = new () => {
+      lang: string; interimResults: boolean; continuous: boolean;
+      onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
+      onerror: ((e: { error?: string }) => void) | null;
+      onend: (() => void) | null;
+      start: () => void; stop: () => void;
+    };
+    const w = window as unknown as { SpeechRecognition?: SRCtor; webkitSpeechRecognition?: SRCtor };
+    const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
+    if (!SR || busy) return;
+    setVoiceError(null);
+    const rec = new SR();
+    rec.lang = "en-GB";
+    rec.interimResults = true;
+    rec.continuous = false;
+    let finalText = "";
+    rec.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) finalText += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+      setInput((finalText + interim).trim());
+    };
+    rec.onerror = (e) => {
+      setVoiceState("idle");
+      setVoiceError(
+        e?.error === "not-allowed" || e?.error === "service-not-allowed"
+          ? "The microphone was blocked; type instead."
+          : "Voice did not catch that; type instead.",
+      );
+    };
+    rec.onend = () => {
+      setVoiceState("idle");
+      const said = finalText.trim();
+      if (said.length >= 3) {
+        ev("workspace_voice", { chars: said.length });
+        void runCycle(said, { fromEnter: true });
+      }
+    };
+    voiceRec.current = rec;
+    setVoiceState("listening");
+    try { rec.start(); } catch { setVoiceState("idle"); }
+  };
+
   /* ---- Debounce per pause ---- */
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -1057,13 +1123,19 @@ export default function ProjectDesk() {
         .pd-sec{break-inside:avoid}
         @keyframes pdlivein{0%{box-shadow:0 0 0 2px rgba(245,158,11,.55)}100%{box-shadow:0 0 0 2px rgba(245,158,11,0)}}
         .pd-live-in{animation:pdlivein 1.4s ease forwards;border-radius:8px}
+        @keyframes pdwave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+        .pd-wave rect{transform-origin:center;animation:pdwave 1s ease-in-out infinite}
+        .pd-wave rect:nth-child(2){animation-delay:.15s}
+        .pd-wave rect:nth-child(3){animation-delay:.3s}
+        .pd-wave rect:nth-child(4){animation-delay:.45s}
+        @media(prefers-reduced-motion:reduce){.pd-wave rect{animation:none}}
       `}</style>
 
       {/* ---- The one line in: the page's one control, framed as such ---- */}
       <div className="mx-auto w-[min(760px,100%)]">
-        <div className="rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.04),0_12px_32px_-18px_rgba(24,24,27,.18)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_1px_0_rgba(245,158,11,.15),0_16px_40px_-18px_rgba(180,83,9,.22)]">
+        <section aria-label="Describe your project" className="rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,.16),0_22px_56px_-20px_rgba(180,83,9,.3)]">
         <p className="m-0 mb-1.5 text-[9.5px] font-semibold uppercase tracking-[.16em] text-zinc-400">Start here · one sentence is enough</p>
-        <div className="flex items-center gap-2 border-b-2 border-zinc-300 px-1 py-2 focus-within:border-amber-500">
+        <div className="relative border-b-2 border-zinc-300 px-1 py-2 focus-within:border-amber-500">
           <input
             ref={inputRef}
             value={input}
@@ -1079,12 +1151,44 @@ export default function ProjectDesk() {
             }}
             placeholder={started ? "Add or correct anything: 'actually 45 sites', 'we already run Defender'…" : "Describe your project in one sentence, or touch anything below to begin"}
             disabled={Boolean(published)}
-            className="w-full bg-transparent text-center text-[16.5px] italic text-zinc-900 outline-none placeholder:text-zinc-400 sm:text-[17.5px]"
+            className="w-full bg-transparent px-9 text-center text-[17px] italic text-zinc-900 outline-none placeholder:text-zinc-400 sm:text-[18px]"
             aria-label="Describe your project"
           />
+          {voiceSupported && !published && (
+            <button
+              type="button"
+              onClick={() => (voiceState === "listening" ? stopVoice() : startVoice())}
+              disabled={busy}
+              aria-label={voiceState === "listening" ? "Stop listening" : "Speak your requirement"}
+              title={voiceState === "listening" ? "Stop listening" : "Speak instead of typing"}
+              className={`absolute right-1 top-1/2 -translate-y-1/2 rounded-full border p-[7px] transition-colors disabled:opacity-40 ${
+                voiceState === "listening"
+                  ? "border-amber-500 bg-amber-50 text-amber-700"
+                  : "border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700"
+              }`}
+            >
+              {voiceState === "listening" ? (
+                <svg className="pd-wave" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+                  <rect x="1" y="3" width="2" height="8" rx="1" fill="currentColor" />
+                  <rect x="4.7" y="3" width="2" height="8" rx="1" fill="currentColor" />
+                  <rect x="8.4" y="3" width="2" height="8" rx="1" fill="currentColor" />
+                  <rect x="12.1" y="3" width="2" height="8" rx="1" fill="currentColor" transform="translate(-1.1 0)" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <rect x="5" y="1.2" width="4" height="7" rx="2" stroke="currentColor" strokeWidth="1.2" />
+                  <path d="M3 6.5v.5a4 4 0 0 0 8 0v-.5M7 11.2v1.6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11.5px] text-zinc-500">
           {busy && <span aria-live="polite" className="text-zinc-700">Reading…</span>}
+          {voiceState === "listening" && !busy && (
+            <span aria-live="polite" className="text-amber-700">Listening… your words land as you speak.</span>
+          )}
+          {voiceError && !busy && voiceState === "idle" && <span className="text-zinc-500">{voiceError}</span>}
           {!busy && started && engineUsed === "deterministic_fallback" && <span>Read without the model this turn; everything still works.</span>}
           {cycleError && <span className="text-red-600">{cycleError}</span>}
           {booted && !started && !busy && (
@@ -1122,7 +1226,7 @@ export default function ProjectDesk() {
           )}
           {testMode && <span className="font-medium text-amber-700">Test mode: signing creates a self-expiring test position and never touches the live board.</span>}
         </div>
-        </div>
+        </section>
         {published && (
           <p className="m-0 mt-3 text-[13px] text-zinc-700">
             <span className="text-[15px] italic">Live. The market answers here.</span>{" "}
@@ -1141,7 +1245,7 @@ export default function ProjectDesk() {
               it, updating with every sentence. Example-labelled until the
               buyer starts; anonymous always; never publishes by itself. ---- */}
       <div className="mx-auto mt-5 w-[min(760px,100%)]">
-        <div className={`rounded-xl border p-4 ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
+        <section aria-label="Your opportunity, as the market will see it" className={`rounded-xl border p-4 shadow-[0_1px_0_rgba(24,24,27,.04),0_14px_36px_-22px_rgba(24,24,27,.22)] ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="m-0 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
               {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />Live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
@@ -1153,19 +1257,72 @@ export default function ProjectDesk() {
           <p className={`m-0 mt-1.5 text-[15px] font-semibold leading-snug ${started ? "text-zinc-900" : "text-zinc-400"}`}>
             {started ? publishTitle : "SASE and SD-WAN transformation · UK retailer"}
           </p>
-          <p className={`m-0 mt-1 text-[11.5px] leading-relaxed ${started ? "text-zinc-600" : "text-zinc-400"}`}>
-            {started
-              ? [
-                  requirement.organisation?.sector ?? null,
-                  usersBandLabel(requirement.estate?.users) ?? null,
-                  typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : null,
-                  buying ? ({ sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>)[buying] ?? buying : null,
-                  opModel === "managed" ? "fully managed" : opModel === "co_managed" ? "co-managed" : null,
-                  (requirement.organisation?.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join(", ") || null,
-                  (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") || null,
-                ].filter(Boolean).join(" · ") || "your first sentence starts this listing"
-              : "Retail · 1,900 users · 42 sites · the UK · SASE and SD-WAN · fully managed · PCI DSS"}
-          </p>
+          {/* The facts as chips (the 24 Jul translation of "tag nodes"): each
+              carries its real provenance in the ink language (solid border
+              stated, dotted inferred) and opens its own section on touch. No
+              emojis, no confidence numbers: provenance IS the confidence. */}
+          {(() => {
+            const B = { sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>;
+            const chips: { v: string; paths: string[]; sec: string }[] = started
+              ? ([
+                  { v: requirement.organisation?.sector ?? "", paths: ["organisation.sector"], sec: "organisation" },
+                  { v: usersBandLabel(requirement.estate?.users) ?? "", paths: ["estate.users"], sec: "organisation" },
+                  { v: typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : "", paths: ["estate.sites"], sec: "organisation" },
+                  { v: buying ? B[buying] ?? buying : "", paths: ["procurement.buying"], sec: "objectives" },
+                  { v: opModel === "managed" ? "fully managed" : opModel === "co_managed" ? "co-managed" : "", paths: ["procurement.operatingModel"], sec: "model" },
+                  { v: (requirement.organisation?.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join(", "), paths: ["organisation.regions"], sec: "organisation" },
+                  { v: (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", "), paths: ["constraints.complianceRequirements"], sec: "compliance" },
+                ].filter((c) => c.v))
+              : [
+                  { v: "Retail", paths: [], sec: "organisation" },
+                  { v: "1,900 users", paths: [], sec: "organisation" },
+                  { v: "42 sites", paths: [], sec: "organisation" },
+                  { v: "the UK", paths: [], sec: "organisation" },
+                  { v: "SASE and SD-WAN", paths: [], sec: "objectives" },
+                  { v: "fully managed", paths: [], sec: "model" },
+                  { v: "PCI DSS", paths: [], sec: "compliance" },
+                ];
+            if (!chips.length) {
+              return <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-zinc-600">your first sentence starts this listing</p>;
+            }
+            return (
+              <p className="m-0 mt-1.5 leading-loose">
+                {chips.map((c) => {
+                  const pf = c.paths.length ? facts.find((f) => !f.struck && c.paths.includes(f.path)) : undefined;
+                  const prov = pf?.provenance;
+                  const cls = !started
+                    ? "border-zinc-200 text-zinc-400"
+                    : prov === "stated"
+                      ? "border-zinc-400 text-zinc-800"
+                      : prov === "inferred"
+                        ? "border-dotted border-zinc-400 text-zinc-700"
+                        : "border-zinc-200 text-zinc-600";
+                  return (
+                    <button
+                      key={c.v}
+                      type="button"
+                      onClick={() => {
+                        ev("workspace_card_chip", { sec: c.sec });
+                        document.getElementById(`sec-${c.sec}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                      title={
+                        !started
+                          ? "Example content · opens the section it lives in"
+                          : prov === "stated"
+                            ? "Your words · opens the section it lives in"
+                            : prov === "inferred"
+                              ? "Inferred, reason attached · opens the section it lives in"
+                              : "Opens the section it lives in"
+                      }
+                      className={`mr-1.5 inline-block rounded-full border bg-white px-2.5 py-[2px] text-[10.5px] transition-colors hover:border-amber-500 ${cls}`}
+                    >
+                      {c.v}
+                    </button>
+                  );
+                })}
+              </p>
+            );
+          })()}
           <p className="m-0 mt-1.5 text-[9.5px] text-zinc-400">
             {published && published.boardId
               ? (<>your notice is live: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
@@ -1173,7 +1330,7 @@ export default function ProjectDesk() {
               ? "anonymous on publish: no name, no contacts until you choose · nothing is sent without your signature"
               : "example content · becomes yours as you speak or touch the document below · never publishes"}
           </p>
-        </div>
+        </section>
       </div>
 
       {/* ---- The Netify SASE Constellation: the market takes position ---- */}
