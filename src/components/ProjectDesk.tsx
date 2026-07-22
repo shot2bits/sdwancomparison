@@ -75,12 +75,29 @@ const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const WORKSPACE_AGREEMENT_TEXT =
   "Publish this requirement: Netify lists an anonymous notice visible to signed-in suppliers and invites the best-fit evaluated suppliers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
 
-const SEEDS: Array<{ label: string; text: string }> = [
-  { label: "Healthcare: replace MPLS across 12 UK sites", text: "We are a healthcare provider replacing MPLS across 12 UK sites with a fully managed service." },
-  { label: "Retail: PCI DSS SD-WAN for 500 stores", text: "We are a retailer needing SD-WAN across 500 stores. PCI DSS applies." },
-  { label: "Manufacturing: managed SASE with OT security", text: "We are a manufacturer looking for managed SASE covering IT and OT security." },
-  { label: "Global enterprise: zero trust SASE consolidation", text: "We are a global enterprise consolidating to SASE with zero trust access." },
+/* The intent blocks (Robert's 24 Jul restructure): a sector and a goal
+ * compose a sentence in the input, in the buyer's own editable words; the
+ * desk's ordinary pause-debounce then reads it. No emojis (his own audit
+ * law), no rigid pre-written profiles: the blocks are fragments, the
+ * sentence stays the buyer's. */
+const SECTOR_CHIPS: Array<{ label: string; text: string }> = [
+  { label: "Healthcare", text: "We are a healthcare provider" },
+  { label: "Retail", text: "We are a retailer" },
+  { label: "Manufacturing", text: "We are a manufacturer" },
+  { label: "Financial services", text: "We are a financial services firm" },
 ];
+const GOAL_CHIPS: Array<{ label: string; text: string }> = [
+  { label: "Replace MPLS", text: "replacing legacy MPLS with managed SD-WAN" },
+  { label: "PCI DSS compliance", text: "needing a PCI DSS compliant network" },
+  { label: "Zero trust SASE", text: "consolidating security into zero trust SASE" },
+];
+
+/** The blocks compose one editable sentence; the buyer owns every word. */
+function composeIntent(sector: string | null, goals: string[]): string {
+  const s = SECTOR_CHIPS.find((c) => c.label === sector)?.text ?? "We are";
+  const g = goals.map((l) => GOAL_CHIPS.find((c) => c.label === l)?.text ?? "").filter(Boolean).join(" and ");
+  return g ? `${s} ${g}.` : `${s}.`;
+}
 
 type MarketVendor = { slug: string; name: string; category: string; last_verified: string; yes_count: number; scopes: string[] };
 type MarketNotice = { id: string; title: string; scope: string[]; sites: number | null; created: number };
@@ -427,12 +444,16 @@ export default function ProjectDesk() {
     [busy, applyMerge, crewLog],
   );
 
-  /* ---- Voice, real (Robert's pick, 24 Jul): the browser's own speech
-   * recognition. The mic renders only where the engine exists; the wave
-   * marks only genuine listening (real liveness, the lawful kind); the
-   * words land in the input as they are heard and the cycle runs on the
-   * final result exactly as if typed. Nothing here pretends. ---- */
-  const [voiceState, setVoiceState] = useState<"idle" | "listening">("idle");
+  /* ---- Voice, real (Robert's pick, 24 Jul; overhauled on his front-door
+   * test the same day): the browser's own speech recognition. The mic
+   * renders only where the engine exists; the wave marks only GENUINE
+   * capture (the listening state waits for the audio channel to open, so
+   * the indicator can never claim a microphone that is not yet live); a
+   * continuous session survives the natural pause after tapping, one
+   * silent no-speech timeout restarts quietly, and the words land in the
+   * input as they are heard. A settled final result ends the session on
+   * its own and runs the cycle exactly as if typed. Nothing pretends. ---- */
+  const [voiceState, setVoiceState] = useState<"idle" | "starting" | "listening">("idle");
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const voiceRec = useRef<{ stop: () => void } | null>(null);
@@ -443,11 +464,12 @@ export default function ProjectDesk() {
   }, []);
   const stopVoice = () => {
     try { voiceRec.current?.stop(); } catch { /* already stopped */ }
-    setVoiceState("idle");
   };
   const startVoice = () => {
     type SRCtor = new () => {
       lang: string; interimResults: boolean; continuous: boolean;
+      onstart: (() => void) | null;
+      onaudiostart: (() => void) | null;
       onresult: ((e: { resultIndex: number; results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }> }) => void) | null;
       onerror: ((e: { error?: string }) => void) | null;
       onend: (() => void) | null;
@@ -460,37 +482,93 @@ export default function ProjectDesk() {
     const rec = new SR();
     rec.lang = "en-GB";
     rec.interimResults = true;
-    rec.continuous = false;
+    rec.continuous = true;
     let finalText = "";
+    let lastError = "";
+    let restarts = 0;
+    let settleTimer: ReturnType<typeof setTimeout> | null = null;
+    const deadline = Date.now() + 30000;
+    rec.onstart = () => { lastError = ""; };
+    rec.onaudiostart = () => setVoiceState("listening");
     rec.onresult = (e) => {
       let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
-        if (r.isFinal) finalText += r[0].transcript;
+        if (r.isFinal) finalText += r[0].transcript + " ";
         else interim += r[0].transcript;
       }
       if (!firstKeyAt.current) firstKeyAt.current = Date.now();
-      setInput((finalText + interim).trim());
+      setInput((finalText + interim).replace(/\s+/g, " ").trim());
+      if (settleTimer) clearTimeout(settleTimer);
+      if (finalText.trim() && !interim) {
+        /* A settled sentence ends the session by itself after a beat. */
+        settleTimer = setTimeout(() => { try { rec.stop(); } catch { /* gone */ } }, 1600);
+      }
     };
-    rec.onerror = (e) => {
-      setVoiceState("idle");
-      setVoiceError(
-        e?.error === "not-allowed" || e?.error === "service-not-allowed"
-          ? "The microphone was blocked; type instead."
-          : "Voice did not catch that; type instead.",
-      );
-    };
+    rec.onerror = (e) => { lastError = e?.error ?? "unknown"; };
     rec.onend = () => {
-      setVoiceState("idle");
+      if (settleTimer) clearTimeout(settleTimer);
       const said = finalText.trim();
+      /* Silence after the tap is human: restart once, quietly, inside the
+       * 30 second window the tap consented to. */
+      if (!said && lastError === "no-speech" && restarts < 1 && Date.now() < deadline) {
+        restarts += 1;
+        try { rec.start(); return; } catch { /* fall through to idle */ }
+      }
+      setVoiceState("idle");
+      voiceRec.current = null;
       if (said.length >= 3) {
         ev("workspace_voice", { chars: said.length });
         void runCycle(said, { fromEnter: true });
+        return;
+      }
+      if (lastError === "not-allowed" || lastError === "service-not-allowed") {
+        setVoiceError("The microphone was blocked; allow it in the address bar, or type instead.");
+      } else if (lastError === "network") {
+        setVoiceError("The browser speech service did not answer; type instead.");
+      } else if (lastError === "audio-capture") {
+        setVoiceError("No microphone was found; type instead.");
+      } else if (lastError === "no-speech" || !said) {
+        setVoiceError("Nothing heard. Tap the mic and speak when you are ready.");
+      } else {
+        setVoiceError("Voice did not catch that; type instead.");
       }
     };
     voiceRec.current = rec;
-    setVoiceState("listening");
-    try { rec.start(); } catch { setVoiceState("idle"); }
+    setVoiceState("starting");
+    try { rec.start(); } catch { setVoiceState("idle"); voiceRec.current = null; }
+  };
+
+  /* ---- The intent blocks and the claimed example (24 Jul): a sector and
+   * any goals compose one editable sentence in the input; the ordinary
+   * pause-debounce reads it. Make this yours now answers visibly: focus,
+   * one amber ring on the call-out, and a worked example as placeholder. */
+  const [selSector, setSelSector] = useState<string | null>(null);
+  const [selGoals, setSelGoals] = useState<string[]>([]);
+  const [yoursHint, setYoursHint] = useState(false);
+  const [yoursRing, setYoursRing] = useState(false);
+  const tapSector = (label: string) => {
+    const next = selSector === label ? null : label;
+    setSelSector(next);
+    setInput(next || selGoals.length ? composeIntent(next, selGoals) : "");
+    if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+    ev("workspace_intent_chip", { kind: "sector", label });
+    inputRef.current?.focus();
+  };
+  const tapGoal = (label: string) => {
+    const next = selGoals.includes(label) ? selGoals.filter((g) => g !== label) : [...selGoals, label];
+    setSelGoals(next);
+    setInput(selSector || next.length ? composeIntent(selSector, next) : "");
+    if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+    ev("workspace_intent_chip", { kind: "goal", label });
+    inputRef.current?.focus();
+  };
+  const makeThisYours = () => {
+    ev("workspace_make_yours", {});
+    setYoursHint(true);
+    setYoursRing(true);
+    setTimeout(() => setYoursRing(false), 1500);
+    inputRef.current?.focus();
   };
 
   /* ---- Debounce per pause ---- */
@@ -1133,7 +1211,7 @@ export default function ProjectDesk() {
 
       {/* ---- The one line in: the page's one control, framed as such ---- */}
       <div className="mx-auto w-[min(760px,100%)]">
-        <section aria-label="Describe your project" className="rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,.16),0_22px_56px_-20px_rgba(180,83,9,.3)]">
+        <section aria-label="Describe your project" className={`rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,.16),0_22px_56px_-20px_rgba(180,83,9,.3)]${yoursRing ? " pd-live-in" : ""}`}>
         <p className="m-0 mb-1.5 text-[9.5px] font-semibold uppercase tracking-[.16em] text-zinc-400">Start here · one sentence is enough</p>
         <div className="relative border-b-2 border-zinc-300 px-1 py-2 focus-within:border-amber-500">
           <input
@@ -1149,7 +1227,13 @@ export default function ProjectDesk() {
                 void runCycle(input, { fromEnter: true });
               }
             }}
-            placeholder={started ? "Add or correct anything: 'actually 45 sites', 'we already run Defender'…" : "Describe your project in one sentence, or touch anything below to begin"}
+            placeholder={
+              started
+                ? "Add or correct anything: 'actually 45 sites', 'we already run Defender'…"
+                : yoursHint
+                  ? "e.g. We are replacing legacy MPLS across 15 UK sites with managed SD-WAN…"
+                  : "Describe your project in one sentence, or touch anything below to begin"
+            }
             disabled={Boolean(published)}
             className="w-full bg-transparent px-9 text-center text-[17px] italic text-zinc-900 outline-none placeholder:text-zinc-400 sm:text-[18px]"
             aria-label="Describe your project"
@@ -1157,12 +1241,12 @@ export default function ProjectDesk() {
           {voiceSupported && !published && (
             <button
               type="button"
-              onClick={() => (voiceState === "listening" ? stopVoice() : startVoice())}
+              onClick={() => (voiceState !== "idle" ? stopVoice() : startVoice())}
               disabled={busy}
-              aria-label={voiceState === "listening" ? "Stop listening" : "Speak your requirement"}
-              title={voiceState === "listening" ? "Stop listening" : "Speak instead of typing"}
+              aria-label={voiceState !== "idle" ? "Stop listening" : "Speak your requirement"}
+              title={voiceState !== "idle" ? "Stop listening" : "Speak instead of typing"}
               className={`absolute right-1 top-1/2 -translate-y-1/2 rounded-full border p-[7px] transition-colors disabled:opacity-40 ${
-                voiceState === "listening"
+                voiceState !== "idle"
                   ? "border-amber-500 bg-amber-50 text-amber-700"
                   : "border-zinc-200 text-zinc-400 hover:border-zinc-400 hover:text-zinc-700"
               }`}
@@ -1185,37 +1269,58 @@ export default function ProjectDesk() {
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11.5px] text-zinc-500">
           {busy && <span aria-live="polite" className="text-zinc-700">Reading…</span>}
+          {voiceState === "starting" && !busy && (
+            <span aria-live="polite" className="text-zinc-500">Opening the microphone…</span>
+          )}
           {voiceState === "listening" && !busy && (
             <span aria-live="polite" className="text-amber-700">Listening… your words land as you speak.</span>
           )}
-          {voiceError && !busy && voiceState === "idle" && <span className="text-zinc-500">{voiceError}</span>}
+          {voiceError && !busy && voiceState === "idle" && <span aria-live="polite" className="text-zinc-500">{voiceError}</span>}
           {!busy && started && engineUsed === "deterministic_fallback" && <span>Read without the model this turn; everything still works.</span>}
           {cycleError && <span className="text-red-600">{cycleError}</span>}
           {booted && !started && !busy && (
             <>
               <button
                 type="button"
-                onClick={() => { ev("workspace_make_yours", {}); inputRef.current?.focus(); }}
+                onClick={makeThisYours}
                 className="rounded-lg bg-zinc-900 px-4 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-black"
               >
                 Make this yours
               </button>
-              <span className="text-zinc-400">describe it in a sentence, or touch anything below to claim it · Try:</span>
-              {SEEDS.map((s) => (
-                <button
-                  key={s.label}
-                  type="button"
-                  onClick={() => {
-                    setInput(s.text);
-                    ev("workspace_seed", { seed: s.label });
-                    firstKeyAt.current = Date.now();
-                    void runCycle(s.text, { fromEnter: true });
-                  }}
-                  className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-zinc-600 transition-colors hover:border-amber-500 hover:text-zinc-900"
-                >
-                  {s.label}
-                </button>
-              ))}
+              <span className="text-zinc-400">describe it in a sentence, speak it, or build it from blocks:</span>
+              <span className="flex w-full flex-wrap items-center justify-center gap-1.5">
+                {SECTOR_CHIPS.map((c) => (
+                  <button
+                    key={c.label}
+                    type="button"
+                    onClick={() => tapSector(c.label)}
+                    aria-pressed={selSector === c.label}
+                    className={`rounded-full border px-3 py-1 transition-colors ${
+                      selSector === c.label
+                        ? "border-amber-500 bg-amber-50 text-zinc-900"
+                        : "border-zinc-300 bg-white text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+                <span aria-hidden="true" className="text-zinc-300">+</span>
+                {GOAL_CHIPS.map((c) => (
+                  <button
+                    key={c.label}
+                    type="button"
+                    onClick={() => tapGoal(c.label)}
+                    aria-pressed={selGoals.includes(c.label)}
+                    className={`rounded-full border px-3 py-1 transition-colors ${
+                      selGoals.includes(c.label)
+                        ? "border-amber-500 bg-amber-50 text-zinc-900"
+                        : "border-zinc-300 bg-white text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </span>
             </>
           )}
           {restored && !published && (
