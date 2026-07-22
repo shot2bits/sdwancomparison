@@ -815,6 +815,9 @@ export default function ProjectDesk() {
     for (const q of earnedShown) map.set(q.section, [...(map.get(q.section) ?? []), q]);
     return map;
   }, [earnedShown]);
+  /** Readiness (the reference concept, live): open questions are the real
+   *  gaps plus the earned questions currently standing, nothing invented. */
+  const openQuestionCount = unansweredGaps.length + earnedShown.length;
 
   const answerEarned = useCallback(
     (q: EarnedQuestion, answer: QuestionAnswer, value?: string) => {
@@ -1019,7 +1022,14 @@ export default function ProjectDesk() {
           {cycleError && <span className="text-red-600">{cycleError}</span>}
           {!started && !busy && (
             <>
-              <span className="text-zinc-400">Try:</span>
+              <button
+                type="button"
+                onClick={() => { ev("workspace_make_yours", {}); inputRef.current?.focus(); }}
+                className="rounded-lg bg-zinc-900 px-4 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-black"
+              >
+                Make this yours
+              </button>
+              <span className="text-zinc-400">describe it in a sentence, or touch anything below to claim it · Try:</span>
               {SEEDS.map((s) => (
                 <button
                   key={s.label}
@@ -1054,6 +1064,73 @@ export default function ProjectDesk() {
             <a href={`/sase/project/${created?.id}${created?.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`} className="underline">your position&rsquo;s record</a>
           </p>
         )}
+      </div>
+
+      {/* ---- The destination: the commercial payoff, before the work begins
+              (the reference concept made live, Robert's word, 23 Jul; every
+              claim renders from real data and no em dashes anywhere). ---- */}
+      <div className="mt-8">
+        <h2 className="m-0" style={{ fontSize: "20px", lineHeight: 1.2, fontWeight: 700, color: "#18181b", letterSpacing: "-0.015em" }}>
+          Publish to our SASE Opportunities Board
+        </h2>
+        <p className="m-0 mt-2 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
+          Your completed Statement of Requirements becomes a live opportunity in a curated SASE marketplace, where
+          leading vendors and managed service providers can compete for your business. The public listing remains
+          anonymous, while the private procurement view is made available only to suitable suppliers from
+          Netify&rsquo;s curated community of {market ? market.counts.vendors : "evaluated"} UK, North American and
+          global SASE partners.
+        </p>
+        <svg viewBox="0 0 1060 150" className="mt-4 hidden w-full sm:block" role="img"
+          aria-label="The journey: a living Statement of Requirements becomes an anonymous published opportunity in a curated marketplace; supplier responses return for comparison and a decision you sign.">
+          <line x1="30" y1="62" x2="1030" y2="62" stroke="#e4e4e7" strokeWidth="1" />
+          <g>
+            <rect x="52" y="44" width="28" height="36" rx="3" fill="#fff" stroke="#3f3f46" strokeWidth="1.2" />
+            <line x1="58" y1="54" x2="74" y2="54" stroke="#3f3f46" strokeWidth="1" />
+            <line x1="58" y1="61" x2="74" y2="61" stroke="#a1a1aa" strokeWidth="1" />
+            <line x1="58" y1="68" x2="68" y2="68" stroke="#a1a1aa" strokeWidth="1" />
+            <text x="66" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Living Statement</text>
+            <text x="66" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">yours, word for word</text>
+          </g>
+          <g>
+            <circle cx="240" cy="62" r="7" fill="#f59e0b" />
+            <text x="240" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Published opportunity</text>
+            <text x="240" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">anonymous on the public board</text>
+          </g>
+          <g>
+            <circle cx="455" cy="36" r="4.5" fill="#2a78d6" /><circle cx="486" cy="28" r="4.5" fill="#e34948" />
+            <circle cx="516" cy="36" r="4.5" fill="#0891b2" /><circle cx="470" cy="52" r="4.5" fill="#7c3aed" />
+            <circle cx="501" cy="50" r="4.5" fill="#1d4ed8" /><circle cx="440" cy="50" r="4.5" fill="#be123c" />
+            <circle cx="530" cy="52" r="4.5" fill="#4a3aa7" /><circle cx="458" cy="66" r="4.5" fill="#d946ef" />
+            <circle cx="490" cy="68" r="4.5" fill="#e87ba4" />
+            <text x="512" y="70" fontSize="9.5" fill="#52525b">and more</text>
+            <text x="485" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Curated SASE marketplace</text>
+            <text x="485" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">{market ? `${market.counts.vendors} evaluated partners` : "evaluated partners"} · UK · North America · Global</text>
+            <text x="485" y="129" textAnchor="middle" fontSize="8.5" fill="#c4c2bc">quality over quantity, never a directory</text>
+          </g>
+          <g>
+            <path d="M 700 48 L 686 62 L 700 76" fill="none" stroke="#3f3f46" strokeWidth="1.3" />
+            <path d="M 716 48 L 702 62 L 716 76" fill="none" stroke="#a1a1aa" strokeWidth="1.1" />
+            <text x="706" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Supplier responses</text>
+            <text x="706" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">answering your requirements</text>
+          </g>
+          <g>
+            <line x1="856" y1="48" x2="856" y2="76" stroke="#3f3f46" strokeWidth="2" />
+            <line x1="866" y1="54" x2="866" y2="76" stroke="#71717a" strokeWidth="2" />
+            <line x1="876" y1="60" x2="876" y2="76" stroke="#a1a1aa" strokeWidth="2" />
+            <text x="866" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Comparison</text>
+            <text x="866" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">side by side, evidence first</text>
+          </g>
+          <g>
+            <path d="M 985 64 L 991 71 L 1003 52" fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round" />
+            <text x="994" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Decision</text>
+            <text x="994" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">you sign; agents never do</text>
+          </g>
+        </svg>
+        <p className="m-0 mt-2 text-[11px] leading-relaxed text-zinc-400 sm:mt-1">
+          <span className="font-semibold text-zinc-500">You stay in control throughout:</span> public listings are
+          anonymous · detailed procurement information is restricted to approved suppliers · supplier access and
+          invitations remain under your control · every response stays connected to this workspace.
+        </p>
       </div>
 
       {/* ---- The Netify SASE Constellation: the market takes position ---- */}
@@ -1199,6 +1276,26 @@ export default function ProjectDesk() {
           {market?.latest_evaluation ? ` Evidence: Netify vendor dataset, live · latest evaluation ${fmtDate(market.latest_evaluation)}.` : ""}
         </p>
       </div>
+
+      {/* ---- Readiness: three things first, from real state only ---- */}
+      {started && (
+        <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-2 rounded-lg border border-zinc-200 bg-white px-5 py-3">
+          <span><span className="text-[20px] font-bold tracking-tight text-zinc-900">{meter.confirmed}</span>
+            <span className="ml-1.5 text-[11px] text-zinc-500">requirement{meter.confirmed === 1 ? "" : "s"} in your words</span></span>
+          {meter.inferred > 0 && (
+            <span><span className="text-[20px] font-bold tracking-tight text-amber-700">{meter.inferred}</span>
+              <span className="ml-1.5 text-[11px] text-zinc-500">inferred, yours to confirm or strike</span></span>
+          )}
+          {openQuestionCount > 0 && (
+            <span><span className="text-[20px] font-bold tracking-tight text-amber-700">{openQuestionCount}</span>
+              <span className="ml-1.5 text-[11px] text-zinc-500">open question{openQuestionCount === 1 ? "" : "s"} in place below</span></span>
+          )}
+          <span className="ml-auto text-right text-[10.5px] leading-relaxed text-zinc-400">
+            {receipts.length > 0 ? `${receipts.length} of your words captured in Notes, unplaced · ` : ""}
+            {market ? `${market.counts.vendors} suppliers evaluated against this position` : ""}
+          </span>
+        </div>
+      )}
 
       {/* ---- The desk: the document and the responding organs ---- */}
       <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_336px]">
@@ -1512,6 +1609,22 @@ export default function ProjectDesk() {
                 <p className="m-0 mt-1 text-[10px] leading-relaxed text-zinc-600">
                   Evaluated {fmtDate(vendorCard.last_verified)} · {vendorCard.yes_count} of 40 capabilities fully met.
                 </p>
+                {(() => {
+                  /* Evidence language, never a score (the reference concept,
+                     live): counts come straight from the graded checks. */
+                  const fs = fitBySlug.get(vendorCard.slug);
+                  if (!fs || !sceneRanked) return null;
+                  const full = fs.matched.filter((m) => m.grade === "yes").length;
+                  const part = fs.matched.length - full;
+                  return (
+                    <p className="m-0 mt-1 text-[10px] leading-relaxed text-zinc-600">
+                      Against your named requirements: {full} evidenced
+                      {part > 0 ? `, ${part} partially evidenced` : ""}
+                      {fs.missed.length > 0 ? `, ${fs.missed.length} without evidence on file` : ""}.
+                      Missing evidence is a supplier gap, never a verdict.
+                    </p>
+                  );
+                })()}
                 {/* Article 14, the four answers: what changed, why it moved,
                     what evidence, and the challenge. */}
                 {(() => {
