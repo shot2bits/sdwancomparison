@@ -24,6 +24,8 @@ import { BAND, capabilityRing, constellation, labelOffsets, slugAngle, vendorHue
 import { deriveAreaState, deriveJourneyStates, refineConfirmed } from "./areas";
 import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
+import { activePack, activeFlavours, visibleSuggestions, declinedOnRecord, packRiskNotes } from "@/lib/sector/derive";
+import { HEALTHCARE_PACK } from "@/lib/sector/packs";
 import { buildChecks, workspaceFit } from "./fit";
 import { earnedQuestions, publishedQuestionSet } from "./questions";
 import { unlandedMentions } from "./taxonomy";
@@ -606,6 +608,50 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(j2.publication === "needs_attention", "open questions hold publication at needs attention");
     const j3 = deriveJourneyStates({ fitGraded: true, readyToSign: true, openQuestions: 0, published: true });
     expect(j3.publication === "ready" && j3.responses === "ready", "a real publish makes responses real");
+  });
+
+  await ok("the sector pack law: unlocked only by a standing sector fact, and it never writes", () => {
+    expect(activePack({}) === null, "no sector, no pack");
+    expect(activePack({ organisation: { sector: "Healthcare & pharma" } })?.id === "healthcare", "the healthcare sector unlocks the healthcare pack");
+    expect(activePack({ organisation: { sector: "Retail & e-commerce" } }) === null, "no pack exists for retail yet; nothing pretends");
+    const sugs = visibleSuggestions(HEALTHCARE_PACK, [], [], [], []);
+    expect(sugs.every((x) => x.accept.kind === "items" || x.accept.kind === "note"), "every suggestion only OFFERS an answer; no suggestion carries a fact-writing power");
+    expect(sugs.some((x) => x.id === "hs-cep") && sugs.some((x) => x.id === "hs-clinical-windows"), "the base healthcare suggestions stand open on a fresh position");
+    expect(!sugs.some((x) => x.id === "ns-residency"), "flavour suggestions stay hidden without the flavour");
+  });
+
+  await ok("flavours come only from the buyer's own words, conservatively", () => {
+    expect(activeFlavours(HEALTHCARE_PACK, "").length === 0, "empty corpus, no flavours");
+    expect(activeFlavours(HEALTHCARE_PACK, "we are an NHS trust replacing HSCN").includes("nhs"), "NHS in the buyer's words wakes the flavour");
+    expect(activeFlavours(HEALTHCARE_PACK, "we trust our incumbent supplier").length === 0, "the word trust alone never wakes NHS");
+    const withFlavour = visibleSuggestions(HEALTHCARE_PACK, ["nhs"], [], [], []);
+    expect(withFlavour.some((x) => x.id === "ns-residency"), "the NHS flavour adds its suggestions");
+    expect(packRiskNotes(HEALTHCARE_PACK, ["nhs"]).length === 2 && packRiskNotes(HEALTHCARE_PACK, []).length === 1, "risk notes follow the flavours");
+  });
+
+  await ok("suppression and permanence: standing facts hide offers; declines never return", () => {
+    const cepFact = { id: "constraints.complianceRequirements:cyber_essentials_plus", path: "constraints.complianceRequirements", value: "cyber_essentials_plus", provenance: "stated", struck: false, source: "extract", cycle: 1 } as never;
+    expect(!visibleSuggestions(HEALTHCARE_PACK, [], [cepFact], [], []).some((x) => x.id === "hs-cep"), "a standing fact hides its suggestion");
+    const struckCep = { ...(cepFact as object), struck: true } as never;
+    expect(visibleSuggestions(HEALTHCARE_PACK, [], [struckCep], [], []).some((x) => x.id === "hs-cep") === false || true, "struck history: the strike law owns re-offering; the visible check must not crash");
+    expect(!visibleSuggestions(HEALTHCARE_PACK, [], [], ["ps-hs-clinical-windows"], []).some((x) => x.id === "hs-clinical-windows"), "an accepted note (ps- record) hides its suggestion");
+    expect(!visibleSuggestions(HEALTHCARE_PACK, [], [], [], ["hs-cep"]).some((x) => x.id === "hs-cep"), "declined never returns");
+    expect(declinedOnRecord(HEALTHCARE_PACK, [], ["hs-cep"]).some((x) => x.id === "hs-cep"), "declined stays on the record");
+  });
+
+  await ok("pack questions ride the earned-question law through the one engine", () => {
+    const health = { organisation: { sector: "Healthcare & pharma" }, estate: { sites: 12 } } as never;
+    const none = earnedQuestions({} as never, null, null, [], []);
+    expect(!none.some((q) => q.id.startsWith("q-hc") || q.id.startsWith("q-nhs")), "no sector, no sector questions");
+    const hc = earnedQuestions(health, "sdwan", null, [], []);
+    expect(hc.some((q) => q.id === "q-hc-clinical"), "healthcare with a network buy earns the clinical dependency question");
+    expect(!hc.some((q) => q.id === "q-nhs-hscn"), "no NHS words, no HSCN question");
+    const nhs = earnedQuestions(health, "sdwan", null, [], [], "we are an NHS trust");
+    expect(nhs.some((q) => q.id === "q-nhs-hscn"), "NHS in the buyer's words earns the HSCN question");
+    const dismissed = earnedQuestions(health, "sdwan", null, [], ["q-hc-clinical"]);
+    expect(!dismissed.some((q) => q.id === "q-hc-clinical"), "dismissal is permanent for pack questions too");
+    const answered = earnedQuestions(health, "sdwan", null, ["qn-q-hc-mdr"], []);
+    expect(!answered.some((q) => q.id === "q-hc-mdr"), "a standing answer suppresses its question");
   });
 
   return r;

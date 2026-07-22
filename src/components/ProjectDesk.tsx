@@ -57,6 +57,8 @@ import {
 } from "@/lib/workspace/draft";
 import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, unlandedMentions, type TaxonomyItem } from "@/lib/workspace/taxonomy";
 import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
+import { activePack, activeFlavours, visibleSuggestions, declinedOnRecord, packRiskNotes } from "@/lib/sector/derive";
+import { PACKS_VERSION, type PackSuggestion } from "@/lib/sector/packs";
 import { deriveAreaState, refineConfirmed } from "@/lib/workspace/areas";
 import { diagramModel } from "@/lib/workspace/diagram";
 import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
@@ -220,6 +222,8 @@ export default function ProjectDesk() {
   const [moveNow, setMoveNow] = useState<Record<string, Move>>({});
   const [moveLog, setMoveLog] = useState<MoveLogEntry[]>([]);
   const [dismissedQ, setDismissedQ] = useState<string[]>([]);
+  /* Sector pack suggestions: declined is permanent, on the record. */
+  const [declinedSug, setDeclinedSug] = useState<string[]>([]);
   const [customTitle, setCustomTitle] = useState<string>("");
   const [editingTitle, setEditingTitle] = useState(false);
 
@@ -318,7 +322,7 @@ export default function ProjectDesk() {
         if (raw) {
           const saved = JSON.parse(raw) as {
             facts?: WorkspaceFact[]; added?: string[]; removed?: string[];
-            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; customTitle?: string; ts?: number;
+            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; declinedSug?: string[]; customTitle?: string; ts?: number;
           };
           if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && ((saved.facts?.length ?? 0) > 0 || (saved.noted?.length ?? 0) > 0)) {
             base = saved.facts ?? [];
@@ -328,6 +332,7 @@ export default function ProjectDesk() {
             setReceipts(saved.receipts ?? []);
             setMoveLog(saved.moveLog ?? []);
             setDismissedQ(saved.dismissedQ ?? []);
+            setDeclinedSug(saved.declinedSug ?? []);
             setCustomTitle(saved.customTitle ?? "");
             receiptId.current = Math.max(0, ...(saved.receipts ?? []).map((r) => r.id));
             setRestored(true);
@@ -353,9 +358,9 @@ export default function ProjectDesk() {
   useEffect(() => {
     if (!started || published) return;
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, customTitle, ts: Date.now() }));
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, ts: Date.now() }));
     } catch { /* best effort */ }
-  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, customTitle, started, published]);
+  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, started, published]);
 
   /* ---- The extraction cycle (the same organ), now with the receipt ---- */
   const runCycle = useCallback(
@@ -967,10 +972,44 @@ export default function ProjectDesk() {
 
   /* ---- P3.4: the earned questions (13.14/13.16). The desk shows at most
      two at once (minimum necessary); weight decides which two. ---- */
+  /* The buyer's own words, for pack flavour detection only (conservative:
+     example content never reaches this, so the example never wears NHS). */
+  const corpus = useMemo(
+    () =>
+      [
+        customTitle,
+        ...facts.filter((f) => !f.struck).flatMap((f) => [f.quote ?? "", f.reason ?? "", String(f.value ?? "")]),
+        ...receipts.map((r) => r.text),
+      ].join(" "),
+    [facts, receipts, customTitle],
+  );
+
+  /* ---- The sector pack (24 Jul): unlocked by the standing sector fact,
+     influence everywhere, authority nowhere. The pack law is fixtured:
+     packs never write facts; only the buyer's touch or words do. ---- */
+  const pack = useMemo(() => activePack(requirement), [requirement]);
+  const packFlavours = useMemo(() => (pack ? activeFlavours(pack, corpus) : []), [pack, corpus]);
+  const packSugs = useMemo(
+    () => (pack ? visibleSuggestions(pack, packFlavours, facts, noted.map((n) => n.id), declinedSug) : []),
+    [pack, packFlavours, facts, noted, declinedSug],
+  );
+  const packSugsBySection = useMemo(() => {
+    const map = new Map<string, PackSuggestion[]>();
+    for (const sg of packSugs) map.set(sg.section, [...(map.get(sg.section) ?? []), sg]);
+    return map;
+  }, [packSugs]);
+  const packDeclinedBySection = useMemo(() => {
+    const map = new Map<string, PackSuggestion[]>();
+    if (!pack) return map;
+    for (const sg of declinedOnRecord(pack, packFlavours, declinedSug)) map.set(sg.section, [...(map.get(sg.section) ?? []), sg]);
+    return map;
+  }, [pack, packFlavours, declinedSug]);
+  const packNotes = useMemo(() => (pack ? packRiskNotes(pack, packFlavours) : []), [pack, packFlavours]);
+
   const earnedShown = useMemo(() => {
     const notedIds = noted.map((n) => n.id);
-    return earnedQuestions(requirement, buying, opModel, notedIds, dismissedQ).slice(0, 2);
-  }, [requirement, buying, opModel, noted, dismissedQ]);
+    return earnedQuestions(requirement, buying, opModel, notedIds, dismissedQ, corpus).slice(0, 2);
+  }, [requirement, buying, opModel, noted, dismissedQ, corpus]);
   const earnedBySection = useMemo(() => {
     const map = new Map<string, EarnedQuestion[]>();
     for (const q of earnedShown) map.set(q.section, [...(map.get(q.section) ?? []), q]);
@@ -999,6 +1038,33 @@ export default function ProjectDesk() {
       ev("workspace_earned_answered", { q: q.id, kind: answer.kind });
     },
     [clickItem, applyMerge, crewLog],
+  );
+
+  /* Accepting a suggestion lands through the SAME machinery an earned
+     question uses (the buyer's touch, never the pack's hand); declining is
+     permanent and stays on the record. */
+  const acceptSuggestion = useCallback(
+    (sg: PackSuggestion) => {
+      if (sg.accept.kind === "items") {
+        for (const id of sg.accept.itemIds) {
+          const e = ITEM_BY_ID[id];
+          if (e) clickItem(e.item, e.section);
+        }
+      } else {
+        setNoted((ns) => (ns.some((n) => n.id === `ps-${sg.id}`) ? ns : [...ns, { id: `ps-${sg.id}`, label: sg.accept.kind === "note" ? sg.accept.text : sg.label, section: sg.section }]));
+      }
+      crewLog(`Sector pack: added on your acceptance: ${sg.label} (${sg.reason})`, "you");
+      ev("workspace_pack_suggestion", { id: sg.id, verdict: "accepted" });
+    },
+    [clickItem, crewLog],
+  );
+  const declineSuggestion = useCallback(
+    (sg: PackSuggestion) => {
+      setDeclinedSug((d) => (d.includes(sg.id) ? d : [...d, sg.id]));
+      crewLog(`Sector pack: declined, kept on the record: ${sg.label}`, "you");
+      ev("workspace_pack_suggestion", { id: sg.id, verdict: "declined" });
+    },
+    [crewLog],
   );
 
   const notedBySection = useMemo(() => {
@@ -1791,6 +1857,34 @@ export default function ProjectDesk() {
                   {(earnedBySection.get(sec.key) ?? []).map((q) => (
                     <EarnedQuestionLine key={q.id} q={q} onAnswer={answerEarned} onDismiss={() => { setDismissedQ((d) => [...d, q.id]); ev("workspace_earned_dismissed", { q: q.id }); }} />
                   ))}
+
+                  {/* Sector pack suggestions (24 Jul): offered clauses under
+                      the pack law. The pack never writes; the buyer's touch
+                      does. Declining is permanent and stays on the record. */}
+                  {!published && (packSugsBySection.get(sec.key) ?? []).map((sg) => (
+                    <div key={sg.id} className="my-1.5 rounded-md border border-dashed border-zinc-300 bg-zinc-50/60 px-2.5 py-2">
+                      <p className="m-0 text-[12px] leading-snug text-zinc-800">
+                        <span className="mr-1.5 inline-block rounded-sm bg-zinc-200 px-1 py-[1px] align-[1px] text-[8.5px] font-semibold uppercase tracking-[.08em] text-zinc-600">Suggested · {pack?.label.toLowerCase()}</span>
+                        {sg.label}
+                      </p>
+                      <p className="m-0 mt-0.5 text-[10px] leading-snug text-zinc-500">{sg.reason}</p>
+                      <div className="mt-1.5 flex gap-2">
+                        <button type="button" onClick={() => acceptSuggestion(sg)} className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-[3px] text-[10.5px] font-semibold text-white transition-colors hover:bg-black">
+                          Add to the record
+                        </button>
+                        <button type="button" onClick={() => declineSuggestion(sg)} className="rounded-full border border-zinc-300 bg-white px-2.5 py-[3px] text-[10.5px] text-zinc-600 transition-colors hover:border-zinc-500 hover:text-zinc-900">
+                          Decline, keep on record
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {(packDeclinedBySection.get(sec.key) ?? []).map((sg) => (
+                    <p key={`dec-${sg.id}`} className="m-0 py-[3px] text-[12px] leading-snug text-zinc-300">
+                      <span className="mr-2 inline-block w-3 text-center text-[11px]">×</span>
+                      <span className="line-through">{sg.label}</span>
+                      <span className="ml-2 text-[9px] no-underline">suggested for {pack?.label.toLowerCase()}, declined; kept on the record</span>
+                    </p>
+                  ))}
                 </section>
               );
             })}
@@ -2138,6 +2232,23 @@ export default function ProjectDesk() {
             <p className="m-0 text-[10.5px] text-emerald-700">
               Sign-in link sent to {saveLiteSentTo}. The position stays right here; the link signs you in on any device.
             </p>
+          )}
+
+          {/* Sector notes (24 Jul): the pack's advice with its provenance.
+              Evidence and advice, never requirements; nothing here publishes
+              or feeds verdict or fit. Grey, not emerald: this advice costs
+              Netify nothing and earns the buyer caution. */}
+          {pack && packNotes.length > 0 && (
+            <div className="rounded-lg border border-zinc-200 bg-white p-3">
+              <p className="m-0 mb-1.5 flex items-baseline justify-between text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
+                Sector notes · {pack.label}{packFlavours.length ? ` · ${packFlavours.map((f) => pack.flavours.find((x) => x.id === f)?.label ?? f).join(" · ")}` : ""}
+                <span className="font-normal normal-case tracking-normal text-zinc-300">{pack.version}</span>
+              </p>
+              {packNotes.map((n) => (
+                <p key={n.id} className="m-0 mb-1.5 text-[10.5px] leading-relaxed text-zinc-600">{n.text}</p>
+              ))}
+              <p className="m-0 text-[9px] leading-snug text-zinc-400">Advice with provenance, never requirements; nothing here publishes.</p>
+            </div>
           )}
 
           {/* The crew */}

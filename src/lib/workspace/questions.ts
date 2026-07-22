@@ -28,11 +28,15 @@
 
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import type { BuyingId } from "@/lib/workspace/extract";
+import { PACK_QUESTIONS } from "@/lib/sector/packs";
 
 export type QuestionEvidence =
   | { source: "bing_ai_live"; query: string; citations: number; note?: string }
   | { source: "bing_ai_2107"; query: string; citations: number }
-  | { source: "buyer_archetype"; query: string };
+  | { source: "buyer_archetype"; query: string }
+  /** Sector query families read from Robert's consoles, 24 Jul 2026
+   *  (healthcare strongest); counts not claimed because none were recorded. */
+  | { source: "console_sector_2407"; query: string };
 
 /** What answering a chip does: land existing taxonomy items (real facts or
  *  noted wants, through the desk's own click machinery), or record a
@@ -60,6 +64,9 @@ type Ctx = {
   opModel: string | null;
   notedIds: string[];
   dismissed: string[];
+  /** The buyer's own words (quotes, receipts, title), for pack flavour
+   *  detection only. Optional and conservative: empty means no flavour. */
+  corpus: string;
 };
 
 const sectorIs = (r: SecurityRequirementInput, re: RegExp) => re.test(String(r.organisation?.sector ?? ""));
@@ -220,17 +227,23 @@ export function earnedQuestions(
   opModel: string | null,
   notedIds: string[],
   dismissed: string[],
+  corpus = "",
 ): EarnedQuestion[] {
-  const ctx: Ctx = { requirement, buying, opModel, notedIds, dismissed };
-  return QUESTIONS.filter((q) => !dismissed.includes(q.id) && q.earnedBy(ctx))
-    .map(({ earnedBy: _e, ...q }) => q)
-    .sort((a, b) => b.weight - a.weight);
+  const ctx: Ctx = { requirement, buying, opModel, notedIds, dismissed, corpus };
+  const packEarned = PACK_QUESTIONS.filter(
+    (q) => !dismissed.includes(q.id) && q.earnedBy({ requirement, buying, opModel, notedIds, corpus }),
+  ).map(({ earnedBy: _e, earnedByProse: _p, ...q }) => q);
+  return [
+    ...QUESTIONS.filter((q) => !dismissed.includes(q.id) && q.earnedBy(ctx)).map(({ earnedBy: _e, ...q }) => q),
+    ...packEarned,
+  ].sort((a, b) => b.weight - a.weight);
 }
 
 /** The full published set (triggers described in prose, for the machine
  *  feeds): what the desk asks and why each question earned its place. */
 export function publishedQuestionSet() {
-  return QUESTIONS.map(({ earnedBy: _e, ...q }) => ({
+  const pack = PACK_QUESTIONS.map(({ earnedBy: _e, earnedByProse, ...q }) => ({ ...q, earned_by: earnedByProse }));
+  return [...QUESTIONS.map(({ earnedBy: _e, ...q }) => ({
     ...q,
     earned_by:
       q.id === "q-fca" ? "the buyer's sector is financial services" :
@@ -243,5 +256,5 @@ export function publishedQuestionSet() {
       q.id === "q-sase-shape" ? "SASE is being bought and neither platform shape is selected yet" :
       q.id === "q-contract-end" ? "a contract renewal is a stated driver" :
       "dual-circuit resilience: ten or more sites and a network service",
-  }));
+  })), ...pack];
 }
