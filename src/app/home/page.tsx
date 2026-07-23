@@ -126,10 +126,11 @@ export default function Page() {
           <p className="m-0 mt-2.5">
             AI agents are first-class visitors here: <a href="/llms.txt" className="underline">llms.txt</a> describes
             this application and Netify&rsquo;s MCP connection lets an agent build and iterate the same Statement of
-            Requirements a person builds, to the same publish gate, where a human always signs. Prefer a
-            question-by-question build? The <a href="/sase/rfp-builder/" className="underline">RFP Builder</a> remains
-            available, and everything you publish from here opens in the same procurement: responses side by side,
-            pricing private to you.
+            Requirements a person builds, to the same publish gate, where a human always signs. Prefer to
+            study the formal shape first? The <a href="/sase/rfp-builder/sample-rfp/" className="underline">sample RFP</a>{" "}
+            and the <a href="/sase/rfp-builder/questions/" className="underline">question bank</a> stay open, and
+            everything you publish from here opens in the same procurement: responses side by side, pricing private to
+            you.
           </p>
         </section>
       </main>

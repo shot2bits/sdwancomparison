@@ -85,10 +85,10 @@ export default function ShortlistPage() {
         </ul>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written and reviewed by the Netify research team, last verified and
-          graded in June 2026. To act on a shortlist, publish a free RFP to the
-          providers it names through the Netify RFP Builder at{" "}
-          <a href="/sase/rfp-builder/new/" className="underline">netify.co.uk/sase/rfp-builder/new/</a>{" "}
-          and compare structured responses, with pricing kept private to the buyer.
+          graded in June 2026. To act on a shortlist, describe the project once at{" "}
+          <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
+          {", "}raise it to a full RFP and publish to the providers it names, then
+          compare structured responses, with pricing kept private to the buyer.
         </p>
       </div>
 

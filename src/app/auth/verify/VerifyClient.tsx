@@ -130,7 +130,7 @@ export default function VerifyClient() {
           ) : (
             <>
               <a href="/sase/account/" className={BTN}>Go to my account</a>
-              <a href="/sase/rfp-builder/new/" className={BTN_GHOST}>Start a project</a>
+              <a href="https://netify.co.uk/" className={BTN_GHOST}>Start a project</a>
             </>
           )}
         </div>

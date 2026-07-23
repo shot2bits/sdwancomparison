@@ -611,7 +611,7 @@ export default function NoticeBuilder() {
                 {improve.recommend_full_rfp && (
                   <p className="rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <strong>Consider a full RFP.</strong> {improve.recommend_reason}{" "}
-                    <a href="/sase/rfp-builder/" className="underline">Open the RFP Builder</a> — you can start it from this RFI later, too.
+                    <a href="https://netify.co.uk/" className="underline">Continue on the desk</a>, where priorities and a commercial position raise it to a full RFP; paste this RFI straight in.
                   </p>
                 )}
                 <div className="flex gap-3">
@@ -663,7 +663,7 @@ export default function NoticeBuilder() {
                 </>
               )}
               <p className="mt-4 text-xs text-[var(--ink-500)]">
-                Need a formal process instead? <a href="/sase/rfp-builder/" className="underline">Turn this into a full RFP</a>.
+                Need a formal process instead? <a href="https://netify.co.uk/" className="underline">Turn this into a full RFP</a>.
               </p>
             </div>
           </div>

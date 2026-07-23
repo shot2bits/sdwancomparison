@@ -885,59 +885,6 @@ function VendorCard({
   );
 }
 
-/**
- * The bridge (Robert, 17 July 2026): the shortlist page is the busiest page
- * on the site while the brief flow sees one or two humans a day, so the
- * invitation moves to where the crowd is. Personalised with the user's top
- * three vendors; falls back to matched-supplier copy on the default view.
- * The href carries the whole scenario through rfpUrl()'s prefill contract.
- */
-function ShortlistBridge({ names, personalised, href }: { names: string[]; personalised: boolean; href: string }) {
-  useEffect(() => {
-    fireNetifyEvent("shortlist_bridge_view", { personalised: personalised ? "1" : "0" });
-    // Once per mount is the useful grain; filter changes re-rank in place.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const recipients =
-    names.length >= 2
-      ? `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`
-      : names.length === 1
-        ? names[0]
-        : "";
-
-  return (
-    <section className="mt-8 rounded-md border border-amber-300 bg-amber-50 p-6">
-      <p className="eyebrow mb-2 text-amber-800">Your shortlist, priced</p>
-      <h3 className="mb-2 text-xl text-[#13294b]">Invite these vendors to bid, in about two minutes</h3>
-      <p className="mb-4 max-w-2xl text-sm text-[var(--ink-700)]">
-        Compare SASE &amp; SD-WAN across 30+ vendors and service providers.
-        {recipients
-          ? ` Your brief goes to ${personalised ? "the vendors you just shortlisted" : "your top-ranked vendors"}, including ${recipients}, who`
-          : " Your brief goes to your best-matched suppliers, who"}{" "}
-        respond in the app with structured answers and <strong>private pricing</strong>, side by
-        side against your questions.
-      </p>
-      <div className="mb-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-[var(--ink-700)]">
-        <span><span aria-hidden="true" className="font-bold text-emerald-600">✓</span> Free for buyers</span>
-        <span><span aria-hidden="true" className="font-bold text-emerald-600">✓</span> No sales calls until you reply</span>
-        <span><span aria-hidden="true" className="font-bold text-emerald-600">✓</span> No obligation to award</span>
-      </div>
-      <div className="flex flex-wrap items-center gap-4">
-        <a
-          href={href}
-          onClick={() => fireNetifyEvent("shortlist_bridge_click", { n: String(names.length) })}
-          className="inline-flex items-center rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-zinc-950 no-underline transition-colors hover:bg-amber-400"
-        >
-          Get competing bids from your shortlist →
-        </a>
-        <a href="/sase/how-it-works/" className="text-[13px] text-[#1e3a5f] underline">How supplier responses work</a>
-      </div>
-      <p className="mt-3 text-[11.5px] text-[var(--ink-500)]">
-        One click to start, about two minutes to finish. Your shortlist carries over; add or remove
-        suppliers before anything is sent. Nothing is shared with any supplier until you agree the
-        submission.
-      </p>
-    </section>
-  );
-}
+/* ShortlistBridge deleted 23 Jul 2026 (Robert: "delete at leisure"): the
+   Continuation replaced it in DEF wave one; the bridge's events retired
+   with it. */

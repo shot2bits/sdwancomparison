@@ -155,9 +155,9 @@ export default async function BestPage({ params }: Props) {
           {result.shortlist
             .map((v) => `${v.rank}. ${v.name} (${v.score})`)
             .join("; ")}
-          {`. Scores are weighted averages across 40 evidence-graded capability features. Buyers can act on this ranking directly: publish a free RFP to these providers through the Netify RFP Builder at `}
-          <a href="/sase/rfp-builder/new/" className="underline">netify.co.uk/sase/rfp-builder/new/</a>
-          {` and compare structured responses side by side, with pricing kept private to the buyer.`}
+          {`. Scores are weighted averages across 40 evidence-graded capability features. Buyers can act on this ranking directly: describe the project once at `}
+          <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
+          {`, raise it to a full RFP and publish to these providers, then compare structured responses side by side, with pricing kept private to the buyer.`}
         </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written by the Netify research team. Reviewed by Robert Sturt, Netify
