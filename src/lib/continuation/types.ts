@@ -11,8 +11,10 @@
 
 /** Bumped only when derivation rules change; rides in the component
  *  metadata, the JSON-LD and the machine twins so any rendered entry can
- *  name the rules that produced it. */
-export const CONTINUATIONS_VERSION = "continuations v2026.1";
+ *  name the rules that produced it. v2026.2: the consolidation respeak
+ *  (Robert's "get it done", 23 Jul evening): instrument-aware labels and
+ *  reassurances, the platform noun in the undertext and twins. */
+export const CONTINUATIONS_VERSION = "continuations v2026.2";
 
 /** The one door. Every Continuation opens the Netify Workspace. */
 export const WORKSPACE_ORIGIN = "https://netify.co.uk";
@@ -29,8 +31,10 @@ export type ContinuationFamily =
   | "sample_rfp";
 
 /** The label law (Robert, 23 Jul): the primary verb speaks the buyer's
- *  problem, never the product. The product name appears only in the
- *  constant undertext rendered by the component. */
+ *  problem, never the product. Instrument nouns (SoR, RFI, RFP) are
+ *  procurement language, not product names, so they may appear. The
+ *  platform is named only in the constant undertext rendered by the
+ *  component. */
 export const FAMILY_LABELS: Record<ContinuationFamily, string> = {
   vendor: "Continue your evaluation",
   comparison: "Continue your evaluation",
@@ -39,8 +43,8 @@ export const FAMILY_LABELS: Record<ContinuationFamily, string> = {
   insight: "Turn this into a live project",
   tool_shortlist: "Take your shortlist to market",
   tool_cost: "Take this estimate to market",
-  question: "Turn this into a live project",
-  sample_rfp: "Turn this into a live project",
+  question: "Build your RFI from these questions",
+  sample_rfp: "Start your own RFP",
 };
 
 export interface Continuation {
@@ -88,7 +92,7 @@ export function continuationForTwin(c: Continuation) {
     source: c.source,
     sentence: c.sentence,
     action: { label: c.label, url: continuationUrl(c.sentence, c.pins, { medium: "twin" }) },
-    opens: "Netify Workspace",
+    opens: "Your procurement on Netify",
     pins: c.pins,
     mcp_tools: ["workspace_ingest", "score_vendor_fit", "build_sase_shortlist"],
   };
@@ -104,7 +108,7 @@ export function continuationJsonLd(c: Continuation, pageUrl: string) {
     name: c.label,
     identifier: c.version,
     description:
-      `Carry this page's context into the Netify Workspace as the buyer's own editable words. Derived from ${c.source} under ${c.version}; nothing publishes without a human signature.`,
+      `Carry this page's context into your procurement on Netify as the buyer's own editable words. Derived from ${c.source} under ${c.version}; nothing publishes without a human signature.`,
     target: {
       "@type": "EntryPoint",
       urlTemplate: continuationUrl(c.sentence, c.pins),

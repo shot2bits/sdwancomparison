@@ -30,6 +30,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { assessSecurityRequirement, type SecurityScopeVerdict } from "@/lib/security/rulebook";
+import { deriveInstrumentLadder } from "@/lib/workspace/instrument";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { ACCEPT_GAP_PREFIX } from "@/components/GapActions";
@@ -1492,15 +1493,46 @@ export default function ProjectDesk() {
       </div>
 
 
-      {/* ---- The three-step journey (Concept A, Robert's copy): the promise
-              as one quiet sequence, never cards. The supplier count prefers
-              the live market number once the feed answers and only shows the
-              approved 30+ line before it does; it never overstates. ---- */}
-      <div className="mx-auto mt-6 w-[min(760px,100%)]">
-        <ol className="m-0 flex list-none flex-col gap-2 p-0 text-[13px] leading-snug text-zinc-600 sm:flex-row sm:justify-center sm:gap-10">
-          <li><span className="mr-2 font-semibold tabular-nums text-zinc-300">1</span>Build your Statement of Requirements</li>
-          <li><span className="mr-2 font-semibold tabular-nums text-zinc-300">2</span>Publish anonymously to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers</li>
-          <li><span className="mr-2 font-semibold tabular-nums text-zinc-300">3</span>Receive competing proposals</li>
+      {/* ---- The procurement spine (the consolidation, Robert's word, 23
+              Jul evening): the three-step journey grown to the canon's five
+              acts, same seat, same quiet, never cards. States render only
+              when true: act one carries the live position once it exists;
+              act two prefers the live market number and only shows the
+              approved 30+ line before the feed answers; unearned acts state
+              their promise and never a count. ---- */}
+      <div className="mx-auto mt-6 w-[min(860px,100%)]">
+        <ol className="m-0 flex list-none flex-col gap-2.5 p-0 text-[13px] leading-snug text-zinc-600 sm:flex-row sm:justify-center sm:gap-7">
+          <li className="sm:max-w-[150px]">
+            <span className="mr-2 font-semibold tabular-nums text-zinc-300">1</span>
+            <span className="font-medium text-zinc-700">Describe</span>
+            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
+              {started && live.length > 0
+                ? <>SoR live · {live.length} claim{live.length === 1 ? "" : "s"} held</>
+                : "one description of your project"}
+            </span>
+          </li>
+          <li className="sm:max-w-[170px]">
+            <span className="mr-2 font-semibold tabular-nums text-zinc-300">2</span>
+            <span className="font-medium text-zinc-700">Publish</span>
+            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
+              SoR, RFI or full RFP · anonymous to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers
+            </span>
+          </li>
+          <li className="sm:max-w-[150px]">
+            <span className="mr-2 font-semibold tabular-nums text-zinc-300">3</span>
+            <span className="font-medium text-zinc-700">Proposals</span>
+            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">competing responses land here</span>
+          </li>
+          <li className="sm:max-w-[160px]">
+            <span className="mr-2 font-semibold tabular-nums text-zinc-300">4</span>
+            <span className="font-medium text-zinc-700">Compare &amp; shortlist</span>
+            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">side by side, evidence lines</span>
+          </li>
+          <li className="sm:max-w-[140px]">
+            <span className="mr-2 font-semibold tabular-nums text-zinc-300">5</span>
+            <span className="font-medium text-zinc-700">Manage</span>
+            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">one thread to award</span>
+          </li>
         </ol>
       </div>
 
@@ -1865,6 +1897,28 @@ export default function ProjectDesk() {
                   </button>
                 </>}
           </p>
+
+          {/* ---- The instrument rail (the consolidation, wave one): one
+                  desk, three instruments. Derived from the position's own
+                  state or absent entirely; every note is a fact about THIS
+                  position. The SoR is the earnable instrument today; the
+                  RFI and full RFP stand as honest horizons until scoring
+                  and the question bank fold in (wave two). ---- */}
+          {(() => {
+            const ladder = deriveInstrumentLadder({ started, claims: live.length, openQuestions: unansweredGaps.length });
+            if (!ladder) return null;
+            return (
+              <div data-instrument-rail className="-mt-2.5 mb-4 flex flex-wrap items-center gap-1.5">
+                <span className="rounded-full border border-amber-400 bg-white px-2.5 py-[2px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">SoR · live</span>
+                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] text-zinc-400">
+                  RFI · <span className="normal-case tracking-normal">{ladder.rfi.note}</span>
+                </span>
+                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] text-zinc-400">
+                  Full RFP · <span className="normal-case tracking-normal">{ladder.rfp.note}</span>
+                </span>
+              </div>
+            );
+          })()}
 
           {artefactOpen && (
             <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-3">
@@ -2369,12 +2423,12 @@ export default function ProjectDesk() {
         <div className="fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-auto sm:right-5 sm:w-[330px]">
           <div className={`rounded-xl border bg-white/95 p-3 shadow-[0_8px_30px_-12px_rgba(24,24,27,.35)] backdrop-blur ${ready ? "border-amber-400" : "border-zinc-200"}`}>
             <div className="flex items-baseline justify-between gap-2">
-              <p className="m-0 text-[13px] font-semibold text-zinc-900">{ready ? "Ready to publish" : "Not ready to publish yet"}</p>
+              <p className="m-0 text-[13px] font-semibold text-zinc-900">{ready ? "Ready to publish your SoR notice" : "Not ready to publish yet"}</p>
               {ready && <span className="rounded-full bg-amber-100 px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">unlocked</span>}
             </div>
             <p className="m-0 mt-0.5 text-[11px] leading-relaxed text-zinc-500">
               {ready
-                ? "The notice goes out anonymous: no name, no contacts, visible to signed-in suppliers only."
+                ? "The SoR notice goes out anonymous: no name, no contacts, visible to signed-in suppliers only."
                 : publishBarLock}
             </p>
             {(fitSlugs.length > 0 || market) && (
@@ -2396,7 +2450,7 @@ export default function ProjectDesk() {
                   : "border border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
               }`}
             >
-              {ready ? "Publish the anonymous notice" : "See what remains"}
+              {ready ? "Publish the SoR notice" : "See what remains"}
             </button>
           </div>
         </div>

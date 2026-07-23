@@ -7,32 +7,35 @@ import { getOrganizationSchema } from "@/lib/structured-data";
  * /home/ (public path /sase/home/, served at netify.co.uk/ by the apex
  * rewrite): the homepage variant of the workspace, Robert's decision,
  * 23 July: "the future is not marketing copy... this page is really
- * Netify". Identical desk, identical H1 verbatim; three differences only:
- * the canonical is the apex itself, the chrome carries one quiet line of
- * paths into the rest of the estate (the takeover must not hide the
- * company when it IS the front door), and the schema declares the
- * application at the apex. Everything else is the workspace, unchanged.
+ * Netify". Three differences only: the canonical is the apex itself, the
+ * chrome carries one quiet line of paths into the rest of the estate
+ * (the takeover must not hide the company when it IS the front door),
+ * and the schema declares the application at the apex.
  *
- * Concept A visual pass (Robert's word, 23 Jul 2026): treatment only. Type,
- * space, depth and colour discipline change; words, order, journeys and
- * behaviour do not.
+ * THE CANON (Robert, verbatim, 23 Jul evening, the consolidation): the
+ * top text IS the canonical paragraph. Sentence one is the H1; the rest
+ * is the sub. Word for word his; never paraphrase it here.
+ *
+ * Concept A visual pass (Robert's word, 23 Jul 2026): treatment only.
+ * Type, space, depth and colour discipline hold.
  */
 
 const APEX = "https://netify.co.uk";
 
-const TITLE =
-  "Imagine describing your SASE and SD-WAN requirements once, then watching the market build itself around you as the world's leading suppliers compete for your business";
+/** The canonical paragraph, Robert's words verbatim (23 Jul 2026). */
+const CANON_H1 = "Netify is a living SASE & SD-WAN procurement marketplace.";
+const CANON_REST =
+  "Build your Statement of Requirements (SoR), RFI or full RFP, then publish anonymously to a curated marketplace of 30+ leading vendors and managed service providers. Receive competing proposals, compare solutions, build your shortlist and manage your procurement from a single description of your project.";
+const CANON = `${CANON_H1} ${CANON_REST}`;
 
 export const metadata: Metadata = {
-  title: `Netify | ${TITLE}`,
-  description:
-    "Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement of Requirements automatically.",
+  title: "The living SASE & SD-WAN procurement marketplace",
+  description: CANON,
   alternates: { canonical: `${APEX}/` },
   robots: { index: true, follow: true },
   openGraph: {
-    title: `Netify | ${TITLE}`,
-    description:
-      "Describe your requirements in a single sentence; Netify has already mapped the thousands of follow-up questions technology buyers ask AI, and builds your Statement of Requirements automatically.",
+    title: "Netify | The living SASE & SD-WAN procurement marketplace",
+    description: CANON,
     url: `${APEX}/`,
     type: "website",
     locale: "en_GB",
@@ -47,19 +50,17 @@ function getHomeSchemas() {
       "@id": `${APEX}/#website`,
       name: "Netify",
       url: `${APEX}/`,
-      description:
-        "Netify is a living procurement position for SASE and SD-WAN: describe your requirements once and the world's leading suppliers compete for your business.",
+      description: CANON,
     },
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "@id": `${APEX}/#webapplication`,
-      name: "Netify Live Sourcing Workspace",
+      name: "Netify SASE & SD-WAN Procurement Marketplace",
       url: `${APEX}/`,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
-      description:
-        "A living Statement of Requirements for SD-WAN, SASE and managed security: the complete framework stands on screen from the first second and becomes yours as you describe your project in plain sentences. Provenance on every claim, evidence-graded supplier fit, and one human signature publishes an anonymous notice to the signed-in curated marketplace. Fully agent-accessible via MCP and llms.txt.",
+      description: `${CANON} Provenance on every claim, evidence-graded supplier fit, and one human signature publishes the anonymous notice. Fully agent-accessible via MCP and llms.txt.`,
       offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
       provider: { "@id": `${APEX}/#organization` },
     },
@@ -94,13 +95,10 @@ export default function Page() {
           className="m-0 max-w-3xl tracking-tight"
           style={{ fontSize: "22px", lineHeight: 1.35, fontWeight: 600, letterSpacing: "-0.015em", color: "#18181b" }}
         >
-          Imagine describing your SASE and SD-WAN requirements once, then watching the market build itself around you as
-          the world&rsquo;s leading suppliers compete for your business.
+          {CANON_H1}
         </h1>
-        <p id="page-subhead" className="mb-0 mt-3 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
-          Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the
-          thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
-          of Requirements automatically.
+        <p id="page-subhead" className="mb-0 mt-3 max-w-3xl text-[14px] leading-relaxed text-zinc-500">
+          {CANON_REST}
         </p>
         <p className="m-0 mt-4 flex max-w-3xl items-start gap-2 text-[13px] leading-relaxed text-zinc-500">
           <svg width="13" height="15" viewBox="0 0 14 16" className="mt-[3px] shrink-0" aria-hidden="true">
@@ -130,8 +128,8 @@ export default function Page() {
             this application and Netify&rsquo;s MCP connection lets an agent build and iterate the same Statement of
             Requirements a person builds, to the same publish gate, where a human always signs. Prefer a
             question-by-question build? The <a href="/sase/rfp-builder/" className="underline">RFP Builder</a> remains
-            available, and everything you publish from here opens in the same project workspace: responses side by
-            side, pricing private to you.
+            available, and everything you publish from here opens in the same procurement: responses side by side,
+            pricing private to you.
           </p>
         </section>
       </main>

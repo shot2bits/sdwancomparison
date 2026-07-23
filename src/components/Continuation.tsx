@@ -64,7 +64,7 @@ export default function Continuation({ c, pageUrl }: { c: ContinuationData | nul
           {c.deepClaim ? ` ${c.deepClaim}` : ""}
         </p>
       </div>
-      <p className="m-0 mt-2.5 text-[10.5px] text-zinc-400">Opens in the Netify Workspace</p>
+      <p className="m-0 mt-2.5 text-[10.5px] text-zinc-400">Opens your procurement on Netify</p>
       <p className="m-0 mt-2.5 border-t border-zinc-100 pt-2 text-[10.5px] leading-relaxed text-zinc-400">
         Working with an assistant? Connect{" "}
         <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[10px]">netify.co.uk/sase/api/mcp/</code> and use{" "}

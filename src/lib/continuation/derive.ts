@@ -100,7 +100,7 @@ export function deriveContinuationComparison(
     `Continue from this comparison · ${a.name} vs ${b.name}`,
     `We are deciding between ${a.name} and ${b.name} for our estate.`,
     [a.slug, b.slug],
-    `Both suppliers arrive pinned; the desk's evidence lines show where each stands against the requirements your own words create.`,
+    `Both suppliers arrive pinned; the desk's evidence lines show where each stands against the requirements your own words create. Take the position to an RFI or a full RFP when you are ready.`,
   );
 }
 
@@ -140,7 +140,7 @@ export function deriveContinuationSector(src: {
     src.pins ?? [],
     src.pins?.length
       ? `The suppliers ranked on this page arrive pinned; your ${label.toLowerCase()} sector becomes part of the conversation from your first sentence.`
-      : `Your ${label.toLowerCase()} sector becomes part of the conversation from your first sentence, and an anonymous notice reaches the market only when you sign.`,
+      : `Your ${label.toLowerCase()} sector becomes part of the conversation from your first sentence; raise the position to an RFI or a full RFP, and nothing reaches the curated marketplace until you sign.`,
     src.sectorKey === "healthcare"
       ? "The workspace already understands healthcare: NHS DSPT, clinical change windows and HSCN are part of the conversation."
       : undefined,
@@ -194,7 +194,7 @@ export function deriveContinuationQuestion(src: { packCount: number; questionCou
     `Continue from the question bank · ${src.questionCount} questions in ${src.packCount} packs`,
     `We are preparing a formal SASE or SD-WAN requirement.`,
     [],
-    `Your position forms first; when it warrants the formal document, the Workspace recommends the RFP Builder with your words carried in.`,
+    `Your position forms first; raise it to an RFI or a full RFP when it warrants the formal document, your words carried in.`,
   );
 }
 
@@ -207,7 +207,7 @@ export function deriveContinuationSampleRfp(src: { sampleTitle: string }): Conti
     `Continue from the sample RFP`,
     `We are preparing an RFP like this one for our own project.`,
     [],
-    `Your position forms first; when it warrants the formal document, the Workspace recommends the RFP Builder with your words carried in.`,
+    `Your position forms first; raise it to a full RFP when it warrants the formal document, your words carried in.`,
   );
 }
 

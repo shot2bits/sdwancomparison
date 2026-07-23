@@ -19,18 +19,19 @@ import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchem
  * the same decision that made the document the hero.
  */
 
-const TITLE =
-  "Imagine describing your SASE and SD-WAN requirements once, then watching the market build itself around you as the world's leading suppliers compete for your business";
+/** The canonical paragraph, Robert's words verbatim (23 Jul 2026). */
+const CANON_H1 = "Netify is a living SASE & SD-WAN procurement marketplace.";
+const CANON_REST =
+  "Build your Statement of Requirements (SoR), RFI or full RFP, then publish anonymously to a curated marketplace of 30+ leading vendors and managed service providers. Receive competing proposals, compare solutions, build your shortlist and manage your procurement from a single description of your project.";
+const CANON = `${CANON_H1} ${CANON_REST}`;
 
 export const metadata: Metadata = {
-  title: TITLE,
-  description:
-    "Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement of Requirements automatically.",
+  title: "The living SASE & SD-WAN procurement marketplace",
+  description: CANON,
   alternates: { canonical: "https://netify.co.uk/" },
   openGraph: {
-    title: TITLE,
-    description:
-      "Describe your requirements in a single sentence; Netify has already mapped the thousands of follow-up questions technology buyers ask AI, and builds your Statement of Requirements automatically.",
+    title: "Netify | The living SASE & SD-WAN procurement marketplace",
+    description: CANON,
     url: `${SITE_URL}/workspace/`,
     type: "website",
     locale: "en_GB",
@@ -42,12 +43,11 @@ function getWorkspaceWebApplicationSchema() {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "@id": "https://netify.co.uk/#webapplication",
-    name: "Netify Live Sourcing Workspace",
+    name: "Netify SASE & SD-WAN Procurement Marketplace",
     url: "https://netify.co.uk/",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
-    description:
-      "A living Statement of Requirements for SD-WAN, SASE and managed security: the complete framework stands on screen from the first second and becomes yours as you describe your project in plain sentences or touch the requirements you recognise. Provenance on every claim, a network diagram drawn from the stated estate, rulebook-assessed scope and evidence-graded supplier fit. One signature publishes an anonymous notice to the open board and the full brief to matched signed-in suppliers.",
+    description: `${CANON} Provenance on every claim, a network diagram drawn from the stated estate, rulebook-assessed scope and evidence-graded supplier fit. One signature publishes an anonymous notice to the open board and the full brief to matched signed-in suppliers.`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
     provider: { "@id": `${SITE_URL}/#organization` },
   };
@@ -77,13 +77,10 @@ export default function Page() {
           className="m-0 max-w-3xl tracking-tight"
           style={{ fontSize: "16.5px", lineHeight: 1.45, fontWeight: 600, color: "#27272a" }}
         >
-          Imagine describing your SASE and SD-WAN requirements once, then watching the market build itself around you as
-          the world&rsquo;s leading suppliers compete for your business.
+          {CANON_H1}
         </h1>
-        <p id="page-subhead" className="mb-0 mt-1 max-w-2xl text-[12.5px] leading-relaxed text-zinc-500">
-          Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the
-          thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
-          of Requirements automatically.
+        <p id="page-subhead" className="mb-0 mt-1 max-w-3xl text-[12.5px] leading-relaxed text-zinc-500">
+          {CANON_REST}
         </p>
         <p className="m-0 mt-2.5 max-w-3xl border-l-2 border-amber-400 pl-2.5 text-[11.5px] leading-relaxed text-zinc-600">
           <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated

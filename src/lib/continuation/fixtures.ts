@@ -148,13 +148,27 @@ export async function runContinuationTests(): Promise<ContinuationTestResult> {
     const t = continuationForTwin(c);
     expect(t.version === CONTINUATIONS_VERSION, "version in the twin");
     expect(t.action.url.includes("utm_medium=twin"), "twin action links carry attribution");
-    expect(t.opens === "Netify Workspace", "provenance line in the twin");
+    expect(t.opens === "Your procurement on Netify", "provenance line in the twin");
   });
   ok("JSON-LD names the rules that produced it", () => {
     const c = deriveContinuationVendor(evaluatedVendor())!;
     const ld = continuationJsonLd(c, "https://netify.co.uk/sase/vendors/cato-networks") as { identifier: string; description: string };
     expect(ld.identifier === CONTINUATIONS_VERSION, "version is the identifier");
     expect(ld.description.includes("vendor:cato-networks"), "source named");
+  });
+
+  /* ---- v2026.2, the consolidation respeak (Robert, 23 Jul evening) ---- */
+  ok("the document families speak their instruments", () => {
+    expect(FAMILY_LABELS.sample_rfp === "Start your own RFP", "sample label");
+    expect(FAMILY_LABELS.question === "Build your RFI from these questions", "question label");
+    expect(CONTINUATIONS_VERSION === "continuations v2026.2", "rulebook version bumped");
+  });
+  ok("comparison and sector reassurances carry the ladder, never the old noun", () => {
+    const comp = deriveContinuationComparison(evaluatedVendor(), evaluatedVendor("zscaler", "Zscaler"))!;
+    expect(comp.reassurance.includes("RFI or a full RFP"), "comparison ladder clause");
+    const sector = deriveContinuationSector({ pageTitle: "SASE for healthcare" , sectorKey: "healthcare", sectorLabel: "Healthcare" })!;
+    expect(sector.reassurance.includes("curated marketplace"), "sector speaks the marketplace");
+    for (const c of [comp, sector]) expect(!/workspace recommends/i.test(c.reassurance), "old mechanic gone");
   });
 
   return r;
