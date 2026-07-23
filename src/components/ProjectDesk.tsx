@@ -30,7 +30,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { assessSecurityRequirement, type SecurityScopeVerdict } from "@/lib/security/rulebook";
-import { deriveInstrumentLadder } from "@/lib/workspace/instrument";
+import {
+  deriveInstrumentLadder,
+  deriveRfiQuestionSet,
+  earnedInstrument,
+  instrumentNotesLine,
+} from "@/lib/workspace/instrument";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { ACCEPT_GAP_PREFIX } from "@/components/GapActions";
@@ -227,6 +232,9 @@ export default function ProjectDesk() {
   /* Sector pack suggestions: declined is permanent, on the record. */
   const [declinedSug, setDeclinedSug] = useState<string[]>([]);
   const [customTitle, setCustomTitle] = useState<string>("");
+  /** Sections the buyer has weighted high for scoring (wave two: the
+   *  full RFP's priorities). Persisted with the draft. */
+  const [weights, setWeights] = useState<string[]>([]);
   const [editingTitle, setEditingTitle] = useState(false);
 
   const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
@@ -334,7 +342,7 @@ export default function ProjectDesk() {
         if (raw) {
           const saved = JSON.parse(raw) as {
             facts?: WorkspaceFact[]; added?: string[]; removed?: string[];
-            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; declinedSug?: string[]; customTitle?: string; ts?: number;
+            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; declinedSug?: string[]; customTitle?: string; weights?: string[]; ts?: number;
           };
           if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && ((saved.facts?.length ?? 0) > 0 || (saved.noted?.length ?? 0) > 0)) {
             base = saved.facts ?? [];
@@ -346,6 +354,7 @@ export default function ProjectDesk() {
             setDismissedQ(saved.dismissedQ ?? []);
             setDeclinedSug(saved.declinedSug ?? []);
             setCustomTitle(saved.customTitle ?? "");
+            setWeights(saved.weights ?? []);
             receiptId.current = Math.max(0, ...(saved.receipts ?? []).map((r) => r.id));
             setRestored(true);
           }
@@ -371,9 +380,9 @@ export default function ProjectDesk() {
   useEffect(() => {
     if (!started || published) return;
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, ts: Date.now() }));
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, ts: Date.now() }));
     } catch { /* best effort */ }
-  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, started, published]);
+  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, started, published]);
 
   /* ---- The extraction cycle (the same organ), now with the receipt ---- */
   const runCycle = useCallback(
@@ -842,6 +851,37 @@ export default function ProjectDesk() {
   const pins = [...new Set([...added, ...fitSlugs])].slice(0, 5);
   const unansweredGaps = brief.openGaps;
 
+  /* ---- The instrument ladder (the consolidation, wave two): the
+          position's covered areas summon their question set from the
+          curated bank; priorities and a commercial claim earn the full
+          RFP. All derived, all fixtured in validate-instruments. ---- */
+  const coveredSections = useMemo(() => {
+    const s = new Set<string>();
+    for (const f of facts) if (!f.struck) s.add(sectionForPath(f.path));
+    return [...s];
+  }, [facts]);
+  const commercialClaims = useMemo(
+    () => facts.filter((f) => !f.struck && sectionForPath(f.path) === "commercial").length,
+    [facts],
+  );
+  const rfiSet = useMemo(
+    () => deriveRfiQuestionSet({ coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null }),
+    [coveredSections, requirement],
+  );
+  const instrumentLadder = useMemo(
+    () =>
+      deriveInstrumentLadder({
+        started,
+        claims: live.length,
+        openQuestions: unansweredGaps.length,
+        rfiQuestions: rfiSet?.total ?? 0,
+        prioritiesSet: weights.length,
+        commercialClaims,
+      }),
+    [started, live.length, unansweredGaps.length, rfiSet, weights.length, commercialClaims],
+  );
+  const instrument = earnedInstrument(instrumentLadder);
+
   const signLocked =
     !started || facts.length === 0 || Boolean(published) || (securityScope && (!verdict || verdict.confidence === "low")) || (!securityScope && !buying);
   const lockReason = !started
@@ -873,8 +913,26 @@ export default function ProjectDesk() {
     if (receipts.length) {
       text += `\n\n## Notes, unplaced (kept verbatim)\n${receipts.map((r) => `- "${r.text}"`).join("\n")}`;
     }
+    /* Wave two: the artefact IS the instrument. The ladder's states, the
+       summoned question set verbatim from the bank, and the buyer's own
+       priorities print with the position. */
+    if (instrumentLadder) {
+      text += `\n\n## Instrument\n- Statement of Requirements: live\n- RFI: ${instrumentLadder.rfi.note}\n- Full RFP: ${instrumentLadder.rfp.note}`;
+      if (rfiSet && instrumentLadder.rfi.state === "ready") {
+        text += `\n\n## RFI question set · bank v${rfiSet.version} · ${rfiSet.total} questions`;
+        for (const c of rfiSet.canonical) {
+          text += `\n\n### ${c.category}\n${c.questions.map((q) => `- ${q.text}`).join("\n")}`;
+        }
+        if (rfiSet.sectorPack) {
+          text += `\n\n### ${rfiSet.sectorPack.label} pack · ${rfiSet.sectorPack.count} questions\n${rfiSet.sectorPack.sections.map((s) => `- ${s}`).join("\n")}`;
+        }
+      }
+      if (weights.length) {
+        text += `\n\n## Scoring priorities (weighted high)\n${weights.map((k) => `- ${TAXONOMY.find((s) => s.key === k)?.title ?? k}`).join("\n")}`;
+      }
+    }
     return text;
-  }, [brief, noted, receipts]);
+  }, [brief, noted, receipts, instrumentLadder, rfiSet, weights]);
 
   /* ---- The signature chain (identical organs to W0/P2) ---- */
   async function signAndPublish() {
@@ -906,7 +964,15 @@ export default function ProjectDesk() {
             requirement.estate?.existingNetwork?.length ? `Network estate: ${requirement.estate.existingNetwork.join(", ")}.` : "",
             noted.length ? `Buyer selections (structured fields pending): ${noted.map((n) => n.label).join(", ")}.` : "",
             receipts.length ? `Buyer notes, kept verbatim: ${receipts.map((r) => r.text).join(" | ")}.` : "",
-            "Drafted in the Live Sourcing Workspace.",
+            /* Wave two: the earned instrument declares itself to suppliers,
+               verbatim from the same derivation the rail renders. */
+            instrumentNotesLine({
+              instrument,
+              set: rfiSet,
+              weightedHigh: weights.map((k) => TAXONOMY.find((s) => s.key === k)?.title ?? k),
+              commercialClaims,
+            }) ?? "",
+            "Drafted on Netify, the SASE & SD-WAN procurement marketplace.",
           ].filter(Boolean).join(" ");
           const res = await fetch("/sase/api/rfp", {
             method: "POST",
@@ -1515,18 +1581,26 @@ export default function ProjectDesk() {
             <span className="mr-2 font-semibold tabular-nums text-zinc-300">2</span>
             <span className="font-medium text-zinc-700">Publish</span>
             <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
-              SoR, RFI or full RFP · anonymous to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers
+              {published
+                ? <span className="text-amber-700">live on the board{published.invited.length > 0 ? ` · ${published.invited.length} supplier${published.invited.length === 1 ? "" : "s"} invited` : " · anonymous"}</span>
+                : <>SoR, RFI or full RFP · anonymous to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers</>}
             </span>
           </li>
-          <li className="sm:max-w-[150px]">
+          <li className="sm:max-w-[160px]">
             <span className="mr-2 font-semibold tabular-nums text-zinc-300">3</span>
             <span className="font-medium text-zinc-700">Proposals</span>
-            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">competing responses land here</span>
+            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
+              {published && created?.id
+                ? <a className="underline hover:text-zinc-700" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>responses land in your record</a>
+                : "competing responses land here"}
+            </span>
           </li>
           <li className="sm:max-w-[160px]">
             <span className="mr-2 font-semibold tabular-nums text-zinc-300">4</span>
             <span className="font-medium text-zinc-700">Compare &amp; shortlist</span>
-            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">side by side, evidence lines</span>
+            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
+              {published && created?.id ? "side by side in your record, evidence lines" : "side by side, evidence lines"}
+            </span>
           </li>
           <li className="sm:max-w-[140px]">
             <span className="mr-2 font-semibold tabular-nums text-zinc-300">5</span>
@@ -1898,27 +1972,70 @@ export default function ProjectDesk() {
                 </>}
           </p>
 
-          {/* ---- The instrument rail (the consolidation, wave one): one
-                  desk, three instruments. Derived from the position's own
-                  state or absent entirely; every note is a fact about THIS
-                  position. The SoR is the earnable instrument today; the
-                  RFI and full RFP stand as honest horizons until scoring
-                  and the question bank fold in (wave two). ---- */}
-          {(() => {
-            const ladder = deriveInstrumentLadder({ started, claims: live.length, openQuestions: unansweredGaps.length });
-            if (!ladder) return null;
-            return (
-              <div data-instrument-rail className="-mt-2.5 mb-4 flex flex-wrap items-center gap-1.5">
-                <span className="rounded-full border border-amber-400 bg-white px-2.5 py-[2px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">SoR · live</span>
-                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] text-zinc-400">
-                  RFI · <span className="normal-case tracking-normal">{ladder.rfi.note}</span>
-                </span>
-                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] text-zinc-400">
-                  Full RFP · <span className="normal-case tracking-normal">{ladder.rfp.note}</span>
-                </span>
-              </div>
-            );
-          })()}
+          {/* ---- The instrument rail (the consolidation, waves one and
+                  two): one desk, three instruments. Derived from the
+                  position's own state or absent entirely; every note is a
+                  fact about THIS position. Earned instruments wear the
+                  market's colour; horizons stay quiet and name what they
+                  need. ---- */}
+          {instrumentLadder && (
+            <div data-instrument-rail className="-mt-2.5 mb-3 flex flex-wrap items-center gap-1.5">
+              <span className="rounded-full border border-amber-400 bg-white px-2.5 py-[2px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">SoR · live</span>
+              <span
+                data-instrument-rfi={instrumentLadder.rfi.state}
+                className={`rounded-full px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] ${
+                  instrumentLadder.rfi.state === "ready"
+                    ? "border border-amber-400 bg-white font-semibold text-amber-800"
+                    : "border border-zinc-200 bg-zinc-50 text-zinc-400"
+                }`}
+              >
+                RFI · <span className="normal-case tracking-normal">{instrumentLadder.rfi.note}</span>
+              </span>
+              <span
+                data-instrument-rfp={instrumentLadder.rfp.state}
+                className={`rounded-full px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] ${
+                  instrumentLadder.rfp.state === "ready"
+                    ? "border border-amber-400 bg-white font-semibold text-amber-800"
+                    : "border border-zinc-200 bg-zinc-50 text-zinc-400"
+                }`}
+              >
+                Full RFP · <span className="normal-case tracking-normal">{instrumentLadder.rfp.note}</span>
+              </span>
+            </div>
+          )}
+
+          {/* ---- Scoring priorities (wave two): the covered areas become
+                  weightable once the RFI stands ready. The buyer weights;
+                  nothing weights itself. ---- */}
+          {instrumentLadder && instrumentLadder.rfi.state === "ready" && !published && (
+            <div data-priorities className="mb-4 flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Priorities</span>
+              <span className="text-[10.5px] text-zinc-400">weight what matters for scoring:</span>
+              {coveredSections
+                .map((k) => TAXONOMY.find((s) => s.key === k))
+                .filter((s): s is (typeof TAXONOMY)[number] => Boolean(s))
+                .map((sec) => {
+                  const on = weights.includes(sec.key);
+                  return (
+                    <button
+                      key={sec.key}
+                      type="button"
+                      onClick={() => {
+                        setWeights((w) => (on ? w.filter((k) => k !== sec.key) : [...w, sec.key]));
+                        ev("workspace_priority_weighted", { section: sec.key, high: on ? 0 : 1 });
+                      }}
+                      className={`rounded-full border px-2.5 py-[2px] text-[10.5px] transition-colors ${
+                        on
+                          ? "border-amber-400 bg-amber-50 font-semibold text-amber-800"
+                          : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-400 hover:text-zinc-800"
+                      }`}
+                    >
+                      {sec.title}{on ? " · high" : ""}
+                    </button>
+                  );
+                })}
+            </div>
+          )}
 
           {artefactOpen && (
             <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-3">
@@ -2423,12 +2540,20 @@ export default function ProjectDesk() {
         <div className="fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-auto sm:right-5 sm:w-[330px]">
           <div className={`rounded-xl border bg-white/95 p-3 shadow-[0_8px_30px_-12px_rgba(24,24,27,.35)] backdrop-blur ${ready ? "border-amber-400" : "border-zinc-200"}`}>
             <div className="flex items-baseline justify-between gap-2">
-              <p className="m-0 text-[13px] font-semibold text-zinc-900">{ready ? "Ready to publish your SoR notice" : "Not ready to publish yet"}</p>
+              <p className="m-0 text-[13px] font-semibold text-zinc-900">
+                {ready
+                  ? instrument === "rfp" ? "Ready to issue your full RFP" : instrument === "rfi" ? "Ready to issue your RFI" : "Ready to publish your SoR notice"
+                  : "Not ready to publish yet"}
+              </p>
               {ready && <span className="rounded-full bg-amber-100 px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">unlocked</span>}
             </div>
             <p className="m-0 mt-0.5 text-[11px] leading-relaxed text-zinc-500">
               {ready
-                ? "The SoR notice goes out anonymous: no name, no contacts, visible to signed-in suppliers only."
+                ? instrument === "rfp"
+                  ? "The RFP goes out anonymous with your priorities and question set declared: no name, no contacts, visible to signed-in suppliers only."
+                  : instrument === "rfi"
+                    ? "The RFI goes out anonymous with your question set declared: no name, no contacts, visible to signed-in suppliers only."
+                    : "The SoR notice goes out anonymous: no name, no contacts, visible to signed-in suppliers only."
                 : publishBarLock}
             </p>
             {(fitSlugs.length > 0 || market) && (
@@ -2450,7 +2575,7 @@ export default function ProjectDesk() {
                   : "border border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
               }`}
             >
-              {ready ? "Publish the SoR notice" : "See what remains"}
+              {ready ? (instrument === "rfp" ? "Issue your full RFP" : instrument === "rfi" ? "Issue the RFI" : "Publish the SoR notice") : "See what remains"}
             </button>
           </div>
         </div>
