@@ -81,10 +81,12 @@ export default function QuestionBankPage() {
         <p className="eyebrow mb-3">Netify question bank</p>
         <h1 id="page-h1" className="mb-4">The Netify SASE &amp; SD-WAN RFP question bank</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          Analyst-written questions used by the RFP Builder and the marketplace: a canonical SASE set where every
-          question carries the evidence suppliers should provide, which sectors it is mandatory for, a weighting hint,
-          the red-flag answers to watch for and the follow-up to ask — plus four sector packs with buyer and supplier
-          lenses. Use it in your own procurement with attribution, or <a href="/sase/rfp-builder/" className="underline">let the builder assemble it for you</a>.
+          These questions were written by our analyst team, and they are the same set the RFP Builder and the
+          marketplace run on. Every question tells you what evidence a supplier should be able to show you, which
+          sectors it is mandatory for, how much weight to give the answer, the responses that should ring alarm bells
+          and the follow-up worth asking. Alongside the main set sit four sector packs, each written with a buyer lens
+          and a supplier lens. You are welcome to use the questions in your own procurement with attribution, or{" "}
+          <a href="/sase/rfp-builder/" className="underline">let the builder assemble everything for you</a>.
         </p>
       </div>
 
