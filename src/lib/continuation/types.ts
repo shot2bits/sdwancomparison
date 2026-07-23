@@ -20,6 +20,7 @@ export const WORKSPACE_ORIGIN = "https://netify.co.uk";
 export type ContinuationFamily =
   | "vendor"
   | "comparison"
+  | "comparison_index" // derived in the main repo for /vendor-comparison/; listed here so the contract is whole
   | "sector"
   | "insight" // derived in the main repo beside the Ghost template; listed here so the contract is whole
   | "tool_shortlist"
@@ -33,6 +34,7 @@ export type ContinuationFamily =
 export const FAMILY_LABELS: Record<ContinuationFamily, string> = {
   vendor: "Continue your evaluation",
   comparison: "Continue your evaluation",
+  comparison_index: "Continue your evaluation",
   sector: "Turn this into a live project",
   insight: "Turn this into a live project",
   tool_shortlist: "Take your shortlist to market",

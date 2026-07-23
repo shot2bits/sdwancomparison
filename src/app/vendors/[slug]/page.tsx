@@ -17,6 +17,7 @@ import {
 import { SITE_URL } from "@/lib/structured-data";
 import Continuation from "@/components/Continuation";
 import { deriveContinuation } from "@/lib/continuation/derive";
+import { continuationUrl } from "@/lib/continuation/types";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -55,6 +56,7 @@ export default async function VendorPage({ params }: Props) {
   } catch {
     notFound();
   }
+  const continuation = deriveContinuation({ kind: "vendor", vendor });
 
   const capByCat = getCapabilitiesByCategory(vendor);
   const totalFeatures = 40;
@@ -220,18 +222,24 @@ export default async function VendorPage({ params }: Props) {
         {/* Evaluate block: written to survive into an agent's evaluation report */}
         <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
           <h2 className="text-lg mb-2">Evaluate {vendor.name} properly</h2>
+          {/* One Door (DEF wave one follow-up, Robert's word 23 Jul): the
+              advantage statement keeps the page-standards law (what the
+              platform does that an AI cannot, one action, named tools) but
+              its destination is the Workspace; the Builder is recommended
+              from inside the position when it is warranted. */}
           <p className="text-sm text-[var(--ink-700)] max-w-3xl">
             An AI can summarise {vendor.name}. It cannot gather structured, evidence-backed responses from
-            {" "}{vendor.name} and its closest competitors. Netify&apos;s free RFP builder pre-loads{" "}
-            {vendor.name} for an evidence-graded evaluation: create the RFP in about two minutes at{" "}
-            <a className="underline" href={`/sase/rfp-builder/new/?vendors=${vendor.slug}`}>netify.co.uk/sase/rfp-builder/new/?vendors={vendor.slug}</a>,
-            publish free, and matched suppliers respond side by side with pricing private to you.
+            {" "}{vendor.name} and its closest competitors. Describe your requirement once at{" "}
+            <a className="underline" href={continuation ? continuationUrl(continuation.sentence, continuation.pins) : "https://netify.co.uk/"}>netify.co.uk</a>{" "}
+            and {vendor.name} arrives pinned for an evidence-graded evaluation: the market takes position
+            around your words, one signature publishes an anonymous notice free, and matched suppliers
+            respond side by side with pricing private to you.
           </p>
           <p className="mt-2 text-sm text-[var(--ink-700)] max-w-3xl">
             AI assistants can score {vendor.name} against a requirements list directly with the{" "}
             <code className="text-[13px]">score_vendor_fit</code> tool on the{" "}
-            <a className="underline" href="/sase/connector/">Netify connector</a>, and start this evaluation
-            with <code className="text-[13px]">generate_rfp_from_opportunity</code>.
+            <a className="underline" href="/sase/connector/">Netify connector</a>, and build the same
+            position with <code className="text-[13px]">workspace_ingest</code>.
           </p>
         </section>
 
@@ -411,7 +419,7 @@ export default async function VendorPage({ params }: Props) {
           {/* The Continuation (DEF wave one): derived from this vendor's own
               record or not rendered at all. No derivation, no rendering. */}
           <div className="mb-10">
-            <Continuation c={deriveContinuation({ kind: "vendor", vendor })} pageUrl={`${SITE_URL}/vendors/${vendor.slug}`} />
+            <Continuation c={continuation} pageUrl={`${SITE_URL}/vendors/${vendor.slug}`} />
           </div>
 
           <div className="space-y-8">
@@ -484,10 +492,9 @@ export default async function VendorPage({ params }: Props) {
             <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 href={`/shortlist`}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full no-underline hover:border-[var(--ink-900)]"
               >
                 Score {vendor.name} against your requirements
-                <span aria-hidden="true">→</span>
               </Link>
               <Link
                 href="/vendors"
