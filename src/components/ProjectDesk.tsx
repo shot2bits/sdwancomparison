@@ -2300,7 +2300,7 @@ export default function ProjectDesk() {
                     {needAuth && (
                       <div className="mt-2 rounded-md bg-zinc-50 p-3">
                         <p className="m-0 mb-1 text-[11px] text-zinc-600">
-                          One step first: publishing reaches named suppliers, so it needs a verified work email. Sign in, then press publish again; your position is untouched.
+                          One step first: publishing reaches named suppliers, so it needs a verified sign-in. Sign in, then press publish again; your position is untouched.
                         </p>
                         <SignIn role="buyer" prompt="Sign in with your work email to publish." />
                         <CodeEntry onVerified={() => setNeedAuth(false)} />

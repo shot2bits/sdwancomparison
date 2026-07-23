@@ -79,7 +79,7 @@ export default function PublishRequirement({ projectId, manage, gapCount }: { pr
           </button>
           {needAuth && (
             <div className="mt-3">
-              <p className="m-0 mb-2 text-xs text-[var(--ink-700)]">One step first: publishing reaches named suppliers, so it needs a verified work email. Sign in and press publish again.</p>
+              <p className="m-0 mb-2 text-xs text-[var(--ink-700)]">One step first: publishing reaches named suppliers, so it needs a verified sign-in. Sign in and press publish again.</p>
               <SignIn role="buyer" prompt="Sign in with your work email to publish." />
               <CodeEntry onVerified={() => { setNeedAuth(false); }} />
             </div>
