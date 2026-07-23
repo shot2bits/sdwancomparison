@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import SectorBridge from "@/components/SectorBridge";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
@@ -179,6 +180,10 @@ export default async function BestPage({ params }: Props) {
           </Link>
         </div>
       </div>
+
+      {/* The sector bridge (24 Jul): from the cited shortlist straight into
+          the apex workspace with a sector sentence waiting in the prompt. */}
+      <SectorBridge sectorKey={page.input.sector as string | undefined} sectorLabel={page.input.sector ? SECTOR_LABELS[page.input.sector] : undefined} />
 
       {page.canonicalOverride && (
         <section className="mb-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5">
