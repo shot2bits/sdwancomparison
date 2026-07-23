@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Continuation from "@/components/Continuation";
+import { deriveContinuationSampleRfp } from "@/lib/continuation/derive";
 import Link from "next/link";
 import { buildSampleProject } from "@/lib/sample-rfp";
 import { includedSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel } from "@/lib/rfp-document";
@@ -181,12 +183,14 @@ export default function SampleRfpPage() {
 
         <aside>
           <div className="sticky top-6 space-y-4">
-            <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
-              <p className="mb-1 text-sm font-medium">Build your own</p>
-              <p className="mb-4 text-sm text-[var(--ink-600)]">The builder adapts every section to your estate, generates tailored questions with evidence checklists, and gates nothing until you publish or download.</p>
-              <a href="/sase/rfp-builder/" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Start your RFP</a>
-              <Link href="/opportunities/new" className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] transition-colors hover:bg-[var(--ink-100,#f5f5f5)]">Just need pricing? Post a project</Link>
-            </div>
+            {/* The Continuation (DEF wave one): replaces the editorial
+                Build-your-own buttons under One Door. Your position forms
+                first; the Workspace recommends the formal Builder when the
+                position warrants it. */}
+            <Continuation
+              c={deriveContinuationSampleRfp({ sampleTitle: `Netify Sample RFP ${project.methodology_version}` })}
+              pageUrl={`${SITE_URL}/rfp-builder/sample-rfp`}
+            />
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 text-sm">
               <p className="eyebrow mb-2">Related</p>
               <ul className="space-y-1.5">

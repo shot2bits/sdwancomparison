@@ -13,6 +13,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import CompareTable from "@/components/CompareTable";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import Continuation from "@/components/Continuation";
+import { deriveContinuationTool } from "@/lib/continuation/derive";
 import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import {
   AI_KEYS,
@@ -699,11 +701,22 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           ))}
         </ol>
 
-        <ShortlistBridge
-          names={result.shortlist.slice(0, 3).map((v) => v.name)}
-          personalised={!isDefaultView}
-          href={rfpUrl()}
-        />
+        {/* The Continuation (DEF wave one): the tool speaks its own live
+            state or says nothing. An empty shortlist derives null and
+            renders nothing at all. Keyed by source so a re-ranked
+            shortlist reseeds the sentence. */}
+        {(() => {
+          const cont = deriveContinuationTool({
+            names: result.shortlist.map((v) => v.name),
+            slugs: result.shortlist.slice(0, 5).map((v) => v.slug),
+            considered: result.considered,
+          });
+          return cont ? (
+            <div className="mt-10">
+              <Continuation key={cont.source} c={cont} />
+            </div>
+          ) : null;
+        })()}
 
         {result.near_misses.length > 0 && (
           <div className="mt-10">

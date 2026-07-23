@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import SectorBridge from "@/components/SectorBridge";
+import Continuation from "@/components/Continuation";
+import { deriveContinuationSector } from "@/lib/continuation/derive";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
@@ -181,9 +182,21 @@ export default async function BestPage({ params }: Props) {
         </div>
       </div>
 
-      {/* The sector bridge (24 Jul): from the cited shortlist straight into
-          the apex workspace with a sector sentence waiting in the prompt. */}
-      <SectorBridge sectorKey={page.input.sector as string | undefined} sectorLabel={page.input.sector ? SECTOR_LABELS[page.input.sector] : undefined} />
+      {/* The Continuation (DEF wave one): the shipped Sector Bridge,
+          rebuilt as the derived component. Same prefill law, same healthcare
+          deep-claim rule, and this page's own ranked suppliers arrive
+          pinned. No derivation, no rendering. */}
+      <div className="mb-10">
+        <Continuation
+          c={deriveContinuationSector({
+            sectorKey: page.input.sector as string | undefined,
+            sectorLabel: page.input.sector ? SECTOR_LABELS[page.input.sector] : undefined,
+            pageTitle: page.title,
+            pins: result.shortlist.slice(0, 5).map((v) => v.slug),
+          })}
+          pageUrl={`${SITE_URL}/best/${page.slug}`}
+        />
+      </div>
 
       {page.canonicalOverride && (
         <section className="mb-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5">
@@ -201,22 +214,10 @@ export default async function BestPage({ params }: Props) {
         </section>
       )}
 
-      {sector && sectorLabel ? (
-        <section className="mb-10 border border-[var(--ink-300,#ccc)] rounded-sm p-5">
-          <p className="eyebrow mb-2">Next step</p>
-          <h2 className="text-xl mb-2">Issue this shortlist as a real RFP</h2>
-          <p className="text-sm text-[var(--ink-700)] mb-4 max-w-2xl">
-            Send a structured {sectorLabel} RFP to the vendors on this page and compare their responses side by side. Free to build and publish. No sign in needed to start.
-          </p>
-          <Link
-            href={`/rfp-builder?prefill=1&sector=${sector}`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
-          >
-            Start a {sectorLabel} RFP
-            <span aria-hidden="true">→</span>
-          </Link>
-        </section>
-      ) : null}
+      {/* The legacy "Issue this shortlist as a real RFP" editorial box is
+          retired (DEF wave one, One Door): the Continuation above carries
+          this page's suppliers and sector into the Workspace, which
+          recommends the formal RFP path when the position warrants it. */}
 
       <ol className="space-y-6 list-none p-0">
         {result.shortlist.map((v) => {

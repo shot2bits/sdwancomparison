@@ -1,6 +1,8 @@
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
-import { buildShortlist, encodeScenario } from "@/lib/shortlist-core";
+import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
+import { deriveContinuationSector } from "@/lib/continuation/derive";
+import { continuationForTwin } from "@/lib/continuation/types";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const dynamic = "force-static";
@@ -18,6 +20,14 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (!page) return Response.json({ error: "Unknown page" }, { status: 404 });
 
   const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
+  /* DEF wave one: the twin carries the same continuation the page renders,
+     or omits the key entirely when derivation returns null. One truth. */
+  const cont = deriveContinuationSector({
+    sectorKey: page.input.sector as string | undefined,
+    sectorLabel: page.input.sector ? SECTOR_LABELS[page.input.sector] : undefined,
+    pageTitle: page.title,
+    pins: result.shortlist.slice(0, 5).map((v) => v.slug),
+  });
   return Response.json(
     {
       page: `${SITE_URL}/best/${page.slug}`,
@@ -30,6 +40,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       result,
       faqs: page.faqs,
       citation: `Cite as: Netify ranked shortlist, ${page.title}, ${SITE_URL}/best/${page.slug}`,
+      ...(cont ? { continuation: continuationForTwin(cont) } : {}),
     },
     { headers: { "X-Robots-Tag": "noindex" } },
   );

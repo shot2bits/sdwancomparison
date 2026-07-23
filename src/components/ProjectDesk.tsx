@@ -317,6 +317,15 @@ export default function ProjectDesk() {
       });
     }
     const q = p.get("q");
+    /* The Continuation contract (DEF wave one, 23 Jul): ?vendors= names
+       suppliers that arrive pinned into invitations alongside ?q=. Applied
+       only on a ?q= arrival so a restored draft's own pins are never
+       overwritten by a stray parameter. Sanitised, capped at five. */
+    const vendorsParam = (p.get("vendors") ?? "")
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => /^[a-z0-9-]{2,60}$/.test(s))
+      .slice(0, 5);
     let base: WorkspaceFact[] = [];
     if (!q) {
       try {
@@ -350,6 +359,7 @@ export default function ProjectDesk() {
     if (q) {
       setInput(q);
       firstKeyAt.current = Date.now();
+      if (vendorsParam.length) setAdded(vendorsParam);
       void runCycle(q, { fromLink: true });
     }
     setBooted(true);

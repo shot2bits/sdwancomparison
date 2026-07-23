@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CompareTable from "@/components/CompareTable";
 import { COMPARE_PAIRS, getComparePair, getRelatedPairs } from "@/lib/compare-pages";
-import { FEATURES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, getShortlistDataset, getVendor } from "@/lib/vendors";
+import Continuation from "@/components/Continuation";
+import { deriveContinuation } from "@/lib/continuation/derive";
 import { buildComparison } from "@/lib/shortlist-core";
 import {
   SITE_URL,
@@ -160,14 +162,16 @@ export default async function ComparePage({ params }: Props) {
 
       <CompareTable comparison={c} />
 
-      <div className="mt-8">
-        <Link
-          href="/shortlist"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
-        >
-          Score both against your requirements
-          <span aria-hidden="true">→</span>
-        </Link>
+      {/* The Continuation (DEF wave one): both vendors derive or nothing
+          renders. The editorial button it replaces is retired. */}
+      <div className="mt-10">
+        <Continuation
+          c={deriveContinuation({ kind: "comparison", a: getVendor(cp.a), b: getVendor(cp.b) })}
+          pageUrl={`${SITE_URL}/compare/${pair}`}
+        />
+        <p className="mt-3 text-sm text-[var(--ink-500)]">
+          Or <Link href="/shortlist" className="underline">score both against your requirements in the shortlist builder</Link>.
+        </p>
       </div>
 
       <section className="mt-14 max-w-3xl">

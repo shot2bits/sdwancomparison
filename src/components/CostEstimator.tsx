@@ -13,6 +13,8 @@
  */
 
 import { useState } from "react";
+import Continuation from "@/components/Continuation";
+import { deriveContinuationCost } from "@/lib/continuation/derive";
 
 type Band = [number, number];
 
@@ -229,19 +231,22 @@ export function CostEstimator() {
           )}
           <p className="mt-3 text-xs text-zinc-500">{result.disclaimer}</p>
 
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <a
-              href={`/sase/rfp-builder?prefill=${base64url(inputs)}`}
-              className="inline-flex items-center justify-center rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-amber-400"
-            >
-              Turn this estimate into an RFP
-            </a>
-            <a
-              href="https://netify.co.uk/insights/10-best-managed-sase-providers/"
-              className="text-sm font-medium text-amber-700 underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600"
-            >
-              10 Best Managed SASE Providers guide
-            </a>
+          {/* The Continuation (DEF wave one): derived from the buyer's own
+              scenario once an estimate exists; the legacy prefill button
+              retires under One Door. */}
+          <div className="mt-5">
+            <Continuation
+              key={`cost:${users}-${sites}`}
+              c={deriveContinuationCost({ hasEstimate: true, users, sites, managed: deliveryModel === "managed" })}
+            />
+            <p className="mt-3 text-sm">
+              <a
+                href="https://netify.co.uk/insights/10-best-managed-sase-providers/"
+                className="font-medium text-amber-700 underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600"
+              >
+                10 Best Managed SASE Providers guide
+              </a>
+            </p>
           </div>
         </div>
       )}

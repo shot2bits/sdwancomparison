@@ -15,6 +15,8 @@ import {
   getResearchFor,
 } from "@/lib/profile-edges";
 import { SITE_URL } from "@/lib/structured-data";
+import Continuation from "@/components/Continuation";
+import { deriveContinuation } from "@/lib/continuation/derive";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -404,7 +406,13 @@ export default async function VendorPage({ params }: Props) {
             data does not render. */}
         <section aria-label={`Continue your ${vendor.name} evaluation`} className="mt-16 border-t-2 border-[var(--ink-900)] pt-8">
           <p className="eyebrow mb-2">Where next</p>
-          <h2 className="mb-8">Continue your {vendor.name} evaluation</h2>
+          <h2 className="mb-6">Continue your {vendor.name} evaluation</h2>
+
+          {/* The Continuation (DEF wave one): derived from this vendor's own
+              record or not rendered at all. No derivation, no rendering. */}
+          <div className="mb-10">
+            <Continuation c={deriveContinuation({ kind: "vendor", vendor })} pageUrl={`${SITE_URL}/vendors/${vendor.slug}`} />
+          </div>
 
           <div className="space-y-8">
             {research.length > 0 && (

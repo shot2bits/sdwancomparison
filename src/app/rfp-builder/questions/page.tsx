@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Continuation from "@/components/Continuation";
+import { deriveContinuationQuestion } from "@/lib/continuation/derive";
 import Link from "next/link";
 import { QUESTION_BANK, SASE_EXTENDED_BANK, EXTENDED_CATEGORY_LABELS, saseExtendedQuestions, bankSummary } from "@/lib/rfp-question-bank";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
@@ -164,6 +166,18 @@ export default function QuestionBankPage() {
             </details>
           ))}
         </div>
+      </div>
+
+      {/* The Continuation (DEF wave one): derived from the bank's own
+          live counts or not rendered at all. */}
+      <div className="mb-8">
+        <Continuation
+          c={deriveContinuationQuestion({
+            packCount: Object.keys(summary.sector_packs).length,
+            questionCount: summary.total,
+          })}
+          pageUrl={`${SITE_URL}/rfp-builder/questions`}
+        />
       </div>
 
       {/* Related */}

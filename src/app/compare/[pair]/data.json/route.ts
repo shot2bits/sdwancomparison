@@ -1,5 +1,7 @@
 import { COMPARE_PAIRS, getComparePair } from "@/lib/compare-pages";
-import { FEATURES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, getShortlistDataset, getVendor } from "@/lib/vendors";
+import { deriveContinuationComparison } from "@/lib/continuation/derive";
+import { continuationForTwin } from "@/lib/continuation/types";
 import { buildComparison } from "@/lib/shortlist-core";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -21,14 +23,14 @@ export async function GET(_req: Request, ctx: Ctx) {
     [cp.a, cp.b],
     FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category })),
   );
+  /* DEF wave one (One Door): the twin's action is the same Continuation
+     the page renders; the old rfp-builder evaluate block retires so humans
+     and agents observe identical truth. Omitted entirely on null. */
+  const cont = deriveContinuationComparison(getVendor(cp.a), getVendor(cp.b));
   return Response.json(
     {
       page: `${SITE_URL}/compare/${pair}`,
-      evaluate: {
-        description: "Create a structured RFP that pre-loads these vendors for an evidence-graded, side-by-side evaluation. Free; matched suppliers respond with pricing private to the buyer.",
-        url: `${SITE_URL}/rfp-builder/new/?vendors=${cp.a},${cp.b}&utm_source=ai_assistant&utm_medium=twin`,
-        mcp_tools: ["score_vendor_fit", "build_sase_shortlist"],
-      },
+      ...(cont ? { continuation: continuationForTwin(cont) } : {}),
       comparison: c,
       citation: `Cite as: Netify, "${c?.names[cp.a]} vs ${c?.names[cp.b]} (2026)", ${SITE_URL}/compare/${pair}`,
     },
