@@ -17,16 +17,16 @@
 const APEX = "https://netify.co.uk";
 
 const PREFILL: Record<string, string> = {
-  healthcare: "We are a healthcare provider replacing legacy connectivity with managed SD-WAN and SASE across our sites.",
+  healthcare: "We are a healthcare provider replacing legacy connectivity with managed SD-WAN and SASE.",
   financial_services: "We are a financial services firm consolidating network and security into SASE.",
-  retail_ecommerce: "We are a retailer needing a PCI DSS compliant network across our stores.",
-  manufacturing: "We are a manufacturer securing IT and OT across our plants with managed SASE.",
-  energy_utilities: "We are an energy and utilities operator connecting remote and critical sites with resilient, secure networking.",
+  retail_ecommerce: "We are a retailer needing a PCI DSS compliant network.",
+  manufacturing: "We are a manufacturer securing IT and OT with managed SASE.",
+  energy_utilities: "We are an energy and utilities operator needing resilient, secure networking for remote and critical locations.",
   government_public_sector: "We are a public sector organisation buying SD-WAN and SASE with UK data residency.",
-  education: "We are an education provider connecting campuses and sites with managed SD-WAN.",
-  transport_logistics: "We are a transport and logistics operator connecting depots and sites with resilient SD-WAN.",
+  education: "We are an education provider connecting campuses with managed SD-WAN.",
+  transport_logistics: "We are a transport and logistics operator connecting depots with resilient SD-WAN.",
   professional_services: "We are a professional services firm consolidating security into SASE for hybrid work.",
-  hospitality_leisure: "We are a hospitality operator connecting sites with managed SD-WAN.",
+  hospitality_leisure: "We are a hospitality operator needing managed SD-WAN across the estate.",
 };
 
 const GENERIC_PREFILL = "We are replacing legacy connectivity with managed SD-WAN and SASE.";

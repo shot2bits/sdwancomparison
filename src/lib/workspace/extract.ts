@@ -387,6 +387,14 @@ async function modelExtract(text: string, notes: string[]): Promise<FieldUpdate[
       if (!ok) continue;
       const quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
       const stated = quote.length > 2 && lower.includes(quote.toLowerCase());
+      /* F-A extension (24 Jul live catch: "across our sites" proposed
+       * sites=1): a numeric estate count must trace to a digit in the
+       * words it cites, or in the buyer's text at all. Otherwise OMIT:
+       * the receipt keeps the clause verbatim, and no count is invented. */
+      if ((ok.path === "estate.sites" || ok.path === "estate.users") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
+        notes.push(`Dropped ${ok.path === "estate.sites" ? "a site" : "a user"} count with no stated number.`);
+        continue;
+      }
       out.push({
         path: ok.path,
         value: ok.value,

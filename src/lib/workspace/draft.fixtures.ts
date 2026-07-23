@@ -654,5 +654,12 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(!answered.some((q) => q.id === "q-hc-mdr"), "a standing answer suppresses its question");
   });
 
+  await ok("F-A extension: no count without a stated number (the bridge walk's live catch)", () => {
+    const det = deterministicExtract("We are a healthcare provider replacing legacy connectivity with managed SD-WAN and SASE.");
+    expect(!det.some((u) => u.path === "estate.sites" || u.path === "estate.users"), "a numberless sentence lands no site or user count from the rail");
+    const det2 = deterministicExtract("We are a healthcare provider with 14 clinical sites.");
+    expect(det2.some((u) => u.path === "estate.sites" && u.value === 14), "Opposite: a stated 14 lands");
+  });
+
   return r;
 }
