@@ -52,8 +52,10 @@ function boardScope(p: ProjectDetails): OppScope[] {
   return scope;
 }
 
-/** Create or refresh the public board notice for a published RFP. */
-async function listOnBoard(p: ProjectDetails, ownerEmail: string): Promise<{ opportunity_id: string; url: string }> {
+/** Create or refresh the public board notice for a published RFP. Exported
+ *  for the standing list-on-board action (published RFPs that skipped the
+ *  board at publish time can list later without re-running invites). */
+export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Promise<{ opportunity_id: string; url: string }> {
   const mapKey = `rfp:${p.id}:board_opp`;
   const existingId = await kvGetJson<string>(mapKey);
   const existing = existingId ? await getOpportunity(existingId) : null;
@@ -304,7 +306,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     board = { listed: false, reason: "Matched suppliers only; not listed on the public board." };
   } else {
     try {
-      const listed = await listOnBoard(published, sessionEmail);
+      const listed = await listRfpOnBoard(published, sessionEmail);
       board = { listed: true, ...listed };
     } catch {
       board = { listed: false, reason: "Board listing failed; try re-publishing." };

@@ -100,7 +100,11 @@ export default function DescribeWizard() {
   // Optional anonymous listing on the public opportunity board: sector and
   // size band only, never the company name (buyer_visibility is anonymous by
   // construction in the publish core). Off by default; explicit consent.
-  const [listBoard, setListBoard] = useState(false);
+  // Board listing defaults ON (Robert's gate ruling, 23 Jul 2026: 41 published
+  // RFPs, only 9 ever supplier-visible). The checkbox stays visible and
+  // untickable, so listing remains a per-publish consent (Article 13); the
+  // notice itself is anonymised either way.
+  const [listBoard, setListBoard] = useState(true);
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -516,7 +520,7 @@ export default function DescribeWizard() {
             </p>
             <label className="mb-2 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
               <input type="checkbox" checked={listBoard} onChange={(e) => setListBoard(e.target.checked)} className="mt-0.5" />
-              <span>Also list this RFP <strong>anonymously</strong> on the public opportunity board so additional verified suppliers can register interest. The board shows your sector, estate size and requirement only — never your company name or contact details (optional).</span>
+              <span>Also list this RFP <strong>anonymously</strong> on the opportunity board so additional verified suppliers can register interest. The board shows your sector, estate size and requirement only, never your company name or contact details, and pricing stays private to you. Untick to go to your matched suppliers only.</span>
             </label>
             <label className="mb-4 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
               <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5" />

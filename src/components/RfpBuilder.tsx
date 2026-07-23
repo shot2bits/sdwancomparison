@@ -431,6 +431,55 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     return manageToken.current ? { "x-manage-token": manageToken.current } : {};
   }
 
+  // The true board state on every visit (Robert's gate ruling, 23 Jul 2026:
+  // 41 published RFPs, 9 ever supplier-visible). boardNote used to exist only
+  // in the moments after a publish; a returning owner of a published-but-
+  // unlisted RFP saw nothing and stayed invisible to board suppliers.
+  const [listingBusy, setListingBusy] = useState(false);
+  const [listAuthNeeded, setListAuthNeeded] = useState(false);
+  useEffect(() => {
+    if (!project || project.status !== "published") return;
+    fetch(`/sase/api/rfp/${project.id}/list-on-board`, { headers: authHeaders() })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { ok?: boolean; board?: { listed: boolean; url?: string } } | null) => {
+        if (!d?.ok || !d.board) return;
+        const next = d.board.listed
+          ? { listed: true, url: d.board.url }
+          : { listed: false, reason: "Verified suppliers browsing the board cannot see this RFP." };
+        setBoardNote((prev) => prev ?? next);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line
+  }, [project?.id, project?.status]);
+
+  /** List an already published RFP on the board without re-running invites. */
+  async function listOnBoardNow() {
+    if (!project || listingBusy) return;
+    setListingBusy(true);
+    setListAuthNeeded(false);
+    fireNetifyEvent("board_list_click", {});
+    try {
+      const res = await fetch(`/sase/api/rfp/${project.id}/list-on-board`, {
+        method: "POST",
+        headers: { "content-type": "application/json", ...authHeaders() },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json().catch(() => ({})) as { board?: { listed?: boolean; url?: string }; auth_required?: boolean; error?: string };
+      if (res.ok && data.board?.listed) {
+        setBoardNote({ listed: true, url: data.board.url });
+        fireNetifyEvent("board_listed", { source: "standing_action" });
+      } else if (data.auth_required) {
+        setListAuthNeeded(true);
+      } else {
+        setBoardNote({ listed: false, reason: data.error || "Board listing failed; try again." });
+      }
+    } catch {
+      setBoardNote({ listed: false, reason: "Network error; nothing was listed. Try again." });
+    } finally {
+      setListingBusy(false);
+    }
+  }
+
   async function loadProject(id: string) {
     // Adopt a manage key carried in the URL (the buyer's private cross-device
     // link is /rfp-builder/{id}?manage={token}), then hide it from the bar.
@@ -1746,8 +1795,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </p>
           ) : (
             <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">
-              <p className="mb-2"><strong>Not on the public board yet.</strong> {boardNote.reason ?? "Sign in to list this RFP on the public opportunity board."} Signing in also lets you recover this RFP from any device via My account.</p>
-              <SignIn role="buyer" prompt="Sign in with your work email, then publish again to list on the board." />
+              <p className="mb-2"><strong>Not on the public board yet.</strong> {boardNote.reason ?? "Verified suppliers browsing the board cannot see this RFP."} Listing is anonymous: the notice shows sector, estate and requirement only, never your company name or contact details, and pricing stays private to you.</p>
+              <button
+                onClick={listOnBoardNow}
+                disabled={listingBusy}
+                className="px-3.5 py-1.5 text-sm rounded-full border border-amber-500 bg-amber-100 hover:bg-amber-200 transition-colors disabled:opacity-60"
+              >
+                {listingBusy ? "Listing…" : "List on the board"}
+              </button>
+              {listAuthNeeded && (
+                <div className="mt-2">
+                  <p className="mb-1 text-xs text-[var(--ink-700)]">Listing reaches verified suppliers, so it needs your signed-in work email first.</p>
+                  <SignIn role="buyer" prompt="Sign in with your work email, then press List on the board again." />
+                </div>
+              )}
             </div>
           )
         )}

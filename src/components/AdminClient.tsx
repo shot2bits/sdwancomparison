@@ -250,7 +250,7 @@ export default function AdminClient() {
       {/* Opportunity board moderation */}
       <section className={card}>
         <h2 className={h2}>Opportunity board ({(data.opportunities ?? []).length})</h2>
-        <p className={sub}>Every notice, including closed and unlisted ones. Remove permanently deletes an opportunity — the public page 404s and supplier room links stop working. Use it when something inappropriate or commercially sensitive was posted by mistake.</p>
+        <p className={sub}>Every notice, including closed and unlisted ones. Close ends an open notice cleanly: it leaves the live board and joins the closed archive, page and record intact (test posts, stale needs). Remove permanently deletes — the public page 404s and supplier room links stop working. Use Remove only when something inappropriate or commercially sensitive was posted by mistake.</p>
         {(data.opportunities ?? []).length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No opportunities posted yet.</p>
         ) : (
@@ -271,15 +271,24 @@ export default function AdminClient() {
                     <td className="py-2 pr-4">{o.bid_count}</td>
                     <td className="py-2 pr-4 text-[var(--ink-500)]">{when(o.created)}</td>
                     <td className="py-2">
-                      <button
-                        className={btn}
-                        disabled={busy}
-                        onClick={() => {
-                          if (window.confirm(`Permanently remove "${o.title || o.id}" from the board? This cannot be undone.`)) {
-                            act({ action: "delete_opportunity", id: o.id });
-                          }
-                        }}
-                      >Remove</button>
+                      <div className="flex items-center gap-2">
+                        {o.status === "open" && (
+                          <button
+                            className={btn}
+                            disabled={busy}
+                            onClick={() => act({ action: "close_opportunity", id: o.id })}
+                          >Close</button>
+                        )}
+                        <button
+                          className={btn}
+                          disabled={busy}
+                          onClick={() => {
+                            if (window.confirm(`Permanently remove "${o.title || o.id}" from the board? This cannot be undone.`)) {
+                              act({ action: "delete_opportunity", id: o.id });
+                            }
+                          }}
+                        >Remove</button>
+                      </div>
                     </td>
                   </tr>
                 ))}

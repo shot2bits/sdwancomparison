@@ -111,6 +111,7 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
               <Link key={o.id} href={`/opportunities/${o.id}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
                 <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
                   <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 font-medium uppercase tracking-wide text-[var(--ink-600)]">{RESPONSE_MODE_LABELS[o.response_mode] ?? (o.engagement_type === "auction" ? "Auction" : "Quote room")}</span>
+                  {o.has_full_rfp && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Full RFP included</span>}
                   {o.eligibility === "open" && <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Open to respond</span>}
                   {dl && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700">{dl}</span>}
                 </div>

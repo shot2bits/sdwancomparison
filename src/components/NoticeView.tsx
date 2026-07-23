@@ -82,6 +82,7 @@ export default function NoticeView({
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Chip tone={o.status === "open" ? "green" : "neutral"}>{statusLabel}</Chip>
           <Chip tone="amber">{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</Chip>
+          {o.has_full_rfp && <Chip tone="amber">Full RFP included</Chip>}
           {o.eligibility === "open" ? <Chip>Open to verified suppliers</Chip> : <Chip>Invite-only</Chip>}
           {o.buyer_visibility === "anonymous" && <Chip>Anonymous buyer</Chip>}
         </div>

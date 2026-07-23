@@ -15,6 +15,8 @@ import {
   decideVendorClaim,
   listOpportunities,
   deleteOpportunity,
+  getOpportunity,
+  saveOpportunity,
   listSignups,
   deleteUser,
   listAllRfpIds,
@@ -261,6 +263,19 @@ export async function POST(req: Request) {
         const removed = await deleteOpportunity(id);
         if (!removed) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
         return Response.json({ ok: true }, { headers: cors });
+      }
+      case "close_opportunity": {
+        // Moderation close (Robert's ruling, 23 Jul 2026, the H TEST notice):
+        // ends an open notice without destroying it. The record keeps its
+        // page and feed and moves to the board's closed archive; Remove
+        // stays the tool for content that should never have existed.
+        const id = String(body.id ?? "");
+        if (!id) return Response.json({ error: "id required." }, { status: 422, headers: cors });
+        const opp = await getOpportunity(id);
+        if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
+        if (opp.status !== "open") return Response.json({ ok: true, status: opp.status }, { headers: cors });
+        const saved = await saveOpportunity({ ...opp, status: "closed", updated: Date.now() });
+        return Response.json({ ok: true, status: saved.status }, { headers: cors });
       }
       case "approve_claim":
       case "reject_claim": {

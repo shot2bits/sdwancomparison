@@ -9,6 +9,7 @@
  */
 
 import { z } from "zod";
+import { noticeDisplayTitle } from "@/lib/notice-title";
 
 export const OPP_SCOPES = [
   "underlay_circuits",
@@ -238,7 +239,11 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     updated: o.updated,
     // Anonymous notices never leak the organisation name to any public surface.
     buyer_org: o.buyer_visibility === "anonymous" ? "" : o.buyer_org,
-    title: o.title,
+    // Display title, derived when the stored title carries no information
+    // ("Untitled SASE / SD-WAN RFP", the F1 numeric-sector artefact). One
+    // application point so every public client renders the same word
+    // (Article 17); the stored title itself is never rewritten.
+    title: noticeDisplayTitle(o),
     scope: o.scope,
     sites: o.sites,
     regions: o.regions,
