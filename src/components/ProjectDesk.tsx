@@ -1697,7 +1697,7 @@ export default function ProjectDesk() {
             {published && published.boardId
               ? (<>your notice is live: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
               : started
-              ? "anonymous on publish: no name, no contacts until you choose · nothing is sent without your signature"
+              ? "anonymous on publish: no name, no contacts · signed-in suppliers see it, never public visitors · nothing is sent without your signature"
               : "a worked example · it becomes yours the moment you speak, paste or touch the document below · never publishes"}
           </p>
         </section>
@@ -2039,8 +2039,35 @@ export default function ProjectDesk() {
 
           {artefactOpen && (
             <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-3">
-              <p className="m-0 mb-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">The artefact · a printout of your position as it stands</p>
+              <p className="m-0 mb-1.5 flex items-baseline justify-between gap-3 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">
+                <span>The artefact · a printout of your position as it stands</span>
+                {published && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const name = instrument === "rfp" ? "RFP" : instrument === "rfi" ? "RFI" : "SoR";
+                      const blob = new Blob([artefactText()], { type: "text/markdown;charset=utf-8" });
+                      const a = document.createElement("a");
+                      a.href = URL.createObjectURL(blob);
+                      a.download = `netify-${name.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.md`;
+                      a.click();
+                      URL.revokeObjectURL(a.href);
+                      ev("workspace_document_downloaded", { instrument });
+                    }}
+                    className="rounded-full border border-amber-400 bg-white px-2.5 py-[2px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800 transition-colors hover:bg-amber-50"
+                  >
+                    Download your {instrument === "rfp" ? "RFP" : instrument === "rfi" ? "RFI" : "SoR"}
+                  </button>
+                )}
+              </p>
               <pre className="m-0 max-h-72 overflow-auto whitespace-pre-wrap text-[11px] leading-relaxed text-zinc-700">{artefactText()}</pre>
+              {!published && (
+                <p data-download-law className="m-0 mt-2 border-t border-zinc-100 pt-2 text-[10.5px] leading-relaxed text-zinc-500">
+                  Your {instrument === "rfp" ? "RFP" : instrument === "rfi" ? "RFI" : "SoR"} downloads once it is published
+                  to the opportunity board: the notice goes out anonymous, signed-in vendors and service providers see it,
+                  public visitors never do.
+                </p>
+              )}
             </div>
           )}
 
@@ -2195,7 +2222,7 @@ export default function ProjectDesk() {
                         {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
                           ? ` (it reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
                           : ""}
-                        , shows only to signed-in suppliers, and the full position goes only to matched suppliers. Assumptions publish labelled as assumptions; example content never publishes at all.
+                        , shows only to signed-in vendors and service providers (public visitors never see it), and the full position goes only to matched suppliers. Assumptions publish labelled as assumptions; example content never publishes at all.
                       </p>
                     </div>
                     {/* Three facts about where this goes, each from live data,
@@ -2550,10 +2577,10 @@ export default function ProjectDesk() {
             <p className="m-0 mt-0.5 text-[11px] leading-relaxed text-zinc-500">
               {ready
                 ? instrument === "rfp"
-                  ? "The RFP goes out anonymous with your priorities and question set declared: no name, no contacts, visible to signed-in suppliers only."
+                  ? "The RFP goes out anonymous with your priorities and question set declared: no name, no contacts. Signed-in vendors and service providers see it; public visitors never do."
                   : instrument === "rfi"
-                    ? "The RFI goes out anonymous with your question set declared: no name, no contacts, visible to signed-in suppliers only."
-                    : "The SoR notice goes out anonymous: no name, no contacts, visible to signed-in suppliers only."
+                    ? "The RFI goes out anonymous with your question set declared: no name, no contacts. Signed-in vendors and service providers see it; public visitors never do."
+                    : "The SoR notice goes out anonymous: no name, no contacts. Signed-in vendors and service providers see it; public visitors never do."
                 : publishBarLock}
             </p>
             {(fitSlugs.length > 0 || market) && (

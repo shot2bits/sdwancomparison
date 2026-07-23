@@ -108,7 +108,6 @@ export default function Page() {
           <span>
             <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated
             supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
-            Reviewed by Robert Sturt.
           </span>
         </p>
 
