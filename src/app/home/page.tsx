@@ -12,6 +12,10 @@ import { getOrganizationSchema } from "@/lib/structured-data";
  * paths into the rest of the estate (the takeover must not hide the
  * company when it IS the front door), and the schema declares the
  * application at the apex. Everything else is the workspace, unchanged.
+ *
+ * Concept A visual pass (Robert's word, 23 Jul 2026): treatment only. Type,
+ * space, depth and colour discipline change; words, order, journeys and
+ * behaviour do not.
  */
 
 const APEX = "https://netify.co.uk";
@@ -83,30 +87,36 @@ export default function Page() {
       {/* One header everywhere (Robert, 24 Jul): the mega navigation IS
           "the homepage must never hide the company", done properly. */}
       <MegaNav takeover />
-      <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6">
+      <main className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 sm:pt-12">
 
         <h1
           id="page-h1"
           className="m-0 max-w-3xl tracking-tight"
-          style={{ fontSize: "16.5px", lineHeight: 1.45, fontWeight: 600, color: "#27272a" }}
+          style={{ fontSize: "22px", lineHeight: 1.35, fontWeight: 600, letterSpacing: "-0.015em", color: "#18181b" }}
         >
           Imagine describing your SASE and SD-WAN requirements once, then watching the market build itself around you as
           the world&rsquo;s leading suppliers compete for your business.
         </h1>
-        <p id="page-subhead" className="mb-0 mt-1 max-w-2xl text-[12.5px] leading-relaxed text-zinc-500">
+        <p id="page-subhead" className="mb-0 mt-3 max-w-2xl text-[14px] leading-relaxed text-zinc-500">
           Imagine describing your requirements in a single sentence. Behind the scenes, Netify has already mapped the
           thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
           of Requirements automatically.
         </p>
-        <p className="m-0 mt-2.5 max-w-3xl border-l-2 border-amber-400 pl-2.5 text-[11.5px] leading-relaxed text-zinc-600">
-          <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated
-          supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
-          Reviewed by Robert Sturt.
+        <p className="m-0 mt-4 flex max-w-3xl items-start gap-2 text-[13px] leading-relaxed text-zinc-500">
+          <svg width="13" height="15" viewBox="0 0 14 16" className="mt-[3px] shrink-0" aria-hidden="true">
+            <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#71717a" strokeWidth="1.3" />
+            <path d="M4.6 8 L6.4 9.8 L9.6 6.2" fill="none" stroke="#71717a" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+          <span>
+            <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated
+            supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
+            Reviewed by Robert Sturt.
+          </span>
         </p>
 
         <ProjectDesk />
 
-        <section className="mx-auto mt-16 max-w-3xl border-t border-zinc-200 pt-5 text-[11.5px] leading-relaxed text-zinc-500">
+        <section className="mx-auto mt-24 max-w-3xl border-t border-zinc-200 pt-6 text-[11px] leading-relaxed text-zinc-500">
           <p className="m-0">
             Most technology buyers ask AI dozens of questions before they speak to a supplier. Netify begins where those
             conversations end: every section above exists because buyers ask for it, and the two rules this surface is

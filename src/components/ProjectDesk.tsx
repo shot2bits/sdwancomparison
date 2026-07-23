@@ -1285,7 +1285,7 @@ export default function ProjectDesk() {
   /* ------------------------------------------------------------------ */
 
   return (
-    <div className="pd-root mt-6">
+    <div className="pd-root mt-10">
       <style>{`
         @keyframes pdink{0%{background:rgba(217,119,6,.14)}100%{background:transparent}}
         .pd-ink{animation:pdink 1.1s ease forwards}
@@ -1324,9 +1324,9 @@ export default function ProjectDesk() {
             const t = e.dataTransfer?.getData("text/plain");
             if (t && t.trim().length > 0) void ingestText(t, "drop");
           }}
-          className={`rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,.16),0_22px_56px_-20px_rgba(180,83,9,.3)]${yoursRing ? " pd-live-in" : ""}`}>
-        <p className="m-0 mb-1.5 text-[9.5px] font-semibold uppercase tracking-[.16em] text-zinc-400">Start here · a sentence is enough, or paste everything you have</p>
-        <div className="relative border-b-2 border-zinc-300 px-1 py-2 focus-within:border-amber-500">
+          className={`rounded-[18px] border border-zinc-200 bg-white px-7 pb-5 pt-6 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] sm:px-8${yoursRing ? " pd-live-in" : ""}`}>
+        <p className="m-0 mb-2 text-[13px] font-semibold text-zinc-700">Describe your SASE or SD-WAN project</p>
+        <div className="relative border-b-2 border-zinc-300 px-1 py-3.5 focus-within:border-amber-500">
           <input
             ref={inputRef}
             value={input}
@@ -1351,13 +1351,11 @@ export default function ProjectDesk() {
             }}
             placeholder={
               started
-                ? "Add or correct anything: 'actually 45 sites', 'we already run Defender'…"
-                : yoursHint
-                  ? "e.g. We are replacing legacy MPLS across 15 UK sites with managed SD-WAN…"
-                  : "Describe your project in one sentence, or paste your research: a conversation, a document, an old RFP"
+                ? "Add or correct anything about your project…"
+                : "45 sites across the UK and US, replacing MPLS with SASE…"
             }
             disabled={Boolean(published)}
-            className="w-full bg-transparent px-9 text-center text-[17px] italic text-zinc-900 outline-none placeholder:text-zinc-400 sm:text-[18px]"
+            className="w-full bg-transparent px-10 text-center text-[18px] text-zinc-900 outline-none placeholder:text-zinc-400 sm:px-16"
             aria-label="Describe your project"
           />
           {voiceSupported && !published && (
@@ -1388,8 +1386,24 @@ export default function ProjectDesk() {
               )}
             </button>
           )}
+          {/* The way in, visible (Concept A): presentation of the existing
+              Enter behaviour, nothing more. Amber because it is a primary
+              action under the colour law; appears only once words exist. */}
+          {!published && !busy && input.trim().length > 0 && (
+            <button
+              type="button"
+              onClick={() => void runCycle(input, { fromEnter: true })}
+              aria-label="Read this into your project"
+              title="Read this into your project (or press Enter)"
+              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-amber-500 p-[7px] text-zinc-950 transition-colors hover:bg-amber-400 ${voiceSupported ? "right-10" : "right-1"}`}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M7 11.5 V3 M3.4 6.6 L7 3 l3.6 3.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
         </div>
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[11.5px] text-zinc-500">
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[13px] text-zinc-500">
           {busy && <span aria-live="polite" className="text-zinc-700">Reading…</span>}
           {voiceState === "starting" && !busy && (
             <span aria-live="polite" className="text-zinc-500">Opening the microphone…</span>
@@ -1406,7 +1420,7 @@ export default function ProjectDesk() {
               <button
                 type="button"
                 onClick={makeThisYours}
-                className="rounded-lg bg-zinc-900 px-4 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-black"
+                className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-[13px] font-semibold text-zinc-700 transition-colors hover:border-zinc-900 hover:text-zinc-900"
               >
                 Make this yours
               </button>
@@ -1421,7 +1435,7 @@ export default function ProjectDesk() {
                     className={`rounded-full border px-3 py-1 transition-colors ${
                       selSector === c.label
                         ? "border-amber-500 bg-amber-50 text-zinc-900"
-                        : "border-zinc-300 bg-white text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
+                        : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
                     }`}
                   >
                     {c.label}
@@ -1437,7 +1451,7 @@ export default function ProjectDesk() {
                     className={`rounded-full border px-3 py-1 transition-colors ${
                       selGoals.includes(c.label)
                         ? "border-amber-500 bg-amber-50 text-zinc-900"
-                        : "border-zinc-300 bg-white text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
+                        : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
                     }`}
                   >
                     {c.label}
@@ -1468,17 +1482,29 @@ export default function ProjectDesk() {
       </div>
 
 
+      {/* ---- The three-step journey (Concept A, Robert's copy): the promise
+              as one quiet sequence, never cards. The supplier count prefers
+              the live market number once the feed answers and only shows the
+              approved 30+ line before it does; it never overstates. ---- */}
+      <div className="mx-auto mt-6 w-[min(760px,100%)]">
+        <ol className="m-0 flex list-none flex-col gap-2 p-0 text-[13px] leading-snug text-zinc-600 sm:flex-row sm:justify-center sm:gap-10">
+          <li><span className="mr-2 font-semibold tabular-nums text-zinc-300">1</span>Build your Statement of Requirements</li>
+          <li><span className="mr-2 font-semibold tabular-nums text-zinc-300">2</span>Publish anonymously to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers</li>
+          <li><span className="mr-2 font-semibold tabular-nums text-zinc-300">3</span>Receive competing proposals</li>
+        </ol>
+      </div>
+
       {/* ---- The listing in formation (Robert, 23 Jul: the opportunity
               listing returns to the top): the notice as the market will see
               it, updating with every sentence. Example-labelled until the
               buyer starts; anonymous always; never publishes by itself. ---- */}
       <div className="mx-auto mt-5 w-[min(760px,100%)]">
-        <section aria-label="Your opportunity, as the market will see it" className={`rounded-xl border p-4 shadow-[0_1px_0_rgba(24,24,27,.04),0_14px_36px_-22px_rgba(24,24,27,.22)] ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
+        <section aria-label="Your opportunity, as the market will see it" className={`rounded-xl border p-5 ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="m-0 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
+            <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">
               {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />Live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
             </p>
-            <span className={`rounded-full px-2 py-[1px] text-[9px] font-semibold uppercase tracking-[.08em] ${started ? "bg-zinc-100 text-zinc-500" : "border border-amber-200 bg-amber-50 text-amber-800"}`}>
+            <span className={`rounded-full px-2 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] ${published ? "border border-amber-200 bg-amber-50 text-amber-800" : started ? "bg-zinc-100 text-zinc-500" : "border border-zinc-200 bg-white text-zinc-500"}`}>
               {published ? "genuinely open" : started ? "updating as you speak" : "make it yours"}
             </span>
           </div>
@@ -1511,7 +1537,7 @@ export default function ProjectDesk() {
                   { v: "PCI DSS", paths: [], sec: "compliance" },
                 ];
             if (!chips.length) {
-              return <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-zinc-600">your first sentence starts this listing</p>;
+              return <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">your first sentence starts this listing</p>;
             }
             return (
               <p className="m-0 mt-1.5 leading-loose">
@@ -1542,7 +1568,7 @@ export default function ProjectDesk() {
                               ? "Inferred, reason attached · opens the section it lives in"
                               : "Opens the section it lives in"
                       }
-                      className={`mr-1.5 inline-block rounded-full border bg-white px-2.5 py-[2px] text-[10.5px] transition-colors hover:border-amber-500 ${cls}`}
+                      className={`mr-1.5 inline-block rounded-full border bg-white px-2.5 py-[2px] text-[11px] transition-colors hover:border-amber-500 ${cls}`}
                     >
                       {c.v}
                     </button>
@@ -1551,7 +1577,7 @@ export default function ProjectDesk() {
               </p>
             );
           })()}
-          <p className="m-0 mt-1.5 text-[9.5px] text-zinc-400">
+          <p className="m-0 mt-1.5 text-[11px] text-zinc-400">
             {published && published.boardId
               ? (<>your notice is live: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
               : started
@@ -1562,12 +1588,12 @@ export default function ProjectDesk() {
       </div>
 
       {/* ---- The Netify SASE Constellation: the market takes position ---- */}
-      <div className="mt-7 rounded-lg border border-zinc-200 bg-white p-4">
+      <div className={`mx-auto mt-16 w-full ${started ? "" : "max-w-[880px]"}`}>
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <p className="m-0 text-[10.5px] font-semibold uppercase tracking-[.16em] text-zinc-900">
+          <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">
             The Netify SASE Constellation
           </p>
-          <p className="m-0 text-[10px] text-zinc-400">
+          <p className="m-0 text-[11px] text-zinc-400">
             distance is fit · every position computed from graded evidence · a supplier only moves on its own evidence
           </p>
         </div>
@@ -1695,7 +1721,7 @@ export default function ProjectDesk() {
             })}
           </svg>
         )}
-        <p className="m-0 mt-1 text-[9.5px] leading-snug text-zinc-400">
+        <p className="m-0 mt-1 text-[11px] leading-snug text-zinc-400">
           {capNodes.length > 0 ? (
             <>Diamonds are the requirements your own words created; a line exists only where Netify&rsquo;s dataset grades that supplier for that requirement (solid evidenced, dashed partial). Hover a supplier or a requirement to isolate its evidence. Circles are technology vendors, squares managed providers.</>
           ) : (
@@ -1707,18 +1733,18 @@ export default function ProjectDesk() {
 
       {/* ---- Readiness: three things first, from real state only ---- */}
       {started && (
-        <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-2 rounded-lg border border-zinc-200 bg-white px-5 py-3">
-          <span><span className="text-[20px] font-bold tracking-tight text-zinc-900">{meter.confirmed}</span>
+        <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-2">
+          <span><span className="text-[19px] font-bold tracking-tight text-zinc-900">{meter.confirmed}</span>
             <span className="ml-1.5 text-[11px] text-zinc-500">requirement{meter.confirmed === 1 ? "" : "s"} in your words</span></span>
           {meter.inferred > 0 && (
-            <span><span className="text-[20px] font-bold tracking-tight text-amber-700">{meter.inferred}</span>
+            <span><span className="text-[19px] font-bold tracking-tight text-amber-700">{meter.inferred}</span>
               <span className="ml-1.5 text-[11px] text-zinc-500">inferred, yours to confirm or strike</span></span>
           )}
           {openQuestionCount > 0 && (
-            <span><span className="text-[20px] font-bold tracking-tight text-amber-700">{openQuestionCount}</span>
+            <span><span className="text-[19px] font-bold tracking-tight text-amber-700">{openQuestionCount}</span>
               <span className="ml-1.5 text-[11px] text-zinc-500">open question{openQuestionCount === 1 ? "" : "s"} in place below</span></span>
           )}
-          <span className="ml-auto text-right text-[10.5px] leading-relaxed text-zinc-400">
+          <span className="ml-auto text-right text-[11px] leading-relaxed text-zinc-400">
             {receipts.length > 0 ? `${receipts.length} of your words captured in Notes, unplaced · ` : ""}
             {market ? `${market.counts.vendors} suppliers evaluated against this position` : ""}
           </span>
@@ -1728,7 +1754,7 @@ export default function ProjectDesk() {
       {/* ---- The areas: a second view of the same position (slice four).
               Every state derives from the fixtured module, never styling. ---- */}
       {started && (
-        <div className="mt-3 rounded-lg border border-zinc-200 bg-white px-5 py-2.5">
+        <div className="mt-4">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
             {areaStates.map((a) => {
               const dot =
@@ -1771,7 +1797,7 @@ export default function ProjectDesk() {
               organisation: "sets the scale band suppliers are matched at",
             };
             return (
-              <p className="m-0 mt-1.5 border-t border-zinc-100 pt-1.5 text-[10.5px] leading-relaxed text-zinc-500" role="status">
+              <p className="m-0 mt-1.5 border-t border-zinc-100 pt-1.5 text-[11px] leading-relaxed text-zinc-500" role="status">
                 <span className="font-semibold text-zinc-700">{a.title}</span>: {a.state.replace("_", " ")} ·{" "}
                 {a.standingN} standing fact{a.standingN === 1 ? "" : "s"}
                 {a.notedN > 0 ? `, ${a.notedN} noted` : ""}
@@ -1786,7 +1812,7 @@ export default function ProjectDesk() {
       )}
 
       {/* ---- The desk: the document and the responding organs ---- */}
-      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_336px]">
+      <div className="mt-16 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_336px]">
 
         {/* ============ THE PROJECT: the living Statement of Requirements ============ */}
         <div>
@@ -1813,9 +1839,9 @@ export default function ProjectDesk() {
                 title={published ? undefined : "Click to name your project"}
               >{title}</h2>
             )}
-            <span className="whitespace-nowrap text-[9.5px] uppercase tracking-[.14em] text-zinc-400">Statement of Requirements · living</span>
+            <span className="whitespace-nowrap text-[10px] uppercase tracking-[.12em] text-zinc-400">Statement of Requirements · living</span>
           </div>
-          <p className="m-0 mb-4 mt-1.5 text-[11.5px] text-zinc-500">
+          <p className="m-0 mb-4 mt-1.5 text-[11px] text-zinc-500">
             {facts.length === 0 && noted.length === 0
               ? "Empty, honestly. Grey is example content: it shows the destination, never publishes, never counts."
               : <>
@@ -1832,8 +1858,8 @@ export default function ProjectDesk() {
 
           {artefactOpen && (
             <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-3">
-              <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">The artefact · a printout of your position as it stands</p>
-              <pre className="m-0 max-h-72 overflow-auto whitespace-pre-wrap text-[10px] leading-relaxed text-zinc-700">{artefactText()}</pre>
+              <p className="m-0 mb-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">The artefact · a printout of your position as it stands</p>
+              <pre className="m-0 max-h-72 overflow-auto whitespace-pre-wrap text-[11px] leading-relaxed text-zinc-700">{artefactText()}</pre>
             </div>
           )}
 
@@ -1849,10 +1875,10 @@ export default function ProjectDesk() {
                 <section key={sec.key} id={`sec-${sec.key}`} className={`pd-sec mb-5${liveRing.has(sec.key) ? " pd-live-in" : ""}`} style={{ scrollMarginTop: "70px" }}>
                   <h3
                     className="mb-1.5 flex items-baseline justify-between border-b border-zinc-200 pb-1 uppercase"
-                    style={{ fontSize: "10.5px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".12em", color: "#71717a" }}
+                    style={{ fontSize: "10px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".12em", color: "#71717a" }}
                   >
                     {sec.title}
-                    <span className={`text-[9px] font-normal normal-case tracking-normal ${isLive ? "invisible" : "text-zinc-300"}`}>{sec.exampleNote}</span>
+                    <span className={`text-[10px] font-normal normal-case tracking-normal ${isLive ? "invisible" : "text-zinc-300"}`}>{sec.exampleNote}</span>
                   </h3>
 
                   {/* Organisation renders as fields */}
@@ -1896,7 +1922,7 @@ export default function ProjectDesk() {
                       <span className={`mr-2 inline-block w-3 text-center text-[11px] ${f.struck ? "text-zinc-300" : "text-zinc-900"}`}>{f.struck ? "×" : "✓"}</span>
                       <span className={f.struck ? "" : f.provenance === "stated" ? "border-b border-zinc-900" : "border-b border-dotted border-zinc-500"}>{factLabel(f)}</span>
                       {!f.struck && (
-                        <span className="ml-2 text-[10px] text-zinc-500">
+                        <span className="ml-2 text-[11px] text-zinc-500">
                           {f.provenance === "stated" ? <em>&ldquo;{f.quote ?? String(f.value)}&rdquo;</em> : (f.reason ?? "inferred")}
                         </span>
                       )}
@@ -1920,26 +1946,26 @@ export default function ProjectDesk() {
                       does. Declining is permanent and stays on the record. */}
                   {!published && (packSugsBySection.get(sec.key) ?? []).map((sg) => (
                     <div key={sg.id} className="my-1.5 rounded-md border border-dashed border-zinc-300 bg-zinc-50/60 px-2.5 py-2">
-                      <p className="m-0 text-[12px] leading-snug text-zinc-800">
-                        <span className="mr-1.5 inline-block rounded-sm bg-zinc-200 px-1 py-[1px] align-[1px] text-[8.5px] font-semibold uppercase tracking-[.08em] text-zinc-600">Suggested · {pack?.label.toLowerCase()}</span>
+                      <p className="m-0 text-[13px] leading-snug text-zinc-800">
+                        <span className="mr-1.5 inline-block rounded-sm bg-zinc-200 px-1 py-[1px] align-[1px] text-[10px] font-semibold uppercase tracking-[.08em] text-zinc-600">Suggested · {pack?.label.toLowerCase()}</span>
                         {sg.label}
                       </p>
-                      <p className="m-0 mt-0.5 text-[10px] leading-snug text-zinc-500">{sg.reason}</p>
+                      <p className="m-0 mt-0.5 text-[11px] leading-snug text-zinc-500">{sg.reason}</p>
                       <div className="mt-1.5 flex gap-2">
-                        <button type="button" onClick={() => acceptSuggestion(sg)} className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-[3px] text-[10.5px] font-semibold text-white transition-colors hover:bg-black">
+                        <button type="button" onClick={() => acceptSuggestion(sg)} className="rounded-full border border-zinc-800 bg-zinc-900 px-2.5 py-[3px] text-[11px] font-semibold text-white transition-colors hover:bg-black">
                           Add to the record
                         </button>
-                        <button type="button" onClick={() => declineSuggestion(sg)} className="rounded-full border border-zinc-300 bg-white px-2.5 py-[3px] text-[10.5px] text-zinc-600 transition-colors hover:border-zinc-500 hover:text-zinc-900">
+                        <button type="button" onClick={() => declineSuggestion(sg)} className="rounded-full border border-zinc-300 bg-white px-2.5 py-[3px] text-[11px] text-zinc-600 transition-colors hover:border-zinc-500 hover:text-zinc-900">
                           Decline, keep on record
                         </button>
                       </div>
                     </div>
                   ))}
                   {(packDeclinedBySection.get(sec.key) ?? []).map((sg) => (
-                    <p key={`dec-${sg.id}`} className="m-0 py-[3px] text-[12px] leading-snug text-zinc-300">
+                    <p key={`dec-${sg.id}`} className="m-0 py-[3px] text-[13px] leading-snug text-zinc-300">
                       <span className="mr-2 inline-block w-3 text-center text-[11px]">×</span>
                       <span className="line-through">{sg.label}</span>
-                      <span className="ml-2 text-[9px] no-underline">suggested for {pack?.label.toLowerCase()}, declined; kept on the record</span>
+                      <span className="ml-2 text-[10px] no-underline">suggested for {pack?.label.toLowerCase()}, declined; kept on the record</span>
                     </p>
                   ))}
                 </section>
@@ -1951,39 +1977,39 @@ export default function ProjectDesk() {
               <section className="pd-sec mb-5">
                 <h3
                   className="mb-1.5 flex items-baseline justify-between border-b border-zinc-200 pb-1 uppercase"
-                  style={{ fontSize: "10.5px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".12em", color: "#71717a" }}
+                  style={{ fontSize: "10px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".12em", color: "#71717a" }}
                 >
                   Notes, unplaced
-                  <span className="text-[9px] font-normal normal-case tracking-normal text-zinc-400">heard, no home yet</span>
+                  <span className="text-[10px] font-normal normal-case tracking-normal text-zinc-400">heard, no home yet</span>
                 </h3>
                 {receipts.map((r) => (
-                  <div key={r.id} className="flex items-baseline gap-2 py-[3px] text-[12.5px] leading-snug text-zinc-600">
+                  <div key={r.id} className="flex items-baseline gap-2 py-[3px] text-[13px] leading-snug text-zinc-600">
                     <span className="text-zinc-400">•</span>
                     <span className="italic">&ldquo;{r.text}&rdquo;</span>
-                    <button type="button" onClick={() => dismissReceipt(r.id)} className="ml-auto text-[10px] text-zinc-400 hover:text-zinc-900" title="Remove this note">✕</button>
+                    <button type="button" onClick={() => dismissReceipt(r.id)} className="ml-auto text-[11px] text-zinc-400 hover:text-zinc-900" title="Remove this note">✕</button>
                   </div>
                 ))}
-                <p className="m-0 mt-1 text-[9.5px] leading-snug text-zinc-400">Kept verbatim with your position. Nothing you say is silently dropped.</p>
+                <p className="m-0 mt-1 text-[11px] leading-snug text-zinc-400">Kept verbatim with your position. Nothing you say is silently dropped.</p>
               </section>
             )}
           </div>
 
           {/* ---- The signature: where the document ends ---- */}
-          <div id="pd-signature" className="mt-2 border-t border-zinc-200 pt-3" style={{ scrollMarginTop: "70px" }}>
+          <div id="pd-signature" className="mt-6 border-t border-zinc-200 pt-5" style={{ scrollMarginTop: "70px" }}>
             {!published && !created?.test && (
-              <div className={ready ? "rounded-lg border-2 border-amber-300 bg-white p-4" : ""}>
+              <div className={ready ? "rounded-lg border-2 border-amber-300 bg-white p-5" : ""}>
                 {ready ? (
                   <>
-                    <p className="m-0 mb-1 text-[9px] font-semibold uppercase tracking-[.14em] text-amber-700">The signature</p>
-                    <p className="m-0 mb-2 text-[14px] italic leading-relaxed text-zinc-900">This position is ready to meet the market.</p>
+                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-amber-700">The signature</p>
+                    <p className="m-0 mb-2 text-[15px] italic leading-relaxed text-zinc-900">This position is ready to meet the market.</p>
                     {/* The privacy strip (the conversion pass, 23 Jul): the same
                         facts the old paragraph carried, under one quiet shield. */}
-                    <div className="mb-2 flex items-start gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-2">
+                    <div className="mb-2 flex items-start gap-2 rounded-md bg-zinc-50 px-3 py-2.5">
                       <svg width="14" height="16" viewBox="0 0 14 16" className="mt-[1px] shrink-0" aria-hidden="true">
                         <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#a16207" strokeWidth="1.3" />
                         <path d="M4.6 8 L6.4 9.8 L9.6 6.2" fill="none" stroke="#a16207" strokeWidth="1.3" strokeLinecap="round" />
                       </svg>
-                      <p className="m-0 text-[10.5px] leading-relaxed text-zinc-600">
+                      <p className="m-0 text-[11px] leading-relaxed text-zinc-600">
                         <span className="font-semibold text-zinc-800">The public notice is anonymous.</span> It carries no name and no contacts
                         {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
                           ? ` (it reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
@@ -1994,30 +2020,30 @@ export default function ProjectDesk() {
                     {/* Three facts about where this goes, each from live data,
                         none invented. */}
                     <div className="mb-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
-                      <div className="rounded-md border border-zinc-200 bg-white px-2.5 py-2">
+                      <div className="rounded-md bg-zinc-50 px-3 py-2.5">
                         <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-zinc-900">
                           {fitSlugs.length > 0 ? fitSlugs.length : market?.counts.vendors ?? "Evaluated"}
                         </p>
-                        <p className="m-0 mt-0.5 text-[9.5px] leading-snug text-zinc-500">
+                        <p className="m-0 mt-0.5 text-[11px] leading-snug text-zinc-500">
                           {fitSlugs.length > 0
                             ? `evaluated supplier${fitSlugs.length === 1 ? "" : "s"} currently in the running, evidence graded with dates`
                             : "suppliers on the curated market, evidence graded with dates"}
                         </p>
                       </div>
-                      <div className="rounded-md border border-zinc-200 bg-white px-2.5 py-2">
+                      <div className="rounded-md bg-zinc-50 px-3 py-2.5">
                         <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-zinc-900">Anonymous</p>
-                        <p className="m-0 mt-0.5 text-[9.5px] leading-snug text-zinc-500">sector and size only; your identity and contacts never publish</p>
+                        <p className="m-0 mt-0.5 text-[11px] leading-snug text-zinc-500">sector and size only; your identity and contacts never publish</p>
                       </div>
-                      <div className="rounded-md border border-zinc-200 bg-white px-2.5 py-2">
+                      <div className="rounded-md bg-zinc-50 px-3 py-2.5">
                         <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-zinc-900">Yours to close</p>
-                        <p className="m-0 mt-0.5 text-[9.5px] leading-snug text-zinc-500">the notice closes from your project record whenever you choose</p>
+                        <p className="m-0 mt-0.5 text-[11px] leading-snug text-zinc-500">the notice closes from your project record whenever you choose</p>
                       </div>
                     </div>
                     {/* Slice three (the reference concept): the notice inherits
                         your standing facts exactly as written, shown before you
                         sign, with what stays private beside it. */}
-                    <p className="m-0 mb-1 text-[9.5px] font-semibold uppercase tracking-[.12em] text-zinc-400">The notice inherits</p>
-                    <p className="m-0 mb-1.5 text-[10.5px] leading-loose">
+                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">The notice inherits</p>
+                    <p className="m-0 mb-1.5 text-[11px] leading-loose">
                       {[
                         typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : null,
                         typeof requirement.estate?.users === "number" ? `${requirement.estate.users} users` : null,
@@ -2026,21 +2052,21 @@ export default function ProjectDesk() {
                         (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join(", ")}` : null,
                         (requirement.constraints?.complianceRequirements ?? []).length ? (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") : null,
                       ].filter(Boolean).map((chip) => (
-                        <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-zinc-200 bg-white px-2 py-[1px] text-[10px] text-zinc-700">{chip}</span>
+                        <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-zinc-200 bg-white px-2 py-[1px] text-[11px] text-zinc-700">{chip}</span>
                       ))}
-                      <span className="text-[9.5px] text-zinc-400">exactly as written, nothing retyped</span>
+                      <span className="text-[11px] text-zinc-400">exactly as written, nothing retyped</span>
                     </p>
-                    <p className="m-0 mb-2 text-[9.5px] leading-relaxed text-zinc-400">
+                    <p className="m-0 mb-2 text-[11px] leading-relaxed text-zinc-400">
                       <span className="font-semibold text-zinc-500">Stays private:</span> your identity and contacts, your notes,
                       {unansweredGaps.length > 0 ? ` ${unansweredGaps.length} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
                       {" "}and anything you have struck from the record.
                     </p>
-                    <label className="mb-1.5 flex items-start gap-2 text-[10.5px] leading-relaxed text-zinc-600">
+                    <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-zinc-600">
                       <input type="checkbox" checked={consentCreate} onChange={(e) => setConsentCreate(e.target.checked)} className="mt-0.5" />
                       <span>{securityScope ? CREATE_CONSENT_TEXT : WORKSPACE_AGREEMENT_TEXT}</span>
                     </label>
                     {securityScope && unansweredGaps.length > 0 && (
-                      <label className="mb-1.5 flex items-start gap-2 text-[10.5px] leading-relaxed text-zinc-600">
+                      <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-zinc-600">
                         <input type="checkbox" checked={consentGaps} onChange={(e) => setConsentGaps(e.target.checked)} className="mt-0.5" />
                         <span>
                           {ACCEPT_GAP_PREFIX}
@@ -2049,7 +2075,7 @@ export default function ProjectDesk() {
                       </label>
                     )}
                     {securityScope && (
-                      <label className="mb-1.5 flex items-start gap-2 text-[10.5px] leading-relaxed text-zinc-600">
+                      <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-zinc-600">
                         <input type="checkbox" checked={consentPublish} onChange={(e) => setConsentPublish(e.target.checked)} className="mt-0.5" />
                         <span>{ENGINE_PUBLISH_CONSENT_TEXT}</span>
                       </label>
@@ -2064,8 +2090,8 @@ export default function ProjectDesk() {
                     </button>
                     {signError && <p className="m-0 mt-1.5 text-[11px] text-red-600">{signError}</p>}
                     {needAuth && (
-                      <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2">
-                        <p className="m-0 mb-1 text-[10.5px] text-zinc-600">
+                      <div className="mt-2 rounded-md bg-zinc-50 p-3">
+                        <p className="m-0 mb-1 text-[11px] text-zinc-600">
                           One step first: publishing reaches named suppliers, so it needs a verified work email. Sign in, then press publish again; your position is untouched.
                         </p>
                         <SignIn role="buyer" prompt="Sign in with your work email to publish." />
@@ -2074,8 +2100,8 @@ export default function ProjectDesk() {
                     )}
                   </>
                 ) : (
-                  <p className="m-0 text-[11px] leading-relaxed text-zinc-400">
-                    <span className="font-semibold text-zinc-500">A person signs here.</span> One signature publishes an anonymous notice to the open board and the full position to matched suppliers.{" "}
+                  <p className="m-0 text-[13px] leading-relaxed text-zinc-500">
+                    <span className="font-semibold text-zinc-700">A person signs here.</span> One signature publishes an anonymous notice to the open board and the full position to matched suppliers.{" "}
                     {lockReason ?? "It unlocks when the position holds enough truth to stand on."}
                   </p>
                 )}
@@ -2083,8 +2109,8 @@ export default function ProjectDesk() {
             )}
             {created?.test && !published && (
               <div className="rounded-lg border border-amber-400 bg-amber-50 p-4">
-                <p className="m-0 text-[12px] font-semibold text-amber-900">Test position created; publishing stayed off</p>
-                <p className="m-0 mt-1 text-[10.5px] leading-relaxed text-amber-900">
+                <p className="m-0 text-[13px] font-semibold text-amber-900">Test position created; publishing stayed off</p>
+                <p className="m-0 mt-1 text-[11px] leading-relaxed text-amber-900">
                   It self-expires in two hours, touched no live board and contacted no supplier.{" "}
                   <a href={`/sase/project/${created.id}?manage=${encodeURIComponent(created.manage)}`} className="underline">Inspect it</a> or{" "}
                   <button type="button" onClick={startAfresh} className="underline">start a real one</button>.
@@ -2093,7 +2119,7 @@ export default function ProjectDesk() {
             )}
 
             {/* The four truth classes, stated once */}
-            <p className="m-0 mt-3 text-[10px] leading-relaxed text-zinc-400">
+            <p className="m-0 mt-3 text-[11px] leading-relaxed text-zinc-400">
               <span className="text-zinc-300">grey</span> example, never publishes · <span className="italic text-zinc-600">&ldquo;quoted&rdquo;</span> captured, awaiting interpretation ·{" "}
               <span className="border-b border-zinc-900 text-zinc-900">solid ink</span> stated, your words or your touch ·{" "}
               <span className="border-b border-dotted border-zinc-500 text-zinc-600">dotted</span> inferred, reason attached, one tap strikes ·{" "}
@@ -2103,12 +2129,12 @@ export default function ProjectDesk() {
         </div>
 
         {/* ============ THE RESPONDING ORGANS ============ */}
-        <div className="space-y-3.5 lg:sticky lg:top-4">
+        <div className="space-y-7 lg:sticky lg:top-6 lg:border-l lg:border-zinc-200 lg:pl-6">
 
           {/* Your estate */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-3">
-            <p className="m-0 mb-1.5 flex items-baseline justify-between text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
-              Your estate <span className="font-normal normal-case tracking-normal">{diagram.empty ? "example plan · becomes yours as you speak" : "drawn from your words only"}</span>
+          <div>
+            <p className="m-0 mb-2 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
+              Your estate <span className="text-right font-normal text-zinc-400">{diagram.empty ? "example plan · becomes yours as you speak" : "drawn from your words only"}</span>
             </p>
             {diagram.empty ? (
               <svg viewBox="0 0 300 120" className="block w-full" role="img" aria-label="Example estate plan">
@@ -2125,15 +2151,15 @@ export default function ProjectDesk() {
             ) : (
               <WorkspaceDiagram model={diagram} />
             )}
-            <p className="m-0 mt-1 text-[9.5px] leading-snug text-zinc-500">Redraws on every correction; never invents topology.</p>
+            <p className="m-0 mt-1 text-[11px] leading-snug text-zinc-500">Redraws on every correction; never invents topology.</p>
           </div>
 
           {/* The market, live */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-3">
-            <p className="m-0 mb-1 flex items-baseline justify-between text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
-              The market, live <span className="font-normal normal-case tracking-normal">movement is written</span>
+          <div>
+            <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
+              The market, live <span className="text-right font-normal text-zinc-400">movement is written</span>
             </p>
-            <p className="m-0 mb-2 text-[10.5px] text-zinc-500">
+            <p className="m-0 mb-2 text-[11px] text-zinc-500">
               {market ? (
                 <>
                   {market.counts.notices > 0 && <span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />}
@@ -2151,7 +2177,7 @@ export default function ProjectDesk() {
                 {marketRows.shown.filter((v) => moveNow[v.slug]).map((v) => {
                   const mv = moveNow[v.slug];
                   return (
-                    <p key={v.slug} className={`m-0 mb-0.5 text-[9.5px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
+                    <p key={v.slug} className={`m-0 mb-0.5 text-[11px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
                       {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
                       {v.name} · {mv.label}: {gradeWord(mv.grade) || "no longer required"}
                       {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
@@ -2161,21 +2187,21 @@ export default function ProjectDesk() {
               </div>
             )}
             {marketRows.more > 0 && (
-              <p className="m-0 mt-1 text-[9.5px] text-zinc-400">and {marketRows.more} more evaluated suppliers, all in the running.</p>
+              <p className="m-0 mt-1 text-[11px] text-zinc-400">and {marketRows.more} more evaluated suppliers, all in the running.</p>
             )}
-            <p className="m-0 mt-1.5 text-[9px] leading-snug text-zinc-400">
+            <p className="m-0 mt-1.5 text-[10px] leading-snug text-zinc-400">
               Every movement in the Constellation is written here the moment it happens, with its evidence and date.
               Nothing moves without a truthful answer to &ldquo;what changed?&rdquo;. Touch any supplier in the scene for its record.
             </p>
             {vendorCard && (
               <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
                 <button type="button" onClick={() => setVendorCard(null)} className="float-right text-zinc-400 hover:text-zinc-900">✕</button>
-                <p className="m-0 text-[12px] font-semibold text-zinc-900">
+                <p className="m-0 text-[13px] font-semibold text-zinc-900">
                   {vendorCard.name}
-                  {namedSlugs.has(vendorCard.slug) && <span className="ml-1.5 rounded-full bg-zinc-200 px-1.5 text-[8.5px] font-normal text-zinc-600">named in your position</span>}
+                  {namedSlugs.has(vendorCard.slug) && <span className="ml-1.5 rounded-full bg-zinc-200 px-1.5 text-[10px] font-normal text-zinc-600">named in your position</span>}
                 </p>
-                <p className="m-0 mt-0.5 text-[10px] text-zinc-500">{vendorCard.category}</p>
-                <p className="m-0 mt-1 text-[10px] leading-relaxed text-zinc-600">
+                <p className="m-0 mt-0.5 text-[11px] text-zinc-500">{vendorCard.category}</p>
+                <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">
                   Evaluated {fmtDate(vendorCard.last_verified)} · {vendorCard.yes_count} of 40 capabilities fully met.
                 </p>
                 {(() => {
@@ -2186,7 +2212,7 @@ export default function ProjectDesk() {
                   const full = fs.matched.filter((m) => m.grade === "yes").length;
                   const part = fs.matched.length - full;
                   return (
-                    <p className="m-0 mt-1 text-[10px] leading-relaxed text-zinc-600">
+                    <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">
                       Against your named requirements: {full} evidenced
                       {part > 0 ? `, ${part} partially evidenced` : ""}
                       {fs.missed.length > 0 ? `, ${fs.missed.length} without evidence on file` : ""}.
@@ -2203,26 +2229,26 @@ export default function ProjectDesk() {
                   return (
                     <>
                       {mv && (
-                        <div className="mt-1.5 border-t border-zinc-200 pt-1.5 text-[10px] leading-relaxed text-zinc-600">
+                        <div className="mt-1.5 border-t border-zinc-200 pt-1.5 text-[11px] leading-relaxed text-zinc-600">
                           <p className="m-0"><b className="text-zinc-800">What changed:</b> your requirement {mv.grade ? "gained" : "withdrew"} {mv.label}.</p>
                           <p className="m-0"><b className="text-zinc-800">Why it moved:</b> {mv.label} is {gradeWord(mv.grade) || "no longer checked"} for {vendorCard.name}.</p>
                           <p className="m-0"><b className="text-zinc-800">Evidence:</b> evaluated {fmtDate(vendorCard.last_verified)}.</p>
                         </div>
                       )}
                       {fs && (fs.matched.length > 0 || fs.missed.length > 0) && (
-                        <div className="mt-1.5 text-[9.5px] leading-relaxed text-zinc-500">
+                        <div className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
                           {fs.matched.length > 0 && <p className="m-0">Evidences: {fs.matched.map((m) => m.label).join(", ")}.</p>}
                           {fs.missed.length > 0 && <p className="m-0 text-zinc-400">Not evidenced: {fs.missed.map((m) => m.label).join(", ")}.</p>}
                         </div>
                       )}
                       {hist.length > 0 && (
-                        <div className="mt-1.5 text-[9px] leading-relaxed text-zinc-400">
+                        <div className="mt-1.5 text-[10px] leading-relaxed text-zinc-400">
                           {hist.map((h, i) => (
                             <p key={i} className="m-0">{h.at} · {h.dir === "up" ? "rose" : h.dir === "down" ? "fell" : "held"} · {h.text}</p>
                           ))}
                         </div>
                       )}
-                      <a href={`/sase/${vendorCard.slug}/`} className="mt-1 inline-block text-[10px] text-zinc-700 underline">
+                      <a href={`/sase/${vendorCard.slug}/`} className="mt-1 inline-block text-[11px] text-zinc-700 underline">
                         Challenge it: compare the evidence
                       </a>
                     </>
@@ -2233,7 +2259,7 @@ export default function ProjectDesk() {
                     <button
                       type="button"
                       onClick={() => { setAdded((x) => x.filter((s) => s !== vendorCard.slug)); setVendorCard(null); }}
-                      className="mt-1.5 rounded-full border border-zinc-300 px-2.5 py-1 text-[10px] text-zinc-600 hover:border-zinc-500"
+                      className="mt-1.5 rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
                     >
                       Unpin
                     </button>
@@ -2246,7 +2272,7 @@ export default function ProjectDesk() {
                         ev("workspace_supplier_added", { slug: vendorCard.slug });
                         setVendorCard(null);
                       }}
-                      className="mt-1.5 rounded-full border border-amber-400 px-2.5 py-1 text-[10px] text-amber-700 hover:border-amber-600"
+                      className="mt-1.5 rounded-full border border-amber-400 px-2.5 py-1 text-[11px] text-amber-700 hover:border-amber-600"
                     >
                       Pin into invitations (up to five)
                     </button>
@@ -2259,18 +2285,18 @@ export default function ProjectDesk() {
           {/* We noticed: emerald, only advice that costs Netify */}
           {verdict && verdict.againstInterest.length > 0 && started && (
             <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3">
-              <p className="m-0 mb-1 text-[9px] font-semibold uppercase tracking-[.14em] text-emerald-700">We noticed · against Netify&rsquo;s own interest</p>
-              <p className="m-0 text-[12px] leading-relaxed text-emerald-900">{verdict.againstInterest[0].statement}</p>
+              <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-emerald-700">We noticed · against Netify&rsquo;s own interest</p>
+              <p className="m-0 text-[13px] leading-relaxed text-emerald-900">{verdict.againstInterest[0].statement}</p>
               {verdict.againstInterest.length > 1 && (
-                <p className="m-0 mt-1 text-[10px] text-emerald-700/80">{verdict.againstInterest.length - 1} more ruling{verdict.againstInterest.length === 2 ? "" : "s"} on your record.</p>
+                <p className="m-0 mt-1 text-[11px] text-emerald-700/80">{verdict.againstInterest.length - 1} more ruling{verdict.againstInterest.length === 2 ? "" : "s"} on your record.</p>
               )}
             </div>
           )}
 
           {/* Save-lite */}
           {saveLite === "shown" && (
-            <div className="rounded-lg border border-zinc-200 bg-white p-3">
-              <p className="m-0 mb-1.5 text-[12px] font-medium text-zinc-800">Want to keep this position?</p>
+            <div className="rounded-lg bg-zinc-50 p-3">
+              <p className="m-0 mb-1.5 text-[13px] font-medium text-zinc-800">Want to keep this position?</p>
               <SaveLiteInline
                 facts={meter.total}
                 onDone={(email) => {
@@ -2286,7 +2312,7 @@ export default function ProjectDesk() {
             </div>
           )}
           {saveLite === "sent" && (
-            <p className="m-0 text-[10.5px] text-emerald-700">
+            <p className="m-0 text-[11px] text-emerald-700">
               Sign-in link sent to {saveLiteSentTo}. The position stays right here; the link signs you in on any device.
             </p>
           )}
@@ -2296,22 +2322,22 @@ export default function ProjectDesk() {
               or feeds verdict or fit. Grey, not emerald: this advice costs
               Netify nothing and earns the buyer caution. */}
           {pack && packNotes.length > 0 && (
-            <div className="rounded-lg border border-zinc-200 bg-white p-3">
-              <p className="m-0 mb-1.5 flex items-baseline justify-between text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">
+            <div>
+              <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
                 Sector notes · {pack.label}{packFlavours.length ? ` · ${packFlavours.map((f) => pack.flavours.find((x) => x.id === f)?.label ?? f).join(" · ")}` : ""}
-                <span className="font-normal normal-case tracking-normal text-zinc-300">{pack.version}</span>
+                <span className="font-normal text-zinc-400">{pack.version}</span>
               </p>
               {packNotes.map((n) => (
-                <p key={n.id} className="m-0 mb-1.5 text-[10.5px] leading-relaxed text-zinc-600">{n.text}</p>
+                <p key={n.id} className="m-0 mb-1.5 text-[11px] leading-relaxed text-zinc-600">{n.text}</p>
               ))}
-              <p className="m-0 text-[9px] leading-snug text-zinc-400">Advice with provenance, never requirements; nothing here publishes.</p>
+              <p className="m-0 text-[10px] leading-snug text-zinc-400">Advice with provenance, never requirements; nothing here publishes.</p>
             </div>
           )}
 
           {/* The crew */}
-          <div className="rounded-lg border border-zinc-200 bg-white p-3">
-            <p className="m-0 mb-1 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">The crew · completed work only</p>
-            <div className="space-y-0.5 font-mono text-[10px] leading-relaxed text-zinc-500" style={{ fontFamily: "'SF Mono',ui-monospace,Menlo,monospace" }}>
+          <div>
+            <p className="m-0 mb-1.5 text-[11px] font-semibold text-zinc-600">The crew · completed work only</p>
+            <div className="space-y-0.5 font-mono text-[11px] leading-relaxed text-zinc-500" style={{ fontFamily: "'SF Mono',ui-monospace,Menlo,monospace" }}>
               {crew.slice(-6).map((l, i) => (
                 <div key={i}>
                   <span className="mr-2 text-zinc-300">{l.t}</span>
@@ -2333,16 +2359,16 @@ export default function ProjectDesk() {
         <div className="fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-auto sm:right-5 sm:w-[330px]">
           <div className={`rounded-xl border bg-white/95 p-3 shadow-[0_8px_30px_-12px_rgba(24,24,27,.35)] backdrop-blur ${ready ? "border-amber-400" : "border-zinc-200"}`}>
             <div className="flex items-baseline justify-between gap-2">
-              <p className="m-0 text-[11px] font-semibold text-zinc-900">{ready ? "Ready to publish" : "Not ready to publish yet"}</p>
-              {ready && <span className="rounded-full bg-amber-100 px-1.5 py-[1px] text-[8.5px] font-semibold uppercase tracking-[.08em] text-amber-800">unlocked</span>}
+              <p className="m-0 text-[13px] font-semibold text-zinc-900">{ready ? "Ready to publish" : "Not ready to publish yet"}</p>
+              {ready && <span className="rounded-full bg-amber-100 px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">unlocked</span>}
             </div>
-            <p className="m-0 mt-0.5 text-[10px] leading-relaxed text-zinc-500">
+            <p className="m-0 mt-0.5 text-[11px] leading-relaxed text-zinc-500">
               {ready
                 ? "The notice goes out anonymous: no name, no contacts, visible to signed-in suppliers only."
                 : publishBarLock}
             </p>
             {(fitSlugs.length > 0 || market) && (
-              <p className="m-0 mt-1 text-[10px] text-zinc-600">
+              <p className="m-0 mt-1 text-[11px] text-zinc-600">
                 {fitSlugs.length > 0
                   ? `${fitSlugs.length} evaluated supplier${fitSlugs.length === 1 ? "" : "s"} currently in the running`
                   : `${market?.counts.vendors} evaluated suppliers on the curated market`}
@@ -2354,7 +2380,7 @@ export default function ProjectDesk() {
                 ev("workspace_publish_bar_cta", { ready: ready ? 1 : 0 });
                 document.getElementById("pd-signature")?.scrollIntoView({ behavior: "smooth", block: "center" });
               }}
-              className={`mt-2 w-full rounded-full px-4 py-1.5 text-[11px] font-bold transition-colors ${
+              className={`mt-2 w-full rounded-full px-4 py-2 text-[13px] font-bold transition-colors ${
                 ready
                   ? "bg-amber-500 text-zinc-950 hover:bg-amber-400"
                   : "border border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
@@ -2369,11 +2395,11 @@ export default function ProjectDesk() {
       {/* ---- The destination: where the finished position goes (below the desk so the document stays the hero, Robert 23 Jul)
               (the reference concept made live, Robert's word, 23 Jul; every
               claim renders from real data and no em dashes anywhere). ---- */}
-      <div className="mt-8">
-        <h2 className="m-0" style={{ fontSize: "20px", lineHeight: 1.2, fontWeight: 700, color: "#18181b", letterSpacing: "-0.015em" }}>
+      <div className="mt-20">
+        <h2 className="m-0" style={{ fontSize: "19px", lineHeight: 1.2, fontWeight: 700, color: "#18181b", letterSpacing: "-0.015em" }}>
           Publish to our SASE Opportunities Board
         </h2>
-        <p className="m-0 mt-2 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
+        <p className="m-0 mt-3 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
           Your completed Statement of Requirements becomes a live opportunity in a curated SASE marketplace, where
           leading vendors and managed service providers can compete for your business. The public listing remains
           anonymous, while the private procurement view is made available only to suitable suppliers from
@@ -2474,14 +2500,14 @@ function ItemLine(props: {
     >
       <span className={`mr-2 inline-block w-3 text-center text-[11px] ${markCls}`}>{mark}</span>
       <span className={labelCls}>{item.label}</span>
-      {state === "example" && <span className="ml-2 text-[9px] text-zinc-300">example</span>}
-      {state === "exampleStruck" && <span className="ml-2 text-[9px] text-zinc-300">example · {item.exampleStruck}</span>}
-      {state === "noted" && <span className="ml-2 text-[9.5px] text-zinc-500">noted with your position</span>}
+      {state === "example" && <span className="ml-2 text-[10px] text-zinc-300">example</span>}
+      {state === "exampleStruck" && <span className="ml-2 text-[10px] text-zinc-300">example · {item.exampleStruck}</span>}
+      {state === "noted" && <span className="ml-2 text-[11px] text-zinc-500">noted with your position</span>}
       {state === "stated" && fact && (
-        <span className="ml-2 text-[10px] text-zinc-500"><em>&ldquo;{fact.quote ?? item.label}&rdquo;</em></span>
+        <span className="ml-2 text-[11px] text-zinc-500"><em>&ldquo;{fact.quote ?? item.label}&rdquo;</em></span>
       )}
       {state === "inferred" && fact && (
-        <span className="ml-2 text-[10px] text-zinc-500">{fact.reason ?? "inferred"}</span>
+        <span className="ml-2 text-[11px] text-zinc-500">{fact.reason ?? "inferred"}</span>
       )}
     </button>
   );
@@ -2516,7 +2542,7 @@ function OrganisationFields(props: {
             {fs.length === 0 ? (
               <span className={isLive ? "text-[11px] text-zinc-300" : "text-zinc-300"}>
                 {isLive ? "not stated" : r.ex}
-                {!isLive && r.was && <span className="ml-2 text-[9px] text-zinc-300">example · {r.was}</span>}
+                {!isLive && r.was && <span className="ml-2 text-[10px] text-zinc-300">example · {r.was}</span>}
               </span>
             ) : (
               <span className="flex flex-wrap items-baseline gap-x-2">
@@ -2538,7 +2564,7 @@ function OrganisationFields(props: {
                   </button>
                 ))}
                 {fs[0] && !fs[0].struck && (
-                  <span className="text-[10px] text-zinc-500">
+                  <span className="text-[11px] text-zinc-500">
                     {fs[0].provenance === "stated" ? <em>&ldquo;{fs[0].quote ?? String(fs[0].value)}&rdquo;</em> : (fs[0].reason ?? "inferred")}
                   </span>
                 )}
@@ -2563,10 +2589,10 @@ function EarnedQuestionLine(props: {
   const textOpt = q.options.find((o) => o.answer.kind === "path");
   return (
     <div className="py-[3px]" title={evidenceLine(q)}>
-      <div className="flex items-baseline gap-2 text-[12.5px] leading-snug text-amber-700">
+      <div className="flex items-baseline gap-2 text-[13px] leading-snug text-amber-700">
         <span className="inline-block w-3 flex-none text-center text-[11px] font-bold">?</span>
         <span className="italic">{q.question}</span>
-        <button type="button" onClick={props.onDismiss} className="ml-auto text-[10px] text-zinc-400 hover:text-zinc-900" title="Not relevant to this project">✕</button>
+        <button type="button" onClick={props.onDismiss} className="ml-auto text-[11px] text-zinc-400 hover:text-zinc-900" title="Not relevant to this project">✕</button>
       </div>
       <div className="ml-5 mt-1 flex flex-wrap items-center gap-1.5">
         {q.options.filter((o) => o.answer.kind !== "path").map((o) => (
@@ -2574,7 +2600,7 @@ function EarnedQuestionLine(props: {
             key={o.label}
             type="button"
             onClick={() => props.onAnswer(q, o.answer)}
-            className="rounded-full border border-zinc-300 bg-white px-2.5 py-0.5 text-[10.5px] text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
+            className="rounded-full border border-zinc-300 bg-white px-2.5 py-0.5 text-[11px] text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
           >
             {o.label}
           </button>
@@ -2586,19 +2612,19 @@ function EarnedQuestionLine(props: {
               onChange={(e) => setVal(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && val.trim() && props.onAnswer(q, textOpt.answer, val)}
               placeholder={textOpt.answer.placeholder}
-              className="w-36 border-b border-dashed border-zinc-400 bg-transparent px-1 py-0.5 text-[12px] text-zinc-900 outline-none focus:border-amber-500"
+              className="w-36 border-b border-dashed border-zinc-400 bg-transparent px-1 py-0.5 text-[13px] text-zinc-900 outline-none focus:border-amber-500"
               aria-label={q.question}
             />
             <button
               type="button"
               onClick={() => val.trim() && props.onAnswer(q, textOpt.answer, val)}
-              className="rounded-full border border-zinc-300 px-2 py-0.5 text-[10px] text-zinc-600 hover:border-amber-500"
+              className="rounded-full border border-zinc-300 px-2 py-0.5 text-[11px] text-zinc-600 hover:border-amber-500"
             >
               Set
             </button>
           </>
         )}
-        <span className="text-[9px] text-zinc-400">asked by real buyers · hover for the evidence</span>
+        <span className="text-[10px] text-zinc-400">asked by real buyers · hover for the evidence</span>
       </div>
     </div>
   );
@@ -2610,7 +2636,7 @@ function GapLine(props: { gap: BriefGap; onAnswer: (gap: BriefGap, value: string
   const [val, setVal] = useState("");
   return (
     <div className="py-[3px]">
-      <div className="flex items-baseline gap-2 text-[12.5px] leading-snug text-amber-700">
+      <div className="flex items-baseline gap-2 text-[13px] leading-snug text-amber-700">
         <span className="inline-block w-3 flex-none text-center text-[11px] font-bold">?</span>
         <span className="italic">{gap.question}</span>
       </div>
@@ -2621,7 +2647,7 @@ function GapLine(props: { gap: BriefGap; onAnswer: (gap: BriefGap, value: string
               key={o.value}
               type="button"
               onClick={() => props.onAnswer(gap, o.value, o.label)}
-              className="rounded-full border border-zinc-300 bg-white px-2.5 py-0.5 text-[10.5px] text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
+              className="rounded-full border border-zinc-300 bg-white px-2.5 py-0.5 text-[11px] text-zinc-600 hover:border-amber-500 hover:text-zinc-900"
             >
               {o.label}
             </button>
@@ -2635,19 +2661,19 @@ function GapLine(props: { gap: BriefGap; onAnswer: (gap: BriefGap, value: string
             onKeyDown={(e) => e.key === "Enter" && val.trim() && props.onAnswer(gap, val.trim())}
             inputMode={gap.control === "number" ? "numeric" : undefined}
             placeholder={gap.control === "number" ? "0" : "type it"}
-            className="w-28 border-b border-dashed border-zinc-400 bg-transparent px-1 py-0.5 text-[12px] text-zinc-900 outline-none focus:border-amber-500"
+            className="w-28 border-b border-dashed border-zinc-400 bg-transparent px-1 py-0.5 text-[13px] text-zinc-900 outline-none focus:border-amber-500"
             aria-label={gap.question}
           />
           <button
             type="button"
             onClick={() => val.trim() && props.onAnswer(gap, val.trim())}
-            className="rounded-full border border-zinc-300 px-2 py-0.5 text-[10px] text-zinc-600 hover:border-amber-500"
+            className="rounded-full border border-zinc-300 px-2 py-0.5 text-[11px] text-zinc-600 hover:border-amber-500"
           >
             Set
           </button>
         </div>
       ) : (
-        <p className="m-0 ml-5 mt-0.5 text-[10px] text-zinc-500">Accepted at the signature; publishes as a stated assumption.</p>
+        <p className="m-0 ml-5 mt-0.5 text-[11px] text-zinc-500">Accepted at the signature; publishes as a stated assumption.</p>
       )}
     </div>
   );
@@ -2686,19 +2712,19 @@ function SaveLiteInline({ facts, onDone, onDismiss }: { facts: number; onDone: (
       setBusy(false);
     }
   };
-  const cls = "w-full rounded-sm border border-zinc-300 bg-white px-2 py-1.5 text-[11.5px] text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-amber-500";
+  const cls = "w-full rounded-md border border-zinc-300 bg-white px-2.5 py-1.5 text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-amber-500";
   return (
     <div className="space-y-1.5">
       <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@yourcompany.com" className={cls} aria-label="Work email" />
       <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className={cls} aria-label="Company" />
       <div className="flex items-center gap-2">
-        <button type="button" onClick={() => void send()} disabled={busy || !email.includes("@")} className="rounded-full bg-amber-500 px-3 py-1 text-[10.5px] font-semibold text-zinc-950 disabled:opacity-50">
+        <button type="button" onClick={() => void send()} disabled={busy || !email.includes("@")} className="rounded-full bg-amber-500 px-3 py-1 text-[11px] font-semibold text-zinc-950 disabled:opacity-50">
           {busy ? "Sending…" : "Email me a sign-in link"}
         </button>
-        <button type="button" onClick={onDismiss} className="text-[10px] text-zinc-500 underline hover:text-zinc-900">Not now</button>
+        <button type="button" onClick={onDismiss} className="text-[11px] text-zinc-500 underline hover:text-zinc-900">Not now</button>
       </div>
-      <p className="m-0 text-[9.5px] leading-snug text-zinc-400">The position stays right here either way. Work email only; we only email you about your own projects.</p>
-      {error && <p className="m-0 text-[10px] text-red-600">{error}</p>}
+      <p className="m-0 text-[11px] leading-snug text-zinc-400">The position stays right here either way. Work email only; we only email you about your own projects.</p>
+      {error && <p className="m-0 text-[11px] text-red-600">{error}</p>}
     </div>
   );
 }
