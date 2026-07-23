@@ -25,13 +25,9 @@ export async function GET() {
     { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
     { loc: `${SITE_URL}/for-suppliers`, priority: "0.8" },
     { loc: `${SITE_URL}/shortlist`, priority: "1.0" },
-    { loc: `${SITE_URL}/workspace/`, priority: "1.0" },
-    { loc: `${SITE_URL}/rfp-builder`, priority: "0.9" },
-    { loc: `${SITE_URL}/rfp-builder/new`, priority: "0.9" },
-    { loc: `${SITE_URL}/rfp-builder/start`, priority: "0.8" },
-    { loc: `${SITE_URL}/rfp-builder/sase`, priority: "0.9" },
-    { loc: `${SITE_URL}/rfp-builder/sd-wan`, priority: "0.9" },
-    { loc: `${SITE_URL}/rfp-builder/sse`, priority: "0.9" },
+    // /workspace/ and the wizard's entry surfaces 301 now (One Door,
+    // 23 Jul 2026): a sitemap must never list redirecting URLs, so only
+    // the serving research surfaces below remain.
     { loc: `${SITE_URL}/rfp-builder/questions`, priority: "0.9" },
     { loc: `${SITE_URL}/rfp-builder/sample-rfp`, priority: "0.9" },
     { loc: `${SITE_URL}/cost-estimator`, priority: "0.8" },
