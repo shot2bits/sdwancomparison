@@ -98,6 +98,11 @@ export default function Page() {
           thousands of follow-up questions technology buyers ask AI, helping you build a richer, more complete Statement
           of Requirements automatically.
         </p>
+        <p className="m-0 mt-2.5 max-w-3xl border-l-2 border-amber-400 pl-2.5 text-[11.5px] leading-relaxed text-zinc-600">
+          <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated
+          supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
+          Reviewed by Robert Sturt.
+        </p>
 
         <ProjectDesk />
 

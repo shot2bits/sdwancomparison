@@ -28,6 +28,8 @@ import { activePack, activeFlavours, visibleSuggestions, declinedOnRecord, packR
 import { HEALTHCARE_PACK } from "@/lib/sector/packs";
 import { buildChecks, workspaceFit } from "./fit";
 import { earnedQuestions, publishedQuestionSet } from "./questions";
+import { chunkForIngest, ingestSummary } from "./ingest";
+import { callWorkspaceTool } from "@/lib/mcp-workspace-tools";
 import { unlandedMentions } from "./taxonomy";
 import { buildSecurityProject } from "@/lib/security/create-project";
 import { assessSecurityRequirement } from "@/lib/security/rulebook";
@@ -659,6 +661,27 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(!det.some((u) => u.path === "estate.sites" || u.path === "estate.users"), "a numberless sentence lands no site or user count from the rail");
     const det2 = deterministicExtract("We are a healthcare provider with 14 clinical sites.");
     expect(det2.some((u) => u.path === "estate.sites" && u.value === 14), "Opposite: a stated 14 lands");
+  });
+
+  await ok("the paste law: chunks respect sentences, budgets are honest, short text is one cycle", () => {
+    const short = chunkForIngest("We are a retailer with 14 sites.");
+    expect(short.chunks.length === 1 && !short.truncated, "a sentence is one chunk, untruncated");
+    const paras = chunkForIngest(Array.from({ length: 8 }, (_, i) => `Paragraph ${i} about the estate. It has several sentences. `.repeat(30)).join("\n\n"));
+    expect(paras.chunks.length === 3 && paras.truncated, "long material caps at three chunks and says so");
+    expect(paras.chunks.every((c) => c.length <= 3500), "no chunk exceeds the cycle budget");
+    expect(/paste the rest in a second pass/.test(ingestSummary(5, 2, paras)), "the summary carries the truncation honestly");
+    expect(!/second pass/.test(ingestSummary(5, 0, short)) && /nothing needed the Notes/.test(ingestSummary(5, 0, short)), "an untruncated read stays quiet about budgets");
+  });
+
+  await ok("workspace_ingest reads both paragraphs through the same engine (deterministic path)", async () => {
+    const out = (await callWorkspaceTool("workspace_ingest", {
+      text: "We are an NHS trust with 14 clinical sites currently running MPLS.\n\nWe are buying managed SD-WAN and PCI DSS applies to our pharmacy tills.",
+    })) as { cycles: number; updates: Array<{ path: string; value: unknown }>; read_summary: string; requirement: { organisation?: { sector?: string } } };
+    expect(out.cycles >= 1, "at least one cycle ran");
+    expect(out.updates.some((u) => u.path === "estate.sites" && u.value === 14), "paragraph one landed the sites");
+    expect(out.updates.some((u) => u.path === "constraints.complianceRequirements"), "paragraph two landed compliance");
+    expect(String(out.requirement.organisation?.sector ?? "").includes("Health"), "the sector stands in the merged requirement");
+    expect(typeof out.read_summary === "string" && out.read_summary.startsWith("Read "), "the read summary is present and honest");
   });
 
   return r;

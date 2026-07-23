@@ -58,6 +58,7 @@ import {
 import { ORGANISATION_EXAMPLES, TAXONOMY, sectionForGapKey, sectionForPath, unlandedMentions, type TaxonomyItem } from "@/lib/workspace/taxonomy";
 import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
 import { activePack, activeFlavours, visibleSuggestions, declinedOnRecord, packRiskNotes } from "@/lib/sector/derive";
+import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
 import { PACKS_VERSION, type PackSuggestion } from "@/lib/sector/packs";
 import { deriveAreaState, refineConfirmed } from "@/lib/workspace/areas";
 import { diagramModel } from "@/lib/workspace/diagram";
@@ -249,6 +250,7 @@ export default function ProjectDesk() {
   const cycleRef = useRef(0);
   const receiptId = useRef(0);
   const factsRef = useRef<WorkspaceFact[]>([]);
+  const receiptsRef = useRef<Receipt[]>([]);
   const prevFitRef = useRef<{ order: string[]; matched: Map<string, Set<string>>; checkIds: Set<string>; checkLabels: Map<string, string> } | null>(null);
   const notedRef = useRef<NotedItem[]>([]);
   useEffect(() => { notedRef.current = noted; }, [noted]);
@@ -461,6 +463,8 @@ export default function ProjectDesk() {
   const [voiceState, setVoiceState] = useState<"idle" | "starting" | "listening">("idle");
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  /* The Threshold (25 Jul): the read summary after a paste or drop. */
+  const [pasteSummary, setPasteSummary] = useState<string | null>(null);
   const voiceRec = useRef<{ stop: () => void } | null>(null);
   useEffect(() => {
     const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
@@ -543,6 +547,33 @@ export default function ProjectDesk() {
     setVoiceState("starting");
     try { rec.start(); } catch { setVoiceState("idle"); voiceRec.current = null; }
   };
+
+  /* ---- The Threshold, stage one (25 Jul): a paste or a dropped text file
+   * runs through the SAME cycles a sentence runs, chunked on paragraph
+   * boundaries, so provenance, guards and receipts hold unchanged. The
+   * summary line says honestly what landed, what the Notes kept, and
+   * whether the read budget truncated. ---- */
+  const ingestText = useCallback(
+    async (raw: string, source: "paste" | "drop") => {
+      const plan = chunkForIngest(raw);
+      if (!plan.chunks.length) return;
+      setPasteSummary(null);
+      const factsBefore = factsRef.current.filter((f) => !f.struck).length;
+      const receiptsBefore = receipts.length;
+      ev("workspace_ingest", { source, chunks: plan.chunks.length, chars: plan.readChars, truncated: plan.truncated ? 1 : 0 });
+      if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+      for (const chunk of plan.chunks) {
+        // Sequential on purpose: each cycle merges before the next reads.
+        // eslint-disable-next-line no-await-in-loop
+        await runCycle(chunk, { fromEnter: true });
+      }
+      const landed = Math.max(0, factsRef.current.filter((f) => !f.struck).length - factsBefore);
+      const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
+      setPasteSummary(ingestSummary(landed, kept, plan));
+      crewLog(`Listener: ${ingestSummary(landed, kept, plan)}`, "you");
+    },
+    [runCycle, crewLog, receipts.length],
+  );
 
   /* ---- The intent blocks and the claimed example (24 Jul): a sector and
    * any goals compose one editable sentence in the input; the ordinary
@@ -787,6 +818,8 @@ export default function ProjectDesk() {
     },
     [published, applyMerge, crewLog, toggleFact],
   );
+
+  useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
 
   const dismissReceipt = useCallback((id: number) => {
     setReceipts((rs) => rs.filter((r) => r.id !== id));
@@ -1277,8 +1310,22 @@ export default function ProjectDesk() {
 
       {/* ---- The one line in: the page's one control, framed as such ---- */}
       <div className="mx-auto w-[min(760px,100%)]">
-        <section aria-label="Describe your project" className={`rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,.16),0_22px_56px_-20px_rgba(180,83,9,.3)]${yoursRing ? " pd-live-in" : ""}`}>
-        <p className="m-0 mb-1.5 text-[9.5px] font-semibold uppercase tracking-[.16em] text-zinc-400">Start here · one sentence is enough</p>
+        <section
+          aria-label="Describe your project"
+          onDragOver={(e) => { e.preventDefault(); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (published) return;
+            const f = e.dataTransfer?.files?.[0];
+            if (f && (f.type.startsWith("text/") || /\.(txt|md|markdown)$/i.test(f.name))) {
+              void f.text().then((t) => ingestText(t, "drop"));
+              return;
+            }
+            const t = e.dataTransfer?.getData("text/plain");
+            if (t && t.trim().length > 0) void ingestText(t, "drop");
+          }}
+          className={`rounded-2xl border border-zinc-200 bg-white px-6 pb-4 pt-5 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] transition-shadow focus-within:border-amber-400 focus-within:shadow-[0_0_0_3px_rgba(245,158,11,.16),0_22px_56px_-20px_rgba(180,83,9,.3)]${yoursRing ? " pd-live-in" : ""}`}>
+        <p className="m-0 mb-1.5 text-[9.5px] font-semibold uppercase tracking-[.16em] text-zinc-400">Start here · a sentence is enough, or paste everything you have</p>
         <div className="relative border-b-2 border-zinc-300 px-1 py-2 focus-within:border-amber-500">
           <input
             ref={inputRef}
@@ -1293,12 +1340,21 @@ export default function ProjectDesk() {
                 void runCycle(input, { fromEnter: true });
               }
             }}
+            onPaste={(e) => {
+              const t = e.clipboardData?.getData("text/plain") ?? "";
+              /* A sentence pastes into the input as ever; a document (long,
+                 or carrying line breaks) reads through the cycles instead. */
+              if (t.length > 300 || /\n/.test(t.trim())) {
+                e.preventDefault();
+                void ingestText(t, "paste");
+              }
+            }}
             placeholder={
               started
                 ? "Add or correct anything: 'actually 45 sites', 'we already run Defender'…"
                 : yoursHint
                   ? "e.g. We are replacing legacy MPLS across 15 UK sites with managed SD-WAN…"
-                  : "Describe your project in one sentence, or touch anything below to begin"
+                  : "Describe your project in one sentence, or paste your research: a conversation, a document, an old RFP"
             }
             disabled={Boolean(published)}
             className="w-full bg-transparent px-9 text-center text-[17px] italic text-zinc-900 outline-none placeholder:text-zinc-400 sm:text-[18px]"
@@ -1342,6 +1398,7 @@ export default function ProjectDesk() {
             <span aria-live="polite" className="text-amber-700">Listening… your words land as you speak.</span>
           )}
           {voiceError && !busy && voiceState === "idle" && <span aria-live="polite" className="text-zinc-500">{voiceError}</span>}
+          {pasteSummary && !busy && <span aria-live="polite" className="text-zinc-700">{pasteSummary}</span>}
           {!busy && started && engineUsed === "deterministic_fallback" && <span>Read without the model this turn; everything still works.</span>}
           {cycleError && <span className="text-red-600">{cycleError}</span>}
           {booted && !started && !busy && (
@@ -1353,7 +1410,7 @@ export default function ProjectDesk() {
               >
                 Make this yours
               </button>
-              <span className="text-zinc-400">describe it in a sentence, speak it, or build it from blocks:</span>
+              <span className="text-zinc-400">describe it in a sentence, speak it, build it from blocks, or drop a ChatGPT thread, an old RFP or any notes onto this card:</span>
               <span className="flex w-full flex-wrap items-center justify-center gap-1.5">
                 {SECTOR_CHIPS.map((c) => (
                   <button
@@ -1499,7 +1556,7 @@ export default function ProjectDesk() {
               ? (<>your notice is live: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
               : started
               ? "anonymous on publish: no name, no contacts until you choose · nothing is sent without your signature"
-              : "example content · becomes yours as you speak or touch the document below · never publishes"}
+              : "a worked example · it becomes yours the moment you speak, paste or touch the document below · never publishes"}
           </p>
         </section>
       </div>

@@ -18,6 +18,7 @@ import { earnedQuestions } from "@/lib/workspace/questions";
 import { assessSecurityRequirement, RULEBOOK_VERSION } from "@/lib/security/rulebook";
 import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/security/rulebook";
 import { SITE_URL } from "@/lib/structured-data";
+import { chunkForIngest } from "@/lib/workspace/ingest";
 
 const CYCLE_DEFINITION = {
   name: "workspace_cycle",
@@ -92,7 +93,38 @@ const CYCLE_DEFINITION = {
   },
 } as const;
 
-export const WORKSPACE_TOOL_DEFINITIONS = [CYCLE_DEFINITION] as const;
+const INGEST_DEFINITION = {
+  name: "workspace_ingest",
+  description:
+    `Netify Live Sourcing Workspace: read a WHOLE document or conversation into a requirement in one call, where workspace_cycle takes a sentence. Paste the buyer's existing material verbatim: a ChatGPT, Perplexity, Gemini or Claude conversation, an existing SASE or SD-WAN RFP, SSE requirements, meeting notes or an email thread (plain text, up to 14,000 characters; longer material is read to the budget and the summary says so honestly). The text is cut on paragraph boundaries and run through the IDENTICAL extraction cycles the page runs, so every claim lands with provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the same validation and magnitude guards apply, and clauses the engine cannot place are reported rather than dropped. Output: the merged requirement, all provenance-marked updates, the ${RULEBOOK_VERSION} verdict for security scope, evidence-graded supplier fit, the earned follow-up questions to relay, the assembled statement of requirements, and a read_summary to show the buyer. Read and compute only; nothing is stored and no supplier is contacted. Continue with workspace_cycle for corrections, or hand the buyer the workspace_url; a human always signs before anything publishes.`,
+  inputSchema: {
+    type: "object",
+    properties: {
+      text: { type: "string", description: "The buyer's material, verbatim: a conversation export, document text, notes or a thread. Plain text." },
+      requirement: { type: "object", description: "A requirement built in earlier cycles to merge into; omit to start fresh." },
+      procurement: {
+        type: "object",
+        description: "Carried workspace context from earlier cycles.",
+        properties: {
+          buying: { type: "string", enum: ["managed_security", "sase", "sdwan", "sse"] },
+          operatingModel: { type: "string", enum: ["managed", "co_managed", "diy"] },
+        },
+      },
+      include_fit: { type: "boolean", description: "Set false to skip the supplier fit block. Default true." },
+    },
+    required: ["text"],
+  },
+  outputSchema: {
+    ...CYCLE_DEFINITION.outputSchema,
+    properties: {
+      ...CYCLE_DEFINITION.outputSchema.properties,
+      read_summary: { type: "string", description: "The honest read line to relay: what landed, what the Notes kept, whether the budget truncated the read." },
+      cycles: { type: "number" },
+    },
+  },
+} as const;
+
+export const WORKSPACE_TOOL_DEFINITIONS = [CYCLE_DEFINITION, INGEST_DEFINITION] as const;
 
 export const WORKSPACE_TOOL_NAMES = new Set<string>(WORKSPACE_TOOL_DEFINITIONS.map((t) => t.name));
 
@@ -102,6 +134,7 @@ const lastValue = (updates: FieldUpdate[], path: string): string | undefined => 
 };
 
 export async function callWorkspaceTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+  if (name === "workspace_ingest") return callWorkspaceIngest(args);
   if (name !== "workspace_cycle") return { error: `Unknown workspace tool: ${name}` };
   const text = String(args?.text ?? "").slice(0, 4000);
   if (text.trim().length < 3) {
@@ -178,5 +211,86 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
     brief,
     workspace_url: `${SITE_URL}/workspace/?q=${encodeURIComponent(text.slice(0, 400))}`,
     notes: result.notes,
+  };
+}
+
+/** The Threshold's agent door (25 Jul): the same cycles, one call. Chunks
+ *  run sequentially, each threading the merged requirement into the next,
+ *  so a document reads exactly as a patient buyer typing it would. */
+async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unknown> {
+  const raw = String(args?.text ?? "").slice(0, 14000);
+  if (raw.trim().length < 20) {
+    return { error: "text is required: the buyer's material, at least a few sentences." };
+  }
+  const plan = chunkForIngest(raw, { chunkMax: 3500, maxChunks: 4 });
+  const carried = (args?.procurement && typeof args.procurement === "object" ? args.procurement : {}) as {
+    buying?: BuyingId;
+    operatingModel?: OperatingModelId;
+  };
+
+  let requirement = (args?.requirement && typeof args.requirement === "object" ? args.requirement : {}) as SecurityRequirementInput;
+  const allUpdates: FieldUpdate[] = [];
+  const allNotes: string[] = [];
+  let engine = "deterministic_fallback";
+  for (const chunk of plan.chunks) {
+    const r = await extractRequirement(chunk, requirement);
+    requirement = r.requirement;
+    allUpdates.push(...r.updates);
+    allNotes.push(...r.notes);
+    if (r.engine === "model") engine = "model";
+  }
+
+  const buying = (lastValue(allUpdates, "procurement.buying") as BuyingId | undefined) ?? carried.buying ?? null;
+  const operatingModel =
+    (lastValue(allUpdates, "procurement.operatingModel") as OperatingModelId | undefined) ?? carried.operatingModel ?? null;
+  const securityScope = buying === "managed_security" || buying === null;
+  const verdict: SecurityScopeVerdict | null = securityScope ? await assessSecurityRequirement(requirement) : null;
+
+  const facts: WorkspaceFact[] = mergeUpdates([], allUpdates, 1, "extract").facts;
+  const brief = briefText(briefModel({ facts, verdict }));
+
+  const includeFit = args?.include_fit !== false;
+  const sseSignal = Boolean(
+    verdict?.capabilities.some((c) => c.id === "sse" && (c.needed === "required" || c.needed === "recommended")) ||
+      verdict?.pathRecommendation === "escalate_sase",
+  );
+  const fitBuying = buying && buying !== "managed_security" ? buying : sseSignal ? "sse" : "managed_security";
+  const fit = includeFit
+    ? workspaceFit({
+        buying: fitBuying,
+        regions: requirement.organisation?.regions ?? [],
+        model: operatingModel ?? "any",
+        clouds: requirement.estate?.cloud ?? [],
+        mplsEstate: (requirement.estate?.existingNetwork ?? []).includes("mpls"),
+      })
+    : undefined;
+
+  /* The receipts idea, stated for the agent: which of its material landed
+   * nowhere. The page keeps clauses verbatim; here the count plus the
+   * engine notes carry the same honesty in one line. */
+  const landed = allUpdates.length;
+  const unplacedNotes = allNotes.filter((n) => /Dropped|kept verbatim|no home/i.test(n)).length;
+  const read_summary = `Read ${plan.readChars.toLocaleString("en-GB")} characters in ${plan.chunks.length} cycle${plan.chunks.length === 1 ? "" : "s"}: ${landed} provenance-marked update${landed === 1 ? "" : "s"}${unplacedNotes ? `, ${unplacedNotes} engine note${unplacedNotes === 1 ? "" : "s"} on material that could not land` : ""}${plan.truncated ? `. The text exceeded the read budget (${plan.totalChars.toLocaleString("en-GB")} characters); send the remainder in a second call` : ""}. Relay inferred markers honestly; a human signs before anything publishes.`;
+
+  return {
+    rulebook_version: RULEBOOK_VERSION,
+    engine,
+    cycles: plan.chunks.length,
+    updates: allUpdates,
+    requirement,
+    procurement: { ...(buying ? { buying } : {}), ...(operatingModel ? { operatingModel } : {}) },
+    ...(verdict ? { verdict } : {}),
+    ...(fit ? { fit: { scope: fitBuying, ...fit, directory: undefined } } : {}),
+    earned_questions: earnedQuestions(requirement, buying, operatingModel ?? null, [], [], raw).map((q) => ({
+      id: q.id,
+      question: q.question,
+      section: q.section,
+      options: q.options.map((o) => o.label),
+      evidence: q.evidence,
+    })),
+    brief,
+    read_summary,
+    workspace_url: `${SITE_URL}/workspace/`,
+    notes: allNotes,
   };
 }
