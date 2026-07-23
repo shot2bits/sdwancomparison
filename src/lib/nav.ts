@@ -118,10 +118,14 @@ export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
 // from the Get quotes group and the workspace's builder link.
 export const NAV_CTA: NavLink = { label: "Start a project", href: "/" };
 
-/* ── The 2026 top navigation (Robert's spec, 24 Jul; his verdicts: one
- * header everywhere, both repos, main as always). Five groups; every href
- * verified against a real route in one of the two repos before it was
- * allowed in; descriptions quiet and factual under the evidence law. ── */
+/* ── The intent navigation (the final architecture, 23 Jul, Robert's
+ * "Please implement"). Five groups labelled by buyer intent; item labels
+ * use the market's nouns; ONE label per URL across the whole menu (the
+ * previous nav listed /sase/vendors/ twice under two names). Research is
+ * a primary destination for the first time, and partner surfaces never
+ * share a group with evaluation surfaces (Principle 5 made visible).
+ * Every href verified against a live route or the declared reseller
+ * subdomain before it was allowed in. ── */
 export type MegaItem = { label: string; href: string; desc: string };
 export type MegaGroup = {
   label: string;
@@ -132,6 +136,37 @@ export type MegaGroup = {
 
 export const MEGA_GROUPS: MegaGroup[] = [
   {
+    label: "Find suppliers",
+    columns: 1,
+    items: [
+      { label: "Evaluated directory", href: "/sase/vendors/", desc: "30 suppliers graded on 40 capabilities, every grade dated and sourced." },
+      { label: "All listed suppliers", href: "/marketplace/", desc: "The wider supplier directory, including managed service providers." },
+      { label: "Demand index", href: "/sase/demand/", desc: "Enterprise demand and supplier interest, measured." },
+    ],
+  },
+  {
+    label: "Compare & plan",
+    columns: 2,
+    items: [
+      { label: "Vendor comparisons", href: "/vendor-comparison/", desc: "Head-to-head capability comparisons, graded from evidence." },
+      { label: "Shortlist builder", href: "/sase/shortlist/", desc: "Score every evaluated supplier against your exact requirements." },
+      { label: "RFP Builder", href: "/sase/rfp-builder/", desc: "The question-by-question builder for SASE, SD-WAN and SSE." },
+      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership." },
+      { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "The questions technology buyers ask AI, explorable." },
+      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/", desc: "A complete SASE Statement of Requirements to inspect." },
+    ],
+  },
+  {
+    label: "Research",
+    columns: 1,
+    items: [
+      { label: "Insights: the blog", href: "/insights/", desc: "Guides, market analysis and procurement strategy, dated and authored." },
+      { label: "SD-WAN research hub", href: "/sd-wan/", desc: "Global and regional SD-WAN provider research." },
+      { label: "Provider & vendor market guide", href: "/sd-wan-provider-and-vendor-comparison/", desc: "The full market comparison guide, updated for 2026." },
+      { label: "Research methodology", href: "/methodology/", desc: "How every grade is earned, and what the statuses mean." },
+    ],
+  },
+  {
     label: "Solutions",
     columns: 2,
     items: [
@@ -140,40 +175,17 @@ export const MEGA_GROUPS: MegaGroup[] = [
       { label: "Manufacturing & OT", href: "/sase/rfp-builder/new/?sector=manufacturing", desc: "Secure SASE with IT and OT integration for industrial sites." },
       { label: "Financial services", href: "/sase/rfp-builder/new/?sector=financial_services", desc: "Audited, low-latency network security frameworks for regulated finance." },
     ],
-    footerLink: { label: "Browse all sector guides", href: "/sase/best/" },
+    footerLink: { label: "Best by sector: all sector guides", href: "/sase/best/" },
   },
   {
-    label: "Compare & research",
-    columns: 2,
-    items: [
-      { label: "SASE providers directory", href: "/sase/vendors/", desc: "Evaluated vendor capability matrices, graded with dates." },
-      { label: "SD-WAN vendors", href: "/sd-wan/", desc: "Global and regional SD-WAN vendor profiles." },
-      { label: "Managed service providers", href: "/marketplace/", desc: "The curated MSP partner directory." },
-      { label: "Shortlist builder", href: "/sase/shortlist/", desc: "Build an interactive vendor shortlist." },
-      { label: "Vendor comparisons", href: "/vendor-comparison/", desc: "Head-to-head capability comparisons." },
-    ],
-  },
-  {
-    label: "Tools & intelligence",
+    label: "For partners",
     columns: 1,
     items: [
-      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership." },
-      { label: "Demand index", href: "/sase/demand/", desc: "Enterprise demand and vendor interest, measured." },
-      { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "The questions technology buyers ask AI, explorable." },
-      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/", desc: "A complete SASE Statement of Requirements to inspect." },
-      { label: "RFP Builder", href: "/sase/rfp-builder/", desc: "The question-by-question builder for SASE, SD-WAN and SSE." },
-      { label: "AI assistant connector", href: "/sase/connector/", desc: "Connect agents through llms.txt and MCP." },
-    ],
-  },
-  {
-    label: "Providers & ecosystem",
-    columns: 2,
-    items: [
-      { label: "Evaluated vendor directory", href: "/sase/vendors/", desc: "Direct vendor capability evaluations." },
       { label: "BT Business portfolio", href: "/resell/bt-business-services/", desc: "BTnet, hosted VoIP and BT managed SASE." },
       { label: "BT SD-WAN & SASE", href: "/resell/bt-sd-wan/", desc: "Enterprise BT network sourcing." },
       { label: "Virgin Media Business", href: "/resell/virgin-media-business/", desc: "High-capacity internet and SD-WAN from VMB." },
-      { label: "For suppliers: the board", href: "/sase/opportunities/board/", desc: "Anonymous buyer notices, visible to the signed-in supplier community." },
+      { label: "Reseller order portal", href: "https://reseller.netify.co.uk/", desc: "Quote, order and track BT reseller business in the partner application." },
+      { label: "Broadband reseller dataset", href: "/insights/broadband-reseller-companies/", desc: "The UK broadband reseller comparison, filterable." },
     ],
   },
 ];

@@ -33,24 +33,51 @@ export const metadata: Metadata = {
 // nav spec): in-app links carry the /sase prefix explicitly (plain anchors
 // miss Next's basePath); marketing-site links are root-relative and resolve
 // on the public host. Keep labels in sync with the main site's footer.
+/* The pillar footer (the final architecture, 23 Jul, "Please implement"):
+ * five columns mirroring the four pillars plus governance. The per-item
+ * audit governs: nothing valuable removed, the one exact duplicate gone
+ * (shortlist listed twice), the reseller portal linked for the first
+ * time, sector preloads live in the nav's Solutions group rather than
+ * duplicating here. /vendor-comparison/ and /about-netify-marketplace/
+ * keep their links until their deferred merges actually happen: internal
+ * linking before redirects, and no page orphaned by the chrome. */
 const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
-    title: "Platform",
+    title: "Procurement",
     links: [
       { label: "How It Works", href: "/sase/how-it-works/" },
       { label: "SASE & SD-WAN RFP Builder", href: "/sase/rfp-builder/" },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
-      { label: "All vendors", href: "/sase/vendors/" },
-      { label: "Best by sector", href: "/sase/best/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
-      { label: "Open opportunities", href: "/sase/opportunities/board/" },
+      { label: "Marketplace: open opportunities", href: "/sase/opportunities/board/" },
       { label: "AI assistant connector", href: "/sase/connector/" },
     ],
   },
   {
-    title: "Resell",
+    title: "Suppliers",
+    links: [
+      { label: "Evaluated directory", href: "/sase/vendors/" },
+      { label: "Best by sector", href: "/sase/best/" },
+      { label: "All listed suppliers", href: "/marketplace/" },
+      { label: "Demand index", href: "/sase/demand/" },
+      { label: "Vendor comparisons", href: "/vendor-comparison/" },
+    ],
+  },
+  {
+    title: "Research",
+    links: [
+      { label: "Insights: the blog", href: "/insights/" },
+      { label: "SD-WAN research hub", href: "/sd-wan/" },
+      { label: "Provider & vendor market guide", href: "/sd-wan-provider-and-vendor-comparison/" },
+      { label: "Netify Resources", href: "/resources/" },
+      { label: "Healthcare Trust & Evidence", href: "/healthcare-trust-and-evidence/" },
+      { label: "Research Methodology", href: "/methodology/" },
+    ],
+  },
+  {
+    title: "Partner Programmes",
     links: [
       { label: "BT Business portfolio", href: "/resell/bt-business-services/" },
       { label: "BT Business Broadband", href: "/resell/bt-business-broadband/" },
@@ -60,38 +87,15 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       { label: "BT SD-WAN", href: "/resell/bt-sd-wan/" },
       { label: "BT SASE", href: "/resell/bt-sase/" },
       { label: "Virgin Media Business", href: "/resell/virgin-media-business/" },
+      { label: "Reseller order portal", href: "https://reseller.netify.co.uk/" },
+      { label: "Broadband reseller dataset", href: "/insights/broadband-reseller-companies/" },
     ],
   },
   {
-    title: "RFP Building by Sector",
-    // Vendor-neutral routing (Harry's evaluation, 03/07/2026): every sector
-    // starts the in-app RFP Builder preloaded for that sector, instead of a
-    // mixed bag of old-site articles and BT-specific content.
-    links: [
-      { label: "Healthcare & Pharma", href: "/sase/rfp-builder/new/?sector=healthcare" },
-      { label: "Retail & E-commerce", href: "/sase/rfp-builder/new/?sector=retail_ecommerce" },
-      { label: "Financial Services", href: "/sase/rfp-builder/new/?sector=financial_services" },
-      { label: "Manufacturing", href: "/sase/rfp-builder/new/?sector=manufacturing" },
-    ],
-  },
-  {
-    title: "Insights & Guidance",
-    links: [
-      { label: "Blog & Articles", href: "/insights/" },
-      { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
-      { label: "SD-WAN Research Hub", href: "/sd-wan/" },
-      { label: "All Providers Directory", href: "/marketplace/" },
-      { label: "Netify Resources", href: "/resources/" },
-      { label: "Healthcare Trust & Evidence", href: "/healthcare-trust-and-evidence/" },
-      { label: "Vendor Comparison Index", href: "/vendor-comparison/" },
-      { label: "Research Methodology", href: "/methodology/" },
-    ],
-  },
-  {
-    title: "Company",
+    title: "Company & Governance",
     links: [
       { label: "About Us", href: "/about-netify/" },
-      { label: "How Netify Works", href: "/about-netify-marketplace/" },
+      { label: "About the Netify Marketplace", href: "/about-netify-marketplace/" },
       { label: "How Netify makes money", href: "/how-netify-makes-money/" },
       { label: "Editorial Policy & Corrections", href: "/editorial-policy/" },
       { label: "Our Team", href: "/staff-list/" },

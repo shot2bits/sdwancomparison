@@ -2,6 +2,7 @@ import { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tools";
 import { SECURITY_TOOL_DEFINITIONS_ALL } from "@/lib/mcp-security-tools";
 import { WORKSPACE_TOOL_DEFINITIONS } from "@/lib/mcp-workspace-tools";
 import { getAllVendorSlugs } from "@/lib/vendors";
+import { getAllMentions } from "@/lib/mentions";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { SITE_URL } from "@/lib/structured-data";
 
@@ -12,6 +13,9 @@ export async function GET() {
   const vendors = getAllVendorSlugs().join(", ");
   const bestPages = BEST_PAGES.map(
     (p) => `- ${SITE_URL}/best/${p.slug} : ${p.title} (ranked top 10, ItemList schema, JSON twin at /best/${p.slug}/data.json)`,
+  ).join("\n");
+  const researchMap = getAllMentions().map(
+    (m) => `- ${m.url} : ${m.title} → supplier profile${m.suppliers.length === 1 ? "" : "s"}: ${m.suppliers.map((s) => `${SITE_URL}/vendors/${s}`).join(", ")}`,
   ).join("\n");
 
   const body = `# Netify SASE and SD-WAN Shortlist Builder
@@ -43,6 +47,12 @@ Operated by Netify Group Limited (netify.co.uk), a UK research and marketplace c
 Pre-computed, citable top 10 rankings driven by the same engine. Each page emits Article, ItemList (ranked), FAQPage, BreadcrumbList and Speakable JSON-LD and has a JSON twin:
 
 ${bestPages}
+
+## Research to supplier map
+
+Netify research and the evaluated supplier profiles cross-reference through one declared mentions dataset (a mention exists only when the article's title names the supplier or an editor declared it after reading; nothing inferred). Current declarations:
+
+${researchMap}
 
 ## Full text version
 

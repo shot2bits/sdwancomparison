@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CompareTable from "@/components/CompareTable";
-import { COMPARE_PAIRS, getComparePair } from "@/lib/compare-pages";
+import { COMPARE_PAIRS, getComparePair, getRelatedPairs } from "@/lib/compare-pages";
 import { FEATURES, getShortlistDataset } from "@/lib/vendors";
 import { buildComparison } from "@/lib/shortlist-core";
 import {
@@ -98,6 +98,16 @@ export default async function ComparePage({ params }: Props) {
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
 
+      {/* Visible breadcrumb (the JSON-LD breadcrumb already existed; the
+          human-readable trail now matches it) */}
+      <nav aria-label="Breadcrumb" className="text-sm mb-6 text-[var(--ink-500)]">
+        <Link href="/" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">Netify</Link>
+        <span className="mx-2 text-[var(--ink-300)]">/</span>
+        <Link href="/vendors" className="no-underline text-[var(--ink-500)] hover:text-[var(--accent)]">Vendors</Link>
+        <span className="mx-2 text-[var(--ink-300)]">/</span>
+        <span className="text-[var(--ink-700)]">{c.names[a]} vs {c.names[b]}</span>
+      </nav>
+
       <div className="mb-10 fade-rise">
         <p className="eyebrow mb-3">Head to head · Updated June 2026</p>
         <h1 id="page-h1" className="mb-4">
@@ -176,7 +186,7 @@ export default async function ComparePage({ params }: Props) {
       <section className="mt-14 border-t border-[var(--ink-300,#ccc)] pt-8">
         <p className="eyebrow mb-3">More head to heads</p>
         <div className="flex flex-wrap gap-2">
-          {COMPARE_PAIRS.filter((p) => p.slug !== pair).slice(0, 12).map((p) => (
+          {getRelatedPairs(pair, 12).map((p) => (
             <Link key={p.slug} href={`/compare/${p.slug}`} className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]">
               {p.slug.replace(/-vs-/, " vs ").replace(/-/g, " ")}
             </Link>

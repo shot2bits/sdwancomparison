@@ -1,0 +1,51 @@
+{
+  "_meta": {
+    "version": "research-mentions v2026-07-23",
+    "law": "A mention is recorded ONLY when the article's own title names the supplier (source: title) or an editor declares it after reading the piece (source: editorial). Never inferred from body text this dataset has not seen. Removing a wrong entry is always safer than keeping it.",
+    "note": "Seed set: title-verified entries from the live insights estate and the root editorial comparisons. Editorial expansion happens article by article on the main site."
+  },
+  "mentions": [
+    {
+      "url": "https://netify.co.uk/insights/fortinet-sase-overview-pricing-examples/",
+      "title": "Fortinet SASE overview, pricing and examples",
+      "suppliers": ["fortinet"],
+      "source": "title"
+    },
+    {
+      "url": "https://netify.co.uk/insights/unified-sase-latest-insights-from-fortinet-gartner/",
+      "title": "Unified SASE: the latest insights from Fortinet and Gartner",
+      "suppliers": ["fortinet"],
+      "source": "title"
+    },
+    {
+      "url": "https://netify.co.uk/cato-vs-aryaka/",
+      "title": "Cato vs Aryaka",
+      "suppliers": ["cato-networks", "aryaka"],
+      "source": "title"
+    },
+    {
+      "url": "https://netify.co.uk/insights/what-are-the-latest-meraki-products/",
+      "title": "What are the latest Meraki products?",
+      "suppliers": ["cisco"],
+      "source": "title"
+    },
+    {
+      "url": "https://netify.co.uk/insights/what-are-the-differences-between-cisco-viptela-vs-meraki/",
+      "title": "What are the differences between Cisco Viptela and Meraki?",
+      "suppliers": ["cisco"],
+      "source": "title"
+    },
+    {
+      "url": "https://netify.co.uk/insights/why-choose-bts-btnet-leased-line-key-benefits-explained-2/",
+      "title": "Why choose BT's BTnet leased line: key benefits explained",
+      "suppliers": ["bt-business"],
+      "source": "title"
+    },
+    {
+      "url": "https://netify.co.uk/insights/migrating-from-bt-one-phone-to-bt-cloud-voice/",
+      "title": "Migrating from BT One Phone to BT Cloud Voice",
+      "suppliers": ["bt-business"],
+      "source": "title"
+    }
+  ]
+}

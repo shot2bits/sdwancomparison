@@ -41,3 +41,20 @@ export const COMPARE_PAIRS: ComparePair[] = [
 export function getComparePair(slug: string): ComparePair | undefined {
   return COMPARE_PAIRS.find((p) => p.slug === slug);
 }
+
+/** Every curated head-to-head involving the supplier (profile edge rule:
+ *  a comparison is always reachable from both of its participants). */
+export function getPairsFor(vendorSlug: string): ComparePair[] {
+  return COMPARE_PAIRS.filter((p) => p.a === vendorSlug || p.b === vendorSlug);
+}
+
+/** Related pairs for a compare page: shared-participant pairs first, then
+ *  the rest in curated order. Deterministic. */
+export function getRelatedPairs(pairSlug: string, limit = 12): ComparePair[] {
+  const cp = getComparePair(pairSlug);
+  const rest = COMPARE_PAIRS.filter((p) => p.slug !== pairSlug);
+  if (!cp) return rest.slice(0, limit);
+  const shares = (p: ComparePair) =>
+    p.a === cp.a || p.a === cp.b || p.b === cp.a || p.b === cp.b;
+  return [...rest.filter(shares), ...rest.filter((p) => !shares(p))].slice(0, limit);
+}

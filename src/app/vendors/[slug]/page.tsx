@@ -8,6 +8,12 @@ import {
   STATUS_LABELS,
   STATUS_DESCRIPTIONS,
 } from "@/lib/vendors";
+import {
+  getBestAppearances,
+  getClosePeers,
+  getHeadToHeads,
+  getResearchFor,
+} from "@/lib/profile-edges";
 import { SITE_URL } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -51,6 +57,14 @@ export default async function VendorPage({ params }: Props) {
   const capByCat = getCapabilitiesByCategory(vendor);
   const totalFeatures = 40;
   const yesPct = Math.round((vendor.score_summary.yes_count / totalFeatures) * 100);
+
+  // The derived edges (final architecture §4.2): head-to-heads, best-for
+  // appearances, close peers and research, all computed from the datasets
+  // at build time. Empty lists render nothing; no edge is ever invented.
+  const headToHeads = getHeadToHeads(vendor.slug);
+  const bestAppearances = getBestAppearances(vendor.slug);
+  const closePeers = getClosePeers(vendor.slug);
+  const research = getResearchFor(vendor.slug);
 
   // JSON-LD for structured data: supports AI and search citation
   const jsonLd = {
@@ -383,6 +397,98 @@ export default async function VendorPage({ params }: Props) {
         <section className="border-t border-[var(--ink-200)] pt-8 text-sm text-[var(--ink-500)]">
           <p className="eyebrow mb-2">Verification notes</p>
           <p className="max-w-3xl">{vendor.verification_notes}</p>
+        </section>
+
+        {/* Continue your evaluation: the derived edges. Every row below is
+            computed from a dataset the reader can inspect; a row with no
+            data does not render. */}
+        <section aria-label={`Continue your ${vendor.name} evaluation`} className="mt-16 border-t-2 border-[var(--ink-900)] pt-8">
+          <p className="eyebrow mb-2">Where next</p>
+          <h2 className="mb-8">Continue your {vendor.name} evaluation</h2>
+
+          <div className="space-y-8">
+            {research.length > 0 && (
+              <div>
+                <p className="eyebrow mb-3">Research covering {vendor.name}</p>
+                <ul className="space-y-2">
+                  {research.map((m) => (
+                    <li key={m.url}>
+                      <a href={m.url} className="text-[var(--ink-700)] hover:text-[var(--accent)]">
+                        {m.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {headToHeads.length > 0 && (
+              <div>
+                <p className="eyebrow mb-3">Head to head</p>
+                <div className="flex flex-wrap gap-2">
+                  {headToHeads.map((p) => (
+                    <Link
+                      key={p.slug}
+                      href={`/compare/${p.slug}`}
+                      className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
+                    >
+                      {vendor.name} vs {p.otherName}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {bestAppearances.length > 0 && (
+              <div>
+                <p className="eyebrow mb-3">Ranked shortlists featuring {vendor.name}</p>
+                <div className="flex flex-wrap gap-2">
+                  {bestAppearances.map((b) => (
+                    <Link
+                      key={b.slug}
+                      href={`/best/${b.slug}`}
+                      className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
+                    >
+                      {b.title} · #{b.rank}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {closePeers.length > 0 && (
+              <div>
+                <p className="eyebrow mb-3">Close peers in the directory</p>
+                <div className="flex flex-wrap gap-2">
+                  {closePeers.map((p) => (
+                    <Link
+                      key={p.slug}
+                      href={`/vendors/${p.slug}`}
+                      className="px-3.5 py-1.5 text-sm rounded-full border border-[var(--ink-300,#ccc)] no-underline hover:border-[var(--ink-900)]"
+                    >
+                      {p.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <Link
+                href={`/shortlist`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium no-underline hover:bg-amber-400 transition-colors rounded-full text-sm"
+              >
+                Score {vendor.name} against your requirements
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link
+                href="/vendors"
+                className="inline-flex items-center px-4 py-2.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full no-underline hover:border-[var(--ink-900)]"
+              >
+                Back to the evaluated directory
+              </Link>
+            </div>
+          </div>
         </section>
       </div>
     </>
