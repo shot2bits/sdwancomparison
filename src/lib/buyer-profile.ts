@@ -25,6 +25,9 @@ export type BuyerProfile = {
   company?: string;
   via?: "linkedin" | "email";
   linkedin_sub?: string;
+  /** The first sign-in's acquisition context, kept so the completion
+   *  alert (sent when the company lands) can say how the buyer arrived. */
+  signup_attr?: { ref: string; landing: string; country: string };
   created: number;
   updated: number;
 };

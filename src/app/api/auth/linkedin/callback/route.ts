@@ -1,7 +1,7 @@
 import { createSession, getProject, kvConfigured, markSignupSeen, saveProject } from "@/lib/rfp-store";
 import { executePublish } from "@/lib/rfp-publish";
 import { notifyNewSignup, parseCookie, sessionCookieHeader } from "@/lib/auth";
-import { getBuyerProfile, saveBuyerProfile } from "@/lib/buyer-profile";
+import { type BuyerProfile, getBuyerProfile, saveBuyerProfile } from "@/lib/buyer-profile";
 import {
   LINKEDIN_ERROR_PATH,
   LINKEDIN_STATE_COOKIE,
@@ -71,17 +71,37 @@ export async function GET(req: Request) {
   } catch { /* non-fatal */ }
 
   // The buyer profile (24 July, Robert: the team needs the person's name
-  // and company). LinkedIn's sign-in gives us the name; store it now.
-  // Internal only, never shown to suppliers, never on the board.
+  // and company). LinkedIn's sign-in gives us the name; store it now, and
+  // keep the FIRST sign-in's acquisition context so the completion alert
+  // can still say how this buyer originally arrived. Internal only, never
+  // shown to suppliers, never on the board.
+  let profile: BuyerProfile | null = null;
   try {
-    await saveBuyerProfile(email, { name: user.name, via: "linkedin", linkedin_sub: user.sub });
+    profile = await getBuyerProfile(email);
+    profile = (await saveBuyerProfile(email, {
+      name: user.name,
+      via: "linkedin",
+      linkedin_sub: user.sub,
+      ...(profile?.signup_attr
+        ? {}
+        : {
+            signup_attr: {
+              ref: "LinkedIn sign-in (OpenID Connect)",
+              landing: st.returnTo || "/",
+              country: req.headers.get("x-vercel-ip-country") ?? "",
+            },
+          }),
+    })) ?? profile;
   } catch { /* non-fatal */ }
 
-  // First-sign-in alert, naming this lane so the team can see which wall
-  // the buyer came through (a LinkedIn identity may carry a personal
-  // email; the LinkedIn account is the verification on this lane).
+  // The alert (Robert's ruling, 24 July, third of the evening): ONE email
+  // per buyer, sent when the signup is complete, which on this lane means
+  // when the company lands on the welcome step. The profile API sends it,
+  // so nothing is announced here. The one exception, ruled with it: a
+  // sign-in carrying an RFP alerts immediately whatever the company
+  // state, because a live publish must never go silent.
   try {
-    if (await markSignupSeen(email, "buyer")) {
+    if (rfpId && (await markSignupSeen(email, "buyer"))) {
       await notifyNewSignup(email, "buyer", {
         attr: {
           ref: "LinkedIn sign-in (OpenID Connect)",
@@ -89,8 +109,8 @@ export async function GET(req: Request) {
           page: "",
           country: req.headers.get("x-vercel-ip-country") ?? "",
         },
-        rfp_attached: Boolean(rfpId),
-        profile: { name: user.name },
+        rfp_attached: true,
+        profile: { name: user.name, company: profile?.company },
       });
     }
   } catch { /* non-fatal */ }
@@ -101,7 +121,6 @@ export async function GET(req: Request) {
   // the welcome question, every time, until the buyer answers it. If the
   // profile read fails the welcome page's own passthrough lets them on:
   // the requirement is that they state it, never that our storage is up.
-  const profile = await getBuyerProfile(email);
   const destination = profile?.company
     ? st.returnTo || "/"
     : `/sase/auth/welcome?return=${encodeURIComponent(st.returnTo || "/")}`;

@@ -1,5 +1,5 @@
-import { sessionFromRequest, notifyCompanyAdded } from "@/lib/auth";
-import { kvConfigured } from "@/lib/rfp-store";
+import { sessionFromRequest, notifyCompanyAdded, notifyNewSignup } from "@/lib/auth";
+import { kvConfigured, markSignupSeen } from "@/lib/rfp-store";
 import { getBuyerProfile, saveBuyerProfile } from "@/lib/buyer-profile";
 import { COMPANY_NAME_REFUSAL, companyReadsAsPersonalName } from "@/lib/company-name-check";
 
@@ -19,9 +19,10 @@ export async function GET(req: Request) {
   return Response.json({ email: s.email, name: p?.name ?? "", company: p?.company ?? "" });
 }
 
-/** Set the company (and optionally correct the name). First company set
- *  sends the team the compact follow-up so "who" becomes "who at which
- *  company". Best effort throughout, with one refusal (Robert, 24 July,
+/** Set the company (and optionally correct the name). The first company
+ *  set announces the buyer: the complete New Buyer alert when this is the
+ *  address's first announcement, the compact follow-up when the team has
+ *  heard of them already. Best effort throughout, with one refusal (Robert, 24 July,
  *  after "Sam White" arrived from Samuel White): a company that is just
  *  the buyer's own name is not an answer. Refused here as well as in the
  *  browser, same rule and same words, so a bypassed client gains nothing. */
@@ -42,10 +43,28 @@ export async function POST(req: Request) {
     ...(company ? { company } : {}),
     ...(name ? { name } : {}),
   });
-  // One follow-up, only when a company lands for the first time.
+  // One alert per buyer, at the completion moment (Robert's ruling, 24
+  // July, third of the evening): the first company landing is when a
+  // LinkedIn signup becomes a buyer, so THIS is where the New Buyer email
+  // sends, carrying the sign-in attribution the callback stored. A buyer
+  // announced earlier (an RFP carried at sign-in, or the pre-ruling era)
+  // gets the compact company follow-up instead, never a second announcement.
   try {
     if (company && !before?.company) {
-      await notifyCompanyAdded(s.email, saved?.name ?? name ?? undefined, company);
+      if (await markSignupSeen(s.email, "buyer")) {
+        await notifyNewSignup(s.email, "buyer", {
+          attr: {
+            ref: before?.signup_attr?.ref ?? "LinkedIn sign-in (OpenID Connect)",
+            landing: before?.signup_attr?.landing ?? "",
+            page: "",
+            country: before?.signup_attr?.country ?? "",
+          },
+          rfp_attached: false,
+          profile: { name: saved?.name ?? name ?? undefined, company },
+        });
+      } else {
+        await notifyCompanyAdded(s.email, saved?.name ?? name ?? undefined, company);
+      }
     }
   } catch { /* non-fatal */ }
   return Response.json({ ok: true, stored: Boolean(saved) });
