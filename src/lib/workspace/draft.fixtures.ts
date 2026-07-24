@@ -23,7 +23,7 @@ import {
 import { BAND, capabilityRing, constellation, labelOffsets, slugAngle, vendorHue, RADIUS, VENDOR_PALETTE } from "./constellation";
 import { deriveAreaState, deriveJourneyStates, refineConfirmed } from "./areas";
 import { diagramModel } from "./diagram";
-import { deterministicExtract, unionUpdates, type FieldUpdate } from "./extract";
+import { deterministicExtract, unionUpdates, vetModelProposals, statedObjectivesIn, type FieldUpdate } from "./extract";
 import { activePack, activeFlavours, visibleSuggestions, declinedOnRecord, packRiskNotes } from "@/lib/sector/derive";
 import { HEALTHCARE_PACK } from "@/lib/sector/packs";
 import { buildChecks, workspaceFit } from "./fit";
@@ -343,6 +343,57 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(out.some((u) => u.path === "procurement.buying" && u.value === "sase"), "the SASE they seek lands as buying");
     expect(out.some((u) => u.path === "estate.existingNetwork" && (u.value as string[]).includes("sdwan")), "the SD-WAN being replaced is estate they hold");
     expect(out.some((u) => u.path === "procurement.operatingModel" && u.value === "managed"), "fully managed lands");
+  });
+
+  /* ---- Harry's 24 July round: the renewal mishearing, the 5G
+          approximation, and stated objectives (wave three) ---- */
+  await ok("a renewal driver needs contract words; outdated kit is not a renewal", () => {
+    const notes: string[] = [];
+    const dropped = vetModelProposals(
+      [{ path: "drivers", value: ["renewal"], quote: "replacing outdated", reason: null }],
+      "We are a retailer, need SASE or SD-WAN, replacing outdated firewalls and remote VPN.",
+      notes,
+    );
+    expect(!dropped.some((u) => u.path === "drivers"), "renewal dropped without contract words");
+    expect(notes.some((n) => n.includes("renewal")), "the drop is spoken, never silent");
+    const kept = vetModelProposals(
+      [{ path: "drivers", value: ["renewal"], quote: "contract ends in March", reason: null }],
+      "Our SD-WAN contract ends in March 2027.",
+      [],
+    );
+    expect(kept.some((u) => u.path === "drivers" && (u.value as string[]).includes("renewal")), "a real renewal still lands");
+    const mixed = vetModelProposals(
+      [{ path: "drivers", value: ["renewal", "incident"], quote: null, reason: "phishing mentioned" }],
+      "We had a phishing attack and are replacing outdated kit.",
+      [],
+    );
+    const drv = mixed.find((u) => u.path === "drivers");
+    expect(Boolean(drv) && !(drv!.value as string[]).includes("renewal") && (drv!.value as string[]).includes("incident"), "renewal stripped, the true driver kept");
+    const det = deterministicExtract("We are a retailer, need SASE or SD-WAN, replacing outdated firewalls and remote VPN.");
+    expect(!det.some((u) => u.path === "drivers" && (u.value as string[]).includes("renewal")), "the deterministic lane never renews on outdated kit");
+  });
+
+  await ok("mobile 4G/5G never lands as broadband", () => {
+    const notes: string[] = [];
+    const dropped = vetModelProposals(
+      [{ path: "estate.existingNetwork", value: ["broadband"], quote: "using 5G mainly", reason: null }],
+      "Small sites are using 5G mainly.",
+      notes,
+    );
+    expect(!dropped.some((u) => u.path === "estate.existingNetwork"), "the approximation is omitted");
+    expect(notes.some((n) => n.includes("broadband")), "the omission is spoken");
+    const real = vetModelProposals(
+      [{ path: "estate.existingNetwork", value: ["broadband"], quote: "broadband at branches", reason: null }],
+      "We run broadband at the branches.",
+      [],
+    );
+    expect(real.some((u) => u.path === "estate.existingNetwork" && (u.value as string[]).includes("broadband")), "stated broadband still lands");
+  });
+
+  await ok("stated objectives note themselves, and nothing is invented", () => {
+    expect(statedObjectivesIn("Need co-managed capabilities, best of breed services.").some((o) => o.id === "obj-bob"), "best of breed lands as the stated objective");
+    expect(statedObjectivesIn("We want a single-vendor platform for the whole estate.").some((o) => o.id === "obj-unified"), "single vendor lands");
+    expect(statedObjectivesIn("Replacing legacy connectivity with managed SD-WAN and SASE.").length === 0, "no objective is invented from unrelated words");
   });
 
   /* ---- Harry's 22 July round: NIS2, the mention guard, the rename ---- */

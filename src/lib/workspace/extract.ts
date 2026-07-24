@@ -350,11 +350,84 @@ Rules:
 - Allowed paths, exactly: ${ALLOWED_PATHS.join(", ")}.
 - Enumerations: drivers ${DRIVER_IDS.join("|")}; constraints.inHouseSocCapacity ${SOC_IDS.join("|")}; constraints.complianceRequirements ${COMPLIANCE_IDS.join("|")}; estate.cloud ${CLOUD_IDS.join("|")}; estate.existingNetwork ${NETWORK_IDS.join("|")}; organisation.regions ${REGION_IDS.join("|")}; organisation.sector one of ${WORKSPACE_SECTORS.join("; ")} (or the buyer's own words if none fits); procurement.buying ${BUYING_IDS.join("|")}; procurement.operatingModel ${OPERATING_MODEL_IDS.join("|")}.
 - procurement.buying is what they SEEK to buy (managed_security covers MDR, SOC, SIEM, MSSP and managed security services); estate.existingNetwork and estate.existingSecurity are what they already HAVE. Never confuse the two.
-- Drivers are exact meanings, not intensities: "incident" only for an actual or ongoing incident (phishing, breach, compromise); "ransomware_concern" only when the buyer names ransomware. Do not escalate one into the other.
+- Drivers are exact meanings, not intensities: "incident" only for an actual or ongoing incident (phishing, breach, compromise); "ransomware_concern" only when the buyer names ransomware. Do not escalate one into the other. "renewal" only when the buyer names a contract, renewal, expiry or agreement ending; replacing outdated, legacy or end-of-life equipment is NOT a renewal, and if no driver fits, omit drivers entirely.
+- Mobile connectivity (4G, 5G) is not "broadband". If the estate runs on mobile and no listed network id fits, omit the field rather than approximating.
 - "quote": if the buyer literally said it, copy their exact words (a short verbatim substring). If you inferred it, set quote to null and give a one-line "reason".
 - Never invent facts. Omit what the text does not support. Fewer, correct fields beat many guesses.`;
 
-type ModelProposal = { path?: unknown; value?: unknown; quote?: unknown; reason?: unknown };
+export type ModelProposal = { path?: unknown; value?: unknown; quote?: unknown; reason?: unknown };
+
+/**
+ * The vetting rail for model proposals, extracted pure so the fixtures can
+ * hold it to account. Every guard here is the same law: a claim the model
+ * proposes must trace to words the buyer actually used, or it is omitted
+ * and the clause keeps its receipt. Nothing is ever mangled into a
+ * different claim.
+ */
+export function vetModelProposals(fields: ModelProposal[], text: string, notes: string[]): FieldUpdate[] {
+  const lower = text.toLowerCase();
+  const out: FieldUpdate[] = [];
+  for (const f of fields.slice(0, 30)) {
+    const ok = validate(String(f.path ?? ""), f.value, notes);
+    if (!ok) continue;
+    let value = ok.value;
+    const quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
+    const stated = quote.length > 2 && lower.includes(quote.toLowerCase());
+    /* F-A extension (24 Jul live catch: "across our sites" proposed
+     * sites=1): a numeric estate count must trace to a digit in the
+     * words it cites, or in the buyer's text at all. Otherwise OMIT:
+     * the receipt keeps the clause verbatim, and no count is invented. */
+    if ((ok.path === "estate.sites" || ok.path === "estate.users") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
+      notes.push(`Dropped ${ok.path === "estate.sites" ? "a site" : "a user"} count with no stated number.`);
+      continue;
+    }
+    /* Harry's 24 July catch: "replacing outdated firewalls and remote
+     * VPN" came back as drivers:["renewal"], and the desk then asked
+     * when the contract ends. Same law: a renewal driver must trace to
+     * contract words the buyer used (contract, renewal, expiry,
+     * agreement), or that driver is omitted. Replacing outdated kit is
+     * a lifecycle statement, not a renewal. */
+    if (ok.path === "drivers" && Array.isArray(value) && (value as string[]).includes("renewal") && !/renew|contract|expir|agreement/.test(lower)) {
+      notes.push("Dropped a contract-renewal driver: no contract or renewal words in your description.");
+      value = (value as string[]).filter((d) => d !== "renewal");
+      if ((value as string[]).length === 0) continue;
+    }
+    /* The 5G mishearing (Harry's first platform round): an estate on
+     * mobile is not "broadband". If the buyer said 4G or 5G and never
+     * said broadband, the approximation is omitted and their words keep
+     * their receipt. */
+    if (ok.path === "estate.existingNetwork" && Array.isArray(value) && (value as string[]).includes("broadband") && /\b[45]g\b/.test(lower) && !/broadband|adsl|fttc|fttp|\bdsl\b|fibre/.test(lower)) {
+      notes.push("Dropped a broadband claim: the description says mobile (4G or 5G), which is not broadband.");
+      value = (value as string[]).filter((n) => n !== "broadband");
+      if ((value as string[]).length === 0) continue;
+    }
+    out.push({
+      path: ok.path,
+      value,
+      provenance: stated ? "stated" : "inferred",
+      ...(stated ? { quote } : {}),
+      ...(!stated ? { reason: clean(f.reason ?? (quote ? "the quoted words were not found verbatim in your text" : "derived from your description"), 160) } : {}),
+    });
+  }
+  return out;
+}
+
+/**
+ * Objectives the buyer states in their own words (Harry, 24 July 2026:
+ * "best of breed services", written near-verbatim, was raised back as an
+ * open question instead of landing). A phrase in the cycle's text is the
+ * buyer's own statement: the desk notes the objective as solid ink and
+ * the shape question stays suppressed. Strict phrases only; nothing here
+ * infers.
+ */
+export const STATED_OBJECTIVE_PHRASES = [
+  { id: "obj-bob", label: "Best-of-breed stack", re: /best[ -]of[ -]breed/i },
+  { id: "obj-unified", label: "Single-vendor SASE platform", re: /single[ -]vendor|\bone platform\b|single platform|unified (?:sase )?platform/i },
+] as const;
+
+export function statedObjectivesIn(text: string): Array<{ id: string; label: string }> {
+  return STATED_OBJECTIVE_PHRASES.filter((o) => o.re.test(text)).map(({ id, label }) => ({ id, label }));
+}
 
 async function modelExtract(text: string, notes: string[]): Promise<FieldUpdate[] | null> {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -380,30 +453,7 @@ async function modelExtract(text: string, notes: string[]): Promise<FieldUpdate[
     const jsonText = raw.replace(/^```(?:json)?/m, "").replace(/```\s*$/m, "").trim();
     const parsed = JSON.parse(jsonText) as { fields?: ModelProposal[] };
     if (!Array.isArray(parsed.fields)) { notes.push("Model reply was not the agreed shape; deterministic parsing used."); return null; }
-    const lower = text.toLowerCase();
-    const out: FieldUpdate[] = [];
-    for (const f of parsed.fields.slice(0, 30)) {
-      const ok = validate(String(f.path ?? ""), f.value, notes);
-      if (!ok) continue;
-      const quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
-      const stated = quote.length > 2 && lower.includes(quote.toLowerCase());
-      /* F-A extension (24 Jul live catch: "across our sites" proposed
-       * sites=1): a numeric estate count must trace to a digit in the
-       * words it cites, or in the buyer's text at all. Otherwise OMIT:
-       * the receipt keeps the clause verbatim, and no count is invented. */
-      if ((ok.path === "estate.sites" || ok.path === "estate.users") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
-        notes.push(`Dropped ${ok.path === "estate.sites" ? "a site" : "a user"} count with no stated number.`);
-        continue;
-      }
-      out.push({
-        path: ok.path,
-        value: ok.value,
-        provenance: stated ? "stated" : "inferred",
-        ...(stated ? { quote } : {}),
-        ...(!stated ? { reason: clean(f.reason ?? (quote ? "the quoted words were not found verbatim in your text" : "derived from your description"), 160) } : {}),
-      });
-    }
-    return out;
+    return vetModelProposals(parsed.fields, text, notes);
   } catch (e) {
     notes.push(e instanceof Error && e.name === "AbortError" ? "Model extraction timed out; deterministic parsing used." : "Model extraction failed; deterministic parsing used.");
     return null;

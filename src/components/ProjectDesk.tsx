@@ -39,7 +39,7 @@ import {
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { ACCEPT_GAP_PREFIX } from "@/components/GapActions";
-import type { AllowedPath, BuyingId, FieldUpdate } from "@/lib/workspace/extract";
+import { statedObjectivesIn, type AllowedPath, type BuyingId, type FieldUpdate } from "@/lib/workspace/extract";
 import {
   briefModel,
   briefText,
@@ -411,6 +411,20 @@ export default function ProjectDesk() {
           );
         }
         for (const n of (data.notes ?? []).slice(0, 2)) crewLog(`Listener: ${humaniseNote(n)}`);
+
+        // Stated objectives note themselves (Harry, 24 July 2026: "best of
+        // breed services", written near-verbatim, was raised back as an
+        // open question). The phrase is in THIS cycle's words, so the note
+        // is solid ink, the buyer's own statement; removing it later stays
+        // removed unless they say it again. questions.ts sees the id and
+        // keeps the shape question suppressed.
+        for (const o of statedObjectivesIn(trimmed)) {
+          setNoted((ns) => {
+            if (ns.some((n) => n.id === o.id)) return ns;
+            crewLog(`Listener: your words: ${o.label} · kept with your position as a stated note`, "you");
+            return [...ns, { id: o.id, label: o.label, section: "objectives" }];
+          });
+        }
 
         // The receipt rule (13.6): no clause vanishes silently. A clause no
         // update evidently touched is kept verbatim under Notes, unplaced.
