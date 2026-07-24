@@ -8,6 +8,8 @@ import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
 import { emailDomain } from "@/lib/access-control";
 import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
+import { sectorLabel } from "@/lib/rfp-document";
+import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
@@ -98,7 +100,7 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     buyer_size_band: p.buyer.organisation_size === "any" ? "" : p.buyer.organisation_size,
     compliance_requirements: p.buyer.compliance,
     response_mode: "full_rfp",
-    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${p.buyer.sector.replace(/_/g, " ")} sector` : ""}${p.buyer.site_count ? ` across ${p.buyer.site_count} sites` : ""}. A full RFP with methodology-mapped questions has been issued; sign in as a verified supplier to register interest.`,
+    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${p.buyer.site_count ? ` across ${p.buyer.site_count} sites` : ""}. A full RFP with methodology-mapped questions has been issued; sign in as a verified supplier to register interest.`,
     methodology_version: p.methodology_version,
     owner_email: ownerEmail,
     source_rfp_id: p.id,
@@ -127,8 +129,8 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
   const rfpUrl = `${SITE_URL}/rfp-builder/${p.id}/`;
   const supplierNames = invited.map((v) => v.name).join("\n");
   const org = [
-    p.buyer.sector && `Sector: ${p.buyer.sector.replace(/_/g, " ")}`,
-    p.buyer.organisation_size && p.buyer.organisation_size !== "any" && `Size: ${p.buyer.organisation_size.replace(/_/g, " ")}`,
+    p.buyer.sector && `Sector: ${sectorLabel(p.buyer.sector)}`,
+    p.buyer.organisation_size && p.buyer.organisation_size !== "any" && `Size: ${labelFor(RFP_ORG_SIZES, p.buyer.organisation_size)}`,
     p.buyer.site_count && `Sites: ${p.buyer.site_count}`,
     p.buyer.regions.length > 0 && `Regions: ${p.buyer.regions.join(", ")}`,
   ].filter(Boolean).join("<br/>");

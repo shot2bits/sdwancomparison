@@ -6,7 +6,7 @@
  * grading, shortlisting and RFP generation.
  */
 
-import { FEATURES, FEATURE_CATEGORIES, type FeatureDefinition } from "@/lib/vendors";
+import { FEATURES, FEATURE_CATEGORIES, FEATURE_NAMES, type FeatureDefinition } from "@/lib/vendors";
 import { SECTOR_KEYS, SECTOR_LABELS, type SectorKey } from "@/lib/shortlist-core";
 
 export const METHODOLOGY_VERSION = "2026.1";
@@ -240,8 +240,12 @@ export function synthesiseSections(buyer: BuyerContext): RfpSection[] {
       const priority: RfpQuestion["priority"] = isRequired ? "required" : isRecommended ? "recommended" : "optional";
       const why = reasons[q.feature_id];
       const rationale = why && why.length
-        ? `Included because: ${why.join("; ")} (per SASE Methodology v${METHODOLOGY_VERSION}, ${q.feature_id}).`
-        : `Standard ${category.toLowerCase()} question (per SASE Methodology v${METHODOLOGY_VERSION}, ${q.feature_id}).`;
+        // The feature speaks its NAME, not its id (Harry, twice across two
+        // reports: "f01_fully_managed_service" verbatim in a buyer-facing
+        // justification reads as internal plumbing). The id-to-name map is
+        // FEATURE_NAMES, the same one the engine and agent share.
+        ? `Included because: ${why.join("; ")} (per SASE Methodology v${METHODOLOGY_VERSION}, ${FEATURE_NAMES[q.feature_id] ?? q.feature_id}).`
+        : `Standard ${category.toLowerCase()} question (per SASE Methodology v${METHODOLOGY_VERSION}, ${FEATURE_NAMES[q.feature_id] ?? q.feature_id}).`;
       questions.push({
         id: `q_${q.feature_id}`,
         feature_id: q.feature_id,

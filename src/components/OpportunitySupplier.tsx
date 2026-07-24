@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FeedView, type FeedItem } from "@/components/OpportunityFeed";
+import { OPP_SCOPE_TAGS, REGIONS, labelsFor } from "@/lib/notice-options";
 
 type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; feed: FeedItem[]; engagement_type?: string; auction_format?: string; deadline?: number | null; evidence_requested?: string[] };
 
@@ -83,7 +84,7 @@ export default function OpportunitySupplier({ token }: { token: string }) {
       <div>
         <p className="eyebrow mb-1">{opp.engagement_type === "auction" ? "Reverse auction" : "Live opportunity"} · {vendor}</p>
         <h1 className="text-2xl mb-1">{opp.title}</h1>
-        <p className="text-sm text-[var(--ink-500)]">Scope: {opp.scope.join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""}{opp.regions.length ? ` · ${opp.regions.join(", ")}` : ""} · {opp.status}{deadlineText(opp) ? ` · ${deadlineText(opp)}` : ""}</p>
+        <p className="text-sm text-[var(--ink-500)]">Scope: {labelsFor(OPP_SCOPE_TAGS, opp.scope).join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""}{opp.regions.length ? ` · ${labelsFor(REGIONS, opp.regions).join(", ")}` : ""} · {opp.status.charAt(0).toUpperCase() + opp.status.slice(1)}{deadlineText(opp) ? ` · ${deadlineText(opp)}` : ""}</p>
         {opp.engagement_type === "auction" && opp.status === "open" && <p className="text-sm text-amber-700 mt-1">Competitive auction: submit your best price. The buyer compares ranked bids.</p>}
         {opp.summary && <p className="text-sm text-[var(--ink-700)] mt-2">{opp.summary}</p>}
         {(opp.budget_note || opp.timeline_note) && <p className="text-sm text-[var(--ink-500)] mt-1">{opp.budget_note}{opp.budget_note && opp.timeline_note ? " · " : ""}{opp.timeline_note}</p>}

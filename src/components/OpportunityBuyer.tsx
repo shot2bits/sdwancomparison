@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FeedView, type FeedItem } from "@/components/OpportunityFeed";
+import { OPP_SCOPE_TAGS, SECTORS as NOTICE_SECTORS, labelFor, labelsFor } from "@/lib/notice-options";
 import BidComparison from "@/components/BidComparison";
 
 type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; buyer_token: string; invited: string[]; feed: FeedItem[]; awarded_vendor_slug: string | null; engagement_type?: string; auction_format?: string; deadline?: number | null };
@@ -23,6 +24,9 @@ const SCOPES = [
   { key: "sase", label: "Full SASE" },
   { key: "managed_service", label: "Managed service" },
 ];
+/** Invite-filter sector keys (unchanged set); labels come from the one
+ *  catalogue in notice-options, so the panel stops rendering lowercase
+ *  slugs (Harry, 24 July 2026). */
 const SECTORS = ["healthcare", "financial_services", "retail_ecommerce", "manufacturing", "energy_utilities", "government_public_sector"];
 
 export default function OpportunityBuyer({ initialId }: { initialId?: string }) {
@@ -216,7 +220,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
       <div className="lg:col-span-2">
         <p className="eyebrow mb-1">{opp.engagement_type === "auction" ? "Reverse auction" : "Live opportunity room"} <span className="text-emerald-700">● live</span></p>
         <h1 className="text-2xl mb-1">{opp.title}</h1>
-        <p className="text-sm text-[var(--ink-500)] mb-4">Scope: {opp.scope.join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""} · {opp.status}{deadlineText(opp) ? ` · ${deadlineText(opp)}` : ""}{opp.awarded_vendor_slug ? ` · awarded to ${opp.awarded_vendor_slug}` : ""}</p>
+        <p className="text-sm text-[var(--ink-500)] mb-4">Scope: {labelsFor(OPP_SCOPE_TAGS, opp.scope).join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""} · {opp.status.charAt(0).toUpperCase() + opp.status.slice(1)}{deadlineText(opp) ? ` · ${deadlineText(opp)}` : ""}{opp.awarded_vendor_slug ? ` · awarded to ${opp.awarded_vendor_slug}` : ""}</p>
         {opp.engagement_type === "auction" && (
           <div className="mb-6 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
             <p className="font-semibold mb-3">Bid comparison</p>
@@ -244,7 +248,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
         <div className="flex gap-2 mb-2">
           <select value={sector} onChange={(e) => setSector(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm flex-1">
             <option value="">Any sector</option>
-            {SECTORS.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
+            {SECTORS.map((s) => <option key={s} value={s}>{labelFor(NOTICE_SECTORS, s)}</option>)}
           </select>
           <button onClick={suggest} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest</button>
         </div>

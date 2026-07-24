@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { getProject, getSession, listResponses, kvConfigured, kvGetJson } from "@/lib/rfp-store";
 import { SESSION_COOKIE } from "@/lib/auth";
-import { documentSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel, buyerProfileSentence } from "@/lib/rfp-document";
+import { documentSections, sectionStats, evidenceChecklist, scopeLabel, modelLabel, buyerProfileSentence, sectorLabel, regionLabelList, complianceLabelList } from "@/lib/rfp-document";
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
 import { PROJECT_PHASE } from "@/lib/rfp-types";
@@ -194,7 +194,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               <p className="m-0 text-sm font-semibold text-[var(--ink-900,#111)]">{project.title}</p>
               <p className="m-0 mt-1 text-xs text-[var(--ink-600,#555)]">
                 Anonymous buyer
-                {project.buyer.sector ? ` · ${project.buyer.sector.replace(/_/g, " ")}` : ""}
+                {project.buyer.sector ? ` · ${sectorLabel(project.buyer.sector)}` : ""}
                 {band ? ` · ${band}` : ""}
                 {project.buyer.site_count != null ? ` · ${project.buyer.site_count} sites` : ""}
               </p>
@@ -232,10 +232,10 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
             <div className="grid gap-x-8 gap-y-1 text-sm sm:grid-cols-2">
               <p><span className="text-[var(--ink-500)]">Scope:</span> {scopeLabel(project)}</p>
               <p><span className="text-[var(--ink-500)]">Delivery:</span> {modelLabel(project)}</p>
-              {project.buyer.sector && <p><span className="text-[var(--ink-500)]">Sector:</span> {project.buyer.sector.replace(/_/g, " ")}</p>}
+              {project.buyer.sector && <p><span className="text-[var(--ink-500)]">Sector:</span> {sectorLabel(project.buyer.sector)}</p>}
               {project.buyer.site_count != null && <p><span className="text-[var(--ink-500)]">Sites:</span> {project.buyer.site_count}</p>}
-              {project.buyer.regions.length > 0 && <p><span className="text-[var(--ink-500)]">Regions:</span> {project.buyer.regions.join(", ").replace(/_/g, " ")}</p>}
-              {project.buyer.compliance.length > 0 && <p><span className="text-[var(--ink-500)]">Compliance:</span> {project.buyer.compliance.join(", ").replace(/_/g, " ").toUpperCase()}</p>}
+              {project.buyer.regions.length > 0 && <p><span className="text-[var(--ink-500)]">Regions:</span> {regionLabelList(project.buyer.regions)}</p>}
+              {project.buyer.compliance.length > 0 && <p><span className="text-[var(--ink-500)]">Compliance:</span> {complianceLabelList(project.buyer.compliance)}</p>}
               <p><span className="text-[var(--ink-500)]">Methodology:</span> v{project.methodology_version}</p>
               <p><span className="text-[var(--ink-500)]">Questions:</span> {totalQuestions} across {sections.length} sections</p>
             </div>

@@ -8,6 +8,24 @@
 
 import type { ProjectDetails, RfpSection } from "@/lib/rfp-types";
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
+import { SECTORS, REGIONS, COMPLIANCE_OPTIONS, labelFor, labelsFor } from "@/lib/notice-options";
+
+/* Buyer-English casing, once at the source (Harry, 24 July 2026: the
+   generated document read "Sector: retail ecommerce" and "Regions:
+   europe, uk ireland", lowercase in a formal document a supplier
+   receives). notice-options is the one label catalogue; these helpers
+   speak through it and fall back gracefully for any key it has never
+   heard of. Guarded by scripts/validate-labels.ts so it cannot regress. */
+export function sectorLabel(key: string): string {
+  const l = labelFor(SECTORS, key);
+  return l === key ? key.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase()) : l;
+}
+export function regionLabelList(keys: string[]): string {
+  return labelsFor(REGIONS, keys).map((l, i) => (l === keys[i] ? l.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase()) : l)).join(", ");
+}
+export function complianceLabelList(keys: string[]): string {
+  return keys.map((k) => { const l = labelFor(COMPLIANCE_OPTIONS, k); return l === k ? k.replace(/_/g, " ").toUpperCase() : l; }).join(", ");
+}
 
 export type SectionStats = {
   category: string;
@@ -131,13 +149,13 @@ export function modelLabel(p: ProjectDetails): string {
 export function buyerProfileSentence(p: ProjectDetails): string {
   const b = p.buyer;
   const bits: string[] = [];
-  const sector = b.sector ? b.sector.replace(/_/g, " ") : "";
+  const sector = b.sector ? sectorLabel(b.sector) : "";
   bits.push(sector ? `The buyer is a ${sector} organisation` : "The buyer is an organisation");
   if (b.site_count != null) bits.push(`operating ${b.site_count} site${b.site_count === 1 ? "" : "s"}`);
-  if (b.regions.length) bits.push(`across ${b.regions.join(", ").replace(/_/g, " ")}`);
+  if (b.regions.length) bits.push(`across ${regionLabelList(b.regions)}`);
   let s = bits.join(" ") + ".";
   s += ` The requirement covers ${scopeLabel(p)}, delivered as ${modelLabel(p).toLowerCase()}.`;
-  if (b.compliance.length) s += ` Responses must address the buyer's stated obligations: ${b.compliance.join(", ").replace(/_/g, " ").toUpperCase()}.`;
+  if (b.compliance.length) s += ` Responses must address the buyer's stated obligations: ${complianceLabelList(b.compliance)}.`;
   if (sector) s += ` Suppliers should tailor answers, references and evidence to the ${sector} sector.`;
   return s;
 }
@@ -156,10 +174,10 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
   L.push(`| Field | Value |`, `| --- | --- |`);
   L.push(`| Scope | ${scopeLabel(p)} |`);
   L.push(`| Delivery model | ${modelLabel(p)} |`);
-  if (p.buyer.sector) L.push(`| Sector | ${p.buyer.sector.replace(/_/g, " ")} |`);
+  if (p.buyer.sector) L.push(`| Sector | ${sectorLabel(p.buyer.sector)} |`);
   if (p.buyer.site_count != null) L.push(`| Sites | ${p.buyer.site_count} |`);
-  if (p.buyer.regions.length) L.push(`| Regions | ${p.buyer.regions.join(", ").replace(/_/g, " ")} |`);
-  if (p.buyer.compliance.length) L.push(`| Compliance | ${p.buyer.compliance.join(", ").replace(/_/g, " ").toUpperCase()} |`);
+  if (p.buyer.regions.length) L.push(`| Regions | ${regionLabelList(p.buyer.regions)} |`);
+  if (p.buyer.compliance.length) L.push(`| Compliance | ${complianceLabelList(p.buyer.compliance)} |`);
   L.push(`| Methodology | Netify SASE Methodology v${p.methodology_version} |`);
   L.push(`| Question bank | Netify question bank v${BANK_VERSION} / ${SASE_EXTENDED_BANK.question_bank_version} |`, "");
 
@@ -243,10 +261,10 @@ export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; aut
     ["Scope", scopeLabel(p)],
     ["Delivery model", modelLabel(p)],
   ];
-  if (p.buyer.sector) coverRows.push(["Sector", p.buyer.sector.replace(/_/g, " ")]);
+  if (p.buyer.sector) coverRows.push(["Sector", sectorLabel(p.buyer.sector)]);
   if (p.buyer.site_count != null) coverRows.push(["Sites", String(p.buyer.site_count)]);
-  if (p.buyer.regions.length) coverRows.push(["Regions", p.buyer.regions.join(", ").replace(/_/g, " ")]);
-  if (p.buyer.compliance.length) coverRows.push(["Compliance", p.buyer.compliance.join(", ").replace(/_/g, " ").toUpperCase()]);
+  if (p.buyer.regions.length) coverRows.push(["Regions", regionLabelList(p.buyer.regions)]);
+  if (p.buyer.compliance.length) coverRows.push(["Compliance", complianceLabelList(p.buyer.compliance)]);
   coverRows.push(["Methodology", `Netify SASE Methodology v${p.methodology_version}`]);
   coverRows.push(["Question bank", `Netify question bank v${BANK_VERSION} / ${SASE_EXTENDED_BANK.question_bank_version}`]);
 

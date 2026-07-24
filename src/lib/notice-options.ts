@@ -93,6 +93,33 @@ export const EVALUATION_PRIORITIES = [
   { key: "references", label: "References" },
 ] as const;
 
+/** Board scope tags (opportunity-types OPP_SCOPES), in buyer English.
+ *  Added 24 July 2026 (Harry: the room read "Scope: sase, managed_service").
+ *  Every surface that renders scope tags speaks through this catalogue. */
+export const OPP_SCOPE_TAGS = [
+  { key: "underlay_circuits", label: "Underlay circuits" },
+  { key: "sd_wan", label: "SD-WAN" },
+  { key: "sse", label: "SSE" },
+  { key: "sase", label: "SASE" },
+  { key: "managed_service", label: "Managed service" },
+  { key: "firewall_fwaas", label: "Firewall & FWaaS" },
+  { key: "ztna", label: "ZTNA" },
+  { key: "swg", label: "SWG" },
+  { key: "casb", label: "CASB" },
+  { key: "connectivity", label: "Connectivity" },
+  { key: "managed_security", label: "Managed security" },
+  { key: "not_sure", label: "Scope to be confirmed" },
+] as const;
+
+/** Organisation sizes as the RFP data model states them (distinct keys from
+ *  the notice wizard's SIZE_BANDS). Added 24 July 2026 so publish emails and
+ *  documents stop rendering "large global enterprise" in lowercase. */
+export const RFP_ORG_SIZES = [
+  { key: "large_global_enterprise", label: "Large global enterprise" },
+  { key: "mid_market", label: "Mid-market" },
+  { key: "small_business", label: "Small business" },
+] as const;
+
 export function labelFor(list: readonly { key: string; label: string }[], key: string): string {
   return list.find((o) => o.key === key)?.label ?? key;
 }
