@@ -81,7 +81,7 @@ export async function sendMagicLink(email: string, token: string, role: string, 
 export async function notifyNewSignup(
   email: string,
   role: "supplier" | "buyer" | "netify",
-  context?: { attr?: { ref: string; landing: string; page: string; country: string } | null; rfp_attached?: boolean },
+  context?: { attr?: { ref: string; landing: string; page: string; country: string } | null; rfp_attached?: boolean; profile?: { name?: string; company?: string } },
 ): Promise<boolean> {
   if (role !== "buyer" && role !== "supplier") return false;
   // Skip our own people: admins and anyone on a Netify domain are internal
@@ -95,11 +95,15 @@ export async function notifyNewSignup(
   const status = role === "supplier" ? "Supplier" : "Buyer";
   // Attribution block (16 July 2026): every sign-up alert states where the
   // person came from and whether an RFP draft is attached, so a qualified
-  // buyer and a wandering sign-in are distinguishable at a glance.
+  // buyer and a wandering sign-in are distinguishable at a glance. Name and
+  // company get their own lines when known (24 July 2026: LinkedIn sign-ins
+  // carry the person's name, and the welcome step asks the company).
   const a = context?.attr;
   const lines = [
     `<strong>Email:</strong> ${email}`,
     `<strong>Status:</strong> ${status}`,
+    context?.profile?.name ? `<strong>Name:</strong> ${context.profile.name}` : "",
+    context?.profile?.company ? `<strong>Company:</strong> ${context.profile.company}` : "",
     role === "buyer" ? `<strong>RFP draft attached:</strong> ${context?.rfp_attached ? "Yes (claimed at sign-in)" : "No, signed in without a draft"}` : "",
     a?.country ? `<strong>Country:</strong> ${a.country}` : "",
     a?.ref ? `<strong>Arrived from:</strong> ${a.ref}` : `<strong>Arrived from:</strong> no referrer (direct, bookmark or an AI assistant link)`,
@@ -115,6 +119,35 @@ export async function notifyNewSignup(
         to,
         subject: `New ${status} sign-up: ${email}`,
         html: `<p>A new ${status.toLowerCase()} has signed in to the Netify marketplace for the first time.</p><p>${lines}</p>`,
+      }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * One compact follow-up when a buyer names their company on the welcome
+ * step (24 July 2026). Fires once, only for real external buyers, so the
+ * team sees "who" become "who at which company" without a second full
+ * alert. Best effort like every notification here.
+ */
+export async function notifyCompanyAdded(email: string, name: string | undefined, company: string): Promise<boolean> {
+  if (isAdminEmail(email) || isNetifyDomain(emailDomain(email) ?? "")) return false;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false;
+  const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
+  const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to,
+        subject: `Buyer company: ${company} (${email})`,
+        html: `<p>The new buyer has named their company on the welcome step.</p><p><strong>Company:</strong> ${company}<br/>${name ? `<strong>Name:</strong> ${name}<br/>` : ""}<strong>Email:</strong> ${email}</p>`,
       }),
     });
     return true;

@@ -164,7 +164,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
   await send({
     from,
     to: ownerEmail,
-    subject: "Your RFP is live — here is your Netify Market Report",
+    subject: "Your RFP is live. Here is your Netify Market Report",
     html:
       `<p>Hello,</p><p>Your RFP "${p.title}" has been published to ${invited.length} curated suppliers on the Netify marketplace. Their responses arrive side by side in your workspace, and pricing stays private to you.</p>` +
       bandBlock +

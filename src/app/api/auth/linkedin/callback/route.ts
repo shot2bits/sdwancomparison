@@ -1,6 +1,7 @@
 import { createSession, getProject, kvConfigured, markSignupSeen, saveProject } from "@/lib/rfp-store";
 import { executePublish } from "@/lib/rfp-publish";
 import { notifyNewSignup, parseCookie, sessionCookieHeader } from "@/lib/auth";
+import { saveBuyerProfile } from "@/lib/buyer-profile";
 import {
   LINKEDIN_ERROR_PATH,
   LINKEDIN_STATE_COOKIE,
@@ -69,24 +70,40 @@ export async function GET(req: Request) {
     }
   } catch { /* non-fatal */ }
 
+  // The buyer profile (24 July, Robert: the team needs the person's name
+  // and company). LinkedIn's sign-in gives us the name; store it now.
+  // Internal only, never shown to suppliers, never on the board.
+  try {
+    await saveBuyerProfile(email, { name: user.name, via: "linkedin", linkedin_sub: user.sub });
+  } catch { /* non-fatal */ }
+
   // First-sign-in alert, naming this lane so the team can see which wall
   // the buyer came through (a LinkedIn identity may carry a personal
-  // email; the LinkedIn account is the verification on this lane).
+  // email; the LinkedIn account is the verification on this lane). First
+  // sign-ups then land on the welcome step, which asks the one question
+  // LinkedIn cannot answer: which company they are buying for. Skippable,
+  // so the welcome never costs the signup we just won.
+  let firstSignup = false;
   try {
-    if (await markSignupSeen(email, "buyer")) {
+    firstSignup = await markSignupSeen(email, "buyer");
+    if (firstSignup) {
       await notifyNewSignup(email, "buyer", {
         attr: {
           ref: "LinkedIn sign-in (OpenID Connect)",
           landing: st.returnTo || "/",
-          page: user.name ? `LinkedIn profile: ${user.name}` : "",
+          page: "",
           country: req.headers.get("x-vercel-ip-country") ?? "",
         },
         rfp_attached: Boolean(rfpId),
+        profile: { name: user.name },
       });
     }
   } catch { /* non-fatal */ }
 
-  const headers = new Headers({ location: st.returnTo || "/", "cache-control": "no-store" });
+  const destination = firstSignup
+    ? `/sase/auth/welcome?return=${encodeURIComponent(st.returnTo || "/")}`
+    : st.returnTo || "/";
+  const headers = new Headers({ location: destination, "cache-control": "no-store" });
   headers.append("set-cookie", sessionCookieHeader(session.token));
   headers.append("set-cookie", clearStateCookieHeader());
   return new Response(null, { status: 302, headers });
