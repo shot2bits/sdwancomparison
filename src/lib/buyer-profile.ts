@@ -8,10 +8,11 @@
  * (anonymous, no name, no contacts) governs everything buyers publish,
  * and this store sits entirely behind it.
  *
- * Names arrive from the LinkedIn OIDC userinfo at sign-in. Company is a
- * one-question ask on the welcome step after a first LinkedIn sign-up,
- * skippable, because LinkedIn's sign-in scopes do not carry employer and
- * a wall at the welcome moment would cost the signup we just won.
+ * Names arrive from the LinkedIn OIDC userinfo at sign-in. Company is the
+ * one-question ask on the welcome step, mandatory since Robert's evening
+ * ruling of 24 July 2026: LinkedIn's sign-in scopes do not carry employer,
+ * so the buyer states it themselves, and Netify never looks it up. The
+ * callback routes every companyless LinkedIn session to the question.
  * Everything here is best effort: a storage failure must never block a
  * sign-in or lose a buyer.
  */

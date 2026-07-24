@@ -129,7 +129,7 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
             <span className="inline-flex h-4 w-4 items-center justify-center rounded-[3px] bg-[#0A66C2] text-[10px] font-bold leading-none text-white" aria-hidden="true">in</span>
             Continue with LinkedIn
           </button>
-          <p className="text-xs text-[var(--ink-500)] mt-1.5">One click if you are signed in to LinkedIn. Works with any email address, because your LinkedIn profile is the verification. We never post or touch your connections.</p>
+          <p className="text-xs text-[var(--ink-500)] mt-1.5">One click if you are signed in to LinkedIn. Works with any email address, because your LinkedIn profile is the verification. We ask one detail after: the company you are buying for. We never post or touch your connections.</p>
           <div className="my-3 flex items-center gap-2" aria-hidden="true">
             <span className="h-px flex-1 bg-[var(--ink-300,#ccc)]" />
             <span className="text-[11px] text-[var(--ink-500)]">or use your work email</span>

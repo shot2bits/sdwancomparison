@@ -1,7 +1,7 @@
 import { createSession, getProject, kvConfigured, markSignupSeen, saveProject } from "@/lib/rfp-store";
 import { executePublish } from "@/lib/rfp-publish";
 import { notifyNewSignup, parseCookie, sessionCookieHeader } from "@/lib/auth";
-import { saveBuyerProfile } from "@/lib/buyer-profile";
+import { getBuyerProfile, saveBuyerProfile } from "@/lib/buyer-profile";
 import {
   LINKEDIN_ERROR_PATH,
   LINKEDIN_STATE_COOKIE,
@@ -79,14 +79,9 @@ export async function GET(req: Request) {
 
   // First-sign-in alert, naming this lane so the team can see which wall
   // the buyer came through (a LinkedIn identity may carry a personal
-  // email; the LinkedIn account is the verification on this lane). First
-  // sign-ups then land on the welcome step, which asks the one question
-  // LinkedIn cannot answer: which company they are buying for. Skippable,
-  // so the welcome never costs the signup we just won.
-  let firstSignup = false;
+  // email; the LinkedIn account is the verification on this lane).
   try {
-    firstSignup = await markSignupSeen(email, "buyer");
-    if (firstSignup) {
+    if (await markSignupSeen(email, "buyer")) {
       await notifyNewSignup(email, "buyer", {
         attr: {
           ref: "LinkedIn sign-in (OpenID Connect)",
@@ -100,9 +95,16 @@ export async function GET(req: Request) {
     }
   } catch { /* non-fatal */ }
 
-  const destination = firstSignup
-    ? `/sase/auth/welcome?return=${encodeURIComponent(st.returnTo || "/")}`
-    : st.returnTo || "/";
+  // Destination (Robert's ruling, 24 July evening): the company is
+  // mandatory on this lane, so route on the missing fact rather than on
+  // first sign-in. Any LinkedIn session without a stored company meets
+  // the welcome question, every time, until the buyer answers it. If the
+  // profile read fails the welcome page's own passthrough lets them on:
+  // the requirement is that they state it, never that our storage is up.
+  const profile = await getBuyerProfile(email);
+  const destination = profile?.company
+    ? st.returnTo || "/"
+    : `/sase/auth/welcome?return=${encodeURIComponent(st.returnTo || "/")}`;
   const headers = new Headers({ location: destination, "cache-control": "no-store" });
   headers.append("set-cookie", sessionCookieHeader(session.token));
   headers.append("set-cookie", clearStateCookieHeader());

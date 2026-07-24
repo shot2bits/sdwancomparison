@@ -3,13 +3,23 @@
 import { useEffect, useState } from "react";
 
 /**
- * The one-question welcome after a first LinkedIn sign-up. Rules it lives
- * by (24 July 2026): never a wall (skip is always there, storage failures
- * still let the person through), never nosy (one field, plain reason,
- * private-to-Netify stated), and never seen twice (a company already on
- * file, or no session at all, passes straight through to the return
- * path). The return path is same-app only, guarded here as well as where
- * it was minted.
+ * The welcome step after LinkedIn sign-in. Robert's ruling (24 July 2026,
+ * evening, after the first organic LinkedIn signup arrived with no
+ * company): the company name is MANDATORY on this lane. The two doors are
+ * now symmetrical declarations: business email (the domain names the
+ * company) or LinkedIn plus the company stated by the buyer themselves.
+ * Netify never looks the company up: consented, stated facts only.
+ *
+ * What mandatory means here: no skip, and every LinkedIn sign-in without
+ * a stored company lands back on this page (the callback routes on the
+ * missing fact, not on first-signup). Someone who closes the tab keeps
+ * their session but meets the question again at their next sign-in.
+ *
+ * What it still never does: lose the buyer to OUR failure. If storage is
+ * down when they answer, the answer is attempted best-effort and they
+ * continue; the requirement is that they state it, not that KV is up.
+ * The answer stays internal to the Netify team; suppliers only ever see
+ * the anonymous position.
  */
 
 function safeReturn(raw: string | null): string {
@@ -39,19 +49,15 @@ export default function AuthWelcome() {
   }, []);
 
   async function submit() {
-    if (busy) return;
+    if (busy || !company.trim()) return;
     setBusy(true);
-    // Best effort by design: the answer is valuable, the person more so.
-    // Whatever storage does, they continue to where they were going.
     try {
-      if (company.trim()) {
-        await fetch("/sase/api/buyer/profile", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ company: company.trim() }),
-        });
-      }
-    } catch { /* never a wall */ }
+      await fetch("/sase/api/buyer/profile", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ company: company.trim() }),
+      });
+    } catch { /* their statement was made; our storage being down must not trap them */ }
     window.location.replace(ret);
   }
 
@@ -64,7 +70,7 @@ export default function AuthWelcome() {
       <p className="eyebrow mb-2">Welcome to Netify</p>
       <h1 className="text-2xl mb-2">{name ? `Good to have you, ${name.split(" ")[0]}.` : "Good to have you."}</h1>
       <p className="text-sm text-[var(--ink-600,#555)] mb-5">
-        You are signed in{name ? ` as ${name}` : ""}. One question and you are on your way:
+        You are signed in{name ? ` as ${name}` : ""}. One required detail and you are in:
       </p>
       <label className="block text-sm font-medium mb-1.5" htmlFor="welcome-company">Which company are you buying for?</label>
       <input
@@ -76,7 +82,7 @@ export default function AuthWelcome() {
         onKeyDown={(e) => { if (e.key === "Enter") void submit(); }}
         autoFocus
       />
-      <div className="mt-3 flex items-center gap-3">
+      <div className="mt-3">
         <button
           type="button"
           onClick={() => void submit()}
@@ -85,12 +91,11 @@ export default function AuthWelcome() {
         >
           {busy ? "Saving…" : "Continue"}
         </button>
-        <button type="button" onClick={() => window.location.replace(ret)} className="text-sm text-[var(--ink-500)] underline hover:text-[var(--ink-900)]">
-          Skip for now
-        </button>
       </div>
       <p className="mt-4 text-xs text-[var(--ink-500)]">
-        Private to the Netify team, so we know who we are working with. Suppliers only ever see your anonymous position, never your name or company.
+        Netify is a marketplace for real businesses, so every buyer names the company they are buying for: by
+        business email on the email lane, or here on the LinkedIn lane. It stays private to the Netify team.
+        Suppliers never see your name or your company, only your anonymous position.
       </p>
     </div>
   );
