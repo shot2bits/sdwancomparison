@@ -71,7 +71,6 @@ import { diagramModel } from "@/lib/workspace/diagram";
 import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
 import SignIn from "@/components/SignIn";
-import CodeEntry from "@/components/CodeEntry";
 import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
 
 /* ------------------------------------------------------------------ */
@@ -2300,10 +2299,19 @@ export default function ProjectDesk() {
                     {needAuth && (
                       <div className="mt-2 rounded-md bg-zinc-50 p-3">
                         <p className="m-0 mb-1 text-[11px] text-zinc-600">
-                          One step first: publishing reaches named suppliers, so it needs a verified sign-in. Sign in, then press publish again; your position is untouched.
+                          One step first: publishing reaches named suppliers, so it needs a verified sign-in. Your position is untouched.
                         </p>
-                        <SignIn role="buyer" prompt="Sign in with your work email to publish." />
-                        <CodeEntry onVerified={() => setNeedAuth(false)} />
+                        <SignIn
+                          role="buyer"
+                          prompt="Verify yourself to publish."
+                          onAuthed={() => {
+                            // Their signature press already happened and the
+                            // consents are still ticked; verification was the
+                            // only gap, so publishing continues by itself.
+                            setNeedAuth(false);
+                            void signAndPublish();
+                          }}
+                        />
                       </div>
                     )}
                   </>
@@ -2904,6 +2912,13 @@ function SaveLiteInline({ facts, onDone, onDismiss }: { facts: number; onDone: (
   const [company, setCompany] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // LinkedIn lane availability (24 July 2026): the save moment is a sign-in
+  // moment, and the buyer most likely to be here mid-evening has a personal
+  // email the work-email lane refuses. One quiet alternative door.
+  const [li, setLi] = useState(false);
+  useEffect(() => {
+    fetch("/sase/api/auth/session").then((r) => r.json()).then((d) => setLi(Boolean(d?.linkedin && !d?.authenticated))).catch(() => {});
+  }, []);
   const send = async () => {
     if (busy || !email.includes("@")) return;
     setBusy(true);
@@ -2939,7 +2954,20 @@ function SaveLiteInline({ facts, onDone, onDismiss }: { facts: number; onDone: (
         </button>
         <button type="button" onClick={onDismiss} className="text-[11px] text-zinc-500 underline hover:text-zinc-900">Not now</button>
       </div>
-      <p className="m-0 text-[11px] leading-snug text-zinc-400">The position stays right here either way. Work email only; we only email you about your own projects.</p>
+      {li && (
+        <button
+          type="button"
+          onClick={() => {
+            const ret = window.location.pathname + window.location.search;
+            window.location.href = `/sase/api/auth/linkedin/start?return=${encodeURIComponent(ret)}`;
+          }}
+          className="flex items-center gap-1.5 text-[11px] font-medium text-[#0A66C2] hover:underline"
+        >
+          <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-[3px] bg-[#0A66C2] text-[9px] font-bold leading-none text-white" aria-hidden="true">in</span>
+          Or continue with LinkedIn, any email works
+        </button>
+      )}
+      <p className="m-0 text-[11px] leading-snug text-zinc-400">The position stays right here either way. {li ? "We" : "Work email only; we"} only email you about your own projects.</p>
       {error && <p className="m-0 text-[11px] text-red-600">{error}</p>}
     </div>
   );

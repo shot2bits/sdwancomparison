@@ -1,6 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { createMagicToken, kvConfigured, kvGetJson, kvSetJson, kvRaw, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
 import { sendMagicLink } from "@/lib/auth";
+import { linkedinConfigured } from "@/lib/linkedin";
 import {
   isBlockedDomainLive,
   isAcademicDomain,
@@ -54,8 +55,21 @@ export async function POST(req: Request) {
   }
   if (!admin && (await isBlockedDomainLive(domain))) {
     try { await recordRejectedAttempt(domain, "webmail"); } catch { /* best effort */ }
+    // The rescue contract (24 July 2026, the overnight read: six of seven
+    // sign-in attempts were personal addresses this lane rightly refuses).
+    // A personal address cannot receive the link because the mailbox IS
+    // this lane's verification; the LinkedIn lane verifies the person
+    // through their profile instead, so any address works there. When that
+    // lane is configured the rejection names the door, and `reason` lets
+    // the sign-in box hand the buyer to it.
+    const linkedinRescue = role !== "supplier" && linkedinConfigured();
     return Response.json(
-      { error: "Please use your organisation email. Free and personal email addresses are not accepted." },
+      {
+        error: linkedinRescue
+          ? "Free and personal email addresses cannot receive the sign-in link. Continue with LinkedIn instead: it verifies you through your profile, so any email works. Or use your organisation email."
+          : "Please use your organisation email. Free and personal email addresses are not accepted.",
+        reason: "personal_email",
+      },
       { status: 422, headers: cors },
     );
   }

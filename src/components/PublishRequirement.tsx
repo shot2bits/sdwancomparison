@@ -11,7 +11,6 @@
 
 import { useState } from "react";
 import SignIn from "@/components/SignIn";
-import CodeEntry from "@/components/CodeEntry";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 
 export default function PublishRequirement({ projectId, manage, gapCount }: { projectId: string; manage?: string; gapCount: number }) {
@@ -79,9 +78,18 @@ export default function PublishRequirement({ projectId, manage, gapCount }: { pr
           </button>
           {needAuth && (
             <div className="mt-3">
-              <p className="m-0 mb-2 text-xs text-[var(--ink-700)]">One step first: publishing reaches named suppliers, so it needs a verified sign-in. Sign in and press publish again.</p>
-              <SignIn role="buyer" prompt="Sign in with your work email to publish." />
-              <CodeEntry onVerified={() => { setNeedAuth(false); }} />
+              <p className="m-0 mb-2 text-xs text-[var(--ink-700)]">One step first: publishing reaches named suppliers, so it needs a verified sign-in. Your work here is untouched.</p>
+              <SignIn
+                role="buyer"
+                prompt="Verify yourself to publish."
+                onAuthed={() => {
+                  // The person already signed: consent is ticked and the
+                  // publish press happened. Verification was the only gap,
+                  // so publishing continues by itself (24 July 2026).
+                  setNeedAuth(false);
+                  void publish(false);
+                }}
+              />
             </div>
           )}
           {error && <p className="m-0 mt-2 text-sm text-rose-600">{error}</p>}
