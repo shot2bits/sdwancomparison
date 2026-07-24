@@ -49,14 +49,29 @@ const BTN_GHOST = "inline-flex items-center px-5 py-2.5 border border-[var(--ink
 
 export default function VerifyClient() {
   const [token, setToken] = useState<string | null>(null);
-  const [state, setState] = useState<"loading" | "ready" | "working" | "done" | "signed_in" | "error">("loading");
+  const [state, setState] = useState<"loading" | "ready" | "working" | "done" | "signed_in" | "already" | "error">("loading");
   const [info, setInfo] = useState<{ role?: string; vendor_slug?: string | null; email?: string }>({});
   const [claimedCount, setClaimedCount] = useState(0);
   const [dest, setDest] = useState<string>("/sase/account/");
 
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get("token");
-    if (t) { setToken(t); setState("ready"); return; }
+    if (t) {
+      setToken(t);
+      // A valid token AND an existing session (Harry, 24 July 2026: signed
+      // in with the 6-digit code, then clicked the same email's link and
+      // was asked to confirm sign-in a third time). Recognise the session
+      // FIRST: the person is already in, so say so and offer the way on.
+      // The unconsumed token stays available behind "someone else" for the
+      // cross-account edge, and scanners still never consume anything.
+      fetch("/sase/api/auth/session")
+        .then((r) => r.json())
+        .then((d: { authenticated?: boolean; role?: string; email?: string; vendor_slug?: string | null }) => {
+          if (d?.authenticated) { setInfo(d); setState("already"); } else { setState("ready"); }
+        })
+        .catch(() => setState("ready"));
+      return;
+    }
     // No token: someone navigated here directly. Recognise an existing
     // session rather than showing a misleading "expired" error.
     fetch("/sase/api/auth/session")
@@ -134,6 +149,23 @@ export default function VerifyClient() {
             </>
           )}
         </div>
+      </div>
+    );
+  }
+
+  if (state === "already") {
+    const ret = safeReturnPath() ?? "/sase/account/";
+    return (
+      <div>
+        <h1 className="text-xl mb-2">You are already signed in{info.email ? ` as ${info.email}` : ""}.</h1>
+        <p className="text-[var(--ink-700)] mb-5">No need to confirm anything again; carry straight on.</p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <a href={ret} className={BTN}>Continue</a>
+        </div>
+        <p className="mt-4 text-xs text-[var(--ink-500)]">
+          Signing in as someone else?{" "}
+          <button type="button" onClick={() => setState("ready")} className="underline hover:text-[var(--ink-900)]">Use this link&rsquo;s sign-in instead</button>
+        </p>
       </div>
     );
   }

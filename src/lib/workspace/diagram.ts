@@ -81,7 +81,13 @@ export function diagramModel(
   return {
     empty,
     clouds,
-    edge: sseInScope ? { label: "Secure service edge", proposed: true } : { label: "Internet", proposed: false },
+    // The edge speaks what the buyer is actually buying (Harry, 24 July
+    // 2026, third session running: SASE selected, node labelled "Secure
+    // service edge"). SASE buyers see SASE; the SSE wording remains for
+    // SSE-only signals, where it is the correct name.
+    edge: sseInScope
+      ? { label: buying === "sase" ? "SASE" : "Secure service edge", proposed: true }
+      : { label: "Internet", proposed: false },
     core,
     sites: { label: sitesLabel, count: sitesN, siteSquares: squares, overflow: sitesN !== null ? Math.max(0, sitesN - squares) : 0 },
     regions,

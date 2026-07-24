@@ -22,7 +22,7 @@ export default function AccountPage() {
       <div className="mb-8">
         <p className="eyebrow mb-2">Your account</p>
         <h1 className="text-2xl mb-1">Your marketplace activity</h1>
-        <p className="text-sm text-[var(--ink-600)]">Opportunities you have published, RFPs you have saved, and what the agent remembers — all tied to your signed-in email, recoverable from any device.</p>
+        <p className="text-sm text-[var(--ink-600)]">Opportunities you have published, RFPs you have saved, and what the agent remembers, all tied to your signed-in email and recoverable from any device.</p>
       </div>
 
       <div className="mb-8">

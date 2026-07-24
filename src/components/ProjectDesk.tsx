@@ -774,6 +774,17 @@ export default function ProjectDesk() {
   }, [fitParams]);
 
   /* ---- Save-lite trigger ---- */
+  // The desk must actually KNOW whether the visitor is signed in (Harry,
+  // 24 July 2026: this flag was declared and checked but never set, so
+  // the save prompt asked an already-verified buyer to sign in again,
+  // straight after the signature, below a Crew log saying the notice was
+  // live). One session read on mount wires it to the truth.
+  useEffect(() => {
+    fetch("/sase/api/auth/session")
+      .then((r) => r.json())
+      .then((d: { authenticated?: boolean }) => setSignedIn(Boolean(d?.authenticated)))
+      .catch(() => {});
+  }, []);
   useEffect(() => {
     if (saveLite !== "hidden" || signedIn || published || created) return;
     if (started && (Boolean(verdict) || live.length >= 3)) {
@@ -781,6 +792,15 @@ export default function ProjectDesk() {
       ev("workspace_save_lite_shown", { facts: live.length });
     }
   }, [saveLite, signedIn, published, created, verdict, live.length, started]);
+  // And the other half of Harry's catch: a prompt already on screen must
+  // stand down the moment the person signs in, creates or publishes.
+  // Asking someone to keep a position they have just signed for is the
+  // single most confusing moment testing found.
+  useEffect(() => {
+    if ((saveLite === "shown" || saveLite === "sent") && (signedIn || published || created)) {
+      setSaveLite("dismissed");
+    }
+  }, [saveLite, signedIn, published, created]);
 
   /* ---- Corrections: strike, answer, click ---- */
   const toggleFact = useCallback(
@@ -2308,6 +2328,7 @@ export default function ProjectDesk() {
                             // Their signature press already happened and the
                             // consents are still ticked; verification was the
                             // only gap, so publishing continues by itself.
+                            setSignedIn(true);
                             setNeedAuth(false);
                             void signAndPublish();
                           }}

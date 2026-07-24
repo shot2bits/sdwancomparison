@@ -17,12 +17,31 @@ const MODELS: [string, string][] = [["any", "No preference"], ["managed", "Fully
 const RISKS: [string, string][] = [["unknown", "Unknown"], ["low", "Low"], ["medium", "Medium"], ["high", "High"]];
 const field = "w-full rounded border border-[var(--ink-300,#ccc)] p-2 text-sm";
 
+/** The five list fields, edited as plain text and parsed only at save. */
+type ListField = "regions" | "compliance_baseline" | "preferred_vendor_slugs" | "avoided_vendor_slugs" | "notes";
+
 export default function BuyerMemoryPanel() {
   const [mem, setMem] = useState<Memory | null>(null);
+  // Raw text for the list fields while the person is typing (Harry, 24
+  // July 2026, three Highs from one line: the old code split, trimmed and
+  // re-joined on EVERY keystroke, so a typed space was trimmed away
+  // instantly and a typed comma filtered out, which made "comma-separated"
+  // fields reject commas and free-text notes reject spaces). The cure is
+  // structural: the input holds an ordinary string while typing, and the
+  // parse into a list happens once, at save.
+  const [raw, setRaw] = useState<Record<ListField, string>>({ regions: "", compliance_baseline: "", preferred_vendor_slugs: "", avoided_vendor_slugs: "", notes: "" });
   const [needsAuth, setNeedsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const seedRaw = (m: Memory) => setRaw({
+    regions: m.regions.join(", "),
+    compliance_baseline: m.compliance_baseline.join(", "),
+    preferred_vendor_slugs: m.preferred_vendor_slugs.join(", "),
+    avoided_vendor_slugs: m.avoided_vendor_slugs.join(", "),
+    notes: m.notes.join(", "),
+  });
 
   useEffect(() => {
     (async () => {
@@ -30,13 +49,17 @@ export default function BuyerMemoryPanel() {
         const res = await fetch("/sase/api/buyer/memory");
         if (res.status === 401) { setNeedsAuth(true); return; }
         const data = await res.json();
-        if (data.memory) setMem(data.memory);
+        if (data.memory) { setMem(data.memory); seedRaw(data.memory); }
       } finally { setLoading(false); }
     })();
   }, []);
 
   function set<K extends keyof Memory>(k: K, v: Memory[K]) {
     setMem((m) => (m ? { ...m, [k]: v } : m));
+    setSaved(false);
+  }
+  function setList(k: ListField, v: string) {
+    setRaw((r) => ({ ...r, [k]: v }));
     setSaved(false);
   }
   const arr = (v: string) => v.split(",").map((s) => s.trim()).filter(Boolean);
@@ -50,13 +73,13 @@ export default function BuyerMemoryPanel() {
         body: JSON.stringify({
           organisation: mem.organisation, organisation_size: mem.organisation_size,
           operating_model: mem.operating_model, risk_tolerance: mem.risk_tolerance,
-          budget_notes: mem.budget_notes, preferred_vendor_slugs: mem.preferred_vendor_slugs,
-          avoided_vendor_slugs: mem.avoided_vendor_slugs, compliance_baseline: mem.compliance_baseline,
-          regions: mem.regions, notes: mem.notes,
+          budget_notes: mem.budget_notes, preferred_vendor_slugs: arr(raw.preferred_vendor_slugs),
+          avoided_vendor_slugs: arr(raw.avoided_vendor_slugs), compliance_baseline: arr(raw.compliance_baseline),
+          regions: arr(raw.regions), notes: arr(raw.notes),
         }),
       });
       const data = await res.json();
-      if (data.memory) { setMem(data.memory); setSaved(true); }
+      if (data.memory) { setMem(data.memory); seedRaw(data.memory); setSaved(true); }
     } finally { setSaving(false); }
   }
 
@@ -85,14 +108,14 @@ export default function BuyerMemoryPanel() {
         </label>
       </div>
 
-      <label className="block text-sm">Regions (comma-separated)<input className={field} value={mem.regions.join(", ")} onChange={(e) => set("regions", arr(e.target.value))} /></label>
-      <label className="block text-sm">Compliance always in scope<input className={field} value={mem.compliance_baseline.join(", ")} onChange={(e) => set("compliance_baseline", arr(e.target.value))} placeholder="e.g. UK GDPR, PCI DSS, DORA" /></label>
+      <label className="block text-sm">Regions (comma-separated)<input className={field} value={raw.regions} onChange={(e) => setList("regions", e.target.value)} placeholder="e.g. UK, Europe, North America" /></label>
+      <label className="block text-sm">Compliance always in scope (comma-separated)<input className={field} value={raw.compliance_baseline} onChange={(e) => setList("compliance_baseline", e.target.value)} placeholder="e.g. UK GDPR, PCI DSS, DORA" /></label>
       <div className="grid sm:grid-cols-2 gap-4">
-        <label className="text-sm">Preferred vendors<input className={field} value={mem.preferred_vendor_slugs.join(", ")} onChange={(e) => set("preferred_vendor_slugs", arr(e.target.value))} placeholder="e.g. Cato Networks, Zscaler" /></label>
-        <label className="text-sm">Avoid vendors<input className={field} value={mem.avoided_vendor_slugs.join(", ")} onChange={(e) => set("avoided_vendor_slugs", arr(e.target.value))} placeholder="e.g. incumbent to replace" /></label>
+        <label className="text-sm">Preferred vendors<input className={field} value={raw.preferred_vendor_slugs} onChange={(e) => setList("preferred_vendor_slugs", e.target.value)} placeholder="e.g. Cato Networks, Zscaler" /></label>
+        <label className="text-sm">Avoid vendors<input className={field} value={raw.avoided_vendor_slugs} onChange={(e) => setList("avoided_vendor_slugs", e.target.value)} placeholder="e.g. an incumbent, a past bad experience, a policy exclusion" /></label>
       </div>
       <label className="block text-sm">Budget notes<input className={field} value={mem.budget_notes} onChange={(e) => set("budget_notes", e.target.value)} placeholder="Cost-sensitive; expect 15-20% saving on current spend." /></label>
-      <label className="block text-sm">Durable notes (comma-separated)<input className={field} value={mem.notes.join(", ")} onChange={(e) => set("notes", arr(e.target.value))} placeholder="UK-sovereign data residency required" /></label>
+      <label className="block text-sm">Durable notes (comma-separated)<input className={field} value={raw.notes} onChange={(e) => setList("notes", e.target.value)} placeholder="UK-sovereign data residency required" /></label>
 
       {mem.past_outcomes.length > 0 && (
         <div>

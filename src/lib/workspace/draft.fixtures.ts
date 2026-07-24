@@ -196,6 +196,11 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(plain.edge.label === "Internet" && !plain.edge.proposed, "no SSE signal, no secure edge");
     const sase = diagramModel({ estate: { sites: 3 } }, null, "sase");
     expect(sase.edge.proposed === true, "SASE buying proposes the edge");
+    // Harry's third-session catch, pinned so it can never regress: buying
+    // SASE must label the node SASE, and only SSE keeps the SSE wording.
+    expect(sase.edge.label === "SASE", "SASE buying labels the edge SASE");
+    const sse = diagramModel({ estate: { sites: 3 } }, null, "sse");
+    expect(sse.edge.label === "Secure service edge" && sse.edge.proposed === true, "SSE buying keeps the SSE name");
   });
 
   await ok("diagram pins derive only from stated facts and the verdict", async () => {
