@@ -185,14 +185,30 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
    * invite list (?vendors=), the sector, and scope=managed when the
    * operating-model filter says a provider should run it.
    */
-  function rfpUrl(): string {
-    const p = new URLSearchParams();
-    if (input.sector) p.set("sector", input.sector);
-    if (input.service_model === "managed") p.set("scope", "managed");
-    const slugs = result.shortlist.slice(0, 3).map((v) => v.slug).filter(Boolean);
-    if (slugs.length) p.set("vendors", slugs.join(","));
-    const qs = p.toString();
-    return `/sase/rfp-builder/new/${qs ? `?${qs}` : ""}`;
+  // One Door (24 July 2026, Robert): this used to point at the wizard path,
+  // which now 301s to the apex and sheds its context on the way. Link the
+  // workspace directly (internal linking before redirects) and carry the
+  // buyer's context as the workspace prompt: their own advisor words when
+  // they typed, otherwise a plain sentence derived from the filters and the
+  // live shortlist, so what they built here travels with them.
+  function workspaceUrl(): string {
+    const words = chatMessages
+      .filter((m) => m.role === "user")
+      .map((m) => m.content.trim())
+      .filter(Boolean)
+      .join("; ")
+      .slice(0, 500)
+      .trim();
+    if (words) return `https://netify.co.uk/?q=${encodeURIComponent(words)}`;
+    const parts: string[] = [
+      input.sector
+        ? `We are a ${SECTOR_LABELS[input.sector]} organisation shortlisting SASE and SD-WAN providers.`
+        : "We are shortlisting SASE and SD-WAN providers.",
+    ];
+    if (input.service_model === "managed") parts.push("We want the service fully managed.");
+    const names = result.shortlist.slice(0, 3).map((v) => v.name).filter(Boolean);
+    if (names.length) parts.push(`Our shortlist so far: ${names.join(", ")}.`);
+    return `https://netify.co.uk/?q=${encodeURIComponent(parts.join(" "))}`;
   }
 
   async function askAgent() {
@@ -334,6 +350,14 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             </div>
           )}
           {chatError && <p className="mt-3 text-sm text-red-700">{chatError}</p>}
+          {chatMessages.some((m) => m.role === "assistant") && (
+            <a
+              href={workspaceUrl()}
+              className="mt-3 block w-full text-center px-4 py-2.5 border border-[var(--ink-900)] rounded-full text-sm font-medium no-underline hover:bg-zinc-900 hover:text-white transition-colors"
+            >
+              Continue in the workspace with what you just described
+            </a>
+          )}
         </section>
 
         {/* Sector */}
@@ -666,7 +690,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               Download PDF
             </a>
             <a
-              href={rfpUrl()}
+              href={workspaceUrl()}
               className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors"
             >
               Get competing bids →
@@ -678,6 +702,23 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             ? "Balanced capability score across all 40 features. Set filters, pick your sector, or describe your needs to the AI advisor to build your bespoke shortlist."
             : result.criteria_summary}
         </p>
+        {/* The road onward (24 July 2026, Robert): the shortlist names the
+            right providers; the workspace gets them answering. Linked
+            directly to the apex, carrying the buyer's context in q. */}
+        <section className="border border-[var(--ink-900)] rounded-sm p-5 mb-6 bg-[var(--paper-base)]">
+          <p className="eyebrow mb-1">Next step</p>
+          <p className="text-sm text-[var(--ink-700)] mb-3">
+            A shortlist names the right providers. The workspace makes them respond: describe your
+            requirement once, publish it as an anonymous position, and suppliers answer with their
+            bids. What you have built on this page travels with you.
+          </p>
+          <a
+            href={workspaceUrl()}
+            className="inline-block px-4 py-2 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm no-underline hover:bg-amber-400 transition-colors"
+          >
+            Start a project
+          </a>
+        </section>
 
         {result.shortlist.length === 0 && (
           <div className="border border-[var(--ink-300,#ccc)] rounded-sm p-6 text-[var(--ink-700)]">

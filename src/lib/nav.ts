@@ -174,10 +174,14 @@ export const MEGA_GROUPS: MegaGroup[] = [
     label: "Solutions",
     columns: 2,
     items: [
-      { label: "Healthcare & pharma", href: "/sase/rfp-builder/new/?sector=healthcare", desc: "SASE and SD-WAN requirements mapped for healthcare trusts and pharma." },
-      { label: "Retail & e-commerce", href: "/sase/rfp-builder/new/?sector=retail_ecommerce", desc: "PCI DSS compliant architectures for multi-site retail estates." },
-      { label: "Manufacturing & OT", href: "/sase/rfp-builder/new/?sector=manufacturing", desc: "Secure SASE with IT and OT integration for industrial sites." },
-      { label: "Financial services", href: "/sase/rfp-builder/new/?sector=financial_services", desc: "Audited, low-latency network security frameworks for regulated finance." },
+      // Internal linking before redirects (24 Jul, the shortlist walk found
+      // these four still hopping through the wizard 301s): the sector doors
+      // carry their prefill sentences straight to the desk, matching the
+      // sidebar's Get quotes doors.
+      { label: "Healthcare & pharma", href: "https://netify.co.uk/?q=We%20are%20a%20healthcare%20provider%20replacing%20legacy%20connectivity%20with%20managed%20SD-WAN%20and%20SASE.", desc: "SASE and SD-WAN requirements mapped for healthcare trusts and pharma." },
+      { label: "Retail & e-commerce", href: "https://netify.co.uk/?q=We%20are%20a%20retailer%20needing%20a%20PCI%20DSS%20compliant%20network.", desc: "PCI DSS compliant architectures for multi-site retail estates." },
+      { label: "Manufacturing & OT", href: "https://netify.co.uk/?q=We%20are%20a%20manufacturer%20securing%20IT%20and%20OT%20with%20managed%20SASE.", desc: "Secure SASE with IT and OT integration for industrial sites." },
+      { label: "Financial services", href: "https://netify.co.uk/?q=We%20are%20a%20financial%20services%20firm%20consolidating%20network%20and%20security%20into%20SASE.", desc: "Audited, low-latency network security frameworks for regulated finance." },
     ],
     footerLink: { label: "Best by sector: all sector guides", href: "/sase/best/" },
   },
