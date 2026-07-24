@@ -90,7 +90,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
           Suppliers respond through the invitation link instead.
         </p>
         <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this project." /></div>
-        <p className="text-sm"><Link href="/rfp-builder" className="underline">Go to the RFP builder</Link></p>
+        <p className="text-sm"><a href="https://netify.co.uk/" className="underline">Start a project on the desk</a></p>
       </div>
     );
   }

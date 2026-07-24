@@ -53,7 +53,7 @@ export default async function ProjectAssessmentPage({ params, searchParams }: Pr
         <p className="eyebrow mb-2">Project assessment</p>
         <h1 className="mb-3 text-2xl">This project is private to the buyer</h1>
         <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this project." /></div>
-        <p className="text-sm"><Link href="/rfp-builder" className="underline">Go to the RFP builder</Link></p>
+        <p className="text-sm"><a href="https://netify.co.uk/" className="underline">Start a project on the desk</a></p>
       </div>
     );
   }

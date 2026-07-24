@@ -1746,6 +1746,12 @@ export default function ProjectDesk() {
             distance is fit · every position computed from graded evidence · a supplier only moves on its own evidence
           </p>
         </div>
+        {marketRows.shown.length === 0 && (
+          <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-400">
+            Empty until you describe your project. Then the evaluated market takes position around your words: the
+            closest fit sits nearest, each supplier keeps its own fixed place and colour, and evidence draws the lines.
+          </p>
+        )}
         {marketRows.shown.length > 0 && (
           <svg
             viewBox={`0 0 ${SCENE.w} ${SCENE.h}`}
@@ -2587,7 +2593,7 @@ export default function ProjectDesk() {
 
           {/* The crew */}
           <div>
-            <p className="m-0 mb-1.5 text-[11px] font-semibold text-zinc-600">The crew · completed work only</p>
+            <p className="m-0 mb-1.5 text-[11px] font-semibold text-zinc-600">The crew · the activity log · completed work only</p>
             <div className="space-y-0.5 font-mono text-[11px] leading-relaxed text-zinc-500" style={{ fontFamily: "'SF Mono',ui-monospace,Menlo,monospace" }}>
               {crew.slice(-6).map((l, i) => (
                 <div key={i}>

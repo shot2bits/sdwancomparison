@@ -144,6 +144,13 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
 
   return (
     <div className="space-y-8">
+      {/* What this area is for, said plainly (Harry, 24 July 2026: hard to
+          find and unclear once found). */}
+      <p className="text-sm text-[var(--ink-600)]">
+        Set a goal here and the agent reads incoming bids against it on a schedule: it flags risks, drafts
+        clarification questions and posts a digest of what moved. Everything it wants to send queues below for your
+        approval; it never contacts a supplier itself.
+      </p>
       {/* Goal */}
       <section className={card}>
         <h3 className="font-semibold mb-1">Procurement goal</h3>

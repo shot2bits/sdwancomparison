@@ -71,7 +71,7 @@ export const CAPABILITIES: Capability[] = [
     id: "build_rfp",
     title: "Build a SASE and SD-WAN RFP",
     description: "Create a methodology-backed RFP conversationally with the AI advisor or by picking scope and delivery model, with compliance mapping. Fully open, no sign-in.",
-    access: "open", page: "/rfp-builder", api: "/api/rfp, /api/rfp/[id]/agent", data: "/methodology.json, /question-bank.json",
+    access: "open", page: "https://netify.co.uk/", api: "/api/rfp, /api/rfp/[id]/agent", data: "/methodology.json, /question-bank.json",
     status: "live", capabilityType: "draft", accessLevel: "public",
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "none",

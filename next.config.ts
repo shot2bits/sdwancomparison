@@ -98,6 +98,16 @@ const nextConfig: NextConfig = {
       { source: "/rfp-builder/new/", destination: "https://netify.co.uk/", statusCode: 301 },
       { source: "/rfp-builder/start", destination: "https://netify.co.uk/", statusCode: 301 },
       { source: "/rfp-builder/start/", destination: "https://netify.co.uk/", statusCode: 301 },
+      // R1, Robert's delegation 24 Jul (Harry's evidence: the bare paths
+      // still served the legacy wizard, and the account launchpad had been
+      // routing brand-new signups into it). The landing and the bare /new
+      // close; the ?sector= prefill rules above keep first claim, and the
+      // working surfaces ([id] records, supplier, questions, sample-rfp)
+      // keep serving untouched.
+      { source: "/rfp-builder", destination: "https://netify.co.uk/", statusCode: 301 },
+      { source: "/rfp-builder/", destination: "https://netify.co.uk/", statusCode: 301 },
+      { source: "/rfp-builder/new", destination: "https://netify.co.uk/", statusCode: 301 },
+      { source: "/rfp-builder/new/", destination: "https://netify.co.uk/", statusCode: 301 },
       { source: "/rfp-builder/sase", destination: "https://netify.co.uk/", statusCode: 301 },
       { source: "/rfp-builder/sase/", destination: "https://netify.co.uk/", statusCode: 301 },
       { source: "/rfp-builder/sd-wan", destination: "https://netify.co.uk/", statusCode: 301 },

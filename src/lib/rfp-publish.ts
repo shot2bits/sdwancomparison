@@ -287,14 +287,27 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     p = advanceProject(p, { at: now + 1, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.live", detail: { invited: invited.length } });
     published = await saveProject(p);
   } else {
-    published = await saveProject({
+    // The record-keeping gap Harry proved (24 July 2026): builder-lane
+    // projects published with EMPTY history, so the Timeline read "No
+    // recorded events yet" on a project created and published the same
+    // morning. The same append-only events the engine lane records are
+    // recorded here; nothing is invented, both facts ARE this call. The
+    // record must never block the publish, so failures fall through to
+    // the plain write.
+    let p: ProjectDetails = {
       ...working,
       status: "published",
       owner_email: ownerEmail,
       response_deadline: responseDeadline,
       invited_vendors: mergedInvited,
       pending_submit: undefined,
-    });
+    };
+    try {
+      const now = Date.now();
+      p = recordProjectEvent(p, { at: now, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.consented", detail: {}, consent: true });
+      p = recordProjectEvent(p, { at: now + 1, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.live", detail: { invited: invited.length } });
+    } catch { /* the history is a record, never a gate */ }
+    published = await saveProject(p);
   }
   if (!project.owner_email) {
     try { await indexRfpForBuyer(sessionEmail, published.id); } catch { /* best effort */ }

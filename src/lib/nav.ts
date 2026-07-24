@@ -55,9 +55,11 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Get quotes",
     items: [
-      { label: "Create your SASE RFP", href: "/sase/rfp-builder/sase/" },
-      { label: "Create your SD-WAN RFP", href: "/sase/rfp-builder/sd-wan/" },
-      { label: "Create your SSE RFP", href: "/sase/rfp-builder/sse/" },
+      // Internal linking before redirects (R1, 24 Jul): these doors point
+      // straight at the desk now the wizard paths 301 there.
+      { label: "Create your SASE RFP", href: "https://netify.co.uk/" },
+      { label: "Create your SD-WAN RFP", href: "https://netify.co.uk/" },
+      { label: "Create your SSE RFP", href: "https://netify.co.uk/" },
       { label: "Create your SASE & SD-WAN RFI", href: "/sase/opportunities/new/" },
       { label: "Your projects", href: "/sase/account/" },
     ],
@@ -65,10 +67,12 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "By sector",
     items: [
-      { label: "Create Healthcare RFP", href: "/sase/rfp-builder/new/?sector=healthcare" },
-      { label: "Create Retail RFP", href: "/sase/rfp-builder/new/?sector=retail_ecommerce" },
-      { label: "Create Manufacturing RFP", href: "/sase/rfp-builder/new/?sector=manufacturing" },
-      { label: "Create Financial Services RFP", href: "/sase/rfp-builder/new/?sector=financial_services" },
+      // The sector doors carry their prefill sentence straight to the desk
+      // (the same destinations the 301s serve, without the hop).
+      { label: "Create Healthcare RFP", href: "https://netify.co.uk/?q=We%20are%20a%20healthcare%20provider%20replacing%20legacy%20connectivity%20with%20managed%20SD-WAN%20and%20SASE." },
+      { label: "Create Retail RFP", href: "https://netify.co.uk/?q=We%20are%20a%20retailer%20needing%20a%20PCI%20DSS%20compliant%20network." },
+      { label: "Create Manufacturing RFP", href: "https://netify.co.uk/?q=We%20are%20a%20manufacturer%20securing%20IT%20and%20OT%20with%20managed%20SASE." },
+      { label: "Create Financial Services RFP", href: "https://netify.co.uk/?q=We%20are%20a%20financial%20services%20firm%20consolidating%20network%20and%20security%20into%20SASE." },
       { label: "All sector guides", href: "/sase/best/" },
     ],
   },
