@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { COMPANY_NAME_REFUSAL, companyReadsAsPersonalName } from "@/lib/company-name-check";
 
 /**
  * The welcome step after LinkedIn sign-in. Robert's ruling (24 July 2026,
@@ -14,6 +15,11 @@ import { useEffect, useState } from "react";
  * a stored company lands back on this page (the callback routes on the
  * missing fact, not on first-signup). Someone who closes the tab keeps
  * their session but meets the question again at their next sign-in.
+ *
+ * What counts as an answer (the evening's second ruling, after "Sam
+ * White" arrived from Samuel White): not the buyer's own name. The
+ * shared check refuses a name-match with the registered-form hint, here
+ * and identically on the server, so a bypassed browser gains nothing.
  *
  * What it still never does: lose the buyer to OUR failure. If storage is
  * down when they answer, the answer is attempted best-effort and they
@@ -32,6 +38,7 @@ export default function AuthWelcome() {
   const [company, setCompany] = useState("");
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [ret, setRet] = useState("/");
 
   useEffect(() => {
@@ -50,13 +57,28 @@ export default function AuthWelcome() {
 
   async function submit() {
     if (busy || !company.trim()) return;
+    // The refusal (Robert, 24 July): a personal name is not a company. A
+    // sole trader passes by stating the registered form (Sam White Ltd).
+    if (companyReadsAsPersonalName(company, name)) {
+      setError(COMPANY_NAME_REFUSAL);
+      return;
+    }
     setBusy(true);
+    setError(null);
     try {
-      await fetch("/sase/api/buyer/profile", {
+      const res = await fetch("/sase/api/buyer/profile", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ company: company.trim() }),
       });
+      if (res.status === 422) {
+        // The server saw a name-match the browser missed. Same rule, same
+        // words: they answer properly rather than moving on.
+        const data: { error?: string } | null = await res.json().catch(() => null);
+        setError(typeof data?.error === "string" ? data.error : COMPANY_NAME_REFUSAL);
+        setBusy(false);
+        return;
+      }
     } catch { /* their statement was made; our storage being down must not trap them */ }
     window.location.replace(ret);
   }
@@ -72,16 +94,18 @@ export default function AuthWelcome() {
       <p className="text-sm text-[var(--ink-600,#555)] mb-5">
         You are signed in{name ? ` as ${name}` : ""}. One required detail and you are in:
       </p>
-      <label className="block text-sm font-medium mb-1.5" htmlFor="welcome-company">Which company are you buying for?</label>
+      <label className="block text-sm font-medium mb-1" htmlFor="welcome-company">Which company are you buying for?</label>
+      <p className="text-xs text-[var(--ink-500)] mb-1.5">The registered or trading name of the business, not your personal name.</p>
       <input
         id="welcome-company"
         value={company}
-        onChange={(e) => setCompany(e.target.value)}
+        onChange={(e) => { setCompany(e.target.value); setError(null); }}
         placeholder="Company name"
         className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm"
         onKeyDown={(e) => { if (e.key === "Enter") void submit(); }}
         autoFocus
       />
+      {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
       <div className="mt-3">
         <button
           type="button"

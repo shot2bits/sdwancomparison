@@ -1,6 +1,7 @@
 import { sessionFromRequest, notifyCompanyAdded } from "@/lib/auth";
 import { kvConfigured } from "@/lib/rfp-store";
 import { getBuyerProfile, saveBuyerProfile } from "@/lib/buyer-profile";
+import { COMPANY_NAME_REFUSAL, companyReadsAsPersonalName } from "@/lib/company-name-check";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,10 @@ export async function GET(req: Request) {
 
 /** Set the company (and optionally correct the name). First company set
  *  sends the team the compact follow-up so "who" becomes "who at which
- *  company". Best effort throughout; never blocks the buyer. */
+ *  company". Best effort throughout, with one refusal (Robert, 24 July,
+ *  after "Sam White" arrived from Samuel White): a company that is just
+ *  the buyer's own name is not an answer. Refused here as well as in the
+ *  browser, same rule and same words, so a bypassed client gains nothing. */
 export async function POST(req: Request) {
   const s = await sessionFromRequest(req);
   if (!s || s.role === "supplier") return Response.json({ error: "Sign in first." }, { status: 401 });
@@ -31,6 +35,9 @@ export async function POST(req: Request) {
   const name = typeof body.name === "string" ? body.name.trim().slice(0, 120) : "";
   if (!company && !name) return Response.json({ ok: true, stored: false });
   const before = await getBuyerProfile(s.email);
+  if (company && companyReadsAsPersonalName(company, before?.name || name)) {
+    return Response.json({ error: COMPANY_NAME_REFUSAL, reason: "personal_name" }, { status: 422 });
+  }
   const saved = await saveBuyerProfile(s.email, {
     ...(company ? { company } : {}),
     ...(name ? { name } : {}),
