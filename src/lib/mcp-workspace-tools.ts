@@ -209,7 +209,9 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
       evidence: q.evidence,
     })),
     brief,
-    workspace_url: `${SITE_URL}/workspace/?q=${encodeURIComponent(text.slice(0, 400))}`,
+    // Apex-direct (25 July 2026): the workspace IS the homepage; the old
+    // /workspace path 301s there and a machine journey should never hop.
+    workspace_url: `https://netify.co.uk/?q=${encodeURIComponent(text.slice(0, 400))}`,
     notes: result.notes,
   };
 }
@@ -290,7 +292,7 @@ async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unkno
     })),
     brief,
     read_summary,
-    workspace_url: `${SITE_URL}/workspace/`,
+    workspace_url: `https://netify.co.uk/`,
     notes: allNotes,
   };
 }

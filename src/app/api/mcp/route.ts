@@ -61,6 +61,78 @@ function rpcError(id: string | number | null | undefined, code: number, message:
   );
 }
 
+/**
+ * The estate's machine twins as first-class MCP resources (25 July 2026,
+ * machine-layer parity with the BT estate, then past it). Fixed datasets
+ * only; each read self-fetches the SAME route that renders the public twin,
+ * so the resource and the page can never disagree. The advertised uri is
+ * the canonical public address; the fetch goes to the SERVING origin,
+ * derived per request, so reads work identically in production, preview
+ * deployments and local walks instead of silently reading production from
+ * everywhere. All CC BY 4.0 with attribution to Netify, stated per twin.
+ * The opportunities board twin exists but stays unlisted until Robert
+ * rules on the board twin regate (open verdict V-C).
+ */
+const ESTATE_RESOURCES = [
+  {
+    path: "/shortlist/data.json",
+    name: "sase-shortlist",
+    title: "The SASE and SD-WAN provider shortlist, machine twin",
+    description:
+      "The flagship providers dataset: 30 vendors graded on 40 evidenced capabilities with the default ranking, the scoring model, and the callable tools to compute bespoke shortlists. Same content as netify.co.uk/sase/shortlist/. CC BY 4.0 with attribution to Netify.",
+  },
+  {
+    path: "/demand/data.json",
+    name: "sase-demand-index",
+    title: "Netify SASE & SD-WAN Demand Index, machine twin",
+    description:
+      "Live, anonymised first-party demand data from the Netify procurement marketplace: sector and technology mix, publish funnel, weekly trend. Cite as the Netify SASE & SD-WAN Demand Index with the week stated. CC BY 4.0 with attribution to Netify.",
+  },
+  {
+    path: "/api/cost/data.json",
+    name: "sase-cost-model",
+    title: "SASE and SD-WAN cost model, machine twin",
+    description:
+      "The cost and TCO model behind the estimator: categories, drivers and defensible bands. Same content as the public estimator dataset. CC BY 4.0 with attribution to Netify.",
+  },
+] as const;
+
+/** Templated twins: any curated comparison or ranking page as data. */
+const RESOURCE_TEMPLATES = [
+  {
+    uriTemplate: `${SITE_URL}/compare/{pair}/data.json`,
+    name: "sase-vendor-comparison",
+    title: "Head-to-head vendor comparison, machine twin",
+    description:
+      "Any curated comparison page as data, {pair} like cato-networks-vs-zscaler. Pairs are linked from the vendors directory and the shortlist. CC BY 4.0 with attribution to Netify.",
+    mimeType: "application/json",
+  },
+  {
+    uriTemplate: `${SITE_URL}/best/{slug}/data.json`,
+    name: "sase-best-ranking",
+    title: "Ranked providers for a sector, size or intent, machine twin",
+    description:
+      "Any best-providers ranking page as data, {slug} like sd-wan-sase-providers-for-healthcare. Slugs are listed at /sase/best/. CC BY 4.0 with attribution to Netify.",
+    mimeType: "application/json",
+  },
+] as const;
+
+const TEMPLATE_PATTERNS: Array<{ re: RegExp; toPath: (m: RegExpMatchArray) => string }> = [
+  { re: new RegExp(`^${SITE_URL}/compare/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/compare/${m[1]}/data.json` },
+  { re: new RegExp(`^${SITE_URL}/best/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/best/${m[1]}/data.json` },
+];
+
+/** Resolve an advertised resource uri to an app path, or null if unknown. */
+function resourcePathFor(uri: string): string | null {
+  const fixed = ESTATE_RESOURCES.find((r) => `${SITE_URL}${r.path}` === uri);
+  if (fixed) return fixed.path;
+  for (const t of TEMPLATE_PATTERNS) {
+    const m = uri.match(t.re);
+    if (m) return t.toPath(m);
+  }
+  return null;
+}
+
 /** Serve-time merge of titles and behaviour annotations onto the tool definitions. */
 function annotatedTools() {
   return [...MCP_TOOL_DEFINITIONS, ...MCP_RFP_TOOL_DEFINITIONS, ...MCP_COST_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL, ...WORKSPACE_TOOL_DEFINITIONS].map((t) => {
@@ -91,7 +163,7 @@ export async function POST(req: Request) {
     case "initialize":
       return rpcResult(body.id, {
         protocolVersion: protocol,
-        capabilities: { tools: { listChanged: false } },
+        capabilities: { tools: { listChanged: false }, resources: { listChanged: false } },
         serverInfo: {
           name: "netify-sase-marketplace",
           title: "Netify SASE & SD-WAN Marketplace",
@@ -128,6 +200,47 @@ export async function POST(req: Request) {
         ...(failed ? { isError: true } : {}),
       }, protocol);
     }
+    case "resources/list":
+      return rpcResult(body.id, {
+        resources: ESTATE_RESOURCES.map((r) => ({
+          uri: `${SITE_URL}${r.path}`,
+          name: r.name,
+          title: r.title,
+          description: r.description,
+          mimeType: "application/json",
+        })),
+      }, protocol);
+    case "resources/templates/list":
+      return rpcResult(body.id, { resourceTemplates: [...RESOURCE_TEMPLATES] }, protocol);
+    case "resources/read": {
+      const uri = body.params?.uri;
+      if (!uri || typeof uri !== "string") {
+        return rpcError(body.id, -32602, "Invalid params: missing uri");
+      }
+      const path = resourcePathFor(uri);
+      if (!path) {
+        return rpcError(body.id, -32002, `Resource not found: ${uri}`);
+      }
+      // Self-fetch the twin from the origin THIS request arrived on, so the
+      // read serves the same bytes as the page in every environment.
+      try {
+        const origin = new URL(req.url).origin;
+        const res = await fetch(`${origin}/sase${path}`, { headers: { accept: "application/json" } });
+        if (res.status === 404) {
+          return rpcError(body.id, -32002, `Resource not found: ${uri}`);
+        }
+        if (!res.ok) {
+          return rpcError(body.id, -32000, `Resource fetch failed: ${res.status}`);
+        }
+        const text = await res.text();
+        return rpcResult(body.id, {
+          contents: [{ uri, mimeType: "application/json", text }],
+        }, protocol);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return rpcError(body.id, -32000, `Resource fetch error: ${message}`);
+      }
+    }
     case "ping":
       return rpcResult(body.id, {}, protocol);
     default:
@@ -150,6 +263,9 @@ export async function GET(req: Request) {
     connector_page: `${SITE_URL}/connector`,
     authentication: "none for research, drafting and estimating; write actions that reach named suppliers are token-gated per tool",
     tools: annotatedTools().map((t) => t.name),
-    usage: "POST JSON-RPC: methods initialize, tools/list, tools/call, ping.",
+    resources: ESTATE_RESOURCES.map((r) => ({ uri: `${SITE_URL}${r.path}`, name: r.name })),
+    resourceTemplates: RESOURCE_TEMPLATES.map((t) => t.uriTemplate),
+    resource_licence: "CC BY 4.0 with attribution to Netify; each twin states it.",
+    usage: "POST JSON-RPC: methods initialize, tools/list, tools/call, resources/list, resources/templates/list, resources/read, ping.",
   }, { headers: MCP_CORS });
 }

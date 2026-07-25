@@ -195,6 +195,10 @@ export const MEGA_GROUPS: MegaGroup[] = [
       { label: "BT SD-WAN & SASE", href: "/resell/bt-sd-wan/", desc: "Enterprise BT network sourcing." },
       { label: "Virgin Media Business", href: "/resell/virgin-media-business/", desc: "High-capacity internet and SD-WAN from VMB." },
       { label: "Reseller order portal", href: "https://reseller.netify.co.uk/", desc: "Quote, order and track BT reseller business in the partner application." },
+      // Twin-sync owed on the lanes board (25 Jul): the BT estate's market
+      // rooms join the partners group so both estates speak both rooms.
+      { label: "SD-WAN reseller routes", href: "https://netify.co.uk/resell/sd-wan-reseller/", desc: "Nine routes into SD-WAN reselling, compared with named sources; the assessment lives in a shareable address." },
+      { label: "VoIP reseller routes", href: "https://netify.co.uk/resell/voip-reseller/", desc: "Hosted-first VoIP reselling routes, compared honestly, including when the Netify route is not the fit." },
       { label: "Broadband reseller dataset", href: "/insights/broadband-reseller-companies/", desc: "The UK broadband reseller comparison, filterable." },
     ],
   },

@@ -4,7 +4,7 @@
  */
 
 import { FEATURES, FEATURE_NAMES, getShortlistDataset, getVendor, getAllVendorSlugs } from "@/lib/vendors";
-import { buildShortlist } from "@/lib/shortlist-core";
+import { buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput } from "@/lib/shortlist-core";
 import { SITE_URL } from "@/lib/structured-data";
 import { getDemandIndex } from "@/lib/demand-index";
 
@@ -12,7 +12,7 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "build_sase_shortlist",
     description:
-      "Build a ranked SASE and SD-WAN provider shortlist from 30 vendors graded by Netify. Hard requirements exclude vendors without public evidence; everything else feeds a weighted score. Returns ranked vendors with reasoning, gaps and watch-outs, plus a canonical shareable URL.",
+      "Build a ranked SASE and SD-WAN provider shortlist from 30 vendors graded by Netify. Hard requirements exclude vendors without public evidence; everything else feeds a weighted score. Returns ranked vendors with reasoning, gaps and watch-outs, plus resume_url: the live shortlist page with these exact criteria applied and every input editable. Hand resume_url to the human to continue, or call get_sase_vendor_profile on any returned slug for depth. Read and compute only, no consent needed, nothing stored.",
     inputSchema: {
       type: "object",
       properties: {
@@ -37,19 +37,19 @@ export const MCP_TOOL_DEFINITIONS = [
   {
     name: "list_sase_features",
     description:
-      "List the 40-feature evaluation catalogue (id, name, category, definition) used to grade every vendor, plus the extended dimensions (regions, clouds, AI capability, resilience, deployment speed).",
+      "List the 40-feature evaluation catalogue (id, name, category, definition) used to grade every vendor, plus the extended dimensions (regions, clouds, AI capability, resilience, deployment speed). Next: pass chosen feature ids to build_sase_shortlist as required_features or preferred_features. Read only, no consent needed.",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
     name: "list_sase_vendors",
     description:
-      "List all 30 graded SASE and SD-WAN vendors with slug, name, category and evidence coverage.",
+      "List all 30 graded SASE and SD-WAN vendors with slug, name, category and evidence coverage. Next: get_sase_vendor_profile with a slug for the full grade sheet, or build_sase_shortlist to rank them against a requirement. Read only, no consent needed.",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
     name: "get_sase_vendor_profile",
     description:
-      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs.",
+      "Full Netify capability profile for one vendor: all 40 feature grades, regions, clouds, AI capability, resilience, deployment speed, differentiators, best fit and watch-outs. Cite grades with their evaluation date. Next: build_sase_shortlist to rank this vendor against the field, or send the human to the workspace with ?vendors= to pin it into a draft. Read only, no consent needed.",
     inputSchema: {
       type: "object",
       properties: { slug: { type: "string", description: "Vendor slug, e.g. cato-networks. Call list_sase_vendors for valid slugs." } },
@@ -68,11 +68,21 @@ export function callMcpTool(name: string, args: unknown): unknown | Promise<unkn
   switch (name) {
     case "build_sase_shortlist": {
       const result = buildShortlist(getShortlistDataset(), args ?? {}, FEATURE_NAMES);
+      // The resume address (25 July 2026, machine-layer parity): the same
+      // scenario codec the page itself uses to make every state shareable,
+      // so this URL lands a human on the live shortlist with these exact
+      // criteria applied and every input editable. Encode from the page's
+      // own defaults so the address decodes to the state that recomputes
+      // this result.
+      const scenario = encodeScenario({ ...DEFAULT_INPUT, ...((args ?? {}) as Partial<ShortlistInput>) } as ShortlistInput);
+      const resumeUrl = `${SITE_URL}/shortlist${scenario ? `?${scenario}` : ""}`;
       return {
         ...result,
+        resume_url: resumeUrl,
         _meta: {
           canonicalUrl: `${SITE_URL}/shortlist`,
-          note: "Reproduce this shortlist in a browser by applying the same criteria at the canonical URL.",
+          resume_url: resumeUrl,
+          note: "Hand resume_url to the human: it opens the live shortlist with these criteria applied and editable, one step from inviting these providers to respond in the workspace.",
         },
       };
     }
