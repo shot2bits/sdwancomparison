@@ -10,9 +10,14 @@ const PLAIN_TOOL_NAMES = new Set<string>(MCP_TOOL_DEFINITIONS.map((t) => t.name)
 
 /**
  * MCP server: JSON-RPC 2.0 over Streamable HTTP (stateless).
- * Canonical endpoint: /api/mcp (no trailing slash; this app does not use
- * trailing slashes). Some MCP clients do not follow 308 redirects on POST,
- * so always document the slash-less form.
+ * Canonical PUBLIC endpoint: https://netify.co.uk/sase/api/mcp/ WITH the
+ * trailing slash (corrected 25 July 2026 after Robert's live curl met
+ * "Redirecting..."): the apex site fronting netify.co.uk enforces trailing
+ * slashes and 308s the slash-less form BEFORE its /sase rewrite runs, and
+ * strict MCP clients refuse to follow redirects on POST. This app itself
+ * serves both forms (trailingSlash true + skipTrailingSlashRedirect, and
+ * the apex rewrite strips the slash on the way through), so the slashed
+ * form works everywhere and is the only form to document.
  *
  * Directory-grade upgrades (18 July 2026, assistant connector work):
  *  - Protocol version negotiation: echoes any supported client version
@@ -259,7 +264,7 @@ export async function GET(req: Request) {
     transport: "streamable-http (stateless)",
     protocol: "JSON-RPC 2.0 (MCP)",
     protocolVersions: SUPPORTED_PROTOCOLS,
-    endpoint: `${SITE_URL}/api/mcp`,
+    endpoint: `${SITE_URL}/api/mcp/`,
     connector_page: `${SITE_URL}/connector`,
     authentication: "none for research, drafting and estimating; write actions that reach named suppliers are token-gated per tool",
     tools: annotatedTools().map((t) => t.name),
