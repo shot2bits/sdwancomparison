@@ -42,6 +42,9 @@ export async function GET() {
     })),
     ...liveNotices,
     { loc: `${SITE_URL}/vendors`, priority: "0.9" },
+    // The /best/ INDEX was missing while all 20 children were listed
+    // (25 Jul): it is the hub Bing cites most from, so it belongs here.
+    { loc: `${SITE_URL}/best`, priority: "0.9" },
     ...BEST_PAGES.map((p) => ({
       loc: `${SITE_URL}/best/${p.slug}`,
       priority: "0.9",

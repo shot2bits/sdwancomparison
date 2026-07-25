@@ -123,7 +123,18 @@ export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
 export const NAV_CTA: NavLink = { label: "Start a project", href: "/" };
 
 /* ── The intent navigation (the final architecture, 23 Jul, Robert's
- * "Please implement"). Five groups labelled by buyer intent; item labels
+ * "Please implement"), re-cut on the AI evidence 25 Jul: Find suppliers and
+ * Compare & plan were two doors on the one question carrying ~27,000 Bing
+ * citations, so they merge into Compare providers; the BT product tools leave
+ * the neutral comparison menu for a neutral Pricing and cost tools parent;
+ * Solutions now leads with the pages the engines cite (managed SASE 5,398
+ * citations, SSE 3,823) instead of four form prefills; For partners becomes
+ * Partner programmes led by programme TYPES with BT as one entry; and
+ * /sd-wan-provider-and-vendor-comparison/ leaves the menu because it 301s to
+ * /sase/shortlist/, which the menu now links directly. THE TWIN of the main
+ * repo's components/mega-nav.tsx MEGA_DATA: keep the two in sync item for
+ * item. UNION LINE held: nothing the old menu reached became unreachable.
+ * Five groups labelled by buyer intent; item labels
  * use the market's nouns; ONE label per URL across the whole menu (the
  * previous nav listed /sase/vendors/ twice under two names). Research is
  * a primary destination for the first time, and partner surfaces never
@@ -140,66 +151,65 @@ export type MegaGroup = {
 
 export const MEGA_GROUPS: MegaGroup[] = [
   {
-    label: "Find suppliers",
-    columns: 1,
-    items: [
-      { label: "Evaluated directory", href: "/sase/vendors/", desc: "30 suppliers graded on 40 capabilities, every grade dated and sourced." },
-      { label: "All listed suppliers", href: "/marketplace/", desc: "The wider supplier directory, including managed service providers." },
-      { label: "Demand index", href: "/sase/demand/", desc: "Enterprise demand and supplier interest, measured." },
-    ],
-  },
-  {
-    label: "Compare & plan",
+    label: "Compare providers",
     columns: 2,
     items: [
-      { label: "Vendor comparisons", href: "/vendor-comparison/", desc: "Head-to-head capability comparisons, graded from evidence." },
-      { label: "Shortlist builder", href: "/sase/shortlist/", desc: "Score every evaluated supplier against your exact requirements." },
-      // One Door repair (25 Jul, bug sweep): the old href 301-bounced to the
-      // apex; the label is Robert's law, the destination is now honest.
-      { label: "RFP Builder", href: "https://netify.co.uk/", desc: "The question-by-question builder for SASE, SD-WAN and SSE." },
-      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership." },
-      { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "The questions technology buyers ask AI, explorable." },
-      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/", desc: "A complete SASE Statement of Requirements to inspect." },
-    ],
-  },
-  {
-    label: "Research",
-    columns: 1,
-    items: [
-      { label: "Insights: the blog", href: "/insights/", desc: "Guides, market analysis and procurement strategy, dated and authored." },
-      { label: "SD-WAN research hub", href: "/sd-wan/", desc: "Global and regional SD-WAN provider research." },
-      { label: "Provider & vendor market guide", href: "/sd-wan-provider-and-vendor-comparison/", desc: "The full market comparison guide, updated for 2026." },
-      { label: "Research methodology", href: "/methodology/", desc: "How every grade is earned, and what the statuses mean." },
+      { label: "Build your shortlist", href: "/sase/shortlist/", desc: "Score every evaluated supplier against your exact requirements, or describe them and let the advisor rank." },
+      { label: "Evaluated providers", href: "/sase/vendors/", desc: "30 suppliers graded on 40 capabilities, every grade dated and sourced." },
+      { label: "Provider comparisons", href: "/vendor-comparison/", desc: "Head-to-head capability comparisons, graded from evidence." },
+      { label: "Best providers by sector", href: "/sase/best/", desc: "Ranked shortlists for 20 sectors and situations, from healthcare to MPLS migration." },
+      { label: "All listed suppliers", href: "/marketplace/", desc: "The wider supplier directory, including managed service providers." },
+      { label: "What the market is buying", href: "/sase/demand/", desc: "Enterprise demand and supplier interest, measured." },
     ],
   },
   {
     label: "Solutions",
     columns: 2,
     items: [
-      // Internal linking before redirects (24 Jul, the shortlist walk found
-      // these four still hopping through the wizard 301s): the sector doors
-      // carry their prefill sentences straight to the desk, matching the
-      // sidebar's Get quotes doors.
-      { label: "Healthcare & pharma", href: "https://netify.co.uk/?q=We%20are%20a%20healthcare%20provider%20replacing%20legacy%20connectivity%20with%20managed%20SD-WAN%20and%20SASE.", desc: "SASE and SD-WAN requirements mapped for healthcare trusts and pharma." },
-      { label: "Retail & e-commerce", href: "https://netify.co.uk/?q=We%20are%20a%20retailer%20needing%20a%20PCI%20DSS%20compliant%20network.", desc: "PCI DSS compliant architectures for multi-site retail estates." },
-      { label: "Manufacturing & OT", href: "https://netify.co.uk/?q=We%20are%20a%20manufacturer%20securing%20IT%20and%20OT%20with%20managed%20SASE.", desc: "Secure SASE with IT and OT integration for industrial sites." },
-      { label: "Financial services", href: "https://netify.co.uk/?q=We%20are%20a%20financial%20services%20firm%20consolidating%20network%20and%20security%20into%20SASE.", desc: "Audited, low-latency network security frameworks for regulated finance." },
+      { label: "SD-WAN research hub", href: "/sd-wan/", desc: "Global and regional SD-WAN provider research." },
+      { label: "Managed SASE providers", href: "/insights/10-best-managed-sase-providers/", desc: "The managed SASE market guide, authored, reviewed and dated." },
+      { label: "SSE and cyber security vendors", href: "/insights/best-sse-security-service-edge-vendors/", desc: "Security service edge compared, and where SSE stops and SASE starts." },
+      { label: "Healthcare and pharma", href: "/sd-wan-for-healthcare/", desc: "SASE and SD-WAN for clinical sites, trusts and pharma estates." },
+      { label: "Retail and e-commerce", href: "/sd-wan-sase-for-retail/", desc: "PCI DSS compliant architectures for multi-site retail estates." },
+      { label: "Financial services", href: "/sd-wan-sase-for-financial-services/", desc: "Audited, low-latency network security for regulated finance." },
+      { label: "Manufacturing and OT", href: "/sd-wan-sase-for-manufacturing/", desc: "Secure SASE with IT and OT integration for industrial sites." },
     ],
-    footerLink: { label: "Best by sector: all sector guides", href: "/sase/best/" },
   },
   {
-    label: "For partners",
+    label: "Pricing and cost tools",
     columns: 1,
     items: [
-      { label: "BT Business portfolio", href: "/resell/bt-business-services/", desc: "BTnet, hosted VoIP and BT managed SASE." },
+      { label: "Cost and TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership for SASE and SD-WAN." },
+      { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/", desc: "Indicative per-seat pricing on live BT price lists, in about 60 seconds." },
+      { label: "BTnet leased line costs", href: "/bt-leased-line-cost-calculator-tool/", desc: "What a leased line actually costs, by bandwidth, term and install." },
+      { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/", desc: "One Phone is switched off: map your usage to the right replacement and price it." },
+      { label: "Buy BT Business through Netify", href: "/buy-bt/", desc: "Describe the requirement once and price Cloud Voice, BTnet and security together." },
+    ],
+  },
+  {
+    label: "Partner programmes",
+    columns: 2,
+    items: [
+      { label: "Compare reseller programmes", href: "/insights/broadband-reseller-companies/", desc: "The UK reseller programme comparison, filterable, with margins named." },
+      { label: "Broadband reseller opportunities", href: "/resell/bt-business-broadband/", desc: "Wholesale and white label broadband routes, with the commission model shown." },
+      { label: "SD-WAN reseller opportunities", href: "/resell/sd-wan-reseller/", desc: "Describe your business and every SD-WAN route is judged for you, with reasons." },
+      { label: "VoIP reseller opportunities", href: "/resell/voip-reseller/", desc: "White label, vendor programmes and the authorised BT route, judged for your shape." },
+      { label: "BT Business Partner Programme", href: "/bt-reseller-programme/", desc: "The reseller workspace: model earnings, check eligibility, compare routes and apply." },
+      { label: "BT Business portfolio", href: "/resell/bt-business-services/", desc: "BTnet, hosted VoIP, cloud security and BT managed SASE, product by product." },
       { label: "BT SD-WAN & SASE", href: "/resell/bt-sd-wan/", desc: "Enterprise BT network sourcing." },
       { label: "Virgin Media Business", href: "/resell/virgin-media-business/", desc: "High-capacity internet and SD-WAN from VMB." },
-      { label: "Reseller order portal", href: "https://reseller.netify.co.uk/", desc: "Quote, order and track BT reseller business in the partner application." },
-      // Twin-sync owed on the lanes board (25 Jul): the BT estate's market
-      // rooms join the partners group so both estates speak both rooms.
-      { label: "SD-WAN reseller routes", href: "https://netify.co.uk/resell/sd-wan-reseller/", desc: "Nine routes into SD-WAN reselling, compared with named sources; the assessment lives in a shareable address." },
-      { label: "VoIP reseller routes", href: "https://netify.co.uk/resell/voip-reseller/", desc: "Hosted-first VoIP reselling routes, compared honestly, including when the Netify route is not the fit." },
-      { label: "Broadband reseller dataset", href: "/insights/broadband-reseller-companies/", desc: "The UK broadband reseller comparison, filterable." },
+    ],
+    footerLink: { label: "Reseller order portal", href: "https://reseller.netify.co.uk/" },
+  },
+  {
+    label: "Research",
+    columns: 1,
+    items: [
+      { label: "Insights: the blog", href: "/insights/", desc: "Guides, market analysis and procurement strategy, dated and authored." },
+      { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "The questions technology buyers ask AI, explorable." },
+      { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/", desc: "A complete SASE Statement of Requirements to inspect." },
+      { label: "Research methodology", href: "/methodology/", desc: "How every grade is earned, and what the statuses mean." },
+      { label: "AI assistant connector", href: "/sase/connector/", desc: "Connect an assistant or agent to Netify over MCP, and what it can do." },
     ],
   },
 ];

@@ -33,8 +33,16 @@ export const metadata: Metadata = {
 // nav spec): in-app links carry the /sase prefix explicitly (plain anchors
 // miss Next's basePath); marketing-site links are root-relative and resolve
 // on the public host. Keep labels in sync with the main site's footer.
-/* The pillar footer (the final architecture, 23 Jul, "Please implement"):
- * five columns mirroring the four pillars plus governance. The per-item
+/* The pillar footer (the final architecture, 23 Jul, "Please implement"),
+ * re-cut on the AI evidence 25 Jul into SIX columns that declare the
+ * architecture rather than repeat the menu. THE TWIN of the main repo's
+ * lib/home-content.ts FOOTER_COLUMNS: keep the two in sync, column for
+ * column. The redirecting provider-and-vendor-comparison URL is replaced by
+ * its destination, the RFP door stops routing through a 301, the two cited
+ * market guides gain seats, a neutral Pricing and cost tools column carries
+ * the revenue routes (two of which were in no chrome at all), Partner
+ * Programmes leads with programme TYPES with BT as one entry, and the
+ * orphaned Acceptable Use Policy joins governance. UNION LINE held. The per-item
  * audit governs: nothing valuable removed, the one exact duplicate gone
  * (shortlist listed twice), the reseller portal linked for the first
  * time, sector preloads live in the nav's Solutions group rather than
@@ -43,52 +51,66 @@ export const metadata: Metadata = {
  * linking before redirects, and no page orphaned by the chrome. */
 const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
-    title: "Procurement",
+    title: "Marketplace and procurement",
     links: [
       { label: "How It Works", href: "/sase/how-it-works/" },
       { label: "SASE & SD-WAN RFP Builder", href: "https://netify.co.uk/" },
-      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
-      { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
+      { label: "Publish a project notice", href: "/sase/opportunities/new/" },
+      { label: "Opportunities board", href: "/sase/opportunities/board/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
-      { label: "Marketplace: open opportunities", href: "/sase/opportunities/board/" },
+      { label: "SD-WAN RFI Builder App", href: "/sd-wan-rfi-builder-app/" },
+      { label: "For suppliers", href: "/sase/for-suppliers/" },
+    ],
+  },
+  {
+    title: "Providers and comparisons",
+    links: [
+      { label: "Build your shortlist", href: "/sase/shortlist/" },
+      { label: "Evaluated providers", href: "/sase/vendors/" },
+      { label: "All listed suppliers", href: "/marketplace/" },
+      { label: "Provider comparisons", href: "/vendor-comparison/" },
+      { label: "Best providers by sector", href: "/sase/best/" },
+      { label: "What the market is buying", href: "/sase/demand/" },
       { label: "AI assistant connector", href: "/sase/connector/" },
     ],
   },
   {
-    title: "Suppliers",
-    links: [
-      { label: "Evaluated directory", href: "/sase/vendors/" },
-      { label: "Best by sector", href: "/sase/best/" },
-      { label: "All listed suppliers", href: "/marketplace/" },
-      { label: "Demand index", href: "/sase/demand/" },
-      { label: "Vendor comparisons", href: "/vendor-comparison/" },
-    ],
-  },
-  {
-    title: "Research",
+    title: "Solutions and sectors",
     links: [
       { label: "Insights: the blog", href: "/insights/" },
       { label: "SD-WAN research hub", href: "/sd-wan/" },
-      { label: "Provider & vendor market guide", href: "/sd-wan-provider-and-vendor-comparison/" },
+      { label: "Managed SASE providers", href: "/insights/10-best-managed-sase-providers/" },
+      { label: "SSE and cyber security vendors", href: "/insights/best-sse-security-service-edge-vendors/" },
+      { label: "SD-WAN for healthcare", href: "/sd-wan-for-healthcare/" },
+      { label: "SD-WAN & SASE for retail", href: "/sd-wan-sase-for-retail/" },
+      { label: "SD-WAN & SASE for financial services", href: "/sd-wan-sase-for-financial-services/" },
+      { label: "SD-WAN & SASE for manufacturing", href: "/sd-wan-sase-for-manufacturing/" },
       { label: "Netify Resources", href: "/resources/" },
       { label: "Healthcare Trust & Evidence", href: "/healthcare-trust-and-evidence/" },
-      { label: "Research Methodology", href: "/methodology/" },
+    ],
+  },
+  {
+    title: "Pricing and cost tools",
+    links: [
+      { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
+      { label: "BT Cloud Voice pricing", href: "/tools/bt-cloud-voice-pricing-calculator/" },
+      { label: "BTnet leased line costs", href: "/bt-leased-line-cost-calculator-tool/" },
+      { label: "BT One Phone replacement", href: "/tools/bt-one-phone-replacement/" },
+      { label: "Buy BT Business through Netify", href: "/buy-bt/" },
     ],
   },
   {
     title: "Partner Programmes",
     links: [
+      { label: "Compare reseller programmes", href: "/insights/broadband-reseller-companies/" },
+      { label: "Broadband reseller opportunities", href: "/resell/bt-business-broadband/" },
+      { label: "SD-WAN reseller opportunities", href: "/resell/sd-wan-reseller/" },
+      { label: "VoIP reseller opportunities", href: "/resell/voip-reseller/" },
+      { label: "BT Business Partner Programme", href: "/bt-reseller-programme/" },
       { label: "BT Business portfolio", href: "/resell/bt-business-services/" },
-      { label: "BT Business Broadband", href: "/resell/bt-business-broadband/" },
-      { label: "BT Business Internet (BTnet)", href: "/resell/bt-business-internet/" },
-      { label: "BT Cloud Voice", href: "/resell/bt-hosted-voip/" },
-      { label: "BT Cloud Security", href: "/resell/bt-cloud-security/" },
-      { label: "BT SD-WAN", href: "/resell/bt-sd-wan/" },
-      { label: "BT SASE", href: "/resell/bt-sase/" },
       { label: "Virgin Media Business", href: "/resell/virgin-media-business/" },
       { label: "Reseller order portal", href: "https://reseller.netify.co.uk/" },
-      { label: "Broadband reseller dataset", href: "/insights/broadband-reseller-companies/" },
     ],
   },
   {
@@ -98,12 +120,15 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       { label: "About the Netify Marketplace", href: "/about-netify-marketplace/" },
       { label: "How Netify makes money", href: "/how-netify-makes-money/" },
       { label: "Editorial Policy & Corrections", href: "/editorial-policy/" },
+      { label: "Acceptable Use Policy", href: "/acceptable-use-policy/" },
+      { label: "Research Methodology", href: "/methodology/" },
       { label: "Our Team", href: "/staff-list/" },
       { label: "Netify Authors", href: "/author-list/" },
       { label: "Contact Us", href: "/contact/" },
       { label: "Privacy Policy", href: "/privacy-policy/" },
       { label: "Cookie Policy", href: "/cookie-policy/" },
       { label: "Terms and Conditions", href: "/terms-conditions/" },
+      { label: "Corrections and updates", href: "/methodology/#corrections-and-updates" },
     ],
   },
 ];
@@ -136,7 +161,7 @@ export default function RootLayout({
           <footer className="border-t border-[var(--ink-200)] mt-24">
             <div className="max-w-6xl mx-auto px-6 py-16">
               {/* Link columns - mirrors the netify.co.uk footer */}
-              <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5 text-sm">
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 text-sm">
                 {FOOTER_COLUMNS.map((col) => (
                   <div key={col.title}>
                     <p className="eyebrow mb-4">{col.title}</p>
