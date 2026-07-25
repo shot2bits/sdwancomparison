@@ -9,9 +9,16 @@
  * Humans and agents observe identical truth.
  *
  * Visually kin to the homepage prompt on purpose: the same white card,
- * the same underlined editable sentence, the same single soft shadow,
- * amber only on the primary action. A buyer who has seen the front door
- * recognises the instrument wherever they meet it again.
+ * the same single soft shadow, amber only on the primary action. A buyer
+ * who has seen the front door recognises the instrument wherever they
+ * meet it again.
+ *
+ * THE AI WINDOW (25 Jul 2026, Robert's mockup sign-off, twin-synced with
+ * the main repo's component the same day): the single-line underlined
+ * input read as a printed statement, so nobody knew they could write.
+ * Presentation only: heading, helper and a real textarea seeded with the
+ * derived sentence. Derivation, consent wording, events and the
+ * assistant footer untouched. Enter submits, Shift+Enter makes a line.
  */
 
 import { useState } from "react";
@@ -38,19 +45,22 @@ export default function Continuation({ c, pageUrl }: { c: ContinuationData | nul
       {pageUrl && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(continuationJsonLd(c, pageUrl)) }} />
       )}
-      <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">{c.stamp}</p>
-      <div className="relative mt-2 border-b-2 border-zinc-300 focus-within:border-amber-500">
-        <input
-          value={sentence}
-          onChange={(e) => setSentence(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); go(); } }}
-          aria-label="Your first sentence, editable"
-          className="w-full bg-transparent py-2 pl-0.5 pr-7 text-[15px] text-zinc-800 outline-none"
-        />
-        <span aria-hidden="true" className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-zinc-400">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5 L10.5 3.5 L4 10 L1.5 10.5 L2 8 Z" stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round" /></svg>
-        </span>
-      </div>
+      <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">AI advisor &middot; {c.stamp}</p>
+      <h3 className="m-0 mt-1.5 text-[19px] font-semibold tracking-[-.01em] text-zinc-900">Describe what you need</h3>
+      <p className="m-0 mt-1 text-[13px] leading-relaxed text-zinc-500">
+        Your first sentence is drafted from {c.family === "insight" ? "this article" : "this page"}. Edit it, or replace it with your own words: sites, regions, what must not go down.
+      </p>
+      <textarea
+        value={sentence}
+        onChange={(e) => setSentence(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); go(); } }}
+        aria-label="Your first sentence, editable"
+        rows={3}
+        className="mt-3 min-h-[76px] w-full resize-y rounded-[10px] border-[1.5px] border-zinc-300 bg-white px-3.5 py-3 text-[15px] leading-relaxed text-zinc-800 outline-none transition-colors focus:border-amber-500"
+      />
+      <p className="m-0 mt-1.5 text-[11px] text-zinc-400">
+        Drafted from {c.family === "insight" ? "this article" : "this page"}. Everything you type stays yours to edit before anything is published.
+      </p>
       <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
           type="button"
