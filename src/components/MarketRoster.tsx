@@ -17,15 +17,14 @@ export default function MarketRoster() {
       <p className="m-0 text-[10px] font-semibold uppercase tracking-[.13em] text-zinc-400">
         The connected market &middot; every grade dated and sourced
       </p>
+      {/* Each name holds together; the spaces around the separator give
+          the browser its break points (the first render shipped with no
+          whitespace between spans and overflowed as one line). */}
       <p className="m-0 mt-1.5 text-[11px] leading-[2] text-zinc-400">
         {names.map((n, i) => (
-          <span key={n} className="whitespace-nowrap">
-            {n}
-            {i < names.length - 1 ? (
-              <span className="mx-1.5 text-zinc-300" aria-hidden="true">
-                &middot;
-              </span>
-            ) : null}
+          <span key={n}>
+            <span className="whitespace-nowrap">{n}</span>
+            {i < names.length - 1 ? <span className="text-zinc-300" aria-hidden="true">{" · "}</span> : null}
           </span>
         ))}
       </p>
