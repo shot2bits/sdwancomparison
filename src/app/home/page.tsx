@@ -28,11 +28,15 @@ const APEX = "https://netify.co.uk";
  *  mockup v4 sign-off). Twin of the definition in
  *  src/app/workspace/page.tsx, kept verbatim-identical. */
 const CANON_H1 = "Netify is a real-time living SASE Security & SD-WAN Buying Assistant.";
+/** The mechanism (Robert, 25 Jul night, v5): the subhead and the page's
+ *  spoken description. Twin of src/app/workspace/page.tsx, verbatim. */
 const CANON_REST =
-  "Connected in real time to 30+ SASE & SD-WAN vendors and managed service providers, from Gartner leaders to niche players. Used by UK & North American national and multinational businesses.";
+  "Start with a single prompt. The Netify SASE Security & SD-WAN buying assistant translates your high-level needs into technical requirements. Build your Statement of Requirements, RFI or RFP. Publish it to our global opportunity board.";
 const CANON_CAPS =
-  "Build your Statement of Requirements, RFI or RFP. Post to the Netify global opportunity board and start receiving responses from vendors and managed service providers, all without a single call. Message vendors and providers to request demos and reach their local teams. Get bids and pricing. Shortlist the solutions that match.";
-const CANON = `${CANON_H1} ${CANON_REST} ${CANON_CAPS}`;
+  "Start receiving responses from vendors and managed service providers, all without a single call. Message vendors and providers to request demos and reach their local teams. Get bids and pricing. Shortlist the solutions that match.";
+const CANON_PROOF =
+  "Connected in real time to 30+ SASE & SD-WAN vendors and managed service providers, from Gartner leaders to niche players. Used by UK & North American national and multinational businesses.";
+const CANON = `${CANON_H1} ${CANON_REST} ${CANON_CAPS} ${CANON_PROOF}`;
 
 export const metadata: Metadata = {
   title: "The real-time living SASE Security & SD-WAN Buying Assistant",
@@ -103,19 +107,22 @@ export default function Page() {
         >
           {CANON_H1}
         </h1>
-        <p id="page-subhead" className="mb-0 mt-3 max-w-3xl text-[14px] leading-relaxed text-zinc-500">
-          {CANON_REST}
+        <p id="page-subhead" className="mb-0 mt-3 max-w-3xl text-[14px] leading-relaxed text-zinc-600">
+          <b className="font-semibold text-zinc-900">Start with a single prompt.</b> The Netify SASE Security &amp; SD-WAN
+          buying assistant translates your high-level needs into technical requirements. Build your Statement of
+          Requirements, RFI or RFP. Publish it to our global opportunity board.
         </p>
-        {/* The capabilities line (Robert, 25 Jul, mockup v4): his seven
-            verbs leading, text identical to CANON_CAPS for the machine
-            surfaces; only the verbs carry weight. */}
+        {/* The capabilities line (Robert, v4 then v5): the openers moved
+            up into the mechanism, so this begins where the market starts
+            answering; text identical to CANON_CAPS for the machine
+            surfaces, only the verbs carry weight. */}
         <p className="m-0 mt-2.5 max-w-3xl text-[13.5px] leading-[1.85] text-zinc-500">
-          <b className="font-semibold text-zinc-800">Build</b> your Statement of Requirements, RFI or RFP.{" "}
-          <b className="font-semibold text-zinc-800">Post</b> to the Netify global opportunity board and start receiving responses from vendors and managed service providers, all without a single call.{" "}
+          <b className="font-semibold text-zinc-800">Start receiving</b> responses from vendors and managed service providers, all without a single call.{" "}
           <b className="font-semibold text-zinc-800">Message</b> vendors and providers to request demos and reach their local teams.{" "}
           <b className="font-semibold text-zinc-800">Get</b> bids and pricing.{" "}
           <b className="font-semibold text-zinc-800">Shortlist</b> the solutions that match.
         </p>
+        <p className="m-0 mt-2.5 max-w-3xl text-[13px] leading-relaxed text-zinc-500">{CANON_PROOF}</p>
         <p className="m-0 mt-4 flex max-w-3xl items-start gap-2 text-[13px] leading-relaxed text-zinc-500">
           <svg width="13" height="15" viewBox="0 0 14 16" className="mt-[3px] shrink-0" aria-hidden="true">
             <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#71717a" strokeWidth="1.3" />

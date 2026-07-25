@@ -28,11 +28,15 @@ import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchem
  *  until the live supply-side slice makes them first-class). Respoken
  *  identically in src/app/home/page.tsx. */
 const CANON_H1 = "Netify is a real-time living SASE Security & SD-WAN Buying Assistant.";
+/** The mechanism (Robert, 25 Jul night, v5): the subhead and the page's
+ *  spoken description. His words; "high-level" hyphenated, house comma. */
 const CANON_REST =
-  "Connected in real time to 30+ SASE & SD-WAN vendors and managed service providers, from Gartner leaders to niche players. Used by UK & North American national and multinational businesses.";
+  "Start with a single prompt. The Netify SASE Security & SD-WAN buying assistant translates your high-level needs into technical requirements. Build your Statement of Requirements, RFI or RFP. Publish it to our global opportunity board.";
 const CANON_CAPS =
-  "Build your Statement of Requirements, RFI or RFP. Post to the Netify global opportunity board and start receiving responses from vendors and managed service providers, all without a single call. Message vendors and providers to request demos and reach their local teams. Get bids and pricing. Shortlist the solutions that match.";
-const CANON = `${CANON_H1} ${CANON_REST} ${CANON_CAPS}`;
+  "Start receiving responses from vendors and managed service providers, all without a single call. Message vendors and providers to request demos and reach their local teams. Get bids and pricing. Shortlist the solutions that match.";
+const CANON_PROOF =
+  "Connected in real time to 30+ SASE & SD-WAN vendors and managed service providers, from Gartner leaders to niche players. Used by UK & North American national and multinational businesses.";
+const CANON = `${CANON_H1} ${CANON_REST} ${CANON_CAPS} ${CANON_PROOF}`;
 
 export const metadata: Metadata = {
   title: "The real-time living SASE Security & SD-WAN Buying Assistant",
@@ -88,19 +92,22 @@ export default function Page() {
         >
           {CANON_H1}
         </h1>
-        <p id="page-subhead" className="mb-0 mt-1 max-w-3xl text-[12.5px] leading-relaxed text-zinc-500">
-          {CANON_REST}
+        <p id="page-subhead" className="mb-0 mt-1 max-w-3xl text-[13px] leading-relaxed text-zinc-600">
+          <b className="font-semibold text-zinc-900">Start with a single prompt.</b> The Netify SASE Security &amp; SD-WAN
+          buying assistant translates your high-level needs into technical requirements. Build your Statement of
+          Requirements, RFI or RFP. Publish it to our global opportunity board.
         </p>
-        {/* The capabilities line (Robert, 25 Jul, mockup v4): his seven
-            verbs leading, text identical to CANON_CAPS for the machine
-            surfaces; only the verbs carry weight. */}
+        {/* The capabilities line (Robert, v4 then v5): the openers moved
+            up into the mechanism, so this begins where the market starts
+            answering; text identical to CANON_CAPS for the machine
+            surfaces, only the verbs carry weight. */}
         <p className="m-0 mt-2 max-w-3xl text-[12.5px] leading-[1.85] text-zinc-500">
-          <b className="font-semibold text-zinc-800">Build</b> your Statement of Requirements, RFI or RFP.{" "}
-          <b className="font-semibold text-zinc-800">Post</b> to the Netify global opportunity board and start receiving responses from vendors and managed service providers, all without a single call.{" "}
+          <b className="font-semibold text-zinc-800">Start receiving</b> responses from vendors and managed service providers, all without a single call.{" "}
           <b className="font-semibold text-zinc-800">Message</b> vendors and providers to request demos and reach their local teams.{" "}
           <b className="font-semibold text-zinc-800">Get</b> bids and pricing.{" "}
           <b className="font-semibold text-zinc-800">Shortlist</b> the solutions that match.
         </p>
+        <p className="m-0 mt-2 max-w-3xl text-[12.5px] leading-relaxed text-zinc-500">{CANON_PROOF}</p>
         <p className="m-0 mt-2.5 max-w-3xl border-l-2 border-amber-400 pl-2.5 text-[11.5px] leading-relaxed text-zinc-600">
           <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated
           supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
