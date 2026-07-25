@@ -88,7 +88,7 @@ export default function Page() {
             vendors, collect structured comparable responses, manage NDAs or score submissions. The
             Netify platform does: one click carries your estimator inputs into the{" "}
             <a
-              href="/sase/rfp-builder/"
+              href="https://netify.co.uk/"
               className="font-medium text-amber-700 underline decoration-amber-300 underline-offset-2 hover:decoration-amber-600"
             >
               SASE and SD-WAN RFP Builder

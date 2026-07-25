@@ -1098,7 +1098,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <li><strong>Is this your RFP?</strong> Sign in below with the email you used when you created it, or reopen the private builder link you bookmarked (it carries your key).</li>
         </ul>
         <div className="mb-5"><SignIn role="buyer" prompt="Sign in with the email that created this RFP." /></div>
-        <p className="text-sm"><a href="/sase/rfp-builder/" className="underline">Or start your own RFP</a></p>
+        <p className="text-sm"><a href="https://netify.co.uk/" className="underline">Or start your own RFP</a></p>
       </div>
     );
   }

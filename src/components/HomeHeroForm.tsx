@@ -3,9 +3,15 @@
 /**
  * Homepage hero form: the Shiply pattern (Robert, 14 July 2026). The single
  * action a new visitor needs is right in the hero: type what you are buying,
- * press the button, land in the Describe wizard with the title already
- * answered. No reading required to understand the product; the form is the
+ * press the button, arrive in the workspace with your words already in the
+ * prompt. No reading required to understand the product; the form is the
  * explanation.
+ *
+ * One Door repair (25 July 2026, found by the bug sweep): this form used to
+ * send the text to the wizard path as ?title=, but that path now 301s to
+ * the apex and the workspace does not read title, so a typed project name
+ * was silently lost at the door. It now travels as ?q=, the same carrier
+ * every other door uses, and the desk starts from it.
  */
 
 import { useState } from "react";
@@ -28,8 +34,8 @@ export default function HomeHeroForm() {
     if (emailCaught) return; // the hint below explains; never submit an email as a title
     fireNetifyEvent("home_hero_start", { has_title: title.trim().length >= 8 ? "yes" : "no" });
     const t = title.trim().slice(0, 120);
-    const q = t.length >= 8 ? `?title=${encodeURIComponent(t)}` : "";
-    window.location.assign(`/sase/rfp-builder/new/${q}`);
+    const q = t.length >= 8 ? `?q=${encodeURIComponent(t)}` : "";
+    window.location.assign(`https://netify.co.uk/${q}`);
   }
 
   return (

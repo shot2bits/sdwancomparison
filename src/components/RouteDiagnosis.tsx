@@ -59,7 +59,7 @@ function recommend(a: Answer): { path: string; href: string; cta: string; why: s
   if (a.formality === "formal" || a.urgency === "responses") {
     return {
       path: "Build a full RFP",
-      href: "/sase/rfp-builder/",
+      href: "https://netify.co.uk/",
       cta: "Open the RFP Builder",
       why: "You want structured, comparable supplier proposals — that needs methodology-backed questions, evidence requests and a scoring matrix. You can still post a notice first to warm up the market.",
     };
@@ -124,7 +124,7 @@ export default function RouteDiagnosis() {
           </div>
           <p className="mt-3 text-xs text-[var(--ink-500)]">
             All routes stay open: <a href="/sase/opportunities/new/" className="underline">publish an RFI</a> ·{" "}
-            <a href="/sase/rfp-builder/" className="underline">build an RFP</a> ·{" "}
+            <a href="https://netify.co.uk/" className="underline">build an RFP</a> ·{" "}
             <a href="/sase/shortlist/" className="underline">build a shortlist</a> ·{" "}
             <a href="/sase/opportunities/board/" className="underline">browse the board</a>
           </p>

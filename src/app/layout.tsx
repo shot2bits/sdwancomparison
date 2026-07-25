@@ -46,7 +46,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Procurement",
     links: [
       { label: "How It Works", href: "/sase/how-it-works/" },
-      { label: "SASE & SD-WAN RFP Builder", href: "/sase/rfp-builder/" },
+      { label: "SASE & SD-WAN RFP Builder", href: "https://netify.co.uk/" },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/" },
       { label: "SD-WAN Shortlist Builder", href: "/sase/shortlist/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },

@@ -154,7 +154,9 @@ export const MEGA_GROUPS: MegaGroup[] = [
     items: [
       { label: "Vendor comparisons", href: "/vendor-comparison/", desc: "Head-to-head capability comparisons, graded from evidence." },
       { label: "Shortlist builder", href: "/sase/shortlist/", desc: "Score every evaluated supplier against your exact requirements." },
-      { label: "RFP Builder", href: "/sase/rfp-builder/", desc: "The question-by-question builder for SASE, SD-WAN and SSE." },
+      // One Door repair (25 Jul, bug sweep): the old href 301-bounced to the
+      // apex; the label is Robert's law, the destination is now honest.
+      { label: "RFP Builder", href: "https://netify.co.uk/", desc: "The question-by-question builder for SASE, SD-WAN and SSE." },
       { label: "Cost & TCO estimator", href: "/sase/cost-estimator/", desc: "Model budget and total cost of ownership." },
       { label: "Question bank", href: "/sase/rfp-builder/questions/", desc: "The questions technology buyers ask AI, explorable." },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/", desc: "A complete SASE Statement of Requirements to inspect." },
