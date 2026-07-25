@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
+import MarketRoster from "@/components/MarketRoster";
 import MegaNav from "@/components/MegaNav";
 import { getOrganizationSchema } from "@/lib/structured-data";
 
@@ -22,19 +23,24 @@ import { getOrganizationSchema } from "@/lib/structured-data";
 
 const APEX = "https://netify.co.uk";
 
-/** The canonical paragraph, Robert's words verbatim (23 Jul 2026). */
-const CANON_H1 = "Netify is a living SASE & SD-WAN procurement marketplace.";
+/** The canonical top text, Robert's words verbatim (revised by Robert
+ *  25 Jul 2026 evening, the real-time living Buying Assistant ruling,
+ *  mockup v4 sign-off). Twin of the definition in
+ *  src/app/workspace/page.tsx, kept verbatim-identical. */
+const CANON_H1 = "Netify is a real-time living SASE Security & SD-WAN Buying Assistant.";
 const CANON_REST =
-  "Build your Statement of Requirements (SoR), RFI or full RFP, then publish anonymously to a curated marketplace of 30+ leading vendors and managed service providers. Receive competing proposals, compare solutions, build your shortlist and manage your procurement from a single description of your project.";
-const CANON = `${CANON_H1} ${CANON_REST}`;
+  "Connected in real time to 30+ SASE & SD-WAN vendors and managed service providers, from Gartner leaders to niche players. Used by UK & North American national and multinational businesses.";
+const CANON_CAPS =
+  "Build your Statement of Requirements, RFI or RFP. Post to the Netify global opportunity board and start receiving responses from vendors and managed service providers, all without a single call. Message vendors and providers to request demos and reach their local teams. Get bids and pricing. Shortlist the solutions that match.";
+const CANON = `${CANON_H1} ${CANON_REST} ${CANON_CAPS}`;
 
 export const metadata: Metadata = {
-  title: "The living SASE & SD-WAN procurement marketplace",
+  title: "The real-time living SASE Security & SD-WAN Buying Assistant",
   description: CANON,
   alternates: { canonical: `${APEX}/` },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Netify | The living SASE & SD-WAN procurement marketplace",
+    title: "Netify | The real-time living SASE Security & SD-WAN Buying Assistant",
     description: CANON,
     url: `${APEX}/`,
     type: "website",
@@ -100,6 +106,16 @@ export default function Page() {
         <p id="page-subhead" className="mb-0 mt-3 max-w-3xl text-[14px] leading-relaxed text-zinc-500">
           {CANON_REST}
         </p>
+        {/* The capabilities line (Robert, 25 Jul, mockup v4): his seven
+            verbs leading, text identical to CANON_CAPS for the machine
+            surfaces; only the verbs carry weight. */}
+        <p className="m-0 mt-2.5 max-w-3xl text-[13.5px] leading-[1.85] text-zinc-500">
+          <b className="font-semibold text-zinc-800">Build</b> your Statement of Requirements, RFI or RFP.{" "}
+          <b className="font-semibold text-zinc-800">Post</b> to the Netify global opportunity board and start receiving responses from vendors and managed service providers, all without a single call.{" "}
+          <b className="font-semibold text-zinc-800">Message</b> vendors and providers to request demos and reach their local teams.{" "}
+          <b className="font-semibold text-zinc-800">Get</b> bids and pricing.{" "}
+          <b className="font-semibold text-zinc-800">Shortlist</b> the solutions that match.
+        </p>
         <p className="m-0 mt-4 flex max-w-3xl items-start gap-2 text-[13px] leading-relaxed text-zinc-500">
           <svg width="13" height="15" viewBox="0 0 14 16" className="mt-[3px] shrink-0" aria-hidden="true">
             <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#71717a" strokeWidth="1.3" />
@@ -110,6 +126,8 @@ export default function Page() {
             supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
           </span>
         </p>
+
+        <MarketRoster />
 
         <ProjectDesk />
 
