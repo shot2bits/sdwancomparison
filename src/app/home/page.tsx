@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
-import MarketRoster from "@/components/MarketRoster";
+import HeroBlocks from "@/components/HeroBlocks";
 import MegaNav from "@/components/MegaNav";
 import { getOrganizationSchema } from "@/lib/structured-data";
 
@@ -100,43 +100,18 @@ export default function Page() {
       <MegaNav takeover />
       <main className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 sm:pt-12">
 
+        {/* The v6 Perplexity ruling (Robert, 26 Jul): the headline is the
+            one line above the prompt; every paragraph lives in the hero
+            blocks the desk renders beneath its prompt card. */}
         <h1
           id="page-h1"
-          className="m-0 max-w-3xl tracking-tight"
+          className="mx-auto m-0 max-w-3xl text-center tracking-tight"
           style={{ fontSize: "22px", lineHeight: 1.35, fontWeight: 600, letterSpacing: "-0.015em", color: "#18181b" }}
         >
           {CANON_H1}
         </h1>
-        <p id="page-subhead" className="mb-0 mt-3 max-w-3xl text-[14px] leading-relaxed text-zinc-600">
-          <b className="font-semibold text-zinc-900">Start with a single prompt.</b> The Netify SASE Security &amp; SD-WAN
-          buying assistant translates your high-level needs into technical requirements. Build your Statement of
-          Requirements, RFI or RFP. Publish it to our global opportunity board.
-        </p>
-        {/* The capabilities line (Robert, v4 then v5): the openers moved
-            up into the mechanism, so this begins where the market starts
-            answering; text identical to CANON_CAPS for the machine
-            surfaces, only the verbs carry weight. */}
-        <p className="m-0 mt-2.5 max-w-3xl text-[13.5px] leading-[1.85] text-zinc-500">
-          <b className="font-semibold text-zinc-800">Start receiving</b> responses from vendors and managed service providers, all without a single call.{" "}
-          <b className="font-semibold text-zinc-800">Message</b> vendors and providers to request demos and reach their local teams.{" "}
-          <b className="font-semibold text-zinc-800">Get</b> bids and pricing.{" "}
-          <b className="font-semibold text-zinc-800">Shortlist</b> the solutions that match.
-        </p>
-        <p className="m-0 mt-2.5 max-w-3xl text-[13px] leading-relaxed text-zinc-500">{CANON_PROOF}</p>
-        <p className="m-0 mt-4 flex max-w-3xl items-start gap-2 text-[13px] leading-relaxed text-zinc-500">
-          <svg width="13" height="15" viewBox="0 0 14 16" className="mt-[3px] shrink-0" aria-hidden="true">
-            <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#71717a" strokeWidth="1.3" />
-            <path d="M4.6 8 L6.4 9.8 L9.6 6.2" fill="none" stroke="#71717a" strokeWidth="1.3" strokeLinecap="round" />
-          </svg>
-          <span>
-            <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated
-            supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
-          </span>
-        </p>
 
-        <MarketRoster />
-
-        <ProjectDesk />
+        <ProjectDesk afterPrompt={<HeroBlocks />} />
 
         <section className="mx-auto mt-24 max-w-3xl border-t border-zinc-200 pt-6 text-[11px] leading-relaxed text-zinc-500">
           <p className="m-0">

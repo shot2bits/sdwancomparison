@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
-import MarketRoster from "@/components/MarketRoster";
+import HeroBlocks from "@/components/HeroBlocks";
 import MegaNav from "@/components/MegaNav";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -85,38 +85,18 @@ export default function Page() {
             commands the viewport; the words recede but do not leave. */}
         {/* Inline sizes: the site's un-layered heading rules would otherwise
             out-cascade the utilities and render the promise huge again. */}
+        {/* The v6 Perplexity ruling (Robert, 26 Jul): the headline is the
+            one line above the prompt; every paragraph lives in the hero
+            blocks the desk renders beneath its prompt card. */}
         <h1
           id="page-h1"
-          className="m-0 max-w-3xl tracking-tight"
+          className="mx-auto m-0 max-w-3xl text-center tracking-tight"
           style={{ fontSize: "16.5px", lineHeight: 1.45, fontWeight: 600, color: "#27272a" }}
         >
           {CANON_H1}
         </h1>
-        <p id="page-subhead" className="mb-0 mt-1 max-w-3xl text-[13px] leading-relaxed text-zinc-600">
-          <b className="font-semibold text-zinc-900">Start with a single prompt.</b> The Netify SASE Security &amp; SD-WAN
-          buying assistant translates your high-level needs into technical requirements. Build your Statement of
-          Requirements, RFI or RFP. Publish it to our global opportunity board.
-        </p>
-        {/* The capabilities line (Robert, v4 then v5): the openers moved
-            up into the mechanism, so this begins where the market starts
-            answering; text identical to CANON_CAPS for the machine
-            surfaces, only the verbs carry weight. */}
-        <p className="m-0 mt-2 max-w-3xl text-[12.5px] leading-[1.85] text-zinc-500">
-          <b className="font-semibold text-zinc-800">Start receiving</b> responses from vendors and managed service providers, all without a single call.{" "}
-          <b className="font-semibold text-zinc-800">Message</b> vendors and providers to request demos and reach their local teams.{" "}
-          <b className="font-semibold text-zinc-800">Get</b> bids and pricing.{" "}
-          <b className="font-semibold text-zinc-800">Shortlist</b> the solutions that match.
-        </p>
-        <p className="m-0 mt-2 max-w-3xl text-[12.5px] leading-relaxed text-zinc-500">{CANON_PROOF}</p>
-        <p className="m-0 mt-2.5 max-w-3xl border-l-2 border-amber-400 pl-2.5 text-[11.5px] leading-relaxed text-zinc-600">
-          <span className="font-semibold text-zinc-800">Netify</span> is a UK research and procurement platform for SASE, SD-WAN and network security: evaluated
-          supplier intelligence with dates on every grade, and an anonymous route to market that only you can sign.
 
-        </p>
-
-        <MarketRoster />
-
-        <ProjectDesk />
+        <ProjectDesk afterPrompt={<HeroBlocks />} />
 
         {/* The quiet footer: the rules, the bridge, the escape hatch. */}
         <section className="mx-auto mt-16 max-w-3xl border-t border-zinc-200 pt-5 text-[11.5px] leading-relaxed text-zinc-500">

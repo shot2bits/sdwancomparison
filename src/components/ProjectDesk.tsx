@@ -28,7 +28,7 @@
  * live. PositionWorkspace remains in-tree as this surface's ancestor.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { assessSecurityRequirement, type SecurityScopeVerdict } from "@/lib/security/rulebook";
 import {
   deriveInstrumentLadder,
@@ -201,7 +201,10 @@ type CrewLine = { t: string; text: string; cls?: "you" | "em" };
 /* The component                                                       */
 /* ------------------------------------------------------------------ */
 
-export default function ProjectDesk() {
+/** afterPrompt (the v6 Perplexity ruling, 26 Jul 2026): the pages slot
+ *  the hero blocks and roster directly beneath the prompt card, above
+ *  the procurement spine; nothing else about the desk changes. */
+export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }) {
   const [market, setMarket] = useState<Market | null>(null);
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
   const [noted, setNoted] = useState<NotedItem[]>([]);
@@ -1435,7 +1438,9 @@ export default function ProjectDesk() {
             if (t && t.trim().length > 0) void ingestText(t, "drop");
           }}
           className={`rounded-[18px] border border-zinc-200 bg-white px-7 pb-5 pt-6 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] sm:px-8${yoursRing ? " pd-live-in" : ""}`}>
-        <p className="m-0 mb-2 text-[13px] font-semibold text-zinc-700">Describe your SASE or SD-WAN project</p>
+        {/* Robert's heading ruling, 26 Jul 2026 (option 2 of five): the
+            one claim a sceptical buyer can test in ten seconds. */}
+        <p className="m-0 mb-2 text-[13px] font-semibold text-zinc-700">Your first sentence becomes your Statement of Requirements</p>
         <div className="relative border-b-2 border-zinc-300 px-1 py-3.5 focus-within:border-amber-500">
           <input
             ref={inputRef}
@@ -1591,6 +1596,7 @@ export default function ProjectDesk() {
         )}
       </div>
 
+      {afterPrompt}
 
       {/* ---- The procurement spine (the consolidation, Robert's word, 23
               Jul evening): the three-step journey grown to the canon's five

@@ -13,7 +13,7 @@ import { getShortlistDataset } from "@/lib/vendors";
 export default function MarketRoster() {
   const names = getShortlistDataset().map((v) => v.name);
   return (
-    <section aria-label="The connected market" className="mt-6 max-w-3xl border-t border-zinc-200 pt-3">
+    <section aria-label="The connected market" className="mx-auto mt-3 w-[min(860px,100%)] rounded-[14px] border border-zinc-200 bg-white px-5 py-3.5">
       <p className="m-0 text-[10px] font-semibold uppercase tracking-[.13em] text-zinc-400">
         The connected market &middot; every grade dated and sourced
       </p>
