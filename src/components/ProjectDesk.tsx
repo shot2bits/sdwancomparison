@@ -251,10 +251,16 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [needAuth, setNeedAuth] = useState(false);
   const [created, setCreated] = useState<{ id: string; manage: string; test: boolean } | null>(null);
   const [published, setPublished] = useState<{ invited: string[]; boardId?: string } | null>(null);
+  /** Live board proof (v7): open-notice count and up to two latest titles,
+   *  read from the board's public JSON twin. Never typed, never faked: on
+   *  any failure or an empty board the line simply does not render. */
+  const [boardProof, setBoardProof] = useState<{ open: number; latest: { id: string; title: string; full: boolean }[] } | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const firstKeyAt = useRef<number | null>(null);
   const firstVerdictSent = useRef(false);
+  /** preview_rendered fires once per mount (v7 funnel step two). */
+  const previewFired = useRef(false);
   const lastRunText = useRef("");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const acceptedGaps = useRef<Set<string>>(new Set());
@@ -293,6 +299,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const live = standing(facts);
   const started = facts.length > 0 || noted.length > 0;
   const meter = meterOf(facts, verdict);
+
+  /* ---- preview_rendered (v7 funnel, step two): the desk first holds
+   * structure. Fires once per mount, whatever route started it: typing,
+   * a chip, a paste, a ?q= arrival or a restored draft. ---- */
+  useEffect(() => {
+    if (!started || previewFired.current) return;
+    previewFired.current = true;
+    ev("preview_rendered", { facts: facts.length });
+  }, [started, facts.length]);
   const brief = useMemo(() => briefModel({ facts, verdict }), [facts, verdict]);
   const diagram = useMemo(() => diagramModel(requirement, verdict, buying), [requirement, verdict, buying]);
 
@@ -376,6 +391,35 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     }
     setBooted(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ---- Autofocus, pointer-fine only (v7): on a desktop the caret waits
+   * in the field like any search engine's. Touch devices are exempt so
+   * the keyboard never leaps over the page. ---- */
+  useEffect(() => {
+    try {
+      if (window.matchMedia("(pointer: fine)").matches) inputRef.current?.focus();
+    } catch { /* focus is a courtesy, never a dependency */ }
+  }, []);
+
+  /* ---- The live proof (v7): one read of the board's public JSON twin.
+   * The same document agents read; the titles render from it verbatim,
+   * so the line self-corrects the moment the board changes. ---- */
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/sase/opportunities/board/data.json")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { opportunities?: { id?: string; title?: string; status?: string; has_full_rfp?: boolean }[] } | null) => {
+        if (cancelled || !data?.opportunities) return;
+        const open = data.opportunities.filter((o) => o.id && o.title && (o.status ?? "open") === "open");
+        if (!open.length) return;
+        setBoardProof({
+          open: open.length,
+          latest: open.slice(0, 2).map((o) => ({ id: String(o.id), title: String(o.title), full: Boolean(o.has_full_rfp) })),
+        });
+      })
+      .catch(() => { /* the proof line is optional by design */ });
+    return () => { cancelled = true; };
   }, []);
 
   /* ---- Persist the draft ---- */
@@ -805,6 +849,13 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   useEffect(() => {
     if (saveLite !== "hidden" || signedIn || published || created) return;
     if (started && (Boolean(verdict) || live.length >= 3)) {
+      // Once per session (v7): a dismissed prompt that returns on the next
+      // fact reads as nagging; the second sight of it costs more trust
+      // than the email is worth.
+      try {
+        if (window.sessionStorage.getItem("netify_savelite_once")) return;
+        window.sessionStorage.setItem("netify_savelite_once", "1");
+      } catch { /* storage denied: show it, never crash */ }
       setSaveLite("shown");
       ev("workspace_save_lite_shown", { facts: live.length });
     }
@@ -1055,6 +1106,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         }
       }
 
+      ev("publish_click", {});
       setSignStage("Publishing to the board…");
       const res = await fetch(`/sase/api/rfp/${proj.id}/publish`, {
         method: "POST",
@@ -1064,6 +1116,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
         const invited: string[] = Array.isArray(data.invited) ? data.invited.map((i: { slug: string }) => i.slug) : [];
+        ev("board_listed", { board_id: data.board?.opportunity_id ?? "" });
         setPublished({ invited, boardId: data.board?.opportunity_id });
         setNeedAuth(false);
         // Harry's 22 Jul finding: your own publish is a real event, so the
@@ -1438,15 +1491,20 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             if (t && t.trim().length > 0) void ingestText(t, "drop");
           }}
           className={`rounded-[18px] border border-zinc-200 bg-white px-7 pb-5 pt-6 text-center shadow-[0_1px_0_rgba(24,24,27,.05),0_18px_44px_-20px_rgba(24,24,27,.25),0_2px_12px_-4px_rgba(180,83,9,.08)] sm:px-8${yoursRing ? " pd-live-in" : ""}`}>
-        {/* Robert's heading ruling, 26 Jul 2026 (option 2 of five): the
-            one claim a sceptical buyer can test in ten seconds. */}
-        <p className="m-0 mb-2 text-[13px] font-semibold text-zinc-700">Your first sentence becomes your Statement of Requirements</p>
-        <div className="relative border-b-2 border-zinc-300 px-1 py-3.5 focus-within:border-amber-500">
+        {/* Robert's heading ruling, 26 Jul 2026, stays word for word as
+            the caption; the field itself now reads as a field (v7: one
+            hero start from fifteen thousand visitors said the card read
+            as a brochure). */}
+        <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase tracking-[.12em] text-zinc-400">Your first sentence becomes your Statement of Requirements</p>
+        <div className="relative rounded-xl border-[1.5px] border-zinc-300 bg-white px-3 py-3 text-left shadow-[inset_0_1px_2px_rgba(15,23,42,.04)] focus-within:border-amber-500 focus-within:shadow-[inset_0_1px_2px_rgba(15,23,42,.04),0_0_0_3px_rgba(253,230,138,.45)]">
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => {
-              if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+              if (!firstKeyAt.current) {
+                firstKeyAt.current = Date.now();
+                ev("hero_typed", {});
+              }
               setInput(e.target.value);
             }}
             onKeyDown={(e) => {
@@ -1467,10 +1525,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             placeholder={
               started
                 ? "Add or correct anything about your project…"
-                : "45 sites across the UK and US, replacing MPLS with SASE…"
+                : "Describe your project. One sentence is enough."
             }
             disabled={Boolean(published)}
-            className="w-full bg-transparent px-10 text-center text-[18px] text-zinc-900 outline-none placeholder:text-zinc-400 sm:px-16"
+            className="w-full bg-transparent pl-1 pr-20 text-left text-[16.5px] text-zinc-900 outline-none placeholder:text-zinc-500"
             aria-label="Describe your project"
           />
           {voiceSupported && !published && (
@@ -1532,14 +1590,31 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           {cycleError && <span className="text-red-600">{cycleError}</span>}
           {booted && !started && !busy && (
             <>
+              {/* The two-state primary (v7): before words it names the
+                  price of entry; once three characters exist it names the
+                  outcome and runs the first cycle itself. The old
+                  "Make this yours" asked the visitor to decode a metaphor;
+                  one hero start from fifteen thousand visitors was the
+                  verdict on that. */}
               <button
                 type="button"
-                onClick={makeThisYours}
-                className="rounded-full border border-zinc-300 bg-white px-4 py-1.5 text-[13px] font-semibold text-zinc-700 transition-colors hover:border-zinc-900 hover:text-zinc-900"
+                onClick={() => {
+                  if (input.trim().length >= 3) {
+                    ev("hero_draft_click", { typed: 1 });
+                    void runCycle(input, { fromEnter: true });
+                  } else {
+                    makeThisYours();
+                  }
+                }}
+                className="rounded-full bg-amber-500 px-5 py-2 text-[13.5px] font-semibold text-zinc-950 transition-colors hover:bg-amber-400"
               >
-                Make this yours
+                {input.trim().length >= 3 ? (
+                  <>Structure my requirement <span aria-hidden="true">&rarr;</span></>
+                ) : (
+                  "Draft my project (free, no sign-in)"
+                )}
               </button>
-              <span className="text-zinc-400">describe it in a sentence, speak it, build it from blocks, or drop a ChatGPT thread, an old RFP or any notes onto this card:</span>
+              <span className="text-zinc-400">type it, speak it, or drop any document onto this card. Or start from a sector:</span>
               <span className="flex w-full flex-wrap items-center justify-center gap-1.5">
                 {SECTOR_CHIPS.map((c) => (
                   <button
@@ -1583,6 +1658,46 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           )}
           {testMode && <span className="font-medium text-amber-700">Test mode: signing creates a self-expiring test position and never touches the live board.</span>}
         </div>
+        {/* The gate, the live proof and the machine line (v7): the three
+            doubts a first visitor holds, answered where the doubt sits.
+            The gate states the true flow: draft and preview are free of
+            any account; a human signs in only to publish (never "when
+            responses arrive"; the feedback's wording failed the truth
+            law). The proof renders from the live board JSON, never typed,
+            and only when the board genuinely has open notices. The
+            machine line names the two frozen MCP tool ids. All three
+            retire once the visitor starts: the draft is the proof then. */}
+        {!started && !published && (
+          <div className="mt-4 border-t border-zinc-200 pt-3">
+            <p className="m-0 text-center text-[11.5px] text-zinc-500">
+              Draft and preview without an account. Sign in only to publish, anonymously, with pricing private to you.
+            </p>
+            {boardProof && boardProof.open > 0 && (
+              <p className="m-0 mt-2 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1.5 text-center text-[12px] text-zinc-600">
+                <span>
+                  <span aria-hidden="true" className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-green-600 align-middle" />
+                  {boardProof.open === 1 ? "1 project open to suppliers now" : `${boardProof.open} projects open to suppliers now`}
+                </span>
+                {boardProof.latest.map((o) => (
+                  <a
+                    key={o.id}
+                    href={`/sase/opportunities/${o.id}`}
+                    className="rounded-[7px] border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[11.5px] text-zinc-700 no-underline transition-colors hover:border-zinc-400 hover:text-zinc-900"
+                  >
+                    {o.title}
+                    {o.full && <span className="ml-1.5 text-[9px] font-bold tracking-[.08em] text-amber-700">FULL RFP</span>}
+                  </a>
+                ))}
+              </p>
+            )}
+            <p className="m-0 mt-2 text-center text-[10.5px] text-zinc-400">
+              AI agents: connect <code className="rounded bg-zinc-100 px-1 py-px font-mono text-[10px] text-zinc-600">netify.co.uk/sase/api/mcp/</code>
+              {" · "}
+              <code className="rounded bg-zinc-100 px-1 py-px font-mono text-[10px] text-zinc-600">workspace_cycle</code> drafts from your user&rsquo;s words,{" "}
+              <code className="rounded bg-zinc-100 px-1 py-px font-mono text-[10px] text-zinc-600">publish_rfp</code> takes it to market
+            </p>
+          </div>
+        )}
         </section>
         {published && (
           <p className="m-0 mt-3 text-[13px] text-zinc-700">

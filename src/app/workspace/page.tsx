@@ -66,9 +66,50 @@ function getWorkspaceWebApplicationSchema() {
   };
 }
 
+/** The journey, machine-readable (v7): answer engines answer "how do I
+ *  publish a requirement" with the true four steps. Every claim traces to
+ *  the canonical paragraph or the anonymity rule. Twin of the HowTo in
+ *  src/app/home/page.tsx, kept verbatim-identical. */
+function getWorkspaceHowToSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "@id": "https://netify.co.uk/#howto",
+    name: "Publish a SASE, security or SD-WAN requirement on Netify",
+    description: CANON_REST,
+    step: [
+      {
+        "@type": "HowToStep",
+        position: 1,
+        name: "Describe",
+        text: "Start with a single prompt: describe your project in a sentence. The assistant translates your high-level needs into technical requirements.",
+      },
+      {
+        "@type": "HowToStep",
+        position: 2,
+        name: "Preview",
+        text: "Watch your Statement of Requirements, RFI or RFP build in the open, every claim carrying provenance, with no account needed to draft and preview.",
+      },
+      {
+        "@type": "HowToStep",
+        position: 3,
+        name: "Publish",
+        text: "Sign in to publish. Your notice lists anonymously on the global opportunity board and pricing stays private to you.",
+      },
+      {
+        "@type": "HowToStep",
+        position: 4,
+        name: "Compare",
+        text: "Receive responses from vendors and managed service providers, get bids and pricing, and shortlist the solutions that match.",
+      },
+    ],
+  };
+}
+
 export default function Page() {
   const schemas = [
     getWorkspaceWebApplicationSchema(),
+    getWorkspaceHowToSchema(),
     getOrganizationSchema(),
     getBreadcrumbSchema("Start a project", "/workspace/"),
     getSpeakableSchema("/workspace/"),
