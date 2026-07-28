@@ -58,6 +58,7 @@ import {
   wizardSectorKey,
   COMPLIANCE_LABELS,
   REGION_LABELS,
+  regionStandalone,
   type BriefGap,
   type WorkspaceFact,
 } from "@/lib/workspace/draft";
@@ -70,6 +71,7 @@ import { deriveAreaState, refineConfirmed } from "@/lib/workspace/areas";
 import { diagramModel } from "@/lib/workspace/diagram";
 import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
+import JourneyStrip from "@/components/JourneyStrip";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
 
@@ -320,7 +322,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         setMarket(d);
         setCrew([
           { t: "today", text: `Scout: ${d.counts.vendors} suppliers evaluated · latest ${fmtDate(d.latest_evaluation)}` },
-          { t: "now", text: `Registrar: ${d.counts.notices} notice${d.counts.notices === 1 ? "" : "s"} genuinely open on the board` },
+          { t: "now", text: `Registrar: ${d.counts.notices} notice${d.counts.notices === 1 ? "" : "s"} open on the board` },
           { t: "now", text: "holding, honestly. grey is example content and never publishes." },
         ]);
       })
@@ -503,13 +505,32 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           });
         };
         const unplaced = clauses.filter((c) => !touched(c));
-        if (unplaced.length) {
-          setReceipts((rs) => {
-            const have = new Set(rs.map((r) => r.text.toLowerCase()));
-            const fresh = unplaced.filter((c) => !have.has(c.toLowerCase()));
-            if (!fresh.length) return rs;
-            return [...rs, ...fresh.map((text) => ({ id: ++receiptId.current, text }))].slice(-12);
+        // Supersede stale snapshots before adding fresh ones (Harry's
+        // Section 1 finding, 28 Jul 2026: a mid-word fragment, "We are a
+        // retailer loo", outlived the finished sentence). The desk derives
+        // while you type, so a cycle can run on a half-typed sentence and
+        // keep its fragment as a receipt. When this cycle's input carries a
+        // receipt's words as a leading fragment of something longer, that
+        // receipt was an earlier photo of the same words, not words with no
+        // home: it is removed, and the finished clause is judged fresh.
+        // Runs even when nothing is unplaced, so the final sentence that
+        // places every word also clears its own stale fragments.
+        setReceipts((rs) => {
+          const wholeNorm = norm(trimmed);
+          const clauseNorms = clauses.map((c) => norm(c));
+          const pruned = rs.filter((r) => {
+            const rn = norm(r.text);
+            if (!rn) return false;
+            const grewInto = clauseNorms.some((cn) => cn.length > rn.length && cn.startsWith(rn));
+            const opensThisInput = wholeNorm.length > rn.length && wholeNorm.startsWith(rn);
+            return !(grewInto || opensThisInput);
           });
+          const have = new Set(pruned.map((r) => r.text.toLowerCase()));
+          const fresh = unplaced.filter((c) => !have.has(c.toLowerCase()));
+          if (!fresh.length && pruned.length === rs.length) return rs;
+          return [...pruned, ...fresh.map((text) => ({ id: ++receiptId.current, text }))].slice(-12);
+        });
+        if (unplaced.length) {
           crewLog(`Listener: heard, no home yet · ${unplaced.length} clause${unplaced.length === 1 ? "" : "s"} kept verbatim in Notes, unplaced`);
         }
 
@@ -575,10 +596,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     let finalText = "";
     let lastError = "";
     let restarts = 0;
+    let opened = false;
     let settleTimer: ReturnType<typeof setTimeout> | null = null;
+    let watchdog: ReturnType<typeof setTimeout> | null = null;
     const deadline = Date.now() + 30000;
     rec.onstart = () => { lastError = ""; };
-    rec.onaudiostart = () => setVoiceState("listening");
+    rec.onaudiostart = () => { opened = true; setVoiceState("listening"); };
     rec.onresult = (e) => {
       let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -596,6 +619,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     };
     rec.onerror = (e) => { lastError = e?.error ?? "unknown"; };
     rec.onend = () => {
+      opened = true;
+      if (watchdog) clearTimeout(watchdog);
       if (settleTimer) clearTimeout(settleTimer);
       const said = finalText.trim();
       /* Silence after the tap is human: restart once, quietly, inside the
@@ -625,7 +650,20 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     };
     voiceRec.current = rec;
     setVoiceState("starting");
-    try { rec.start(); } catch { setVoiceState("idle"); voiceRec.current = null; }
+    /* The watchdog (Harry's Section 1 finding, 28 Jul 2026): a denied or
+     * dismissed permission prompt can leave some browsers firing neither
+     * onaudiostart nor onend, and the button then read "Opening the
+     * microphone" forever. Eight quiet seconds, then back to idle with the
+     * blocked-microphone guidance; a browser never re-opens a denied
+     * prompt, so honest guidance is the only correct behaviour. */
+    watchdog = setTimeout(() => {
+      if (opened || voiceRec.current !== rec) return;
+      try { rec.stop(); } catch { /* gone */ }
+      voiceRec.current = null;
+      setVoiceState("idle");
+      setVoiceError("The microphone did not open; it may be blocked. Allow it in the address bar, or type instead.");
+    }, 8000);
+    try { rec.start(); } catch { if (watchdog) clearTimeout(watchdog); setVoiceState("idle"); voiceRec.current = null; }
   };
 
   /* ---- The Threshold, stage one (25 Jul): a paste or a dropped text file
@@ -1731,7 +1769,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         )}
       </div>
 
-      {afterPrompt}
+      {/* One strip only (Robert's R1 ruling on Harry's Section 1 test,
+          28 Jul 2026): the door's server-rendered journey strip stands
+          down once a project exists; the state-aware strip below takes
+          over with the same ruled labels. */}
+      {!started && !published ? afterPrompt : null}
 
       {/* The door recut (Robert's build ruling, 28 Jul, the sourcing
           engine): before a project exists the page is the door and
@@ -1742,56 +1784,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           face (slice two) reshapes them. */}
       {(started || Boolean(published)) && (<>
 
-      {/* ---- The procurement spine (the consolidation, Robert's word, 23
-              Jul evening): the three-step journey grown to the canon's five
-              acts, same seat, same quiet, never cards. States render only
-              when true: act one carries the live position once it exists;
-              act two prefers the live market number and only shows the
-              approved 30+ line before the feed answers; unearned acts state
-              their promise and never a count. ---- */}
-      <div className="mx-auto mt-6 w-[min(860px,100%)]">
-        <ol className="m-0 flex list-none flex-col gap-2.5 p-0 text-[13px] leading-snug text-zinc-600 sm:flex-row sm:justify-center sm:gap-7">
-          <li className="sm:max-w-[150px]">
-            <span className="mr-2 font-semibold tabular-nums text-zinc-300">1</span>
-            <span className="font-medium text-zinc-700">Describe</span>
-            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
-              {started && live.length > 0
-                ? <>SoR live · {live.length} claim{live.length === 1 ? "" : "s"} held</>
-                : "one description of your project"}
-            </span>
-          </li>
-          <li className="sm:max-w-[170px]">
-            <span className="mr-2 font-semibold tabular-nums text-zinc-300">2</span>
-            <span className="font-medium text-zinc-700">Publish</span>
-            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
-              {published
-                ? <span className="text-amber-700">live on the board{published.invited.length > 0 ? ` · ${published.invited.length} supplier${published.invited.length === 1 ? "" : "s"} invited` : " · anonymous"}</span>
-                : <>SoR, RFI or full RFP · anonymous to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers</>}
-            </span>
-          </li>
-          <li className="sm:max-w-[160px]">
-            <span className="mr-2 font-semibold tabular-nums text-zinc-300">3</span>
-            <span className="font-medium text-zinc-700">Proposals</span>
-            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
-              {published && created?.id
-                ? <a className="underline hover:text-zinc-700" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>responses land in your record</a>
-                : "competing responses land here"}
-            </span>
-          </li>
-          <li className="sm:max-w-[160px]">
-            <span className="mr-2 font-semibold tabular-nums text-zinc-300">4</span>
-            <span className="font-medium text-zinc-700">Compare &amp; shortlist</span>
-            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">
-              {published && created?.id ? "side by side in your record, evidence lines" : "side by side, evidence lines"}
-            </span>
-          </li>
-          <li className="sm:max-w-[140px]">
-            <span className="mr-2 font-semibold tabular-nums text-zinc-300">5</span>
-            <span className="font-medium text-zinc-700">Manage</span>
-            <span className="mt-0.5 block pl-[17px] text-[10.5px] leading-snug text-zinc-400">one thread to award</span>
-          </li>
-        </ol>
-      </div>
+      {/* ---- One journey strip (Robert's R1 ruling on Harry's Section 1
+              test, 28 Jul 2026): the ruled five stations replace the old
+              procurement-spine numbering, the current station follows the
+              project's real state, and the spine's earned live sublines
+              ride under their stations. Nothing renders that is not
+              earned: counts come from the live market feed and the
+              publish response, never a promise. ---- */}
+      <JourneyStrip
+        current={published ? 5 : 2}
+        notes={{
+          1: started && live.length > 0 ? <>{published ? "SoR live" : "SoR forming"} · {live.length} claim{live.length === 1 ? "" : "s"} held</> : undefined,
+          3: market ? <>{market.counts.vendors} suppliers evaluated against this position</> : undefined,
+          4: published
+            ? <>live on the board{published.invited.length > 0 ? ` · ${published.invited.length} supplier${published.invited.length === 1 ? "" : "s"} invited` : " · anonymous"}</>
+            : <>anonymous to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers</>,
+          5: published && created?.id
+            ? <a className="underline hover:text-amber-800" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>responses land in your record</a>
+            : undefined,
+        }}
+      />
 
       {/* ---- The listing in formation (Robert, 23 Jul: the opportunity
               listing returns to the top): the notice as the market will see
@@ -1801,10 +1813,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         <section aria-label="Your opportunity, as the market will see it" className={`rounded-xl border p-5 ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">
-              {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />Live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
+              {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />Published · live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
             </p>
             <span className={`rounded-full px-2 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] ${published ? "border border-amber-200 bg-amber-50 text-amber-800" : started ? "bg-zinc-100 text-zinc-500" : "border border-zinc-200 bg-white text-zinc-500"}`}>
-              {published ? "genuinely open" : started ? "updating as you speak" : "make it yours"}
+              {published ? "open on the board" : started ? "updating as you speak" : "make it yours"}
             </span>
           </div>
           <p className={`m-0 mt-1.5 text-[15px] font-semibold leading-snug ${started ? "text-zinc-900" : "text-zinc-400"}`}>
@@ -1822,17 +1834,17 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   { v: usersBandLabel(requirement.estate?.users) ?? "", paths: ["estate.users"], sec: "organisation" },
                   { v: typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : "", paths: ["estate.sites"], sec: "organisation" },
                   { v: buying ? B[buying] ?? buying : "", paths: ["procurement.buying"], sec: "objectives" },
-                  { v: opModel === "managed" ? "fully managed" : opModel === "co_managed" ? "co-managed" : "", paths: ["procurement.operatingModel"], sec: "model" },
-                  { v: (requirement.organisation?.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join(", "), paths: ["organisation.regions"], sec: "organisation" },
+                  { v: opModel === "managed" ? "Fully managed" : opModel === "co_managed" ? "Co-managed" : "", paths: ["procurement.operatingModel"], sec: "model" },
+                  { v: (requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", "), paths: ["organisation.regions"], sec: "organisation" },
                   { v: (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", "), paths: ["constraints.complianceRequirements"], sec: "compliance" },
                 ].filter((c) => c.v))
               : [
                   { v: "Retail", paths: [], sec: "organisation" },
                   { v: "1,900 users", paths: [], sec: "organisation" },
                   { v: "42 sites", paths: [], sec: "organisation" },
-                  { v: "the UK", paths: [], sec: "organisation" },
+                  { v: "UK", paths: [], sec: "organisation" },
                   { v: "SASE and SD-WAN", paths: [], sec: "objectives" },
-                  { v: "fully managed", paths: [], sec: "model" },
+                  { v: "Fully managed", paths: [], sec: "model" },
                   { v: "PCI DSS", paths: [], sec: "compliance" },
                 ];
             if (!chips.length) {
@@ -1878,7 +1890,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           })()}
           <p className="m-0 mt-1.5 text-[11px] text-zinc-400">
             {published && published.boardId
-              ? (<>your notice is live: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
+              ? (<>published: signed-in suppliers can now see your anonymous notice · <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
               : started
               ? "anonymous on publish: no name, no contacts · signed-in suppliers see it, never public visitors · nothing is sent without your signature"
               : "a worked example · it becomes yours the moment you speak, paste or touch the document below · never publishes"}
@@ -2047,10 +2059,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           )}
           {openQuestionCount > 0 && (
             <span><span className="text-[19px] font-bold tracking-tight text-amber-700">{openQuestionCount}</span>
-              <span className="ml-1.5 text-[11px] text-zinc-500">open question{openQuestionCount === 1 ? "" : "s"} in place below</span></span>
+              <span className="ml-1.5 text-[11px] text-zinc-500">open question{openQuestionCount === 1 ? "" : "s"} waiting below</span></span>
           )}
           <span className="ml-auto text-right text-[11px] leading-relaxed text-zinc-400">
-            {receipts.length > 0 ? `${receipts.length} of your words captured in Notes, unplaced · ` : ""}
+            {receipts.length > 0 ? `${receipts.length} note${receipts.length === 1 ? "" : "s"} kept verbatim in Notes below · ` : ""}
             {market ? `${market.counts.vendors} suppliers evaluated against this position` : ""}
           </span>
         </div>
@@ -2137,12 +2149,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 aria-label="Project title"
               />
             ) : (
-              <h2
-                className={`m-0 tracking-tight ${published ? "" : "cursor-text"}`}
-                style={{ fontSize: "19px", lineHeight: 1.3, fontWeight: 600, color: facts.length || customTitle.trim() ? "#09090b" : "#a1a1aa" }}
-                onClick={() => !published && setEditingTitle(true)}
-                title={published ? undefined : "Click to name your project"}
-              >{title}</h2>
+              <span className="flex min-w-0 items-baseline gap-2">
+                <h2
+                  className={`m-0 tracking-tight ${published ? "" : "cursor-text"}`}
+                  style={{ fontSize: "19px", lineHeight: 1.3, fontWeight: 600, color: facts.length || customTitle.trim() ? "#09090b" : "#a1a1aa" }}
+                  onClick={() => !published && setEditingTitle(true)}
+                  title={published ? undefined : "Click to name your project"}
+                >{title}</h2>
+                {/* The rename affordance made visible (Harry's Section 1
+                    finding, 28 Jul 2026: nothing said the title was the
+                    project's name or that it could change). Same edit
+                    underneath; one quiet word beside the title. */}
+                {!published && (
+                  <button
+                    type="button"
+                    onClick={() => setEditingTitle(true)}
+                    className="shrink-0 text-[10px] uppercase tracking-[.08em] text-zinc-400 underline decoration-dotted underline-offset-2 hover:text-zinc-700"
+                    aria-label="Rename this project"
+                  >rename</button>
+                )}
+              </span>
             )}
             <span className="whitespace-nowrap text-[10px] uppercase tracking-[.12em] text-zinc-400">Statement of Requirements · living</span>
           </div>
@@ -2151,7 +2177,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               ? "Empty, honestly. Grey is example content: it shows the destination, never publishes, never counts."
               : <>
                   {meter.total} fact{meter.total === 1 ? "" : "s"} · {meter.confirmed} stated · {meter.inferred} inferred
-                  {meter.struck > 0 ? ` · ${meter.struck} struck` : ""}
+                  {/* The struck counter earns its explanation (Harry's
+                      Section 1 question, 28 Jul 2026: struck or decrement?
+                      Both: the stated count drops AND the strike stays on
+                      the record, because nothing is silently dropped). */}
+                  {meter.struck > 0 ? <> · <span className="cursor-help underline decoration-dotted underline-offset-2" title="Struck items stay on the record and never publish; the stated count already excludes them. Nothing is silently dropped.">{meter.struck} struck</span></> : ""}
                   {unansweredGaps.length > 0 ? <> · <span className="text-amber-700">{unansweredGaps.length} question{unansweredGaps.length === 1 ? "" : "s"} open</span></> : ""}
                   {noted.length > 0 ? ` · ${noted.length} noted` : ""}
                   {" · "}
@@ -2169,7 +2199,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   need. ---- */}
           {instrumentLadder && (
             <div data-instrument-rail className="-mt-2.5 mb-3 flex flex-wrap items-center gap-1.5">
-              <span className="rounded-full border border-amber-400 bg-white px-2.5 py-[2px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">SoR · live</span>
+              {/* "SOR · LIVE" before anything was published read as a claim
+                  of publication (Harry's Section 1 finding, 28 Jul 2026).
+                  Forming until the signature; live on the board after. */}
+              <span className="rounded-full border border-amber-400 bg-white px-2.5 py-[2px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">{published ? "SoR · live on the board" : "SoR · forming"}</span>
               <span
                 data-instrument-rfi={instrumentLadder.rfi.state}
                 className={`rounded-full px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] ${
@@ -2198,8 +2231,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   nothing weights itself. ---- */}
           {instrumentLadder && instrumentLadder.rfi.state === "ready" && !published && (
             <div data-priorities className="mb-4 flex flex-wrap items-center gap-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Priorities</span>
-              <span className="text-[10.5px] text-zinc-400">weight what matters for scoring:</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Scoring weights</span>
+              <span className="text-[10.5px] text-zinc-400">weight the sections that matter most when scoring suppliers:</span>
               {coveredSections
                 .map((k) => TAXONOMY.find((s) => s.key === k))
                 .filter((s): s is (typeof TAXONOMY)[number] => Boolean(s))
@@ -2249,7 +2282,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   </button>
                 )}
               </p>
-              <pre className="m-0 max-h-72 overflow-auto whitespace-pre-wrap text-[11px] leading-relaxed text-zinc-700">{artefactText()}</pre>
+              {/* Rendered for reading (Harry's Section 1 finding, 28 Jul
+                  2026: the printout showed raw markdown). The markdown
+                  stays the machine and download form; humans get type. */}
+              <ArtefactPrint text={artefactText()} />
               {!published && (
                 <p data-download-law className="m-0 mt-2 border-t border-zinc-100 pt-2 text-[10.5px] leading-relaxed text-zinc-500">
                   Your {instrument === "rfp" ? "RFP" : instrument === "rfi" ? "RFI" : "SoR"} downloads once it is published
@@ -2397,8 +2433,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               <div className={ready ? "rounded-lg border-2 border-amber-300 bg-white p-5" : ""}>
                 {ready ? (
                   <>
-                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-amber-700">The signature</p>
-                    <p className="m-0 mb-2 text-[15px] italic leading-relaxed text-zinc-900">This position is ready to meet the market.</p>
+                    {/* Plain heading, countable sentence (Harry's Section 1
+                        finding, 28 Jul 2026: "ready to meet the market" read
+                        as AI flourish; the copy law counts before it claims). */}
+                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-amber-700">Sign and publish</p>
+                    <p className="m-0 mb-2 text-[15px] leading-relaxed text-zinc-900">Signing publishes the anonymous notice and sends your position, {live.length} claim{live.length === 1 ? "" : "s"}, to matched suppliers.</p>
                     {/* The privacy strip (the conversion pass, 23 Jul): the same
                         facts the old paragraph carried, under one quiet shield. */}
                     <div className="mb-2 flex items-start gap-2 rounded-md bg-zinc-50 px-3 py-2.5">
@@ -2439,14 +2478,18 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     {/* Slice three (the reference concept): the notice inherits
                         your standing facts exactly as written, shown before you
                         sign, with what stays private beside it. */}
-                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">The notice inherits</p>
+                    {/* Renamed from "The notice inherits" (Harry's Section 1
+                        finding, 28 Jul 2026: the heading hid its point). The
+                        point: these words carry onto the public notice
+                        exactly as written. */}
+                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">What the notice carries</p>
                     <p className="m-0 mb-1.5 text-[11px] leading-loose">
                       {[
                         typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : null,
                         typeof requirement.estate?.users === "number" ? `${requirement.estate.users} users` : null,
                         buying ? ({ sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>)[buying] ?? buying : null,
-                        opModel === "managed" ? "fully managed" : opModel === "co_managed" ? "co-managed" : null,
-                        (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join(", ")}` : null,
+                        opModel === "managed" ? "Fully managed" : opModel === "co_managed" ? "Co-managed" : null,
+                        (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", ")}` : null,
                         (requirement.constraints?.complianceRequirements ?? []).length ? (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") : null,
                       ].filter(Boolean).map((chip) => (
                         <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-zinc-200 bg-white px-2 py-[1px] text-[11px] text-zinc-700">{chip}</span>
@@ -2570,7 +2613,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               {market ? (
                 <>
                   {market.counts.notices > 0 && <span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />}
-                  {market.counts.vendors} suppliers evaluated{market.latest_evaluation ? `, latest ${fmtDate(market.latest_evaluation)}` : ""} · {market.counts.notices} notice{market.counts.notices === 1 ? "" : "s"} genuinely open ·{" "}
+                  {market.counts.vendors} suppliers evaluated{market.latest_evaluation ? `, latest ${fmtDate(market.latest_evaluation)}` : ""} · {market.counts.notices} notice{market.counts.notices === 1 ? "" : "s"} open ·{" "}
                   <a href="/sase/opportunities/board/" className="underline hover:text-zinc-900">the board</a>
                 </>
               ) : "Reaching the market…"}
@@ -2977,7 +3020,7 @@ function OrganisationFields(props: {
                           : "border-b border-dotted border-zinc-500 text-zinc-800"
                     }`}
                   >
-                    {f.path === "organisation.regions" ? (REGION_LABELS[String(f.value)] ?? String(f.value)) : String(f.value)}
+                    {f.path === "organisation.regions" ? regionStandalone(String(f.value)) : String(f.value)}
                   </button>
                 ))}
                 {fs[0] && !fs[0].struck && (
@@ -3162,6 +3205,37 @@ function SaveLiteInline({ facts, onDone, onDismiss }: { facts: number; onDone: (
       )}
       <p className="m-0 text-[11px] leading-snug text-zinc-400">The position stays right here either way. {li ? "We" : "Work email only; we"} only email you about your own projects.</p>
       {error && <p className="m-0 text-[11px] text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+/** The artefact, rendered for reading (Harry's Section 1 finding, 28 Jul
+ *  2026: the printout rendered raw markdown in a pre). The generator's
+ *  markdown is untouched, and stays what the download button saves and
+ *  what machines read; this renderer only gives the same lines type:
+ *  headings as headings, list rows as rows, and the provenance marks
+ *  ([stated], [inferred], [stated by selection]) as small chips. */
+function ArtefactPrint({ text }: { text: string }) {
+  const mark = (s: string, i: number) => {
+    const parts = s.split(/(\[(?:stated(?: by selection)?|inferred)\])/g);
+    return parts.map((p, j) =>
+      /^\[(?:stated(?: by selection)?|inferred)\]$/.test(p) ? (
+        <span key={`${i}-${j}`} className="mx-0.5 inline-block rounded-full border border-zinc-300 bg-zinc-50 px-1.5 text-[9px] uppercase tracking-[.06em] text-zinc-500 align-[1.5px]">{p.slice(1, -1)}</span>
+      ) : (
+        <span key={`${i}-${j}`}>{p}</span>
+      ),
+    );
+  };
+  return (
+    <div className="max-h-72 overflow-auto text-[12px] leading-relaxed text-zinc-700">
+      {text.split("\n").map((line, i) => {
+        if (line.startsWith("### ")) return <p key={i} className="m-0 mb-0.5 mt-2.5 text-[11px] font-semibold text-zinc-800">{line.slice(4)}</p>;
+        if (line.startsWith("## ")) return <p key={i} className="m-0 mb-1 mt-3.5 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">{line.slice(3)}</p>;
+        if (line.startsWith("# ")) return <p key={i} className="m-0 text-[13px] font-semibold text-zinc-900">{line.slice(2)}</p>;
+        if (line.startsWith("- ")) return <p key={i} className="m-0 pl-3.5">{mark(line.slice(2), i)}</p>;
+        if (!line.trim()) return null;
+        return <p key={i} className="m-0">{mark(line, i)}</p>;
+      })}
     </div>
   );
 }

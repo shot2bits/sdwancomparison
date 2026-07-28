@@ -172,6 +172,11 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
       { label: "SWG", answer: { kind: "items", itemIds: ["sse-swg"] } },
       { label: "CASB", answer: { kind: "items", itemIds: ["sse-casb"] } },
       { label: "DLP", answer: { kind: "items", itemIds: ["sse-dlp"] } },
+      /* FWaaS joined the quick answers (Harry's Section 1 ask, 28 Jul
+       * 2026): it is one of the controls the question is about, and a
+       * one-tap answer beats retyping it. Nothing pre-ticks: consented
+       * stated facts only. */
+      { label: "FWaaS / NGFW", answer: { kind: "items", itemIds: ["sse-fwaas"] } },
     ],
     evidence: [
       { source: "bing_ai_2107", query: "zero trust network access providers", citations: 178 },

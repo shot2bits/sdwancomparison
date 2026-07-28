@@ -132,7 +132,9 @@ export const TAXONOMY: TaxonomySection[] = [
       { id: "sse-ztna", label: "ZTNA", path: null, why: FEATURES , want: "ztna", exampleTick: true },
       { id: "sse-swg", label: "SWG", path: null, why: FEATURES , want: "swg" },
       { id: "sse-casb", label: "CASB", path: null, why: FEATURES , want: "casb", exampleStruck: "suggested, then declined; kept on the record" },
-      { id: "sse-fwaas", label: "FWaaS", path: null, why: FEATURES , want: "fwaas" },
+      /* "FWaaS / NGFW" (Harry's Section 1 ask, 28 Jul 2026): buyers name
+       * this control by either word; one row answers both. */
+      { id: "sse-fwaas", label: "FWaaS / NGFW", path: null, why: FEATURES , want: "fwaas" },
       { id: "sse-dlp", label: "DLP", path: null, why: FEATURES , want: "dlp" },
       { id: "sse-dns", label: "DNS security", path: null, why: FEATURES },
       { id: "sse-email", label: "Email security", path: null, why: FEATURES },
