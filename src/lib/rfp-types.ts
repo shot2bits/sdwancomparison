@@ -5,7 +5,13 @@
 
 import { z } from "zod";
 
-export const PRODUCT_SCOPES = ["full_sase", "sse_only", "sdwan_only", "single_vendor_sase", "best_of_breed"] as const;
+// "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
+// 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
+// schema defaulted the field, and the platform publishes that index with a
+// suggested citation. A guess must never be recorded as a fact; unstated
+// records as unstated everywhere, and the question engine may still work to
+// full-coverage as an internal assumption without writing it down.
+export const PRODUCT_SCOPES = ["not_stated", "full_sase", "sse_only", "sdwan_only", "single_vendor_sase", "best_of_breed"] as const;
 export type ProductScope = (typeof PRODUCT_SCOPES)[number];
 
 export const RFP_STATUSES = ["draft", "review", "published", "qa", "evaluation"] as const;
@@ -43,7 +49,7 @@ export const BuyerContextSchema = z.object({
   regions: z.array(z.string()).default([]),
   compliance: z.array(z.string()).default([]),
   operating_model: z.string().default("any"),
-  product_scope: z.enum(PRODUCT_SCOPES).default("full_sase"),
+  product_scope: z.enum(PRODUCT_SCOPES).default("not_stated"),
   /** Vendors the buyer named for evaluation (?vendors= prefill). Pinned
    *  into the publish invite list; validated against dataset slugs, max 5. */
   pinned_vendors: z.array(z.string()).default([]),

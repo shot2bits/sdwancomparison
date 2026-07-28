@@ -41,9 +41,10 @@ export type SectionStats = {
 };
 
 const SCOPE_LABELS: Record<string, string> = {
+  not_stated: "Not stated by the buyer",
   full_sase: "Full SASE (no vendor-approach preference)",
-  single_vendor_sase: "SASE — unified single vendor",
-  best_of_breed: "SASE — best-of-breed",
+  single_vendor_sase: "SASE, unified single vendor",
+  best_of_breed: "SASE, best-of-breed",
   sse_only: "SSE (security service edge)",
   sdwan_only: "SD-WAN",
 };

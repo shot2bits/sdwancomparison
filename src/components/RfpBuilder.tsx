@@ -560,7 +560,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             current_environment?: string; desired_outcomes?: string; title?: string;
           };
           const scopeArr = o.scope ?? [];
-          const product_scope = scopeArr.includes("sase") ? "full_sase" : scopeArr.includes("sse") ? "sse_only" : scopeArr.includes("sd_wan") ? "sdwan_only" : "full_sase";
+          // A notice with no scope tags prefills as not stated (intake-truth
+          // ruling, 28 Jul 2026): the builder never invents a scope the
+          // notice did not carry.
+          const product_scope = scopeArr.includes("sase") ? "full_sase" : scopeArr.includes("sse") ? "sse_only" : scopeArr.includes("sd_wan") ? "sdwan_only" : "not_stated";
           const buyer: Record<string, unknown> = {
             sector: o.buyer_sector || null,
             organisation_size: o.buyer_size_band === "large_global" ? "large_global_enterprise" : o.buyer_size_band === "enterprise" || o.buyer_size_band === "mid_market" ? "mid_market" : o.buyer_size_band === "small" ? "small_business" : "any",
@@ -628,7 +631,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 : est.deliveryModel === "diy"
                   ? "diy"
                   : "any",
-          product_scope: est.securityDepth === "sse-only" ? "sse_only" : "full_sase",
+          product_scope: est.securityDepth === "sse-only" ? "sse_only" : est.securityDepth ? "full_sase" : "not_stated",
           site_count: typeof est.sites === "number" ? est.sites : null,
           notes: "Prefilled from the SASE cost estimator (Netify SASE Methodology v2026.1).",
         };
@@ -648,7 +651,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       regions: (p.get("regions") ?? "").split(".").filter(Boolean),
       compliance: (p.get("compliance") ?? "").split(".").filter(Boolean),
       operating_model: p.get("model") || "any",
-      product_scope: p.get("scope") || "full_sase",
+      product_scope: p.get("scope") || "not_stated",
       site_count: p.get("sites") ? Number(p.get("sites")) : null,
       notes: p.get("notes") || "",
     };

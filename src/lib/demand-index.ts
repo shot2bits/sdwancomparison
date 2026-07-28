@@ -54,6 +54,7 @@ const SECTOR_LABELS: Record<string, string> = {
 };
 
 const SCOPE_LABELS: Record<string, string> = {
+  not_stated: "Not stated",
   full_sase: "Full SASE",
   sse_only: "SSE",
   sdwan_only: "SD-WAN",
@@ -104,6 +105,7 @@ export interface DemandIndex {
     computed_at: string;
     methodology_version: string;
     launch_note: string;
+    scope_recording_note: string;
   };
   totals: {
     projects_all_time: number;
@@ -166,8 +168,10 @@ async function compute(): Promise<DemandIndex> {
         updated: p.updated ?? 0,
         status: p.status ?? "draft",
         // sector and product_scope live on the buyer context, not the root.
+        // Unstated is a value (intake-truth ruling, 28 Jul 2026): the index
+        // must never re-apply the retired wizard default when reading.
         sector: p.buyer?.sector ?? "unspecified",
-        scope: p.buyer?.product_scope ?? "full_sase",
+        scope: p.buyer?.product_scope ?? "not_stated",
       });
     }
   }
@@ -247,6 +251,8 @@ async function compute(): Promise<DemandIndex> {
       methodology_version: "v2026.1",
       launch_note:
         "The index reports live counts from launch. Percentage shares appear once a sample passes the suppression minimum; small numbers are shown as counts and described as such. The trend series compounds weekly.",
+      scope_recording_note:
+        "Technology scope is recorded only when the buyer states it, from 29 July 2026. Records created before that date carried a wizard default of Full SASE, which inflated the Full SASE share; read earlier technology-mix figures with that in mind.",
     },
     totals: {
       projects_all_time: projects.length,

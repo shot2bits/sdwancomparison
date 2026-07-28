@@ -76,12 +76,16 @@ const COMPLIANCE = [
   { key: "iec_62443", label: "IEC 62443 (OT)" },
 ] as const;
 
-/** Wizard scope key → persisted product_scope + delivery model default. */
+/** Wizard scope key → persisted product_scope + delivery model default.
+ *  A managed-service choice states HOW it is run, not WHAT technology is
+ *  in scope, so it records not_stated (intake-truth ruling, 28 Jul 2026);
+ *  only an explicit SASE choice records full_sase. */
 function scopeToBuyer(scope: string): { product_scope: string; operating_model?: string } {
   if (scope === "sdwan") return { product_scope: "sdwan_only" };
   if (scope === "sse") return { product_scope: "sse_only" };
-  if (scope === "managed") return { product_scope: "full_sase", operating_model: "managed" };
-  return { product_scope: "full_sase" };
+  if (scope === "sase") return { product_scope: "full_sase" };
+  if (scope === "managed") return { product_scope: "not_stated", operating_model: "managed" };
+  return { product_scope: "not_stated" };
 }
 
 /** Representative site count for the question engine from the public band. */

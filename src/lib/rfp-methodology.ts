@@ -227,7 +227,11 @@ export function synthesiseSections(buyer: BuyerContext): RfpSection[] {
   const all = methodologyQuestions();
   const sections: RfpSection[] = [];
 
-  const scope = buyer.product_scope ?? "full_sase";
+  // WORKING ASSUMPTION, NEVER RECORDED (intake-truth ruling, 28 Jul 2026):
+  // when the buyer has not stated a technology scope, the question matrix
+  // covers the full breadth so nothing relevant goes unasked. The record
+  // keeps "not_stated"; only the question selection widens here.
+  const scope = !buyer.product_scope || buyer.product_scope === "not_stated" ? "full_sase" : buyer.product_scope;
   for (const category of FEATURE_CATEGORIES) {
     const catFeatures = all.filter((q) => q.category === category && featureInScope(q.feature_id, scope));
     if (catFeatures.length === 0) continue;

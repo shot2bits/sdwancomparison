@@ -264,8 +264,11 @@ export function builderCompliance(list: string[]): string[] {
   return list.map((c) => COMPLIANCE_BRIDGE[c] ?? c);
 }
 
-export function productScopeFor(buying: BuyingId): "full_sase" | "sdwan_only" | "sse_only" {
-  return buying === "sdwan" ? "sdwan_only" : buying === "sse" ? "sse_only" : "full_sase";
+export function productScopeFor(buying: BuyingId): "full_sase" | "sdwan_only" | "sse_only" | "not_stated" {
+  // managed_security states a service need, not a technology scope: it
+  // records not_stated instead of implying Full SASE (intake-truth ruling,
+  // 28 Jul 2026). SASE, SD-WAN and SSE remain the buyer's own words.
+  return buying === "sdwan" ? "sdwan_only" : buying === "sse" ? "sse_only" : buying === "sase" ? "full_sase" : "not_stated";
 }
 
 /** Workspace sector labels to the wizard's SECTOR_KEYS. */
