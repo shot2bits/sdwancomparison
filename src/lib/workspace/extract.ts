@@ -246,17 +246,35 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?)\\b`));
   if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim());
 
+  /* The sector inference map, widened under Robert's intake-truth ruling
+   * (28 Jul 2026, mapping reviewed and approved by him): buyers describe
+   * their ESTATE, not their sector, so the estate vocabulary carries the
+   * inference. Ambiguity is handled with compound patterns, never with
+   * guesses. Rows run in order and the first match wins, so compound
+   * professional terms (law practice) sit below healthcare, whose own
+   * compounds (gp, dental) would otherwise never fire. Every inference
+   * renders labelled with its trigger and stays correctable.
+   *
+   * NEVER MAPPED ALONE, by design, with reasons: site(s) is the
+   * platform's own estate vocabulary; branch(es) belongs to banks and
+   * retailers alike; trust alone is financial as often as NHS; campus
+   * alone is corporate as often as academic; practice alone is medical
+   * as often as legal; fleet alone describes device estates; port(s) is
+   * network vocabulary here; outlet(s) is electrical as often as retail;
+   * grid alone is compute vocabulary; mat alone collides with ordinary
+   * words (their compounds map below); agency and department are too
+   * generic to carry any sector. */
   const sectorMap: Array<[RegExp, (typeof WORKSPACE_SECTORS)[number]]> = [
-    [/retail|e-?commerce|shops?\b|stores?\b/, "Retail & e-commerce"],
-    [/health|nhs|clinic|pharma|hospital|care home/, "Healthcare & pharma"],
-    [/bank|financial|insur|fintech|wealth/, "Financial services"],
-    [/manufactur|factory|factories|plant\b/, "Manufacturing"],
-    [/school|universit|college|educat/, "Education"],
-    [/hotel|restaurant|hospitality|leisure|pub\b/, "Hospitality & leisure"],
-    [/council|government|public sector/, "Government & public sector"],
-    [/logistics|transport|haulage|freight/, "Transport & logistics"],
-    [/law firm|solicitor|accountanc|consultanc|professional services/, "Professional services"],
-    [/energy|utilit/, "Energy & utilities"],
+    [/health|nhs trust|hospital trust|foundation trust|\bnhs\b|clinic|pharma|hospital|care home|care group|surger(?:y|ies)\b|\bwards?\b|\bgp\b|dental|dentist|veterinary|vet practice|pharmac(?:y|ies)|hospice/, "Healthcare & pharma"],
+    [/retail|e-?commerce|shops?\b|stores?\b|showrooms?\b|dealerships?\b|supermarkets?\b|convenience store|high street|retail outlets?|outlet stores?|\btills\b|click and collect/, "Retail & e-commerce"],
+    [/bank|financial|insur|fintech|wealth|building societ|credit union|asset management|brokerage|\blenders?\b|lending|mortgage|underwrit/, "Financial services"],
+    [/manufactur|factory|factories|plant\b|production line|assembly plant|foundr(?:y|ies)|\bmills?\b|fabrication|packaging line/, "Manufacturing"],
+    [/school|universit|college|educat|academ(?:y|ies)\b|multi-?academy|academy trust|sixth form|nurser(?:y|ies)|school campus|university campus/, "Education"],
+    [/hotel|restaurant|hospitality|leisure|pub\b|\bgyms?\b|\bspas?\b|cinemas?\b|casinos?\b|holiday park|caravan park|golf club|stadium|\bbars?\b|caf(?:e|es)\b|coffee shop/, "Hospitality & leisure"],
+    [/council|government|public sector|\bborough\b|housing association|\bpolice\b|fire service|emergency services|ministry/, "Government & public sector"],
+    [/logistics|transport|haulage|freight|depots?\b|distribution centre|warehouses?\b|couriers?\b|\bhgvs?\b|lorr(?:y|ies)|vehicle fleet/, "Transport & logistics"],
+    [/law firm|solicitor|accountanc|consultanc|professional services|\bchambers\b|law practice|accountancy practice|architects?\b|surveyors?\b|recruitment agenc/, "Professional services"],
+    [/energy|utilit|substations?\b|power grid|national grid|water compan|renewables|wind farm|solar farm/, "Energy & utilities"],
   ];
   for (const [re, sector] of sectorMap) {
     const m = hit(re);

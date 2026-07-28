@@ -26,6 +26,7 @@ import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, vetModelProposals, statedObjectivesIn, type FieldUpdate } from "./extract";
 import { deriveRfiQuestionSet, bankRfpSections } from "./instrument";
 import { RfpSectionSchema } from "@/lib/rfp-types";
+import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import { activePack, activeFlavours, visibleSuggestions, declinedOnRecord, packRiskNotes } from "@/lib/sector/derive";
 import { HEALTHCARE_PACK } from "@/lib/sector/packs";
 import { buildChecks, workspaceFit } from "./fit";
@@ -376,6 +377,58 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(sections.filter((s) => !s.category.includes(":")).every((s) => s.questions.every((q) => q.priority === "required")), "canonical questions publish as required");
     expect(sections.every((s) => s.questions.every((q) => q.priority !== "optional")), "nothing publishes as optional, so every question counts on the notice");
     for (const s of sections) RfpSectionSchema.parse(s);
+  });
+
+  /* ---- Intake truth (Robert's ruling, 28 Jul 2026): unstated is a value.
+          The desk never implies Full SASE from a managed-security need, the
+          widened estate vocabulary infers sectors buyers actually describe,
+          ambiguous terms never map alone, and the root-fact questions ask
+          once when the position has taken shape. ---- */
+  await ok("productScopeFor records the buyer's words and nothing more", () => {
+    expect(productScopeFor("sase") === "full_sase", "sase states full_sase");
+    expect(productScopeFor("sdwan") === "sdwan_only", "sdwan states sdwan_only");
+    expect(productScopeFor("sse") === "sse_only", "sse states sse_only");
+    expect(productScopeFor("managed_security") === "not_stated", "managed security states a service need, not a technology scope");
+  });
+
+  await ok("the widened sector map reads the estate vocabulary and refuses the ambiguous", () => {
+    const sec = (text: string) => deterministicExtract(text).find((u) => u.path === "organisation.sector")?.value ?? null;
+    expect(sec("we are an NHS trust with 14 wards") === "Healthcare & pharma", "nhs trust lands healthcare");
+    expect(sec("three showrooms and a dealership") === "Retail & e-commerce", "showrooms land retail");
+    expect(sec("nine depots and forty lorries") === "Transport & logistics", "depots land transport");
+    expect(sec("a law practice across two chambers") === "Professional services", "law practice lands professional");
+    expect(sec("gp surgery with a dental wing") === "Healthcare & pharma", "gp surgery lands healthcare");
+    expect(sec("an academy trust of twelve schools") === "Education", "academy trust lands education");
+    expect(sec("a building society with 40 sites") === "Financial services", "building society lands financial");
+    expect(sec("two wind farms and a substation") === "Energy & utilities", "wind farm lands energy");
+    expect(sec("we have 50 branches") === null, "branches alone never maps");
+    expect(sec("a trust with 40 sites") === null, "trust alone never maps");
+    expect(sec("the campus network needs SD-WAN") === null, "campus alone never maps");
+    expect(sec("40 ports across the estate") === null, "ports never map");
+    expect(sec("a fleet of laptops") === null, "fleet alone never maps");
+  });
+
+  await ok("the root-fact questions ask once, when the position has taken shape", () => {
+    const req = (r: Partial<SecurityRequirementInput>) => r as SecurityRequirementInput;
+    const ids = (qs: Array<{ id: string }>) => qs.map((q) => q.id);
+    // Sector absent, buying landed: the sector question earns its place.
+    const a = earnedQuestions(req({ organisation: {} }), "sase", null, [], []);
+    expect(ids(a).includes("q-root-sector"), "sector question asks when buying landed and sector is absent");
+    // Sector stated: it never asks.
+    const b = earnedQuestions(req({ organisation: { sector: "Healthcare & pharma" } }), "sase", null, [], []);
+    expect(!ids(b).includes("q-root-sector"), "a stated sector silences the sector question");
+    // Nothing landed at all: neither root question asks (the door stays quiet).
+    const c = earnedQuestions(req({ organisation: {} }), null, null, [], []);
+    expect(!ids(c).includes("q-root-sector") && !ids(c).includes("q-root-scope"), "an empty position asks nothing");
+    // Shape without buying: the scope question earns its place.
+    const d = earnedQuestions(req({ organisation: { sector: "Retail & e-commerce" } }), null, null, [], []);
+    expect(ids(d).includes("q-root-scope"), "scope question asks when the position has shape and buying is absent");
+    // Dismissal is forever.
+    const e = earnedQuestions(req({ organisation: {} }), "sase", null, [], ["q-root-sector"]);
+    expect(!ids(e).includes("q-root-sector"), "a dismissed root question never returns");
+    // The computed pack range is inside the question wording (counted claims).
+    const worded = a.find((q) => q.id === "q-root-sector");
+    expect(Boolean(worded && /adds between \d+ and \d+ of its own/.test(worded.question)), "the pack range is computed into the wording");
   });
 
   await ok("Pack 3, Geography: country names reach their regions instead of vanishing", () => {
