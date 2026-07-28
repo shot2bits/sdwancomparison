@@ -1496,7 +1496,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             hero start from fifteen thousand visitors said the card read
             as a brochure). */}
         <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase tracking-[.12em] text-zinc-400">Your first sentence becomes your Statement of Requirements</p>
-        <div className="relative rounded-xl border-[1.5px] border-zinc-300 bg-white px-3 py-3 text-left shadow-[inset_0_1px_2px_rgba(15,23,42,.04)] focus-within:border-amber-500 focus-within:shadow-[inset_0_1px_2px_rgba(15,23,42,.04),0_0_0_3px_rgba(253,230,138,.45)]">
+        {/* Focus is a border change alone (instrument-grade law, 28 Jul:
+            no glow ring; the field is alive because words land in it). */}
+        <div className="relative rounded-xl border-[1.5px] border-zinc-300 bg-white px-3 py-3 text-left shadow-[inset_0_1px_2px_rgba(15,23,42,.04)] focus-within:border-amber-500">
           <input
             ref={inputRef}
             value={input}
@@ -1671,6 +1673,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           <div className="mt-4 border-t border-zinc-200 pt-3">
             <p className="m-0 text-center text-[11.5px] text-zinc-500">
               Draft and preview without an account. Sign in only to publish, anonymously, with pricing private to you.
+              A Netify analyst reviews every published RFP.
             </p>
             {boardProof && boardProof.open > 0 && (
               <p className="m-0 mt-2 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1.5 text-center text-[12px] text-zinc-600">
@@ -1690,11 +1693,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 ))}
               </p>
             )}
-            <p className="m-0 mt-2 text-center text-[10.5px] text-zinc-400">
-              AI agents: connect <code className="rounded bg-zinc-100 px-1 py-px font-mono text-[10px] text-zinc-600">netify.co.uk/sase/api/mcp/</code>
-              {" · "}
-              <code className="rounded bg-zinc-100 px-1 py-px font-mono text-[10px] text-zinc-600">workspace_cycle</code> drafts from your user&rsquo;s words,{" "}
-              <code className="rounded bg-zinc-100 px-1 py-px font-mono text-[10px] text-zinc-600">publish_rfp</code> takes it to market
+            {/* The two-buyer line (Robert's ruling, 28 Jul): outcome
+                language on the consumer surface; the tool ids moved to
+                the connection details (llms.txt, the agents' door). */}
+            <p className="m-0 mt-2 text-center text-[11px] text-zinc-500">
+              Use Netify directly, or connect your organisation&rsquo;s approved AI agent through MCP. Agents research,
+              draft, compare and monitor. Your team publishes, selects and awards.
+            </p>
+            <p className="m-0 mt-1 text-center text-[10.5px] text-zinc-400">
+              Connecting an agent? <a href="/llms.txt" className="underline hover:text-zinc-600">View agent connection details</a>
             </p>
           </div>
         )}
@@ -1712,6 +1719,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       </div>
 
       {afterPrompt}
+
+      {/* The door recut (Robert's build ruling, 28 Jul, the sourcing
+          engine): before a project exists the page is the door and
+          nothing else renders below the journey strip. The spine, the
+          example listing, the framework sections, the crew and the
+          below-fold explanations appear only for a started or published
+          project, where they continue unchanged until the interview
+          face (slice two) reshapes them. */}
+      {(started || Boolean(published)) && (<>
 
       {/* ---- The procurement spine (the consolidation, Robert's word, 23
               Jul evening): the three-step journey grown to the canon's five
@@ -2844,6 +2860,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           invitations remain under your control · every response stays connected to this workspace.
         </p>
       </div>
+
+      </>)}
 
     </div>
   );
