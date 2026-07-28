@@ -3,6 +3,11 @@
  * observed on 23 July 2026 is encoded here, plus the exact-null cases the
  * no-derivation-no-rendering contract depends on. Run by
  * scripts/validate-notice-titles.ts inside `npm run validate` (build gate).
+ *
+ * Band update (Robert's re-identification ruling, 28 Jul 2026): titles are
+ * public surfaces, so a derived title now carries the site BAND from the
+ * ruled seven-band ladder ("21–50 sites"), never the exact count. The
+ * exact-count expectations below were updated to bands on 29 Jul 2026.
  */
 
 import { deriveNoticeTitle, insufficientNoticeTitle, noticeDisplayTitle, type NoticeTitleSource } from "@/lib/notice-title";
@@ -30,7 +35,7 @@ const FIXTURES: Fixture[] = [
   {
     name: "sufficient stored title stands untouched (Harry's exemplar)",
     source: src({ title: "H TEST Fully managed SASE, 21-50 sites, UK & Ireland and Europe", scope: ["sase", "managed_service"], sites: 50, regions: ["uk_ireland", "europe"] }),
-    derived: "Managed SASE, 50 sites, UK & Ireland and Europe",
+    derived: "Managed SASE, 21–50 sites, UK & Ireland and Europe",
     display: "H TEST Fully managed SASE, 21-50 sites, UK & Ireland and Europe",
   },
   {
@@ -48,7 +53,7 @@ const FIXTURES: Fixture[] = [
   {
     name: "engine title with a real sector stands (letters present)",
     source: src({ title: "Security sourcing for Healthcare & pharma (12 users)", scope: ["managed_security"], sites: 123, buyer_sector: "Healthcare & pharma" }),
-    derived: "Managed security, 123 sites",
+    derived: "Managed security, 51–200 sites",
     display: "Security sourcing for Healthcare & pharma (12 users)",
   },
   {
@@ -84,14 +89,14 @@ const FIXTURES: Fixture[] = [
   {
     name: "estate facts beat the sector clause",
     source: src({ title: "Untitled SASE / SD-WAN RFP", scope: ["sase", "managed_service"], sites: 38, regions: ["uk_ireland"], buyer_sector: "retail_ecommerce" }),
-    derived: "Managed SASE, 38 sites, UK & Ireland",
-    display: "Managed SASE, 38 sites, UK & Ireland",
+    derived: "Managed SASE, 21–50 sites, UK & Ireland",
+    display: "Managed SASE, 21–50 sites, UK & Ireland",
   },
   {
-    name: "single site reads singular",
+    name: "a single site enters as the smallest band (the singular read retired with exact counts, 28 Jul ruling)",
     source: src({ title: "", scope: ["connectivity"], sites: 1 }),
-    derived: "Connectivity, 1 site",
-    display: "Connectivity, 1 site",
+    derived: "Connectivity, 1–5 sites",
+    display: "Connectivity, 1–5 sites",
   },
   {
     name: "known users band enters when sites are absent",
