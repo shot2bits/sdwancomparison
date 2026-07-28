@@ -222,6 +222,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [crew, setCrew] = useState<CrewLine[]>([]);
   const [vendorCard, setVendorCard] = useState<MarketVendor | null>(null);
   const [artefactOpen, setArtefactOpen] = useState(false);
+  /* The constellation's reading key (Robert's R3 on Harry's Section 1 ask,
+   * 28 Jul 2026): a quiet toggle, granular detail, no marketing modal. */
+  const [constellationKey, setConstellationKey] = useState(false);
   const [restored, setRestored] = useState(false);
   /** True once the mount effect has decided between draft, link and the
    *  pristine example, so pre-start controls never flash before a
@@ -1906,8 +1909,27 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           </p>
           <p className="m-0 text-[11px] text-zinc-400">
             distance is fit · every position computed from graded evidence · a supplier only moves on its own evidence
+            {" · "}
+            <button type="button" onClick={() => setConstellationKey((o) => !o)} className="underline hover:text-zinc-600">
+              {constellationKey ? "close the key" : "how to read this"}
+            </button>
           </p>
         </div>
+        {/* The reading key (Harry's Section 1 ask, Robert's R3, 28 Jul 2026):
+            every sentence traces to this component's own laws; nothing here
+            promises what the map does not do. */}
+        {constellationKey && (
+          <div className="mt-2 rounded-md border border-zinc-200 bg-white p-4 text-[11.5px] leading-relaxed text-zinc-600">
+            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">You</span> are the dot at the centre. Everything on the map positions itself against your stated requirements.</p>
+            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Diamonds</span> are requirements created from your own words. Each one exists because you said it; strike the fact and its diamond goes with it.</p>
+            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Circles</span> are technology vendors. <span className="font-semibold text-zinc-800">Squares</span> are managed service providers.</p>
+            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Distance is fit.</span> A supplier sits closer when its graded evidence against your named requirements is stronger. Before you name requirements, suppliers hold one honest ring, because there is nothing yet to rank them against.</p>
+            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Lines are evidence.</span> A line exists only where the Netify dataset grades that supplier for that requirement: solid means evidenced, dashed means partial. No line means no graded evidence, never a guess.</p>
+            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Movement.</span> A supplier moves only when its own evidence changes, and only towards or away from you. Nothing shuffles for effect.</p>
+            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Colour</span> follows the supplier, never its rank. Amber marks your market activity, such as invited suppliers. Emerald is reserved for advice given against Netify&rsquo;s own interest.</p>
+            <p className="m-0"><span className="font-semibold text-zinc-800">Hover</span> a supplier or a requirement to isolate its evidence. The evidence source and its latest evaluation date sit beneath the map.</p>
+          </div>
+        )}
         {marketRows.shown.length === 0 && (
           <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-400">
             Empty until you describe your project. Then the evaluated market takes position around your words: the
