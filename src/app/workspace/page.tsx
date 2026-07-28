@@ -11,8 +11,11 @@ import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchem
  *
  * THE RECUT (Robert's build ruling, 28 Jul 2026): category line,
  * promise, input, journey strip, live proof, control lines, nothing
- * else on first paint. Copy is his ruled wording; the constants are
- * kept verbatim-identical with the home twin.
+ * else on first paint. ONE HIERARCHY (Robert, 29 Jul, exact-copy
+ * prompt): one H1, one supporting paragraph, one trust paragraph, then
+ * the input — no card, no second heading, geography stays retired.
+ * Copy is his exact wording; the constants are kept verbatim-identical
+ * with the home twin.
  */
 
 /** The category line (Robert's ruling, 28 Jul 2026; his correction the
@@ -20,19 +23,18 @@ import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchem
  *  src/app/home/page.tsx, kept verbatim-identical. */
 const ENGINE_H1 = "The global SASE and SD-WAN sourcing engine";
 const ENGINE_PROMISE =
-  "Describe your requirement in your own words. Netify's specialist sourcing assistant structures it, identifies what's missing, evaluates fit across the SASE and SD-WAN market, and prepares an anonymous opportunity for suitable suppliers to respond to.";
-/** The value section (his ruled paragraph, placed by his correction:
- *  after the promise, before the input). */
-const ENGINE_VALUE_H2 = "Purpose-built for UK and North American enterprise and mid-market global SASE & SD-WAN sourcing";
+  "Describe your requirement in your own words. Netify structures it, identifies what’s missing, evaluates suitable suppliers and prepares an anonymous opportunity for the market.";
+/** The trust paragraph (his exact copy, 29 Jul): plain centred text,
+ *  never a card or border, never uppercase, no heading of its own. */
 const ENGINE_VALUE =
-  "Netify combines specialist AI with continuously updated supplier intelligence, years of networking and procurement expertise, and real sourcing data from healthcare, manufacturing, retail, financial services and other sectors. Connected to more than 30 global vendors and managed service providers, every sourcing project benefits from knowledge that evolves with the market.";
+  "Connected to 30+ leading vendors and managed service providers, Netify combines specialist AI with continuously updated supplier intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors.";
 /** Geography retired as a separate line (Robert, 29 Jul: one message);
  *  it lives in the value card's title. Twin of home. */
 const ENGINE_AGENT =
   "Use Netify directly, or connect your organisation's approved AI agent through MCP. Agents research, draft, compare and monitor. Your team publishes, selects and awards.";
 const ENGINE_CONTROL =
   "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. A Netify analyst reviews every published RFP.";
-const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE_H2}. ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
+const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 export const metadata: Metadata = {
   title: "The global SASE and SD-WAN sourcing engine",
@@ -120,38 +122,32 @@ export default function Page() {
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
       <MegaNav takeover />
-      <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6">
+      <main className="mx-auto max-w-6xl px-5 pb-16 pt-6 sm:px-6">
 
+        {/* One visual hierarchy (Robert, 29 Jul, exact-copy prompt): H1,
+            supporting paragraph, trust paragraph, input — nothing else.
+            Twin of home, same fluid clamps; gap before the input is
+            trust mb 12px + ProjectDesk's mt-10 = 52px. */}
         <h1
           id="page-h1"
-          className="mx-auto m-0 max-w-3xl text-center tracking-tight"
-          style={{ fontSize: "22px", lineHeight: 1.3, fontWeight: 650, letterSpacing: "-0.015em", color: "#18181b" }}
+          className="mx-auto max-w-[1150px] text-center"
+          style={{ fontSize: "clamp(38px, 2.5vw + 24px, 58px)", lineHeight: 1.1, fontWeight: 650, letterSpacing: "-0.015em", color: "#18181b", margin: "0 auto 32px" }}
         >
           {ENGINE_H1}
         </h1>
-        <p id="page-subhead" className="mx-auto m-0 mt-2.5 max-w-3xl text-center text-[13.5px] leading-relaxed text-zinc-600">
+        <p
+          id="page-subhead"
+          className="mx-auto text-center"
+          style={{ fontSize: "clamp(20px, 1vw + 16px, 26px)", lineHeight: 1.55, color: "#52525b", margin: "0 auto 22px" }}
+        >
           {ENGINE_PROMISE}
         </p>
-        {/* The value section (Robert's correction, 28 Jul eve): part of
-            the title and trust proposition, after the promise, before
-            the input. His words, twin of home. */}
-        <section aria-labelledby="enterprise-sourcing-value" className="mx-auto mt-5 max-w-3xl">
-          {/* One header section on this page (Robert, 29 Jul): eyebrow
-              heading, inline-styled so global heading styles can never
-              inflate it; twin of home. */}
-          <div className="rounded-2xl border border-zinc-200 bg-white px-6 py-4 text-center">
-            <h2
-              id="enterprise-sourcing-value"
-              className="m-0 uppercase"
-              style={{ fontSize: "11.5px", fontWeight: 600, letterSpacing: "0.08em", color: "#71717a" }}
-            >
-              {ENGINE_VALUE_H2}
-            </h2>
-            <p className="m-0 mt-2" style={{ fontSize: "13.5px", lineHeight: 1.6, color: "#52525b" }}>
-              {ENGINE_VALUE}
-            </p>
-          </div>
-        </section>
+        <p
+          className="mx-auto text-center"
+          style={{ fontSize: "clamp(16.5px, 0.5vw + 14px, 20px)", lineHeight: 1.6, color: "#71717a", margin: "0 auto 12px" }}
+        >
+          {ENGINE_VALUE}
+        </p>
 
         <ProjectDesk afterPrompt={<JourneyStrip />} />
       </main>
