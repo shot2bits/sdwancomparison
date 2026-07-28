@@ -155,6 +155,24 @@ export default function NoticeView({
       </Section>
 
       {/* 7. Supplier response instructions */}
+      {/* What suppliers answer (Robert's R8 ruling on Harry's Section 1
+          finding "Where is the actual RFP/SoR", 28 Jul 2026): the issued
+          document's true shape, section titles and counts only; the full
+          question set opens to participating suppliers. Renders only when
+          the notice carries a document, and only its real numbers. */}
+      {o.rfp_shape && o.rfp_shape.sections.length > 0 && (
+        <Section title="What suppliers answer">
+          <p className="mb-2 text-sm text-[var(--ink-700)]">
+            The issued document holds {o.rfp_shape.total} question{o.rfp_shape.total === 1 ? "" : "s"} across {o.rfp_shape.sections.length} section{o.rfp_shape.sections.length === 1 ? "" : "s"}{o.methodology_version ? `, Netify methodology v${o.methodology_version}` : ""}. The full question set opens to participating suppliers; pricing stays private to the buyer.
+          </p>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
+            {o.rfp_shape.sections.map((s) => (
+              <li key={s.title}>{s.title}: {s.questions} question{s.questions === 1 ? "" : "s"}</li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
       <Section title="How suppliers respond">
         <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
           <li>

@@ -115,6 +115,14 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     response_mode: "full_rfp",
     ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${p.buyer.site_count ? ` across ${p.buyer.site_count} sites` : ""}. A full RFP with methodology-mapped questions has been issued; sign in as a verified supplier to register interest.`,
     methodology_version: p.methodology_version,
+    // The instrument's true shape rides the notice (Robert's R8 ruling,
+    // 28 Jul 2026): section titles and counts only, never the questions;
+    // the full set opens to participating suppliers.
+    rfp_shape: {
+      version: p.methodology_version,
+      total: questionCount,
+      sections: activeSections.map((s) => ({ title: s.category, questions: s.questions.filter((q) => q.priority !== "optional").length })),
+    },
     owner_email: ownerEmail,
     source_rfp_id: p.id,
   });

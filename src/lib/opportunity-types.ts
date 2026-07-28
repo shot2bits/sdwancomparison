@@ -169,6 +169,16 @@ export const OpportunitySchema = z.object({
   ai_assumptions: z.array(z.string()).default([]),
   ai_gap_flags: z.array(z.string()).default([]),
   methodology_version: z.string().default(""),
+  // The published instrument's true shape (Robert's R8 ruling on Harry's
+  // Section 1, 28 Jul 2026: the notice showed no requirement content at
+  // all). Section titles and question counts only, never the questions:
+  // the full set opens to participating suppliers. Null on notices that
+  // carry no document.
+  rfp_shape: z.object({
+    version: z.string().default(""),
+    total: z.number().int().min(0),
+    sections: z.array(z.object({ title: z.string(), questions: z.number().int().min(0) })),
+  }).nullable().default(null),
   owner_email: z.string().default(""), // publishing account (private, never in public projection)
   // When the notice was auto-listed from a published full RFP, the source RFP
   // id. Public flag only ("this buyer issued a full RFP"); the RFP's private
@@ -225,6 +235,7 @@ export type PublicOpportunity = {
   ai_assumptions: string[];
   ai_gap_flags: string[];
   methodology_version: string;
+  rfp_shape?: { version: string; total: number; sections: Array<{ title: string; questions: number }> } | null; // optional: sample fixtures omit it
   has_full_rfp?: boolean; // true when this notice was listed from a published full RFP (optional: sample fixtures omit it)
 };
 
@@ -278,6 +289,7 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     ai_assumptions: o.ai_assumptions,
     ai_gap_flags: o.ai_gap_flags,
     methodology_version: o.methodology_version,
+    rfp_shape: o.rfp_shape ?? null,
     has_full_rfp: Boolean(o.source_rfp_id),
   };
 }
