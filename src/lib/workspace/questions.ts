@@ -7,6 +7,16 @@
  * desk asks the minimum necessary to improve certainty. No trigger, no
  * question, ever. An unearned question is noise wearing a question mark.
  *
+ * THE ROOT-FACT EXCEPTION (named, ruled by Robert, 28 Jul 2026): a small
+ * closed set of root facts, sector and technology scope, may be asked
+ * ONCE, unprompted, because nothing a buyer says summons them while the
+ * answers change what suppliers are asked: the sector selects its own
+ * question pack and the scope selects the question sets. The exception
+ * is bounded. Root questions still wait until the position has taken
+ * shape, are asked at most once, are dismissable forever, and no other
+ * question joins this set without a ruling. Everything else remains
+ * earned. This is the law amended in the open, not breached quietly.
+ *
  * ONE TRUTH, THREE DOORS: this same set serves the buyer on the desk, AI
  * engines through /workspace/questions.json and llms.txt, and agents
  * through the workspace_cycle MCP tool. Every question carries its own
@@ -29,6 +39,13 @@
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import type { BuyingId } from "@/lib/workspace/extract";
 import { PACK_QUESTIONS } from "@/lib/sector/packs";
+import { QUESTION_BANK } from "@/lib/rfp-question-bank";
+
+/* The pack-count range for the root sector question is computed from the
+ * bank, never typed (rule 16: counted claims are counted). */
+const PACK_SIZES = Object.values(QUESTION_BANK.sector_packs).map((p) => p.count);
+const MIN_PACK = Math.min(...PACK_SIZES);
+const MAX_PACK = Math.max(...PACK_SIZES);
 
 export type QuestionEvidence =
   | { source: "bing_ai_live"; query: string; citations: number; note?: string }
@@ -44,7 +61,7 @@ export type QuestionEvidence =
 export type QuestionAnswer =
   | { kind: "items"; itemIds: string[] }
   | { kind: "note"; text: string }
-  | { kind: "path"; path: "constraints.timeline"; control: "text"; placeholder: string }
+  | { kind: "path"; path: "constraints.timeline" | "organisation.sector"; control: "text"; placeholder: string }
   | { kind: "dismiss" };
 
 export type EarnedQuestion = {
@@ -79,6 +96,42 @@ const networkBuying = (b: BuyingId | null) => b === "sase" || b === "sdwan" || b
  *  in the guard: minimum questions necessary, never duplicated against a
  *  fact that already stands or a rulebook gap that already asks. */
 const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
+  /* ---- The root facts (the named exception in the law above). Wording
+          PROVISIONAL pending Harry Yelland's copy pass; the pack-count
+          range is computed, never typed. Each asks once, when the
+          position has taken shape, and dismisses forever. ---- */
+  {
+    id: "q-root-sector",
+    question: `Which sector are you in? It changes the questions we put to suppliers: your sector adds between ${MIN_PACK} and ${MAX_PACK} of its own.`,
+    section: "organisation",
+    weight: 95,
+    earnedBy: (c) => !c.requirement.organisation?.sector && c.buying !== null,
+    options: [
+      { label: "type it", answer: { kind: "path", path: "organisation.sector", control: "text", placeholder: "e.g. Healthcare, Retail, Financial services" } },
+      { label: "Prefer not to say", answer: { kind: "dismiss" } },
+    ],
+    evidence: [{ source: "buyer_archetype", query: "Which sector is the buyer in? The sector selects its supplier question pack." }],
+  },
+  {
+    id: "q-root-scope",
+    question: "Are you buying SASE, SD-WAN or SSE? The technology scope selects which question sets suppliers answer.",
+    section: "objectives",
+    weight: 93,
+    earnedBy: (c) =>
+      c.buying === null &&
+      (Boolean(c.requirement.organisation?.sector) ||
+        typeof c.requirement.estate?.sites === "number" ||
+        (c.requirement.organisation?.regions ?? []).length > 0 ||
+        (c.requirement.constraints?.complianceRequirements ?? []).length > 0),
+    options: [
+      { label: "SASE", answer: { kind: "items", itemIds: ["buy-sase"] } },
+      { label: "SD-WAN", answer: { kind: "items", itemIds: ["buy-sdwan"] } },
+      { label: "SSE", answer: { kind: "items", itemIds: ["buy-sse"] } },
+      { label: "Managed security", answer: { kind: "items", itemIds: ["buy-sec"] } },
+      { label: "Not sure yet", answer: { kind: "dismiss" } },
+    ],
+    evidence: [{ source: "buyer_archetype", query: "What technology scope is being bought? The scope selects the supplier question sets." }],
+  },
   {
     id: "q-fca",
     question: "Financial services often brings FCA obligations. Do they apply to this service?",
