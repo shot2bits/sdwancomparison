@@ -17,7 +17,7 @@
  */
 
 import type { OppScope } from "@/lib/opportunity-types";
-import { REGIONS, SECTORS, USERS_BANDS, labelFor } from "@/lib/notice-options";
+import { REGIONS, SECTORS, USERS_BANDS, labelFor, siteBandLabelFor } from "@/lib/notice-options";
 
 export const NOTICE_TITLE_RULES_VERSION = "notice-title v2026.07.23";
 
@@ -84,8 +84,14 @@ export function deriveNoticeTitle(f: NoticeTitleSource): string | null {
   const head = managed ? `Managed ${scopeWord}` : scopeWord;
 
   const segments: string[] = [];
-  if (typeof f.sites === "number" && f.sites > 0) {
-    segments.push(`${f.sites} ${f.sites === 1 ? "site" : "sites"}`);
+  // Titles are public surfaces: the site figure enters as its band, never
+  // exact (Robert's re-identification ruling, 28 Jul 2026). A derived title
+  // reading "SASE, 51–200 sites, UK & Ireland" states a true band; an exact
+  // count in combination with sector and region can identify an anonymous
+  // buyer.
+  const siteBand = siteBandLabelFor(f.sites);
+  if (siteBand) {
+    segments.push(siteBand);
   } else if (f.users_band) {
     // Only a known band enters the title (labels already read "100–500 users").
     // Unknown or free-typed values are skipped — the "66" lesson, applied here.
@@ -136,8 +142,11 @@ export function ensureDistinctNoticeTitle(
   const clash = (t: string) => openTitles.some((o) => norm(o) === norm(t));
   if (!clash(title)) return title;
   const region = src.regions && src.regions.length ? labelFor(REGIONS, String(src.regions[0])) : "";
+  // The distinguishing site fact enters as its public band, never the exact
+  // count (Robert's re-identification ruling, 28 Jul 2026).
+  const siteBand = siteBandLabelFor(src.sites);
   const candidates = [
-    src.sites ? `${title}, ${src.sites} sites` : "",
+    siteBand ? `${title}, ${siteBand}` : "",
     region && !norm(title).includes(norm(region)) ? `${title}, ${region}` : "",
     src.users_band ? `${title}, ${labelFor(USERS_BANDS, src.users_band)} users` : "",
     `${title} (${new Date(src.created).toLocaleDateString("en-GB", { day: "numeric", month: "short" })})`,

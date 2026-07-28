@@ -76,6 +76,17 @@ export default function NoticeView({
           <strong>Preview.</strong> This is exactly how your notice will appear on the public board. Nothing is published yet.
         </p>
       )}
+      {/* Closed notices stay published forever (Robert's ruling, 28 Jul
+          2026): the page states its status and close date plainly instead
+          of vanishing. Wording provisional pending Harry's copy pass. */}
+      {!isSample && o.status !== "open" && (
+        <p className="mb-4 rounded-sm border border-[var(--ink-300,#ccc)] bg-[var(--ink-50,#fafafa)] px-4 py-2 text-sm text-[var(--ink-700)]">
+          <strong>{o.status === "awarded" ? "Awarded." : "Closed."}</strong>{" "}
+          This notice {o.status === "awarded" ? "was awarded" : "closed"}
+          {o.closed_at ? ` on ${new Date(o.closed_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""} and is no longer
+          accepting responses. It stays published as a record of market demand.
+        </p>
+      )}
 
       {/* 1. Header */}
       <header className="mb-6">
@@ -134,7 +145,10 @@ export default function NoticeView({
           <Fact label="Sector" value={sector} />
           <Fact label="Organisation size" value={o.buyer_size_band ? labelFor(SIZE_BANDS, o.buyer_size_band) : ""} />
           <Fact label="Regions" value={regionLabels(o).join(", ")} />
-          <Fact label="Sites" value={o.sites != null ? String(o.sites) : ""} />
+          {/* Always bands on the open surface (Robert's ruling, 28 Jul 2026):
+              real notices carry site_band from the projection; exact counts
+              render only for sample notices about invented organisations. */}
+          <Fact label="Sites" value={o.site_band ?? (o.sites != null ? String(o.sites) : "")} />
           <Fact label="Users" value={o.users_band ? labelFor(USERS_BANDS, o.users_band) : ""} />
           <Fact label="Remote users" value={o.remote_users_band ? labelFor(USERS_BANDS, o.remote_users_band) : ""} />
           <Fact label="Cloud platforms" value={labelsFor(CLOUD_PLATFORMS, o.cloud_platforms).join(", ")} />

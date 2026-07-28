@@ -9,6 +9,8 @@ import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { SITE_URL } from "@/lib/structured-data";
 import { emailDomain } from "@/lib/access-control";
 import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
+import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validate";
+import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { sectorLabel } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
@@ -109,7 +111,10 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     invited: existing?.invited ?? [],
     feed: existing?.feed ?? [],
     buyer_visibility: "anonymous", // RFPs carry no org name; sector/size describe the buyer
-    buyer_sector: p.buyer.sector ?? "",
+    // Unstated is a value (the intake-truth law, 28 Jul 2026): a notice
+    // listed from an RFP whose buyer never stated a sector says so
+    // explicitly. The public record reads "Not stated", never a guess.
+    buyer_sector: p.buyer.sector || SECTOR_NOT_STATED,
     buyer_size_band: p.buyer.organisation_size === "any" ? "" : p.buyer.organisation_size,
     compliance_requirements: p.buyer.compliance,
     response_mode: "full_rfp",
@@ -127,9 +132,32 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     source_rfp_id: p.id,
   });
 
+  // The public quality gate (Robert's ruling, 28 Jul 2026): no test data,
+  // coherent figures, sector stated or explicitly not stated. A gate failure
+  // must never fail the publish itself — the RFP still goes to its invited
+  // suppliers — it only keeps the notice off the public board, with the
+  // reason handed back to the caller.
+  const gateFailures = publicNoticeQualityGate(base);
+  if (gateFailures.length > 0) {
+    throw new BoardQualityGateError(gateFailures);
+  }
+
   const saved = await saveOpportunity(base);
   await kvSetJson(mapKey, saved.id);
+  // A new or refreshed public notice is news: tell IndexNow the notice,
+  // board and sitemap changed. Best effort; never blocks the listing.
+  try { await pingIndexNow(noticePingPaths(saved.id)); } catch { /* accelerant, never a dependency */ }
   return { opportunity_id: saved.id, url: `${SITE_URL}/opportunities/${saved.id}/` };
+}
+
+/** Thrown when the public quality gate keeps an RFP's notice off the board. */
+export class BoardQualityGateError extends Error {
+  code = "board_quality_gate" as const;
+  failures: string[];
+  constructor(failures: string[]) {
+    super(`Not listed on the public board: ${failures.join(" ")}`);
+    this.failures = failures;
+  }
 }
 
 /**
@@ -344,8 +372,12 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     try {
       const listed = await listRfpOnBoard(published, sessionEmail);
       board = { listed: true, ...listed };
-    } catch {
-      board = { listed: false, reason: "Board listing failed; try re-publishing." };
+    } catch (e) {
+      // The quality gate says exactly why a notice stayed off the board
+      // (Robert's ruling, 28 Jul 2026); other failures keep the generic line.
+      board = e instanceof BoardQualityGateError
+        ? { listed: false, reason: e.message }
+        : { listed: false, reason: "Board listing failed; try re-publishing." };
     }
   }
 

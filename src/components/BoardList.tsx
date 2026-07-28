@@ -149,7 +149,14 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
                 </div>
                 <h2 className="text-lg font-semibold mb-1 leading-snug">{o.title}</h2>
                 <p className="text-sm text-[var(--ink-500)] mb-2">
-                  {o.buyer_org || (o.buyer_sector ? `${labelFor(SECTORS, o.buyer_sector)} buyer${o.buyer_visibility === "anonymous" ? " (anonymous)" : ""}` : "")}
+                  {/* "Not stated" is a sector value, not a description of the
+                      buyer: "Healthcare & pharma buyer" reads naturally,
+                      "Not stated buyer" does not. */}
+                  {o.buyer_org || (o.buyer_sector && o.buyer_sector !== "not_stated"
+                    ? `${labelFor(SECTORS, o.buyer_sector)} buyer${o.buyer_visibility === "anonymous" ? " (anonymous)" : ""}`
+                    : o.buyer_sector === "not_stated"
+                      ? `Sector not stated${o.buyer_visibility === "anonymous" ? " (anonymous buyer)" : ""}`
+                      : "")}
                 </p>
                 {o.summary && <p className="text-sm text-[var(--ink-700)] mb-3 line-clamp-2">{o.summary}</p>}
                 <div className="flex flex-wrap gap-1.5 mb-3">
@@ -157,7 +164,11 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--ink-500)]">
                   {o.regions.length > 0 && <span>{o.regions.map((r) => labelFor(REGIONS, r)).join(", ")}</span>}
-                  {o.sites != null && <span>{o.sites} sites</span>}
+                  {/* Always bands on the open surface (Robert's ruling,
+                      28 Jul 2026): the projection carries site_band; exact
+                      counts survive only on sample notices, which describe
+                      invented organisations. */}
+                  {o.site_band ? <span>{o.site_band}</span> : o.sites != null ? <span>{o.sites} sites</span> : null}
                   <span>{o.bid_count} {o.bid_count === 1 ? "bid" : "bids"}</span>
                   <span>{o.comment_count} {o.comment_count === 1 ? "comment" : "comments"}</span>
                   <span>Updated {timeAgo(o.last_activity)}</span>

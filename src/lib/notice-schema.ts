@@ -38,7 +38,10 @@ export function regionLabels(o: PublicOpportunity): string[] {
 
 export function buyerLabel(o: PublicOpportunity): string {
   if (o.buyer_visibility === "anonymous" || !o.buyer_org) {
-    const sector = sectorLabel(o);
+    // "Not stated" is a sector value, not a buyer description: the phrase
+    // "Not stated buyer" would read as nonsense, so an explicit not-stated
+    // sector falls back to the plain anonymous label.
+    const sector = o.buyer_sector === "not_stated" ? "" : sectorLabel(o);
     return sector ? `${sector} buyer (anonymous)` : "Anonymous buyer";
   }
   return o.buyer_org;
@@ -62,7 +65,12 @@ export function getNoticeSchema(o: PublicOpportunity, opts?: { canonicalPath?: s
       serviceType: scopeLabels(o),
       areaServed: regionLabels(o),
     },
-    availabilityEnds: isoDate(o.response_deadline ?? o.deadline),
+    // A closed or awarded notice states the observed end of the demand
+    // (closed notices stay published forever, with their close date); an
+    // open notice states its stated deadline.
+    availabilityEnds: o.status !== "open" && o.closed_at
+      ? isoDate(o.closed_at)
+      : isoDate(o.response_deadline ?? o.deadline),
     seller: undefined,
   };
   return {

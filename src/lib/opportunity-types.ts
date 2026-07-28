@@ -10,6 +10,7 @@
 
 import { z } from "zod";
 import { noticeDisplayTitle } from "@/lib/notice-title";
+import { siteBandLabelFor } from "@/lib/notice-options";
 
 export const OPP_SCOPES = [
   "underlay_circuits",
@@ -138,6 +139,12 @@ export const OpportunitySchema = z.object({
   budget_note: z.string().default(""),
   timeline_note: z.string().default(""),
   status: z.enum(OPP_STATUSES).default("open"),
+  // When the notice left the open state (epoch ms). Closed notices stay
+  // published forever (Robert's ruling, 28 Jul 2026): the public record
+  // needs the date the market question ended, not just that it did. Set at
+  // the close and award writes; null on open notices and on notices closed
+  // before this field existed (the projection falls back to updated).
+  closed_at: z.number().nullable().default(null),
   // Engagement model. Defaults preserve the original quote-room behaviour.
   engagement_type: z.enum(ENGAGEMENT_TYPES).default("quote_room"),
   auction_format: z.enum(AUCTION_FORMATS).default("open"),
@@ -201,12 +208,21 @@ export type PublicOpportunity = {
   buyer_org: string;
   title: string;
   scope: OppScope[];
+  // Always null for real notices (Robert's re-identification ruling, 28 Jul
+  // 2026: always bands on the open surface). The exact count stays gated;
+  // site_band carries the public figure. Sample notices (authored worked
+  // examples about invented organisations) may carry an exact count.
   sites: number | null;
+  site_band?: string | null; // public band label, e.g. "51–200 sites" (optional: sample fixtures omit it)
   regions: string[];
   summary: string;
   budget_note: string;
   timeline_note: string;
   status: OppStatus;
+  // When the notice left the open state (epoch ms). Null while open. For
+  // notices closed before closed_at existed, the projection reports the
+  // record's last update, which for an archived notice is the close write.
+  closed_at?: number | null; // optional: sample fixtures omit it
   engagement_type: EngagementType;
   auction_format: AuctionFormat;
   deadline: number | null;
@@ -256,12 +272,20 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     // (Article 17); the stored title itself is never rewritten.
     title: noticeDisplayTitle(o),
     scope: o.scope,
-    sites: o.sites,
+    // Always bands on the open surface (Robert's ruling, 28 Jul 2026): the
+    // exact count never enters the public projection; the band does. Exact
+    // figures stay with the buyer's own face and participating suppliers.
+    sites: null,
+    site_band: siteBandLabelFor(o.sites),
     regions: o.regions,
     summary: o.summary,
     budget_note: o.budget_note,
     timeline_note: o.timeline_note,
     status: o.status,
+    // Open notices carry null; closed and awarded notices carry the close
+    // moment, falling back to the record's last update for notices closed
+    // before closed_at existed (that update was the close write).
+    closed_at: o.status === "open" ? null : (o.closed_at ?? o.updated),
     engagement_type: o.engagement_type,
     auction_format: o.auction_format,
     deadline: o.deadline,

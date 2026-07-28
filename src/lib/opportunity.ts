@@ -3,6 +3,7 @@
 import { getOpportunity, saveOpportunity, inviteToOpportunity, resolveOpportunityToken, newId } from "@/lib/rfp-store";
 import { getShortlistDataset } from "@/lib/vendors";
 import { notifyBuyerOfSupplierActivity } from "@/lib/notify";
+import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { FEED_TYPES, PricingSchema, type FeedItem, type FeedType, type Opportunity, type Pricing } from "@/lib/opportunity-types";
 
 export function vendorName(slug: string): string | null {
@@ -75,11 +76,25 @@ export async function addFeedItem(
     type: t, body, pricing: pricing ? PricingSchema.parse(pricing) : null, links: sanitiseLinks(links), answers: sanitiseAnswers(answers), created: Date.now(),
   };
   const status = t === "award" ? "awarded" : t === "closed" ? "closed" : opp.status;
-  const saved = await saveOpportunity({ ...opp, status, feed: [...opp.feed, item] });
+  // The moment a notice leaves the open state is a public fact the record
+  // keeps forever (Robert's ruling, 28 Jul 2026): stamp closed_at once, at
+  // the transition, and never overwrite it on later feed activity.
+  const leavingOpen = opp.status === "open" && status !== "open";
+  const saved = await saveOpportunity({
+    ...opp,
+    status,
+    ...(leavingOpen && !opp.closed_at ? { closed_at: Date.now() } : {}),
+    feed: [...opp.feed, item],
+  });
   // Single choke point for buyer notifications: every supplier post — via the
   // web room or the MCP — lands here. Best effort and rate-limited inside.
   if (actorType === "supplier") {
     try { await notifyBuyerOfSupplierActivity(saved, actorName, t); } catch { /* never blocks the post */ }
+  }
+  // A close or award is news: tell IndexNow the notice, board and sitemap
+  // changed. Best effort; the ping never blocks or fails the post.
+  if (leavingOpen && saved.visibility === "public") {
+    try { await pingIndexNow(noticePingPaths(saved.id)); } catch { /* accelerant, never a dependency */ }
   }
   return saved;
 }

@@ -2,19 +2,32 @@ import { getAllVendorSlugs } from "@/lib/vendors";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
-import { listPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
+import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
 
 export async function GET() {
   const today = new Date().toISOString().slice(0, 10);
-  // Live public notices are crawlable pages; include them best-effort so the
-  // sitemap never fails if KV is unavailable.
+  // Public notices are crawlable pages; include them best-effort so the
+  // sitemap never fails if KV is unavailable. Closed notices are published
+  // forever (Robert's ruling, 28 Jul 2026): a notice that entered the public
+  // record never leaves this sitemap — it would previously drop out on close,
+  // which contradicted the permanent-record promise. Archived notices carry a
+  // lower priority than open ones; the pages themselves stay indexable.
   let liveNotices: { loc: string; priority: string }[] = [];
+  let archivedNotices: { loc: string; priority: string }[] = [];
   try {
     if (kvConfigured()) {
-      liveNotices = (await listPublicOpportunities()).map((o) => ({
+      const [open, archived] = await Promise.all([
+        listPublicOpportunities(),
+        listArchivedPublicOpportunities(10000),
+      ]);
+      liveNotices = open.map((o) => ({
         loc: `${SITE_URL}/opportunities/${o.id}`,
         priority: "0.8",
+      }));
+      archivedNotices = archived.map((o) => ({
+        loc: `${SITE_URL}/opportunities/${o.id}`,
+        priority: "0.5",
       }));
     }
   } catch {
@@ -41,6 +54,7 @@ export async function GET() {
       priority: "0.7",
     })),
     ...liveNotices,
+    ...archivedNotices,
     { loc: `${SITE_URL}/vendors`, priority: "0.9" },
     // The /best/ INDEX was missing while all 20 children were listed
     // (25 Jul): it is the hub Bing cites most from, so it belongs here.

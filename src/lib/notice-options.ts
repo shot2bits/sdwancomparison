@@ -16,6 +16,11 @@ export const SECTORS = [
   { key: "professional_services", label: "Professional services" },
   { key: "hospitality_leisure", label: "Hospitality & leisure" },
   { key: "other", label: "Other" },
+  // Unstated is a value, not a gap to fill (the intake-truth law, 28 Jul
+  // 2026). A buyer may explicitly decline to name a sector; the public
+  // record then says "Not stated" and never a guess. The quality gate
+  // requires one or the other before a notice reaches a public surface.
+  { key: "not_stated", label: "Not stated" },
 ] as const;
 
 export const SIZE_BANDS = [
@@ -32,6 +37,32 @@ export const SITES_BANDS = [
   { key: "51-200", label: "51–200 sites" },
   { key: "200+", label: "200+ sites" },
 ] as const;
+
+/**
+ * Public site bands (Robert's re-identification ruling, 28 Jul 2026: always
+ * bands on the open surface). Exact site counts identify anonymous buyers in
+ * combination with sector and region, so every public surface — board, notice
+ * page, data.json twins, derived titles, MCP reads — renders the band, never
+ * the figure. Exact counts stay with the buyer's own signed-in face and with
+ * participating suppliers after the gate. This ladder is the ruled public
+ * vocabulary; SITES_BANDS above stays the wizard's coarser input catalogue.
+ */
+export const SITE_PUBLIC_BANDS = [
+  { key: "1-5", label: "1–5 sites", min: 1, max: 5 },
+  { key: "6-20", label: "6–20 sites", min: 6, max: 20 },
+  { key: "21-50", label: "21–50 sites", min: 21, max: 50 },
+  { key: "51-200", label: "51–200 sites", min: 51, max: 200 },
+  { key: "201-500", label: "201–500 sites", min: 201, max: 500 },
+  { key: "501-1000", label: "501–1,000 sites", min: 501, max: 1000 },
+  { key: "1000+", label: "1,000+ sites", min: 1001, max: Infinity },
+] as const;
+
+/** The public band label for an exact site count, or null when no count is stated. */
+export function siteBandLabelFor(sites: number | null | undefined): string | null {
+  if (typeof sites !== "number" || !Number.isFinite(sites) || sites < 1) return null;
+  const band = SITE_PUBLIC_BANDS.find((b) => sites >= b.min && sites <= b.max);
+  return band ? band.label : null;
+}
 
 export const USERS_BANDS = [
   { key: "under_100", label: "Under 100 users" },

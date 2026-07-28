@@ -48,6 +48,92 @@ export type NoticeValidation = {
 const str = (v: unknown, max = 4000) => (typeof v === "string" ? v.slice(0, max) : "");
 const keys = (list: readonly { key: string }[]) => new Set(list.map((o) => o.key));
 
+/**
+ * The literal a buyer states when they choose not to name a sector. Unstated
+ * is a value, not a gap to fill (the intake-truth law, 28 Jul 2026): the
+ * public record may say "not stated", it may never say a guess.
+ */
+export const SECTOR_NOT_STATED = "not_stated";
+
+/* ------------------------------------------------------------------ */
+/* The public quality gate (Robert's ruling, 28 Jul 2026)             */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Placeholder and test-marker patterns that must never reach a public
+ * surface. Two tiers, deterministic and versioned by observation, because
+ * real procurement prose legitimately contains words like "testing" ("UAT
+ * testing phase") that a title or an organisation name never needs:
+ *  - TITLE_MARKERS run against title and buyer_org, where marker words
+ *    have no legitimate use;
+ *  - GIBBERISH_MARKERS run against the summary too, where only unambiguous
+ *    placeholder text is refused.
+ */
+const TITLE_MARKERS =
+  /\b(test(?:ing)?|asdf+|qwerty|lorem|ipsum|placeholder|dummy|fake|xxx+|zzz+|do not (?:respond|reply|use)|delete me|smoke[- ]?probe)\b/i;
+const GIBBERISH_MARKERS =
+  /\b(lorem|ipsum|asdf{2,}|qwerty|xxx{2,}|zzz{2,}|test (?:notice|record|opportunity|rfp|rfi|entry|data)|do not (?:respond|reply|use)|delete me|smoke[- ]?probe)\b/i;
+
+/** Accepts epoch ms or an ISO date string; null when absent or unreadable. */
+function toEpoch(v: unknown): number | null {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v) {
+    const t = Date.parse(v);
+    return Number.isNaN(t) ? null : t;
+  }
+  return null;
+}
+
+export type QualityGateInput = {
+  title: string;
+  summary: string;
+  buyer_org?: string;
+  buyer_sector?: string;
+  sites?: number | null;
+  response_deadline?: number | string | null;
+  decision_target?: number | string | null;
+  go_live_target?: number | string | null;
+};
+
+/**
+ * The gate every notice crosses before a public surface: no test data, no
+ * placeholder text, coherent figures, and a sector that is either stated or
+ * explicitly "not_stated". Returns the list of failures in plain English;
+ * an empty list is a pass. Callers decide the consequence (the MCP reports
+ * them as critical gaps; the RFP auto-listing skips the board and says why).
+ */
+export function publicNoticeQualityGate(n: QualityGateInput): string[] {
+  const failures: string[] = [];
+
+  const title = String(n.title ?? "").trim();
+  const org = String(n.buyer_org ?? "").trim();
+  const summary = String(n.summary ?? "").trim();
+  if (TITLE_MARKERS.test(title)) failures.push('title: reads as test or placeholder content. A public notice needs a real project title.');
+  if (org && TITLE_MARKERS.test(org)) failures.push('buyer_org: reads as test or placeholder content. Name the organisation, or publish as anonymous.');
+  if (GIBBERISH_MARKERS.test(summary)) failures.push('summary: contains placeholder or test wording. Describe the real need; suppliers read this verbatim.');
+
+  if (typeof n.sites === "number" && Number.isFinite(n.sites) && (n.sites < 1 || n.sites > 20000)) {
+    failures.push(`sites: ${n.sites} is outside the plausible estate range (1 to 20,000). State the real count or leave it unstated.`);
+  }
+
+  const rd = toEpoch(n.response_deadline ?? null);
+  const dt = toEpoch(n.decision_target ?? null);
+  const gl = toEpoch(n.go_live_target ?? null);
+  if (rd != null && dt != null && rd > dt) failures.push("dates: the response deadline falls after the decision target. Suppliers cannot respond to a decision already due.");
+  if (dt != null && gl != null && dt > gl) failures.push("dates: the decision target falls after the go-live target. The plan decides before it goes live.");
+  if (rd != null && gl != null && rd > gl) failures.push("dates: the response deadline falls after the go-live target.");
+
+  const sector = String(n.buyer_sector ?? "").trim();
+  const sectorOk = sector === SECTOR_NOT_STATED || keys(SECTORS).has(sector);
+  if (!sectorOk) {
+    failures.push(sector
+      ? `buyer_sector: "${sector}" is not a catalogue sector. Pick one, or state not_stated explicitly.`
+      : 'buyer_sector: pick a sector, or state not_stated explicitly. The public record says one or the other, never a guess.');
+  }
+
+  return failures;
+}
+
 function filterKeys(v: unknown, allowed: Set<string>, dropped: string[], label: string): string[] {
   if (!Array.isArray(v)) return [];
   const out: string[] = [];
@@ -70,6 +156,7 @@ export function normaliseNoticeDraft(input: NoticeDraftInput): { notice: Normali
 
   const scope = filterKeys(input.scope, new Set(OPP_SCOPES as readonly string[]), dropped, "scope");
   const sectorKeys = keys(SECTORS);
+  sectorKeys.add(SECTOR_NOT_STATED); // "not stated" is a stated value, never dropped
   const sector = str(input.buyer_sector);
 
   const notice: NormalisedNotice = {
@@ -105,17 +192,24 @@ export function normaliseNoticeDraft(input: NoticeDraftInput): { notice: Normali
   if (notice.summary.trim().length < 40) critical.push("summary: describe the need in plain English (a few sentences).");
   if (!notice.title) critical.push("title: a clear one-line project title.");
   if (notice.regions.length === 0) critical.push("regions: where suppliers must deliver.");
+  // The public quality gate (Robert's ruling, 28 Jul 2026): no test data,
+  // coherent figures, sector stated or explicitly not stated. Reported as
+  // critical gaps so every client, web wizard or agent, hears the same
+  // refusal for the same reason (Article 17).
+  critical.push(...publicNoticeQualityGate(notice));
 
   const recommended: string[] = [];
-  if (!notice.buyer_sector) recommended.push("buyer_sector: suppliers qualify opportunities by sector.");
   if (notice.sites == null && !notice.users_band) recommended.push("sites or users_band: scale is the first thing every supplier asks.");
   if (!notice.response_deadline) recommended.push("response_deadline: undated notices get slower responses.");
   if (notice.evidence_requested.length === 0) recommended.push("evidence_requested: asking for evidence up front makes replies comparable.");
   if (notice.evaluation_priorities.length === 0) recommended.push("evaluation_priorities: tell suppliers what will win.");
   if (!notice.current_environment) recommended.push("current_environment: what you run today (contracts ending, known pain).");
 
-  const criticalScore = (4 - critical.length) / 4;
-  const recommendedScore = (6 - recommended.length) / 6;
+  // Denominators reflect the checks actually run (4 baseline critical checks
+  // plus the quality gate's ceiling of 8; 5 recommended checks). Clamped at
+  // zero: a notice can fail more gates than the baseline four.
+  const criticalScore = Math.max(0, (4 - critical.length) / 4);
+  const recommendedScore = Math.max(0, (5 - recommended.length) / 5);
   const completeness = Math.round((criticalScore * 0.7 + recommendedScore * 0.3) * 100) / 100;
 
   return {

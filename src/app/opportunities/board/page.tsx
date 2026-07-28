@@ -74,7 +74,7 @@ export default async function OpportunityBoardPage() {
       {archived.length > 0 && (
         <div className="mt-12">
           <h2 className="text-lg font-semibold mb-1">Recently closed and awarded</h2>
-          <p className="text-sm text-[var(--ink-600)] mb-4">Completed opportunities stay visible so suppliers can gauge marketplace activity. Outcomes only — no responses or pricing.</p>
+          <p className="text-sm text-[var(--ink-600)] mb-4">Every notice that was published here stays published, permanently, with its status and close date. Outcomes only, no responses or pricing. The most recent are shown below; the full permanent archive is in the <a className="underline" href="/sase/opportunities/board/data.json">board data feed</a>.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             {archived.map((o) => (
               <Link key={o.id} href={`/opportunities/${o.id}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit opacity-80 transition-opacity hover:opacity-100">
@@ -82,6 +82,11 @@ export default async function OpportunityBoardPage() {
                   <span className={`rounded-full px-2 py-0.5 font-medium uppercase tracking-wide ${o.status === "awarded" ? "bg-emerald-50 text-emerald-700" : "bg-[var(--ink-100,#f0f0f0)] text-[var(--ink-500)]"}`}>
                     {o.status === "awarded" ? "Awarded" : "Closed"}
                   </span>
+                  {o.closed_at && (
+                    <span className="text-[var(--ink-500)]">
+                      {new Date(o.closed_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                  )}
                 </div>
                 <h3 className="text-base font-semibold leading-snug mb-1">{o.title}</h3>
                 <div className="flex flex-wrap gap-1.5">
@@ -108,6 +113,46 @@ export default async function OpportunityBoardPage() {
               <p className="mt-1.5 text-xs text-[var(--ink-500)]">Compliance: {s.compliance_requirements.join(", ").replace(/_/g, " ").toUpperCase()}</p>
             </Link>
           ))}
+        </div>
+      </div>
+
+      {/* The public / gated line (Robert's ruling, approved as written,
+          28 Jul 2026). The table is the ruled content; the intro sentence
+          below it is provisional structure. HARRY COPY SLOT: the section
+          intro and any plain-English framing are Harry's to write; the
+          table rows themselves are Robert's ruled line and stay as ruled.
+          Repo twin: docs/netify-public-gated-line-2026-07-28.md. */}
+      <div className="mt-12">
+        <h2 className="text-lg font-semibold mb-1">What is public and what stays gated</h2>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Every notice keeps the same line between its public record and its gated room. Site and user figures are published as bands; exact figures stay with the buyer and participating suppliers.</p>
+        <div className="overflow-x-auto rounded-sm border border-[var(--ink-200,#e5e5e5)]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--ink-200,#e5e5e5)] bg-[var(--ink-50,#fafafa)] text-left">
+                <th className="px-4 py-2.5 font-semibold w-44">Public, forever</th>
+                <th className="px-4 py-2.5 font-normal text-[var(--ink-600)]">On the notice page, the data feeds, the MCP and search alike</th>
+              </tr>
+            </thead>
+            <tbody className="align-top">
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Identity of the notice</td><td className="px-4 py-2 text-[var(--ink-700)]">Its URL and id, created and updated dates, status (open, closed, awarded) and the close date once closed</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">What is sought</td><td className="px-4 py-2 text-[var(--ink-700)]">Title, summary, scope, sector (or the literal &ldquo;not stated&rdquo;), desired outcomes, compliance, evidence requested, evaluation priorities</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Size and place</td><td className="px-4 py-2 text-[var(--ink-700)]">Regions, the site band, user bands, cloud platforms. Bands always, exact figures never</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Process</td><td className="px-4 py-2 text-[var(--ink-700)]">Response mode and deadlines, decision and go-live targets, engagement type, eligibility</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Document and activity</td><td className="px-4 py-2 text-[var(--ink-700)]">Whether a full RFP is attached and its section shape (titles and question counts only), plus bid and comment counts, never contents</td></tr>
+            </tbody>
+            <thead>
+              <tr className="border-b border-t border-[var(--ink-200,#e5e5e5)] bg-[var(--ink-50,#fafafa)] text-left">
+                <th className="px-4 py-2.5 font-semibold w-44">Gated</th>
+                <th className="px-4 py-2.5 font-normal text-[var(--ink-600)]">Sign-in, or the supplier&rsquo;s issued token</th>
+              </tr>
+            </thead>
+            <tbody className="align-top">
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Buyer identity</td><td className="px-4 py-2 text-[var(--ink-700)]">The organisation name where the buyer chose anonymity, and any contact route. Publishing emails are never rendered anywhere</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Exact figures</td><td className="px-4 py-2 text-[var(--ink-700)]">The exact site and user counts behind the public bands</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">The room</td><td className="px-4 py-2 text-[var(--ink-700)]">Supplier responses and the feed, the full RFP question set, all pricing (each supplier sees only its own; the buyer sees all)</td></tr>
+              <tr><td className="px-4 py-2 font-medium">The controls</td><td className="px-4 py-2 text-[var(--ink-700)]">Responding, inviting, closing. Tokens and infrastructure are never public</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
