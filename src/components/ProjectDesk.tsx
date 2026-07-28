@@ -1499,8 +1499,21 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         {/* Focus is a border change alone (instrument-grade law, 28 Jul:
             no glow ring; the field is alive because words land in it). */}
         <div className="relative rounded-xl border-[1.5px] border-zinc-300 bg-white px-3 py-3 text-left shadow-[inset_0_1px_2px_rgba(15,23,42,.04)] focus-within:border-amber-500">
+          {/* Safari AutoFill defence (Robert's catch, 29 Jul: private-window
+              Safari offered his saved netify.co.uk username in this box).
+              An anonymous, nameless text input on a domain with saved
+              credentials gets classified as a login field; the explicit
+              non-credential identity + autoComplete off + the password
+              manager ignore attributes stop the username sheet. If Safari
+              ever regresses, the escalation is a rows-1 textarea. */}
           <input
             ref={inputRef}
+            type="text"
+            name="project-brief"
+            autoComplete="off"
+            data-1p-ignore="true"
+            data-lpignore="true"
+            data-form-type="other"
             value={input}
             onChange={(e) => {
               if (!firstKeyAt.current) {
