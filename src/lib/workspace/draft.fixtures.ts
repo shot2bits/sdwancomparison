@@ -326,6 +326,34 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(has("nobody watching overnight, no out-of-hours cover", "constraints.inHouseSocCapacity", "none"), "no-out-of-hours still lands SOC none");
   });
 
+  /* ---- Harry's Section 1 round (28 Jul 2026): the managed words must
+          attach to the service being bought. "Fully managed SaaS services"
+          planted Fully managed [stated] and an "other SaaS" estate claim
+          off the same clause; both layers now hold the object guard. ---- */
+  await ok("Harry's sentence: fully managed SaaS services is not a managed SASE instruction", () => {
+    const H = "We are a UK based retailer looking to move to SASE and fully managed SaaS services";
+    const out = deterministicExtract(H);
+    expect(!out.some((u) => u.path === "procurement.operatingModel"), "no operating model lands off the SaaS clause");
+    expect(!out.some((u) => u.path === "estate.cloud"), "no estate cloud claim lands off the SaaS clause");
+    expect(out.some((u) => u.path === "procurement.buying" && u.value === "sase"), "the SASE they seek still lands as buying");
+    expect(out.some((u) => u.path === "organisation.regions" && (u.value as string[]).includes("uk")), "UK based still lands the region");
+    const notes: string[] = [];
+    const vetted = vetModelProposals([
+      { path: "procurement.operatingModel", value: "managed", quote: "fully managed SaaS services" },
+      { path: "estate.cloud", value: ["other_saas"], quote: "SaaS services" },
+    ] as never, H, notes);
+    expect(!vetted.some((u) => u.path === "procurement.operatingModel"), "the model's managed proposal off the SaaS quote is dropped");
+    expect(!vetted.some((u) => u.path === "estate.cloud"), "the model's other-SaaS estate proposal is dropped");
+    expect(notes.length === 2, `both drops leave notes, got ${notes.length}`);
+    // and the guard must not over-suppress
+    const okOut = deterministicExtract("We want a fully managed SASE for 40 stores");
+    expect(okOut.some((u) => u.path === "procurement.operatingModel" && u.value === "managed"), "fully managed SASE still lands managed");
+    const estateOut = vetModelProposals([
+      { path: "estate.cloud", value: ["other_saas"], quote: "we run everything on SaaS today" },
+    ] as never, "We run everything on SaaS today and want SD-WAN", []);
+    expect(estateOut.some((u) => u.path === "estate.cloud"), "a real SaaS estate statement still lands");
+  });
+
   await ok("Pack 3, Geography: country names reach their regions instead of vanishing", () => {
     const regions = (text: string) =>
       deterministicExtract(text).filter((u) => u.path === "organisation.regions").flatMap((u) => u.value as string[]);

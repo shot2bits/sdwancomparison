@@ -313,7 +313,11 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   // What they are BUYING (distinct from what they have). Seeking verbs near
   // a product term read as procurement intent; security service terms are
   // strong enough on their own because they are not estate descriptions.
-  const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|moving to|migrat\\w+ to|replace \\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
+  // "move to" joined the seeking verbs on Harry's Section 1 sentence
+  // (28 Jul 2026: "looking to move to SASE" reached the ledger only via
+  // the model layer; the rail's own verbs never matched). The negation
+  // window already keeps "moving away" and "moved off" out.
+  const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|move to|moving to|migrat\\w+ to|replace \\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
   const buyRe = (term: string) => new RegExp(`${seek}[^.!?]{0,60}\\b${term}|\\b${term}\\b[^.!?]{0,30}(?:rollout|roll-out|project|procurement|tender|rfp)`);
   if (hit(/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/)) {
     say("procurement.buying", "managed_security", "managed security");
@@ -327,9 +331,22 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     if (i >= 0) out.splice(i, 1);
   }
 
-  if (hit(/fully managed|managed service|manage it for us|no in.house it|outsourced?/)) say("procurement.operatingModel", "managed", "managed service");
-  else if (hit(/co-?managed/)) say("procurement.operatingModel", "co_managed", "co-managed");
-  else if (hit(/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/)) say("procurement.operatingModel", "diy", "self-managed");
+  // Operating model: the managed words must attach to the SERVICE BEING
+  // BOUGHT, not to some other object in the sentence. "Fully managed SaaS
+  // services" is a statement about their software, not an instruction to
+  // buy the SASE fully managed (Harry's Section 1 finding, 28 Jul 2026:
+  // the ledger said Fully managed [stated] off exactly that clause). Same
+  // philosophy as the negation window: wrongly suppressing costs an
+  // omission the receipt catches; wrongly landing records a lie. The
+  // quote is the words actually matched, never a canned phrase.
+  {
+    const m = hit(/fully managed|managed service|manage it for us|no in.house it|outsourced?/);
+    const after = m ? t.slice(m.index + m[0].length, m.index + m[0].length + 44) : "";
+    const foreignObject = /^\s*(?:\w+\s+)?(?:saas\b|software\b|apps?\b|applications?\b|desktops?\b|laptops?\b|endpoints?\b|devices?\b|printers?\b|payroll\b|crm\b|erp\b|m365\b|office ?365\b)/.test(after);
+    if (m && !foreignObject) say("procurement.operatingModel", "managed", m[0].trim());
+    else if (hit(/co-?managed/)) say("procurement.operatingModel", "co_managed", "co-managed");
+    else if (hit(/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/)) say("procurement.operatingModel", "diy", "self-managed");
+  }
 
   return out;
 }
@@ -400,6 +417,37 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
       notes.push("Dropped a broadband claim: the description says mobile (4G or 5G), which is not broadband.");
       value = (value as string[]).filter((n) => n !== "broadband");
       if ((value as string[]).length === 0) continue;
+    }
+    /* Harry's Section 1 catch (28 Jul 2026): "fully managed SaaS services"
+     * came back as operatingModel managed [stated]. Same law as the rail's
+     * object guard: a managed operating model must attach to the network
+     * or security service being bought. A quote whose managed words attach
+     * to software (SaaS, apps, M365 and friends) with no network object in
+     * it is omitted; the receipt keeps the clause and the operating-model
+     * question stays open for the buyer to answer. */
+    if (ok.path === "procurement.operatingModel" && value === "managed") {
+      const q = quote.toLowerCase();
+      const managesSoftware = /\bmanaged?\b[^.!?]{0,34}\b(?:saas|software|apps?|applications?|desktops?|laptops?|endpoints?|devices?|printers?|payroll|crm|erp|m365|office ?365)\b/.test(q);
+      const managesTheService = /\b(?:sase|sd-?wan|sse|network|wan\b|security|soc\b|service edge|firewall|connectivity)\b/.test(q);
+      if (managesSoftware && !managesTheService) {
+        notes.push("Dropped fully managed: those words describe the software mentioned, not the service being bought.");
+        continue;
+      }
+    }
+    /* The same clause's second life (Harry's Section 1, 28 Jul 2026): the
+     * artefact read "The estate runs on other SaaS [stated]" off "fully
+     * managed SaaS services". SaaS named as the OBJECT of a managed or
+     * buying phrase is not an estate statement; the claim is omitted and
+     * the clause keeps its receipt. */
+    if (ok.path === "estate.cloud" && Array.isArray(value) && (value as string[]).includes("other_saas")) {
+      const q = quote.toLowerCase().trim();
+      const objectOfManaged = q.length > 2 && new RegExp(`\\bmanaged?\\s+(?:\\w+\\s+)?${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").slice(0, 60)}`).test(lower);
+      const bareSaasEcho = /^(?:other\s+)?saas(?:\s+services?)?$/.test(q) && /\b(?:managed|buying|move to|moving to)\b[^.!?]{0,30}\bsaas\b/.test(lower) && !/\b(?:run|runs|running|use|uses|using|estate|currently|today)\b[^.!?]{0,30}\bsaas\b/.test(lower);
+      if (objectOfManaged || bareSaasEcho) {
+        notes.push("Dropped an estate claim: the SaaS words name what is being managed, not what the estate runs on.");
+        value = (value as string[]).filter((c) => c !== "other_saas");
+        if ((value as string[]).length === 0) continue;
+      }
     }
     out.push({
       path: ok.path,

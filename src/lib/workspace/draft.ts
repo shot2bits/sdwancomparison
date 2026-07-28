@@ -180,6 +180,23 @@ export const REGION_LABELS: Record<string, string> = {
   me: "the Middle East",
 };
 
+/** Standalone forms for chips, table rows and the notice-inherits row:
+ *  "the UK" reads right inside a sentence ("across the UK") and wrong as
+ *  a freestanding value (Harry's Section 1 finding, 28 Jul 2026: the
+ *  Countries row showed "the UK"). Sentences keep REGION_LABELS; anything
+ *  freestanding renders through regionStandalone(). */
+export const REGION_LABELS_STANDALONE: Record<string, string> = {
+  uk: "UK",
+  ie: "Ireland",
+  eu: "Europe",
+  us: "North America",
+  apac: "Asia Pacific",
+  me: "Middle East",
+};
+export function regionStandalone(id: string): string {
+  return REGION_LABELS_STANDALONE[id] ?? REGION_LABELS[id] ?? id;
+}
+
 export const COMPLIANCE_LABELS: Record<string, string> = {
   iso27001: "ISO 27001",
   pci_dss: "PCI DSS",
