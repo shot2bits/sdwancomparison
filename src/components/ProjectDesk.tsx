@@ -1118,6 +1118,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 notes: notesLine,
               },
               consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" },
+              /* The bank-set bridge (Robert's ruling, 28 Jul 2026): the desk
+                 names which sections hold standing claims; the server
+                 re-derives the earned question set through the same pure
+                 rulebook, so the published document carries what the RFI
+                 chip promised. Names only, never question content. */
+              position: {
+                covered_sections: coveredSections,
+                sector: (requirement.organisation?.sector as string | undefined) ?? null,
+              },
             }),
           });
           const data = await res.json().catch(() => ({}));

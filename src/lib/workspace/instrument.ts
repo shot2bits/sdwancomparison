@@ -21,7 +21,7 @@
  * the buyer weights, the position earns.
  */
 
-import { QUESTION_BANK, BANK_VERSION, type BankCanonicalQuestion } from "@/lib/rfp-question-bank";
+import { QUESTION_BANK, BANK_VERSION, sectorPack, type BankCanonicalQuestion } from "@/lib/rfp-question-bank";
 
 /* ------------------------------------------------------------------ */
 /* The RFI question set: derived from the covered areas + the bank      */
@@ -153,4 +153,72 @@ export function instrumentNotesLine(src: {
   const base = `Instrument: ${src.instrument.toUpperCase()}. Question set: ${src.set.canonicalCount} canonical questions (${cats})${pack} · bank v${src.set.version}.`;
   if (src.instrument === "rfi") return base;
   return `${base} Priorities weighted high: ${src.weightedHigh.join(", ")}. Commercial position stated (${src.commercialClaims} claim${src.commercialClaims === 1 ? "" : "s"}).`;
+}
+
+/* ------------------------------------------------------------------ */
+/* The earned set in the document's native shape                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The earned bank set as RFP document sections (Robert's bank-set ruling,
+ * 28 Jul 2026, on the 142-vs-6 discovery from Harry's Section 1 round:
+ * the desk promised the bank's questions and publishing sent the wizard's
+ * synthesised handful; nothing at publish touched the bank). The desk's
+ * creation call now sends its covered sections, the server re-derives the
+ * SAME set through deriveRfiQuestionSet (one rulebook, both sides), and
+ * this converter renders it in the document's shape: canonical questions
+ * publish as required, sector-pack questions as recommended (both count
+ * as non-optional everywhere counts are made), every question names the
+ * bank and its earning in the rationale, and the pack's buyer and
+ * supplier lenses ride along. Nothing here invents a question.
+ */
+export function bankRfpSections(set: RfiQuestionSet): Array<{
+  category: string;
+  included: boolean;
+  questions: Array<{
+    id: string; feature_id: string; text: string; evidence_requested: string; rationale: string;
+    priority: "required" | "recommended" | "optional"; source: "bank";
+    buyer_lens: string; supplier_lens: string; mandatory: boolean; weight: number;
+  }>;
+}> {
+  const out = set.canonical.map((c) => ({
+    category: c.category,
+    included: true,
+    questions: c.questions.map((q) => ({
+      id: q.id,
+      feature_id: q.id,
+      text: q.text,
+      evidence_requested: "",
+      rationale: `Netify question bank v${set.version}, ${c.category}; earned by the position's covered sections.`,
+      priority: "required" as const,
+      source: "bank" as const,
+      buyer_lens: "",
+      supplier_lens: "",
+      mandatory: false,
+      weight: 3,
+    })),
+  }));
+  const pack = set.sectorPack ? sectorPack(set.sectorPack.key) : null;
+  if (pack) {
+    for (const s of pack.sections) {
+      out.push({
+        category: `${pack.label}: ${s.title}`,
+        included: true,
+        questions: s.questions.map((q) => ({
+          id: q.id,
+          feature_id: q.id,
+          text: q.text,
+          evidence_requested: "",
+          rationale: `Netify sector pack (${pack.label}), bank v${set.version}; earned by the buyer's stated sector.`,
+          priority: "recommended" as const,
+          source: "bank" as const,
+          buyer_lens: q.buyer_lens,
+          supplier_lens: q.supplier_lens,
+          mandatory: false,
+          weight: 3,
+        })),
+      });
+    }
+  }
+  return out;
 }

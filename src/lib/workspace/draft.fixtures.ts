@@ -24,6 +24,8 @@ import { BAND, capabilityRing, constellation, labelOffsets, slugAngle, vendorHue
 import { deriveAreaState, deriveJourneyStates, refineConfirmed } from "./areas";
 import { diagramModel } from "./diagram";
 import { deterministicExtract, unionUpdates, vetModelProposals, statedObjectivesIn, type FieldUpdate } from "./extract";
+import { deriveRfiQuestionSet, bankRfpSections } from "./instrument";
+import { RfpSectionSchema } from "@/lib/rfp-types";
 import { activePack, activeFlavours, visibleSuggestions, declinedOnRecord, packRiskNotes } from "@/lib/sector/derive";
 import { HEALTHCARE_PACK } from "@/lib/sector/packs";
 import { buildChecks, workspaceFit } from "./fit";
@@ -352,6 +354,28 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
       { path: "estate.cloud", value: ["other_saas"], quote: "we run everything on SaaS today" },
     ] as never, "We run everything on SaaS today and want SD-WAN", []);
     expect(estateOut.some((u) => u.path === "estate.cloud"), "a real SaaS estate statement still lands");
+  });
+
+  /* ---- Robert's bank-set ruling (28 Jul 2026): the published document
+          carries the earned bank set, exactly as the desk's chip counted
+          it, in the document's native schema. ---- */
+  await ok("the earned bank set converts to schema-valid document sections, count for count", () => {
+    const set = deriveRfiQuestionSet({
+      coveredSections: ["security", "model", "organisation", "compliance", "commercial"],
+      sector: "Retail & e-commerce",
+    });
+    expect(Boolean(set), "the covered sections summon a set");
+    if (!set) return;
+    const sections = bankRfpSections(set);
+    const count = sections.reduce((n, s) => n + s.questions.length, 0);
+    expect(count === set.total, `converted count ${count} equals the set's own total ${set.total}: 142 means 142`);
+    expect(sections.every((s) => s.questions.every((q) => q.source === "bank")), "every question names the bank as its source");
+    const packSections = sections.filter((s) => s.category.includes(":"));
+    expect(packSections.length > 0, "the stated sector's pack publishes");
+    expect(packSections.every((s) => s.questions.every((q) => q.priority === "recommended")), "pack questions publish as recommended");
+    expect(sections.filter((s) => !s.category.includes(":")).every((s) => s.questions.every((q) => q.priority === "required")), "canonical questions publish as required");
+    expect(sections.every((s) => s.questions.every((q) => q.priority !== "optional")), "nothing publishes as optional, so every question counts on the notice");
+    for (const s of sections) RfpSectionSchema.parse(s);
   });
 
   await ok("Pack 3, Geography: country names reach their regions instead of vanishing", () => {

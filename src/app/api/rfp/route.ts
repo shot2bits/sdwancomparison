@@ -4,6 +4,7 @@ import { getAllVendorSlugs } from "@/lib/vendors";
 import { BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
 import { recordProjectEvent } from "@/lib/project-machine";
 import { synthesiseSections } from "@/lib/rfp-methodology";
+import { deriveRfiQuestionSet, bankRfpSections } from "@/lib/workspace/instrument";
 import { sessionFromRequest } from "@/lib/auth";
 import { indexRfpForBuyer } from "@/lib/rfp-store";
 import { isBlockedDomainLive, emailDomain } from "@/lib/access-control";
@@ -109,6 +110,25 @@ export async function POST(req: Request) {
           requested_at: Date.now(),
         }
       : undefined;
+  // The desk sends its position's covered sections at creation (Robert's
+  // bank-set ruling, 28 Jul 2026). The server RE-DERIVES the earned bank
+  // set through the same pure rulebook the desk's chip used, so the
+  // published document carries exactly the questions the desk promised:
+  // 142 means 142. Absent or empty, the wizard's synthesised sections
+  // stand as before. The client is never trusted for question content;
+  // it only names which of its sections hold standing claims.
+  const rawPosition = body.position as { covered_sections?: unknown; sector?: unknown } | undefined;
+  const position =
+    rawPosition && typeof rawPosition === "object" && Array.isArray(rawPosition.covered_sections)
+      ? {
+          covered_sections: rawPosition.covered_sections.map(String).slice(0, 24),
+          sector: typeof rawPosition.sector === "string" ? rawPosition.sector : null,
+        }
+      : null;
+  const bankSet = position
+    ? deriveRfiQuestionSet({ coveredSections: position.covered_sections, sector: position.sector ?? buyer.sector })
+    : null;
+
   const id = newId("rfp");
   const session = await sessionFromRequest(req);
   const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
@@ -119,7 +139,7 @@ export async function POST(req: Request) {
     status: "draft",
     title: body.title || "Untitled SASE / SD-WAN RFP",
     buyer,
-    rfp_sections: synthesiseSections(buyer),
+    rfp_sections: bankSet ? bankRfpSections(bankSet) : synthesiseSections(buyer),
     invited_vendors: [],
     share_token: newId("tok"),
     manage_token: newId("mtok"),
@@ -141,7 +161,7 @@ export async function POST(req: Request) {
       actor_ref: ownerEmail || "unauthenticated",
       via: "web",
       event: "project.created",
-      detail: { source: "wizard" },
+      detail: bankSet ? { source: "desk", bank_questions: bankSet.total } : { source: "wizard" },
     });
   } catch { /* the history is a record, never a gate */ }
   const saved = await saveProject(project);
