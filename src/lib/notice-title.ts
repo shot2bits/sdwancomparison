@@ -115,3 +115,33 @@ export function noticeDisplayTitle(f: NoticeTitleSource): string {
   if (!insufficientNoticeTitle(f.title)) return f.title;
   return deriveNoticeTitle(f) ?? f.title;
 }
+
+/**
+ * A title that would sit on the board beside an identical open title gains
+ * one distinguishing stated fact, in the house grammar (Harry's Section 1
+ * finding, 28 Jul 2026: two live notices both read "SASE requirement:
+ * Retail & e-commerce", indistinguishable to suppliers). Derived, never
+ * invented: sites first, then a region not already in the title, then the
+ * users band, and when no stated fact distinguishes, the created date,
+ * which is always true. Applied at listing time to the opportunity record
+ * being created or refreshed; stored titles of OTHER notices are never
+ * touched.
+ */
+export function ensureDistinctNoticeTitle(
+  title: string,
+  src: { sites: number | null; regions: string[] | readonly string[]; users_band?: string; created: number },
+  openTitles: string[],
+): string {
+  const norm = (t: string) => t.replace(/\s+/g, " ").trim().toLowerCase();
+  const clash = (t: string) => openTitles.some((o) => norm(o) === norm(t));
+  if (!clash(title)) return title;
+  const region = src.regions && src.regions.length ? labelFor(REGIONS, String(src.regions[0])) : "";
+  const candidates = [
+    src.sites ? `${title}, ${src.sites} sites` : "",
+    region && !norm(title).includes(norm(region)) ? `${title}, ${region}` : "",
+    src.users_band ? `${title}, ${labelFor(USERS_BANDS, src.users_band)} users` : "",
+    `${title} (${new Date(src.created).toLocaleDateString("en-GB", { day: "numeric", month: "short" })})`,
+  ].filter(Boolean) as string[];
+  for (const c of candidates) if (!clash(c)) return c;
+  return title;
+}

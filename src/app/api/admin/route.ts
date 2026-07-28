@@ -31,6 +31,7 @@ import {
   saveConnection,
 } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
+import { SECTORS, REGIONS } from "@/lib/notice-options";
 import {
   isAdminEmail,
   effectiveVendorDomains,
@@ -276,6 +277,40 @@ export async function POST(req: Request) {
         if (opp.status !== "open") return Response.json({ ok: true, status: opp.status }, { headers: cors });
         const saved = await saveOpportunity({ ...opp, status: "closed", updated: Date.now() });
         return Response.json({ ok: true, status: saved.status }, { headers: cors });
+      }
+      case "edit_opportunity": {
+        // The generic-notice rewrite tool (Robert's ruling, 28 Jul 2026:
+        // test records stay on the board and read as credible, generic
+        // notices; and Harry's duplicate-Healthcare filter finding traced
+        // to sector values stored as labels on some records). Title, sector
+        // and regions only; sector normalises to its slug on the way in so
+        // one label can never render twice. Nothing else is editable here:
+        // feeds, bids and provenance stay exactly as posted.
+        const id = String(body.id ?? "");
+        if (!id) return Response.json({ error: "id required." }, { status: 422, headers: cors });
+        const opp = await getOpportunity(id);
+        if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
+        const patch: { title?: string; buyer_sector?: string; regions?: string[] } = {};
+        if (typeof body.title === "string" && body.title.trim()) {
+          const t = body.title.replace(/\s+/g, " ").trim();
+          if (t.length < 8 || t.length > 140) return Response.json({ error: "Title must be 8 to 140 characters." }, { status: 422, headers: cors });
+          patch.title = t;
+        }
+        if (typeof body.buyer_sector === "string" && body.buyer_sector.trim()) {
+          const raw = body.buyer_sector.trim();
+          const match = SECTORS.find((s) => s.key === raw) ?? SECTORS.find((s) => s.label.toLowerCase() === raw.toLowerCase());
+          if (!match) return Response.json({ error: `Unknown sector "${raw}". Use a key or label from the sector catalogue.` }, { status: 422, headers: cors });
+          patch.buyer_sector = match.key;
+        }
+        if (Array.isArray(body.regions) && body.regions.length) {
+          const keys = body.regions.map(String);
+          const bad = keys.filter((k) => !REGIONS.some((r) => r.key === k));
+          if (bad.length) return Response.json({ error: `Unknown regions: ${bad.join(", ")}.` }, { status: 422, headers: cors });
+          patch.regions = keys;
+        }
+        if (!Object.keys(patch).length) return Response.json({ error: "Nothing to change: send title, buyer_sector or regions." }, { status: 422, headers: cors });
+        const saved = await saveOpportunity({ ...opp, ...patch, updated: Date.now() });
+        return Response.json({ ok: true, id: saved.id, title: saved.title, buyer_sector: saved.buyer_sector, regions: saved.regions }, { headers: cors });
       }
       case "approve_claim":
       case "reject_claim": {

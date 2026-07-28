@@ -1,4 +1,5 @@
-import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs } from "@/lib/rfp-store";
+import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities } from "@/lib/rfp-store";
+import { ensureDistinctNoticeTitle } from "@/lib/notice-title";
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED_ACTION, ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { inviteSupplier } from "@/lib/rfp-connect";
@@ -73,12 +74,24 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     `Netify SASE Methodology v${p.methodology_version}). Suppliers respond to the RFP question set with evidence; ` +
     `pricing stays private to the buyer.`;
 
+  // No two identical open titles on the board (Harry's Section 1 finding,
+  // 28 Jul 2026): the new listing's title gains one distinguishing stated
+  // fact when it would collide with another open notice's display title.
+  const openTitles = (await listPublicOpportunities().catch(() => []))
+    .filter((o) => o.id !== (existing?.id ?? ""))
+    .map((o) => o.title);
+  const distinctTitle = ensureDistinctNoticeTitle(
+    p.title,
+    { sites: p.buyer.site_count ?? null, regions: p.buyer.regions ?? [], created: existing?.created ?? Date.now() },
+    openTitles,
+  );
+
   const base: Opportunity = OpportunitySchema.parse({
     id: existing?.id ?? newId("opp"),
     created: existing?.created ?? Date.now(),
     updated: Date.now(),
     buyer_org: existing?.buyer_org ?? "",
-    title: p.title,
+    title: distinctTitle,
     scope: boardScope(p),
     sites: p.buyer.site_count,
     regions: p.buyer.regions,

@@ -55,6 +55,11 @@ export default function AdminClient() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /* The board rewrite panel (Robert's ruling, 28 Jul 2026). */
+  const [oppEditing, setOppEditing] = useState<string | null>(null);
+  const [oppTitle, setOppTitle] = useState("");
+  const [oppSector, setOppSector] = useState("");
+  const [oppRegions, setOppRegions] = useState("");
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [newBlock, setNewBlock] = useState("");
   const [vendorFilter, setVendorFilter] = useState("");
@@ -272,6 +277,14 @@ export default function AdminClient() {
                     <td className="py-2 pr-4 text-[var(--ink-500)]">{when(o.created)}</td>
                     <td className="py-2">
                       <div className="flex items-center gap-2">
+                        <button
+                          className={btn}
+                          disabled={busy}
+                          onClick={() => {
+                            if (oppEditing === o.id) { setOppEditing(null); return; }
+                            setOppEditing(o.id); setOppTitle(o.title || ""); setOppSector(""); setOppRegions("");
+                          }}
+                        >{oppEditing === o.id ? "Cancel" : "Edit"}</button>
                         {o.status === "open" && (
                           <button
                             className={btn}
@@ -289,6 +302,32 @@ export default function AdminClient() {
                           }}
                         >Remove</button>
                       </div>
+                      {/* The rewrite panel (Robert's ruling, 28 Jul 2026: board
+                          records read as credible generic notices). Empty
+                          fields keep their current values; sector accepts a
+                          key or a label and stores the slug. */}
+                      {oppEditing === o.id && (
+                        <div className="mt-2 flex flex-wrap items-center gap-2 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--ink-50,#fafafa)] p-2">
+                          <input value={oppTitle} onChange={(e) => setOppTitle(e.target.value)} placeholder="Title" className="min-w-64 flex-1 rounded-sm border border-[var(--ink-300,#ccc)] p-1.5 text-xs" />
+                          <input value={oppSector} onChange={(e) => setOppSector(e.target.value)} placeholder="Sector key or label (empty keeps)" className="w-56 rounded-sm border border-[var(--ink-300,#ccc)] p-1.5 text-xs" />
+                          <input value={oppRegions} onChange={(e) => setOppRegions(e.target.value)} placeholder="Region keys, comma separated (empty keeps)" className="w-64 rounded-sm border border-[var(--ink-300,#ccc)] p-1.5 text-xs" />
+                          <button
+                            className={btn}
+                            disabled={busy}
+                            onClick={async () => {
+                              const regions = oppRegions.split(",").map((s) => s.trim()).filter(Boolean);
+                              await act({
+                                action: "edit_opportunity",
+                                id: o.id,
+                                ...(oppTitle.trim() && oppTitle.trim() !== o.title ? { title: oppTitle.trim() } : {}),
+                                ...(oppSector.trim() ? { buyer_sector: oppSector.trim() } : {}),
+                                ...(regions.length ? { regions } : {}),
+                              });
+                              setOppEditing(null);
+                            }}
+                          >Save</button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
