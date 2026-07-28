@@ -141,7 +141,10 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
                       {o.has_full_rfp && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Full RFP included</span>}
                     </>
                   )}
-                  {o.eligibility === "open" && <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Open to respond</span>}
+                  {/* Neutral, not emerald (Robert's ruling, 28 Jul 2026):
+                      openness is a status fact; emerald stays reserved for
+                      against-interest statements. */}
+                  {o.eligibility === "open" && <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 font-medium text-[var(--ink-700)]">Open to respond</span>}
                   {dl && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700">{dl}</span>}
                 </div>
                 <h2 className="text-lg font-semibold mb-1 leading-snug">{o.title}</h2>
