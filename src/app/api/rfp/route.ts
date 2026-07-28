@@ -78,6 +78,7 @@ export async function POST(req: Request) {
     consent?: { version?: unknown; agreed_at?: unknown; flow?: unknown };
     pending_submit?: { shortlist_size?: unknown; list_on_board?: unknown; marketing_opt_in?: unknown };
     contact_email?: unknown;
+    position?: unknown;
   } = {};
   try {
     body = await req.json();

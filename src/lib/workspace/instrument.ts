@@ -172,7 +172,7 @@ export function instrumentNotesLine(src: {
  * bank and its earning in the rationale, and the pack's buyer and
  * supplier lenses ride along. Nothing here invents a question.
  */
-export function bankRfpSections(set: RfiQuestionSet): Array<{
+export type PublishedBankSection = {
   category: string;
   included: boolean;
   questions: Array<{
@@ -180,8 +180,10 @@ export function bankRfpSections(set: RfiQuestionSet): Array<{
     priority: "required" | "recommended" | "optional"; source: "bank";
     buyer_lens: string; supplier_lens: string; mandatory: boolean; weight: number;
   }>;
-}> {
-  const out = set.canonical.map((c) => ({
+};
+
+export function bankRfpSections(set: RfiQuestionSet): PublishedBankSection[] {
+  const out: PublishedBankSection[] = set.canonical.map((c) => ({
     category: c.category,
     included: true,
     questions: c.questions.map((q) => ({
