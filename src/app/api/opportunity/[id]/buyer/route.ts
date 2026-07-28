@@ -23,7 +23,15 @@ export async function POST(req: Request, ctx: Ctx) {
     return Response.json(updated, { headers: cors });
   }
   if (body.action === "close") {
-    return Response.json(await addFeedItem(opp, "buyer", null, name, "closed", body.body || "Opportunity closed."), { headers: cors });
+    // The buyer's own close, honouring the publish signature's "Yours to
+    // close" (Harry's Section 1 finding, 28 Jul 2026: the room offered no
+    // close control). addFeedItem already derives status "closed" from the
+    // feed type and saves; this call additionally stamps `updated`, exactly
+    // as the admin moderation close does, so the board's freshness line and
+    // the closed archive order stay honest. The live board and data.json
+    // drop the notice on the status alone.
+    const updated = await addFeedItem({ ...opp, updated: Date.now() }, "buyer", null, name, "closed", body.body || "Opportunity closed by the buyer.");
+    return Response.json(updated, { headers: cors });
   }
   return Response.json(await addFeedItem(opp, "buyer", null, name, "comment", body.body ?? ""), { headers: cors });
 }

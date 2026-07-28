@@ -38,6 +38,11 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [comment, setComment] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  /* The close the buyer was promised (Harry's Section 1 finding, 28 Jul
+   * 2026): the account page and the publish signature both said "close it
+   * from its room" and the room had no control. Two-step, never one tap. */
+  const [closing, setClosing] = useState(false);
+  const [closeReason, setCloseReason] = useState("");
   const lastTs = useRef(0);
 
   useEffect(() => { if (initialId) load(initialId); /* eslint-disable-next-line */ }, [initialId]);
@@ -218,7 +223,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2">
-        <p className="eyebrow mb-1">{opp.engagement_type === "auction" ? "Reverse auction" : "Live opportunity room"} <span className="text-emerald-700">● live</span></p>
+        <p className="eyebrow mb-1">{opp.engagement_type === "auction" ? "Reverse auction" : "Live opportunity room"} {opp.status === "open" ? <span className="text-emerald-700">● live</span> : <span className="text-[var(--ink-500)]">· closed</span>}</p>
         <h1 className="text-2xl mb-1">{opp.title}</h1>
         <p className="text-sm text-[var(--ink-500)] mb-4">Scope: {labelsFor(OPP_SCOPE_TAGS, opp.scope).join(", ")}{opp.sites ? ` · ${opp.sites} sites` : ""} · {opp.status.charAt(0).toUpperCase() + opp.status.slice(1)}{deadlineText(opp) ? ` · ${deadlineText(opp)}` : ""}{opp.awarded_vendor_slug ? ` · awarded to ${opp.awarded_vendor_slug}` : ""}</p>
         {opp.engagement_type === "auction" && (
@@ -274,6 +279,23 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           </div>
         )}
         <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a supplier copies their private room link. Suppliers reply live with comments and pricing.</p>
+        {opp.status === "open" && (
+          <div className="mt-6 border-t border-[var(--ink-200,#e5e5e5)] pt-4">
+            <p className="eyebrow mb-1">Close this notice</p>
+            {!closing ? (
+              <>
+                <p className="text-sm text-[var(--ink-600)] mb-2">Closing takes the notice off the live board. The record, its page and its feed stay, in the board&apos;s closed archive.</p>
+                <button onClick={() => setClosing(true)} className="text-sm px-3.5 py-1.5 rounded-full border border-[var(--ink-900)] hover:bg-[var(--ink-900)] hover:text-white transition-colors">Close this notice</button>
+              </>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                <input value={closeReason} onChange={(e) => setCloseReason(e.target.value)} placeholder="Reason for the feed (optional)" className="flex-1 min-w-52 border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
+                <button onClick={() => { buyerAction("close", closeReason || "Opportunity closed by the buyer."); setClosing(false); setCloseReason(""); }} className="text-sm px-3.5 py-1.5 rounded-full border border-[var(--ink-900)] bg-[var(--ink-900)] text-white transition-colors">Confirm close</button>
+                <button onClick={() => { setClosing(false); setCloseReason(""); }} className="text-sm underline text-[var(--ink-600)]">Keep it open</button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       )}
     </div>
