@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BuyerMemoryPanel from "@/components/BuyerMemoryPanel";
 import BuyerDigests from "@/components/BuyerDigests";
-import MyOpportunities from "@/components/MyOpportunities";
-import MyRfps from "@/components/MyRfps";
+import MyProcurements from "@/components/MyProcurements";
 import SignIn from "@/components/SignIn";
 
 export const metadata: Metadata = { title: "Your account: opportunities, RFPs and agent memory", robots: { index: false, follow: false } };
@@ -22,7 +21,9 @@ export default function AccountPage() {
       <div className="mb-8">
         <p className="eyebrow mb-2">Your account</p>
         <h1 className="text-2xl mb-1">Your marketplace activity</h1>
-        <p className="text-sm text-[var(--ink-600)]">Opportunities you have published, RFPs you have saved, and what the agent remembers, all tied to your signed-in email and recoverable from any device.</p>
+        {/* One list, one procurement, one row (Robert's R9 on Harry's
+            Section 1 test, 28 Jul 2026). */}
+        <p className="text-sm text-[var(--ink-600)]">Your procurements and what the agent remembers, all tied to your signed-in email and recoverable from any device.</p>
       </div>
 
       <div className="mb-8">
@@ -33,8 +34,7 @@ export default function AccountPage() {
         </p>
       </div>
 
-      <MyOpportunities />
-      <MyRfps />
+      <MyProcurements />
 
       <div className="mt-4 mb-6">
         <h2 className="text-xl mb-1">What the agent remembers about you</h2>

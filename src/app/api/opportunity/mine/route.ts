@@ -36,6 +36,9 @@ export async function GET(req: Request) {
       bid_count: o.feed.filter((f) => f.type === "pricing").length,
       comment_count: o.feed.filter((f) => f.type === "comment").length,
       buyer_token: o.buyer_token,
+      // The project link (Robert's R9, 28 Jul 2026): the account page joins
+      // a published notice to its project so one procurement is one row.
+      source_rfp_id: o.source_rfp_id || "",
     }));
   return Response.json({ opportunities: mine, count: mine.length }, { headers: cors });
 }
