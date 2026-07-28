@@ -166,11 +166,19 @@ export default function Page() {
             title and trust proposition, after the promise, before the
             input, never below the journey strip. His words. */}
         <section aria-labelledby="enterprise-sourcing-value" className="mx-auto mt-5 max-w-3xl">
+          {/* One header section on this page (Robert, 29 Jul): the card's
+              heading is a quiet uppercase eyebrow, inline-styled like the
+              H1 above so global heading styles can never inflate it; the
+              h2 element stays for the machine layer. */}
           <div className="rounded-2xl border border-zinc-200 bg-white px-6 py-4 text-center">
-            <h2 id="enterprise-sourcing-value" className="m-0 text-[13.5px] font-semibold tracking-tight text-zinc-900">
+            <h2
+              id="enterprise-sourcing-value"
+              className="m-0 uppercase"
+              style={{ fontSize: "11.5px", fontWeight: 600, letterSpacing: "0.08em", color: "#71717a" }}
+            >
               {ENGINE_VALUE_H2}
             </h2>
-            <p className="m-0 mt-1.5 text-[13px] leading-relaxed text-zinc-600">
+            <p className="m-0 mt-2" style={{ fontSize: "13.5px", lineHeight: 1.6, color: "#52525b" }}>
               {ENGINE_VALUE}
             </p>
           </div>
