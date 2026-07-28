@@ -96,6 +96,12 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
   }
 
   const qs = tokenOk && manage ? `?manage=${encodeURIComponent(manage)}` : "";
+  /* Preview doors carry their origin so the return link comes back here,
+   * not to the builder (Harry's Section 1 finding, 28 Jul 2026). */
+  const qsFrom = qs ? `${qs}&from=project` : "?from=project";
+  /* The board twin, when this project listed publicly: the publication card
+   * points at its real object instead of duplicating the builder door. */
+  const boardOpp = await kvGetJson<string>(`rfp:${id}:board_opp`).catch(() => null);
   const phase = projectPhase(project);
   const engine = project.engine === "security_sourcing";
   const responses = await listResponses(id);
@@ -221,7 +227,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Link
-                href={`/rfp-builder/${id}/preview${qs}`}
+                href={`/rfp-builder/${id}/preview${qsFrom}`}
                 className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-950 no-underline transition-colors hover:bg-amber-400"
               >
                 {isPublished ? "View your requirement →" : "Preview and publish →"}
@@ -249,7 +255,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
             <p className="m-0 mt-2 text-sm">
               <Link href={`/rfp-builder/${id}${qs}`} className="underline">Review and edit</Link>
               <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
-              <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline">Preview</Link>
+              <Link href={`/rfp-builder/${id}/preview${qsFrom}`} className="underline">Preview</Link>
             </p>
           </section>
         )}
@@ -289,16 +295,25 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
               ))}
             </ul>
           )}
+          {/* One door per activity (Harry's Section 1 finding, 28 Jul 2026:
+              RFP tab, Review and edit, and Open the builder all reached the
+              same page). Editing lives on the Current RFP card; this card
+              opens publication's own objects: the publish step when drafted,
+              the public notice or the published document after. */}
           <p className="m-0 mt-2 text-sm">
             {engine ? (
-              <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline">
+              <Link href={`/rfp-builder/${id}/preview${qsFrom}`} className="underline">
                 {isPublished ? "View your published requirement" : "Preview and publish your requirement"}
               </Link>
-            ) : (
-              <Link href={`/rfp-builder/${id}${qs}`} className="underline">
-                {phase === "drafted" ? "Publish from the builder" : "Open the builder"}
-              </Link>
-            )}
+            ) : phase === "drafted" ? (
+              <Link href={`/rfp-builder/${id}${qs}`} className="underline">Publish from the builder</Link>
+            ) : isPublished ? (
+              boardOpp ? (
+                <Link href={`/opportunities/${boardOpp}`} className="underline">View the public notice</Link>
+              ) : (
+                <Link href={`/rfp-builder/${id}/preview${qsFrom}`} className="underline">View the published document</Link>
+              )
+            ) : null}
           </p>
           {phase === "drafted" && <ApprovalRequest projectId={id} manage={tokenOk ? manage : undefined} />}
         </section>
@@ -329,7 +344,20 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
       <section className="mt-8">
         <p className="eyebrow mb-2">Activity</p>
         {recent.length === 0 ? (
-          <p className="text-sm text-[var(--ink-600)]">No recorded events yet.</p>
+          <>
+            {/* Never a bare "nothing" on a project that exists (Harry's
+                Section 1 finding, 28 Jul 2026): the creation date is always
+                true, and older projects born before creation events were
+                recorded still deserve a first line. */}
+            <p className="text-sm text-[var(--ink-600)]">
+              Created {new Date(project.created).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}. Recorded events appear here as they happen.
+            </p>
+            <p className="mt-3 text-sm">
+              <Link href={`/project/${id}/story${qs}`} className="underline">Full story</Link>
+              <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
+              <Link href={`/project/${id}/timeline${qs}`} className="underline">Timeline</Link>
+            </p>
+          </>
         ) : (
           <>
             <ul className="m-0 list-none space-y-1.5 p-0">

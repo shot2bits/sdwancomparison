@@ -245,7 +245,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           <p className="eyebrow mb-2">Respond to this opportunity</p>
           <p className="text-sm text-[var(--ink-600)] mb-3">Suppliers sign in with a verified work email to submit comments, pricing or clarification questions. Pricing stays private to the buyer.</p>
           <a href="/sase/for-suppliers/" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Sign in to respond</a>
-          <p className="text-xs text-[var(--ink-500)] mt-3">Posted this opportunity yourself? Sign in with the email you published with and reload this page — your manage controls will be restored automatically.</p>
+          <p className="text-xs text-[var(--ink-500)] mt-3">Posted this opportunity yourself? Sign in with the email you published with and reload this page; your manage controls will be restored automatically.</p>
         </div>
       ) : (
       <div>

@@ -2,6 +2,7 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
 import { BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
+import { recordProjectEvent } from "@/lib/project-machine";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { sessionFromRequest } from "@/lib/auth";
 import { indexRfpForBuyer } from "@/lib/rfp-store";
@@ -111,7 +112,7 @@ export async function POST(req: Request) {
   const id = newId("rfp");
   const session = await sessionFromRequest(req);
   const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
-  const project = ProjectDetailsSchema.parse({
+  let project = ProjectDetailsSchema.parse({
     id,
     created: Date.now(),
     updated: Date.now(),
@@ -128,6 +129,21 @@ export async function POST(req: Request) {
     consent,
     pending_submit: pendingSubmit,
   });
+  // The record starts at creation (Harry's Section 1 finding, 28 Jul 2026:
+  // "Shows no recorded events despite it being created?". The 24 Jul fix
+  // recorded publish events only, and the engine lane records its own
+  // creation, so wizard and desk projects were born with empty histories).
+  // The record must never block the create; failures fall through.
+  try {
+    project = recordProjectEvent(project, {
+      at: Date.now(),
+      actor: "buyer",
+      actor_ref: ownerEmail || "unauthenticated",
+      via: "web",
+      event: "project.created",
+      detail: { source: "wizard" },
+    });
+  } catch { /* the history is a record, never a gate */ }
   const saved = await saveProject(project);
   if (ownerEmail) {
     try { await indexRfpForBuyer(ownerEmail, saved.id); } catch { /* best effort */ }

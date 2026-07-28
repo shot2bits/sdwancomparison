@@ -36,7 +36,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "RFP preview", robots: { index: false, follow: false } };
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ manage?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ manage?: string; from?: string }> };
 
 /** Coarse public band for the anonymous board card; never the raw number. */
 function usersBandLabel(n: number | null): string | null {
@@ -51,7 +51,7 @@ function usersBandLabel(n: number | null): string | null {
 
 export default async function RfpPreviewPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const { manage } = await searchParams;
+  const { manage, from } = await searchParams;
   if (!kvConfigured()) notFound();
   const project = await getProject(id);
   if (!project) notFound();
@@ -154,7 +154,14 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
       )}
       {!engine && (
         <nav className="mb-6 text-sm text-[var(--ink-500)] print:hidden">
-          <Link href={`/rfp-builder/${id}`} className="underline">← Back to the builder</Link>
+          {/* The return honours where you came from (Harry's Section 1
+              finding, 28 Jul 2026: preview opened from the project page
+              still said back to the builder). */}
+          {from === "project" ? (
+            <Link href={`/project/${id}${manage ? `?manage=${encodeURIComponent(manage)}` : ""}`} className="underline">← Back to your project</Link>
+          ) : (
+            <Link href={`/rfp-builder/${id}`} className="underline">← Back to the builder</Link>
+          )}
         </nav>
       )}
 
