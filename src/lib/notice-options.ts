@@ -39,13 +39,14 @@ export const SITES_BANDS = [
 ] as const;
 
 /**
- * Public site bands (Robert's re-identification ruling, 28 Jul 2026: always
- * bands on the open surface). Exact site counts identify anonymous buyers in
- * combination with sector and region, so every public surface — board, notice
- * page, data.json twins, derived titles, MCP reads — renders the band, never
- * the figure. Exact counts stay with the buyer's own signed-in face and with
+ * Public site bands (Robert's re-identification ruling, 28 Jul 2026, revised
+ * 29 Jul 2026: EXACT UNLESS IDENTIFYING). A public notice shows the exact
+ * site count by default; the band replaces it only when the combination of
+ * details could identify the buyer (see siteFigureIsIdentifying below).
+ * Exact counts always remain with the buyer's own signed-in face and with
  * participating suppliers after the gate. This ladder is the ruled public
- * vocabulary; SITES_BANDS above stays the wizard's coarser input catalogue.
+ * vocabulary for the banded case; SITES_BANDS above stays the wizard's
+ * coarser input catalogue.
  */
 export const SITE_PUBLIC_BANDS = [
   { key: "1-5", label: "1–5 sites", min: 1, max: 5 },
@@ -62,6 +63,31 @@ export function siteBandLabelFor(sites: number | null | undefined): string | nul
   if (typeof sites !== "number" || !Number.isFinite(sites) || sites < 1) return null;
   const band = SITE_PUBLIC_BANDS.find((b) => sites >= b.min && sites <= b.max);
   return band ? band.label : null;
+}
+
+/**
+ * The identifying-combination test (Robert's ruling, 29 Jul 2026: exact
+ * unless identifying). The identifying power is never one field, it is the
+ * COMBINATION: an anonymous buyer, plus a stated sector, plus a single
+ * region narrows the world enough that an exact site count can single the
+ * buyer out without naming them. All three present: the public face carries
+ * the band. Any one absent (a named buyer is already named; no sector or a
+ * not-stated sector names no industry; zero or several regions is not a
+ * narrow geography): the public face carries the exact count. Deterministic
+ * on structured fields only, applied at the one projection point so every
+ * client renders the same figure. A named-incumbent match in free text will
+ * join the triggers when the pre-publish scrub lands; the scrub warns the
+ * buyer rather than silently rewriting.
+ */
+export function siteFigureIsIdentifying(o: {
+  buyer_visibility?: string;
+  buyer_sector?: string;
+  regions?: readonly string[] | string[];
+}): boolean {
+  const anonymous = (o.buyer_visibility ?? "anonymous") === "anonymous";
+  const sectorStated = Boolean(o.buyer_sector) && o.buyer_sector !== "not_stated";
+  const narrowGeography = (o.regions ?? []).length === 1;
+  return anonymous && sectorStated && narrowGeography;
 }
 
 export const USERS_BANDS = [

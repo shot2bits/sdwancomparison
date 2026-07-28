@@ -4,10 +4,12 @@
  * no-derivation-no-rendering contract depends on. Run by
  * scripts/validate-notice-titles.ts inside `npm run validate` (build gate).
  *
- * Band update (Robert's re-identification ruling, 28 Jul 2026): titles are
- * public surfaces, so a derived title now carries the site BAND from the
- * ruled seven-band ladder ("21–50 sites"), never the exact count. The
- * exact-count expectations below were updated to bands on 29 Jul 2026.
+ * Site-figure rule (Robert's ruling, revised 29 Jul 2026): EXACT UNLESS
+ * IDENTIFYING. A derived title carries the exact count unless the
+ * identifying combination holds (anonymous buyer + stated sector + single
+ * region, siteFigureIsIdentifying); then it carries the band from the
+ * ruled ladder ("21–50 sites"). Fixtures without buyer_visibility read as
+ * anonymous, the privacy-conservative default.
  */
 
 import { deriveNoticeTitle, insufficientNoticeTitle, noticeDisplayTitle, type NoticeTitleSource } from "@/lib/notice-title";
@@ -33,9 +35,9 @@ const src = (over: Partial<NoticeTitleSource>): NoticeTitleSource => ({
 
 const FIXTURES: Fixture[] = [
   {
-    name: "sufficient stored title stands untouched (Harry's exemplar)",
+    name: "sufficient stored title stands untouched (Harry's exemplar); two regions is not narrow, so the derivation is exact",
     source: src({ title: "H TEST Fully managed SASE, 21-50 sites, UK & Ireland and Europe", scope: ["sase", "managed_service"], sites: 50, regions: ["uk_ireland", "europe"] }),
-    derived: "Managed SASE, 21–50 sites, UK & Ireland and Europe",
+    derived: "Managed SASE, 50 sites, UK & Ireland and Europe",
     display: "H TEST Fully managed SASE, 21-50 sites, UK & Ireland and Europe",
   },
   {
@@ -51,9 +53,9 @@ const FIXTURES: Fixture[] = [
     display: "SASE requirement",
   },
   {
-    name: "engine title with a real sector stands (letters present)",
+    name: "engine title with a real sector stands (letters present); no region means no narrow geography, so the derivation is exact",
     source: src({ title: "Security sourcing for Healthcare & pharma (12 users)", scope: ["managed_security"], sites: 123, buyer_sector: "Healthcare & pharma" }),
-    derived: "Managed security, 51–200 sites",
+    derived: "Managed security, 123 sites",
     display: "Security sourcing for Healthcare & pharma (12 users)",
   },
   {
@@ -87,16 +89,28 @@ const FIXTURES: Fixture[] = [
     display: "SASE for Financial services",
   },
   {
-    name: "estate facts beat the sector clause",
+    name: "estate facts beat the sector clause; anonymous + stated sector + single region is the identifying combination, so the band enters",
     source: src({ title: "Untitled SASE / SD-WAN RFP", scope: ["sase", "managed_service"], sites: 38, regions: ["uk_ireland"], buyer_sector: "retail_ecommerce" }),
     derived: "Managed SASE, 21–50 sites, UK & Ireland",
     display: "Managed SASE, 21–50 sites, UK & Ireland",
   },
   {
-    name: "a single site enters as the smallest band (the singular read retired with exact counts, 28 Jul ruling)",
+    name: "single site reads singular (exact path: no sector, no narrow geography)",
     source: src({ title: "", scope: ["connectivity"], sites: 1 }),
-    derived: "Connectivity, 1–5 sites",
-    display: "Connectivity, 1–5 sites",
+    derived: "Connectivity, 1 site",
+    display: "Connectivity, 1 site",
+  },
+  {
+    name: "the identifying combination bands the title: anonymous + stated sector + one region",
+    source: src({ title: "Untitled", scope: ["sase"], sites: 400, regions: ["uk_ireland"], buyer_sector: "financial_services" }),
+    derived: "SASE, 201–500 sites, UK & Ireland",
+    display: "SASE, 201–500 sites, UK & Ireland",
+  },
+  {
+    name: "a named buyer is already named: the same combination stays exact",
+    source: src({ title: "Untitled", scope: ["sase"], sites: 400, regions: ["uk_ireland"], buyer_sector: "financial_services", buyer_visibility: "named" }),
+    derived: "SASE, 400 sites, UK & Ireland",
+    display: "SASE, 400 sites, UK & Ireland",
   },
   {
     name: "known users band enters when sites are absent",

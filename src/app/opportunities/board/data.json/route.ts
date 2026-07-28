@@ -33,7 +33,7 @@ export async function GET() {
     description: "Open buyer opportunities. Verified vendors respond and quote. Pricing amounts are private to the posting buyer.",
     generated: new Date().toISOString(),
     methodology_version: "sase-marketplace-2026.1",
-    public_record_note: "Site and user figures are published as bands; exact figures stay with the buyer and participating suppliers. Closed and awarded notices remain published permanently in the archived array, each with its closed_at date.",
+    public_record_note: "Site counts are published exactly unless the combination of an anonymous buyer, a stated sector and a single region could identify the buyer; then the site_band range is published and sites is null. Exact figures always stay with the buyer and participating suppliers. Closed and awarded notices remain published permanently in the archived array, each with its closed_at date.",
     count: opportunities.length,
     archived_count: archived.length,
     opportunities: opportunities.map((o) => ({

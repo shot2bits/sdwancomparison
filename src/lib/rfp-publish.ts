@@ -84,7 +84,15 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     .map((o) => o.title);
   const distinctTitle = ensureDistinctNoticeTitle(
     p.title,
-    { sites: p.buyer.site_count ?? null, regions: p.buyer.regions ?? [], created: existing?.created ?? Date.now() },
+    {
+      sites: p.buyer.site_count ?? null,
+      regions: p.buyer.regions ?? [],
+      created: existing?.created ?? Date.now(),
+      // RFP notices list anonymously; the title's site figure follows the
+      // same exact-unless-identifying rule as the notice body.
+      buyer_sector: p.buyer.sector || SECTOR_NOT_STATED,
+      buyer_visibility: "anonymous",
+    },
     openTitles,
   );
 

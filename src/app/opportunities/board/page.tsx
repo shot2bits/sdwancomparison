@@ -124,7 +124,7 @@ export default async function OpportunityBoardPage() {
           Repo twin: docs/netify-public-gated-line-2026-07-28.md. */}
       <div className="mt-12">
         <h2 className="text-lg font-semibold mb-1">What is public and what stays gated</h2>
-        <p className="text-sm text-[var(--ink-600)] mb-4">Every notice keeps the same line between its public record and its gated room. Site and user figures are published as bands; exact figures stay with the buyer and participating suppliers.</p>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Every notice keeps the same line between its public record and its gated room. Site counts publish exactly unless the combination of an anonymous buyer, a stated sector and a single region could identify the buyer; then the range publishes instead. Exact figures always stay with the buyer and participating suppliers.</p>
         <div className="overflow-x-auto rounded-sm border border-[var(--ink-200,#e5e5e5)]">
           <table className="w-full text-sm">
             <thead>
@@ -136,7 +136,7 @@ export default async function OpportunityBoardPage() {
             <tbody className="align-top">
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Identity of the notice</td><td className="px-4 py-2 text-[var(--ink-700)]">Its URL and id, created and updated dates, status (open, closed, awarded) and the close date once closed</td></tr>
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">What is sought</td><td className="px-4 py-2 text-[var(--ink-700)]">Title, summary, scope, sector (or the literal &ldquo;not stated&rdquo;), desired outcomes, compliance, evidence requested, evaluation priorities</td></tr>
-              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Size and place</td><td className="px-4 py-2 text-[var(--ink-700)]">Regions, the site band, user bands, cloud platforms. Bands always, exact figures never</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Size and place</td><td className="px-4 py-2 text-[var(--ink-700)]">Regions, site count, user bands, cloud platforms. The site count shows exactly unless the combination could identify the buyer; then its range shows instead</td></tr>
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Process</td><td className="px-4 py-2 text-[var(--ink-700)]">Response mode and deadlines, decision and go-live targets, engagement type, eligibility</td></tr>
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Document and activity</td><td className="px-4 py-2 text-[var(--ink-700)]">Whether a full RFP is attached and its section shape (titles and question counts only), plus bid and comment counts, never contents</td></tr>
             </tbody>
@@ -148,7 +148,7 @@ export default async function OpportunityBoardPage() {
             </thead>
             <tbody className="align-top">
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Buyer identity</td><td className="px-4 py-2 text-[var(--ink-700)]">The organisation name where the buyer chose anonymity, and any contact route. Publishing emails are never rendered anywhere</td></tr>
-              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Exact figures</td><td className="px-4 py-2 text-[var(--ink-700)]">The exact site and user counts behind the public bands</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Exact figures</td><td className="px-4 py-2 text-[var(--ink-700)]">The exact counts behind any published range</td></tr>
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">The room</td><td className="px-4 py-2 text-[var(--ink-700)]">Supplier responses and the feed, the full RFP question set, all pricing (each supplier sees only its own; the buyer sees all)</td></tr>
               <tr><td className="px-4 py-2 font-medium">The controls</td><td className="px-4 py-2 text-[var(--ink-700)]">Responding, inviting, closing. Tokens and infrastructure are never public</td></tr>
             </tbody>

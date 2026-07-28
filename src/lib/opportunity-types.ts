@@ -10,7 +10,7 @@
 
 import { z } from "zod";
 import { noticeDisplayTitle } from "@/lib/notice-title";
-import { siteBandLabelFor } from "@/lib/notice-options";
+import { siteBandLabelFor, siteFigureIsIdentifying } from "@/lib/notice-options";
 
 export const OPP_SCOPES = [
   "underlay_circuits",
@@ -208,12 +208,14 @@ export type PublicOpportunity = {
   buyer_org: string;
   title: string;
   scope: OppScope[];
-  // Always null for real notices (Robert's re-identification ruling, 28 Jul
-  // 2026: always bands on the open surface). The exact count stays gated;
-  // site_band carries the public figure. Sample notices (authored worked
-  // examples about invented organisations) may carry an exact count.
+  // Exact unless identifying (Robert's ruling, revised 29 Jul 2026): the
+  // exact count shows publicly unless the identifying combination holds
+  // (anonymous buyer + stated sector + single region, see
+  // siteFigureIsIdentifying); then sites is null here and site_band carries
+  // the public figure. One face at a time: when sites is present, site_band
+  // is null, and vice versa.
   sites: number | null;
-  site_band?: string | null; // public band label, e.g. "51–200 sites" (optional: sample fixtures omit it)
+  site_band?: string | null; // public band label, e.g. "51–200 sites", only when the identifying combination holds (optional: sample fixtures omit it)
   regions: string[];
   summary: string;
   budget_note: string;
@@ -272,11 +274,12 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     // (Article 17); the stored title itself is never rewritten.
     title: noticeDisplayTitle(o),
     scope: o.scope,
-    // Always bands on the open surface (Robert's ruling, 28 Jul 2026): the
-    // exact count never enters the public projection; the band does. Exact
-    // figures stay with the buyer's own face and participating suppliers.
-    sites: null,
-    site_band: siteBandLabelFor(o.sites),
+    // Exact unless identifying (Robert's ruling, 29 Jul 2026): the exact
+    // count is public by default; the band replaces it only when the
+    // identifying combination holds. Exact figures always remain with the
+    // buyer's own face and participating suppliers.
+    sites: siteFigureIsIdentifying(o) ? null : o.sites,
+    site_band: siteFigureIsIdentifying(o) ? siteBandLabelFor(o.sites) : null,
     regions: o.regions,
     summary: o.summary,
     budget_note: o.budget_note,

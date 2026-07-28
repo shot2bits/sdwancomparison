@@ -22,11 +22,11 @@ A notice that entered the public record never leaves it. Closed and awarded noti
 
 Buyer identity and any contact route (buyer_org where the buyer chose anonymity; owner_email is never rendered anywhere), attached documents, supplier responses and the feed bodies, all pricing (each supplier sees only its own; the buyer sees all), the exact site and user figures behind the public bands, and the controls: responding, inviting, closing. Infrastructure is never public: buyer_token, manage and share tokens.
 
-## The re-identification rule (ruled 28 July 2026: always bands)
+## The re-identification rule (ruled 28 July 2026; revised by Robert 29 July 2026: exact unless identifying)
 
 Anonymous means the public fields cannot single out the buyer. The identifying power is always the combination: sector plus a narrow region plus an exact figure plus a named incumbent will identify a buyer no name ever mentions. So:
 
-- **Always bands on the open surface.** Site and user counts render as bands on every public surface, always (1-5, 6-20, 21-50, 51-200, 201-500, 501-1000, 1000+ sites), applied at the projection so no client can drift. Exact figures are revealed only to the buyer's own signed-in face and to participating suppliers after the gate. Derived titles use the band too.
+- **Exact unless identifying.** The public site count shows exactly by default. It renders as its band (1-5, 6-20, 21-50, 51-200, 201-500, 501-1000, 1000+ sites) only when the identifying combination holds: an anonymous buyer AND a stated sector AND a single region (`siteFigureIsIdentifying` in `src/lib/notice-options.ts`). Deterministic on structured fields, applied at the one projection point so no client can drift; derived titles follow the same rule. Exact figures are always available to the buyer's own signed-in face and to participating suppliers after the gate. A named-incumbent match in free text joins the triggers when the pre-publish scrub lands.
 - **The free-text scrub** (pre-publish validation of summary, outcomes, budget and timeline notes for names, places and phrases of uniqueness) and **the combination sentence** on preview belong to the preview slice; flags warn and the buyer decides. Nothing is silently rewritten.
 - **The preview is the public face:** the pre-publish preview renders the public projection byte-identical, bands applied.
 

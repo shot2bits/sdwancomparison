@@ -17,7 +17,7 @@
  */
 
 import type { OppScope } from "@/lib/opportunity-types";
-import { REGIONS, SECTORS, USERS_BANDS, labelFor, siteBandLabelFor } from "@/lib/notice-options";
+import { REGIONS, SECTORS, USERS_BANDS, labelFor, siteBandLabelFor, siteFigureIsIdentifying } from "@/lib/notice-options";
 
 export const NOTICE_TITLE_RULES_VERSION = "notice-title v2026.07.23";
 
@@ -60,7 +60,19 @@ export type NoticeTitleSource = {
   regions: string[] | readonly string[];
   buyer_sector: string;
   users_band: string;
+  // Optional so older callers and fixtures keep working; absent reads as
+  // anonymous, the privacy-conservative default (titles are public surfaces).
+  buyer_visibility?: string;
 };
+
+/** The site figure as a public title states it: exact unless identifying (Robert's ruling, 29 Jul 2026). */
+function titleSitePhrase(f: { sites: number | null; regions: readonly string[] | string[]; buyer_sector?: string; buyer_visibility?: string }): string | null {
+  if (typeof f.sites !== "number" || !Number.isFinite(f.sites) || f.sites < 1) return null;
+  if (siteFigureIsIdentifying({ buyer_visibility: f.buyer_visibility, buyer_sector: f.buyer_sector ?? "", regions: f.regions })) {
+    return siteBandLabelFor(f.sites);
+  }
+  return `${f.sites} ${f.sites === 1 ? "site" : "sites"}`;
+}
 
 /** Region list as a title reads it: "UK & Ireland", "UK & Ireland and Europe", "UK & Ireland, Europe and more". */
 function regionPhrase(regions: readonly string[]): string | null {
@@ -84,14 +96,13 @@ export function deriveNoticeTitle(f: NoticeTitleSource): string | null {
   const head = managed ? `Managed ${scopeWord}` : scopeWord;
 
   const segments: string[] = [];
-  // Titles are public surfaces: the site figure enters as its band, never
-  // exact (Robert's re-identification ruling, 28 Jul 2026). A derived title
-  // reading "SASE, 51–200 sites, UK & Ireland" states a true band; an exact
-  // count in combination with sector and region can identify an anonymous
-  // buyer.
-  const siteBand = siteBandLabelFor(f.sites);
-  if (siteBand) {
-    segments.push(siteBand);
+  // Titles are public surfaces: the site figure enters exactly unless the
+  // identifying combination holds, in which case the band enters instead
+  // (Robert's ruling, 29 Jul 2026). One rule with the projection, so the
+  // title never says more than the notice body does.
+  const sitePhrase = titleSitePhrase(f);
+  if (sitePhrase) {
+    segments.push(sitePhrase);
   } else if (f.users_band) {
     // Only a known band enters the title (labels already read "100–500 users").
     // Unknown or free-typed values are skipped — the "66" lesson, applied here.
@@ -135,18 +146,19 @@ export function noticeDisplayTitle(f: NoticeTitleSource): string {
  */
 export function ensureDistinctNoticeTitle(
   title: string,
-  src: { sites: number | null; regions: string[] | readonly string[]; users_band?: string; created: number },
+  src: { sites: number | null; regions: string[] | readonly string[]; users_band?: string; created: number; buyer_sector?: string; buyer_visibility?: string },
   openTitles: string[],
 ): string {
   const norm = (t: string) => t.replace(/\s+/g, " ").trim().toLowerCase();
   const clash = (t: string) => openTitles.some((o) => norm(o) === norm(t));
   if (!clash(title)) return title;
   const region = src.regions && src.regions.length ? labelFor(REGIONS, String(src.regions[0])) : "";
-  // The distinguishing site fact enters as its public band, never the exact
-  // count (Robert's re-identification ruling, 28 Jul 2026).
-  const siteBand = siteBandLabelFor(src.sites);
+  // The distinguishing site fact follows the projection's rule: exact
+  // unless the identifying combination holds, then the band (Robert's
+  // ruling, 29 Jul 2026).
+  const sitePhrase = titleSitePhrase({ sites: src.sites, regions: src.regions, buyer_sector: src.buyer_sector, buyer_visibility: src.buyer_visibility });
   const candidates = [
-    siteBand ? `${title}, ${siteBand}` : "",
+    sitePhrase ? `${title}, ${sitePhrase}` : "",
     region && !norm(title).includes(norm(region)) ? `${title}, ${region}` : "",
     src.users_band ? `${title}, ${labelFor(USERS_BANDS, src.users_band)} users` : "",
     `${title} (${new Date(src.created).toLocaleDateString("en-GB", { day: "numeric", month: "short" })})`,
