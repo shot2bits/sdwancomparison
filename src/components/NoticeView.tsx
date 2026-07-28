@@ -67,7 +67,7 @@ export default function NoticeView({
     <article className="max-w-3xl">
       {isSample && (
         <p className="mb-4 rounded-sm border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-800">
-          <strong>Sample RFI.</strong> A worked example showing what a published RFI looks like — not a live opportunity.{" "}
+          <strong>Sample RFI.</strong> A worked example showing what a published RFI looks like, not a live opportunity.{" "}
           <Link href="/opportunities/new" className="underline">Post your own project</Link>.
         </p>
       )}
@@ -81,8 +81,16 @@ export default function NoticeView({
       <header className="mb-6">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Chip tone={o.status === "open" ? "green" : "neutral"}>{statusLabel}</Chip>
-          <Chip tone="amber">{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</Chip>
-          {o.has_full_rfp && <Chip tone="amber">Full RFP included</Chip>}
+          {/* One fact, one chip (Harry's Section 1 finding, 28 Jul 2026):
+              response mode and attachment merge when both say full RFP. */}
+          {o.response_mode === "full_rfp" && o.has_full_rfp ? (
+            <Chip tone="amber">Full RFP · issued and attached</Chip>
+          ) : (
+            <>
+              <Chip tone="amber">{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</Chip>
+              {o.has_full_rfp && <Chip tone="amber">Full RFP included</Chip>}
+            </>
+          )}
           {o.eligibility === "open" ? <Chip>Open to verified suppliers</Chip> : <Chip>Invite-only</Chip>}
           {o.buyer_visibility === "anonymous" && <Chip>Anonymous buyer</Chip>}
         </div>
@@ -139,7 +147,7 @@ export default function NoticeView({
       <Section title="Timeline">
         <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
           <Fact label="Published" value={formatDate(o.created)} />
-          <Fact label="Response deadline" value={responseDeadline ?? "None set — responses accepted while open"} />
+          <Fact label="Response deadline" value={responseDeadline ?? "None set, responses accepted while open"} />
           <Fact label="Decision target" value={formatDate(o.decision_target)} />
           <Fact label="Target go-live" value={formatDate(o.go_live_target)} />
           {o.timeline_note && <p className="pt-2 text-sm text-[var(--ink-700)]">{o.timeline_note}</p>}

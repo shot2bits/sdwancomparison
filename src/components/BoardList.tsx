@@ -39,15 +39,31 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
   const [mode, setMode] = useState("");
 
   const scopesInUse = useMemo(() => [...new Set(opps.flatMap((o) => o.scope))], [opps]);
-  const sectorsInUse = useMemo(() => [...new Set(opps.map((o) => o.buyer_sector).filter(Boolean))], [opps]);
-  const regionsInUse = useMemo(() => [...new Set(opps.flatMap((o) => o.regions))], [opps]);
+  /* Sectors dedupe by DISPLAY LABEL, not raw value: legacy notices stored
+   * label strings while newer ones store slugs, and both render the same
+   * word, so the dropdown showed Healthcare & pharma twice (Harry's
+   * Section 1 finding, 28 Jul 2026). The select's value IS the label and
+   * the filter compares labels, so either stored form matches. */
+  const sectorLabelsInUse = useMemo(
+    () => [...new Set(opps.map((o) => (o.buyer_sector ? labelFor(SECTORS, o.buyer_sector) : "")).filter(Boolean))],
+    [opps],
+  );
   const modesInUse = useMemo(() => [...new Set(opps.map((o) => o.response_mode))], [opps]);
+  /* Regions offer the full taxonomy with live counts, not just the regions
+   * present today: a three-entry dropdown read as "this board only covers
+   * three regions" (Harry's Section 1 finding) on a product built for UK
+   * and North American organisations. Counts keep it truthful. */
+  const regionCounts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const r of REGIONS) m.set(r.key, opps.filter((o) => o.regions.includes(r.key)).length);
+    return m;
+  }, [opps]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return opps.filter((o) => {
       if (scope && !o.scope.includes(scope as OppScope)) return false;
-      if (sector && o.buyer_sector !== sector) return false;
+      if (sector && (!o.buyer_sector || labelFor(SECTORS, o.buyer_sector) !== sector)) return false;
       if (region && !o.regions.includes(region)) return false;
       if (mode && o.response_mode !== mode) return false;
       if (needle && !(`${o.title} ${o.summary} ${o.buyer_org}`.toLowerCase().includes(needle))) return false;
@@ -71,15 +87,18 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
             <option value="">All scopes</option>
             {scopesInUse.map((s) => <option key={s} value={s}>{OPP_SCOPE_LABELS[s] ?? s}</option>)}
           </select>
-          {sectorsInUse.length > 0 && (
+          {sectorLabelsInUse.length > 0 && (
             <select value={sector} onChange={(e) => { setSector(e.target.value); track("opportunity_board_filtered", { field: "sector", value: e.target.value }); }} className={inputCls}>
               <option value="">All sectors</option>
-              {sectorsInUse.map((s) => <option key={s} value={s}>{labelFor(SECTORS, s)}</option>)}
+              {sectorLabelsInUse.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           )}
           <select value={region} onChange={(e) => { setRegion(e.target.value); track("opportunity_board_filtered", { field: "region", value: e.target.value }); }} className={inputCls}>
             <option value="">All regions</option>
-            {regionsInUse.map((r) => <option key={r} value={r}>{labelFor(REGIONS, r)}</option>)}
+            {REGIONS.map((r) => {
+              const n = regionCounts.get(r.key) ?? 0;
+              return <option key={r.key} value={r.key}>{r.label}{n > 0 ? ` (${n})` : ""}</option>;
+            })}
           </select>
           <select value={mode} onChange={(e) => { setMode(e.target.value); track("opportunity_board_filtered", { field: "responseMode", value: e.target.value }); }} className={inputCls}>
             <option value="">All response modes</option>
@@ -110,8 +129,18 @@ export default function BoardList({ opps }: { opps: PublicOpportunity[] }) {
             return (
               <Link key={o.id} href={`/opportunities/${o.id}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
                 <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
-                  <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 font-medium uppercase tracking-wide text-[var(--ink-600)]">{RESPONSE_MODE_LABELS[o.response_mode] ?? (o.engagement_type === "auction" ? "Auction" : "Quote room")}</span>
-                  {o.has_full_rfp && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Full RFP included</span>}
+                  {/* One fact, one chip: "Full RFP responses" (the response mode)
+                      next to "Full RFP included" (the attachment) read as a
+                      duplicate (Harry's Section 1 finding, 28 Jul 2026). When
+                      both are true they merge. */}
+                  {o.response_mode === "full_rfp" && o.has_full_rfp ? (
+                    <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Full RFP · issued and attached</span>
+                  ) : (
+                    <>
+                      <span className="rounded-full bg-[var(--ink-100,#f0f0f0)] px-2 py-0.5 font-medium uppercase tracking-wide text-[var(--ink-600)]">{RESPONSE_MODE_LABELS[o.response_mode] ?? (o.engagement_type === "auction" ? "Auction" : "Quote room")}</span>
+                      {o.has_full_rfp && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-800">Full RFP included</span>}
+                    </>
+                  )}
                   {o.eligibility === "open" && <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">Open to respond</span>}
                   {dl && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700">{dl}</span>}
                 </div>
