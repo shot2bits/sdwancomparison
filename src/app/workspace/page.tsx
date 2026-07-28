@@ -15,17 +15,23 @@ import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchem
  * kept verbatim-identical with the home twin.
  */
 
-/** The category line (Robert's ruling, 28 Jul 2026). Twin of
+/** The category line (Robert's ruling, 28 Jul 2026; his correction the
+ *  same evening: no full stop on the title). Twin of
  *  src/app/home/page.tsx, kept verbatim-identical. */
-const ENGINE_H1 = "The global SASE and SD-WAN sourcing engine.";
+const ENGINE_H1 = "The global SASE and SD-WAN sourcing engine";
 const ENGINE_PROMISE =
-  "Describe your requirement in your own words. Netify's specialist sourcing assistant structures it, challenges missing assumptions, evaluates fit across the SASE and SD-WAN market, and prepares an anonymous opportunity for suitable suppliers to respond to.";
+  "Describe your requirement in your own words. Netify's specialist sourcing assistant structures it, identifies what's missing, evaluates fit across the SASE and SD-WAN market, and prepares an anonymous opportunity for suitable suppliers to respond to.";
+/** The value section (his ruled paragraph, placed by his correction:
+ *  after the promise, before the input). */
+const ENGINE_VALUE_H2 = "Purpose-built for enterprise SASE and SD-WAN sourcing";
+const ENGINE_VALUE =
+  "Netify combines specialist AI with continuously updated supplier intelligence, years of networking and procurement expertise, and real sourcing data from healthcare, manufacturing, retail, financial services and other sectors. Connected to more than 30 global vendors and managed service providers, every sourcing project benefits from knowledge that evolves with the market.";
 const ENGINE_GEO = "Built for UK and North American organisations sourcing national, multi-site or global deployments.";
 const ENGINE_AGENT =
   "Use Netify directly, or connect your organisation's approved AI agent through MCP. Agents research, draft, compare and monitor. Your team publishes, selects and awards.";
 const ENGINE_CONTROL =
   "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. A Netify analyst reviews every published RFP.";
-const ENGINE_DESCRIPTION = `${ENGINE_H1} ${ENGINE_PROMISE} ${ENGINE_GEO} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
+const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_GEO} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 export const metadata: Metadata = {
   title: "The global SASE and SD-WAN sourcing engine",
@@ -125,7 +131,20 @@ export default function Page() {
         <p id="page-subhead" className="mx-auto m-0 mt-2.5 max-w-3xl text-center text-[13.5px] leading-relaxed text-zinc-600">
           {ENGINE_PROMISE}
         </p>
-        <p className="mx-auto m-0 mt-1.5 max-w-3xl text-center text-[11.5px] text-zinc-400">
+        {/* The value section (Robert's correction, 28 Jul eve): part of
+            the title and trust proposition, after the promise, before
+            the input. His words, twin of home. */}
+        <section aria-labelledby="enterprise-sourcing-value" className="mx-auto mt-5 max-w-3xl">
+          <div className="rounded-2xl border border-zinc-200 bg-white px-6 py-4 text-center">
+            <h2 id="enterprise-sourcing-value" className="m-0 text-[13.5px] font-semibold tracking-tight text-zinc-900">
+              {ENGINE_VALUE_H2}
+            </h2>
+            <p className="m-0 mt-1.5 text-[13px] leading-relaxed text-zinc-600">
+              {ENGINE_VALUE}
+            </p>
+          </div>
+        </section>
+        <p className="mx-auto m-0 mt-2.5 max-w-3xl text-center text-[11.5px] text-zinc-400">
           {ENGINE_GEO}
         </p>
 
