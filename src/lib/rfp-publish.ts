@@ -11,6 +11,7 @@ import { emailDomain } from "@/lib/access-control";
 import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
 import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validate";
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
+import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
 import { sectorLabel } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
@@ -36,6 +37,54 @@ export type PublishOpts = {
 /** Thrown when a declined approval requires the explicit confirmation. */
 export class DeclinedApprovalError extends Error {
   code = "declined_approval" as const;
+}
+
+/**
+ * Thrown when the automatic business verification chain fails at the
+ * publish click (Robert's Rulings One and Two, 29 Jul 2026). The
+ * requirement is SAVED, the email is CAPTURED as a lead on the internal
+ * list, and nothing publishes anywhere. The message is what the buyer
+ * reads; wording PROVISIONAL pending Harry's copy pass (the business-email
+ * rejection message, pass four of five).
+ */
+export class SavedUnpublishedError extends Error {
+  code = "saved_unpublished" as const;
+  verification: BusinessVerification;
+  return_url: string;
+  constructor(verification: BusinessVerification, returnUrl: string) {
+    super(
+      verification.failed_check === "mx" || verification.failed_check === "website"
+        ? "We could not verify that email address's company domain, so nothing has been published. Your requirement is saved and will keep. Publishing needs a working business email address because suppliers need to know which business they are responding to."
+        : "Publishing needs a business email address, because suppliers need to know which business they are responding to. Nothing has been published. Your requirement is saved and will keep; come back with your work address and it publishes without redoing anything.",
+    );
+    this.verification = verification;
+    this.return_url = returnUrl;
+  }
+}
+
+/**
+ * The internal list entry (Harry's list): every publish outcome, published
+ * or saved-unpublished, with the buyer contact, the derived company, the
+ * verification evidence and the requirement depth. Private: KV only, admin
+ * surface only, never any public projection.
+ */
+async function recordPublishLead(entry: {
+  state: "published" | "saved_unpublished";
+  rfp_id: string;
+  email: string;
+  verification: BusinessVerification;
+  requirement_depth: { questions: number; sections: number };
+  board_opportunity_id?: string;
+}): Promise<void> {
+  try {
+    const key = "publish:leads";
+    const list = (await kvGetJson<Array<Record<string, unknown>>>(key)) ?? [];
+    // One live entry per RFP: a later outcome supersedes (the saved
+    // unpublished buyer who returns with a work address becomes published).
+    const kept = list.filter((e) => e.rfp_id !== entry.rfp_id);
+    kept.push({ at: Date.now(), ...entry });
+    await kvSetJson(key, kept.slice(-500));
+  } catch { /* the list is a record, never a gate */ }
 }
 
 export type PublishResult = {
@@ -261,6 +310,30 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     );
   }
 
+  // The automatic business verification chain (Rulings One and Two, 29 Jul
+  // 2026), on the click, before anything sends or lists: list check, MX,
+  // live website, Companies House evidence for UK domains. Fail: nothing
+  // publishes, the requirement stays saved, the email is captured on the
+  // internal list, and the buyer is told plainly why. Pass: the evidence
+  // rides the record and the publish continues. One choke point for the
+  // web page, the MCP publish tools and the magic-link confirm (Article 17).
+  const publishEmail = project.owner_email || sessionEmail;
+  const requirementDepth = {
+    questions: activeQuestionCount,
+    sections: project.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional")).length,
+  };
+  const verification = await verifyBusinessEmail(publishEmail);
+  if (!verification.passed) {
+    await recordPublishLead({
+      state: "saved_unpublished",
+      rfp_id: project.id,
+      email: publishEmail,
+      verification,
+      requirement_depth: requirementDepth,
+    });
+    throw new SavedUnpublishedError(verification, `${SITE_URL}/rfp-builder/${project.id}/`);
+  }
+
   const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
   // Region hint (20 July 2026, the ministry lesson): when the buyer stated no
   // regions, weight the ranking by the email's country TLD. Never filters;
@@ -333,6 +406,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       response_deadline: responseDeadline,
       invited_vendors: mergedInvited,
       pending_submit: undefined,
+      business_verification: { ...verification },
     };
     if (!(p.consents ?? []).some((c) => c.action === "publish")) {
       p = {
@@ -358,6 +432,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       response_deadline: responseDeadline,
       invited_vendors: mergedInvited,
       pending_submit: undefined,
+      business_verification: { ...verification },
     };
     try {
       const now = Date.now();
@@ -388,6 +463,17 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
         : { listed: false, reason: "Board listing failed; try re-publishing." };
     }
   }
+
+  // The internal list hears every outcome (Ruling One): this publish, with
+  // its evidence, derived company and requirement depth. Best effort.
+  await recordPublishLead({
+    state: "published",
+    rfp_id: published.id,
+    email: publishEmail,
+    verification,
+    requirement_depth: requirementDepth,
+    ...(board.listed && board.opportunity_id ? { board_opportunity_id: board.opportunity_id } : {}),
+  });
 
   // Optional marketing consent captured at the agreement step is recorded
   // against the verified identity the publish runs as.

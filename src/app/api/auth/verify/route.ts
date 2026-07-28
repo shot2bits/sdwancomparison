@@ -1,5 +1,5 @@
 import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
-import { executePublish } from "@/lib/rfp-publish";
+import { executePublish, SavedUnpublishedError } from "@/lib/rfp-publish";
 import { sessionCookieHeader, notifyNewSignup } from "@/lib/auth";
 
 export const runtime = "nodejs";
@@ -45,6 +45,11 @@ export async function POST(req: Request) {
   // "Confirm and submit your RFP" email promises. Never claims over an
   // existing owner, never publishes someone else's draft, never blocks
   // sign-in.
+  // Carried to the response so the client can say what happened to a
+  // pending submit (Rulings One and Two, 29 Jul 2026): the sign-in itself
+  // always succeeds when the token is good, because the email round trip
+  // completed; the publish outcome is a separate fact.
+  let publishOutcome: { state: string; message?: string; return_url?: string } | null = null;
   try {
     if (payload.rfp_id && payload.role !== "supplier") {
       let project = await getProject(payload.rfp_id);
@@ -59,9 +64,18 @@ export async function POST(req: Request) {
         project.owner_email === payload.email
       ) {
         await executePublish(project, payload.email, project.pending_submit);
+        publishOutcome = { state: "published" };
       }
     }
-  } catch { /* non-fatal */ }
+  } catch (e) {
+    // The saved-unpublished outcome is a first-class answer, not a silent
+    // failure: the requirement is saved, the lead is captured, and the
+    // buyer must be told why nothing published (Ruling One). Every other
+    // publish failure stays non-fatal to sign-in exactly as before.
+    if (e instanceof SavedUnpublishedError) {
+      publishOutcome = { state: "saved_unpublished", message: e.message, return_url: e.return_url };
+    }
+  }
   // Alert the Netify team the first time a buyer or supplier signs in. Best
   // effort and never blocks sign-in: a notification failure must not stop a
   // legitimate user getting their session.
@@ -71,7 +85,7 @@ export async function POST(req: Request) {
     }
   } catch { /* non-fatal */ }
   return Response.json(
-    { ok: true, role: session.role, email: session.email, vendor_slug: session.vendor_slug },
+    { ok: true, role: session.role, email: session.email, vendor_slug: session.vendor_slug, ...(publishOutcome ? { publish_outcome: publishOutcome } : {}) },
     { headers: { "set-cookie": sessionCookieHeader(session.token) } },
   );
 }

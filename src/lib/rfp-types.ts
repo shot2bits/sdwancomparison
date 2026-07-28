@@ -205,6 +205,12 @@ export const ProjectDetailsSchema = z.object({
   phase: z.enum(PROJECT_PHASE).optional(),
   history: z.array(ProjectHistoryEventSchema).default([]),
   consents: z.array(ProjectConsentSchema).default([]),
+  // The automatic business verification evidence (Robert's Ruling Two,
+  // 29 Jul 2026): recorded at the publish click, private to the record and
+  // the internal list, never in any public projection. Optional so every
+  // pre-ruling record validates unchanged. Loose object rather than a
+  // duplicated shape: verify-business.ts owns the structure.
+  business_verification: z.record(z.string(), z.unknown()).optional(),
   /** Integration-test record (spec 1.7): expires in two hours, sends no
    *  emails, joins no buyer index or moderation queue, and is excluded
    *  from telemetry funnels. */

@@ -17,8 +17,12 @@ import { getVendorDomainOverrides, getBlocklistExtra } from "@/lib/rfp-store";
 
 /**
  * Free / consumer webmail and common disposable domains. Sign-in with any
- * of these is rejected for both suppliers and buyers. Extend live from the
- * admin blocklist editor; this is the compiled baseline.
+ * of these is rejected for both suppliers and buyers, and the publish
+ * verification chain refuses them (Robert's Ruling One, 29 Jul 2026: there
+ * is no personal-email path to publishing; suppliers need to know which
+ * business they are responding to). ONE LIST, OWNED BY ROBERT STURT:
+ * additions and removals are his call, made here or live from the admin
+ * blocklist editor; this is the compiled baseline.
  */
 export const FREE_EMAIL_DOMAINS: ReadonlySet<string> = new Set([
   // Mainstream consumer webmail
