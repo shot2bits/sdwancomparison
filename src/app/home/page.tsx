@@ -34,17 +34,17 @@ const ENGINE_PROMISE =
   "Describe your requirement in your own words. Netify's specialist sourcing assistant structures it, identifies what's missing, evaluates fit across the SASE and SD-WAN market, and prepares an anonymous opportunity for suitable suppliers to respond to.";
 /** The value section (his ruled paragraph from the re-issued challenge,
  *  placed by his correction: after the promise, before the input). */
-const ENGINE_VALUE_H2 = "Purpose-built for enterprise SASE and SD-WAN sourcing";
+const ENGINE_VALUE_H2 = "Purpose-built for UK and North American enterprise and mid-market global SASE & SD-WAN sourcing";
 const ENGINE_VALUE =
   "Netify combines specialist AI with continuously updated supplier intelligence, years of networking and procurement expertise, and real sourcing data from healthcare, manufacturing, retail, financial services and other sectors. Connected to more than 30 global vendors and managed service providers, every sourcing project benefits from knowledge that evolves with the market.";
-/** Geography, his exact words. */
-const ENGINE_GEO = "Built for UK and North American organisations sourcing national, multi-site or global deployments.";
-/** The two-buyer line and the control line (ruled v2 door). */
+/** The two-buyer line and the control line (ruled v2 door). Geography
+ *  retired as a separate line (Robert, 29 Jul: one message); it lives in
+ *  the value card's title. */
 const ENGINE_AGENT =
   "Use Netify directly, or connect your organisation's approved AI agent through MCP. Agents research, draft, compare and monitor. Your team publishes, selects and awards.";
 const ENGINE_CONTROL =
   "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. A Netify analyst reviews every published RFP.";
-const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_GEO} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
+const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE_H2}. ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 export const metadata: Metadata = {
   title: "The global SASE and SD-WAN sourcing engine",
@@ -183,9 +183,6 @@ export default function Page() {
             </p>
           </div>
         </section>
-        <p className="mx-auto m-0 mt-3 max-w-3xl text-center text-[12px] text-zinc-400">
-          {ENGINE_GEO}
-        </p>
 
         <ProjectDesk afterPrompt={<JourneyStrip />} />
       </main>
