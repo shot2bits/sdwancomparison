@@ -19,7 +19,7 @@
  * untouched. This must never be the reason a deploy fails.
  */
 
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const DIR = join(process.cwd(), "data", "vendors");

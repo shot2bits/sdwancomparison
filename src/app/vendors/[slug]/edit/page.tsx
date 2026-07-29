@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getVendor, getAllVendorSlugs } from "@/lib/vendors";
+import WikiOutcome from "@/components/WikiOutcome";
 import {
   FACT_FIELDS,
   JUDGEMENT_FIELDS,
   GUIDANCE,
   FACT_GUIDANCE,
+  WIKI_ACTION,
   classifyField,
 } from "@/lib/vendor-edit";
 
@@ -28,7 +30,10 @@ import {
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ r?: string | string[] }>;
+};
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
@@ -59,7 +64,7 @@ function Field({
           </span>
         </span>
       </summary>
-      <form method="post" action="/api/vendor-edit" className="px-4 py-4 space-y-3">
+      <form method="post" action={WIKI_ACTION} className="px-4 py-4 space-y-3">
         <input type="hidden" name="vendor_slug" value={vendorSlug} />
         <input type="hidden" name="field" value={field} />
 
@@ -107,8 +112,9 @@ function Field({
   );
 }
 
-export default async function VendorEditPage({ params }: Props) {
+export default async function VendorEditPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { r } = await searchParams;
   if (!getAllVendorSlugs().includes(slug)) notFound();
   const v = getVendor(slug);
   const rec = v as unknown as Record<string, unknown>;
@@ -122,6 +128,7 @@ export default async function VendorEditPage({ params }: Props) {
     <div className="max-w-4xl mx-auto px-6 py-12">
       <p className="eyebrow mb-3">Record editor</p>
       <h1 className="mb-3">{v.name}</h1>
+      <WikiOutcome code={r} />
       <p className="text-[var(--ink-700)] max-w-3xl mb-2">
         Last verified {v.last_verified}. Changes are proposed here, never applied directly. Netify
         reviews each one, checks any cited sentence against the page, and publishes it on the next

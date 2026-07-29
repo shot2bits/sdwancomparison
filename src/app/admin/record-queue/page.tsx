@@ -2,7 +2,13 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { isAdminEmail } from "@/lib/access-control";
 import { sessionFromRequest } from "@/lib/auth";
-import { listProposals, editingConfigured, type Proposal } from "@/lib/vendor-edit";
+import WikiOutcome from "@/components/WikiOutcome";
+import {
+  listProposals,
+  editingConfigured,
+  WIKI_ACTION,
+  type Proposal,
+} from "@/lib/vendor-edit";
 
 /**
  * The review queue. This is the product, not the editor.
@@ -65,13 +71,13 @@ function Row({ p }: { p: Proposal }) {
 
       {p.status === "pending" ? (
         <div className="flex flex-wrap gap-2 items-end mt-3">
-          <form method="post" action="/api/vendor-edit" className="flex gap-2 items-end">
+          <form method="post" action={WIKI_ACTION} className="flex gap-2 items-end">
             <input type="hidden" name="action" value="approve" />
             <input type="hidden" name="id" value={p.id} />
             <input name="note" placeholder="note, optional" className="text-sm border border-[var(--ink-300,#c9ced6)] rounded p-2" />
             <button className="text-sm px-3 py-2 rounded bg-[var(--ink-900,#14161a)] text-white">Approve</button>
           </form>
-          <form method="post" action="/api/vendor-edit" className="flex gap-2 items-end">
+          <form method="post" action={WIKI_ACTION} className="flex gap-2 items-end">
             <input type="hidden" name="action" value="reject" />
             <input type="hidden" name="id" value={p.id} />
             <input name="note" placeholder="why not" className="text-sm border border-[var(--ink-300,#c9ced6)] rounded p-2" />
@@ -88,7 +94,12 @@ function Row({ p }: { p: Proposal }) {
   );
 }
 
-export default async function RecordQueuePage() {
+export default async function RecordQueuePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ r?: string | string[] }>;
+}) {
+  const { r } = await searchParams;
   if (!editingConfigured()) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-16">
@@ -128,6 +139,7 @@ export default async function RecordQueuePage() {
     <div className="max-w-4xl mx-auto px-6 py-12">
       <p className="eyebrow mb-3">Netify only</p>
       <h1 className="mb-3">Record review queue</h1>
+      <WikiOutcome code={r} />
       <p className="text-[var(--ink-700)] max-w-3xl mb-8">
         {pending.length === 0
           ? "Nothing waiting."

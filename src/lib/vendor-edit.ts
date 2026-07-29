@@ -27,6 +27,51 @@
 import { kvGetJson, kvSetJson, kvRaw, kvConfigured } from "@/lib/rfp-store";
 
 /* ------------------------------------------------------------------ */
+/* Raw URLs, because basePath does not reach them                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Next's basePath rewrites next/link and the router. It does NOT rewrite a
+ * raw form action, and it does not rewrite a Location header returned by a
+ * route handler. A bare "/api/vendor-edit" posts to netify.co.uk/api/vendor-edit,
+ * which is outside this app and 404s, so the form silently never works. Every
+ * raw URL the wiki writes goes through here, so the prefix lives in one place.
+ */
+export const WIKI_BASE = "/sase";
+export const WIKI_ACTION = `${WIKI_BASE}/api/vendor-edit`;
+
+/**
+ * A human posting a plain form gets a redirect, not a JSON body. The outcome
+ * rides back as a short code and the page renders the sentence, so no message
+ * text and nothing personal ever sits in a URL, and nobody lands on a wall of
+ * JSON with no way back to the record they were editing.
+ */
+export const OUTCOMES: Record<string, { tone: "ok" | "no"; text: string }> = {
+  queued: {
+    tone: "ok",
+    text: "Thank you. Netify reviews every proposal, checks the sentence against the page you cited, and publishes it or explains why not.",
+  },
+  queued_netify: { tone: "ok", text: "Queued. Approve it from the review queue to write it to the overlay." },
+  approved: { tone: "ok", text: "Approved and written to the overlay. It reaches the live pages on the next build." },
+  rejected: { tone: "ok", text: "Rejected. The proposal stays on the record with your note." },
+  judgement: {
+    tone: "no",
+    text: "That field is the Netify View and cannot be proposed by a supplier. Summaries, differentiators, best-fit statements and watch-outs are written by Netify and are not open to the companies they describe. If one is factually wrong, propose a correction to the underlying fact and cite the page that proves it.",
+  },
+  evidence: {
+    tone: "no",
+    text: "A supplier proposal needs a source URL and the exact sentence on that page. We check the sentence is really there before anything is applied, which is the same standard we hold ourselves to.",
+  },
+  signin: { tone: "no", text: "Sign in as this supplier, with an approved claim, to propose a change to its record." },
+  notadmin: { tone: "no", text: "Only Netify can approve or reject a proposal." },
+  badfield: { tone: "no", text: "That is not an editable field." },
+  missing: { tone: "no", text: "Give a field and a value." },
+  unknown_vendor: { tone: "no", text: "That supplier is not in the dataset." },
+  notconfigured: { tone: "no", text: "The editing store is not configured, so nothing was saved." },
+  failed: { tone: "no", text: "That did not save. Nothing was changed." },
+};
+
+/* ------------------------------------------------------------------ */
 /* What may be edited, and by whom                                     */
 /* ------------------------------------------------------------------ */
 

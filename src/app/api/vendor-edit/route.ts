@@ -7,6 +7,7 @@ import {
   editingConfigured,
   listProposals,
   reviewProposal,
+  WIKI_BASE,
   type ProposalStatus,
 } from "@/lib/vendor-edit";
 
@@ -57,16 +58,42 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!editingConfigured()) return json({ error: "Editing store not configured." }, 503);
-  const session = await sessionFromRequest(req);
-  const email = session?.email ?? null;
-  const admin = isAdminEmail(email);
   // The editor posts a plain HTML form so it works without JavaScript; agents
   // and the review queue post JSON. Accept both rather than making the humans
   // depend on a client bundle.
-  let body: Body;
   const ctype = req.headers.get("content-type") ?? "";
   const formPost = ctype.includes("form");
+
+  /**
+   * Send a human back to the page they were on, carrying a short outcome
+   * code. The sentence itself lives in OUTCOMES and is rendered by the page,
+   * so a redirect never carries message text or anything personal. A referer
+   * that is not one of our own /sase pages is not trusted, and the review
+   * queue is the fallback rather than an open redirect.
+   */
+  const back = (code: string) => {
+    let path = `${WIKI_BASE}/admin/record-queue/`;
+    try {
+      const u = new URL(req.headers.get("referer") ?? "");
+      if (u.pathname.startsWith(`${WIKI_BASE}/`)) path = u.pathname;
+    } catch {
+      // No referer, or not a URL at all. The queue is a safe place to land.
+    }
+    return new Response(null, {
+      status: 303,
+      headers: { location: `${path}?r=${code}`, "cache-control": "no-store" },
+    });
+  };
+
+  /** JSON for agents, a redirect for humans, one call site either way. */
+  const out = (code: string, payload: unknown, status = 200) =>
+    formPost ? back(code) : json(payload, status);
+
+  if (!editingConfigured()) return out("notconfigured", { error: "Editing store not configured." }, 503);
+  const session = await sessionFromRequest(req);
+  const email = session?.email ?? null;
+  const admin = isAdminEmail(email);
+  let body: Body;
   try {
     if (formPost) {
       const fd = await req.formData();
@@ -75,20 +102,21 @@ export async function POST(req: Request) {
       body = (await req.json()) as Body;
     }
   } catch {
-    return json({ error: "Send JSON or a form post." }, 400);
+    return out("failed", { error: "Send JSON or a form post." }, 400);
   }
 
   /* ---------------- review: Netify only ---------------- */
   if (body.action === "approve" || body.action === "reject") {
-    if (!admin) return json({ error: "Only Netify can approve or reject a proposal." }, 403);
-    if (!body.id) return json({ error: "Give the proposal id." }, 400);
+    if (!admin) return out("notadmin", { error: "Only Netify can approve or reject a proposal." }, 403);
+    if (!body.id) return out("failed", { error: "Give the proposal id." }, 400);
     const res = await reviewProposal(
       body.id,
       body.action === "approve" ? "approved" : "rejected",
       email!,
       body.note ?? null,
     );
-    if (!res.ok) return json({ error: res.error }, 400);
+    if (!res.ok) return out("failed", { error: res.error }, 400);
+    if (formPost) return back(body.action === "approve" ? "approved" : "rejected");
     return json({
       ok: true,
       proposal: res.proposal,
@@ -103,22 +131,23 @@ export async function POST(req: Request) {
   const slug = (body.vendor_slug ?? "").trim();
   const field = (body.field ?? "").trim();
   const value = (body.value ?? "").trim();
-  if (!getAllVendorSlugs().includes(slug)) return json({ error: `Unknown supplier: ${slug}` }, 400);
-  if (!field || !value) return json({ error: "Give a field and a value." }, 400);
+  if (!getAllVendorSlugs().includes(slug)) return out("unknown_vendor", { error: `Unknown supplier: ${slug}` }, 400);
+  if (!field || !value) return out("missing", { error: "Give a field and a value." }, 400);
 
   const cls = classifyField(field);
-  if (cls === "unknown") return json({ error: `${field} is not an editable field.` }, 400);
+  if (cls === "unknown") return out("badfield", { error: `${field} is not an editable field.` }, 400);
 
   if (!admin) {
     // Supplier lane. The claim gate is the existing one, not a new check.
     const { requireClaimedSupplierFor } = await import("@/lib/auth");
     const refusal = await requireClaimedSupplierFor(session, slug, {});
-    if (refusal) return refusal;
+    if (refusal) return formPost ? back("signin") : refusal;
 
     // Article 7. A supplier may correct a fact about itself. It may never
     // touch the judgement layer, not even as a suggestion, because a vendor
     // who can soften their own watch-outs has removed the reason to trust us.
     if (cls === "judgement") {
+      if (formPost) return back("judgement");
       return json(
         {
           error:
@@ -130,6 +159,7 @@ export async function POST(req: Request) {
     }
     // Evidence is mandatory in the supplier lane. No source, no proposal.
     if (!body.source_url || !body.quote) {
+      if (formPost) return back("evidence");
       return json(
         {
           error:
@@ -140,7 +170,7 @@ export async function POST(req: Request) {
     }
   }
 
-  if (!admin && !session?.email) return json({ error: "Sign in to propose a change." }, 401);
+  if (!admin && !session?.email) return out("signin", { error: "Sign in to propose a change." }, 401);
 
   const rec = await addProposal({
     vendor_slug: slug,
@@ -154,10 +184,7 @@ export async function POST(req: Request) {
     proposer_email: email ?? "unknown",
   });
 
-  if (formPost) {
-    const back = admin ? "/admin/record-queue" : `/vendors/${slug}`;
-    return new Response(null, { status: 303, headers: { location: `${back}?proposed=${rec.id}` } });
-  }
+  if (formPost) return back(admin ? "queued_netify" : "queued");
   return json({
     ok: true,
     proposal: rec,
