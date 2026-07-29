@@ -184,12 +184,30 @@ export async function POST(req: Request) {
     proposer_email: email ?? "unknown",
   });
 
-  if (formPost) return back(admin ? "queued_netify" : "queued");
+  // A Netify edit applies on save. Asking Harry to approve his own correction
+  // is a queue with one person in it, and the review queue exists to hold a
+  // supplier's word to account, not ours.
+  //
+  // Article 9 is untouched by this. The proposal is still written first and
+  // then approved by name, through the same reviewProposal path a supplier
+  // correction takes, so the log records who changed what, when, and to what,
+  // in exactly the same shape. Nothing is applied anonymously and nothing
+  // skips the record.
+  if (admin) {
+    const applied = await reviewProposal(rec.id, "approved", email ?? "netify", "Applied on save by Netify.");
+    if (formPost) return back("applied");
+    return json({
+      ok: true,
+      proposal: applied.proposal ?? rec,
+      note: "Saved and applied to the record, logged under your name. It reaches the live pages at the next build.",
+    });
+  }
+
+  if (formPost) return back("queued");
   return json({
     ok: true,
     proposal: rec,
-    note: admin
-      ? "Queued. Approve it from the review queue to write it to the overlay."
-      : "Thank you. Netify reviews every proposal, checks the sentence against the page you cited, and publishes it or explains why not.",
+    note:
+      "Thank you. Netify reviews every proposal, checks the sentence against the page you cited, and publishes it or explains why not.",
   });
 }

@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { sessionFromRequest } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/access-control";
 import { getVendor, getAllVendorSlugs } from "@/lib/vendors";
 import WikiOutcome from "@/components/WikiOutcome";
 import {
@@ -45,11 +48,13 @@ function Field({
   field,
   current,
   lane,
+  netify,
 }: {
   vendorSlug: string;
   field: string;
   current: string;
   lane: "fact" | "judgement";
+  netify: boolean;
 }) {
   const g = GUIDANCE[field] ?? FACT_GUIDANCE;
   const long = lane === "judgement";
@@ -105,7 +110,7 @@ function Field({
         </label>
 
         <button type="submit" className="text-sm px-4 py-2 rounded bg-[var(--ink-900,#14161a)] text-white">
-          Propose this change
+          {netify ? "Save this change" : "Propose this change"}
         </button>
       </form>
     </details>
@@ -115,6 +120,15 @@ function Field({
 export default async function VendorEditPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { r } = await searchParams;
+
+  // Who is looking decides what the screen promises. Telling Harry his edit
+  // will be reviewed, when it applies the moment he saves, would be a lie on
+  // the one screen whose whole purpose is keeping the record honest.
+  const h = await headers();
+  const session = await sessionFromRequest(
+    new Request(`https://netify.co.uk/vendors/${slug}/edit`, { headers: { cookie: h.get("cookie") ?? "" } }),
+  );
+  const netify = isAdminEmail(session?.email);
   if (!getAllVendorSlugs().includes(slug)) notFound();
   const v = getVendor(slug);
   const rec = v as unknown as Record<string, unknown>;
@@ -130,9 +144,10 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
       <h1 className="mb-3">{v.name}</h1>
       <WikiOutcome code={r} />
       <p className="text-[var(--ink-700)] max-w-3xl mb-2">
-        Last verified {v.last_verified}. Changes are proposed here, never applied directly. Netify
-        reviews each one, checks any cited sentence against the page, and publishes it on the next
-        build or explains why not.
+        Last verified {v.last_verified}.{" "}
+        {netify
+          ? "You are signed in as Netify, so what you save is applied to the record straight away and logged under your name. It reaches the live pages at the next build."
+          : "Changes are proposed here, never applied directly. Netify reviews each one, checks the sentence you cite against the page, and publishes it at the next build or explains why not."}
       </p>
       <p className="text-sm text-[var(--ink-600,#5b636e)] max-w-3xl mb-8">
         Everything you change here reaches this supplier&apos;s profile, its alternatives page, the
@@ -151,7 +166,7 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
           sentence on it, which is the same standard we hold ourselves to.
         </p>
         {FACT_FIELDS.filter((f) => classifyField(f) === "fact").map((f) => (
-          <Field key={f} vendorSlug={slug} field={f} current={str(f)} lane="fact" />
+          <Field key={f} vendorSlug={slug} field={f} current={str(f)} lane="fact" netify={netify} />
         ))}
       </section>
 
@@ -164,7 +179,7 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
           by the server, not just by this screen.
         </p>
         {JUDGEMENT_FIELDS.map((f) => (
-          <Field key={f} vendorSlug={slug} field={f} current={str(f)} lane="judgement" />
+          <Field key={f} vendorSlug={slug} field={f} current={str(f)} lane="judgement" netify={netify} />
         ))}
       </section>
 

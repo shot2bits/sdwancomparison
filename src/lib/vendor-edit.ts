@@ -51,7 +51,10 @@ export const OUTCOMES: Record<string, { tone: "ok" | "no"; text: string }> = {
     tone: "ok",
     text: "Thank you. Netify reviews every proposal, checks the sentence against the page you cited, and publishes it or explains why not.",
   },
-  queued_netify: { tone: "ok", text: "Queued. Approve it from the review queue to write it to the overlay." },
+  applied: {
+    tone: "ok",
+    text: "Saved and applied to the record, logged under your name. It reaches the live pages at the next build.",
+  },
   approved: { tone: "ok", text: "Approved and written to the overlay. It reaches the live pages on the next build." },
   rejected: { tone: "ok", text: "Rejected. The proposal stays on the record with your note." },
   judgement: {

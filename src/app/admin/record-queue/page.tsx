@@ -144,7 +144,9 @@ export default async function RecordQueuePage({
         {pending.length === 0
           ? "Nothing waiting."
           : `${pending.length} proposal${pending.length === 1 ? "" : "s"} waiting.`}{" "}
-        Approving writes the value to the overlay, and the next build folds it into the record, so
+        Your own edits are not here: a Netify edit applies on save and appears below under what was
+        decided, logged under your name. This queue is for supplier proposals. Approving one writes
+        the value to the overlay, and the next build folds it into the record, so
         it reaches the supplier&apos;s profile and every generated page at once. Check any cited
         sentence against the page before approving: a supplier proposal is only as good as its
         source, which is the standard we hold ourselves to.
