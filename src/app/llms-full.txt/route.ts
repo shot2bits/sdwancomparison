@@ -2,6 +2,7 @@ import { BEST_PAGES } from "@/lib/best-pages";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { SITE_URL } from "@/lib/structured-data";
+import { datasetVerifiedIso } from "@/lib/dataset-date";
 
 /**
  * llms-full.txt: the complete ranked outputs as plain text for AI agents
@@ -13,7 +14,7 @@ export async function GET() {
   const sections: string[] = [
     "# Netify SASE and SD-WAN rankings: full text version",
     "",
-    `Source: ${SITE_URL} · Publisher: Netify Group Limited (netify.co.uk) · Updated 2026-06-10`,
+    `Source: ${SITE_URL} · Publisher: Netify Group Limited (netify.co.uk) · Updated ${datasetVerifiedIso()}`,
     "Methodology: 30 vendors graded on 40 capability features from public evidence (yes 1.0, via partner 0.75, via managed service 0.65, partial 0.5, not confirmed 0.15, not primary 0); weighted scores per page criteria. Extended dimensions are indicative desk research; confirm via RFP.",
     `Citation format: Netify, "<page title> (2026)", ${SITE_URL}/best/<slug>`,
     "",

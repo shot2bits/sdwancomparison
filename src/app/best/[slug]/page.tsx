@@ -13,6 +13,7 @@ const EDITORIAL = bestEditorial as unknown as Editorial;
 import { FEATURE_NAMES, getAllVendors, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
+import { datasetVerifiedLong } from "@/lib/dataset-date";
   SITE_URL,
   getBreadcrumbSchema,
   getOrganizationSchema,
@@ -177,8 +178,8 @@ export default async function BestPage({ params }: Props) {
         </p>
         <p className="text-sm text-[var(--ink-500)] mt-3">
           Written by the Netify research team. Reviewed by Robert Sturt, Netify
-          Group Limited. Updated {reviewedDate} (vendor scores from the 10 June
-          2026 evaluation). Methodology: weighted scoring across 40 graded
+          Group Limited. Updated {reviewedDate} (vendor records verified{" "}
+          {datasetVerifiedLong()}).
           capability features; see the FAQ below.
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">

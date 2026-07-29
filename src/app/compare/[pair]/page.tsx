@@ -14,6 +14,7 @@ import {
   getShortlistFaqSchema,
   getSpeakableSchema,
 } from "@/lib/structured-data";
+import { datasetVerifiedIso, datasetVerifiedMonth } from "@/lib/dataset-date";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -88,7 +89,7 @@ export default async function ComparePage({ params }: Props) {
       description: c.summary,
       author: { "@type": "Organization", name: "Netify research team", url: "https://netify.co.uk/about-netify/" },
       publisher: { "@id": `${SITE_URL}/#organization` },
-      dateModified: "2026-06-11",
+      dateModified: datasetVerifiedIso(),
       mainEntityOfPage: `${SITE_URL}/compare/${pair}`,
     },
     getShortlistFaqSchema(faqs),
@@ -111,7 +112,7 @@ export default async function ComparePage({ params }: Props) {
       </nav>
 
       <div className="mb-10 fade-rise">
-        <p className="eyebrow mb-3">Head to head · Updated June 2026</p>
+        <p className="eyebrow mb-3">Head to head · Updated {datasetVerifiedMonth()}</p>
         <h1 id="page-h1" className="mb-4">
           {c.names[a]} vs {c.names[b]} (2026): graded feature by feature
         </h1>

@@ -5,6 +5,7 @@ import { getAllVendorSlugs } from "@/lib/vendors";
 import { getAllMentions } from "@/lib/mentions";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { SITE_URL } from "@/lib/structured-data";
+import { datasetVerifiedLong } from "@/lib/dataset-date";
 
 export async function GET() {
   const tools = [...MCP_TOOL_DEFINITIONS, ...SECURITY_TOOL_DEFINITIONS_ALL, ...WORKSPACE_TOOL_DEFINITIONS].map(
@@ -110,7 +111,7 @@ Users can install Netify as a connector in Claude, ChatGPT or Copilot: add ${SIT
 
 ## Methodology and citation
 
-Capability grades use public source evidence only: yes, partial, via partner, via managed service, not primary, not confirmed. Extended dimensions are indicative desk research (June 2026). Cite as "Netify SASE and SD-WAN shortlist builder" with the canonical URL ${SITE_URL}/shortlist. Netify is a BT Authorised Partner; scoring is not influenced by commercial relationships.
+Capability grades use public source evidence only: yes, partial, via partner, via managed service, not primary, not confirmed. Eighteen facts per provider carry a named source, a reliability tier and a sentence quoted from that source, re-verified ${datasetVerifiedLong()}; the remaining extended dimensions are indicative desk research and are not individually sourced. Cite as "Netify SASE and SD-WAN shortlist builder" with the canonical URL ${SITE_URL}/shortlist. Netify is a BT Authorised Partner; scoring is not influenced by commercial relationships.
 `;
   return new Response(body, { headers: { "content-type": "text/plain" } });
 }

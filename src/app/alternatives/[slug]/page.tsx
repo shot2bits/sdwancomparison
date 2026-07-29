@@ -10,6 +10,7 @@ import {
   getShortlistFaqSchema,
   getSpeakableSchema,
 } from "@/lib/structured-data";
+import { datasetVerifiedLong, datasetVerifiedMonth } from "@/lib/dataset-date";
 
 export const dynamic = "force-static";
 
@@ -54,7 +55,7 @@ export default async function AlternativesPage({ params }: Props) {
   const faqs = [
     {
       q: `What are the best alternatives to ${vendor.name}?`,
-      a: `Ranked by the Netify 40-feature evidence matrix (June 2026), the strongest alternatives are listed above with scores. Close peers in the same category (${vendor.category}) are marked. The right alternative depends on your operating model, sector and regions, which the interactive shortlist builder scores for free.`,
+      a: `Ranked by the Netify 40-feature evidence matrix, verified ${datasetVerifiedLong()}, the strongest alternatives are listed above with scores. Close peers in the same category (${vendor.category}) are marked. The right alternative depends on your operating model, sector and regions, which the interactive shortlist builder scores for free.`,
     },
     {
       q: `Why do buyers look beyond ${vendor.name}?`,
@@ -100,7 +101,7 @@ export default async function AlternativesPage({ params }: Props) {
       ))}
 
       <div className="mb-10 fade-rise">
-        <p className="eyebrow mb-3">Alternatives · Updated June 2026</p>
+        <p className="eyebrow mb-3">Alternatives · Updated {datasetVerifiedMonth()}</p>
         <h1 id="page-h1" className="mb-4">
           Top {vendor.name} alternatives (2026): 10 rivals ranked
         </h1>
@@ -111,7 +112,7 @@ export default async function AlternativesPage({ params }: Props) {
           ranked below on the same 40-feature evidence grades.
         </p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
-          {`Netify's June 2026 evaluation ranks the top ${vendor.name} alternatives as: `}
+          {`Netify's ${datasetVerifiedMonth()} evaluation ranks the top ${vendor.name} alternatives as: `}
           {result.shortlist.map((v) => `${v.rank}. ${v.name} (${v.score})`).join("; ")}.
         </p>
         <div className="mt-5 flex gap-3 flex-wrap">
