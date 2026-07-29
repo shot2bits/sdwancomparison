@@ -70,6 +70,7 @@ import { PACKS_VERSION, type PackSuggestion } from "@/lib/sector/packs";
 import { deriveAreaState, refineConfirmed } from "@/lib/workspace/areas";
 import { diagramModel } from "@/lib/workspace/diagram";
 import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
+import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
 import JourneyStrip from "@/components/JourneyStrip";
 import SignIn from "@/components/SignIn";
@@ -2521,9 +2522,19 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         point: these words carry onto the public notice
                         exactly as written. */}
                     <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">What the notice carries</p>
+                    {/* The sites chip shows what the PUBLIC notice will show
+                        (exact unless identifying, Robert's ruling 29 Jul
+                        2026): when sector plus a single region would make an
+                        exact count identifying, the chip carries the range
+                        the notice will carry, and the caption says so.
+                        Everything else carries exactly as written. */}
                     <p className="m-0 mb-1.5 text-[11px] leading-loose">
                       {[
-                        typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : null,
+                        typeof requirement.estate?.sites === "number"
+                          ? (siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
+                            ? (siteBandLabelFor(requirement.estate.sites) ?? `${requirement.estate.sites} sites`)
+                            : `${requirement.estate.sites} sites`)
+                          : null,
                         typeof requirement.estate?.users === "number" ? `${requirement.estate.users} users` : null,
                         buying ? ({ sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>)[buying] ?? buying : null,
                         opModel === "managed" ? "Fully managed" : opModel === "co_managed" ? "Co-managed" : null,
@@ -2532,7 +2543,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                       ].filter(Boolean).map((chip) => (
                         <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-zinc-200 bg-white px-2 py-[1px] text-[11px] text-zinc-700">{chip}</span>
                       ))}
-                      <span className="text-[11px] text-zinc-400">exactly as written, nothing retyped</span>
+                      <span className="text-[11px] text-zinc-400">
+                        {typeof requirement.estate?.sites === "number" && siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
+                          ? "as written, except the site count: sector plus one region could identify you, so the notice shows the range and suppliers see the exact count after the gate"
+                          : "exactly as written, nothing retyped"}
+                      </span>
                     </p>
                     <p className="m-0 mb-2 text-[11px] leading-relaxed text-zinc-400">
                       <span className="font-semibold text-zinc-500">Stays private:</span> your identity and contacts, your notes,

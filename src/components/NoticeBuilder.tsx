@@ -29,7 +29,10 @@ import {
   COMPLIANCE_OPTIONS,
   EVIDENCE_OPTIONS,
   EVALUATION_PRIORITIES,
+  siteFigureIsIdentifying,
+  siteBandLabelFor,
 } from "@/lib/notice-options";
+import { scrubNoticeText, type ScrubFlag } from "@/lib/notice-scrub";
 
 const DRAFT_KEY = "netify_notice_draft_v1";
 
@@ -205,12 +208,19 @@ export default function NoticeBuilder() {
 
   const preview: PublicOpportunity = useMemo(() => {
     const now = previewTs;
+    // R4, the preview IS the public face (Robert's ruling): the preview
+    // applies the same exact-unless-identifying rule as the server
+    // projection, so the buyer sees byte-what the public sees. Exact
+    // count when not identifying; the band when the combination holds.
+    const rawSites = draft.sites ? Number(draft.sites) || null : null;
+    const identifying = siteFigureIsIdentifying({ buyer_visibility: draft.buyer_visibility, buyer_sector: draft.buyer_sector, regions: draft.regions });
     return {
       id: "preview", created: now, updated: now, last_activity: now,
       buyer_org: draft.buyer_visibility === "anonymous" ? "" : draft.buyer_org,
       title: draft.title || "Untitled RFI",
       scope: draft.scope.filter((s): s is OppScope => (OPP_SCOPES as readonly string[]).includes(s)),
-      sites: draft.sites ? Number(draft.sites) || null : null,
+      sites: identifying ? null : rawSites,
+      site_band: identifying ? siteBandLabelFor(rawSites) : null,
       regions: draft.regions,
       summary: draft.summary,
       budget_note: draft.budget_note,
@@ -630,6 +640,45 @@ export default function NoticeBuilder() {
       {step === 7 && (
         <div className="grid gap-10 lg:grid-cols-3">
           <div className="lg:col-span-2">
+            {/* R3, the combination sentence (Robert's ruling): when sector,
+                a single region and anonymity band the site count, say so
+                plainly before the preview, with the buyer left to decide.
+                WORDING PROVISIONAL pending Harry. */}
+            {preview.site_band && (
+              <p className="mb-3 rounded-sm border border-[var(--ink-300,#ccc)] bg-[var(--ink-50,#fafafa)] px-4 py-2.5 text-sm text-[var(--ink-700)]">
+                Together, your sector, single region and exact site count could identify you, so the public notice shows{" "}
+                <strong>{preview.site_band}</strong> instead of the exact figure. Participating suppliers see the exact
+                count after the gate. Widen the regions or remove the sector and the exact figure shows instead.
+              </p>
+            )}
+            {/* R2, the free-text scrub (Robert's ruling): flags warn, the
+                buyer decides, nothing is rewritten. Runs over the fields
+                that render publicly, on the preview where the decision is
+                made. WORDING PROVISIONAL pending Harry. */}
+            {(() => {
+              const flags: ScrubFlag[] = scrubNoticeText({
+                "project title": draft.title,
+                "project overview": draft.summary,
+                "current environment": draft.current_environment,
+                "desired outcome": draft.desired_outcomes,
+                "budget note": draft.budget_note,
+                "timeline note": draft.timeline_note,
+              });
+              if (flags.length === 0) return null;
+              return (
+                <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm text-amber-900">
+                  <p className="m-0 mb-1 font-semibold">Worth checking before you publish: your own words may identify you.</p>
+                  <ul className="m-0 list-none space-y-1 p-0">
+                    {flags.slice(0, 6).map((f) => (
+                      <li key={`${f.field}-${f.kind}-${f.match}`} className="text-[13px] leading-relaxed">
+                        In your {f.field}: {f.why}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="m-0 mt-1.5 text-[12.5px]">Nothing is changed for you. Edit the wording in the earlier steps if you want it out, or publish as written.</p>
+                </div>
+              );
+            })()}
             <NoticeView notice={preview} isPreview />
           </div>
           <div>
@@ -638,7 +687,7 @@ export default function NoticeBuilder() {
                 <>
                   <p className="text-sm font-medium mb-1">Ready to publish?</p>
                   <p className="text-sm text-[var(--ink-600)] mb-4">
-                    Publishing creates a public RFI page page, lists it on the opportunity board and opens your private response room.
+                    Publishing creates a public RFI page, lists it on the opportunity board and opens your private response room.
                     Supplier pricing stays private to you.
                   </p>
                   <button type="button" onClick={publish} disabled={publishing} className="w-full px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">

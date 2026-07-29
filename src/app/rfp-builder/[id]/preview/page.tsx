@@ -11,6 +11,7 @@ import { PROJECT_PHASE } from "@/lib/rfp-types";
 import { CAPABILITY_BANK_MAP, SERVICE_PATH_CORE_CATEGORIES } from "@/lib/security/criteria";
 import { securityCodeLabel, humaniseSecurityCodes } from "@/lib/security/labels";
 import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
+import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import PrintButton from "@/components/PrintButton";
 import SignIn from "@/components/SignIn";
 import ProjectNav from "@/components/ProjectNav";
@@ -199,12 +200,25 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
             <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-4">
               <p className="m-0 mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--ink-500)]">Public board · anyone can see this</p>
               <p className="m-0 text-sm font-semibold text-[var(--ink-900,#111)]">{project.title}</p>
+              {/* R4, the preview IS the public face: the site figure here
+                  follows the same exact-unless-identifying rule as the live
+                  projection, so this card cannot overpromise or overexpose. */}
               <p className="m-0 mt-1 text-xs text-[var(--ink-600,#555)]">
                 Anonymous buyer
                 {project.buyer.sector ? ` · ${sectorLabel(project.buyer.sector)}` : ""}
                 {band ? ` · ${band}` : ""}
-                {project.buyer.site_count != null ? ` · ${project.buyer.site_count} sites` : ""}
+                {project.buyer.site_count != null
+                  ? ` · ${siteFigureIsIdentifying({ buyer_visibility: "anonymous", buyer_sector: project.buyer.sector ?? "", regions: project.buyer.regions ?? [] })
+                      ? (siteBandLabelFor(project.buyer.site_count) ?? `${project.buyer.site_count} sites`)
+                      : `${project.buyer.site_count} sites`}`
+                  : ""}
               </p>
+              {project.buyer.site_count != null && siteFigureIsIdentifying({ buyer_visibility: "anonymous", buyer_sector: project.buyer.sector ?? "", regions: project.buyer.regions ?? [] }) && (
+                <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-[var(--ink-500)]">
+                  Together, your sector, single region and exact site count could identify you, so the public notice
+                  shows the range instead. Participating suppliers see the exact count after the gate.
+                </p>
+              )}
               {activeSectionNames.length > 0 && (
                 <p className="m-0 mt-2 flex flex-wrap gap-1">
                   {activeSectionNames.slice(0, 4).map((c) => (
