@@ -8,7 +8,7 @@
     "build": "npm run validate && next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "validate": "tsx scripts/validate-vendors.ts && tsx scripts/validate-continuations.ts && tsx scripts/validate-instruments.ts && tsx scripts/validate-notice-titles.ts && tsx scripts/validate-labels.ts"
+    "validate": "tsx scripts/apply-vendor-overrides.ts && tsx scripts/validate-vendors.ts && tsx scripts/validate-continuations.ts && tsx scripts/validate-instruments.ts && tsx scripts/validate-notice-titles.ts && tsx scripts/validate-labels.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",

@@ -1,0 +1,168 @@
+import { sessionFromRequest } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/access-control";
+import { getAllVendorSlugs } from "@/lib/vendors";
+import {
+  addProposal,
+  classifyField,
+  editingConfigured,
+  listProposals,
+  reviewProposal,
+  type ProposalStatus,
+} from "@/lib/vendor-edit";
+
+/**
+ * The wiki's write surface.
+ *
+ * Nothing here mutates a vendor record. A proposal is queued; approval writes
+ * to an overlay that the build folds into the files. That keeps every page
+ * static, keeps the record a file, and keeps git as the audit trail, while
+ * removing the developer from the loop for Harry and for suppliers.
+ *
+ * Identity is not reinvented here. The session, the admin check and the
+ * supplier claim gate already exist and are imported, not modified.
+ */
+
+export const dynamic = "force-dynamic";
+
+const json = (body: unknown, status = 200) =>
+  Response.json(body, { status, headers: { "cache-control": "no-store" } });
+
+type Body = {
+  action?: "propose" | "approve" | "reject";
+  vendor_slug?: string;
+  field?: string;
+  value?: string;
+  source_url?: string;
+  quote?: string;
+  rationale?: string;
+  id?: string;
+  note?: string;
+};
+
+export async function GET(req: Request) {
+  if (!editingConfigured()) return json({ error: "Editing store not configured." }, 503);
+  const session = await sessionFromRequest(req);
+  const email = session?.email ?? null;
+  const admin = isAdminEmail(email);
+  const url = new URL(req.url);
+  const status = (url.searchParams.get("status") as ProposalStatus | null) ?? undefined;
+
+  const all = await listProposals(status);
+  if (admin) return json({ role: "netify", proposals: all });
+
+  // A supplier sees only its own vendor's proposals, and never anyone else's.
+  const slug = session?.vendor_slug;
+  if (!slug) return json({ error: "Sign in to see proposals." }, 401);
+  return json({ role: "supplier", proposals: all.filter((p) => p.vendor_slug === slug) });
+}
+
+export async function POST(req: Request) {
+  if (!editingConfigured()) return json({ error: "Editing store not configured." }, 503);
+  const session = await sessionFromRequest(req);
+  const email = session?.email ?? null;
+  const admin = isAdminEmail(email);
+  // The editor posts a plain HTML form so it works without JavaScript; agents
+  // and the review queue post JSON. Accept both rather than making the humans
+  // depend on a client bundle.
+  let body: Body;
+  const ctype = req.headers.get("content-type") ?? "";
+  const formPost = ctype.includes("form");
+  try {
+    if (formPost) {
+      const fd = await req.formData();
+      body = Object.fromEntries([...fd.entries()].map(([k, v]) => [k, String(v)])) as Body;
+    } else {
+      body = (await req.json()) as Body;
+    }
+  } catch {
+    return json({ error: "Send JSON or a form post." }, 400);
+  }
+
+  /* ---------------- review: Netify only ---------------- */
+  if (body.action === "approve" || body.action === "reject") {
+    if (!admin) return json({ error: "Only Netify can approve or reject a proposal." }, 403);
+    if (!body.id) return json({ error: "Give the proposal id." }, 400);
+    const res = await reviewProposal(
+      body.id,
+      body.action === "approve" ? "approved" : "rejected",
+      email!,
+      body.note ?? null,
+    );
+    if (!res.ok) return json({ error: res.error }, 400);
+    return json({
+      ok: true,
+      proposal: res.proposal,
+      note:
+        body.action === "approve"
+          ? "Approved and written to the overlay. It reaches the live pages on the next build."
+          : "Rejected. The proposal stays on the record with your note.",
+    });
+  }
+
+  /* ---------------- propose ---------------- */
+  const slug = (body.vendor_slug ?? "").trim();
+  const field = (body.field ?? "").trim();
+  const value = (body.value ?? "").trim();
+  if (!getAllVendorSlugs().includes(slug)) return json({ error: `Unknown supplier: ${slug}` }, 400);
+  if (!field || !value) return json({ error: "Give a field and a value." }, 400);
+
+  const cls = classifyField(field);
+  if (cls === "unknown") return json({ error: `${field} is not an editable field.` }, 400);
+
+  if (!admin) {
+    // Supplier lane. The claim gate is the existing one, not a new check.
+    const { requireClaimedSupplierFor } = await import("@/lib/auth");
+    const refusal = await requireClaimedSupplierFor(session, slug, {});
+    if (refusal) return refusal;
+
+    // Article 7. A supplier may correct a fact about itself. It may never
+    // touch the judgement layer, not even as a suggestion, because a vendor
+    // who can soften their own watch-outs has removed the reason to trust us.
+    if (cls === "judgement") {
+      return json(
+        {
+          error:
+            "This field is the Netify View and cannot be proposed by a supplier. Summaries, differentiators, best-fit statements and watch-outs are written by Netify and are not open to the companies they describe. If you believe one is factually wrong, propose a correction to the underlying fact and cite the page that proves it.",
+          field_class: "judgement",
+        },
+        403,
+      );
+    }
+    // Evidence is mandatory in the supplier lane. No source, no proposal.
+    if (!body.source_url || !body.quote) {
+      return json(
+        {
+          error:
+            "A supplier proposal needs a source URL and the exact sentence on that page. We check the sentence is really there before anything is applied, which is the same standard we hold ourselves to.",
+        },
+        400,
+      );
+    }
+  }
+
+  if (!admin && !session?.email) return json({ error: "Sign in to propose a change." }, 401);
+
+  const rec = await addProposal({
+    vendor_slug: slug,
+    field,
+    field_class: cls,
+    proposed_value: value,
+    source_url: body.source_url?.trim() || null,
+    quote: body.quote?.trim() || null,
+    rationale: body.rationale?.trim() || null,
+    proposed_by: admin ? "netify" : "supplier",
+    proposer_email: email ?? "unknown",
+  });
+
+  if (formPost) {
+    const back = admin ? "/admin/record-queue" : `/vendors/${slug}`;
+    return new Response(null, { status: 303, headers: { location: `${back}?proposed=${rec.id}` } });
+  }
+  return json({
+    ok: true,
+    proposal: rec,
+    note: admin
+      ? "Queued. Approve it from the review queue to write it to the overlay."
+      : "Thank you. Netify reviews every proposal, checks the sentence against the page you cited, and publishes it or explains why not.",
+  });
+}
