@@ -25,6 +25,27 @@ type RfpRow = {
   invited_vendors: number; responses: number; created: number; updated: number;
 };
 type DraftLead = { rfp_id: string; email: string; ts: number };
+/** Harry's list (Robert's ruling, 29 Jul 2026): every publish outcome with
+ *  its evidence. Private to this console. */
+type PublishLead = {
+  at: number;
+  state: "published" | "saved_unpublished" | string;
+  rfp_id: string;
+  email: string;
+  title?: string | null;
+  reason?: string;
+  board_opportunity_id?: string;
+  requirement_depth?: { questions: number; sections: number };
+  verification?: {
+    domain?: string;
+    passed?: boolean;
+    failed_check?: string | null;
+    derived_company?: string | null;
+    mx?: { pass: boolean; records: number };
+    website?: { pass: boolean; status: number | null };
+    companies_house?: Record<string, unknown> | null;
+  } | null;
+};
 type Overview = {
   admin_email: string;
   sessions: AdminSession[];
@@ -36,6 +57,7 @@ type Overview = {
   opportunities: OppRow[];
   funnel?: Funnel;
   broker_queue?: BrokerRfp[];
+  publish_leads?: PublishLead[];
   rfps?: RfpRow[];
   draft_link_leads?: DraftLead[];
   buyer_allowlist?: string[];
@@ -86,6 +108,11 @@ export default function AdminClient() {
       if (!r.ok) throw new Error(typeof d.error === "string" ? d.error : "Action failed.");
       if (payload.action === "delete_user") {
         setNotice(`Deleted ${String(payload.email)}. Sessions revoked: ${Number(d.sessions_deleted ?? 0)}, RFPs deleted: ${Number(d.rfps_deleted ?? 0)}, board opportunities deleted: ${Number(d.opportunities_deleted ?? 0)}.`);
+      }
+      if (payload.action === "recover_unlisted") {
+        const results = Array.isArray(d.results) ? (d.results as Array<{ state?: string }>) : [];
+        const listed = results.filter((r) => r.state === "published").length;
+        setNotice(`Recovery batch: ${listed} listed, ${results.length - listed} saved unpublished, ${Number(d.remaining ?? 0)} still to process of ${Number(d.unlisted_total ?? 0)} unlisted.`);
       }
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : "Action failed."); }
@@ -146,6 +173,58 @@ export default function AdminClient() {
           </div>
         </section>
       )}
+
+      {/* Harry's list (Robert's ruling, 29 Jul 2026): every publish outcome,
+          published or saved-unpublished, with contact, derived company,
+          verification evidence and requirement depth. The recover button
+          works through historic publishes that never reached the board, in
+          small batches, through the same chain as a fresh publish. */}
+      <section className={card}>
+        <h2 className={h2}>Publish leads</h2>
+        <p className={sub}>Every notice published or saved unpublished, with the buyer contact, the derived company, the verification evidence and the requirement depth. Nothing here is public. Recovery lists historic publishes that never reached the board where a business email verifies; the rest land here as saved unpublished with the reason.</p>
+        <button className={btnAmber} disabled={busy} onClick={() => act({ action: "recover_unlisted", limit: 5 })}>Recover unlisted publishes (batch of 5)</button>
+        {(data.publish_leads ?? []).length > 0 && (
+          <div className="overflow-x-auto mt-4">
+            <table className="w-full text-sm">
+              <thead><tr className="text-left text-[var(--ink-500)] border-b border-[var(--ink-200,#e5e5e5)]">
+                <th className="py-2 pr-4">State</th><th className="py-2 pr-4">Requirement</th><th className="py-2 pr-4">Contact</th><th className="py-2 pr-4">Derived company</th><th className="py-2 pr-4">Evidence</th><th className="py-2 pr-4">Depth</th><th className="py-2 pr-4">When</th>
+              </tr></thead>
+              <tbody>
+                {(data.publish_leads ?? []).slice(0, 60).map((l) => {
+                  const v = l.verification;
+                  const ch = v?.companies_house && typeof v.companies_house === "object" && "company_number" in v.companies_house
+                    ? `CH ${String((v.companies_house as Record<string, unknown>).company_number)}`
+                    : null;
+                  const evidence = v
+                    ? [v.mx ? `MX ${v.mx.pass ? "pass" : "fail"}` : null, v.website ? `web ${v.website.pass ? "pass" : "fail"}` : null, ch].filter(Boolean).join(" · ")
+                    : "none";
+                  return (
+                    <tr key={`${l.rfp_id}-${l.at}`} className="border-b border-[var(--ink-100,#f0f0f0)] align-top">
+                      <td className="py-2 pr-4">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium uppercase tracking-wide ${l.state === "published" ? "bg-[var(--ink-100,#f0f0f0)] text-[var(--ink-700)]" : "bg-amber-50 text-amber-800"}`}>
+                          {l.state === "published" ? "Published" : "Saved unpublished"}
+                        </span>
+                        {l.reason && <p className="mt-1 text-xs text-[var(--ink-500)] max-w-56">{l.reason}</p>}
+                      </td>
+                      <td className="py-2 pr-4">
+                        <a href={`/sase/rfp-builder/${l.rfp_id}/`} className="underline" target="_blank" rel="noreferrer">{l.title || l.rfp_id}</a>
+                        {l.board_opportunity_id && (
+                          <a href={`/sase/opportunities/${l.board_opportunity_id}/`} className="ml-2 text-xs underline" target="_blank" rel="noreferrer">notice</a>
+                        )}
+                      </td>
+                      <td className="py-2 pr-4">{l.email || "none"}</td>
+                      <td className="py-2 pr-4">{v?.derived_company ?? ""}</td>
+                      <td className="py-2 pr-4 text-xs text-[var(--ink-600)]">{evidence}</td>
+                      <td className="py-2 pr-4 text-xs">{l.requirement_depth ? `${l.requirement_depth.questions}q / ${l.requirement_depth.sections}s` : ""}</td>
+                      <td className="py-2 pr-4 text-xs">{when(l.at)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       {/* Buyer funnel: the four stages that matter */}
       {data.funnel && (

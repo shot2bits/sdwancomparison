@@ -72,9 +72,10 @@ async function recordPublishLead(entry: {
   state: "published" | "saved_unpublished";
   rfp_id: string;
   email: string;
-  verification: BusinessVerification;
+  verification: BusinessVerification | null;
   requirement_depth: { questions: number; sections: number };
   board_opportunity_id?: string;
+  reason?: string;
 }): Promise<void> {
   try {
     const key = "publish:leads";
@@ -218,6 +219,47 @@ export class BoardQualityGateError extends Error {
 }
 
 /**
+ * Recover one historic publish that never reached the board (Robert's
+ * ruling, 29 Jul 2026: 46 published, 14 ever seen by a supplier; the rest
+ * should be publishable without the buyer redoing anything where a business
+ * email exists). Runs the same verification chain as a fresh publish on the
+ * stored owner email: pass and the notice lists through the same gate and
+ * pipeline as any publish; fail (or no email, or the quality gate refuses
+ * the content) and the record lands on the internal list as
+ * saved-unpublished with the reason. Never throws; the outcome is the
+ * answer. Invites are NOT re-run: listing is listRfpOnBoard's whole job.
+ */
+export async function recoverUnlistedPublish(
+  p: ProjectDetails,
+  contactFallback: string | null = null,
+): Promise<{ state: "published" | "saved_unpublished"; reason: string | null; opportunity_id?: string }> {
+  const email = p.owner_email || contactFallback || "";
+  const depth = {
+    questions: p.rfp_sections.filter((s) => s.included).reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0),
+    sections: p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional")).length,
+  };
+  if (!email) {
+    await recordPublishLead({ state: "saved_unpublished", rfp_id: p.id, email: "", verification: null, requirement_depth: depth, reason: "no email on the record" });
+    return { state: "saved_unpublished", reason: "no email on the record" };
+  }
+  const verification = await verifyBusinessEmail(email);
+  if (!verification.passed) {
+    const reason = `verification failed: ${verification.failed_check ?? "unknown"}`;
+    await recordPublishLead({ state: "saved_unpublished", rfp_id: p.id, email, verification, requirement_depth: depth, reason });
+    return { state: "saved_unpublished", reason };
+  }
+  try {
+    const listed = await listRfpOnBoard(p, email);
+    await recordPublishLead({ state: "published", rfp_id: p.id, email, verification, requirement_depth: depth, board_opportunity_id: listed.opportunity_id });
+    return { state: "published", reason: null, opportunity_id: listed.opportunity_id };
+  } catch (e) {
+    const reason = e instanceof BoardQualityGateError ? e.message : "board listing failed";
+    await recordPublishLead({ state: "saved_unpublished", rfp_id: p.id, email, verification, requirement_depth: depth, reason });
+    return { state: "saved_unpublished", reason };
+  }
+}
+
+/**
  * Publish notifications, best effort: an internal lead alert to the Netify
  * team and a confirmation to the buyer. Sent with the auth transport (Resend,
  * no-reply sender); failures never fail the publish, matching /api/lead.
@@ -317,7 +359,16 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // internal list, and the buyer is told plainly why. Pass: the evidence
   // rides the record and the publish continues. One choke point for the
   // web page, the MCP publish tools and the magic-link confirm (Article 17).
-  const publishEmail = project.owner_email || sessionEmail;
+  //
+  // The SESSION email is what the chain verifies, never the stored owner
+  // (Harry's retest F11, 29 Jul 2026: his draft was claimed days earlier
+  // under a personal gmail, so the stored owner beat the work-email session
+  // pressing publish and the chain refused a legitimate business publish).
+  // The ruling is precise: the confirmation click proves the person
+  // controls an address at that company, and the person clicking IS the
+  // session. This also makes the rejection message's promise true: come
+  // back with your work address and it publishes without redoing anything.
+  const publishEmail = sessionEmail || project.owner_email;
   const requirementDepth = {
     questions: activeQuestionCount,
     sections: project.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional")).length,

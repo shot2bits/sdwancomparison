@@ -22,6 +22,7 @@ import {
   listAllRfpIds,
   getProjectsBulk,
   kvMgetJson,
+  kvGetJson,
   listDraftLinkLeads,
   getBuyerAllowlist,
   addBuyerAllowDomain,
@@ -31,6 +32,7 @@ import {
   saveConnection,
 } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
+import { recoverUnlistedPublish } from "@/lib/rfp-publish";
 import { SECTORS, REGIONS } from "@/lib/notice-options";
 import {
   isAdminEmail,
@@ -143,6 +145,17 @@ export async function GET(req: Request) {
     })),
   }));
 
+  // Harry's list (Robert's ruling, 29 Jul 2026): every publish outcome,
+  // published or saved-unpublished, with contact, derived company,
+  // verification evidence, requirement depth and working state. Private to
+  // this console; nothing here reaches any public surface.
+  const titleById = new Map(projects.map((p) => [p.id, p.title]));
+  const publishLeadsRaw = (await kvGetJson<Array<Record<string, unknown>>>("publish:leads").catch(() => null)) ?? [];
+  const publish_leads = publishLeadsRaw
+    .slice(-100)
+    .reverse()
+    .map((e) => ({ ...e, title: titleById.get(String(e.rfp_id ?? "")) ?? null }));
+
   const owned = projects.filter((p) => p.owner_email);
   const funnel = {
     buyer_accounts: signups.filter((u) => u.roles.includes("buyer")).length,
@@ -171,6 +184,7 @@ export async function GET(req: Request) {
       claims,
       funnel,
       broker_queue,
+      publish_leads,
       rfps,
       draft_link_leads: leads.slice(0, 50),
       buyer_allowlist: buyerAllowlist,
@@ -270,13 +284,43 @@ export async function POST(req: Request) {
         // ends an open notice without destroying it. The record keeps its
         // page and feed and moves to the board's closed archive; Remove
         // stays the tool for content that should never have existed.
+        // closed_at stamps the close moment (closed-forever, 29 Jul 2026).
         const id = String(body.id ?? "");
         if (!id) return Response.json({ error: "id required." }, { status: 422, headers: cors });
         const opp = await getOpportunity(id);
         if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
         if (opp.status !== "open") return Response.json({ ok: true, status: opp.status }, { headers: cors });
-        const saved = await saveOpportunity({ ...opp, status: "closed", updated: Date.now() });
+        const saved = await saveOpportunity({ ...opp, status: "closed", closed_at: opp.closed_at ?? Date.now(), updated: Date.now() });
         return Response.json({ ok: true, status: saved.status }, { headers: cors });
+      }
+      case "recover_unlisted": {
+        // The thirty-two (Robert's ruling, 29 Jul 2026): historic publishes
+        // that never reached the board relist through the same verification
+        // chain and quality gate as a fresh publish, in small batches
+        // because the chain does network work per record. Records already on
+        // the internal list are skipped so repeated clicks converge; retry
+        // reprocesses everything. Invites are never re-run.
+        const limit = Math.min(Math.max(Number(body.limit ?? 5), 1), 10);
+        const ids = await listAllRfpIds();
+        const projects = await getProjectsBulk(ids);
+        const PUBLISHED = new Set(["published", "qa", "evaluation"]);
+        const published = projects.filter((p) => PUBLISHED.has(p.status) && p.test !== true);
+        const mappings = await kvMgetJson<string>(published.map((p) => `rfp:${p.id}:board_opp`));
+        const unlisted = published.filter((_, i) => !mappings[i]);
+        const leads = (await kvGetJson<Array<{ rfp_id?: string }>>("publish:leads").catch(() => null)) ?? [];
+        const processed = new Set(leads.map((l) => String(l.rfp_id ?? "")));
+        const queue = unlisted.filter((p) => body.retry === true || !processed.has(p.id));
+        const contacts = await kvMgetJson<string>(queue.map((p) => `rfp:${p.id}:contact_email`));
+        const batch = queue.slice(0, limit);
+        const results = [];
+        for (let i = 0; i < batch.length; i++) {
+          const r = await recoverUnlistedPublish(batch[i], contacts[i] ?? null);
+          results.push({ rfp_id: batch[i].id, title: batch[i].title, ...r });
+        }
+        return Response.json(
+          { ok: true, unlisted_total: unlisted.length, processed_now: batch.length, remaining: queue.length - batch.length, results },
+          { headers: cors },
+        );
       }
       case "edit_opportunity": {
         // The generic-notice rewrite tool (Robert's ruling, 28 Jul 2026:

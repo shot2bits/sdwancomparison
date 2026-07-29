@@ -23,7 +23,8 @@
  */
 
 import { resolveMx } from "node:dns/promises";
-import { isBlockedDomainLive, isAcademicDomain } from "@/lib/access-control";
+import { isBlockedDomainLive, isAcademicDomain, isAdminEmail } from "@/lib/access-control";
+import { getBuyerAllowlist } from "@/lib/rfp-store";
 
 export type BusinessVerification = {
   domain: string;
@@ -32,6 +33,11 @@ export type BusinessVerification = {
   passed: boolean;
   /** Which gate stopped the chain, when one did. */
   failed_check: "free_or_disposable" | "academic" | "mx" | "website" | null;
+  /** The sign-in convention honoured here too (Harry's retest, 29 Jul
+   *  2026): admin emails and admin-allowlisted buyer domains are exempt
+   *  from the free and academic refusals, exactly as they are at sign-in.
+   *  The exemption is recorded on the evidence; MX and website still run. */
+  exemption: "admin" | "buyer_allowlist" | null;
   mx: { pass: boolean; records: number };
   website: { pass: boolean; status: number | null; host: string | null; title: string | null };
   /** Derived, never typed by the buyer. */
@@ -145,6 +151,7 @@ export async function verifyBusinessEmail(email: string): Promise<BusinessVerifi
     checked_at: Date.now(),
     passed: false,
     failed_check: null,
+    exemption: null,
     mx: { pass: false, records: 0 },
     website: { pass: false, status: null, host: null, title: null },
     derived_company: null,
@@ -152,8 +159,25 @@ export async function verifyBusinessEmail(email: string): Promise<BusinessVerifi
   };
   if (!domain) return { ...base, failed_check: "free_or_disposable" };
 
-  if (await isBlockedDomainLive(domain)) return { ...base, failed_check: "free_or_disposable" };
-  if (isAcademicDomain(domain)) return { ...base, failed_check: "academic" };
+  // The sign-in convention, honoured here too: admin emails and
+  // admin-allowlisted buyer domains bypass the free-webmail and academic
+  // refusals. Sign-in already admits them; a publish gate that then
+  // refuses them would be incoherent. The exemption is recorded and the
+  // MX and website checks still run.
+  let exemption: BusinessVerification["exemption"] = null;
+  if (isAdminEmail(email)) {
+    exemption = "admin";
+  } else {
+    try {
+      if ((await getBuyerAllowlist()).includes(domain)) exemption = "buyer_allowlist";
+    } catch { /* allowlist unavailable reads as no exemption */ }
+  }
+  base.exemption = exemption;
+
+  if (!exemption) {
+    if (await isBlockedDomainLive(domain)) return { ...base, failed_check: "free_or_disposable" };
+    if (isAcademicDomain(domain)) return { ...base, failed_check: "academic" };
+  }
 
   // MX and website in parallel: independent facts about the same domain.
   const [mx, website] = await Promise.all([checkMx(domain), checkWebsite(domain)]);
