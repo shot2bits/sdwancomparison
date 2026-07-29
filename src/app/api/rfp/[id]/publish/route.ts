@@ -24,7 +24,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
 
-  let body: { manage_token?: string; shortlist_size?: number; list_on_board?: boolean; marketing_opt_in?: boolean; acknowledge_declined_approval?: boolean } = {};
+  let body: { manage_token?: string; shortlist_size?: number; list_on_board?: boolean; marketing_opt_in?: boolean; acknowledge_declined_approval?: boolean; excluded_vendors?: unknown } = {};
   try { body = await req.json(); } catch { /* body optional */ }
 
   const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
@@ -53,6 +53,11 @@ export async function POST(req: Request, ctx: Ctx) {
       list_on_board: body.list_on_board,
       marketing_opt_in: body.marketing_opt_in,
       acknowledge_declined_approval: body.acknowledge_declined_approval === true,
+      // F3: buyer exclusions for the ranked fill (sanitised again in the
+      // core; unknown slugs are inert). A pinned vendor always beats one.
+      excluded_vendors: Array.isArray(body.excluded_vendors)
+        ? body.excluded_vendors.filter((s): s is string => typeof s === "string").slice(0, 40)
+        : undefined,
     });
   } catch (e) {
     // D5: a declined approval requires the explicit confirmation; the

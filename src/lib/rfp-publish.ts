@@ -33,6 +33,13 @@ export type PublishOpts = {
   /** D5 (Robert's amendment): publishing after a declined approval is
    *  allowed only as an intentional, recorded decision. */
   acknowledge_declined_approval?: boolean;
+  /** F3 (29 Jul 2026, the mockup review Robert approved: the distribution
+   *  list is the buyer's). Slugs the ranked fill must not invite. A pinned
+   *  vendor beats an exclusion (explicit intent, and the pin is the
+   *  stronger word); excluded seats backfill from the next best evidenced;
+   *  the public board listing is unaffected. An exclusion is distribution
+   *  control, never a judgement on the supplier's record. */
+  excluded_vendors?: string[];
 };
 
 /** Thrown when a declined approval requires the explicit confirmation. */
@@ -399,6 +406,21 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   }
 
   const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
+  // Buyer-named vendors are always invited (explicit intent beats inference),
+  // capped upstream at five; the ranked shortlist fills the remainder.
+  const pinSlugs = (project.buyer.pinned_vendors ?? []).filter(Boolean);
+  // Buyer exclusions (F3): sanitised, capped, and never allowed to beat a
+  // pin. They govern the ranked fill only; the board listing, the grading
+  // and the record are untouched.
+  const excluded = new Set(
+    (opts.excluded_vendors ?? [])
+      .filter((s): s is string => typeof s === "string" && s.length > 0 && s.length <= 80)
+      .slice(0, 40)
+      .filter((s) => !pinSlugs.includes(s)),
+  );
+  // Excluded seats backfill: ask the ranking for enough names that an
+  // exclusion shrinks nobody's field, capped at the engine's own ceiling.
+  const requestSize = Math.min(12, size + excluded.size);
   // Region hint (20 July 2026, the ministry lesson): when the buyer stated no
   // regions, weight the ranking by the email's country TLD. Never filters;
   // declared to the buyer as an assumption in the confirmation email.
@@ -410,13 +432,11 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     service_model: project.buyer.operating_model ?? "any",
     required_regions: statedRegions,
     ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
-    shortlist_size: size,
+    shortlist_size: requestSize,
   }, FEATURE_NAMES);
 
-  // Buyer-named vendors are always invited (explicit intent beats inference),
-  // capped upstream at five; the ranked shortlist fills the remainder.
-  const pinSlugs = (project.buyer.pinned_vendors ?? []).filter(Boolean);
-  const inviteSlugs = [...new Set([...pinSlugs, ...result.shortlist.map((v) => v.slug)])].slice(0, Math.max(size, pinSlugs.length));
+  const rankedFill = result.shortlist.map((v) => v.slug).filter((s) => !excluded.has(s));
+  const inviteSlugs = [...new Set([...pinSlugs, ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
   const invited: { slug: string; name: string; supplier_url: string }[] = [];
   for (const v of inviteSlugs.map((slug) => ({ slug }))) {
     const r = await inviteSupplier(

@@ -233,6 +233,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [booted, setBooted] = useState(false);
   const [testMode, setTestMode] = useState(false);
   const [flash, setFlash] = useState<Set<string>>(new Set());
+  /* The applied-changes strip (F2, 29 Jul 2026, adopted from the mockup
+   * review Robert approved): after a machine pass the desk names what it
+   * placed or revised and offers one Undo. The staleness gate is
+   * reference equality on the facts array: ANY later mutation (a strike,
+   * an answer, another pass, a restore) produces a new array, so a stale
+   * undo can never fire. Undo reverts the LEDGER only: receipts (your
+   * verbatim words) and noted items (your stated objectives) are the
+   * buyer's own and are never machine-undone. Session-local by design;
+   * an undo across a reload would revert work the buyer can no longer
+   * see the shape of. */
+  const [lastPass, setLastPass] = useState<{
+    source: "extract" | "link";
+    changes: Array<{ id: string; label: string; provenance: WorkspaceFact["provenance"]; kind: "placed" | "revised" }>;
+    prevFacts: WorkspaceFact[];
+    factsAtSet: WorkspaceFact[];
+  } | null>(null);
+  /* What changed, pass by pass: newest first, capped at ten, persisted
+   * with the draft so the history survives a reload. */
+  const [passLog, setPassLog] = useState<Array<{ at: string; text: string; changes: number; undone?: boolean }>>([]);
+  const [passLogOpen, setPassLogOpen] = useState(false);
 
   const [moveNow, setMoveNow] = useState<Record<string, Move>>({});
   const [moveLog, setMoveLog] = useState<MoveLogEntry[]>([]);
@@ -371,7 +391,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         if (raw) {
           const saved = JSON.parse(raw) as {
             facts?: WorkspaceFact[]; added?: string[]; removed?: string[];
-            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; declinedSug?: string[]; customTitle?: string; weights?: string[]; ts?: number;
+            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; declinedSug?: string[]; customTitle?: string; weights?: string[];
+            passLog?: Array<{ at: string; text: string; changes: number; undone?: boolean }>; ts?: number;
           };
           if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && ((saved.facts?.length ?? 0) > 0 || (saved.noted?.length ?? 0) > 0)) {
             base = saved.facts ?? [];
@@ -384,6 +405,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             setDeclinedSug(saved.declinedSug ?? []);
             setCustomTitle(saved.customTitle ?? "");
             setWeights(saved.weights ?? []);
+            setPassLog(saved.passLog ?? []);
             receiptId.current = Math.max(0, ...(saved.receipts ?? []).map((r) => r.id));
             setRestored(true);
           }
@@ -438,9 +460,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   useEffect(() => {
     if (!started || published) return;
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, ts: Date.now() }));
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, passLog, ts: Date.now() }));
     } catch { /* best effort */ }
-  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, started, published]);
+  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, passLog, started, published]);
 
   /* ---- The extraction cycle (the same organ), now with the receipt ---- */
   const runCycle = useCallback(
@@ -459,7 +481,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         if (!res.ok) throw new Error(`extract ${res.status}`);
         const data = (await res.json()) as { updates: FieldUpdate[]; engine: string; notes: string[] };
         const updates = data.updates ?? [];
-        applyMerge(updates, "extract");
+        // Snapshot BEFORE the merge for the Undo strip: applyMerge
+        // reassigns factsRef, so this reference IS the pre-pass ledger
+        // (mergeUpdates copies, it never mutates its input).
+        const factsBefore = factsRef.current;
+        const merged = applyMerge(updates, "extract");
+        if (merged.changed.length) {
+          const beforeIds = new Set(factsBefore.map((f) => f.id));
+          const byId = new Map(merged.facts.map((f) => [f.id, f]));
+          const changes = merged.changed
+            .map((id) => {
+              const f = byId.get(id);
+              return f
+                ? { id, label: factLabel(f), provenance: f.provenance, kind: (beforeIds.has(id) ? "revised" : "placed") as "placed" | "revised" }
+                : null;
+            })
+            .filter((c): c is NonNullable<typeof c> => c !== null)
+            .slice(0, 12);
+          setLastPass({ source: opts.fromLink ? "link" : "extract", changes, prevFacts: factsBefore, factsAtSet: merged.facts });
+          setPassLog((l) => [{ at: stamp(), text: trimmed.slice(0, 90), changes: merged.changed.length }, ...l].slice(0, 10));
+        }
 
         for (const u of updates.slice(0, 4)) {
           crewLog(
@@ -983,6 +1024,20 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     setReceipts((rs) => rs.filter((r) => r.id !== id));
   }, []);
 
+  /** Undo the last machine pass (F2). Only reachable while the ledger is
+   *  byte-for-byte the array that pass produced; the strip hides itself
+   *  the moment anything else touches the facts. */
+  const undoPass = () => {
+    const u = lastPass;
+    if (!u || busy || facts !== u.factsAtSet) return;
+    factsRef.current = u.prevFacts;
+    setFacts(u.prevFacts);
+    setLastPass(null);
+    setPassLog((l) => (l.length ? [{ ...l[0], undone: true }, ...l.slice(1)] : l));
+    crewLog(`Registrar: undone · this pass's ${u.changes.length} change${u.changes.length === 1 ? "" : "s"} reverted, your words stay yours to re-run`, "em");
+    ev("workspace_pass_undone", { changes: u.changes.length });
+  };
+
   /* ---- Fit sets, pins, readiness ---- */
   const fitSlugs = (fit?.mode === "graded" ? fit.suppliers.map((s) => s.slug) : []).filter((s) => !removed.includes(s));
   const shownFit = new Set([...fitSlugs, ...added].slice(0, 8));
@@ -1171,7 +1226,13 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const res = await fetch(`/sase/api/rfp/${proj.id}/publish`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ manage_token: proj.manage, list_on_board: true }),
+        body: JSON.stringify({
+          manage_token: proj.manage,
+          list_on_board: true,
+          // F3: the buyer's exclusions ride the publish; the server's ranked
+          // fill honours them and backfills from the next best evidenced.
+          ...(removed.length ? { excluded_vendors: removed.slice(0, 40) } : {}),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
@@ -1733,6 +1794,47 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           )}
           {testMode && <span className="font-medium text-amber-700">Test mode: signing creates a self-expiring test position and never touches the live board.</span>}
         </div>
+        {/* The applied-changes strip (F2): what the last pass did, with one
+            Undo. Renders only while the ledger is exactly the array that
+            pass produced, so it can never offer a stale revert. */}
+        {lastPass && facts === lastPass.factsAtSet && !published && (
+          <div className="mx-auto mt-2 flex max-w-2xl flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-md bg-amber-50/70 px-3 py-1.5 text-[11.5px] text-zinc-600">
+            <span className="font-medium text-zinc-800">
+              This pass: {lastPass.changes.filter((c) => c.kind === "placed").length} placed
+              {lastPass.changes.some((c) => c.kind === "revised") ? `, ${lastPass.changes.filter((c) => c.kind === "revised").length} revised` : ""}
+              {lastPass.source === "link" ? " · from the link you arrived on" : ""}
+            </span>
+            {lastPass.changes.slice(0, 5).map((c) => (
+              <span
+                key={c.id}
+                title={`${c.kind === "placed" ? "placed" : "revised"} this pass · ${c.provenance}`}
+                className={`rounded-full border bg-white px-2 py-[1px] text-[11px] ${c.provenance === "stated" ? "border-zinc-300 text-zinc-800" : "border-dashed border-zinc-300 text-zinc-500"}`}
+              >
+                {c.label.slice(0, 34)}
+              </span>
+            ))}
+            {lastPass.changes.length > 5 && <span className="text-zinc-400">+{lastPass.changes.length - 5} more</span>}
+            <button type="button" onClick={undoPass} className="font-semibold text-amber-800 underline hover:text-amber-900">Undo</button>
+            <button type="button" onClick={() => setLastPass(null)} className="text-zinc-400 hover:text-zinc-700" title="Keep these changes">✕</button>
+          </div>
+        )}
+        {passLog.length > 0 && !published && (
+          <p className="m-0 mt-1.5 text-center text-[11px] text-zinc-400">
+            <button type="button" onClick={() => setPassLogOpen((v) => !v)} className="underline hover:text-zinc-700">
+              What changed, pass by pass ({passLog.length})
+            </button>
+          </p>
+        )}
+        {passLogOpen && passLog.length > 0 && !published && (
+          <div className="mx-auto mt-1 max-w-2xl rounded-md bg-zinc-50 px-3 py-2">
+            {passLog.map((p, i) => (
+              <p key={i} className={`m-0 py-[2px] text-[11px] leading-snug ${p.undone ? "text-zinc-400 line-through" : "text-zinc-600"}`}>
+                {p.at} · &ldquo;{p.text}&rdquo; · {p.changes} change{p.changes === 1 ? "" : "s"}{p.undone ? " · undone" : ""}
+              </p>
+            ))}
+            <p className="m-0 pt-1 text-[10px] text-zinc-400">Every pass logs what it changed. Undo reverts the ledger only; your verbatim notes stay yours.</p>
+          </div>
+        )}
         {/* The gate, the live proof and the machine line (v7): the three
             doubts a first visitor holds, answered where the doubt sits.
             The gate states the true flow: draft and preview are free of
@@ -2510,7 +2612,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         </p>
                         <p className="m-0 mt-0.5 text-[11px] leading-snug text-zinc-500">
                           {fitSlugs.length > 0
-                            ? `evaluated supplier${fitSlugs.length === 1 ? "" : "s"} currently in the running, evidence graded with dates`
+                            ? `evaluated supplier${fitSlugs.length === 1 ? "" : "s"} currently in the running, evidence graded with dates${removed.length ? `; ${removed.length} left out at your word` : ""}`
                             : "suppliers on the curated market, evidence graded with dates"}
                         </p>
                       </div>
@@ -2611,6 +2713,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                           Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays saved while you switch.
                         </p>
                       )
+                    )}
+                    {removed.length > 0 && (
+                      <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-500">
+                        Direct invites leave out {removed.length} supplier{removed.length === 1 ? "" : "s"} at your word; the ranked fill tops back up
+                        from the next best evidenced. The anonymous public notice is unaffected.
+                      </p>
                     )}
                     {needAuth && (
                       <div className="mt-2 rounded-md bg-zinc-50 p-3">
@@ -2797,28 +2905,64 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   );
                 })()}
                 {!published && (
-                  added.includes(vendorCard.slug) ? (
-                    <button
-                      type="button"
-                      onClick={() => { setAdded((x) => x.filter((s) => s !== vendorCard.slug)); setVendorCard(null); }}
-                      className="mt-1.5 rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
-                    >
-                      Unpin
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAdded((x) => (x.includes(vendorCard.slug) ? x : [...x, vendorCard.slug]));
-                        setRemoved((x) => x.filter((r) => r !== vendorCard.slug));
-                        ev("workspace_supplier_added", { slug: vendorCard.slug });
-                        setVendorCard(null);
-                      }}
-                      className="mt-1.5 rounded-full border border-amber-400 px-2.5 py-1 text-[11px] text-amber-700 hover:border-amber-600"
-                    >
-                      Pin into invitations (up to five)
-                    </button>
-                  )
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {added.includes(vendorCard.slug) ? (
+                      <button
+                        type="button"
+                        onClick={() => { setAdded((x) => x.filter((s) => s !== vendorCard.slug)); setVendorCard(null); }}
+                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
+                      >
+                        Unpin
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdded((x) => (x.includes(vendorCard.slug) ? x : [...x, vendorCard.slug]));
+                          setRemoved((x) => x.filter((r) => r !== vendorCard.slug));
+                          ev("workspace_supplier_added", { slug: vendorCard.slug });
+                          setVendorCard(null);
+                        }}
+                        className="rounded-full border border-amber-400 px-2.5 py-1 text-[11px] text-amber-700 hover:border-amber-600"
+                      >
+                        Pin into invitations (up to five)
+                      </button>
+                    )}
+                    {/* The distribution list is the buyer's (F3, 29 Jul 2026,
+                        from the mockup review Robert approved): leaving a
+                        supplier out governs the DIRECT invites only. The
+                        anonymous public notice, the grading and this record
+                        are untouched: an exclusion is distribution control,
+                        never a judgement on the supplier. */}
+                    {removed.includes(vendorCard.slug) ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoved((x) => x.filter((s) => s !== vendorCard.slug));
+                          ev("workspace_supplier_included", { slug: vendorCard.slug });
+                          crewLog(`Registrar: back in the running for direct invites: ${vendorCard.name}`, "you");
+                          setVendorCard(null);
+                        }}
+                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
+                      >
+                        Include again
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoved((x) => (x.includes(vendorCard.slug) ? x : [...x, vendorCard.slug]));
+                          setAdded((x) => x.filter((s) => s !== vendorCard.slug));
+                          ev("workspace_supplier_excluded", { slug: vendorCard.slug });
+                          crewLog(`Registrar: left out of direct invites at your word: ${vendorCard.name} · the public notice is unaffected`, "you");
+                          setVendorCard(null);
+                        }}
+                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-500 hover:border-zinc-500 hover:text-zinc-700"
+                      >
+                        Leave out of direct invites
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             )}
