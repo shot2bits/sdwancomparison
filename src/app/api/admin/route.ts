@@ -293,6 +293,41 @@ export async function POST(req: Request) {
         const saved = await saveOpportunity({ ...opp, status: "closed", closed_at: opp.closed_at ?? Date.now(), updated: Date.now() });
         return Response.json({ ok: true, status: saved.status }, { headers: cors });
       }
+      case "backfill_notice_shapes": {
+        // Harry's N2 retest (29 Jul 2026): the What-suppliers-answer section
+        // was absent on every notice he could open, because rfp_shape is
+        // stamped at listing time and every live notice predates the stamp
+        // (observed: 1 of 15 notices carried a shape). This recomputes the
+        // shape for notices that have a source RFP and no shape, with the
+        // same counting rule the publish path uses: sections that carry
+        // active questions, titles and counts only, never the questions.
+        const all = await listOpportunities();
+        const missing = all.filter((o) => o.source_rfp_id && (!o.rfp_shape || o.rfp_shape.sections.length === 0));
+        const batch = missing.slice(0, Math.min(Math.max(Number(body.limit ?? 10), 1), 20));
+        const rfps = await getProjectsBulk(batch.map((o) => o.source_rfp_id));
+        const results: Array<{ opp_id: string; outcome: string }> = [];
+        for (let i = 0; i < batch.length; i++) {
+          const o = batch[i];
+          const p = rfps[i];
+          if (!p) { results.push({ opp_id: o.id, outcome: "source RFP not found" }); continue; }
+          const active = p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
+          const total = active.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+          if (active.length === 0 || total === 0) { results.push({ opp_id: o.id, outcome: "source RFP has no active questions" }); continue; }
+          await saveOpportunity({
+            ...o,
+            rfp_shape: {
+              version: p.methodology_version,
+              total,
+              sections: active.map((s) => ({ title: s.category, questions: s.questions.filter((q) => q.priority !== "optional").length })),
+            },
+          });
+          results.push({ opp_id: o.id, outcome: `stamped ${total} questions across ${active.length} sections` });
+        }
+        return Response.json(
+          { ok: true, missing_total: missing.length, processed_now: batch.length, remaining: missing.length - batch.length, results },
+          { headers: cors },
+        );
+      }
       case "recover_unlisted": {
         // The thirty-two (Robert's ruling, 29 Jul 2026): historic publishes
         // that never reached the board relist through the same verification

@@ -306,7 +306,12 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
                 {isPublished ? "View your published requirement" : "Preview and publish your requirement"}
               </Link>
             ) : phase === "drafted" ? (
-              <Link href={`/rfp-builder/${id}${qs}`} className="underline">Publish from the builder</Link>
+              // One door per activity, non-engine lane (Harry's P1 retest,
+              // 29 Jul 2026): this card no longer duplicates the Current RFP
+              // card's builder door. Pre-publish its own object does not
+              // exist yet, so it states where publishing happens instead of
+              // opening a second door there.
+              <span className="text-[var(--ink-600,#555)]">Publishing happens from the builder&rsquo;s submit step, through Review and edit above.</span>
             ) : isPublished ? (
               boardOpp ? (
                 <Link href={`/opportunities/${boardOpp}`} className="underline">View the public notice</Link>

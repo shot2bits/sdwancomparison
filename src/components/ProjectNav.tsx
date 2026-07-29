@@ -40,8 +40,12 @@ export default function ProjectNav({
         { key: "review", label: "Review & responses", href: `/rfp-builder/${id}/review${qs}` },
       ]
     : [
+        // One door per activity, completed for the non-engine lane too
+        // (Harry's P1 retest, 29 Jul 2026: the RFP tab, Review and edit and
+        // the publish link all reached the builder). The RFP tab leaves this
+        // bar exactly as it left the engine bar; editing's one door is the
+        // Current RFP card's Review and edit on Overview.
         { key: "overview", label: "Overview", href: `/project/${id}${qs}` },
-        { key: "rfp", label: "RFP", href: `/rfp-builder/${id}${qs}` },
         { key: "preview", label: "Preview", href: `/rfp-builder/${id}/preview${qs}` },
         { key: "story", label: "Story", href: `/project/${id}/story${qs}` },
         { key: "timeline", label: "Timeline", href: `/project/${id}/timeline${qs}` },

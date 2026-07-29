@@ -81,6 +81,7 @@ type Row = {
   statusLine: string;
   projectId?: string;
   oppId?: string;
+  noticeEnded?: boolean;
   responses?: number;
   bids?: number;
   comments?: number;
@@ -164,15 +165,30 @@ export default function MyProcurements() {
   const rows: Row[] = [];
   for (const r of rfps) {
     const o = oppByRfp.get(r.id);
+    const basePhase = r.phase ?? STATUS_TO_PHASE[r.status] ?? "drafting";
+    // The route back to a closed notice (Harry's retest finding, 29 Jul
+    // 2026: he closed a notice and could not find it again). A joined
+    // procurement's stage followed the PROJECT, so closing the notice
+    // left the row sitting in Published saying nothing about the close.
+    // When the notice has closed or been awarded and the project has no
+    // later life of its own, the procurement's stage IS that outcome: the
+    // row moves to the Closed or Awarded group, says what happened, and
+    // keeps every door, including the still-published notice page.
+    const noticeEnded = o && (o.status === "closed" || o.status === "awarded");
+    const phase = noticeEnded && ["published", "qa"].includes(basePhase)
+      ? (o.status === "awarded" ? "awarded" : "closed")
+      : basePhase;
+    const baseLine = r.health?.label ?? STATUS_LABELS[r.status] ?? r.status;
     rows.push({
       key: `rfp:${r.id}`,
-      phase: r.phase ?? STATUS_TO_PHASE[r.status] ?? "drafting",
+      phase,
       title: r.title,
       updated: Math.max(r.updated, o?.updated ?? 0),
       health: r.health,
-      statusLine: r.health?.label ?? STATUS_LABELS[r.status] ?? r.status,
+      statusLine: noticeEnded ? `${baseLine} · notice ${o.status}` : baseLine,
       projectId: r.id,
       oppId: o?.id,
+      noticeEnded: Boolean(noticeEnded),
       responses: r.responses,
       bids: o?.bid_count,
       comments: o?.comment_count,
@@ -186,6 +202,7 @@ export default function MyProcurements() {
       updated: o.updated,
       statusLine: `${o.status === "open" ? "Open" : o.status === "awarded" ? "Awarded" : "Closed"} notice${o.visibility === "unlisted" ? " · Unlisted" : ""}`,
       oppId: o.id,
+      noticeEnded: o.status === "closed" || o.status === "awarded",
       bids: o.bid_count,
       comments: o.comment_count,
     });
@@ -220,7 +237,7 @@ export default function MyProcurements() {
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
                     {r.oppId && (
-                      <Link href={`/opportunities/${r.oppId}`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">Public notice</Link>
+                      <Link href={`/opportunities/${r.oppId}`} className="rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs no-underline text-[var(--ink-800)] hover:border-[var(--ink-900)]">{r.noticeEnded ? "View closed notice" : "Public notice"}</Link>
                     )}
                     {r.oppId && (
                       <Link href={`/opportunities/${r.oppId}/room`} className={`rounded-full px-3 py-1 text-xs no-underline ${r.projectId ? "border border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]" : "bg-amber-500 font-medium text-zinc-950 hover:bg-amber-400"}`}>Manage room</Link>

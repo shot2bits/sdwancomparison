@@ -114,6 +114,9 @@ export default function AdminClient() {
         const listed = results.filter((r) => r.state === "published").length;
         setNotice(`Recovery batch: ${listed} listed, ${results.length - listed} saved unpublished, ${Number(d.remaining ?? 0)} still to process of ${Number(d.unlisted_total ?? 0)} unlisted.`);
       }
+      if (payload.action === "backfill_notice_shapes") {
+        setNotice(`Shape backfill: ${Number(d.processed_now ?? 0)} processed, ${Number(d.remaining ?? 0)} still to process of ${Number(d.missing_total ?? 0)} missing a shape.`);
+      }
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : "Action failed."); }
     finally { setBusy(false); }
@@ -182,7 +185,13 @@ export default function AdminClient() {
       <section className={card}>
         <h2 className={h2}>Publish leads</h2>
         <p className={sub}>Every notice published or saved unpublished, with the buyer contact, the derived company, the verification evidence and the requirement depth. Nothing here is public. Recovery lists historic publishes that never reached the board where a business email verifies; the rest land here as saved unpublished with the reason.</p>
-        <button className={btnAmber} disabled={busy} onClick={() => act({ action: "recover_unlisted", limit: 5 })}>Recover unlisted publishes (batch of 5)</button>
+        <div className="flex flex-wrap gap-2">
+          <button className={btnAmber} disabled={busy} onClick={() => act({ action: "recover_unlisted", limit: 5 })}>Recover unlisted publishes (batch of 5)</button>
+          {/* Harry's N2 retest (29 Jul 2026): historic notices predate the
+              rfp_shape stamp, so their What-suppliers-answer section was
+              absent. This works through them in batches. */}
+          <button className={btn} disabled={busy} onClick={() => act({ action: "backfill_notice_shapes", limit: 10 })}>Backfill notice shapes (batch of 10)</button>
+        </div>
         {(data.publish_leads ?? []).length > 0 && (
           <div className="overflow-x-auto mt-4">
             <table className="w-full text-sm">
