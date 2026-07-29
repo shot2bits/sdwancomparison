@@ -111,6 +111,20 @@ export default function NoticeView({
             <span key={s} className="rounded-full border border-[var(--ink-200,#e5e5e5)] px-2.5 py-0.5 text-xs text-[var(--ink-700)]">{s}</span>
           ))}
         </div>
+        {/* The honest supply-side line (Robert's ruling, 29 Jul 2026): how
+            many vetted suppliers are matched, what happens next, by when.
+            Every figure from the record; no queue implied that is not
+            there. Renders only when suppliers were actually invited.
+            WORDING PROVISIONAL pending Harry's status-language pass. */}
+        {!isSample && o.status === "open" && o.invited_count > 0 && (
+          <p className="mt-3 mb-0 text-sm text-[var(--ink-600)]">
+            {o.invited_count} vetted supplier{o.invited_count === 1 ? " was" : "s were"} matched and invited when this
+            notice published on {new Date(o.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+            Responses go privately to the buyer{o.response_deadline
+              ? `; the response window closes on ${new Date(o.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
+              : "; the notice stays open until the buyer closes it"}.
+          </p>
+        )}
       </header>
 
       {/* 2. AI-readable summary */}

@@ -2469,19 +2469,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         as AI flourish; the copy law counts before it claims). */}
                     <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-amber-700">Sign and publish</p>
                     <p className="m-0 mb-2 text-[15px] leading-relaxed text-zinc-900">Signing publishes the anonymous notice and sends your position, {live.length} claim{live.length === 1 ? "" : "s"}, to matched suppliers.</p>
-                    {/* The privacy strip (the conversion pass, 23 Jul): the same
-                        facts the old paragraph carried, under one quiet shield. */}
+                    {/* The four promises beside the publish control (Robert's
+                        Ruling Three, 29 Jul 2026: a promise made after the
+                        decision is worthless, so it stands at the decision).
+                        One quiet shield, the ruled wording from
+                        lib/publish-promises (PROVISIONAL pending Harry), the
+                        notice-specific read-back kept beneath it, and the
+                        vetting claim linked to the published standard so it
+                        is checkable, not asserted. */}
                     <div className="mb-2 flex items-start gap-2 rounded-md bg-zinc-50 px-3 py-2.5">
                       <svg width="14" height="16" viewBox="0 0 14 16" className="mt-[1px] shrink-0" aria-hidden="true">
                         <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#a16207" strokeWidth="1.3" />
                         <path d="M4.6 8 L6.4 9.8 L9.6 6.2" fill="none" stroke="#a16207" strokeWidth="1.3" strokeLinecap="round" />
                       </svg>
                       <p className="m-0 text-[11px] leading-relaxed text-zinc-600">
-                        <span className="font-semibold text-zinc-800">The public notice is anonymous.</span> It carries no name and no contacts
+                        <span className="font-semibold text-zinc-800">Your project publishes anonymously.</span>{" "}
+                        Nobody browsing Netify, and no search engine, sees your company name or your contact details
                         {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
-                          ? ` (it reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
+                          ? ` (the notice reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
                           : ""}
-                        , shows only to signed-in vendors and service providers (public visitors never see it), and the full position goes only to matched suppliers. Assumptions publish labelled as assumptions; example content never publishes at all.
+                        . Only vendors and service providers we have <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted</a> can respond, and your details are never shared with anyone we have not vetted. You choose which suppliers receive your contact details, and when. Assumptions publish labelled as assumptions; example content never publishes at all.
                       </p>
                     </div>
                     {/* Three facts about where this goes, each from live data,

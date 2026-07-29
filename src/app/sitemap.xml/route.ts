@@ -49,6 +49,10 @@ export async function GET() {
     { loc: `${SITE_URL}/opportunities`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities/new`, priority: "0.9" },
     { loc: `${SITE_URL}/opportunities/board`, priority: "0.9" },
+    // The citable vetting standard behind the four promises (approved
+    // 29 Jul 2026): the promise copy links here, so the page is public
+    // record, not an internal note.
+    { loc: `${SITE_URL}/supplier-vetting-standard`, priority: "0.7" },
     ...SAMPLE_NOTICES.map((s) => ({
       loc: `${SITE_URL}/opportunities/${s.slug}`,
       priority: "0.7",

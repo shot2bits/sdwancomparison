@@ -12,6 +12,7 @@ import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opport
 import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validate";
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
+import { PROMISES_PARAGRAPH } from "@/lib/publish-promises";
 import { sectorLabel } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
@@ -311,21 +312,33 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
   const gapsBlock = report && report.gaps.length
     ? `<p><strong>Gaps worth closing</strong> (edit your RFP any time; suppliers always see the latest version):</p><ul>${report.gaps.map((g) => `<li>${g}</li>`).join("")}</ul>`
     : "";
+  // The confirmation email is the first interaction, not a receipt
+  // (Robert's Ruling Three, 29 Jul 2026): it carries the requirement, the
+  // four promises, what happens next with real dates, and who is looking
+  // after it. WORDING PROVISIONAL pending Harry's copy pass (the
+  // confirmation email, pass three of five).
+  const activeSectionsForEmail = p.rfp_sections.filter((s) => s.included && s.questions.some((q) => q.priority !== "optional"));
+  const questionCountForEmail = activeSectionsForEmail.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+  const deadlineLine = p.response_deadline
+    ? new Date(p.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : null;
   await send({
     from,
     to: ownerEmail,
-    subject: "Your RFP is live. Here is your Netify Market Report",
+    subject: "Your requirement is live. Here is what happens next",
     html:
-      `<p>Hello,</p><p>Your RFP "${p.title}" has been published to ${invited.length} curated suppliers on the Netify marketplace. Their responses arrive side by side in your workspace, and pricing stays private to you.</p>` +
+      `<p>Hello,</p>` +
+      `<p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
+      `<p><strong>What happens to your information:</strong> ${PROMISES_PARAGRAPH} The vetting standard is published at <a href="${SITE_URL}/supplier-vetting-standard/">${SITE_URL}/supplier-vetting-standard/</a>.</p>` +
+      `<p><strong>What happens next:</strong> ${invited.length} evaluated supplier${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>` +
       bandBlock +
-      (invited.length ? `<p><strong>Going to:</strong> ${invited.map((v) => v.name).join(", ")}.</p>` : "") +
       (report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : "") +
       pinnedNoteFor(p) +
       `<p>To make replying fast, each invited supplier starts from a response Netify pre-drafted from its public-evidence evaluation of that vendor. They confirm, correct and add their pricing; capabilities Netify could not evidence are left blank for them to answer.</p>` +
       gapsBlock +
-      `<p><strong>Your document:</strong> download your RFP as Word or PDF from your workspace to circulate internally.</p>` +
-      `<p><a href="${rfpUrl}">Open your RFP workspace</a></p>` +
-      `<p>${report?.analyst_note ?? "A Netify analyst reviews every published RFP."}</p><p>Netify research team</p>`,
+      `<p><strong>Your document:</strong> download your requirement as Word or PDF from your workspace to circulate internally.</p>` +
+      `<p><a href="${rfpUrl}">Open your workspace</a></p>` +
+      `<p><strong>Who is looking after this:</strong> ${report?.analyst_note ?? "A Netify analyst reviews every published requirement."}</p><p>Netify research team</p>`,
   });
 }
 

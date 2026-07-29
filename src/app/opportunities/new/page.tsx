@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import NoticeBuilder from "@/components/NoticeBuilder";
+import PublishPromises from "@/components/PublishPromises";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
@@ -45,11 +46,17 @@ export default function NewOpportunityPage() {
         <p className="eyebrow mb-3">Publish an RFI</p>
         <h1 id="page-h1" className="mb-4">Publish an RFI in minutes.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          Tell the market what you need — no full RFP required. Draft and preview everything in the clear;
+          Tell the market what you need, no full RFP required. Draft and preview everything in the clear;
           you sign in only when you publish. See a{" "}
           <Link href="/opportunities/sample-uk-retailer-sd-wan-managed-underlay" className="underline">sample RFI</Link>{" "}
           or the <Link href="/opportunities/board" className="underline">live board</Link> first.
         </p>
+        {/* Moment one of the four promises (Robert's Ruling Three, 29 Jul
+            2026): before they begin, so the whole flow is framed by it.
+            Robert ruled this moment lives here, not on the homepage hero. */}
+        <div className="mt-6">
+          <PublishPromises />
+        </div>
       </div>
       <NoticeBuilder />
     </div>
