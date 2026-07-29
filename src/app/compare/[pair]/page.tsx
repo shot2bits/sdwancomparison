@@ -15,6 +15,7 @@ import {
   getSpeakableSchema,
 } from "@/lib/structured-data";
 import { datasetVerifiedIso, datasetVerifiedMonth } from "@/lib/dataset-date";
+import SourcedTable from "@/components/SourcedTable";
 
 export const dynamic = "force-static";
 export const dynamicParams = false;
@@ -160,6 +161,18 @@ export default async function ComparePage({ params }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Who owns it and who runs it. The 40-feature grid below answers what
+          the platforms do; this answers who actually owns the network and the
+          security stack, which is what separates two suppliers whose feature
+          rows look identical. Added 29 July 2026. */}
+      <SourcedTable
+        slugs={[a, b]}
+        caption={`${c.names[a]} and ${c.names[b]}: who owns it and who runs it`}
+        intro="Sourced facts rather than scores. Each value carries a named source and a sentence quoted from it."
+        id="ownership-evidence"
+        ranked={false}
+      />
 
       <CompareTable comparison={c} />
 

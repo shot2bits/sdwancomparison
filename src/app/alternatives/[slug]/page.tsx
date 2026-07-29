@@ -11,6 +11,7 @@ import {
   getSpeakableSchema,
 } from "@/lib/structured-data";
 import { datasetVerifiedLong, datasetVerifiedMonth } from "@/lib/dataset-date";
+import SourcedTable from "@/components/SourcedTable";
 
 export const dynamic = "force-static";
 
@@ -131,6 +132,16 @@ export default async function AlternativesPage({ params }: Props) {
           </Link>
         </div>
       </div>
+
+      {/* Evidence table for the alternatives set. "<vendor> evaluation" style
+          queries carry real citation share (Forcepoint 43 per cent, 29 July
+          2026) and had no table to quote from. */}
+      <SourcedTable
+        slugs={result.shortlist.map((v) => v.slug)}
+        caption={`${vendor.name} alternatives compared on sourced evidence`}
+        intro={`How the leading alternatives to ${vendor.name} differ on who owns the network and who runs the service. Ordered as ranked.`}
+        id="evidence-table"
+      />
 
       <ol className="space-y-6 list-none p-0">
         {result.shortlist.map((v) => (

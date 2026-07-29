@@ -20,6 +20,7 @@ import {
   getSpeakableSchema,
 } from "@/lib/structured-data";
 import { datasetVerifiedLong } from "@/lib/dataset-date";
+import SourcedTable from "@/components/SourcedTable";
 
 export const dynamic = "force-static";
 
@@ -235,6 +236,17 @@ export default async function BestPage({ params }: Props) {
           retired (DEF wave one, One Door): the Continuation above carries
           this page's suppliers and sector into the Workspace, which
           recommends the formal RFP path when the position warrants it. */}
+
+      {/* The extractable form of the ranking above. Added 29 July 2026: the
+          qualified cuts are where Netify's citation share actually sits (17 to
+          43 per cent measured on Bing AI), and every one of these pages was
+          rendering scored cards with no table for an engine to lift. */}
+      <SourcedTable
+        slugs={result.shortlist.map((v) => v.slug)}
+        caption={`${page.h1.replace(/\s*\(\d{4}\)\s*$/, "")}: the evidence`}
+        intro="The same ranking as below, as sourced facts rather than scores. Ordered as ranked."
+        id="evidence-table"
+      />
 
       <ol className="space-y-6 list-none p-0">
         {result.shortlist.map((v) => {
