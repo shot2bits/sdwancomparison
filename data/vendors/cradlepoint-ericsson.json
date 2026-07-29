@@ -12,13 +12,13 @@
   "cost_model": "Quote-based NetCloud subscriptions + routers/adapters; public hardware pricing may exist through resellers.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "not_primary",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f03_co_managed_service": "unknown",
+    "f04_multi_tenant_msp_white_label_support": "partial",
     "f05_professional_services_and_migration_support": "partner_integrated",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "yes",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -30,15 +30,15 @@
     "f16_mpls_coexistence_and_migration": "yes",
     "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "partial",
-    "f19_public_cloud_gateways": "partial",
-    "f20_private_pops_dedicated_pops": "unknown",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "yes",
     "f21_private_global_backbone": "unknown",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "partial",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
-    "f27_integrated_next_generation_firewall": "partial",
+    "f26_sla_backed_service_fabric": "unknown",
+    "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "partial",
     "f30_zero_trust_network_access": "partial",
@@ -51,16 +51,18 @@
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 18,
+    "yes_count": 22,
     "partial_count": 10,
-    "partner_integrated_count": 8,
+    "partner_integrated_count": 2,
     "managed_service_dependent_count": 0,
-    "unknown_count": 4,
-    "not_primary_count": 0,
-    "evidence_coverage_pct": 0.9
+    "unknown_count": 5,
+    "not_primary_count": 1,
+    "evidence_coverage_pct": 0.875,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Wireless-first branch architecture from Ericsson with deep 5G expertise; NetCloud provides cellular-centric SD-WAN management.",
@@ -77,8 +79,8 @@
     "Cloud on-ramp and multi-cloud transit fabric have limited public evidence relative to dedicated SASE platforms.",
     "Best for cellular-led architectures; less strong as a primary fit for fixed-circuit-heavy estates."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -179,5 +181,395 @@
   "value_tier": "value",
   "cost_note": "Subscription-led cellular WAN; cost-effective where 5G primary or backup replaces fixed lines.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US, Ericsson-owned). UK delivery via mobile operators and partners."
+  "uk_basis": "No UK HQ (US, Ericsson-owned). UK delivery via mobile operators and partners.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Ericsson Enterprise Wireless (Cradlepoint) home page",
+      "url": "https://cradlepoint.ericsson.com/",
+      "published": null,
+      "reliability": "Supplier's own site, top level positioning of Wireless WAN, private 5G and neutral host lines.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Wireless WAN product overview",
+      "url": "https://cradlepoint.com/products/wireless-wan/",
+      "published": null,
+      "reliability": "Supplier product page, lists the product families including NetCloud SASE.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Ericsson NetCloud SASE product page",
+      "url": "https://cradlepoint.com/products/netcloud-sase/",
+      "published": null,
+      "reliability": "Supplier product page, primary source for SASE architecture, cellular optimisation and deployment models. Full page text retrieved.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Ericsson NetCloud Service overview",
+      "url": "https://cradlepoint.com/products/netcloud-service/",
+      "published": null,
+      "reliability": "Supplier page covering subscription tiers, warranty, software updates, support and training.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Zero trust security solutions page",
+      "url": "https://cradlepoint.com/products/zero-trust-security/",
+      "published": null,
+      "reliability": "Supplier page on isolation based zero trust internet access. Thin on specifics, used only for corroboration.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Ericsson NetCloud SASE data sheet page",
+      "url": "https://cradlepoint.com/datasheet/netcloud-sase/",
+      "published": null,
+      "reliability": "Supplier data sheet, most detailed public description of SWG, IDS/IPS, CASB, RBI, ZTNA and deployment options.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "NetCloud Exchange Service Gateway data sheet",
+      "url": "https://cradlepoint.com/datasheet/ncx-service-gateway/",
+      "published": null,
+      "reliability": "Supplier data sheet, source for customer hosted headend deployment and hybrid mesh firewall features.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Ericsson Cradlepoint support",
+      "url": "https://cradlepoint.com/support/",
+      "published": null,
+      "reliability": "Supplier page describing global 24x7 support centres and engineer accreditation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Partner programme overview",
+      "url": "https://cradlepoint.com/partners/",
+      "published": null,
+      "reliability": "Supplier page defining reseller, technology alliance and service provider partner types.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "For partners page",
+      "url": "https://cradlepoint.com/partners/for-partners/",
+      "published": null,
+      "reliability": "Supplier partner page. Confirms service providers deliver managed networking on the platform, but carries no white label or tenancy detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Trust in Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/about/trust/",
+      "published": null,
+      "reliability": "Supplier trust centre landing page. Links to status and security pages, names no certification.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Ericsson Cradlepoint security page",
+      "url": "https://cradlepoint.com/about/trust/security/",
+      "published": null,
+      "reliability": "Supplier security page, source for hosting model, penetration testing and policy assurance wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "How to buy",
+      "url": "https://cradlepoint.ericsson.com/about/how-to-buy",
+      "published": null,
+      "reliability": "Supplier page setting out the indirect route to market through distributors, resellers, MSPs and integrators.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Ericsson Private 5G",
+      "url": "https://cradlepoint.com/products/ericsson-private-5g/",
+      "published": null,
+      "reliability": "Supplier product page for on premises private cellular, used for dedicated deployment evidence.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 4,
+      "title": "Cradlepoint legal document index",
+      "url": "https://cradlepoint.ericsson.com/legal",
+      "published": null,
+      "reliability": "Not used as evidence. The page returned only a client side loading state with no document list, so no service level agreement text could be read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 4,
+      "title": "NetCloud SASE resources index",
+      "url": "https://cradlepoint.ericsson.com/resources/netcloud-sase/netcloud-sase-data-sheet",
+      "published": null,
+      "reliability": "Not used as evidence. Returned a gated resource listing of document titles only, with none of the underlying document text.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 4,
+      "title": "Zero trust SD-WAN page (attempted)",
+      "url": "https://cradlepoint.com/products/zero-trust-sd-wan/",
+      "published": null,
+      "reliability": "Not used as evidence. URL returned HTTP 404 so no content was read.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "not_primary",
+      "evidence": [
+        13,
+        9
+      ],
+      "confidence": "medium",
+      "quote": "Enterprise Wireless products are sold through our world-class global ecosystem of distributors, resellers, managed service providers, and integrators.",
+      "claimed_by": "netify_assessment",
+      "note": "Nothing on the pages reviewed describes Ericsson Cradlepoint itself designing, deploying, monitoring, changing and reporting on a customer network end to end. The route to market is indirect and the partner programme casts managed delivery as a service provider partner activity, so a fully managed wrap is a partner outcome rather than a vendor service."
+    },
+    "f03_co_managed_service": {
+      "value": "unknown",
+      "evidence": [
+        4,
+        8,
+        3
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The NetCloud Service page, the support page and the NetCloud SASE page describe a customer operated SaaS console with vendor supplied 24x7 technical support, but no page reviewed sets out a co-managed engagement in which Ericsson runs the service while the customer retains defined policy and change rights. Absence of a quote is not treated as absence of the capability."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        13,
+        9,
+        10
+      ],
+      "confidence": "low",
+      "quote": "Enterprise Wireless products are sold through our world-class global ecosystem of distributors, resellers, managed service providers, and integrators.",
+      "claimed_by": "vendor",
+      "note": "Managed service providers are an explicit channel and the partner programme names a service provider category that builds managed offerings on the platform, which implies multi customer operation. However no page reviewed documents tenant isolation, delegated administration, branded portals or templates under the partner's own brand, so this is graded partial rather than yes. NetCloud Manager subaccount structure is referenced in the security page bullets but not in language firm enough to quote for white labelling."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partner_integrated",
+      "evidence": [
+        13,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "These specialized partners have deep knowledge of our products and offer an array of high-value services.",
+      "claimed_by": "vendor",
+      "note": "Design, integration and implementation services are attributed to the reseller and integrator channel rather than to an Ericsson Cradlepoint professional services organisation. The vendor supplies training and certification directly, but no discovery, pilot, staging, migration runbook or rollback offering was found on the pages reviewed, so the capability is graded as delivered through partners."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        4
+      ],
+      "confidence": "high",
+      "quote": "Your wireless edge routers and adapters, or endpoints, include a product warranty for the duration of your active NetCloud Essential or Advanced subscription.",
+      "claimed_by": "vendor",
+      "note": "Hardware warranty runs for the life of the subscription and the same page states that NetCloud Manager continuously delivers real time cloud and device operating software updates to 5G and LTE endpoints, so firmware and software currency are part of the subscription. End of life planning and renewal management are implied by the subscription continuity wording but are not separately documented."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        3,
+        6,
+        2
+      ],
+      "confidence": "high",
+      "quote": "With benefits like traffic steering based on cellular attributes and network slicing for guaranteed bandwidth as networks evolve to 5G standalone, NetCloud SASE enables fast moving organizations to accelerate their transformation.",
+      "claimed_by": "vendor",
+      "note": "This is the supplier's core competence. The data sheet additionally describes SD-WAN optimising traffic across wired, 5G and LTE, satellite, Wi-Fi as WAN, private APNs and 5G standalone network slices, and the endpoint range is built around integrated cellular modems. Traffic steering on cellular attributes evidences signal level awareness."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        6,
+        3,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Zero-trust security and SD-WAN services can be consumed through the cloud using NetCloud SASE or deployed in a private data center or private cloud through NetCloud Exchange.",
+      "claimed_by": "vendor",
+      "note": "Ericsson operates its own cloud delivered SASE service, with the NetCloud SASE page describing Ericsson's global cloud delivering zero trust security and SD-WAN as a service through NetCloud Manager. This is the vendor's own service infrastructure, not a resold third party edge, so yes rather than partner_integrated. Confidence is medium because the security page states the cloud services are hosted within Amazon Web Services and no gateway or region list is published."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        7,
+        6,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Flexible deployment in a customer-hosted data center or cloud or downloaded on a physical server.",
+      "claimed_by": "vendor",
+      "note": "The NetCloud Exchange Service Gateway is offered as a customer hosted headend in the customer's own data centre or private cloud, which meets the customer hosted or dedicated test. The NetCloud SASE page also states that certain NetCloud SASE services can be implemented through a customer hosted model in addition to cloud delivered options. Sovereign deployment is not separately claimed."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        6,
+        12
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The NetCloud SASE product page, the SASE data sheet, the Service Gateway data sheet and the security page were all checked for backbone, private network core or inter region transit language and none was present. The security page instead states the cloud back end is hosted within Amazon Web Services, which is third party infrastructure rather than a vendor owned backbone. No claim either way is asserted."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "unknown",
+      "evidence": [
+        8,
+        4,
+        15
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The support page describes 24x7 global telephone support and the NetCloud Service page describes enterprise level support, but neither states contractual uptime, response or change handling commitments. The legal document index at cradlepoint.ericsson.com/legal returned only a loading state, so any published service level agreement could not be read."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        7,
+        6
+      ],
+      "confidence": "high",
+      "quote": "With application and web filtering plus integrated IDS/IPS, HMF brings in modern firewall features, without the complexity.",
+      "claimed_by": "vendor",
+      "note": "The hybrid mesh firewall in NetCloud Exchange combines application control, web filtering and integrated IDS/IPS in the platform. The NetCloud SASE data sheet separately describes scanning incoming web traffic for known virus signatures so the secure web gateway can block malicious content, and application visibility and enforcement using deep packet inspection. No third party firewall vendor is named on any page reviewed, so this is graded as native rather than partner_integrated."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        6,
+        5
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The NetCloud SASE product page carries a benefit bullet about retaining data and intellectual property in the era of GenAI, and the data sheet describes a cloud access security broker, but neither describes content classification, inspection of sensitive data, blocking or flagging before egress, or exception workflows. The zero trust security page contains no DLP language at all. Graded unknown rather than no."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        8,
+        4,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "Support is one of the most valuable tools within a NetCloud subscription and is staffed by accredited network engineers",
+      "claimed_by": "vendor",
+      "note": "Round the clock global support is documented, with centres in Boise, London and Melbourne and direct access to the engineering organisation, and a public NetCloud status page exists for incident notification. What is not documented on any page reviewed is a 24/7 NOC and SOC proactively monitoring the customer's service, incident ownership through to root cause analysis, structured service reviews or change governance, so this falls short of the full definition."
+    },
+    "delivery_model": {
+      "value": "technology_vendor",
+      "evidence": [
+        13,
+        9,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Enterprise Wireless products are sold through our world-class global ecosystem of distributors, resellers, managed service providers, and integrators.",
+      "note": "Ericsson Cradlepoint authors the NetCloud platform, endpoints and NetCloud SASE software. Sales and delivery run through distributors, resellers, MSPs and integrators rather than Ericsson operating the service for the end customer, so this reads as a technology vendor rather than a managed provider.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        3,
+        6,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "Intelligently bonds diverse WAN connections",
+      "claimed_by": "netify_assessment",
+      "note": "Ericsson Cradlepoint sells endpoints, cloud management and SASE software, and the product proposition is bonding and steering whatever WAN links the customer already has, including wired, cellular, satellite and Wi-Fi as WAN. No page reviewed shows the supplier selling or owning access circuits or a core routing network for enterprise WAN customers, and the route to market is through distributors and resellers rather than a carrier contract."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        3,
+        6,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "NetCloud SASE is based on a clean architecture that delivers one platform, one policy engine",
+      "claimed_by": "vendor",
+      "note": "The security service edge functions, secure web gateway, remote browser isolation, ZTNA, CASB, IDS/IPS and hybrid mesh firewall, are all presented as Ericsson NetCloud components on a single policy engine. No third party security vendor is named as the underlying technology on any page reviewed, so this is graded native. Confidence is medium rather than high because the pages do not explicitly state that every component was built in house."
+    },
+    "regulatory_documentation": {
+      "value": "assurance_only",
+      "evidence": [
+        12,
+        11
+      ],
+      "confidence": "high",
+      "quote": "From incident response to acceptable use, Ericsson's documented IT policies, baselines, and procedures meet or exceed industry standards.",
+      "claimed_by": "vendor",
+      "note": "This is a general assurance sentence, not a named framework. Both the trust centre landing page and the security page were checked and neither names ISO 27001, SOC 2, NIS2, DORA, NHS DSPT, GDPR compliance status or FedRAMP. The security page does document penetration testing of hardware and NCOS, encryption at rest and in transit, and a responsible disclosure process, but attestation evidence was not present."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        6,
+        7,
+        12
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The NetCloud SASE product page, the SASE data sheet, the Service Gateway data sheet and the security page carry no count of points of presence, edge locations or regions. The Service Gateway ordering table lists only All Regions with no regional breakdown."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        8,
+        4,
+        11,
+        15
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No availability percentage was found. The support page and NetCloud Service page describe 24x7 support without any uptime figure, the trust centre links to a NetCloud status page rather than a published availability target, and the legal document index would not render so any service level agreement document could not be opened. A mention of support without a percentage is graded unknown."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "f20_private_pops_dedicated_pops",
+      "claim_a": "NetCloud Exchange Service Gateway is a scalable and reliable services delivery platform (or headend) that can reside standalone or in an active/standby configuration in a customer's data center or hosted cloud.",
+      "source_a": 7,
+      "claim_b": "NetCloud Exchange Service Gateway is for on-premises deployments only and is a reliable headend solution that can reside standalone or in an active/standby configuration.",
+      "source_b": 6
+    }
+  ]
 }

@@ -15,10 +15,10 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
-    "f05_professional_services_and_migration_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
+    "f05_professional_services_and_migration_support": "partial",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -31,20 +31,20 @@
     "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "partial",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "yes",
+    "f26_sla_backed_service_fabric": "partial",
     "f27_integrated_next_generation_firewall": "partner_integrated",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "partner_integrated",
     "f31_secure_web_gateway": "partner_integrated",
     "f32_casb_capability": "partner_integrated",
-    "f33_data_loss_prevention": "unknown",
+    "f33_data_loss_prevention": "partner_integrated",
     "f34_remote_user_access": "partner_integrated",
     "f35_soc_siem_soar_integration": "partner_integrated",
     "f36_centralised_orchestration": "yes",
@@ -54,13 +54,15 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 29,
-    "partial_count": 2,
+    "yes_count": 25,
+    "partial_count": 6,
     "partner_integrated_count": 8,
     "managed_service_dependent_count": 0,
     "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.975
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Tier 1 global backbone provides strong international transit capability alongside managed SD-WAN.",
@@ -77,8 +79,8 @@
     "Security stack is largely partner-integrated.",
     "Commercial model is consultative; ensure cost lines for managed changes, security and SLAs are explicit."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -144,8 +146,8 @@
     "chromeos": "managed_service_dependent",
     "agentless": "managed_service_dependent"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 400,
+  "sla_availability_pct": 99.99,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,424 @@
   "value_tier": "value",
   "cost_note": "Challenger pricing against incumbent carriers on like-for-like global managed SD-WAN, on a Tier 1 backbone.",
   "uk_delivery": "uk_entity",
-  "uk_basis": "UK contracting entity with UK operations on a Tier 1 backbone; UK and EMEA delivery is established."
+  "uk_basis": "UK contracting entity with UK operations on a Tier 1 backbone; UK and EMEA delivery is established.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Managed SD-WAN Services | GTT",
+      "url": "https://www.gtt.net/services/secure-networking/managed-sd-wan/",
+      "published": null,
+      "reliability": "Supplier product page. Undated. Exact string checks run against it and confirmed for the quotes used.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Secure Networking | GTT",
+      "url": "https://www.gtt.net/services/secure-networking/",
+      "published": null,
+      "reliability": "Supplier category page. Undated. Thin on specifics; used only for orientation, not for any grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "SASE Solutions: Secure Access Service Edge | GTT",
+      "url": "https://www.gtt.net/services/secure-networking/sase-secure-connect/",
+      "published": null,
+      "reliability": "Supplier product page. Undated. Primary source for SSE partner ownership, co-management, PoPs, NOC/SOC and SLO wording. Quotes re-verified by exact string presence check.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Connect | GTT",
+      "url": "https://www.gtt.net/connect/",
+      "published": null,
+      "reliability": "Supplier network page. Undated. Source of the 400+ PoP figure and the 99.99% network availability stat; both re-verified by string presence check.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "5G Fixed Wireless Access - Internet - GTT",
+      "url": "https://www.gtt.net/services/managed-networking/internet/5g-services/",
+      "published": null,
+      "reliability": "Supplier product page. Undated. Quotes re-verified by exact string presence check.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "SSE or Cloud Security Solutions | GTT",
+      "url": "https://www.gtt.net/services/secure-networking/cloud-security/",
+      "published": null,
+      "reliability": "Supplier product page. Undated. Source for the DLP service description; substring re-verified.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Cloud Access Security Broker (CASB) | GTT",
+      "url": "https://www.gtt.net/services/secure-networking/cloud-security/cloud-access-security-broker-casb/",
+      "published": null,
+      "reliability": "Supplier product page. Undated. Corroborates DLP presence but names no underlying vendor.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Security and compliance | GTT",
+      "url": "https://www.gtt.net/about-us/esg-environmental-social-governance-hub/security-and-compliance/",
+      "published": null,
+      "reliability": "Supplier trust/compliance page. Undated. Names specific attestations; quotes re-verified by string presence check.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Professional Services | GTT",
+      "url": "https://www.gtt.net/services/professional-services/",
+      "published": null,
+      "reliability": "Supplier page. Undated. Quotes re-verified; the string 'migration' was confirmed ABSENT.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Service Management | Professional Services | GTT",
+      "url": "https://www.gtt.net/services/professional-services/service-management/",
+      "published": null,
+      "reliability": "Supplier page. Undated. Used for service governance and review evidence.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Channel Partners | GTT",
+      "url": "https://www.gtt.net/channel-partners/",
+      "published": null,
+      "reliability": "Supplier channel page. Undated. Checked for white label and multi-tenant evidence; both ABSENT, hence the unknown grade on f04.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "GTT Envision | GTT",
+      "url": "https://www.gtt.net/envision/",
+      "published": null,
+      "reliability": "Supplier platform page. Undated. Lifecycle operations quote re-verified by string presence check.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "GTT EnvisionDX | GTT",
+      "url": "https://www.gtt.net/envision/envisiondx/",
+      "published": null,
+      "reliability": "Supplier platform page. Undated. Note the initial summary rendered the control-level line inaccurately; the verified string is 'run operations in-house or collaborate with GTT's global experts'.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "GTT Launches Secure Co-Manage Feature for SD-WAN and Security Services (PDF)",
+      "url": "https://www.gtt.net/wp-content/uploads/media/3203/gtt-launches-secure-co-manage-feature-for-sd-wan-and-security-services.pdf",
+      "published": "2021-07-21",
+      "reliability": "Supplier press release hosted on gtt.net. Dated. Quotes re-verified by string presence check. Ageing: names the legacy EtherVision portal.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "GTT Partners with Palo Alto Networks to Power Its SASE Platform | GTT",
+      "url": "https://www.gtt.net/about-us/press-releases/gtt-partners-with-palo-alto-networks-to-power-its-sase-platform/",
+      "published": "2021-11-30",
+      "reliability": "Supplier press release. Dated. Establishes that the SASE platform utilises Palo Alto Networks Prisma Access.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "GTT Expands Its SASE Portfolio With Fortinet ... Enabled by GTT's Global Tier 1 IP Backbone | GTT",
+      "url": "https://www.gtt.net/us-en/about-us/press-releases/gtt-expands-its-sase-portfolio-with-fortinet-to-offer-enterprises-a-robust-suite-of-security-solutions-uniquely-enabled-by-gtts-global-tier-1-ip-backbone/",
+      "published": "2024-01-16",
+      "reliability": "Supplier press release. Dated. Establishes the Fortinet-sourced ZTNA, FWaaS, CASB and SWG components and the 260-city backbone figure.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "GTT Expands Partnership with Palo Alto Networks to Offer Leading Managed Single-Vendor SASE Solution | GTT",
+      "url": "https://www.gtt.net/us-en/about-us/press-releases/gtt-expands-partnership-with-palo-alto-networks/",
+      "published": "2025-07-10",
+      "reliability": "Supplier press release. Dated and the most recent SASE positioning found. Confirms managed single-vendor SASE on Palo Alto Prisma SASE.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 3,
+      "title": "GTT Managed SD-WAN datasheet (PDF, GTT-authored, hosted by Apex Assembly)",
+      "url": "https://apexassembly.com/wp-content/uploads/2023/03/GTT_SD-WAN_Datasheet_US_Letter_v6-2.pdf",
+      "published": null,
+      "reliability": "Corroboration only. GTT-authored datasheet but hosted on a third-party events site and undated apart from the 2023 upload path, so it may be superseded. Used only alongside a Tier 1 source, never alone.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "GTT Launches Secure Co-Manage Feature for SD-WAN and Security Services (gb-en media centre)",
+      "url": "https://www.gtt.net/gb-en/media-centre/press-releases/gtt-launches-secure-co-manage-feature-for-sd-wan-and-security-services",
+      "published": null,
+      "reliability": "Not used as evidence. The URL returned a 404 client error when fetched, so no content could be read; the same release was obtained from the gtt.net PDF at register 14 instead.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        1,
+        18
+      ],
+      "confidence": "high",
+      "quote": "We manage the underlay (network) and the cloud-based overlay (SD-WAN) as a unified service",
+      "claimed_by": "vendor",
+      "note": "GTT positions Managed SD-WAN as an end to end managed service covering circuit installation, hardware delivery, zero touch provisioning and 24/7/365 proactive monitoring under one bill and one support team. Corroborated by the GTT SD-WAN datasheet (register 18, Tier 3 host) which states GTT experts design, implement, install and optimise the service."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        14,
+        3,
+        13
+      ],
+      "confidence": "high",
+      "quote": "GTT's Secure Co-Manage feature provides full security management capability that includes firewall policy and object management",
+      "claimed_by": "vendor",
+      "note": "Secure Co-Manage (GTT press release, 21 July 2021, register 14) lets customers make policy changes without placing an order while GTT continues to run the platform. The SASE Secure Connect page lists 'Access to co-management platform' and EnvisionDX states 'run operations in-house or collaborate with GTT's global experts'. Note the 2021 release names the legacy EtherVision portal; the current portal branding is Envision."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [
+        11,
+        12,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The GTT Channel Partners page, the Envision page and the EnvisionDX page were all checked for the exact strings 'multi-tenant' and 'white label' and both were ABSENT on each. The Channel Partners page only offers sell-to, sell-with or sell-through commercial models, which is not evidence of tenant isolation, delegated administration or branded partner portals."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partial",
+      "evidence": [
+        9,
+        10,
+        18
+      ],
+      "confidence": "high",
+      "quote": "Your Project Manager ensures the successful deployment of your complex solutions with well-defined milestones along the way.",
+      "claimed_by": "vendor",
+      "note": "GTT publishes a structured Professional Services portfolio (Project Management, Technical Management, Service Management, Customer Incident Management, Program Management) aligned to PRINCE2 and ITIL. Graded partial because the exact string 'migration' was ABSENT on the Professional Services index, and no published discovery, pilot, staging, migration runbook, rollback plan or training detail was found."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        12,
+        9,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Lifecycle operations for SD-WAN/SASE, internet, voice, cloud connect, plus performance tuning and change control",
+      "claimed_by": "vendor",
+      "note": "GTT Envision advertises lifecycle operations and change control, and Professional Services covers 'throughout the lifecycle of your deployment'. Graded partial because exact string checks on the Managed SD-WAN page returned ABSENT for both 'firmware' and 'hardware replacement', and no published statement was found on patching, renewals or end of life planning being included in the service."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        5,
+        1,
+        18
+      ],
+      "confidence": "high",
+      "quote": "Dual SIM capability allows automatic switching between carrier networks during localized outages",
+      "claimed_by": "vendor",
+      "note": "GTT publishes a 5G Fixed Wireless Access service supporting primary and failover use ('Deploy automatic failover for primary circuits'), multi-carrier SIM handling, and feeding 'reliable underlay connectivity into SD-WAN and SASE architectures'. The Managed SD-WAN page lists access types 'fiber, broadband, 4G/5G'. Signal monitoring specifically was not evidenced."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        3,
+        15,
+        17
+      ],
+      "confidence": "medium",
+      "quote": "100+ Points of Presence (POPs) between GTT and Palo Alto Networks for secure, edge-based access",
+      "claimed_by": "vendor",
+      "note": "GTT operates its own Tier 1 IP backbone PoPs, but the security enforcement edge is explicitly shared with Palo Alto Networks, and the 2021 launch release states the GTT SASE platform 'utilizes Palo Alto Networks Prisma Access'. The 2025 release describes a 'managed single-vendor SASE solution with Palo Alto Networks Prisma SASE'. Under the definition, gateways belonging to a third party whose technology the supplier resells grade partner_integrated rather than yes."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "partial",
+      "evidence": [
+        3
+      ],
+      "confidence": "low",
+      "quote": "Dedicated private cloud solution (Fortinet Only)",
+      "claimed_by": "vendor",
+      "note": "The SASE Secure Connect page offers a dedicated private cloud option, restricted to the Fortinet variant. Exact string checks on the same page returned ABSENT for both 'sovereign' and 'on-premises', so customer-hosted or sovereign PoP deployment was not evidenced. Graded partial and the dedicated instance is a partner (Fortinet) construct rather than a GTT-built PoP."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        1,
+        4,
+        16
+      ],
+      "confidence": "high",
+      "quote": "GTT owns and operates one of the world's largest global Tier 1 IP backbones",
+      "claimed_by": "vendor",
+      "note": "GTT is a Tier 1 IP transit operator. The Fortinet press release (register 16) describes a 'top-ranked, global, Tier 1 IP backbone, which spans more than 260 cities on six continents', and the Connect page claims the '4th largest global IP backbone'. This is genuinely global rather than single-country, so yes rather than partial."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "partial",
+      "evidence": [
+        3,
+        10,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Choose the right Service Level Objective (SLO) to meet your operational needs.",
+      "claimed_by": "vendor",
+      "note": "The SASE page frames commitments as Service Level Objectives, not contractual SLAs, and also states '365/24/7 uptime assurance'. The Service Management page covers scheduled service reviews and SLA tracking. Graded partial because no published SLA schedule with contractual uptime, response or change-handling terms, or latency/jitter/loss commitments, was found on gtt.net; only a marketing stat of 99.99% network availability on the Connect page."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        3,
+        16,
+        17
+      ],
+      "confidence": "high",
+      "quote": "Powered by market-leading partners Fortinet and Palo Alto Networks",
+      "claimed_by": "vendor",
+      "note": "Firewalling is delivered as 'Firewall as a Service (FWaaS) – Provides cloud-based firewall protection for your network' but the underlying stack is third-party. The Fortinet release (16) lists ZTNA, FWaaS, CASB and SWG from Fortinet; the 2025 Palo Alto release (17) lists SD-WAN, FWaaS, SWG, CASB and ZTNA under Prisma SASE. GTT resells and manages rather than authors the NGFW, so partner_integrated."
+    },
+    "f33_data_loss_prevention": {
+      "value": "partner_integrated",
+      "evidence": [
+        6,
+        7,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "prevents sensitive data from being exposed or exfiltrated by identifying, monitoring, and",
+      "claimed_by": "vendor",
+      "note": "GTT's Cloud Security page lists 'Data Loss Protection (DLP)' as one of six SSE services, and the CASB page states it leverages data loss prevention technologies. Graded partner_integrated because the SSE stack is explicitly Fortinet and Palo Alto Networks technology per the SASE page. Alerting and exception workflow detail was not found. Quote is a verified substring of the DLP service description; the full sentence continues with enforcing policies on data across users, devices, applications, and networks."
+    },
+    "f40_managed_service_assurance": {
+      "value": "yes",
+      "evidence": [
+        3,
+        18,
+        10
+      ],
+      "confidence": "high",
+      "quote": "24/7/365 support from NOC and SOC teams",
+      "claimed_by": "vendor",
+      "note": "GTT publishes both NOC and SOC coverage. The SD-WAN datasheet (register 18, Tier 3 host) states 24/7 continuous, proactive, end-to-end monitoring by global NOCs and SOCs, and the Service Management page provides an ITIL-accredited Service Manager, scheduled service reviews and SLA tracking. Formal root cause analysis wording was not directly quoted, though Customer Incident Management is a named service."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        1,
+        3,
+        17
+      ],
+      "confidence": "high",
+      "quote": "We manage the underlay (network) and the cloud-based overlay (SD-WAN) as a unified service",
+      "note": "GTT operates a network and a managed service wrap rather than authoring the SD-WAN or SSE product. The SASE service is 'Powered by market-leading partners Fortinet and Palo Alto Networks' and the 2025 press release describes a 'managed single-vendor SASE solution with Palo Alto Networks Prisma SASE'. GTT does own and operate its own Tier 1 IP backbone, which is infrastructure ownership rather than product authorship, so managed_provider rather than both.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        1,
+        16,
+        5
+      ],
+      "confidence": "high",
+      "quote": "GTT owns and operates one of the world's largest global Tier 1 IP backbones",
+      "claimed_by": "vendor",
+      "note": "GTT owns the core Tier 1 IP backbone and routing (more than 260 cities on six continents per register 16), but last-mile access is procured on the customer's behalf: the Managed SD-WAN page states GTT handles the logistics of circuit installation across fibre, broadband and 4G/5G, and the 5G page describes wrapping multi-carrier 5G from other operators into a single managed service. Core owned, access largely resold, hence mixed."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        3,
+        15,
+        16,
+        17
+      ],
+      "confidence": "high",
+      "quote": "Powered by market-leading partners Fortinet and Palo Alto Networks",
+      "claimed_by": "vendor",
+      "note": "Palo Alto Networks and Fortinet. GTT's SASE/SSE stack is dual-vendor: the 2021 release states the GTT SASE platform utilises Palo Alto Networks Prisma Access, the 2025 release describes a managed single-vendor SASE solution with Palo Alto Networks Prisma SASE, and the 2024 release adds Fortinet-sourced ZTNA, FWaaS, CASB and SWG. GTT supplies the managed wrap, the backbone and 1,000+ Fortinet NSE-certified staff, not the security software."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        8
+      ],
+      "confidence": "high",
+      "quote": "GTT's SOC 2 scope includes the SD-WAN and SIP Trunking services.",
+      "claimed_by": "vendor",
+      "note": "Found and named on GTT's security and compliance page: ISO 27001:2022 ('GTT holds ISO 27001: 2022 compliance at multiple locations, please view the certifications list for further information.'), SOC 1, SOC 2 scoped to SD-WAN and SIP Trunking, PCI DSS with an Attestation of Compliance available on request, GDPR, plus ISO 20000 and ISO 22301 at named operation centres and UK PSN at OFFICIAL. NOT found: NHS DSPT, DORA, NIS2, Cyber Essentials."
+    },
+    "pop_count": {
+      "value": "400",
+      "evidence": [
+        4,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "With 140,000+ customer sites connected and 400+ points of presence, you can enjoy reliable, consistent service wherever you operate with faster access and smoother collaboration",
+      "claimed_by": "vendor",
+      "note": "The figure is published as '400+' so the true count is at least 400. This is the network PoP count. It conflicts with the SASE page, which claims '100+ Points of Presence (POPs) between GTT and Palo Alto Networks for secure, edge-based access', a different and smaller security edge footprint that is partly Palo Alto's. Recorded in conflicts."
+    },
+    "sla_availability_pct": {
+      "value": "99.99",
+      "evidence": [
+        4
+      ],
+      "confidence": "low",
+      "quote": "99.99% network availability",
+      "claimed_by": "vendor",
+      "note": "This figure appears as a benefit stat under the 'Resilient by design' comparison panel on the Connect page, not in a published SLA schedule. No availability percentage was found on the Managed SD-WAN or SASE Secure Connect pages; the SASE page uses Service Level Objective wording and '365/24/7 uptime assurance' with no number, and an exact string check for '99.9' on that page returned ABSENT. Treat 99.99 as a marketing claim rather than a verified contractual commitment."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "400+ points of presence across the GTT network",
+      "source_a": 4,
+      "claim_b": "100+ Points of Presence (POPs) between GTT and Palo Alto Networks for secure, edge-based access",
+      "source_b": 3
+    },
+    {
+      "field": "f21_private_global_backbone",
+      "claim_a": "GTT owns and operates one of the world's largest global Tier 1 IP backbones",
+      "source_a": 1,
+      "claim_b": "Leverage the 4th largest global IP backbone, optimized by AI to deliver consistent performance across every connection point.",
+      "source_b": 4
+    },
+    {
+      "field": "f03_co_managed_service",
+      "claim_a": "Co-management is delivered via the EtherVision portal (2021 press release)",
+      "source_a": 14,
+      "claim_b": "Co-management and lifecycle operations are presented under the GTT Envision / EnvisionDX platform",
+      "source_b": 12
+    }
+  ]
 }

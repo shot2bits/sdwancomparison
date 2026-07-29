@@ -12,13 +12,13 @@
   "cost_model": "Quote-based appliances/software/support; public price transparency limited.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "partial",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partial",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "unknown",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
+    "f05_professional_services_and_migration_support": "unknown",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "unknown",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,7 +28,7 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "partial",
     "f19_public_cloud_gateways": "partial",
     "f20_private_pops_dedicated_pops": "unknown",
@@ -37,30 +37,32 @@
     "f23_multi_cloud_transit_fabric": "partial",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
-    "f27_integrated_next_generation_firewall": "partial",
+    "f26_sla_backed_service_fabric": "unknown",
+    "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "not_primary",
     "f29_sse_ecosystem_integration": "partner_integrated",
     "f30_zero_trust_network_access": "not_primary",
     "f31_secure_web_gateway": "partner_integrated",
     "f32_casb_capability": "not_primary",
-    "f33_data_loss_prevention": "not_primary",
+    "f33_data_loss_prevention": "yes",
     "f34_remote_user_access": "partial",
     "f35_soc_siem_soar_integration": "partial",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 15,
-    "partial_count": 9,
-    "partner_integrated_count": 9,
+    "yes_count": 18,
+    "partial_count": 8,
+    "partner_integrated_count": 3,
     "managed_service_dependent_count": 0,
-    "unknown_count": 2,
-    "not_primary_count": 5,
-    "evidence_coverage_pct": 0.825
+    "unknown_count": 7,
+    "not_primary_count": 4,
+    "evidence_coverage_pct": 0.825,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Long heritage in WAN optimisation, dynamic load balancing and MPSec encryption.",
@@ -77,8 +79,8 @@
     "SASE and SSE capabilities are not primary positioning; security relies on partner integration.",
     "Public pricing and case study transparency are limited; expect more discovery work in evaluation."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "partial",
@@ -179,5 +181,418 @@
   "value_tier": "budget",
   "cost_note": "Appliance plus support licensing, competitively priced; a specialist value play for multipath WAN.",
   "uk_delivery": "global_managed",
-  "uk_basis": "No UK HQ (US). UK delivery would be via partners; confirm local support during procurement."
+  "uk_basis": "No UK HQ (US). UK delivery would be via partners; confirm local support during procurement.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "FatPipe Networks homepage",
+      "url": "https://www.fatpipe.com",
+      "published": null,
+      "reliability": "Vendor homepage, undated. Marketing claims including several different WAN reliability percentages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "FatPipe SASE with ZTNA solution page",
+      "url": "https://www.fatpipe.com/solutions/sase.html",
+      "published": null,
+      "reliability": "Vendor solution page, undated. Primary source for SASE PoP, cloud security stack, DLP, ZTNA and FWaaS.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "FatPipe Managed WAN Edge solution page",
+      "url": "https://www.fatpipe.com/solutions/managed-wan-edge.html",
+      "published": null,
+      "reliability": "Vendor solution page, undated. Primary source for managed service and monitoring claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "FatPipe Total Security 360 product page",
+      "url": "https://www.fatpipe.com/products/fatpipe-total-security-360.html",
+      "published": null,
+      "reliability": "Vendor product page, undated. Source for firewall/IPS, DLP and FIPS encryption statements.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "FatPipe 5G and LTE Solutions product page",
+      "url": "https://www.fatpipe.com/products/5g.html",
+      "published": null,
+      "reliability": "Vendor product page, undated. Detailed cellular transport, modem and SIM statements.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "FatPipe Orchestrator product page",
+      "url": "https://www.fatpipe.com/products/orchestrator.html",
+      "published": null,
+      "reliability": "Vendor product page, undated. Checked for multi-tenancy, MSP, white label, delegated administration and firmware upgrade terms; none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "FatPipe EnterpriseView product page",
+      "url": "https://www.fatpipe.com/products/enterprise-view.html",
+      "published": null,
+      "reliability": "Vendor product page, undated. Checked for NOC, 24/7, multi-tenant and root cause terms; none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "FatPipe SIEM and Compliance solution page",
+      "url": "https://www.fatpipe.com/solutions/fatpipe-compliance.html",
+      "published": null,
+      "reliability": "Vendor solution page, undated. Names HIPAA, PCI DSS and GDPR as customer compliance reporting features, not as vendor attestations. Extracted lines came back truncated at line breaks, so used for framework naming only, not for verbatim grading quotes.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "FatPipe SD-WAN Secure Connectivity page",
+      "url": "https://www.fatpipe.com/sd-wan/secure-connectivity.html",
+      "published": null,
+      "reliability": "Vendor feature page, undated. States native inbuilt stateful firewall, DDoS protection, web filtering and IDS/IPS.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "FatPipe MPVPN product page",
+      "url": "https://www.fatpipe.com/products/mpvpn.html",
+      "published": null,
+      "reliability": "Vendor product page, undated. Establishes patented appliance and product authorship. No backbone or PoP claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "FatPipe WARP product page",
+      "url": "https://www.fatpipe.com/products/warp.html",
+      "published": null,
+      "reliability": "Vendor product page, undated. Establishes that customer ISP connections are bonded, and gives a 99.9998% WAN availability figure that conflicts with other pages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "FatPipe Contact Us page",
+      "url": "https://www.fatpipe.com/pages/contact.html",
+      "published": null,
+      "reliability": "Vendor contact page, undated. Office locations in USA, India, Philippines, South Africa and Australia. Used for site navigation discovery only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "FatPipe Partners page",
+      "url": "https://www.fatpipe.com/pages/partners.html",
+      "published": null,
+      "reliability": "Vendor partner page, undated. Distribution focused (Carahsoft, TD SYNNEX, CDW) with deal registration; no MSP white-label or multi-tenant statements.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "FatPipe Technical Support page",
+      "url": "https://www.fatpipe.com/technical-support/tech-support.html",
+      "published": null,
+      "reliability": "Vendor support page, undated. Contains only a feedback form. No support hours, tiers, RMA, response times or SLA published.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "FatPipe SD-WAN Remote User Connectivity page",
+      "url": "https://www.fatpipe.com/sd-wan/remote-user-connectivity.html",
+      "published": null,
+      "reliability": "Vendor feature page, undated. Checked for ZTNA gateway, PoP and hosting ownership statements; none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "FatPipe SD-WAN Detailed Network Visibility page",
+      "url": "https://www.fatpipe.com/sd-wan/detailed-network-visibility.html",
+      "published": null,
+      "reliability": "Vendor feature page, undated. Checked for multi-tenant, MSP, managed and SLA terms; none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 4,
+      "title": "FatPipe Total Security 360 on-premise SMB white paper (PDF)",
+      "url": "https://www.fatpipe.com/track_pdf.php?f=Fatpipe_Total_360_on_Premise_SMB_Integrated.pdf",
+      "published": null,
+      "reliability": "Not used as evidence. The download endpoint returned HTTP 409 and the document could not be retrieved, so nothing in it was read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 4,
+      "title": "FatPipe company / about page (attempted URLs)",
+      "url": "https://www.fatpipe.com/pages/about.html",
+      "published": null,
+      "reliability": "Not used as evidence. Returned HTTP 404, as did https://www.fatpipe.com/pages/company-overview.html and https://www.fatpipe.com/pages/privacy-policy.html, so no corporate profile or trust-centre page could be read.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "partial",
+      "evidence": [
+        1,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "To proactively manage and troubleshoot WAN connectivity, there is a single point-of-contact that leads to increased network redundancy.",
+      "claimed_by": "vendor",
+      "note": "FatPipe publishes a Managed WAN Edge solution page describing proactive management, a single point of contact, zero-touch provisioning and 24x7x365 device health monitoring, which is more than a pure product play. However no page reviewed states that FatPipe designs, deploys, makes changes, supports and reports end to end, and no service description or support policy was found (the technical support page is a feedback form only). Graded partial on that basis."
+    },
+    "f03_co_managed_service": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        6,
+        7,
+        14
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Managed WAN Edge page, Orchestrator page, EnterpriseView page and technical support page contain no statement of shared responsibility, customer-retained change rights or a co-managed operating model. Absence is not being treated as a no."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        7,
+        13,
+        16
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Orchestrator page returned no occurrences of multi-tenant, tenant, MSP, managed service provider, white label, branding or delegated administration; EnterpriseView and Detailed Network Visibility likewise. The partners page is distribution oriented (Carahsoft, TD SYNNEX, CDW, deal registration) and does not describe white-label operation. No partner portal or MSP documentation was reachable."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        12,
+        13,
+        14,
+        18
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No professional services, deployment services, migration, discovery, pilot, runbook, rollback or training page was found on the site; the about and company pages returned HTTP 404 and the support page carries only a feedback form."
+    },
+    "f07_lifecycle_management": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        6,
+        14
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Orchestrator page contains no firmware upgrade or patching statement, the technical support page publishes no RMA, warranty or hardware replacement terms, and the Managed WAN Edge page does not say lifecycle tasks are included in the service. Zero-touch provisioning is described but that is deployment, not lifecycle."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        5,
+        1,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Enables seamless cellular connectivity via an external 5G modem or embedded SIM, offering flexible deployment options for secure, scalable, and efficient network management.",
+      "claimed_by": "vendor",
+      "note": "Vendor claim, well supported. The 5G and LTE page also states that cellular links can serve as automatic failover paths or as primary connections when wired broadband is not available, describes single-SIM instant failover, and says administrators can manage LTE or 5G data usage by policy. The Managed WAN Edge page lists 4G/5G among monitored link types. Signal-strength monitoring specifically was not found, though link monitoring of 4G/5G is stated."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partial",
+      "evidence": [
+        2
+      ],
+      "confidence": "medium",
+      "quote": "SD-WAN Branches connect to the nearest SASE point of presence (PoP), which applies security and routing policies dynamically.",
+      "claimed_by": "vendor",
+      "note": "FatPipe describes its own SASE PoPs and states the solution is deployed through FatPipe's cloud-based security layer, which points to vendor-operated infrastructure rather than a resold third party, and no third-party gateway vendor is named on any page read. Graded partial rather than yes because FatPipe publishes no PoP location list, count or map, and no page states who owns or hosts the PoPs. No evidence was found that would justify partner_integrated either."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        2,
+        4,
+        15
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The SASE page refers to on-premise intelligence alongside the cloud security layer but never offers a customer-hosted, dedicated or sovereign PoP deployment. No sovereignty or dedicated-instance page was found."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [
+        2,
+        10,
+        11
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No page read contains any backbone, private network core or inter-region transit claim. The MPVPN and WARP products bond customer internet and ISP lines rather than riding a FatPipe-owned network, but that is context, not proof that no backbone exists."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        3,
+        11,
+        14
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. FatPipe publishes several achievable WAN reliability figures on marketing pages but no service level agreement document, no uptime commitment, no response or change-handling targets, and no latency, jitter or loss commitments. The technical support page publishes no response times. See the conflicts list for the differing reliability percentages."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        2,
+        9,
+        4
+      ],
+      "confidence": "high",
+      "quote": "FatPipe Cloud Security includes essential capabilities such as IPS and web filtering, DNS protection, SSL inspection, antimalware, ZTNA (Zero Trust Network Access), endpoint protection, Secure Web Gateway (SWG), antivirus, and antispam.",
+      "claimed_by": "vendor",
+      "note": "Vendor claim. The Secure Connectivity page states FatPipe has native inbuilt capabilities providing stateful firewall, DDoS protection, advanced web filtering and intrusion detection and prevention, and the Total Security 360 page states the firewall acts as the first line of defense with built-in IPS functionality. Application classification and control is a separately published SD-WAN feature. No third-party firewall vendor is named on any page read, so graded yes rather than partner_integrated."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        2,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Additionally, FatPipe integrates Data Loss Prevention (DLP) at the data layer, inspecting outbound packets to detect and block sensitive information such as credit card or social security numbers from leaving the organization.",
+      "claimed_by": "vendor",
+      "note": "Vendor claim, presented as FatPipe's own capability with no third-party DLP engine named. Inspection and blocking of outbound sensitive data before it leaves the organisation is explicit. The alerting and exception or incident workflow element of the definition is not described on any page read, so confidence is medium rather than high."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        3,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "FatPipe edge device health is monitored 24x7x365.",
+      "claimed_by": "vendor",
+      "note": "Round-the-clock proactive monitoring with automated email and SMS alerting is published, which covers part of the definition. Graded partial because no page read names a NOC or SOC, states that FatPipe owns incidents through to root cause analysis, or describes structured service reviews or change governance. EnterpriseView contains no NOC, 24/7 or root cause references."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        1,
+        3,
+        10,
+        11,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "FatPipe edge device health is monitored 24x7x365.",
+      "note": "FatPipe is primarily a technology vendor authoring its own appliances and software (MPVPN, WARP, Total Security 360, Orchestrator, EnterpriseView) and sells through distributors named on its partner page (Carahsoft, TD SYNNEX, CDW). It also publishes a Managed WAN Edge solution page describing 24x7x365 device health monitoring and a single point of contact, so a service-operator role is claimed as well. Graded both, medium confidence, because no service description, service catalogue or contract terms were found to confirm the depth of the managed offer.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        11,
+        10,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "FatPipe WARP achieves fault tolerance for companies by creating an easy method of combining two or more Internet connections of any kind over multiple ISPs.",
+      "claimed_by": "vendor",
+      "note": "FatPipe's products bond and steer connections the customer already has from multiple ISPs, and the WARP page states the product works with your existing infrastructure. No page read offers FatPipe-supplied circuits, carrier services or an owned routing core, and no access portfolio or price list was found. Graded customer_supplied_only at medium confidence because the absence of a connectivity offer is inferred from the pages read rather than stated outright."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        2,
+        9,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "FatPipe Cloud Security includes essential capabilities such as IPS and web filtering, DNS protection, SSL inspection, antimalware, ZTNA (Zero Trust Network Access), endpoint protection, Secure Web Gateway (SWG), antivirus, and antispam.",
+      "claimed_by": "vendor",
+      "note": "Every security function is branded as FatPipe's own (FatPipe Cloud Security, FatPipe ZTNA, FatPipe Firewall-as-a-Service, FatPipe IPS, FatPipe SIEM) and the Secure Connectivity page claims native inbuilt firewall, DDoS, web filtering and IDS/IPS. No OEM or partner security vendor is named on any page read. Confidence is medium because this rests entirely on vendor self-description, with no OEM disclosure, engine attribution or third-party test report available."
+    },
+    "regulatory_documentation": {
+      "value": "assurance_only",
+      "evidence": [
+        4,
+        8,
+        18
+      ],
+      "confidence": "medium",
+      "quote": "FatPipe appliances use FIPS Compliant encryption with IPSec and GRE encapsulation, ensuring strong security and compliance with industry standards for safe data transmission.",
+      "claimed_by": "vendor",
+      "note": "Frameworks found named on the site: FIPS, but only as 'FIPS Compliant encryption' with no certificate number or CMVP validation reference; and HIPAA, PCI DSS and GDPR on the SIEM and compliance page, where they appear as customer compliance-reporting features of the SIEM product rather than attestations held by FatPipe. Frameworks NOT found anywhere: ISO 27001, SOC 2, NIS2, DORA, NHS DSPT, Cyber Essentials. No trust centre, certification register entry or attestation report was found, and the privacy policy and about URLs returned HTTP 404. Graded assurance_only accordingly."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        2,
+        1,
+        15
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The SASE page refers to branches connecting to the nearest SASE point of presence but gives no total, no list of PoP cities or regions and no coverage map. No PoP count appears on the homepage, the Remote User Connectivity page or any other page read."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        3,
+        11,
+        14
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed as a service level agreement figure. FatPipe publishes several different achievable WAN reliability or availability marketing figures across its pages (99.98%, 99.999%, 99.9998% and 99.999988%) but these are product performance claims, not a contractual availability commitment, and no SLA document, support policy or service credit scheme was found. The figures also disagree with one another, so no single value can be reported; see conflicts."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "99.98% WAN reliability",
+      "source_a": 1,
+      "claim_b": "It enables customers to achieve 99.999988% WAN reliability.",
+      "source_b": 3
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "See how FatPipe's Secure SD-WAN can deliver 99.999% uptime",
+      "source_a": 1,
+      "claim_b": "It delivers 99.9998% WAN availability, sub-second failover, and intelligent load balancing without costly equipment or BGP expertise.",
+      "source_b": 11
+    }
+  ]
 }

@@ -13,13 +13,13 @@
   "cost_model": "Quote-based subscription/licence + appliance/support; Meraki public SKUs via partners, enterprise pricing varies by platform and term.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "not_primary",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "partial",
+    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f05_professional_services_and_migration_support": "partial",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "yes",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -29,39 +29,41 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
     "f20_private_pops_dedicated_pops": "unknown",
-    "f21_private_global_backbone": "unknown",
+    "f21_private_global_backbone": "partial",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "partial",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "yes",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "not_primary"
   },
   "score_summary": {
-    "yes_count": 28,
-    "partial_count": 2,
-    "partner_integrated_count": 8,
+    "yes_count": 32,
+    "partial_count": 4,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 2,
-    "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "unknown_count": 1,
+    "not_primary_count": 2,
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Broadest platform portfolio in the category, covering Catalyst SD-WAN for enterprise WAN, Meraki MX for cloud-managed branch, and Cisco Secure Access for converged SASE delivery.",
@@ -78,8 +80,8 @@
     "Managed delivery is partner-led rather than first-party, so service quality varies meaningfully by integrator.",
     "Private global backbone is not part of the platform; cloud transport relies on internet and partner gateways."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "yes",
@@ -146,7 +148,7 @@
     "agentless": "partial"
   },
   "pop_count": null,
-  "sla_availability_pct": null,
+  "sla_availability_pct": 99.999,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -181,5 +183,451 @@
   "value_tier": "mid",
   "cost_note": "Subscription licensing; Meraki is mid, Catalyst total cost runs higher, so blended mid leaning premium.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). Extensive UK channel; Catalyst and Meraki widely delivered as UK managed services."
+  "uk_basis": "No UK HQ (US). Extensive UK channel; Catalyst and Meraki widely delivered as UK managed services.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Cisco SD-WAN solutions overview",
+      "url": "https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html",
+      "published": null,
+      "reliability": "Supplier's own primary solution page named in the task. Marketing level, thin on operational detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Offer Description - Cisco Secure Access (Product Description PDF)",
+      "url": "https://www.cisco.com/c/dam/en_us/about/doing_business/legal/OfferDescriptions/Cisco-Secure-Access-Product-Description.pdf",
+      "published": null,
+      "reliability": "Supplier's own contractual offer description. Highest value source here because it is legal rather than marketing text; carries the availability figure.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE) Connect Anywhere - Cisco",
+      "url": "https://www.cisco.com/site/us/en/solutions/secure-access-service-edge-sase/index.html",
+      "published": null,
+      "reliability": "Supplier's own SASE landing page. Useful for stack composition, no infrastructure numbers.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Cisco Secure Access product page",
+      "url": "https://www.cisco.com/site/us/en/products/security/secure-access/index.html",
+      "published": null,
+      "reliability": "Supplier's own product page. Very light on the specific capabilities sought; mostly ZTNA framing.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Global cloud network activity and data centers - Cisco Umbrella",
+      "url": "https://umbrella.cisco.com/why-umbrella/global-network-and-traffic",
+      "published": null,
+      "reliability": "Supplier's own infrastructure page with a data centre table. Table is not a sentence, so it cannot supply a quoted PoP count.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Cisco Secure Connect Data Center List - Cisco Meraki Documentation",
+      "url": "https://documentation.meraki.com/CiscoPlusSecureConnect/Cisco___Secure_Connect_Pre-configuration_Checklist/Data_Centers",
+      "published": null,
+      "reliability": "Supplier's own technical documentation. Strongest source found on Cisco-operated PoP infrastructure and inter-PoP backbone.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE) and Security Service Edge (SSE) Architecture Guide - Cisco",
+      "url": "https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-sse-ag.html",
+      "published": null,
+      "reliability": "Supplier's own design zone architecture guide. Definitional in places, so care taken to separate generic SASE definitions from Cisco product claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Solutions - Cisco SASE Design Guide",
+      "url": "https://www.cisco.com/c/en/us/solutions/collateral/enterprise/design-zone-security/sase-design-guide.html",
+      "published": null,
+      "reliability": "Supplier's own design guide. Product-specific and therefore useful for confirming FWaaS, IPS and DLP are Secure Access features.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Dashboard Branding for MSPs - Cisco Meraki Documentation",
+      "url": "https://documentation.meraki.com/Platform_Management/Managed_Service_Provider_Resources/Dashboard_Branding_for_MSPs",
+      "published": null,
+      "reliability": "Supplier's own documentation. Direct and explicit on white-label branding for MSPs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Cisco Meraki | Managed Services",
+      "url": "https://meraki.cisco.com/managedserviceproviders",
+      "published": null,
+      "reliability": "Supplier's own MSP page. Useful as evidence that the managed-service operator role sits with partners, not Cisco.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Cisco Trust Center - Compliance",
+      "url": "https://www.cisco.com/c/en/us/about/trust-center/compliance.html",
+      "published": null,
+      "reliability": "Supplier's own trust centre landing page. Framework names appear only as navigation link parameters, not as body sentences, so it cannot carry a quoted grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Cisco Services",
+      "url": "https://www.cisco.com/site/us/en/services/index.html",
+      "published": null,
+      "reliability": "Supplier's own services page. Carries the professional services and support lifecycle statements.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Cisco Catalyst 8300 Series Edge Platforms Data Sheet",
+      "url": "https://www.cisco.com/c/en/us/products/collateral/routers/catalyst-8300-series-edge-platforms/datasheet-c78-744088.html",
+      "published": null,
+      "reliability": "Supplier's own hardware datasheet. Authoritative for cellular and 5G transport support.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Cisco Umbrella Global Cloud Architecture",
+      "url": "https://umbrella.cisco.com/cisco-umbrella-global-cloud-architecture",
+      "published": null,
+      "reliability": "Supplier's own infrastructure page. Gives peering and historic uptime claims but no PoP count and no backbone ownership statement.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Cisco Secure Access Data Sheet",
+      "url": "https://www.cisco.com/c/en/us/products/collateral/security/secure-access/secure-access-ds.html",
+      "published": null,
+      "reliability": "Supplier's own datasheet. Best source for DLP, IPS and multi-org detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Cisco Support services",
+      "url": "https://www.cisco.com/site/us/en/services/support/index.html",
+      "published": null,
+      "reliability": "Supplier's own support page. Confirms hardware replacement and software updates but contains no NOC/SOC or root cause language.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Cisco Meraki Trust and Compliance",
+      "url": "https://meraki.cisco.com/trust/",
+      "published": null,
+      "reliability": "Supplier's own trust page. Only page found that names specific certification frameworks in body text; applies to Meraki data centres rather than to the whole Cisco SASE estate.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Cisco Trust Center",
+      "url": "https://www.cisco.com/c/en/us/about/trust-center.html",
+      "published": null,
+      "reliability": "Supplier's own trust centre. Framework detail sits behind the gated Trust Portal, so nothing quotable was obtained.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Cisco Secure Access: A Comprehensive Guide (Medium, SDNTechForum)",
+      "url": "https://medium.com/@sdntechdemo/cisco-secure-access-a-comprehensive-guide-82f73a59ea70",
+      "published": null,
+      "reliability": "Not used as evidence. Self-published third-party blog with no named accountable author or editorial process.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "Why Five Nines of Service Availability Matters for SASE - Palo Alto Networks Blog",
+      "url": "https://www.paloaltonetworks.com/blog/sase/why-five-nines-of-service-availability-matters-for-sase/",
+      "published": null,
+      "reliability": "Not used as evidence. Competitor marketing blog discussing rival SLA claims; not a source on Cisco's own commitments.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Cloud-Delivered Security Services Features - G2",
+      "url": "https://www.g2.com/products/cloud-delivered-security-services/features",
+      "published": null,
+      "reliability": "Not used as evidence. Review aggregator with crowd-sourced, unattributed and undated feature claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "Cisco global cloud architecture sets the stage for powerful cloud security (router-switch.com mirror PDF)",
+      "url": "https://www.router-switch.com/media/upload/subscribe/cisco-global-cloud-architecture-sets-the-stage-for-powerful-cloud-security.pdf",
+      "published": null,
+      "reliability": "Not used as evidence. Reseller-hosted mirror of Cisco collateral with no verifiable version or date; superseded by the Cisco-hosted originals used instead.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "not_primary",
+      "evidence": [
+        10,
+        1,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Create a multitude of offers from managed business Wi-Fi to managed SD-WAN",
+      "note": "Cisco positions itself as the technology platform that partners wrap a managed service around, rather than as the party that designs, deploys, monitors, changes and reports on the customer's service end to end. The Meraki managed services page addresses MSPs as the service operator. No Cisco-branded end-to-end fully managed SD-WAN or SASE service was found across the SD-WAN solution page, the SASE page or the Cisco Services page.",
+      "claimed_by": "netify_assessment"
+    },
+    "f03_co_managed_service": {
+      "value": "partial",
+      "evidence": [
+        12,
+        2
+      ],
+      "confidence": "low",
+      "quote": "Cisco Services and our network of partners act as an extension of your IT team.",
+      "note": "Partial rather than yes. Cisco does run the Secure Access cloud platform and its support while the customer sets policy, which is structurally co-managed, and the services page describes an extension-of-your-team model. However no page reviewed sets out a named co-managed offer with a defined split of change rights and policy rights between Cisco and the customer. Graded low confidence because the quote is generic positioning rather than a description of a co-managed service construct.",
+      "claimed_by": "vendor"
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "yes",
+      "evidence": [
+        9,
+        10,
+        15
+      ],
+      "confidence": "high",
+      "quote": "Managed Service Providers (MSPs) can now take advantage of custom branding options within the Cisco Meraki Dashboard.",
+      "note": "All four elements of the definition are evidenced. Branded portals from the Meraki dashboard branding documentation, which also states \"Any logos that are applied to Dashboard should be the logo of the MSP and not of the end customer.\" Tenant isolation and delegated administration from multi-organisation management, corroborated on the Secure Access datasheet: \"Large enterprise customers can manage multiple organizations (orgs) through a single user interface, with central access and license management.\" Branding is configured per organisation and can be cloned to new organisations as a template.",
+      "claimed_by": "vendor"
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partial",
+      "evidence": [
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Cisco Professional Services provide strategic consulting, design, and implementation expertise to help you build or transform your IT environment.",
+      "note": "Partial because the definition is narrower than the label. Consulting, design and implementation are evidenced verbatim, but no page reviewed names the specific structured artefacts the definition requires: discovery workshops, pilots, staging, migration runbooks, rollback plans or training. Graded partial rather than yes on that gap, not on any doubt that Cisco has a large professional services arm.",
+      "claimed_by": "vendor"
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        16,
+        12,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "Cisco Support focuses on software updates, hardware replacement, and rapid issue resolution to keep your operations running smoothly.",
+      "note": "Hardware replacement and software updates or patching are stated verbatim, and firmware upgrade automation is corroborated on the Meraki managed services page: \"Use remote troubleshooting and automatic firmware updates to provide a superior service\". Confidence is medium rather than high because renewals management and end-of-life planning were not found in the pages reviewed, and because Cisco support is normally a separately purchased contract rather than something inherently bundled into the service.",
+      "claimed_by": "vendor"
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        13,
+        7
+      ],
+      "confidence": "high",
+      "quote": "With the higher throughputs provided by CAT18 LTE and 5G, wireless WAN connections become feasible as primary transports for different use cases.",
+      "note": "Both primary and failover cellular use are evidenced. The same datasheet covers integrated and external modem options: \"Based on a specific branch's direct line of sight and cellular coverage, this solution provides the flexibility of either using integrated PIM module or an external gateway. The integrated module can work in tandem with a cellular gateway for Active-Active redundancy.\" The SASE/SSE architecture guide corroborates 5G as a steerable WAN link. SIM management and signal monitoring specifically were not found as verbatim statements in the pages reviewed, so those two sub-elements are unevidenced even though the overall grade holds.",
+      "claimed_by": "vendor"
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        6,
+        5,
+        14
+      ],
+      "confidence": "high",
+      "quote": "Cisco Secure Connect services operate in the Cisco Umbrella global cloud architecture which is network of data centers located throughout the world interconnected with a high speed, low latency backbone.",
+      "note": "Yes rather than partner_integrated. This is Cisco's own service infrastructure, not a third party's PoPs that Cisco resells: Cisco owns and operates the Umbrella global cloud architecture, publishes its data centre list, and enforces security and delivers remote access from it. Corroborated by the Umbrella global network page, \"The Cisco Umbrella global cloud architecture serves more than 30,000 customers daily in 190+ countries.\" AWS, Azure and GCP connectivity was disregarded as it does not meet the definition.",
+      "claimed_by": "vendor"
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        5,
+        7
+      ],
+      "confidence": "low",
+      "quote": "",
+      "note": "Not found in public sources reviewed. Looked at the Cisco Secure Connect data centre list documentation, the Umbrella global network and data centre page, the Umbrella global cloud architecture page and the Cisco SASE/SSE architecture guide. All describe shared multi-tenant Cisco locations only. No customer-hosted, dedicated or sovereign PoP option was named on any of them. Note that the Secure Access offer description does mention that \"Data center(s) located in mainland China, when and if available, require a separate subscription\", but a separately subscribed regional data centre is not the same as a dedicated or sovereign PoP, so it was not treated as evidence. Unknown here means not found, not absent.",
+      "claimed_by": "none"
+    },
+    "f21_private_global_backbone": {
+      "value": "partial",
+      "evidence": [
+        6,
+        14
+      ],
+      "confidence": "low",
+      "quote": "Cisco Secure Connect services operate in the Cisco Umbrella global cloud architecture which is network of data centers located throughout the world interconnected with a high speed, low latency backbone.",
+      "note": "Partial rather than yes. A global, not national, footprint is clearly evidenced and the documentation states the data centres are interconnected by a backbone. What is not evidenced is the ownership or control test in the definition: no page reviewed states that Cisco owns or controls that backbone rather than buying transit or leased capacity. The Umbrella global cloud architecture page instead emphasises internet peering and anycast, \"Umbrella peers directly with more than 1000 organizations\", which points towards an internet-peering-centric design. Graded partial on the ownership gap. See conflicts.",
+      "claimed_by": "vendor"
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "partial",
+      "evidence": [
+        2,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "Cisco will use commercially reasonable efforts to deliver the Core Services to meet or exceed 99.999% Availability in accordance with the Secure Access Service Level Agreement (\"SLA\")",
+      "note": "Partial rather than yes on two grounds. First, the commitment is framed as \"commercially reasonable efforts\" rather than a firm contractual guarantee. Second, the definition requires commitments covering uptime, response and change handling, and only uptime was found; the offer description states the SLA terms themselves are available from a Cisco account representative or authorised partner, so response times, credits and change handling could not be read. Latency, jitter and loss commitments were not found either.",
+      "claimed_by": "vendor"
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        7,
+        8,
+        15
+      ],
+      "confidence": "high",
+      "quote": "FWaaS provides cloud delivered firewall services without the need to deploy, maintain, and upgrade physical or virtual appliances at a site.",
+      "note": "Yes and native, not partner_integrated. The firewall is built into the Cisco Secure Access platform rather than supplied as a separate appliance or as a third party's technology. Intrusion prevention uses Cisco's own Snort engine, per the Secure Access datasheet: \"Customizable IPS profiles with Snort 3.0 support.\" The SASE design guide confirms the pairing: \"Evaluation through Secure Access FWaaS also enables Intrusion Prevention System (IPS) inspection.\" URL filtering and anti-malware inspection are described in the architecture guide, and DLP is graded separately.",
+      "claimed_by": "vendor"
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        15,
+        8,
+        7
+      ],
+      "confidence": "high",
+      "quote": "Enterprise Data Loss Prevention (DLP) provides visibility and control over sensitive data leaving your organization.",
+      "note": "Native Cisco capability within Secure Access. Classification depth is corroborated on the same datasheet, \"1,200+ built-in global identifiers for Personally Identifiable Information (PII), spanning 77 countries\", and the SASE design guide confirms DLP is applied inline to traffic alongside SWG. Alerting and exception workflows specifically were not found as verbatim statements in the pages reviewed, so that sub-element is unevidenced, though the core classify, inspect and block requirement is clearly met.",
+      "claimed_by": "vendor"
+    },
+    "f40_managed_service_assurance": {
+      "value": "not_primary",
+      "evidence": [
+        10,
+        16,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Tap into 24/7 support and escalation process for complex issues",
+      "note": "Not_primary rather than yes. Round-the-clock support and an escalation path exist, but the quote is Cisco offering that to MSPs so that the MSP can assure its own customers. No page reviewed describes a Cisco-run customer-facing NOC and SOC that proactively monitors the customer's service, owns incidents through to root cause analysis, and runs structured service reviews and change governance. The Cisco Support page carries no NOC, SOC, root cause or service review language at all. In the Cisco model this assurance role generally sits with the partner or MSP.",
+      "claimed_by": "netify_assessment"
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        2,
+        12,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "Cisco will use commercially reasonable efforts to deliver the Core Services to meet or exceed 99.999% Availability in accordance with the Secure Access Service Level Agreement (\"SLA\")",
+      "note": "Cisco authors the SD-WAN and SSE technology (Catalyst SD-WAN, Meraki, Secure Access) and additionally operates Secure Access as its own cloud service under a contractual SLA, which is a service-operator role. Day to day managed WAN operations are largely delivered by Cisco partners and MSPs rather than by Cisco itself, per the Meraki MSP page which invites partners to \"Create a multitude of offers from managed business Wi-Fi to managed SD-WAN\".",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        7,
+        13,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Route traffic across different links (MPLS, Internet, 5G, etc.) based on destination",
+      "note": "Cisco is a technology vendor for the WAN edge and does not sell the physical circuits. Its architecture guide treats MPLS, internet and cellular as transports the customer already has, and the Catalyst 8300 datasheet describes terminating those links rather than providing them. No circuit, access or carrier service offering was found on any page reviewed. Graded medium confidence because the evidence is the consistent absence of a circuit offer plus transport-agnostic framing, rather than an explicit Cisco statement that it never supplies access. This is separate from the Umbrella cloud PoP estate, which Cisco does operate.",
+      "claimed_by": "netify_assessment"
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        3,
+        15,
+        7
+      ],
+      "confidence": "high",
+      "quote": "Simplify the complexity of IT by leveraging one powerful platform for Cisco SD-WAN, SWG, ZTNA, DNS-layer security, CASB, and more.",
+      "note": "Cisco built and owns its security service edge stack. Secure Access and Umbrella are Cisco products running on Cisco-operated data centres, the IPS engine is Cisco's own Snort 3.0, and DLP, SWG, ZTNA, CASB and FWaaS are all delivered from the same Cisco platform. There is no third-party security vendor being resold or OEM'd here, so this is native rather than partner or resold. No partner vendor to name.",
+      "claimed_by": "vendor"
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        17,
+        11,
+        18
+      ],
+      "confidence": "medium",
+      "quote": "Data centers are certified by industry-recognized standards such as ISO 9001:2008, ISO 27001, PCI DSS, SSAE16, and ISAE 3402",
+      "note": "Frameworks found named in body text: ISO 27001, PCI DSS, ISO 9001:2008, SSAE16, ISAE 3402, and GDPR is discussed separately on the same page. Frameworks NOT found named on any page reviewed: SOC 2, NHS DSPT, DORA, NIS2. Two caveats. First, the quote is from the Meraki trust page and covers Meraki data centres, not the whole Cisco SASE and SD-WAN estate. Second, the Cisco Trust Center compliance page surfaces SOC, ISO, FedRAMP, CSA STAR, C5, IRAP and HIPAA only as navigation link parameters behind the gated Trust Portal, not as body-text statements, so it could not carry a quote. Confidence medium for those reasons.",
+      "claimed_by": "vendor"
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        5,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "note": "Not found in public sources reviewed. Cisco publishes locations but not a headline count. The Cisco Secure Connect data centre documentation lists roughly 33 named locations across the Americas, APAC, Europe and MEA in a table, and the Umbrella global network page tabulates approximately 50 or more data centre locations with operators and peering fabrics, but neither page contains any sentence stating a number, so no quote is available and the count cannot be graded. The Umbrella global cloud architecture page gives reach and peering figures instead, and the Umbrella global network page states \"The Cisco Umbrella global cloud architecture serves more than 30,000 customers daily in 190+ countries.\", but neither is a PoP count. The two Cisco tables also differ in scope, so deriving a single figure would mean resolving that conflict myself, which is out of scope.",
+      "claimed_by": "none"
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        2,
+        14
+      ],
+      "confidence": "high",
+      "quote": "Cisco will use commercially reasonable efforts to deliver the Core Services to meet or exceed 99.999% Availability in accordance with the Secure Access Service Level Agreement (\"SLA\")",
+      "note": "Figure taken from Cisco's own contractual offer description for Secure Access, which is the strongest available source. Read the qualifier carefully: the target is 99.999% but the obligation is expressed as commercially reasonable efforts, and the underlying SLA document with its credits and measurement method is not public. Cisco separately claims historical achievement on the Umbrella marketing page, \"Umbrella's DNS security services have delivered 99.999% business uptime since 2006.\", which is a track record claim rather than a commitment. The figure applies to Secure Access core services; no equivalent published availability percentage was found for the SD-WAN products themselves.",
+      "claimed_by": "vendor"
+    }
+  },
+  "conflicts": [
+    {
+      "field": "f21_private_global_backbone",
+      "claim_a": "Cisco Secure Connect and Umbrella data centres worldwide are \"interconnected with a high speed, low latency backbone\", implying a vendor-controlled inter-PoP network.",
+      "source_a": 6,
+      "claim_b": "The Umbrella global cloud architecture page attributes inter-region performance to internet peering and anycast rather than to a backbone, stating \"Umbrella peers directly with more than 1000 organizations\" and that \"Our innovative use of Anycast augmented routing is integral to Cisco Umbrella's top performance and rock-solid reliability\".",
+      "source_b": 14
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "Contractual offer description frames 99.999% as a commercially reasonable efforts target: \"Cisco will use commercially reasonable efforts to deliver the Core Services to meet or exceed 99.999% Availability\".",
+      "source_a": 2,
+      "claim_b": "Umbrella marketing page presents 99.999% as achieved historical fact: \"Umbrella's DNS security services have delivered 99.999% business uptime since 2006.\"",
+      "source_b": 14
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "Cisco Secure Connect data centre documentation tabulates roughly 33 named service locations, with some marked TBD or Coming.",
+      "source_a": 6,
+      "claim_b": "The Umbrella global network and traffic page tabulates a materially larger estate, on the order of 50 or more data centre locations.",
+      "source_b": 5
+    }
+  ]
 }

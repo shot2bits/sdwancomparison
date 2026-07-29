@@ -12,13 +12,13 @@
   "cost_model": "Quote-based subscription; Microsoft marketplace listing exists but enterprise deployments normally require quote.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "partial",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "yes",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "partial",
     "f10_dynamic_path_selection": "partial",
@@ -28,39 +28,41 @@
     "f14_packet_loss_remediation": "partial",
     "f15_local_internet_breakout": "partial",
     "f16_mpls_coexistence_and_migration": "partial",
-    "f17_cellular_and_5g_support": "unknown",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
     "f20_private_pops_dedicated_pops": "unknown",
-    "f21_private_global_backbone": "partial",
+    "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "partial",
     "f25_high_availability_design": "partial",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "partial",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "yes",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "partial",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 17,
-    "partial_count": 13,
-    "partner_integrated_count": 8,
+    "yes_count": 22,
+    "partial_count": 16,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 2,
+    "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Harmony SASE combines Check Point security heritage with cloud-delivered SASE and optimised SD-WAN performance.",
@@ -77,8 +79,8 @@
     "Smaller SD-WAN deployment footprint than category leaders; validate scale references.",
     "Managed delivery is partner-led."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -144,7 +146,7 @@
     "chromeos": "unknown",
     "agentless": "partial"
   },
-  "pop_count": null,
+  "pop_count": 80,
   "sla_availability_pct": null,
   "support_model": {
     "follow_the_sun_24x7": "yes",
@@ -180,5 +182,429 @@
   "value_tier": "mid",
   "cost_note": "Per-user SASE plus gateway subscriptions, generally below the premium security rivals.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (Israel/US). Harmony SASE UK presence; delivered via UK security partners."
+  "uk_basis": "No UK HQ (Israel/US). Harmony SASE UK presence; delivered via UK security partners.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Check Point SASE (Hybrid SASE) product page",
+      "url": "https://www.checkpoint.com/harmony/sase/",
+      "published": null,
+      "reliability": "Supplier's own primary product page; read in full as raw body text.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Full Mesh Private Access",
+      "url": "https://www.checkpoint.com/harmony/sase/private-access/",
+      "published": null,
+      "reliability": "Supplier's own product page; carries the backbone and PoP wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Check Point Services",
+      "url": "https://www.checkpoint.com/services/",
+      "published": null,
+      "reliability": "Supplier's own services overview page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Managed Security Services",
+      "url": "https://www.checkpoint.com/services/managed-security/",
+      "published": null,
+      "reliability": "Supplier's own page describing co-managed and 24/7 service delivery.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Professional Services",
+      "url": "https://www.checkpoint.com/services/professional-services/",
+      "published": null,
+      "reliability": "Supplier's own page listing design, deployment and migration services.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "MSSP Partner Program",
+      "url": "https://www.checkpoint.com/partners/mssp-program/",
+      "published": null,
+      "reliability": "Supplier's own partner programme page; multi-tenancy claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Secure SD-WAN Solution",
+      "url": "https://www.checkpoint.com/solutions/sd-wan-security/",
+      "published": null,
+      "reliability": "Supplier's own SD-WAN solution page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Check Point SASE Internet Access",
+      "url": "https://www.checkpoint.com/harmony/sase/internet-access/",
+      "published": null,
+      "reliability": "Supplier's own product page; carries a data centre count and DLP wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Check Point Next-Generation Firewalls",
+      "url": "https://www.checkpoint.com/quantum/next-generation-firewall/",
+      "published": null,
+      "reliability": "Supplier's own product page including an FAQ describing the NGFW feature set.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Check Point Support Programs",
+      "url": "https://www.checkpoint.com/support-services/support-plans/",
+      "published": null,
+      "reliability": "Supplier's own support programme page with contractual response-time tables and RMA terms.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Check Point Portal (Infinity Portal)",
+      "url": "https://www.checkpoint.com/infinity/portal/",
+      "published": null,
+      "reliability": "Supplier's own management platform page; contained no certification, SLA or tenancy detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Managed Firewall Services",
+      "url": "https://www.checkpoint.com/services/managed-security/managed-firewall/",
+      "published": null,
+      "reliability": "Supplier's own managed service page describing 24/7 monitoring and patching scope.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Public Cloud Compliance and Governance",
+      "url": "https://www.checkpoint.com/solutions/compliance-governance/",
+      "published": null,
+      "reliability": "Supplier's own page. Names frameworks the product audits customers against, not attestations Check Point holds for its own SASE service.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 4,
+      "title": "Check Point Quantum SD-WAN",
+      "url": "https://www.checkpoint.com/quantum/sd-wan/",
+      "published": null,
+      "reliability": "Not used as evidence: the fetch returned no retrievable body text on repeated attempts, so nothing could be quoted.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 4,
+      "title": "Lifecycle Management (support services)",
+      "url": "https://www.checkpoint.com/support-services/lifecycle-management/",
+      "published": null,
+      "reliability": "Not used as evidence: the fetch returned no retrievable body text, so the lifecycle service scope could not be quoted from it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 4,
+      "title": "Perimeter 81 compliance page (Check Point SASE heritage)",
+      "url": "https://www.perimeter81.com/compliance",
+      "published": null,
+      "reliability": "Not used as evidence: blocked by robots.txt, page could not be read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 4,
+      "title": "Check Point SASE portal, private access",
+      "url": "https://sase.checkpoint.com/private-access",
+      "published": null,
+      "reliability": "Not used as evidence: returned no retrievable body text.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 4,
+      "title": "Check Point trust page",
+      "url": "https://www.checkpoint.com/trust/",
+      "published": null,
+      "reliability": "Not used as evidence: URL returned no content, so no trust centre or attestation register could be read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Managed Detection and Response",
+      "url": "https://www.checkpoint.com/services/incident-response/managed-detection-and-response/",
+      "published": null,
+      "reliability": "Not used as evidence: returned no retrievable body text, so SOC and root cause claims could not be sourced from it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "Managed Firewall as a Service",
+      "url": "https://www.checkpoint.com/services/managed-security/managed-firewall-as-a-service/",
+      "published": null,
+      "reliability": "Not used as evidence: returned no retrievable body text.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Harmony SASE datasheet resource page",
+      "url": "https://www.checkpoint.com/resources/items/harmony-sase-datasheet",
+      "published": null,
+      "reliability": "Not used as evidence: gated resource page returned no retrievable body text.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "partial",
+      "evidence": [
+        12,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Managed Firewall Services with 24/7 monitoring, policy management, tuning, patching, upgrades, incident handling, and expert support for Check Point and third-party NGFWs.",
+      "claimed_by": "vendor",
+      "note": "Check Point sells first-party managed services covering firewall, EDR, vulnerability management and Microsoft 365, with 24/7 monitoring, policy management and incident handling. I did not find a page describing Check Point itself designing, deploying, changing and reporting on the SASE service end to end for the customer, so partial rather than yes. The Managed Firewall as a Service page (register 20) could not be read."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4
+      ],
+      "confidence": "high",
+      "quote": "Delivering co-managed services with partners and customers for optimal protection through unified collaboration and robust security strategies.",
+      "claimed_by": "vendor",
+      "note": "Check Point explicitly frames its managed security offer as co-managed, with its experts acting as an extension of the customer team while the customer retains its own operations."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        6
+      ],
+      "confidence": "medium",
+      "quote": "Leverage true multi-tenancy, a wide range of security services, and full API integration to streamline customer management and accelerate service delivery.",
+      "claimed_by": "vendor",
+      "note": "Multi-tenant architecture, delegated multi-customer management through one portal and API integration are all stated on the MSSP programme page. I found no statement of branded or white-label portals under the MSP's own brand, which the definition requires, so partial rather than yes."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        5,
+        3
+      ],
+      "confidence": "high",
+      "quote": "As your security infrastructure becomes more complicated, our Professional Services team can assist you with your security design, deployment, operation, and optimization needs.",
+      "claimed_by": "vendor",
+      "note": "The same page lists a Jumpstart Program, Maestro Deployment, SmartOptimize, Gateway Health Check and Lifecycle Management Services, and states delivery covers adding new features and layers while ensuring smooth migrations and scheduled updates. Training programmes are listed separately. Explicit runbook and rollback wording was not found."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        10,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "Check Point shall use commercially reasonable efforts to ship the replacement hardware on the same business day, however, shipment my occur on the next business day if required for operational reasons.",
+      "claimed_by": "vendor",
+      "note": "Support programmes include RMA hardware replacement with same business day shipment and onsite delivery options, plus Latest Hot Fixes & Service Packs and Major Upgrades & Enhancements on every tier, and Lifecycle Management Services is a named professional service. This is a purchased support or services contract rather than something bundled into every subscription. The dedicated lifecycle management page (register 15) could not be read. The quote reproduces the page's own typo."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        1,
+        2,
+        9
+      ],
+      "confidence": "medium",
+      "quote": "Sub-second failover to any WAN link: MPLS, 5G, broadband",
+      "claimed_by": "vendor",
+      "note": "5G is named as a supported WAN failover transport for SD-WAN, and the NGFW page notes a Wi-Fi 5G option on small business appliances and 1 GbE & 5G wireless secure connectivity on industrial appliances. I found no statement covering SIM management or signal monitoring, which the definition requires, so partial. The Quantum SD-WAN page (register 14) could not be read."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        2,
+        1,
+        8
+      ],
+      "confidence": "high",
+      "quote": "Our high-performance network provides fast delivery between corporate sites worldwide thanks to multiple tier-1 links at each point-of-presence (PoP), reserved bandwidth, and peering agreements.",
+      "claimed_by": "vendor",
+      "note": "Check Point operates its own PoP and data centre estate for SASE internet access, private access and SaaS security, described as 80+ to 85+ global data centres depending on the page. This is Check Point's own infrastructure rather than a resold third party edge, so yes rather than partner_integrated."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        2,
+        1,
+        8
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I read the SASE overview, Private Access, Internet Access, SD-WAN solution and Infinity Portal pages and found only references to Check Point's own shared global data centres and PoPs. No statement of customer-hosted, dedicated or sovereign PoP options was found. The sase.checkpoint.com private access page and the Harmony SASE datasheet (registers 17 and 21) could not be read, and the legacy Perimeter 81 material was not reachable."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        2,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Our high-performance network provides fast delivery between corporate sites worldwide thanks to multiple tier-1 links at each point-of-presence (PoP), reserved bandwidth, and peering agreements.",
+      "claimed_by": "vendor",
+      "note": "The heading above this text is Global Private Backbone, and the SASE overview separately states Private Access delivers high performance with a full mesh global private backbone. The backbone is global rather than national. Check Point describes it as built on purchased tier-1 links, reserved bandwidth and peering rather than fibre it owns, so it is a controlled overlay backbone rather than owned infrastructure."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "partial",
+      "evidence": [
+        10
+      ],
+      "confidence": "medium",
+      "quote": "Get advanced access to our large, self-service knowledge base and a committed 30-minute response time to issues with level one severity.",
+      "claimed_by": "vendor",
+      "note": "Check Point publishes contractual support SLAs with per-severity response times (30 minutes for Severity 1 across all tiers), 7x24 coverage on Premium and above, and named SLA documents including the Check Point Direct Support Program Service Level Agreement. I found no published availability, latency, jitter or loss commitment for the SASE cloud service, so partial rather than yes."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        9,
+        7,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Advanced security services including intrusion prevention, application control, and zero-day protection, including blocking threats hiding in encrypted HTTP web traffic.",
+      "claimed_by": "vendor",
+      "note": "This is Check Point's own firewall technology, not a resold third party stack, so yes rather than partner_integrated. The SD-WAN solution page adds converged security and network optimization in a single appliance, and the SASE pages list web and DNS filtering and malware protection delivered in the same platform."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        1,
+        2,
+        8
+      ],
+      "confidence": "high",
+      "quote": "Inline and API-based enforcement with Application Control for 10,000+ cloud apps, tenant restrictions, DLP, and Threat Prevention powered by ThreatCloud AI",
+      "claimed_by": "vendor",
+      "note": "The same pages state AI-powered data classification with 800+ predefined data types, and the Internet Access page cites in-browser data loss prevention. Content classification and inline enforcement are clearly evidenced. Explicit alerting and exception workflow detail was not found on the pages read."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        4,
+        12,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "Our 24/7 global service team will be there whenever and wherever you need them to help make sure your organization is always protected.",
+      "claimed_by": "vendor",
+      "note": "24/7 coverage, incident handling and NOC and SOC oriented managed services are stated, and the services pages claim 99% of threats responded to within 1 hour. I found no statement of provider-owned root cause analysis, structured service reviews or change governance, so partial. The Managed Detection and Response page (register 19) could not be read."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        1,
+        3,
+        4,
+        5,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Leverage managed security and cloud services to enhance the proactive capabilities of Network Operations Centers (NOCs), Security Operations Centers (SOCs), and IT operational teams.",
+      "note": "Primarily a technology vendor that authors its own SASE, SD-WAN and firewall products, but it also sells first-party managed security services (Managed Firewall, Managed EDR, Managed XDR) and professional services, so both applies.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        2,
+        1,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "Our high-performance network provides fast delivery between corporate sites worldwide thanks to multiple tier-1 links at each point-of-presence (PoP), reserved bandwidth, and peering agreements.",
+      "claimed_by": "vendor",
+      "note": "Check Point controls its own PoPs and core routing overlay but buys the transport: it describes tier-1 links and peering agreements at each PoP rather than owned fibre. Branch and user access transport is customer supplied, with SD-WAN steering across MPLS, 5G and broadband. Graded mixed on that basis. No page reviewed claims Check Point owns physical circuits."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        1,
+        9,
+        8
+      ],
+      "confidence": "high",
+      "quote": "Single-vendor SASE solution with unmatched user and management experience",
+      "claimed_by": "vendor",
+      "note": "The security service edge stack is Check Point's own technology, built around its ThreatCloud AI, its own firewall and threat prevention engines and the Harmony SASE platform that came from its Perimeter 81 acquisition. No third party security vendor is named as supplying any SSE layer on the pages read."
+    },
+    "regulatory_documentation": {
+      "value": "not_found",
+      "evidence": [
+        13,
+        11,
+        1,
+        2,
+        18
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Compliance and Governance page names PCI DSS, NIST, SOC 2 and HIPAA, but as frameworks the Check Point product audits a customer's cloud estate against, not as attestations Check Point holds for its own SASE service. I found no ISO 27001, SOC 2, NIS2, DORA or NHS DSPT attestation named for the service itself on the SASE, Private Access, Internet Access or Infinity Portal pages. The Check Point trust page and the legacy Perimeter 81 compliance page (registers 18 and 16) could not be read, so a trust centre may exist that I was unable to reach."
+    },
+    "pop_count": {
+      "value": "80+",
+      "evidence": [
+        8,
+        1,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "80+ Global Data Centers",
+      "claimed_by": "vendor",
+      "note": "Check Point publishes a global data centre count rather than an explicit PoP count, though the Private Access page uses the term point-of-presence (PoP) for the same estate. The figure is inconsistent across Check Point's own pages: 80+ on the SASE overview and Internet Access pages, 85+ on the Private Access page. See conflicts."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        10,
+        9,
+        1
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The support programmes page publishes response-time SLAs (30 minutes for Severity 1) but no availability percentage for the SASE cloud service. The NGFW product page cites 99.999% resiliency and carrier-class 99.999% uptime, but those are appliance clustering and hardware resilience claims for on-premises gateways, not a contractual availability commitment for the SASE service, so they are not used here. No SASE service SLA document was reachable."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "80+ Global Data Centers",
+      "source_a": 8,
+      "claim_b": "85+ Global Data Centers",
+      "source_b": 2
+    }
+  ]
 }

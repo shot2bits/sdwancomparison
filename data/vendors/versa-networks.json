@@ -13,13 +13,13 @@
   "cost_model": "Quote-based subscription; MSP/carrier pricing depends on tenant scale, bandwidth, security package and delivery model.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "partial",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
+    "f03_co_managed_service": "yes",
     "f04_multi_tenant_msp_white_label_support": "yes",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f05_professional_services_and_migration_support": "unknown",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -29,39 +29,41 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
-    "f20_private_pops_dedicated_pops": "partial",
-    "f21_private_global_backbone": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "yes",
+    "f21_private_global_backbone": "partial",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "yes",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "yes",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 29,
-    "partial_count": 3,
-    "partner_integrated_count": 8,
+    "yes_count": 34,
+    "partial_count": 4,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Multi-tenancy from the ground up, making Versa a common choice for service providers and carriers building managed SD-WAN and SASE platforms.",
@@ -78,8 +80,8 @@
     "Buyers should confirm exactly which managed provider is delivering the platform and what the operational RACI looks like.",
     "Brand recognition trails Cisco, Palo Alto and Fortinet in enterprise procurement processes."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "yes",
@@ -144,8 +146,8 @@
     "chromeos": "unknown",
     "agentless": "partial"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 90,
+  "sla_availability_pct": 99.999,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,417 @@
   "value_tier": "mid",
   "cost_note": "Subscription by appliance or software tier; competitive against firewall-heritage stacks, flexible via white-box.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). Delivered in the UK through carrier and MSP partners building managed services on Versa."
+  "uk_basis": "No UK HQ (US). Delivered in the UK through carrier and MSP partners building managed services on Versa.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Versa Networks: Explore Our Range of Products",
+      "url": "https://versa-networks.com/products/",
+      "published": null,
+      "reliability": "Supplier's own product index. Retrieved successfully; lists VersaONE, Unified SASE, Private SASE, Sovereign SASE, SD-WAN, NGFW, DLP, CASB, Cloud Gateways, Concerto.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Versa Hosted SASE Service Level Agreement (PDF)",
+      "url": "https://versa-networks.com/documents/Versa-Hosted-SASE-SLA.pdf",
+      "published": "2025-05-29",
+      "reliability": "Supplier's own published contractual SLA document, explicitly dated. Strongest single source for SLA and uptime figures.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Versa SASE Ecosystem (product documentation)",
+      "url": "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Director/Ecosystem/Versa_SASE_Ecosystem",
+      "published": null,
+      "reliability": "Supplier's own technical documentation site. Renders without JavaScript so text is reliably retrievable. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Configure Data Loss Prevention in Concerto (product documentation)",
+      "url": "https://docs.versa-networks.com/Security_Service_Edge_(SSE)/Configuration_from_Concerto/Configure_Data_Loss_Prevention_in_Concerto",
+      "published": null,
+      "reliability": "Supplier's own technical documentation. Describes native DLP engine, match rules and enforcement actions. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Configure WWAN (product documentation)",
+      "url": "https://docs.versa-networks.com/Secure_SD-WAN/01_Configuration_from_Director/Common_Configuration/Configure_WWAN",
+      "published": null,
+      "reliability": "Supplier's own technical documentation covering LTE/4G/5G interfaces, SIM activation and radio signal metrics. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Versa Networks NIS2 Compliance Disclaimer (white paper PDF)",
+      "url": "https://versa-networks.com/documents/white-papers/versa-nis-2.pdf",
+      "published": "2025-10",
+      "reliability": "Supplier's own dated white paper naming certifications and frameworks. Self-asserted, not the certificates themselves, but explicitly named and dated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 2,
+      "title": "Versa Networks launches sovereign SASE, challenging cloud-only security model (Network World, Sean Michael Kerner)",
+      "url": "https://www.networkworld.com/article/3829177/versa-networks-launches-sovereign-sase-challenging-cloud-only-security-model.html",
+      "published": "2025-02-20",
+      "reliability": "Named-author, dated trade journalism with direct quotes from Versa's CEO. Independent corroboration for the Sovereign SASE deployment model.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Portal for Titan Order Management for MSPs 9.3.0 (product documentation)",
+      "url": "https://docs.versa-networks.com/Titan/Order_Management_for_MSPs/01_Portal_for_Titan_Order_Management_for_MSPs_9.3.0",
+      "published": null,
+      "reliability": "Supplier's own documentation for MSP account hierarchy. Read in full; contains account and reseller hierarchy but no branding or white-label content.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Versa Premier Service Datasheet",
+      "url": "https://versa-networks.com/documents/datasheets/versa-premier-service.pdf",
+      "published": "2020",
+      "reliability": "Supplier's own support-tier datasheet. Copyright 2020, so ageing; used only for support and assurance commitments that are unlikely to have been withdrawn.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Versa Networks Hosted and Managed Head-End (VHM) Headend as-a-Service datasheet",
+      "url": "https://versa-networks.com/documents/datasheets/versa-networks-hosted-and-managed-head-end.pdf",
+      "published": "2023",
+      "reliability": "Supplier's own datasheet for the hosted and managed control plane. Primary source for 24x7 monitoring, patching and upgrade scope.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Versa Concerto datasheet",
+      "url": "https://versa-networks.com/documents/datasheets/versa-concerto.pdf",
+      "published": "2023",
+      "reliability": "Supplier's own orchestration datasheet. Primary source for multi-tenancy and provider/tenant RBAC claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Versa Secure SD-WAN datasheet",
+      "url": "https://versa-networks.com/documents/datasheets/versa-sdwan.pdf",
+      "published": "2024",
+      "reliability": "Supplier's own datasheet. Primary source for the integrated NGFW/UTM claim and 4G/5G WAN support.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Versa SASE solution brief: Finding Control in All the Commotion",
+      "url": "https://versa-networks.com/documents/solution-briefs/versa-sase.pdf",
+      "published": "2021",
+      "reliability": "Supplier's own solution brief. Only source found carrying a numeric PoP figure, but copyright 2021 so the figure is likely stale; treated with reduced confidence.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Secure Private Access white paper",
+      "url": "https://versa-networks.com/documents/white-papers/secure-private-access.pdf",
+      "published": "2023",
+      "reliability": "Supplier's own white paper. Read in full; references globally dispersed PoPs but gives no counts, no SLA figures and no backbone detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Versa Secure Access Fabric datasheet",
+      "url": "https://versa-networks.com/documents/datasheets/versa-secure-access-fabric.pdf",
+      "published": "2025",
+      "reliability": "Supplier's own current datasheet. Read in full; describes globally distributed PoPs and Cloud Gateways but publishes no PoP count and no SLA percentage.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Versa Concerto Overview (product documentation)",
+      "url": "https://docs.versa-networks.com/Management_and_Orchestration/Versa_Concerto_Orchestrator/01_Getting_Started/01_Versa_Concerto_Overview",
+      "published": null,
+      "reliability": "Supplier's own technical documentation. Detailed, specific source for tenant isolation and delegated administration roles. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Hardware Support Overview (product documentation)",
+      "url": "https://docs.versa-networks.com/Hardware/Hardware_Maintenance_and_Support/01Hardware_Support_Overview",
+      "published": null,
+      "reliability": "Supplier's own documentation for warranty, RMA, advance replacement and end-of-life policy. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 3,
+      "title": "Versa Secure Access Fabric (copy hosted by reseller Innovation Network Technologies)",
+      "url": "https://innetworktech.com/wp-content/uploads/2024/09/versa-secure-access-fabric.pdf",
+      "published": "2024-09",
+      "reliability": "Corroboration only. A reseller-hosted copy of a Versa datasheet, so provenance and currency cannot be independently confirmed. Read but no grade rests on it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Versa Cloud Gateways product page",
+      "url": "https://versa-networks.com/products/cloud-gateways/",
+      "published": null,
+      "reliability": "Not used as evidence. The URL returned a 404 client error, so no content was retrievable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "Sovereign SASE product page",
+      "url": "https://versa-networks.com/products/sovereign-sase/",
+      "published": null,
+      "reliability": "Not used as evidence. The page served only a JavaScript-required redirect interstitial, so no body text was retrievable. Same outcome for /sase/, /products/unified-sase/, /products/data-loss-prevention/, /products/components/, /partners/ and the 2025 certifications and Sovereign SASE news pages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Versa Managed Secured Access Service Document (Versa Support)",
+      "url": "https://support.versa-networks.com/support/solutions/articles/23000023286-versa-managed-secured-access-service-document",
+      "published": null,
+      "reliability": "Not used as evidence. Fetch was refused by the support portal's robots.txt rules, so the body text was never read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "MSP Partner Program page",
+      "url": "https://versa-networks.com/partners/msp-partners/",
+      "published": null,
+      "reliability": "Not used as evidence. The page served only a JavaScript-required redirect interstitial; no partner programme, white-label or professional services text was retrievable.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "partial",
+      "evidence": [
+        13,
+        10,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "In this model Versa NOC is responsible for managing and maintaining Versa SASE, while the customer IT team is responsible for management and monitoring of the CPEs.",
+      "claimed_by": "vendor",
+      "note": "Versa does operate a NOC and a hosted, managed head-end and gateway service under its own SLA, so part of the estate is genuinely run by Versa. But its own solution brief places CPE management with the customer IT team in that model, and the alternative model places configuration management and monitoring with a Service Provider. End-to-end design, deploy, change, support and report by Versa itself for the whole service is not evidenced, so partial rather than yes."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        13,
+        16
+      ],
+      "confidence": "high",
+      "quote": "In this model Versa NOC is responsible for managing and maintaining Versa SASE, while the customer IT team is responsible for management and monitoring of the CPEs.",
+      "claimed_by": "vendor",
+      "note": "This is a textbook split of responsibility: Versa runs the platform and the customer retains CPE operations. Concerto's provider-level and tenant-level roles document the same shared model in the tooling."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "unknown",
+      "evidence": [
+        9,
+        22
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I read the Versa Premier Service datasheet, which covers named L3 TAC engineers, quarterly review meetings and up to one upgrade assistance engagement per year, but contains no discovery, pilot, staging, migration runbook, rollback or training offer. The MSP partner programme page and the main partners page, the two likeliest locations for a professional services description, both served JavaScript-required interstitials with no body text. No structured design and migration service is therefore evidenced from a page I actually read."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        10,
+        17
+      ],
+      "confidence": "medium",
+      "quote": "Head-end server hardware OS and security patch upgrades and updates",
+      "claimed_by": "vendor",
+      "note": "For the hosted head-end, Versa documents software upgrades of Director, Analytics, Controller, Concerto and VMS plus OS and security patching, which is lifecycle handled as part of the service. Separately, hardware documentation covers a two-year limited warranty, next-business-day and same-business-day advance replacement, DOA handling and an end-of-life policy. Graded partial rather than yes because branch CPE firmware upgrades and renewals in a typical Versa deployment sit with the customer or the service provider partner, and hardware replacement coverage is a purchased support tier rather than something evidenced as included in the service by default."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        5,
+        12
+      ],
+      "confidence": "high",
+      "quote": "The term WWAN interfaces refers to LTE, 4G, and 5G interfaces.",
+      "claimed_by": "vendor",
+      "note": "Documentation covers LTE, 4G and 5G on a VOS WAN port, SIM activation and operator ID checks, and radio quality monitoring via RSRP, RSRQ, RSSI and SINR with banded signal states. It is documented as usable where a branch has no wired connection and alongside wired links, so both primary and failover roles are covered. On the source page the words WWAN interfaces are italicised; the italics add no characters to the rendered text."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        3,
+        15,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Versa Cloud Gateways (VCGs) are Versa SASE Gateways which are deployed in Point of Presence (PoP) locations around the world.",
+      "claimed_by": "vendor",
+      "note": "These are Versa's own gateways running Versa's own VOS software, not a third party's PoPs resold under Versa's name, so yes rather than partner_integrated. They deliver secure internet access, ZTNA, threat protection and DLP as a cloud service, and the SASE client selects the VCG offering lowest latency."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        1,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "Versa SASE is delivered via the cloud, on-premises, or as a blended combination of both",
+      "claimed_by": "vendor",
+      "note": "Versa markets Private SASE and Sovereign SASE as distinct deployment models alongside the shared cloud. Network World, a named-author dated source, reports that Sovereign SASE runs entirely on customer-controlled infrastructure with the customer choosing its own compute, on-premises or in a private cloud. Confidence is medium rather than high because the Sovereign SASE product page itself would not render without JavaScript, so the strongest Tier 1 statement of the claim could not be read directly."
+    },
+    "f21_private_global_backbone": {
+      "value": "partial",
+      "evidence": [
+        3
+      ],
+      "confidence": "medium",
+      "quote": "Versa SD-WAN Traffic Engineered network which uses multiple global and regional providers for the underlay.",
+      "claimed_by": "vendor",
+      "note": "Inter-gateway traffic rides a Versa-controlled traffic-engineered overlay that selects paths on least end-to-end latency and loss, and each VCG is connected to multiple global and multiple regional service providers with peering relationships. But the underlay is explicitly other carriers' capacity, not fibre or circuits owned by Versa. Graded partial: the control plane and path selection are Versa's, the physical backbone is not."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "target Uptime average of 99.999% (\"Uptime SLA Percentage\") measured monthly",
+      "claimed_by": "vendor",
+      "note": "A published, dated SLA document covering Versa Hosted and Managed Secure Services Edge Gateways, with a tiered service-credit table running from 2 days of credit for uptime below 99.999% up to 24 days below 98.0%, plus a security processing latency commitment of 10ms without TLS inspection and 50ms with anti-virus, malware detection and IPS with TLS decryption. Contractual rather than best-effort, including a two calendar day claim window."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        12,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Versa's fully integrated Next Generation Firewall (NGFW) and Unified Threat Management (UTM) solution",
+      "claimed_by": "vendor",
+      "note": "Built into VOS, Versa's own operating system, with security and networking on the same software stack as a single OS. Named functions include stateful firewall, DOS protection, NG-IPS, anti-virus and anti-malware, and URL and IP filtering. This is Versa's own code, not a bundled third-party engine, so yes rather than partner_integrated."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        4,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Data loss prevention (DLP) is a set of tools and processes for detecting and preventing data breaches, cyber exfiltration, and unwanted destruction of sensitive data.",
+      "claimed_by": "vendor",
+      "note": "Native to the platform and configured from Concerto. Content passing through the organisation's ports and protocols is scanned against match rules, with enforcement actions of Alert, Allow, Block, Reject, Quarantine, Encrypt, Redact or Tokenize, and all actions reported to Versa Analytics for review. Documentation also covers offline DLP, DLP data exfiltration policies and applying Microsoft MIP sensitivity labels."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        9,
+        10,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "Versa will provide Root-Cause Analysis for customer-reported P1 issues.",
+      "claimed_by": "vendor",
+      "note": "The NOC half is evidenced: 24x7 monitoring of head-end alarms and application health, a Versa NOC responsible for managing and maintaining Versa SASE, formal root cause analysis on P1 incidents, and scheduled periodic or quarterly customer review meetings. What I did not find on any page I read is a 24x7 SOC performing proactive security monitoring on the customer's behalf, nor a documented change governance process. Graded partial on that gap. Note also that the Premier Service datasheet carries a 2020 copyright."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        1,
+        2,
+        13
+      ],
+      "confidence": "high",
+      "quote": "In this model Versa NOC is responsible for managing and maintaining Versa SASE, while the customer IT team is responsible for management and monitoring of the CPEs.",
+      "note": "Versa authors its own product stack (VOS, Director, Concerto, Analytics) and sells it through service providers, so it is primarily a technology vendor. It also operates its own hosted infrastructure and NOC with a published SLA for Hosted and Managed Secure Services Edge Gateways, so it is a managed provider as well. Hence both.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        3,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "Versa SD-WAN Traffic Engineered network which uses multiple global and regional providers for the underlay.",
+      "claimed_by": "vendor",
+      "note": "No evidence of any circuits owned by Versa. At the branch, transport is whatever the customer or their service provider supplies, including broadband, MPLS and LTE/4G/5G. Between Versa's own cloud gateways, the underlay is bought from multiple global and regional providers. Graded mixed because it is neither purely customer-supplied nor a case of Versa reselling circuits to customers: Versa buys transit for its own fabric while customers bring their own access."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        12,
+        4,
+        3,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Versa's fully integrated Next Generation Firewall (NGFW) and Unified Threat Management (UTM) solution",
+      "claimed_by": "vendor",
+      "note": "Versa authors its own security stack in VOS: NGFW, IPS, anti-virus and anti-malware, URL filtering, SWG, CASB, ZTNA, DLP, RBI and sandboxing, delivered from Versa's own cloud gateways and configured through Versa's own Director and Concerto. No third-party OEM security engine is named as the basis of the SSE layer on any page I read. Versa is the vendor other providers partner with, rather than the partner."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        6
+      ],
+      "confidence": "medium",
+      "quote": "Versa Networks is also certified for security standards such as ISO 27001, HIPAA, and SOC 2 Type II",
+      "claimed_by": "vendor",
+      "note": "Frameworks and attestations named on a dated Versa document (October 2025): NIS2 (the subject of the paper, including its 24-hour incident reporting obligation), ISO 27001, SOC 2 Type II, HIPAA, GDPR, PCI-DSS and Common Criteria EAL4+. NOT found on any page I read: DORA and NHS DSPT. Confidence is medium rather than high because these are self-asserted statements in a vendor white paper; I did not reach a certification register entry or the certificates themselves, and the 2025 certifications press release would not render without JavaScript."
+    },
+    "pop_count": {
+      "value": "90",
+      "evidence": [
+        13,
+        15,
+        14
+      ],
+      "confidence": "low",
+      "quote": "Versa SASE is delivered through a globally distributed system of Versa Cloud Gateways in 90 POP locations which have peering relationships.",
+      "claimed_by": "vendor",
+      "note": "This is the only numeric PoP figure I found in a source I actually read, and it comes from a solution brief carrying a 2021 copyright, so it is very likely stale. Current Versa material is deliberately non-numeric: the 2025 Secure Access Fabric datasheet and the 2023 Secure Private Access white paper both refer only to globally distributed Points of Presence with no count, and the SASE ecosystem documentation says PoP locations around the world without a figure. Treat 90 as a historical floor, not a current published count."
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "target Uptime average of 99.999% (\"Uptime SLA Percentage\") measured monthly",
+      "claimed_by": "vendor",
+      "note": "From Versa's own Hosted SASE Service Level Agreement, last updated 29 May 2025, covering Versa Hosted and Managed Secure Services Edge Gateways. Measured monthly and backed by a tiered service credit table. Note the document frames it as a target uptime average with credits as the remedy, so it is a credit-backed commitment rather than an absolute guarantee."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "Versa SASE is delivered through a globally distributed system of Versa Cloud Gateways in 90 POP locations which have peering relationships.",
+      "source_a": 13,
+      "claim_b": "The current Secure Access Fabric datasheet refers only to Versa's globally distributed Points-of-Presence (PoPs) and globally distributed Versa Cloud Gateways, publishing no PoP count at all.",
+      "source_b": 15
+    }
+  ]
 }

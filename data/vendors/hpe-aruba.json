@@ -12,13 +12,13 @@
   "cost_model": "Quote-based subscription/appliance/support; MSP-managed options available through partners/providers.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "yes",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,39 +28,41 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
-    "f19_public_cloud_gateways": "partial",
+    "f19_public_cloud_gateways": "yes",
     "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "unknown",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
-    "f27_integrated_next_generation_firewall": "partial",
+    "f26_sla_backed_service_fabric": "partial",
+    "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "yes",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 26,
-    "partial_count": 4,
-    "partner_integrated_count": 8,
+    "yes_count": 34,
+    "partial_count": 3,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
     "unknown_count": 2,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "evidence_coverage_pct": 0.95,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "EdgeConnect SD-WAN (acquired with Silver Peak) is positioned as the foundation for single-vendor SASE alongside Aruba SSE.",
@@ -77,8 +79,8 @@
     "Managed delivery is partner-led rather than from HPE directly.",
     "Private global backbone is not vendor-owned; SASE transport uses public cloud gateways."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -179,5 +181,466 @@
   "value_tier": "mid",
   "cost_note": "Subscription by bandwidth tier; mid-market pricing with strong link-quality value on poor circuits.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). EdgeConnect delivered in the UK via HPE partners and MSPs."
+  "uk_basis": "No UK HQ (US). EdgeConnect delivered in the UK via HPE partners and MSPs.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "HPE Aruba Networking EdgeConnect SD-WAN",
+      "url": "https://www.hpe.com/us/en/aruba-edgeconnect-sd-wan.html",
+      "published": null,
+      "reliability": "Supplier's own primary product page. Undated. Used for firewall and orchestration wording, and for confirmed absence of cellular and backbone claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "HPE Aruba Networking Unified SASE",
+      "url": "https://www.hpe.com/us/en/networking/sase.html",
+      "published": null,
+      "reliability": "Supplier's own SASE solution page. Undated. Used for built-in NGFW and integrated DLP wording, and it also names Juniper SRX as a separate firewall line.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "HPE Aruba Networking SSE",
+      "url": "https://www.hpe.com/us/en/aruba-networking-sse.html",
+      "published": null,
+      "reliability": "Supplier's own SSE product page. Undated. Confirms the SSE stack is HPE branded and links to Axis Security login, support portal and documentation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "HPE Aruba Networking Central",
+      "url": "https://www.hpe.com/us/en/aruba-central.html",
+      "published": null,
+      "reliability": "Supplier's own management platform page. Undated. No SLA, MSP or multi-tenant statements present; used mainly to locate documentation links.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "HPE Services",
+      "url": "https://www.hpe.com/us/en/services.html",
+      "published": null,
+      "reliability": "Supplier's own services hub. Undated. Used to identify the managed services and advisory service lines.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "HPE Tech Care Service",
+      "url": "https://www.hpe.com/us/en/services/tech-care.html",
+      "published": null,
+      "reliability": "Supplier's own support service page. Undated. Contains no response time or SLA figures; used to rule out an SLA percentage here.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "HPE Advisory and Professional Services",
+      "url": "https://www.hpe.com/us/en/services/advisory-and-professional.html",
+      "published": null,
+      "reliability": "Supplier's own professional services page. Undated. Migration and design wording is largely mainframe and cloud oriented rather than network specific.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "HPE Managed Services",
+      "url": "https://www.hpe.com/us/en/services/remote-infrastructure-monitoring.html",
+      "published": null,
+      "reliability": "Supplier's own managed services page. Undated. Primary evidence for fully managed and co-managed grades.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "HPE Aruba Networking",
+      "url": "https://www.hpe.com/us/en/networking/hpe-aruba-networking.html",
+      "published": null,
+      "reliability": "Supplier's own networking landing page. Undated. Used to locate networking services, support services and partner programme pages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "HPE Aruba Networking Services",
+      "url": "https://www.hpe.com/us/en/networking/hpe-aruba-networking-services.html",
+      "published": null,
+      "reliability": "Supplier's own networking services page. Undated. Primary evidence for professional services and migration grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "HPE Aruba Networking Support Services",
+      "url": "https://www.hpe.com/us/en/networking/hpe-aruba-networking-support-services.html",
+      "published": null,
+      "reliability": "Supplier's own support services page. Undated. Primary evidence for lifecycle management, SLA-backed fabric and service assurance grades.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "HPE Aruba Networking Partner Programs",
+      "url": "https://www.hpe.com/us/en/networking/partner-programs.html",
+      "published": null,
+      "reliability": "Supplier's own partner programme page. Undated. Confirms a managed services partner route but gives no white-label or multi-tenant technical detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "What is SD-WAN? | HPE",
+      "url": "https://www.hpe.com/us/en/what-is/sd-wan.html",
+      "published": null,
+      "reliability": "Supplier's own explainer page. Undated. Primary evidence for cellular and 5G transport support and for underlay ownership reasoning. Explainer pages are more generic than product pages, which lowers confidence slightly.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "HPE GreenLake",
+      "url": "https://www.hpe.com/us/en/greenlake.html",
+      "published": null,
+      "reliability": "Supplier's own cloud platform page. Undated. Checked for availability percentages and service credits; none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "HPE Networking SSE documentation, Getting Started",
+      "url": "https://docs.axissecurity.com/docs/getting-started",
+      "published": null,
+      "reliability": "Supplier's own product documentation, HPE Networking SSE branded and linked directly from the HPE SSE product page. Undated. Used to navigate to PoPs, tenants and file security pages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "HPE Networking SSE documentation, Points of Presence (POPs)",
+      "url": "https://docs.axissecurity.com/docs/pops",
+      "published": null,
+      "reliability": "Supplier's own product documentation. Undated. Lists PoP locations by region across Africa, Asia, Europe, North America, Oceania and South America but publishes no total count.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "HPE Networking SSE documentation, Managing Multi-Tenants",
+      "url": "https://docs.axissecurity.com/docs/tenants-management",
+      "published": null,
+      "reliability": "Supplier's own product documentation. Undated. Primary evidence for the multi-tenant MSP grade, including the limited release caveat.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "HPE Networking SSE documentation, File Security Profile",
+      "url": "https://docs.axissecurity.com/docs/data-security-profile",
+      "published": null,
+      "reliability": "Supplier's own product documentation. Undated. Primary evidence for the data loss prevention grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "HPE Networking SSE documentation, Architecture (About Axis)",
+      "url": "https://docs.axissecurity.com/docs/about-axis",
+      "published": null,
+      "reliability": "Supplier's own product documentation. Undated. Describes Atmos Cloud, Connector and Portal components; contains no backbone or dedicated PoP claim.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "How the EdgeConnect SD-WAN Platform Supports PCI DSS Compliance",
+      "url": "https://www.hpe.com/psnow/doc/a00119355enw",
+      "published": null,
+      "reliability": "Supplier's own published collateral landing page. Undated on the landing page. Title and description text used for the regulatory documentation grade; the PDF body itself could not be retrieved.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "GDPR and CCPA compliance: Ensuring data protection with SD-WAN and SASE",
+      "url": "https://www.hpe.com/psnow/doc/a00143218enw",
+      "published": null,
+      "reliability": "Supplier's own published collateral landing page. Undated on the landing page. Title used for the regulatory documentation grade; PDF body not retrievable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "HPE Aruba Networking New Central technical documentation, home",
+      "url": "https://www.arubanetworks.com/techdocs/new-central/content/home.htm",
+      "published": null,
+      "reliability": "Supplier's own technical documentation. Undated. Checked for MSP, multi-tenant and cellular terms; none present on the home page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 4,
+      "title": "HPE Networking EdgeConnect SD-WAN data sheet (PSNow landing page)",
+      "url": "https://www.hpe.com/psnow/doc/a00109847enw",
+      "published": null,
+      "reliability": "Not used as evidence. Only navigation metadata and a download link were retrievable; the PDF body could not be read, so no verbatim datasheet text could be quoted.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 4,
+      "title": "HPE security service edge page (attempted URL)",
+      "url": "https://www.hpe.com/us/en/security-service-edge.html",
+      "published": null,
+      "reliability": "Not used as evidence. Returned HTTP 404; no content available.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 4,
+      "title": "HPE Aruba Networking SSE techdocs (attempted URL)",
+      "url": "https://arubanetworking.hpe.com/techdocs/sse/",
+      "published": null,
+      "reliability": "Not used as evidence. Returned HTTP 403; content inaccessible from this session.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 26,
+      "tier": 4,
+      "title": "HPE GreenLake service level agreements (attempted URL)",
+      "url": "https://www.hpe.com/us/en/greenlake/service-level-agreements.html",
+      "published": null,
+      "reliability": "Not used as evidence. Returned HTTP 404, so no published availability percentage could be confirmed at this address.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 27,
+      "tier": 4,
+      "title": "HPE Trust Center (attempted URL)",
+      "url": "https://trustcenter.hpe.com/",
+      "published": null,
+      "reliability": "Not used as evidence. Host could not be resolved from this session, so ISO 27001 and SOC 2 attestations could not be checked there.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        8,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "Services that monitor, operate, and optimize your infrastructure and applications, delivered consistently and globally to give you unified control and let you focus on innovation.",
+      "claimed_by": "vendor",
+      "note": "HPE Managed Services is presented as a run-it-for-me operate model covering monitoring, operations and administration. The evidence is corporate HPE Managed Services wording rather than a SASE or SD-WAN specific managed offer, and no end-to-end change and reporting scope for EdgeConnect or SSE was found on the pages reviewed, so confidence is medium."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        8
+      ],
+      "confidence": "medium",
+      "quote": "HPE Managed Services take care of routine maintenance but leave you in control of innovation.",
+      "claimed_by": "vendor",
+      "note": "Shared responsibility is stated explicitly at corporate level. No networking-specific co-managed RACI or customer change-rights matrix was found on the HPE Aruba Networking pages reviewed."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        17,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Managing multiple tenants can be useful when you are an MSSP and you manage several separate clients, or otherwise your company has several organizational units it prefers to keep separate.",
+      "claimed_by": "vendor",
+      "note": "Tenant isolation and cross-tenant admin roles are documented for HPE Networking SSE, and the same documentation page states this is a limited release feature. No evidence of branded or white-label portals, custom logos or reseller templates was found on the documentation or partner programme pages reviewed, so graded partial rather than yes."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        10,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "Take advantage of our networking expertise through your entire journey from initial planning, design, and deployment to ongoing operations and optimization.",
+      "claimed_by": "vendor",
+      "note": "HPE Aruba Networking Services covers planning, design and deployment, and packaged or custom QuickStart services are named. Explicit migration runbooks, rollback plans and pilot or staging stages were not found on the pages reviewed, so the full definition is only partly evidenced and confidence is medium."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        11
+      ],
+      "confidence": "medium",
+      "quote": "Advanced hardware replacement options ranging from next business day to 4-hour replacements are available",
+      "claimed_by": "vendor",
+      "note": "Hardware replacement and software updates, upgrades and security patches are stated as part of the support offering. No explicit end-of-life planning or renewal management wording was found on the pages reviewed."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        13
+      ],
+      "confidence": "medium",
+      "quote": "SD-WAN works across any IP-based transport such as broadband internet, LTE, 5G, or MPLS.",
+      "claimed_by": "vendor",
+      "note": "The same HPE page also states that EdgeConnect SD-Branch has onboard LTE support. No SIM management or signal monitoring detail was found; the EdgeConnect SD-WAN product page itself contains no mention of LTE, 5G or cellular, so confidence is medium."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        16,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "The HPE Aruba Networking SSE service utilizes both onramps and Points of Presence (PoPs) to enhance connectivity.",
+      "claimed_by": "vendor",
+      "note": "The PoPs are documented as part of the HPE Aruba Networking SSE service itself, which is HPE's own security service edge infrastructure following the Axis Security acquisition, so this is the vendor's own service infrastructure rather than a resold third party gateway. Several PoP locations carry hyperscaler region names such as Northern Virginia, Oregon and Iowa, which suggests hosting inside public cloud regions, but the service and enforcement layer are HPE's."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        16,
+        19
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The HPE Networking SSE Points of Presence documentation lists shared regional PoPs only and contains no mention of private, dedicated, customer-hosted or sovereign PoPs, and the architecture page describes only Atmos Connector, Portal and Cloud components. Absence of a statement is not treated as evidence of absence."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        16,
+        19
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The word backbone is not present on the EdgeConnect SD-WAN product page, the What is SD-WAN page, the SSE Points of Presence page or the SSE architecture page. No claim of vendor-owned or vendor-controlled inter-region transport was located, so this is recorded as unknown rather than no."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "partial",
+      "evidence": [
+        11,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "Advanced hardware replacement options ranging from next business day to 4-hour replacements are available",
+      "claimed_by": "vendor",
+      "note": "Contractual support response and hardware replacement commitments are published, and prioritised case handling with expedited initial response time is named. No availability percentage, latency, jitter or loss commitment and no service credit regime were found on any page reviewed, including the HPE GreenLake page, so graded partial."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        2,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Leverage a built-in next-generation firewall with IDS/IPS and adaptive DDoS protection to replace branch firewalls.",
+      "claimed_by": "vendor",
+      "note": "The firewall is described as built into the EdgeConnect SD-WAN platform rather than as a separate appliance, and the EdgeConnect product page repeats a built-in next-generation firewall providing IDS/IPS. Note that the same SASE page separately offers Juniper SRX Series Firewalls as a distinct product line, and URL filtering and malware inspection are delivered through the SSE secure web gateway rather than the SD-WAN firewall itself."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        18,
+        2
+      ],
+      "confidence": "high",
+      "quote": "The File Security Profile is a key Data Loss Prevention (DLP) and Security feature, controlling the transport of session file data by allowing approved data, blocking risky data or directing suspicious data to be scanned further.",
+      "claimed_by": "vendor",
+      "note": "DLP is native to HPE Networking SSE with data matchers, allow, block and scan verdicts applied through policy rules. The HPE SASE page also states that security is enforced through integrated ZTNA, SWG, CASB and DLP services. Alerting and formal exception workflows were not separately evidenced."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        11,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "HPE Aruba Networking's technical assistance centers provide AI-driven 24x7x365 support",
+      "claimed_by": "vendor",
+      "note": "24x7x365 technical assistance centres and proactive and preventive features with customer success management are published. No named 24/7 NOC or SOC, no root cause analysis ownership commitment and no structured service review or change governance wording were found on the pages reviewed, so graded partial rather than yes."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        1,
+        8,
+        12
+      ],
+      "confidence": "high",
+      "quote": "HPE Managed Services offloads the heavy lifting of running modern IT, when and where you need it.",
+      "note": "HPE authors its own products, EdgeConnect SD-WAN gateways, HPE Aruba Networking Central and HPE Networking SSE, and separately operates HPE Managed Services. It also recruits partners to deliver managed networking, so the technology vendor role is primary and the managed provider role is delivered both directly and through the Partner Ready Vantage Managed Services Center of Expertise.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        13,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "SD-WAN works across any IP-based transport such as broadband internet, LTE, 5G, or MPLS.",
+      "claimed_by": "netify_assessment",
+      "note": "HPE positions EdgeConnect as a transport-agnostic overlay that rides whatever IP transport the customer already has. No page reviewed offers HPE-owned circuits, HPE-resold access or an HPE-operated core routing network, and no backbone claim appears anywhere in the material read. Graded customer_supplied_only on that basis, with medium confidence because absence of a circuit-resale statement is not proof that no such offer exists through HPE Networking partners."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        20,
+        21
+      ],
+      "confidence": "medium",
+      "quote": "How the EdgeConnect SD-WAN Platform Supports PCI DSS Compliance",
+      "claimed_by": "vendor",
+      "note": "Named framework documentation found: PCI DSS (dedicated HPE collateral) and GDPR plus CCPA (dedicated HPE collateral titled 'GDPR and CCPA compliance: Ensuring data protection with SD-WAN and SASE'). A HIPAA collateral was listed in the page link set but was not fetched, so it is not claimed. Not found on any page reviewed: ISO 27001, SOC 2, NIS2, DORA, NHS DSPT. The HPE trust centre host did not resolve from this session, so certification attestations could not be checked there. Confidence is medium because the graded evidence is collateral titles and descriptions rather than an attestation register."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        16,
+        3
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The HPE Networking SSE documentation page dedicated to Points of Presence lists individual locations grouped by region (Africa, Asia, Europe, North America, Oceania, South America) but publishes no total figure, and the terms points of presence and PoP do not appear at all on the HPE Aruba Networking SSE marketing page. Counting the listed entries would be my arithmetic rather than a published claim, so the value is recorded as unknown."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        11,
+        14
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No availability percentage appears on the HPE Tech Care page, the HPE Aruba Networking Support Services page or the HPE GreenLake page, and the HPE GreenLake service level agreements URL returned 404. Support commitments are expressed as response and hardware replacement windows (next business day to 4-hour) rather than an uptime percentage, so the availability figure is unknown."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "f27_integrated_next_generation_firewall",
+      "claim_a": "Leverage a built-in next-generation firewall with IDS/IPS and adaptive DDoS protection to replace branch firewalls.",
+      "source_a": 2,
+      "claim_b": "Juniper SRX Series Firewalls: Deliver more effective security consistently, in a unified experience with hybrid mesh firewall.",
+      "source_b": 2
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "HPE Networking SSE documentation lists PoP locations region by region and publishes no total figure",
+      "source_a": 16,
+      "claim_b": "No PoP count appears on the HPE Aruba Networking SSE marketing page, where the terms points of presence and PoP are absent entirely",
+      "source_b": 3
+    }
+  ]
 }

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
+import ProviderTables from "@/components/ProviderTables";
 import { BEST_PAGES } from "@/lib/best-pages";
-import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST, getAllVendors, getShortlistDataset } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import {
   SITE_URL,
@@ -31,6 +32,10 @@ export const metadata: Metadata = {
 
 export default function ShortlistPage() {
   const vendors = getShortlistDataset();
+  // Full records for the server-rendered tables: they carry the provenance
+  // fields, which the compact shortlist dataset deliberately does not.
+  const fullVendors = getAllVendors();
+  const verified = fullVendors[0]?.last_verified ?? "";
   const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
 
   const schemas = [
@@ -84,13 +89,16 @@ export default function ShortlistPage() {
           <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No obligation to award</li>
         </ul>
         <p className="text-sm text-[var(--ink-500)] mt-3">
-          Written and reviewed by the Netify research team, last verified and
-          graded in June 2026. To act on a shortlist, describe the project once at{" "}
+          Written and reviewed by the Netify research team. Every supplier record
+          was re-verified against named primary sources on {verified}, with a
+          quoted sentence behind each graded fact. To act on a shortlist, describe the project once at{" "}
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
           {", "}raise it to a full RFP and publish to the providers it names, then
           compare structured responses, with pricing kept private to the buyer.
         </p>
       </div>
+
+      <ProviderTables vendors={fullVendors} />
 
       <ShortlistBuilder vendors={vendors} features={features} />
 

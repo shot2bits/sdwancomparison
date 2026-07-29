@@ -14,11 +14,11 @@
   "capabilities": {
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
-    "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f03_co_managed_service": "partial",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -31,7 +31,7 @@
     "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "partner_integrated",
     "f22_regional_breakout_and_data_residency": "partner_integrated",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -44,23 +44,25 @@
     "f30_zero_trust_network_access": "partner_integrated",
     "f31_secure_web_gateway": "partner_integrated",
     "f32_casb_capability": "unknown",
-    "f33_data_loss_prevention": "unknown",
+    "f33_data_loss_prevention": "partner_integrated",
     "f34_remote_user_access": "partner_integrated",
     "f35_soc_siem_soar_integration": "partner_integrated",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "yes"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 25,
-    "partial_count": 2,
+    "yes_count": 21,
+    "partial_count": 5,
     "partner_integrated_count": 11,
     "managed_service_dependent_count": 0,
-    "unknown_count": 2,
+    "unknown_count": 3,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "evidence_coverage_pct": 0.925,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Strong specialism in distributed organisations with site count in the hundreds or thousands.",
@@ -77,8 +79,8 @@
     "Less suited to enterprise headquarters or data centre SD-WAN at large bandwidth scale.",
     "Underlying SD-WAN platform should be confirmed; managed service wraps various vendor platforms."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "partner_integrated",
@@ -145,7 +147,7 @@
     "agentless": "managed_service_dependent"
   },
   "pop_count": null,
-  "sla_availability_pct": null,
+  "sla_availability_pct": 99.999,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,457 @@
   "value_tier": "mid",
   "cost_note": "Per-site managed tuned to high-volume small sites; value for distributed retail estates.",
   "uk_delivery": "global_managed",
-  "uk_basis": "No UK HQ (US). UK delivery via partners; specialism is distributed retail estates."
+  "uk_basis": "No UK HQ (US). UK delivery via partners; specialism is distributed retail estates.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Hughes Managed SD-WAN",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services/managed-sd-wan",
+      "published": null,
+      "reliability": "Supplier's own primary product page for the service under assessment. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Hughes Managed Network Services",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services",
+      "published": null,
+      "reliability": "Supplier's own service portfolio hub page. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Hughes Managed Security Services (managed-cybersecurity under managed-network-services)",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services/managed-cybersecurity",
+      "published": null,
+      "reliability": "Supplier's own page. Appears to be an older security page still live at this path; carries the ISO-certified SOC and Fortinet / Cisco Meraki statements that the newer hub page does not. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Hughes Managed Cybersecurity hub",
+      "url": "https://www.hughes.com/what-we-offer/managed-cybersecurity/",
+      "published": null,
+      "reliability": "Supplier's own current security hub page, used for sub-page discovery and SASE, SSE and UTM positioning. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Hughes Managed Wireless",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services/managed-wireless",
+      "published": null,
+      "reliability": "Supplier's own page, primary source for 4G LTE and 5G support. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Hughes Managed SASE",
+      "url": "https://www.hughes.com/what-we-offer/managed-cybersecurity/managed-sase",
+      "published": null,
+      "reliability": "Supplier's own page. Names FWaaS, DLP, CASB, NG-SWG and ZTNA and identifies Fortinet and Netskope as the underlying platforms. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Hughes Managed SSE",
+      "url": "https://www.hughes.com/what-we-offer/managed-cybersecurity-services/managed-sse",
+      "published": null,
+      "reliability": "Supplier's own page. Confirms Netskope PoP network and DLP attribution. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Hughes Managed Broadband",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services/managed-broadband",
+      "published": null,
+      "reliability": "Supplier's own page. Source for SLA, QoS and CIR commitments and transport mix. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Hughes Managed Unified Threat Management",
+      "url": "https://www.hughes.com/what-we-offer/managed-cybersecurity/managed-unified-threat-management",
+      "published": null,
+      "reliability": "Supplier's own page. Confirms firewall platform is Fortinet and Cisco Meraki technology managed by Hughes. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Hughes Managed Router / Managed Routing",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services/managed-router",
+      "published": null,
+      "reliability": "Supplier's own page. Source for 24x7x365 management, installation, maintenance and field services. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Hughes What We Offer index",
+      "url": "https://www.hughes.com/what-we-offer",
+      "published": null,
+      "reliability": "Supplier's own navigation index, used to enumerate live sub-page URLs. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Hughes Resellers / VAR programme",
+      "url": "https://www.hughes.com/who-we-serve/by-service-provider/resellers",
+      "published": null,
+      "reliability": "Supplier's own partner page. Checked for white-label and multi-tenant claims; none present. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "About Hughes",
+      "url": "https://www.hughes.com/who-we-are/about-hughes",
+      "published": null,
+      "reliability": "Supplier's own corporate page. Read, but the fetch tool declined to reproduce full body text verbatim, so no quote is drawn from it. Used for background only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Hughes Industry Recognition for Managed SD-WAN and Managed Services Leadership",
+      "url": "https://www.hughes.com/resources/insights/managed-services/hughes-industry-recognition-for-managed-sd-wan-and-managed-services-leadership",
+      "published": "2026-05-20",
+      "reliability": "Supplier's own dated insight article. Reliable for what Hughes claims and for citing Gartner, Vertical Systems Group, CRN and Frost & Sullivan recognitions; the analyst rankings themselves are relayed second hand here and are treated as corroboration only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Hughes Resources: data sheets and solutions sheets listing",
+      "url": "https://www.hughes.com/resources/?pager=1&type=data-sheet,solutions-sheet",
+      "published": null,
+      "reliability": "Supplier's own document index, used to locate the two Managed SASE solutions sheets. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Hughes UK Solutions",
+      "url": "https://www.hughes.com/uk/solutions",
+      "published": null,
+      "reliability": "Supplier's own UK page. Checked specifically for ISO 27001, Cyber Essentials, GDPR, NIS2 and DORA references; none found. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Solutions Sheet: Hughes Managed SASE Powered with Netskope (PDF)",
+      "url": "https://www.hughes.com/wp-content/uploads/2026/02/Hughes-Managed-SASE.pdf",
+      "published": null,
+      "reliability": "Supplier's own solutions sheet, the strongest single document in this review. Source for the 99.999% uptime SLA, PoP and backbone language, DLP description and the deployment options list. No printed date visible; the upload path indicates February 2026.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Solutions Sheet: Hughes Managed SASE Powered with FortiSASE (PDF)",
+      "url": "https://www.hughes.com/wp-content/uploads/2026/02/Hughes-Managed-SASE-With-FortiSASE.pdf",
+      "published": null,
+      "reliability": "Supplier's own solutions sheet. Source for the Fortinet partnership, Fortinet-owned cloud PoPs and the deploy, migrate and manage professional services claim. No printed date visible; upload path indicates February 2026.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Solutions Sheet: Smart Network Exchange (PDF)",
+      "url": "https://www.hughes.com/wp-content/uploads/2026/06/Smart-Network-Exchange.pdf",
+      "published": null,
+      "reliability": "Supplier's own solutions sheet. Read and checked for PoP, backbone and SLA claims; none of those terms present. Contributed transport-agnostic architecture context only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Solutions Sheet: Resilient Connectivity (PDF)",
+      "url": "https://www.hughes.com/wp-content/uploads/2026/06/Resilient-Connectivity.pdf",
+      "published": null,
+      "reliability": "Supplier's own solutions sheet. Read; defence and multi-transport focused, no NOC, SLA or field services statements. No printed date visible.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Hughes Managed Detection and Response",
+      "url": "https://www.hughes.com/what-we-offer/managed-cybersecurity/managed-detection-response",
+      "published": null,
+      "reliability": "Supplier's own page. Primary source for 24/7/365 SOC operation and monthly executive summary reporting. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Hughes JUPITER GEO Satellites",
+      "url": "https://www.hughes.com/what-we-offer/satellite-services/jupiter-geo-satellites",
+      "published": null,
+      "reliability": "Supplier's own page. Evidence that Hughes owns and operates satellite transport assets, relevant to underlay ownership. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Hughes Managed Network Access Control",
+      "url": "https://www.hughes.com/what-we-offer/managed-cybersecurity/managed-network-access-control",
+      "published": null,
+      "reliability": "Supplier's own page. Read and checked for compliance, lifecycle and SOC statements; none found. Contributed no grades.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 4,
+      "title": "Hughes Technologies Managed Network Services (attempted)",
+      "url": "https://www.hughes.com/technologies/managed-network-services",
+      "published": null,
+      "reliability": "Not used as evidence. URL returned HTTP 404, no content retrieved.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 4,
+      "title": "Hughes Professional Services (attempted)",
+      "url": "https://www.hughes.com/what-we-offer/professional-services",
+      "published": null,
+      "reliability": "Not used as evidence. URL returned HTTP 404; Hughes publishes no standalone professional services page at this path.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        17,
+        1,
+        10
+      ],
+      "confidence": "high",
+      "quote": "Fully Managed Solution: Ideal for businesses that are seeking expert support from a managed service provider with design, strategy, installation, configuration, monitoring, and ongoing management.",
+      "claimed_by": "vendor",
+      "note": "Corroborated on the Managed SD-WAN page (\"Fully managed service delivery\") and the Managed Router page (\"Hughes monitors, manages, and maintains your network for you, bringing decades of expertise and industry-leading customer service to provide 24x7x365 support to your business.\"). Hughes operates the service end to end across design, install, monitoring and ongoing management."
+    },
+    "f03_co_managed_service": {
+      "value": "partial",
+      "evidence": [
+        21,
+        17
+      ],
+      "confidence": "medium",
+      "quote": "Our SOC works seamlessly with your existing security staff, augmenting their current capabilities and drastically increasing a team of any size's productivity.",
+      "claimed_by": "vendor",
+      "note": "No named co-managed tier with defined customer change rights was found. The Managed SASE solutions sheet lists three deployment options (\"Fully Managed Solution\", \"SSE Investments in Place\", \"Standalone Offering\"), of which \"SSE Investments in Place: For businesses that need help in fully leveraging and optimizing their existing SSE investments.\" is the closest to shared responsibility. The MDR page describes the Hughes SOC augmenting in-house staff. Graded partial because shared policy and change rights are not documented."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [
+        12,
+        11
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Read the Hughes VAR / resellers page, which offers \"The Hughes Value Added Resellers (VAR) program allows service operators, system integrators\" and \"Automated ordering portals for hardware and service\", plus the What We Offer index. No language on tenant isolation, delegated administration, branded or white-label portals, or MSP templates was found on any Hughes page read."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        18,
+        17
+      ],
+      "confidence": "high",
+      "quote": "Hughes has decades of experience as a managed services provider with exceptional engineering expertise and qualified staff to deploy, migrate, and manage the solution.",
+      "claimed_by": "vendor",
+      "note": "The FortiSASE solutions sheet also states \"Global Secure Connectivity: Extend corporate security policies to users anywhere in the world while Hughes handles onboarding, policy tuning, and user provisioning at scale.\" and the Netskope sheet covers design, strategy, installation and configuration. Discovery, pilots, runbooks, rollback plans and training are not itemised, but structured design and migration services are clearly offered."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        10,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "The Managed Routing offering includes router installation, configuration, maintenance, monitoring, help desk, billing, and management, plus end-to-end secure VPN tunneling from all sites.",
+      "claimed_by": "vendor",
+      "note": "The Managed Router page also states \"Responsive on-site field maintenance\" and \"Full range of services, from design to on-site support\", and the May 2026 recognition article refers to Hughes strength spanning managed network services, security, monitoring, and lifecycle support. Graded partial because hardware replacement or RMA terms, firmware upgrade and patching cycles, renewals and end-of-life planning are not individually documented on the pages read."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        5,
+        2,
+        8
+      ],
+      "confidence": "high",
+      "quote": "Support for 4G LTE and 5G technologies",
+      "claimed_by": "vendor",
+      "note": "The Managed Wireless page also carries \"Multi-carrier support\", \"Single & dual wireless transport options\", \"Secure your business wireless plans with backup and failover protection.\" and \"Cellular connectivity provides higher availability options compared to wired broadband.\" The Managed Network Services page lists 4G LTE and 5G among all wireline transports, point-to-point microwave and satellite. SIM management and signal monitoring as discrete features were not documented, but primary and failover cellular transport is clearly supported."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        18,
+        17,
+        7
+      ],
+      "confidence": "high",
+      "quote": "Scalable Cloud Points of Presence: Low latency and high availability with Fortinet's distributed cloud infrastructure",
+      "claimed_by": "vendor",
+      "note": "The gateway and PoP estate is explicitly a third party's. The FortiSASE sheet attributes the cloud PoPs to Fortinet's distributed cloud infrastructure, and the Netskope sheet and Managed SSE page attribute the PoP network to Netskope. No evidence of Hughes operating its own terrestrial SASE gateway or PoP infrastructure was found, so this is partner_integrated rather than yes."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        17,
+        18,
+        7,
+        6
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Read both Managed SASE solutions sheets (Netskope and FortiSASE), the Managed SASE page and the Managed SSE page. All PoP references describe shared global multi-tenant PoP networks belonging to Netskope or Fortinet. No customer-hosted, dedicated or sovereign PoP option was described anywhere."
+    },
+    "f21_private_global_backbone": {
+      "value": "partner_integrated",
+      "evidence": [
+        17,
+        18,
+        22
+      ],
+      "confidence": "medium",
+      "quote": "Global Infrastructure: A vast network of global Points of Presence (PoPs) supports organizations with a reliable and scalable backbone for their security needs.",
+      "claimed_by": "vendor",
+      "note": "The backbone described in this quote belongs to Netskope, since the document is the Managed SASE by Hughes, Powered with Netskope solutions sheet; the FortiSASE variant attributes equivalent infrastructure to Fortinet. Hughes does own and operate a GEO satellite fleet (JUPITER page: \"Our fleet of satellites\"), which is genuine owned transport, but no page read described a Hughes-owned or Hughes-controlled inter-region terrestrial backbone carrying traffic between PoPs. Graded partner_integrated on that basis."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        17,
+        8
+      ],
+      "confidence": "high",
+      "quote": "Industry-Leading SLAs: Boasting an impressive 10/50ms latency and 99.999% uptime, Hughes Managed SASE ensures consistent, high-performance connectivity.",
+      "claimed_by": "vendor",
+      "note": "Corroborated on the Managed Broadband page: \"Service Level Agreements (SLAs), guaranteed Quality of Service (QOS), and Committed Information Rates (CIR).\" Latency and uptime commitments are published. Response times and change-handling commitments were not found as published figures on the pages read."
+    },
+    "f33_data_loss_prevention": {
+      "value": "partner_integrated",
+      "evidence": [
+        17,
+        7,
+        6
+      ],
+      "confidence": "high",
+      "quote": "Advanced Data Loss Prevention (DLP): Powered by artificial intelligence/machine learning (AI/ML), it monitors and protects sensitive data across websites, Software-as-a-Service (SaaS) applications, emails, and platforms that use generative AI.",
+      "claimed_by": "vendor",
+      "note": "DLP is fully described with classification, blocking and real-time enforcement (Managed SASE page: \"DLP detects and blocks unauthorized sharing of sensitive information in real time, ensuring compliance and preventing data from leaving your network without explicit approval.\"), but the capability is Netskope technology delivered under the Hughes managed wrapper, so partner_integrated rather than yes. Exception workflows were not documented."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        21,
+        10,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "With 24/7/365 SOC monitoring, comprehensive cybersecurity expertise, and resilient prevention, let Hughes mitigate advanced threats on your endpoints and servers that bypass prevention so you can focus on running your business.",
+      "claimed_by": "vendor",
+      "note": "24/7 SOC and 24x7x365 network management are both evidenced (Managed Router: \"24x7x365 management and support\"), as is structured periodic reporting (MDR: \"Receive monthly Executive Summary Reports detailing trends, updates, improvements and daily and weekly critical observations (depending upon service level).\"). Graded partial because no page read documents formal root cause analysis ownership or change governance as contracted elements of the service."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        1
+      ],
+      "confidence": "high",
+      "quote": "the largest non-carrier managed network services provider in North America",
+      "claimed_by": "vendor",
+      "note": "Confirmed verbatim on the page 29 Jul 2026. Hughes states it is explicitly non-carrier, which is why underlay ownership is graded separately below."
+    },
+    "underlay_ownership": {
+      "value": "unknown",
+      "evidence": [
+        1
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "vendor",
+      "note": "Not found in public sources reviewed. The managed SD-WAN page states Hughes is non-carrier but does not say whether circuits are resold or customer-supplied."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        18,
+        17,
+        7,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Hughes has partnered with Fortinet to address these realities with a comprehensive Secure Access Service Edge (SASE) solution that brings together the advanced security capabilities of FortiSASE, with Hughes proven expertise in Managed Network Services.",
+      "claimed_by": "vendor",
+      "note": "Fortinet and Netskope. Hughes publishes two parallel Managed SASE solutions sheets, one Powered with FortiSASE and one Powered with Netskope (\"Hughes has partnered with Netskope to address these challenges with a comprehensive Secure Access Service Edge (SASE) solution\"). The Managed UTM and firewall layer additionally uses Cisco Meraki. Hughes contributes the managed operations wrapper, not the SSE stack itself."
+    },
+    "regulatory_documentation": {
+      "value": "assurance_only",
+      "evidence": [
+        3,
+        16,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Delivers peace of mind from knowing our next-generation SOC is ISO-certified",
+      "claimed_by": "vendor",
+      "note": "ISO is claimed but the standard is not numbered, so this is an assurance statement rather than a named attestation. The same page names customer-facing compliance regimes it helps support, including Payment Card Industry (PCI) compliance, HIPAA for patient information security and SOX for financial practices and corporate governance. Not found on any page read: ISO 27001 by number, SOC 2, NIS2, DORA or NHS DSPT. The Hughes UK solutions page was checked specifically and returned none of these. No trust centre or certification register entry was located."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        17,
+        18,
+        7
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Hughes describes \"A vast network of global Points of Presence (PoPs)\" in the Netskope solutions sheet and \"Scalable Cloud Points of Presence\" in the FortiSASE sheet, but publishes no numeric PoP count on any page or PDF read. The PoP estate in question belongs to Netskope or Fortinet in any case, not to Hughes."
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        17
+      ],
+      "confidence": "high",
+      "quote": "Industry-Leading SLAs: Boasting an impressive 10/50ms latency and 99.999% uptime, Hughes Managed SASE ensures consistent, high-performance connectivity.",
+      "claimed_by": "vendor",
+      "note": "Published by Hughes in the Managed SASE Powered with Netskope solutions sheet, alongside a 10/50ms latency commitment. The underlying platform SLA is Netskope's, surfaced through the Hughes managed wrapper. No equivalent percentage was published for Hughes Managed SD-WAN or Managed Broadband, where the Broadband page mentions SLAs, guaranteed QoS and CIR without any figure."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "sse_layer_ownership",
+      "claim_a": "Hughes Managed SASE is powered with Netskope, whose SSE, DLP and global PoP network underpin the service",
+      "source_a": 17,
+      "claim_b": "Hughes Managed SASE is powered with FortiSASE, with Fortinet supplying the security stack and distributed cloud Points of Presence",
+      "source_b": 18
+    },
+    {
+      "field": "regulatory_documentation",
+      "claim_a": "The Managed Cybersecurity page under Managed Network Services states the Hughes SOC is ISO-certified and discusses PCI, HIPAA and SOX",
+      "source_a": 3,
+      "claim_b": "The current Managed Cybersecurity hub page contains no ISO, SOC 2, PCI or certification references at all",
+      "source_b": 4
+    }
+  ]
 }

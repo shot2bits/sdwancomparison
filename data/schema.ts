@@ -92,7 +92,17 @@ export const ScoreSummary = z.object({
   managed_service_dependent_count: z.number().int().min(0).max(40),
   unknown_count: z.number().int().min(0).max(40),
   not_primary_count: z.number().int().min(0).max(40),
+  /**
+   * Retained so every existing consumer keeps compiling. It measures filled
+   * boxes, not sourced facts: for 27 of 30 records it is exactly
+   * 1 - unknown/40. It is no longer rendered anywhere. The two counts below
+   * are the honest evidence position and are what the page publishes.
+   */
   evidence_coverage_pct: z.number().min(0).max(1),
+  /** Scored facts resting on a tier 1 or tier 2 source. */
+  sourced_facts_tier_1_2: z.number().int().min(0).optional(),
+  /** Scored facts resting on tier 3 corroboration alone. */
+  sourced_facts_tier_3_only: z.number().int().min(0).optional(),
 }).strict();
 export type ScoreSummary = z.infer<typeof ScoreSummary>;
 
@@ -212,6 +222,58 @@ export const Logging = z.object({
 }).strict();
 export type Logging = z.infer<typeof Logging>;
 
+/* ------------------------------------------------------------------ */
+/* Provenance (added 28 July 2026, shortlist re-verification)          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Source reliability tiers, per the Netify vendor profile standard.
+ *  1 the supplier's own material
+ *  2 an independently accountable public record
+ *  3 corroboration only, never carries a grade alone
+ *  4 found and NOT used as evidence, listed so exclusions are public
+ */
+export const SourceTier = z.union([
+  z.literal(1), z.literal(2), z.literal(3), z.literal(4),
+]);
+
+export const SourceRecord = z.object({
+  n: z.number().int().positive(),
+  tier: SourceTier,
+  title: z.string().min(1),
+  url: z.string().url(),
+  /** Date printed on the source, or null when the source is undated. */
+  published: z.string().nullable(),
+  verified_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  reliability: z.string().min(1),
+}).strict();
+export type SourceRecord = z.infer<typeof SourceRecord>;
+
+export const SourcedFact = z.object({
+  value: z.string().min(1),
+  /** Register numbers this grade rests on. */
+  evidence: z.array(z.number().int().positive()),
+  confidence: z.enum(["high", "medium", "low"]),
+  /**
+   * The sentence the grade rests on, copied from the cited page and confirmed
+   * present there by an independent check. Empty only when value is unknown.
+   */
+  quote: z.string(),
+  claimed_by: z.enum(["vendor", "third_party", "netify_assessment", "none"]),
+  /** Required when value is unknown: why, and what was looked at. */
+  note: z.string().nullable(),
+}).strict();
+export type SourcedFact = z.infer<typeof SourcedFact>;
+
+export const ClaimConflict = z.object({
+  field: z.string().min(1),
+  claim_a: z.string().min(1),
+  source_a: z.number().int().positive(),
+  claim_b: z.string().min(1),
+  source_b: z.number().int().positive(),
+}).strict();
+export type ClaimConflict = z.infer<typeof ClaimConflict>;
+
 export const VendorSchema = z.object({
   // Identity
   slug: z.string().regex(/^[a-z0-9-]+$/, "slug must be lowercase letters, digits and hyphens only"),
@@ -287,6 +349,22 @@ export const VendorSchema = z.object({
   // Provenance
   last_verified: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "last_verified must be YYYY-MM-DD"),
   verification_notes: z.string().min(1),
+
+  /**
+   * Per-supplier evidence register. Sources are numbered once and cited by
+   * number from each sourced fact. Tier 4 entries are sources that were found
+   * and NOT used as evidence; they stay listed so the exclusions are public.
+   */
+  evidence_register: z.array(SourceRecord).optional(),
+
+  /**
+   * The sourced facts, keyed by field id. Additive: `capabilities` above stays
+   * a flat status map so every existing consumer is untouched.
+   */
+  sourced_facts: z.record(z.string(), SourcedFact).optional(),
+
+  /** Conflicting claims between sources, documented rather than resolved. */
+  conflicts: z.array(ClaimConflict).optional(),
 }).strict();
 
 export type Vendor = z.infer<typeof VendorSchema>;

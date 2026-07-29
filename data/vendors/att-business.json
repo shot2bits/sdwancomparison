@@ -15,10 +15,10 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "partial",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -31,36 +31,38 @@
     "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "yes",
+    "f26_sla_backed_service_fabric": "partial",
     "f27_integrated_next_generation_firewall": "partner_integrated",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "partner_integrated",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "yes"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 34,
-    "partial_count": 3,
+    "yes_count": 30,
+    "partial_count": 6,
     "partner_integrated_count": 3,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Major US carrier-led managed SD-WAN portfolio with multi-vendor platform options (including Fortinet for AT&T SASE).",
@@ -77,8 +79,8 @@
     "International delivery depth depends on partnerships outside North America.",
     "Commercial structure typically bundles access, security and platform; line-item costing requires explicit RFP."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "partner_integrated",
@@ -144,8 +146,8 @@
     "chromeos": "managed_service_dependent",
     "agentless": "managed_service_dependent"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 1600,
+  "sla_availability_pct": 100.0,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,458 @@
   "value_tier": "premium",
   "cost_note": "Carrier-scale managed pricing; premium positioning, US-centric delivery.",
   "uk_delivery": "global_managed",
-  "uk_basis": "No UK HQ (US). UK sites served through AT&T's global managed network and partners, not UK-native infrastructure."
+  "uk_basis": "No UK HQ (US). UK sites served through AT&T's global managed network and partners, not UK-native infrastructure.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "SD-WAN Service Provider - Software Defined Wide Area Network at AT&T Business",
+      "url": "https://www.business.att.com/products/sd-wan.html",
+      "published": null,
+      "reliability": "Supplier's own primary product page. Names the three SD-WAN technology partners and the deployment reach claim. Light on operational detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE) - AT&T Business",
+      "url": "https://www.business.att.com/products/sase.html",
+      "published": null,
+      "reliability": "Supplier's own SASE overview. Mostly definitional marketing and FAQ content; no PoP, SLA or DLP specifics.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "AT&T SASE Branch with Fortinet - Solution Brief",
+      "url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-branch-with-fortinet-solution-brief.pdf",
+      "published": null,
+      "reliability": "Supplier datasheet. Strongest source read for firewall, IPS, web filtering, LTE and 5G transport and SNOC operations. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "What is AT&T SD-WAN with Cisco?",
+      "url": "https://www.business.att.com/collateral/att-sd-wan-with-cisco.html",
+      "published": null,
+      "reliability": "Supplier collateral page. Verified verbatim for the fully managed and co-managed statement. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "AT&T SASE with Palo Alto Networks - Solution Brief",
+      "url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-sase-with-pan-solution-brief.pdf",
+      "published": null,
+      "reliability": "Supplier datasheet. Verified verbatim for 24/7 managed service and fully managed plus co-managed options. Contains no SLA or PoP figures.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Managed SD-WAN from AT&T - Product Brief",
+      "url": "https://www.business.att.com/content/dam/attbusiness/briefs/sd-wan-product-brief.pdf",
+      "published": null,
+      "reliability": "Supplier datasheet. Best source for professional services, LAN migration and 24/7 tiered support. Confirmed absence of SLA, co-managed, gateway and maintenance wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "AT&T Managed Telecom Services Provider - AT&T Business",
+      "url": "https://www.business.att.com/categories/att-managed-services.html",
+      "published": null,
+      "reliability": "Supplier category page. Verified verbatim for 24/7/365 monitoring and included maintenance. No SLA or lifecycle wording present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Why AT&T? - Global Business",
+      "url": "https://www.corp.att.com/worldwide/why-att/",
+      "published": null,
+      "reliability": "Supplier corporate page. Verified verbatim for the 107 countries and over 1600 MPLS service nodes claim. Conflicts with country counts elsewhere on AT&T sites.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "AT&T Global Business Services - Internet Connectivity, Networking & Wireless",
+      "url": "https://www.business.att.com/industries/att-global-business.html",
+      "published": null,
+      "reliability": "Supplier page. Verified verbatim for the fibre mileage and 200 countries figures. No PoP or backbone wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "AT&T and Palo Alto Networks Revolutionize Business Security",
+      "url": "https://about.att.com/story/2025/palo-alto-networks-dynamic-defense.html",
+      "published": "2025",
+      "reliability": "Supplier press release, dated. Verified verbatim for the DLP and ZTNA capability descriptions and the Prisma Access relationship. Forward-looking language in places.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Security Operations Center (SOC) - AT&T Business",
+      "url": "https://www.business.att.com/products/security-operations-center.html",
+      "published": null,
+      "reliability": "Supplier page. Read and largely rejected for grading: it describes SOC optimisation consulting, not an AT&T-run managed SOC, and yielded no usable verbatim assurance claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "AT&T SD-WAN with VMware - Product Brief",
+      "url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-sd-wan-with-vmware-product-brief.pdf",
+      "published": null,
+      "reliability": "Supplier datasheet. Used as corroboration for co-managed options, 24/7 support, wireless and LTE transport and VMware gateway architecture.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "AT&T FlexWare Applications - Brief",
+      "url": "https://www.business.att.com/content/dam/attbusiness/briefs/att-flexware-applications-brief.pdf",
+      "published": null,
+      "reliability": "Supplier datasheet. Confirms multi-vendor virtual firewall sourcing and AT&T managed universal CPE. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "AT&T Partner Exchange Reseller Program - AT&T Business",
+      "url": "https://www.business.att.com/industries/partner-solutions/att-partner-exchange.html",
+      "published": null,
+      "reliability": "Supplier programme page. Verified presence of reseller, co-branded, API and lifecycle wording, and verified absence of white label and multi-tenant wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Governance, Risk and Compliance Services - Product Brief",
+      "url": "https://www.business.att.com/content/dam/attbusiness/briefs/cybersecurity-consulting-governance-risk-compliance-brief.pdf",
+      "published": null,
+      "reliability": "Supplier datasheet. Names ISO 27001 and HITRUST but only as customer-facing readiness services, not as AT&T attestations. Treated accordingly.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "AT&T Dedicated Internet - AT&T Business",
+      "url": "https://www.business.att.com/products/dedicated-internet.html",
+      "published": null,
+      "reliability": "Supplier product page. Only source read that publishes an availability figure and explicit SLA language, but it covers dedicated internet access, not managed SD-WAN or SASE.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "AT&T Dedicated Internet Service Level Agreement credit request quick guide",
+      "url": "https://www.att.com/scmsassets/business/help/pdf/sla_qg_ADI-credit_updBC.pdf",
+      "published": null,
+      "reliability": "Supplier document, read in full. Contains no numeric objectives; it defers to the ADI Service Guide, so it could not carry the SLA percentage grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 4,
+      "title": "AT&T Business Service Guide - SD-WAN",
+      "url": "https://serviceguidenew.att.com/sg_flashPlayerPage/SDWAN",
+      "published": null,
+      "reliability": "Not used as evidence: fetch failed with a robots and TLS certificate error, so no content was read. This is where the managed SD-WAN SLA objectives would sit.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "AT&T Switched Ethernet Service Guide",
+      "url": "https://cpr.att.com/pdf/se/0001-0003.pdf",
+      "published": null,
+      "reliability": "Not used as evidence: the URL returned a 404 client error, so no SLA objectives could be read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "AT&T Business Delivers New Managed Wireless WAN",
+      "url": "https://about.att.com/ecms/dam/snrdocs/pdf/business-managed-wan.pdf",
+      "published": null,
+      "reliability": "Not used as evidence: the PDF returned unreadable binary rather than extractable text, so no verbatim quote could be taken for the cellular grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "AT&T Business: Global Network, SD-WAN and SASE Partnerships - Netify",
+      "url": "https://netify.co.uk/marketplace/att/",
+      "published": null,
+      "reliability": "Not used as evidence: marketplace tracker page and the commissioning party's own listing, so it cannot corroborate supplier claims independently. Seen in search results only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 3,
+      "title": "AT&T Joins Forces with Palo Alto Networks to Introduce Secure Connectivity Solution for Business Customers",
+      "url": "https://www.paloaltonetworks.com/company/press/2025/at-t-joins-forces-with-palo-alto-networks-to-introduce-secure-connectivity-solution-for-business-customers",
+      "published": "2025",
+      "reliability": "Partner press release, seen in search results but not fetched. Corroboration only for the Palo Alto Networks relationship; carries no grade on its own.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 3,
+      "title": "Frost Radar: Managed SD-WAN Services in North America, 2024",
+      "url": "https://www.business.att.com/content/dam/attbusiness/reports/frost-radar-managed-sd-wan-2024.pdf",
+      "published": "2024",
+      "reliability": "Analyst report hosted and sponsored by the supplier. Seen in search results, not fetched. Corroboration only; would not carry a grade alone.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "confidence": "high",
+      "quote": "As a fully managed or co-managed solution, AT&T engineers analyze customer applications, security requirements, and traffic patterns to optimize solution performance, ensure a superior user experience, and lay a solid foundation for your enterprise growth.",
+      "claimed_by": "vendor",
+      "note": "AT&T explicitly offers a fully managed option across its SD-WAN and SASE portfolio. Corroborated by the Palo Alto Networks solution brief (\"AT&T SASE with Palo Alto Networks is offered as a 24/7 managed service\") and the Managed SD-WAN product brief (\"AT&T supports the entire continuum of the customer lifecycle from design and delivery to ongoing network management.\"). Graded yes rather than partner_integrated because the managed wrapper is AT&T's own, even though the underlying SD-WAN and security technology is Cisco, VMware, Aruba, Fortinet or Palo Alto Networks."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4,
+        5,
+        12,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Fully-managed and co-managed options available to meet business' unique requirements",
+      "claimed_by": "vendor",
+      "note": "Co-managed is named as a distinct commercial option on the Cisco collateral page, the VMware product brief and the Palo Alto Networks SASE brief. The Fortinet brief describes the shared model operationally: \"Get the benefits of a fully managed experience with the agility of self-service.\""
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        14
+      ],
+      "confidence": "medium",
+      "quote": "Design co-branded solutions",
+      "claimed_by": "vendor",
+      "note": "AT&T Partner Exchange is a reseller programme with co-branding, open APIs and a partner portal, and partners \"Control the complete lifecycle\". However nothing on the page evidences tenant isolation, delegated administration or white-label branding of the SD-WAN or SASE management platform itself. The strings \"white label\", \"white-label\" and \"multi-tenant\" do not appear on the page. Graded partial, not yes."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        6,
+        1,
+        4
+      ],
+      "confidence": "high",
+      "quote": "Engineers also support initial installations and LAN migrations and create and fine-tune business policies.",
+      "claimed_by": "vendor",
+      "note": "The Managed SD-WAN product brief also states \"AT&T supports the entire continuum of the customer lifecycle from design and delivery to ongoing network management.\" and assigns \"Dedicated resources are assigned to each implementation, including project managers\". Discovery, pilots, staging, runbooks and rollback plans are not itemised in the material reviewed, so the grade rests on the design, installation and LAN migration wording."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        7,
+        13
+      ],
+      "confidence": "low",
+      "quote": "With comprehensive support and maintenance included, your systems and connectivity services stay smooth and efficient.",
+      "claimed_by": "vendor",
+      "note": "Maintenance is stated to be included in AT&T managed services, and the FlexWare brief covers AT&T managed universal CPE. No AT&T page reviewed names hardware replacement, firmware upgrades, patching, renewals or end-of-life planning. The words \"maintenance\", \"replacement\" and \"firmware\" do not appear in the Managed SD-WAN product brief, and \"lifecycle\" does not appear on the managed services category page. Graded partial on that gap."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        3,
+        4,
+        12
+      ],
+      "confidence": "high",
+      "quote": "Moving to a more distributed cloud connectivity model means you can use widely available, low-cost options for connectivity such as broadband, 4G/LTE, and 5G.",
+      "claimed_by": "vendor",
+      "note": "The Fortinet brief also states \"Fortinet extenders provide an LTE-based backup WAN connection. They can also serve as a primary connection to kiosks, retail pop-up stores, small branch offices, point of sale systems, and other locations.\", which covers both primary and failover use. AT&T is itself the mobile network operator. SIM management and signal monitoring were not evidenced on the pages read; the attempted AT&T managed wireless WAN PDF returned unreadable binary."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        10,
+        5,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Together, AT&T and Palo Alto Networks will deliver a comprehensive, network-integrated secure access service edge (SASE) solution to help businesses safeguard their data, applications, and users.",
+      "claimed_by": "vendor",
+      "note": "Cloud security enforcement and SaaS or remote access gateways in AT&T's SASE portfolio are delivered on Palo Alto Networks' SASE platform (Prisma Access) or on VMware's gateway estate. The VMware product brief refers to \"globally positioned gateways, and centralized orchestration provide enterprise-wide visibility\", which are VMware VeloCloud gateways. AT&T does claim network-embedded protection of its own for Dynamic Defense, but no AT&T-operated SASE gateway or PoP estate is published, so partner_integrated rather than yes."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        2,
+        5,
+        9
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the SD-WAN product page, the SASE product page, the Palo Alto Networks SASE brief, the VMware and Fortinet briefs, and the AT&T global business page. The strings \"point of presence\" and \"PoP\" do not appear on the Fortinet brief, the Palo Alto Networks brief or the global business page, and no customer-hosted, dedicated or sovereign PoP option is described anywhere."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        8,
+        9
+      ],
+      "confidence": "medium",
+      "quote": "With AT&T, your business is supported by world-class network and business services that can be accessed from 107 countries with over 1600 MPLS service nodes.",
+      "claimed_by": "vendor",
+      "note": "AT&T operates its own international MPLS network reaching 107 countries with over 1600 service nodes, and separately publishes \"1.4M+ miles of fiber worldwide\". This is a genuinely multi-region carrier backbone rather than a single-country network, so graded yes. The word \"backbone\" itself does not appear on either page; the grade rests on the MPLS service node and fibre statements."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "partial",
+      "evidence": [
+        16,
+        17,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "AT&T Dedicated Internet access is perfect for businesses that require the fastest speeds available and protection from outages with world-class Service Level Agreements (SLAs) supported by 24/7 active monitoring.",
+      "claimed_by": "vendor",
+      "note": "Contractual SLAs with service credits are published for the underlying AT&T Dedicated Internet access service, and the SLA credit quick guide points to the ADI Service Guide for the objectives. No SLA covering the managed SD-WAN or SASE service itself was reachable: the AT&T Service Guide Library at serviceguidenew.att.com could not be fetched, and the strings \"SLA\" and \"service level agreement\" do not appear in the Managed SD-WAN product brief or the Palo Alto Networks SASE brief. Graded partial for that reason."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        3,
+        13,
+        4
+      ],
+      "confidence": "high",
+      "quote": "AT&T Business next-generation firewalls with Fortinet enable one of the fastest application steering methods in the industry.",
+      "claimed_by": "vendor",
+      "note": "Fortinet technology, branded and managed by AT&T. The same brief lists \"SSL/TLS inspection and threat protection for visibility and prevention against malware.\", \"Web filtering service to enforce internet security and reduce complexity.\" and \"Complete threat protection anti-virus, and intrusion prevention system (IPS)\", so the full NGFW feature set is present but is another vendor's. The FlexWare brief confirms multi-vendor sourcing: \"Supports a variety of secure virtual firewall vendor designs, including Palo Alto, Fortinet, and Juniper.\""
+    },
+    "f33_data_loss_prevention": {
+      "value": "partner_integrated",
+      "evidence": [
+        10,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "Data Loss Prevention (DLP): Safeguards sensitive information from unauthorized access and breaches, ensuring that critical data remains protected.",
+      "claimed_by": "vendor",
+      "note": "DLP arrives through the Palo Alto Networks SASE platform under AT&T Dynamic Defense, not through AT&T-authored technology. The AT&T SASE with Palo Alto Networks brief only offers the weaker \"Reduce risk of data loss - provide identity-based access to specific applications and restrict sharing of sensitive information\", which is access control rather than content inspection. Alerting and exception workflow detail was not found. The terms \"data loss\" and \"DLP\" do not appear in the Fortinet SASE Branch brief."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        3,
+        7,
+        6,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "Dedicated experts at the AT&T SNOC use rich SD-WAN analytics to help you fine-tune your business and security policies to improve user experiences.",
+      "claimed_by": "vendor",
+      "note": "AT&T evidences a security network operations centre and round-the-clock proactive monitoring: \"With 24/7/365 proactive and reactive support, businesses can ensure continuous monitoring and troubleshooting across their connectivity solutions, including managed IT services, SD-WAN, and business Wi-Fi solutions.\" and \"At completion of installation, customers experience a world-class tiered support model available 24/7 to manage their global solution.\" No page reviewed evidences root cause analysis ownership, structured service reviews or change governance, and the AT&T SOC page proved to be about SOC optimisation consulting rather than a managed SOC. Graded partial on those gaps."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        4,
+        5,
+        3,
+        12
+      ],
+      "confidence": "high",
+      "quote": "As a fully managed or co-managed solution, AT&T engineers analyze customer applications, security requirements, and traffic patterns to optimize solution performance, ensure a superior user experience, and lay a solid foundation for your enterprise growth.",
+      "note": "AT&T operates services rather than authoring the SD-WAN or SASE product. Every offer reviewed is branded as AT&T plus a technology partner: \"AT&T SD-WAN with Cisco\", \"AT&T SD-WAN with VMware\", \"AT&T SD-WAN with Aruba\", \"AT&T SASE Branch with Fortinet\" and \"AT&T SASE with Palo Alto Networks\". AT&T does author the underlying carrier network, but not the SD-WAN or SSE software.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "owns_own_circuits",
+      "evidence": [
+        8,
+        9,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "1.4M+ miles of fiber worldwide",
+      "claimed_by": "vendor",
+      "note": "AT&T is a facilities-based carrier with its own fibre and mobile network and its own international MPLS estate reaching 107 countries with over 1600 service nodes. Caveat: the SD-WAN offers also ride third party and customer-supplied transport, since the Fortinet brief markets \"widely available, low-cost options for connectivity such as broadband, 4G/LTE, and 5G\", so in practice the underlay is part-owned and part-procured. Graded owns_own_circuits because the core network and routing are AT&T's, with mixed as the close alternative."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        3,
+        5,
+        10,
+        13
+      ],
+      "confidence": "high",
+      "quote": "Together, AT&T and Palo Alto Networks will deliver a comprehensive, network-integrated secure access service edge (SASE) solution to help businesses safeguard their data, applications, and users.",
+      "claimed_by": "vendor",
+      "note": "Palo Alto Networks (Prisma Access and Prisma Access Browser, under AT&T Dynamic Defense), Fortinet (AT&T SASE Branch with Fortinet, NGFW, IPS, web filtering, SSL/TLS inspection), and Cisco (AT&T SD-WAN with Cisco embedded and cloud security). The FlexWare brief adds Juniper for virtual firewalls. AT&T wraps these in its own management and network embedding but does not author the SSE stack."
+    },
+    "regulatory_documentation": {
+      "value": "assurance_only",
+      "evidence": [
+        15,
+        3,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "ISO 27001 Readiness Assessments and HITRUST Common Security Framework (CSF)",
+      "claimed_by": "vendor",
+      "note": "ISO 27001 and HITRUST CSF are named, but as consulting readiness services AT&T sells to customers, not as AT&T's own certification or attestation. HIPAA/HITECH and Sarbanes Oxley appear in the same brief in the same customer-obligation framing. Not found on any page reviewed: SOC 2, NHS DSPT, DORA, NIS2, PCI DSS, GDPR, NIST, or an AT&T Business trust centre listing attestations for the SD-WAN or SASE services. Graded assurance_only rather than documented on that basis."
+    },
+    "pop_count": {
+      "value": "1600",
+      "evidence": [
+        8
+      ],
+      "confidence": "low",
+      "quote": "With AT&T, your business is supported by world-class network and business services that can be accessed from 107 countries with over 1600 MPLS service nodes.",
+      "claimed_by": "vendor",
+      "note": "The published figure is \"over 1600 MPLS service nodes\", not a point of presence count and not a SASE or SSE PoP count. AT&T publishes no PoP number for its SD-WAN or SASE services: the strings \"point of presence\" and \"PoP\" are absent from the Fortinet brief, the Palo Alto Networks brief and the AT&T global business page. Recorded here with that caveat, at low confidence."
+    },
+    "sla_availability_pct": {
+      "value": "100",
+      "evidence": [
+        16,
+        17
+      ],
+      "confidence": "low",
+      "quote": "A 100% uptime guarantee",
+      "claimed_by": "vendor",
+      "note": "This 100% uptime guarantee is published for AT&T Dedicated Internet, not for managed SD-WAN or SASE. No availability percentage for the managed SD-WAN or SASE service was found: the SLA credit quick guide defers to the ADI Service Guide, and the AT&T Service Guide Library could not be fetched. Treat the SD-WAN and SASE availability percentage as unpublished in the sources reviewed."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "global country coverage",
+      "claim_a": "more than 150+ countries and territories (AT&T SD-WAN product page, site deployment reach)",
+      "source_a": 1,
+      "claim_b": "107 countries with over 1600 MPLS service nodes (AT&T global business site)",
+      "source_b": 8
+    },
+    {
+      "field": "global country coverage",
+      "claim_a": "200 countries and territories with available Ethernet and internet connectivity (AT&T global business page)",
+      "source_a": 9,
+      "claim_b": "107 countries with over 1600 MPLS service nodes (corp.att.com why AT&T page)",
+      "source_b": 8
+    }
+  ]
 }

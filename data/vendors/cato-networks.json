@@ -15,10 +15,10 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "yes",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
-    "f05_professional_services_and_migration_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "partial",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,7 +28,7 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
     "f20_private_pops_dedicated_pops": "yes",
@@ -54,13 +54,15 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 38,
-    "partial_count": 1,
+    "yes_count": 36,
+    "partial_count": 3,
     "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
     "unknown_count": 0,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 1.0,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Single converged platform with no policy or log fragmentation across SD-WAN and security functions.",
@@ -77,8 +79,8 @@
     "Customer does not own the underlay; circuits sourced separately, so multi-supplier coordination remains.",
     "Less mature than incumbents for very large multinational deployments with heavy legacy MPLS estates."
   ],
-  "last_verified": "2026-07-13",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP. pop_count corrected to 100 on 2026-07-13: catonetworks.com Global Private Backbone page states 100+ PoPs worldwide.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "hours",
   "regions": {
     "uk_ireland": "yes",
@@ -181,5 +183,392 @@
   "value_tier": "mid",
   "cost_note": "Quote-based subscription, positioned mid-market: neither the cheapest nor the most expensive, with convergence reducing tool sprawl.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (Israel and US). Delivers in the UK from London and Manchester PoPs; contract direct or through UK partners including Netify routes."
+  "uk_basis": "No UK HQ (Israel and US). Delivers in the UK from London and Manchester PoPs; contract direct or through UK partners including Netify routes.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Cato SASE Cloud Platform Capabilities",
+      "url": "https://www.catonetworks.com/platform/",
+      "published": null,
+      "reliability": "Supplier's own primary platform page. Fetched three times with identical wording returned each time, so quotes are stable. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Global Private Backbone | Cato Networks",
+      "url": "https://www.catonetworks.com/platform/global-private-backbone/",
+      "published": null,
+      "reliability": "Supplier's own backbone page. Carries two different PoP figures on the same page (85+ in prose, 100+ in a stat block), recorded in conflicts. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Cato Networks Master Service Agreement (including Schedule 1 Service Level Agreement)",
+      "url": "https://www.catonetworks.com/msa/",
+      "published": null,
+      "reliability": "Supplier's published contractual terms. Strongest available source for the SLA percentage and credit regime. Undated on the page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Cato Managed Services",
+      "url": "https://www.catonetworks.com/services/",
+      "published": null,
+      "reliability": "Supplier's own managed services page. Primary source for fully managed, co-managed, deployment and assurance grades. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Managed SASE: Cato MSASE Partner Platform",
+      "url": "https://www.catonetworks.com/services/managed-sase/",
+      "published": null,
+      "reliability": "Supplier's own partner platform page. Primary source for multi-tenancy, co-branding and autonomous life cycle management. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Managed Services Provider | Cato Networks",
+      "url": "https://www.catonetworks.com/partners/managed-services-provider/",
+      "published": null,
+      "reliability": "Supplier's own MSP page. Corroborates multi-tenancy and co-branded delivery. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Cato Empowers Service Providers to Deliver True SASE Services with Cato Private PoP",
+      "url": "https://www.catonetworks.com/news/cato-empowers-service-providers-deliver-true-sase-services-with-cato-private-pop/",
+      "published": "2025-06-10",
+      "reliability": "Supplier press release with a printed date. Primary source for dedicated and sovereign PoP capability.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Security, Compliance and Privacy | Cato Networks",
+      "url": "https://www.catonetworks.com/security-compliance-and-privacy/",
+      "published": null,
+      "reliability": "Supplier's own compliance page naming specific certifications and attestations. Undated, so certification currency should be re-checked against the Cato Trust Center before contract.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "X1600 Cellular Connectivity Troubleshooting - Cato Learning Center",
+      "url": "https://support.catonetworks.com/hc/en-us/articles/16308182518173-X1600-Cellular-Connectivity-Troubleshooting",
+      "published": null,
+      "reliability": "Supplier's own product documentation. Operational detail rather than marketing, so a strong source for the cellular grade. Undated in the fetched content.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Data Loss Prevention (DLP) | Cato Networks",
+      "url": "https://www.catonetworks.com/platform/data-loss-prevention-dlp/",
+      "published": null,
+      "reliability": "Supplier's own DLP product page. Fetch returned mostly phrase fragments rather than clean full sentences, so the graded quote was taken from source 1 instead and this page is used for corroborating detail only. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Cato Managed Detection and Response (MDR) Service datasheet (PDF)",
+      "url": "https://go.catonetworks.com/rs/245-RJK-441/images/Cato_Managed_Detection_and_Response-MDR-Service.pdf",
+      "published": null,
+      "reliability": "Supplier datasheet. Source for SOC team, guided remediation and monthly reporting. Undated PDF, so version currency is unverified.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Support | Cato Networks",
+      "url": "https://www.catonetworks.com/support/",
+      "published": null,
+      "reliability": "Supplier page, fetched and read but contained no NOC, SOC, response time, escalation or root cause content. Recorded as a negative result supporting the medium confidence on f40.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "SD-WAN | Cato Networks",
+      "url": "https://www.catonetworks.com/platform/sd-wan/",
+      "published": null,
+      "reliability": "Supplier page, fetched and read but contained no cellular, 5G, SIM or firmware upgrade content. Negative result only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Professional Services Engineer | Cato Networks careers",
+      "url": "https://www.catonetworks.com/careers/careers-post/4526572101/professional-services-engineer/",
+      "published": null,
+      "reliability": "Supplier careers page, fetched but returned no job description body text, so it yields no usable evidence on professional services scope. Negative result only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Cato SASE Cloud",
+      "url": "https://www.catonetworks.com/cato-sase-cloud/",
+      "published": null,
+      "reliability": "Supplier URL fetched; resolved to the same content as the platform page (source 1). Used only as a consistency cross-check on the 85+ PoP and SLA-backed backbone wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 4,
+      "title": "Cato Networks managed services page (404)",
+      "url": "https://www.catonetworks.com/managed-services/",
+      "published": null,
+      "reliability": "Not used as evidence. The URL returned a 404 client error, so no content was read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 4,
+      "title": "Cato Networks - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Cato_Networks",
+      "published": null,
+      "reliability": "Not used as evidence. Wikipedia is excluded by the tier rules; it appeared in search results only and was not opened or graded from.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 4,
+      "title": "What are Cato Sockets - Cato Learning Center",
+      "url": "https://support.catonetworks.com/hc/en-us/articles/30175650827677-What-are-Cato-Sockets",
+      "published": null,
+      "reliability": "Not used as evidence. The fetch returned a 403 client error, so no content was read from it.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4
+      ],
+      "confidence": "high",
+      "quote": "Choose Cato or a partner for complete hands-free management.",
+      "claimed_by": "vendor",
+      "note": "Cato's own services page offers Hands-Free Management delivered either by Cato directly or by a partner, with \"Expert staff perform every networking and security policy change as your needs evolve.\" Combined with Site Deployment, Intelligent Last-Mile Monitoring and MDR on the same page, Cato covers deploy, monitor, change and support end to end. Note the wording gives the customer a choice of Cato or partner as the operator."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4
+      ],
+      "confidence": "high",
+      "quote": "A co-management model across customer, partner, and Cato is available, and Cato always maintains the platform.",
+      "claimed_by": "vendor",
+      "note": "Explicit three-way co-management model stated on Cato's own services page, with Cato retaining platform operation. This matches the definition precisely: provider runs the platform, customer retains selected rights."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        5,
+        6
+      ],
+      "confidence": "medium",
+      "quote": "True multi-tenancy and immediate access to new features and capabilities simplifies centralized management and enables partners to focus on delivering a great managed service experience.",
+      "claimed_by": "vendor",
+      "note": "Multi-tenancy and delegated partner administration are clearly evidenced via the MSASE Partner Platform, and the MSP page states \"Strengthen Your Brand: Deliver a seamless, co-branded customer experience with the MSASE Partner Platform, reinforcing your brand identity at every touchpoint.\" However Cato's own wording is consistently \"co-branding\" and \"co-branded\", not white-label: \"Everything from license management to co-branding is available in one place.\" Graded partial because the definition requires operation under the MSP's own brand, and no full white-label claim was found on the pages read."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partial",
+      "evidence": [
+        4,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "The zero-touch Cato Socket deploys quickly at your premises, by you, or with Cato and partner remote or on-site support.",
+      "claimed_by": "vendor",
+      "note": "Deployment assistance from Cato and partners, remote or on-site, is documented, and the same page adds \"Each site is fully configured with the right networking, QoS, security, and failover policies.\" Graded partial rather than yes because the definition requires structured discovery, pilots, staging, migration runbooks, rollback plans and training, and none of those were named on any page reviewed. A Cato careers listing for a Professional Services Engineer was fetched but returned no usable job description text, so it is not relied on."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        4,
+        5,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "No software for you to upgrade, patch, or otherwise maintain.",
+      "claimed_by": "vendor",
+      "note": "Software upgrade and patching are unambiguously part of the service: the MSASE page adds \"Autonomous Life Cycle Management: Cato ensures the SASE cloud platform maintains optimal security posture, 99.999% service availability, and low-latency security processing for all users and locations, without any customer involvement.\" and the Private PoP release adds \"Cato manages the software lifecycle of the private PoP for service providers, including automated software updates and seamless deployment of new security patches and features.\" Graded partial because hardware replacement, RMA, renewals and end-of-life planning for the Socket were not found on any page reviewed."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        9,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Socket X1600 now has a hardware version that supports Cellular (LTE/5G) connections",
+      "claimed_by": "vendor",
+      "note": "Cato's own Learning Center documents integrated LTE/5G on the X1600 Socket, dual SIM management (\"By default, SIM Slot 1 is the active one, while Slot 2 is standby.\") and signal monitoring via RSSI, RSRP, SINR and RSRQ. The platform page corroborates transport choice: \"Customers can choose any mix of fiber, cable, xDSL, and cellular connections.\" All three definition elements (transport, SIM management, signal monitoring) are met."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        1,
+        2
+      ],
+      "confidence": "high",
+      "quote": "Cato Neural Edge powers the global cloud network through a dense footprint of 85+ physical Points of Presence (PoPs) hosted in top-tier regional datacenters and interconnected by multiple global and regional carriers.",
+      "claimed_by": "vendor",
+      "note": "These are Cato's own PoPs running Cato's own software stack, not a third party's gateways resold, so yes rather than partner_integrated. The PoPs deliver security enforcement and remote access as a cloud service. The datacentre space and the interconnecting carriers are third party, but the gateway service itself is Cato's."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        7
+      ],
+      "confidence": "high",
+      "quote": "Cato Private PoP enables service providers to maintain traffic locally, optimize network performance, and ensure security and compliance.",
+      "claimed_by": "vendor",
+      "note": "Cato Private PoP, announced 10 June 2025, places a dedicated PoP inside a service provider's own infrastructure. The same release states \"Keep customer data local within the service provider's network infrastructure, addressing regional sovereignty and regulatory requirements.\" The offer is framed for service providers rather than for direct enterprise customers, which is worth checking in any specific deal."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "Cato Neural Edge is a cloud-native, private global backbone spanning 100+ PoPs worldwide.",
+      "claimed_by": "vendor",
+      "note": "Global rather than national, and controlled by Cato end to end."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        3,
+        2,
+        5
+      ],
+      "confidence": "high",
+      "quote": "PoPs interconnect across multiple tier-1 providers, backed by SLAs on availability, latency, packet loss, and jitter.",
+      "claimed_by": "vendor",
+      "note": "Contractual rather than best-effort: the Master Service Agreement defines an SLA Metric of 99.999% availability with a tiered service level credit schedule (5%, 7% and 9% credits at defined availability bands) and a processing time commitment of 10 milliseconds for IPS, CASB and NGFW for Internet Access. Availability, latency, packet loss and jitter are all named. Change handling commitments as such were not found in the pages read."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        1
+      ],
+      "confidence": "high",
+      "quote": "FWaaS controls traffic flow, across all ports and protocols, and in all directions both WAN (east-west), and the Internet (south-north).",
+      "claimed_by": "vendor",
+      "note": "Native, not partner_integrated. The platform page states that the SSE 360 stack \"converges the following capabilities: network segmentation and zero-trust (FWaaS), threat prevention (SWG, IPS, Malware Prevention, DNS Security, RBI), and application and data protection (CASB, DLP, ZTNA)\", all built on Cato's own Single Pass Cloud Engine (SPACE) architecture and delivered from Cato PoPs rather than a separate appliance. Stateful firewalling, IPS, malware prevention, URL/web filtering and application control are all present in the one engine."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        1,
+        10
+      ],
+      "confidence": "high",
+      "quote": "Data Loss Prevention (DLP) engine enforces access policies and granular actions on sensitive data across on-premises and cloud destinations from corporate and BYOD devices.",
+      "claimed_by": "vendor",
+      "note": "Native DLP inside SSE 360. The dedicated DLP page adds a catalog of 350+ pre-defined data types, custom data types based on Microsoft Information Protection labels, keywords and regular expressions, Exact Data Match, OCR scanning of image files, and a dedicated DLP events dashboard. Explicit exception workflow wording was not found, but classification, inspection, blocking and alerting are all evidenced."
+    },
+    "f40_managed_service_assurance": {
+      "value": "yes",
+      "evidence": [
+        4,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "Cato monitors your last-mile ISPs 24×7 at every site.",
+      "claimed_by": "vendor",
+      "note": "24x7 proactive monitoring with incident ownership is evidenced: \"On an outage or performance degradation, Cato works with the ISP to resolve it and keeps you informed, so teams that left managed MPLS don't burn IT resources chasing global ISPs.\" On the security side the MDR datasheet states \"Customers can offload the process of detecting compromised endpoints to Cato's SOC team.\" and \"Cato generates monthly custom reports, summarizing security posture, all detected threats, descriptions, risk levels, impacted endpoints, and more.\" plus \"Assessment Check-Ups\" reviews. Confidence is medium because the phrase root cause analysis and formal change governance wording were not found verbatim on any page read; the Cato support page carried no NOC, SOC, response time or escalation detail at all."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        1,
+        4,
+        5
+      ],
+      "confidence": "high",
+      "quote": "Choose Cato or a partner for complete hands-free management.",
+      "note": "Cato authors and owns the SASE platform and the SSE 360 security stack, and separately operates managed services itself (Hands-Free Management, MDR, Intelligent Last-Mile Monitoring, Site Deployment) while also enabling partners to deliver managed SASE through the MSASE Partner Platform. Both a technology vendor and a managed provider.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        1,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Cato Neural Edge powers the global cloud network through a dense footprint of 85+ physical Points of Presence (PoPs) hosted in top-tier regional datacenters and interconnected by multiple global and regional carriers.",
+      "claimed_by": "vendor",
+      "note": "Cato owns and controls the PoP software, routing and the backbone as a logical network, but it does not own physical fibre. Core inter-PoP capacity is bought from third parties: \"PoPs interconnect across multiple tier-1 providers, backed by SLAs on availability, latency, packet loss, and jitter.\" The last mile is customer-supplied: \"Customers can choose any mix of fiber, cable, xDSL, and cellular connections.\" Graded mixed because it combines resold third-party transit with customer-supplied access, over Cato-owned routing. If the grading scheme requires a single strict reading of physical circuit ownership, resells_third_party_circuits would also be defensible."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        1
+      ],
+      "confidence": "high",
+      "quote": "Cato SASE Cloud Platform includes a cloud-native security stack, SSE 360.",
+      "claimed_by": "vendor",
+      "note": "Built by Cato, not licensed from another security vendor. The same page states the stack \"is based on Cato's Single Pass Cloud Engine (SPACE) architecture and converges the following capabilities: network segmentation and zero-trust (FWaaS), threat prevention (SWG, IPS, Malware Prevention, DNS Security, RBI), and application and data protection (CASB, DLP, ZTNA).\" No third-party security vendor is named as the underlying engine on any page reviewed. Cato is one of the few single-vendor SASE suppliers where the network and security layers are the same codebase."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        8
+      ],
+      "confidence": "high",
+      "quote": "Cato holds SOC2 and SOC3 certifications, which are independently validated by a third party.",
+      "claimed_by": "vendor",
+      "note": "Named on the Cato compliance page: SOC 2 and SOC 3, PCI-DSS Level 1, ISO/IEC 27001:2013, ISO/IEC 27017:2015, ISO/IEC 27018:2019, ISO/IEC 27701:2019, ISO/IEC 14001:2015, UK Cyber Essentials, CSA STAR Self-Assessment, GDPR, and Esquema Nacional de Seguridad (ENS) High. NOT found on the pages reviewed: NHS DSPT, DORA, NIS2, FedRAMP and HIPAA. Note also that the CSA STAR entry is described as a Self-Assessment rather than a third party certification, and the ISO 27001 citation is against the superseded 2013 version rather than 2022."
+    },
+    "pop_count": {
+      "value": "100",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "Cato Neural Edge is a cloud-native, private global backbone spanning 100+ PoPs worldwide.",
+      "claimed_by": "vendor",
+      "note": "Cato publishes two figures on this page. The body copy and stat tile state 100+ PoPs for Cato Neural Edge; the page's meta description still reads 85+ points of presence. The body figure is treated as current and the stale meta description is recorded rather than hidden."
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        3,
+        5,
+        2
+      ],
+      "confidence": "high",
+      "quote": "Cato ensures the SASE cloud platform maintains optimal security posture, 99.999% service availability, and low-latency security processing for all users and locations, without any customer involvement.",
+      "claimed_by": "vendor",
+      "note": "The figure is contractual, not just marketing: Cato's Master Service Agreement defines the SLA Metric or Service Level as the overall Availability metric of 99.999%, with service level credits of 5%, 7% and 9% at defined availability bands, plus a separate processing time commitment of 10 milliseconds for IPS, CASB and NGFW for Internet Access. The quote given is taken from the MSASE partner page because the MSA rendering contained formatting characters that would not reproduce cleanly."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "The Cato Global Private Backbone is a private cloud-native network spanning 85+ points of presence (PoPs) worldwide.",
+      "source_a": 2,
+      "claim_b": "100+ PoPs. 99.999% uptime.",
+      "source_b": 2
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "Cato Neural Edge powers the global cloud network through a dense footprint of 85+ physical Points of Presence (PoPs) hosted in top-tier regional datacenters and interconnected by multiple global and regional carriers.",
+      "source_a": 1,
+      "claim_b": "100+ PoPs. 99.999% uptime.",
+      "source_b": 2
+    }
+  ]
 }

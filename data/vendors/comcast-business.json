@@ -15,10 +15,10 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
-    "f05_professional_services_and_migration_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "partial",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,11 +28,11 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "yes",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
-    "f21_private_global_backbone": "yes",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "partial",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
@@ -44,23 +44,25 @@
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "partner_integrated",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "yes"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 34,
-    "partial_count": 3,
+    "yes_count": 28,
+    "partial_count": 8,
     "partner_integrated_count": 3,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "SASE combining SD-WAN and security available fully managed or co-managed, drawing on Masergy AIOps heritage.",
@@ -77,8 +79,8 @@
     "Underlying platform choice should be confirmed; service depth varies by selected platform.",
     "Commercial model bundles access, SD-WAN, SASE and SOC elements; explicit line-item costing required."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "partner_integrated",
@@ -145,7 +147,7 @@
     "agentless": "managed_service_dependent"
   },
   "pop_count": null,
-  "sla_availability_pct": null,
+  "sla_availability_pct": 100.0,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,352 @@
   "value_tier": "mid",
   "cost_note": "Per-site managed pricing, often compelling where Comcast access is on-net in the US.",
   "uk_delivery": "global_managed",
-  "uk_basis": "No UK HQ (US). UK delivery via the Masergy global platform and partners."
+  "uk_basis": "No UK HQ (US). UK delivery via the Masergy global platform and partners.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "SD-WAN solutions - Comcast Business (secure networking)",
+      "url": "https://business.comcast.com/enterprise/products-services/secure-networking/sd-wan",
+      "published": null,
+      "reliability": "Tier 1 supplier product page. Undated. Used for managed service models and SLA framing.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Product Sheet: Masergy Managed SD-WAN Secure (PDF)",
+      "url": "https://business.comcast.com/~/media/business_comcast_com/PDFs/SDN---SD-WAN/Masergy/Product%20Sheet%20%20Masergy%20Managed%20SDWAN%20Secure.pdf",
+      "published": null,
+      "reliability": "Tier 1 supplier datasheet. Undated. Most specific source for SLA figures and for the Fortinet hardware dependency.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Comcast Business, Fortinet, and Exclusive Networks Expand Masergy Guardian Portfolio with New Managed SD-WAN Services Sales Route",
+      "url": "https://business.comcast.com/about-us/press-releases/2023/comcast-business-fortinet-and-exclusive-networks-expand-masergy",
+      "published": "2023-05-10",
+      "reliability": "Tier 1 dated supplier press release. Used for fully managed vs co-managed and the reseller/MSP route.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "SASE (Secure Access Service Edge) | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/products-services/secure-networking/sase",
+      "published": null,
+      "reliability": "Tier 1 supplier product page. Undated. Describes ZTNA, SWG, CASB, FWaaS components and a 99.99% connectivity SLA figure that conflicts with the SD-WAN product sheet.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Comcast Business Partners with Fortinet to Secure Enterprise Application Access with New SASE and SSE Solutions",
+      "url": "https://business.comcast.com/about-us/press-releases/2022/comcast-business-partners-with-fortinet-to-secure-enterprise-application-access",
+      "published": "2022-08-01",
+      "reliability": "Tier 1 dated supplier press release. Primary source for DLP, gateway hosting and the Fortinet/Equinix dependency.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Comcast Business Partners with Fortinet to Secure Enterprise Application Access with New SASE and SSE Solutions (corporate newsroom copy)",
+      "url": "https://corporate.comcast.com/press/releases/comcast-business-fortinet-secure-enterprise-application-access-sase-sse-solutions",
+      "published": "2022-08-01",
+      "reliability": "Tier 1 corporate newsroom copy of the same release, fetched separately to confirm the verbatim wording of the gateway and technology-provider sentences.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Fiber Optic Network & Internet | Comcast Business (Our Network)",
+      "url": "https://business.comcast.com/about-us/our-network",
+      "published": null,
+      "reliability": "Tier 1 supplier network page. Undated. Used for owned fibre footprint and its national, not global, scope.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "SD-WAN Software Defined Networking | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan",
+      "published": null,
+      "reliability": "Tier 1 supplier product page. Undated. Most detailed source for included managed-service elements, 4G LTE backup, equipment replacement SLA and MAC SLOs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Cybersecurity Services | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/products-services/cybersecurity-services",
+      "published": null,
+      "reliability": "Tier 1 supplier page. Undated. Used for the 24/7 SOC statement. Contains no named compliance frameworks.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Comcast Business to Acquire Masergy, a Pioneer in Software-Defined Networking and Cloud Platforms",
+      "url": "https://business.comcast.com/about-us/press-releases/2021/comcast-business-to-acquire-masergy",
+      "published": "2021-08-25",
+      "reliability": "Tier 1 dated supplier press release. Used only for stated international customer reach; contains no PoP or backbone-ownership detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Masergy is now part of Comcast Business (managed security landing page)",
+      "url": "https://business.comcast.com/masergy/managed-security",
+      "published": null,
+      "reliability": "Tier 1 supplier URL but content is now a redirect stub with no product detail. Fetched and yielded no usable evidence.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Masergy Global Gateway (cloud UC global presence page)",
+      "url": "https://business.comcast.com/masergy/solutions/cloud-unified-communications/global-presence/global-gateway",
+      "published": null,
+      "reliability": "Tier 1 supplier URL but content is now a redirect stub. Fetched specifically to find a PoP count and backbone statement; yielded neither.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        3,
+        1,
+        2
+      ],
+      "confidence": "high",
+      "quote": "VARs and MSPs to sell fully managed SD-WAN services (provided entirely by Comcast Business) and co-managed services",
+      "claimed_by": "vendor",
+      "note": "Comcast Business states the fully managed variant is provided entirely by itself. The Masergy product sheet reinforces this with \"all as a globally-available managed service\". Underlying SD-WAN and firewall technology is Fortinet's, but the operating model is Comcast Business end to end."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        8,
+        3,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Managed or co-managed service from a single provider with optional 24/7 monitoring and management",
+      "claimed_by": "vendor",
+      "note": "Co-managed is explicitly offered alongside fully managed on the SD-WAN product page and in the 2023 Masergy Guardian press release. The split of retained customer change rights is not itemised on the pages reviewed."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        3
+      ],
+      "confidence": "low",
+      "quote": "The Masergy Guardian Portfolio™ supports the reseller community with a combined offering that uniquely converges networking, security, and services",
+      "claimed_by": "vendor",
+      "note": "Evidence supports a reseller/VAR/MSP sales route only. No page reviewed evidences tenant isolation, delegated administration, branded partner portals or templates, which the definition requires for a full yes. Graded partial on the reseller-programme evidence alone."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partial",
+      "evidence": [
+        8,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "A single project management partner",
+      "claimed_by": "vendor",
+      "note": "The SD-WAN page lists \"Network configuration with solution architects\", \"Installation validation\" and \"Network consultation and access to SD-WAN experts (post installation)\", which covers design and implementation. No evidence found of documented migration runbooks, rollback plans, pilots or training programmes, so graded partial rather than yes."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        8,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Equipment replacement SLA — 24x7x4 (On-Net) and 8X5XNBD (Off-Net)",
+      "claimed_by": "vendor",
+      "note": "Hardware replacement is contractually covered as part of the managed service. No statement found on the pages reviewed covering firmware upgrades, patching, renewals or end-of-life planning, so graded partial. CPE is Fortinet hardware per the Masergy product sheet."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        8
+      ],
+      "confidence": "medium",
+      "quote": "Help keep your network running with 4G LTE backup.",
+      "claimed_by": "vendor",
+      "note": "4G LTE is documented as a backup transport. No evidence found on the pages reviewed for 5G, for cellular as a primary transport, or for SIM management and signal monitoring, so graded partial."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        6,
+        5
+      ],
+      "confidence": "high",
+      "quote": "Comcast Business Secure Gateways are hosted across the United States at Equinix data centers, offering up to 10 gigabits per second (Gbps) of cloud connectivity for public, private, or hybrid cloud deployments.",
+      "claimed_by": "vendor",
+      "note": "Comcast Business brands and operates the Secure Gateways, but the enforcement stack is Fortinet technology and the hosting fabric is Equinix, per the same release: \"Fortinet's security-driven networking technology and Equinix's flexible cloud connection Equinix Fabric™ for a complete secure network service.\" Under the definition this is partner_integrated, not yes. Footprint stated as United States only."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        4,
+        12
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the SASE page, the Fortinet SASE/SSE press releases and the Masergy global gateway page. Secure Gateways are described as shared infrastructure hosted at Equinix; no offer of customer-hosted, dedicated or sovereign PoPs was found."
+    },
+    "f21_private_global_backbone": {
+      "value": "partial",
+      "evidence": [
+        7,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "Our high-speed, high-capacity internet operates across our vast and growing hybrid fiber-coax network, with more than 350,000 miles of fiber.",
+      "claimed_by": "vendor",
+      "note": "The owned network described is national, not global: \"Our vast and growing footprint spans 29 regional networks in 39 states\". Masergy reach is described commercially as \"serving more than 1,400 customers in nearly 100 countries\" but no page reviewed states that inter-region traffic rides a Comcast-owned or Comcast-controlled global backbone. Per the definition, a single-country network is graded partial."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        2,
+        8,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Our service level agreements (SLAs) are trailblazing in the industry, with 100% uptime for all high availability-configured Masergy SD-WAN Secure sites, 100% cloud service reachability for AWS, Azure, and 200+ providers, along with an industry-leading 5-minute proactive outage notification.",
+      "claimed_by": "vendor",
+      "note": "Contractual commitments cover uptime, cloud reachability, outage notification, equipment replacement (24x7x4 on-net) and change handling (\"MAC SLOs (simple/complex) — 30 minutes/12 hours\"), with service credits stated in the product sheet."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        2,
+        6,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Powered by industry-leading Fortinet® hardware",
+      "claimed_by": "vendor",
+      "note": "The firewall and NGFW functions are Fortinet technology that Comcast Business bundles and manages. The 2022 release lists \"Firewall-as-a-Service (FWaaS), Intrusion Prevention (IPS), Data Loss Prevention (DLP), Cloud Access Security Brokers (CASB), and Zero Trust Network Access (ZTNA).\" delivered on Fortinet's stack. Cisco SD-WAN is also resold. Graded partner_integrated per the definition."
+    },
+    "f33_data_loss_prevention": {
+      "value": "partner_integrated",
+      "evidence": [
+        6,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "Firewall-as-a-Service (FWaaS), Intrusion Prevention (IPS), Data Loss Prevention (DLP), Cloud Access Security Brokers (CASB), and Zero Trust Network Access (ZTNA).",
+      "claimed_by": "vendor",
+      "note": "DLP is named as part of the SASE/SSE offer but is delivered on Fortinet's security-driven networking technology, so partner_integrated rather than yes. No detail found on classification depth, blocking versus flagging, alerting or exception workflows."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        9,
+        8,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Get 24/7 customer support with experts at security operations centers (SOCs).",
+      "claimed_by": "vendor",
+      "note": "24/7 SOC support and \"Proactive monitoring, ticket creation, and remediation\" are documented. No page reviewed evidences ownership of incidents through to root cause analysis, structured service reviews or formal change governance, so graded partial rather than yes."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        3,
+        2,
+        6,
+        7
+      ],
+      "confidence": "high",
+      "quote": "VARs and MSPs to sell fully managed SD-WAN services (provided entirely by Comcast Business) and co-managed services",
+      "note": "Comcast Business operates a network and a managed service wrapper; the SD-WAN and security technology it delivers is Fortinet's (and Cisco's in other variants), and the SASE/SSE gateway fabric is Equinix. It is not authoring the SD-WAN or SSE product itself on the evidence reviewed, so managed_provider rather than both.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        7,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "Our high-speed, high-capacity internet operates across our vast and growing hybrid fiber-coax network, with more than 350,000 miles of fiber.",
+      "claimed_by": "vendor",
+      "note": "Comcast Business owns extensive last-mile and metro fibre in the United States and describes itself as \"the largest facilities-based, last-mile alternative to the phone company in the U.S.\" Outside that footprint it clearly rides third-party access, evidenced by the on-net versus off-net distinction in its own SLA table (\"Equipment replacement SLA — 24x7x4 (On-Net) and 8X5XNBD (Off-Net)\"), and customer-provided underlays are supported. Hence mixed rather than owns_own_circuits."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        6,
+        5,
+        2
+      ],
+      "confidence": "high",
+      "quote": "Fortinet's security-driven networking technology and Equinix's flexible cloud connection Equinix Fabric™ for a complete secure network service.",
+      "claimed_by": "vendor",
+      "note": "Fortinet. The SASE and SSE stack (FWaaS, IPS, DLP, CASB, ZTNA) is Fortinet technology delivered through Comcast Business Secure Gateways hosted in Equinix data centres; Equinix supplies the interconnection fabric. The Masergy SD-WAN Secure product sheet separately confirms the edge is \"Powered by industry-leading Fortinet® hardware\". Cisco is a further third-party SD-WAN option in the wider portfolio."
+    },
+    "regulatory_documentation": {
+      "value": "not_found",
+      "evidence": [
+        9,
+        4,
+        1,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the cybersecurity services page, the SASE page and both SD-WAN product pages. No NHS DSPT, DORA, NIS2, ISO 27001, SOC 2, PCI DSS or HIPAA attestation was named on any page fetched, and no trust centre page was located. Targeted searches for a Comcast Business compliance or trust page returned no supplier-hosted result."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        4,
+        12,
+        7
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The 2022 SASE/SSE release says Secure Gateways are \"hosted across the United States at Equinix data centers\" but publishes no count. The Masergy global gateway page is now a redirect stub. The Our Network page publishes fibre miles and \"29 regional networks in 39 states\" but no PoP figure."
+    },
+    "sla_availability_pct": {
+      "value": "100",
+      "evidence": [
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Our service level agreements (SLAs) are trailblazing in the industry, with 100% uptime for all high availability-configured Masergy SD-WAN Secure sites, 100% cloud service reachability for AWS, Azure, and 200+ providers, along with an industry-leading 5-minute proactive outage notification.",
+      "claimed_by": "vendor",
+      "note": "The 100% figure is conditional: it applies only to high availability-configured Masergy SD-WAN Secure sites, not to all sites. A different figure, 99.99%, appears on the SASE page for dedicated connectivity solutions. Conflict recorded; not resolved."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "100% uptime for all high availability-configured Masergy SD-WAN Secure sites",
+      "source_a": 2,
+      "claim_b": "Dedicated connectivity solutions with 99.99% SLAs",
+      "source_b": 4
+    },
+    {
+      "field": "f27_integrated_next_generation_firewall",
+      "claim_a": "Masergy SD-WAN Secure product sheet states the service is \"Powered by industry-leading Fortinet® hardware\"",
+      "source_a": 2,
+      "claim_b": "Comcast Business also markets a managed SD-WAN built on Cisco technology, indicating more than one third-party underlying stack",
+      "source_b": 3
+    }
+  ]
 }

@@ -14,11 +14,11 @@
   "capabilities": {
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
-    "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f03_co_managed_service": "partial",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,10 +28,10 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "yes",
+    "f17_cellular_and_5g_support": "unknown",
     "f18_cloud_on_ramp": "yes",
-    "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -44,7 +44,7 @@
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "unknown",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
@@ -54,13 +54,15 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 34,
-    "partial_count": 3,
-    "partner_integrated_count": 3,
+    "yes_count": 31,
+    "partial_count": 4,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 4,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.9,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Global managed network leadership with strong service assurance, NOC depth and field operations.",
@@ -77,8 +79,8 @@
     "Commercial model is bespoke; rate cards and change costs need careful scoping.",
     "DIY/self-managed model is not the primary positioning."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -144,8 +146,8 @@
     "chromeos": "managed_service_dependent",
     "agentless": "managed_service_dependent"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 400,
+  "sla_availability_pct": 100.0,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,528 @@
   "value_tier": "premium",
   "cost_note": "Per-site managed on term; premium, with Orange Cyberdefense operations included.",
   "uk_delivery": "uk_entity",
-  "uk_basis": "UK contracting entity (Orange Business UK) of a French parent, with UK delivery."
+  "uk_basis": "UK contracting entity (Orange Business UK) of a French parent, with UK delivery.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Network Solutions / SD-WAN landing page | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/network-solutions/sd-wan",
+      "published": null,
+      "reliability": "Supplier's own page. Generic portfolio landing content, little product detail; used only for orientation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Flexible SD-WAN (product page) | Orange Business",
+      "url": "https://www.orange-business.com/en/products/flexible-sd-wan",
+      "published": null,
+      "reliability": "Supplier's own product page. Returned mostly portfolio navigation content; superseded by the fuller solutions page (register 4).",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "SASE solutions: Cisco technology meets Orange integration | Orange Business",
+      "url": "https://www.orange-business.com/en/partners/sase-solutions-cisco-technology-meets-orange-integration",
+      "published": null,
+      "reliability": "Supplier's own partner page. Confirms the Cisco technology plus Orange integration model; thin on technical specifics.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Flexible SD-WAN | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international",
+      "published": null,
+      "reliability": "Supplier's own primary SD-WAN page. Richest single source: PoP count, SLA, service journey, partner list. Key quotes re-verified on a second pass with a different prompt.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "IDC MarketScape: Worldwide Managed SASE Services 2025 | Orange Business",
+      "url": "https://www.orange-business.com/en/about-us/analysts/idc-marketscape-worldwide-managed-sase-services",
+      "published": "2025",
+      "reliability": "Supplier's own page reporting a third-party analyst placement. Used for the vendor's own quoted statements about its partner-based SASE model, not for the analyst rating itself.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Orange Business, Orange Cyberdefense and Palo Alto Networks join forces to deliver cloud-native SASE (press release)",
+      "url": "https://www.orange-business.com/en/press/orange-business-orange-cyberdefense-palo-alto-networks-join-forces-deliver-cloud-native",
+      "published": null,
+      "reliability": "Supplier press release. Dated line not captured in the fetch; names Prisma SASE as the security technology.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Network solutions | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/network-solutions",
+      "published": null,
+      "reliability": "Supplier's own page. Source for network ownership and service centre statements.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Business VPN Galerie | Orange Business",
+      "url": "https://www.orange-business.com/en/products/business-vpn-galerie",
+      "published": null,
+      "reliability": "Supplier's own product page. Explicit availability and GTTR commitments and private cloud on-ramp statements.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Connectivity | Orange Business",
+      "url": "https://www.orange-business.com/en/connectivity",
+      "published": null,
+      "reliability": "Supplier's own hub page. Checked for cellular and 5G WAN transport; no relevant statement found.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Business VPN | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/internet-networks/business-vpn",
+      "published": null,
+      "reliability": "Supplier's own product page. Source for the fully-managed statement, 220-country reach and a conflicting 99.95% availability figure.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Catalogue | Orange Business",
+      "url": "https://www.orange-business.com/en/products",
+      "published": null,
+      "reliability": "Supplier's own product catalogue. Used to confirm which named products exist (and that no DLP or 4G/5G access product is listed).",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "SASE (Secure Access Service Edge) | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/sase-secure-access-service-edge",
+      "published": null,
+      "reliability": "Supplier's own page but returned only high-level marketing copy; carried no gradeable detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "SASE (Secure Access Service Edge) | Orange Business Belgium",
+      "url": "https://www.orange-business.com/be-en/expertise/enjoy-scalable-responsive-secure-digital-infrastructure/sase-secure-access-service-edge",
+      "published": null,
+      "reliability": "Supplier's own country page. Source for the named SASE technology partners and the 24/7/365 monitoring and security headcount figures.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Orange Business Services and Fortinet partner on SASE (press release)",
+      "url": "https://www.orange-business.com/en/press/orange-business-services-and-fortinet-partner-sase-create-secure-seamless-and-scalable-cloud",
+      "published": "2022-03-09",
+      "reliability": "Dated supplier press release. Clear statement that the managed service runs on Orange telco cloud infrastructure using Fortinet technology. Older than other sources, so used for model rather than current specifications.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "ISO 27001 Certification | Orange Business",
+      "url": "https://www.orange-business.com/en/about-us/our-certifications/iso-27001",
+      "published": null,
+      "reliability": "Supplier's own certification page with named scope and locations. Strong evidence for regulatory documentation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Our certifications | Orange Business",
+      "url": "https://www.orange-business.com/en/about-us/our-certifications",
+      "published": null,
+      "reliability": "Supplier's own certification index. Enumerates the named frameworks held.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "IDC MarketScape: Worldwide Managed SD-WAN Services 2025 | Orange Business",
+      "url": "https://www.orange-business.com/en/about-us/analysts/idc-marketscape-worldwide-managed-sdwan-services",
+      "published": "2025",
+      "reliability": "Supplier's own page reporting an analyst placement. Used for the supplier's own quoted statements about operating models and partner breadth.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Secure Gateway (product) | Orange Business",
+      "url": "https://www.orange-business.com/en/products/secure-gateway",
+      "published": null,
+      "reliability": "Supplier's own product page. Names the underlying firewall vendors and the managed 24x7 wrapper.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Secure Gateway | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/security/secure-gateway",
+      "published": null,
+      "reliability": "Supplier's own solution page. Source for the firewall-at-the-heart wording and the ISO 20000 / SOC 27001 certification statement.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Mobile Private Networks Global services | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/mobile-private-networks-global-services",
+      "published": null,
+      "reliability": "Supplier's own page. Documents private 4G/5G networks, which is a different capability from cellular WAN transport; used only to explain why f17 is unknown, and for a conflicting availability figure.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "SD-WAN from Orange Business Services (focus page)",
+      "url": "https://www.orange-business.com/en/focus/sd-wan",
+      "published": null,
+      "reliability": "Supplier's own page. Checked for co-managed and cellular detail; returned no gradeable content.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 3,
+      "title": "The SD-WAN \"DIY or managed services\" conundrum (blog) | Orange Business",
+      "url": "https://www.orange-business.com/en/blogs/sd-wan-diy-or-managed-services-conundrum",
+      "published": null,
+      "reliability": "Undated supplier blog, corroboration only. No date printed and no service-model detail returned, so it carries no grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Evolution Platform | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/evolution-platform",
+      "published": null,
+      "reliability": "Supplier's own page. Checked for multi-tenancy, self-service and operating models; returned only high-level catalogue copy.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Business VPN Internet | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/internet-networks/business-vpn-internet",
+      "published": null,
+      "reliability": "Supplier's own product page. Best evidence that the internet gateway estate is Orange-owned and Orange-invested.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Fortinet partner page | Orange Business",
+      "url": "https://www.orange-business.com/en/about-us/partners/fortinet",
+      "published": null,
+      "reliability": "Supplier's own partner page. Direct statement that Fortinet Secure SD-WAN underpins the Flexible SD-WAN offering.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 26,
+      "tier": 4,
+      "title": "Managed Secure Access | Orange Cyberdefense",
+      "url": "https://orangecyberdefense.com/global/managed-secure-access",
+      "published": null,
+      "reliability": "Not used as evidence: URL returned HTTP 404, so no content was read and nothing can be graded from it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 27,
+      "tier": 4,
+      "title": "SASE solutions | Orange Cyberdefense",
+      "url": "https://orangecyberdefense.com/global/solutions/sase",
+      "published": null,
+      "reliability": "Not used as evidence: URL returned HTTP 404, so no content was read. This was the most likely home for DLP and SSE component detail, and its absence is why f33 is unknown.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 28,
+      "tier": 4,
+      "title": "Orange Business | Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Orange_Business",
+      "published": null,
+      "reliability": "Not used as evidence: Wikipedia is excluded by the source-tier rules. Appeared in search results only and was not opened.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4,
+        7,
+        9,
+        10
+      ],
+      "confidence": "high",
+      "quote": "Business VPN is a fully-managed, business-class IP MPLS VPN service",
+      "claimed_by": "vendor",
+      "note": "Orange Business is a carrier-operated managed provider. Corroborated on the Galerie page (\"fully managed 24*7 by Orange in coordination with your cloud service providers\") and by the Flexible SD-WAN service journey, where Orange runs discovery, design, deployment (\"A technician then visits my site to configure and finalize the setup\"), management and monitoring. The quote cited is for Business VPN rather than SD-WAN specifically."
+    },
+    "f03_co_managed_service": {
+      "value": "partial",
+      "evidence": [
+        4
+      ],
+      "confidence": "low",
+      "quote": "I manage my Flexible SD-WAN solution through an administration portal",
+      "claimed_by": "vendor",
+      "note": "The Flexible SD-WAN service journey gives the customer a configuration and monitoring portal while Orange retains design, deployment and support, which is consistent with shared responsibility. However, no page reviewed uses the words co-managed or co-management, or sets out an explicit split of change rights. Graded partial rather than yes for that reason. Searched orange-business.com for \"co-managed\"/\"co-management\" with no product page result."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [
+        4,
+        11,
+        23
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Flexible SD-WAN page, the product catalogue, the Evolution Platform page and the SASE pages for tenant isolation, delegated administration, branded portals or reseller/white-label programmes. Orange Business presents itself as the managed service provider to the end customer rather than as a platform other MSPs rebrand."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        4,
+        11,
+        17
+      ],
+      "confidence": "medium",
+      "quote": "An expert is assigned to design my Flexible SD-WAN solution, ensuring it meets my business needs",
+      "claimed_by": "vendor",
+      "note": "The Flexible SD-WAN service journey documents Discovery (\"Together with Orange Business experts, I define my use cases\"), Assessment (\"Together with Orange Business teams, I co-develop a test plan tailored to my requirements and aligned with my performance objectives\") and ongoing \"Orange Business SD-WAN consulting services\". The product catalogue also lists \"Professional Services: our cloud experts at your service\". Discovery, pilot and design are evidenced; migration runbooks, rollback plans and training are not named on any page reviewed, hence medium confidence."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        4,
+        8,
+        10
+      ],
+      "confidence": "low",
+      "quote": "Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours.",
+      "claimed_by": "vendor",
+      "note": "Break-fix and repair commitments are documented (five hour issue resolution on Flexible SD-WAN, \"4-hour guaranteed time to repair (GTTR)\" on Galerie, \"5 hour Guaranteed Time To Repair\" on Business VPN), and Orange performs on-site installation. No page reviewed states that firmware upgrades, patching, licence renewals or end-of-life planning are included in the service, so this is graded partial rather than yes."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "unknown",
+      "evidence": [
+        4,
+        9,
+        10,
+        20,
+        24,
+        25
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Flexible SD-WAN page, the Business VPN and Business VPN Internet pages, the Connectivity hub and the Fortinet partner page for 4G/5G as WAN transport, SIM management or signal monitoring, and found no such statement. The Mobile Private Networks page does discuss private 4G/5G (\"A packaged radio access network based on 4 indoor antennas and managed services that allow you to test private 5G in your own environment on a limited area.\"), but that is a separate private-network product and is not evidence of cellular as SD-WAN primary or failover transport under this definition. Orange is a mobile network operator, but absence of a quote means unknown, not inferred yes."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        4,
+        8,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Orange Business has invested in 16 global Internet gateways on five continents.",
+      "claimed_by": "vendor",
+      "note": "These are Orange's own gateways, not a third party's: \"These distributed Internet gateways break traffic out closer to the user to eliminate the latency caused by the long physical distances between the user, the gateway and the destination web site.\" Orange also publishes \"400 Points of Presence globally\" and operates the Galerie cloud gateway service. Caveat: the security enforcement running in the SASE PoPs is partner technology (Palo Alto Networks, Fortinet), so the gateway estate is Orange's own but the security stack inside it is not."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        4,
+        18,
+        19,
+        16
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Flexible SD-WAN, Secure Gateway, Business VPN Internet and certifications pages for customer-hosted, dedicated or sovereign PoP options. The Secure Gateway page refers to web reputation \"integrated into next-gen firewalls or delivered on a dedicated platform\", which is about the security platform rather than a dedicated PoP, and Orange holds a SecNumCloud qualification for sovereign cloud, but neither is a statement that PoPs can be supplied as dedicated or customer-hosted deployments."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        7,
+        8,
+        4,
+        10
+      ],
+      "confidence": "high",
+      "quote": "Orange Business uses its own network to create the digital services of tomorrow.",
+      "claimed_by": "vendor",
+      "note": "Corroborated by the Galerie statement that \"Your sites, traffic and data are not exposed to the public Internet\", by the network solutions page claim \"#1 Global voice and data network\", by \"400 Points of Presence globally\" and by \"global reach covering 220 countries and territories\". This is a genuinely international backbone rather than a single-country network."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        4,
+        8,
+        10
+      ],
+      "confidence": "high",
+      "quote": "Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours.",
+      "claimed_by": "vendor",
+      "note": "Availability and time-to-repair commitments are published across Flexible SD-WAN, Business VPN (\"99.95% site availability\" and \"5 hour Guaranteed Time To Repair\") and Galerie (\"Orange Business commits to 100% Galerie availability and 4-hour guaranteed time to repair (GTTR)\"). Latency, jitter and loss commitments and change-handling SLAs were not found on the pages reviewed."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        19,
+        18,
+        25,
+        14,
+        6
+      ],
+      "confidence": "high",
+      "quote": "Secure Gateway consists of a new-generation firewall at the heart of the service",
+      "claimed_by": "vendor",
+      "note": "The firewall function is present but the technology belongs to third parties Orange resells and manages. The Secure Gateway page names Fortinet and Palo Alto as its partners, the Fortinet partner page states \"Orange Business has chosen Fortinet Secure SD-WAN to enhance the Flexible SD-WAN offering, providing clients of all sizes worldwide with a security-focused solution\", and the Palo Alto press release names \"Prisma® SASE (Prisma Access + Prisma SD-WAN)\". Orange authors the management and service wrapper, not the firewall engine, hence partner_integrated rather than yes."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [
+        18,
+        19,
+        13,
+        12
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Secure Gateway product and solution pages, the group SASE page and the Belgian SASE page; none mention data loss prevention, content classification or sensitive-data blocking. Two Orange Cyberdefense URLs that might have carried DLP detail returned 404. Underlying partner platforms (Palo Alto, Fortinet, Netskope, Zscaler) include DLP, but Orange publishes no statement of its own, so this is unknown rather than partner_integrated."
+    },
+    "f40_managed_service_assurance": {
+      "value": "yes",
+      "evidence": [
+        19,
+        13,
+        7,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "Personalized services fully managed and supervised by our experts 24x7",
+      "claimed_by": "vendor",
+      "note": "Corroborated by \"Managed Firewall is ISO 20000 certified, and our SOCs are 27001 certified\" on the same page, by \"24/7/365 continuous monitoring of security systems worldwide\" and \"3,000+ multi-skilled cybersecurity experts\" on the Belgian SASE page, and by \"6 Major Service Centers covering all continents\" on the network solutions page. Round-the-clock NOC and SOC monitoring is well evidenced; formal root cause analysis ownership and structured service review or change governance are not explicitly stated on the pages reviewed, hence medium confidence."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        14,
+        6,
+        4,
+        17
+      ],
+      "confidence": "high",
+      "quote": "It delivers a secure and managed service from the Orange telco cloud infrastructure, boosted by cybersecurity expertise and capabilities with Orange Cyberdefense.",
+      "note": "Orange Business operates the service and owns the underlying network and gateway estate, but the SD-WAN and security technology is authored by partners (Fortinet, Cisco, VeloCloud, Palo Alto Networks). Its own Evolution Platform is an orchestration and service-catalogue layer rather than an SD-WAN or SSE product, so this is a managed provider rather than \"both\".",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "owns_own_circuits",
+      "evidence": [
+        7,
+        24,
+        8,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Orange Business uses its own network to create the digital services of tomorrow.",
+      "claimed_by": "vendor",
+      "note": "Orange Business is the enterprise arm of a facilities-based carrier and states ownership of its network and gateway estate (\"Orange Business has invested in 16 global Internet gateways on five continents.\", \"400 Points of Presence globally\", \"#1 Global voice and data network\"). Confidence is medium rather than high because reach of \"more than 220 countries and territories\" almost certainly involves third-party access circuits outside Orange's own footprint, but no page reviewed states this, so \"mixed\" would be an inference rather than a sourced grade."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        5,
+        13,
+        14,
+        6,
+        25,
+        19
+      ],
+      "confidence": "high",
+      "quote": "For SASE, this recognition highlights our unique expertise in both connectivity and security, thanks to our ability to offer a broad range of technology partners, supporting both 'single vendor' and 'dual vendor' models.",
+      "claimed_by": "vendor",
+      "note": "Vendors named across Orange's own pages: Palo Alto Networks (Prisma SASE / Prisma Access), Fortinet (Fortinet Secure SD-WAN, and \"Fortinet is among the first partners to collaborate with Evolution Platform to co-innovate and deliver a SASE solution for network and security convergence\"), Cisco, VMware VeloCloud, Zscaler and Netskope. Orange builds the orchestration, integration and managed operations layer and hosts it on its own telco cloud infrastructure, but it does not author the SSE stack itself."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        15,
+        16,
+        19
+      ],
+      "confidence": "high",
+      "quote": "Our long-standing ISO27001 certification reflects our deep commitment to information security and risk management.",
+      "claimed_by": "vendor",
+      "note": "Frameworks named on Orange Business's own certification pages: ISO 27001 (with published scope covering \"Design, Engineering, Sales, Deployment and Support of Information and Communication Technology services, Business Cloud services and Outsourcing contracts\"), SOC2 Type II, CISPE RGPD/GDPR compliance, HDS, SecNumCloud and TISAX. NIS2 appears as alignment rather than certification: \"This certification supports alignment with the EU's NIS2 Directive, strengthening cybersecurity across critical sectors.\" The Secure Gateway page adds ISO 20000 for Managed Firewall and ISO 27001 for the SOCs. NOT found on any page reviewed: NHS DSPT and DORA."
+    },
+    "pop_count": {
+      "value": "400",
+      "evidence": [
+        4
+      ],
+      "confidence": "high",
+      "quote": "400 Points of Presence globally, ensuring low-latency connections and a vast networking infrastructure.",
+      "claimed_by": "vendor",
+      "note": "Published on the Flexible SD-WAN page and re-verified on a second fetch with a different prompt. Note a separate and narrower figure on the Business VPN Internet page: \"Orange Business has invested in 16 global Internet gateways on five continents.\" These count different things (network PoPs versus internet breakout gateways) but are recorded in conflicts for transparency."
+    },
+    "sla_availability_pct": {
+      "value": "100",
+      "evidence": [
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours.",
+      "claimed_by": "vendor",
+      "note": "Graded from the Flexible SD-WAN page, which is the product in scope for this shortlist, and re-verified on a second fetch. Confidence is medium rather than high because Orange publishes different figures for adjacent products: 99.95% site availability for Business VPN, 100% availability with a four hour GTTR for Galerie, and 99,98% continuous network availability for Mobile Private Networks. All are recorded in conflicts; not resolved here."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours.",
+      "source_a": 4,
+      "claim_b": "99.95% site availability",
+      "source_b": 10
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours.",
+      "source_a": 4,
+      "claim_b": "Orange Business commits to 100% Galerie availability and 4-hour guaranteed time to repair (GTTR)",
+      "source_b": 8
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours.",
+      "source_a": 4,
+      "claim_b": "Orange Business guarantees a continuous network availability of 99, 98%, with only 5 minutes of downtime per annum.",
+      "source_b": 20
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "400 Points of Presence globally, ensuring low-latency connections and a vast networking infrastructure.",
+      "source_a": 4,
+      "claim_b": "Orange Business has invested in 16 global Internet gateways on five continents.",
+      "source_b": 24
+    }
+  ]
 }

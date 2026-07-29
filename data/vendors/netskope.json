@@ -11,13 +11,13 @@
   "cost_model": "Quote-based subscription; modules commonly priced by users, sites, traffic and security functions.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "managed_service_dependent",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "managed_service_dependent",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "partial",
     "f10_dynamic_path_selection": "partial",
@@ -27,16 +27,16 @@
     "f14_packet_loss_remediation": "partial",
     "f15_local_internet_breakout": "partial",
     "f16_mpls_coexistence_and_migration": "partial",
-    "f17_cellular_and_5g_support": "unknown",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
-    "f20_private_pops_dedicated_pops": "unknown",
-    "f21_private_global_backbone": "partial",
+    "f20_private_pops_dedicated_pops": "yes",
+    "f21_private_global_backbone": "unknown",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "partial",
     "f25_high_availability_design": "partial",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "yes",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
@@ -50,16 +50,18 @@
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 19,
-    "partial_count": 11,
-    "partner_integrated_count": 8,
-    "managed_service_dependent_count": 0,
-    "unknown_count": 2,
+    "yes_count": 23,
+    "partial_count": 13,
+    "partner_integrated_count": 1,
+    "managed_service_dependent_count": 2,
+    "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Strong CASB heritage; widely recognised as a leading SSE vendor for SaaS-heavy environments.",
@@ -76,8 +78,8 @@
     "Managed delivery is partner-led; first-party managed service is limited.",
     "Premium pricing with modular structure; full SASE bundle costs can scale meaningfully with users and traffic."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -142,7 +144,7 @@
     "chromeos": "partial",
     "agentless": "yes"
   },
-  "pop_count": 75,
+  "pop_count": 120,
   "sla_availability_pct": 99.999,
   "support_model": {
     "follow_the_sun_24x7": "yes",
@@ -178,5 +180,431 @@
   "value_tier": "mid",
   "cost_note": "Per-user subscription, premium-adjacent but mid versus the most expensive SSE leaders.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). UK NewEdge presence; delivered direct or via UK security MSPs."
+  "uk_basis": "No UK HQ (US). UK NewEdge presence; delivered direct or via UK security MSPs.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Netskope NewEdge Network",
+      "url": "https://www.netskope.com/netskope-one/newedge",
+      "published": null,
+      "reliability": "Supplier's own product page. Primary source for PoP counts and network ownership claims. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Netskope Sets New Industry Benchmarks for Cloud Security Performance; Announces Industry-First SLA to Address Encrypted Traffic Processing",
+      "url": "https://www.netskope.com/press-releases/netskope-sets-new-industry-benchmarks-for-cloud-security-performance",
+      "published": null,
+      "reliability": "Supplier press release. Primary source for published availability and latency SLA figures. Date not captured from the page body; its region count is clearly older than the current NewEdge page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Netskope NewEdge data sheet (2026-03)",
+      "url": "https://www.netskope.com/wp-content/uploads/2026/03/2026-03-NewEdge-DS-333-12.pdf",
+      "published": "2026-03",
+      "reliability": "Supplier datasheet PDF, dated by filename. Primary source for peering, internet exchange presence and Embedded Data Plane dedicated deployments.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Netskope One Firewall as a Service",
+      "url": "https://www.netskope.com/products/firewall",
+      "published": null,
+      "reliability": "Supplier product page. Primary source for firewall and IPS being native to the platform and delivered from NewEdge. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Netskope One Next Generation Secure Web Gateway (SWG)",
+      "url": "https://www.netskope.com/products/next-gen-swg",
+      "published": null,
+      "reliability": "Supplier product page. Corroborates web categorisation, anti-malware and single-pass TLS inspection in the same platform. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Netskope Enables MSPs to Generate Revenue Faster with Launch of New Catalyst MSP/SP Program and Netskope Partner Orchestrator",
+      "url": "https://www.netskope.com/press-releases/netskope-enables-msps-to-generate-revenue-faster-with-launch-of-new-catalyst-msp-sp-program-and-netskope-partner-orchestrator",
+      "published": "2026-06-17",
+      "reliability": "Supplier press release with a publication date. Primary source for multi-tenant orchestration and delegated partner-tier administration.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Professional Services - Achieve your security vision",
+      "url": "https://www.netskope.com/company/professional-services",
+      "published": null,
+      "reliability": "Supplier services page. Primary source for implementation, migration and training services. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Netskope One Data Loss Prevention (DLP)",
+      "url": "https://www.netskope.com/products/data-loss-prevention",
+      "published": null,
+      "reliability": "Supplier product page. Primary source for DLP classification, coaching and incident workflow. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Netskope Technical Support",
+      "url": "https://www.netskope.com/netskope-technical-support",
+      "published": null,
+      "reliability": "Supplier support page. Primary source for 24/7/365 support operation and support tiers. Contains no NOC/SOC or root cause analysis commitments. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Customer Solutions",
+      "url": "https://www.netskope.com/customer-solutions",
+      "published": null,
+      "reliability": "Supplier page covering professional services, technical support and customer success. Read specifically to test for a Netskope-operated managed service; none described. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Wireless WAN & Cellular Gateway",
+      "url": "https://www.netskope.com/products/wireless-wan",
+      "published": null,
+      "reliability": "Supplier product page. Primary source for 5G SA, eSIM and cellular signal monitoring. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Netskope One Converged Gateway",
+      "url": "https://www.netskope.com/products/converged-gateway",
+      "published": null,
+      "reliability": "Supplier product page. Corroborates built-in 4G/5G and Zero Trust SIM. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Netskope One SD-WAN data sheet",
+      "url": "https://www.netskope.com/wp-content/uploads/2022/07/2025-06-Netskope-One-SD-WAN-DS-607-9.pdf",
+      "published": "2025-06",
+      "reliability": "Supplier datasheet PDF, dated by filename. Primary source for zero-touch activation and one-click RMA. Silent on firmware patching.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Security, Compliance and Assurance",
+      "url": "https://www.netskope.com/company/security-compliance-and-assurance",
+      "published": null,
+      "reliability": "Supplier compliance page. Names SOC reports, CCPA, CIS and FedRAMP. Page body was truncated on fetch so the full framework list could not be confirmed. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Netskope Raises The Bar With Expanded Data Sovereignty Support in Two Dozen Countries",
+      "url": "https://www.netskope.com/press-releases/netskope-raises-the-bar-with-expanded-data-sovereignty-support-in-two-dozen-countries",
+      "published": "2026-05-28",
+      "reliability": "Supplier press release with a publication date. Corroborates the 120+ data centre and 80+ region figures and in-country processing and storage.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 2,
+      "title": "Netskope gives MSPs more control over managed SASE delivery (ChannelE2E, Suparna Chawla Bhasin)",
+      "url": "https://www.channele2e.com/news/netskope-gives-msps-more-control-over-managed-sase-delivery",
+      "published": "2026-06-18",
+      "reliability": "Named-author dated trade journalism. Used to establish that managed SASE around Netskope is built and delivered by MSP partners.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Netskope Launches New Managed Service Provider Program to Enable Partners to Grow Revenue",
+      "url": "https://www.netskope.com/press-releases/netskope-launches-new-managed-service-provider-program-to-enable-partners-to-grow-revenue-and-help-customers-quickly-and-easily-unlock-sases-full-potential",
+      "published": "2023-07-18",
+      "reliability": "Supplier press release. Fetched but returned a truncated body with no usable sentences on managed, co-managed or white-label delivery, so no grade rests on it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Netskope Premium Plus",
+      "url": "https://www.netskope.com/resources/netskope-resources/netskope-premium-plus",
+      "published": null,
+      "reliability": "Supplier resource landing page. Fetch returned only navigation and a one-line abstract; the underlying datasheet was not reachable, so no grade rests on it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Netskope NewEdge (netskope.com/netskope-newedge)",
+      "url": "https://www.netskope.com/netskope-newedge",
+      "published": null,
+      "reliability": "Not used as evidence. The fetch was blocked by the site's robots.txt rules, so the page content was never read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "Netskope NewEdge Network product listing, SoftwareOne Marketplace",
+      "url": "https://platform.softwareone.com/product/netskope-newedge-network/PCP-3832-0499",
+      "published": null,
+      "reliability": "Not used as evidence. Reseller marketplace listing surfaced in search; Tier 3 at best and not fetched, so it cannot carry any grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Netskope extends data localization capabilities with NewEdge updates (Help Net Security)",
+      "url": "https://www.helpnetsecurity.com/2026/05/29/netskope-newedge-network-enhancements/",
+      "published": "2026-05-29",
+      "reliability": "Not used as evidence. Restatement of supplier press release 15; the supplier original was read instead.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "managed_service_dependent",
+      "evidence": [
+        10,
+        16,
+        6
+      ],
+      "confidence": "medium",
+      "quote": "build managed SASE services around Netskope's platform",
+      "claimed_by": "third_party",
+      "note": "Netskope's own customer-facing pages describe professional services, technical support and customer success, not end-to-end design, operate, monitor and change management of a customer's service. Named-author trade coverage of the Catalyst programme frames managed SASE as something MSP partners build and deliver on the Netskope platform. Graded managed_service_dependent rather than yes because the operating party is a partner, not Netskope."
+    },
+    "f03_co_managed_service": {
+      "value": "managed_service_dependent",
+      "evidence": [
+        10,
+        16,
+        9
+      ],
+      "confidence": "low",
+      "quote": "build managed SASE services around Netskope's platform",
+      "claimed_by": "third_party",
+      "note": "No page reviewed uses co-managed language or sets out a split of policy and change rights between Netskope and the customer. Netskope runs the SaaS platform and offers tiered support with technical account management at Premium Plus level, but the shared-responsibility model is not documented. Where a co-managed arrangement exists it appears to sit with an MSP partner rather than Netskope. Low confidence."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        6,
+        16
+      ],
+      "confidence": "medium",
+      "quote": "A self-service multi-tenant orchestrator for the full SASE and AI product suite that quickly provisions production-ready customer environments.",
+      "claimed_by": "vendor",
+      "note": "Multi-tenant provisioning and delegated administration across unlimited partner tiers are documented in the June 2026 Catalyst announcement and corroborated by ChannelE2E. Branded or white-label partner portals and reusable customer templates were not evidenced on any page read, so graded partial rather than yes."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        7,
+        10
+      ],
+      "confidence": "high",
+      "quote": "Smooth migration onto advanced Netskope platform",
+      "claimed_by": "vendor",
+      "note": "The professional services page documents implementation, migration from siloed legacy solutions, tailored statements of work for complex enterprise deployments, service packages and training. Discovery, pilot, runbook and rollback detail is not itemised on the public page."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        13,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "simple one-click RMA, customized applications",
+      "claimed_by": "vendor",
+      "note": "The SD-WAN datasheet documents zero-touch activation and one-click hardware RMA, and the platform is cloud-managed from a single console. No page read states that firmware upgrades, patching, renewals or end-of-life planning are performed as part of the service, so graded partial rather than yes."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        11,
+        12,
+        13
+      ],
+      "confidence": "high",
+      "quote": "Reliable, high-performance 5G connectivity for primary, backup, or active-active links delivers sub-second brownout/blackout protection.",
+      "claimed_by": "vendor",
+      "note": "5G Standalone is supported as primary, backup or active-active transport. eSIM with on-gateway LPAd covers SIM management, the Converged Gateway carries built-in 4G/5G with Netskope Zero Trust SIM across 400+ networks, and digital experience management reports cellular signal strength and quality."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        1,
+        3,
+        15
+      ],
+      "confidence": "high",
+      "quote": "Unlike vendors that rely on the public cloud, Netskope has complete control over its NewEdge infrastructure",
+      "claimed_by": "vendor",
+      "note": "NewEdge is Netskope's own security cloud, presented as full-compute data centres carrying the complete SSE stack, expressly contrasted with vendors hosting on third-party public cloud. This is the vendor's own service infrastructure, so yes rather than partner_integrated."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        3,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "Embedded Data Planes provide fully private, dedicated deployments with full compute and a complete SASE stack",
+      "claimed_by": "vendor",
+      "note": "The March 2026 NewEdge datasheet documents Embedded Data Planes as fully private, dedicated deployments, alongside 12+ NewEdge management planes across 8 countries for sovereignty. The May 2026 sovereignty release adds in-country processing and domestic storage. Whether Embedded Data Planes can be hosted on customer premises is not stated, hence medium confidence."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The NewEdge product page and the March 2026 NewEdge datasheet were read specifically for this. Both describe a purpose-built private security cloud with dense peering, presence in 120+ internet exchanges and nearly 11,000 adjacencies to 750+ ASNs, but neither states that inter-region traffic between PoPs rides a Netskope-owned or Netskope-controlled backbone. Absence of a statement is not treated as evidence of absence, so recorded as unknown."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        2,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Netskope launches an industry-first SLA committing to less than 50 ms of latency for processing encrypted traffic",
+      "claimed_by": "vendor",
+      "note": "Contractual commitments cover uptime and availability at five nines plus latency for both decrypted and non-decrypted traffic. The NewEdge datasheet repeats industry-best SLAs for availability and latency. Support response-time and change-handling commitments sit in Support Terms, which were not reachable in this task."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        4,
+        5,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Netskope IPS scans network traffic to find and prevent vulnerability exploits",
+      "claimed_by": "vendor",
+      "note": "Firewall as a Service is Netskope's own technology delivered from NewEdge data centres with application-aware firewall rules and native IPS, on one platform, console, policy engine and client. Web categorisation across 130+ categories, anti-malware with multi-stage sandboxing and single-pass TLS inspection are documented on the Next Gen SWG page within the same platform. The phrase stateful firewall was not found verbatim on the pages read, hence medium confidence."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        8
+      ],
+      "confidence": "high",
+      "quote": "Alert and coach users on data loss risks, including app and user risk context, when performing activities.",
+      "claimed_by": "vendor",
+      "note": "Content is classified and inspected for PII, payment card and financial data and intellectual property, with real-time coaching, a proceed or cancel option and end-to-end incident workflows or third-party integrations."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        9,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "We are a global team and operate 24/7/365",
+      "claimed_by": "vendor",
+      "note": "Netskope runs a global support organisation on a 24/7/365 basis at Premium and Premium Plus tiers, with technical account management and a focused technical support engineer at Premium Plus. No page read describes a Netskope NOC or SOC proactively monitoring the customer service, owning incidents through to root cause analysis, or running structured service reviews and change governance, so graded partial."
+    },
+    "delivery_model": {
+      "value": "technology_vendor",
+      "evidence": [
+        1,
+        6,
+        9,
+        16
+      ],
+      "confidence": "high",
+      "quote": "build managed SASE services around Netskope's platform",
+      "note": "Netskope authors and operates the Netskope One SASE/SSE platform and the NewEdge cloud, and sells professional services and tiered technical support. Managed service delivery to end customers is described as something MSP partners build on the platform, not something Netskope itself operates end to end.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        3,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Present in 120+ internet exchanges with deep peering to ISPs, CDNs, cloud, and SaaS providers",
+      "claimed_by": "vendor",
+      "note": "Netskope owns and controls its NewEdge compute and core routing and runs its own peering at 120+ internet exchanges, but the pages read describe reaching customers and SaaS over peering and third-party ISP transit rather than owning physical circuits. Branch and user access circuits are customer supplied. No page reviewed states that Netskope owns fibre or long-haul capacity."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        4,
+        5,
+        8,
+        1
+      ],
+      "confidence": "high",
+      "quote": "FWaaS is available globally via NewEdge data centers",
+      "claimed_by": "vendor",
+      "note": "The secure web gateway, firewall as a service, IPS, threat protection and DLP are Netskope-authored modules on the Netskope One platform, delivered from Netskope's own NewEdge cloud. No third-party security vendor is named as supplying the enforcement stack on any page read."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        14,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "Netskope System & Organization Control (SOC) Reports are independent third-party examination reports",
+      "claimed_by": "vendor",
+      "note": "Found named on the compliance page: AICPA SOC 2 reports, the California Consumer Privacy Act, CIS, and a FedRAMP High authorisation reference. Not found on any page read: NHS DSPT, DORA, NIS2. ISO 27001 and ISO 27018 are claimed in a separate Netskope press release surfaced in search but not fetched in this task, so they are not counted here. The compliance page body was truncated on fetch, so the full framework list may be longer than recorded; confidence medium for that reason."
+    },
+    "pop_count": {
+      "value": "120+",
+      "evidence": [
+        1,
+        3,
+        15
+      ],
+      "confidence": "high",
+      "quote": "Powered by 120+ data centers in 80+ regions today, including Mainland China",
+      "claimed_by": "vendor",
+      "note": "Published as 120+ data centres across 80+ regions, with Localization Zones extending coverage to 220+ countries and territories. The March 2026 datasheet and the May 2026 sovereignty press release give the same 120+ and 80+ figures. The figure is a floor, not an exact count."
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "five-nines (99.999%) uptime and availability SLA",
+      "claimed_by": "vendor",
+      "note": "Published as a five-nines uptime and availability SLA, alongside separate latency SLAs of under 10 milliseconds for non-decrypted traffic and under 50 milliseconds for encrypted traffic processing. The full SLA contract text was not reachable, so the percentage rests on the supplier press release."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "Today, NewEdge is powered by data centers in nearly 50 regions globally, with every data center offering full compute, all services available with no need to rely on the unpredictable performance of public cloud connectivity",
+      "source_a": 2,
+      "claim_b": "Powered by 120+ data centers in 80+ regions today, including Mainland China",
+      "source_b": 1
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "120+ data centers in 80+ regions globally—including Mainland China",
+      "source_a": 3,
+      "claim_b": "NewEdge—now comprising over 120 data centers across more than 80 regions, including recent additions in Indonesia and Turkey",
+      "source_b": 15
+    }
+  ]
 }

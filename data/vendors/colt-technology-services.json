@@ -16,9 +16,9 @@
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
     "f04_multi_tenant_msp_white_label_support": "yes",
-    "f05_professional_services_and_migration_support": "yes",
+    "f05_professional_services_and_migration_support": "partial",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "unknown",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -30,8 +30,8 @@
     "f16_mpls_coexistence_and_migration": "yes",
     "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
-    "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f19_public_cloud_gateways": "partial",
+    "f20_private_pops_dedicated_pops": "partial",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -44,23 +44,25 @@
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "partial",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "unknown",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "yes"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 33,
-    "partial_count": 4,
-    "partner_integrated_count": 3,
+    "yes_count": 30,
+    "partial_count": 7,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 2,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.95,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "SD-WAN and SASE with strong European data sovereignty positioning.",
@@ -77,8 +79,8 @@
     "CASB and DLP have partial public evidence; SSE platform partner choice should be confirmed.",
     "Underlying SD-WAN platform should be explicitly confirmed in RFP."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -145,7 +147,7 @@
     "agentless": "managed_service_dependent"
   },
   "pop_count": null,
-  "sla_availability_pct": null,
+  "sla_availability_pct": 99.9,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "yes",
@@ -180,5 +182,368 @@
   "value_tier": "mid",
   "cost_note": "Per-site managed with on-demand bandwidth flexing; mid pricing on owned European fibre.",
   "uk_delivery": "uk_hq",
-  "uk_basis": "UK headquartered (London). UK contracting entity with owned UK metro fibre and UK support."
+  "uk_basis": "UK headquartered (London). UK contracting entity with owned UK metro fibre and UK support.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "SD WAN & SASE | Colt Technology Services (main product page)",
+      "url": "https://www.colt.net/products/networking/sd-wan",
+      "published": null,
+      "reliability": "Supplier's own product page. Undated. Marketing-level; thin on operational detail but authoritative for portfolio scope, Sovereign SASE and vendor choice.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Colt Versa SD WAN & SASE - External Service Guide",
+      "url": "https://coltonlinehelp.colt.net/sd-wan-external-service-guide/",
+      "published": null,
+      "reliability": "Supplier's own contractual-grade service guide. Undated but the most detailed and specific source found: SLA table, transport options, wholesale/white-label, cloud gateways, firewall feature tiers.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "SD WAN | Colt Docs (datasheet)",
+      "url": "https://docs.colt.net/datasheets/networking/sd-wan",
+      "published": null,
+      "reliability": "Supplier's own datasheet. Undated. Authoritative for the vendor partner list and firewall feature tiers.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Colt Technology Services brings together SD WAN and SSE features in new integrated full SASE solution",
+      "url": "https://www.colt.net/resources/colt-technology-services-brings-together-sd-wan-and-sse-features-in-new-integrated-full-sase-solution/",
+      "published": "2022-06-28",
+      "reliability": "Supplier press release, dated. Authoritative for the Versa relationship and network scale claims at that date. Now four years old, so scale figures may be superseded.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Technical Certifications | Colt Technology Services",
+      "url": "https://www.colt.net/why-colt/certifications/",
+      "published": null,
+      "reliability": "Supplier's own certification listing with named standards and version years. Undated page but the certificate identifiers are specific and checkable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Global Network Services - 400G Intelligent Network - Colt",
+      "url": "https://www.colt.net/global-network/",
+      "published": null,
+      "reliability": "Supplier's own network page. Undated. Figures are rendered as icon-adjacent stat tiles, so surrounding whitespace in the raw markup is unreliable; the numerals themselves are quotable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Versa Archives - Colt Technology Services",
+      "url": "https://www.colt.net/resources/partner/versa/",
+      "published": null,
+      "reliability": "Supplier's own partner index page. Undated, aggregates article teasers rather than product statements. Used only to corroborate the Versa relationship.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Solutions Overview: Professional Services - Colt Technology Services",
+      "url": "https://www.colt.net/solutions/professional-services/",
+      "published": null,
+      "reliability": "Supplier's own professional services page. Undated. Names service lines but does not itemise migration runbooks or rollback plans.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Managed Security Services | Colt Technology Services",
+      "url": "https://www.colt.net/products/security",
+      "published": null,
+      "reliability": "Supplier's own security portfolio page. Undated. Useful mainly for naming Fortinet, Zscaler and Palo Alto as security technology partners.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Solutions Overview: Security - Colt Technology Services",
+      "url": "https://www.colt.net/cybersecurity/",
+      "published": null,
+      "reliability": "Supplier's own security solutions page. Undated. Carries the clearest published statements on CSOC coverage, 24x7 management and managed NGFW feature set.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Security services support | Colt",
+      "url": "https://www.colt.net/help/security.html",
+      "published": null,
+      "reliability": "Supplier's own support page. Undated. Confirms a named Security Operations Center support route; little product detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "CYBERSECURITY SERVICES | Colt Docs",
+      "url": "https://docs.colt.net/datasheets/cybersecurity/cybersecurity-services",
+      "published": null,
+      "reliability": "Supplier's own datasheet, reached via 302 from colt.net/datasheet/colt-cybersecurity-services. Undated. Returned no matches for the security terms searched, so used as a negative check only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 2,
+      "title": "Colt, Versa team up on SASE (Kelsey Ziser, Senior Editor, Light Reading)",
+      "url": "https://www.lightreading.com/sd-wan/colt-versa-team-up-on-sase/d/d-id/778602",
+      "published": "2022-06-28",
+      "reliability": "Named-author dated trade journalism. Independently accountable. Valuable because it states explicitly where the SASE gateways are hosted, which the supplier's own pages do not.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 3,
+      "title": "Accelerating Digital Transformation with the Best-in-Breed SD-WAN Solution (Colt/Versa solution brief PDF)",
+      "url": "https://versa-networks.com/documents/solution-briefs/accelerating-digital-transformation-with-the-best-in-breed-sd-wan-solution.pdf",
+      "published": null,
+      "reliability": "Joint partner marketing brief hosted by the technology vendor, undated. Corroboration only. Fetched but contained no statements on managed service model, PoPs, backbone, SLA or security features, so it carries no grade here.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 4,
+      "title": "Colt - Why Colt / Network page",
+      "url": "https://www.colt.net/why-colt/network/",
+      "published": null,
+      "reliability": "Not used as evidence: URL returned HTTP 404, no content retrieved. Recorded so the gap in network-page evidence is visible.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 4,
+      "title": "Colt SD WAN & SASE Cybersecurity solutions - Netify marketplace",
+      "url": "https://www.netify.com/marketplace/colt",
+      "published": null,
+      "reliability": "Not used as evidence: this is the commissioning party's own marketplace listing, which would make the verification circular. Seen in search results only, not fetched.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 4,
+      "title": "Colt Technology Services - Grokipedia",
+      "url": "https://grokipedia.com/page/Colt_Technology_Services",
+      "published": null,
+      "reliability": "Not used as evidence: machine-generated encyclopaedia entry with no named author, no editorial accountability and no dated primary sourcing. Seen in search results only, not fetched.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        10,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Our Next Generation Firewall is fully managed by Colt, and offers perimeter security, application awareness and content security, including IDS/IPS, anti-malware, URL filtering and SSL inspection.",
+      "claimed_by": "vendor",
+      "note": "Colt states outright that it fully manages the firewall element and provides 24x7 proactive management, monitoring and reporting. The SD-WAN service guide describes Colt managed CPE and zero touch provisioning. Confidence is medium rather than high because the strongest 'fully managed' wording sits on the cybersecurity page and covers the security service, not an end-to-end SD-WAN managed tier; no page found publishes a named fully managed SD-WAN service level."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "Customers can choose to do (add/edit/delete) all their policy configurations anytime via the secure Colt SD WAN portal",
+      "claimed_by": "vendor",
+      "note": "This is a textbook shared-responsibility split: Colt runs the platform, CPE and support while the customer retains live policy and change rights through the portal. The guide also states customers can add branch sites in hours and upgrade bandwidth in real time themselves."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "yes",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "For the Wholesale SD WAN service, both wholesale customers and end customers will benefit from a customized look and feel, setting wholesale customer's own logo, background image, links and contact details, so that their end-customer experience doesn't differ from the rest of their services offered.",
+      "claimed_by": "vendor",
+      "note": "All four elements of the definition are evidenced on one page: branded portal (logo, background, links), delegated administration (the carrier holds end-customer credentials and handles resets), tenant isolation (IPC* tenant identifiers in Versa Director) and hierarchy templates (customizable portal, branding and further hierarchy levels). Colt sells this explicitly as a Wholesale SD WAN solution for partners to resell."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partial",
+      "evidence": [
+        8
+      ],
+      "confidence": "medium",
+      "quote": "Project Management – End-to-end project management services for the implementation of the services",
+      "claimed_by": "vendor",
+      "note": "Colt publishes a professional services portfolio covering consultancy, service integration, project management, service induction (training) and end-to-end workload migrations. Graded partial rather than yes because the definition requires structured discovery, pilots, staging, migration runbooks and rollback plans, and none of the words discovery, pilot, staging, runbook or rollback appear on the professional services page. The migration wording found is about cloud workload migration, not WAN or SD-WAN migration."
+    },
+    "f07_lifecycle_management": {
+      "value": "unknown",
+      "evidence": [
+        2,
+        3
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I searched the SD-WAN external service guide and the SD-WAN datasheet specifically for hardware replacement, spares, RMA, firmware upgrade, software upgrade, patching, renewals and end-of-life, and the service guide fetch returned an explicit negative on all of those terms. The guide does contain planned works and maintenance headings, but no published statement that hardware replacement, patching or end-of-life planning is included in the service. Absence of a statement is not evidence of absence of the capability."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Colt SD WAN services can be provided over public internet – broadband Internet and business internet – dedicated internet access (DIA) connectivity (using any and all transport technologies like xDSL, wireless 3G/4G/LTE/5G (only available in EU for Colt provided SIMs, no limitation for customer-owned), Ethernet or traditional MPLS regardless of whether Colt is providing that underlying connectivity or not.",
+      "claimed_by": "vendor",
+      "note": "4G and 5G are supported as transport, and SIM management is evidenced both ways: Colt provided SIMs (EU only) or customer-owned SIMs with no geographic limitation. A separate wireless option is delivered with Blue Wireless, a Singapore-based company, supplying a Cradlepoint mobile router with dual SIM, data, installation, operation and an SLA. Confidence is medium because the guide also states that by default 3G/4G/5G circuits should be used as backup only where fixed Internet and MPLS are available, and because no published evidence of signal monitoring was found. Note the sentence quoted is reproduced as printed, including its unclosed parenthesis and en dashes."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partial",
+      "evidence": [
+        13,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "The SASE services can be deployed via the cloud and/or on-premises; Colt is deploying the Versa SWG plus other Versa services via the Versa Operating System (VOS) within Colt's own cloud.",
+      "claimed_by": "third_party",
+      "note": "Split verdict, and the distinction matters. Colt does operate its own gateway infrastructure: the SASE security enforcement runs inside Colt's own cloud, and the service guide states Colt has deployed multiple Cloud Gateways in Europe and Asia for AWS, Microsoft and Google connectivity. However the enforcement software riding those gateways is Versa's, not Colt's, and the guide offers a parallel Versa SDWAN with Zscaler SSE option where the enforcement PoPs belong entirely to Zscaler. Graded partial rather than yes on that mixed ownership, and not partner_integrated because the hosting infrastructure in the primary option is genuinely Colt's. Per the definition I have discounted the AWS/Azure/GCP connectivity gateways as evidence in themselves. Best quote comes from Tier 2 journalism because Colt's own pages do not state where the gateways are hosted."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "partial",
+      "evidence": [
+        1,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Sovereign SASE keeps data within its own network and in specific regions, avoiding third-party transfers and boosting control.",
+      "claimed_by": "vendor",
+      "note": "Colt markets a Sovereign SASE deployment model and a Versa Hosted SASE Solution, and the product page describes sovereign SASE as a model where the organisation or a service provider hosts all components. That evidences regional and sovereign data control. Graded partial rather than yes because no page found describes a customer-hosted or single-tenant dedicated PoP as an orderable option with defined commercials; the published claim is about data residency within Colt's own network, which is not the same as a dedicated PoP."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        2
+      ],
+      "confidence": "medium",
+      "quote": "SLA (for on-net circuits) | 99.90% | 99.90% | 99.95% | 99.90% | 99.95% | 99.90% | 99.95%",
+      "claimed_by": "vendor",
+      "note": "The service guide publishes a contractual availability SLA differentiated by site package, 99.90% for XS/S/M/L and 99.95% for the S Plus, M Plus and L Plus tiers, and the guide is a service-guide-grade document rather than marketing. The wireless option is separately stated to guarantee 50% of contract speed. Confidence is medium on two counts: the SLA applies to on-net circuits only, and no published response-time, change-handling, latency, jitter or loss commitments were found. The quote is a table row, so a verifier should expect it rendered as a table rather than prose."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        10,
+        2,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Our Next Generation Firewall is fully managed by Colt, and offers perimeter security, application awareness and content security, including IDS/IPS, anti-malware, URL filtering and SSL inspection.",
+      "claimed_by": "vendor",
+      "note": "Every element the definition requires is present and it is genuinely built into the platform rather than bolted on: the service guide states the Colt SD WAN platform uses an integrated Next Generation firewall integrated with the SD-WAN router, with Basic (Layer 3/4 stateful) and Advanced (Layer 7 policies, DDoS) tiers, and Versa CPE firewall session logs covering Security Policy, URL/IP Filtering, DOS, IPS, AntiVirus and Decryption. Graded partner_integrated and not yes because the technology is not Colt's: the datasheet states Colt has supplier partnerships with a range of vendors, including Versa Networks, Cisco, Meraki, Aruba, Fortinet, Palo Alto, Juniper and VMware, and the SD-WAN NGFW is Versa's."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [
+        2,
+        10,
+        12
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I searched the SD-WAN and SASE external service guide, the cybersecurity solutions page, the managed security page, the security support page and the cybersecurity services datasheet for DLP, data loss prevention, CASB and content classification. The service guide fetch returned an explicit negative: DLP and Data Loss Prevention do not appear anywhere in that document. Versa Networks, the underlying SASE vendor, does market a Network DLP product, but that is the vendor's claim and not a Colt-published capability, so it cannot carry this grade. If Colt does resell Versa DLP the correct grade would be partner_integrated, but no Colt page states it."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        10,
+        11,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Our managed security services are managed by highly specialized engineers and analysts in Colt's Cyber Security Operations Centers (CSOC) across Asia and Europe.",
+      "claimed_by": "vendor",
+      "note": "The monitoring half of the definition is well evidenced: Colt publishes 24x7 proactive management, monitoring, and reporting, staffed CSOCs across Asia and Europe, a named Security Operations Center support route, and near real time interactive dashboards in the SD-WAN portal. Change governance is partly evidenced through the guide's Modifying an Existing Service and Out-of-hours Changes sections. Graded partial rather than yes because the definition is compound and two elements are missing from public sources: no published commitment to owning incidents through to root cause analysis, and no description of structured service reviews."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        10,
+        3,
+        12
+      ],
+      "confidence": "high",
+      "quote": "Our managed security services are managed by highly specialized engineers and analysts in Colt's Cyber Security Operations Centers (CSOC) across Asia and Europe.",
+      "note": "Colt operates services on its own fibre network and manages third-party SD-WAN and security technology. It does not author the SD-WAN or SSE stack: the datasheet lists Versa Networks, Cisco, Meraki, Aruba, Fortinet, Palo Alto, Juniper and VMware as supplier partners. Graded managed_provider rather than both because no Colt-authored SD-WAN or SSE product was found.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        2,
+        6
+      ],
+      "confidence": "high",
+      "quote": "Colt SD WAN services can be provided over public internet – broadband Internet and business internet – dedicated internet access (DIA) connectivity (using any and all transport technologies like xDSL, wireless 3G/4G/LTE/5G (only available in EU for Colt provided SIMs, no limitation for customer-owned), Ethernet or traditional MPLS regardless of whether Colt is providing that underlying connectivity or not.",
+      "claimed_by": "vendor",
+      "note": "Unambiguously mixed, and the supplier says so itself in the closing clause: regardless of whether Colt is providing that underlying connectivity or not. Colt genuinely owns substantial physical infrastructure (50+ metropolitan area networks across 230+ cities, 10 submarine cable systems, a fully redundant network core) and also states that Colt SD WAN supports Colt provided MPLS underlay connection as a standard. But the same service equally rides third-party broadband, DIA and customer-owned circuits and SIMs."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        3,
+        2,
+        13,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Colt has supplier partnerships with a range of vendors, including Versa Networks, Cisco, Meraki, Aruba, Fortinet, Palo Alto, Juniper and VMware.",
+      "claimed_by": "vendor",
+      "note": "Versa Networks is the primary SSE partner. Colt's own service guide offers a Versa Hosted SASE Solution and an alternative Versa SDWAN with Zscaler SSE Solution, and the 2022 press release describes the integrated full SASE offering as underpinned by Colt's long-standing partnership with Versa Networks, including Versa Secure Web Gateway. Light Reading confirms Colt deploys Versa SWG and other Versa services via the Versa Operating System within Colt's own cloud. Colt's security portfolio page additionally names Fortinet, Zscaler and Palo Alto. Graded partner rather than resold because Colt hosts and operates the primary stack on its own infrastructure rather than simply reselling a vendor's tenancy. No Colt-authored SSE technology was found. Vendors named: Versa Networks (primary), Zscaler, Fortinet, Palo Alto."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        5
+      ],
+      "confidence": "high",
+      "quote": "ISO/IEC 27001:2022 | Information Security Management",
+      "claimed_by": "vendor",
+      "note": "Colt publishes a technical certifications page naming specific standards with version years, which meets the documented bar rather than assurance_only. Frameworks found: ISO/IEC 27001:2022 (Information Security Management), ISO/IEC 27701:2019 (Privacy Information Management System), ISO 9001:2015, ISO/IEC 20000-1:2018, ISO 14001:2015, ISO 22301:2019 (Business Continuity Management), Cyber Essentials and Cyber Essentials Plus, Binding Corporate Rules, and a Certificate of compliance with the National Security Scheme (ENS, Spain). Frameworks explicitly NOT found on that page: SOC 2, NHS DSPT, DORA, NIS2, PCI DSS and TISAX. Given Colt is an EU and UK telecoms operator, the absence of any published NIS2 or DORA positioning is worth flagging to a buyer in a regulated sector."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        2
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Colt does not publish a count of its own SASE or SD-WAN points of presence. The nearest published figure on the global network page is 250+ connected cloud PoPs worldwide, but those are third-party cloud provider on-ramps that Colt connects to, not Colt-operated PoPs, so using it as a PoP count would misrepresent the estate. The SD-WAN service guide refers only to Multiple points of presence with no number attached, and states Colt has deployed multiple Cloud Gateways in Europe and Asia without quantifying them. Related published scale figures, which are not PoP counts: 40+ countries connected, 230+ cities connected with 50+ MANs, 1,100+ Data Centres."
+    },
+    "sla_availability_pct": {
+      "value": "99.90",
+      "evidence": [
+        2
+      ],
+      "confidence": "medium",
+      "quote": "SLA (for on-net circuits) | 99.90% | 99.90% | 99.95% | 99.90% | 99.95% | 99.90% | 99.95%",
+      "claimed_by": "vendor",
+      "note": "99.90% is the baseline availability across the XS, S, M and L site packages; the S Plus, M Plus and L Plus packages carry 99.95%. I have recorded the baseline as the headline value since it applies to the majority of tiers. Two caveats for a buyer: the figure is qualified as applying to on-net circuits only, so off-net and internet-underlay sites are not covered by it, and the value is published in a table rather than prose, so the quote is a table row. No availability percentage appears on any of Colt's marketing-facing SD-WAN or SASE pages."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "data_centres_connected",
+      "claim_a": "The Colt IQ Network connects more than 1000+ data centres and over 29,000 on net buildings across Europe",
+      "source_a": 4,
+      "claim_b": "1,100+Data Centres",
+      "source_b": 6
+    }
+  ]
 }

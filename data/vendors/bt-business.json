@@ -14,7 +14,7 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
     "f07_lifecycle_management": "yes",
@@ -30,20 +30,20 @@
     "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
-    "f21_private_global_backbone": "yes",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "partial",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "yes",
+    "f26_sla_backed_service_fabric": "partial",
     "f27_integrated_next_generation_firewall": "partner_integrated",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "unknown",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
@@ -53,13 +53,15 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 34,
-    "partial_count": 3,
-    "partner_integrated_count": 3,
+    "yes_count": 31,
+    "partial_count": 4,
+    "partner_integrated_count": 2,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 3,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.925,
+    "sourced_facts_tier_1_2": 15,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "UK market leader for managed SD-WAN with deep access circuit ownership and field engineering capability.",
@@ -76,8 +78,8 @@
     "DIY/self-managed model is not BT's primary positioning.",
     "Co-managed model and customer control boundaries should be confirmed via RACI and portal demo."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "yes",
@@ -143,7 +145,7 @@
     "chromeos": "managed_service_dependent",
     "agentless": "managed_service_dependent"
   },
-  "pop_count": null,
+  "pop_count": 140,
   "sla_availability_pct": null,
   "support_model": {
     "follow_the_sun_24x7": "yes",
@@ -179,5 +181,455 @@
   "value_tier": "mid",
   "cost_note": "Per-site managed pricing bundling circuits, platform and service; mid UK carrier positioning.",
   "uk_delivery": "uk_hq",
-  "uk_basis": "UK headquartered (BT Group). UK contract holder with owned UK access, UK NOC and SOC, and named UK support."
+  "uk_basis": "UK headquartered (BT Group). UK contract holder with owned UK access, UK NOC and SOC, and named UK support.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "SD-WAN | BT Business networks and digital services",
+      "url": "https://business.bt.com/networks-digital-services/sd-wan",
+      "published": null,
+      "reliability": "Supplier's primary SD-WAN product page. Undated marketing copy, thin and partly JavaScript rendered, but carries two direct first-person claims used for f01, f03 and delivery_model.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Managed SASE Solutions | Secure Access Service Edge",
+      "url": "https://business.bt.com/overlay-networks-cloud/sd-wan-sase/sase/",
+      "published": null,
+      "reliability": "Supplier page. Returned only metadata and headers when fetched; the body is client-side rendered. Read but yielded no gradeable detail, recorded for completeness. The variant at /networks-digital-services/sd-wan-sase/sase/ returned the same thin content.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "BT launches a new managed SASE service powered by Fortinet",
+      "url": "https://newsroom.bt.com/bt-launches-a-new-managed-sase-service-powered-by-fortinet/",
+      "published": "2024-11-25",
+      "reliability": "Supplier newsroom, dated. Primary evidence for sse_layer_ownership and f27. Explicitly attributes the SSE layer and the NGFW to Fortinet, which is a vendor admission against marketing interest and therefore reliable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Fortinet SD-WAN Service Schedule Part B, Service Description, v3",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-B-31-01-2025-v3.pdf",
+      "published": "2025-01-31",
+      "reliability": "Contractual service description, the highest-value source in this set. Binding language on co-management, lifecycle, mobile data access and FortiSASE PoPs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "BT Managed Fortinet SD-WAN, annex to the Managed Services Schedule",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-frtnt-sdwan-annex-to-mngd-srvcs-sch.pdf",
+      "published": null,
+      "reliability": "Contractual annex, undated on its face. Source of the 5G/4G/3G fallback definition, the Protective Monitoring Service, and the explicit exclusion of service levels from the Fortinet Service.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Fortinet SD-WAN Service Schedule Part A, Service Terms, v3",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/BT-fortinet-SD-WAN-service-schedule-part-A-31-01-2025-v3.pdf",
+      "published": "2025-01-31",
+      "reliability": "Contractual terms. Definitive on how service levels do and do not reach the customer, and on third-party enabling services. Basis for f26 and underlay_ownership.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Fortinet SD-WAN Service Schedule Part B, Service Description, V4",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/terms-and-conditions/service-schedules/digital-workplace/BT-Fortinet-SD-WAN-Service-Schedule-Part-B-31.03.2025-V4.pdf",
+      "published": "2025-03-31",
+      "reliability": "Most recent revision of the service description, supersedes source 4. Source of the 24/7 PMS wording, the SASE Licences clause, the FortiSASE regulatory assurance sentence and the co-management incident priority clause.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Managed Service, Schedule to the General Terms",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-mngdsrvcsch-published-28-november-2024.pdf",
+      "published": "2024-11-28",
+      "reliability": "Master contractual schedule governing BT managed services. Best evidence for f05, f07 and f40, since it commits BT to implementation, end-of-life notification, 24x7x365 desk, one-hour incident contact, end-to-end ownership and periodic service reviews.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "BT Managed Cisco SD-WAN, annex to the Managed Services Schedule",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/terms/managed-services/btl-bte-bt-mngd-cisco-sd-wan-annex-to-mngd-srvcs-sch.pdf",
+      "published": null,
+      "reliability": "Contractual annex, undated on its face, carries a 2022 copyright line. Confirms the same no-service-levels position on the Cisco build and documents URL filtering behaviour. Useful cross-check that the SLA gap is a BT pattern, not Fortinet-specific.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "BTnet Service Level Agreement",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/products/networking/bt-net-sla.pdf",
+      "published": null,
+      "reliability": "Published SLA document for BT's dedicated internet access product. Reliable but out of scope for sla_availability_pct because it covers BTnet access rather than the SD-WAN/SASE service; cited in the note for context only, not used to set the value.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "BT's Global Fabric goes live with customer traffic",
+      "url": "https://newsroom.bt.com/bts-global-fabric-goes-live-with-customer-traffic/",
+      "published": "2025-02-25",
+      "reliability": "Supplier newsroom, dated. Most recent and most specific BT figure for PoPs and countries, so used for pop_count and f21.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "BT readies customers for Global Fabric so they can hit the cloud running",
+      "url": "https://newsroom.bt.com/bt-readies-customers-for-global-fabric-so-they-can-hit-the-cloud-running/",
+      "published": "2024-10-01",
+      "reliability": "Supplier newsroom, dated. Earlier PoP figure showing 140 as a target rather than a delivered count at that date; recorded in conflicts to make the ramp visible.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "BT wraps multi-cloud in a new Global Fabric",
+      "url": "https://newsroom.bt.com/bt-wraps-multi-cloud-in-a-new-global-fabric/",
+      "published": "2023-10-17",
+      "reliability": "Supplier newsroom, dated. Launch announcement. Source of the 180 countries managed services claim and the deterministic-network positioning. No PoP count or ownership statement, so it corroborates rather than grades.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Our businesses, Our company, About BT",
+      "url": "https://www.bt.com/about/bt/our-company/group-businesses",
+      "published": null,
+      "reliability": "Group corporate page, undated. Establishes that Openreach is a wholly owned BT Group subsidiary and that a Networks unit runs BT's fixed and mobile networks. Supports the owned-infrastructure half of the mixed underlay grade, for the UK only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Global Fabric | Network as a Service (NaaS) | Connectivity",
+      "url": "https://business.bt.com/connectivity/global-fabric-naas/",
+      "published": null,
+      "reliability": "Supplier product page. Fetched but returned only metadata and a heading; body is client-side rendered. No gradeable content, recorded for completeness.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "SD-WAN | Corporate SD-WAN & SASE Solutions",
+      "url": "https://business.bt.com/corporate/overlay-networks-cloud/sd-wan-sase/",
+      "published": null,
+      "reliability": "Supplier page. Fetched but returned only a heading and image reference; no product detail rendered. No gradeable content.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Digital Services | Managed & Professional Services",
+      "url": "https://business.bt.com/overlay-networks-cloud/digital-services/",
+      "published": null,
+      "reliability": "Supplier page. Fetched but yielded only a meta description; no substantive professional services detail. f05 was graded from the contractual schedule instead.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 2,
+      "title": "BT unveils managed SASE service, Computer Weekly, by Joe O'Halloran",
+      "url": "https://www.computerweekly.com/news/366616338/BT-unveils-managed-SASE-service",
+      "published": "2024-11-25",
+      "reliability": "Named-author, dated trade journalism. Independent corroboration that the SSE functions (FWaaS, SWG, CASB, ZTNA) are Fortinet technology, which is what makes the partner_integrated calls on f19 and f27 safe rather than inferred.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 2,
+      "title": "BT Cyber Security Governance, Risk & Compliance Advisory Services, G-Cloud listing, BRITISH TELECOMMUNICATIONS LIMITED",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/646333780544795",
+      "published": null,
+      "reliability": "UK government Digital Marketplace register entry, supplier-declared under procurement rules and therefore accountable. Notable for answering 'ISO/IEC 27001 certification: No' while confirming Cyber Essentials and Cyber Essentials Plus. Covers a BT advisory service rather than SD-WAN/SASE, so it informs the regulatory_documentation note without lifting the grade to documented.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "SD-WAN, G-Cloud listing (Six Degrees)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/415319489599306",
+      "published": null,
+      "reliability": "Not used as evidence: the listing belongs to Six Degrees, a different supplier, despite surfacing on a BT-targeted search. Its ISO 27001, SOC 2 and 99.99% SLA details describe Six Degrees and would be a serious misattribution if carried across to BT. Recorded to document the near-miss.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 3,
+      "title": "BT squares up to the enterprise multi-cloud networking challenge ahead of its peers, Analysys Mason, by Gorkem Yigit",
+      "url": "https://www.analysysmason.com/research/content/articles/bt-multicloud-networking-ren01-rma21/",
+      "published": "2023-04-11",
+      "reliability": "Analyst commentary, corroboration only and cannot carry a grade alone. Contradicts BT on two points: it puts Global Fabric at 160 PoPs and states the fabric rides partner fibre. Both recorded in conflicts, and the fibre point is the reason f21 is capped at partial. Predates the 2025 go-live so may describe pre-launch plans.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 3,
+      "title": "BT and Netskope Partner to Provide Secure Managed Services to the Modern Hybrid Enterprise",
+      "url": "https://www.netskope.com/press-releases/bt-and-netskope-partner-to-provide-secure-managed-services-to-the-modern-hybrid-enterprise",
+      "published": "2023-12-12",
+      "reliability": "Partner newsroom, corroboration only. Shows BT also sources SSE from Netskope, so the SSE vendor varies by deal. Contains no DLP language, so it did not help f33. Named in the sse_layer_ownership note but not relied on for the grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 4,
+      "title": "SD-WAN | SD-WAN Solutions For Small & Large Businesses (BT Global Services legacy URL)",
+      "url": "https://www.globalservices.bt.com/en/solutions/products/fortinet-sd-wan",
+      "published": null,
+      "reliability": "Not used as evidence: the legacy BT Global Services URL 302 redirects to the current business.bt.com SD-WAN page, so it is a superseded duplicate of source 1 with no independent content.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        1,
+        8,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Choose from fully managed or co-managed options which align to your operational model.",
+      "claimed_by": "vendor",
+      "note": "Corroborated by the Managed Services Schedule, which commits BT to implementation, 24x7x365 service desk, end-to-end incident ownership and periodic service reviews, and by the Managed Cisco SD-WAN annex phrase 'BT will provide you with a remotely managed, cloud-hosted overlay network'."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        7,
+        4,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Any Incidents caused due to the changes made by the Customer utilising the Co-Management Service option will be considered as either Priority 2 or 3",
+      "claimed_by": "vendor",
+      "note": "Co-management is a contractually defined option, not marketing language. Part B also states that BT provides read access to FortiManager and FortiAnalyzer by default, and that where the customer is granted write access BT disclaims liability for the customer's own configuration changes. That is a clear shared-responsibility split."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I checked the BT SD-WAN and SASE product pages, the Fortinet SD-WAN Service Schedules Parts A and B, the Managed Fortinet and Managed Cisco SD-WAN annexes and the Managed Services Schedule, and searched for BT wholesale/channel white-label SD-WAN material. Nothing describes tenant isolation, delegated administration or branded portals allowing an MSP to operate the platform under its own brand. Netify's own BT partner-programme pages surfaced in search are Tier 3 and describe reseller commercial terms rather than platform multi-tenancy, so they cannot carry this grade. BT sells this as its own managed service, so absence here is plausible, but I am not inferring absence."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        8
+      ],
+      "confidence": "high",
+      "quote": "BT will provide you with an implementation service covering project management, coordination, detailed solution design, installation, configuration, commissioning, acceptance testing and rollout",
+      "claimed_by": "vendor",
+      "note": "Contractual, from the Managed Services Schedule. Also present: a named project manager and project coordinator as single point of contact, preparation of a customer-specific technical design specification, and 'BT will provide you with a professional services consultant on an ad hoc basis who will help address any non-standard requirements'. Discovery, pilots and rollback runbooks are not itemised by name, but structured design, staging and migration are clearly covered."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        8,
+        4
+      ],
+      "confidence": "high",
+      "quote": "BT will inform you of any upcoming End of Life BT Equipment / Purchased Equipment and will, where possible, provide details of any replacement model",
+      "claimed_by": "vendor",
+      "note": "All four lifecycle elements are contractually in scope. The Fortinet Part B schedule adds hardware maintenance and replacement where the edge device is BT owned, management of operating system updates on SD-WAN edge devices, and an annual proactive software review plus one further update per year on request. The Managed Services Schedule commits BT to a bi-annual software review across agreed sites."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        5,
+        4
+      ],
+      "confidence": "high",
+      "quote": "Active-Active Mobile Data Access is only available over 5G where 5G is available to you.",
+      "claimed_by": "vendor",
+      "note": "5G and 4G are contractually defined transport, with a fallback ladder: the annex defines Mobile Network as a 5G or 4G communication network, 4G where 5G is not available and 3G where 4G is not available. SIM management is covered both ways, with a Customer Managed Mobile Data Access option where the customer provides the SIM. Two caveats worth carrying: Part B limits BT-provided Mobile Data Access to UK sites only, and BT explicitly disclaims mobile network degradation, congestion and interference. Signal monitoring specifically is not evidenced."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        4,
+        7,
+        3,
+        18
+      ],
+      "confidence": "high",
+      "quote": "The service is only available with the FortiSASE PoPs plus selected PoPs.",
+      "claimed_by": "vendor",
+      "note": "This is the key ownership call. The cloud security enforcement points are Fortinet's FortiSASE PoPs, not BT infrastructure, so partner_integrated rather than yes. Computer Weekly (Tier 2, named author, dated) confirms the SSE functions of firewall as a service, secure web gateway, CASB and ZTNA come from Fortinet technology. Do not confuse this with BT's Global Fabric PoPs, which BT does operate itself but which are a cloud interconnect fabric rather than a SaaS optimisation or security enforcement gateway service."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I checked the three Global Fabric newsroom releases, the Global Fabric NaaS product page, the Fortinet SD-WAN Service Schedules Parts A and B and both managed service annexes. The Global Fabric releases describe PoPs hosted in carrier-neutral facilities and cloud data centres but say nothing about customer-hosted, dedicated or sovereign deployment options, and the FortiSASE PoPs are Fortinet's shared multi-tenant estate. No basis to grade either way."
+    },
+    "f21_private_global_backbone": {
+      "value": "partial",
+      "evidence": [
+        11,
+        12,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "Global Fabric will be available to customers internationally via 140 PoPs hosted in the world's top cloud locations located in 40 countries.",
+      "claimed_by": "vendor",
+      "note": "Graded partial, and the reason matters. BT clearly operates a genuinely global, BT-controlled PoP footprint across 40 countries and markets it as deterministic in contrast to the public internet, which is more than a single-country network. What I could not evidence from any Tier 1 or Tier 2 source is that BT owns the inter-region fibre between those PoPs. Analysys Mason (Tier 3, so it cannot carry a grade) states the opposite, that Global Fabric rides partner fibre networks. That unresolved gap between control of the platform and ownership of the transmission caps this at partial. Recorded in conflicts. Note also that Global Fabric is a separate product from the Fortinet SD-WAN/SASE service and the schedules do not place SASE traffic on it."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "partial",
+      "evidence": [
+        6,
+        5,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Where the Customer has procured Enabling Services from BT, the Service levels and Service credits applicable to BT provided Enabling Services (as set out in the terms associated with such Enabling Service) will apply to this Service.",
+      "claimed_by": "vendor",
+      "note": "This is the single most commercially important finding on BT and it cuts against the marketing. The SD-WAN/SASE overlay itself carries no service levels: the Managed Fortinet annex states 'Service Levels and Service Credits do not apply to the Fortinet Service' and the Managed Cisco annex states 'Service Levels and Service Credits do not apply to the MC SD-WAN Service'. Contractual commitments reach the customer only by inheritance from BT-provided enabling access services, and Part A removes even that where the enabling service is from a third party or where an incident stems from a customer change under the co-managed option. So there is a real contractual fabric, but it sits under the overlay rather than around it. Partial, not yes."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        3,
+        18,
+        9,
+        5
+      ],
+      "confidence": "high",
+      "quote": "Fortinet Next-Generation Firewalls provide enterprise security at any edge, and at any scale on all WAN and LAN traffic as it passes through.",
+      "claimed_by": "vendor",
+      "note": "The NGFW is Fortinet's technology that BT bundles and manages, so partner_integrated by definition even though it is tightly integrated into BT's managed service. The Managed Fortinet annex refers to 'Fortinet Security Options' configured against agreed design with applicable licence subscriptions, confirming a licensed third-party stack. The functional elements are evidenced: the Managed Cisco SD-WAN annex documents URL filtering by whitelist, blacklist, category and reputation, and Computer Weekly confirms firewall as a service alongside SWG, CASB and ZTNA. BT also offers Palo Alto Prisma and VMware variants, so the underlying firewall vendor varies by build."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I looked specifically for DLP in the Fortinet SD-WAN Service Schedule Parts A and B (both the January and March 2025 revisions), the Managed Fortinet and Managed Cisco SD-WAN annexes, the Managed Services Schedule, the BT SASE product pages and the Fortinet SASE launch release. The closest language is the launch release and Computer Weekly referring to 'data protection via BT's unified monitoring services in the UK', which describes threat monitoring rather than content classification, egress blocking and exception workflow, so it does not meet the definition. Fortinet's own FortiSASE documentation describes a DLP engine, but grading BT from the component vendor's docs would be inference about what BT actually sells and licenses, which I am not doing. Genuinely unknown, and a fair question to put to BT."
+    },
+    "f40_managed_service_assurance": {
+      "value": "yes",
+      "evidence": [
+        7,
+        5,
+        8
+      ],
+      "confidence": "high",
+      "quote": "The PMS provides 24 hours a day, 7 days per week monitoring of high and critical security events.",
+      "claimed_by": "vendor",
+      "note": "Strongly evidenced across the contracts. Security side: the Protective Monitoring Service gives 24/7 monitoring of high and critical security events. Network side: the Managed Services Schedule commits BT to a service desk that will 'operate 24x7x365', to proactive detection with contact 'within one hour of detecting an Incident', to 'take full ownership of the Incident and manage it end-to-end', and to structured reviews on a monthly or three-monthly basis. Part B adds that service impacting alerts generate proactive tickets into the BT service desk. One gap: the phrase root cause analysis does not appear verbatim in any document I read, so incident ownership through to formal RCA is implied by end-to-end ownership rather than explicitly contracted."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        1,
+        3,
+        8
+      ],
+      "confidence": "high",
+      "quote": "We provide access to the best technology vendors from global partners like Cisco, VMware (Broadcom), Fortinet and Palo Alto.",
+      "note": "BT operates services rather than authoring the SD-WAN or SASE product. The overlay and security technology is explicitly third party (Cisco, VMware/Broadcom, Fortinet, Palo Alto), while BT supplies the wrap: design, implementation, managed operation and support per the Managed Services Schedule. BT does operate its own Global Fabric NaaS platform, which is a genuine BT-built asset, but it is a cloud interconnect fabric and not the SD-WAN/SASE product under review, so managed_provider rather than both.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        6,
+        14,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "No Service levels and Service credits will apply to this Service; where the Customer has Enabling Services from a third party; or where the Incident is due to changes made by the Customer utilizing the Co-managed option as set out in Part B.",
+      "claimed_by": "vendor",
+      "note": "Mixed, and the contract itself is the proof. BT contemplates three underlay cases: BT-provided enabling services, third-party enabling services, and customer-provided devices and circuits. BT genuinely owns large physical infrastructure, with Openreach a wholly owned subsidiary of BT Group and a Networks unit that runs BT's fixed and mobile networks, so this is not a pure overlay reseller. But the SD-WAN service explicitly rides third-party access where the customer brings it, and internationally BT's own material does not establish owned circuits. Buyers should price the difference, because the SLA position changes materially depending on whose access is underneath, as shown in the quote."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        3,
+        18,
+        7,
+        4
+      ],
+      "confidence": "high",
+      "quote": "BT today announced an expansion of its managed secure SD-WAN solution for business and public sector customers in the UK with new SSE (Security Service Edge) capabilities, leveraging technology from Fortinet.",
+      "claimed_by": "vendor",
+      "note": "Fortinet. BT's managed SASE SSE layer is FortiSASE, licensed by BT and delivered on Fortinet PoPs, confirmed by BT's own release and independently by Computer Weekly (Joe O'Halloran, 25 November 2024). The service schedule reinforces this commercially: BT provides the customer with SASE Licences, and the service is available only with FortiSASE PoPs plus selected PoPs. BT has additionally partnered with Netskope for SSE (Netskope release, 12 December 2023, Tier 3, named in the register), so the SSE vendor may vary by deal, but in either case the stack is a partner's and not BT-built."
+    },
+    "regulatory_documentation": {
+      "value": "assurance_only",
+      "evidence": [
+        7,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "FortiSASE is available in line with global regulations.",
+      "claimed_by": "vendor",
+      "note": "This is exactly the assurance_only pattern: a general sentence about meeting regulatory standards, with no framework named and no attestation cited, on the SD-WAN/SASE material itself. Frameworks I searched for and did not find on any BT SD-WAN or SASE page or schedule: ISO 27001, SOC 2, NHS DSPT, NIS2, DORA. One notable Tier 2 data point recorded rather than graded: BT's own G-Cloud listing on the UK Digital Marketplace, filed as BRITISH TELECOMMUNICATIONS LIMITED, answers 'ISO/IEC 27001 certification: No' while answering yes to Cyber Essentials and Cyber Essentials Plus. That listing covers a BT cyber advisory service, not the SD-WAN/SASE product, so it does not lift this to documented for the product in scope, but the explicit ISO 27001 'No' is worth putting to BT directly."
+    },
+    "pop_count": {
+      "value": "140",
+      "evidence": [
+        11,
+        12
+      ],
+      "confidence": "high",
+      "quote": "Global Fabric will be available to customers internationally via 140 PoPs hosted in the world's top cloud locations located in 40 countries.",
+      "claimed_by": "vendor",
+      "note": "140 Global Fabric PoPs across 40 countries, from BT's own go-live release dated 25 February 2025. Two important qualifications. First, this is the Global Fabric NaaS estate, not the SASE enforcement estate, which is Fortinet's FortiSASE PoP footprint and is not numbered anywhere I could find. Second, BT's earlier release of 1 October 2024 describes PoPs 'in over 45 of the world's major cloud data centres with the number increasing to 140', so 140 was a target figure that the February 2025 release presents as delivered. A third-party analyst figure of 160 conflicts with both; see conflicts. If a verifier's exact-string check fails on this quote, the likely cause is a typographic apostrophe in 'world's' on the source page rather than a wording difference."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed for the SD-WAN or SASE service. I read the Fortinet SD-WAN Service Schedule Part A (service terms), Parts B of January and March 2025, both the Managed Fortinet and Managed Cisco SD-WAN annexes and the Managed Services Schedule. None publishes an availability percentage for this service, and two state the opposite, that service levels and service credits do not apply to the Fortinet Service and to the MC SD-WAN Service respectively. Availability instead flows in from whatever enabling access the customer buys. For context, and deliberately not graded here because it is a different product, BT's published BTnet SLA states 'We aim to provide your service with a target of 100% availability at all times, subject to the terms of this agreement', along with a 20ms UK core round-trip and 95ms transatlantic latency guarantee. So a BT SD-WAN customer on BTnet access inherits a real percentage, but BT publishes none for the SD-WAN/SASE layer itself."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "Global Fabric will be available to customers internationally via 140 PoPs hosted in the world's top cloud locations located in 40 countries.",
+      "source_a": 11,
+      "claim_b": "160 points of presence (PoPs) located in carrier-neutral facilities such as Equinix",
+      "source_b": 21
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "Global Fabric 'points of presence' (PoPs) in over 45 of the world's major cloud data centres with the number increasing to 140.",
+      "source_a": 12,
+      "claim_b": "Global Fabric will be available to customers internationally via 140 PoPs hosted in the world's top cloud locations located in 40 countries.",
+      "source_b": 11
+    },
+    {
+      "field": "f26_sla_backed_service_fabric",
+      "claim_a": "Where the Customer has procured Enabling Services from BT, the Service levels and Service credits applicable to BT provided Enabling Services (as set out in the terms associated with such Enabling Service) will apply to this Service.",
+      "source_a": 6,
+      "claim_b": "Service Levels and Service Credits do not apply to the Fortinet Service.",
+      "source_b": 5
+    },
+    {
+      "field": "f21_private_global_backbone",
+      "claim_a": "Global Fabric will be available to customers internationally via 140 PoPs hosted in the world's top cloud locations located in 40 countries.",
+      "source_a": 11,
+      "claim_b": "Global Fabric will use its partners' fibre networks to support a high-bandwidth L2/3 routing layer",
+      "source_b": 21
+    }
+  ]
 }

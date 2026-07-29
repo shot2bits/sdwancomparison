@@ -12,13 +12,13 @@
   "cost_model": "Quote-based subscription; typically per-user/workload/location modules; SD-WAN integrations may add partner/vendor cost.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "partial",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "partial",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "unknown",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "partial",
     "f10_dynamic_path_selection": "partial",
@@ -28,16 +28,16 @@
     "f14_packet_loss_remediation": "partial",
     "f15_local_internet_breakout": "partial",
     "f16_mpls_coexistence_and_migration": "partial",
-    "f17_cellular_and_5g_support": "unknown",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
-    "f20_private_pops_dedicated_pops": "unknown",
-    "f21_private_global_backbone": "partial",
+    "f20_private_pops_dedicated_pops": "yes",
+    "f21_private_global_backbone": "not_primary",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "partial",
     "f25_high_availability_design": "partial",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "yes",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
@@ -51,16 +51,18 @@
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 19,
-    "partial_count": 11,
-    "partner_integrated_count": 8,
+    "yes_count": 22,
+    "partial_count": 15,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 2,
-    "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "unknown_count": 1,
+    "not_primary_count": 1,
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Category leader in SSE with ZIA, ZPA and ZDX; widely adopted as the security layer in best-of-breed SASE architectures.",
@@ -77,8 +79,8 @@
     "Premium pricing; typically per-user/workload/location with security modules adding cost.",
     "Buyers needing one vendor for both SD-WAN and security may prefer a converged platform (Cato, FortiSASE, Prisma)."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -179,5 +181,461 @@
   "value_tier": "premium",
   "cost_note": "Per-user Editions, premium priced; transaction scale justifies it for large estates.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). UK PoPs in the Zero Trust Exchange; delivered direct or via UK partners and carriers."
+  "uk_basis": "No UK HQ (US). UK PoPs in the Zero Trust Exchange; delivered direct or via UK partners and carriers.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Zscaler SLA Support | Service Level Agreement Documentation",
+      "url": "https://www.zscaler.com/legal/sla-support",
+      "published": null,
+      "reliability": "Vendor's own published contractual SLA schedule. Highest quality source for availability, latency and support response commitments. No publication date printed.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Zscaler Extends Edge Compute, Now Operating Over 150 Data Centers (press release)",
+      "url": "https://www.zscaler.com/press/zscaler-extends-edge-compute-now-operating-over-150-data-centers",
+      "published": "2019-09-17",
+      "reliability": "Vendor press release, dated. Reliable for its date but superseded on PoP count by later 2026 material. Retained because it documents a conflicting figure.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Zscaler Internet Access data sheet (PDF)",
+      "url": "https://www.zscaler.com/resources/data-sheets/zscaler-internet-access.pdf",
+      "published": null,
+      "reliability": "Vendor datasheet. Strong for product capability and headline figures. Undated, and PDF text extraction may reflow line breaks.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Zscaler Significantly Expands Global Sovereignty on Zero Trust Exchange Platform (press release)",
+      "url": "https://www.zscaler.com/press/zscaler-significantly-expands-global-sovereignty-zero-trust-exchange-platform",
+      "published": "2026-03-12",
+      "reliability": "Vendor press release with an explicit date, most recent statement of data centre count and sovereign or dedicated deployment options.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Zero Trust Cloud Firewall | Zscaler",
+      "url": "https://www.zscaler.com/products-and-solutions/cloud-firewall",
+      "published": null,
+      "reliability": "Vendor product page. Reliable for whether the firewall is native to the platform. Marketing register, undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Zscaler Data Protection product page",
+      "url": "https://www.zscaler.com/products-and-solutions/data-protection",
+      "published": null,
+      "reliability": "Vendor product page for DLP and data classification. Undated marketing page but explicit on capability.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Zscaler Professional Services (PDF datasheet)",
+      "url": "https://www.zscaler.com/resources/data-sheets/professional-services.pdf",
+      "published": null,
+      "reliability": "Vendor services datasheet listing deployment package scope, pilots and education credits. Undated; content is largely tabular so extracted strings are short fragments rather than prose.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Simplify IoT & Mobile Security with Zscaler Cellular",
+      "url": "https://www.zscaler.com/products-and-solutions/zscaler-cellular",
+      "published": null,
+      "reliability": "Vendor product page for the Zscaler Cellular SIM-based service. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Zscaler's Compliance Center",
+      "url": "https://compliance.zscaler.com/",
+      "published": null,
+      "reliability": "Vendor-operated compliance portal listing named certifications and attestations. Undated but is the vendor's authoritative compliance index.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Service Provider Partners - Zscaler",
+      "url": "https://www.zscaler.com/partners/service-providers",
+      "published": null,
+      "reliability": "Vendor partner programme page. Reliable for how managed offers are routed to market. Undated, light on operational detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Streamlining Multi-Tenant Management: Announcing Integration of the Multi-Tenant Portal (Zscaler blog)",
+      "url": "https://www.zscaler.com/blogs/product-insights/streamlining-multi-tenant-management-announcing-integration-multi-tenant",
+      "published": "2026-03-25",
+      "reliability": "Vendor blog with an explicit publication date, describing the Multi-Tenant Portal for MSPs. Dated vendor material so usable as Tier 1, but it is product marketing rather than documentation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Zscaler Managed Detection & Response (MDR) product page",
+      "url": "https://www.zscaler.com/products-and-solutions/managed-detection-and-response",
+      "published": null,
+      "reliability": "Vendor product page for Zscaler's own managed service. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Zscaler MDR: 24/7 Managed Detection & Response (PDF brochure)",
+      "url": "https://www.zscaler.com/resources/brochures/zscaler-managed-detection-and-response-mdr.pdf",
+      "published": null,
+      "reliability": "Vendor brochure. Explicit on 24x7x365 human-led response. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Traffic Forwarding in Zscaler Internet Access Reference Architecture (PDF)",
+      "url": "https://www.zscaler.com/resources/reference-architectures/traffic-forwarding-in-zscaler-internet-access.pdf",
+      "published": null,
+      "reliability": "Vendor reference architecture, the most technical source read. Strong on Service Edge types and peering. Undated and states 150+ data centres, which conflicts with newer material.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Zero Trust Branch: Secure, Simplify, and Connect with Zscaler",
+      "url": "https://www.zscaler.com/products-and-solutions/zero-trust-branch",
+      "published": null,
+      "reliability": "Vendor product page. Read for lifecycle and cellular evidence; contained neither beyond a zero touch provisioning table entry.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Zscaler Zero Trust SD-WAN (PDF datasheet)",
+      "url": "https://www.zscaler.com/resources/data-sheets/zscaler-zero-trust-sd-wan-datasheet.pdf",
+      "published": null,
+      "reliability": "Vendor datasheet with appliance models. Read specifically for cellular uplinks, firmware update and RMA or lifecycle statements; none were present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Zero Trust Branch: A simpler, safer, more cost-effective way to connect (PDF datasheet)",
+      "url": "https://www.zscaler.com/resources/data-sheets/zscaler-zero-trust-branch.pdf",
+      "published": null,
+      "reliability": "Vendor datasheet. Read for lifecycle management and cellular; neither documented.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Zero Trust 5G Architecture for Private 5G | Zscaler",
+      "url": "https://www.zscaler.com/products-and-solutions/private-5G",
+      "published": null,
+      "reliability": "Vendor product page. Concerns securing a customer's private 5G core, not 4G or 5G as WAN transport, so of limited use for the cellular capability definition.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Zscaler Extends Zero Trust Platform to Enable Cellular Communications for IoT/OT (press release)",
+      "url": "https://www.zscaler.com/press/zscaler-extends-zero-trust-platform-enable-cellular-communications-iot-ot-simply-sim-card-no",
+      "published": "2025-07-08",
+      "reliability": "Dated vendor press release. Confirms SIM-based cellular service but does not name 4G, 5G or LTE.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 3,
+      "title": "Internet 2.0: A Quantum Leap for Secure Global Connectivity (Zscaler blog, Teridion partnership)",
+      "url": "https://www.zscaler.com/blogs/product-insights/internet-2-0-quantum-leap-secure-global-connectivity",
+      "published": "2023-04-02",
+      "reliability": "Corroboration only. Describes a third party (Teridion Liquid Network) overlay rather than Zscaler-owned infrastructure, and is three years old. Not sufficient to grade backbone ownership on its own.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Understanding Private Service Edge for Internet & SaaS (Zscaler Help Portal)",
+      "url": "https://help.zscaler.com/zia/understanding-private-service-edge",
+      "published": null,
+      "reliability": "Not used as evidence: the help portal is a JavaScript single-page application and returned only an enable-JS stub, so no content was actually retrieved and no quote could be verified.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "About Private Service Edges (Zscaler Help Portal, ZPA)",
+      "url": "https://help.zscaler.com/zpa/about-private-service-edges",
+      "published": null,
+      "reliability": "Not used as evidence: JavaScript-only page, returned an enable-JS stub with no retrievable text.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 4,
+      "title": "What Is Zscaler Management Portal for Partners? (Zscaler Help Portal)",
+      "url": "https://help.zscaler.com/zia/what-zscaler-management-portal-partners",
+      "published": null,
+      "reliability": "Not used as evidence: JavaScript-only page, returned an enable-JS stub, so the partner multi-tenancy documentation could not be quoted.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 4,
+      "title": "Zscaler Zero Trust Exchange platform page (attempted)",
+      "url": "https://www.zscaler.com/products-and-solutions/zscaler-zero-trust-exchange",
+      "published": null,
+      "reliability": "Not used as evidence: returned HTTP 404, no content retrieved.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "partial",
+      "evidence": [
+        10,
+        12,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "We partner with service providers to develop comprehensive managed offers that leverage the Zero Trust Exchange, our industry-leading security platform, to enable profitable managed service provider business models.",
+      "claimed_by": "vendor",
+      "note": "Zscaler operates the platform itself and sells one first-party managed service (Zscaler MDR, security operations). On its own partner page the comprehensive managed offer is built and delivered by service provider partners, not by Zscaler. No Zscaler page was found describing Zscaler itself designing, deploying, changing and reporting on a customer's end-to-end service, so graded partial rather than yes."
+    },
+    "f03_co_managed_service": {
+      "value": "partial",
+      "evidence": [
+        1,
+        12,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "Human-led, hands-on-keyboard response acts as an extension of your security team and ensures threats can be mitigated even when your team is unavailable, 24x7x365.",
+      "claimed_by": "vendor",
+      "note": "Zscaler runs the platform as SaaS with a contractual SLA while the customer retains policy authoring, and MDR is explicitly positioned as an extension of the customer's own team, which is the shared-responsibility pattern. However no Zscaler page read set out a formal co-managed service definition with a documented split of change rights between Zscaler and the customer, so graded partial."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        11,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "The Multi-Tenant Portal has long been the cornerstone for Managed Service Providers (MSPs) and large-scale enterprises to oversee multiple Zscaler instances.",
+      "claimed_by": "vendor",
+      "note": "Tenant isolation, cross-tenant pivoting and centralised delegated administration through ZIdentity are documented for MSPs. Nothing was found on Zscaler's own pages evidencing branded or white-label portals under the partner's own brand, and the definition requires that. The definitive partner portal documentation on help.zscaler.com could not be read because it is a JavaScript-only page (register 23). Graded partial for that reason."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        7
+      ],
+      "confidence": "medium",
+      "quote": "Review current Zscaler implementation and operations, provide leading practices, recommendations and remediation plan",
+      "claimed_by": "vendor",
+      "note": "Zscaler publishes tiered deployment packages (Essential through Enterprise Plus) covering architecture and design, pilot user test plans, phased site rollout, production support and education credits, plus separate datasheets for ZIA policy creation and migration and for resident engineers. The datasheet is largely tabular, so the quote is the longest continuous prose string available. Confidence medium because the source is undated and table-formatted, which raises the risk of line-break differences on re-fetch."
+    },
+    "f07_lifecycle_management": {
+      "value": "unknown",
+      "evidence": [
+        15,
+        16,
+        17
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Zero Trust Branch product page, the Zero Trust SD-WAN datasheet and the Zero Trust Branch datasheet were all read specifically for hardware replacement or RMA, firmware upgrade, patching, renewals and end-of-life statements. The datasheets list appliance models (ZT 400, ZT 600, ZT 800, ZT 8010) and single-touch provisioning but say nothing about who owns firmware upgrades, hardware replacement or end-of-life planning. Absence is not being treated as a no."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        8,
+        19,
+        18,
+        16
+      ],
+      "confidence": "medium",
+      "quote": "Devices use Zscaler SIMs to steer traffic securely to the Zero Trust Exchange with no need for additional software.",
+      "claimed_by": "vendor",
+      "note": "Zscaler Cellular provides Zscaler-issued SIMs that carry cellular IoT and mobile device traffic into the Zero Trust Exchange, which covers SIM provisioning and management. The definition also asks for 4G and 5G as primary or failover WAN transport with modem and signal monitoring. Neither the Cellular product page nor the July 2025 cellular press release names 4G, 5G or LTE, the private 5G page concerns securing a customer's private 5G core rather than WAN transport, and the Zero Trust SD-WAN datasheet contains no cellular uplink specification. Graded partial on that gap."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        4,
+        3,
+        14
+      ],
+      "confidence": "high",
+      "quote": "Zscaler already operates 160+ data centers and is present in most countries.",
+      "claimed_by": "vendor",
+      "note": "This is Zscaler's own infrastructure, not a resold third party's, so yes rather than partner_integrated. The reference architecture confirms Zscaler deploys its own ZIA Service Edge devices into those data centres and that users are always directed to the nearest one for traffic processing, which is security enforcement and SaaS access delivered as the vendor's own cloud service."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        14,
+        4,
+        3
+      ],
+      "confidence": "high",
+      "quote": "ZIA Private Service Edge and ZIA Virtual Service Edge devices extend the Zscaler cloud into your data center.",
+      "claimed_by": "vendor",
+      "note": "Directly meets the definition: customer-hosted and dedicated deployments exist alongside the shared multi-tenant Public Service Edges. The March 2026 sovereignty press release additionally describes Private Service Edges as single-tenant, customer-hosted, and Zscaler-managed appliances, plus dedicated control and logging planes in six countries, which covers the sovereign case."
+    },
+    "f21_private_global_backbone": {
+      "value": "not_primary",
+      "evidence": [
+        3,
+        14,
+        20
+      ],
+      "confidence": "low",
+      "quote": "Direct peering with major internet and SaaS providers and public cloud destinations ensures the fastest traffic path possible.",
+      "claimed_by": "netify_assessment",
+      "note": "No claim of a vendor-owned or vendor-controlled inter-region backbone was found on any Zscaler page read. The published architecture is peering-based: the reference architecture states many data centres are in internet exchange peering points with other cloud infrastructure and application providers, such as Microsoft, Amazon, and Google. The only global-WAN backbone material found was a 2023 blog describing the Teridion Liquid Network, which is a third party's infrastructure and is Tier 3 corroboration only (register 20), so it cannot support a grade. Graded not_primary rather than unknown because the vendor's own architecture documents describe an internet-and-peering model, but confidence is low since this is read off architecture description rather than an explicit vendor statement about backbone ownership."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        1,
+        3
+      ],
+      "confidence": "high",
+      "quote": "The SaaS will be available to accept Customer's Transactions and Sessions 99.999% of the total hours during every month Customer uses the SaaS",
+      "claimed_by": "vendor",
+      "note": "Zscaler publishes a contractual SLA schedule covering availability by product (99.999% for ZIA, ZPA, ZDX and Zero Trust Device Segmentation or Microsegmentation; 99.99% for DNS-based guest WiFi; 99.9% for Risk360, DSPM, Cellular, MDR and others), a latency commitment, and tiered support response times (15 minutes P1 on Premium Support Advanced, 2 hours P1 on Standard Support). That is contractual rather than best-effort."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        5,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Built on a cloud native platform, a zero trust firewall protects web and non-web traffic for all users, apps, locations, and clouds.",
+      "claimed_by": "vendor",
+      "note": "Native Zscaler technology, not a resold or bundled third party, so yes rather than partner_integrated. The ZIA datasheet corroborates the combined firewall and IPS function with the line Zscaler Firewall & cloud IPS: Extend industry-leading protection to all ports and protocols, and replace edge and branch firewalls with a cloud native platform. The cloud firewall page also cites always-on cloud IPS with custom signatures and native TLS/SSL decryption. URL filtering and malware inspection are delivered by the same ZIA platform rather than a separate appliance."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        6,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Deliver high-performance DLP inspection across web and email data.",
+      "claimed_by": "vendor",
+      "note": "Native inline DLP with content classification (LLM classification, EDM, IDM, OCR and regex) and blocking of risky access across web, GenAI, endpoints, email, SaaS and IaaS. The ZIA datasheet corroborates with Cloud Data Loss Prevention (DLP): Protect data in motion with full inline inspection and advanced measures like exact data match (EDM). Alerting and exception workflow detail was not separately quotable from the pages read, but the classify, inspect and block elements of the definition are met."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        13,
+        12,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Human-led, hands-on-keyboard response acts as an extension of your security team and ensures threats can be mitigated even when your team is unavailable, 24x7x365.",
+      "claimed_by": "vendor",
+      "note": "Zscaler MDR provides 24/7 monitoring, investigation and response with human analysts, and the SLA schedule commits MDR response within 10 minutes of a Zscaler analyst confirming a threat, plus 24 x 7 x 365 support access across tiers. However the MDR page and brochure were both read for root cause analysis ownership, formal escalation procedure and structured service reviews or change governance, and none of those were stated, and no vendor-run NOC (as distinct from SOC) was evidenced. Graded partial for those gaps."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        10,
+        12,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "We partner with service providers to develop comprehensive managed offers that leverage the Zero Trust Exchange, our industry-leading security platform, to enable profitable managed service provider business models.",
+      "note": "Zscaler authors and operates its own SaaS security platform (technology vendor) and also sells a Zscaler-delivered managed service in the form of Zscaler MDR. End-to-end managed SASE or network service to enterprises is, on Zscaler's own partner page, positioned as something service provider partners build on top of the Zero Trust Exchange. Graded both on that basis.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        3,
+        14,
+        8
+      ],
+      "confidence": "low",
+      "quote": "Direct peering with major internet and SaaS providers and public cloud destinations ensures the fastest traffic path possible.",
+      "claimed_by": "netify_assessment",
+      "note": "No Zscaler page read states that Zscaler owns physical circuits or core routing; the published model is that customers forward their own internet or MPLS transport to the nearest Service Edge, with Zscaler peering at internet exchanges. The one caveat is Zscaler Cellular, where Zscaler supplies its own SIMs riding mobile operator networks, which is a Zscaler-supplied access product rather than circuit ownership. Confidence low because this is read off architecture documents rather than an explicit ownership statement, and no supplier statement was found either confirming or denying circuit ownership."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        3,
+        5,
+        4,
+        14
+      ],
+      "confidence": "high",
+      "quote": "Distributed across more than 160 data centers globally, the SSE-based Zero Trust Exchange™ is the world's largest in-line cloud security platform.",
+      "claimed_by": "vendor",
+      "note": "Zscaler built and operates its own SSE stack (Zero Trust Exchange, ZIA, ZPA, ZDX, cloud firewall, cloud IPS, DLP) running on Zscaler-operated Service Edge infrastructure in Zscaler data centres. No third-party security vendor is named as the source of the SSE layer on any page read. Zscaler is the vendor that other suppliers resell, rather than a reseller of someone else's stack."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        9
+      ],
+      "confidence": "high",
+      "quote": "Zscaler compliance enablers are built on foundational programs focusing on data protection and regulatory requirements, including ISO 27001, ISO 27701, SOC 2, and various others.",
+      "claimed_by": "vendor",
+      "note": "Zscaler operates a dedicated compliance portal naming specific attestations rather than making a general assurance statement, which is why this is documented and not assurance_only. Frameworks found and named on the portal: SOC 2 Type 2, SOC 3, ISO/IEC 27001, ISO/IEC 27017:2015, ISO/IEC 27018:2019, ISO/IEC 27701, ISO 22301, CSA STAR Level 2, FIPS 140-2, FIPS 140-3, HIPAA, HITRUST, GDPR, PCI DSS, C5, Cyber Essentials Plus, TISAX, ISMAP, IRAP, ENS, MTCS Level 3, NIST 800-53 Rev. 5, G-Cloud, EU-US DPF, Swiss-US DPF, UK Extension to EU-US DPF, CISA Secure-by-Design Pledge, China Cybersecurity Law (CSL), CCCS CSP ITS, DCSO Security Assessment, FSQS, TruSight and CyberVadis Gold. Frameworks specifically looked for and NOT found on the portal listing: DORA, NIS2 and NHS DSPT. FedRAMP was not returned in the portal listing read here; a separate Zscaler press release announcing FedRAMP High authorisation was seen in search results but was not fetched in this task, so it is not cited as evidence."
+    },
+    "pop_count": {
+      "value": "160",
+      "evidence": [
+        4,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "Zscaler already operates 160+ data centers and is present in most countries.",
+      "claimed_by": "vendor",
+      "note": "Value recorded as 160 from the 160+ figure in the March 2026 press release, corroborated by the ZIA datasheet phrase more than 160 data centers globally. Zscaler's own older material states 150+, so the figure is a published floor rather than an exact count. See conflicts. Zscaler counts data centres rather than using the term PoP consistently, although its 2019 press release equates the two."
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        1,
+        3
+      ],
+      "confidence": "high",
+      "quote": "The SaaS will be available to accept Customer's Transactions and Sessions 99.999% of the total hours during every month Customer uses the SaaS",
+      "claimed_by": "vendor",
+      "note": "99.999% applies to ZIA, ZPA, ZDX and Zero Trust Device Segmentation or Microsegmentation. Lower figures apply to other Zscaler products in the same schedule: 99.99% for DNS-based guest WiFi and 99.9% for Posture Control, Risk360, Business Insights, UVM, DSPM, Breach Predictor, EASM, Cellular, MDR and Identity Protection. The ZIA datasheet corroborates with Availability 99.999%, measured by transactions lost. A separate latency commitment of 100 milliseconds or less for the 95th percentile of traffic is also published."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "Zscaler already operates 160+ data centers and is present in most countries.",
+      "source_a": 4,
+      "claim_b": "It is now distributed across more than 150 data centers on six continents",
+      "source_b": 2
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "Distributed across more than 160 data centers globally, the SSE-based Zero Trust Exchange™ is the world's largest in-line cloud security platform.",
+      "source_a": 3,
+      "claim_b": "Zscaler has deployed ZIA Service Edge devices in 150+ data centers around the world.",
+      "source_b": 14
+    }
+  ]
 }

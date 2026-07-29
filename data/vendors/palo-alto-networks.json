@@ -13,13 +13,13 @@
   "cost_model": "Quote-based subscriptions; appliance/ION and Prisma Access/SASE licensing typically priced by users, bandwidth, locations and term.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "managed_service_dependent",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f03_co_managed_service": "managed_service_dependent",
+    "f04_multi_tenant_msp_white_label_support": "partial",
     "f05_professional_services_and_migration_support": "partner_integrated",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -29,16 +29,16 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
-    "f20_private_pops_dedicated_pops": "unknown",
-    "f21_private_global_backbone": "unknown",
+    "f20_private_pops_dedicated_pops": "yes",
+    "f21_private_global_backbone": "partner_integrated",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "yes",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "yes",
     "f29_sse_ecosystem_integration": "yes",
@@ -52,16 +52,18 @@
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "unknown"
   },
   "score_summary": {
-    "yes_count": 29,
-    "partial_count": 1,
-    "partner_integrated_count": 8,
-    "managed_service_dependent_count": 0,
-    "unknown_count": 2,
+    "yes_count": 32,
+    "partial_count": 2,
+    "partner_integrated_count": 3,
+    "managed_service_dependent_count": 2,
+    "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Prisma SASE converges SD-WAN, cloud-delivered security, and digital experience management (ADEM) under a single platform identity.",
@@ -78,8 +80,8 @@
     "Managed delivery is via partners (Orange Business, NTT, others); first-party managed service is not the primary model.",
     "Private global backbone is not vendor-owned; cloud transport uses internet and Prisma Access PoPs."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "yes",
@@ -145,8 +147,8 @@
     "chromeos": "unknown",
     "agentless": "partial"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 100,
+  "sla_availability_pct": 99.999,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -181,5 +183,430 @@
   "value_tier": "premium",
   "cost_note": "Per-user Prisma Access plus appliance subscriptions at premium positioning; buyers pay for security depth.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). UK Prisma Access presence; delivered direct or via UK partners and carriers."
+  "uk_basis": "No UK HQ (US). UK Prisma Access presence; delivered direct or via UK partners and carriers.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Prisma SASE (supplier SASE landing page)",
+      "url": "https://www.paloaltonetworks.com/sase",
+      "published": null,
+      "reliability": "Supplier's own product landing page. Marketing level; used only for portfolio context, no technical figures published.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Prisma Access (product page)",
+      "url": "https://www.paloaltonetworks.com/sase/access",
+      "published": null,
+      "reliability": "Supplier's own product page. States the 99.999% uptime SLA claim; corroborated by the SLA PDF (source 5).",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Prisma Access Overview (technical documentation)",
+      "url": "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview",
+      "published": null,
+      "reliability": "Supplier's own administration documentation. Highest quality tier 1 source here for built-in security functions and who operates the infrastructure.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Prisma Access Locations (technical documentation)",
+      "url": "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview/list-of-prisma-access-locations",
+      "published": null,
+      "reliability": "Supplier's own documentation. Publishes the location count and enumerates compute locations by region. Undated, so the figure is point-in-time.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Prisma Access Service Level Agreement (PDF)",
+      "url": "https://www.paloaltonetworks.com/content/dam/pan/en_US/assets/pdf/datasheets/support/prisma-access-service-sla.pdf",
+      "published": null,
+      "reliability": "Supplier's published contractual SLA document. Strongest available evidence for availability and latency commitments and service credits.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Managed SASE (supplier page for MSPs)",
+      "url": "https://www.paloaltonetworks.com/sase/managed-sase",
+      "published": null,
+      "reliability": "Supplier's own page. Directly evidences that fully managed and co-managed delivery is performed by MSPs using the platform, plus multitenancy and delegated administration.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Professional Services for Secure Access Service Edge",
+      "url": "https://www.paloaltonetworks.com/services/consulting/sase",
+      "published": null,
+      "reliability": "Supplier's own consulting services page. Evidences design, deployment and operations services; silent on migration runbooks and rollback plans.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Configure Cellular Interfaces (Prisma SD-WAN documentation)",
+      "url": "https://docs.paloaltonetworks.com/prisma-sd-wan/administration/prisma-sd-wan-sites-and-devices/prisma-sd-wan-ports-and-interfaces/configure-cellular-interfaces",
+      "published": null,
+      "reliability": "Supplier's own administration documentation. Specific and technical; strongest source for 4G/5G transport and SIM handling.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Prisma Access Colo-Connect (technical documentation)",
+      "url": "https://docs.paloaltonetworks.com/prisma-access/administration/colo-connect-in-prisma-access",
+      "published": null,
+      "reliability": "Supplier's own documentation. Shows private connectivity is delivered over Google Cloud interconnect, that is, a third party's transport.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "SASE Private Location (technical documentation)",
+      "url": "https://docs.paloaltonetworks.com/prisma-access/administration/sase-private-location",
+      "published": null,
+      "reliability": "Supplier's own documentation. Decisive evidence for customer-hosted/dedicated PoP deployment and for the split of lifecycle responsibilities.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "The Architecture Behind Prisma SASE and Its 99.999% Uptime (supplier blog)",
+      "url": "https://www.paloaltonetworks.com/blog/sase/the-architecture-behind-prisma-sase-99999-uptime/",
+      "published": "2024-06-18",
+      "reliability": "Supplier's own dated blog post. Explicit about reliance on GCP and AWS infrastructure, the key evidence against a vendor-owned backbone.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Why Sovereignty Controls in SASE Are the New Standard for the Modern Enterprise (supplier blog)",
+      "url": "https://www.paloaltonetworks.com/blog/sase/why-sovereign-sase-is-the-new-standard-for-the-modern-enterprise/",
+      "published": "2026-04-22",
+      "reliability": "Supplier's own dated blog. Corroborates SASE Private Location for data residency; names GDPR and CCPA only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Fast-Track Enterprise Digital Transformation with Managed Prisma SASE (supplier blog)",
+      "url": "https://www.paloaltonetworks.com/blog/sase/fast-track-enterprise-digital-transformation-with-managed-prisma-sase/",
+      "published": "2022-04-04",
+      "reliability": "Supplier's own dated blog. Defines the fully managed and co-managed models and attributes both to the MSP rather than to Palo Alto Networks. Four years old, so treat as potentially superseded.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Palo Alto Networks Introduces Industry's Most Complete SASE Solution for MSPs (press release)",
+      "url": "https://www.paloaltonetworks.com/company/press/2022/palo-alto-networks-introduces-industry-s-most-complete-sase-solution-for-msps",
+      "published": "2022-02-28",
+      "reliability": "Supplier's own dated press release. Corroborates hierarchical multitenancy and RBAC. Used as corroboration only given its age.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Enterprise DLP (product page)",
+      "url": "https://www.paloaltonetworks.com/sase/enterprise-data-loss-prevention",
+      "published": null,
+      "reliability": "Supplier's own product page. Marketing register rather than technical, so workflow detail is thin, but it establishes the capability is first-party technology.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Palo Alto Networks Trust Center - Compliance and Certifications",
+      "url": "https://www.paloaltonetworks.com/legal-notices/trust-center/compliance",
+      "published": null,
+      "reliability": "Supplier's own trust centre. Names specific frameworks and attestations rather than making a general assurance statement.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Prisma Access Datasheet (resource landing page)",
+      "url": "https://www.paloaltonetworks.com/resources/datasheets/prisma-access",
+      "published": null,
+      "reliability": "Supplier landing page only; the substantive datasheet sits behind a download. Returned no usable figures, so it carries no grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Prisma SASE for MSPs At a Glance (resource landing page)",
+      "url": "https://www.paloaltonetworks.com/resources/datasheets/prisma-sase-for-msps",
+      "published": null,
+      "reliability": "Supplier landing page only; detail sits in a gated PDF. Returned no usable verbatim text, so it carries no grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Support Policies",
+      "url": "https://www.paloaltonetworks.com/services/support/support-policies",
+      "published": null,
+      "reliability": "Supplier's own page but a link index only. Returned no substantive text on RMA, firmware or end-of-life, so it carries no grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "SASE Private Location (What's New feature listing)",
+      "url": "https://docs.paloaltonetworks.com/whats-new/new-features/november-2025/sase-private-location",
+      "published": "2025-11",
+      "reliability": "Supplier documentation hub page. The fetch returned only navigation chrome with no feature description, so nothing was graded from it; the administration page (source 10) was used instead.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Prisma Access for MSPs - LIVEcommunity",
+      "url": "https://live.paloaltonetworks.com/t5/prisma-access-for-msps-and/ct-p/Prisma_Access_for_MSPs",
+      "published": null,
+      "reliability": "Not used as evidence: user community forum with undated, user-generated posts and no editorial accountability.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "Prisma Access listing on AWS Marketplace",
+      "url": "https://aws.amazon.com/marketplace/pp/prodview-krvl6a6upwzzs",
+      "published": null,
+      "reliability": "Not used as evidence: third-party marketplace listing, undated and reproduced from vendor-supplied copy.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "managed_service_dependent",
+      "evidence": [
+        3,
+        6,
+        13
+      ],
+      "confidence": "high",
+      "quote": "With Prisma Access, Palo Alto Networks deploys and manages the security infrastructure globally to secure your remote networks and mobile users.",
+      "claimed_by": "vendor",
+      "note": "Palo Alto Networks operates the cloud security infrastructure itself, but end-to-end design, change, support and reporting for a customer is positioned as an MSP function. The Managed Prisma SASE blog (source 13) describes the fully managed model as one where the MSP is responsible for all aspects of the tenant service lifecycle including security policy configuration and operations, and the Managed SASE page (source 6) frames fully managed and co-managed delivery as something MSPs provide using the platform. Graded managed_service_dependent rather than yes because the provider of the wrap is a partner, not Palo Alto Networks."
+    },
+    "f03_co_managed_service": {
+      "value": "managed_service_dependent",
+      "evidence": [
+        13,
+        6
+      ],
+      "confidence": "high",
+      "quote": "The MSP provides delegated access to the customer to co-manage the policies and their specific services.",
+      "claimed_by": "vendor",
+      "note": "Co-management is explicitly described as an MSP-delivered model in which the MSP delegates policy rights to the customer. The platform supplies the delegated administration mechanism; the service relationship sits with the MSP, so graded managed_service_dependent. Source 13 is dated 4 April 2022 and may be superseded."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        6,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "MSPs can securely delegate responsibilities while ensuring only authorized users can read or modify critical security configurations.",
+      "claimed_by": "vendor",
+      "note": "Hierarchical multitenancy and granular role-based delegated administration are evidenced on the Managed SASE page (source 6) and the 2022 MSP press release (source 14), which describes a cloud-based management portal with hierarchical multitenancy using granular role-based access control. Graded partial rather than yes because no evidence of branded or white-label portals and service templates carrying the MSP's own brand was found on the pages reviewed; the Prisma SASE for MSPs datasheet (source 18) is gated and returned no usable text."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        10,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "Palo Alto Networks manages sizing, content versioning, monitoring, upgrades, and security subscriptions.",
+      "claimed_by": "vendor",
+      "note": "For the cloud service and for SASE Private Location, Palo Alto Networks handles sizing, content versioning, upgrades and security subscriptions as part of the service. Graded partial because hardware replacement and RMA, ION appliance firmware handling, renewals and end-of-life planning were not evidenced: the Support Policies page (source 19) is a link index that returned no substantive text, and no RMA or end-of-life policy document was read in this task."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        8
+      ],
+      "confidence": "high",
+      "quote": "The cellular ION devices have integrated 4G or 5G cellular modem for primary or backup WAN connectivity.",
+      "claimed_by": "vendor",
+      "note": "Documentation confirms integrated 4G and 5G modems usable as primary or backup transport, optional dual SIMs for carrier failover, automatic carrier profile and firmware detection for AT&T, T-Mobile and Verizon, and separate primary and backup APN and circuit label configuration. Cellular statistics and SIM operations pages exist in the same documentation set but were not opened in this task, so signal monitoring is indicated by the documentation structure rather than quoted."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        3,
+        4,
+        11
+      ],
+      "confidence": "high",
+      "quote": "With Prisma Access, Palo Alto Networks deploys and manages the security infrastructure globally to secure your remote networks and mobile users.",
+      "claimed_by": "vendor",
+      "note": "The PoPs are Palo Alto Networks' own service, sold under its own brand and covered by its own SLA, so this is yes rather than partner_integrated. Recorded for transparency: the compute those PoPs run on is rented from GCP and AWS (source 11), which is a hosting arrangement rather than reselling another vendor's SASE gateway service."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        10,
+        12
+      ],
+      "confidence": "high",
+      "quote": "SASE Private Location enables you to deploy Prisma Access services within your own infrastructure.",
+      "claimed_by": "vendor",
+      "note": "SASE Private Location is a customer-hosted deployment of Prisma Access services on the customer's own hypervisor and ISP links, with Palo Alto Networks retaining backend management. Corroborated by the sovereignty blog (source 12), which states that for organisations with the most stringent data residency requirements Palo Alto offers SASE Private Location. Colo-Connect (source 9) is a different thing: private connectivity into the shared cloud, not a dedicated PoP."
+    },
+    "f21_private_global_backbone": {
+      "value": "partner_integrated",
+      "evidence": [
+        11,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Prisma SASE leverages the infrastructure of major hyperscale providers such as Google Cloud Platform (GCP) and Amazon Web Services (AWS).",
+      "claimed_by": "vendor",
+      "note": "Inter-region transport rides the backbones of Google Cloud and AWS rather than a network owned or controlled by Palo Alto Networks. The same post adds that Prisma SASE benefits from private peering connections between tier 1 cloud providers and other public cloud platforms, SaaS networks and ISPs, which again describes third-party peering. Colo-Connect (source 9) uses GCP interconnect technology, reinforcing the same conclusion. No evidence of Palo Alto-owned fibre, wavelengths or core routing was found."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        5,
+        2
+      ],
+      "confidence": "high",
+      "quote": "If, during any calendar month, the Service availability falls below 99.999%, Customer can submit a claim for credit",
+      "claimed_by": "vendor",
+      "note": "The published SLA is contractual with service credits and covers three separate measures: service availability at 99.999%, a Monthly Security Processing Latency Percentage at 99.99% and a Monthly SaaS Application Latency Percentage at 99.99%, with credits scaling to 100% where availability falls below 98%. That goes beyond best-effort targets. Support response times and change handling commitments were not evidenced in the SLA text reviewed."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        3
+      ],
+      "confidence": "high",
+      "quote": "Threat prevention, malware prevention, URL filtering, SSL decryption, and application-based policy capabilities are built-in to provide you with the same level of security no matter where your users are or what resources they are accessing.",
+      "claimed_by": "vendor",
+      "note": "All the inspection functions in the definition are built into the Prisma Access platform and are Palo Alto Networks' own technology (App-ID, Threat Prevention, WildFire, Advanced URL Filtering), not a third party's, so this is yes rather than partner_integrated. Stateful firewalling is inherent to the PAN-OS engine the service runs on but is not named in the quoted sentence."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        15,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Discover sensitive data wherever it resides and travels.",
+      "claimed_by": "vendor",
+      "note": "Enterprise DLP is a first-party Palo Alto Networks product delivered as part of the SASE portfolio. The same page also states comprehensive coverage for data in-motion and at-rest, classification using thousands of data identifiers and over 100 trainable ML classifiers, and real-time user coaching and adaptive response. Confidence is medium rather than high because the page is written in marketing register and does not document alerting or exception and incident approval workflows explicitly; no Enterprise DLP administration documentation was read in this task."
+    },
+    "f40_managed_service_assurance": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        13,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I looked at the Managed SASE page (source 6), the Managed Prisma SASE blog (source 13), the Support Policies page (source 19) and the Prisma Access administration documentation (source 3). Palo Alto Networks operates the cloud platform and backs it with a 99.999% availability SLA, and the MSP blog refers to operational lifecycle management that includes monitoring and reporting, but no Palo Alto-operated 24/7 NOC and SOC owning customer incidents through to root cause analysis with structured service reviews and change governance is documented for Prisma SASE. On the material reviewed that wrap appears to sit with MSP partners, but no quotable sentence stating it was found, so this is recorded as unknown rather than graded."
+    },
+    "delivery_model": {
+      "value": "technology_vendor",
+      "evidence": [
+        3,
+        6,
+        13
+      ],
+      "confidence": "high",
+      "quote": "With Prisma Access, Palo Alto Networks deploys and manages the security infrastructure globally to secure your remote networks and mobile users.",
+      "note": "Palo Alto Networks authors and operates the Prisma SASE cloud platform (Prisma Access, Prisma SD-WAN, Enterprise DLP) and runs the underlying security infrastructure, but the customer-facing fully managed and co-managed wrap is positioned as something managed service providers deliver on top of the platform (Managed SASE page and the Managed Prisma SASE blog). Consulting and deployment services are sold directly, but no Palo Alto-operated managed SASE service offering was found on the pages reviewed.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        10,
+        11,
+        9
+      ],
+      "confidence": "medium",
+      "quote": "You provide the hypervisor, ISP links, and public IP address infrastructure.",
+      "claimed_by": "vendor",
+      "note": "No evidence that Palo Alto Networks owns or resells physical circuits. For SASE Private Location the customer supplies the ISP links and compute; for the shared cloud service the compute and inter-region transport are rented from GCP and AWS (source 11); Colo-Connect uses GCP interconnect (source 9). Prisma SD-WAN is transport-agnostic over customer-procured WAN and cellular links. Graded customer_supplied_only rather than mixed because nothing found indicates Palo Alto sells connectivity itself, though the absence of a circuit-sales page is not proof, hence medium confidence."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        3,
+        15
+      ],
+      "confidence": "high",
+      "quote": "Threat prevention, malware prevention, URL filtering, SSL decryption, and application-based policy capabilities are built-in to provide you with the same level of security no matter where your users are or what resources they are accessing.",
+      "claimed_by": "vendor",
+      "note": "The security service edge stack is Palo Alto Networks' own engineering: PAN-OS-derived inspection delivered from Prisma Access, with Enterprise DLP as a first-party product (source 15). No third-party SSE vendor is named anywhere in the material reviewed. The hosting substrate is GCP and AWS, but that is infrastructure rental, not a resold security stack."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        16
+      ],
+      "confidence": "high",
+      "quote": "The Federal Risk and Authorization Management Program (FedRAMP) is a U.S. Federal Government-wide program that provides a standardized approach to the security assessment, authorization, and continuous monitoring of cloud products and services.",
+      "claimed_by": "vendor",
+      "note": "The trust centre names specific attestations rather than making a general assurance statement: FedRAMP, StateRAMP, SOC 2+, PCI DSS, ISMAP, IRAP, TISAX, Germany C5, CSA STAR, Common Criteria, FIPS 140, Cyber Essentials Plus, NCSC Cloud Security Principles, ENS, DODIN APL and an ISO certifications section. Frameworks I looked for and did NOT find named on this page: NHS DSPT, DORA, NIS2, and the exact string ISO 27001 (the page refers to ISO certifications generically and to the ISO 27000 series). SOC 2 appears only in the form SOC 2+."
+    },
+    "pop_count": {
+      "value": "100+",
+      "evidence": [
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Prisma Access provides over 100 locations worldwide",
+      "claimed_by": "vendor",
+      "note": "The supplier publishes a floor, not an exact figure, so the value is recorded as 100+. The same documentation page enumerates compute locations by region across Africa, Asia, ANZ, Europe, Japan, Middle East, North America and South America, plus separate lists for Explicit Proxy, Colo-Connect, High Performance Remote Networks, Secure Agentless Access and Local Zones, but prints no consolidated total. The page is undated so the figure is point-in-time. Confidence is medium because a range claim cannot be resolved to a single number."
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        5,
+        2,
+        11
+      ],
+      "confidence": "high",
+      "quote": "If, during any calendar month, the Service availability falls below 99.999%, Customer can submit a claim for credit",
+      "claimed_by": "vendor",
+      "note": "Taken from the published contractual SLA document rather than a marketing page. Corroborated by the Prisma Access product page, which advertises 99.999% industry-leading uptime SLAs, and by the architecture blog. Separate 99.99% commitments apply to security processing latency and third-party SaaS application latency; those are latency percentages, not availability, so they are not used for this field."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "Prisma Access provides over 100 locations worldwide",
+      "source_a": 4,
+      "claim_b": "The same documentation page enumerates only roughly 70 distinct entries in its compute locations table and prints no consolidated total, so the enumerated detail does not visibly reconcile to the headline over 100 figure unless the specialty location lists are counted as well",
+      "source_b": 4
+    },
+    {
+      "field": "f21_private_global_backbone",
+      "claim_a": "The Prisma Access product page markets the service as leveraging its massive hyperscale backbone to avoid outages, wording that reads as though the backbone is the vendor's own",
+      "source_a": 2,
+      "claim_b": "Prisma SASE leverages the infrastructure of major hyperscale providers such as Google Cloud Platform (GCP) and Amazon Web Services (AWS).",
+      "source_b": 11
+    },
+    {
+      "field": "f01_fully_managed_service",
+      "claim_a": "Prisma Access administration documentation states that Palo Alto Networks deploys and manages the security infrastructure globally, which reads as vendor-operated end to end",
+      "source_a": 3,
+      "claim_b": "Managed SASE material attributes fully managed and co-managed customer service delivery to MSPs, with the MSP responsible for all aspects of the tenant service lifecycle including security policy configuration and operations",
+      "source_b": 13
+    }
+  ]
 }

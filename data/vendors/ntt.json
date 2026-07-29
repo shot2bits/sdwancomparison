@@ -15,8 +15,8 @@
   "capabilities": {
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
-    "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f03_co_managed_service": "partial",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
     "f07_lifecycle_management": "yes",
@@ -29,10 +29,10 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "yes",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
-    "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -45,7 +45,7 @@
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "unknown",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
@@ -55,13 +55,15 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 34,
-    "partial_count": 3,
-    "partner_integrated_count": 3,
+    "yes_count": 32,
+    "partial_count": 4,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 3,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.925,
+    "sourced_facts_tier_1_2": 16,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "24x7 managed SD-WAN delivery via global operations centres with strong portal visibility.",
@@ -78,8 +80,8 @@
     "Commercial complexity is meaningful at global scale; ensure scope and RACI are explicit.",
     "DIY/self-managed model is not the primary positioning."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -145,8 +147,8 @@
     "chromeos": "managed_service_dependent",
     "agentless": "managed_service_dependent"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 75,
+  "sla_availability_pct": 100.0,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -181,5 +183,415 @@
   "value_tier": "premium",
   "cost_note": "Per-site managed on term; premium, consulting-led global delivery.",
   "uk_delivery": "uk_entity",
-  "uk_basis": "UK contracting entity (NTT DATA UK) of a Japanese parent, with UK delivery and operations."
+  "uk_basis": "UK contracting entity (NTT DATA UK) of a Japanese parent, with UK delivery and operations.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "SD-WAN Service Portfolio | NTT Global Networks",
+      "url": "https://www.nttglobal.net/services/sd-wan",
+      "published": null,
+      "reliability": "Supplier's own product page, the site named in the task brief. Primary source for the LCC count, transport options, firewall and IPS features, lifecycle and Global Operations Centers. Undated, so currency cannot be confirmed. Key quotes were re-fetched and verified literally; one candidate string was corrected during verification from 'NTT SD-WAN platform supports 10+' to the page's actual 'NTT SD-WAN services support 10+'.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Managed Network Services | NTT DATA",
+      "url": "https://services.global.ntt/en-us/services-and-products/network-services/managed-network-services",
+      "published": null,
+      "reliability": "Supplier's own service page. Useful context on the network lifecycle approach and the SPEKTRA platform, but the wording is high-level marketing and no quote from it was relied on for a grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "NTT Enhances Its Managed Campus Networks Portfolio With Palo Alto Networks Prisma SASE",
+      "url": "https://www.businesswire.com/news/home/20230202005142/en/NTT-Enhances-Its-Managed-Campus-Networks-Portfolio-With-Palo-Alto-Networks-Prisma-SASE-to-Address-Networking-Security-and-Business-Management-Challenges",
+      "published": "2023-02-02",
+      "reliability": "Supplier press release on a dated newswire of record. Strong for the fully managed claim and for identifying Palo Alto Networks as the SASE technology. Both quotes used were re-fetched and confirmed as exact matches. Dated 2023, so it may be partly superseded by the later Cisco-based offering.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Home - NTT-GIN (Global IP Network AS2914)",
+      "url": "https://www.gin.ntt.net/",
+      "published": null,
+      "reliability": "Supplier's own backbone site. Authoritative for backbone ownership and AS2914. The quote used was re-fetched and confirmed as an exact match. Undated page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Managed Campus Networks with Prisma SASE | NTT DATA",
+      "url": "https://services.global.ntt/en-us/campaigns/managed-campus-networks-with-prisma-sase",
+      "published": null,
+      "reliability": "Supplier campaign page. Confirms the Prisma SASE offering exists and describes a design, build, operate and optimise motion, but contains no SLA, NOC, DLP or PoP detail. No quote relied on for a grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Service Level Agreement | NTT-GIN",
+      "url": "https://www.gin.ntt.net/support/service-level-agreement/",
+      "published": null,
+      "reliability": "Supplier SLA index page. States the intent to make the network available free of outages 100% of the time but carries no numeric commitments itself; used only as a pointer to source 8.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Security Services | NTT Global Networks",
+      "url": "https://www.nttglobal.net/services/security/",
+      "published": null,
+      "reliability": "Supplier's own security service page. Used as negative evidence for DLP: it lists URL Filtering, Malware Detection, Direct Internet Access, Remote Access, Firewall and App Acceleration, and names no DLP capability and no underlying technology vendor.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Our Global IP Network SLA | NTT-GIN",
+      "url": "https://www.gin.ntt.net/support-center/service-level-agreements-slas/our-global-ip-network/",
+      "published": null,
+      "reliability": "Supplier's published contractual SLA. Highest-quality source for the availability, latency, packet loss and jitter numbers. The availability quote was re-fetched and corrected during verification to the page's literal wording. Scope is the IP backbone product, not the managed SD-WAN service.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Home | NTT Global Networks",
+      "url": "https://www.nttglobal.net/",
+      "published": null,
+      "reliability": "Supplier home page. Used for portfolio orientation (SD-WAN, SD-LAN, SD Security, Network Analytics, NTTView portal). No infrastructure figures; no quote relied on for a grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Network Management | NTT Global Networks",
+      "url": "https://www.nttglobal.net/services/network-management/",
+      "published": null,
+      "reliability": "Supplier page fetched specifically to test co-management, NOC and change governance claims. Returned no usable detail beyond a reference to the NTTView Customer Portal. Recorded as a checked-and-empty source.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "SD-WAN Service Portfolio Platform | NTT Global Networks",
+      "url": "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/",
+      "published": null,
+      "reliability": "Supplier's own platform page. Source of the self-manage-or-managed wording and corroborates the 75+ LCC figure and the 24x7 lifecycle statement. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Managed Network Services | NTT DATA Group",
+      "url": "https://www.nttdata.com/global/en/services/enterprise-networking/managed-network-services",
+      "published": null,
+      "reliability": "Supplier group-level page. Names 40+ partners across 60+ technologies including Cisco, Palo Alto Networks, Zscaler and Fortinet, which corroborates the partner-led security model. Wording is generic so no quote from it was relied on for a grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Compliance and Certification | NTT Global Data Centers",
+      "url": "https://services.global.ntt/en-us/services-and-products/global-data-centers/compliance-and-certification",
+      "published": null,
+      "reliability": "Supplier compliance page naming specific attestations by region. The quote used was re-fetched and verified. Important scope limit: the certifications listed apply to NTT Global Data Centers, and the page itself notes certain certifications apply only to specific data centre buildings, so it is not direct evidence for the SD-WAN or SASE service.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Managed Network Services | NTT DATA Group (network-services path)",
+      "url": "https://www.nttdata.com/global/en/services/network-services/managed-network-services",
+      "published": null,
+      "reliability": "Supplier page. Fetched to test fully managed versus co-managed wording and private 5G; returned nothing specific enough to grade from. Recorded as checked-and-empty.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Managed SASE white paper | NTT",
+      "url": "https://services.global.ntt/en-us/campaigns/managed-sase-white-paper",
+      "published": null,
+      "reliability": "Supplier gated landing page. Only generic SASE definitional language is visible without registration; the substantive white paper sits behind a form. No quote relied on for a grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Enterprise Networking / Network Services | NTT DATA",
+      "url": "https://services.global.ntt/en-us/services-and-products/network-services",
+      "published": null,
+      "reliability": "Supplier services index. Used to locate sub-service pages (Managed Network Services, Global Network Services, Private 5G, Professional Services). Navigational value only.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Global Network Services | NTT DATA",
+      "url": "https://services.global.ntt/en-us/services-and-products/network-services/global-network-services",
+      "published": null,
+      "reliability": "Supplier page. Source of the 190+ countries and territories coverage figure. Contains no statement on circuit ownership, carrier relationships or PoP counts, which is why underlay_ownership is graded mixed rather than resolved.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Managed SASE for Cisco Secure Access (NTT DATA and Cisco brochure)",
+      "url": "https://www.cisco.com/c/dam/en_us/solutions/global-partners/ntt-data-cisco-sase-brochure.pdf",
+      "published": null,
+      "reliability": "Co-branded NTT DATA collateral hosted on Cisco's domain. Treated as tier 1 supplier material because NTT DATA is the named service provider describing its own service, though the hosting domain belongs to the technology partner. All three quotes used were re-fetched and confirmed as exact matches. Undated PDF.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "NTT DATA Partners with Palo Alto Networks to Deliver AI Driven Cloud to Edge Cybersecurity to Enterprise Clients",
+      "url": "https://www.businesswire.com/news/home/20241028913666/en/NTT-DATA-Partners-with-Palo-Alto-Networks-to-Deliver-AI-Driven-Cloud-to-Edge-Cybersecurity-to-Enterprise-Clients",
+      "published": "2024-10-28",
+      "reliability": "Dated supplier press release. Confirms the continuing Palo Alto Networks relationship, but the announced service is Managed Extended Detection and Response built on Cortex XSIAM, not SASE, so it corroborates the partner-technology pattern only and carries no capability grade on its own.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "G-Cloud service listing 749342260880397 (Managed Detection and Response)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/749342260880397",
+      "published": null,
+      "reliability": "Not used as evidence. The listing turned out to belong to a different supplier (D2NA), not NTT DATA or NTT Ltd., so nothing on it can be attributed to this supplier. Retained in the register to record that a UK public procurement register was checked and did not yield an NTT SD-WAN or SASE entry at this URL.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        3,
+        1,
+        18
+      ],
+      "confidence": "high",
+      "quote": "As a fully managed solution, enterprises will be able to conserve scarce IT resources and reduce the complexity of managing a global network and security infrastructure.",
+      "claimed_by": "vendor",
+      "note": "NTT positions its Managed Campus Networks with Prisma SASE offering explicitly as a fully managed solution, and the nttglobal.net SD-WAN pages state NTT can operate the service end to end. Note that the fully managed wording sits on an offering built on Palo Alto Networks technology, so NTT is operating, not authoring, the security layer."
+    },
+    "f03_co_managed_service": {
+      "value": "partial",
+      "evidence": [
+        1,
+        11,
+        18
+      ],
+      "confidence": "medium",
+      "quote": "Customers have the option to self-manage via a web portal or NTT can offer managed services.",
+      "claimed_by": "vendor",
+      "note": "The published wording describes an either/or choice (customer self-manages via portal, OR NTT manages) rather than an explicitly shared-responsibility co-managed model. The NTT DATA/Cisco managed SASE brochure describes people-augmented, technology-augmented and hybrid operating models, which implies shared operation, but no page reviewed states which policy or change rights the customer retains. Graded partial rather than yes for that reason."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked nttglobal.net SD-WAN service page, the SD-WAN Service Portfolio Platform page, the nttglobal.net home page and security page, NTT DATA Managed Network Services (both nttdata.com and services.global.ntt), and the NTT DATA/Cisco managed SASE brochure. None mentions tenant isolation, delegated administration, branded/white-label portals or MSP reseller templates. NTT presents itself as the MSP rather than as a platform for other MSPs."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        18,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "NTT DATA delivers end-to-end managed SASE services that span consulting, design, build, management, decommissioning and refresh.",
+      "claimed_by": "vendor",
+      "note": "Structured design and migration services are clearly offered across a consult/design/build lifecycle, and the nttglobal.net SD-WAN page states NTT is able to strategically assist organizations with their network transformation and SD-WAN initiatives. The granular items in the definition (pilots, staging, migration runbooks, rollback plans, training) are not itemised on any page reviewed, hence medium confidence."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        1,
+        11,
+        18
+      ],
+      "confidence": "high",
+      "quote": "NTT's Infrastructure Management Services provide full life cycle: architecture, design, implementation, upgrades, and full proactive 24×7 management of a customer's global network and security infrastructure.",
+      "claimed_by": "vendor",
+      "note": "Quote uses a multiplication sign in 24×7 as printed on the page. Upgrades and full lifecycle management are stated as part of the service. The NTT DATA/Cisco SASE brochure adds decommissioning and refresh to the same lifecycle. Hardware replacement and end-of-life planning are not named in those exact terms."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Unrivaled performance and connectivity options: MPLS, Ethernet, Local Internet, Broadband, LTE/4G in over 190 countries.",
+      "claimed_by": "vendor",
+      "note": "LTE/4G is named as a supported transport option alongside MPLS, Ethernet, internet and broadband. 5G is not named on the SD-WAN service page, the platform page or the security page, and no page reviewed mentions SIM management or signal monitoring. NTT DATA does market a separate Private 5G service, but that is a private cellular network offering rather than evidence of 5G WAN transport in the SD-WAN service, so it is not used to lift this grade."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        1,
+        11
+      ],
+      "confidence": "high",
+      "quote": "Secure Web Gateways located at 75+ globally distributed Local Cloud Centers (LCCs) closer to client locations to protect customers from Internet threats.",
+      "claimed_by": "vendor",
+      "note": "The Local Cloud Centers are NTT's own distributed infrastructure delivering secure web gateway enforcement as a cloud service, which meets the definition of vendor-operated shared gateways. Separately the page describes optimised connectivity to AWS, Azure and Oracle Cloud, but per the definition that cloud onramp capability is not counted as evidence here. The security functions enforced at these gateways may use partner technology, which is graded separately under sse_layer_ownership."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The 75+ Local Cloud Centers are described as globally distributed shared infrastructure with no statement that they can be supplied as customer-hosted, dedicated or sovereign instances. Checked the nttglobal.net SD-WAN service and platform pages, the security page, NTT Global Network Services, NTT DATA Managed Network Services and the NTT DATA/Cisco managed SASE brochure. Absence of a statement is not evidence that the capability is absent."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        4,
+        8
+      ],
+      "confidence": "high",
+      "quote": "Our dual-stack Tier-1 Global IP Network spans the Americas, Asia, Europe and Oceania on a single autonomous system number (AS2914).",
+      "claimed_by": "vendor",
+      "note": "NTT owns and operates a Tier 1 global IP backbone under AS2914 spanning four continents, and publishes contractual inter-region latency, loss and jitter figures for it, which is the strongest form of evidence for this field. Caveat: this is the Global IP Network transit product; none of the SD-WAN or SASE pages reviewed states that SD-WAN inter-region traffic is carried on AS2914 by default rather than over the public internet."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        8,
+        6
+      ],
+      "confidence": "medium",
+      "quote": "The Global IP Network Backbone will be available to the customer free of Network Outages 100% of the time.",
+      "claimed_by": "vendor",
+      "note": "NTT publishes a contractual SLA for its Global IP Network covering availability, region-by-region latency, packet loss (average monthly not exceeding 0.1%) and jitter. Confidence is medium because this SLA document covers the IP backbone product; no published SLA percentage or response and change-handling commitment specific to the managed SD-WAN or managed SASE service was located on the pages reviewed."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        18,
+        3,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Built on Cisco's enterprise-grade cloud-native Secure Access technology and powered by NTT DATA's global managed services and AI-driven platform",
+      "claimed_by": "vendor",
+      "note": "Graded partner_integrated because NTT's named SASE offerings are built on other vendors' security technology: Cisco Secure Access (providing FWaaS and DNS security) in the NTT DATA/Cisco brochure, and Palo Alto Networks Prisma SASE in the 2023 Managed Campus Networks announcement. NTT's own SD-WAN portfolio page does describe a Firewall offering with application aware controls and an Intrusion Protection add-on covering protocol anomaly detection, port scan blocking and virus, spyware and bot blocking, but the same page states NTT SD-WAN services support 10+ third-party SD-WAN CPE vendors, so the enforcement engine is another company's technology that NTT operates."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The nttglobal.net SD Security page lists URL Filtering, Malware Detection, Direct Internet Access, Remote Access, Firewall and App Acceleration but not DLP. The NTT DATA/Cisco managed SASE brochure does not mention data loss prevention. No content classification, blocking, alerting or exception workflow description was found on the SD-WAN service page, platform page, or NTT DATA Managed Network Services pages. The underlying partner platforms (Palo Alto Prisma, Cisco Secure Access) include DLP, but no NTT page reviewed claims it, so this is left unknown rather than inferred."
+    },
+    "f40_managed_service_assurance": {
+      "value": "yes",
+      "evidence": [
+        1,
+        18,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "NTT's SD-WAN Services are managed by world-class Global Operations Centers that perform 24×7 predictive modeling, monitoring and management",
+      "claimed_by": "vendor",
+      "note": "Quote uses a multiplication sign in 24×7 as printed on the page. NTT states 24x7 proactive monitoring and management from Global Operations Centers acting as a single point of contact, and the NTT DATA/Cisco brochure states that its ISO-certified operations and ITIL-aligned processes ensure service excellence in all areas, which implies formal change governance. Confidence is medium because no page reviewed explicitly commits to owning incidents through to root cause analysis or to structured periodic service reviews; NTT DATA's SPEKTRA platform page references AI-based root cause analysis as a platform feature but that wording was not independently verified as a contractual service commitment."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        1,
+        11,
+        4,
+        18
+      ],
+      "confidence": "medium",
+      "quote": "Customers have the option to self-manage via a web portal or NTT can offer managed services.",
+      "note": "NTT DATA / NTT Ltd. is primarily a managed provider: it operates managed SD-WAN, managed SASE and managed network services on third-party CPE and security technology. It is graded both rather than managed_provider only because it also authors and operates its own assets: the NTT SD-WAN platform and NTTView customer portal, the 75+ Local Cloud Centers, the SPEKTRA operations platform, and the Tier 1 AS2914 Global IP Network. It does not author the SASE security stack.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        4,
+        8,
+        1,
+        17
+      ],
+      "confidence": "medium",
+      "quote": "Our dual-stack Tier-1 Global IP Network spans the Americas, Asia, Europe and Oceania on a single autonomous system number (AS2914).",
+      "claimed_by": "vendor",
+      "note": "Mixed. NTT genuinely owns core routing and a Tier 1 global IP backbone under AS2914, for which it publishes contractual latency and loss figures, so it is not a pure reseller. However its SD-WAN service offers MPLS, Ethernet, Local Internet, Broadband and LTE/4G access in over 190 countries, a footprint no single carrier owns, so last-mile access is necessarily sourced from third-party carriers in most markets. No page reviewed states explicitly which access circuits NTT owns versus procures, hence medium confidence."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        18,
+        3,
+        12,
+        19
+      ],
+      "confidence": "high",
+      "quote": "Built on Cisco's enterprise-grade cloud-native Secure Access technology and powered by NTT DATA's global managed services and AI-driven platform",
+      "claimed_by": "vendor",
+      "note": "Partner. Named vendors: Cisco (Cisco Secure Access underpins NTT DATA's Managed SASE per the co-branded brochure) and Palo Alto Networks (Prisma SASE underpins NTT's Managed Campus Networks SASE offering per the February 2023 announcement; Cortex XSIAM underpins its MXDR service per the October 2024 announcement). NTT DATA's group page further states it works with 40+ partners across 60+ technologies including Zscaler and Fortinet. NTT contributes the managed service wrapper, the operations platform and its own Local Cloud Centers, but the SSE enforcement stack is other vendors' technology. Note that the two SASE offerings run on different vendors' technology, recorded in conflicts."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        13,
+        18
+      ],
+      "confidence": "medium",
+      "quote": "ISO/IEC 27001 is an international standard for Information Security Management Systems (ISMS), providing a structured framework of processes and controls to safeguard the confidentiality, integrity, availability and authenticity of information assets against various threats.",
+      "claimed_by": "vendor",
+      "note": "Frameworks found and named on NTT's compliance page: ISO/IEC 27001, ISO 9001, ISO 22301, ISO 14001, ISO 45001, ISO 50001, PCI DSS, ISAE 3402/SOC 1, ISAE 3000/SOC 2, HIPAA Security Rule, NIST 800-53 High, TISAX, EN 50600, ANSI/TIA-942, OSPAR and Indonesia POJK. Frameworks explicitly NOT found: NHS DSPT, DORA and NIS2 do not appear anywhere on that page. Important scope caveat: these attestations are published for NTT Global Data Centers and the page states certain certifications apply only to specific data centre buildings, so they are not directly scoped to the SD-WAN or managed SASE service. The only service-level statement located is the NTT DATA/Cisco brochure line that its ISO-certified operations and ITIL-aligned processes ensure service excellence in all areas, which names no certificate number or scope and would on its own be assurance_only. Confidence is medium for that reason."
+    },
+    "pop_count": {
+      "value": "75+",
+      "evidence": [
+        1,
+        11
+      ],
+      "confidence": "high",
+      "quote": "Secure Web Gateways located at 75+ globally distributed Local Cloud Centers (LCCs) closer to client locations to protect customers from Internet threats.",
+      "claimed_by": "vendor",
+      "note": "The published figure is 75+ Local Cloud Centers, which is NTT Global Networks' term for its distributed cloud security PoPs. This is the only PoP-style count found. It should not be confused with the separate 190+ countries and territories coverage figure on NTT DATA's Global Network Services page, which describes reach rather than PoPs, nor with the AS2914 backbone footprint, for which no PoP count was published on the pages reviewed."
+    },
+    "sla_availability_pct": {
+      "value": "100",
+      "evidence": [
+        8,
+        6
+      ],
+      "confidence": "high",
+      "quote": "The Global IP Network Backbone will be available to the customer free of Network Outages 100% of the time.",
+      "claimed_by": "vendor",
+      "note": "100% is the published availability commitment for NTT's Global IP Network Backbone (AS2914), accompanied by contractual latency figures per region (50ms Intra US, 80ms Trans-Atlantic, 130ms Trans-Pacific, 285ms Asia to Europe, 95ms Intra Asia, 35ms Intra Europe), average monthly packet loss not exceeding 0.1%, and jitter commitments. Caveat: this percentage is for the IP transit backbone product. No availability percentage specific to the managed SD-WAN or managed SASE service was found on any NTT page reviewed, so this figure should not be read as the SD-WAN service SLA."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "sse_layer_ownership",
+      "claim_a": "NTT's managed SASE offering is built on Palo Alto Networks Prisma SASE, announced 2 February 2023 as a comprehensive managed SASE solution including SD-WAN and cloud-delivered security.",
+      "source_a": 3,
+      "claim_b": "NTT DATA's managed SASE is built on Cisco's enterprise-grade cloud-native Secure Access technology, providing FWaaS and DNS security.",
+      "source_b": 18
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "Secure Web Gateways located at 75+ globally distributed Local Cloud Centers (LCCs) closer to client locations to protect customers from Internet threats.",
+      "source_a": 1,
+      "claim_b": "190+ countries and territories covered by Global Network Services, with no PoP or gateway count published on that page.",
+      "source_b": 17
+    }
+  ]
 }

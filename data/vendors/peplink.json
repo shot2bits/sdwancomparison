@@ -12,13 +12,13 @@
   "cost_model": "Public hardware prices often available via resellers; licences/support/managed service vary by partner and region.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "not_primary",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
+    "f03_co_managed_service": "partial",
     "f04_multi_tenant_msp_white_label_support": "partial",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f05_professional_services_and_migration_support": "partial",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -30,9 +30,9 @@
     "f16_mpls_coexistence_and_migration": "yes",
     "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "partial",
-    "f19_public_cloud_gateways": "partial",
-    "f20_private_pops_dedicated_pops": "unknown",
-    "f21_private_global_backbone": "unknown",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "yes",
+    "f21_private_global_backbone": "not_primary",
     "f22_regional_breakout_and_data_residency": "not_primary",
     "f23_multi_cloud_transit_fabric": "partial",
     "f24_flexible_edge_form_factors": "yes",
@@ -44,23 +44,25 @@
     "f30_zero_trust_network_access": "not_primary",
     "f31_secure_web_gateway": "not_primary",
     "f32_casb_capability": "not_primary",
-    "f33_data_loss_prevention": "not_primary",
+    "f33_data_loss_prevention": "unknown",
     "f34_remote_user_access": "partial",
     "f35_soc_siem_soar_integration": "partial",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "partial",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "not_primary"
   },
   "score_summary": {
-    "yes_count": 15,
-    "partial_count": 9,
-    "partner_integrated_count": 8,
+    "yes_count": 17,
+    "partial_count": 11,
+    "partner_integrated_count": 3,
     "managed_service_dependent_count": 0,
-    "unknown_count": 2,
-    "not_primary_count": 6,
-    "evidence_coverage_pct": 0.8
+    "unknown_count": 1,
+    "not_primary_count": 8,
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "SpeedFusion bonding technology is genuinely differentiated for sites needing to combine multiple cellular, broadband or satellite links into a single resilient connection.",
@@ -77,8 +79,8 @@
     "Enterprise-class observability, SOC integration and DLP are not the primary positioning.",
     "Best paired with a separate SSE platform if cloud-delivered security is required."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -143,7 +145,7 @@
     "chromeos": "unknown",
     "agentless": "partial"
   },
-  "pop_count": null,
+  "pop_count": 28,
   "sla_availability_pct": null,
   "support_model": {
     "follow_the_sun_24x7": "yes",
@@ -179,5 +181,436 @@
   "value_tier": "budget",
   "cost_note": "Hardware-led with low entry cost; SpeedFusion bonding gives strong value for connectivity-constrained sites.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (Hong Kong). UK specialist partners in transport, maritime and events."
+  "uk_basis": "No UK HQ (Hong Kong). UK specialist partners in transport, maritime and events.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Peplink homepage (Supercharged Connectivity)",
+      "url": "https://www.peplink.com/",
+      "published": null,
+      "reliability": "Supplier's own site. Used for product and service scope and for footer navigation to policy and company pages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Peplink Technology: SpeedFusion",
+      "url": "https://www.peplink.com/technology/speedfusion/",
+      "published": null,
+      "reliability": "Supplier's own technology page. Primary source for SpeedFusion Cloud node count and hosting model. Undated, so currency cannot be verified.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Peplink Services overview",
+      "url": "https://www.peplink.com/services/",
+      "published": null,
+      "reliability": "Supplier's own services index. Used for the list of services and their canonical URLs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "SpeedFusion Connect (service page)",
+      "url": "https://www.peplink.com/services/products-sfc/",
+      "published": null,
+      "reliability": "Supplier's own page. Lists SpeedFusion Connect locations by country and city but publishes no total figure and no SLA.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "SpeedFusion Connect app page",
+      "url": "https://www.peplink.com/services/speedfusion-connect/",
+      "published": null,
+      "reliability": "Supplier's own page for the consumer app. States a different location figure (30 cities) from the technology page (28 nodes); recorded as a conflict.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Peplink Care Plans",
+      "url": "https://www.peplink.com/services/care-plans/",
+      "published": null,
+      "reliability": "Supplier's own page. Primary source for warranty, RMA, firmware upgrade and support tier coverage.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "InControl 2 network management solution",
+      "url": "https://www.peplink.com/services/software/network-management-solution-incontrol-2/",
+      "published": null,
+      "reliability": "Supplier's own product page. Primary source for organisation and group model, user roles, hosting location and the private virtual appliance.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "FusionHub virtual SpeedFusion appliance",
+      "url": "https://www.peplink.com/software/virtual-appliance-fusionhub/",
+      "published": null,
+      "reliability": "Supplier's own product page. Primary source for customer-hosted and private-datacentre endpoint deployment.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Peplink Software overview",
+      "url": "https://www.peplink.com/services/software/",
+      "published": null,
+      "reliability": "Supplier's own index. Used to locate FusionHub, FusionHub Solo, InControl API and SD-WAN Controller URLs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Peplink Balance product page (Balance 310X)",
+      "url": "https://www.peplink.com/products/balance/",
+      "published": null,
+      "reliability": "Supplier's own product page. Primary source for built-in 5G, FirstNet Band 14, stateful firewall and web filtering feature claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Peplink Security (Defense in Depth)",
+      "url": "https://www.peplink.com/technology/defense-in-depth/",
+      "published": null,
+      "reliability": "Supplier's own dedicated security page. Primary source for firewall, DoS protection, DPI application filtering, web blocking, FIPS and PCI DSS claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Peplink SD-WAN solutions",
+      "url": "https://www.peplink.com/technology/sd-wan-solutions/",
+      "published": null,
+      "reliability": "Supplier's own page. Used to confirm SD-WAN is delivered as product plus management software rather than an operated service.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Peplink Policies (Support Service Policy, Care Plans T&Cs, InControl 2 / SpeedFusion Connect agreement)",
+      "url": "https://www.peplink.com/support/policies/",
+      "published": "2025-04-30",
+      "reliability": "Supplier's own published policy set with individual last-updated dates. Primary source for service level objectives and for the absence of any published availability percentage.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Peplink eSIM & Data Plans",
+      "url": "https://www.peplink.com/services/products-esim-data-plans/",
+      "published": null,
+      "reliability": "Supplier's own page. Primary source for multi-carrier eSIM data plans sold by Peplink.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Peplink About Us",
+      "url": "https://www.peplink.com/company/about-us/",
+      "published": null,
+      "reliability": "Supplier's own corporate page. Used for business model and channel structure. Marketing register, so treated as directional.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Peplink Certified Partner Program",
+      "url": "https://www.peplink.com/partner-programs/peplink-certified-partner-program/",
+      "published": null,
+      "reliability": "Supplier's own partner programme page. Primary source for certification tiers, deal registration and partner support obligations. Contains no MSP or white-label tier.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Peplink Certified Partners directory",
+      "url": "https://www.peplink.com/partners/",
+      "published": null,
+      "reliability": "Supplier's own directory of distributors, platinum resellers and resellers. Corroborates channel-led delivery.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Peplink Training and Certification",
+      "url": "https://www.peplink.com/training/",
+      "published": null,
+      "reliability": "Supplier's own page. Primary source for PCSS, PCA and PCE certification content.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Peplink Products index",
+      "url": "https://www.peplink.com/products/",
+      "published": null,
+      "reliability": "Supplier's own index. Used to enumerate hardware families and locate product URLs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Peplink Support hub",
+      "url": "https://www.peplink.com/support/",
+      "published": null,
+      "reliability": "Supplier's own support landing page. Contained no response times, NOC or professional services detail; used only to confirm the absence and to route to the policies page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Peplink Technology index",
+      "url": "https://www.peplink.com/technology/",
+      "published": null,
+      "reliability": "Supplier's own index. Used to enumerate technology topics and locate the security page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "Peplink InControl service page (alternate paths tried)",
+      "url": "https://www.peplink.com/services/incontrol/",
+      "published": null,
+      "reliability": "Not used as evidence: the URL returned a fetch error (image-only content) and other InControl path variants returned HTTP 404, so no text could be read. The canonical InControl 2 page at register entry 7 was used instead.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "not_primary",
+      "evidence": [
+        6,
+        15,
+        16,
+        17
+      ],
+      "confidence": "medium",
+      "quote": "All hardware comes with a one-year limited warranty. To extend your coverage, purchase a Care plan that fits you and your deployment needs.",
+      "claimed_by": "netify_assessment",
+      "note": "Peplink's own commercial offer is hardware, software licences and Care Plan support subscriptions, not an end-to-end operated service. Nothing on the Peplink site describes Peplink designing, deploying, monitoring and changing a customer network on the customer's behalf; the certified partner directory and partner programme show that day-to-day operation sits with resellers and integrators. No Peplink managed service page was found across the services, support, partner and about pages reviewed."
+    },
+    "f03_co_managed_service": {
+      "value": "partial",
+      "evidence": [
+        7,
+        6
+      ],
+      "confidence": "medium",
+      "quote": "InControl is our cloud-based endpoint management system.",
+      "claimed_by": "netify_assessment",
+      "note": "Peplink runs the InControl 2 cloud platform itself (the same page states InControl is hosted at Amazon Web Services in the US) and sells tiered support, while the customer or its partner retains configuration and change rights. That is a shared-responsibility pattern in substance, but Peplink does not publish a named co-managed service with a defined responsibility split, so graded partial rather than yes."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        7,
+        16
+      ],
+      "confidence": "medium",
+      "quote": "These users can access the entire organization, reading and making changes.",
+      "claimed_by": "vendor",
+      "note": "InControl 2 provides organisation and group containers with five delegated roles (Dashboard Viewer, Group Viewer, Group Administrator, Organization Viewer, Organization Administrator) and lets an administrator switch between multiple organisations, which supports multi-tenant operation. No evidence of branded or white-label portals, tenant-level branding or an MSP-specific programme tier was found on the InControl 2 page or the certified partner programme page, so graded partial."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partial",
+      "evidence": [
+        18,
+        16
+      ],
+      "confidence": "medium",
+      "quote": "Dive into the technical details of Peplink gear and perform expert network design. Troubleshoot like a pro with skilled tier-2 technical support.",
+      "claimed_by": "vendor",
+      "note": "Peplink publishes a three-tier certification and training programme (PCSS, PCA, PCE) delivered through a training portal and regional certified trainers, which covers the training element of the definition. No structured discovery, pilot, staging, migration runbook or rollback service was found on the services, support, partner programme or training pages, and design work appears to be performed by certified partners rather than sold by Peplink, so graded partial."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        6,
+        3
+      ],
+      "confidence": "high",
+      "quote": "All hardware comes with a one-year limited warranty. To extend your coverage, purchase a Care plan that fits you and your deployment needs.",
+      "claimed_by": "vendor",
+      "note": "Care Plans bundle hardware coverage (Standard RMA, or Advance Hardware Replacement on Care+ and EnterpriseCare), firmware upgrades, InControl cloud management, software support and SpeedFusion licensing into a renewable subscription, so replacement, patching and renewals are handled as part of the purchased plan. End-of-life planning is not mentioned anywhere in the Care Plans page or the policies set reviewed, hence partial rather than yes."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        10,
+        14,
+        7
+      ],
+      "confidence": "high",
+      "quote": "The Balance 310X provides built-in 5G for seamless failover.",
+      "claimed_by": "vendor",
+      "note": "Built-in 5G and LTE modems across the Balance, MAX and SDX ranges, FirstNet Band 14 support, USB 4G/3G modem support, and Peplink eSIM Data Plans providing multi-carrier backup data with usage tracking through InControl. Cellular is used as both primary and failover transport and SIM/eSIM management is native to the platform."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        2,
+        4,
+        5
+      ],
+      "confidence": "high",
+      "quote": "This is possible through the 28 SpeedFusion Cloud nodes Peplink hosts on public clouds all over the world.",
+      "claimed_by": "vendor",
+      "note": "SpeedFusion Connect / SpeedFusion Cloud is Peplink's own shared gateway service, described as Peplink's infrastructure providing access to a global network of SpeedFusion endpoints without additional hardware, and it is Peplink that operates the nodes. Important qualifier: the nodes run on third-party public cloud IaaS rather than Peplink-owned facilities, and the service delivers bonding, smoothing and failover rather than security enforcement."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        8,
+        7,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Deploy in your local datacenter or remotely in a public cloud without needing new hardware.",
+      "claimed_by": "vendor",
+      "note": "FusionHub is the virtual SpeedFusion appliance and can be deployed in the customer's own datacentre, on existing virtual machines, or in AWS, Google Cloud or Azure, giving a customer-hosted dedicated endpoint instead of Peplink's shared nodes. InControl 2 Virtual Appliance (ICVA) can likewise be hosted on private server hardware, so the management plane can also be made dedicated or sovereign."
+    },
+    "f21_private_global_backbone": {
+      "value": "not_primary",
+      "evidence": [
+        2,
+        4,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "This is possible through the 28 SpeedFusion Cloud nodes Peplink hosts on public clouds all over the world.",
+      "claimed_by": "netify_assessment",
+      "note": "Peplink's inter-region path is a SpeedFusion overlay across nodes hosted on third-party public clouds, not a vendor-owned or vendor-controlled backbone. No statement of owned fibre, leased wavelengths, private inter-PoP transit or inter-region latency control was found on the SpeedFusion technology page, the SpeedFusion Connect page or the FusionHub page. Peplink's value claim is loss and latency mitigation over commodity internet links rather than a private backbone."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partial",
+      "evidence": [
+        11,
+        10
+      ],
+      "confidence": "high",
+      "quote": "With Peplink gear, you can set firewall rules based on application, and even by country.",
+      "claimed_by": "vendor",
+      "note": "Built into Peplink's own routers rather than a third party's technology, so not partner_integrated. Evidenced elements: stateful firewall, DoS prevention described as detecting and blocking traffic typical of intrusion and denial of service attacks, DPI application filtering, and a dynamically updated web blocking tool that filters traffic into several categories. Not evidenced anywhere on the security page or the Balance product page: a signature-based intrusion prevention engine, malware or file inspection, or TLS decryption. Graded partial on that basis."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [
+        11,
+        21,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Peplink's dedicated security page (Defense in Depth), the technology index and the SD-WAN solutions page enumerate firewall, DoS protection, DPI application filtering, web blocking, FIPS and PCI DSS but contain no reference to content classification, sensitive-data inspection, blocking or flagging of egress data, or exception workflows. The services and software indexes contain no DLP product. Recording unknown rather than inferring absence."
+    },
+    "f40_managed_service_assurance": {
+      "value": "not_primary",
+      "evidence": [
+        13,
+        6,
+        20
+      ],
+      "confidence": "medium",
+      "quote": "Our fulfilment of these SLOs may, however, be impeded by factors including, but not limited to, Force Majeure Events, third-party service interruptions, volume of support requests, scheduled or unscheduled maintenance.",
+      "claimed_by": "netify_assessment",
+      "note": "What Peplink publishes is a reactive, ticket-driven support function: 8x5 or 24x7 support ticketing by Care Plan tier, 24x7 telephone support and a dedicated technical account manager on EnterpriseCare. No 24/7 NOC or SOC, no proactive monitoring of customer services by Peplink, no root cause analysis commitment and no structured service review or change governance process were found on the Care Plans page, the support hub or the published policies. Proactive assurance in the Peplink model is performed by the customer or its partner using InControl 2."
+    },
+    "delivery_model": {
+      "value": "technology_vendor",
+      "evidence": [
+        15,
+        16,
+        17,
+        18
+      ],
+      "confidence": "high",
+      "quote": "a complete SD-WAN solution; including edge routers which can connect multiple fixed or cellular WAN links at the same time",
+      "note": "Peplink authors hardware (Balance, MAX, SDX) plus software (InControl 2, FusionHub, SpeedFusion Connect) and sells through a certified distributor, reseller and e-tailer channel. No Peplink-operated managed service offering was found on peplink.com; managed delivery is done by its certified partners rather than by Peplink itself.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        2,
+        14,
+        7,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "This is possible through the 28 SpeedFusion Cloud nodes Peplink hosts on public clouds all over the world.",
+      "claimed_by": "netify_assessment",
+      "note": "Peplink owns no circuits and no core routing estate. Its cloud nodes sit on third-party public cloud infrastructure and InControl is hosted at Amazon Web Services in the US. The dominant model is customer-supplied WAN links bonded by Peplink hardware. Graded mixed rather than customer_supplied_only because Peplink does resell third-party mobile capacity directly through Peplink eSIM Data Plans, which provide multi-carrier LTE and 5G backup data billed by Peplink (register entry 14)."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        11,
+        10,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "Each Peplink router has a dynamically updated web blocking tool that filters traffic into several categories.",
+      "claimed_by": "netify_assessment",
+      "note": "The security functions Peplink offers are its own engineering, built into its own firmware, with no OEM or resold third-party security vendor named anywhere on the security, product or SD-WAN pages. Important qualifier: this is on-device edge security (stateful firewall, DoS protection, DPI application filtering, category web blocking) rather than a cloud-delivered security service edge. No SWG-as-a-service, CASB, ZTNA or DLP offering was found, and SpeedFusion Connect nodes are described as bonding and smoothing infrastructure, not security enforcement points."
+    },
+    "regulatory_documentation": {
+      "value": "assurance_only",
+      "evidence": [
+        11,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "Peplink routers are capable of meeting PCI DSS 3.2 requirements.",
+      "claimed_by": "vendor",
+      "note": "Frameworks named on Peplink pages: PCI DSS 3.2 (framed as capability language, 'capable of meeting'), and FIPS (the same page states Peplink has a range of FIPS compliant products). Neither is accompanied by a certificate number, validation entry, attestation report or scope statement, so this is assurance language rather than published documentation. Frameworks looked for and NOT found anywhere on the peplink.com pages reviewed: ISO 27001, SOC 2, NIS2, DORA, NHS DSPT, Cyber Essentials. The policies set contains only a general clause that Peplink shall take all reasonable technical and organizational measures against unauthorized or unlawful processing of personal data. No trust centre or compliance portal exists on the site."
+    },
+    "pop_count": {
+      "value": "28",
+      "evidence": [
+        2,
+        5,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "This is possible through the 28 SpeedFusion Cloud nodes Peplink hosts on public clouds all over the world.",
+      "claimed_by": "vendor",
+      "note": "Taken from Peplink's SpeedFusion technology page, which states the figure explicitly and adds that there is at least one node in six of the world's seven continents. Peplink's own material is inconsistent: the SpeedFusion Connect app page states 30 cities, and the SpeedFusion Connect service page lists individual cities across roughly 24 named countries without publishing any total. All three pages are undated, so recency cannot be used to break the tie. The disagreement is recorded in conflicts and the figure should be treated as approximate."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        13,
+        6,
+        4
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Peplink's published Support Service Policy and Care Plans terms define response and closure Service Level Objectives only (Urgent under 1 hour, High under 4 hours, Normal under 12 hours, Low under 48 hours). No availability or uptime percentage of any kind appears in the policies index, the Care Plans page, the SpeedFusion Connect service page or the InControl 2 subscription terms. Per the brief, response-time targets without a published availability figure are graded unknown."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "This is possible through the 28 SpeedFusion Cloud nodes Peplink hosts on public clouds all over the world.",
+      "source_a": 2,
+      "claim_b": "Tap \"Connect\" to connect your device to SpeedFusion Connect Locations in 30 cities around the world.",
+      "source_b": 5
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "Peplink states a specific total of 28 SpeedFusion Cloud nodes on its technology page.",
+      "source_a": 2,
+      "claim_b": "The SpeedFusion Connect service page publishes a per-country and per-city location list covering around 24 named countries but states no total figure at all.",
+      "source_b": 4
+    }
+  ]
 }

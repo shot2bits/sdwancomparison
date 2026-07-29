@@ -15,10 +15,10 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,10 +28,10 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "yes",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -54,13 +54,15 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 28,
-    "partial_count": 2,
-    "partner_integrated_count": 9,
+    "yes_count": 25,
+    "partial_count": 4,
+    "partner_integrated_count": 8,
     "managed_service_dependent_count": 0,
-    "unknown_count": 1,
+    "unknown_count": 3,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.975
+    "evidence_coverage_pct": 0.925,
+    "sourced_facts_tier_1_2": 16,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Strong UK and European market presence with NaaS positioning and integrated mobile/fixed access.",
@@ -77,8 +79,8 @@
     "Security and SASE capabilities are largely partner-integrated.",
     "Commercial structure bundles access, mobile and platform; line-item costing requires explicit RFP."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -144,8 +146,8 @@
     "chromeos": "managed_service_dependent",
     "agentless": "managed_service_dependent"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 212,
+  "sla_availability_pct": 99.99,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "yes",
@@ -180,5 +182,448 @@
   "value_tier": "mid",
   "cost_note": "Per-site managed pricing; fixed-mobile convergence can reduce separate contracts.",
   "uk_delivery": "uk_hq",
-  "uk_basis": "UK headquartered (Vodafone, Newbury). UK contracting entity with UK support desks and fixed-mobile UK assets."
+  "uk_basis": "UK headquartered (Vodafone, Newbury). UK contracting entity with UK support desks and fixed-mobile UK assets.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Vodafone Business SD-WAN (supplier site given in the brief)",
+      "url": "https://vb2b.vodafone.com/business/products/fixed-connectivity/sd-wan",
+      "published": null,
+      "reliability": "Tier 1 supplier page but almost entirely JavaScript-rendered. Only navigation, meta tags and benefit headings such as Boost security, Take control and Respond faster were extractable. No gradeable sentence obtained from this URL.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Vodafone Business SD-WAN datasheet (PDF)",
+      "url": "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf",
+      "published": null,
+      "reliability": "Tier 1 supplier datasheet, undated on its face; the asset filename carries a 2024 timestamp. Richest single source in this task: managed and co-managed service scope, Orchestrator co-management profiles, 192 country underlay reach, SLA posture, 24x7x365 operations centres. Used for most grades.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "SD-WAN for Business, Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/sdn/sd-wan",
+      "published": null,
+      "reliability": "Tier 1 supplier page, undated. Only source found publishing an availability percentage against SD-WAN specifically. Marketing-register page, so the 99.99% figure is a headline claim rather than a contractual schedule.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE), Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/sdn/secure-access-service-edge",
+      "published": null,
+      "reliability": "Tier 1 supplier page, undated. Unusually explicit: names the underlying technology partners by name and describes the Managed and Co-Managed service tiers in full sentences. Strong for f01, f03, f21 and sse_layer_ownership.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Vodafone Business and Fortinet Expand Global Partnership to Secure Hybrid Work (Vodafone newsroom)",
+      "url": "https://www.vodafone.com/news/newsroom/technology/vodafone-business-and-fortinet-expand-global-partnership-to-secure-hybrid-work",
+      "published": "2025-04-29",
+      "reliability": "Tier 1 supplier newsroom, dated. Establishes that the firewall, SD-WAN and SASE products branded Vodafone Business Secure are Fortinet technology operated by Vodafone.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 2,
+      "title": "Vodafone Business and Fortinet Expand Global Partnership to Secure Hybrid Work (Fortinet newsroom)",
+      "url": "https://www.fortinet.com/corporate/about-us/newsroom/press-releases/2025/vodafone-business-and-fortinet-expands-global-partnership-to-secure-hybrid-work",
+      "published": "2025-04-29",
+      "reliability": "Dated corporate press release from the technology partner, not from the supplier under assessment, so treated as independently accountable public record rather than supplier marketing. Carries the fullest single sentence on the four management options including professional services.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Vodafone and Zscaler help SMEs migrate securely to the cloud (Vodafone UK news centre)",
+      "url": "https://www.vodafone.co.uk/newscentre/press-release/zscaler-smes-cloud/",
+      "published": "2024-04-16",
+      "reliability": "Tier 1 supplier press release, dated. States plainly that Vodafone Business Secure Access Gateway sits on the Zscaler Zero Trust Exchange platform. Decisive for sse_layer_ownership and f19.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Vodafone expands network for enterprise in Americas (Vodafone newsroom)",
+      "url": "https://www.vodafone.com/news/newsroom/services/vodafone-expands-high-speed-network-connections-enterprise-americas",
+      "published": "2014-10-01",
+      "reliability": "Tier 1 supplier newsroom and the only source found in this task that publishes a PoP count. Dated 2014, so more than a decade old and very likely superseded. Used for pop_count only, at low confidence, with the staleness recorded.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 2,
+      "title": "Managed Security Operations Centre + Security Information and Event Management, VODAFONE LIMITED, G-Cloud 14, Digital Marketplace",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/866476791133693",
+      "published": null,
+      "reliability": "Tier 2 UK government procurement register entry filed by VODAFONE LIMITED. Structured fields carry named certifications with accreditor and date, plus availability figures. Note the entry covers Managed SOC and SIEM, not SD-WAN, so its 99.99% figure was not used for sla_availability_pct.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Vodafone Business Secure SD-WAN with Fortinet",
+      "url": "https://www.vodafone.com/business/products/fixed-connectivity/sd-wan/secure-networking",
+      "published": null,
+      "reliability": "Tier 1 supplier page but body copy did not render to the fetcher. Only the title and headings Features and benefits, Centralised control and Best-of-breed partnerships were retrievable. No quote taken.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Vodafone Business SD-WAN with Cisco",
+      "url": "https://www.vodafone.com/business/products/fixed-connectivity/sd-wan/sd-wan-cisco",
+      "published": null,
+      "reliability": "Tier 1 supplier page, body copy did not render. Only meta description text confirming the Cisco partnership was retrievable. No quote taken, but corroborates that SD-WAN technology is partner-supplied.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Vodafone Business SD-WAN with VMware",
+      "url": "https://www.vodafone.com/business/products/fixed-connectivity/sd-wan/sd-wan-vmware",
+      "published": null,
+      "reliability": "Tier 1 supplier page, body copy did not render. Headings including Managed or co-managed service and SD-Internet were visible but no complete sentences. No quote taken.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Vodafone Business Secure Access Service Edge (solutions page)",
+      "url": "https://www.vodafone.com/business/solutions/fixed-connectivity/secure-access-service-edge",
+      "published": null,
+      "reliability": "Tier 1 supplier page, body copy did not render. Only headings Features and benefits, Enhanced user experience, Centralised control and Best-of-breed partnerships. No quote taken.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Vodafone Business Secure Network Gateway",
+      "url": "https://www.vodafone.com/business/products/fixed-connectivity/secure-network-gateway",
+      "published": null,
+      "reliability": "Tier 1 supplier page, body copy did not render. Only headings Easy to deploy, Easy to manage and Easy to scale. Fetched specifically to test f19 and f20 and yielded nothing gradeable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Vodafone Cloud Connect",
+      "url": "https://www.vodafone.com/business/products/fixed-connectivity/cloud-connect",
+      "published": null,
+      "reliability": "Tier 1 supplier page. Only a partner list naming AWS, Google Cloud, IBM, Microsoft Azure and Oracle was retrievable. Under the f19 definition, connecting to hyperscalers is explicitly not evidence of vendor-operated gateways, so this was not used to grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Managed Security Services, Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/cloud-solutions/managed-security-services",
+      "published": null,
+      "reliability": "Tier 1 supplier page. Yielded service-line labels such as Firewall management and 24x7 real-time security monitoring, but no named SOC entity, no root cause analysis wording and no DLP line item. Checked for f33 and f40 and only partly useful.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Vodafone Business SD-WAN (global product page)",
+      "url": "https://www.vodafone.com/business/products/fixed-connectivity/sd-wan",
+      "published": null,
+      "reliability": "Tier 1 supplier page. The fetcher declined to reproduce full body text on copyright grounds and returned only headings and short fragments. No verbatim quote could be safely taken from this URL.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Service Level Agreements and Service Level Guarantees for Vodafone SME customers",
+      "url": "https://www.vodafone.co.uk/terms-and-conditions-business/Business/Policies/Service-Level-Agreements/",
+      "published": "2018-06-01",
+      "reliability": "Tier 1 supplier terms landing page. Fetched specifically to find contractual availability percentages. The page itself carries none; the substance sits in a linked PDF that could not be retrieved. Records that no contractual SD-WAN percentage was located.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 2,
+      "title": "Vodafone Limited supplier page, G-Cloud, Digital Marketplace",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/supplier/92222",
+      "published": null,
+      "reliability": "Tier 2 procurement register. Fetched to look for a Vodafone-filed SD-WAN or SASE G-Cloud listing. The service catalogue did not render, and no Vodafone SD-WAN listing was located. Recorded as a negative result.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "SD-WAN, ARROW BUSINESS COMMUNICATIONS LIMITED, G-Cloud, Digital Marketplace",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/129950889626014",
+      "published": null,
+      "reliability": "Not used as evidence: this listing belongs to Arrow Business Communications trading as ARO, a different supplier entirely. Surfaced by a search for a Vodafone SD-WAN G-Cloud entry. Its 99.9% availability figure and NHS DSPT certification are Arrow's and must not be attributed to Vodafone.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Software Defined Wide Area Network (SD-WAN), TALKTALK BUSINESS DIRECT LIMITED, G-Cloud, Digital Marketplace",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/737140235351926",
+      "published": null,
+      "reliability": "Not used as evidence: this listing belongs to TalkTalk Business Direct, a different supplier. Surfaced by the same search. Its 99.99% availability, sub-30ms latency and sub-0.1% loss figures are TalkTalk's and were deliberately excluded from the Vodafone SLA grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "Vodafone Business SASE (attempted, dead link)",
+      "url": "https://www.vodafone.com/business/products/security/sase",
+      "published": null,
+      "reliability": "Not used as evidence: returned HTTP 404. Recorded because it was an obvious candidate location for SSE component detail including DLP, and its absence is part of why f33 is unknown.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 4,
+      "title": "Vodafone Business SASE on vb2b host (attempted, dead link)",
+      "url": "https://vb2b.vodafone.com/business/products/security/sase",
+      "published": null,
+      "reliability": "Not used as evidence: returned HTTP 404. Attempted on the vb2b host named in the brief for the same reason as source 22.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        3
+      ],
+      "confidence": "high",
+      "quote": "Reduce complexity with one trusted provider for end-to-end service delivery and management.",
+      "claimed_by": "vendor",
+      "note": null
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4,
+        2,
+        6
+      ],
+      "confidence": "high",
+      "quote": "Our Co-Managed Service supports customers with their requirements for the design, build, transition and running of their SASE services.",
+      "claimed_by": "vendor",
+      "note": "The split of rights is explicit rather than implied. The SD-WAN datasheet states Co-Management via Vodafone Orchestrator with a choice of profiles, which is the delegated-permission mechanism the definition asks for, and the Vodafone UK page adds that the co-managed tier is ideal for businesses that want to manage some parts of the service in-house. The 2025 Fortinet announcement independently lists co-managed network and security as one of four management options."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I looked specifically for tenant isolation, delegated administration, branded portals or partner templates across the SD-WAN datasheet, the Vodafone UK SD-WAN and SASE pages, the global SD-WAN and SASE product pages, the Vodafone Limited G-Cloud supplier catalogue, and a targeted search for a Vodafone white-label or wholesale SD-WAN partner programme. The datasheet's only adjacent phrases are Best of Breed Partnership and Your choice of SD-WAN, both of which describe Vodafone's technology suppliers rather than Vodafone enabling an MSP to resell under its own brand. Note also the direction of travel: Vodafone is generally the operator of record to the end customer, which is the opposite posture to a white-label platform. Absence is not graded as a no."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        6,
+        5,
+        2,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Customers can choose from four management options, including 24x7, co-managed network and security, various service-level guarantees, and professional services, including service discovery, design, implementation, and training.",
+      "claimed_by": "third_party",
+      "note": "Graded from the Fortinet press release because it carries the discovery, design, implementation and training breakdown in one complete sentence; the Vodafone newsroom release of the same date carries the same list. Supplier-side corroboration: the SD-WAN datasheet includes Professional Services in the managed service list and uses the phrases transition and transformation framework and zero risk migrations, and the Vodafone UK SD-WAN page offers Build your SD-WAN in phased migration. Discovery, design, migration and training are all evidenced. Staging, runbooks and rollback plans specifically were not found by name, but the definition is met on the balance of what is documented."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        5,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Vodafone Business Secure Firewall with Fortinet delivers a comprehensive managed security service to setup, operate, run, manage and maintain customer firewalls in a highly secure manner.",
+      "claimed_by": "vendor",
+      "note": "Graded partial, and the gap matters. What is documented is estate scale and ongoing maintenance: the datasheet claims 45,000 managed CPEs, includes Release Management and Vulnerability Management in the managed service list, and states Zero-touch provisioning reduces engineer time on site. Release and Vulnerability Management reasonably imply firmware upgrades and patching in service. What I could not evidence anywhere is the harder half of the definition: hardware replacement or RMA, renewals, and end-of-life planning. None of those terms appear in the datasheet or on any product page reviewed. A buyer should treat hardware refresh and EoL as an open contractual question rather than assume it is included."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Replace expensive private links with low-cost internet/5G",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes because the evidence establishes only the transport half of the definition. The datasheet positions 5G as a substitute for private circuits and lists 4/5G among access options, so cellular as primary or failover transport is evidenced. I found no published detail on integrated versus external modems, SIM management, or signal monitoring. This is a case where prior knowledge would be tempting, since Vodafone is a mobile network operator and self-evidently manages SIMs at scale, but no page I fetched in this task documents SIM management as part of the SD-WAN service, so I have not graded it."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        7,
+        4,
+        6,
+        5
+      ],
+      "confidence": "high",
+      "quote": "Vodafone Business Secure Gateway Access is underpinned by the Zscaler Zero Trust Exchange™ Platform.",
+      "claimed_by": "vendor",
+      "note": "This is the distinction the definition is built around, and it falls clearly on the partner side. The cloud enforcement points behind Vodafone Business Secure Access Gateway ZIA and ZPA are Zscaler's, and the 2025 Fortinet announcement adds FortiSASE, described by Fortinet as FortiSASE cloud-based security solutions. Both are another company's PoP estate that Vodafone resells and manages. Vodafone Cloud Connect was also checked and offers connectivity to AWS, Google Cloud, IBM, Microsoft Azure and Oracle, which the definition expressly excludes as evidence. No Vodafone-operated shared SASE gateway estate was found."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I looked for customer-hosted, dedicated, single-tenant or sovereign PoP options in the SD-WAN datasheet, the Vodafone UK SD-WAN and SASE pages, the Vodafone Business Secure Network Gateway page (fetched specifically for this field, though its body copy did not render), the Cloud Connect page and the 2014 network expansion release. Nothing addresses dedicated or sovereign deployment. Since the SSE enforcement layer is Zscaler's and Fortinet's rather than Vodafone's, any dedicated-PoP option would in practice be a question for those vendors, but I found no page stating either way and so have not inferred absence."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        4,
+        2,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "Our range of access networks is available in 192 countries using our enhanced internet backbone, reducing the number of hops and providing resilience.",
+      "claimed_by": "vendor",
+      "note": "Graded yes because the possessive is doing real work: our enhanced internet backbone is Vodafone-owned or controlled infrastructure, and the stated scope is global rather than national, which clears the bar the definition sets against single-country networks. The datasheet corroborates with We cover underlay, overlay, local access and wider services within the solution to 192 countries. Confidence is held at medium for two reasons. First, Vodafone describes it as an internet backbone rather than a private MPLS core in the current material, so the predictable latency and loss characteristic is asserted only indirectly through reducing the number of hops. Second, the 2014 release makes clear the reach is a mix of directly operated and partner networks, so not every one of the 192 countries rides Vodafone-owned fibre. Between regions on Vodafone's own core, the capability holds."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        2,
+        6,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Our managed and co-managed services are backed up by the broadest range of SLAs in line with our vision for an excellent customer experience",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the existence of contractual commitments, which is what this field measures, and it is distinct from the sla_availability_pct field where the published number is much weaker. The datasheet also states Bundle our underlay for E2E SLAs, which is a meaningful claim: because Vodafone supplies the access circuits as well as the overlay, it can commit end to end rather than only on the overlay. The 2025 Fortinet announcement independently confirms various service-level guarantees as a purchasable management option. Change handling is covered by Change Management in the managed service list. Latency, jitter and loss targets were not found published."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        5,
+        6,
+        2
+      ],
+      "confidence": "high",
+      "quote": "Vodafone Business Secure Firewall with Fortinet delivers a comprehensive managed security service to setup, operate, run, manage and maintain customer firewalls in a highly secure manner.",
+      "claimed_by": "vendor",
+      "note": "Fortinet technology, operated by Vodafone, so partner_integrated per the definition rather than yes. Fortinet's own release confirms the services integrate Fortinet's industry-leading software-defined wide area network (SD-WAN) and FortiSASE cloud-based security solutions. The datasheet's Inbuilt encryption and firewalls protects data and branches shows the firewall is integrated into the SD-WAN edge rather than sold as a separate appliance, which satisfies the integration half of the test, but the technology is not Vodafone's. I did not find a Vodafone page enumerating the individual NGFW functions (application control, IPS, malware inspection, URL filtering) by name, so that breakdown rests on the Fortinet product identification rather than on a Vodafone feature list."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed, despite looking hard for it. I checked the SD-WAN datasheet (which returned HIPAA Compliance, PCI compliance and Regulatory Compliance but no DLP), the Vodafone UK SASE page (explicitly no DLP reference), the Vodafone UK Managed Security Services page (secure web gateway and breach response are listed, DLP is not), the Vodafone Business Secure Network Gateway page, two Vodafone SASE URLs that returned 404, and a targeted search pairing Vodafone Business with data loss prevention. Worth flagging for the buyer: Zscaler and Fortinet both ship capable DLP, so the function may well be available through the underlying platforms, but no Vodafone page reviewed states that it is in scope, and inferring it would breach the evidence rule. Content classification, block-versus-flag behaviour and exception workflows are all undocumented."
+    },
+    "f40_managed_service_assurance": {
+      "value": "yes",
+      "evidence": [
+        2,
+        9,
+        16
+      ],
+      "confidence": "medium",
+      "quote": "Our global service desk and regional operations centres run 24x7x365",
+      "claimed_by": "vendor",
+      "note": "The network operations half is well evidenced by the datasheet quote plus 24/7 Incidents Support and Proactive incidents in the managed service list. The security operations half is evidenced from the Tier 2 G-Cloud filing by VODAFONE LIMITED, whose support levels field reads 24 x7 x 365 Security Operations Centre, although note that filing covers Managed SOC and SIEM rather than SD-WAN. Incident ownership through to root cause is supported by Problem Management appearing as a distinct line item alongside incident handling, which is the ITIL construct for root cause work, and change governance by Change Management. Confidence is medium rather than high because the phrase root cause analysis does not itself appear on any page fetched, and structured service reviews are implied by Service Management in the list rather than described."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        3
+      ],
+      "confidence": "high",
+      "quote": "Reduce complexity with one trusted provider for end-to-end service delivery and management.",
+      "claimed_by": "vendor",
+      "note": "Confirmed verbatim 29 Jul 2026. The page also carries the heading 'Fully managed solution' above the line 'End-to-end service delivery and monitoring, while giving you day-to-day network control.'"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        2,
+        4,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "We cover underlay, overlay, local access and wider services within the solution to 192 countries",
+      "claimed_by": "vendor",
+      "note": "Mixed is the honest answer and the interesting one. Vodafone genuinely owns circuits and core routing, which is what lets it say Bundle our underlay for E2E SLAs and offer end-to-end commitments that pure overlay vendors cannot. But the 192 country figure cannot rest on owned infrastructure alone: the 2014 network release describes connecting more than 150 countries via partner networks against more than 67 countries reached directly, and complements Vodafone-operated fixed and mobile networks in 17 countries. So the pattern is owned core and owned access in a limited set of markets, third-party access resold elsewhere, all wrapped in a single Vodafone contract. Customer-supplied circuits are also accepted, since the datasheet positions replacing private links with commodity internet. Graded mixed rather than owns_own_circuits."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        7,
+        4,
+        5,
+        6
+      ],
+      "confidence": "high",
+      "quote": "Vodafone Business Secure Gateway Access is underpinned by the Zscaler Zero Trust Exchange™ Platform.",
+      "claimed_by": "vendor",
+      "note": "Zscaler and Fortinet. Vodafone did not build its SSE stack. Zscaler underpins Vodafone Business Secure Access Gateway, sold as ZIA for internet-bound traffic and ZPA for private applications, and the Vodafone UK SASE page describes Zscaler as a leading cloud-based cybersecurity platform, delivering secure internet access and private application connectivity through a zero-trust architecture. Fortinet supplies a parallel route via Vodafone Business FortiSASE from April 2025. The same page names Arista + VeloCloud for the SD-WAN overlay. Graded partner rather than resold because Vodafone wraps these in its own managed and co-managed operating model, service desk and Orchestrator portal rather than simply passing the licence through."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        9,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "KPMG are Vodafones ISO27001:2013 accreditor",
+      "claimed_by": "vendor",
+      "note": "Found and named: ISO/IEC 27001, with KPMG as accreditor and an accreditation date of 19/10/2023, plus Cyber Essentials and Cyber Essentials Plus, all as structured fields in VODAFONE LIMITED's own G-Cloud filing on the UK government Digital Marketplace, which is a Tier 2 accountable register rather than marketing copy. PCI DSS is also named there. The SD-WAN datasheet separately lists PCI compliance and HIPAA Compliance as outcomes. Not found anywhere I looked: NHS DSPT, DORA, NIS2 and SOC 2. Two caveats keep this at medium confidence. The certifications are filed against Vodafone's Managed SOC and SIEM service, not against the SD-WAN or SASE service being assessed, and no equivalent Vodafone-filed SD-WAN listing was located. Also note that the NHS DSPT hit surfaced during searching belongs to Arrow Business Communications, a different supplier, and must not be attributed here."
+    },
+    "pop_count": {
+      "value": "212",
+      "evidence": [
+        8
+      ],
+      "confidence": "low",
+      "quote": "212 points of presence worldwide",
+      "claimed_by": "vendor",
+      "note": "Treat this figure with real caution. It comes from a Vodafone newsroom release dated 1 October 2014, which is nearly twelve years old at the time of this assessment and describes an MPLS estate that has almost certainly been restructured since, particularly given the subsequent shift to Zscaler and Fortinet cloud enforcement points. The same release breaks it down as 42 across the USA, Canada, South America and Latin America. I could find no current PoP count on any live product page: the global and UK SD-WAN pages, the UK SASE page, the SD-WAN datasheet, the Secure Network Gateway page and the Cloud Connect page all publish reach in countries rather than PoPs, the recurring current figure being 192 countries. Graded at the published number rather than unknown because the figure is genuinely published by the supplier and still live, but the low confidence and the date should travel with it. Separately, the SASE PoP estate a buyer would actually consume is Zscaler's or Fortinet's, not Vodafone's, so a Vodafone PoP count would not answer that question anyway."
+    },
+    "sla_availability_pct": {
+      "value": "99.99",
+      "evidence": [
+        3,
+        18,
+        2
+      ],
+      "confidence": "low",
+      "quote": "99.99% Uptime that keeps your data flowing.",
+      "claimed_by": "vendor",
+      "note": "Graded from the only page found that attaches a percentage to SD-WAN specifically, but the qualifications are significant. The figure sits on a Vodafone UK marketing page as a headline stat, not in a service schedule, and no service credit regime or measurement method accompanies it. I fetched the Vodafone UK Service Level Agreements terms page expressly to find the contractual figure; that page carries no percentages at all and defers to a linked PDF I could not retrieve. The global SD-WAN datasheet claims the broadest range of SLAs but publishes no number, which under the field rule would be unknown on its own. I also deliberately excluded the 99.99% and 99.7% figures in Vodafone's G-Cloud filing because those cover Managed SOC and SIEM log collection, a different service, and the 99.9% and 99.99% figures returned by searching, which belong to Arrow and TalkTalk respectively. Buyers should treat 99.99 as indicative and ask for the contractual schedule."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "SD-WAN carries 99.99% uptime, stated as a headline figure on the Vodafone UK SD-WAN page: 99.99% Uptime that keeps your data flowing.",
+      "source_a": 3,
+      "claim_b": "The global Vodafone Business SD-WAN datasheet claims SLA coverage without publishing any percentage: Our managed and co-managed services are backed up by the broadest range of SLAs in line with our vision for an excellent customer experience. The Vodafone UK Service Level Agreements terms page likewise publishes no percentage on the page itself.",
+      "source_b": 2
+    },
+    {
+      "field": "sse_layer_ownership",
+      "claim_a": "The Vodafone UK SASE page names Zscaler as the security platform and Arista + VeloCloud as the SD-WAN overlay: Zscaler is a leading cloud-based cybersecurity platform, delivering secure internet access and private application connectivity through a zero-trust architecture.",
+      "source_a": 4,
+      "claim_b": "The April 2025 Vodafone newsroom release presents Fortinet as the SD-WAN and SASE technology: Vodafone Business FortiSASE is aimed at customers looking to adopt flexible, robust and secure hybrid work. The SD-WAN datasheet and product pages additionally name Cisco and VMware. Not necessarily contradictory, since Vodafone runs a multi-vendor portfolio, but a buyer cannot tell from public material which stack a given contract lands on.",
+      "source_b": 5
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "Vodafone published 212 points of presence worldwide in an October 2014 newsroom release describing its global MPLS network.",
+      "source_a": 8,
+      "claim_b": "No current Vodafone product page publishes a PoP count at all; the live SD-WAN and SASE material expresses scale as country reach instead, for example: Our range of access networks is available in 192 countries using our enhanced internet backbone, reducing the number of hops and providing resilience.",
+      "source_b": 4
+    }
+  ]
 }

@@ -14,11 +14,11 @@
   "capabilities": {
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
-    "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f03_co_managed_service": "partial",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,10 +28,10 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "yes",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -44,7 +44,7 @@
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "partner_integrated",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
@@ -54,13 +54,15 @@
     "f40_managed_service_assurance": "yes"
   },
   "score_summary": {
-    "yes_count": 34,
-    "partial_count": 3,
+    "yes_count": 30,
+    "partial_count": 5,
     "partner_integrated_count": 3,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 2,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.95,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Global carrier-led managed SASE and SD-WAN with strong North American presence and international delivery.",
@@ -77,8 +79,8 @@
     "Commercial model is bespoke; cost transparency and change governance require careful contracting.",
     "DIY/self-managed model is not the primary positioning."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -145,7 +147,7 @@
     "agentless": "managed_service_dependent"
   },
   "pop_count": null,
-  "sla_availability_pct": null,
+  "sla_availability_pct": 100.0,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,469 @@
   "value_tier": "premium",
   "cost_note": "Carrier-scale managed pricing on multi-year terms; premium incumbent positioning.",
   "uk_delivery": "uk_entity",
-  "uk_basis": "UK contracting entity (Verizon Business has UK operations), though US headquartered, with real UK and European delivery."
+  "uk_basis": "UK contracting entity (Verizon Business has UK operations), though US headquartered, with real UK and European delivery.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "SASE Solutions landing page (Verizon Business)",
+      "url": "https://www.verizon.com/business/resources/lp/secure-access-service-edge",
+      "published": null,
+      "reliability": "Supplier's own campaign landing page for the exact URL under assessment. Names the third-party SASE vendors Verizon partners with. Undated, so treated as current but not time-stamped.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Verizon Partners with Versa Integrated Solutions",
+      "url": "https://www.verizon.com/business/resources/technology-partners/versa-integrated-solutions/",
+      "published": null,
+      "reliability": "Supplier-hosted technology partner page. Enumerates the security functions (DLP, IDS/IPS, URL filtering) delivered via Versa and confirms Verizon NOC/SOC support wraps it. Strong for capability presence and for third-party attribution.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Managed SD WAN Solutions and Services",
+      "url": "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-wan/",
+      "published": null,
+      "reliability": "Supplier's own product page. Marketing register rather than contractual, so useful for service posture and professional services language but thin on technical specifics.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Managed Software-Defined Branch Services",
+      "url": "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-branch/",
+      "published": null,
+      "reliability": "Supplier's own product page. The only page reviewed that states the management-model spectrum verbatim and confirms wireless access support.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Adaptive Network Fabric Service Level Agreement",
+      "url": "https://www.verizon.com/business/service_guide/reg/cp-adaptive-network-fabric-sla-2026JUL15.pdf",
+      "published": "2026-07-15",
+      "reliability": "Contractual SLA document published in the supplier's own service guide, dated and current. Highest reliability class available for SLA figures.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Network as a Service Solution SLA",
+      "url": "https://www.verizon.com/business/service_guide/reg/NaaS-SLA-2026JAN15-mk.pdf",
+      "published": "2026-01-15",
+      "reliability": "Contractual SLA covering Verizon-managed NaaS components including MWAN and managed security VNFs. Dated and current. Primary basis for the SLA and assurance grades.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Global Private IP Service Level Agreement",
+      "url": "https://www.verizon.com/business/service_guide/reg/cp/pip/plus/sla.htm",
+      "published": null,
+      "reliability": "Contractual SLA in the supplier's service guide covering the Private IP MPLS backbone. Gives tiered availability plus jitter and packet delivery ratio commitments. Undated in the page body.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Advanced Secure Access Service Edge (SASE), Verizon UK",
+      "url": "https://www.verizon.com/business/en-gb/products/security/network-cloud-security/advanced-secure-access-service-edge/",
+      "published": null,
+      "reliability": "Supplier's own SASE product page. The single clearest statement of which third-party stacks the SASE service supports. Quote independently re-verified against the page in a second read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE) Solutions, Verizon US",
+      "url": "https://www.verizon.com/business/products/security/network-cloud-security/sase-management/",
+      "published": null,
+      "reliability": "US-market equivalent of source 8. Corroborates the same third-party vendor list, confirming it is not a region-specific arrangement.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Private IP Network Solutions",
+      "url": "https://www.verizon.com/business/products/networks/connectivity/private-ip/",
+      "published": null,
+      "reliability": "Supplier's own product page for the MPLS backbone. Gives the 185+ country figure and the statement that traffic is separated from the public internet. Primary basis for the backbone grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Global Integrated Solutions",
+      "url": "https://www.verizon.com/business/solutions/global-integrated-solutions/",
+      "published": null,
+      "reliability": "Supplier's own page. Contains the explicit network ownership statement. Caveat: the page cites a 2016 capital investment figure, so parts of it are stale and it was used only for the ownership claim.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Zscaler product description (Verizon service guide)",
+      "url": "https://www.verizon.com/business/service_guide/reg/zscaler_product_description.pdf",
+      "published": null,
+      "reliability": "Supplier-hosted service guide document describing the Zscaler subscriptions Verizon sells. Decisive for establishing that the cloud security edge is Zscaler technology, not Verizon-built.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Verizon Care: CPE and Network Hardware Maintenance",
+      "url": "https://www.verizon.com/business/en-nl/products/networks/edge-solutions/verizon-care/",
+      "published": null,
+      "reliability": "Supplier's own product page. Establishes hardware maintenance exists but as a discrete purchasable service, which is what limits the lifecycle grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "CPE and Subscription Services",
+      "url": "https://www.verizon.com/business/products/networks/cpe-and-subscription-services/",
+      "published": null,
+      "reliability": "Supplier's own product page. Corroborates procurement, deployment, maintenance and refresh, but returned mostly sentence fragments rather than full quotable sentences.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Advanced Security Operations Center (SOC) Services",
+      "url": "https://www.verizon.com/business/products/security/advanced-security-operations-center-services/",
+      "published": null,
+      "reliability": "Supplier's own product page. Supports 24/7 SOC monitoring. Named PCI DSS v4.0 only in a customer-advisory context, which is why it does not support a 'documented' regulatory grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Governance, Risk & Compliance (GRC) Services",
+      "url": "https://www.verizon.com/business/en-en/products/security/cyber-risk-management/governance-risk-compliance/",
+      "published": null,
+      "reliability": "Supplier's own page. Checked specifically for supplier-held attestations. Names PCI DSS and SWIFT CSCF but only as frameworks Verizon helps customers meet, not as Verizon certifications.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Professional Services service guide table of contents",
+      "url": "https://www.verizon.com/business/service_guide/reg/ps-plus-toc-2020DEC01.htm",
+      "published": "2020-12-01",
+      "reliability": "Contractual service guide index confirming a Professional Services Service Attachment exists. Dated 2020 and lists no network migration SOW by name, so it corroborates existence but not migration scope.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Verizon Partner Solutions: SD-WAN (wholesale)",
+      "url": "https://www22.verizon.com/wholesale/solutions/solution/sdwan.html",
+      "published": null,
+      "reliability": "Supplier's wholesale channel page. Checked specifically for white-label and multi-tenant evidence. Confirms Verizon sells Managed SD-WAN to Service Providers but is silent on rebranding, tenant isolation and delegated administration.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Combined company facts sheet",
+      "url": "https://www.verizon.com/about/news/combined-company-facts-sheet",
+      "published": null,
+      "reliability": "Not used as evidence. Although hosted on verizon.com, the body text is the 1998 MCI WorldCom merger announcement ('MCI WorldCom will bring together the Internet expertise of UUNET and MCI'). Its 'over 2,000 points-of-presence' and 'over 1,000 Points of Presence (POPs)' figures are historic and internally inconsistent, and describe a predecessor company, not the current Verizon Business estate. Retained in the register because it documents a conflicting PoP claim.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Networking Solutions & Services overview",
+      "url": "https://www.verizon.com/business/products/networks/",
+      "published": null,
+      "reliability": "Supplier's own page, read and rejected for grading. Contains only high-level positioning ('30+ years of network management experience') with no infrastructure figures, PoP counts or service-model detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "SD WAN Solutions & Services",
+      "url": "https://www.verizon.com/business/solutions/it-infrastructure/sd-wan/",
+      "published": null,
+      "reliability": "Supplier's own page, read and rejected for grading. Solution overview and customer stories only; yielded no quotable statement on any of the 18 fields.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 3,
+      "title": "Managed and Professional Services for Your Business",
+      "url": "https://www.verizon.com/business/resources/articles/professional-services-vs-managed-services/",
+      "published": null,
+      "reliability": "Undated supplier resource article, corroboration only. Discusses professional versus managed services generically rather than describing Verizon's own scope, so it carries no grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 4,
+      "title": "Verizon Business expands Cisco relationship with SD-WAN managed service offers (Cisco newsroom)",
+      "url": "https://newsroom.cisco.com/press-release-content?type=webcontent&articleId=2143456",
+      "published": null,
+      "reliability": "Not used as evidence. Surfaced in search results and noted for the Cisco SD-WAN relationship, but not fetched in this task, so under the rules it cannot support any grade. The Cisco relationship is instead evidenced from Verizon's own pages (sources 8 and 9).",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        4,
+        3,
+        6
+      ],
+      "confidence": "high",
+      "quote": "From fully managed to monitor/notify only, Managed SD Branch offers flexible management options that give you the control you need",
+      "claimed_by": "vendor",
+      "note": "Verizon states a fully managed option explicitly and in its own words. The Managed SD WAN page reinforces it ('Get peace of mind by allowing our experts to plan, monitor, manage and secure your network'), and the NaaS SLA makes the managed scope contractual by applying only to 'Verizon managed NaaS components'. End-to-end design, deploy, monitor, change, support and report is the standing Verizon operating model across the reviewed pages."
+    },
+    "f03_co_managed_service": {
+      "value": "partial",
+      "evidence": [
+        4
+      ],
+      "confidence": "medium",
+      "quote": "From fully managed to monitor/notify only, Managed SD Branch offers flexible management options that give you the control you need",
+      "claimed_by": "vendor",
+      "note": "Graded partial deliberately. This sentence evidences a spectrum of management options between fully managed and monitor/notify only, which implies shared responsibility, but no page reviewed sets out a named co-managed tier with a defined split of policy authorship and change rights between Verizon and the customer. The definition requires the customer to retain selected policy and change rights, and that specific division was not found verbatim in sources 3, 4, 8, 9 or 6."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [
+        18
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Verizon Partner Solutions wholesale SD-WAN page (source 18) does market Managed SD-WAN to Service Providers, stating 'Verizon Managed SD-WAN has the ability to enable Service Providers to quickly realize this opportunity', but it is silent on every element the definition actually requires: tenant isolation, delegated administration, branded customer portals and reusable templates enabling an MSP to operate the platform under its own brand. Selling wholesale to service providers is not the same as white-label multi-tenancy, so an inference either way would be unsafe. Also checked sources 3, 4, 9 and the Verizon Enterprise Center portal references without result."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        3,
+        1,
+        17
+      ],
+      "confidence": "medium",
+      "quote": "Verizon brings decades of expertise in designing, transitioning, implementing and managing SD WAN networks.",
+      "claimed_by": "vendor",
+      "note": "Design, transition and implementation are claimed directly, corroborated by the SASE landing page ('We have 20 years of experience in the design, deployment, and management of network and security infrastructure') and by the existence of a contractual Professional Services Service Attachment in the service guide (source 17). Confidence held at medium because the granular elements named in the definition, specifically discovery workshops, pilots, staging, migration runbooks, rollback plans and training, were not found verbatim on any page reviewed; the 2020 professional services index lists no network migration SOW by name."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        13,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "Verizon Care is an equipment maintenance service that provides advanced parts replacement with on-site repair support.",
+      "claimed_by": "vendor",
+      "note": "Graded partial for two reasons. First, scope: hardware replacement and on-site repair are documented, and the CPE page adds procurement, deployment, maintenance and refresh, but firmware upgrades, patching, licence renewals and end-of-life planning were not found verbatim. Second, and more important for the definition, Verizon Care is presented as a separately purchasable equipment maintenance service rather than something inherently bundled into the Managed SD-WAN or SASE service, so the 'as part of the service' test is only partly met on the evidence reviewed."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Whether you have Verizon wireline or wireless access, SD Branch can support both.",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes. Wireless access as a supported transport is stated plainly, and the same page describes a wireless backup option, which covers the failover half of the definition. However the words '5G', '4G' and 'LTE' do not appear in this context, and SIM management and signal monitoring were not found on any page reviewed (sources 3, 4, 8, 9, 21). Verizon is of course a mobile network operator, but that is prior knowledge and cannot be graded from; only what the pages state is reflected here."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        8,
+        9,
+        12,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Integrates network operation centers (NOCs) and security operation centers (SOCs) with our Managed SD WAN and Virtual Network Services (VNS), and supports Versa, Cisco cEdge and vEdge, Zscaler ZIA, Zscaler ZPA and Palo Alto Prisma Access.",
+      "claimed_by": "vendor",
+      "note": "This is the pivotal judgement in the record. The cloud gateways that actually enforce security and deliver remote access in Verizon's SASE service are Zscaler Internet Access, Zscaler Private Access and Palo Alto Prisma Access, all of which run on those vendors' own global PoP estates, not Verizon's. Verizon's service guide carries a Zscaler product description (source 12) confirming it resells those subscriptions. Verizon operates substantial infrastructure of its own, but that is the MPLS and IP transport layer, not a Verizon-built cloud security edge, so the definition forces partner_integrated rather than yes. An identical vendor list was found on both the UK and US product pages, so this is not a regional arrangement."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        8,
+        9,
+        10
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No page describes customer-hosted, dedicated or sovereign PoP deployments as an alternative to shared multi-tenant locations. Specifically checked the UK and US SASE product pages (sources 8, 9), the Private IP page (source 10) and the SD Branch page (source 4), and ran a targeted search for Verizon sovereign or dedicated SASE PoPs which returned only generic private-IP-addressing explainer pages. Note that on-premises security enforcement is offered ('SD Branch manages SD WAN (and other) services and can optionally employ either premises-based or cloud-based security mechanisms'), but premises-based security appliances are not the same thing as a dedicated PoP, so this is recorded as unknown rather than inferred."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        10,
+        11,
+        7
+      ],
+      "confidence": "high",
+      "quote": "Private IP is a MultiProtocol Label Switching (MPLS) network that connects locations and clouds around the globe in 185+ countries.",
+      "claimed_by": "vendor",
+      "note": "Comfortably meets the definition and is not a single-country case. Verizon operates a genuinely global MPLS backbone reaching 185+ countries, the Private IP page states 'Traffic is completely separated from the public internet to help keep it secure', and source 11 carries the ownership claim 'we own and operate one of the largest and most reliable networks on the planet'. Inter-region predictability is contractually underwritten by the Private IP SLA (source 7), which commits to jitter of '< 5 ms' PE to PE for EF class and a packet delivery ratio of '99.995%' for EF, exactly the sort of between-PoP commitment the definition contemplates."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        6,
+        7,
+        5
+      ],
+      "confidence": "high",
+      "quote": "This SLA only applies to Verizon managed NaaS components on a NaaS Order.",
+      "claimed_by": "vendor",
+      "note": "Among the strongest evidence in this record because it rests on contractual documents rather than marketing pages. Three separate published SLAs were read. The NaaS SLA (source 6) commits to tiered site availability, to repair response of '3.5 hours (US)' or '4 hours (rest of world)' for managed devices, and to proactive incident notification 'within 15 minutes of opening such Priority 1 Trouble Ticket'. The Private IP SLA adds latency, jitter and packet delivery ratio standards. This is contractual rather than best-effort, covering uptime, response and incident handling together."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        2,
+        8,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Intrusion detection and prevention services (IDS/IPS)",
+      "claimed_by": "vendor",
+      "note": "The full NGFW feature set is present in the delivered service: the Versa partner page lists IDS/IPS alongside 'Antispam, antimalware and URL filtering' and DLP, and the SASE pages describe firewall as a service. But every one of those functions is another company's technology that Verizon bundles and manages, named on Verizon's own pages as Versa, Cisco cEdge and vEdge, Palo Alto Prisma Access and Zscaler, with the SASE landing page adding Netskope and Viptela. No evidence was found of a Verizon-authored firewall engine. Under the definition's explicit instruction, third-party firewall technology that the supplier resells or bundles grades partner_integrated, not yes."
+    },
+    "f33_data_loss_prevention": {
+      "value": "partner_integrated",
+      "evidence": [
+        2,
+        12
+      ],
+      "confidence": "high",
+      "quote": "Data loss prevention (DLP)",
+      "claimed_by": "vendor",
+      "note": "DLP is available in the service, evidenced from two independent Verizon-hosted Tier 1 documents: the Versa partner page lists it as a delivered capability, and Verizon's own Zscaler product description names 'core data protection capabilities (such as data loss prevention essentials and out-of-band CASB essentials)'. In both cases the inspection and classification engine belongs to the partner (Versa, Zscaler), so partner_integrated. Caveat recorded honestly: the alerting and exception workflow element of the definition was not found verbatim on either page, so the grade rests on the classify-and-block half of the definition."
+    },
+    "f40_managed_service_assurance": {
+      "value": "yes",
+      "evidence": [
+        2,
+        15,
+        6,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Support provided by Verizon's Network Operations Center (NOC) and Security Operations Center (SOC) teams",
+      "claimed_by": "vendor",
+      "note": "Both a NOC and a SOC are Verizon's own and wrap the partner technology, which is the core of the definition. Proactive ownership is contractual rather than merely claimed: the NaaS SLA commits Verizon to open a trouble ticket for each Priority 1 incident and notify the customer within 15 minutes. The SOC services page adds 'Gain 24/7 access to monitoring, extensive global threat visibility and expert analysis', and SD Branch confirms '24/7/365 access to Managed SD Branch reporting'. Confidence is medium rather than high because two named elements of the definition, formal root cause analysis and structured periodic service reviews with change governance, were not found verbatim on any page reviewed."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        1,
+        3,
+        8,
+        9
+      ],
+      "confidence": "high",
+      "quote": "We partner with leading SASE vendors including Palo Alto, Zscaler, Versa Networks, Viptela and Netskope.",
+      "note": "Verizon Business does not author the SD-WAN or SSE software it sells. Every SASE and SD-WAN page reviewed describes Verizon operating and managing other vendors' technology (Versa, Cisco cEdge/vEdge, Zscaler ZIA/ZPA, Palo Alto Prisma Access, Netskope, Viptela) across its own network and its own NOCs and SOCs. Verizon does author the surrounding operational layer (NaaS Management Center, Verizon Enterprise Center portal) and owns the underlying carrier network, but no evidence was found that it authors a SASE product, so 'managed_provider' rather than 'both'.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "owns_own_circuits",
+      "evidence": [
+        11,
+        10,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "We have more than 160,000 employees around the world, and we own and operate one of the largest and most reliable networks on the planet.",
+      "claimed_by": "vendor",
+      "note": "Verizon states network ownership directly, and unlike most SASE suppliers on this shortlist it is a facilities-based carrier: it runs its own Private IP MPLS core and publishes contractual PE-to-PE latency, jitter and packet delivery standards for it (source 7), which a pure reseller could not underwrite. Confidence is held at medium rather than high for one specific reason: the Private IP footprint spans 185+ countries, which in practice must involve third-party local access outside Verizon's owned footprint, but no page reviewed documents those off-net arrangements. If that off-net detail were published the honest value might be 'mixed'. Graded from what the pages state, not from what the footprint implies. Caveat on the source: page 11 cites a 2016 investment figure and is partly stale, so it was used only for the ownership sentence."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        1,
+        8,
+        9,
+        12
+      ],
+      "confidence": "high",
+      "quote": "We partner with leading SASE vendors including Palo Alto, Zscaler, Versa Networks, Viptela and Netskope.",
+      "claimed_by": "vendor",
+      "note": "Palo Alto Networks (Prisma Access), Zscaler (ZIA and ZPA), Versa Networks, Netskope, and Cisco (cEdge and vEdge, plus Viptela). Verizon did not build its security service edge; it integrates, sells and operates other vendors' stacks. This is stated by Verizon itself on the exact landing page under assessment and independently confirmed on both the UK and US SASE product pages, which give the same vendor list. Verizon's service guide even hosts a Zscaler product description document (source 12), which is about as direct as resale evidence gets. Directly analogous to the BT and Fortinet example. Verizon's own build is the wrapper (NaaS Management Center, NOC and SOC integration, Verizon Enterprise Center), not the enforcement stack."
+    },
+    "regulatory_documentation": {
+      "value": "not_found",
+      "evidence": [
+        15,
+        16
+      ],
+      "confidence": "medium",
+      "quote": "Learn how to get to the root of your payment security strategy to better address PCI DSS v4.0 compliance requirements.",
+      "claimed_by": "vendor",
+      "note": "Frameworks found named on Verizon pages: PCI DSS v4.0 and the SWIFT Customer Security Controls Framework (CSCF). Frameworks specifically searched for and NOT found as attestations: ISO 27001, SOC 2, NIS2, DORA, NHS DSPT, GDPR and HIPAA. The distinction that decides this grade is that every framework named appears in a customer-advisory context, Verizon selling assessment and consultancy to help customers reach compliance, not as an attestation covering Verizon's own SASE or SD-WAN service. An ISO 27001 statement of work exists in the service guide but it is a Professional Services SOW that Verizon performs for customers, again not a Verizon certification. No trust centre or certification schedule for the SASE service was located, so this is 'not_found' rather than 'assurance_only'; there is not even a general sentence claiming the SASE platform meets regulatory standards."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        19,
+        10,
+        20
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The only PoP figures located anywhere on verizon.com are in source 19, which on inspection is the 1998 MCI WorldCom merger announcement, not a current Verizon Business document: it reads 'MCI WorldCom will bring together the Internet expertise of UUNET and MCI to create one of the world's largest providers of Internet services with over 2,000 points-of-presence around the globe' and, contradicting itself elsewhere on the same page, 'over 1,000 Points of Presence (POPs) throughout the United States and in Canada, Europe and the Asia-Pacific region'. Those describe a predecessor company nearly three decades ago and are internally inconsistent, so neither can be reported as Verizon Business's current PoP count. The networks overview page and Private IP page publish reach figures instead of PoP counts (185+ countries and territories; services in more than 150 countries). Separately, because the SASE security PoPs are Zscaler's and Palo Alto's estates rather than Verizon's, any Verizon PoP figure would not be the relevant number for a SASE comparison in any case."
+    },
+    "sla_availability_pct": {
+      "value": "100",
+      "evidence": [
+        6,
+        7,
+        5
+      ],
+      "confidence": "high",
+      "quote": "Verizon will maintain the Availability for each Site Type as detailed below, with MLAN and MWLAN Network Components meeting the Functionality Threshold, if applicable.",
+      "claimed_by": "vendor",
+      "note": "Read this figure with care. Verizon does not publish one headline availability number; it publishes a tiered table keyed to site type, quoted from the NaaS SLA as 'Highly Available Large Medium Small Extra Small 100% 99.95% 99.90% 99.50% 99.00%'. The 100% figure applies only to a 'Highly Available' site, meaning a dual-CPE resilient design. The realistic figures for standard sites are 99.95% (Large), 99.90% (Medium), 99.50% (Small) and 99.00% (Extra Small). Two other SLAs read in this task give different numbers again for different services: the Global Private IP SLA commits to 99.9% end-to-end for Gold, 99.5% for Silver and 97.0% for Bronze, and the Adaptive Network Fabric SLA states 'The Service is designed to maintain 99.9% Port Network Availability per billing cycle'. These are different products rather than contradictions, but a like-for-like comparison against a single-number SASE vendor should probably use 99.95% rather than 100%. Recorded in conflicts."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "over 2,000 points-of-presence around the globe",
+      "source_a": 19,
+      "claim_b": "over 1,000 Points of Presence (POPs) throughout the United States and in Canada, Europe and the Asia-Pacific region",
+      "source_b": 19
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "NaaS SLA site availability table commits to 100% for a Highly Available site type and 99.95% for a Large site type",
+      "source_a": 6,
+      "claim_b": "Global Private IP SLA commits to 99.9% end-to-end availability for the Gold tier, 99.5% for Silver and 97.0% for Bronze",
+      "source_b": 7
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "NaaS SLA site availability table commits to up to 100% depending on site type",
+      "source_a": 6,
+      "claim_b": "The Service is designed to maintain 99.9% Port Network Availability per billing cycle",
+      "source_b": 5
+    },
+    {
+      "field": "f19_public_cloud_gateways",
+      "claim_a": "Verizon states it owns and operates one of the largest and most reliable networks on the planet, implying vendor-owned service infrastructure",
+      "source_a": 11,
+      "claim_b": "The SASE cloud security gateways are named as Zscaler ZIA, Zscaler ZPA and Palo Alto Prisma Access, which run on those vendors' own PoP estates",
+      "source_b": 8
+    }
+  ]
 }

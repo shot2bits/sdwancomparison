@@ -16,10 +16,10 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -29,11 +29,11 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "yes",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
-    "f21_private_global_backbone": "yes",
+    "f20_private_pops_dedicated_pops": "unknown",
+    "f21_private_global_backbone": "partial",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
@@ -45,23 +45,25 @@
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "yes",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "partner_integrated",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "yes"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 34,
-    "partial_count": 3,
+    "yes_count": 29,
+    "partial_count": 6,
     "partner_integrated_count": 3,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 2,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.95,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "flexWAN and managed SD-WAN delivery with Cisco-based converged SD-WAN, security and SASE service.",
@@ -78,8 +80,8 @@
     "Global delivery depth outside core geographies is less mature than the largest carriers.",
     "DIY/self-managed model is not the primary positioning."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -181,5 +183,479 @@
   "value_tier": "mid",
   "cost_note": "Per-site managed pricing; competitive across Iberia and Latin America.",
   "uk_delivery": "uk_entity",
-  "uk_basis": "UK contracting entity (Telefónica Tech UK&I) of a Spanish parent, with local UK delivery teams."
+  "uk_basis": "UK contracting entity (Telefónica Tech UK&I) of a Spanish parent, with local UK delivery teams.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Cloud Networking & SASE - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase",
+      "published": null,
+      "reliability": "Supplier's own top-level solution page. Undated. Used for transport mix and service catalogue.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Secure SD-WAN to connect branches and cloud services - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase/secure-sd-wan",
+      "published": null,
+      "reliability": "Supplier's own product page. Undated. Strongest source for managed service scope, 24/7x365 support and commercial model.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "SASE architecture for secure cloud access (Extended SASE) - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase/extended-sase",
+      "published": null,
+      "reliability": "Supplier's own product page. Undated. Source for SOC/NOC operation, NGFW functions, DLP-adjacent wording and SLA wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "SASE: Protect your network at all levels - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase/sase",
+      "published": null,
+      "reliability": "Supplier's own page. Undated. Returned content identical to the Extended SASE page on fetch, so treated as the same body of text.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Smart perimeter security for environments (Security Edge) - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/network-security-and-security-management/security-edge",
+      "published": null,
+      "reliability": "Supplier's own product page. Undated. Decisive source for SSE layer ownership and cloud node footprint. Two independent fetches returned the same verbatim strings.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Scalable network security for critical environments - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/network-security-and-security-management",
+      "published": null,
+      "reliability": "Supplier's own category page. Undated. Source for managed plus professional services framing and partner technology dependence.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Centralized and secure network policy management (Security Management) - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/network-security-and-security-management/security-management",
+      "published": null,
+      "reliability": "Supplier's own product page. Undated. Source for DOC and global SOC network operation and real-time dashboards.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Cloud WiFi and SD-LAN managed for connectivity - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase/cloud-wifi-sdlan",
+      "published": null,
+      "reliability": "Supplier's own product page. Undated. Confirms managed cloud platform model and 24/7x365 support; no cellular, SLA or white-label content.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Policies and certificates - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/policies-certificates",
+      "published": null,
+      "reliability": "Supplier's own certification register with linked PDF certificates. Undated index. Primary source for regulatory documentation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Cybersecurity Consulting and Professional Services - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/consulting-sspp",
+      "published": null,
+      "reliability": "Supplier's own service page. Undated. Source for professional services lifecycle coverage.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Our partners - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/wearetech/partners",
+      "published": null,
+      "reliability": "Supplier's own partner directory. Undated. Establishes the technology ecosystem (Fortinet, Palo Alto Networks, Check Point, Netskope, Cisco, Cloudflare and others) that the managed services are built on.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "FlexWAN with Fortinet Technology - Telefonica Tech",
+      "url": "https://telefonicatech.com/en/news/flexwan-fortinet",
+      "published": "2023-06-13",
+      "reliability": "Supplier's own dated resource page (reached via 302 redirect from cybersecuritycloud.telefonicatech.com). Explicit statement that flexWAN is powered by Fortinet technology.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Telefonica Tech and Fortinet launch global Secure SD-WAN service (Telefonica Tech news copy)",
+      "url": "https://telefonicatech.com/en/news/telefonica-tech-and-fortinet-launch-global-secure-sd-wan-service-to-secure-and-connect-work-from-anywhere",
+      "published": "2021-10-18",
+      "reliability": "Supplier's own news item, dated. Fetched body returned almost no substantive text, so no grade rests on it; the same release was read in full at refs 14 and 15.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Telefonica Tech and Fortinet launch global Secure SD-WAN service to secure and connect work-from-anywhere - Telefonica press room",
+      "url": "https://www.telefonica.com/en/communication-room/press-room/telefonica-tech-and-fortinet-launch-global-secure-sd-wan-service-to-secure-and-connect-work-from-anywhere/",
+      "published": "2021-10-18",
+      "reliability": "Parent company press room, dated. Corroborates the managed service framing and SASE extension.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Telefonica Tech and Fortinet launch global Secure SD-WAN service to secure and connect work-from-anywhere - Fortinet newsroom",
+      "url": "https://www.fortinet.com/corporate/about-us/newsroom/press-releases/2021/telefonica-tech-fortinet-launch-global-secure-sd-wan-service-secure-connect-work-from-anywhere",
+      "published": "2021-10-18",
+      "reliability": "Jointly issued press release published by the technology partner, dated and attributable. Full text read. Used for managed service, SASE extension and SOC operation wording. Note it is over four years old relative to today.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "flexWAN Managed SD-WAN Services - Telefonica Tech UK",
+      "url": "https://telefonicatech.uk/solutions/cyber-security/flexwan/",
+      "published": null,
+      "reliability": "Supplier's own UK country page. Undated. Only source found that explicitly offers co-management, and it corroborates design/deploy/monitor professional services.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Coverage - Telefonica Global Solutions",
+      "url": "https://globalsolutions.telefonica.com/en/coverage/",
+      "published": null,
+      "reliability": "Telefonica group sibling unit, not Telefonica Tech itself. Undated. Used only as supporting evidence for group-owned submarine and terrestrial infrastructure (Telxius); flagged in notes because the entity differs from the graded supplier.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Discover our SASE network management and security solution - Telefonica Tech blog",
+      "url": "https://telefonicatech.com/en/blog/telefonica-tech-sase-network-management-and-security-solution",
+      "published": "2025-02-10",
+      "reliability": "Supplier's own dated blog. Fetched content was truncated mid sentence and yielded no complete verbatim sentence, so no grade rests on it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Managed Network Services - Telefonica Global Solutions",
+      "url": "https://globalsolutions.telefonica.com/en/multinationals/products/hyperconnectivity/managed-network-services/",
+      "published": null,
+      "reliability": "Not used as evidence: fetch returned HTTP 403, so the page content was never read. Would have been the likeliest source of PoP counts and SLA percentages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "International Network - Telefonica Business Solutions",
+      "url": "https://www.business-solutions.telefonica.com/en/about/international-network/",
+      "published": null,
+      "reliability": "Not used as evidence: fetch blocked by robots/DNS failure, content never read.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 3,
+      "title": "Fortinet, Telefonica Tech Partner for Global Managed SD-WAN Service - MSSP Alert",
+      "url": "https://www.msspalert.com/news/fortinet-telefonica-sd-wans",
+      "published": null,
+      "reliability": "Corroboration only, and not opened. Trade press restating the 2021 joint release; carries no grade alone under the tier rules.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "Telefonica Wraps Fortinet Into SASE Strategy - SDxCentral",
+      "url": "https://www.sdxcentral.com/articles/news/telefonica-wraps-fortinet-into-sase-strategy/2021/10/",
+      "published": "2021-10",
+      "reliability": "Not used as evidence: surfaced in search but not opened, and it is a 2021 trade article superseded by the supplier's own 2023 flexWAN page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 4,
+      "title": "Telefonica strengthens its alliance with flexWAN - Teldat blog",
+      "url": "https://www.teldat.com/blog/teldat-and-telefonica-flexwan/",
+      "published": null,
+      "reliability": "Not used as evidence: undated third-party vendor blog. Retained because it implies a second CPE supplier (Teldat) alongside Fortinet in flexWAN, which was not corroborated on any tier 1 page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 4,
+      "title": "SD-WAN - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/SD-WAN",
+      "published": null,
+      "reliability": "Not used as evidence: Wikipedia, generic topic page with no supplier-specific fact.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 4,
+      "title": "Telefonica Tech company profile - Cyber Security Intelligence",
+      "url": "https://www.cybersecurityintelligence.com/telefonica-tech-2156.html",
+      "published": null,
+      "reliability": "Not used as evidence: undated third-party directory listing, no accountable author.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        2,
+        3,
+        7,
+        15,
+        16
+      ],
+      "confidence": "high",
+      "quote": "We support companies from the equipment to the commercial, provisioning and operation processes.",
+      "claimed_by": "vendor",
+      "note": "Telefonica Tech states end-to-end responsibility from equipment through provisioning to operation, with a specialist technician implementing the service and the platform managed by Telefonica in the cloud (ref 2), operation from its DOC and SOC/NOC estate (refs 3 and 7), and customer-facing reporting (ref 2: \"The client has personalized reports and graphs to read the status of its network and security services.\"). The UK page repeats the framing: \"flexWAN; a single managed solution where networking and security converge to empower the hybrid work era.\" (ref 16). The underlying technology is Fortinet's, but this definition tests who runs the service, and that is the provider."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        2,
+        3,
+        8,
+        11,
+        16
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Cloud Networking & SASE hub, Secure SD-WAN, Extended SASE, Cloud WiFi/SD-LAN, the partner directory and the UK flexWAN page; none mentions multi-tenancy, tenant isolation, delegated administration, branded portals or white labelling. Telefonica Tech's partner pages describe it as a partner OF technology vendors, which is the opposite direction of travel to enabling third-party MSPs to resell its platform under their own brand. Absence is recorded as unknown, not as a no."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        10,
+        16,
+        6,
+        2
+      ],
+      "confidence": "high",
+      "quote": "We support you with our Consulting and Professional Services capabilities throughout the entire lifecycle of identifying, implementing and managing the solution that best suits your business objectives.",
+      "claimed_by": "vendor",
+      "note": "Corroborated by the UK flexWAN page (ref 16: \"Our expert team assesses your network requirements, seamlessly deploys the solution, and provides ongoing monitoring and support, ensuring a smooth transition and optimal network performance.\") and the network security category page (ref 6: \"Managed service and professional services that guarantee the correct functioning and evolution of the client's security infrastructures.\"). Discovery, design, implementation and integration are documented. Structured migration runbooks, rollback plans, pilots and training are NOT named on any page reviewed, so the fullest reading of the definition is only partly evidenced."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        2,
+        6,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "We offer a customized monthly payment model with no upfront investment in HW, licenses and platforms.",
+      "claimed_by": "vendor",
+      "note": "Graded partial deliberately. The provider clearly owns the hardware and licence estate commercially and covers equipment, provisioning and operation (ref 2), and ref 6 promises \"the correct functioning and evolution of the client's security infrastructures\". But no page reviewed names firmware upgrades, patching, hardware replacement, renewals or end-of-life planning as service inclusions, which are the specific tests in the definition. Refs 2, 6, 7 and 8 were checked for those terms and returned none."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        1,
+        2,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "In it, we bring together our MPLS, fibre, 5G networks of your headquarters and devices; with the cloud connectivity of your applications",
+      "claimed_by": "vendor",
+      "note": "5G is named as one of the access technologies aggregated into the service, supporting cellular as a transport option. The definition also requires evidence of primary-or-failover positioning, integrated or external modems, SIM management and signal monitoring, and none was found: the Secure SD-WAN and Cloud WiFi/SD-LAN pages (refs 2 and 8) returned NOT PRESENT for 4G, 5G and LTE entirely. Partial reflects transport support evidenced, management features not."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partner_integrated",
+      "evidence": [
+        5,
+        11,
+        12
+      ],
+      "confidence": "high",
+      "quote": "A solution based on the technology of the most recognised providers in the Security Service Edge market.",
+      "claimed_by": "vendor",
+      "note": "Telefonica Tech does operate a cloud enforcement footprint as a service (ref 5: \"The service platform is deployed in the cloud, on an extensive network of nodes that adapts to the customer's footprint to offer the best experience.\") and delivers ZTNA-style access from it (ref 5: \"Provide secure access to private applications, through a Zero Trust model, to users from any location and device.\"). But the same page states the solution is built on third-party SSE providers' technology, and no page reviewed claims the nodes are Telefonica Tech owned infrastructure rather than the SSE vendor's PoPs. Under the CRITICAL clause in the definition that makes this partner_integrated, not yes."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        5,
+        3,
+        1,
+        2
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Ref 5 describes only a shared \"extensive network of nodes\" and an \"international footprint of nodes\"; no customer-hosted, dedicated, single-tenant or sovereign PoP option appears on any page read. The Extended SASE page returned NOT PRESENT for points of presence, PoP and backbone. The Telefonica Global Solutions managed network services page, which might have covered this, returned HTTP 403 (ref 19) and was not read."
+    },
+    "f21_private_global_backbone": {
+      "value": "partial",
+      "evidence": [
+        17,
+        1,
+        15
+      ],
+      "confidence": "low",
+      "quote": "Telxius is a leading global connectivity provider with an extensive ecosystem including next-generation fiber optic submarine cables and terrestrial backhauls, together spanning +100,000 km.",
+      "claimed_by": "vendor",
+      "note": "Graded partial at low confidence. The Telefonica group demonstrably owns intercontinental fibre through Telxius, and the joint release describes rollout across \"Telefonica's worldwide footprint in Europe and the Americas\" (ref 15). However the cited quote comes from Telefonica Global Solutions (ref 17), a sibling unit, not from Telefonica Tech, and no Telefonica Tech SASE or SD-WAN page reviewed states that inter-region SASE traffic rides that backbone rather than the public internet. The group footprint is also concentrated in Europe and Latin America rather than genuinely global. Do not read this as a verified vendor-controlled SASE backbone."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        3,
+        4,
+        5,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "Our service is backed by our experienced SOC-NOC team, who hold the highest certifications in the technologies involved, and provides service level agreements and absolute commitment to performance and security.",
+      "claimed_by": "vendor",
+      "note": "Service level agreements are explicitly claimed, and ref 5 adds an availability assurance (\"The service's international footprint of nodes guarantees close to 100% availability, with geographical redundancy.\"). What is NOT published anywhere reviewed is the substance: no availability percentage, no response-time targets, no change-handling commitments, no latency, jitter or loss figures. Graded yes because contractual SLAs are asserted, at medium confidence because the terms are unpublished. See sla_availability_pct, which remains unknown."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        12,
+        3,
+        15,
+        11
+      ],
+      "confidence": "high",
+      "quote": "FlexWAN, powered by Fortinet technology, is the 100% convergent network and security service",
+      "claimed_by": "vendor",
+      "note": "NGFW functionality is present and converged into the same service rather than sold as a separate box (ref 3: \"These functions can include network access control or Next Generation Firewall with threat protection, IPS, etc.\"), and ref 15 describes \"next-generation managed security\" natively integrated with SD-WAN. But the firewall is Fortinet's technology that Telefonica Tech packages and manages, stated in Telefonica Tech's own dated material (ref 12) and corroborated by the joint release (ref 15) and the partner directory (ref 11). The definition's final clause makes that partner_integrated, not yes."
+    },
+    "f33_data_loss_prevention": {
+      "value": "partner_integrated",
+      "evidence": [
+        3,
+        5,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "It is a solution that consolidates security functions and applies, in a crossover, coordinated and consistent manner, policies, especially in relation to data leakage, malware and intrusion protection.",
+      "claimed_by": "vendor",
+      "note": "Data leakage protection is named as a headline policy area of the Security Edge / SSE layer, but that layer is explicitly third-party technology (ref 5: \"A solution based on the technology of the most recognised providers in the Security Service Edge market.\"), hence partner_integrated. Note also that the specific mechanics in the definition, content classification, block-or-flag on egress, alerting and exception workflows, are NOT described on any page reviewed; the Security Edge page itself returned NOT PRESENT for DLP. Confidence medium for that reason."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        5,
+        2,
+        3,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "The service is monitored 24x7 and the client has access to our DOC and global network of SOCs 24x7 to manage their requests and incidents.",
+      "claimed_by": "vendor",
+      "note": "Graded partial against a three-part definition. Evidenced: round-the-clock proactive monitoring and incident ownership by a combined SOC/NOC estate (ref 5; ref 3 \"All managed from the Telefonica DOC and SOCs/NOCs.\"; ref 2 \"We have optimized customer support teams available 24/7x365 for early identification and resolution of incidents\") plus dashboards and reporting (ref 7 \"Service powered by our DOC and global network of SOCs with security status tracking and case management through real-time dashboards, along with robust reporting capabilities.\"). Not evidenced anywhere reviewed: root cause analysis, structured service reviews and change governance."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        2,
+        12,
+        15,
+        16
+      ],
+      "confidence": "high",
+      "quote": "This new managed service, flexWAN by Fortinet, is an evolution of the flexWAN service as it now natively integrates cybersecurity.",
+      "note": "Telefonica Tech operates and manages the service; it does not author the SD-WAN or SSE product. Its Secure SD-WAN and flexWAN offers are explicitly Fortinet powered (ref 12: \"FlexWAN, powered by Fortinet technology, is the 100% convergent network and security service\"), and the Security Edge SSE layer is described as third party technology (ref 5). No evidence found of Telefonica Tech authoring its own SD-WAN or SSE software, so graded managed_provider rather than both.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        1,
+        17,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "In it, we bring together our MPLS, fibre, 5G networks of your headquarters and devices; with the cloud connectivity of your applications",
+      "claimed_by": "vendor",
+      "note": "The possessive \"our MPLS, fibre, 5G networks\" indicates Telefonica-owned access and core within the group's own footprint, reinforced by group-owned submarine and terrestrial fibre via Telxius (ref 17). However the service is sold beyond that footprint (ref 15 names Europe and the Americas), and no page reviewed states how circuits are sourced outside Telefonica operating countries, nor whether customer-supplied internet underlay is used for SD-WAN branches. Graded mixed as the honest reading; owns_own_circuits would overstate the evidence for the global service."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        5,
+        12,
+        11,
+        15
+      ],
+      "confidence": "high",
+      "quote": "A solution based on the technology of the most recognised providers in the Security Service Edge market.",
+      "claimed_by": "vendor",
+      "note": "Telefonica Tech does not build its SSE stack; it integrates and manages other vendors' technology, stated in its own words on the Security Edge page. The specific SSE vendor is NOT named on that page. Fortinet is named as the technology behind the SD-WAN plus integrated security element, flexWAN (ref 12, dated 13 June 2023, and ref 15). The partner directory (ref 11) lists SSE-capable vendors including Netskope, Palo Alto Networks, Check Point, Cisco and Cloudflare, but no page reviewed ties a named vendor to Security Edge, so the SSE vendor is left unnamed rather than guessed. The Extended SASE page frames the role as integration: \"Seamless integration of leading SASE component technologies (SSE and SD-WAN), providing a single point of contact and accountability for end-to-end service.\""
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        9,
+        10
+      ],
+      "confidence": "high",
+      "quote": "SOC 1 - Type 2 & SOC 2 - Type 2 Certification",
+      "claimed_by": "vendor",
+      "note": "Telefonica Tech publishes a certificates register with downloadable attestation PDFs. Found and named on ref 9: ISO/IEC 27001:2022 (under \"Information Security Management System Certificates\"), ISO 9001, ISO 14001, ISO 45001, UNE-ISO/IEC 20000-1:2018, TISAX, the Spanish National Security Scheme at HIGH, MEDIUM and BASIC (\"National Security Scheme (ENS) Certificates\"), and SOC 1 Type 2 and SOC 2 Type 2. NOT found on that page: NIS2, DORA, NHS DSPT, PCI DSS. Caveat worth carrying into any shortlist: the SOC 2 Type 2 scope shown is \"Telefonica Tech Cloud Platform - Spain\", so it is not evidently scoped to the SASE or SD-WAN service. Ref 10 mentions ISO 27001, NIST and PCI-DSS only as frameworks it advises customers on, which is assurance-only in character and is not what this grade rests on."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        5,
+        3,
+        1,
+        19
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No figure is published. Ref 5 gives only unquantified wording (\"an extensive network of nodes\" and \"The service's international footprint of nodes\"), and the Extended SASE page returned NOT PRESENT for points of presence, PoP and backbone. The Telefonica Global Solutions managed network services page that might have carried a count returned HTTP 403 (ref 19) and the Telefonica Business Solutions international network page was blocked by robots (ref 20); neither was read, so neither can support a number."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        5,
+        3,
+        2,
+        16
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No availability percentage is published on any page read. The closest wording is ref 5, \"The service's international footprint of nodes guarantees close to 100% availability, with geographical redundancy\", which is a qualitative assurance and not a figure, and ref 3, which claims service level agreements exist without stating terms. Under the stated rule, a marketing mention of an SLA without a percentage is unknown. Secure SD-WAN (ref 2), Cloud WiFi/SD-LAN (ref 8) and the UK flexWAN page (ref 16) all returned NOT PRESENT for SLA."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "f27_integrated_next_generation_firewall",
+      "claim_a": "The Extended SASE page presents Next Generation Firewall as a function of Telefonica Tech's own converged platform and names no external vendor anywhere on the page.",
+      "source_a": 3,
+      "claim_b": "Telefonica Tech's own dated resource page states the converged network and security service is Fortinet technology: \"FlexWAN, powered by Fortinet technology, is the 100% convergent network and security service\".",
+      "source_b": 12
+    },
+    {
+      "field": "underlay_ownership",
+      "claim_a": "Telefonica Tech markets the SASE service as bringing together \"our MPLS, fibre, 5G networks\", implying owned underlay.",
+      "source_a": 1,
+      "claim_b": "A third-party vendor blog (Teldat) indicates a separate CPE and equipment supplier is involved in flexWAN, which is not reflected on any Telefonica Tech page and was not corroborated. Recorded as an unresolved discrepancy in the supply chain picture, not used as evidence.",
+      "source_b": 23
+    }
+  ]
 }

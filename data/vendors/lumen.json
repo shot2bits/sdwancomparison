@@ -14,7 +14,7 @@
     "f01_fully_managed_service": "yes",
     "f02_diy_self_managed_model": "partial",
     "f03_co_managed_service": "yes",
-    "f04_multi_tenant_msp_white_label_support": "yes",
+    "f04_multi_tenant_msp_white_label_support": "unknown",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "yes",
     "f07_lifecycle_management": "yes",
@@ -27,10 +27,10 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "yes",
+    "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
-    "f19_public_cloud_gateways": "partner_integrated",
-    "f20_private_pops_dedicated_pops": "partner_integrated",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "yes",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "partner_integrated",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -43,23 +43,25 @@
     "f30_zero_trust_network_access": "partner_integrated",
     "f31_secure_web_gateway": "partner_integrated",
     "f32_casb_capability": "partner_integrated",
-    "f33_data_loss_prevention": "unknown",
+    "f33_data_loss_prevention": "partner_integrated",
     "f34_remote_user_access": "partner_integrated",
     "f35_soc_siem_soar_integration": "partner_integrated",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "yes"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 26,
-    "partial_count": 2,
-    "partner_integrated_count": 11,
+    "yes_count": 25,
+    "partial_count": 4,
+    "partner_integrated_count": 10,
     "managed_service_dependent_count": 0,
     "unknown_count": 1,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.975
+    "evidence_coverage_pct": 0.975,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Fully managed or co-managed SD-WAN with strong NaaS positioning and integrated network services.",
@@ -76,8 +78,8 @@
     "International delivery depth is less prominent than the dedicated global carriers.",
     "Underlying SD-WAN platform should be confirmed; platform choice affects feature set."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "partner_integrated",
@@ -143,8 +145,8 @@
     "chromeos": "managed_service_dependent",
     "agentless": "managed_service_dependent"
   },
-  "pop_count": null,
-  "sla_availability_pct": null,
+  "pop_count": 50,
+  "sla_availability_pct": 99.99,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -179,5 +181,441 @@
   "value_tier": "premium",
   "cost_note": "Per-site managed; sharp where Lumen fibre is on-net in the US, premium elsewhere.",
   "uk_delivery": "global_managed",
-  "uk_basis": "No UK HQ (US); UK delivery is largely via partners following the EMEA divestment to Colt."
+  "uk_basis": "No UK HQ (US); UK delivery is largely via partners following the EMEA divestment to Colt.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Enterprise SD-WAN Solutions | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/services/sd-wan.html",
+      "published": null,
+      "reliability": "Supplier's own primary product page. Undated but authoritative for managed and co-managed positioning and transport options.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Lumen Service Level Agreement (PDF)",
+      "url": "https://assets.lumen.com/is/content/Lumen/lumen-service-level-agreementpdf?Creativeid=dc0beb0f-83c4-46d5-8684-85af0333edbe",
+      "published": null,
+      "reliability": "Supplier's published contractual SLA. Names SD-WAN with Versa Networks, SD-WAN with Cisco Meraki and SASE Solutions as qualifying services. Availability figures sit in a table rather than prose.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Managed SASE Solutions | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/services/sase.html",
+      "published": null,
+      "reliability": "Supplier's own SASE product page. Authoritative for pro-managed and self-managed split, SSE feature list, named partners and edge node count.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Lumen SASE Solutions Service Guide (PDF)",
+      "url": "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615",
+      "published": null,
+      "reliability": "Supplier's contractual service guide. Strongest single source for what is and is not included in the managed wrap, including the explicit SOC exclusion.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "SD-WAN and Managed Equipment with Cisco Meraki | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/services/sdwan-cisco-meraki.html",
+      "published": null,
+      "reliability": "Supplier's own product page. Useful for the full-management wrap and the built-in LTE reference.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Lumen SASE Solutions FAQ (PDF)",
+      "url": "https://assets.lumen.com/is/content/Lumen/lumen-sase-solutions-faq",
+      "published": null,
+      "reliability": "Supplier collateral. Used for corroboration only because its edge-location figure conflicts with the main SASE product page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Trust Center | Compliance and Audit | Lumen",
+      "url": "https://www.lumen.com/en-us/about/legal/trust-center/security-and-compliance/compliance-and-audit.html",
+      "published": null,
+      "reliability": "Supplier's trust centre listing named attestations and the services each covers. Directly usable for regulatory documentation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Enterprise SD-WAN Solutions | Lumen (networking)",
+      "url": "https://www.lumen.com/en-us/networking/sd-wan.html",
+      "published": null,
+      "reliability": "Supplier's own page. Corroborates managed and co-managed positioning plus network scale marketing statistics.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "LUMEN SD-WAN SERVICE SCHEDULE (PDF)",
+      "url": "https://assets.lumen.com/is/content/Lumen/sd-wan-service-schedule?Creativeid=914be424-577f-4a0d-97cd-3c9c00a783e4",
+      "published": null,
+      "reliability": "Supplier's contractual service schedule. Best source for cellular back-up, controller hosting and dedicated deployment options.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Lumen and Versa Expand Partnership to Deliver a Sovereign SASE Solution",
+      "url": "https://ir.lumen.com/news/news-details/2024/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution/default.aspx",
+      "published": "2024-05-07",
+      "reliability": "Dated supplier investor relations press release. Authoritative for dedicated and customer-premises SASE gateways and for Lumen's global internet backbone.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Lumen Accelerates Multi-Billion-Dollar Network Expansion to Meet Soaring AI Demand",
+      "url": "https://ir.lumen.com/news/news-details/2025/Lumen-Accelerates-Multi-Billion-Dollar-Network-Expansion-to-Meet-Soaring-AI-Demand/default.aspx",
+      "published": "2025-09-22",
+      "reliability": "Dated supplier investor relations press release. Authoritative for owned intercity fibre scale, though framed on North America.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Legal | Business Customer | Terms and Conditions | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/about/legal/business-customer-terms-conditions.html",
+      "published": null,
+      "reliability": "Supplier's legal index. Used to locate canonical SLA and service guide URLs rather than as a grading source.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "SD-WAN and Managed Equipment Service Guide (PDF)",
+      "url": "https://assets.lumen.com/is/content/Lumen/SD-WAN___Managed_Equipment_Service_Guide",
+      "published": null,
+      "reliability": "Supplier's contractual service guide. Best source for lifecycle management, RMA, patching and 24x7 operations.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Reliable and Secure Connectivity | Use Case | Lumen",
+      "url": "https://www.lumen.com/en-us/solutions/use-case/reliable-secure-connectivity.html",
+      "published": null,
+      "reliability": "Supplier's own use-case page. The only page found stating an availability percentage for SD-WAN in prose rather than in a table.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Lumen and Versa Expand Partnership to Deliver a Sovereign SASE Solution (PDF copy)",
+      "url": "https://s21.q4cdn.com/756714007/files/doc_news/Lumen-and-Versa-Expand-Partnership-to-Deliver-a-Sovereign-SASE-Solution-2024.pdf",
+      "published": "2024-05-07",
+      "reliability": "Supplier-hosted PDF of the same dated press release. Used to confirm the sovereign gateway wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Flexible Networking for Secure Access | Use Case | Lumen",
+      "url": "https://www.lumen.com/en-us/solutions/use-case/flexible-networking-for-secure-access.html",
+      "published": null,
+      "reliability": "Supplier's own page. Read but contained no quotable material on infrastructure, SLA or operations.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Lumen SD-WAN with Versa Networks support | Lumen",
+      "url": "https://docs.lumen.com/sd-wan-versa/",
+      "published": null,
+      "reliability": "Supplier's customer documentation portal. Read for co-management, tenancy and cellular detail; none found.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 4,
+      "title": "An Explanation about Managed SD-WAN Service Level Agreements (SLAs) - SolveForce",
+      "url": "https://solveforce.com/2026/02/19/an-explanation-about-managed-sd-wan-service-level-agreements-slas/",
+      "published": "2026-02-19",
+      "reliability": "Not used as evidence. Third-party reseller blog with generic SD-WAN SLA commentary and no supplier-specific verifiable claim about Lumen.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Lumen DIA: Pricing, Pros and Availability - Lightyear.ai",
+      "url": "https://lightyear.ai/tips/lumen-dia",
+      "published": null,
+      "reliability": "Not used as evidence. Undated third-party broker and marketplace page restating supplier marketing.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "Versa plunges deeper into Lumen's SD-WAN, SASE pool - SDxCentral",
+      "url": "https://www.sdxcentral.com/articles/news/versa-plunges-deeper-into-lumens-sd-wan-sase-pool/2024/05/",
+      "published": "2024-05",
+      "reliability": "Not used as evidence. Trade coverage restating the supplier press release already held as Tier 1; adds no independent verification.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Lumen and Fortinet Solutions | Fortinet",
+      "url": "https://www.fortinet.com/partners/partnerships/lumen",
+      "published": null,
+      "reliability": "Not used as evidence. Undated partner page that would only corroborate the Fortinet relationship already evidenced on Lumen's own site.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        1,
+        3,
+        5,
+        13
+      ],
+      "confidence": "high",
+      "quote": "Scale and enhance your WAN while you minimize risk using fully managed or co-managed SD-WAN solutions for enterprise.",
+      "claimed_by": "vendor",
+      "note": "Corroborated by the SASE page, which states that pro-managed service provides a fully managed Lumen SASE solution including design, implementation and support for the entire term of the service, and by the Cisco Meraki product page which states Lumen fully manages the solution from design to installation and Day 2 management of all devices. Lumen designs, deploys, monitors and supports end to end, although the underlying SD-WAN and SASE software is Versa, Fortinet or Cisco technology."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        9,
+        1,
+        13
+      ],
+      "confidence": "high",
+      "quote": "The SD-WAN Service is offered as a managed or co-managed service.",
+      "claimed_by": "vendor",
+      "note": "The SD-WAN and Managed Equipment Service Guide adds that for Managed Equipment and SD-WAN with Meraki, Lumen provides read-only access credentials and co-management with read-write access is only available with Lumen approval, so the shared-rights model is real but gated."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the SD-WAN and SASE product pages, the SD-WAN service schedule, the SASE service guide, the SD-WAN and Managed Equipment service guide and the docs.lumen.com SD-WAN with Versa portal documentation; none describes tenant isolation, delegated administration, branded portals or templates letting managed service providers operate the platform under their own brand. Searches for a Lumen white-label or wholesale SD-WAN programme returned only unrelated third-party vendors. Absence of evidence is not being graded as absence of capability."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        13,
+        4,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "Standard Implementation includes (a) responsibility for roll-out schedule, installation management, and project communication",
+      "claimed_by": "vendor",
+      "note": "The SASE service guide adds that the customer may purchase additional add-on services from Lumen to support design, implementation and management, and the Cisco Meraki page describes a service wrapper covering design, deployment, configuration and site activation. Explicit migration runbooks, pilots, rollback plans and training were not found by name in the documents reviewed, so this rests on the structured design and implementation wrap rather than on a documented migration methodology."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        13,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Lifecycle management – notification of end of sale/end of support.",
+      "claimed_by": "vendor",
+      "note": "The same service guide lists CPE break/fix (RMA) warranty support for failed devices and processing of return material authorisation replacement requests, plus patch management for all hardware and software. The SD-WAN service schedule states that during the initial service term purchased CPE is eligible for the Managed Device Replacement Service Level in the Lumen Service Level Agreement, so replacement is contractual rather than best effort."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        9,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "Cellular back-up access service leverages third party cellular network connectivity and is established utilizing CPE (internal modem or an external enterprise-class cellular-to-Ethernet bridge)",
+      "claimed_by": "vendor",
+      "note": "Graded partial because the contractual wording covers cellular as back-up only and rides third-party cellular networks rather than Lumen SIMs. The Cisco Meraki product page mentions support for connectivity options including built-in LTE. No mention of 5G specifically, of SIM management, or of signal monitoring was found in the SD-WAN service schedule, the SD-WAN and Managed Equipment service guide, the SASE service guide or the docs.lumen.com Versa documentation."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        10,
+        15,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "The Sovereign SASE solution is deployed on dedicated SASE gateways in Lumen's global points of presence (PoPs) or on customer premises, based on the customer's preference and needs.",
+      "claimed_by": "vendor",
+      "note": "The PoPs are Lumen's own, which is what this field measures, and the SASE product page advertises 50+ low-latency edge nodes in key metro areas. The security software running in them is Versa or Fortinet technology, which does not change the ownership of the infrastructure. One complication is recorded in conflicts: the SASE service guide also describes an option delivered through a global network of VMware SASE points of presence, which would be partner_integrated rather than Lumen-owned."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        9,
+        10,
+        15
+      ],
+      "confidence": "high",
+      "quote": "The Lumen SD-WAN with Versa Networks network Controllers are hosted within Lumen facilities, but can also be deployed as private infrastructure in a customer provided environment for an additional charge.",
+      "claimed_by": "vendor",
+      "note": "Reinforced by the dated May 2024 Versa Sovereign SASE press release, which states the solution is deployed on dedicated SASE gateways in Lumen's global PoPs or on customer premises based on the customer's preference and needs. Customer-hosted, dedicated and sovereign options are therefore documented, not only shared multi-tenant locations."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        10,
+        15,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "Black Lotus Labs, Lumen's threat research team, leverages its unique visibility into Lumen's global internet backbone using ML algorithms to generate threat intelligence",
+      "claimed_by": "vendor",
+      "note": "Lumen owns and operates its own global backbone, which is the substance of this field. Confidence is medium rather than high for two reasons: the clearest wording found is incidental to a threat intelligence sentence, and the most explicit owned-fibre statement found, that Lumen operates the largest ultra-low-loss intercity fiber network in North America, is scoped to North America. No page reviewed states as a product property that inter-region SASE or SD-WAN traffic rides the Lumen backbone rather than the public internet."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        2,
+        9,
+        14
+      ],
+      "confidence": "high",
+      "quote": "Lumen offers Service Availability Service Levels for Qualifying Services based on the following Availability Tiers.",
+      "claimed_by": "vendor",
+      "note": "The published Lumen Service Level Agreement names Lumen SD-WAN Service with Versa Networks, Lumen SD-WAN Service with Cisco Meraki and Lumen SASE Solutions as qualifying services, and carries availability tiers, a four hour incident response commitment, managed device replacement targets, and regional latency, jitter and packet delivery objectives. These are credit-bearing contractual commitments rather than best-effort targets."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partner_integrated",
+      "evidence": [
+        4,
+        3,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Next Generation Firewall (NGFW) is available as a service license with Fortinet and is powered by FortiOS",
+      "claimed_by": "vendor",
+      "note": "The firewall function is Fortinet technology licensed and operated by Lumen, so partner_integrated rather than yes. The same guide describes anti-malware, web filtering and firewall, intrusion detection and prevention (IDS/IPS) within the unified threat management set, and the SD-WAN service schedule describes a Security Upgrade providing a set of firewall, web filtering and intrusion prevention. The function is integrated into the delivered platform, but the technology belongs to another vendor."
+    },
+    "f33_data_loss_prevention": {
+      "value": "partner_integrated",
+      "evidence": [
+        4,
+        3,
+        6
+      ],
+      "confidence": "medium",
+      "quote": "intrusion detection and prevention (IDS/IPS), and data loss prevention",
+      "claimed_by": "vendor",
+      "note": "DLP is listed on the Lumen SASE product page as one of the Security Service Edge services alongside NGFW, SWG, ZTNA and CASB, and appears in the SASE service guide within the Fortinet-powered feature set, so it is another vendor's engine operated by Lumen. No Lumen page reviewed describes content classification detail, blocking versus flagging behaviour, alerting or exception workflows, so confidence is medium on the depth of the capability rather than on its presence."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        13,
+        9,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Lumen resources are available 24x7 for support.",
+      "claimed_by": "vendor",
+      "note": "Graded partial for two reasons. First, the SD-WAN and Managed Equipment service guide evidences 24x7x365 performance management by Lumen skilled operations engineers and continuous network monitoring, which covers the NOC half, but the SASE service guide states that the Pro-Managed service does not include security operations center services, so the SOC half is not part of the standard managed wrap. Second, no source reviewed documents ownership of incidents through to root cause analysis, structured service reviews or change governance as contractual elements; those terms were searched for in both service guides and the service schedule and not found."
+    },
+    "delivery_model": {
+      "value": "managed_provider",
+      "evidence": [
+        1,
+        3,
+        4,
+        9
+      ],
+      "confidence": "high",
+      "quote": "Scale and enhance your WAN while you minimize risk using fully managed or co-managed SD-WAN solutions for enterprise.",
+      "note": "Lumen operates the service rather than authoring the SD-WAN or SASE software. Its own SASE page names Fortinet and Versa as the underlying technology partners, and the SD-WAN service schedule names Versa Networks and Cisco Meraki. Lumen does own and author the underlying network, but the SASE and SD-WAN products themselves are partner technology operated by Lumen.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        11,
+        1,
+        9
+      ],
+      "confidence": "medium",
+      "quote": "operates the largest ultra-low-loss intercity fiber network in North America",
+      "claimed_by": "vendor",
+      "note": "Lumen owns extensive fibre and core routing of its own, evidenced by the dated September 2025 network expansion release. At the same time its SD-WAN product page states the service connects branch and remote users using MPLS, broadband or Wi-Fi, and the SD-WAN service schedule states cellular back-up leverages third party cellular network connectivity, so third-party and customer-supplied access is routinely used alongside owned circuits. Hence mixed rather than owns_own_circuits."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        3,
+        4,
+        10
+      ],
+      "confidence": "high",
+      "quote": "Choose flexible pro‑ or self‑managed options from industry‑leading partners Fortinet and Versa.",
+      "claimed_by": "vendor",
+      "note": "Fortinet and Versa, with VMware appearing as a third stack. The SASE service guide confirms the NGFW is available as a service licence with Fortinet powered by FortiOS and names FortiManager, FortiAnalyzer, FortiEMS and FortiClient, and the dated May 2024 press release describes Lumen SASE powered by Versa technology. The same guide also references a VMware SASE PoP-based delivery option. Lumen did not build the SSE stack; it operates and wraps partner technology on its own network."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        7
+      ],
+      "confidence": "high",
+      "quote": "The SOC 2 program provides customer assurance of the Lumen controls supporting the AICPA Trust Services criteria relevant to security, availability, and confidentiality (where applicable).",
+      "claimed_by": "vendor",
+      "note": "Named on Lumen's trust centre compliance and audit page: ISO 27001, SOC 1 Type 2, SOC 2 Type 2, PCI-DSS attestations of compliance, HIPAA, a NIST federal controls assessment confirmation letter and the SIG questionnaire, with covered services listed per attestation and reference to the SSAE 18 and ISAE 3402 standards. Not found on the pages reviewed: NHS DSPT, DORA, NIS2. Note that SOC 2 scope is named against specific services such as Adaptive Network Security, Colocation Services, Edge Compute Platform and Technology Solution Services rather than against SD-WAN or SASE Solutions by name."
+    },
+    "pop_count": {
+      "value": "50+",
+      "evidence": [
+        3,
+        6
+      ],
+      "confidence": "low",
+      "quote": "50+ low‑latency edge nodes in key metro areas",
+      "claimed_by": "vendor",
+      "note": "Confidence is low because Lumen publishes two different figures for the same concept and neither is labelled a SASE PoP count. The main SASE product page states 50+ low-latency edge nodes in key metro areas, while the Lumen SASE Solutions FAQ states 60+ edge locations in major metros connected to high-capacity fiber. Graded from the product page as the more current supplier-controlled surface, with the disagreement recorded in conflicts. The quote contains a non-breaking hyphen character in low-latency as rendered on the page."
+    },
+    "sla_availability_pct": {
+      "value": "99.99",
+      "evidence": [
+        14,
+        2
+      ],
+      "confidence": "medium",
+      "quote": "99.99% availability SLA for single device; 100% service availability when purchases in High Availability configuration",
+      "claimed_by": "vendor",
+      "note": "This is the only Lumen page found stating an availability percentage for SD-WAN in prose. The contractual Lumen Service Level Agreement expresses availability as tiers in a table rather than as one figure: Platinum Managed Service 100%, Platinum 99.999%, Gold 99.99%, Silver 99.9%, Bronze 99.5%, with the applicable tier depending on the qualifying service ordered. So 99.99 is the single-device SD-WAN figure, not a portfolio-wide number, and 100% applies only in a high availability configuration."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "pop_count",
+      "claim_a": "50+ low-latency edge nodes in key metro areas",
+      "source_a": 3,
+      "claim_b": "60+ edge locations in major metros connected to high-capacity fiber",
+      "source_b": 6
+    },
+    {
+      "field": "f19_public_cloud_gateways",
+      "claim_a": "The Sovereign SASE solution is deployed on dedicated SASE gateways in Lumen's global points of presence (PoPs) or on customer premises",
+      "source_a": 10,
+      "claim_b": "delivered through a global network of VMware SASE points of presence (PoPs) for optimal access",
+      "source_b": 4
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "99.99% availability SLA for single device; 100% service availability when purchases in High Availability configuration",
+      "source_a": 14,
+      "claim_b": "Availability tier table listing Platinum Managed Service 100%, Platinum 99.999%, Gold 99.99%, Silver 99.9%, Bronze 99.5%, with no single SD-WAN figure",
+      "source_b": 2
+    }
+  ]
 }

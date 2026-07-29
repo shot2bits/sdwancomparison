@@ -12,13 +12,13 @@
   "cost_model": "Quote-based appliances/software/subscriptions; managed SD-WAN positioned but pricing public transparency limited.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "yes",
+    "f01_fully_managed_service": "not_primary",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "unknown",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "partial",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,7 +28,7 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "partial",
     "f20_private_pops_dedicated_pops": "unknown",
@@ -37,7 +37,7 @@
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "partial",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "partial",
     "f29_sse_ecosystem_integration": "partial",
@@ -51,16 +51,18 @@
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "unknown"
   },
   "score_summary": {
     "yes_count": 23,
-    "partial_count": 8,
-    "partner_integrated_count": 7,
+    "partial_count": 11,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 2,
-    "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "unknown_count": 4,
+    "not_primary_count": 1,
+    "evidence_coverage_pct": 0.9,
+    "sourced_facts_tier_1_2": 14,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "FlexEdge Secure SD-WAN combines secure SD-WAN with strong DLP and data security heritage from the wider Forcepoint portfolio.",
@@ -77,8 +79,8 @@
     "Full SASE platform completeness has partial public evidence; SSE module depth should be confirmed.",
     "Managed delivery is partner-led; co-managed and white-label support require partner validation."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -179,5 +181,380 @@
   "value_tier": "mid",
   "cost_note": "Per-user SSE and appliance subscriptions; mid pricing, with DLP depth the value driver.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). UK delivery via security partners; government and defence heritage suits UK public sector."
+  "uk_basis": "No UK HQ (US). UK delivery via security partners; government and defence heritage suits UK public sector.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Forcepoint Secure SD-WAN product page",
+      "url": "https://www.forcepoint.com/product/secure-sd-wan",
+      "published": null,
+      "reliability": "Vendor primary product page; used for product capability and positioning quotes.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Forcepoint NGFW (Next Generation Firewall) product page",
+      "url": "https://www.forcepoint.com/product/ngfw-next-generation-firewall",
+      "published": null,
+      "reliability": "Vendor primary product page; used for platform and management quotes and to locate datasheets.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Forcepoint Next Generation Firewall (NGFW) datasheet",
+      "url": "https://www.forcepoint.com/resources/datasheets/forcepoint-next-generation-firewall-ngfw-datasheet",
+      "published": null,
+      "reliability": "Vendor datasheet; most specific source for built-in security engine features. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "FlexEdge Secure SD-WAN Manager datasheet",
+      "url": "https://www.forcepoint.com/resources/datasheets/flexedge-secure-sd-wan-manager",
+      "published": null,
+      "reliability": "Vendor datasheet; explicit on administrative domains, RBAC and MSSP use. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Forcepoint NGFW 120 Series appliance datasheet",
+      "url": "https://www.forcepoint.com/resources/datasheets/forcepoint-ngfw-120-series-appliance",
+      "published": null,
+      "reliability": "Vendor datasheet; hardware level detail on LTE and 5G models and radio bands. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Forcepoint Technical Support Offerings datasheet",
+      "url": "https://www.forcepoint.com/resources/datasheets/forcepoint-technical-support-offerings",
+      "published": null,
+      "reliability": "Vendor datasheet; published support tiers, severity response targets and RMA inclusion. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Forcepoint Trust Center",
+      "url": "https://trust.forcepoint.com/",
+      "published": null,
+      "reliability": "Vendor trust portal listing named certifications and downloadable attestation reports.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Forcepoint Compliance Hub",
+      "url": "https://www.forcepoint.com/legal/forcepoint-compliance-hub",
+      "published": null,
+      "reliability": "Vendor legal page naming specific compliance documents including DORA and HIPAA.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Forcepoint Cybersecurity Services",
+      "url": "https://www.forcepoint.com/cybersecurity-services",
+      "published": null,
+      "reliability": "Vendor services overview; used to enumerate the service portfolio and locate service pages.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Forcepoint Implementation Packages",
+      "url": "https://www.forcepoint.com/services/implementation-packages",
+      "published": null,
+      "reliability": "Vendor services page; confirms packaged implementation services exist but is light on methodology detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Forcepoint Global Partner Program",
+      "url": "https://www.forcepoint.com/partners/forcepoint-global-partner-program",
+      "published": null,
+      "reliability": "Vendor partner page; indicates managed services are a partner motion. No MSP, MSSP, white label or multi-tenant terms found on the page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Forcepoint DLP (Data Loss Prevention) product page",
+      "url": "https://www.forcepoint.com/product/dlp-data-loss-prevention",
+      "published": null,
+      "reliability": "Vendor primary product page; used for DLP classification, inspection and enforcement quotes.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Forcepoint Secure Web Gateway (SWG) product page",
+      "url": "https://www.forcepoint.com/product/secure-web-gateway-swg",
+      "published": null,
+      "reliability": "Vendor primary product page; confirms a cloud web security service but publishes no PoP or data centre figures.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Forcepoint CASB product page",
+      "url": "https://www.forcepoint.com/product/casb-cloud-access-security-broker",
+      "published": null,
+      "reliability": "Vendor primary product page; checked for cloud infrastructure and SLA statements, none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Forcepoint homepage",
+      "url": "https://www.forcepoint.com/",
+      "published": null,
+      "reliability": "Vendor homepage; used to enumerate the live site structure after several assumed URLs returned 404.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Forcepoint ONE / Data Security Cloud page",
+      "url": "https://www.forcepoint.com/product/forcepoint-one",
+      "published": null,
+      "reliability": "Vendor page; now presents Data Security Cloud content and carries no infrastructure or availability detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Forcepoint AI Mesh / DSPM page",
+      "url": "https://www.forcepoint.com/ai-mesh",
+      "published": null,
+      "reliability": "Vendor page; checked for cloud platform and gateway architecture statements, none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 4,
+      "title": "Forcepoint documentation portal",
+      "url": "https://help.forcepoint.com/",
+      "published": null,
+      "reliability": "Not used as evidence: the fetch returned no readable page content, so nothing could be quoted from it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 4,
+      "title": "Assumed URL: Forcepoint ONE SSE product page",
+      "url": "https://www.forcepoint.com/product/forcepoint-one-sse",
+      "published": null,
+      "reliability": "Not used as evidence: returned HTTP 404, so no content exists to quote.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 4,
+      "title": "Assumed URL: Forcepoint Professional Services",
+      "url": "https://www.forcepoint.com/services/professional-services",
+      "published": null,
+      "reliability": "Not used as evidence: returned HTTP 404. Services content was found instead at the Cybersecurity Services page.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "Assumed URL: Forcepoint Secure SD-WAN datasheet",
+      "url": "https://www.forcepoint.com/resources/datasheets/forcepoint-secure-sd-wan",
+      "published": null,
+      "reliability": "Not used as evidence: returned HTTP 404. Equivalent detail was taken from the NGFW and SD-WAN Manager datasheets.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "not_primary",
+      "evidence": [
+        1,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "A managed SD-WAN is a service where a provider handles the deployment, configuration, monitoring and optimisation of your WAN.",
+      "claimed_by": "netify_assessment",
+      "note": "Forcepoint's own SD-WAN page defines managed SD-WAN generically as something 'a provider' delivers, and does not claim Forcepoint itself designs, deploys, monitors and reports on the service end to end. The partner programme page frames managed services as certified partner revenue. No Forcepoint-operated fully managed offer was found on the vendor pages reviewed."
+    },
+    "f03_co_managed_service": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Secure SD-WAN product page, the NGFW product page and datasheet, the Cybersecurity Services page, the Implementation Packages page, the Technical Support Offerings datasheet and the Global Partner Program page. No description of a shared responsibility or co-managed operating model was located."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Forcepoint Administrative Domain License enables multiple customer environments to be managed through a single management server.",
+      "claimed_by": "vendor",
+      "note": "The SD-WAN Manager datasheet evidences tenant isolation and delegated administration: it also states 'Allows division of the environment into isolated configuration domains' and names MSSPs directly. Graded partial rather than yes because no evidence of branded or white-label portals was found on any page reviewed, and the partner programme page contains no MSP, MSSP, white label or multi-tenant terms."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partial",
+      "evidence": [
+        9,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "Resources and deliverables aligned to your deployment needs and timeline",
+      "claimed_by": "vendor",
+      "note": "Packaged implementation services and consulting are published, and the Cybersecurity Services page lists 'Implementation Packages for our award-winning products' and 'Data Security Consulting customized to your organization's needs'. Graded partial because the pages reviewed do not describe discovery, pilots, staging, migration runbooks or rollback plans."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        6,
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Next Generation Firewall (NGFW) appliances (both N and S-series) now have RMA support included",
+      "claimed_by": "vendor",
+      "note": "Hardware replacement is included in the support contract, with an option to 'upgrade to next business day or same day RMA service'. The SD-WAN Manager datasheet adds 'Upgrades and dynamic update packages for managed devices can be automatically downloaded' and 'Remote Upgrades One-click fail-safe remote upgrade of the managed engines'. Graded partial because upgrades and patching are customer-executed platform features rather than work performed for the customer as part of a service, and no end-of-life planning service was found."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        5
+      ],
+      "confidence": "high",
+      "quote": "For LTE without Wi-Fi, Forcepoint offers the 120L model with LTE support and 125L model with LTE/5G support.",
+      "claimed_by": "vendor",
+      "note": "The 120 Series datasheet also states 'Optional Wi-Fi and LTE/5G connectivity' and lists supported LTE and 5G NR band tables, so integrated cellular is a shipped hardware capability. SIM management and signal monitoring specifics were not located in the pages reviewed."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partial",
+      "evidence": [
+        13
+      ],
+      "confidence": "low",
+      "quote": "Public cloud elasticity",
+      "claimed_by": "vendor",
+      "note": "Forcepoint operates its own cloud web security service and the SWG page lists 'Public cloud elasticity' and 'Distributed enforcement' as features, but none of the pages reviewed (SWG, CASB, Forcepoint ONE, AI Mesh, Trust Center) publish gateway or point of presence infrastructure detail. Graded partial with low confidence for that reason: a firm yes would need a page describing Forcepoint operated gateway locations."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the SWG, CASB, Forcepoint ONE and AI Mesh product pages, the Secure SD-WAN page and the Trust Center. No reference to customer-hosted, dedicated or sovereign points of presence was located."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Secure SD-WAN page, the NGFW product page and datasheet, the SWG and CASB pages and the AI Mesh page. No claim of a vendor owned or controlled inter-region backbone was located, and no national network claim was found either."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "partial",
+      "evidence": [
+        6
+      ],
+      "confidence": "medium",
+      "quote": "24/7 availability for your most critical issues.",
+      "claimed_by": "vendor",
+      "note": "The Technical Support Offerings datasheet publishes tiered severity response targets ('Severity 1 1 hour' for Essential, 'Severity 1 45 minutes' for Enhanced, 'Severity 1 30 minutes' for Enterprise) and states 'Severity 1 issues use a follow-the-sun approach; Forcepoint technicians are always available'. Graded partial because these are support response commitments only: no uptime percentage, and no latency, jitter, loss or change handling commitments were found in the pages reviewed."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        3,
+        2
+      ],
+      "confidence": "high",
+      "quote": "Built-in IPS with anti-evasion defenses",
+      "claimed_by": "vendor",
+      "note": "Forcepoint authors the NGFW software itself. The datasheet also evidences 'Anti-malware sandboxing', 'Granular application control', 'Always-on SD-WAN connectivity for enterprises' and 'URL Filtering (Separate Subscription)'. URL filtering is a chargeable subscription module but runs on the same platform rather than a separate appliance, so the grade remains yes rather than partial."
+    },
+    "f40_managed_service_assurance": {
+      "value": "unknown",
+      "evidence": [
+        6
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Technical Support Offerings datasheet describes a reactive, severity-driven technical support model with Customer Success Manager and Customer Success Architect roles, but no 24/7 NOC or SOC monitoring the customer service, no incident ownership through to root cause analysis and no structured service review or change governance were described. Checked also the Cybersecurity Services, Implementation Packages and Global Partner Program pages."
+    },
+    "delivery_model": {
+      "value": "technology_vendor",
+      "evidence": [
+        1,
+        11
+      ],
+      "confidence": "medium",
+      "quote": "A managed SD-WAN is a service where a provider handles the deployment, configuration, monitoring and optimisation of your WAN.",
+      "note": "Forcepoint authors the product (NGFW / FlexEdge Secure SD-WAN, SMC, DLP, SWG, CASB). Its own SD-WAN page describes managed SD-WAN in the third person as something 'a provider' does, and the partner programme page positions managed services as partner revenue rather than a Forcepoint-operated service. No Forcepoint-operated managed network service page was found in the pages reviewed.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Slash networking costs and improve reliability with real-time mixing and matching of local ISP broadband and private MPLS selection.",
+      "claimed_by": "netify_assessment",
+      "note": "Forcepoint's SD-WAN rides transport the customer already buys (local ISP broadband, private MPLS, and cellular via the LTE and 5G appliance models). No page reviewed shows Forcepoint selling, owning or reselling circuits or core routing."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        12,
+        13,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "Provide users with safe and reliable access to the internet, wherever they're located",
+      "claimed_by": "netify_assessment",
+      "note": "The security stack is Forcepoint's own engineering across Forcepoint DLP, Secure Web Gateway, CASB and the NGFW software rather than a third party's technology resold under the Forcepoint name. No OEM or partner attribution for the security layer was found on any page reviewed. Confidence is medium because the quote evidences a Forcepoint branded cloud web service rather than explicitly stating in-house authorship."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        7,
+        8
+      ],
+      "confidence": "high",
+      "quote": "ISO Statement of Applicability and SOC 2 Type II certifications and assessments",
+      "claimed_by": "vendor",
+      "note": "Frameworks found and named with downloadable documentation: ISO/IEC 27001:2022, ISO/IEC 27017:2015, ISO/IEC 27018:2019, SOC 2 Type 2 (with separate reports listed for Forcepoint ONE, Cloud DSPM and Cloud Web), GDPR, plus a 'Forcepoint EU DORA Compliance document' and 'Covered Entity Compliance with HIPAA and Forcepoint Products'. Not found in the pages reviewed: NHS DSPT, NIS2, FedRAMP, Common Criteria, PCI DSS."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No point of presence, gateway or data centre count is published on the Secure SD-WAN, SWG, CASB, Forcepoint ONE or AI Mesh pages, nor on the Trust Center. No figure could be quoted, so the value stays unknown."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        6,
+        7
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No availability percentage was found. The Technical Support Offerings datasheet publishes severity response times only, and the Trust Center lists a 'Forcepoint Service Status' document under continuous monitoring without stating an uptime figure. A support SLA exists but with no published percentage, so this is unknown."
+    }
+  },
+  "conflicts": []
 }

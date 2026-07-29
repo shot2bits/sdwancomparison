@@ -5,6 +5,7 @@ import {
   getAllVendorSlugs,
   getVendor,
   getCapabilitiesByCategory,
+  FEATURE_NAMES,
   STATUS_LABELS,
   STATUS_DESCRIPTIONS,
 } from "@/lib/vendors";
@@ -57,6 +58,14 @@ export default async function VendorPage({ params }: Props) {
     notFound();
   }
   const continuation = deriveContinuation({ kind: "vendor", vendor });
+
+  // Provenance, added 29 July 2026. Tier 4 sources were read and rejected;
+  // they are rendered separately rather than hidden, which is the whole point.
+  const register = vendor.evidence_register ?? [];
+  const usedSources = register.filter((e) => e.tier !== 4);
+  const rejectedSources = register.filter((e) => e.tier === 4);
+  const conflicts = vendor.conflicts ?? [];
+  const sourcedFacts = Object.entries(vendor.sourced_facts ?? {});
 
   const capByCat = getCapabilitiesByCategory(vendor);
   const totalFeatures = 40;
@@ -378,29 +387,155 @@ export default async function VendorPage({ params }: Props) {
 
         <hr className="rule mb-16" />
 
-        {/* Sources */}
-        <section className="mb-16">
+        {/* Sources. The evidence register: every source used, every source
+            rejected, and the sentence each graded fact rests on. No competitor
+            publishes its exclusions, which is the reason to do it. */}
+        <section className="mb-16" id="evidence">
           <div className="grid md:grid-cols-12 gap-6 mb-6">
             <div className="md:col-span-4">
               <p className="eyebrow mb-2">Evidence</p>
-              <h2>Primary sources</h2>
+              <h2>Sources and exclusions</h2>
             </div>
             <div className="md:col-span-7 md:col-start-6">
               <p className="text-[var(--ink-700)]">
-                Every capability grade traces back to one of these sources. Reviewed{" "}
-                {vendor.last_verified}.
+                {sourcedFacts.length > 0 ? (
+                  <>
+                    {sourcedFacts.length} facts about {vendor.name} were re-verified on{" "}
+                    {vendor.last_verified} against named sources, each carrying a sentence quoted
+                    from the source and confirmed present on that page. {usedSources.length}{" "}
+                    sources were used.{" "}
+                    {rejectedSources.length > 0
+                      ? `${rejectedSources.length} more were read and rejected, and are listed below with the reason.`
+                      : ""}
+                  </>
+                ) : (
+                  <>Primary sources behind this record. Reviewed {vendor.last_verified}.</>
+                )}
               </p>
             </div>
           </div>
-          <ol className="space-y-3 list-decimal list-inside text-[var(--ink-700)]">
-            {vendor.primary_sources.map((url, i) => (
-              <li key={i} className="break-words">
-                <a href={url} target="_blank" rel="noopener" className="text-sm">
-                  {url}
-                </a>
-              </li>
-            ))}
+
+          {sourcedFacts.length > 0 && (
+            <div className="overflow-x-auto border border-[var(--ink-200)] rounded-lg mb-8">
+              <table className="w-full text-sm border-collapse min-w-[720px]">
+                <caption className="sr-only">
+                  Sourced facts for {vendor.name}, each with its grade, the source it rests on and
+                  the sentence quoted from that source.
+                </caption>
+                <thead>
+                  <tr className="bg-[var(--ink-50,#f6f8fa)] border-b-2 border-[var(--ink-300,#c9ced6)]">
+                    <th scope="col" className="text-left px-3.5 py-2.5 text-xs font-semibold">
+                      Fact
+                    </th>
+                    <th scope="col" className="text-left px-3.5 py-2.5 text-xs font-semibold">
+                      Finding
+                    </th>
+                    <th scope="col" className="text-left px-3.5 py-2.5 text-xs font-semibold">
+                      Evidence
+                    </th>
+                    <th scope="col" className="text-left px-3.5 py-2.5 text-xs font-semibold">
+                      Quoted from the source
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sourcedFacts.map(([key, f]) => (
+                    <tr key={key} className="border-b border-[var(--ink-200)] align-top">
+                      <th
+                        scope="row"
+                        className="text-left px-3.5 py-2.5 font-medium whitespace-nowrap"
+                      >
+                        {FEATURE_NAMES[key] ?? key.replace(/_/g, " ")}
+                      </th>
+                      <td className="px-3.5 py-2.5 text-[var(--ink-700)] whitespace-nowrap">
+                        {f.value === "unknown"
+                          ? "Not found"
+                          : (STATUS_LABELS[f.value] ?? f.value)}
+                      </td>
+                      <td className="px-3.5 py-2.5 text-[var(--ink-600,#5b636e)] whitespace-nowrap">
+                        {f.evidence.length > 0
+                          ? f.evidence.map((n) => `[${n}]`).join(" ")
+                          : "none"}
+                      </td>
+                      <td className="px-3.5 py-2.5 text-[var(--ink-700)]">
+                        {f.quote ? (
+                          `"${f.quote}"`
+                        ) : (
+                          <span className="text-[var(--ink-500)]">
+                            {f.note ?? "Not found in public sources reviewed."}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <h3 className="text-base font-medium mb-3">Sources used</h3>
+          <ol className="space-y-2 text-[var(--ink-700)] mb-8">
+            {usedSources.length > 0
+              ? usedSources.map((e) => (
+                  <li key={e.n} className="text-sm break-words">
+                    <span className="font-medium">[{e.n}]</span> Tier {e.tier}.{" "}
+                    <a href={e.url} target="_blank" rel="noopener" className="underline">
+                      {e.title}
+                    </a>
+                    {e.published ? ` Published ${e.published}.` : " Undated."}{" "}
+                    <span className="text-[var(--ink-500)]">
+                      Read {e.verified_on}. {e.reliability}
+                    </span>
+                  </li>
+                ))
+              : vendor.primary_sources.map((url, i) => (
+                  <li key={i} className="text-sm break-words">
+                    <a href={url} target="_blank" rel="noopener" className="underline">
+                      {url}
+                    </a>
+                  </li>
+                ))}
           </ol>
+
+          {rejectedSources.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-base font-medium mb-2">Sources found and not used</h3>
+              <p className="text-sm text-[var(--ink-700)] mb-3 max-w-3xl">
+                These were read and rejected as evidence. They are listed so the record can be
+                audited rather than taken on trust, and because what a comparison refuses to rely
+                on says as much as what it cites.
+              </p>
+              <ol className="space-y-2 text-[var(--ink-600,#5b636e)]">
+                {rejectedSources.map((e) => (
+                  <li key={e.n} className="text-sm break-words">
+                    <span className="font-medium">[{e.n}]</span> {e.title}.{" "}
+                    <a href={e.url} target="_blank" rel="noopener" className="underline">
+                      {e.url}
+                    </a>{" "}
+                    {e.reliability}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {conflicts.length > 0 && (
+            <div>
+              <h3 className="text-base font-medium mb-2">Claims that disagree</h3>
+              <p className="text-sm text-[var(--ink-700)] mb-3 max-w-3xl">
+                Where two sources conflict, both are recorded rather than one being chosen
+                quietly. Confirm these directly with the supplier.
+              </p>
+              <ul className="space-y-3 text-sm text-[var(--ink-700)]">
+                {conflicts.map((c, i) => (
+                  <li key={i}>
+                    <span className="font-medium">{c.field.replace(/_/g, " ")}.</span> [
+                    {c.source_a}] {c.claim_a} [{c.source_b}] {c.claim_b}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {/* Provenance */}

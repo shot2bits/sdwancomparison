@@ -12,13 +12,13 @@
   "cost_model": "Quote-based hardware/subscription/support; managed delivery via partners/providers.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "partial",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f03_co_managed_service": "unknown",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "partial",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -37,7 +37,7 @@
     "f23_multi_cloud_transit_fabric": "partial",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "unknown",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "partial",
     "f29_sse_ecosystem_integration": "partial",
@@ -51,16 +51,18 @@
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "unknown"
   },
   "score_summary": {
-    "yes_count": 18,
-    "partial_count": 11,
-    "partner_integrated_count": 8,
+    "yes_count": 19,
+    "partial_count": 14,
+    "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 3,
+    "unknown_count": 6,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.925
+    "evidence_coverage_pct": 0.85,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Mist AI delivers WAN Assurance, providing AI-driven monitoring and troubleshooting at the WAN edge that few competitors match.",
@@ -77,8 +79,8 @@
     "Managed delivery is via partners; first-party managed service is not the primary model.",
     "Cloud on-ramp and private backbone capabilities are less prominent than dedicated SASE platforms."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -179,5 +181,323 @@
   "value_tier": "mid",
   "cost_note": "Subscription per device and Mist service; mid pricing with operational savings from AIOps.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US, now HPE). UK channel and delivery via partners and MSPs."
+  "uk_basis": "No UK HQ (US, now HPE). UK channel and delivery via partners and MSPs.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE) Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/sase.html",
+      "published": null,
+      "reliability": "Supplier's own solution page. Retrievable body text is thin marketing copy; used for the cloud-delivered SSE and unified policy claims. No PoP, SLA, DLP or backbone detail present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "SD-WAN Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/sd-wan.html",
+      "published": null,
+      "reliability": "Supplier's own solution page. Only source found in this task naming 5G as an integrated element of the branch proposition. Fetched twice; the 5G phrase appeared consistently across both retrievals.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Managed AI-Native SD-WAN for MSPs | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/sd-wan/managed-sd-wan.html",
+      "published": null,
+      "reliability": "Supplier's own page aimed at MSPs. Establishes that the managed offer is MSP-delivered rather than Juniper-operated. Contains no multi-tenancy, white-label or SLA specifics.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Juniper Services | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/services.html",
+      "published": null,
+      "reliability": "Supplier's own services page. Strongest source retrieved for professional services, migration and lifecycle claims. Does not evidence a 24/7 NOC/SOC or contractual service levels.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Session Smart Router | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/products/routers/session-smart-router.html",
+      "published": null,
+      "reliability": "Supplier's own product page. Used for the built-in stateful firewall claim and deployment flexibility. Explicitly contained no LTE, 5G, cellular, MPLS, SLA or multi-tenancy content when queried for it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "Juniper WAN Assurance | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/products/cloud-services/wan-assurance.html",
+      "published": null,
+      "reliability": "Supplier's own product page. Confirms SRX Series Firewalls and Session Smart Routers are components of the same Juniper-authored platform. No LTE/5G, SLE, multi-tenancy or MSP content when queried.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Network Security Products | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/products/security.html",
+      "published": null,
+      "reliability": "Supplier's own product overview. Corroborates full-stack SSE positioning. Retrieved text was truncated mid-description, so DLP/CASB/IPS detail could not be read from it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Juniper Secure Edge Documentation | Juniper Networks",
+      "url": "https://www.juniper.net/documentation/product/us/en/juniper-secure-edge/",
+      "published": null,
+      "reliability": "Supplier's own documentation landing page. Page is JavaScript-rendered so only title and meta description were retrievable; the meta description supports the native single-stack SSE reading. No guide links or body text were obtainable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 4,
+      "title": "Juniper Mist Cloud Services SLA (attempted)",
+      "url": "https://www.juniper.net/us/en/legal/juniper-mist-cloud-services-sla.html",
+      "published": null,
+      "reliability": "Not used as evidence: URL returned HTTP 404. Recorded because it was the targeted attempt to find a published availability percentage, which is why sla_availability_pct is unknown rather than graded.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 4,
+      "title": "Juniper Secure Edge product page (attempted)",
+      "url": "https://www.juniper.net/us/en/products/security/secure-edge.html",
+      "published": null,
+      "reliability": "Not used as evidence: redirects off-host to a buy.hpe.com product page which returned Product Not Found, so no Secure Edge feature or PoP text was retrievable. Recorded because it is the primary page that would have carried PoP, DLP and CASB detail.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 4,
+      "title": "Juniper Networks Trust Center (attempted)",
+      "url": "https://www.juniper.net/us/en/company/trust-center.html",
+      "published": null,
+      "reliability": "Not used as evidence: the retrieved page returned site navigation and a meta description only, with no certification or framework names in the body. This is the reason regulatory_documentation is graded not_found.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 4,
+      "title": "Juniper certifications page (attempted)",
+      "url": "https://www.juniper.net/us/en/products/certifications.html",
+      "published": null,
+      "reliability": "Not used as evidence: URL returned HTTP 404. Recorded as the second attempt to locate named compliance frameworks (ISO 27001, SOC 2, FedRAMP, Common Criteria).",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "partial",
+      "evidence": [
+        4,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "Our highly trained experts, backed by AI-Native and automated insights, can help you design, deploy, and proactively manage your network to deliver seamless experiences for all.",
+      "claimed_by": "vendor",
+      "note": "Juniper Services offers design, deployment and proactive management assistance, but the Juniper pages reviewed position end-to-end managed SD-WAN/SASE as something MSPs and service providers deliver using Juniper technology rather than something Juniper operates itself. The managed SD-WAN page is written to MSPs as the operator. No Juniper page reviewed described Juniper owning day-to-day operations, change execution and service reporting for a customer end to end. Graded partial rather than yes for that reason."
+    },
+    "f03_co_managed_service": {
+      "value": "unknown",
+      "evidence": [
+        4,
+        3,
+        6
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the Juniper Services page, the managed SD-WAN page and the WAN Assurance page; none described a shared responsibility model in which Juniper runs the platform and support while the customer retains selected policy and change rights."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        3
+      ],
+      "confidence": "low",
+      "quote": "engineered specifically for forward-thinking MSPs ready to scale",
+      "claimed_by": "vendor",
+      "note": "Juniper explicitly targets MSPs with its managed SD-WAN proposition, which is why this is not graded unknown. However none of the three specific tests in the definition were evidenced on pages reviewed: tenant isolation, delegated administration and branded (white-label) portals are not described. The Juniper Mist MSP dashboard documentation URL attempted returned HTTP 404, so multi-tenant administration could not be verified in this task."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Accelerate and support your deployment and migration of Juniper data center infrastructure and Juniper Apstra intent-based networking deployment software.",
+      "claimed_by": "vendor",
+      "note": "Design, deployment and migration services are named on Juniper's own services page. The granular elements in the definition (discovery, pilots, staging, migration runbooks, rollback plans, training) were not itemised on the pages reviewed, and the migration sentence quoted is data-centre specific; the broader services statement covers design and deployment across campus, branch and WAN. The dedicated professional services and technical services URLs attempted both returned HTTP 404."
+    },
+    "f07_lifecycle_management": {
+      "value": "partial",
+      "evidence": [
+        4
+      ],
+      "confidence": "medium",
+      "quote": "Achieve simplicity and reliability at scale across your wired, wireless, and SD-WAN environments with AI-Native operations and support from Juniper Services, using AI for a comprehensive, proactive approach across the full network life cycle.",
+      "claimed_by": "vendor",
+      "note": "Juniper claims a full network life cycle approach through Juniper Services. The specific components in the definition (hardware replacement/RMA, firmware upgrades, patching, renewals and end-of-life planning handled as part of the service) were not individually evidenced; the technical services page that would carry them returned HTTP 404 on attempt. Graded partial on that basis."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        2
+      ],
+      "confidence": "low",
+      "quote": "tightly integrating SD-WAN, Wi-Fi, switching, and 5G",
+      "claimed_by": "vendor",
+      "note": "5G is named as an integrated element of Juniper's Branch-in-a-Box SD-WAN proposition. The rest of the definition was not evidenced: no page reviewed described 4G/5G as primary or failover transport, integrated or external modems, SIM management or signal monitoring. The Session Smart Router product page reviewed made no mention of LTE, 5G or cellular at all, and the SSR datasheet URLs attempted returned HTTP 404. Quote is a verbatim fragment, not a complete sentence."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "partial",
+      "evidence": [
+        1,
+        7,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "full-stack Security Service Edge (SSE) and SD-WAN capabilities that leverage the power of the cloud to optimize both the network and the security experience",
+      "claimed_by": "vendor",
+      "note": "Juniper operates its own cloud-delivered SSE (Juniper Secure Edge, managed by Juniper Security Director Cloud), so this is Juniper's own service infrastructure rather than a third party's resold platform. Graded partial not yes because no page reviewed named the gateway or PoP locations, the number of locations, or which capabilities (SaaS optimisation, remote access, security enforcement) are enforced at Juniper-operated PoPs. Attempts to reach the Juniper Secure Edge product page redirected to an HPE store page that returned Product Not Found, and the Secure Edge documentation guide URLs returned 404/403."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        7,
+        8,
+        10
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the SASE solution page, the security products page, the Juniper Secure Edge documentation landing page and the Juniper Secure Edge product page (which redirected to an HPE store page returning Product Not Found). Nothing described customer-hosted, dedicated or sovereign PoP options as an alternative to shared multi-tenant locations. Absence is not being read as a no."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        2,
+        5
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the SASE solution page, the SD-WAN solution page and the Session Smart Router page. No claim of a Juniper-owned or Juniper-controlled inter-region backbone was found, nor any claim of a national network. Juniper's SD-WAN messaging is tunnel-free routing over customer transport rather than a vendor backbone, but no page stated this explicitly enough to grade, so this is recorded as unknown rather than inferred."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        9
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The managed SD-WAN page refers to helping MSPs meet and exceed their own customer SLAs, which is a claim about the MSP's contractual commitments and not a Juniper contractual commitment to the end customer. The Juniper Mist cloud services SLA URL attempted returned HTTP 404 and no published SLA document covering uptime, response or change handling was located in this task."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        7,
+        8
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. Checked the SASE solution page, the security products page and the Juniper Secure Edge documentation landing page for DLP, CASB or content classification language; none was present in the retrievable text. The Secure Edge datasheet PDF and admin/user guide URLs attempted returned HTTP 404, 403 or a server error, so DLP could not be confirmed or ruled out."
+    },
+    "f40_managed_service_assurance": {
+      "value": "unknown",
+      "evidence": [
+        4,
+        6
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Juniper Services page describes proactive management assistance and Juniper Support Insights visibility, and the WAN Assurance page describes automated identification and correction of misconfigurations, but neither evidences the specific tests in the definition: a 24/7 NOC and SOC operated by the provider, incident ownership through to root cause analysis, structured service reviews and change governance. The Juniper support and technical services pages attempted returned HTTP 404."
+    },
+    "delivery_model": {
+      "value": "technology_vendor",
+      "evidence": [
+        3,
+        4,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "engineered specifically for forward-thinking MSPs ready to scale",
+      "note": "Juniper authors the products (Session Smart Router, SRX Series Firewalls, Juniper Secure Edge, Marvis AI, WAN Assurance) and its managed SD-WAN page is written to MSPs and service providers as the parties who will operate the service for end customers. Juniper Services provides design, deployment and proactive management support alongside the products. No page reviewed showed Juniper contracting to operate a managed SASE or SD-WAN service end to end for enterprise customers, so this is graded technology_vendor rather than both. Note that Juniper is now part of HPE: several juniper.net product URLs redirect to buy.hpe.com.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        5,
+        2
+      ],
+      "confidence": "low",
+      "quote": "The SSR is a software-based solution that can run on dedicated Juniper hardware (SSR series), customer premises equipment (CPE), data center network servers, or in the public cloud.",
+      "claimed_by": "netify_assessment",
+      "note": "This is a Netify assessment, not a Juniper claim. Juniper sells routing and security software and hardware that a customer or MSP deploys onto transport they already have; no page reviewed contained any claim that Juniper owns circuits, core routing infrastructure or a transport network, and no circuit or access product was offered anywhere on the pages read. Confidence is low because this rests on the shape of the product proposition rather than an explicit statement of underlay ownership, and no page was found that addresses the question directly."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        8,
+        1,
+        7
+      ],
+      "confidence": "medium",
+      "quote": "Use full-stack Secure Services Edge (SSE) in a single-stack software architecture that Juniper Security Director Cloud manages.",
+      "claimed_by": "vendor",
+      "note": "Juniper authors its own SSE stack. Juniper Secure Edge is described as a full-stack SSE in a single-stack software architecture managed by Juniper Security Director Cloud, and the security portfolio page attributes the underlying firewall efficacy to Juniper's own product in the CyberRatings.org cloud network firewall testing. No third-party security vendor was named as the source of the SSE layer on any page reviewed. The quote is taken from the meta description of the Juniper Secure Edge documentation landing page, as the page body is JavaScript-rendered and was not retrievable."
+    },
+    "regulatory_documentation": {
+      "value": "not_found",
+      "evidence": [
+        11,
+        12,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Juniper Networks Trust Center page returned site navigation and a meta description only, with no framework named in the retrievable body. A certifications page URL was attempted and returned HTTP 404. None of ISO 27001, SOC 2, FedRAMP, Common Criteria, FIPS, NHS DSPT, DORA or NIS2 was found named on any page read in this task. Juniper does publish certification material elsewhere, but nothing was verified here, so this is not_found rather than documented or assurance_only."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        1,
+        7,
+        8,
+        10
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No figure for points of presence was published on the SASE solution page, the security products page or the Juniper Secure Edge documentation landing page. The Juniper Secure Edge product page, which would be the natural home for a PoP count, redirects off juniper.net to an HPE store page that returned Product Not Found, and the Secure Edge datasheet PDF URLs attempted returned HTTP 404."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        9
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No availability percentage was published on any page read. The managed SD-WAN page mentions customer SLAs only in the context of helping MSPs exceed the SLAs they offer their own customers, with no percentage figure, which per the rules is unknown rather than a grade. The Juniper Mist cloud services SLA URL attempted returned HTTP 404."
+    }
+  },
+  "conflicts": []
 }

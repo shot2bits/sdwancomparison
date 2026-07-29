@@ -15,10 +15,10 @@
     "f01_fully_managed_service": "partner_integrated",
     "f02_diy_self_managed_model": "yes",
     "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "yes",
-    "f05_professional_services_and_migration_support": "partner_integrated",
+    "f04_multi_tenant_msp_white_label_support": "partial",
+    "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "yes",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -28,39 +28,41 @@
     "f14_packet_loss_remediation": "yes",
     "f15_local_internet_breakout": "yes",
     "f16_mpls_coexistence_and_migration": "yes",
-    "f17_cellular_and_5g_support": "partial",
+    "f17_cellular_and_5g_support": "yes",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
-    "f20_private_pops_dedicated_pops": "unknown",
+    "f20_private_pops_dedicated_pops": "yes",
     "f21_private_global_backbone": "unknown",
     "f22_regional_breakout_and_data_residency": "partner_integrated",
     "f23_multi_cloud_transit_fabric": "yes",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "unknown",
     "f27_integrated_next_generation_firewall": "partial",
     "f28_full_sase_platform": "partner_integrated",
     "f29_sse_ecosystem_integration": "yes",
     "f30_zero_trust_network_access": "partner_integrated",
     "f31_secure_web_gateway": "partner_integrated",
     "f32_casb_capability": "partner_integrated",
-    "f33_data_loss_prevention": "partner_integrated",
+    "f33_data_loss_prevention": "unknown",
     "f34_remote_user_access": "partner_integrated",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "managed_service_dependent"
   },
   "score_summary": {
-    "yes_count": 22,
+    "yes_count": 25,
     "partial_count": 2,
-    "partner_integrated_count": 14,
-    "managed_service_dependent_count": 0,
-    "unknown_count": 2,
+    "partner_integrated_count": 9,
+    "managed_service_dependent_count": 1,
+    "unknown_count": 3,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 0.95
+    "evidence_coverage_pct": 0.925,
+    "sourced_facts_tier_1_2": 18,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "VeloCloud was an early SD-WAN platform with strong cloud-delivered gateway architecture; now under Arista following the 2025 acquisition.",
@@ -77,8 +79,8 @@
     "Security and SASE capabilities are largely partner-integrated rather than native.",
     "Direct enterprise sales motion is less established than legacy vendors; most consumption is via managed providers."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -143,7 +145,7 @@
     "chromeos": "unknown",
     "agentless": "partial"
   },
-  "pop_count": null,
+  "pop_count": 150,
   "sla_availability_pct": null,
   "support_model": {
     "follow_the_sun_24x7": "yes",
@@ -179,5 +181,451 @@
   "value_tier": "mid",
   "cost_note": "Subscription per edge by bandwidth; historically aggressive through carrier deals.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). VeloCloud delivered in the UK through carriers including BT and Vodafone."
+  "uk_basis": "No UK HQ (US). VeloCloud delivered in the UK through carriers including BT and Vodafone.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Arista Networks - Company Overview",
+      "url": "https://www.arista.com/en/company/company-overview",
+      "published": null,
+      "reliability": "Supplier's own corporate page. Confirms the VeloCloud portfolio was acquired from Broadcom in July 2025 and describes Arista as a networking product company.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Arista Products index",
+      "url": "https://www.arista.com/en/products",
+      "published": null,
+      "reliability": "Supplier's own navigation page. Used only to locate the correct VeloCloud product URLs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "SD-WAN & Edge Routing Solution",
+      "url": "https://www.arista.com/en/solutions/sd-wan",
+      "published": null,
+      "reliability": "Supplier's own solution page. Primary source for gateway and PoP counts, firewall wording and named SSE partners.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "VeloCloud 7x0 Series, Virtual Edge",
+      "url": "https://www.arista.com/en/products/velocloud-7x0-series",
+      "published": null,
+      "reliability": "Supplier's own product page. Source for the integrated WiFi and 5G statement.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN Data Sheet (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Data-Sheet.pdf",
+      "published": null,
+      "reliability": "Supplier's own datasheet and the strongest single source: gateway hosting model, multitenancy, RBAC, Enhanced Firewall Service and managed-service delivery wording. Undated PDF, so recency is not verifiable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN Edge 7x0 Series Data Sheet (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-7x0-Series.pdf",
+      "published": null,
+      "reliability": "Supplier's own hardware datasheet. Detailed cellular specifications (modem, LTE category, 5G FR1 bands, SIM slots) and the security feature list.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "SD-WAN Security",
+      "url": "https://www.arista.com/en/solutions/sd-wan/sd-wan-security",
+      "published": null,
+      "reliability": "Supplier's own page. Firewall, IDS/IPS and URL filtering wording, including the third-party origin of URL filtering.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "SASE Integrations",
+      "url": "https://www.arista.com/en/solutions/sd-wan/sase-integrations",
+      "published": null,
+      "reliability": "Supplier's own page. States the best-of-breed SSE integration strategy explicitly and names the SSE vendors.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "SD-WAN Solution Overview (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/SD-WAN-Solution-Overview.pdf",
+      "published": null,
+      "reliability": "Supplier's own solution overview. Source for gateway placement in top-tier PoPs and cloud data centres, partner gateways, and MSP policy administration. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN PCI Compliance Solution Brief (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-PCI-Compliance-Solution-Brief.pdf",
+      "published": null,
+      "reliability": "Supplier's own compliance brief. Names PCI DSS and a PCI Attestation of Compliance issued to customers in PCI-compliant PoPs. Undated.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Arista Networks Introduces AI-Driven Zero Trust Branch (press release)",
+      "url": "https://www.arista.com/en/company/news/press-release/24357-pr-20260721",
+      "published": "2026-07-21",
+      "reliability": "Dated supplier press release. Names Edge Threat Management capabilities and two MSP partners operating the platform for end customers.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Arista Customer Support",
+      "url": "https://www.arista.com/en/support/customer-support",
+      "published": null,
+      "reliability": "Supplier's own support page. Source for 24x7x365 TAC coverage, advance hardware replacement and professional services wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Arista Support (index)",
+      "url": "https://www.arista.com/en/support",
+      "published": null,
+      "reliability": "Supplier's own navigation page. Used to locate lifecycle, certification and documentation URLs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "VeloCloud 4100 & 5100 Series",
+      "url": "https://www.arista.com/en/products/velocloud-4100-5100-series",
+      "published": null,
+      "reliability": "Supplier's own product page. Confirms integrated 5G on the larger edge platforms.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Arista Partner Program",
+      "url": "https://www.arista.com/en/partner/partner-program",
+      "published": null,
+      "reliability": "Supplier's own partner page. Contains SD-WAN MSP programme sections but no descriptive prose on white-labelling or branded portals, so it corroborates the MSP channel only weakly.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Arista Security Services (Awake Labs)",
+      "url": "https://www.arista.com/en/products/security-services",
+      "published": null,
+      "reliability": "Supplier's own page. Checked for NOC/SOC and firewall claims; contains neither in usable form, so it carried no grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Edge Threat Management (ETM)",
+      "url": "https://www.arista.com/en/solutions/security/etm",
+      "published": null,
+      "reliability": "Supplier's own page. Checked for DLP and IPS wording; returned NDR and microsegmentation content instead, so it carried no grade.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Arista Corporate Responsibility",
+      "url": "https://www.arista.com/en/company/corporate-responsibility",
+      "published": null,
+      "reliability": "Supplier's own page. Checked for ISO 27001, SOC 2 and similar; only ISO 14001 for contract manufacturers was present, which is environmental and not an information-security framework.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Arista Product Certificate lookup",
+      "url": "https://www.arista.com/en/support/product-certificate",
+      "published": null,
+      "reliability": "Supplier's own tool. A model-number search form with no framework names rendered, so no certification could be graded from it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Arista Press Release index",
+      "url": "https://www.arista.com/en/company/news/press-release",
+      "published": null,
+      "reliability": "Supplier's own index. Used to locate the dated Zero Trust Branch release.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 4,
+      "title": "VeloCloud.com home page (VMware SD-WAN by VeloCloud)",
+      "url": "https://www.velocloud.com/",
+      "published": null,
+      "reliability": "Not used as evidence. The page still presents the product as VMware SD-WAN by VeloCloud, superseded by the July 2025 Arista acquisition, so it would misstate current ownership. Retained because it documents the conflicting claim.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 4,
+      "title": "Arista Product Lifecycle page",
+      "url": "https://www.arista.com/en/support/product-lifecycle",
+      "published": null,
+      "reliability": "Not used as evidence. The URL returned an authentication/login wrapper rather than the policy text, so no verifiable quote could be taken from it.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 4,
+      "title": "Arista URLs returning 'Page not found or access denied' (wan-routing-systems, products/velocloud-sd-wan, products/wan-routing, support/advanced-services, support/product-certifications)",
+      "url": "https://www.arista.com/en/products/wan-routing-systems",
+      "published": null,
+      "reliability": "Not used as evidence. All five guessed URLs returned an error page with no content; listed so the search path is auditable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 4,
+      "title": "VeloCloud SD-WAN Edge 7x0 Series Datasheet (incorrect asset path)",
+      "url": "https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-7x0-Series-Datasheet.pdf",
+      "published": null,
+      "reliability": "Not used as evidence. Returned HTTP 400; the correct asset path was found later via the solution page link list.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "partner_integrated",
+      "evidence": [
+        5,
+        11,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "Cloud-native by design, VeloCloud SD-WAN is delivered via a global network of Edge PoPs, either self-managed or as a managed service.",
+      "claimed_by": "vendor",
+      "note": "Arista authors the platform; the managed-service option is operated by MSP and service-provider partners rather than by Arista end to end. Arista's own press release quotes T&A SYSTEME GmbH, 'a German MSP managing 7500+ sites in 98 countries', and MetTel as the parties running the service for customers. No Arista-run design-to-report managed service was found."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        9,
+        5,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "Enterprises or their managed service providers can define business-level policies that apply enterprise-wide across many Edges",
+      "claimed_by": "vendor",
+      "note": "Tenant isolation and delegated administration are evidenced by the multitenant Orchestrator, Controller and Gateway architecture and the three-tier RBAC model, and the partner programme carries 'SD-WAN MSP Partner Requirements'. Graded partial rather than yes because no page reviewed described branded or white-label partner portals, which the definition requires."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        12
+      ],
+      "confidence": "high",
+      "quote": "Statement of Work - Professional Services - Universal Cloud Network (UCN) Deployment",
+      "claimed_by": "vendor",
+      "note": "Arista publishes named Statements of Work for professional services including deployment and a SOW service mapping guide."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        12
+      ],
+      "confidence": "high",
+      "quote": "Worldwide Advance Hardware Replacement and an option for onsite hardware replacement services.",
+      "claimed_by": "vendor",
+      "note": "Confirmed verbatim 29 Jul 2026. Page also documents Next Business Day, 4 Hour and 2 Hour service levels."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "yes",
+      "evidence": [
+        6,
+        4,
+        14
+      ],
+      "confidence": "high",
+      "quote": "Dual Physical SIM + single eSIM (single standby)",
+      "claimed_by": "vendor",
+      "note": "The 7x0 datasheet documents an integrated Telit FN990A28 modem, 'LTE Category Cat-19', carrier aggregation, HSPA+ 3G fallback and a full 5G FR1 band list, with dual physical SIM plus eSIM. The product page states 'integrated WiFi and 5G' and the 4100/5100 page leads with 'Integrated 5G Enterprise-class SD-WAN appliances for branches'. LTE is also listed among supported WAN transports."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        3,
+        5,
+        9
+      ],
+      "confidence": "high",
+      "quote": "VeloCloud's cloud based architecture offers a unique footprint of more than 3,000 cloud gateways spanning 150+ SASE points of presence from VeloCloud and its partners around the world.",
+      "claimed_by": "vendor",
+      "note": "This is VeloCloud's own gateway service infrastructure rather than a resold third party's, so it meets the definition. Two qualifications worth carrying forward: part of the estate is partner-hosted ('hosted by Arista/service providers or deployed on-premises'), and the security enforcement reached through those PoPs is supplied by third-party SSE vendors, not by Arista."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        9,
+        5
+      ],
+      "confidence": "high",
+      "quote": "Gateways can be deployed as partner Gateways on the premises of service providers, where they are managed by the service provider",
+      "claimed_by": "vendor",
+      "note": "Gateways are not restricted to a shared multi-tenant estate: the datasheet describes 'A distributed, global network of gateways, hosted by Arista/service providers or deployed on-premises' and lists 'Partner Gateway Support' as a feature, covering customer-hosted and dedicated partner deployments. No sovereign-region offering was named on the pages reviewed."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [
+        9,
+        5,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The SD-WAN solution page, the VeloCloud datasheet and the SD-WAN solution overview were each searched for backbone wording. The overview states gateways are 'deployed at top-tier network points of presence (PoPs) and in cloud data centers' and the datasheet lists broadband, MPLS, LTE and satellite as transports, but no source claims an Arista-owned or Arista-controlled inter-region backbone. Absence of a claim is not treated as absence of the capability."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "unknown",
+      "evidence": [
+        5,
+        9,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The VeloCloud datasheet and the SD-WAN solution overview contain no occurrence of SLA, service level, uptime or availability. The support page documents 24x7x365 TAC coverage and A-Care advance hardware replacement, but no contractual uptime, response-time or change-handling commitments were published on any page reviewed and no SLA document was located."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "partial",
+      "evidence": [
+        7,
+        6,
+        5,
+        11
+      ],
+      "confidence": "high",
+      "quote": "Every VeloCloud edge device ships with an integrated stateful firewall to provide an extended security layer at the branch.",
+      "claimed_by": "vendor",
+      "note": "Stateful layer 7 firewalling, IDS/IPS and URL filtering are built into the edge as the Enhanced Firewall Service, and the July 2026 release adds 'advanced firewalling and threat prevention capabilities, zone-based segmentation, Geo-IP filtering, DNS filtering'. Graded partial for two reasons: URL filtering and IP reputation are a third party's technology, since 'VeloCloud EFS includes URL filtering and IP reputation services powered by Webroot Brightcloud', and no malware inspection or sandboxing capability was evidenced on any page reviewed."
+    },
+    "f33_data_loss_prevention": {
+      "value": "unknown",
+      "evidence": [
+        5,
+        7,
+        17,
+        8
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The VeloCloud datasheet, the SD-WAN security page, the Edge Threat Management page and the July 2026 press release were each searched for DLP or data loss wording and returned none. The SASE integrations page names third-party SSE vendors including Zscaler and Netskope whose platforms would supply data protection, but no reviewed page states that content classification, inspection or blocking of sensitive data is delivered by Arista or through those integrations, so even a partner_integrated grade would be unsupported."
+    },
+    "f40_managed_service_assurance": {
+      "value": "managed_service_dependent",
+      "evidence": [
+        12,
+        11,
+        16
+      ],
+      "confidence": "medium",
+      "quote": "Arista Global TAC provides you with 24x7x365 coverage for your product support needs around the world.",
+      "claimed_by": "vendor",
+      "note": "What is documented is a vendor technical assistance centre with round-the-clock coverage, which is reactive product support. No Arista NOC or SOC monitoring a customer's SD-WAN service proactively, owning incidents to root cause, or running structured service reviews and change governance was found. Proactive assurance is carried out by MSP partners such as MetTel and T&A SYSTEME GmbH. The Awake Labs security services page was checked for SOC and 24x7 wording and returned none."
+    },
+    "delivery_model": {
+      "value": "technology_vendor",
+      "evidence": [
+        1,
+        5,
+        11
+      ],
+      "confidence": "high",
+      "quote": "Arista Networks is an industry leader in data-driven, client to cloud networking for large data center/AI, campus and routing environments.",
+      "note": "Arista authors and sells the VeloCloud SD-WAN platform and edge hardware; the company overview confirms it acquired the portfolio rather than operating a managed WAN service. Managed delivery is carried out by MSP and service-provider partners named in Arista's own press release (T&A SYSTEME GmbH, MetTel). No Arista-run managed WAN service description was found.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        5,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "flexible WAN choices, such as broadband, MPLS, LTE, and satellite",
+      "claimed_by": "vendor",
+      "note": "Arista sells edge hardware, software and cloud gateways and rides whatever transport the customer or their service provider supplies. No page reviewed offers Arista-supplied circuits or access, and the company overview describes a networking product business rather than a carrier. Where circuits are bundled it is the MSP partner, not Arista, supplying them."
+    },
+    "sse_layer_ownership": {
+      "value": "partner",
+      "evidence": [
+        8,
+        3
+      ],
+      "confidence": "high",
+      "quote": "VeloCloud™ leverages a Best-of-Breed SASE strategy by combining its industry-leading SD-WAN with seamless integration of leading Security Service Edge (SSE) solutions.",
+      "claimed_by": "vendor",
+      "note": "The SSE stack is other vendors' technology integrated with VeloCloud SD-WAN, not built by Arista. Named partners on the pages reviewed: Zscaler, Netskope (Netskope One SSE), Palo Alto Networks (Prisma Access), Symantec (WSS), Forcepoint and Microsoft SSE. Arista builds the SD-WAN and the on-box Enhanced Firewall Service itself, but the cloud security edge is partner-supplied."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        10,
+        18,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "Customers provisioned in PCI-compliant PoPs will be provided with a PCI AoC which can be used to simplify and accelerate their own PCI audit.",
+      "claimed_by": "vendor",
+      "note": "Found and documented: PCI DSS, with a named artefact, the Attestation of Compliance issued to customers in PCI-compliant PoPs, plus a published split of Arista, merchant and shared DSS responsibilities. Not found on any page reviewed: ISO 27001, SOC 2, NIS2, DORA, NHS DSPT. The corporate responsibility page names only ISO 14001 for contract manufacturers, which is environmental, and the product certificate page is a model-number lookup form that rendered no framework names."
+    },
+    "pop_count": {
+      "value": "150+",
+      "evidence": [
+        3,
+        9
+      ],
+      "confidence": "high",
+      "quote": "VeloCloud's cloud based architecture offers a unique footprint of more than 3,000 cloud gateways spanning 150+ SASE points of presence from VeloCloud and its partners around the world.",
+      "claimed_by": "vendor",
+      "note": "Published as 150+ SASE points of presence, with more than 3,000 cloud gateways as the separate and larger figure. The count is explicitly a combined VeloCloud and partner footprint, so it is not purely Arista-operated infrastructure. The solution overview adds that gateways sit 'at top-tier network points of presence (PoPs) and in cloud data centers'."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        5,
+        9,
+        12
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No availability percentage appears on the SD-WAN solution page, the VeloCloud datasheet, the SD-WAN solution overview or the customer support page. Targeted checks for the strings SLA, service level, uptime, availability and '99.' in the datasheet and the solution overview returned nothing, so there is not even a marketing mention of an SLA to downgrade from."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "delivery_model",
+      "claim_a": "Arista states it acquired the VeloCloud SD-WAN portfolio from Broadcom in July 2025, making Arista the current owner and vendor.",
+      "source_a": 1,
+      "claim_b": "The velocloud.com site still presents the product as 'VMware SD-WAN by VeloCloud', implying VMware ownership.",
+      "source_b": 21
+    },
+    {
+      "field": "f19_public_cloud_gateways",
+      "claim_a": "The SD-WAN solution page attributes the footprint to 'VeloCloud and its partners', implying a jointly operated gateway estate.",
+      "source_a": 3,
+      "claim_b": "The datasheet describes gateways as 'hosted by Arista/service providers or deployed on-premises', which also allows entirely customer-hosted gateways that would not form part of the published shared footprint.",
+      "source_b": 5
+    }
+  ]
 }

@@ -18,7 +18,7 @@
     "f04_multi_tenant_msp_white_label_support": "partial",
     "f05_professional_services_and_migration_support": "yes",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "yes",
+    "f07_lifecycle_management": "unknown",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -31,7 +31,7 @@
     "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "yes",
     "f19_public_cloud_gateways": "yes",
-    "f20_private_pops_dedicated_pops": "partial",
+    "f20_private_pops_dedicated_pops": "unknown",
     "f21_private_global_backbone": "yes",
     "f22_regional_breakout_and_data_residency": "yes",
     "f23_multi_cloud_transit_fabric": "yes",
@@ -44,23 +44,25 @@
     "f30_zero_trust_network_access": "yes",
     "f31_secure_web_gateway": "yes",
     "f32_casb_capability": "partial",
-    "f33_data_loss_prevention": "partial",
+    "f33_data_loss_prevention": "yes",
     "f34_remote_user_access": "yes",
     "f35_soc_siem_soar_integration": "yes",
     "f36_centralised_orchestration": "yes",
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "yes",
     "f39_apis_and_automation": "yes",
-    "f40_managed_service_assurance": "yes"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 33,
-    "partial_count": 6,
+    "yes_count": 32,
+    "partial_count": 5,
     "partner_integrated_count": 1,
     "managed_service_dependent_count": 0,
-    "unknown_count": 0,
+    "unknown_count": 2,
     "not_primary_count": 0,
-    "evidence_coverage_pct": 1.0
+    "evidence_coverage_pct": 0.95,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "Unified SASE delivered as a managed service from end to end, including the private global core network and WAN optimisation.",
@@ -77,8 +79,8 @@
     "DIY/self-managed model has limited evidence; this is a managed-service-first proposition.",
     "CASB and DLP capabilities have partial public evidence; depth should be confirmed in RFP."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -145,7 +147,7 @@
     "agentless": "yes"
   },
   "pop_count": 40,
-  "sla_availability_pct": 99.99,
+  "sla_availability_pct": 99.999,
   "support_model": {
     "follow_the_sun_24x7": "yes",
     "uk_support_desk": "partial",
@@ -180,5 +182,545 @@
   "value_tier": "mid",
   "cost_note": "Subscription per site with the private middle mile included; pricing reflects the owned core.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). UK PoP on the private core; managed-service delivery into the UK."
+  "uk_basis": "No UK HQ (US). UK PoP on the private core; managed-service delivery into the UK.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "Managed SASE (Aryaka)",
+      "url": "https://www.aryaka.com/managed-sase/",
+      "published": null,
+      "reliability": "Vendor page. Fetched, but returned only high level marketing copy; no gradeable verbatim sentences extracted.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "Aryaka Unified SASE homepage",
+      "url": "https://www.aryaka.com/",
+      "published": null,
+      "reliability": "Vendor homepage. Fetched; marketing copy only, no gradeable figures.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "Aryaka Global Points-of-Presence (PoPs)",
+      "url": "https://www.aryaka.com/about-us/global-pop-locations/",
+      "published": null,
+      "reliability": "Vendor page listing PoP cities by region. Good for network description; enumerates roughly 47 city locations but does not state a headline count.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "Aryaka Service Level Agreement: Definitions And Details",
+      "url": "https://www.aryaka.com/aryaka-service-level-agreement/",
+      "published": null,
+      "reliability": "Vendor published SLA document with per service uptime targets, packet loss targets and service credit tables. Strongest source for contractual commitments.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Managed Unified SASE As A Service",
+      "url": "https://www.aryaka.com/solutions/managed-unified-sase/",
+      "published": null,
+      "reliability": "Vendor solution page. Confirms managed models and the 40+ PoPs claim.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "ARYAKA SERVICES DESCRIPTION AND TERMS",
+      "url": "https://www.aryaka.com/services-terms/",
+      "published": null,
+      "reliability": "Vendor contractual service description. Authoritative on scope inclusions and exclusions, including the managed SOC exclusion and the Check Point EULA reference.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "Aryaka Trust Center (SafeBase)",
+      "url": "https://trustcenter.aryaka.com/",
+      "published": null,
+      "reliability": "Vendor operated trust centre naming certifications and attestations. Primary source for regulatory documentation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "Aryaka Global Connectivity: Secure, Reliable, And High-Performance Networking",
+      "url": "https://www.aryaka.com/datasheet/global-connectivity-solution/",
+      "published": null,
+      "reliability": "Vendor datasheet. Strongest source for private core backbone, PoP count and NOC ownership.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "Aryaka ANAP Datasheet",
+      "url": "https://www.aryaka.com/datasheet/anap-datasheet/",
+      "published": null,
+      "reliability": "Vendor edge appliance datasheet. Checked for cellular, firmware and RMA content; none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "Aryaka High Availability Datasheet",
+      "url": "https://www.aryaka.com/datasheet/high-availability-solution/",
+      "published": null,
+      "reliability": "Vendor datasheet. Checked for cellular or wireless backup; only dual ISP link redundancy described.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "Aryaka Next-Gen DLP Datasheet",
+      "url": "https://www.aryaka.com/datasheet/next-gen-dlp/",
+      "published": null,
+      "reliability": "Vendor datasheet. Describes inspection, classification and enforcement actions for DLP.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "Streamline Your Last Mile Connectivity",
+      "url": "https://www.aryaka.com/last-mile-connectivity/",
+      "published": null,
+      "reliability": "Vendor page. Primary source for last mile procurement model and 4G/5G access.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Aryaka Products And Services",
+      "url": "https://www.aryaka.com/products-and-services/",
+      "published": null,
+      "reliability": "Vendor catalogue page. Source for Day 0 and Smart Hands professional services, DLP and NGFW-SWG one line descriptions.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "NGFW-SWG - Knowledge Base - Aryaka Documentation",
+      "url": "https://docs.aryaka.com/space/KNOW/1275462073",
+      "published": null,
+      "reliability": "Vendor documentation space. Fetched but returned only the page heading; no usable text, so not relied on.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Aryaka NGFW And SWG Datasheet",
+      "url": "https://www.aryaka.com/datasheet/ngfw-swg-solution/",
+      "published": null,
+      "reliability": "Vendor datasheet. Source for the native security stack claim and URL filtering scale.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Integrated Next-Gen Firewall use case",
+      "url": "https://www.aryaka.com/use-cases/integrated-next-gen-firewall/",
+      "published": null,
+      "reliability": "Vendor use case page. Confirms NGFW hosted on ANAP and on Aryaka POPs with IPS, SWG, CASB and anti-malware.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Aryaka SmartManage Datasheet",
+      "url": "https://www.aryaka.com/datasheet/smartmanage-datasheet/",
+      "published": null,
+      "reliability": "Vendor datasheet. Source for multi-tenant orchestration, 24x7x365 NOCs and the 99.999% Day 1 SLA.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Aryaka Accelerate Partner Program",
+      "url": "https://www.aryaka.com/partners/",
+      "published": null,
+      "reliability": "Vendor partner page. Names MSP and System Integrator partner types but contains no white label, branded portal or delegated administration language.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Services Description and Terms (November 2025 edition PDF)",
+      "url": "https://www.aryaka.com/docs/services-description-terms-2026.pdf",
+      "published": "2025-11",
+      "reliability": "Vendor contractual PDF. Checked for lifecycle, RMA, dedicated PoP and cellular terms; none found.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Services Description and Terms (March 2024 PDF)",
+      "url": "https://www.aryaka.com/docs/services-description-terms-march-2024.pdf",
+      "published": "2024-03",
+      "reliability": "Superseded vendor contractual PDF, read only to cross-check lifecycle and hardware replacement wording. Nothing found.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Aryaka Smart Hands Service Datasheet",
+      "url": "https://www.aryaka.com/datasheet/smart-hands-service/",
+      "published": null,
+      "reliability": "Vendor datasheet. Primary source for on-site professional services.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Aryaka Day 0 Firewall / Professional Services Datasheet",
+      "url": "https://www.aryaka.com/datasheet/day0-firewall-services/",
+      "published": null,
+      "reliability": "Vendor datasheet. Source for design, migration and integration professional services menu.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Aryaka Managed Solutions",
+      "url": "https://www.aryaka.com/managed-solutions/",
+      "published": null,
+      "reliability": "Vendor page. Fetched; contained no verbatim managed service, NOC or lifecycle wording.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Aryaka SmartManage: Essential SD-WAN And SASE Management",
+      "url": "https://www.aryaka.com/datasheet/managed-wan-services/",
+      "published": null,
+      "reliability": "Vendor page, near duplicate of the SmartManage datasheet. Corroborates NOC and 99.999% uptime claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Aryaka Unified SASE As A Service Platform",
+      "url": "https://aryaka.com/platform",
+      "published": null,
+      "reliability": "Vendor platform page. Primary source for the self-managed, co-managed and Aryaka-managed delivery options.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Aryaka SmartSecure Hosted VM Firewall Service Datasheet",
+      "url": "https://www.aryaka.com/datasheet/smartsecure-hosted-vm-firewall-service/",
+      "published": null,
+      "reliability": "Vendor datasheet. Names Palo Alto Networks VM-Series as the technology partner for the optional hosted VM firewall, distinguishing it from the native NGFW-SWG.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 27,
+      "tier": 4,
+      "title": "Aryaka SD-WAN and SASE Review | Netify Marketplace",
+      "url": "https://netify.co.uk/marketplace/aryaka/",
+      "published": null,
+      "reliability": "Not used as evidence. Surfaced in search but it is the commissioning party's own marketplace listing, so it cannot corroborate itself; not opened.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 28,
+      "tier": 4,
+      "title": "Aryaka Networks Reviews 2026 | G2",
+      "url": "https://www.g2.com/products/aryaka-networks/reviews",
+      "published": null,
+      "reliability": "Not used as evidence. Review aggregator with unverifiable user submitted content; not opened.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 29,
+      "tier": 4,
+      "title": "Aryaka Managed SD-WAN & Unified SASE Solutions | CXponent",
+      "url": "https://cxponent.com/directory/vendor/aryaka",
+      "published": null,
+      "reliability": "Not used as evidence. Undated third party broker directory listing; not opened.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 30,
+      "tier": 4,
+      "title": "Aryaka Networks invests in global PoP footprint for SASE, SD-WAN | Fierce Network",
+      "url": "https://www.fierce-network.com/security/aryaka-invests-global-pop-footprint-expansion",
+      "published": null,
+      "reliability": "Not used as evidence. Trade article surfaced in search but not fetched, so no verbatim quote can be attested; retained because it may document a different PoP footprint claim.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "yes",
+      "evidence": [
+        25,
+        5,
+        8,
+        17
+      ],
+      "confidence": "high",
+      "quote": "Aryaka-managed: Leverage Aryaka and we take care as a single point of contact managed services provider.",
+      "claimed_by": "vendor",
+      "note": "Aryaka positions a fully managed option in which it is the single point of contact. Corroborated by the managed Unified SASE page line \"Fully, co-, and self-managed security and networking functions.\" and by Aryaka operating its own 24/7 NOC, orchestration and last mile management."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        25,
+        5
+      ],
+      "confidence": "high",
+      "quote": "Co-managed: Hand over some aspects to Aryaka or an Aryaka partner and keep others to yourself per your preference.",
+      "claimed_by": "vendor",
+      "note": "Explicit co-managed model in which the customer retains selected policy and change rights while Aryaka or an Aryaka partner runs the rest. A self-managed option is also offered on the same page."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        17,
+        18,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "Utilizes the Aryaka Network Management and Control (ANMC) system for scalable, multi-tenant automation and orchestration",
+      "claimed_by": "vendor",
+      "note": "Multi-tenant orchestration is confirmed at platform level, the partner programme names Managed Service Providers and System Integrators as a partner category, and co-management can be delegated to an Aryaka partner. However I found no vendor statement about white-label or partner-branded portals, delegated administration roles or tenant templates on the partners page or elsewhere, so this falls short of the full definition."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "yes",
+      "evidence": [
+        21,
+        22,
+        13,
+        6
+      ],
+      "confidence": "high",
+      "quote": "The Aryaka Smart Hands Service provides on-site and hands-on assistance for the configuration, activation, and implementation of the foundational Aryaka SD-WAN services at customer locations.",
+      "claimed_by": "vendor",
+      "note": "Two named professional services lines exist: Day 0 services covering \"initial configuration, design and implementation of Aryaka security services\" with a menu including \"migration services to Aryaka security, integration services\", and Smart Hands for on-site activation. No published evidence found for formal rollback plans or training curricula, so the grade rests on discovery, design, implementation and migration only."
+    },
+    "f07_lifecycle_management": {
+      "value": "unknown",
+      "evidence": [
+        9,
+        19,
+        20,
+        6,
+        26
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. I checked the ANAP datasheet, the Services Description and Terms page and both the March 2024 and November 2025 PDF editions for hardware replacement, RMA, advance replacement, firmware upgrades, patching, warranty and end of life language and found none. The only lifecycle wording located was \"MyAryaka customer portal always provides full visibility and control over the VM life cycle management\" on the hosted VM firewall datasheet, which concerns a virtual appliance add-on rather than hardware lifecycle, and \"Aryaka reserves the right to upgrade the Services and/or add additional functionality from time to time with or without notice\" in the terms, which is a vendor right rather than a customer lifecycle commitment. Absence of a published statement is not proof the capability is missing."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        12,
+        9,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "Aryaka provides truly global last mile services including wireline and 4G/5G wireless connectivity",
+      "claimed_by": "vendor",
+      "note": "4G and 5G are confirmed as supported and procurable last mile transport. Graded partial rather than yes because the ANAP appliance datasheet contains no mention of LTE, 5G, cellular, SIM or modem, and the High Availability datasheet describes redundancy only as dual ISP links, so integrated modem, SIM management and signal monitoring are not evidenced in the sources reviewed."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        8,
+        13,
+        16,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Aryaka Secure Remote Access provides integrated, managed VPN as a service connecting users to the nearest Aryaka POP.",
+      "claimed_by": "vendor",
+      "note": "The gateways are Aryaka's own infrastructure, not a resold third party's. Corroborated by \"a global private network interconnected in a mesh service fabric of over 40 Points of Presence (PoPs) across the globe\" and by the NGFW being hosted on the ANAP and on Aryaka's POP, so SaaS acceleration, remote access and security enforcement all run on vendor operated PoPs."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        8,
+        19,
+        6
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The PoP locations page, the Global Connectivity datasheet, the Services Description and Terms page and the November 2025 terms PDF were all checked for dedicated PoP, private PoP, customer hosted PoP or sovereign deployment wording and none was found. Aryaka publishes only its own shared multi-tenant PoP estate. Absence of a statement is not proof the option does not exist."
+    },
+    "f21_private_global_backbone": {
+      "value": "yes",
+      "evidence": [
+        8,
+        3,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Aryaka's private global network is a closed network in which data is transported through enterprise-grade encrypted tunnels",
+      "claimed_by": "vendor",
+      "note": "Aryaka states the service \"is based on a private core network delivering software-defined wide-area networking\" interconnecting over 40 PoPs on six continents, so inter-region traffic rides a vendor controlled core rather than the public internet. This is control of a leased optical and IP core rather than proven ownership of physical fibre; no source reviewed states Aryaka owns the underlying fibre."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "yes",
+      "evidence": [
+        4,
+        17,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Operates 24x7x365 to maintain industry-leading SLAs for uptime, latency, jitter and packet loss globally.",
+      "claimed_by": "vendor",
+      "note": "Aryaka publishes a full SLA document with per service uptime targets (\"Uptime of 99.999%\" for PrivateCore, NGFW-SWG, PrivateAccess and RemoteUser, and Internet Breakout), a target of \"Packet Loss of less than 0.1%\", per minute probing, monthly measurement and graduated service credits of 5, 10 and 20 percent of Link Service Fees. That is contractual rather than best effort."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        15,
+        16,
+        13,
+        26,
+        6
+      ],
+      "confidence": "high",
+      "quote": "Aryaka has built a dedicated security stack on top of our Software Defined Wide Area Network (SD-WAN) architecture",
+      "claimed_by": "vendor",
+      "note": "The NGFW-SWG is Aryaka authored and runs on both the ANAP and Aryaka POPs, with IPS, anti-malware, application control via inline CASB and DPI, and URL filtering that \"Protects users from accessing malicious URLs using reputation scores for more than 32 billion URLs.\" Note that a separate optional SmartSecure Hosted VM Firewall Service is partner technology (\"The first technology partner providing the NGFW functionality is Palo Alto Networks with its VM series of virtualized NGFWs.\") and the Services Description and Terms references a Check Point EULA, so a partner_integrated firewall option exists alongside the native one. The integrated platform firewall itself is native."
+    },
+    "f33_data_loss_prevention": {
+      "value": "yes",
+      "evidence": [
+        13,
+        11
+      ],
+      "confidence": "high",
+      "quote": "Aryaka Data Loss Prevention safeguards sensitive data with real-time monitoring and policy enforcement.",
+      "claimed_by": "vendor",
+      "note": "The Next-Gen DLP datasheet describes classification and inspection (\"AI-powered natural language processing, contextual analysis\", \"named entry recognition (NER)\", \"Image Based Detection\") across \"data in motion, archived files, compressed files\", with enforcement actions \"Permit, Drop, Log Only, Redact, Masking & Skip\" and alerting where \"Security events (policy hits, IPS alerts) and asset data are presented in a common UI over MyAryaka\". It is described as built into the Aryaka Unified SASE as a Service platform and requires the Aryaka Advanced Security tier. Formal exception approval workflow detail was not found."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        8,
+        17,
+        6,
+        24
+      ],
+      "confidence": "medium",
+      "quote": "Aryaka operates its own 24/7 NOC (Network Operations Center) to manage, orchestrate, and monitor all traffic",
+      "claimed_by": "vendor",
+      "note": "The 24/7 NOC half of the definition is well evidenced: Aryaka runs its own NOCs \"24x7x365 to maintain industry-leading SLAs for uptime, latency, jitter and packet loss globally\", provides \"24x7 proactive Link Monitoring and management of Customer's procured last mile links\" and \"24x7 health monitoring and handle incident management issues related to the ZTNA Gateways\". Graded partial because the Services Description and Terms explicitly excludes a managed SOC from at least one offering: \"managed SOC (Security Operation Center) are not part of the scope of the Managed Firewall Service offering, and Customer is solely responsible for these functions.\" No published evidence found for root cause analysis commitments or structured service review and change governance."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        25,
+        8,
+        17
+      ],
+      "confidence": "high",
+      "quote": "Aryaka-managed: Leverage Aryaka and we take care as a single point of contact managed services provider.",
+      "note": "Aryaka authors its own platform (ANAP appliance, ANMC orchestration, MyAryaka portal, its own security stack) and also operates it as a managed service with its own PoPs, private core and 24x7x365 NOCs. Both technology vendor and managed provider.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "mixed",
+      "evidence": [
+        12,
+        8,
+        6,
+        3
+      ],
+      "confidence": "high",
+      "quote": "Leverage our worldwide Tier-1 ISP partnerships and expertise in the procurement, deployment and monitoring of Last Mile Links",
+      "claimed_by": "vendor",
+      "note": "Core routing and the inter-PoP fabric are Aryaka's own: \"Aryaka Global Connectivity is based on a private core network delivering software-defined wide-area networking\" and Aryaka operates the PoPs and NOCs. Last mile is either resold by Aryaka from Tier-1 ISP partners (\"Last Mile Service allows Customer to purchase last mile internet connection services like DIA, Broadband, Fixed Wire etc. from Aryaka\") or procured by the customer and monitored by Aryaka under a Letter of Authorization. No source reviewed states Aryaka owns physical fibre, so the core is controlled rather than proven owned."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        15,
+        16,
+        11,
+        26,
+        6
+      ],
+      "confidence": "high",
+      "quote": "Aryaka has built a dedicated security stack on top of our Software Defined Wide Area Network (SD-WAN) architecture",
+      "claimed_by": "vendor",
+      "note": "NGFW-SWG, inline CASB, IPS, anti-malware, URL filtering, Secure Remote Access and Next-Gen DLP are Aryaka authored and run on the ANAP and on Aryaka's own POPs. Two partner exceptions exist and are add-ons rather than the core SSE stack: the SmartSecure Hosted VM Firewall Service uses Palo Alto Networks VM-Series, and the Services Description and Terms carries a Check Point EULA warranty disclaimer indicating a Check Point based managed firewall option."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        7
+      ],
+      "confidence": "medium",
+      "quote": "maintains an SSAE-18 SOC 2 Type II report and ISO/IEC 27001:2013 certification",
+      "claimed_by": "vendor",
+      "note": "Frameworks named on the Aryaka Trust Center: ISO/IEC 27001:2013 (with a Statement of Applicability document), SSAE-18 SOC 2 Type II, CSA STAR and CAIQ, GDPR and CCPA. Not found anywhere in the sources reviewed: NHS DSPT, DORA, NIS2, PCI DSS. The trust centre gates the underlying reports behind NDA request, so the quote is the attestation line rendered on the public landing page. Confidence is medium because the SafeBase page renders dynamically and wording may differ on re-fetch."
+    },
+    "pop_count": {
+      "value": "40+",
+      "evidence": [
+        8,
+        5,
+        3
+      ],
+      "confidence": "high",
+      "quote": "a global private network interconnected in a mesh service fabric of over 40 Points of Presence (PoPs) across the globe",
+      "claimed_by": "vendor",
+      "note": "Aryaka publishes \"over 40\" and the managed Unified SASE page repeats \"40+ PoPs\". The PoP locations page enumerates roughly 47 individual city locations across Americas, EMEA and APAC and states they are located on all six habitable continents, without giving a headline figure, so the published headline number is 40+ rather than an exact count."
+    },
+    "sla_availability_pct": {
+      "value": "99.999",
+      "evidence": [
+        17,
+        4,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Global SLAs: Uptime of 99.999% on Day 1",
+      "claimed_by": "vendor",
+      "note": "99.999% is the headline availability commitment and appears repeatedly in the SLA document as \"Uptime of 99.999%\" for PrivateCore services, NGFW-SWG, PrivateAccess and RemoteUser gateways and Internet Breakout. A lower 99.99% figure applies to certain site pair scenarios, so the number varies by service element rather than being a single blanket figure."
+    }
+  },
+  "conflicts": [
+    {
+      "field": "f40_managed_service_assurance",
+      "claim_a": "Aryaka operates its own 24/7 NOC (Network Operations Center) to manage, orchestrate, and monitor all traffic",
+      "source_a": 8,
+      "claim_b": "managed SOC (Security Operation Center) are not part of the scope of the Managed Firewall Service offering, and Customer is solely responsible for these functions.",
+      "source_b": 6
+    },
+    {
+      "field": "f27_integrated_next_generation_firewall",
+      "claim_a": "Aryaka has built a dedicated security stack on top of our Software Defined Wide Area Network (SD-WAN) architecture",
+      "source_a": 15,
+      "claim_b": "The first technology partner providing the NGFW functionality is Palo Alto Networks with its VM series of virtualized NGFWs.",
+      "source_b": 26
+    },
+    {
+      "field": "sla_availability_pct",
+      "claim_a": "Uptime of 99.999%",
+      "source_a": 4,
+      "claim_b": "Uptime of 99.99% for site pairs with ANAP HA and Dual ISP using the Last",
+      "source_b": 4
+    },
+    {
+      "field": "pop_count",
+      "claim_a": "a global private network interconnected in a mesh service fabric of over 40 Points of Presence (PoPs) across the globe",
+      "source_a": 8,
+      "claim_b": "Our worldwide Points-of-Presence (PoPs) are located on all six habitable continents, and have been strategically located to place end-users with optional optimal access to Cloud, SaaS applications and data centers.",
+      "source_b": 3
+    }
+  ]
 }

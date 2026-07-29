@@ -12,13 +12,13 @@
   "cost_model": "Public hardware/security bundle pricing often available via resellers; managed options partner-dependent.",
   "public_pricing_visibility": "quote_based",
   "capabilities": {
-    "f01_fully_managed_service": "partner_integrated",
+    "f01_fully_managed_service": "partial",
     "f02_diy_self_managed_model": "yes",
-    "f03_co_managed_service": "partner_integrated",
-    "f04_multi_tenant_msp_white_label_support": "partner_integrated",
+    "f03_co_managed_service": "yes",
+    "f04_multi_tenant_msp_white_label_support": "partial",
     "f05_professional_services_and_migration_support": "partner_integrated",
     "f06_last_mile_circuit_management": "partner_integrated",
-    "f07_lifecycle_management": "partner_integrated",
+    "f07_lifecycle_management": "yes",
     "f08_flexible_commercial_model": "yes",
     "f09_encrypted_overlay_fabric": "yes",
     "f10_dynamic_path_selection": "yes",
@@ -30,14 +30,14 @@
     "f16_mpls_coexistence_and_migration": "yes",
     "f17_cellular_and_5g_support": "partial",
     "f18_cloud_on_ramp": "partial",
-    "f19_public_cloud_gateways": "not_primary",
-    "f20_private_pops_dedicated_pops": "unknown",
-    "f21_private_global_backbone": "not_primary",
+    "f19_public_cloud_gateways": "yes",
+    "f20_private_pops_dedicated_pops": "yes",
+    "f21_private_global_backbone": "unknown",
     "f22_regional_breakout_and_data_residency": "partial",
     "f23_multi_cloud_transit_fabric": "partial",
     "f24_flexible_edge_form_factors": "yes",
     "f25_high_availability_design": "yes",
-    "f26_sla_backed_service_fabric": "partner_integrated",
+    "f26_sla_backed_service_fabric": "unknown",
     "f27_integrated_next_generation_firewall": "yes",
     "f28_full_sase_platform": "partial",
     "f29_sse_ecosystem_integration": "partial",
@@ -51,16 +51,18 @@
     "f37_customer_portal_and_rbac": "yes",
     "f38_observability_and_digital_experience_monitoring": "partial",
     "f39_apis_and_automation": "partial",
-    "f40_managed_service_assurance": "partner_integrated"
+    "f40_managed_service_assurance": "partial"
   },
   "score_summary": {
-    "yes_count": 18,
-    "partial_count": 11,
-    "partner_integrated_count": 8,
+    "yes_count": 22,
+    "partial_count": 14,
+    "partner_integrated_count": 2,
     "managed_service_dependent_count": 0,
-    "unknown_count": 1,
-    "not_primary_count": 2,
-    "evidence_coverage_pct": 0.925
+    "unknown_count": 2,
+    "not_primary_count": 0,
+    "evidence_coverage_pct": 0.95,
+    "sourced_facts_tier_1_2": 19,
+    "sourced_facts_tier_3_only": 0
   },
   "key_differentiators": [
     "SD-WAN delivered via existing TZ, NSa and SM firewall appliances; familiar deployment for organisations standardised on SonicWall.",
@@ -77,8 +79,8 @@
     "Less suited to large enterprise multinational deployments requiring private backbone or PoP architectures.",
     "Public cloud gateway and multi-cloud transit fabric capabilities are less prominent than cloud-native SASE vendors."
   ],
-  "last_verified": "2026-05-22",
-  "verification_notes": "Capability matrix sourced from Netify internal vendor research (May 2026). Status grades reflect public source evidence only. Confirm via RFP. Qualitative fields (differentiators, best fit, watch-outs) are Netify editorial synthesis based on the evidence summary and capability profile; review before publishing. Extended dimensions (regions, clouds, AI, resilience, deployment speed, sectors, organisation fit, identity, platforms, support, logging) are indicative desk research grades from June 2026; confirm via RFP.",
+  "last_verified": "2026-07-29",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -179,5 +181,477 @@
   "value_tier": "budget",
   "cost_note": "Firewall-led SD-WAN with aggressive SMB and mid-market street pricing; low cost where a SonicWall estate exists.",
   "uk_delivery": "uk_pops_partner",
-  "uk_basis": "No UK HQ (US). Strong UK SMB and mid-market channel and distribution."
+  "uk_basis": "No UK HQ (US). Strong UK SMB and mid-market channel and distribution.",
+  "evidence_register": [
+    {
+      "n": 1,
+      "tier": 1,
+      "title": "SonicWall Cloud Secure Edge (CSE) product page",
+      "url": "https://www.sonicwall.com/products/cloud-secure-edge",
+      "published": null,
+      "reliability": "Vendor's own product page, undated but current site content (footer copyright 2026). Primary source for CSE scope, SWG/CASB, MSP and multi-tenant claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 2,
+      "tier": 1,
+      "title": "SonicWall Secure Private Access product page",
+      "url": "https://www.sonicwall.com/products/secure-private-access",
+      "published": null,
+      "reliability": "Vendor product page. Primary source for Global Edge vs Private Edge deployment options.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 3,
+      "tier": 1,
+      "title": "SonicWall Secure Internet Access product page",
+      "url": "https://www.sonicwall.com/products/secure-internet-access",
+      "published": null,
+      "reliability": "Vendor product page. Primary source for SonicWall-operated cloud PoP architecture; names no PoP count.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 4,
+      "tier": 1,
+      "title": "SonicWall Firewalls / NGFW page",
+      "url": "https://www.sonicwall.com/products/firewalls",
+      "published": null,
+      "reliability": "Vendor product page. Source for built-in inspection and security service claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 5,
+      "tier": 1,
+      "title": "Managed Protection Security Suite (MPSS) managed firewall service",
+      "url": "https://www.sonicwall.com/products/firewalls/managed-protection-security-suite",
+      "published": null,
+      "reliability": "Vendor service page. Strongest first-party evidence of a SonicWall-operated managed firewall service, firmware handling and reporting.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 6,
+      "tier": 1,
+      "title": "SonicWall Service Providers / SecureFirst Service Provider Plan",
+      "url": "https://www.sonicwall.com/partners/msp-mssp-service-providers",
+      "published": null,
+      "reliability": "Vendor partner-programme page. Source for multi-tenant dashboard and co-managed NOC/SOC claims.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 7,
+      "tier": 1,
+      "title": "SonicWall MSSP Security / Managed Security Services solution page",
+      "url": "https://www.sonicwall.com/solutions/service-provider/mssp-security",
+      "published": null,
+      "reliability": "Vendor page, but describes services delivered by third-party MSPs rather than by SonicWall; used only as context.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 8,
+      "tier": 1,
+      "title": "SonicWall Secure Access Service Edge (SASE) use-case page",
+      "url": "https://www.sonicwall.com/solutions/use-case/secure-access-service-edge",
+      "published": null,
+      "reliability": "Vendor marketing page. Broad claims (low-latency global connectivity) with no substantiating detail; used only for scope of the SASE suite.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 9,
+      "tier": 1,
+      "title": "SonicWall Secure SD-WAN use-case page",
+      "url": "https://www.sonicwall.com/solutions/use-cases/secure-sd-wan",
+      "published": null,
+      "reliability": "Vendor page. Only first-party source found naming cellular transport (3G/4G/LTE).",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 10,
+      "tier": 1,
+      "title": "SonicWall Partner Enabled Services",
+      "url": "https://www.sonicwall.com/partners/partner-enabled-services",
+      "published": null,
+      "reliability": "Vendor page describing professional services scope and explicitly attributing delivery to Advanced Services Partners.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 11,
+      "tier": 1,
+      "title": "SonicWall Unified Management",
+      "url": "https://www.sonicwall.com/products/sonicwall-unified-management",
+      "published": null,
+      "reliability": "Vendor product page. Source for multi-tenant MSP management claims; silent on branding/white-label.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 12,
+      "tier": 1,
+      "title": "SonicSentry MXDR",
+      "url": "https://www.sonicwall.com/products/sonicsentry-mxdr",
+      "published": null,
+      "reliability": "Vendor service page. Source for SonicWall-operated 24/7 SOC.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "SonicSentry MDR for Network",
+      "url": "https://www.sonicwall.com/products/sonicsentry-mdr-for-network",
+      "published": null,
+      "reliability": "Vendor service page. Source for 24/7 SOC monitoring of firewalls, switches and access points.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "SonicWall Trust Center",
+      "url": "https://trust.sonicwall.com",
+      "published": null,
+      "reliability": "Vendor trust centre. Names specific attestations and certifications rather than generic assurance language.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "SonicWall Product Life Cycle Tables and policy",
+      "url": "https://www.sonicwall.com/support/product-lifecycle-tables",
+      "published": null,
+      "reliability": "Vendor support policy page. Source for end-of-life phases, firmware support and hardware replacement entitlement.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "SonicWall Hosted / Cloud Email Security",
+      "url": "https://www.sonicwall.com/products/secure-email/cloud-email-security",
+      "published": null,
+      "reliability": "Vendor product page. Only first-party source found naming data loss prevention, and it is an email security product, not the SASE/SSE platform.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "SonicWall Support Services index",
+      "url": "https://www.sonicwall.com/support/support-services",
+      "published": null,
+      "reliability": "Vendor page. Lists a 'SR Severity Levels & Response Times' section heading but the underlying commitments were not rendered in the fetched content, so no SLA figures could be extracted.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "SonicWall Contact Support",
+      "url": "https://www.sonicwall.com/support/contact-support",
+      "published": null,
+      "reliability": "Vendor page. Checked for published response-time or availability commitments; none present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "SonicWall Legal index",
+      "url": "https://www.sonicwall.com/legal",
+      "published": null,
+      "reliability": "Vendor legal directory. Checked for a published Service Level Agreement; no SLA document is listed.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "SonicWall Firewall Security Services",
+      "url": "https://www.sonicwall.com/products/firewalls/security-services",
+      "published": null,
+      "reliability": "Vendor page. Feature comparison table names IPS and content filtering but carries no descriptive sentences suitable for quotation.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "SonicWall Entry Level (TZ Series) Firewalls",
+      "url": "https://www.sonicwall.com/products/firewalls/entry-level",
+      "published": null,
+      "reliability": "Vendor page. Checked specifically for 5G/LTE/modem support; no cellular references present.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "SonicOS product page",
+      "url": "https://www.sonicwall.com/products/sonicos",
+      "published": null,
+      "reliability": "Vendor page. Checked for NGFW feature descriptions; content is architectural and did not yield quotable capability sentences.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Cloud Secure Edge documentation index",
+      "url": "https://www.sonicwall.com/support/technical-documentation/docs/cse",
+      "published": null,
+      "reliability": "Vendor documentation landing page. Rendered as a navigation shell only; no PoP list, edge network map or SLA content retrievable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "SonicWall Products A to Z",
+      "url": "https://www.sonicwall.com/products-a-to-z",
+      "published": null,
+      "reliability": "Vendor index page used to enumerate the product estate and locate authoritative product URLs.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "SonicWall homepage",
+      "url": "https://www.sonicwall.com/",
+      "published": null,
+      "reliability": "Vendor homepage used to harvest the authoritative navigation and footer link map after search was unavailable.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "SonicWall Secure SD-Branch use-case page",
+      "url": "https://www.sonicwall.com/solutions/use-cases/secure-sd-branch",
+      "published": null,
+      "reliability": "Vendor page. Checked for cellular and failover transport claims; none found.",
+      "verified_on": "2026-07-29"
+    },
+    {
+      "n": 27,
+      "tier": 4,
+      "title": "SonicWall managed security services (guessed URL)",
+      "url": "https://www.sonicwall.com/partners/managed-security-services",
+      "published": null,
+      "reliability": "Not used as evidence: URL returned HTTP 404 and no content was retrieved. Recorded to show the path was attempted before the correct pages were located via the site navigation map.",
+      "verified_on": "2026-07-29"
+    }
+  ],
+  "sourced_facts": {
+    "f01_fully_managed_service": {
+      "value": "partial",
+      "evidence": [
+        5,
+        10
+      ],
+      "confidence": "medium",
+      "quote": "Managed Firewall Service, MPSS, gives you expert configuration, proactive firmware management, and 24/7 monitoring for your Gen 7 or Gen 8 firewall",
+      "claimed_by": "vendor",
+      "note": "SonicWall itself operates MPSS, covering configuration, firmware management, 24/7 monitoring, notifications, monthly health reporting and enhanced support. That is a genuine first-party managed service, but it is scoped to the firewall estate rather than the whole SASE service, and design, deployment and migration are explicitly delivered by Advanced Services Partners (source 10), not by SonicWall. Graded partial because the provider does not own the full design-to-report lifecycle end to end."
+    },
+    "f03_co_managed_service": {
+      "value": "yes",
+      "evidence": [
+        6,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "24/7 co-managed NOC and SOC support",
+      "claimed_by": "vendor",
+      "note": "The SecureFirst Service Provider Plan explicitly advertises co-managed NOC and SOC support, and MPSS lets the customer or MSP raise tickets to request non-critical changes while SonicWall handles critical firmware updates. Confidence is medium because the quote is a programme bullet rather than a described service definition, and no split-responsibility matrix is published."
+    },
+    "f04_multi_tenant_msp_white_label_support": {
+      "value": "partial",
+      "evidence": [
+        11,
+        6,
+        1
+      ],
+      "confidence": "medium",
+      "quote": "SonicWall Unified Management is a single pane of glass tool purpose-built for MSPs, making managing complex security environments among multiple tenants easy and streamlined.",
+      "claimed_by": "vendor",
+      "note": "Multi-tenancy and delegated MSP management are clearly documented across Unified Management, the Service Provider Plan single multi-tenant dashboard, and CSE customer stories citing centralised multi-tenant management. However, no page reviewed names branded or white-label portals, custom branding, or tenant templates. Graded partial on the branding limb of the definition."
+    },
+    "f05_professional_services_and_migration_support": {
+      "value": "partner_integrated",
+      "evidence": [
+        10
+      ],
+      "confidence": "high",
+      "quote": "From basic remote installation support to complex migration projects, SonicWall Advanced Services Partners can meet your implementation needs.",
+      "claimed_by": "vendor",
+      "note": "Structured assessment, network design, project management, technology migration, staging, implementation and training are all published and cover the discovery-to-training span in the definition. But SonicWall attributes delivery throughout to SonicWall Advanced Services Partners rather than to SonicWall staff, and directs buyers to Find a Service Partner. Graded partner_integrated for that reason. No rollback-plan language was found on any page reviewed."
+    },
+    "f07_lifecycle_management": {
+      "value": "yes",
+      "evidence": [
+        5,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "The SonicSentry team will handle critical firmware updates for you",
+      "claimed_by": "vendor",
+      "note": "MPSS covers firmware patching as part of the service, and the published product lifecycle policy sets out Last Order Day, Active Retirement Mode, Limited Retirement Mode and End of Support phases, with firmware support and hardware warranty available through LRM for products holding an active support contract. Renewals and hardware replacement are entitlement-based rather than proactively managed on the customer's behalf, so confidence is medium."
+    },
+    "f17_cellular_and_5g_support": {
+      "value": "partial",
+      "evidence": [
+        9,
+        21,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "By using low-cost internet access (broadband, 3G/4G/LTE, fiber), organizations can cost-effectively replace expensive WAN connection technologies such as MPLS with SD-WAN.",
+      "claimed_by": "vendor",
+      "note": "Cellular is named only as a low-cost WAN transport option on the Secure SD-WAN page. No page reviewed mentions 5G at all, and the entry-level TZ firewall page and the SD-Branch page contain no cellular, modem, WWAN or failover references. SIM management and signal monitoring were not found anywhere. Graded partial: 3G/4G/LTE transport is evidenced, 5G and SIM/signal management are not."
+    },
+    "f19_public_cloud_gateways": {
+      "value": "yes",
+      "evidence": [
+        3,
+        2,
+        1
+      ],
+      "confidence": "high",
+      "quote": "All traffic is intelligently routed to the nearest global cloud Point of Presence (PoP), providing low latency and high performance",
+      "claimed_by": "vendor",
+      "note": "SonicWall operates its own cloud PoP estate under the Cloud Secure Edge / Global Edge banner, enforcing SWG, CASB, DNS-layer security and ZTNA as a cloud service. This is SonicWall's own infrastructure (CSE originated from its Banyan Security acquisition and is now a SonicWall product), not a third party's gateway resold, hence yes rather than partner_integrated."
+    },
+    "f20_private_pops_dedicated_pops": {
+      "value": "yes",
+      "evidence": [
+        2
+      ],
+      "confidence": "high",
+      "quote": "Global Edge for fully managed cloud delivery or Private Edge for environments requiring local performance or regulatory needs.",
+      "claimed_by": "vendor",
+      "note": "Private Edge is offered in the Secure Private Access Advanced tier as a customer-hosted alternative to the shared Global Edge, deployable on Linux, SonicWall firewalls, Windows Server, Kubernetes and OVB, and positioned explicitly for local performance or regulatory need. That matches the customer-hosted and sovereign limb of the definition."
+    },
+    "f21_private_global_backbone": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        8,
+        2
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The SASE use-case page claims it 'Optimizes traffic routing with low-latency global connectivity' and the Secure Internet Access page describes routing to the nearest cloud PoP, but neither states that inter-region traffic rides a SonicWall-owned or SonicWall-controlled backbone. I read the CSE, Secure Private Access, Secure Internet Access, SASE and SD-WAN pages plus the CSE documentation index, which rendered as a navigation shell only. Absence of a claim is not evidence of absence, so this is recorded as unknown rather than no."
+    },
+    "f26_sla_backed_service_fabric": {
+      "value": "unknown",
+      "evidence": [
+        17,
+        18,
+        19,
+        5
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Legal index lists no Service Level Agreement document. The Support Services page shows a section heading 'SR Severity Levels & Response Times' but the underlying commitments did not render in the fetched content, and the Contact Support page publishes no response or availability targets. MPSS offers after-hours emergency support for critical issues, which is a support description rather than a contractual commitment. Graded unknown rather than no because contractual terms may sit behind support agreement documents that were not retrievable."
+    },
+    "f27_integrated_next_generation_firewall": {
+      "value": "yes",
+      "evidence": [
+        4,
+        20,
+        1
+      ],
+      "confidence": "high",
+      "quote": "Signature updates for intrusion prevention, anti-malware, botnet, and content filtering refresh automatically from the Capture Cloud Platform, activated as part of security services.",
+      "claimed_by": "vendor",
+      "note": "SonicWall authors its own NGFW (SonicOS on TZ, NSa, NSsp and NSv platforms) with intrusion prevention, anti-malware, botnet and content filtering delivered natively from its own Capture Cloud Platform, plus inspection of encrypted traffic ('Every packet, including encrypted traffic, is actively inspected at full speed.'). This is first-party technology, not a resold third-party engine, hence yes rather than partner_integrated. Note the delivery form is an appliance or virtual appliance under a common platform and management plane rather than a cloud-only firewall as a service."
+    },
+    "f33_data_loss_prevention": {
+      "value": "partial",
+      "evidence": [
+        16,
+        1,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "Enforce strong email data loss prevention (DLP) & compliance",
+      "claimed_by": "vendor",
+      "note": "The only explicit DLP capability found sits in SonicWall's Hosted / Cloud Email Security product, which analyses outbound email content and attachments for sensitive data. That is a separate email security product, not the SASE or SSE data path. The CSE page claims protection against 'data leaks' via SWG and CASB, and the Secure Internet Access page does not mention DLP at all. Graded partial: inspection of content for sensitive data is evidenced for email egress only, and no alerting or exception-workflow detail was found on any page reviewed."
+    },
+    "f40_managed_service_assurance": {
+      "value": "partial",
+      "evidence": [
+        13,
+        12,
+        6,
+        5
+      ],
+      "confidence": "medium",
+      "quote": "SonicSentry MDR for Network puts the power of our 24/7 expert SOC behind perimeter devices like firewalls, switches, and access points.",
+      "claimed_by": "vendor",
+      "note": "A SonicWall-operated 24/7 SOC with proactive threat hunting and a published four-minute average 2024 response time is well evidenced, and the Service Provider Plan advertises 24/7 co-managed NOC and SOC support. MPSS adds proactive offline and local-change notifications plus monthly health and productivity reports. However, no page reviewed uses the words root cause analysis, structured service reviews or change governance, and NOC appears only as a programme bullet. Graded partial against the full definition."
+    },
+    "delivery_model": {
+      "value": "both",
+      "evidence": [
+        1,
+        5,
+        10,
+        12
+      ],
+      "confidence": "high",
+      "quote": "Managed Firewall Service, MPSS, gives you expert configuration, proactive firmware management, and 24/7 monitoring",
+      "note": "SonicWall is primarily a technology vendor authoring firewalls, SonicOS and the Cloud Secure Edge SSE stack, but it also operates first-party managed services delivered by its own SonicSentry team (MPSS managed firewall, SonicSentry MDR/MXDR). Design, deployment and migration work is largely delivered through Advanced Services Partners rather than by SonicWall itself, so the model is genuinely mixed.",
+      "claimed_by": "vendor"
+    },
+    "underlay_ownership": {
+      "value": "customer_supplied_only",
+      "evidence": [
+        9,
+        8,
+        3
+      ],
+      "confidence": "medium",
+      "quote": "By using low-cost internet access (broadband, 3G/4G/LTE, fiber), organizations can cost-effectively replace expensive WAN connection technologies such as MPLS with SD-WAN.",
+      "claimed_by": "vendor",
+      "note": "SonicWall positions its SD-WAN over customer-procured internet access (broadband, DSL, Ethernet, 3G/4G/LTE, fibre) and sells no circuits. No page reviewed offers SonicWall-supplied access, carrier services or circuit procurement. Confidence is medium because this rests on the absence of any circuit offering across the pages read rather than on an explicit statement that SonicWall does not supply underlay."
+    },
+    "sse_layer_ownership": {
+      "value": "native",
+      "evidence": [
+        3,
+        1,
+        2
+      ],
+      "confidence": "high",
+      "quote": "SonicWall Secure Internet Access (SIA), part of the Cloud Secure Edge (CSE), delivers cloud-native security for internet-bound traffic, protecting your users and data from malicious websites, phishing, ransomware, and risky SaaS applications everywhere work happens.",
+      "claimed_by": "vendor",
+      "note": "The SSE stack (Cloud Secure Edge, comprising Secure Private Access for ZTNA and Secure Internet Access for SWG, CASB and DNS-layer security) is SonicWall's own branded platform, sold standalone or added to its own Gen 7 firewalls via a built-in connector, and run on SonicWall's Global Edge. No third-party security vendor is named as the engine on any page reviewed. Recorded as native. Context: CSE derives from SonicWall's acquisition of Banyan Security, but it is now SonicWall-owned technology rather than a partner or resale arrangement."
+    },
+    "regulatory_documentation": {
+      "value": "documented",
+      "evidence": [
+        14
+      ],
+      "confidence": "high",
+      "quote": "SOC 2 Type 2",
+      "claimed_by": "vendor",
+      "note": "The SonicWall Trust Center names specific attestations and certifications in its Compliance section: SOC 2 Type 2, FIPS 140-2, FIPS 140-3 and Common Criteria. Found: SOC 2 Type 2. Not found on any page reviewed: ISO 27001, NHS DSPT, DORA, NIS2. The Legal index also carries a Sub-Processor List and Privacy Statement but no ISO certificate reference."
+    },
+    "pop_count": {
+      "value": "unknown",
+      "evidence": [
+        3,
+        2,
+        23,
+        8
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. The Secure Internet Access page confirms a global cloud PoP estate but publishes no number, the Secure Private Access page names Global Edge and Private Edge without a location count, and the Cloud Secure Edge documentation index rendered as a navigation shell with no edge network topic. Web search was unavailable during this task because the session search budget was exhausted, so only directly fetched vendor pages were assessed."
+    },
+    "sla_availability_pct": {
+      "value": "unknown",
+      "evidence": [
+        19,
+        17,
+        18,
+        2
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not found in public sources reviewed. No availability percentage of any kind appears on the Cloud Secure Edge, Secure Private Access, Secure Internet Access, Support Services, Contact Support or Legal pages, and the Legal index lists no Service Level Agreement document. There is not even a generic marketing mention of 'an SLA' to downgrade from; the figure is simply absent from the material read."
+    }
+  },
+  "conflicts": []
 }
