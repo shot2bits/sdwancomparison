@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NETIFY_NDA_TEMPLATE } from "@/lib/rfp-types";
+import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
@@ -1280,7 +1281,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                   <a href={`/sase/rfp-builder/${project.id}/preview/download?format=print${manageToken.current ? `&manage=${manageToken.current}` : ""}`} target="_blank" rel="noreferrer" className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] bg-white px-4 py-1.5 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)] transition-colors">Print / save as PDF</a>
                   <a href={`/sase/rfp-builder/${project.id}/preview/download${manageToken.current ? `?manage=${manageToken.current}` : ""}`} className="text-xs underline text-[var(--ink-600,#555)]">Markdown</a>
                 </div>
-                <p className="mt-2 text-xs text-[var(--ink-600,#555)]">{marketReport.analyst_note}</p>
+                {/* One truth for the human layer (29 Jul 2026): stored
+                    reports carry whatever note they published with, some
+                    of them the retired analyst-review claim, so the
+                    display reads the current constant, never the payload. */}
+                <p className="mt-2 text-xs text-[var(--ink-600,#555)]">{FOLLOW_UP_NOTE}</p>
               </div>
             )}
           </div>

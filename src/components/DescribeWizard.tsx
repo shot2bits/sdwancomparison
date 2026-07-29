@@ -513,7 +513,7 @@ export default function DescribeWizard() {
                 <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched suppliers, each with a private response link; structured responses come back side by side</li>
                 <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing stays private to you; you stay anonymous until you reply, and your contact details are never shown to suppliers</li>
               </ul>
-              <p className="mt-2 text-xs text-[var(--ink-600,#555)]">A Netify analyst reviews every published RFP.</p>
+              <p className="mt-2 text-xs text-[var(--ink-600,#555)]">Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted suppliers</a> can respond, and you choose who receives your contact details.</p>
             </div>
             <p className="mb-3 text-xs text-[var(--ink-600,#555)]">
               Suppliers make contact only through this app and conversations start when you reply. You can edit

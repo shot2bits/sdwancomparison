@@ -248,6 +248,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
   const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
   const [signedIn, setSignedIn] = useState(false);
+  // Who the signature will publish as (29 Jul 2026, Robert's mockup
+  // review: the buyer sees their verification state at the decision, not
+  // at the refusal). Read from the session endpoint: the address, whether
+  // it can publish (work_address, the same static list the chain checks
+  // first), and the company as Netify derives it from the domain.
+  const [sessId, setSessId] = useState<{ email: string; work: boolean; company: string | null } | null>(null);
 
   const [consentCreate, setConsentCreate] = useState(false);
   const [consentGaps, setConsentGaps] = useState(false);
@@ -885,7 +891,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   useEffect(() => {
     fetch("/sase/api/auth/session")
       .then((r) => r.json())
-      .then((d: { authenticated?: boolean }) => setSignedIn(Boolean(d?.authenticated)))
+      .then((d: { authenticated?: boolean; email?: string; work_address?: boolean; company_hint?: string | null }) => {
+        setSignedIn(Boolean(d?.authenticated));
+        setSessId(d?.authenticated ? { email: d.email ?? "", work: Boolean(d.work_address), company: d.company_hint ?? null } : null);
+      })
       .catch(() => {});
   }, []);
   useEffect(() => {
@@ -1737,7 +1746,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           <div className="mt-4 border-t border-zinc-200 pt-3">
             <p className="m-0 text-center text-[11.5px] text-zinc-500">
               Draft and preview without an account. Sign in only to publish, anonymously, with pricing private to you.
-              A Netify analyst reviews every published RFP.
+              Only vetted suppliers can respond, and you choose who receives your contact details.
             </p>
             {boardProof && boardProof.open > 0 && (
               <p className="m-0 mt-2 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1.5 text-center text-[12px] text-zinc-600">
@@ -2582,6 +2591,27 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                       {signStage ?? (testMode ? "Sign · create the test position" : "Sign and publish your opportunity to the board")}
                     </button>
                     {signError && <p className="m-0 mt-1.5 text-[11px] text-red-600">{signError}</p>}
+                    {/* The identity read-back (29 Jul 2026, from the mockup
+                        review's two adopted pieces: the identity chip and the
+                        resolve-the-company card, fused into one quiet line).
+                        A work address shows who the publish will verify as
+                        and the company Netify derives from the domain, so
+                        nobody types a name we cannot check. A personal
+                        address hears the refusal HERE, before the click,
+                        with the ruled reassurance that nothing is lost.
+                        Advisory only: the publish chain remains the gate. */}
+                    {signedIn && sessId && (
+                      sessId.work ? (
+                        <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                          Publishing as <span className="font-medium text-zinc-700">{sessId.email}</span>
+                          {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
+                        </p>
+                      ) : (
+                        <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-amber-700">
+                          Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays saved while you switch.
+                        </p>
+                      )
+                    )}
                     {needAuth && (
                       <div className="mt-2 rounded-md bg-zinc-50 p-3">
                         <p className="m-0 mb-1 text-[11px] text-zinc-600">
@@ -2596,6 +2626,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                             // only gap, so publishing continues by itself.
                             setSignedIn(true);
                             setNeedAuth(false);
+                            // Refresh the identity read-back with who just
+                            // signed in, so the line under the button is
+                            // true for the session that will publish.
+                            fetch("/sase/api/auth/session")
+                              .then((r) => r.json())
+                              .then((d: { authenticated?: boolean; email?: string; work_address?: boolean; company_hint?: string | null }) => {
+                                setSessId(d?.authenticated ? { email: d.email ?? "", work: Boolean(d.work_address), company: d.company_hint ?? null } : null);
+                              })
+                              .catch(() => {});
                             void signAndPublish();
                           }}
                         />
@@ -3201,13 +3240,9 @@ function SaveLiteInline({ facts, onDone, onDismiss }: { facts: number; onDone: (
   const [company, setCompany] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // LinkedIn lane availability (24 July 2026): the save moment is a sign-in
-  // moment, and the buyer most likely to be here mid-evening has a personal
-  // email the work-email lane refuses. One quiet alternative door.
-  const [li, setLi] = useState(false);
-  useEffect(() => {
-    fetch("/sase/api/auth/session").then((r) => r.json()).then((d) => setLi(Boolean(d?.linkedin && !d?.authenticated))).catch(() => {});
-  }, []);
+  // One lane only (29 Jul 2026, Robert's ruling with the mockup review):
+  // the LinkedIn door that used to sit here is removed. Business email
+  // only, and the copy below says the position is safe either way.
   const send = async () => {
     if (busy || !email.includes("@")) return;
     setBusy(true);
@@ -3243,20 +3278,7 @@ function SaveLiteInline({ facts, onDone, onDismiss }: { facts: number; onDone: (
         </button>
         <button type="button" onClick={onDismiss} className="text-[11px] text-zinc-500 underline hover:text-zinc-900">Not now</button>
       </div>
-      {li && (
-        <button
-          type="button"
-          onClick={() => {
-            const ret = window.location.pathname + window.location.search;
-            window.location.href = `/sase/api/auth/linkedin/start?return=${encodeURIComponent(ret)}`;
-          }}
-          className="flex items-center gap-1.5 text-[11px] font-medium text-[#0A66C2] hover:underline"
-        >
-          <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-[3px] bg-[#0A66C2] text-[9px] font-bold leading-none text-white" aria-hidden="true">in</span>
-          Or continue with LinkedIn, any email works
-        </button>
-      )}
-      <p className="m-0 text-[11px] leading-snug text-zinc-400">The position stays right here either way. {li ? "We" : "Work email only; we"} only email you about your own projects.</p>
+      <p className="m-0 text-[11px] leading-snug text-zinc-400">The position stays right here either way. Work email only; we only email you about your own projects.</p>
       {error && <p className="m-0 text-[11px] text-red-600">{error}</p>}
     </div>
   );

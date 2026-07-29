@@ -15,6 +15,18 @@
 
 export const VETTING_STANDARD_PATH = "/supplier-vetting-standard";
 
+/**
+ * The human layer, one truth for every surface that answers "who is
+ * looking after this". The old claim ("a Netify analyst reviews every
+ * published RFP") retired 29 Jul 2026 with Robert's mockup review:
+ * Ruling Two made publishing automatic, so a review claim was neither
+ * true pre-publish nor countable post-publish. What is mechanically true:
+ * every publish outcome is recorded to the internal follow-up list
+ * (recordPublishLead in lib/rfp-publish), and support reaches a person.
+ */
+export const FOLLOW_UP_NOTE =
+  "Every published requirement lands on Netify's internal follow-up list the moment it goes live, and support@netify.com reaches the team directly.";
+
 /** The ruled paragraph, one voice, used where prose fits (the email, compact strips). */
 export const PROMISES_PARAGRAPH =
   "Your project publishes anonymously. Nobody browsing Netify, and no search engine, sees your company name or your contact details. Only vendors and service providers we have vetted can respond, and your details are never shared with anyone we have not vetted. You choose which suppliers receive your contact details, and when.";

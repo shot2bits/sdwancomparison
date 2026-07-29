@@ -97,8 +97,8 @@ export default function MyRfps() {
           Describe your project once and Netify builds it into a living Statement of Requirements you can
           raise to an RFI or a full RFP. Publishing is free and pays out instantly: an indicative market price
           band for your estate, your document as Word and PDF, and structured responses from your matched
-          suppliers, side by side, with pricing private to you. You stay anonymous until you reply, and a
-          Netify analyst reviews every published RFP.
+          suppliers, side by side, with pricing private to you. You stay anonymous until you reply, and only
+          vetted suppliers can respond.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           {/* The One Door (Harry, 24 July 2026): this button used to hand a

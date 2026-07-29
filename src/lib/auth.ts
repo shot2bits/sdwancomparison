@@ -96,8 +96,9 @@ export async function notifyNewSignup(
   // Attribution block (16 July 2026): every sign-up alert states where the
   // person came from and whether an RFP draft is attached, so a qualified
   // buyer and a wandering sign-in are distinguishable at a glance. Name and
-  // company get their own lines when known (24 July 2026: LinkedIn sign-ins
-  // carry the person's name, and the welcome step asks the company).
+  // company get their own lines when known (from stored buyer profiles;
+  // the LinkedIn lane that first carried names was removed 29 July 2026,
+  // business email only).
   const a = context?.attr;
   const lines = [
     `<strong>Email:</strong> ${email}`,

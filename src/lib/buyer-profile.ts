@@ -8,13 +8,13 @@
  * (anonymous, no name, no contacts) governs everything buyers publish,
  * and this store sits entirely behind it.
  *
- * Names arrive from the LinkedIn OIDC userinfo at sign-in. Company is the
- * one-question ask on the welcome step, mandatory since Robert's evening
- * ruling of 24 July 2026: LinkedIn's sign-in scopes do not carry employer,
- * so the buyer states it themselves, and Netify never looks it up. The
- * callback routes every companyless LinkedIn session to the question.
- * Everything here is best effort: a storage failure must never block a
- * sign-in or lose a buyer.
+ * History: names first arrived from the LinkedIn OIDC userinfo and the
+ * company from the welcome step's one question (24 July 2026). That lane
+ * was removed on Robert's ruling of 29 July 2026 (business email only),
+ * so no new records arrive that way; the via and linkedin_sub fields
+ * remain so every profile stored in that era still reads cleanly. On the
+ * email lane the domain names the company. Everything here is best
+ * effort: a storage failure must never block a sign-in or lose a buyer.
  */
 
 import { kvGetJson, kvSetJson } from "@/lib/rfp-store";
@@ -23,6 +23,7 @@ export type BuyerProfile = {
   email: string;
   name?: string;
   company?: string;
+  /** Historic records only: the LinkedIn lane was removed 29 July 2026. */
   via?: "linkedin" | "email";
   linkedin_sub?: string;
   /** The first sign-in's acquisition context, kept so the completion

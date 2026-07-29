@@ -6,8 +6,10 @@ import { COMPANY_NAME_REFUSAL, companyReadsAsPersonalName } from "@/lib/company-
 export const runtime = "nodejs";
 
 /**
- * The signed-in buyer's own internal profile (24 July 2026): name arrives
- * from LinkedIn at sign-in, company from the welcome step's one question.
+ * The signed-in buyer's own internal profile (24 July 2026). The LinkedIn
+ * lane and its welcome step, which used to feed this record, were removed
+ * on Robert's ruling of 29 July 2026 (business email only); the API stays
+ * so historic profiles remain readable and any future surface can ask.
  * Session-scoped both ways; a buyer can only ever read or write their own
  * record. Internal to the Netify team beyond that: nothing here reaches
  * suppliers, positions or the board (the anonymity law governs those).
@@ -44,9 +46,8 @@ export async function POST(req: Request) {
     ...(name ? { name } : {}),
   });
   // One alert per buyer, at the completion moment (Robert's ruling, 24
-  // July, third of the evening): the first company landing is when a
-  // LinkedIn signup becomes a buyer, so THIS is where the New Buyer email
-  // sends, carrying the sign-in attribution the callback stored. A buyer
+  // July, third of the evening): the first company landing announces the
+  // buyer, carrying whatever sign-in attribution was stored. A buyer
   // announced earlier (an RFP carried at sign-in, or the pre-ruling era)
   // gets the compact company follow-up instead, never a second announcement.
   try {
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
       if (await markSignupSeen(s.email, "buyer")) {
         await notifyNewSignup(s.email, "buyer", {
           attr: {
-            ref: before?.signup_attr?.ref ?? "LinkedIn sign-in (OpenID Connect)",
+            ref: before?.signup_attr?.ref ?? "",
             landing: before?.signup_attr?.landing ?? "",
             page: "",
             country: before?.signup_attr?.country ?? "",

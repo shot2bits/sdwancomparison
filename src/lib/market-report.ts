@@ -6,11 +6,13 @@
  *  - the price band comes from the TCO estimator engine (Methodology v2026.1),
  *    with every inference from RFP fields recorded as a labelled assumption;
  *  - gaps are deterministic checks on the RFP itself, no AI.
- * The human layer is deliberately uncommitted: "a Netify analyst reviews every
- * published RFP" — no response time is promised anywhere.
+ * The human layer states only what the machinery does (29 Jul 2026, the
+ * analyst-review claim retired): every publish lands on the internal
+ * follow-up list, and no response time is promised anywhere.
  */
 
 import { estimate, type EstimateResult } from "@/lib/estimator/engine";
+import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
 import { matchSuppliers } from "@/lib/supplier-match";
 import { regionHintFromEmail } from "@/lib/region-hint";
 import { includedSections } from "@/lib/rfp-document";
@@ -37,8 +39,7 @@ export type MarketReport = {
   analyst_note: string;
 };
 
-export const ANALYST_NOTE =
-  "A Netify analyst reviews every published RFP and follows up where a human read adds value.";
+export const ANALYST_NOTE = FOLLOW_UP_NOTE;
 
 /** Map wizard region keys onto estimator region enums. */
 const REGION_MAP: Record<string, "uk-europe" | "north-america" | "apac" | "middle-east-africa" | "latam"> = {

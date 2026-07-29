@@ -12,7 +12,7 @@ import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opport
 import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validate";
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
-import { PROMISES_PARAGRAPH } from "@/lib/publish-promises";
+import { FOLLOW_UP_NOTE, PROMISES_PARAGRAPH } from "@/lib/publish-promises";
 import { sectorLabel } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
@@ -338,7 +338,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       gapsBlock +
       `<p><strong>Your document:</strong> download your requirement as Word or PDF from your workspace to circulate internally.</p>` +
       `<p><a href="${rfpUrl}">Open your workspace</a></p>` +
-      `<p><strong>Who is looking after this:</strong> ${report?.analyst_note ?? "A Netify analyst reviews every published requirement."}</p><p>Netify research team</p>`,
+      `<p><strong>Who is looking after this:</strong> ${report?.analyst_note ?? FOLLOW_UP_NOTE}</p><p>Netify research team</p>`,
   });
 }
 
@@ -564,7 +564,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       assumptions: [],
       gaps: [],
       document: { sections: 0, questions: 0 },
-      analyst_note: "A Netify analyst reviews every published RFP and follows up where a human read adds value.",
+      analyst_note: FOLLOW_UP_NOTE,
     };
   }
 

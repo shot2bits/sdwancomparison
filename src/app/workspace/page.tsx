@@ -32,8 +32,11 @@ const ENGINE_VALUE =
  *  it lives in the value card's title. Twin of home. */
 const ENGINE_AGENT =
   "Use Netify directly, or connect your organisation's approved AI agent through MCP. Agents research, draft, compare and monitor. Your team publishes, selects and awards.";
+/** Last sentence changed 29 Jul 2026 (Robert's ruling with the mockup
+ *  review): the analyst-review claim retired with the approval queue; the
+ *  sentence that replaces it is ruled promise wording. Twin of home. */
 const ENGINE_CONTROL =
-  "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. A Netify analyst reviews every published RFP.";
+  "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. Only vetted suppliers can respond.";
 const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 export const metadata: Metadata = {
