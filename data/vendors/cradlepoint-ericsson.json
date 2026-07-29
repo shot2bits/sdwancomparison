@@ -80,7 +80,7 @@
     "Best for cellular-led architectures; less strong as a primary fit for fixed-circuit-heavy estates."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -109,21 +109,21 @@
     "note": "Wireless WAN failover is the core use case; dual-SIM and dual-modem designs."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
+    "healthcare": "yes",
+    "financial_services": "unknown",
     "retail_ecommerce": "yes",
     "manufacturing": "partial",
-    "energy_utilities": "partial",
+    "energy_utilities": "yes",
     "government_public_sector": "yes",
-    "education": "partial",
+    "education": "yes",
     "transport_logistics": "yes",
     "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "partner_integrated"
   },
   "organisation_fit": {
-    "large_global_enterprise": "partial",
+    "large_global_enterprise": "yes",
     "mid_market": "yes",
-    "small_business": "yes"
+    "small_business": "partial"
   },
   "pricing_units": [
     "per_site",
@@ -335,6 +335,393 @@
       "published": null,
       "reliability": "Not used as evidence. URL returned HTTP 404 so no content was read.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Industries (UK site) - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/gb/industries/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own UK industries landing page. Names exactly four industries (retail, public safety, manufacturing, construction) with descriptive copy but no named customers on the page itself."
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Subway franchisee keeps network fresh with 5G connectivity",
+      "url": "https://cradlepoint.com/resources/subway-franchisee-keeps-network-fresh-with-5g-connectivity/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published success story naming DiPasqua Enterprises, a Subway franchisee with over 100 locations in the United States."
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Branch continuity - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/products/branch/branch-continuity/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page carrying a named retail deployment quote attributed to the T-Mobile Operations Department covering more than 5,000 storefronts."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Branch - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/products/branch/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page naming Valvoline Instant Oil Change franchisee Henley Enterprises as a customer."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "How 5G and LTE enable retail transformation (retail at a glance)",
+      "url": "https://cradlepoint.com/resources/how-5g-and-lte-enable-retail-transformation/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier retail sector overview; references Wawa in the additional resources section. Sector-specific marketing collateral rather than a case study."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "NASPO ValuePoint - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/solutions/naspo/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page describing its seven-year NASPO ValuePoint Data Communications contract. A published public-sector purchasing framework, so it is verifiable against the NASPO record."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "State of Washington NASPO highlights",
+      "url": "https://cradlepoint.com/solutions/naspo/state-of-washinton-naspo-highlights/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page reproducing the Washington participating addendum terms, including which state and higher education entities may purchase and Net 30 payment terms."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "State of Oregon NASPO highlights",
+      "url": "https://cradlepoint.com/solutions/naspo/state-of-oregon-naspo-highlights/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page stating the minimum discount off MSRP under the Oregon addendum and linking to the NASPO price list."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "NASPO price list resources",
+      "url": "https://cradlepoint.ericsson.com/resources/naspo/naspo-price-list",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier resource index listing 31 NASPO PDFs including a price schedule. States the minimum discount but the actual figures sit inside the linked PDFs, which were not opened."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Aspen Medical Enables Connectivity for COVID Clinics and Vaccination Program in Australia with Cradlepoint Wireless Network Solutions",
+      "url": "https://cradlepoint.ericsson.com/about/press-releases/aspen-medical-enables-connectivity-for-covid-clinics-and-vaccination-program-in-australia-with-cradlepoint-wireless-network-solutions",
+      "published": "2021-06-22",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming a healthcare customer and describing its healthcare services. Vendor claim, five years old."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "University of Illinois Delivers Interactive Experiences at Live Events Across US Leveraging Cradlepoint Wireless 'Pop-up' Branch Networks",
+      "url": "https://cradlepoint.ericsson.com/about/press-releases/university-illinois-delivers-interactive-experiences-live-events-across-us-leveraging",
+      "published": "2018-07-24",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming a university customer. Old (2018) and the use case is live theatre events rather than campus networking."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Vix Vizion Partners with Cradlepoint To Deploy Connected Facial Recognition Solution in Gaming Facilities as Part of South Australian Gambling Law Reforms",
+      "url": "https://cradlepoint.ericsson.com/about/press-releases/vix-vizion-partners-with-cradlepoint-to-deploy-connected-facial-recognition-solution-in-gaming-facilities-as-part-of-south-australian-gambling-law-reforms",
+      "published": "2021-06-02",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release. The contracting customer is Vix Vizion, a technology partner; the venues (pubs, clubs, casinos) are reached through that partner."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Cutting the Cord: How WISE Employment Thrives On All-Wireless Networks, Validating the Wireless WAN for Business",
+      "url": "https://cradlepoint.ericsson.com/about/press-releases/cutting-the-cord-how-wise-employment-thrives-on-all-wireless-networks-validating-the-wireless-wan-for-business/",
+      "published": "2020-12-15",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming an Australian employment services organisation with over 160 offices and more than 1,000 employees."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Cradlepoint enhances public safety with Avon Fire and Rescue Service solution",
+      "url": "https://cradlepoint.ericsson.com/about/press-releases/cradlepoint-enhances-public-safety-with-avon-fire-and-rescue-service-solution",
+      "published": "2023-06-08",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming a UK fire and rescue service and a 21-station deployment. Datelined London, United Kingdom."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Cradlepoint Signs on Tech Data Distribution Partner in Southeast Asia to Fuel Wireless WAN and 5G Expansion",
+      "url": "https://cradlepoint.ericsson.com/about/press-releases/cradlepoint-signs-on-tech-data-distribution-partner-in-southeast-asia-to-fuel-wireless-wan-and-5g-expansion",
+      "published": "2021-07-21",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming four specific Southeast Asian markets served through a named distributor."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Cradlepoint on the Lookout for New Channel Partners to Leverage Multi-Billion Wireless WAN Market in EMEA",
+      "url": "https://cradlepoint.ericsson.com/about/press-releases/cradlepoint-on-the-lookout-for-new-channel-partners-to-leverage-multi-billion-wireless-wan-market-in-emea",
+      "published": "2020-08-27",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release. Weak as coverage evidence: it names EMEA collectively and no Middle Eastern or African country, partner or customer."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Private 5G keeps Lufthansa Cargo's warehouse scanners connected 24x7",
+      "url": "https://cradlepoint.com/resources/private-5g-keeps-lufthansa-cargos-warehouse-scanners-connected-24x7/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier success story naming a global cargo airline and the specific site (LAX warehouse, Los Angeles)."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Private 5G - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/products/private-5g/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page naming Port of Tyne (UK) as a private 5G customer."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Ericsson Smart Oil Field Assessment",
+      "url": "https://cradlepoint.com/solutions/oil-and-gas-assessment/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page for the oil and gas sector offering a maturity assessment. No named oil and gas customer on the page."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Network operators - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/partners/network-operators/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page listing certified carrier partners grouped by region: North America, Europe and Asia Pacific. Good delivery-partner evidence; no Middle East, Africa, Latin America or China operator listed."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Contact us - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.com/about/contact-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier contact page listing regional sales numbers for the Americas, Australia, Germany and the United Kingdom, and a single physical HQ address in Boise, Idaho."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "How to buy - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.ericsson.com/about/how-to-buy",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page confirming an indirect route to market. States no prices and no country list."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "NetCloud Service subscription",
+      "url": "https://cradlepoint.com/products/netcloud-service/subscription/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page naming subscription tiers and six packaging options including Small Sites. No prices published."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "NetCloud Service",
+      "url": "https://cradlepoint.com/products/netcloud-service/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page naming NetCloud Essentials and Advanced tiers. No pricing, directs to sales."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "SOHO router solutions",
+      "url": "https://cradlepoint.com/products/soho/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page. Aimed at remote and home-based employees of larger organisations rather than at small businesses as buyers."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "5G for construction efficiency and safety? Built for this.",
+      "url": "https://cradlepoint.com/industries/cellular-networking-for-construction/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for construction naming Taylor Construction and Bilfinger Global IT. Construction is outside the ten graded sectors but the Bilfinger reference evidences large multinational customers."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Resources library - Ericsson Enterprise Wireless Solutions",
+      "url": "https://cradlepoint.ericsson.com/resources",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier resource library. Only four success stories are currently surfaced: City of Cheyenne, Valvoline, a Seattle transit agency and a dozer operations story. Filters are by technology (Private 5G, Wireless WAN, 5G, Security), not by industry."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "NetCloud SASE",
+      "url": "https://cradlepoint.com/products/netcloud-sase/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier SASE product page. No industries, no customer size and no pricing disclosed."
+    },
+    {
+      "n": 46,
+      "tier": 3,
+      "title": "IDC MarketScape: European Enterprise Private 5G Solutions 2025 Vendor Assessment (vendor-hosted landing page)",
+      "url": "https://cradlepoint.ericsson.com/resources/private-5g/idc-marketscape-european-enterprise-private-5g-solutions-2025/",
+      "published": "2025",
+      "verified_on": "2026-07-29",
+      "reliability": "Corroboration only. The analyst report is IDC's but the page is vendor-hosted and the report body sits behind a PDF that was not opened. Supports European delivery, does not carry a grade alone."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Press release sitemap",
+      "url": "https://cradlepoint.com/press_release-sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier XML sitemap listing 198 press release URLs. Used as an index to locate sector and region evidence and to confirm which sectors are absent."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Page sitemap",
+      "url": "https://cradlepoint.com/page-sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier XML sitemap listing all site pages. Used to confirm there is no financial services, healthcare, education or hospitality landing page."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "Sitemap index",
+      "url": "https://cradlepoint.com/sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier sitemap index listing locale sitemaps (de_at, en_be, en_dk, en_fi, de_de, en_ca, en_my, es_mx, en_nl, fr_ca, en_nz, en_no, es_pt, en_sg, en_za, es_es, en_se, en_uk, en_au, fr, de_ch). Locale sitemaps are website language, not service delivery, so used only as a pointer."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "All use cases",
+      "url": "https://cradlepoint.com/solutions/use-cases/all-use-cases/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page organised by deployment type (fixed sites, vehicles, IoT, private cellular). Confirms the supplier does not organise its solutions by industry vertical."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "Industries index (cradlepoint.com/industries/)",
+      "url": "https://cradlepoint.com/industries/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. There is no live global industries index page; only the UK /gb/industries/ page and a single construction page exist."
+    },
+    {
+      "n": 52,
+      "tier": 4,
+      "title": "Customer stories index",
+      "url": "https://cradlepoint.com/customer-stories/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. No consolidated customer story index exists on the site."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Site search for healthcare",
+      "url": "https://cradlepoint.com/search/?s=healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: blocked by robots.txt, so sector keyword sweeps of the site search were not possible."
+    },
+    {
+      "n": 54,
+      "tier": 4,
+      "title": "South Africa locale homepage",
+      "url": "https://cradlepoint.com/en-za/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: listed in the en_za sitemap but now 302 redirects to the global homepage, so no South Africa coverage or availability statement survives."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "Mexico locale homepage",
+      "url": "https://cradlepoint.com/es-mx/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: listed in the es_mx sitemap but now 302 redirects to the global homepage, so no Mexico coverage or availability statement survives."
+    },
+    {
+      "n": 56,
+      "tier": 4,
+      "title": "NetCloud Exchange",
+      "url": "https://cradlepoint.com/products/netcloud-exchange/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: contains no points of presence, cloud region or geographic availability detail, only a generic reference to a global cloud."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "Find a partner",
+      "url": "https://cradlepoint.com/partners/for-customers/find-a-partner/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the page is a lead capture form with no browsable partner directory or country filter, so it yields no regional coverage data."
+    },
+    {
+      "n": 58,
+      "tier": 4,
+      "title": "Wireless WAN product page",
+      "url": "https://cradlepoint.com/products/wireless-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: uses only generic terms such as organisations and IT teams, with no organisation size, industry or customer named."
+    },
+    {
+      "n": 59,
+      "tier": 4,
+      "title": "NetCloud Private Networks / Ericsson Private 5G Compact datasheet page",
+      "url": "https://cradlepoint.com/products/netcloud-private-networks/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: technical specification content only, with no industry, customer or organisation size stated."
+    },
+    {
+      "n": 60,
+      "tier": 4,
+      "title": "About us (UK)",
+      "url": "https://cradlepoint.com/gb/about-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence for regional delivery: contains only a UK sales telephone number and the Boise, Idaho headquarters address, with no statement of UK operations or countries served."
     }
   ],
   "sourced_facts": {
@@ -561,6 +948,245 @@
       "quote": "",
       "claimed_by": "none",
       "note": "No availability percentage was found. The support page and NetCloud Service page describe 24x7 support without any uptime figure, the trust centre links to a NetCloud status page rather than a published availability target, and the legal document index would not render so any service level agreement document could not be opened. A mention of support without a percentage is graded unknown."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        27
+      ],
+      "confidence": "medium",
+      "quote": "Aspen Medical specialises in providing healthcare services, including modular and temporary clinical infrastructure, in environments that are remote, challenging and under-resourced",
+      "claimed_by": "vendor",
+      "note": "Single named healthcare customer (Aspen Medical, Australia, COVID clinics and vaccination programme), from a supplier press release dated 22 June 2021. There is no healthcare landing page, no healthcare filter in the resource library and no hospital or health system in the current success story set, so the evidence is one dated deployment rather than a sustained sector practice. Confidence held at medium for that reason."
+    },
+    "sectors.financial_services": {
+      "value": "unknown",
+      "evidence": [
+        21,
+        48,
+        47,
+        18,
+        44
+      ],
+      "confidence": "high",
+      "quote": "For pop-up locations such as seasonal stores, tax prep offices, and election polling places, wired connectivity often either isn't available or is too expensive.",
+      "claimed_by": "none",
+      "note": "Checked the UK industries page, the branch and branch continuity product pages, the retail collateral, the resource library, the full page sitemap and all 198 press release titles in the press release sitemap. No bank, credit union, insurer, payments firm or financial services customer is named anywhere, and there is no financial services landing page. The nearest mention is tax prep offices in a list of pop-up location types, which is not sector evidence. Graded unknown."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        21,
+        19,
+        20,
+        22,
+        18
+      ],
+      "confidence": "high",
+      "quote": "In Valvoline Instant Oil Change locations, franchisee Henley Enterprises uses Ericsson's multi-WAN, cellular-enabled solution to curb downtime.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector on the site. Multiple named customers (Henley Enterprises for Valvoline, DiPasqua Enterprises operating over 100 Subway locations, T-Mobile retail across more than 5,000 storefronts, Wawa referenced), plus a retail section on the UK industries page and dedicated retail collateral. Evidence is store connectivity and failover rather than ecommerce platforms."
+    },
+    "sectors.manufacturing": {
+      "value": "partial",
+      "evidence": [
+        18,
+        35,
+        43
+      ],
+      "confidence": "medium",
+      "quote": "Private networks built for the rigours of manufacturing",
+      "claimed_by": "vendor",
+      "note": "Manufacturing is one of four industries given a headed section with descriptive copy on the UK industries page, but no manufacturing customer, plant deployment or case study was found on any page read. The nearest named private cellular customers are Port of Tyne (a port) and, on the construction page, Taylor Construction and Bilfinger Global IT. Graded partial because the sector is named with detail but nothing is shown behind it."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        36
+      ],
+      "confidence": "medium",
+      "quote": "Our Smart Oil Field Maturity Assessment helps IT and OT leaders evaluate their progress in digitalizing operations and adopting advanced digital solutions.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the basis of a dedicated oil and gas sector page offering a named assessment service (Ericsson Smart Oil Field Assessment). No named oil and gas customer appears on the page, and no electricity, water or utility customer was found anywhere on the site, so the grade rests on the dedicated page alone and confidence is medium. Oil and gas only, not utilities."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        23,
+        24,
+        31,
+        44
+      ],
+      "confidence": "high",
+      "quote": "Ericsson Enterprise Wireless Solutions has a seven-year NASPO ValuePoint Data Communications Products and Services contract",
+      "claimed_by": "vendor",
+      "note": "Multiple independent strands: a published NASPO ValuePoint contract with per-state participating addenda pages, a named UK public body (Avon Fire and Rescue Service, 21 stations, June 2023), and a City of Cheyenne success story in the current resource library. Public safety also has its own headed section on the UK industries page."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        28,
+        24,
+        23
+      ],
+      "confidence": "medium",
+      "quote": "University of Illinois Delivers Interactive Experiences at Live Events Across US Leveraging Cradlepoint Wireless 'Pop-up' Branch Networks",
+      "claimed_by": "vendor",
+      "note": "Named education customer, but the press release is from July 2018 and the deployment was pop-up connectivity at live theatre venues rather than campus or classroom networking. Corroborated by the NASPO contract vehicle, whose Washington addendum explicitly lists state universities, regional universities, community colleges and technical colleges as eligible purchasers, and whose national description names colleges and school districts. There is no education landing page. Confidence medium given the age of the customer evidence."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        34,
+        35,
+        44
+      ],
+      "confidence": "high",
+      "quote": "Lufthansa Cargo is one of the world's leading cargo airlines, serving about 350 destinations worldwide in about 100 countries",
+      "claimed_by": "vendor",
+      "note": "Three separate strands: Lufthansa Cargo private 5G at its LAX warehouse, Port of Tyne named on the private 5G product page, and a Seattle transit agency success story in the current resource library. Transdev Sydney Ferries also appears as a press release title in the press release sitemap, though that page was not opened."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        30
+      ],
+      "confidence": "low",
+      "quote": "Australian employment services company's Wireless WAN networking infrastructure lowers cost, helps remain agile during COVID-19 and sets pathway to 5G",
+      "claimed_by": "vendor",
+      "note": "One named customer, WISE Employment, an Australian nonprofit employment services provider with over 160 offices, from a press release dated 15 December 2020. Graded partial rather than yes because whether employment services counts as professional services is a taxonomy judgement, and no consulting, legal, accountancy or staffing firm is named anywhere else on the site. There is no professional services landing page."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partner_integrated",
+      "evidence": [
+        29,
+        19
+      ],
+      "confidence": "low",
+      "quote": "It enabled the government to mandate facial recognition technology in all gaming facilities, including pubs, clubs and casinos with more than 30 machines in a venue.",
+      "claimed_by": "vendor",
+      "note": "Reached indirectly. The contracting party is Vix Vizion, a facial recognition technology partner; the pubs, clubs and casinos are the end venues in South Australia, and the deployment was driven by state gambling law reform rather than by a hospitality buyer. No hotel, restaurant chain, stadium or leisure operator is named directly. Note a possible conflict of classification: the Subway franchisee story (evidence 2) is a quick service restaurant operator, which some taxonomies place under hospitality rather than retail. Recorded, not resolved."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        31,
+        35,
+        38,
+        18
+      ],
+      "confidence": "high",
+      "quote": "London, United Kingdom — June 8, 2023 — Cradlepoint, the global leader in cloud-delivered LTE and 5G wireless solutions, announced that Avon Fire and Rescue Services (Avon FRS) will be using Cradlepoint routers, powered by NetCloud to provide failover support to ensure unfailing and continuous connectivity across the Service's 21 stations.",
+      "claimed_by": "vendor",
+      "note": "Delivered service evidenced by two named UK customers (Avon Fire and Rescue Service, 21 stations; Port of Tyne private 5G), a dedicated UK site section at /gb/, a UK sales line on the contact page, and BT listed among certified European carrier partners. The press release sitemap also shows ESN accreditation releases for the R1900 router on Great Britain's Emergency Services Network. No Ireland-specific customer, office or partner was found; the grade rests on UK evidence."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        37,
+        38,
+        46
+      ],
+      "confidence": "high",
+      "quote": "assesses 11 selected players who are actively delivering private 5G solutions for enterprise customers in the European market",
+      "claimed_by": "third_party",
+      "note": "Vodafone, BT and Deutsche Telekom are listed as certified European carrier partners on the supplier's network operators page, and the contact page carries a German sales number (+49 40 82211740) alongside a line described as covering the United Kingdom and parts of Europe. The IDC MarketScape quote is a third-party statement of active European private 5G delivery, but it is hosted on the vendor's own site and the report body was not opened, so it is corroboration rather than the primary basis. Locale sitemaps exist for Austria, Belgium, Denmark, Finland, Germany, Netherlands, Norway, Portugal, Spain, Sweden, France and Switzerland, but website language is not treated as delivery evidence."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        23,
+        24,
+        37,
+        38
+      ],
+      "confidence": "high",
+      "quote": "Ericsson Enterprise Wireless Solutions has a seven-year NASPO ValuePoint Data Communications Products and Services contract",
+      "claimed_by": "vendor",
+      "note": "Deepest coverage of any region. A live multi-state US public sector contract vehicle with per-state participating addenda, US and Canadian carrier certifications (AT&T, Verizon, T-Mobile, UScellular, Rogers, Bell), the sole physical office address (Boise, Idaho) and an Americas sales line. Named US customers include City of Cheyenne, Valvoline via Henley Enterprises, DiPasqua Enterprises and Lufthansa Cargo at LAX."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        32,
+        37,
+        27,
+        29,
+        30,
+        38
+      ],
+      "confidence": "high",
+      "quote": "The distribution partnership will enable Cradlepoint to accelerate operations initially in Singapore, Malaysia, Indonesia, and Thailand, with plans to expand into other markets in the region longer term.",
+      "claimed_by": "vendor",
+      "note": "Australia is the strongest sub-market: Telstra, TPG Telecom and Optus are listed as certified carrier partners, an Australian sales line is published (+61 1300 295 134), and three named Australian customers appear (Aspen Medical, WISE Employment, and gaming venues via Vix Vizion). Southeast Asia is served through a named distributor covering Singapore, Malaysia, Indonesia and Thailand as at July 2021. The press release sitemap also shows an India software development subsidiary and New Zealand and Malaysia locale sitemaps. No Japan or Korea evidence was found."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        33,
+        37,
+        54
+      ],
+      "confidence": "low",
+      "quote": "Cradlepoint on the Lookout for New Channel Partners to Leverage Multi-Billion Wireless WAN Market in EMEA",
+      "claimed_by": "vendor",
+      "note": "Deliberately held at partial with low confidence. The only evidence is a channel recruitment press release dated 27 August 2020 that refers to EMEA collectively and names no Middle Eastern or African country, partner, carrier or customer. No Middle East or Africa operator appears on the network operators page, there is no regional sales number on the contact page, and the South Africa locale pages listed in the en_za sitemap now redirect to the global homepage. Treat EMEA in this supplier's material as effectively Europe unless a buyer confirms otherwise."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        37,
+        49,
+        39
+      ],
+      "confidence": "high",
+      "quote": "We work closely with network operators across the globe to plan, optimize, and certify our products for their LTE and 5G networks.",
+      "claimed_by": "none",
+      "note": "The quoted global claim is treated as evidence of nothing for mainland China, per the brief. No Chinese carrier (China Mobile, China Telecom, China Unicom) appears in the certified operator list, there is no zh locale in the sitemap index, no China office or sales number is published, and no ICP or licensed local arrangement is mentioned anywhere. Mainland China would need a specific licensed arrangement that this supplier does not publish."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        34,
+        43,
+        20
+      ],
+      "confidence": "high",
+      "quote": "Lufthansa Cargo is one of the world's leading cargo airlines, serving about 350 destinations worldwide in about 100 countries",
+      "claimed_by": "vendor",
+      "note": "Named multinational customers across several pages: Lufthansa Cargo, Bilfinger Global IT (named on the construction industry page via a regional IT business partner), and T-Mobile with more than 5,000 storefronts on network failover. Backed by an enterprise-oriented product and licensing model and a public sector contract vehicle."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        30,
+        19,
+        44
+      ],
+      "confidence": "high",
+      "quote": "By deploying wireless edge routers to provide Internet and connectivity to over 160 offices across Australia, with more than 1,000 employees, WISE's wireless plans came to fruition.",
+      "claimed_by": "vendor",
+      "note": "Clear mid-market evidence: WISE Employment at roughly 160 sites and 1,000 staff, DiPasqua Enterprises running over 100 Subway locations with a two-person IT team, Henley Enterprises as a Valvoline franchisee, and City of Cheyenne. The distributed multi-site organisation with a very small IT team is the recurring customer profile in the supplier's own stories."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        42,
+        40,
+        39
+      ],
+      "confidence": "medium",
+      "quote": "Ericsson's Small Office/Home Office (SOHO) solutions deliver enterprise-class connectivity plus security to help mission-critical employees remain productive and protected outside the office.",
+      "claimed_by": "vendor",
+      "note": "Held at partial. A SOHO product line and a Small Sites subscription package exist, and the press release sitemap shows a small site router launch, but the published framing is consistently small sites and home-based employees within larger organisations, not small businesses as buyers. No SMB pricing, no self-serve purchase route (products are sold only through distributors, resellers, MSPs and integrators) and no small business named as a customer. Carrier-fronted business internet offers with T-Mobile and UScellular may reach small businesses, but those press release pages returned 404 and were not read."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

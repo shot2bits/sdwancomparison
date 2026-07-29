@@ -80,16 +80,16 @@
     "Commercial structure bundles access, mobile and platform; line-item costing requires explicit RFP."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
-    "north_america": "partial",
+    "north_america": "partner_integrated",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "unknown"
+    "middle_east_africa": "yes",
+    "latin_america": "partner_integrated",
+    "china_mainland": "partial"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -109,21 +109,21 @@
     "note": "Fixed-mobile convergence with 5G backup for rapid site continuity."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
     "government_public_sector": "yes",
-    "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
+    "education": "yes",
+    "transport_logistics": "yes",
+    "professional_services": "yes",
     "hospitality_leisure": "partial"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "partial",
-    "small_business": "not_primary"
+    "mid_market": "yes",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -390,6 +390,339 @@
       "published": null,
       "reliability": "Not used as evidence: returned HTTP 404. Attempted on the vb2b host named in the brief for the same reason as source 22.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "SD-WAN for Business | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/sdn/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier product page. Carries the vendor's own SD-WAN partner line-up (Fortinet, Arista, Cisco), sector suitability lists, business-size tiers and the 192 country claim. No date published on the page."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Places For People & SD-WAN Case Study | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/case-studies/places-for-people-and-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study with a named UK customer and a stated site count. Undated."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Vodafone SD-WAN keeps Optos connected | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/case-studies/sd-wan-keeps-optos-connected-worldwide",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study with a named customer (Optos) and named operating geographies. Undated."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE) | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/sdn/secure-access-service-edge",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier product page for SASE. Confirms managed and co-managed models, partner stack (Arista/VeloCloud, Zscaler) and the medium/large business tiers. Undated."
+    },
+    {
+      "n": 28,
+      "tier": 2,
+      "title": "Vodafone Business and Fortinet Expand Global Partnership to Secure Hybrid Work",
+      "url": "https://www.fortinet.com/corporate/about-us/newsroom/press-releases/2025/vodafone-business-and-fortinet-expands-global-partnership-to-secure-hybrid-work",
+      "published": "2025-04-29",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 2 dated press release from a named accountable third party (Fortinet, a listed company). Jointly agreed wording with Vodafone, so treat as corroborated vendor claim rather than independent verification."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Vodafone Business SD-WAN (product document, PDF)",
+      "url": "https://d3bql97l1ytoxn.cloudfront.net/app_resources/401786/documentation/1435542_1720420681871_en-US.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 Vodafone-authored SD-WAN document, but hosted on a third-party CDN (cloudfront) rather than a vodafone.com URL, so permanence is not guaranteed. Contains sector requirement sections, deal-size examples and the 192 country statement."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "A network adapted to your needs: transforming a financial services business with SD-WAN",
+      "url": "https://www.vodafone.com/business/news-and-insights/case-studies/a-network-adapted-to-your-needs-transforming-a-financial-services-business-with-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study. Sector is stated but the customer is anonymised, which weakens it relative to a named reference."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Phygital retail: helping Coin enhance customer experience with SD-WAN and analytics",
+      "url": "https://www.vodafone.com/business/news-and-insights/case-studies/phygital-retail-helping-coin-enhance-customer-experience-with-sd-wan-and-analytics",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study with a named retail customer (Coin SpA). Undated."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Vodafone Business in Retail",
+      "url": "https://www.vodafone.com/business/industry/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated supplier industry page naming SD-WAN and SASE and a named retail customer."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Vodafone Business in Manufacturing, Transport and Logistics",
+      "url": "https://www.vodafone.com/business/solutions/by-industry/manufacturing-transport-and-logistics",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated supplier industry page covering three of the ten sectors at once, naming SD-WAN and a named manufacturing customer (Ford)."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Connected sites around the globe: helping a logistics business meet changing demands with SD-WAN",
+      "url": "https://www.vodafone.com/business/news-and-insights/case-studies/connected-sites-around-the-globe-helping-a-logistics-business-meet-changing-demands-with-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier SD-WAN case study. Sector stated, customer anonymised."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Vodafone in Health | Public Sector | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/public-sector/sectors/healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated supplier healthcare page with multiple named NHS customers and named CCS frameworks. Strong sector evidence, though the named deployments are telephony, 5G and MedTech rather than SD-WAN or SASE."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Connected Education | Vodafone Public Sector | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/public-sector/sectors/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated supplier education page with a named pilot school, a stated deployment scale and named CCS frameworks."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Sectors | Vodafone Public Sector | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/public-sector/sectors",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier index page confirming which public sector verticals have dedicated pages (central government, local government, defence, emergency services, healthcare, housing associations, education)."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Network Services 3 Framework | Public Sector | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/public-sector/frameworks/network-services-3",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page describing its position on a published UK Crown Commercial Service framework. The framework itself is a Tier 2 style artefact but this is the supplier's own restatement of it."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Digital Transformation in the Energy Sector | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/our-industry-expertise/energy",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated supplier energy page with named customers (UK Power Networks, Centrica, Data Communications Company) and coverage percentages. Coverage percentages are unaudited vendor claims."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Finance | Industry Expertise | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/our-industry-expertise/finance",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated supplier finance page naming SD-WAN as a finance-sector service and referencing a Lloyds Banking Group collaboration (digital inclusion, not networking)."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Professional Services | Industry Expertise | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/our-industry-expertise/professional-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated supplier professional services page with a named customer quote (Bravura) and zero trust network security language. No SD-WAN or SASE customer named."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Industry Expertise index | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/our-industry-expertise",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier index confirming exactly which industries have dedicated UK pages (water, energy, retail, finance, manufacturing, professional services, central government, local government, construction). Useful as negative evidence for sectors absent from the list."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Vodafone Business in Asia-Pacific",
+      "url": "https://www.vodafone.com/business/solutions/by-region/asia-pacific",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier regional page stating an APAC SD-WAN offer. Thin on countries, licences or points of presence."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Vodafone Business in Middle East and Africa",
+      "url": "https://www.vodafone.com/business/solutions/by-region/middle-east-and-africa",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier regional page naming MEA countries of operation and listing SD-WAN and SASE. No named MEA customer."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Vodafone Business in the Americas",
+      "url": "https://www.vodafone.com/business/solutions/by-region/americas",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier regional page. Notably thin: states delivery via operating companies, partners and affiliates with no countries, points of presence or SD-WAN detail."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Vodafone Business in Europe",
+      "url": "https://www.vodafone.com/business/solutions/by-region/europe",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier regional page listing 30 plus European countries and naming SD-WAN, SD-LAN and SASE."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Vodafone expands network for enterprise in Americas (Vodafone newsroom)",
+      "url": "https://www.vodafone.com/news/newsroom/services/vodafone-expands-high-speed-network-connections-enterprise-americas",
+      "published": "2014-10-01",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dated supplier newsroom item giving a points of presence count for the Americas. Over ten years old, so the figures should be treated as historic and not current SD-WAN coverage."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Vodafone Global Infrastructure Map (PDF)",
+      "url": "https://globalnetworkmap.vodafone.com/assets/pdfs/Vodafone_Global_Infrastructure_Map.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier infrastructure map. Gives group-level operating country counts and regional cable and PoP maps, but the group figures describe Vodafone Group mobile operations rather than SD-WAN or SASE service availability, so it cannot carry a regional SD-WAN grade alone."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "Vodafone Business helps you become intelligently connected (Large & multinational business)",
+      "url": "https://www.vodafone.com/business/solutions/by-business-type/large-multinational-business",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier segment page confirming a dedicated large and multinational business segment with named customers."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "Vodafone Business Small & medium business solutions",
+      "url": "https://www.vodafone.com/business/solutions/by-business-type/small-medium-business",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier segment page. Used mainly as negative evidence: it lists product categories but does not name SD-WAN or SASE for the small and medium segment."
+    },
+    {
+      "n": 51,
+      "tier": 1,
+      "title": "International Government | Vodafone Business",
+      "url": "https://www.vodafone.com/business/solutions/by-business-type/public-sector/government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier public sector page naming SD-WAN, SD-LAN and SASE for government customers. No named government customer."
+    },
+    {
+      "n": 52,
+      "tier": 2,
+      "title": "G-Cloud service search, Digital Marketplace (Crown Commercial Service)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/search?q=SD-WAN&supplierName=Vodafone",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 2 UK government procurement register. Searched for a Vodafone SD-WAN or SASE listing with published pricing and found none in the returned results. Used only as negative evidence for the price tier; a null result on a filtered search is weaker than a confirmed absence."
+    },
+    {
+      "n": 53,
+      "tier": 1,
+      "title": "Vodafone Business SD-WAN (global product page)",
+      "url": "https://www.vodafone.com/business/products/fixed-connectivity/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier product page. Read in full but yielded no country counts, sector claims, size targeting or pricing, so it carries no grade here."
+    },
+    {
+      "n": 54,
+      "tier": 1,
+      "title": "Our Global Network | Vodafone Business",
+      "url": "https://www.vodafone.com/business/solutions/our-global-network",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Read but contains only regional section headers with no country counts, points of presence or China detail, so it carries no grade."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "Vodafone Business | About | Global support",
+      "url": "https://www.vodafone.com/business/products-hub/about-vodafone-business",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Fetched but returned no quantified statements on countries, points of presence, regions, sectors or pricing; the only concrete detail was the registered office address."
+    },
+    {
+      "n": 56,
+      "tier": 4,
+      "title": "Vodafone Business: SD-WAN and SASE capability profile | Netify",
+      "url": "https://netify.co.uk/sase/vendors/vodafone-business/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. This is the Netify profile this task is producing evidence for, so citing it would be circular."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "Vodafone Global WAN Services Reviews, Ratings & Features 2025 | Gartner Peer Insights",
+      "url": "https://www.gartner.com/reviews/market/global-wan-services/vendor/vodafone/product/vodafone-global-wan-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Appeared in search results but was not fetched or read in this task, and Gartner Peer Insights content is gated, so no verbatim quote could be verified."
+    },
+    {
+      "n": 58,
+      "tier": 4,
+      "title": "Digital certainty strengthens food supply chains (showhome.vb2b.vodafone.com)",
+      "url": "https://showhome.vb2b.vodafone.com/business/news-and-insights/case-studies/digital-certainty-strengthens-food-supply-chains",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The host is a Vodafone staging or preview environment (showhome.vb2b), not a production supplier URL, so it is not a citable published record."
+    },
+    {
+      "n": 59,
+      "tier": 4,
+      "title": "Helping Thames Water digitise to make better data-led decisions | Vodafone UK",
+      "url": "https://www.vodafone.co.uk/business/case-studies/helping-thames-water-digitise-to-make-better-data-led-decisions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL returned HTTP 404 when fetched, so no quote could be taken. The case study title appears on the Vodafone UK case studies index but the page itself was unreachable."
+    },
+    {
+      "n": 60,
+      "tier": 4,
+      "title": "SD-WAN (Meraki) - Business Marketplace - Vodafone (marketplaceshowhome)",
+      "url": "https://marketplaceshowhome.vodafone.com/marketplace/product-list/sd-wan-meraki",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Hosted on a Vodafone marketplace staging or preview host (marketplaceshowhome), not a production URL, and was not fetched."
     }
   ],
   "sourced_facts": {
@@ -601,6 +934,259 @@
       "quote": "99.99% Uptime that keeps your data flowing.",
       "claimed_by": "vendor",
       "note": "Graded from the only page found that attaches a percentage to SD-WAN specifically, but the qualifications are significant. The figure sits on a Vodafone UK marketing page as a headline stat, not in a service schedule, and no service credit regime or measurement method accompanies it. I fetched the Vodafone UK Service Level Agreements terms page expressly to find the contractual figure; that page carries no percentages at all and defers to a linked PDF I could not retrieve. The global SD-WAN datasheet claims the broadest range of SLAs but publishes no number, which under the field rule would be unknown on its own. I also deliberately excluded the 99.99% and 99.7% figures in Vodafone's G-Cloud filing because those cover Managed SOC and SIEM log collection, a different service, and the 99.9% and 99.99% figures returned by searching, which belong to Arrow and TalkTalk respectively. Buyers should treat 99.99 as indicative and ask for the contractual schedule."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        35,
+        37,
+        42
+      ],
+      "confidence": "high",
+      "quote": "We've been working with NHS 111 for 15 years, supporting the delivery of the national service to over 80 million patients.",
+      "claimed_by": "vendor",
+      "note": "Vodafone UK runs a dedicated Vodafone in Health page under its public sector section, with several named NHS customers (NHS 111, NHS Blood and Transplant, Norfolk and Norwich University Hospitals NHS Foundation Trust) and named CCS frameworks. Caveat for a SASE and SD-WAN comparison: none of the named healthcare deployments are SD-WAN or SASE. The evidence is telephony, 5G, mobile private networks and MedTech partners. The Vodafone Business SD-WAN document lists a Healthcare sector requirements section and the UK SD-WAN page lists healthcare as suited to its Fortinet and Cisco variants, but no healthcare SD-WAN customer was found."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        30,
+        40,
+        29,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Vodafone Business SD-WAN has helped a leading financial services company introduce emerging cloud technologies to become more agile and customer centric.",
+      "claimed_by": "vendor",
+      "note": "There is a published SD-WAN case study for the sector plus a dedicated Vodafone UK finance industry page that names SD-WAN directly (\"SD-WAN uses multiple access technologies to make sure your network is always ready to scale to business demands.\"). Weakness: the SD-WAN case study customer is anonymised (\"a leading financial services company\", over 170 sites), and the only named finance organisation on the UK page is Lloyds Banking Group in a digital inclusion partnership, not a networking deployment. The SD-WAN document also carries a Financial Services sector requirements section."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        32,
+        31,
+        24,
+        29
+      ],
+      "confidence": "high",
+      "quote": "Vodafone Business SD-WAN and Analytics helped Coin connect stores across digital and physical channels and tailor their offers to customer needs.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in the set: a named retail customer (Coin SpA, Italy) on an SD-WAN deployment, a dedicated retail industry page on vodafone.com that names both SD-WAN and SASE, a separate retail page in the Vodafone UK industry expertise list, a Retail sector requirements section in the SD-WAN document, and retail named against all three SD-WAN partner variants on the UK page."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        33,
+        42,
+        29,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Vodafone 5G Mobile Private Network (MPN) is supporting Ford in the digital transformation of its technical centre to speed up electric vehicle manufacturing.",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page (Manufacturing, Transport and Logistics) on vodafone.com that names Vodafone Business SD-WAN directly, plus a separate manufacturing page in the Vodafone UK industry expertise list, plus a Construction & Manufacturing sector requirements section in the SD-WAN document. Caveat: the named manufacturing customers (Ford, Irish Manufacturing Research) are 5G mobile private network deployments, not SD-WAN or SASE. The SD-WAN document does cite an anonymised \"84 plants in 36 countries\" engagement."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        39,
+        42,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Centrica's plant will be the first in the UK to enjoy a secure 5G-ready mobile private network, kick-starting a 5G revolution in energy and utilities.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Vodafone UK energy industry page with three named customers (Centrica, UK Power Networks, Data Communications Company) and vendor coverage claims (\"100% of electricity and gas transmission operators\"). A separate Water Sector page also exists. Caveat: no SD-WAN or SASE deployment is shown for any energy customer. The named work is 5G mobile private networks, smart metering and the Vodafone storm platform. Energy and utilities is named as suited to the Fortinet SD-WAN variant on the UK page."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        38,
+        37,
+        35,
+        36,
+        51
+      ],
+      "confidence": "high",
+      "quote": "Our customisable range of IT and connectivity solutions is available under eight lots of the CCS Network Services 3 framework",
+      "claimed_by": "vendor",
+      "note": "Published framework position (Crown Commercial Service Network Services 3, eight lots including Lot 1a Inter Site Connectivity), plus dedicated pages for central government, local government, defence, emergency services and housing associations, plus an International Government page on vodafone.com that names SD-WAN, SD-LAN and SASE. Caveat: SD-WAN is not itself named in the NS3 lot descriptions on the framework page, where the listed connectivity products are PSN Connect, IP VPN, Dedicated Internet Access and Enterprise Broadband. Vodafone also lists CCS G-Cloud 14, CCS Mobile Voice and Data Services and the Scottish National Framework."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        36,
+        29,
+        37
+      ],
+      "confidence": "medium",
+      "quote": "Connected Education is being used in 5000 establishments across 13 countries including Italy, Spain, Germany, Hungary, Romania, Turkey, South Africa, Ghana, Kenya and Tanzania.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Connected Education page with a named pilot partner (Bridge of Allan Primary School), a stated multi-country deployment scale and named CCS frameworks. Caveat for this comparison: the education products shown are Campus WiFi (Cisco Meraki access points), endpoint security via Trend Micro and Connected Education content, not SD-WAN or SASE. The SD-WAN document carries an Education sector requirements section (Distance Learning, Ease of Management, Integrations), which is a list mention only."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        34,
+        33,
+        29
+      ],
+      "confidence": "high",
+      "quote": "Vodafone Business SD-WAN has enabled a global transport and logistics business to optimise their network performance and connect new sites in a flash.",
+      "claimed_by": "vendor",
+      "note": "A published SD-WAN case study for the sector plus a dedicated industry page whose title covers transport and logistics and which names Vodafone Business SD-WAN. Weakness: the SD-WAN case study customer is anonymised. The SD-WAN document cites an anonymised \"2,300 depots across 13 countries\" engagement. Transport and logistics are also named as suited to the Arista SD-WAN variant, and logistics to the Cisco variant, on the UK page. Vodafone UK separately lists an \"Explore Transport improves logistic efficiency\" case study on its case studies index, which was not read."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        41,
+        42
+      ],
+      "confidence": "medium",
+      "quote": "At Vodafone, our track record in Professional Services rests on a deep understanding of the challenges faced by business leaders in this sector, day in, day out.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test only. Vodafone UK runs a Professional Services page in its industry expertise list, and that page addresses network security (\"Professional Services firms looking to adopt zero trust security approaches know that network security is a critical starting point.\") and carries a named customer quote from Terry McCaan, CIO, Bravura, for Vodafone Cloud and Hosting. No SD-WAN or SASE customer or case study was found for this sector. Arista's SD-WAN variant on the UK page names \"services\" in its ideal-for list, which is too vague to grade on."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partial",
+      "evidence": [
+        29,
+        42,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "Hospitality sector requirements",
+      "claimed_by": "vendor",
+      "note": "Graded partial: hospitality appears only as a sector heading in the Vodafone Business SD-WAN document (listed against Optimised performance, PCI compliance and Easy Upgrades), with no customer, case study or detail behind it. There is no hospitality page in the Vodafone UK industry expertise list and none in the vodafone.com by-industry set that was checked. The Cisco SD-WAN variant on the UK page names \"travel\" in its ideal-for list. The nearest leisure-adjacent evidence is indirect: Places for People, an SD-WAN customer, \"operate more than 100 leisure facilities\", but the customer is a housing and social enterprise, not a hospitality operator."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        25,
+        24,
+        46
+      ],
+      "confidence": "high",
+      "quote": "The organisation has covered more than 190 housing sites with Vodafone's simple and secure SD-WAN network.",
+      "claimed_by": "vendor",
+      "note": "Home market with a named UK SD-WAN customer at scale (Places for People, over 190 sites across the UK, delivered with Cisco Meraki engineers). The UK SD-WAN page also claims \"99.7% of UK premises** are covered by multiple access technology options\". Ireland is not separately evidenced for SD-WAN or SASE: it appears only in the country list on the Vodafone Business in Europe page, so the Ireland half of this region rests on weaker evidence than the UK half."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        28,
+        46,
+        31
+      ],
+      "confidence": "high",
+      "quote": "Large and medium-sized enterprises in Germany and in other European markets as well as multinational businesses served through Vodafone Business International can now benefit from Vodafone Business Secure Networking Services.",
+      "claimed_by": "third_party",
+      "note": "Dated Fortinet press release (29 April 2025) confirming SASE and secure SD-WAN availability in Germany and other European markets, corroborated by the Vodafone Business in Europe page which lists 30 plus European countries and names \"SD-WAN, SD-LAN, Secure Access Service Edge and more\", and by the named Italian retail SD-WAN customer Coin. Note the Fortinet release is jointly agreed vendor and partner wording rather than independent verification."
+    },
+    "regions.north_america": {
+      "value": "partner_integrated",
+      "evidence": [
+        45,
+        26,
+        47
+      ],
+      "confidence": "medium",
+      "quote": "In the Americas we provide excellent service via our operating companies, partners and affiliates",
+      "claimed_by": "vendor",
+      "note": "Vodafone's own Americas regional page states delivery via operating companies, partners and affiliates rather than its own network, and lists no countries, points of presence or SD-WAN detail. Corroborating delivery evidence is indirect: the named SD-WAN customer Optos \"has operational bases in the UK, the USA and Australia\" and Vodafone states the SD-WAN gives \"connectivity across the world\". A 2014 Vodafone newsroom item claims \"Expansion will provide customers with 212 points of presence worldwide, including 42 across the USA, Canada, South America and Latin America\", but at over ten years old it should not be read as current SD-WAN or SASE coverage. Graded partner_integrated rather than yes because the supplier's own current regional page frames North American delivery through partners."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        43,
+        26,
+        29
+      ],
+      "confidence": "medium",
+      "quote": "With our SD-WAN solution in APAC, enterprise networks can respond quickly to support growing and changing business requirements.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Asia-Pacific regional page that explicitly states an SD-WAN solution in APAC, plus the SD-WAN document citing an anonymised \"72 site APAC SD-WAN including 26 sites in China\" engagement, plus the named customer Optos with an Australian operational base. Weakness: the APAC page names no countries, no points of presence and no licences, and its supporting analyst claim relates to managed mobility services rather than SD-WAN."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        44,
+        48
+      ],
+      "confidence": "medium",
+      "quote": "Secure fixed connectivity solutions for multinational businesses. SD-WAN, SD-LAN, Secure Access Service Edge and more to work and collaborate from anywhere.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Middle East and Africa regional page that names SD-WAN and SASE and lists countries of operation including Egypt, Qatar, South Africa, United Arab Emirates, Kenya, Tanzania, Ghana, Mozambique, Democratic Republic of Congo, Lesotho, Benin and Tunisia. The Vodafone Global Infrastructure Map includes a Middle East and Africa infrastructure map and the 2Africa subsea cable project. Weakness: no named MEA SD-WAN or SASE customer and no published points of presence list for the region."
+    },
+    "regions.latin_america": {
+      "value": "partner_integrated",
+      "evidence": [
+        45,
+        47
+      ],
+      "confidence": "low",
+      "quote": "In the Americas we provide excellent service via our operating companies, partners and affiliates",
+      "claimed_by": "vendor",
+      "note": "The only current supplier statement covering Latin America is the generic Americas page, which frames delivery through operating companies, partners and affiliates. The single quantified claim is from a 2014 Vodafone newsroom item covering \"South America and Latin America\" points of presence, which is too old to grade current SD-WAN or SASE delivery on. No Latin American country list, no named customer and no LatAm-specific SD-WAN or SASE page were found. Graded low confidence."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        29,
+        48
+      ],
+      "confidence": "low",
+      "quote": "72 site APAC SD-WAN including 26 sites in China.",
+      "claimed_by": "vendor",
+      "note": "This is the only mainland China specific evidence found anywhere: a single anonymised deal reference line in the Vodafone Business SD-WAN document indicating 26 delivered sites in China within an APAC SD-WAN. Graded partial not yes because no licensing arrangement, in-country partner, point of presence list or China service page is published on any Vodafone page checked, including the Asia-Pacific regional page, Our Global Network and the global SD-WAN product page. The Global Infrastructure Map shows China on its Asia and Oceania map, but a map marker is not a statement of SD-WAN or SASE service availability. The generic 192 countries claim is treated as evidence of nothing here."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        24,
+        27,
+        28,
+        49,
+        29
+      ],
+      "confidence": "high",
+      "quote": "Ideal for large businesses with multi-site operations that has complex network needs.",
+      "claimed_by": "vendor",
+      "note": "Explicit product tier on both the UK SD-WAN and UK SASE pages, with large business defined on the site as 250 plus employees. Corroborated by a dedicated Large & multinational business segment on vodafone.com, by the Fortinet release naming large enterprises and multinationals served through Vodafone Business International, and by the SD-WAN document's Large Scale multi-country and multi-region tier and engagement examples such as \"280 site fully managed SD-WAN\" and \"26,000 employees in 30 countries, with 171 locations\". This is clearly the primary target."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        24,
+        27,
+        28,
+        29
+      ],
+      "confidence": "high",
+      "quote": "Ideal for medium businesses with multi-site operations that has complex network needs.",
+      "claimed_by": "vendor",
+      "note": "Explicit product tier on both the UK SD-WAN and UK SASE pages, with medium business defined on the site as 10 to 249 employees, including a separate medium business support line and stated opening hours. The Fortinet release names \"Large and medium-sized enterprises\". The SD-WAN document defines a \"Mid-sized WAN\" tier of \"20-100+ sites\". Note the qualifier throughout: the offer is aimed at multi-site mid-market organisations, not single-site ones."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        24,
+        27,
+        50,
+        42
+      ],
+      "confidence": "medium",
+      "quote": "Ideal for medium businesses with multi-site operations that has complex network needs.",
+      "claimed_by": "none",
+      "note": "No small business evidence found, and deliberately not graded not_primary because Vodafone nowhere explicitly states small business is out of scope. What was checked: the UK SD-WAN page and the UK SASE page both present exactly two product tiers, medium (10 to 249 employees) and large (250 plus), with no small business option; the vodafone.com Small & medium business solutions page lists eight product categories and does not name SD-WAN or SASE at all; no small business pricing, entry package or case study was found. Vodafone UK does market to small business (1 to 9 employees) generally, but not for these products on the pages read. Treat the absence of a small business tier as the signal rather than an explicit exclusion."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

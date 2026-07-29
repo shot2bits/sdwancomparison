@@ -81,15 +81,15 @@
     "Private global backbone is not vendor-owned; cloud transport uses internet and Prisma Access PoPs."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
-    "uk_ireland": "yes",
+    "uk_ireland": "partner_integrated",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
+    "middle_east_africa": "unknown",
+    "latin_america": "unknown",
     "china_mainland": "partial"
   },
   "supported_clouds": {
@@ -112,18 +112,18 @@
   "sectors": {
     "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
+    "retail_ecommerce": "yes",
     "manufacturing": "yes",
-    "energy_utilities": "partial",
+    "energy_utilities": "yes",
     "government_public_sector": "yes",
-    "education": "partial",
+    "education": "yes",
     "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "professional_services": "yes",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
+    "mid_market": "unknown",
     "small_business": "partial"
   },
   "pricing_units": [
@@ -382,6 +382,330 @@
       "published": null,
       "reliability": "Not used as evidence: third-party marketplace listing, undated and reproduced from vendor-supplied copy.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Prisma SASE product page",
+      "url": "https://www.paloaltonetworks.com/sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE landing page. Names customers (Westfield, Zespri, Colgate-Palmolive, Autodesk, Grupo Bimbo, Cordis) but publishes no PoP count, no coverage list, no pricing and no organisation-size language."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Prisma SASE customer stories index",
+      "url": "https://www.paloaltonetworks.com/sase/customer-stories",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE case study index. Gave story URLs and informal industry labels (Relias Healthcare, AutoNation automotive retail, Ministry of Justice government, RaceTrac retail, Colgate-Palmolive manufacturing, Costa Group agriculture)."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Industries index page",
+      "url": "https://www.paloaltonetworks.com/industry",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own index of dedicated industry pages. Establishes which sectors have a dedicated page: financial services, healthcare, ICS/SCADA, manufacturing, oil and gas, public sector, retail, service providers, utilities, federal."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Healthcare industry page",
+      "url": "https://www.paloaltonetworks.com/industry/healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier healthcare page with four named healthcare customers (Nuffield Health, BayCare Health System, AZ Vesalius, Southern Nevada Health District). Strong sector evidence, though vendor-authored."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Financial services industry page",
+      "url": "https://www.paloaltonetworks.com/industry/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page with one named customer (Better) and an attributed CISO quote."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Manufacturing industry page",
+      "url": "https://www.paloaltonetworks.com/industry/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page with named customer Flex and an attributed CISO quote."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Retail industry page",
+      "url": "https://www.paloaltonetworks.com/industry/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page with two named retail customers carrying quantified outcomes (AutoNation, Aaron's)."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Electric utilities industry page",
+      "url": "https://www.paloaltonetworks.com/industry/electric-utilities",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page. Sector claim is present but no individual utility is named on the page, so evidence rests on the dedicated page rather than a named reference."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Oil and gas industry page",
+      "url": "https://www.paloaltonetworks.com/industry/oil-gas",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page. No named oil and gas customer on the page; supports the energy grade alongside the utilities page."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "About us / company page",
+      "url": "https://www.paloaltonetworks.com/company/about-us",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own corporate stat block. Unaudited marketing figures, but the organisation-size and sector penetration claims are explicit and attributable."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Education industry page",
+      "url": "https://www.paloaltonetworks.com/industry/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier education page exists with headline 'Securely Connecting Students' but names no education customer in the retrieved content."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Federal government industry page",
+      "url": "https://www.paloaltonetworks.com/industry/federal",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page carrying named accreditations (FedRAMP High, DoD IL5, DoDIN APL, CSfC). Accreditation claims are verifiable against US government registers, so this is the strongest public sector evidence found."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Public sector industry page",
+      "url": "https://www.paloaltonetworks.com/industry/public-sector",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier page naming Vallejo Flood and Wastewater District and explicitly scoping federal, K-12, higher education and state and local government."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Prisma Access product page",
+      "url": "https://www.paloaltonetworks.com/prisma/access",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page. Checked specifically for point of presence counts, country lists and pricing; none present. Only an uptime SLA claim and 'massive hyperscale backbone' language."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Prisma SD-WAN page",
+      "url": "https://www.paloaltonetworks.com/sase/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page. Checked for coverage, locations, organisation size and pricing; none present. Only customer deployment scale (Beam Suntory, 74 locations)."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Company locations page",
+      "url": "https://www.paloaltonetworks.com/company/locations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's office list covering 40 plus countries including Qatar, Saudi Arabia, UAE, South Africa, Brazil, Mexico and mainland China. Used only as context: the Netify definition excludes sales offices from region grading, so this cannot carry a region grade on its own."
+    },
+    {
+      "n": 39,
+      "tier": 4,
+      "title": "Company newsroom landing page",
+      "url": "https://www.paloaltonetworks.com/company/newsroom",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the landing page renders only a single featured item and contained no regional or coverage announcements. Superseded by the full press index."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Press release index",
+      "url": "https://www.paloaltonetworks.com/company/press",
+      "published": "2026-06-24",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press index, 793 releases, most recent 24 June 2026. Used to locate dated releases; dated and attributable."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Customer stories index",
+      "url": "https://www.paloaltonetworks.com/customers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier customer index. Industry filter facets are enumerable (including Transportation, Hospitality, Education, Professional & Legal Services) but the card list is JavaScript paginated and only five cards rendered, so most per-sector customers could not be retrieved."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Westfield Prisma SASE case study",
+      "url": "https://www.paloaltonetworks.com/customers/westfield-responds-rapidly-to-a-changing-market-with-prisma-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named supplier case study, industry Retail, United States, 19 malls."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Wipro case study",
+      "url": "https://www.paloaltonetworks.com/customers/wipro",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named supplier case study, industry labelled 'IT and Consulting', region Global. Deployment is Prisma Browser within a stated SASE strategy."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Zespri Prisma SASE case study",
+      "url": "https://www.paloaltonetworks.com/customers/prisma-sase-simplifies-and-enhances-security-for-zespri",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named supplier SASE case study, New Zealand, Agriculture. Direct evidence of Asia Pacific SASE delivery."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Village Roadshow Prisma SASE case study",
+      "url": "https://www.paloaltonetworks.com/content/pan/en_US/customers/village-roadshow-transforms-the-business-with-prisma-sase-realizes-savings-of-thousands-of-hours-per-month",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named supplier SASE case study, Australia, Media & Entertainment. Corroborates Asia Pacific delivery."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "American Food & Vending Prisma SASE case study",
+      "url": "https://www.paloaltonetworks.com/customers/american-food-and-vending-scales-quickly-with-prisma-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named supplier SASE case study, industry labelled Hospitality, United States, 2,000 employees, 400 Prisma SD-WAN ION devices. The only hospitality-sector SASE reference located."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "VINCI case study",
+      "url": "https://www.paloaltonetworks.com/customers/vinci-standardises-on-cortex-xdr",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named supplier case study, France headquartered, Construction/Concessions/Energy, 200,000 endpoints. Deployment is Cortex XDR not SASE, so used only as weak European delivery context."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Prisma Access datasheet landing page",
+      "url": "https://www.paloaltonetworks.com/resources/datasheets/prisma-access",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the landing page is a gated download wrapper and contained no location, country or point of presence statement in the retrievable HTML."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "Prisma SASE datasheet landing page",
+      "url": "https://www.paloaltonetworks.com/resources/datasheets/prisma-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page. Contains no coverage or pricing data, but does carry explicit positioning language used for the price tier assessment."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "Prisma Access technical documentation home",
+      "url": "https://docs.paloaltonetworks.com/prisma-access",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier technical documentation index. Confirms a dedicated 'Prisma Access China' documentation topic exists, but the topic page itself could not be opened (see rejected entry 35), so no licensing or partner detail was confirmed."
+    },
+    {
+      "n": 51,
+      "tier": 1,
+      "title": "Press release: Palo Alto Networks Introduces the Most Secure Workspace for Small Business",
+      "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-introduces-the-most-secure-workspace-for-small-business",
+      "published": "2026-03-23",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release. Explicit, unambiguous small business targeting with stated pricing intent and US availability. Product is Prisma Browser for Business, not the SASE or SD-WAN portfolio."
+    },
+    {
+      "n": 52,
+      "tier": 1,
+      "title": "Press release: Palo Alto Networks and Deutsche Telekom Bring AI-Driven Security with Advanced Sovereignty Controls for European Regulated Industries",
+      "url": "https://www.paloaltonetworks.com/company/press/2026/palo-alto-networks-and-deutsche-telekom-bring-ai-driven-security-with-advanced-sovereignty-controls-for-european-regulated-industries",
+      "published": "2026-06-09",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release, datelined Amsterdam and Munich. Strongest European service-delivery evidence found: states data residency controls across all cloud services plus Europe-based support personnel and European governing law."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Palo Alto Networks UK homepage",
+      "url": "https://www.paloaltonetworks.co.uk/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the UK domain serves identical global content with no UK-specific service delivery, data residency, customer or framework statement. A country domain is not delivery evidence."
+    },
+    {
+      "n": 54,
+      "tier": 2,
+      "title": "UK Government Digital Marketplace G-Cloud search results for Prisma Access",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/search?q=Prisma%20Access",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK Government procurement register operated by Crown Commercial Service. Independently accountable. Shows 25 plus live listings of Palo Alto Prisma Access from UK resellers, evidencing UK availability through partners rather than direct supplier delivery."
+    },
+    {
+      "n": 55,
+      "tier": 2,
+      "title": "G-Cloud listing: Palo Alto Networks Prisma Access (SASE), Khipu Networks Limited",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/255345729934588",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK Government register entry with a mandatory published price. Reseller-set price, so it reflects UK channel pricing rather than the supplier's own list price."
+    },
+    {
+      "n": 56,
+      "tier": 2,
+      "title": "G-Cloud listing: Palo Alto Prisma Access, Softcat PLC",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/617969701415439",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK Government register entry with a mandatory published price. Unit basis is stated only as 'a unit', which is less precise than the Khipu per-user figure, and the two prices disagree."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "Prisma Access administration overview documentation",
+      "url": "https://docs.paloaltonetworks.com/prisma-access/administration/prisma-access-overview",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: contains no region or location list. Recorded because eight further candidate URLs for the Prisma Access locations table and the Prisma Access China topic all returned HTTP 404, so no vendor-published point of presence list could be retrieved in this task."
+    },
+    {
+      "n": 58,
+      "tier": 4,
+      "title": "AWS Marketplace product page attempt",
+      "url": "https://aws.amazon.com/marketplace/pp/prodview-fdvxbxlmxnvfy",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL resolved to the AWS Marketplace homepage, not a Palo Alto SASE listing, and returned no pricing."
     }
   ],
   "sourced_facts": {
@@ -584,6 +908,253 @@
       "quote": "If, during any calendar month, the Service availability falls below 99.999%, Customer can submit a claim for credit",
       "claimed_by": "vendor",
       "note": "Taken from the published contractual SLA document rather than a marketing page. Corroborated by the Prisma Access product page, which advertises 99.999% industry-leading uptime SLAs, and by the architecture blog. Separate 99.99% commitments apply to security processing latency and third-party SaaS application latency; those are latency percentages, not availability, so they are not used for this field."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        26,
+        32,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Healthcare providers work with Palo Alto Networks to help ensure care from anywhere is uninterrupted.",
+      "claimed_by": "vendor",
+      "note": "Dedicated healthcare industry page plus four named healthcare customers on that page: Nuffield Health, BayCare Health System, AZ Vesalius and Southern Nevada Health District. Relias also appears on the SASE customer stories index under a healthcare label. The about us page separately claims '7 of 10 Top U.S. hospitals'. Note that the named healthcare references are platform-wide rather than explicitly Prisma SASE deployments."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        27,
+        32
+      ],
+      "confidence": "high",
+      "quote": "Empowering financial institutions to securely deliver a modern customer experience.",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services industry page with one named customer, Better, and an attributed quote from Ali Khan, Chief Information Security Officer. The about us page claims '8 of 10 Largest U.S. banks'. Financial services is also named as a target vertical in the dated Deutsche Telekom sovereignty release [30]. No named financial services Prisma SASE or SD-WAN case study was found."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        29,
+        42,
+        24
+      ],
+      "confidence": "high",
+      "quote": "AutoNation reduced telco costs by 25% and gained fast, reliable connectivity across its 350 locations.",
+      "claimed_by": "vendor",
+      "note": "Dedicated retail industry page with two named customers carrying quantified outcomes, AutoNation and Aaron's. Independently corroborated by the Westfield Prisma SASE case study, industry Retail, United States, 19 malls, and by RaceTrac on the SASE customer stories index. The AutoNation reference is explicitly connectivity and telco related, so it bears directly on the SD-WAN and SASE scope."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        28,
+        24,
+        23
+      ],
+      "confidence": "high",
+      "quote": "If you can bring up a secure remote access solution for 20,000 people in seven days, I think that shows we made the right choice.",
+      "claimed_by": "vendor",
+      "note": "Quote is attributed on the manufacturing industry page to Friedrich (Fritz) Wetschnig, CISO and VP of Enterprise IT at Flex. Dedicated manufacturing industry page headed 'Cybersecurity for Manufacturing'. Corroborated by Colgate-Palmolive, described on the SASE page as securing manufacturing with a unified platform approach, and by NXP labelled Manufacturing on the customers index."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        30,
+        31,
+        32
+      ],
+      "confidence": "medium",
+      "quote": "Electric utilities worldwide count on Palo Alto Networks® to prevent successful cyberattacks, safely modernize OT networks and exceed compliance requirements.",
+      "claimed_by": "vendor",
+      "note": "Two dedicated industry pages exist, electric utilities and oil and gas, which meets the dedicated industry page test. Confidence is held at medium rather than high because neither page names an individual utility or energy customer, so the grade rests on vendor pages and the unaudited about us claims '10 of 10 Largest utilities in the world' and '6 of 10 Largest oil & gas in the world' rather than on a verifiable named reference. No energy-sector SASE or SD-WAN case study was found."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        34,
+        35,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Palo Alto Networks achieves FedRAMP High Authorization across network, cloud and security operations.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in this record. A published accreditation, FedRAMP High, plus DoD Impact Level 5, DoDIN APL and Commercial Solutions for Classified, all independently checkable against US government registers. Supported by a dedicated public sector page naming Vallejo Flood and Wastewater District, and by Ministry of Justice and Vermont Judiciary on the SASE customer stories index. The 25 plus UK G-Cloud listings [32] evidence public sector routes to market in the UK as well."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        35,
+        33,
+        41
+      ],
+      "confidence": "medium",
+      "quote": "Discover how Palo Alto Networks trusted platforms and proven expertise safeguard public sector organizations — federal, K–12, higher education, and state and local government.",
+      "claimed_by": "vendor",
+      "note": "A dedicated education industry page exists at /industry/education headed 'Securely Connecting Students', which satisfies the dedicated industry page test, and the customers index carries both Education and Higher Education filter facets. Confidence is medium not high because no named education customer could be retrieved from either page. One partner G-Cloud listing [33] separately states 'Education pricing available', which suggests a sector-specific commercial motion but is a reseller statement, not the supplier's."
+    },
+    "sectors.transport_logistics": {
+      "value": "partial",
+      "evidence": [
+        41
+      ],
+      "confidence": "low",
+      "quote": "Transportation",
+      "claimed_by": "vendor",
+      "note": "The only evidence is that 'Transportation' and 'Airlines' exist as industry filter facets on the supplier's customer index. There is no dedicated transport or logistics industry page in the industries index [3], and no named transport or logistics customer could be retrieved because the customer index is JavaScript paginated and rendered only five cards. Graded partial rather than yes on that basis; a facet implies at least one listed customer but shows nothing about capability. Grupo Bimbo is described on the SASE page as protecting a global connected supply chain across 35 countries, but it is labelled Manufacturing on the customers index, so I have not counted it here."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        43,
+        41
+      ],
+      "confidence": "medium",
+      "quote": "Prisma Browser delivered true zero trust security to the last mile. It strengthened, complemented, and augmented our SASE strategy for hybrid workforce and workplace.",
+      "claimed_by": "vendor",
+      "note": "Named case study for Wipro, industry labelled 'IT and Consulting', region Global, and the customers index carries a 'Professional & Legal Services' facet. Confidence is medium because the deployed product is Prisma Browser rather than Prisma Access or Prisma SD-WAN, although the customer quote explicitly places it inside their SASE strategy. There is no dedicated professional services industry page."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        46,
+        41
+      ],
+      "confidence": "medium",
+      "quote": "Just three members of our network team deployed 400 Prisma SD-WAN Instant-On Network (ION) devices to locations scattered throughout the country in only 12 months.",
+      "claimed_by": "vendor",
+      "note": "American Food & Vending is a named Prisma SASE and Prisma SD-WAN case study labelled Hospitality, United States, 2,000 employees. This is a directly relevant SD-WAN reference rather than a general platform one. The customers index also carries a Hospitality facet. Confidence is medium because it is a single reference and there is no dedicated hospitality industry page; Green Bay Packers and Village Roadshow sit under Sports & Leisure and Media & Entertainment respectively and were not counted here."
+    },
+    "regions.uk_ireland": {
+      "value": "partner_integrated",
+      "evidence": [
+        54,
+        55,
+        56,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "Palo Alto Networks Prisma Access (SASE)",
+      "claimed_by": "third_party",
+      "note": "Graded partner_integrated, not yes, because every piece of UK evidence found is partner delivered. The UK Government Digital Marketplace carries 25 plus live G-Cloud listings of Prisma Access, all from UK resellers such as Khipu Networks, Softcat, Computacenter, CDW, Bytes, Trustmarque, boxxe and Phoenix Software, not from Palo Alto Networks itself. Nuffield Health, a UK healthcare provider, appears on the healthcare page but the page does not state a country. The supplier's own UK domain [31] publishes no UK service delivery, data residency or framework statement, and no vendor-published UK point of presence list could be retrieved. Ireland: the only Ireland evidence found is a Dublin office on the locations page [16], which the brief excludes."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        52,
+        47,
+        38
+      ],
+      "confidence": "high",
+      "quote": "In addition to the data residency controls we provide customers for all of our cloud services, Sovereign Cortex with T Security provides additional sovereign controls for every layer of the environment.",
+      "claimed_by": "vendor",
+      "note": "Dated release of 9 June 2026, datelined Amsterdam and Munich. The quoted sentence is a supplier claim of data residency controls across all its cloud services, and the same release states 'all support personnel are based exclusively in Europe, and all contractual agreements are governed by European law' and names GDPR, NIS2 and DORA. Caveat to record: the exclusively-European support and governing law commitments attach to the Sovereign Cortex with T Security offering delivered with Deutsche Telekom, not to Prisma SASE generally. VINCI, headquartered in France, corroborates European delivery but on Cortex XDR rather than SASE."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        34,
+        42,
+        46
+      ],
+      "confidence": "high",
+      "quote": "Palo Alto Networks achieves FedRAMP High Authorization across network, cloud and security operations.",
+      "claimed_by": "vendor",
+      "note": "FedRAMP High plus DoD Impact Level 5 authorisation is service availability evidence for the United States, not merely a sales presence, and is checkable against US government registers. Corroborated by two United States SASE and SD-WAN case studies, Westfield (19 malls) and American Food & Vending (400 ION devices). Canada: the only Canadian evidence found is a Toronto office on the locations page [16], which the brief excludes, so Canada specifically is weaker than the United States."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        44,
+        45,
+        38
+      ],
+      "confidence": "medium",
+      "quote": "A lean two-person security team at Zespri completed the implementation in under six months",
+      "claimed_by": "vendor",
+      "note": "Two named Prisma SASE customer deployments in the region, Zespri in New Zealand and Village Roadshow in Australia, are direct service delivery evidence. The locations page separately describes Singapore as 'headquarters for supporting our business and customers in Asia Pacific (APAC)', but that is an office and is not relied on for the grade. Confidence is medium because no vendor-published Asia Pacific point of presence or availability list could be retrieved; both references are Australia and New Zealand, with nothing found for Japan, India or South East Asia beyond offices."
+    },
+    "regions.middle_east_africa": {
+      "value": "unknown",
+      "evidence": [
+        38,
+        36,
+        37
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No service delivery evidence found. Checked the Prisma Access product page, the Prisma SD-WAN page, the Prisma Access and Prisma SASE datasheet pages, the SASE and SASE customer stories pages, the technical documentation index and the press release index, and found no Middle East or Africa point of presence, coverage or availability statement and no named customer in the region. The locations page lists offices in Qatar (Doha), Saudi Arabia (Riyadh), UAE (Dubai) and South Africa (Johannesburg), but the Netify definition explicitly excludes sales offices, so those are recorded as context only and carry no grade."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        23,
+        41,
+        38
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Insufficient evidence to grade. Grupo Bimbo, a Mexico headquartered group, is presented on the SASE page as protecting its global connected supply chain across 35 countries and appears on the customers index labelled Manufacturing, which points towards Latin American delivery, but three candidate case study URLs all returned HTTP 404 so no country or coverage statement could be confirmed and no verbatim quote could be captured. The locations page lists Brazil (São Paulo, Rio de Janeiro) and Mexico (Mexico City) offices, which the brief excludes. Recorded as unknown rather than partial because no quotable delivery statement was obtained."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        50,
+        38
+      ],
+      "confidence": "low",
+      "quote": "Prisma Access China",
+      "claimed_by": "vendor",
+      "note": "The supplier's technical documentation index carries a dedicated 'Prisma Access China' topic, which is China-specific rather than a generic global claim and is why this is graded partial rather than unknown. However the topic page itself could not be opened: five candidate URLs across documentation versions all returned HTTP 404, so the licensing arrangement, local partner and any restrictions remain unverified. Treat as an indication that a distinct mainland China offering exists, not as confirmation of its terms. Offices in Beijing, Shanghai, Guangzhou, Shenzhen and Macau appear on the locations page but are excluded by the brief. A buyer should request the China documentation and the specific licensed arrangement directly."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        32,
+        47,
+        23
+      ],
+      "confidence": "high",
+      "quote": "9 of 10 of the Fortune 10",
+      "claimed_by": "vendor",
+      "note": "The about us stat block also carries '70K+ Customers Globally', '8 of 10 Largest U.S. banks', '10 of 10 Largest utilities in the world', '6 of 10 Largest oil & gas in the world' and '7 of 10 Top U.S. hospitals'. These are unaudited vendor claims, but they are explicit and the supporting case studies are consistent with them: VINCI at 200,000 endpoints across a group operating in 120 plus countries, Grupo Bimbo across 35 countries, Wipro, Autodesk and Colgate-Palmolive. Every SASE case study located is a large or upper mid enterprise."
+    },
+    "organisation_fit.mid_market": {
+      "value": "unknown",
+      "evidence": [
+        36,
+        37,
+        23,
+        51
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence of explicit mid-market targeting found. Checked the SASE page, Prisma Access page, Prisma SD-WAN page, both datasheet landing pages and the press release index for mid-market, midsize or SMB tiering, a mid-market product edition, or mid-market pricing, and found none. Two managed service and MSP partner page URLs were tried and both returned HTTP 404, so a partner-led mid-market motion could not be checked. Circumstantially the smaller named references sit in this bracket, American Food & Vending at 2,000 employees and Cordis at 2,500 employees, but neither is described by the supplier as a mid-market customer, and inferring a mid-market tier from customer headcount would be exactly the guesswork this exercise replaces."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        51
+      ],
+      "confidence": "medium",
+      "quote": "flexible and accessible pricing for any small business",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes, and the distinction matters for a SASE and SD-WAN comparison. There is unambiguous, dated small business targeting: a press release of 23 March 2026 headed 'Palo Alto Networks Introduces the Most Secure Workspace for Small Business', describing a product that lets 'small business owners to easily configure and manage the apps and AI tools their business relies on'. But the product is Prisma Browser for Business, an adjacent secure browser offering, not Prisma Access or Prisma SD-WAN. The release states 'Prisma Browser for Business is available today in the United States. Start the 30-day free trial', so availability at launch is United States only. No small business tier, entry point or pricing was found anywhere in the SASE or SD-WAN portfolio, and no small business definition by headcount or revenue is published."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        55,
+        56,
+        49,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "£68.86 a user",
+      "claimed_by": "vendor",
+      "note": "The supplier publishes no pricing of its own: the Prisma Access page, Prisma SD-WAN page and both datasheet landing pages were checked and contain no price, no entry point and no packaging detail. The grade therefore rests on third party listed pricing on the UK Government Digital Marketplace, a mandatory-price procurement register, combined with the supplier's own positioning language on the Prisma SASE datasheet page, 'the industry's most comprehensive secure access service edge (SASE) solution'. CONFLICT TO RECORD, not resolved: two resellers list materially different prices for nominally the same product. Khipu Networks lists Palo Alto Networks Prisma Access (SASE) at '£68.86 a user' with 'Education pricing available'; Softcat lists Palo Alto Prisma Access at '£90 a unit', where 'a unit' is undefined and may not be per user. Both are reseller-set UK channel prices under G-Cloud and neither is the supplier's list price. Confidence is medium: the direction of travel is clearly premium, consistent with an enterprise platform sold to Fortune 10 accounts with no published small business or mid-market SASE tier, but the underlying figures are indicative rather than authoritative and a buyer should treat them as a starting point for negotiation, not a quote."
     }
   },
   "conflicts": [

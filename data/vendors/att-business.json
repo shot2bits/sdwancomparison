@@ -80,16 +80,16 @@
     "Commercial structure typically bundles access, security and platform; line-item costing requires explicit RFP."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
-    "uk_ireland": "partner_integrated",
-    "europe": "partner_integrated",
+    "uk_ireland": "yes",
+    "europe": "yes",
     "north_america": "yes",
-    "asia_pacific": "partial",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "unknown"
+    "asia_pacific": "yes",
+    "middle_east_africa": "yes",
+    "latin_america": "yes",
+    "china_mainland": "partial"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -112,18 +112,18 @@
     "healthcare": "yes",
     "financial_services": "yes",
     "retail_ecommerce": "yes",
-    "manufacturing": "partial",
+    "manufacturing": "yes",
     "energy_utilities": "partial",
     "government_public_sector": "yes",
-    "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "education": "yes",
+    "transport_logistics": "yes",
+    "professional_services": "unknown",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "partial",
-    "small_business": "not_primary"
+    "mid_market": "yes",
+    "small_business": "yes"
   },
   "pricing_units": [
     "per_site",
@@ -390,6 +390,213 @@
       "published": "2024",
       "reliability": "Analyst report hosted and sponsored by the supplier. Seen in search results, not fetched. Corroboration only; would not carry a grade alone.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "SD-WAN Service Provider - Software Defined Wide Area Network at AT&T Business",
+      "url": "https://www.business.att.com/products/sd-wan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Primary supplier product page. Carries the core SD-WAN proposition, the country-count claim and two named SD-WAN customer cards (Lincoln Tech, Fisher and Paykel). Marketing copy, so treat coverage claims as vendor assertion."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Managed SASE Cybersecurity Network Solution | AT&T Business",
+      "url": "https://www.business.att.com/products/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Primary supplier product page for the SASE offer. Contains an explicit FAQ on small and mid sized business suitability and the mid-market and enterprise positioning line. Vendor claim, no third party verification."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Customer Stories | AT&T Business",
+      "url": "https://www.business.att.com/learn/customer-stories.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier customer story index with explicit industry labels per card. Useful because AT&T itself assigns the sector label, but most cards are fibre, IoT or wireless rather than SD-WAN or SASE."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Software Defined Wide Area Network (SD-WAN) Customer Story For COCC at AT&T",
+      "url": "https://www.business.att.com/learn/customer-stories/cocc.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named SD-WAN case study in financial services with a named customer and a named underlying platform. Supplier authored so outcome figures are unverified, but the customer identity and sector are unambiguous."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "CUSTOMER STORIES About Lincoln Tech (PDF)",
+      "url": "https://www.business.att.com/content/dam/attbusiness/customer-stories/lincoln-technical-institute-customer-story.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study PDF with a named education customer, a named CIO and direct attributed quotes about AT&T SD-WAN replacing MPLS. Strongest education evidence found."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Digital Transformation Technology & Solutions at AT&T Business (Industries index)",
+      "url": "https://www.business.att.com/industries.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier index establishing which industries have dedicated pages. Definitive for scoping which sectors AT&T chooses to publish for, but says nothing about depth."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Healthcare Technology Solutions at AT&T Business",
+      "url": "https://www.business.att.com/industries/healthcare.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier sector page including an SD-WAN specific healthcare item. Vendor material."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Financial Technology & Security Solutions at AT&T Business",
+      "url": "https://www.business.att.com/industries/finance.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier sector page for financial services with a named customer reference. Vendor material."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Retail Technology Solutions at AT&T Business",
+      "url": "https://www.business.att.com/industries/retail.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier sector page listing managed SD-WAN and several named retail customers. Vendor material; the named retail customers are connectivity rather than SD-WAN wins."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "IOT Network and Technology Solutions for Manufacturers at AT&T Business",
+      "url": "https://www.business.att.com/industries/manufacturing.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier sector page for manufacturing with a named customer. Vendor material; manufacturing evidence is IoT and connectivity led rather than SD-WAN led."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Transportation Technology Solutions at AT&T Business",
+      "url": "https://www.business.att.com/industries/transportation.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier sector page that names managed SD-WAN directly in the transport solution set. Vendor material."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Hospitality Technology Solutions at AT&T Business",
+      "url": "https://www.business.att.com/industries/hospitality.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier sector page for hospitality. Vendor material; managed SD-WAN appears only in the site-wide product footer, not in hospitality specific copy."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "AT&T Public Sector Solutions deliver a faster, smarter, safer future",
+      "url": "https://www.business.att.com/industries/public-sector.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier public sector page with named public bodies and an SD-WAN specific reference. Vendor material."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Government Infrastructure Technology Solutions at AT&T Business (Enterprise Infrastructure Solutions)",
+      "url": "https://www.business.att.com/industries/family/public-sector/enterprise-infrastructure-solutions.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page describing AT&T delivery of SD-WAN and Managed Network Service under the US federal EIS contract vehicle. Vendor authored but describes a real, externally awarded government contract."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "E-Rate program for Schools and Libraries | AT&T Business",
+      "url": "https://www.business.att.com/industries/public-sector/e-rate.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page tied to a US federal funding programme for K-12 schools and libraries. Corroborates a standing education go to market, though it is a funding scheme page rather than an SD-WAN page."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "AT&T Global Business Services | Internet Connectivity, Networking & Wireless",
+      "url": "https://www.business.att.com/industries/att-global-business.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier global coverage hub carrying region by region presence statements and headline reach figures. Vendor claims, unaudited, and mixes network reach with staffing presence."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "AT&T Global Business EMEA region",
+      "url": "https://www.business.att.com/industries/att-global-business-europe-middle-east-and-africa.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier regional page listing named country offices with street addresses across Europe, the Middle East and Africa plus network statistics. Address level detail makes this notably more concrete than a generic global claim."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "AT&T Global Business Asia Pacific region",
+      "url": "https://www.business.att.com/industries/att-global-business-asia-pacific.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier regional page listing named country offices with street addresses across Asia Pacific including Beijing and Shanghai, plus MPLS node and datacentre counts. Presence detail is strong; service licensing detail is absent."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "AT&T Global Business LATAM region",
+      "url": "https://www.business.att.com/industries/att-global-business-latin-america-and-caribbean.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier regional page listing named Latin American country offices and staffing counts. Vendor claim, no independent verification of service availability."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "AT&T and Cisco Deliver Comprehensive SASE Solution",
+      "url": "https://about.att.com/story/2025/sase-with-cisco.html",
+      "published": "2025-08-27",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated corporate newsroom release with named executives from both parties. Supplier authored so it is Tier 1, but the date and named attribution make the customer segment statement reliable as a positioning claim."
+    },
+    {
+      "n": 44,
+      "tier": 2,
+      "title": "AT&T Price List - Best and Final Offer Response, Data Communications Network Services (New Jersey Treasury contract T1776)",
+      "url": "https://www.nj.gov/treasury/purchase/pricelists/T1776/ATT%20Price%20List%20BAFO.pdf",
+      "published": "2024-01-10",
+      "verified_on": "2026-07-29",
+      "reliability": "Independently accountable US state procurement record publishing AT&T managed SD-WAN line item rates. Strongest pricing evidence available. Caveat: these are negotiated public sector contract rates for one US state, not a published commercial list price, so they indicate order of magnitude only."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "AT&T Business SASE category page (attempted)",
+      "url": "https://www.business.att.com/categories/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL returned an HTTP 404 and no content could be read, so nothing on it can be quoted or graded."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "AT&T Business Lincoln Technical Institute customer story HTML page (attempted)",
+      "url": "https://www.business.att.com/learn/customer-stories/lincoln-technical-institute.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL returned an HTTP 404. The equivalent content was obtained from the supplier PDF at source 5 instead."
     }
   ],
   "sourced_facts": {
@@ -618,6 +825,249 @@
       "quote": "A 100% uptime guarantee",
       "claimed_by": "vendor",
       "note": "This 100% uptime guarantee is published for AT&T Dedicated Internet, not for managed SD-WAN or SASE. No availability percentage for the managed SD-WAN or SASE service was found: the SLA credit quick guide defers to the ADI Service Guide, and the AT&T Service Guide Library could not be fetched. Treat the SD-WAN and SASE availability percentage as unpublished in the sources reviewed."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        30,
+        26,
+        29
+      ],
+      "confidence": "high",
+      "quote": "SD-WANs can be game changers for healthcare",
+      "claimed_by": "vendor",
+      "note": "AT&T runs a dedicated healthcare industry page and publishes SD-WAN specific healthcare content on it. Source 3 also lists a named healthcare customer, ENT of Georgia North, under the Healthcare label, although that story is dedicated internet and voice rather than SD-WAN. No named healthcare SD-WAN or SASE customer was found, and no HIPAA or healthcare accreditation statement was found on the SD-WAN or SASE product pages."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        27,
+        31,
+        29
+      ],
+      "confidence": "high",
+      "quote": "COCC today serves more than 150 community banks and credit unions and is the sixth largest core banking solutions provider in the U.S.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in the set. COCC is a named, sector specific SD-WAN case study on the supplier site, and AT&T also runs a dedicated financial services industry page. The case study names the underlying SD-WAN platform. Outcome figures in the case study are supplier authored and unverified."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        24,
+        32,
+        29
+      ],
+      "confidence": "high",
+      "quote": "A global appliance maker needed consistent connectivity for its in-store displays. AT&T SD-WAN was the clear choice for dependable, scalable solution that didn't require a huge investment.",
+      "claimed_by": "vendor",
+      "note": "The SD-WAN product page itself carries a retail SD-WAN customer card for Fisher and Paykel, and AT&T runs a dedicated retail industry page listing managed SD-WAN. Note that the other named retail customers on source 9 (JPS Motors, RDH Partners) are dedicated internet and wireless broadband wins, not SD-WAN."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        33,
+        29,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "AT&T Business delivers the right insights, guidance, and highly secure solutions to help you connect your factory environment, simplify your supply chain, enable your digital transformation, and make your business more resilient.",
+      "claimed_by": "vendor",
+      "note": "A dedicated manufacturing industry page exists and source 3 labels Alfa Laval and ACT Pipe & Supply as Manufacturing customers. Confidence is capped at medium for the SASE and SD-WAN context because every named manufacturing customer found is an IoT, fibre or dedicated internet story. No manufacturing SD-WAN or SASE case study was found."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        26,
+        29
+      ],
+      "confidence": "low",
+      "quote": "WaveLink Secure relies on AT&T connectivity to continuously monitor swimming areas such as pools and docks for dangerous electrical current.",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes. The only energy evidence found is a single customer card that AT&T itself labels Energy and Utilities, and the deployment is IoT sensing, not SD-WAN or SASE. There is no dedicated energy or utilities industry page in the supplier industries index at source 6, and no utility named on the SD-WAN or SASE product pages. Checked sources 1, 2, 3 and 6."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        37,
+        36,
+        38
+      ],
+      "confidence": "high",
+      "quote": "EIS is a comprehensive solution-based vehicle to address all aspects of federal agency IT, telecommunications, and infrastructure needs.",
+      "claimed_by": "vendor",
+      "note": "AT&T publishes a dedicated public sector division with an Enterprise Infrastructure Solutions page that describes SD-WAN and Managed Network Service delivery under the US federal EIS contract vehicle. Source 13 additionally names public bodies including New Zealand Trade and Enterprise on AT&T SD-WAN, the Town of Duck NC and the City of Danville, Illinois. Evidence is US federal and US municipal weighted."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        28,
+        24,
+        38
+      ],
+      "confidence": "high",
+      "quote": "E-Rate helps provide funding to K-12 schools and libraries for eligible connectivity services.",
+      "claimed_by": "vendor",
+      "note": "Two independent strands. Source 5 is a full named education SD-WAN case study (Lincoln Technical Institute, quoted CIO Val Thomas, MPLS replaced across the estate) and it is also surfaced as a customer card on the SD-WAN product page itself. Source 15 shows a standing K-12 and libraries go to market via the US E-Rate funding programme. Evidence is US only."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        34,
+        29,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "Transform and optimize your network with enhanced performance, security, and intelligence with managed SD-WAN",
+      "claimed_by": "vendor",
+      "note": "AT&T runs a dedicated transportation industry page and names managed SD-WAN directly within its transport solution set, which is stronger than a footer mention. Confidence is medium because the named transport customers found (SareKon on source 11, Coco Robotics on source 3) are IoT and wireless connectivity, not SD-WAN or SASE."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [
+        29,
+        26,
+        24,
+        25
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No professional services evidence found. The supplier industries index at source 6 lists six sectors only (healthcare, retail, hospitality, financial services, transportation, manufacturing) and professional services is not among them. The customer stories index at source 3 has no professional services label, and the nearest card, Credico, is filed by AT&T under Other. Neither the SD-WAN nor the SASE product page names the sector. Checked sources 1, 2, 3 and 6."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        35,
+        29,
+        24
+      ],
+      "confidence": "medium",
+      "quote": "AT&T can help you optimize the guest experience and streamline property operations with our suite of end-to-end business solutions.",
+      "claimed_by": "vendor",
+      "note": "A dedicated hospitality industry page exists and hospitality is one of the six industries linked from the SD-WAN and SASE product pages. Confidence is medium for this comparison because managed SD-WAN appears on the hospitality page only in the site-wide product footer, not in hospitality specific copy, and no hospitality SD-WAN or SASE case study was found. Source 3 lists Gullo's under a hospitality style story but categorised as Small business and delivered on fibre."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        40,
+        39
+      ],
+      "confidence": "high",
+      "quote": "AT&T's dedicated staff provides local account management, design and operational support from multiple locations across the EMEA region.",
+      "claimed_by": "vendor",
+      "note": "Source 17 lists named UK offices with street addresses in London (80 Victoria Street), Studley (Studley Point, Birmingham Rd) and Portsmouth (1000 Lakeside, North Harbour), and an Ireland office in Dublin (The Sweepstakes). This is address level presence rather than a published UK or Ireland points of presence list, and AT&T does not break its MPLS node or datacentre counts down to UK and Ireland level."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        40,
+        39
+      ],
+      "confidence": "high",
+      "quote": "AT&T provides countries across Europe, Africa, and the Middle East with sales and operational support for international business.",
+      "claimed_by": "vendor",
+      "note": "Source 17 states dedicated staff in 30 countries across EMEA and names offices in Austria, Belgium, Bulgaria, Croatia, Czech Republic, Denmark, Finland, France, Germany, Greece, Hungary, Ireland, Italy, Luxembourg, Netherlands, Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Switzerland and Turkey. The same page publishes 63 MPLS service nodes in 33 countries and territories, though that figure is not broken out by region."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        39,
+        25,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Since 1980, AT&T has operated in some of Canada's largest cities, providing account management, design, and operational support.",
+      "claimed_by": "vendor",
+      "note": "The United States is AT&T's home market and the whole of business.att.com is US facing, so US delivery is not in question; the quote is used because it is the explicit published statement covering the rest of North America. Source 2 additionally displays the accolade text 2024 SASE Service Provider of the Year: Global, North America. Mexico appears in the Latin America grouping at source 19 rather than under North America."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        41,
+        39
+      ],
+      "confidence": "high",
+      "quote": "We make it possible for businesses across Asia Pacific to mobilize people, assets and information across the region and the rest of the world.",
+      "claimed_by": "vendor",
+      "note": "Source 18 publishes concrete regional infrastructure figures: dedicated staff in 14 countries and territories, 47 MPLS service nodes in 15 markets and territories, internet broadband and dedicated access in 41 markets, an AT&T colocation ecosystem of 85+ datacentres in 6 countries, and 2 security operations centres in region. Named offices include Sydney, Tokyo, Osaka, Seoul, Singapore, Taipei, Bangkok, Ho Chi Minh City, Jakarta, Auckland, Makati City, Selangor and several Indian cities."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        39,
+        40
+      ],
+      "confidence": "medium",
+      "quote": "AT&T provides countries across Europe, Africa, and the Middle East with sales and operational support for international business.",
+      "claimed_by": "vendor",
+      "note": "Confidence is medium rather than high because the Middle East and Africa footprint inside the EMEA page is thin compared with Europe. Source 17 names offices in Israel (Tel Aviv), South Africa and the United Arab Emirates only. No separate Middle East or Africa coverage statistics, points of presence list or partner carrier arrangement is published."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        42,
+        39
+      ],
+      "confidence": "high",
+      "quote": "We make it possible for businesses across Latin America & the Caribbean to mobilize people, assets and information across the region and the rest of the world.",
+      "claimed_by": "vendor",
+      "note": "Source 19 states dedicated staff in 11 countries and names offices in Argentina, Brasil, Chile, Colombia, El Salvador, Guatemala, Mexico, Panama, Peru and Venezuela, with regional headquarters in Mexico City and Sao Paulo. Source 16 dates the regional presence to 1987. The published MPLS node and datacentre counts on source 19 are the same global figures shown on the EMEA page and are not broken out for Latin America."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        41
+      ],
+      "confidence": "low",
+      "quote": "Unit 2811 & 2812, Level 28, China World Office 1, No 1, Jianguomenwai Avenue, Chaoyang District, Beijing 100004, China.",
+      "claimed_by": "vendor",
+      "note": "Graded partial, deliberately not yes. AT&T publishes named mainland China office addresses in Beijing and Shanghai and lists China among the Asia Pacific countries and territories with dedicated staff, which is more than a generic global claim. However these are office and staffing entries, not published service availability. No mainland China SD-WAN or SASE service description, licensed local carrier arrangement, ICP or VPN licence reference, or in-country points of presence list was found on sources 1, 2, 16 or 18. The 150+ countries and territories claim on source 1 is treated as evidence of nothing here."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        39,
+        43,
+        24
+      ],
+      "confidence": "high",
+      "quote": "~2,000 top multinational clients (MNCs) trust in AT&T business services",
+      "claimed_by": "vendor",
+      "note": "Source 20, a dated corporate release of 27 August 2025, describes the target set as reaching highly distributed global enterprises focused on optimizing scale, security, and resiliency. Source 1 claims deployment in more than 150+ countries and territories. The named SD-WAN customers skew large and multi-site: Lincoln Tech at 22 locations, Fisher and Paykel described as a global appliance maker, COCC serving more than 150 institutions."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        25,
+        43
+      ],
+      "confidence": "high",
+      "quote": "Explore AT&T Business SASE (Secure Access Service Edge), providing managed SASE services for mid-market & enterprise business networking security.",
+      "claimed_by": "vendor",
+      "note": "Explicit and unambiguous targeting in AT&T's own SASE page description. Corroborated by source 20, which names mid-sized businesses with multiple branches as the first of three target segments for the AT&T SASE with Cisco offer. No mid-market specific pricing tier or mid-market SD-WAN case study is published."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        25,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "Yes. AT&T SASE is modular and scalable with solutions designed for growing businesses, remote workforces, and multi-location teams. You can start small and expand as your needs evolve.",
+      "claimed_by": "vendor",
+      "note": "AT&T answers the small business question explicitly and affirmatively in its own SASE FAQ, which meets the explicit targeting test. Confidence is held at medium because no small business SD-WAN or SASE product tier, entry price or small business SD-WAN case study was found. The one card source 3 labels Small business, Gullo's, is a fibre connectivity story. AT&T does operate a separate small business sales motion, but the evidence found for SASE and SD-WAN specifically is a single FAQ sentence."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        44,
+        24,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "$2,564.90",
+      "claimed_by": "vendor",
+      "note": "AT&T publishes no commercial list price for SD-WAN or SASE. Neither source 1 nor source 2 carries any price, entry point or starting from figure, and the SASE page cost element renders as a zero value placeholder. The only published pricing found is source 21, the New Jersey Treasury contract T1776 AT&T price list dated 10 January 2024, a US state procurement record. Under its section headed MANAGED SD-WAN it lists AT&T SD-WAN static network-based bandwidth rates, of which the quoted figure is the monthly rate for the 10 Mbps tier; the same table runs from $436.80 at 0.5 Mbps to $22,842.95 at 100 Mbps, alongside NFV line items such as Fortinet VM01 ES FW SD-WAN and Juniper U210 and U410. Premium is a Netify assessment from that carrier-managed rate card plus AT&T's own leader and service provider of the year positioning language on sources 1 and 2. Caveat, and the reason confidence is medium not high: these are negotiated public sector rates for one US state, not commercial pricing, so they indicate order of magnitude only and could be disputed."
     }
   },
   "conflicts": [

@@ -80,14 +80,14 @@
     "Underlying SD-WAN platform should be confirmed; managed service wraps various vendor platforms."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
-    "uk_ireland": "partner_integrated",
-    "europe": "partial",
+    "uk_ireland": "yes",
+    "europe": "yes",
     "north_america": "yes",
-    "asia_pacific": "partial",
-    "middle_east_africa": "partial",
+    "asia_pacific": "yes",
+    "middle_east_africa": "unknown",
     "latin_america": "yes",
     "china_mainland": "unknown"
   },
@@ -109,21 +109,21 @@
     "note": "Satellite plus terrestrial blended transport keeps remote sites online."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
     "retail_ecommerce": "yes",
     "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
+    "energy_utilities": "yes",
+    "government_public_sector": "yes",
+    "education": "yes",
     "transport_logistics": "partial",
-    "professional_services": "partial",
+    "professional_services": "unknown",
     "hospitality_leisure": "yes"
   },
   "organisation_fit": {
-    "large_global_enterprise": "partial",
+    "large_global_enterprise": "yes",
     "mid_market": "yes",
-    "small_business": "partial"
+    "small_business": "yes"
   },
   "pricing_units": [
     "per_site",
@@ -408,6 +408,294 @@
       "published": null,
       "reliability": "Not used as evidence. URL returned HTTP 404; Hughes publishes no standalone professional services page at this path.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Managed SD-WAN Solutions | Managed Services | Hughes",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services/managed-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own primary product page for Managed SD-WAN. Names regional availability (Europe, Brazil, India, Latin America), North America endpoint scale, and the industry and business-type taxonomy."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Who We Serve | Hughes",
+      "url": "https://www.hughes.com/who-we-serve",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own segmentation hub. Authoritative for which industries and business types Hughes itself claims, but list-level only with no customer detail."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Offer connected patient/provider care with Hughes (Healthcare)",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for healthcare with SD-WAN specific use cases and case study titles. Case studies are anonymised (no named provider)."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Retail industry page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for retail, links named SD-WAN case studies including Sportsman's Warehouse."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Financial industry page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/financial",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for financial services, references M&T Bank and a Managed SD-WAN consumer finance case study."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Energy industry page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/energy",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for energy with midstream/upstream framing and links to a Managed SASE energy use case."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Education industry page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for education. No named institution customer; examples are generic (schools in Peru)."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Hospitality industry page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/hospitality",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page naming multiple hospitality customers (TooJay's Deli, BurgerFi, Manna Hospitality). Note several named engagements are digital signage rather than SD-WAN."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "State Government industry page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/state-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for state and local government, cites NASPO ValuePoint and Equalis Group contract vehicles plus an SD-WAN state agency case study."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "U.S. Federal Government industry page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/us-federal-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page listing GSA EIS, GSA CS3 and Schedule 70 vehicles. Strong public sector corroboration; no FedRAMP claim seen."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Global Websites and Office Locations - Hughes",
+      "url": "https://www.hughes.com/who-we-are/locations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own office location register. Good for corporate presence by country, but offices are not by themselves proof of service delivery."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Managed SD-WAN Services UK - Hughes Network Systems",
+      "url": "https://www.hughes.com/uk/solutions/network-management/managed-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's UK-specific SD-WAN service page. Directly evidences UK and pan-European delivery and states cost positioning."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Hughes SD-WAN India | Hughes Communications India",
+      "url": "https://www.hughes.in/services/managed-services/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's India entity site (Hughes Communications India). Lists Indian target industries and named managed services customers. Separate legal entity from Hughes Network Systems, so treat as affiliated rather than identical delivery."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Another Reason to Choose Hughes for Global Managed Services",
+      "url": "https://www.hughes.com/resources/insights/sd-wan/another-reason-choose-hughes-global-managed-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier blog/insight. Gives a global SD-WAN site count and regional availability. Marketing content, undated on page."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Hughes UK / Europe homepage",
+      "url": "https://www.hughes.com/uk",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's UK and Europe landing page. Useful for the European industry vertical list (Construction, Defence, Forecourts, Manufacturing, Oil & Gas, Retail, Utilities); no country-by-country coverage detail."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Managed SASE | Secure Access Service Edge | Hughes",
+      "url": "https://www.hughes.com/what-we-offer/managed-cybersecurity/managed-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's primary Managed SASE product page. States the mid-to-large enterprise target and the Netskope/Fortinet partner stack. No pricing, no named customers."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Managed SASE Solutions | Hughes UK",
+      "url": "https://www.hughes.com/uk/solutions/managed-sase-solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's UK SASE page. Confirms multi-PoP architecture for European delivery; PoP locations are not enumerated."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Hughes Partners with Netskope to Launch Managed SASE Solution for Small to Medium Enterprises",
+      "url": "https://www.hughes.com/resources/press-releases/hughes-partners-netskope-launch-managed-sase-solution-small-medium",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release. Strongest single source for SME targeting and for the geographic scope of the SME SASE product (U.S., Canada, Mexico)."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Large Enterprise business type page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-business-type/large-enterprise",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated large enterprise segment page. Confirms explicit targeting; contains no named customers itself."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Small Business business type page | Hughes",
+      "url": "https://www.hughes.com/who-we-serve/by-business-type/small-business",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated small business segment page, including a Managed SD-WAN line for small enterprises. No published pricing."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Managed Network Services and SD-WAN Migration | Hughes",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's managed network services overview. Generic worldwide claims only; used for organisation size language, not for region grading."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Modernizing Retail Operations: Sportsman's Warehouse Partners with Hughes for Growth",
+      "url": "https://www.hughes.com/resources/insights/managed-services/modernizing-retail-operations-sportsmans-warehouse-partners-with-hughes-for-growth",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study with a named, publicly listed retail customer and store count. Corroborated independently by source 26."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Brazilian Retailer Selects Hughes Managed SD-WAN to Improve and Expand Operations",
+      "url": "https://www.hughes.com/resources/brazilian-retailer-selects-hughes-managed-sd-wan-improve-and-expand-operations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study naming Le biscuit with a specific Brazilian site count. Best available evidence of live Latin American SD-WAN delivery."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "M&T Bank Case Study - Hughes Network Systems",
+      "url": "https://www.hughes.com/resources/mt-bank-case-study",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study with a named US commercial bank. Note the deployment described is managed broadband backup and 4G/LTE continuity rather than a full SD-WAN overlay."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "Large Global Provider of Energy, Water, and Waste Management Chooses Hughes Managed SASE to Secure 10,000 Users",
+      "url": "https://www.hughes.com/resources/large-global-provider-of-energy-water-and-waste-management-chooses-hughes-managed-sase-to-secure-10000-users",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier SASE case study. Customer is anonymised but scale, sector and North American footprint are specific. Strongest large-enterprise SASE evidence found."
+    },
+    {
+      "n": 51,
+      "tier": 2,
+      "title": "EXCLUSIVE: Sportsman's Warehouse unifies network operations (Chain Store Age, Dan Berthiaume)",
+      "url": "https://chainstoreage.com/exclusive-sportsmans-warehouse-unifies-network-operations",
+      "published": "2026-06-12",
+      "verified_on": "2026-07-29",
+      "reliability": "Named-author, dated trade journalism independently confirming the Hughes managed SD-WAN deployment and the underlying VeloCloud/Meraki stack. Independent corroboration of source 22."
+    },
+    {
+      "n": 52,
+      "tier": 4,
+      "title": "Managed SASE (assumed URL under managed-network-services)",
+      "url": "https://www.hughes.com/what-we-offer/managed-network-services/managed-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. The live SASE page is at source 16."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Airlines industry page (attempted)",
+      "url": "https://www.hughes.com/who-we-serve/by-industry/airlines",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404, so no verbatim aviation content could be captured despite Airlines appearing in the industry list on source 2."
+    },
+    {
+      "n": 54,
+      "tier": 4,
+      "title": "Manufacturer business type page (attempted)",
+      "url": "https://www.hughes.com/who-we-serve/by-business-type/manufacturer",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. No dedicated manufacturing page could be verified, which caps the manufacturing grade at partial."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "Managed SD-WAN Case Studies: Powering the Future of Connected Business",
+      "url": "https://www.hughes.com/resources/managed-sd-wan-case-studies-powering-future-connected-business",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404 on fetch despite appearing in search results, so no verbatim quote could be taken."
+    },
+    {
+      "n": 56,
+      "tier": 4,
+      "title": "Middle East Africa global locations page",
+      "url": "https://hughes.com/who-we-are/about-hughes/global-locations/middle-east-africa",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: page fetched successfully but contained only a global country selector and generic worldwide claims, with no Middle East or Africa service delivery, coverage or SD-WAN availability statement to quote."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "Hughes Europe WAN and SD-WAN Support",
+      "url": "https://europe.hughes.com/solutions/managed-network-solutions/wan-support-sd-wan-support",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: 302 redirect to www.hughes.com/uk, so the europe.hughes.com hostname carries no independent content. The redirect target is source 15."
     }
   ],
   "sourced_facts": {
@@ -617,6 +905,241 @@
       "quote": "Industry-Leading SLAs: Boasting an impressive 10/50ms latency and 99.999% uptime, Hughes Managed SASE ensures consistent, high-performance connectivity.",
       "claimed_by": "vendor",
       "note": "Published by Hughes in the Managed SASE Powered with Netskope solutions sheet, alongside a 10/50ms latency commitment. The underlying platform SLA is Netskope's, surfaced through the Hughes managed wrapper. No equivalent percentage was published for Hughes Managed SD-WAN or Managed Broadband, where the Broadband page mentions SLAs, guaranteed QoS and CIR without any figure."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        28,
+        27
+      ],
+      "confidence": "high",
+      "quote": "Managed SD-WAN ensures you have the bandwidth you need at every location for medical devices, real-time patient monitoring, virtual visits and administrative services.",
+      "claimed_by": "vendor",
+      "note": "Dedicated healthcare industry page with SD-WAN specific use cases, plus healthcare case study titles including \"Hughes Professional Services Enable Healthcare Provider to Meet Aggressive Growth Goals and Integrate Newly Acquired Clinics\" and \"VA Hospitals Engage in New Ways Thanks to Digital Signage\". Caveat: the SD-WAN healthcare case study is anonymised, and the only named healthcare engagement (VA Hospitals) is digital signage, not SD-WAN or SASE."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        30,
+        49
+      ],
+      "confidence": "high",
+      "quote": "M&T Bank is a commercial bank with more than 775 retail and commercial branches and more than 1,800 partner ATMs in eight states, the District of Columbia, and Ontario, Canada.",
+      "claimed_by": "vendor",
+      "note": "Named customer (M&T Bank) plus a dedicated financial industry page and a \"Consumer Finance Company Improves Customer Experience with Hughes Managed SD-WAN\" case study. Caveat: the M&T Bank engagement as described is managed broadband backup and 4G/LTE business continuity rather than a full SD-WAN deployment. Hughes India (source 13) separately names UCO Bank and HDFC as managed services customers."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        47,
+        51,
+        48,
+        29
+      ],
+      "confidence": "high",
+      "quote": "With 145 stores nationwide, the retailer offers a vast selection of over 60,000 products, each tailored to local outdoor activities and customer preferences.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector by some distance. Named SD-WAN customers on two continents: Sportsman's Warehouse (US, 145 stores, independently confirmed by Chain Store Age) and Le biscuit (Brazil, 141 outlets). Dedicated retail industry page plus separate Grocery and Retail Petroleum verticals. Batteries Plus also appears as a Hughes managed services customer."
+    },
+    "sectors.manufacturing": {
+      "value": "partial",
+      "evidence": [
+        40,
+        37,
+        38
+      ],
+      "confidence": "medium",
+      "quote": "supports the connectivity between different offices, retail stores, manufacturing plants, construction projects, warehouses, petrol forecourts, call centres, utilities, and delivery hubs across Europe",
+      "claimed_by": "vendor",
+      "note": "Manufacturing appears only as a named item in vertical lists on the UK and Europe pages and in the Hughes India industry list (\"manufacturing, retail, automobile, FMCG, white goods, financial services, banking and hospitality\"). No manufacturing case study and no dedicated manufacturing page could be verified: the by-business-type/manufacturer URL returned 404 (source 29). Hughes India lists Hitachi and cement producers ACC and Ambuja among its customers, but that is the affiliated Indian entity and no manufacturing SD-WAN case study text was retrievable, so this stays at partial."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        50,
+        31
+      ],
+      "confidence": "high",
+      "quote": "A Europe-based global provider of energy, water, and waste management services, operating more than 400 locations across North America",
+      "claimed_by": "vendor",
+      "note": "Dedicated energy industry page plus a substantive Managed SASE case study (300 water treatment facilities, 10,000 users, 24 month phased rollout). Utilities also appears as a named vertical on the UK and Europe sites. Customer is anonymised but the scale and sector detail are specific."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        34,
+        35
+      ],
+      "confidence": "high",
+      "quote": "Managed SD-WAN Resolves Bandwidth, Budget, and Security Challenges for State Agency",
+      "claimed_by": "vendor",
+      "note": "Two dedicated public sector pages (State Government and U.S. Federal Government). Published procurement frameworks are the decisive evidence: NASPO ValuePoint, the Hughes and Equalis Group contract vehicle, GSA EIS, GSA CS3 and GSA Schedule 70, plus the E-Rate programme. Defense is listed as a separate vertical. No FedRAMP authorisation was found on the pages read."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        32,
+        34
+      ],
+      "confidence": "medium",
+      "quote": "Connecting students to education around the world",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated education industry page plus the E-Rate programme participation cited on the state government page (E-Rate is a published funding framework for schools and libraries). Confidence held at medium because no named educational institution customer was found; the only concrete example is unnamed \"schools in Peru\", and the listed case studies (\"Enhancing Campus Communication with Digital Signage\") are digital signage rather than SD-WAN or SASE."
+    },
+    "sectors.transport_logistics": {
+      "value": "partial",
+      "evidence": [
+        37,
+        27
+      ],
+      "confidence": "low",
+      "quote": "supports the connectivity between different offices, retail stores, manufacturing plants, construction projects, warehouses, petrol forecourts, call centres, utilities, and delivery hubs across Europe",
+      "claimed_by": "vendor",
+      "note": "Only list-level evidence: \"warehouses\" and \"delivery hubs\" in the UK SD-WAN vertical list, and \"Airlines\" plus \"Commercial Aviation\" in the Who We Serve taxonomy. The airlines industry page returned 404 (source 28) so no aviation content could be quoted, and Hughes aviation activity is in-flight satellite connectivity rather than enterprise SD-WAN or SASE. No freight, fleet, rail or logistics customer or case study was found. Low confidence and arguably closer to unknown."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [
+        27,
+        40
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. Checked the full Who We Serve industry taxonomy (Airlines, Defense, Education, Energy, Financial, Grocery, Healthcare, Hospitality, National Telecom Ministry, Retail Petroleum, Retail, State Government, U.S. Federal Government), the UK and Europe vertical list (Construction, Defence, Forecourts, Manufacturing, Oil & Gas, Retail, Utilities), the Hughes India industry list, and ran a targeted search for law firm, accounting and consultancy customers. Professional services does not appear in any Hughes vertical list and no such customer or case study surfaced."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Manna Hospitality Boosts Strategic Focus with Managed Services and Support from Hughes",
+      "claimed_by": "vendor",
+      "note": "Dedicated hospitality industry page with several named customers: Manna Hospitality, TooJay's Deli, BurgerFi, plus executive interviews with Brinker International (Chili's) and Smoothie King. Caveat: the named TooJay's and BurgerFi engagements are described primarily as digital signage with managed services, not explicitly SD-WAN or SASE. The page does state SD-WAN covers \"hotels, restaurants, theme parks and tourist destinations with multiple locations\"."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        37,
+        40,
+        36
+      ],
+      "confidence": "high",
+      "quote": "Managed SD-WAN Services in the UK ensure that all your stakeholders and customers feel that their digital interactions with your business have been a success",
+      "claimed_by": "vendor",
+      "note": "Dedicated UK service pages for both Managed SD-WAN and Managed SASE, a UK and Europe country site, a named European team page, and offices in Milton Keynes (UK) and Dublin (Ireland) on the locations register. Ireland evidence is the Dublin office only; no Ireland-specific service page or customer was found."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        26,
+        37,
+        42,
+        36
+      ],
+      "confidence": "high",
+      "quote": "Interested in SD-WAN solutions around the world? Discover our solutions in Europe, Brazil, India and Latin America.",
+      "claimed_by": "vendor",
+      "note": "Corroborated three ways: the main product page directs European buyers to a European SD-WAN offering; the UK page states delivery \"across Europe\" spanning offices, retail, manufacturing, warehouses and forecourts; and the locations register lists offices in Italy (Rome), Germany (Griesheim), Bulgaria (Sofia) and Ireland (Dublin) alongside the UK, with German and Italian language sites. The UK SASE page claims \"multiple points of presence (PoPs)\" but does not enumerate their locations."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        26,
+        38,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "Interested in SD-WAN solutions around the world? Discover our solutions in Europe, Brazil, India and Latin America.",
+      "claimed_by": "vendor",
+      "note": "Evidence is India-centric, not APAC-wide. Delivery is through Hughes Communications India (hughes.in), which runs its own SD-WAN service page naming managed services customers including Tata Teleservices, Tata Communications, UCO Bank, Hitachi and HDFC, and offices in Gurgaon, Bangalore, Mumbai, Chennai, Kolkata and Delhi. One further APAC office in Jakarta, Indonesia. Confidence is medium because Hughes Communications India is a distinct affiliated entity and no evidence was found of SD-WAN or SASE delivery elsewhere in Asia Pacific (no Australia, Japan, Singapore or South East Asia service page or customer)."
+    },
+    "regions.middle_east_africa": {
+      "value": "unknown",
+      "evidence": [
+        56,
+        36,
+        57
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No service delivery evidence found. The locations register lists a Dubai, United Arab Emirates office, but an office is presence not delivery. The dedicated Middle East Africa global locations page (source 31) was fetched and contained only a country selector and generic \"worldwide\" claims with no MEA coverage, PoP or SD-WAN availability statement to quote. Hughes has substantial satellite and telecom-ministry business in these regions historically, but nothing SD-WAN or SASE specific was verifiable in this task, so this stays unknown rather than partial."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        48,
+        26,
+        36
+      ],
+      "confidence": "high",
+      "quote": "A popular home goods department store in Brazil, Le biscuit offers everything from decorative items and appliances to toys and entertainment at 141 retail outlets across 14 Brazilian states, plus a robust e-commerce channel.",
+      "claimed_by": "vendor",
+      "note": "Live named Managed SD-WAN deployment in Brazil (Le biscuit, 141 sites, 14 states), plus the main product page pointing separately to Brazil and Latin America offerings via hughes.com.br. Locations register shows a dense regional footprint: six Brazilian offices (Sao Paulo, Barueri, Boa Vista, Rio Branco, Brasilia, Rio de Janeiro) plus Colombia, Peru, Chile, Ecuador and Mexico, with local-language sites for each."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        36,
+        26,
+        46
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence of any kind. Checked the locations register (no China office listed among the North America, Latin America, Asia-Pacific or EMEA entries), the main Managed SD-WAN page, the managed network services overview, and ran a targeted search for Hughes SD-WAN delivery in mainland China. The only relevant statements are generic worldwide claims such as \"Managed services for public and private sector organizations worldwide\", which per the brief count as evidence of nothing for mainland China. No ICP licence, no local carrier partnership and no China PoP were found."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        50,
+        49,
+        44,
+        41
+      ],
+      "confidence": "high",
+      "quote": "300 of its water treatment facilities and 10,000 users",
+      "claimed_by": "vendor",
+      "note": "Dedicated Large Enterprise and Multinational Organization segment pages, plus concrete large-scale proof: a 10,000 user Managed SASE rollout for a Europe-based global energy, water and waste provider, M&T Bank at 775+ branches, and a claimed \"single deployment of 9,500 sites\" within \"over 50,000 managed SD-WAN sites around the world\". The SASE page states the target is \"Mid to large enterprises with diverse infrastructures\"."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        41,
+        43,
+        47
+      ],
+      "confidence": "high",
+      "quote": "Hughes Managed SASE is designed for small and mid-sized enterprises headquartered in the U.S., Canada and Mexico",
+      "claimed_by": "vendor",
+      "note": "Explicitly targeted at two levels: the flagship SASE page states \"Mid to large enterprises with diverse infrastructures\", and Hughes launched a purpose-built SME SASE product with Netskope, offered either as \"a full SASE implementation or as an add-on to an existing SD-WAN deployment\". The Franchise segment page and mid-size chain customers such as Sportsman's Warehouse (145 stores) sit in this band. Note the SME SASE product is geographically limited to the US, Canada and Mexico."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        45,
+        43,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "Hughes delivers powerful yet cost-effective solutions and services tailored to the small enterprise.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Small Business segment page that explicitly includes Managed SD-WAN for multi-location small businesses, plus the SME-targeted Managed SASE product with Netskope. The Managed SD-WAN page states \"Supporting businesses of all sizes, from small enterprises to government agencies\". Confidence held at medium because no named small business customer, no small business price point and no self-serve tier were published: the offering is still a managed service sold through a sales motion, and the realistic floor is multi-site small chains rather than single-site micro businesses."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        37,
+        35,
+        43,
+        45
+      ],
+      "confidence": "medium",
+      "quote": "size and cost the solution based on multiple low-cost broadband technologies rather than dedicated higher cost circuit products",
+      "claimed_by": "vendor",
+      "note": "No published pricing, no entry point, no analyst or marketplace listed price was found anywhere across 32 pages, so this grade rests entirely on the supplier's own positioning language, which is consistent and explicit across four independent pages. Hughes positions on cost displacement rather than premium: the UK page sizes solutions on \"multiple low-cost broadband technologies rather than dedicated higher cost circuit products\"; the federal page claims \"Using broadband has shown cost savings of 60-70%\"; the SME SASE press release promises \"at a price point that fits their budget\"; and the small business page offers \"cost-effective solutions\". Counterweight noted but not resolved: Hughes is positioned by analysts at the premium end of capability, described as \"a Leader in the 2026 Gartner Magic Quadrant for Managed Network Services\" and a Frost & Sullivan Managed SD-WAN leader for four consecutive years, and a fully managed multi-vendor SASE stack (Netskope plus Fortinet) with 24/7 NOC and SOC is not a budget purchase. \"value\" reflects the cost-versus-MPLS positioning; a buyer should expect mid-market managed service pricing in practice. Treat as unverified against any actual quote."
     }
   },
   "conflicts": [

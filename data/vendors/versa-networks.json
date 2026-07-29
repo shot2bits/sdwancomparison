@@ -81,16 +81,16 @@
     "Brand recognition trails Cisco, Palo Alto and Fortinet in enterprise procurement processes."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
-    "uk_ireland": "yes",
+    "uk_ireland": "unknown",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "partial"
+    "middle_east_africa": "unknown",
+    "latin_america": "unknown",
+    "china_mainland": "unknown"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -110,8 +110,8 @@
     "note": "Multi-tenant HA head-ends and regional Versa Cloud Gateways."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
     "retail_ecommerce": "partial",
     "manufacturing": "partial",
     "energy_utilities": "partial",
@@ -123,8 +123,8 @@
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "partial"
+    "mid_market": "unknown",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -381,6 +381,231 @@
       "published": null,
       "reliability": "Not used as evidence. The page served only a JavaScript-required redirect interstitial; no partner programme, white-label or professional services text was retrievable.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Our Customers | Versa Networks",
+      "url": "https://versa-networks.com/customers/",
+      "published": "2022-04-04",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. versa-networks.com sits behind an Imperva JavaScript bot wall returning only 'Javascript is required' to non-browser clients, so this was read via the text proxy https://r.jina.ai/https://versa-networks.com/customers/ where every quoted string reproduces. Attributions are anonymised Gartner Peer Insights reviewers labelled by industry, not named customers."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Versa Networks homepage, customer story cards and review strip",
+      "url": "https://versa-networks.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Read via https://r.jina.ai/https://versa-networks.com/ because of the same bot wall. Quotes re-extracted on three separate passes and matched each time. Customer stories are anonymised apart from Adobe."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Versa Networks site navigation, Industry Solutions menu, rendered on the /company/ 404 page",
+      "url": "https://versa-networks.com/company/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 but weaker than a live page. This URL 404s; its 'Looking for something?' block renders the full site navigation including an Industry Solutions menu of dedicated industry page URLs. Read via https://r.jina.ai/https://versa-networks.com/company/. The individual industry pages could NOT be loaded: reader attempts returned HTTP 429 and direct attempts hit the bot wall. Verified navigation entries, not verified page content, so possibly stale."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Versa docs: Portal for Titan Order Management for MSPs 9.3.0",
+      "url": "https://docs.versa-networks.com/Titan/Order_Management_for_MSPs/01_Portal_for_Titan_Order_Management_for_MSPs_9.3.0",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier documentation. docs.versa-networks.com is NOT behind the bot wall and was fetched directly, so quotes are independently reproducible. Strongest service-delivery evidence found. Gateway data centre sentence confirmed on two separate fetches."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Versa docs: Versa Secure SD-WAN Licensing Overview (2025)",
+      "url": "https://docs.versa-networks.com/Getting_Started/Licenses_and_Entitlement/Versa_Secure_SD-WAN_Licensing_Overview_(2025)",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier documentation, fetched directly. Names licence tiers Essential, Professional and Elite and subscription terms of 1, 3 or 5 years. Contains no prices, list prices or currency amounts."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Versa docs: Solution Use Cases",
+      "url": "https://docs.versa-networks.com/Getting_Started/Versa_Product_Solution/02_Solution_Use_Cases",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Negative evidence: checked for healthcare, retail, manufacturing, government, education, finance, logistics and hospitality and for organisation size wording. None present; only generic 'enterprises' and 'service providers'."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Versa docs: Reference section index",
+      "url": "https://docs.versa-networks.com/Reference",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Negative evidence for regions: no gateway locations, points of presence, regional IP ranges or service availability published."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Versa docs: Security Service Edge (SSE) section index",
+      "url": "https://docs.versa-networks.com/Security_Service_Edge_(SSE)",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Negative evidence for regions: no PoP, gateway location or data centre topology published in the SSE configuration tree."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Versa docs: Integrations and Solutions section index",
+      "url": "https://docs.versa-networks.com/Integrations_and_Solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Negative evidence: no industry, vertical, region or country references found."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Versa docs: Knowledge Base index",
+      "url": "https://docs.versa-networks.com/Reference/Knowledge_Base/Knowledge_Base",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Negative evidence for sector accreditations: checked for FedRAMP, Common Criteria, FIPS, NIAP, HIPAA and PCI DSS. None mentioned. Full knowledge base sits behind login at support.versa-networks.com/kb."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Versa docs: Titan section index",
+      "url": "https://docs.versa-networks.com/Titan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Establishes that Titan has a dedicated MSP order-management portal. No target-audience or organisation-size statement present."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Versa docs: Getting Started section index",
+      "url": "https://docs.versa-networks.com/Getting_Started",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Used to locate the licensing pages. Negative evidence: no deployment region, cloud region or hosted gateway location list."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Versa Networks product documentation home",
+      "url": "https://docs.versa-networks.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Used for site structure discovery only. Carries no grade."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Versa docs: Titan Release Notes for Releases 11.0, 11.2 and 11.3",
+      "url": "https://docs.versa-networks.com/Titan/Release_Notes/01_Versa_Titan_Release_Notes_for_Releases_11.0%2C_11.2%2C_and_11.3",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Negative evidence: no new gateway locations, regions, countries, data centres or pricing tiers announced."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Versa docs: Getting Started with Titan Portal and Deploy SASE Gateway Devices",
+      "url": "https://docs.versa-networks.com/Titan/Titan_Portal/Getting_Started_with_Titan_Portal",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly. Both this page and https://docs.versa-networks.com/Titan/Titan_Portal/Deploy_SASE_Gateway_Devices are index stubs. Negative evidence: no selectable gateway region, city or country list, and no small-business or lean-IT audience statement."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "versa-networks.com robots.txt",
+      "url": "https://versa-networks.com/robots.txt",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1, fetched directly as plain text (the bot wall applies to HTML pages, not this file). Used for site structure discovery: confirms five language sitemaps and disallowed /lp/ and datasheet PDF paths. Carries no grade."
+    },
+    {
+      "n": 39,
+      "tier": 2,
+      "title": "SEC EDGAR full-text search, Versa Networks Inc Form D filings, CIK 0001562280",
+      "url": "https://efts.sec.gov/LATEST/search-index?q=%22Versa%20Networks%22&forms=D",
+      "published": "2022-10-27",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 2 regulator record, fetched directly. Confirms Versa Networks Inc is a Delaware-incorporated company with two Form D exempt-offering filings, Cupertino CA in 2012 and San Jose CA in 2022. Corroborates a US corporate base only. Does not evidence sector, service region or price, so carries no grade here."
+    },
+    {
+      "n": 40,
+      "tier": 4,
+      "title": "Gartner Peer Insights vendor page for Versa Networks",
+      "url": "https://www.gartner.com/reviews/market/sase-platforms/vendor/versa-networks",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the fetch returned HTTP 403, so no reviewer industry, company-size band or region label could be read at source. Note that the vendor's own customers page reproduces Gartner review text, and those reproductions are graded under source 1 rather than here."
+    },
+    {
+      "n": 41,
+      "tier": 4,
+      "title": "PeerSpot product reviews search for Versa SASE",
+      "url": "https://www.peerspot.com/products/versa-sase-reviews",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL resolved to a generic product directory listing other vendors, with no Versa-specific pricing, reviewer size band, industry or region content."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "Wikipedia article on Versa Networks",
+      "url": "https://en.wikipedia.org/wiki/Versa_Networks",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the fetch failed with 'This domain is cache-only and cannot be fetched'. Would in any case be Tier 3 corroboration only."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "AWS Marketplace search results for Versa Networks",
+      "url": "https://aws.amazon.com/marketplace/search/results?searchTerms=Versa+Networks",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: blocked by robots.txt rules, so no marketplace-listed pricing could be read. This was the most promising route to a published price point and it is closed."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "Azure Marketplace search results for Versa Networks",
+      "url": "https://azuremarketplace.microsoft.com/en-us/marketplace/apps?search=Versa%20Networks",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the fetch returned HTTP 403, so no marketplace-listed pricing could be read."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "Internet Archive Wayback Machine snapshots of versa-networks.com",
+      "url": "https://web.archive.org/web/2025/https://versa-networks.com/customers/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the session egress proxy rejected web.archive.org with HTTP 403, and archive.ph was likewise rejected. This removed the obvious workaround for the vendor's JavaScript bot wall."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "Direct fetches of versa-networks.com HTML pages, including the industry pages",
+      "url": "https://versa-networks.com/solutions/industries/healthcare/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: every direct HTML fetch of versa-networks.com returned the Imperva interstitial 'You are being redirected...Javascript is required.' This affected /solutions/industries/healthcare/, /solutions/industries/financial-services/, /products/sd-wan/, /blog/, /platform/, /company/about-us/ and /wp-json/. Reader-proxy retries on the industry pages returned HTTP 429 across roughly 25 minutes of spaced attempts, so no industry page body text was ever read."
+    },
+    {
+      "n": 47,
+      "tier": 4,
+      "title": "Search engines and generic fetch proxies used for discovery",
+      "url": "https://html.duckduckgo.com/html/?q=%22Versa+Networks%22+case+study+customer",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: DuckDuckGo, Mojeek, Microlink, AllOrigins and CodeTabs were all rejected by robots.txt, timeouts or 403s, and the session's WebSearch budget was already exhausted at the first call. Discovery therefore relied on the vendor's own navigation and robots.txt."
     }
   ],
   "sourced_facts": {
@@ -584,6 +809,225 @@
       "quote": "target Uptime average of 99.999% (\"Uptime SLA Percentage\") measured monthly",
       "claimed_by": "vendor",
       "note": "From Versa's own Hosted SASE Service Level Agreement, last updated 29 May 2025, covering Versa Hosted and Managed Secure Services Edge Gateways. Measured monthly and backed by a tiered service credit table. Note the document frames it as a target uptime average with credits as the remedy, so it is a credit-backed commitment rather than an absolute guarantee."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        24,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "A national dental practice that provides accessible, high-quality dentistry and orthodontics to patients of all ages",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a published customer story with substantive detail, not on inference. The homepage carries a dental practice story covering WAN resiliency, availability and security compliance. The customer is anonymised, which is why confidence is medium rather than high. The site navigation also lists a dedicated page at https://versa-networks.com/solutions/industries/healthcare/, but that page could not be loaded through the bot wall, so it does not carry the grade. No HIPAA or healthcare accreditation was found in the documentation."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        24,
+        23,
+        25
+      ],
+      "confidence": "high",
+      "quote": "A Fortune 500 financial services company chooses software defined WAN (SD-WAN) to transform their legacy architecture",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence for this supplier. Two independent strands on the vendor's own site: a Fortune 500 financial services customer story on the homepage, and a Gartner Peer Insights review published on the customers page attributed to 'Network Engineer – Banking'. A dedicated page is also listed at https://versa-networks.com/solutions/industries/financial-services/ but could not be loaded. Neither customer is named."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "partial",
+      "evidence": [
+        25
+      ],
+      "confidence": "low",
+      "quote": "https://versa-networks.com/solutions/industries/retail/",
+      "claimed_by": "vendor",
+      "note": "Partial, and deliberately not yes. The only evidence is a Retail entry in the vendor's own Industry Solutions navigation menu, which is a list mention. The target page returned HTTP 429 through the reader proxy and the bot wall directly, so no retail customer, case study or page body was ever seen. Checked the homepage, the customers page and the docs Solution Use Cases page for the word retail: not present in any of them. No PCI DSS reference found in the documentation."
+    },
+    "sectors.manufacturing": {
+      "value": "partial",
+      "evidence": [
+        25
+      ],
+      "confidence": "low",
+      "quote": "https://versa-networks.com/solutions/industries/manufacturing/",
+      "claimed_by": "vendor",
+      "note": "Partial on a navigation list entry only. The target page could not be loaded. Checked the homepage, the customers page and the docs Solution Use Cases page for the word manufacturing: not present in any of them. No named manufacturing customer or case study was found."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        23,
+        24,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "General Manager Information Systems – Energy and Utilities",
+      "claimed_by": "vendor",
+      "note": "A real customer voice rather than a bare list mention: a five-star Gartner Peer Insights review reproduced on both the vendor's customers page and its homepage, attributed to an Energy and Utilities general manager describing a completed WAN transformation. Held at partial rather than yes because the reviewer and the organisation are anonymous and there is no energy case study. Navigation also lists https://versa-networks.com/solutions/industries/oil-gas/, which could not be loaded."
+    },
+    "sectors.government_public_sector": {
+      "value": "partial",
+      "evidence": [
+        25
+      ],
+      "confidence": "low",
+      "quote": "https://versa-networks.com/solutions/industries/federal-government/",
+      "claimed_by": "vendor",
+      "note": "Partial on navigation list entries only. The menu lists both Federal Government and a separate https://versa-networks.com/solutions/industries/public-sector/ entry; neither page could be loaded. Specifically checked the Versa knowledge base index for FedRAMP, Common Criteria, FIPS and NIAP, which would have supported a yes as a published accreditation: none of these terms appear. No government customer or framework award found."
+    },
+    "sectors.education": {
+      "value": "partial",
+      "evidence": [
+        25
+      ],
+      "confidence": "low",
+      "quote": "https://versa-networks.com/solutions/industries/education/",
+      "claimed_by": "vendor",
+      "note": "Partial on a navigation list entry only. The target page could not be loaded. Checked the homepage for education and university: neither word is present. No education customer, case study or sector framework was found."
+    },
+    "sectors.transport_logistics": {
+      "value": "partial",
+      "evidence": [
+        25
+      ],
+      "confidence": "low",
+      "quote": "https://versa-networks.com/solutions/industries/transportation/",
+      "claimed_by": "vendor",
+      "note": "Partial on a navigation list entry labelled Transportation only; the page could not be loaded. Checked the homepage for logistics and transport: neither word is present. The customers page carries a 'Principal Architect – Travel and Hospitality' review, but travel and hospitality is graded under hospitality_leisure rather than being double counted as freight or logistics evidence."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        25,
+        23
+      ],
+      "confidence": "low",
+      "quote": "https://versa-networks.com/solutions/industries/legal/",
+      "claimed_by": "vendor",
+      "note": "Partial. Navigation lists Legal, plus https://versa-networks.com/solutions/industries/engineering-construction/ and https://versa-networks.com/solutions/industries/architecture/, all of which map to professional services; none of the pages could be loaded. The customers page also carries Gartner reviews attributed to 'IT Security Service Product Manager – IT Services' and 'Business Manager – IT Services'. Adobe is named on the homepage as a customer but Adobe is a software vendor, so it is not counted as professional services evidence."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partial",
+      "evidence": [
+        23,
+        24,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "Principal Architect – Travel and Hospitality",
+      "claimed_by": "vendor",
+      "note": "A published customer review rather than a bare list mention: a five-star Gartner Peer Insights review reproduced on both the customers page and the homepage, attributed to a Travel and Hospitality principal architect. Held at partial because the organisation is anonymous and there is no hospitality case study. Navigation also lists https://versa-networks.com/solutions/industries/hospitality/, which could not be loaded."
+    },
+    "regions.uk_ireland": {
+      "value": "unknown",
+      "evidence": [
+        26
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No UK or Ireland specific service delivery statement was found. The only published gateway location statement names the U.S., Japan and Europe as a bloc, with no country breakdown, so a UK or Ireland PoP cannot be inferred from it. Checked the docs Reference index, the SSE index, the Titan portal pages and the Titan release notes for any PoP or data centre list: none published. Not resolving this against the generic Europe claim, per instruction."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        26
+      ],
+      "confidence": "high",
+      "quote": "SASE gateways are multitenant gateways hosted and maintained by Versa Networks at various data centers in the U.S., Japan, and Europe.",
+      "claimed_by": "vendor",
+      "note": "Supplier-operated infrastructure, not a sales office: the documentation states Versa itself hosts and maintains the multitenant SASE gateways in European data centres. Taken from docs.versa-networks.com, which is outside the bot wall and so directly reproducible. The same page shows a gateway service region option labelled 'Americas & EMEA'. No city or country breakdown is published."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        26
+      ],
+      "confidence": "high",
+      "quote": "SASE gateways are multitenant gateways hosted and maintained by Versa Networks at various data centers in the U.S., Japan, and Europe.",
+      "claimed_by": "vendor",
+      "note": "Supplier-operated U.S. data centres stated explicitly in the product documentation. Corroborated as the corporate base by the SEC Form D filings, which give a San Jose, California address, though that is a registered office rather than service delivery. Canada and Mexico are not separately named."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        26
+      ],
+      "confidence": "high",
+      "quote": "SASE gateways are multitenant gateways hosted and maintained by Versa Networks at various data centers in the U.S., Japan, and Europe.",
+      "claimed_by": "vendor",
+      "note": "Japan is the only Asia Pacific country named, and the same documentation offers a separate gateway service region labelled 'Asia'. Graded yes on the strength of a named, supplier-operated Japanese data centre. Australia, India, Singapore and Hong Kong are not named anywhere in the documentation read."
+    },
+    "regions.middle_east_africa": {
+      "value": "unknown",
+      "evidence": [
+        26
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No Middle East or Africa gateway, data centre or coverage statement was found. The Titan MSP ordering page offers a service region labelled 'Americas & EMEA', but the only data centres named in that same document are in the U.S., Japan and Europe, so the EMEA label is a commercial grouping and is not treated as evidence of delivery in the Middle East or Africa."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        26
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No Latin American gateway, data centre or coverage statement was found. The 'Americas & EMEA' service region label is the closest text, but the only country named in the Americas is the U.S., so the label is not treated as evidence of Latin American delivery."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        26
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Nothing found. Mainland China is not named in any page read, no ICP licence or Chinese carrier arrangement is published, and the only Asian data centre named is in Japan. Treating the absence as unknown rather than reading anything into generic global or 'Asia' region wording, which is the correct handling for a market that requires a specific licensed arrangement."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        24
+      ],
+      "confidence": "high",
+      "quote": "A Fortune 500 financial services company chooses software defined WAN (SD-WAN) to transform their legacy architecture",
+      "claimed_by": "vendor",
+      "note": "Unambiguous. The homepage customer stories are all large-enterprise scale: a Fortune 500 financial services company, a Fortune 1000 enterprise described with over 300 sites and 10,000 or more users, a global enterprise with 100 sites and 2,500 or more users, and a deployment across 130 locations globally in 100 days. Adobe is named as a customer."
+    },
+    "organisation_fit.mid_market": {
+      "value": "unknown",
+      "evidence": [
+        24,
+        25
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No mid-market targeting evidence found. Specifically searched the homepage text for mid-market, midsize and SMB: none of these terms is present. The navigation lists a https://versa-networks.com/solutions/lean-it/ page which may be the relevant offer, but it could not be loaded through the bot wall and lean IT describes a team profile rather than an organisation size. Every customer story published is enterprise scale."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        24,
+        26,
+        25
+      ],
+      "confidence": "low",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No small business targeting evidence found. The homepage does not contain the phrase small business. The Titan product line has a dedicated MSP ordering portal, and the documentation states that an MSP can create reseller and customer accounts, create orders and manage subscriptions, which suggests smaller customers may be reached indirectly through partners; that is a route to market, not a published size target, so it does not support a partner_integrated grade on its own. No entry-level tier or per-site price aimed at small business was found."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

@@ -80,14 +80,14 @@
     "Public pricing and case study transparency are limited; expect more discovery work in evaluation."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
-    "uk_ireland": "partial",
+    "uk_ireland": "unknown",
     "europe": "partial",
     "north_america": "yes",
-    "asia_pacific": "partial",
-    "middle_east_africa": "unknown",
+    "asia_pacific": "yes",
+    "middle_east_africa": "partial",
     "latin_america": "unknown",
     "china_mainland": "unknown"
   },
@@ -109,16 +109,16 @@
     "note": "MPVPN multi-path WAN redundancy by design; HA appliance pairs."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "unknown",
-    "manufacturing": "unknown",
+    "healthcare": "yes",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
     "energy_utilities": "unknown",
-    "government_public_sector": "partial",
-    "education": "unknown",
-    "transport_logistics": "unknown",
-    "professional_services": "unknown",
-    "hospitality_leisure": "unknown"
+    "government_public_sector": "yes",
+    "education": "yes",
+    "transport_logistics": "yes",
+    "professional_services": "partial",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "partial",
@@ -344,6 +344,240 @@
       "published": null,
       "reliability": "Not used as evidence. Returned HTTP 404, as did https://www.fatpipe.com/pages/company-overview.html and https://www.fatpipe.com/pages/privacy-policy.html, so no corporate profile or trust-centre page could be read.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "FatPipe homepage (fatpipeinc.com) - hero statistics and Case Studies section listing ten industry case studies with PDF links",
+      "url": "https://www.fatpipeinc.com/index.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own primary marketing site. Used for the per-sector case study index and headline customer count. Undated."
+    },
+    {
+      "n": 20,
+      "tier": 2,
+      "title": "FatPipe, Inc. Form 10-K annual report (fiscal year ended 31 March 2026), hosted as PDF on the supplier investor page",
+      "url": "https://www.fatpipeinc.com/assets/sec.gov_Archives_edgar_data_1993400_000149315226024184_form10-k.pdf",
+      "published": "2026",
+      "verified_on": "2026-07-29",
+      "reliability": "SEC-filed annual report of a NASDAQ-listed company (NASDAQ:FATN). Highest reliability source in this set: legally accountable, dated, and contains explicit customer count, sector list, customer size band and geographic revenue statements. Preferred over marketing pages wherever they disagree."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "FatPipe Contact page - corporate office and legal entity addresses",
+      "url": "https://www.fatpipeinc.com/pages/contact.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own contact page. Reliable for corporate/legal entity presence only. Does NOT establish service delivery or points of presence, so used only to support partial region grades."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "FatPipe SD-WAN Data Quadrant page - Info-Tech Research Group / SoftwareReviews awards",
+      "url": "https://www.fatpipeinc.com/sd-wan-data-quadrant.html",
+      "published": "2026",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page reporting a third-party analyst result (Info-Tech Research Group / SoftwareReviews). Vendor-hosted restatement of an analyst finding, so treated as tier 1 not tier 2; corroborated independently by the same claim in the SEC 10-K (source 2)."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "FatPipe MPVPN product page - target organisation types",
+      "url": "https://www.fatpipeinc.com/products/mpvpn.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page. Names target verticals in a single sentence with no customers behind it, so supports 'partial'-strength claims only unless corroborated."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "FatPipe SASE solution page - architecture, PoP references, retail mention",
+      "url": "https://www.fatpipeinc.com/solutions/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier solution page. Notably refers to a 'nearest SASE point of presence (PoP)' but publishes NO PoP locations, which is why no region is graded from it."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "FatPipe Total Security 360 product page",
+      "url": "https://www.fatpipeinc.com/products/fatpipe-total-security-360.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page. Contains generic TCO positioning language but no pricing, tiering or entry point."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "FatPipe Partners Corner page - named distributors and resellers",
+      "url": "https://www.fatpipeinc.com/pages/partners.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page naming Carahsoft, TD SYNNEX and CDW. Establishes route to market; does not itself establish regional service delivery as no partner territories are stated."
+    },
+    {
+      "n": 27,
+      "tier": 3,
+      "title": "Carahsoft FatPipe partner page - US public sector reseller",
+      "url": "https://www.carahsoft.com/fatpipe",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Reseller marketing page. Corroboration only. It is the sole source naming 'utilities', and under the tier rules a tier 3 source cannot carry a grade alone, so energy_utilities remains unknown."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "FatPipe case study: Healthcare MPVPN benefits (healthcare claims and benefits administrator)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatpipeCaseStudyHealthcareMPVPNHealthcareBenefits.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study. Customer is anonymised ('the company'), which weakens it, but it is a dedicated healthcare deployment document, not a vertical name in a list."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "FatPipe case study: Las Vegas destination resort (hospitality)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatpipeCaseStudyOtherStratosphere.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study, customer anonymised but described specifically enough to be a real deployment (Las Vegas Boulevard resort). Filename references 'Stratosphere'."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "FatPipe case study: International school district (education)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatpipeCaseStudyEducationInternationalSchoolDistrictv2.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study. Customer anonymised; describes an international school system of over 500 schools."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "FatPipe case study: Europe-based packaging manufacturer (manufacturing)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatpipeCaseStudyManufacturing.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study. Customer anonymised but explicitly Europe-headquartered, making it the only evidence of a European deployment found in this task."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "FatPipe case study: Multi-site retailer (retail)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatpipeCaseStudyretail.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study. Customer anonymised; 40+ stores and 10 distribution centres."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "FatPipe case study: Rhode Island mortgage financing company (financial services)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatpipeCaseStudyFinanceWANFinancial.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study. Customer anonymised but located (Rhode Island, USA)."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "FatPipe case study: Cities and counties / DoD support services contractor (government)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatPipeCaseStudyCities-Counties.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study covering a US Department of Defense and government agency IT support contractor. Customer anonymised."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "FatPipe case study: US Tax Court deploys FatPipe WARP (legal / judiciary)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatPipeCaseStudyTaxCourts.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published case study naming an institution type (a US Tax Court). Judicial body, therefore counted towards government_public_sector rather than professional_services."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "FatPipe case study: Temperature-controlled carrier (transport and logistics)",
+      "url": "https://www.fatpipeinc.com/case-studies/generic-case-studies/FatPipeCaseStudyTransport.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published sector case study. Customer anonymised; no named geography."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "FatPipe corporate site mirror at fatpipe.com",
+      "url": "https://www.fatpipe.com",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Mirrors the fatpipeinc.com homepage content; /case-studies/ on this domain 302-redirects to fatpipeinc.com. Used only to confirm the two domains carry the same material."
+    },
+    {
+      "n": 38,
+      "tier": 4,
+      "title": "FatPipe Investor Relations page - SEC filings index and company description",
+      "url": "https://www.fatpipeinc.com/pages/investors.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence for any grade. The page's descriptive paragraph is apparently boilerplate copied from an unrelated company: it describes FatPipe as 'focused on the broadband access and optical networking market' and lists 'cable/MSOs' and 'fiber overbuilders', which contradicts the SEC 10-K description of the business. Its customer list (including 'utilities', 'Fortune 500', 'SMBs') is therefore unsafe to grade from. Used only to locate the 10-K PDF link."
+    },
+    {
+      "n": 39,
+      "tier": 4,
+      "title": "FatPipe robots.txt",
+      "url": "https://www.fatpipeinc.com/robots.txt",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence, it carries no factual claims. Read only for site navigation. Worth noting it disallows GPTBot, PerplexityBot and AnthropicBot, and blocks /partners/, /press/, /gartner/ and /resellers/ paths."
+    },
+    {
+      "n": 40,
+      "tier": 4,
+      "title": "FatPipe sitemap.xml",
+      "url": "https://www.fatpipeinc.com/sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence, the response was returned as unreadable binary/compressed data and no URLs could be extracted."
+    },
+    {
+      "n": 41,
+      "tier": 4,
+      "title": "SEC EDGAR company filing search for FatPipe",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=fatpipe&type=10-K&dateb=&owner=include&count=40",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence, the fetch was refused by sec.gov robots.txt rules. The 10-K was obtained instead from the supplier-hosted copy (source 2), whose filename preserves the EDGAR accession path for CIK 1993400."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "FatPipe industries page (attempted)",
+      "url": "https://www.fatpipe.com/industries/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence, the URL returned HTTP 404. FatPipe publishes no dedicated per-industry web pages; sector material is delivered only as case study PDFs linked from the homepage."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "FatPipe case studies index page (attempted)",
+      "url": "https://www.fatpipeinc.com/resources/case-studies.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence, the URL returned HTTP 404. There is no case study library page; the only index is the Case Studies section of the homepage."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "Jina reader proxy rendering of the FatPipe homepage",
+      "url": "https://r.jina.ai/https://www.fatpipeinc.com/index.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence, it is a third-party rendering proxy of source 1 rather than an independent record. Read only to cross-check that the homepage text extraction was complete."
     }
   ],
   "sourced_facts": {
@@ -577,6 +811,248 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed as a service level agreement figure. FatPipe publishes several different achievable WAN reliability or availability marketing figures across its pages (99.98%, 99.999%, 99.9998% and 99.999988%) but these are product performance claims, not a contractual availability commitment, and no SLA document, support policy or service credit scheme was found. The figures also disagree with one another, so no single value can be reported; see conflicts."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        20,
+        28,
+        19
+      ],
+      "confidence": "high",
+      "quote": "FatPipe's software solutions have been deployed by over 2,500 end-user customers across a diverse set of sectors including education, financial services, government, healthcare, hospitality, legal, manufacturing, retail, and transportation and in various deployment models, including hybrid, SaaS, and managed services.",
+      "claimed_by": "vendor",
+      "note": "Named in the SEC 10-K sector list and backed by a dedicated healthcare case study PDF (source 10) describing a benefits and medical claims processor operating between California and Texas under HIPAA and COBRA obligations. The case study customer is anonymised, so there is no named healthcare reference account. Homepage case study strapline reads 'Delivering reliable MPVPN connectivity for healthcare operations and patient data security.'"
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        20,
+        33,
+        23
+      ],
+      "confidence": "high",
+      "quote": "It is designed for organizations that depend on secure, high-performance connectivity, such as financial institutions, credit unions, retailers, restaurant chains, logistics companies, and multi-branch enterprises.",
+      "claimed_by": "vendor",
+      "note": "Three independent supplier sources: the SEC 10-K sector list names 'financial services'; the MPVPN product page names financial institutions and credit unions (quoted here); and a dedicated case study PDF (source 15) covers 'one of the leading mortgage financing companies in Rhode Island'. Customer anonymised. No banking accreditation or regulatory framework page found."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        20,
+        32,
+        24
+      ],
+      "confidence": "high",
+      "quote": "A leading retail company provides thousands of products to the market through 40+ store locations plus 10 distribution centers.",
+      "claimed_by": "vendor",
+      "note": "Quote is from the dedicated retail case study PDF (source 14). Corroborated by the SEC 10-K sector list, by the MPVPN page naming retailers, and by the SASE page: 'Industries like retailers can embrace FatPipe SASE framework and integrate secure web gateway (SWG), zero trust network access, and cloud access security broker (CASB) straight into their network architecture.' Evidence is bricks-and-mortar retail and point of sale connectivity, not ecommerce; no ecommerce-specific evidence was found."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        20,
+        31,
+        19
+      ],
+      "confidence": "high",
+      "quote": "A large Europe-based packaging manufacturer that relies heavily on its Internet connectivity for business",
+      "claimed_by": "vendor",
+      "note": "Quote is from the dedicated manufacturing case study PDF (source 13), which also states 'The company is globally distributed with offices in Europe, Asia, and North America.' Corroborated by the SEC 10-K sector list. Customer anonymised. Homepage strapline: 'Optimizing WAN performance across manufacturing plants and supply chains.'"
+    },
+    "sectors.energy_utilities": {
+      "value": "unknown",
+      "evidence": [
+        27,
+        20
+      ],
+      "confidence": "medium",
+      "quote": "For public sector customers, FatPipe helps agencies, schools, libraries, healthcare organizations, utilities, and local governments maintain connectivity when a carrier, circuit, or site connection fails.",
+      "claimed_by": "third_party",
+      "note": "Graded unknown deliberately. Utilities appear only in this sentence on the Carahsoft reseller page, which is a tier 3 source and under the tier rules cannot carry a grade alone. Energy and utilities is absent from the SEC 10-K sector list, absent from the homepage case study set (which covers ten other verticals), and absent from the MPVPN and SASE pages. Checked: homepage case study index, all nine case study PDFs, 10-K, MPVPN page, SASE page, TS360 page, partners page. No utility, energy, oil and gas, or OT/ICS material found."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        20,
+        34,
+        35,
+        27
+      ],
+      "confidence": "high",
+      "quote": "A US Tax Court has recently added FatPipe WARP to futureproof their network from increased online demand due to the Covid-19 lockdown.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in the set. A named institution type (a US Tax Court) in source 17; a separate Cities and Counties case study (source 16) covering a contractor to the US Department of Defense; the SEC 10-K sector list naming 'government'; and a public sector distribution route via Carahsoft, described on FatPipe's own partners page as 'Carahsoft is The Trusted IT Solutions Provider®, supporting Federal, State, Local Government, Education, Healthcare, and Private Sector industries.' No specific contract vehicle or FedRAMP/GSA schedule number was published on either the FatPipe or Carahsoft page."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        20,
+        30,
+        27
+      ],
+      "confidence": "high",
+      "quote": "An international school system has over 500 schools within its boundaries.",
+      "claimed_by": "vendor",
+      "note": "Quote is from the dedicated education case study PDF (source 12), headed 'CASE STUDY EDUCATION'. Corroborated by the SEC 10-K sector list and by the Carahsoft public sector route naming Education. Customer anonymised and no country stated, so the deployment geography for this reference is not established."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        20,
+        36,
+        23
+      ],
+      "confidence": "high",
+      "quote": "The transportation company, a prominent temperature-controlled carrier, provides comprehensive range of transportation solutions to fulfill the demands of a growing customer base.",
+      "claimed_by": "vendor",
+      "note": "Quote is from the dedicated transport case study PDF (source 18). Corroborated by the SEC 10-K sector list ('transportation') and the MPVPN page naming 'logistics companies'. Customer anonymised; the PDF refers to a 'global network' but names no country."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        20,
+        35,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "FatPipe's software solutions have been deployed by over 2,500 end-user customers across a diverse set of sectors including education, financial services, government, healthcare, hospitality, legal, manufacturing, retail, and transportation and in various deployment models, including hybrid, SaaS, and managed services.",
+      "claimed_by": "vendor",
+      "note": "Graded partial, not yes. 'Legal' is named in the SEC 10-K sector list and FatPipe runs a Legal vertical on its homepage, but the only supporting case study is a US Tax Court, which is a judicial body and has been counted under government_public_sector instead. No law firm, accountancy, consultancy or other professional services firm case study or reference was found. Homepage strapline for the Legal vertical is court-focused: 'Network solutions for courts and legal institutions requiring high availability.'"
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        20,
+        29,
+        23
+      ],
+      "confidence": "high",
+      "quote": "The destination resort is one of the most prominent and famous establishments on Las Vegas Boulevard.",
+      "claimed_by": "vendor",
+      "note": "Quote is from the dedicated hospitality case study PDF (source 11), whose filename references 'Stratosphere' although the customer is not named in the document text. Corroborated by the SEC 10-K sector list ('hospitality') and by the MPVPN page naming 'restaurant chains'. Homepage strapline: 'Achieving network resilience and uptime for hospitality and entertainment venues.'"
+    },
+    "regions.uk_ireland": {
+      "value": "unknown",
+      "evidence": [
+        21,
+        20,
+        31
+      ],
+      "confidence": "medium",
+      "quote": "We service customers in geographies around the world, with our largest customer populations located in the United States and India.",
+      "claimed_by": "none",
+      "note": "No UK or Ireland evidence found. Checked: the Contact page, which lists exactly five corporate locations (Salt Lake City USA, Chennai India, Makati Philippines, Midrand South Africa, Huntingdale Australia) and no UK or Irish entity; the SEC 10-K, which mentions no UK, Ireland or Europe revenue or operations; the partners page, which names Carahsoft, TD SYNNEX and CDW without stated territories; and the SASE page, which references a 'nearest SASE point of presence (PoP)' but publishes no PoP list. A generic 'geographies around the world' claim is not treated as UK coverage."
+    },
+    "regions.europe": {
+      "value": "partial",
+      "evidence": [
+        31,
+        20,
+        21
+      ],
+      "confidence": "low",
+      "quote": "A large Europe-based packaging manufacturer that relies heavily on its Internet connectivity for business",
+      "claimed_by": "vendor",
+      "note": "Graded partial on the strength of a single published customer deployment for a Europe-headquartered manufacturer (source 13), which also states 'The company is globally distributed with offices in Europe, Asia, and North America.' Against this: FatPipe has no European office or legal entity on its Contact page, the SEC 10-K names no European revenue or operations and lists expansion targets as North America, Southeast Asia, Mexico and India only, and no European PoP locations are published anywhere. This is customer-side evidence of a deployment, not published European service coverage."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        20,
+        21,
+        33,
+        35
+      ],
+      "confidence": "high",
+      "quote": "Our revenues are primarily generated in the United States, with India generating an increasing share of sales since 2022.",
+      "claimed_by": "vendor",
+      "note": "SEC-filed statement of revenue geography, the strongest region evidence available. Reinforced by the Salt Lake City headquarters ('392 East Winchester Street, Salt Lake City, UT 84107'), by named US deployments (a US Tax Court, a Rhode Island mortgage financier, a US Department of Defense support contractor), by US public sector distribution through Carahsoft and CDW, and by the 10-K statement 'We plan to continue expanding our presence throughout North America and parts of Southeast Asia.' Evidence is United States specific; nothing Canada or Mexico specific was found beyond a stated plan to expand into Mexico."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        20,
+        21
+      ],
+      "confidence": "high",
+      "quote": "We service customers in geographies around the world, with our largest customer populations located in the United States and India.",
+      "claimed_by": "vendor",
+      "note": "India is the second largest customer base per the SEC 10-K, and the majority of the workforce is there: the filing reports 172 full-time staff, '56 in the United States, 112 in India, and 4 in the Philippines.' Three APAC legal entities are published on the Contact page: FatPipe Networks Pvt Ltd (Chennai, India), FatPipe Networks Inc (Makati, Philippines) and FatPipe Networks Australia Pty Ltd (Huntingdale, VIC). The 10-K also states 'We are currently exploring options to grow our global sales, with emphasis on expansion opportunities within the burgeoning India information technology market.' Note this is India-centred; no Japan, Korea or Singapore evidence was found, and Southeast Asia is described as prospective."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        21,
+        20
+      ],
+      "confidence": "low",
+      "quote": "Midrand, Gauteng South Africa",
+      "claimed_by": "vendor",
+      "note": "Graded partial and low confidence. The only evidence is a South African office address on the Contact page under the entity name 'FatPipe Networks Inc' with phone numbers +27 11 318 4700 and +27 82 441 9238. That establishes corporate presence, not published service delivery: the SEC 10-K does not list South Africa among operating locations (it names only the US, India and the Philippines) and reports no African revenue. Conflict noted rather than resolved: the marketing site shows a South African office the 10-K does not account for. No Middle East evidence of any kind was found."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        20,
+        21
+      ],
+      "confidence": "medium",
+      "quote": "We plan to expand its presence in Mexico and Asia markets with products and services bundles to address geography specific markets.",
+      "claimed_by": "none",
+      "note": "Graded unknown. The only Latin America reference in any source is this forward-looking expansion intention in the SEC 10-K, which is a plan and not current delivery. No Latin American office, entity, partner, PoP, case study or Spanish or Portuguese language coverage page was found. Checked: Contact page, partners page, 10-K, homepage case study set."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        20
+      ],
+      "confidence": "high",
+      "quote": "We are in discussions with multiple potential partners in Southeast Asia, which does not include China, to address these local markets.",
+      "claimed_by": "none",
+      "note": "Unusually strong negative evidence: the SEC 10-K explicitly carves China out of its Asian partner strategy. China otherwise appears in the filing only in risk factor language about geopolitical tension ('Rising tensions between China and Taiwan'). No mainland China ICP licence, PoP, partner or entity was found. The homepage '10K+ Customers Worldwide' claim is treated as evidence of nothing here."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "partial",
+      "evidence": [
+        20,
+        30,
+        34
+      ],
+      "confidence": "high",
+      "quote": "The Company's end-user customers range in size from smaller businesses to Fortune 1000 enterprise users, but its core customer base can be classified as mid-market companies.",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes on the supplier's own SEC-filed wording: Fortune 1000 users exist at the top of the range but are explicitly not the core base. Supporting deployments of scale include an international school system with over 500 schools and a US Department of Defense support services contractor. The 10-K also describes FatPipe as 'a leading developer of enterprise-class, application-aware, secure SD-WAN solutions and integrated single-stack cybersecurity solutions for organizations, including enterprises, communication service providers, security service providers, government organizations, and other middle-market companies.' No named global enterprise logo, no enterprise product tier and no global 24x7 support commitment page was found."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        20,
+        22
+      ],
+      "confidence": "high",
+      "quote": "The Company's end-user customers range in size from smaller businesses to Fortune 1000 enterprise users, but its core customer base can be classified as mid-market companies.",
+      "claimed_by": "vendor",
+      "note": "The clearest organisation fit signal for this supplier and the one to lead with. Independently corroborated by Info-Tech Research Group / SoftwareReviews, whose midmarket-specific SD-WAN category FatPipe has topped repeatedly. Award labels on the supplier's own page read '2026 Data Quadrant Champion SD-WAN Midmarket', '2025 Emotional Footprint Champion SD-WAN Midmarket', '2024 Data Quadrant Champion SD-WAN Midmarket' and '2023 Data Quadrant Champion SD-WAN Midmarket', drawn 'From 59 validated reviews on SoftwareReviews.' The 10-K restates the same finding, so the analyst claim is attested in an SEC filing."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        20,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "The Company's end-user customers range in size from smaller businesses to Fortune 1000 enterprise users, but its core customer base can be classified as mid-market companies.",
+      "claimed_by": "vendor",
+      "note": "Graded partial. Smaller businesses are stated to be within the customer range but there is no SMB product tier, no SMB pricing, no self-service purchase route and no small business case study. The TS360 page uses only generic language, 'Every business, irrespective of their size, is challenged with their own share of vulnerabilities due to their weaker security postures.' The 10-K contains a risk factor arguing the opposite way, warning that 'the market perception that all-in-one solutions may be suitable only for small and medium-sized businesses because such solution lacks the performance capabilities and functionality of other solutions may harm our sales to large businesses, service provider and government organization end-customers', which indicates the company is positioning away from an SMB-only perception rather than towards SMB."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

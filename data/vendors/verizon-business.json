@@ -80,7 +80,7 @@
     "DIY/self-managed model is not the primary positioning."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -88,8 +88,8 @@
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "unknown"
+    "latin_america": "yes",
+    "china_mainland": "partial"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -109,21 +109,21 @@
     "note": "Private IP global MPLS plus managed dual-vendor designs."
   },
   "sectors": {
-    "healthcare": "partial",
+    "healthcare": "yes",
     "financial_services": "yes",
     "retail_ecommerce": "yes",
-    "manufacturing": "partial",
+    "manufacturing": "yes",
     "energy_utilities": "partial",
     "government_public_sector": "yes",
-    "education": "partial",
+    "education": "yes",
     "transport_logistics": "partial",
     "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "unknown"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "partial",
-    "small_business": "not_primary"
+    "mid_market": "yes",
+    "small_business": "partial"
   },
   "pricing_units": [
     "per_site",
@@ -390,6 +390,321 @@
       "published": null,
       "reliability": "Not used as evidence. Surfaced in search results and noted for the Cisco SD-WAN relationship, but not fetched in this task, so under the rules it cannot support any grade. The Cisco relationship is instead evidenced from Verizon's own pages (sources 8 and 9).",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "SASE Security Solutions for Business | Verizon Business (SASE landing page)",
+      "url": "https://www.verizon.com/business/resources/lp/secure-access-service-edge/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE landing page, the page named in the brief. Carries analyst-recognition claims and an industry navigation list but no pricing and no named SASE customer."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Secure Access Service Edge (SASE) Solutions | Verizon",
+      "url": "https://www.verizon.com/business/products/security/network-cloud-security/sase-management/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE product page. Contains the only sector-specific customer proof point on the SASE product pages (an unnamed healthcare business)."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Managed SD WAN Solutions and Services | Verizon",
+      "url": "https://www.verizon.com/business/products/networks/managed-network-services/managed-sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own managed SD-WAN product page. Source of the headline global delivery statistic and links to the SD-WAN case studies."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Financial Services Network Case Study (leading bank) | Verizon Business",
+      "url": "https://www.verizon.com/business/resources/customer-success-stories/leading-bank/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study. Customer anonymised but the sector and the SD-WAN solution are stated explicitly."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Retail Banking Network Technology Case Study | Verizon Business",
+      "url": "https://www.verizon.com/business/resources/customer-success-stories/retail-bank/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study. Customer anonymised, sector and SD-WAN outcome stated explicitly."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Manufacturing SD-WAN Use Case | Verizon Business",
+      "url": "https://www.verizon.com/business/resources/customer-success-stories/manufacturing-giant/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study. Customer anonymised. Describes a global SD-WAN and LAN rollout with Verizon Professional Services."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Digital Transformation Examples & Success Stories | Verizon",
+      "url": "https://www.verizon.com/business/resources/customer-success-stories/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study index. Used to map which sectors Verizon publishes customer proof for. Note most listed stories are 5G, private wireless and IoT rather than SD-WAN or SASE."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "SD WAN Solutions & Services | Verizon Global (en-en)",
+      "url": "https://www.verizon.com/business/en-en/solutions/it-infrastructure/sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own global SD-WAN solutions page. Country selector and segment definitions are useful, but a country selector is a website locale list and is weak evidence of service delivery on its own."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "How SASE Solutions Can Help a Large Business Provide a Consistent User Experience | Verizon Business",
+      "url": "https://www.verizon.com/business/resources/articles/sase-helps-healthcare-business-privacy-concerns/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own written case study of a SASE and NaaS deployment at a diversified healthcare company across 200 sites. Customer not named, but the account is detailed and sector-specific."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "International Network Services | Verizon Business",
+      "url": "https://www.verizon.com/business/answers/international-network-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own answers page. States a global country count for network coverage. Conflicts with the 150 country figure on the managed SD-WAN page, see note."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Retail Ecosystem Digital Connectivity for Retail Businesses | Verizon",
+      "url": "https://www.verizon.com/business/solutions/industry/retail/digital-connectivity-in-business/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own retail sub-page. Carries retail-specific network visibility and cloud security copy under an SD-WAN heading, but no named retail customer."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Enterprise Infrastructure Solutions (EIS) contract | Verizon",
+      "url": "https://www.verizon.com/business/solutions/public-sector/federal-government/contracts/eis/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own page describing a US federal contract vehicle. Lists SD-WAN network virtualisation and managed network services as available scope to federal agencies."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "3 SD WAN Use Cases for Enterprises | Verizon",
+      "url": "https://www.verizon.com/business/resources/articles/s/three-sd-wan-use-cases-for-enterprises/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own thought-leadership article. Names retail, manufacturing and professional and business services as SD-WAN use cases. Generic market commentary, no customers, so supports partial only."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Verizon Business terms and conditions, Europe, Middle East and Africa",
+      "url": "https://www.verizon.com/business/terms/emea/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own legal terms index. A per-country terms page is reasonable evidence of a contracting and service relationship in that country, stronger than a website locale switcher."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Verizon Business terms and conditions, Latin America",
+      "url": "https://www.verizon.com/business/terms/latam/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own legal terms index for Latin America with eight per-country terms pages."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Verizon Business terms and conditions, region index",
+      "url": "https://www.verizon.com/business/terms/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own top-level terms index listing five contracting regions and their per-country pages, including an Asia Pacific list containing China."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "State & Local Government | Verizon",
+      "url": "https://www.verizon.com/business/solutions/public-sector/state-local-government/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated public sector page. Lists Managed SD WAN and SASE among the products offered to state and local agencies."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Industry Solutions and Services | Verizon",
+      "url": "https://www.verizon.com/business/solutions/industry/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own industry index. Establishes which sectors have a dedicated industry page. Does not itself evidence SD-WAN or SASE capability per sector."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Connected Technology for Production & Distribution of Energy | Verizon",
+      "url": "https://www.verizon.com/business/solutions/industry/energy-and-utilities/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated energy and utilities page with one named utility customer. The customer proof is a smart-grid product, not SD-WAN or SASE, so it supports partial only."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Education solutions | Verizon",
+      "url": "https://www.verizon.com/business/solutions/public-sector/education/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated education page. Unusually explicit: it names Managed SD WAN and describes the education-specific benefit in a full sentence."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Distribution and logistics | Verizon",
+      "url": "https://www.verizon.com/business/solutions/industry/distribution-logistics/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated logistics page with several named customers. All named proof is private 5G, IoT and warehouse connectivity, not SD-WAN or SASE, so it supports partial only."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Retail IT Solutions and Services for Shopping Experiences | Verizon",
+      "url": "https://www.verizon.com/business/solutions/industry/retail/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated retail industry page. Networking and security copy is present but no named retail customer and no retail SD-WAN or SASE case study."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Enterprise and Medium Business Technology Solutions | Verizon",
+      "url": "https://www.verizon.com/business/solutions/enterprise/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own segment page. Gives Verizon's explicit organisation-size definitions and an explicit statement that the portfolio targets enterprise and medium businesses."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Business Internet Secure: Small Business Security Tools | Verizon",
+      "url": "https://www.verizon.com/business/resources/lp/business-internet-secure/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own small business security landing page. Establishes that Verizon's small business security product is capped at a very small headcount and is not a SASE or SD-WAN offer."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Enterprise Internet Cost | Verizon Business",
+      "url": "https://www.verizon.com/business/answers/enterprise-internet-cost/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own pricing answers page. Publishes broadband, mobile and voice prices only. Confirms that no SD-WAN or SASE price is published anywhere Verizon lists prices."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "GSA Schedule Program (GSA MAS) | Verizon",
+      "url": "https://www.verizon.com/business/solutions/public-sector/federal-government/contracts/gsa-mas/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own contract vehicle page. Checked specifically for a published rate card. States pricing is pre-negotiated but publishes no rates on the page."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "How SASE secured a Manufacturing Brand's Future | Verizon (en-gb)",
+      "url": "https://www.verizon.com/business/en-gb/resources/customer-success-stories/sase-secures-manufacturing-brand-future/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE case study. Strongest single piece of evidence in this set: identifies the customer as a UK-based manufacturer and describes a zero trust and cloud security migration off firewalls and MPLS. Customer not named."
+    },
+    {
+      "n": 51,
+      "tier": 1,
+      "title": "SD WAN Solutions & Services | Verizon (US)",
+      "url": "https://www.verizon.com/business/solutions/it-infrastructure/sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own US SD-WAN solutions page. Confirms the Cisco-based SD-WAN positioning. No pricing, no size targeting statement, no sector detail."
+    },
+    {
+      "n": 52,
+      "tier": 3,
+      "title": "Verizon Business launches Advanced SASE solution (GlobeNewswire)",
+      "url": "https://www.globenewswire.com/news-release/2021/06/09/2244298/0/en/Verizon-Business-launches-Advanced-SASE-solution.html",
+      "published": "2021-06-09",
+      "verified_on": "2026-07-29",
+      "reliability": "Vendor press release on a newswire, dated but not independently authored. Read for regional availability and size targeting and contained neither. Corroboration only, not used to carry any grade."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Verizon Business Extends Managed Local Area Network Service to EMEA and Asia-Pacific",
+      "url": "https://www.verizon.com/about/news/verizon-business-extends-managed-local-area-network-service-to-emea-and-asia-pacific",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The release is undated on page and internal references date it to around 2007, far too old to evidence current SASE or SD-WAN delivery, and it mentions neither SD-WAN nor SASE."
+    },
+    {
+      "n": 54,
+      "tier": 4,
+      "title": "Verizon Global Networks Map (PDF)",
+      "url": "https://www.verizon.com/business/content/dam/business-markets/img/why-verizon/global_networks_map_en_xg.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The PDF is image-based with no machine-readable text, so no verbatim quote could be taken from it. This would otherwise have been the best regional points-of-presence source."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "Travel and Hospitality | Verizon Business (en-gb)",
+      "url": "https://www.verizon.com/business/en-gb/resources/travel-and-hospitality/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Checked specifically for hospitality and leisure sector proof. The page is a resource hub with navigation and a subscription form only, containing no hospitality-specific network, SD-WAN or SASE content and no named customer."
+    },
+    {
+      "n": 56,
+      "tier": 4,
+      "title": "Business Case Studies | Verizon Global (en-gb)",
+      "url": "https://www.verizon.com/business/en-gb/resources/casestudies/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Rendered with a single unrelated US education case study and no UK or European SD-WAN or SASE customers, so it did not support any regional or sector grade."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "Verizon Business terms and conditions, China",
+      "url": "https://www.verizon.com/business/terms/apac/cn/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. This was the targeted check for a licensed mainland China service arrangement and it could not be completed."
+    },
+    {
+      "n": 58,
+      "tier": 4,
+      "title": "Get SD WAN | Verizon Enterprise Solutions (en-gb)",
+      "url": "https://www.verizon.com/business/en-gb/solutions/achieving-business-objectives/get-sdwan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Was targeted as a UK-specific SD-WAN availability page."
     }
   ],
   "sourced_facts": {
@@ -615,6 +930,242 @@
       "quote": "Verizon will maintain the Availability for each Site Type as detailed below, with MLAN and MWLAN Network Components meeting the Functionality Threshold, if applicable.",
       "claimed_by": "vendor",
       "note": "Read this figure with care. Verizon does not publish one headline availability number; it publishes a tiered table keyed to site type, quoted from the NaaS SLA as 'Highly Available Large Medium Small Extra Small 100% 99.95% 99.90% 99.50% 99.00%'. The 100% figure applies only to a 'Highly Available' site, meaning a dual-CPE resilient design. The realistic figures for standard sites are 99.95% (Large), 99.90% (Medium), 99.50% (Small) and 99.00% (Extra Small). Two other SLAs read in this task give different numbers again for different services: the Global Private IP SLA commits to 99.9% end-to-end for Gold, 99.5% for Silver and 97.0% for Bronze, and the Adaptive Network Fabric SLA states 'The Service is designed to maintain 99.9% Port Network Availability per billing cycle'. These are different products rather than contradictions, but a like-for-like comparison against a single-number SASE vendor should probably use 99.95% rather than 100%. Recorded in conflicts."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        25,
+        32,
+        41
+      ],
+      "confidence": "high",
+      "quote": "Deploying a Verizon SASE solution helped a large healthcare business optimize its security operations.",
+      "claimed_by": "vendor",
+      "note": "Two separate supplier sources tie SASE specifically to healthcare. The SASE product page carries the short proof point quoted here, and a longer written case study describes a diversified healthcare company where Verizon Network-as-a-Service provided the foundation with SASE layered on, covering users across all 200 sites. The customer is not named in either. Healthcare also has a dedicated industry page in Verizon's industry index."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        27,
+        28,
+        41
+      ],
+      "confidence": "high",
+      "quote": "A slow and dated network kept this retail bank from moving its business into the future.",
+      "claimed_by": "vendor",
+      "note": "Two distinct SD-WAN banking case studies exist. The retail bank story is quoted here. A second story on a leading bank states it Deployed SD WAN architecture and private IP circuits with 4G LTE backup. Both customers are anonymised, which is why this is vendor-claimed rather than independently verifiable, but the sector and the SD-WAN solution are explicit in both. Financial services also has a dedicated industry page."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        34,
+        36,
+        45
+      ],
+      "confidence": "medium",
+      "quote": "Deploy network monitoring and cloud security services to address core network security, and leverage mobile solutions to help ensure data security across all your devices.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated retail industry page plus a retail digital connectivity sub-page whose SD-WAN section carries retail-specific network visibility copy, and an SD-WAN article that treats retail as one of three named use cases. Confidence is medium rather than high because there is no named retail customer and no retail SD-WAN or SASE case study anywhere in the material read. Buyers should not read this as equivalent to the healthcare, financial services or manufacturing evidence."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        29,
+        50,
+        41
+      ],
+      "confidence": "high",
+      "quote": "Verizon Professional Services provided a detailed plan for SD WAN design and roll-out, while engineers prepared the manufacturer's LANs.",
+      "claimed_by": "vendor",
+      "note": "The strongest sector in this set. There is both an SD-WAN case study, quoted here, describing a global build book, LAN refresh and MPLS offload, and a separate SASE case study describing a UK-based manufacturing business reducing physical firewalls through zero trust network access. Both customers are anonymised. Manufacturing also has a dedicated industry page."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        42,
+        41
+      ],
+      "confidence": "medium",
+      "quote": "Dakota Valley Electric Cooperative powers efficiency with Verizon Grid Wide.",
+      "claimed_by": "vendor",
+      "note": "Verizon has a dedicated energy and utilities industry page carrying the one named utility customer quoted here. Graded partial rather than yes because that named proof is a Grid Wide smart-grid deployment, and the page contains no SD-WAN or SASE narrative content at all beyond global navigation menu links. Sector presence is real, SASE and SD-WAN proof for the sector is absent."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        35,
+        40
+      ],
+      "confidence": "high",
+      "quote": "Network modernization, full lifecycle communications integration, mobility, secure collaboration, managed security services.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on two dedicated public sector routes. The federal EIS contract vehicle page, quoted here, lists network virtualisation SD-WAN as in-scope modernisation and links managed network services. The state and local government solutions page separately lists Managed SD WAN with US-based support and Secure Access Service Edge among its products. A US federal contract vehicle is a published framework for the sector, which meets the yes bar directly. Evidence is US-specific; no equivalent UK or European public sector framework was found in the pages read."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        43
+      ],
+      "confidence": "high",
+      "quote": "A Managed SD WAN solution can provide intelligent control over network services to improve performance for students and faculty without expensive infrastructure upgrades.",
+      "claimed_by": "vendor",
+      "note": "The clearest sector-plus-product statement found anywhere in this research. Verizon's dedicated education page names Managed SD WAN and states the education-specific benefit in a full sentence. No named education SD-WAN customer, but the dedicated industry page with product-specific copy meets the yes bar on its own."
+    },
+    "sectors.transport_logistics": {
+      "value": "partial",
+      "evidence": [
+        44,
+        41,
+        30
+      ],
+      "confidence": "medium",
+      "quote": "Connecting workers to high-speed networks can help unlock the full potential of automation, robotics and other technologies needed to drive warehouse transformations.",
+      "claimed_by": "vendor",
+      "note": "Verizon has a dedicated distribution and logistics industry page carrying several genuinely named customers including GSM Outdoors, Nucor, Penske and Associated British Ports. Graded partial rather than yes because every one of those named engagements is private 5G, IoT or warehouse connectivity, and neither SD-WAN nor SASE appears in the page content. This is the case where the temptation to over-grade is strongest, since the named-customer density is high, but none of it is SASE or SD-WAN evidence."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        36
+      ],
+      "confidence": "low",
+      "quote": "the industries with the highest percentage of remote and hybrid working arrangements are information, financial activities, and professional and business services",
+      "claimed_by": "vendor",
+      "note": "The sector is named only inside a general SD-WAN thought-leadership article, as market commentary about hybrid working rather than as a Verizon capability claim. There is no dedicated professional services industry page in Verizon's industry index and no customer or case study. This is a list mention and nothing more, which is exactly the partial definition."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "unknown",
+      "evidence": [
+        55,
+        41,
+        30
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No sector-specific evidence found. Checked: the industry solutions index, which lists Live entertainment but has no hospitality or leisure entry and whose live entertainment page returned HTTP 404; the en-gb Travel and Hospitality resource hub, which rendered as navigation and a subscription form with no network, SD-WAN or SASE content; and the full customer success stories index, where the closest entries are sports venue, stadium and bar fixed wireless stories that are 5G and fixed wireless access rather than SD-WAN or SASE. Recording unknown rather than inferring from the venue connectivity work."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        50,
+        37,
+        39
+      ],
+      "confidence": "high",
+      "quote": "a UK-based manufacturing business",
+      "claimed_by": "vendor",
+      "note": "Best-evidenced region outside the US. A SASE case study explicitly identifies the customer as a UK-based manufacturing business migrating off Verizon's global MPLS network, which is delivery evidence rather than a sales presence claim. Verizon also publishes separate per-country contractual terms for both the United Kingdom and Ireland under its EMEA terms index, and runs a dedicated en-gb site."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        37,
+        39
+      ],
+      "confidence": "high",
+      "quote": "Europe, Middle East, and Africa",
+      "claimed_by": "vendor",
+      "note": "Verizon publishes per-country contractual terms pages for a long list of European countries including Austria, Belgium, Bulgaria, Croatia, Czech Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Latvia, Lithuania, Luxembourg, Netherlands, Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Switzerland, Ukraine and the United Kingdom. Per-country terms indicate a contracting entity and service relationship, which is materially stronger than the locale switcher on the product pages."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        26,
+        35,
+        39,
+        49
+      ],
+      "confidence": "high",
+      "quote": "150 countries where we manage networks",
+      "claimed_by": "vendor",
+      "note": "Home market. Beyond the global statistic quoted here, Verizon holds US federal contract vehicles including EIS and GSA MAS that explicitly carry SD-WAN and managed network services, and the state and local government page advertises Managed SD WAN with US-based support. Canada appears as its own contracting region in the terms index. Direct delivery, not partner-mediated."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        39,
+        31
+      ],
+      "confidence": "medium",
+      "quote": "Asia Pacific",
+      "claimed_by": "vendor",
+      "note": "Verizon's terms index publishes Asia Pacific as a contracting region with per-country terms pages for Japan, Australia, Hong Kong, China, India, South Korea, Malaysia, New Zealand, Pakistan, Philippines, Singapore, Taiwan and Thailand. Confidence is medium rather than high because no APAC points of presence, SD-WAN availability statement or APAC customer case study was found in the pages read, so this rests on contractual footprint rather than published service coverage."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        37,
+        39
+      ],
+      "confidence": "medium",
+      "quote": "Europe, Middle East, and Africa",
+      "claimed_by": "vendor",
+      "note": "Graded partial deliberately. Although Verizon brands the region EMEA, the actual per-country terms list contains only Morocco, South Africa and Turkey outside Europe. No Gulf states, no wider African coverage, no MEA points of presence and no MEA customer evidence were found. The regional brand name substantially overstates the evidenced footprint, so partial is the honest grade."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        38,
+        39
+      ],
+      "confidence": "medium",
+      "quote": "Latin America",
+      "claimed_by": "vendor",
+      "note": "Verizon publishes Latin America as a distinct contracting region with per-country terms pages for Argentina, Brazil, Chile, Colombia, Mexico, Panama, Peru and Venezuela. Confidence is medium because this is contractual footprint evidence only. No Latin American points of presence, SD-WAN availability statement or customer case study was found."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        39,
+        57
+      ],
+      "confidence": "low",
+      "quote": "Asia Pacific",
+      "claimed_by": "vendor",
+      "note": "China appears by name in Verizon's own Asia Pacific per-country terms list, which is more than a generic global claim and is why this is partial rather than unknown. However the China terms page itself returned HTTP 404, so the licensing arrangement, the local entity and the actual services deliverable in mainland China could not be verified. No SD-WAN or SASE availability statement for mainland China was found. Treat any Verizon global coverage figure as saying nothing about China and require the arrangement to be confirmed directly with the supplier."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        46,
+        26,
+        29,
+        50
+      ],
+      "confidence": "high",
+      "quote": "Learn how Verizon helps power enterprise and medium businesses with a broad portfolio of secure technology solutions that are built to power scale and growth.",
+      "claimed_by": "vendor",
+      "note": "Explicit targeting plus matching case study size. Verizon's own segmentation defines Enterprise as 500+ employees, and the published SD-WAN and SASE case studies are all large multi-site organisations: a global manufacturer rolling out a build book around the world, a bank with thousands of locations, a healthcare company across 200 sites and a UK manufacturer operating in over 200 countries. This is clearly the primary target."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        46
+      ],
+      "confidence": "medium",
+      "quote": "Learn how Verizon helps power enterprise and medium businesses with a broad portfolio of secure technology solutions that are built to power scale and growth.",
+      "claimed_by": "vendor",
+      "note": "Explicitly named in the supplier's own segment positioning, which is why this is yes. Confidence is medium because Verizon's published size bands are only Small and medium-sized business 1 to 499 employees and Enterprise 500+ employees, so there is no distinct mid-market product tier, no mid-market pricing and no mid-market SD-WAN or SASE case study. The targeting claim is real but the supporting proof is thin."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        47,
+        31
+      ],
+      "confidence": "medium",
+      "quote": "Available to businesses with 19 employees or less.",
+      "claimed_by": "vendor",
+      "note": "Verizon runs a substantial small business division, but the small business security product is Business Internet Secure, capped at the headcount quoted here, and it is a broadband and device security bundle rather than SASE or SD-WAN. No small business SD-WAN or SASE tier, packaging or price point was found in any page read. Graded partial to reflect that Verizon serves the segment but not with this product line."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

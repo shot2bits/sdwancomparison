@@ -80,15 +80,15 @@
     "Managed delivery is partner-led; co-managed and white-label support require partner validation."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
-    "uk_ireland": "yes",
-    "europe": "yes",
-    "north_america": "yes",
-    "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
+    "uk_ireland": "partner_integrated",
+    "europe": "partner_integrated",
+    "north_america": "partner_integrated",
+    "asia_pacific": "partner_integrated",
+    "middle_east_africa": "partner_integrated",
+    "latin_america": "partner_integrated",
     "china_mainland": "unknown"
   },
   "supported_clouds": {
@@ -109,21 +109,21 @@
     "note": "Cloud SSE with regional redundancy; Secure SD-WAN appliances deploy in HA pairs."
   },
   "sectors": {
-    "healthcare": "partial",
+    "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
     "government_public_sector": "yes",
-    "education": "partial",
-    "transport_logistics": "partial",
+    "education": "yes",
+    "transport_logistics": "yes",
     "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "partial"
+    "mid_market": "partial",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_user",
@@ -371,6 +371,276 @@
       "published": null,
       "reliability": "Not used as evidence: returned HTTP 404. Equivalent detail was taken from the NGFW and SD-WAN Manager datasheets.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Forcepoint Secure SD-WAN product page",
+      "url": "https://www.forcepoint.com/product/secure-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Primary product page for the SD-WAN offer. Read four times with different extraction prompts; the appliance sizing phrases and the cost heading reproduced identically across passes, so those strings are treated as reliable verbatim. Customer logo wall and testimonial carousel also confirmed across passes."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Forcepoint Customer Stories index",
+      "url": "https://www.forcepoint.com/company/customers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Carries Forcepoint's own industry tags against each customer story, which is the single most useful sector artefact found. Read three times; the tag set (Healthcare, Education, Aerospace, Entertainment, Financial Services, Manufacturing, Energy, Information Technology) reproduced consistently."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Forcepoint About Us",
+      "url": "https://www.forcepoint.com/company/about-us",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Source of corporate scale claims. Read twice; the 'most sensitive data' sentence reproduced character for character on both passes. Statistic labels are unlabelled numerics on the page, so only the full sentence is treated as safely quotable."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Forcepoint Partners",
+      "url": "https://www.forcepoint.com/partners",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Explicit statement of a 100 per cent channel go-to-market, which is decisive for grading every region as partner delivered. Verified twice with a direct string-presence check; the string was confirmed literally present."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Forcepoint Healthcare Cybersecurity industry page",
+      "url": "https://www.forcepoint.com/industry/healthcare-cybersecurity",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Dedicated healthcare industry page. Single read. Names HIPAA and GDPR but no named healthcare customer, which is recorded in the note rather than inferred past."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Forcepoint cybersecurity solutions for banks (Financial Services industry page)",
+      "url": "https://www.forcepoint.com/solutions/industry/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Dedicated financial services page carrying three named bank and lender testimonials. Read twice; the Fedbank testimonial opening reproduced identically on both passes, the second pass returning the fuller sentence."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Forcepoint Data Security for Retailers industry page",
+      "url": "https://www.forcepoint.com/solutions/industry/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Dedicated retail page with three named retail customers and PCI language. Single read, so only the H1 heading is used as the graded quote."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Forcepoint Data Security for Manufacturers industry page",
+      "url": "https://www.forcepoint.com/solutions/industry/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Dedicated manufacturing page with three named manufacturing customers. Single read, so only the H1 heading is used as the graded quote."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Forcepoint Public Sector industry page",
+      "url": "https://www.forcepoint.com/industry/public-sector",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Dedicated public sector page listing government assurance frameworks. Single read. No named government customer appears, which is recorded rather than inferred past."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "VR Group customer story",
+      "url": "https://www.forcepoint.com/customer-stories/vr-group",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Named SD-WAN customer in rail transport, with country stated. The strongest transport evidence found because it is SD-WAN specific rather than data security specific. Single read."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Burger King customer story",
+      "url": "https://www.forcepoint.com/customer-stories/burger-king",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Named SD-WAN customer, restaurant estate, headquarters stated as Turkey. Single read; the heading is used as the graded quote because headings reproduce most reliably."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Communisis customer story",
+      "url": "https://www.forcepoint.com/customer-stories/communisis",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Named UK customer. Used only as weak support for professional services and as corroboration of UK delivery. Single read, and the descriptive sentence was returned inside a summariser frame, so it is treated as lower confidence than a heading."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Liberty University customer story",
+      "url": "https://www.forcepoint.com/customer-stories/liberty-university",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Named education customer with scale stated, and tagged Education on the customer index. Single read; heading used as the graded quote."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "HDI Seguros customer story",
+      "url": "https://www.forcepoint.com/customer-stories/hdi-seguros",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Named insurance customer, tagged Financial Services on the customer index. Used as supporting evidence for Latin America. Single read; the page heading is generic and does not name the customer, which weakens it."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "ERG Group customer story",
+      "url": "https://www.forcepoint.com/customer-stories/erg-group",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Named renewable energy customer with sector and country stated, tagged Energy on the customer index. Single read; heading used as the graded quote."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Forcepoint Contact Us office locations",
+      "url": "https://www.forcepoint.com/company/contact-us",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Read twice and the city and country lines reproduced identically, so the short location strings are reliable verbatim. Important caveat: these are corporate offices, not points of presence or service delivery infrastructure, so they are used only as supporting geography alongside partner delivery and in region customers."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Forcepoint homepage",
+      "url": "https://www.forcepoint.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Used for navigation discovery to locate the industry and customer pages. No grade rests on it."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Forcepoint Data Security Cloud product page",
+      "url": "https://www.forcepoint.com/product/forcepoint-one",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. Checked specifically for a data centre, point of presence, cloud region or uptime SLA statement. Explicitly returned none. Recorded because the absence is itself the finding behind the region grades."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Forcepoint Resources hub filtered to customer stories",
+      "url": "https://www.forcepoint.com/resources?type=customer-story",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier material. The filter did not apply and the page returned the general resources hub. No usable customer story list, so no grade rests on it."
+    },
+    {
+      "n": 41,
+      "tier": 4,
+      "title": "Forcepoint sitemap.xml",
+      "url": "https://www.forcepoint.com/sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The sitemap contains only homepage language variants and blog article URLs; it returned no industry, customer story, case study or pricing paths, so it could not be used to enumerate pages."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "Forcepoint customer stories (guessed path)",
+      "url": "https://www.forcepoint.com/customer-stories",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Individual stories live under this prefix but the index itself does not resolve."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "Forcepoint resources customer stories (guessed path)",
+      "url": "https://www.forcepoint.com/resources/customer-stories",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "Forcepoint industries index (guessed path)",
+      "url": "https://www.forcepoint.com/industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Industry pages were instead located from the homepage navigation and sit under two inconsistent prefixes, /industry/ and /solutions/industry/."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "Forcepoint ONE SASE product page (guessed path)",
+      "url": "https://www.forcepoint.com/product/forcepoint-one-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. This was the most likely home for a points of presence or cloud region list, so its absence is the reason no region could be graded yes on published infrastructure."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "Forcepoint pricing page (guessed path)",
+      "url": "https://www.forcepoint.com/pricing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Forcepoint publishes no pricing page, which is the direct basis for the unknown price tier."
+    },
+    {
+      "n": 47,
+      "tier": 4,
+      "title": "Forcepoint trust hub (guessed path)",
+      "url": "https://www.forcepoint.com/company/trust-hub",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Sought for data residency, hosting region and certification statements; none obtainable."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Emirates NBD customer story (guessed path)",
+      "url": "https://www.forcepoint.com/customer-stories/emirates-nbd",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Emirates NBD is featured on the customers index but the individual story URL could not be resolved, so the Middle East grade does not rest on it."
+    },
+    {
+      "n": 49,
+      "tier": 4,
+      "title": "VR Group customer story (first guessed path)",
+      "url": "https://www.forcepoint.com/resources/customer-stories/vr-group",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. The story was subsequently reached at /customer-stories/vr-group, which is source 10."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "Azure Marketplace Forcepoint NGFW listing",
+      "url": "https://azuremarketplace.microsoft.com/en-us/marketplace/apps/forcepoint-llc.forcepoint-ngfw",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 403 and could not be read. Attempted in order to find third party marketplace listed pricing to support a price tier."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "AWS Marketplace product page probe",
+      "url": "https://aws.amazon.com/marketplace/pp/prodview-6vixw6lkbdpsw",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL resolved to the AWS Marketplace shell rather than a Forcepoint listing and contained no Forcepoint product or price. The session's web search budget was already exhausted, so the correct listing identifier could not be found."
     }
   ],
   "sourced_facts": {
@@ -554,6 +824,242 @@
       "quote": "",
       "claimed_by": "none",
       "note": "No availability percentage was found. The Technical Support Offerings datasheet publishes severity response times only, and the Trust Center lists a 'Forcepoint Service Status' document under continuous monitoring without stating an uptime figure. A support SLA exists but with no published percentage, so this is unknown."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        26,
+        23
+      ],
+      "confidence": "high",
+      "quote": "Ensure HIPAA, GDPR, state, and local regulatory compliance while protecting your data, your patients, and your reputation.",
+      "claimed_by": "vendor",
+      "note": "Forcepoint runs a dedicated healthcare industry page at /industry/healthcare-cybersecurity, and its customer index carries a story tagged Healthcare. Two material caveats. First, the healthcare customer is anonymised on the index as 'Digital-First Life Sciences Innovator', so there is no named healthcare reference. Second, all healthcare content found is data security, DLP and compliance led; nothing healthcare specific was found on the Secure SD-WAN product page or in any SD-WAN case study."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        27,
+        23,
+        35
+      ],
+      "confidence": "high",
+      "quote": "With a single hybrid agent Forcepoint offered ease of manageability, which was our key selection criterion.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence found. Dedicated industry page with three named customers: Fedbank Financial Services Ltd (source of the quote), UCI and Vakifbank. The customer index separately tags Middle East Bank, FBD Insurance and HDI Seguros as Financial Services, and Emirates NBD is featured. Caveat: the named references are data security and NGFW deployments, not Secure SD-WAN deployments. Note also that the page H1 narrows to banks specifically, 'Forcepoint AI-powered Cybersecurity Solutions for Banks', while the navigation label is the broader 'Financial Services'."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        28,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Data Security for Retailers",
+      "claimed_by": "vendor",
+      "note": "Dedicated retail industry page carrying three named retail customers (Whataburger, Big Star and Genuine Parts Company) and PCI content under a 'Protect Customer PII and PCI' section. The Secure SD-WAN product page independently lists retail among its industries and names The Home Depot, CVS and Sysco on its logo wall. The graded quote is the page H1 because that page was read once and headings reproduce most reliably; the customer testimonials on it were not re-verified on a second pass."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        29,
+        23,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Data Security for Manufacturers",
+      "claimed_by": "vendor",
+      "note": "Dedicated manufacturing industry page with three named customers quoted (ACME Brick, GG Group and Caesarstone). The customer index separately tags HUBER+SUHNER as Manufacturing, and HUBER+SUHNER is the one manufacturing reference that is also an SD-WAN deployment, cited on the Secure SD-WAN page with a '20+ Countries' and '45+ Cluster Nodes' scale figure. Graded on the H1 because that page was read once."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        36,
+        23
+      ],
+      "confidence": "high",
+      "quote": "ERG Group Partners with Forcepoint to Scale with the Rising Tide of Renewable Energy",
+      "claimed_by": "vendor",
+      "note": "A named, dedicated energy case study, and the customer index tags it 'Energy'. The story states an Italian headquarters and describes wind, hydroelectric and solar plants across Europe. Caveat: there is no dedicated energy or utilities industry page, this is a single reference, and it is not an SD-WAN deployment."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        30
+      ],
+      "confidence": "medium",
+      "quote": "Defense-Grade Security for the Public Sector",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page plus published assurance frameworks rather than on customers. The page names Common Criteria, CMMC, FIPS 140-3 and the CISA Zero Trust Maturity Model, and refers to Federal Civilian Executive Branch Agencies. Confidence is held at medium because no government customer is named anywhere that was read, and the framing is almost entirely US federal, with no evidence found for UK, EU or other national public sector accreditation. Note the corporate positioning at source 3 also names 'defense' and 'intelligence'."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        34,
+        23
+      ],
+      "confidence": "high",
+      "quote": "Liberty University Secures Data at Scale to Safeguard AI Innovation",
+      "claimed_by": "vendor",
+      "note": "A named university with a dedicated case study, tagged Education on the customer index, and stated at more than 140,000 residential and online learners. Caveat: there is no dedicated education industry page, this is a single reference, and it is a data security rather than an SD-WAN engagement."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        31,
+        22
+      ],
+      "confidence": "high",
+      "quote": "VR Group Delivers a Reliable Network Aboard High-Speed Trains",
+      "claimed_by": "vendor",
+      "note": "The best evidenced sector for the SD-WAN product specifically. VR Group is a named rail operator, the story describes it as a railway transportation and maintenance company operating across Finland, and VR Group also appears as a testimonial in the 'Why Customers Choose Forcepoint's Managed SD-WAN' section of the SD-WAN product page. Caveat: no dedicated transport industry page exists, and this is rail passenger and freight rather than road logistics. Forcepoint's own customer index does not offer a Transport tag; it tags two comparable stories as 'Aerospace'."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        33
+      ],
+      "confidence": "low",
+      "quote": "Communisis Modernizes Their Forcepoint DLP with Risk-Adaptive Protection",
+      "claimed_by": "netify_assessment",
+      "note": "Deliberately not graded yes. Forcepoint publishes no professional services industry page and its customer index has no professional services tag. The only candidate is Communisis, a named UK customer described on its story page as providing communications and print management services for UK financial services and insurance firms plus creative and point-of-sale marketing. Classifying that as professional services is a Netify reading, not a Forcepoint claim, and the engagement is DLP not SD-WAN. The nearest vendor tag found is 'Information Technology' against Globaltek Security, which is a different thing again."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        32,
+        22
+      ],
+      "confidence": "medium",
+      "quote": "Burger King Scales SD-WAN for Hundreds of Restaurants",
+      "claimed_by": "netify_assessment",
+      "note": "A named restaurant estate customer with a dedicated SD-WAN case study, stating over 650 restaurants and a Turkish headquarters, and also quoted on the SD-WAN product page. Confidence is medium and claimed_by is recorded as a Netify assessment because the hospitality classification is ours, not Forcepoint's. Conflict recorded and not resolved: Forcepoint's own customer index tags a comparable story, 'Global Food Chain', as 'Entertainment', and its retail industry page places the quick service restaurant customer Whataburger under retail. Forcepoint therefore does not itself recognise a hospitality or leisure sector."
+    },
+    "regions.uk_ireland": {
+      "value": "partner_integrated",
+      "evidence": [
+        37,
+        25,
+        33
+      ],
+      "confidence": "medium",
+      "quote": "Reading, United Kingdom",
+      "claimed_by": "vendor",
+      "note": "Graded partner_integrated because Forcepoint states at source 4 that '100% of our business flows through partners.', so nothing is delivered directly in any territory. Supporting UK and Ireland evidence: published offices at 'Reading, United Kingdom' and 'Cork, Ireland' on the contact page, reproduced identically across two reads, plus Communisis as a named UK customer. Important limitation: offices are corporate presence, not service delivery. No UK or Ireland point of presence, data centre, data residency option or public sector accreditation such as Cyber Essentials or G-Cloud was found on any page read."
+    },
+    "regions.europe": {
+      "value": "partner_integrated",
+      "evidence": [
+        37,
+        25,
+        31,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "Helsinki, Finland",
+      "claimed_by": "vendor",
+      "note": "Graded partner_integrated on the strength of the '100% of our business flows through partners.' statement at source 4. Europe is the best evidenced region for delivery of the SD-WAN product itself: VR Group is a live SD-WAN deployment across Finland, ERG is a named Italian energy customer with plants across Europe, Eczacibasi Holding and Burger King are Turkish customers, and the GNZ testimonial on the SD-WAN product page explicitly credits a named local partner, magellan. A Helsinki office is also published. Limitation: no European point of presence list, no data centre locations and no EU data residency statement were found."
+    },
+    "regions.north_america": {
+      "value": "partner_integrated",
+      "evidence": [
+        37,
+        25,
+        30,
+        34
+      ],
+      "confidence": "medium",
+      "quote": "Austin, Texas",
+      "claimed_by": "vendor",
+      "note": "Graded partner_integrated rather than yes because of the unambiguous '100% of our business flows through partners.' statement at source 4, which applies to the home market too. Supporting evidence: Austin, Texas is published as the corporate headquarters, Liberty University is a named US customer, and the public sector page publishes US federal assurance frameworks including CMMC, FIPS 140-3 and the CISA Zero Trust Maturity Model. The SD-WAN product page logo wall is dominated by US enterprises. Limitation: still no published point of presence or cloud region list; no FedRAMP authorisation was found on the pages read."
+    },
+    "regions.asia_pacific": {
+      "value": "partner_integrated",
+      "evidence": [
+        37,
+        25,
+        27
+      ],
+      "confidence": "low",
+      "quote": "Mumbai, India",
+      "claimed_by": "vendor",
+      "note": "Graded partner_integrated per the '100% of our business flows through partners.' statement at source 4. Supporting evidence is thin: published offices at 'Mumbai, India', 'Bangalore, India', 'Singapore' and 'Hong Kong', plus one named Indian customer, Fedbank Financial Services Ltd, on the financial services page. Confidence is low because that is a single in region customer, it is a data security rather than SD-WAN reference, and no Asia Pacific point of presence, data centre or local data residency option was found. No Japan, Korea or Australia specific evidence was found at all."
+    },
+    "regions.middle_east_africa": {
+      "value": "partner_integrated",
+      "evidence": [
+        37,
+        25,
+        23
+      ],
+      "confidence": "low",
+      "quote": "Dubai, United Arab Emirates",
+      "claimed_by": "vendor",
+      "note": "Graded partner_integrated per the '100% of our business flows through partners.' statement at source 4. Supporting evidence: published offices at 'Dubai, United Arab Emirates' and 'Riyadh, Saudi Arabia', plus the customer index featuring Emirates NBD and carrying a story tagged Financial Services titled 'Middle East Bank'. Two limitations drive the low confidence. The Middle East reference is anonymised, and the individual Emirates NBD story URL returned 404 (source 27) so it could not be read. Critically, no Africa evidence of any kind was found: no office, no customer, no partner. This grade rests entirely on the Middle East half of the region."
+    },
+    "regions.latin_america": {
+      "value": "partner_integrated",
+      "evidence": [
+        37,
+        25,
+        35
+      ],
+      "confidence": "low",
+      "quote": "São Paulo, Brazil",
+      "claimed_by": "vendor",
+      "note": "Graded partner_integrated per the '100% of our business flows through partners.' statement at source 4. Supporting evidence: published offices at 'São Paulo, Brazil' and 'Mexico City, Mexico', plus HDI Seguros, a named insurance customer tagged Financial Services. Confidence is low because the HDI Seguros story heading is generic and does not name the customer, the story is a data security rather than SD-WAN engagement, and no Latin American point of presence, data centre or in country partner was published on any page read."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        37,
+        24,
+        39
+      ],
+      "confidence": "high",
+      "quote": "Hong Kong",
+      "claimed_by": "none",
+      "note": "No mainland China evidence found and this is a firm unknown rather than a gap in searching. The nearest published location is a Hong Kong office, which is not mainland China and does not imply a mainland arrangement. Per the brief, the corporate 'across 150 countries' style claim at source 3 is a generic global statement and is treated as evidence of nothing here. Specifically checked and not found: any ICP licence, any mainland point of presence or data centre, any named Chinese carrier or in country partner, any mainland customer, and any China data residency statement. The Data Security Cloud product page at source 18 was read for exactly this and returned no infrastructure or region information at all."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        22,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Ideal for large enterprises, campus networks and data centers.",
+      "claimed_by": "vendor",
+      "note": "Clearly and repeatedly evidenced. The quote is the positioning of the 3500 Series appliance on the Secure SD-WAN page and reproduced identically across two separate reads of that page. Corroborated by the corporate positioning at source 3, 'For more than 20 years, we've protected the world's most sensitive data, across defense, intelligence, finance, healthcare and global enterprises.', by scale statistics on that page including 12k+ customers and 485 of the Forbes Global 2000, and by an SD-WAN logo wall of Coca-Cola, Visa, IBM, American Express, Intel, Delta, Citi, Kyndryl and British Airways. This is unambiguously the target."
+    },
+    "organisation_fit.mid_market": {
+      "value": "partial",
+      "evidence": [
+        22
+      ],
+      "confidence": "low",
+      "quote": "Ideal for mid-sized and large offices.",
+      "claimed_by": "vendor",
+      "note": "Deliberately graded partial, not yes. The quote is the positioning of the 2300, 2200 and 1200 Series appliances and reproduced identically across two reads. The critical distinction is that this describes the size of a site within a customer network, not the size of the buying organisation, so it is not evidence of mid-market targeting. Nothing found supports a genuine mid-market motion: no mid-market pricing, no packaged mid-market tier, no case study of an identifiably mid-sized company, and no use of the phrase mid-market anywhere on the pages read. A mid-market buyer would in practice reach Forcepoint only through a channel partner given the 100 per cent partner model at source 4."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        22,
+        46
+      ],
+      "confidence": "medium",
+      "quote": "Ideal for remote offices, branches and stores.",
+      "claimed_by": "none",
+      "note": "No evidence of small business targeting was found, and the quoted phrase is the reason it is unknown rather than yes. The 60, 120 and 130 Series appliances are positioned for remote offices, branches, stores and brick-and-mortar locations, all of which are sites inside a larger enterprise estate rather than small businesses as customers in their own right. Specifically checked and not found: any SMB or small business tier, any self-serve or published entry price (the pricing path at source 25 returns 404), any free trial pricing, and any small business case study. Not graded not_primary because Forcepoint nowhere explicitly rules the segment out, and inferring exclusion would be the same reasoning error as inferring inclusion."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": []

@@ -81,15 +81,15 @@
     "Private global backbone is not part of the platform; cloud transport relies on internet and partner gateways."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
+    "middle_east_africa": "yes",
+    "latin_america": "yes",
     "china_mainland": "partial"
   },
   "supported_clouds": {
@@ -117,9 +117,9 @@
     "energy_utilities": "partial",
     "government_public_sector": "yes",
     "education": "yes",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "transport_logistics": "yes",
+    "professional_services": "yes",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
@@ -382,6 +382,240 @@
       "published": null,
       "reliability": "Not used as evidence. Reseller-hosted mirror of Cisco collateral with no verifiable version or date; superseded by the Cisco-hosted originals used instead.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Cisco SD-WAN for a secure, future-ready workplace (Cisco Catalyst SD-WAN solution page)",
+      "url": "https://www.cisco.com/site/us/en/solutions/networking/sdwan/index.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own primary SD-WAN solution page. Carries named customer story cards (Nestle, United Airlines, Coca-Cola Icecek, Kamstrup, HelloFresh, The Sto Group) and a FedRAMP government statement. Quotes re-verified on a second independent fetch and matched character for character."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Cisco Catalyst Center - Validated Profile: Healthcare (SD-WAN)",
+      "url": "https://www.cisco.com/c/en/us/td/docs/cloud-systems-management/network-automation-and-management/catalyst-center/cisco-validated-solution-profiles/validated-profile-healthcare-sdwan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier technical documentation. A healthcare-specific published SD-WAN deployment profile, i.e. a dedicated sector framework rather than a marketing mention."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Cisco Networking Customer Stories",
+      "url": "https://www.cisco.com/c/en/us/solutions/enterprise-networks/network-architecture-customer-success-stories.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier customer-story index listing named customers alongside the exact Cisco products deployed. Useful because it ties named organisations directly to Cisco Catalyst SD-WAN / Cisco Software-Defined Wide Area Network."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Cisco Secure Access Regions (Secure Access user guide)",
+      "url": "https://securitydocs.cisco.com/api/v0/apps?appId=SecureAccess&topic=secure-access-regions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier technical documentation, strongest regional evidence found. Enumerates every Secure Access (Cisco's SASE/SSE service) data centre by continent, country, city, deployment type and peering fabric. Reached via a 302 redirect from https://docs.sse.cisco.com/sse-user-guide/docs/secure-access-regions. Every string cited below was individually re-verified as literally present on a second fetch."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Cisco Secure Connect Data Center List (Cisco Meraki documentation)",
+      "url": "https://documentation.meraki.com/SASE_and_SD-WAN/Cisco_Secure_Connect/Install_and_Get_Started/Secure_Connect_-_Getting_Started/Data_Centers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier documentation for the Meraki-based SASE offering. Corroborates the Secure Access region list. Table row formatting did not survive markdown conversion cleanly, so used for corroboration only and not as the sole carrier of any grade."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "SD-WAN: The secure foundation for the new education landscape of networking",
+      "url": "https://www.cisco.com/c/m/en_us/solutions/industries/education/new-education-landscape-of-networking.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated education-sector SD-WAN page. Sector-specific and product-specific, but contains no named education customer."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "SD-WAN: The Secure Foundation for The New Retail Landscape of Networking",
+      "url": "https://www.cisco.com/c/m/en_us/solutions/industries/retail/new-retail-landscape-of-networking.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated retail-sector SD-WAN page. Sector-specific and product-specific."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "SD-WAN for Industrial Solutions Solution Brief",
+      "url": "https://www.cisco.com/c/en/us/solutions/collateral/enterprise-networks/sd-wan/sd-wan-for-industrial-solution.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier solution brief. Names energy, water utilities, oil and gas, transit, rail and fleet use cases for SD-WAN, but names no customer in any of them, so it supports 'partial' only."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Cisco and Kamstrup Customer Case Study",
+      "url": "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/kamstrup.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study. Cisco's own industry label on the page is Manufacturing and the products list includes Cisco SD-WAN and Cisco SD-WAN Manager."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "BBVA Customer Story",
+      "url": "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/bbva.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study. Industry label Financial Services, products list includes Cisco Catalyst SD-WAN."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Tech Mahindra Customer Story",
+      "url": "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/tech-mahindra.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study. Industry label Professional Services, headline explicitly about Cisco SD-WAN."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Room & Board Customer Story",
+      "url": "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/room-and-board.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study. Industry label Retail, products list includes Cisco Catalyst SD-WAN and Cisco Meraki MX security and SD-WAN appliances."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Distinctive Resorts and Cisco Meraki Case Study",
+      "url": "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/distinctive-resorts.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study. Industry label Hospitality, products list includes Meraki MX security and SD-WAN appliances. The story's headline is about cameras rather than WAN, so the SD-WAN element is present but incidental."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Cisco small and medium enterprise solutions",
+      "url": "https://www.cisco.com/site/us/en/solutions/small-business/index.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier segment landing page. Explicitly targets small and medium enterprise, but names no SD-WAN product on the page, so it evidences segment targeting rather than SD-WAN segment targeting."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Cisco Catalyst SD-WAN Small Branch Design Case Study (Cisco Validated Design)",
+      "url": "https://www.cisco.com/c/en/us/td/docs/solutions/CVD/SDWAN/cisco-sdwan-casestudy-smallbranch.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier validated design document. Defines the small branch profile and worked example. Note it describes small sites belonging to a 500-site chain, not small businesses as buyers."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Cisco Case Studies and Customer Success Stories (filtered to Networking)",
+      "url": "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/index.html?filterby=0%2C1%2C2%2C3&filters=%2Fmarketing-portfolio%2Fproducts%2Fnetworking&search=&showMore=&sort=date-newest",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study index with sector filters. Confirms which sector labels Cisco itself uses. Many entries are general networking rather than SD-WAN, so used to locate candidates rather than to carry grades."
+    },
+    {
+      "n": 39,
+      "tier": 3,
+      "title": "Cisco Catalyst SD-WAN Pricing (TrustRadius)",
+      "url": "https://www.trustradius.com/products/cisco-catalyst-sd-wan/pricing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Third-party software marketplace listing, no named author or date. Used only to record the absence of any listed price, which is consistent with what was found on Cisco's own pages. Not sufficient alone to set a price tier."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Cisco Industries (sector index)",
+      "url": "https://www.cisco.com/c/en/us/solutions/industries.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier index of the sectors Cisco addresses corporately. Deliberately NOT used to grade any sector, because it is company-wide and says nothing about SD-WAN or SASE capability in those sectors."
+    },
+    {
+      "n": 41,
+      "tier": 4,
+      "title": "Cisco Catalyst SD-WAN CloudOps - Cloud Infrastructure",
+      "url": "https://www.cisco.com/c/en/us/td/docs/routers/sdwan/knowledge-base/CloudOps/b-cisco-sdwan-cloudops/m-cloud-infra.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Read looking for a list of controller hosting regions; the page gives only an illustrative US-East / US-West example and enumerates no actual region list."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "Cisco Catalyst SD-WAN CloudOps - Ordering, Licensing, and Account Management",
+      "url": "https://www.cisco.com/c/en/us/td/docs/routers/sdwan/knowledge-base/CloudOps/b-cisco-sdwan-cloudops/m-ordering-account.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Read looking for published licence tiers and prices; it describes a la carte DNA Cloud SKUs versus Enterprise Agreement bundles but publishes no prices and no region list."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "Cisco Catalyst SD-WAN At-a-Glance",
+      "url": "https://www.cisco.com/c/en/us/solutions/collateral/enterprise-networks/sd-wan/nb-07-enterprise-grade-wp-cte-en.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Read looking for pricing or explicit market-tier positioning language; contains only commissioned ROI figures, no price points and no segment statements."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "West Ada School District Customer Story",
+      "url": "https://www.cisco.com/site/us/en/about/case-studies-customer-stories/west-ada-school-district.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. This is the leading Cisco education networking case study, but the deployment is Meraki and Catalyst LAN/wireless with no SD-WAN component, so it cannot support an education SD-WAN grade."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "Cisco Catalyst SD-WAN Solutions for Industrial Networks",
+      "url": "https://www.cisco.com/site/us/en/solutions/networking/sdwan/industrial/index.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Read for sector naming; the page describes rugged edge use cases (substations, roadways, renewable energy, fleets) but names no industry as a served vertical and no customer. The companion solution brief (evidence 8) was used instead."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "Cisco Meraki Hospitality and Tourism customer stories",
+      "url": "https://meraki.cisco.com/customers/hospitality-and-tourism",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Confirms a large hospitality customer roster (InterContinental Hotels Group, Club Mediterranee, Motel 6, bluegr Hotels) but the listing page itself does not state which of them use MX SD-WAN, so the named Distinctive Resorts case study was used instead."
+    },
+    {
+      "n": 47,
+      "tier": 4,
+      "title": "Cisco Meraki MX Family datasheet",
+      "url": "https://meraki.cisco.com/product-collateral/meraki-mx-family-datasheet/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Fetch blocked by robots.txt, so the page could not be read in this task and nothing may be graded from it."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Cisco Meraki Security and SD-WAN product page",
+      "url": "https://meraki.cisco.com/products/security-sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Fetch blocked by robots.txt, so the page could not be read in this task and nothing may be graded from it."
     }
   ],
   "sourced_facts": {
@@ -605,6 +839,239 @@
       "quote": "Cisco will use commercially reasonable efforts to deliver the Core Services to meet or exceed 99.999% Availability in accordance with the Secure Access Service Level Agreement (\"SLA\")",
       "note": "Figure taken from Cisco's own contractual offer description for Secure Access, which is the strongest available source. Read the qualifier carefully: the target is 99.999% but the obligation is expressed as commercially reasonable efforts, and the underlying SLA document with its credits and measurement method is not public. Cisco separately claims historical achievement on the Umbrella marketing page, \"Umbrella's DNS security services have delivered 99.999% business uptime since 2006.\", which is a track record claim rather than a commitment. The figure applies to Secure Access core services; no equivalent published availability percentage was found for the SD-WAN products themselves.",
       "claimed_by": "vendor"
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        24,
+        38
+      ],
+      "confidence": "high",
+      "quote": "Healthcare organizations run thousands of branches throughout the world, ranging from small clinic to large hospitals spanning across multiple regions.",
+      "claimed_by": "vendor",
+      "note": "Graded on a published, healthcare-specific Cisco Validated Profile for SD-WAN, which is a dedicated sector framework rather than a passing mention. Caveat worth recording: no named healthcare customer with an SD-WAN deployment was found. Cisco's healthcare case studies (Barts Health NHS Trust, Rush University System for Health, University Hospital Frankfurt, Clarke County Hospital) are LAN, data centre or security deployments in the material read, not SD-WAN."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        25,
+        32
+      ],
+      "confidence": "high",
+      "quote": "Argentine bank establishes a new standard for software-defined networking across global locations.",
+      "claimed_by": "vendor",
+      "note": "BBVA is a named customer carrying Cisco's own Financial Services industry label, with Cisco Catalyst SD-WAN explicitly in the deployed products list. Banco do Brasil, Fiserv and Jammu & Kashmir Bank are further published financial services customers, though SD-WAN was not confirmed in their product lists."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        29,
+        25,
+        34
+      ],
+      "confidence": "high",
+      "quote": "As big box stores, QSRs and grocery stores rapidly adopt a cloud-first strategy, the IT landscape has become significantly different.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in the set. Cisco publishes a dedicated retail SD-WAN page and a named retail customer, Room & Board, whose case study carries the Retail industry label and lists Cisco Catalyst SD-WAN plus Meraki MX security and SD-WAN appliances."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        23,
+        31
+      ],
+      "confidence": "high",
+      "quote": "Kamstrup optimized its network with Cisco SD-WAN and ThousandEyes, enabling seamless global expansion.",
+      "claimed_by": "vendor",
+      "note": "Kamstrup's case study carries Cisco's own Manufacturing industry label and lists Cisco SD-WAN and Cisco SD-WAN Manager. Coca-Cola Icecek, Nestle and The Sto Group are further named SD-WAN customers in manufacturing or food and beverage production."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        30,
+        38
+      ],
+      "confidence": "medium",
+      "quote": "fleets, oil and gas, energy and water utilities, and remote condition monitoring and control",
+      "claimed_by": "vendor",
+      "note": "Deliberately held at partial. Cisco's SD-WAN industrial solution brief names energy and water utilities, oil and gas and the utility grid as target use cases, but names no customer in any of them. Cisco's general energy and utilities case studies (ScottishPower Renewables, CPFL Energia, Noida Power) were checked and none was confirmed as an SD-WAN deployment in the material read. Kamstrup serves utilities but is itself labelled Manufacturing by Cisco."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        23,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Federal, state, and local government agencies can deploy a FedRAMP-authorized SD-WAN cloud-delivered solution designed to optimize performance, enhance security, and simplify their operations.",
+      "claimed_by": "vendor",
+      "note": "Two independent supports: a published accreditation claim (FedRAMP authorisation for the cloud-delivered SD-WAN solution) and a named public sector customer, Buckinghamshire Council, whose entry lists Cisco Software-Defined Wide Area Network."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        28,
+        44
+      ],
+      "confidence": "medium",
+      "quote": "As schools, colleges, and universities rapidly adopt a cloud-first strategy, the IT landscape has become significantly different.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a dedicated Cisco SD-WAN page for education, which meets the dedicated industry page test. Confidence held at medium because no named education customer with an SD-WAN deployment was found: the leading Cisco education networking story, West Ada School District, is a Meraki and Catalyst LAN and wireless deployment with no SD-WAN component."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        23,
+        30,
+        38
+      ],
+      "confidence": "high",
+      "quote": "United Airlines uses Cisco SD-WAN to centralize network management, enhance security, and boost performance across its global operations.",
+      "claimed_by": "vendor",
+      "note": "United Airlines is a named SD-WAN customer promoted on the SD-WAN solution page itself. The SD-WAN industrial solution brief separately names transit, rail, trucking and service fleets. Cisco's wider transportation roster (DP World, easyJet, Alcoa ports) was checked but SD-WAN was not confirmed in those product lists."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        25,
+        33
+      ],
+      "confidence": "high",
+      "quote": "Tech Mahindra reimagines network operations to deliver agility across 32 branches and 6 hubs.",
+      "claimed_by": "vendor",
+      "note": "Tech Mahindra's case study carries Cisco's own Professional Services industry label and is headlined on SD-WAN, listing Cisco Software-Defined WAN (SD-WAN) and Cisco vManage. Worth noting Tech Mahindra is an IT services firm and also a Cisco channel partner, so it is a less neutral reference than a pure end customer."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        35,
+        46
+      ],
+      "confidence": "medium",
+      "quote": "Meraki MX security and SD-WAN appliances",
+      "claimed_by": "vendor",
+      "note": "Distinctive Resorts is a named case study carrying Cisco's own Hospitality industry label with Meraki MX security and SD-WAN appliances in the deployed products list. Confidence held at medium because the story is headlined on smart cameras and the SD-WAN element is incidental rather than the subject. Cisco's Meraki hospitality roster is large (InterContinental Hotels Group, Club Mediterranee, Motel 6, bluegr Hotels) but that index page does not state which of them use MX SD-WAN."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        26,
+        25,
+        27
+      ],
+      "confidence": "high",
+      "quote": "LINX Manchester",
+      "claimed_by": "vendor",
+      "note": "Cisco Secure Access publishes three separate UK and Ireland edge locations: London (peering LINX / LoNAP), Manchester (peering LINX Manchester) and Dublin (peering INEX), all listed as Cisco Edge v1. Corroborated by the Secure Connect data centre list, which shows London UK. A UK public sector SD-WAN customer (Buckinghamshire Council) is also published."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        26,
+        27
+      ],
+      "confidence": "high",
+      "quote": "AMS-IX",
+      "claimed_by": "vendor",
+      "note": "Extensive published mainland European footprint in the Secure Access regions table: Frankfurt and Dusseldorf (DE-CIX), Amsterdam (AMS-IX), Paris and Marseille, Milan, Madrid, Stockholm, Copenhagen, Prague, Warsaw, Bucharest and Zurich. Corroborated by the Secure Connect data centre list."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        26,
+        27
+      ],
+      "confidence": "high",
+      "quote": "Equinix Ashburn",
+      "claimed_by": "vendor",
+      "note": "Dense published US and Canadian footprint. US locations include Ashburn (Equinix Ashburn), New York (NYIIX) and Los Angeles (Equinix Los Angeles); Canadian locations include Toronto (TorIX), Vancouver and Alberta and Quebec multi-availability-zone regions. FedRAMP authorisation is also published for US government."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        26,
+        27
+      ],
+      "confidence": "high",
+      "quote": "Equinix Singapore",
+      "claimed_by": "vendor",
+      "note": "Published locations across Singapore, Japan (Tokyo and Osaka), India (Mumbai, Chennai, Hyderabad), South Korea (Seoul), Malaysia, Thailand, Indonesia (Jakarta) and Australia (Sydney via Equinix Sydney / MegaIX, and Melbourne). Corroborated by the Secure Connect data centre list."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        26,
+        27
+      ],
+      "confidence": "high",
+      "quote": "UAE-IX",
+      "claimed_by": "vendor",
+      "note": "Published Middle East locations include Dubai (UAE-IX), Bahrain, Tel Aviv, Jeddah and Riyadh. Published African locations include Johannesburg (NAPAfrica IX) and Cape Town. The Secure Connect list flags Johannesburg as partially available for one service, so coverage depth varies by component even though presence is clearly published."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        26,
+        27
+      ],
+      "confidence": "high",
+      "quote": "IX.br Sao Paulo",
+      "claimed_by": "vendor",
+      "note": "Published locations include Sao Paulo (IX.br Sao Paulo) and Rio de Janeiro in Brazil, plus Queretaro and a Mexico Central multi-availability-zone region. BBVA, a published Catalyst SD-WAN customer, is described as operating across Europe and Latin America."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        26,
+        27
+      ],
+      "confidence": "medium",
+      "quote": "Ningxia (Multi-AZ)",
+      "claimed_by": "vendor",
+      "note": "Cisco does publish mainland China entries, listed under Asia / China as Beijing (Multi-AZ) and Ningxia (Multi-AZ). Graded partial rather than yes for three reasons recorded here rather than resolved: both are AWS public cloud regions rather than Cisco Edge points of presence, Ningxia is marked as by-request rather than on-demand, and both carry a footnote marker whose conditions were not read. Note the disagreement between sources: the Cisco Secure Connect data centre list (evidence 5) shows only Hong Kong under the China heading and no mainland location at all. Cisco publishes nothing in either source about the licensed arrangement required to operate in mainland China."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        23,
+        25,
+        32
+      ],
+      "confidence": "high",
+      "quote": "scaling connectivity across 1700 sites in 185 countries through a unified platform",
+      "claimed_by": "vendor",
+      "note": "Unambiguous. The SD-WAN solution page leads with global enterprise references (Nestle across 1700 sites in 185 countries, United Airlines global operations, BBVA across more than 25 countries). This is the segment Cisco puts front and centre for Catalyst SD-WAN."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        36,
+        35,
+        34
+      ],
+      "confidence": "medium",
+      "quote": "Cisco small and medium enterprise solutions",
+      "claimed_by": "vendor",
+      "note": "Cisco runs a dedicated small and medium enterprise segment page, and the Meraki MX line (cloud-managed security and SD-WAN) is the vehicle for this segment, appearing in mid-sized customer stories such as Distinctive Resorts and Room & Board. Confidence held at medium because the SME segment page itself does not name SD-WAN, so the mid-market claim is inferred from the Meraki product line rather than stated as SD-WAN targeting."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        36,
+        37
+      ],
+      "confidence": "medium",
+      "quote": "Gartner characterizes the SD-WAN small branch as a remote site supporting up to 10 people, where simplicity, cost consciousness, and flexibility of transport choices are key.",
+      "claimed_by": "vendor",
+      "note": "Graded partial deliberately. Cisco addresses small organisations corporately, and it publishes a small branch SD-WAN validated design, but that design describes small sites within a 500-site chain, not a small business as the buyer. No pricing, packaging or case study aimed at a standalone small business SD-WAN buyer was found. The two Meraki pages that would most likely settle this (evidence 25 and 26) were blocked by robots.txt."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

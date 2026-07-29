@@ -79,16 +79,16 @@
     "Premium pricing with modular structure; full SASE bundle costs can scale meaningfully with users and traffic."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "partner_integrated"
+    "middle_east_africa": "unknown",
+    "latin_america": "unknown",
+    "china_mainland": "yes"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -110,19 +110,19 @@
   "sectors": {
     "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
+    "government_public_sector": "yes",
+    "education": "yes",
+    "transport_logistics": "unknown",
     "professional_services": "yes",
     "hospitality_leisure": "partial"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "partial"
+    "mid_market": "unknown",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_user",
@@ -370,6 +370,357 @@
       "published": "2026-05-29",
       "reliability": "Not used as evidence. Restatement of supplier press release 15; the supplier original was read instead.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Netskope Customers",
+      "url": "https://www.netskope.com/customers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own customer index. Carries named customer logos (Airbus, BMO, Colgate Palmolive, ManTech, Prologis, JLL, Orbia, Republic Services, BLG, Culture Amp, GBfoods, The Auto Club Group, Elevance Health, Ross Stores, Sainsburys Supermarkets Ltd, Yamaha Motor Corporation, AVX Corporation) but only one linked case study. Logos alone are used as supporting, not sole, evidence."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Netskope Solutions index (industry list)",
+      "url": "https://www.netskope.com/solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own navigation page. Establishes which industry pages exist. Used to bound the sector search, including confirming which sectors have no page."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Netskope for Healthcare and Life Sciences",
+      "url": "https://www.netskope.com/solutions/healthcare-and-life-sciences",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page. Marketing copy, no named healthcare customer, but a standing sector page with HIPAA and HITECH detail."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Securing Financial Services in the Cloud and AI Era",
+      "url": "https://www.netskope.com/solutions/financial-services-and-insurance",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page carrying four named customer stories (Apex Group, JLL, RSM Australia, Ascensus) and a quantified Fortune 100 claim. Strongest sector page on the site."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Netskope For Manufacturing",
+      "url": "https://www.netskope.com/solutions/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page. Testimonial is anonymised ('Security Architect, Fortune 100 Equipment Manufacturer'), so the page itself plus manufacturer logos carry the grade."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Netskope for Retail and Hospitality",
+      "url": "https://www.netskope.com/solutions/retail-and-hospitality",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page covering two sectors jointly. Only anonymised testimonial ('SOC Analyst, Fortune 500 Retailer'). Retail content is substantive; hospitality appears only in the title."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Netskope for Utility Companies",
+      "url": "https://www.netskope.com/solutions/utilities",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page naming PDC Energy as a customer."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Netskope for Legal",
+      "url": "https://www.netskope.com/solutions/legal",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page for law firms. Testimonial anonymised ('Information Security Engineer, Corporate Law Firm')."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Netskope Service Companies",
+      "url": "https://www.netskope.com/solutions/service-companies",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page naming Oak Hill Advisors. Checked for transport and logistics content; none present."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Netskope High Technology",
+      "url": "https://www.netskope.com/solutions/high-technology",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page naming SolutionIT, Raiffeisen Information Service (RIS) and Dana Foundation. Sector falls outside the ten under assessment; used only as corroboration of European customers."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Netskope for the UK Public Sector",
+      "url": "https://www.netskope.com/solutions/public-sector-uk",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page making a specific UK infrastructure claim (full compute data centres in multiple UK cities) and naming central government, local government, NHS, education and defence. Vendor claim, not independently verified."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Netskope for US Public Sector",
+      "url": "https://www.netskope.com/solutions/public-sector",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page stating FedRAMP High authorisation for Netskope GovCloud and carrying an attributed quote from Gary Stevens, Deputy CIO, Department of Veterans Affairs."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Netskope US Federal Government",
+      "url": "https://www.netskope.com/solutions/public-sector/federal-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page restating FedRAMP High authorisation and NIST 800-53 control family mapping. Agency customer described only as 'Large Federal Agency'."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Netskope for State and Local Government",
+      "url": "https://www.netskope.com/solutions/state-local-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page. No named agency; testimonials anonymised. Supports the sector grade only in combination with the federal page."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Netskope for Australian Government",
+      "url": "https://www.netskope.com/solutions/australian-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page citing an independent IRAP assessment to PROTECTED level and naming Sydney, Melbourne and Perth data planes. The IRAP reference points to third party assessment, which raises its weight for Asia Pacific delivery."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Netskope for Higher Education Institutions",
+      "url": "https://www.netskope.com/solutions/higher-education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page. No named institution."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Netskope for K12",
+      "url": "https://www.netskope.com/solutions/k12",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Dedicated supplier industry page. No named district."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Netskope NewEdge platform page",
+      "url": "https://www.netskope.com/platform/newedge",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier infrastructure page. Gives aggregate figures (120+ data centres, 80+ regions, 220+ countries and territories via Localization Zones) and an explicit Mainland China statement. No per city or per country list is published, so the aggregate cannot be resolved to individual regions."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Netskope NewEdge China",
+      "url": "https://www.netskope.com/platform/newedge/newedge-china",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page describing a specific, named China arrangement rather than a generic global claim. This is the distinction the China test requires."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "BDO case study",
+      "url": "https://www.netskope.com/resources/case-studies/bdo",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named supplier case study with an industry label of Business Services and a location of London, UK. The only fully named, linked case study found on the site."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Netskope Case Studies index",
+      "url": "https://www.netskope.com/resources/case-studies",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier index. Filters exist for Industries but the listing is rendered client side, so only the BDO study was retrievable. This limits sector evidence more than the supplier's actual portfolio probably does."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Netskope Company page",
+      "url": "https://www.netskope.com/company",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier corporate page. Gives employee count, customer count, 30%+ Fortune 100 and 'more than 80 regions'. Supports organisation size grading."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Netskope Partners",
+      "url": "https://www.netskope.com/partners",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier partner page. Checked specifically for mid market, SMB and MSSP segment language; none found. Used as negative evidence."
+    },
+    {
+      "n": 45,
+      "tier": 2,
+      "title": "Netskope Investor Relations",
+      "url": "https://investors.netskope.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Investor relations site of a NASDAQ listed company (NTSK). Statements here carry securities law accountability, so the Fortune 100 customer claim is more reliable than ordinary marketing copy."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Netskope Slashes Network Latency By Up to 90% for Enterprise AI Traffic",
+      "url": "https://www.netskope.com/press-releases/netskope-slashes-network-latency-by-up-to-90-for-enterprise-ai-traffic",
+      "published": "2026-07-21",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release restating 'more than 120 data centers in over 80 regions worldwide' as of June 2026. Corroborates the platform page figures and gives them a date."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Netskope Press Releases index",
+      "url": "https://www.netskope.com/press-releases",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier newsroom index. Scanned for announcements on customer counts, regional data centre builds and transport or logistics customers; none found in the 2026 listings."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Netskope Catalyst MSP/SP Program press release",
+      "url": "https://www.netskope.com/press-releases/netskope-enables-msps-to-generate-revenue-faster-with-launch-of-new-catalyst-msp-sp-program-and-netskope-partner-orchestrator",
+      "published": "2026-06-17",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release. Checked specifically for mid market or SMB segment language; none present. Used as negative evidence on organisation size."
+    },
+    {
+      "n": 49,
+      "tier": 2,
+      "title": "G-Cloud 14: Netskope SSE (ITHQ LTD)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/449020513272270",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK Crown Commercial Service Digital Marketplace listing. Prices on this register are contractually binding on the supplier, which makes them materially better evidence than vendor marketing. Reseller listing, so it prices a reseller package rather than Netskope's own list price."
+    },
+    {
+      "n": 50,
+      "tier": 2,
+      "title": "G-Cloud 14: Netskope Secure Web Gateway and CASB (Somerford Associates)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/650275800883372",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK Digital Marketplace listing. Publishes a per user annual price and a data storage and processing locations field naming United Kingdom and European Economic Area (EEA). Same reseller caveat as source 28."
+    },
+    {
+      "n": 51,
+      "tier": 2,
+      "title": "G-Cloud 14: Netskope Web and Cloud Security (Bytes Software Services)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/614738418021424",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK Digital Marketplace listing. Third independent price point, consistent with sources 28 and 29."
+    },
+    {
+      "n": 52,
+      "tier": 2,
+      "title": "G-Cloud 14: Netskope Web and Cloud Security (Integrity360)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/915184240488477",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK Digital Marketplace listing. Fourth price point plus a data residency field covering United Kingdom, European Economic Area and other locations."
+    },
+    {
+      "n": 53,
+      "tier": 3,
+      "title": "G-Cloud 14 search results for Netskope",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/search?q=netskope",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Register search index. Used only to locate the five reseller listings and to establish that Netskope reaches UK public sector buyers through resellers rather than a direct listing. Corroboration only."
+    },
+    {
+      "n": 54,
+      "tier": 4,
+      "title": "Netskope blog, NewEdge tag",
+      "url": "https://www.netskope.com/blog/tag/newedge",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Read in full looking for data centre expansion posts naming Middle East, African or Latin American cities. The tag listing returned only AI and threat research posts with no location content, so it graded nothing."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "Netskope transportation and logistics industry page (attempted)",
+      "url": "https://www.netskope.com/solutions/transportation-and-logistics",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Recorded because the absence is itself the finding: there is no transport or logistics industry page, and the sector does not appear on the solutions index either."
+    },
+    {
+      "n": 56,
+      "tier": 4,
+      "title": "Netskope industries page (attempted)",
+      "url": "https://www.netskope.com/industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. The industry taxonomy lives under /solutions instead."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "Netskope NewEdge marketing URL (attempted)",
+      "url": "https://www.netskope.com/netskope-newedge",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Blocked by the site's robots.txt so the content could not be read. A per city data centre list may exist behind this path, which is a known gap in the regional grading."
+    },
+    {
+      "n": 58,
+      "tier": 4,
+      "title": "AWS Marketplace search for Netskope (attempted)",
+      "url": "https://aws.amazon.com/marketplace/search/results?searchTerms=Netskope",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Blocked by robots.txt, so no marketplace listed pricing could be read to corroborate the G-Cloud figures."
+    },
+    {
+      "n": 59,
+      "tier": 4,
+      "title": "Netskope pricing page (attempted)",
+      "url": "https://www.netskope.com/products/netskope-one/pricing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Netskope publishes no pricing page of its own, which is why the price tier rests entirely on third party register listings."
+    },
+    {
+      "n": 60,
+      "tier": 4,
+      "title": "Netskope trust and about-us pages (attempted)",
+      "url": "https://www.netskope.com/trust",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404, as did /company/about-us, /company/global-offices, /company/newedge-network, /solutions/dora-compliance, /solutions/nis2-compliance and /solutions/gdpr. These were the routes most likely to carry EU data residency and regional certification detail."
     }
   ],
   "sourced_facts": {
@@ -589,6 +940,262 @@
       "quote": "five-nines (99.999%) uptime and availability SLA",
       "claimed_by": "vendor",
       "note": "Published as a five-nines uptime and availability SLA, alongside separate latency SLAs of under 10 milliseconds for non-decrypted traffic and under 50 milliseconds for encrypted traffic processing. The full SLA contract text was not reachable, so the percentage rests on the supplier press release."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        24,
+        23,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Netskope helps healthcare organizations maintain patient privacy, secure organizational IP, avoid regulatory fines, guard against data breaches, and provide optimized, zero trust access to people, devices, and data anywhere they go.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test, not on a customer. There is no named healthcare case study anywhere I could reach, and the page's HIPAA and HITECH language describes helping customers comply rather than any accreditation Netskope itself holds. Elevance Health appears as a logo on the customers page but with no linked story behind it, so it corroborates rather than proves. The UK public sector page separately names the NHS as one of five focus areas."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        25,
+        45,
+        22
+      ],
+      "confidence": "high",
+      "quote": "More than 4,000 customers, including three of the five largest financial services companies on the Fortune 100, trust our unified secure access service edge (SASE) platform, Netskope One.",
+      "claimed_by": "vendor",
+      "note": "The best evidenced sector by a clear margin. Four named customer stories on the industry page (Apex Group, JLL, RSM Australia, Ascensus), plus BMO and The Auto Club Group as logos, plus explicit DORA, GDPR, NIS 2 and PCI references. The Fortune 100 claim is a vendor claim and is not independently verified here."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        27,
+        22
+      ],
+      "confidence": "medium",
+      "quote": "Netskope for Retail and Hospitality",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page, which meets the yes test, and two named retail logos on the customers page (Ross Stores, Sainsburys Supermarkets Ltd). Confidence is medium rather than high because the page carries no named retail case study; its only testimonial is anonymised as 'SOC Analyst, Fortune 500 Retailer'. The case studies index is client side rendered so a named retail study may exist that I could not retrieve."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        26,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Netskope helps the world's largest and most demanding manufacturing companies securely adopt the cloud to streamline operations and compete at all levels.",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page plus an unusually strong set of manufacturer logos on the customers page: Airbus, Yamaha Motor Corporation, Colgate Palmolive, AVX Corporation and Orbia. No named manufacturing case study; the page testimonial is anonymised as 'Security Architect, Fortune 100 Equipment Manufacturer'."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        28
+      ],
+      "confidence": "high",
+      "quote": "Netskope for Utility Companies",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page and one named customer, PDC Energy. Note the page is framed around utilities and billing rather than OT or ICS security, so it evidences the sector but not necessarily operational technology capability. Republic Services appears as a logo on the customers page but is waste services rather than energy, so I have not counted it."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        33,
+        34,
+        32,
+        36,
+        35
+      ],
+      "confidence": "high",
+      "quote": "Netskope GovCloud holds FedRAMP High Authorization, the maximum cloud security certification level available.",
+      "claimed_by": "vendor",
+      "note": "The strongest accreditation backed sector. Four separate government pages (US federal, US state and local, UK, Australia), FedRAMP High for GovCloud, an IRAP assessment to PROTECTED for Australia, and an attributed quote from Gary Stevens, Deputy CIO and Director of Cyber Strategy at the Department of Veterans Affairs. ManTech International, a defence contractor, appears both on the federal page and as a customer logo. No StateRAMP status was found on the state and local page."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        37,
+        38,
+        32
+      ],
+      "confidence": "medium",
+      "quote": "Netskope enables K12 schools to use the cloud and web securely.",
+      "claimed_by": "vendor",
+      "note": "Two dedicated industry pages, Higher Education and K12, which meets the yes test, and education is named as one of five UK public sector focus areas. Confidence is medium because neither page names a single university, college or school district, and no education case study was retrievable. This is a sector Netskope addresses on paper more clearly than it demonstrates with customers."
+    },
+    "sectors.transport_logistics": {
+      "value": "unknown",
+      "evidence": [
+        23,
+        30,
+        55,
+        42
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found and I am confident the absence is real, not a search failure. I checked the full solutions index, which lists fifteen industry pages and includes no transport or logistics entry; I fetched /solutions/transportation-and-logistics directly and got a 404; I read the Service Companies page specifically for transport, logistics, shipping or airline content and found none; and I scanned the press release index for logistics customers. Prologis appears as a customer logo and is often read as logistics, but it is a logistics real estate owner with no linked case study, and inferring sector capability from a single unexplained logo is exactly the reasoning this exercise is meant to remove."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        41,
+        29,
+        30,
+        22
+      ],
+      "confidence": "high",
+      "quote": "BDO Brings Together Networking and Security to Protect a Cloud-First, AI-Friendly Infrastructure",
+      "claimed_by": "vendor",
+      "note": "The only fully named and linked case study on the site, labelled by Netskope with the industry 'Business Services' and located in London, UK. Reinforced by two further industry pages (Legal, Service Companies), a named customer on each of them in Oak Hill Advisors and the RSM Australia story, and law firm BLG plus JLL as logos."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partial",
+      "evidence": [
+        27,
+        23
+      ],
+      "confidence": "medium",
+      "quote": "Netskope for Retail and Hospitality",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes deliberately. Hospitality has no page of its own; it is named in the title of a shared retail page whose body content, use cases and single testimonial are all retail. There is no hospitality customer, no hospitality case study and no hospitality specific compliance content. This is the sector named in a heading with nothing behind it, which is the partial test. A reviewer applying the dedicated page rule mechanically would reach yes, so I am flagging the disagreement rather than hiding it."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        32,
+        41,
+        50,
+        52
+      ],
+      "confidence": "high",
+      "quote": "powered by full compute data centres in multiple UK cities",
+      "claimed_by": "vendor",
+      "note": "Specific in country infrastructure claim rather than a global one, supported by a London based named case study (BDO) and by four UK reseller listings on the Crown Commercial Service Digital Marketplace whose data storage and processing fields name the United Kingdom. Ireland specifically is not mentioned anywhere I read; the evidence is UK only and the region grade carries Ireland by grouping, not by evidence."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        50,
+        52,
+        31,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "European Economic Area (EEA)",
+      "claimed_by": "third_party",
+      "note": "Confidence is medium because the cleanest evidence is third party rather than from Netskope. The Somerford and Integrity360 G-Cloud listings both declare data storage and processing locations including the European Economic Area with user control over location, which is a delivery statement on a binding public register. Netskope's own site gave me nothing Europe specific: /solutions/dora-compliance, /solutions/nis2-compliance and /solutions/gdpr all returned 404, and the NewEdge page publishes only aggregate figures with no European city list. Raiffeisen Information Service and GBfoods are named or logoed European customers, which corroborates."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        33,
+        34,
+        43,
+        45
+      ],
+      "confidence": "high",
+      "quote": "Netskope GovCloud holds FedRAMP High Authorization, the maximum cloud security certification level available.",
+      "claimed_by": "vendor",
+      "note": "FedRAMP High is a US government authorisation that cannot be held without US based, assessed infrastructure, so it evidences delivery rather than presence. Reinforced by the Santa Clara headquarters, a US federal agency customer quote, and BMO plus The Auto Club Group as North American customer logos."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        36,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Netskope has been independently assessed under the Information Security Registered Assessors Program (IRAP) to the PROTECTED level.",
+      "claimed_by": "third_party",
+      "note": "The Australian Government page names three in country data plane locations, Sydney, Melbourne and Perth, and cites an IRAP assessment to PROTECTED. IRAP is an Australian Government scheme carried out by registered assessors, so this is the one regional claim with genuine independent backing. RSM Australia is a named customer story on the financial services page. Evidence is heavily Australia weighted; Japan, Singapore, India and the rest of Asia Pacific are covered only by the aggregate NewEdge figure."
+    },
+    "regions.middle_east_africa": {
+      "value": "unknown",
+      "evidence": [
+        39,
+        46,
+        54
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No region specific evidence found. The only applicable material is the aggregate NewEdge claim of 120+ data centres in 80+ regions and Localization Zones reaching 220+ countries and territories, which almost certainly includes this region but names no city, country or point of presence in it. Under the rule that this field measures service delivery and not a global marketing figure, that is not gradeable. I checked the NewEdge platform page, the NewEdge blog tag and the press release index for Middle East or Africa locations and found none, and the /netskope-newedge path that may hold a per city list is blocked by robots.txt."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        39,
+        46,
+        22
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Same position as Middle East and Africa: only the aggregate 80+ regions and 220+ countries and territories figures, with no Latin American city, country or point of presence published. Orbia is a Mexico headquartered customer logo and GBfoods has Latin American operations, but neither has a linked case study and a logo does not evidence in region service delivery. Recorded as unknown rather than inferred."
+    },
+    "regions.china_mainland": {
+      "value": "yes",
+      "evidence": [
+        40,
+        39
+      ],
+      "confidence": "high",
+      "quote": "120+ data centers in 80+ regions today, including Mainland China",
+      "claimed_by": "vendor",
+      "note": "This is the rare case where the China test is actually met. Netskope does not rely on a generic global claim: it calls out Mainland China explicitly in the coverage sentence, states full compute and all SASE services at the edge in every location, and maintains a separate named NewEdge China solution described as providing specialised, compliant access to domestic or international apps with its own datasheet. What is not published, and what a buyer should still ask for, is the licensing basis and the operating partner, since a foreign provider cannot deliver in country without a licensed arrangement."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        25,
+        45,
+        43,
+        22
+      ],
+      "confidence": "high",
+      "quote": "More than 4,000 customers, including three of the five largest financial services companies on the Fortune 100, trust our unified secure access service edge (SASE) platform, Netskope One.",
+      "claimed_by": "vendor",
+      "note": "Unambiguous and corroborated across three separate pages. The investor relations site states thousands of customers including more than 30 of the Fortune 100, and the company page repeats 30%+ Fortune 100. The customer logo set is almost entirely global enterprise: Airbus, BMO, Colgate Palmolive, Elevance Health, Yamaha Motor Corporation. Netskope is NASDAQ listed as NTSK, so the investor relations version of this claim carries securities law accountability rather than being pure marketing."
+    },
+    "organisation_fit.mid_market": {
+      "value": "unknown",
+      "evidence": [
+        44,
+        48,
+        49,
+        51
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No explicit mid market targeting found. I read the partners page and the June 2026 Catalyst MSP/SP programme press release specifically looking for mid market, SMB or segment language and neither uses those terms. The MSP and service provider route to market and the per user G-Cloud pricing with no stated minimum commitment would both suit mid market buyers, but that is inference about what could work rather than evidence of who Netskope targets, so it does not carry a grade. A buyer in this bracket should treat mid market fit as an open question to put to the vendor."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        59,
+        44,
+        43
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence either way. There is no published SMB tier, no self serve sign up, no free tier and no pricing page at all on netskope.com, and the partners page carries no small business language. Everything readable points at enterprise, but Netskope nowhere states that small business is out of scope, so not_primary would be over reading it. Unknown is the honest grade."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        50,
+        49,
+        51,
+        52,
+        59
+      ],
+      "confidence": "medium",
+      "quote": "£111.62 a user a year",
+      "claimed_by": "vendor",
+      "note": "Netskope publishes no pricing itself; /products/netskope-one/pricing returns 404 and no entry point appears anywhere on the site. The grade rests entirely on four independent UK Digital Marketplace reseller listings, which are binding published prices on a government procurement register. They cluster tightly: £111.62 a user a year (Somerford Associates), £130 a user a year (ITHQ), £9.00 a unit a month, which is £108 a year (Bytes Software Services), and £8.10 a unit (Integrity360). Roughly £108 to £130 per user per year for SSE sits in the middle of this market, hence mid rather than premium or value. Two caveats a buyer should weigh: these are reseller packages for public sector framework buyers, not Netskope list price, and the underlying module mix differs between listings, so they are not strictly like for like. Enterprise direct pricing at Fortune 100 scale is unpublished and may sit anywhere."
     }
   },
   "conflicts": [

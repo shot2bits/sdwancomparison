@@ -80,16 +80,16 @@
     "Direct enterprise sales motion is less established than legacy vendors; most consumption is via managed providers."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
-    "uk_ireland": "yes",
+    "uk_ireland": "partial",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "partner_integrated"
+    "latin_america": "unknown",
+    "china_mainland": "partial"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -109,21 +109,21 @@
     "note": "700+ gateways across 200+ PoPs give multi-gateway failover; HA edge pairs supported."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
     "retail_ecommerce": "yes",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "manufacturing": "unknown",
+    "energy_utilities": "unknown",
+    "government_public_sector": "yes",
+    "education": "yes",
+    "transport_logistics": "unknown",
+    "professional_services": "unknown",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "partial"
+    "mid_market": "partial",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -398,6 +398,267 @@
       "published": null,
       "reliability": "Not used as evidence. Returned HTTP 400; the correct asset path was found later via the solution page link list.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Arista Networks - SD-WAN & Edge Routing (VeloCloud SD-WAN solution page)",
+      "url": "https://www.arista.com/en/solutions/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own primary solution page for VeloCloud SD-WAN. Carries the global gateway/PoP claim and links every vertical solution brief. Highest-value single page for this assessment."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN for Healthcare - Solution Brief (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-for-Healthcare-Solution-Brief.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier marketing collateral, healthcare-specific. Dedicated vertical asset but contains no named healthcare customer."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN for Retail - Solution Brief (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-for-Retail-Solution-Brief.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier marketing collateral, retail-specific. Dedicated vertical asset, no named retail customer."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN for Financial Services - Solution Brief (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Financial-Services-Solution-Brief.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier marketing collateral, financial services specific. Describes anonymised deployments (an international banking institution, a large insurance company) rather than named customers."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN: PCI Compliance Solution Brief (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-PCI-Compliance-Solution-Brief.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier compliance collateral aimed at card-accepting retailers. Useful sector-intent evidence, no named customers."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN Cloud Gateway Advantages (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Cloud-Gateway-Advantages.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier white paper on gateway architecture. Gives gateway counts and a generic 'over 30 regions globally' claim but names no gateway countries or cities."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN Data Sheet (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/VeloCloud-SD-WAN-Data-Sheet.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product data sheet. Source for organisation-size language and for the licensing model (Standard/Enterprise/Premium editions, bandwidth tiers). No prices."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN Solution Overview (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/SD-WAN-Solution-Overview.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier overview. Confirms partner-hosted gateway model and PCI/HIPAA/GDPR compliance framing; names no regions or partners."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Arista Networks - Customer Testimonials / Customer Success Stories",
+      "url": "https://www.arista.com/en/company/customer-testimonials",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's named-customer library with an explicit industry filter taxonomy. Strongest source for which sectors Arista can actually name customers in. Caveat: the visible stories are campus, Wi-Fi, CloudVision and data centre deployments, not VeloCloud SD-WAN."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Arista Networks - Federal Government solutions",
+      "url": "https://www.arista.com/en/solutions/federal-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated public-sector page, listing US federal certifications (FIPS 140, Common Criteria, DoDIN APL, USGv6, CSfC) and including VeloCloud 7x0/4100/5100 in its SD-WAN section."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Arista Networks - Electronic Trading solutions",
+      "url": "https://www.arista.com/en/solutions/electronic-trading",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated financial-sector page with named customer stories (Deutsche Boerse Group, ING Romania). Strongest sector evidence found, though it is Arista switching/monitoring rather than VeloCloud SD-WAN."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Arista Networks - Company Overview",
+      "url": "https://www.arista.com/en/company/company-overview",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier corporate page. Source for customer count and Fortune 500 positioning; used only for organisation-size grading."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Arista Networks - Contact Us (office locations)",
+      "url": "https://www.arista.com/en/company/contact-us",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier office list. Offices are corporate/R&D presence, not service delivery, so used only as supporting evidence and noted as such."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN Edge 7x0 Series Data Sheet (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-7x0-Series.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier hardware data sheet. Its EMC and safety approval list is the only country-specific availability evidence found (US, Europe, Japan, China, Korea, Taiwan, Australia/NZ, Canada)."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "VeloCloud SD-WAN Edge 4100, 5100 Data Sheet (PDF)",
+      "url": "https://www.arista.com/assets/data/pdf/Datasheets/VeloCloud-SD-WAN-Edge-4100-5100.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier hardware data sheet. Corroborates the same country approval list as the 7x0 series."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Arista Networks Introduces AI-Driven Zero Trust Branch (press release)",
+      "url": "https://www.arista.com/en/company/news/press-release/24357-pr-20260721",
+      "published": "2026-07-21",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release. Names partners T&A SYSTEME GmbH (German MSP) and MetTel, evidencing partner-led delivery, but names no end-customer industries."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Arista Networks - SD-WAN & Edge Routing Literature",
+      "url": "https://www.arista.com/en/solutions/sd-wan/literature",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's complete VeloCloud document index. Confirms exactly which vertical briefs exist (retail, healthcare, financial services, PCI) and, by omission, which do not."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Arista Networks - Technology Partners",
+      "url": "https://www.arista.com/en/partner/technology-partners",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier partner list. Confirms SASE/security technology partners but contains no regional or carrier delivery partners, so it does not support any regional grade."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Arista Networks homepage",
+      "url": "https://www.arista.com/en/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier homepage, used only for navigation discovery of VeloCloud and vertical URLs."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Arista Networks - Press Releases index",
+      "url": "https://www.arista.com/en/company/news/press-release",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier newsroom index, used to locate the single VeloCloud-related release in the visible period."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "VMware SD-WAN by VeloCloud legacy site",
+      "url": "https://www.velocloud.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The page still serves pre-acquisition VMware-branded content and does not represent Arista's current VeloCloud offer, so nothing on it can be attributed to the supplier as it exists today."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "Arista VeloCloud SD-WAN (guessed solution URL)",
+      "url": "https://www.arista.com/en/solutions/velocloud-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned 'Page not found or access denied!!!' with no content."
+    },
+    {
+      "n": 47,
+      "tier": 4,
+      "title": "Arista VeloCloud SD-WAN (guessed product URL)",
+      "url": "https://www.arista.com/en/products/velocloud-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned 'Page not found or access denied!!!' with no content."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Arista customers (guessed URL)",
+      "url": "https://www.arista.com/en/customers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned 'Page not found or access denied!!!' with no content."
+    },
+    {
+      "n": 49,
+      "tier": 4,
+      "title": "Arista customer success (guessed URL)",
+      "url": "https://www.arista.com/en/company/customer-success",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned 'Page not found or access denied!!!' with no content."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "Arista China site",
+      "url": "https://www.arista.com/cn/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned 'Page not found or access denied!!!', so no China-specific supplier statement could be captured."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "VeloCloud service status page",
+      "url": "https://status.velocloud.net/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Fetch blocked (robots.txt / DNS resolution failure), so no per-region orchestrator or gateway list could be read."
+    },
+    {
+      "n": 52,
+      "tier": 4,
+      "title": "AWS Marketplace search for VeloCloud",
+      "url": "https://aws.amazon.com/marketplace/search/results?searchTerms=velocloud",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Fetch blocked by robots.txt, so no marketplace-listed pricing could be confirmed for the price tier."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Arista sitemap.xml",
+      "url": "https://www.arista.com/sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned in a binary/compressed form that could not be parsed, so no URL discovery was possible from it."
     }
   ],
   "sourced_facts": {
@@ -610,6 +871,227 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed. No availability percentage appears on the SD-WAN solution page, the VeloCloud datasheet, the SD-WAN solution overview or the customer support page. Targeted checks for the strings SLA, service level, uptime, availability and '99.' in the datasheet and the solution overview returned nothing, so there is not even a marketing mention of an SLA to downgrade from."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        41,
+        25,
+        26,
+        33
+      ],
+      "confidence": "medium",
+      "quote": "VeloCloud SD-WAN for Healthcare - Solution Brief",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a dedicated vertical asset, not a customer. Arista publishes a healthcare-specific VeloCloud solution brief, listed by that exact title on both the SD-WAN solution page and the SD-WAN literature index, and its customer story library carries a 'Medical & Healthcare' industry filter. The brief itself names no healthcare customer and no healthcare case study was found anywhere on arista.com. Compliance framing is generic (HIPAA is named alongside PCI and GDPR in the solution overview) rather than an accreditation."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        35,
+        28,
+        33,
+        25
+      ],
+      "confidence": "high",
+      "quote": "From the exchange edge to the back office, Arista offers a range of products optimized for demanding finance and trading environments.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence found. There is a dedicated Electronic Trading industry page with named customer stories (Deutsche Boerse Group, ING Romania), named banking customers Odeabank and FIBI Bank under a 'Finance' label in the customer story library, and a VeloCloud SD-WAN for Financial Services solution brief. Caveat worth carrying: the named customers are Arista switching, CloudVision and data centre deployments, while the VeloCloud-specific financial brief keeps its deployments anonymous ('an international banking institution', 'a large insurance company')."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        29,
+        27,
+        41,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "Securing customer data is essential for retail organizations because any breach can be a devastating blow to the retailer's brand and value.",
+      "claimed_by": "vendor",
+      "note": "Two dedicated retail-facing assets exist: 'VeloCloud SD-WAN for Retail - Solution Brief' and 'VeloCloud SD-WAN: PCI Compliance Solution Brief'. No named retail customer and no retail case study was found, and the customer story library has no Retail industry filter at all, so this is vendor collateral rather than demonstrated logos."
+    },
+    "sectors.manufacturing": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No manufacturing-specific evidence found. Checked the VeloCloud SD-WAN solution page, the full SD-WAN literature index (only retail, healthcare, financial services and PCI vertical briefs exist), the customer story library and its industry filter list (Cloud & Service Provider, Education, Enterprise, Finance, Government / Public Sector, Hospitality, Media & Entertainment, Medical & Healthcare - no Manufacturing), the solution overview and the product data sheets. Nothing manufacturing-specific in any of them."
+    },
+    "sectors.energy_utilities": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No energy or utilities specific evidence found. Same pages checked as manufacturing: SD-WAN solution page, SD-WAN literature index, customer story library and its industry filter taxonomy, solution overview, data sheets and the 2026 VeloCloud press release. No energy or utility customer, brief, page or accreditation appeared. Note only that a customer named 'enabl' appears under an 'Enterprise' label with no sector stated."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        34,
+        33
+      ],
+      "confidence": "medium",
+      "quote": "Arista has been meeting the unique IT and security needs of the U.S. Federal government",
+      "claimed_by": "vendor",
+      "note": "There is a dedicated Federal Government solutions page which lists US federal accreditations (FIPS 140, Common Criteria, DoDIN APL, USGv6, CSfC) and which includes VeloCloud 7x0, 4100 and 5100 platforms in its SD-WAN section, and the customer story library carries a 'Government / Public Sector' industry filter. No individual agency is named as a customer, and the accreditations are US-specific with no UK, EU or other public-sector framework found."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "medium",
+      "quote": "South Western City Schools",
+      "claimed_by": "vendor",
+      "note": "Four named education customers appear under an 'Education' industry label in the supplier's customer story library: South Western City Schools, Universidad Europea, University of Waikato and Bern University of Applied Sciences. All four are tagged to Campus & Wi-Fi, CloudVision and Data Center solutions, so this evidences Arista as a supplier to education but not VeloCloud SD-WAN specifically. No education-specific SD-WAN brief exists in the literature index."
+    },
+    "sectors.transport_logistics": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No transport or logistics specific evidence found. Checked the SD-WAN solution page, the complete SD-WAN literature index, the customer story library and its industry filter list (which has no Transport or Logistics category), the solution overview, both Edge data sheets and the July 2026 VeloCloud press release."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No professional-services-specific evidence found. The customer story library has no Professional Services category; the nearest labels are the generic 'Enterprise' tag applied to Tecnalia, enabl, Taboola and ENNI Group. No professional services brief, page or case study exists in the SD-WAN literature index."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "low",
+      "quote": "Kāhala Nui",
+      "claimed_by": "vendor",
+      "note": "Graded yes only because a single named customer sits under a 'Hospitality' industry label in the supplier's customer story library, and 'Hospitality' is one of the eight industry filter categories. Three caveats that materially weaken this: the customer is a senior living community rather than a hotel or leisure operator, the deployment is tagged Campus & Wi-Fi, CloudVision and Security rather than VeloCloud SD-WAN, and there is no hospitality solution brief in the SD-WAN literature index. Treat as one logo, not a vertical practice."
+    },
+    "regions.uk_ireland": {
+      "value": "partial",
+      "evidence": [
+        37,
+        30,
+        25
+      ],
+      "confidence": "low",
+      "quote": "3220, Aviation House, Westpark, Shannon, Co. Clare, Ireland, V14AN29",
+      "claimed_by": "vendor",
+      "note": "Ireland is evidenced as corporate presence only: the Contact Us page lists offices at Shannon and at 2 Georges Dock, IFSC, Dublin 1, and the Cloud Gateway Advantages paper labels Shannon the International Headquarters. Those are offices, not service delivery. No UK office is listed on the Contact Us page, no UK or Ireland gateway or point of presence is named anywhere, and the Edge data sheets list CE but no UKCA mark. Delivery in this region rests on the generic worldwide gateway claim plus channel partners, so graded partial rather than yes."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        35,
+        38,
+        37,
+        40
+      ],
+      "confidence": "medium",
+      "quote": "Deutsche Börse Group monitors every trade with Arista",
+      "claimed_by": "vendor",
+      "note": "Best-evidenced non-US region. Named European customer stories (Deutsche Boerse Group in Germany, ING Romania, plus Universidad Europea and Bern University of Applied Sciences in the customer library), CE and the EN 55022/EN 62368-1/EN 300-386 European approvals on both VeloCloud Edge data sheets, Irish offices, and a named German managed service provider partner (T&A SYSTEME GmbH) in the July 2026 press release. No individual European gateway city or PoP is published, so coverage detail is inferred from the worldwide gateway claim."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        34,
+        38,
+        37
+      ],
+      "confidence": "high",
+      "quote": "Arista has been meeting the unique IT and security needs of the U.S. Federal government",
+      "claimed_by": "vendor",
+      "note": "Clearest region. US federal deployment history with US-government accreditations (FIPS 140, DoDIN APL, USGv6, CSfC), FCC (US), UL 60950-1/UL 62368-1 and CAN/CSA C22.2 approvals on the Edge data sheets covering the US and Canada, US headquarters and R&D offices in Santa Clara, Austin, Nashua, Cary and San Francisco plus a Burnaby, British Columbia office, and MetTel named as a US service provider partner in the July 2026 press release."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        38,
+        33,
+        37
+      ],
+      "confidence": "medium",
+      "quote": "University of Waikato",
+      "claimed_by": "vendor",
+      "note": "Supported by country-specific product approvals on both VeloCloud Edge data sheets: R-Mark (Japan), KCC (Korea), NCC (Taiwan), VCCI, CNS 13438, AS/NZS 3548 and AS/NZS 60950-1/AS/NZS-62368-1 for Australia and New Zealand. Corroborated by a named New Zealand customer (University of Waikato) and by offices in Sydney, Singapore (described as the APAC Administrative Office), Seoul and three Indian R&D sites. No individual APAC gateway location is published."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        33,
+        30
+      ],
+      "confidence": "low",
+      "quote": "stc Bahrain",
+      "claimed_by": "vendor",
+      "note": "Only one piece of MEA-specific evidence found: stc Bahrain appears as a named customer under a 'Cloud & Service Provider' label in the customer story library, tagged to Automation, CloudVision, Data Center and Monitoring rather than VeloCloud SD-WAN. No Middle East or Africa office is listed on the Contact Us page, no MEA gateway or point of presence is named, and no Gulf or African regulatory approval appears on the Edge data sheets. Graded partial on that single customer; delivery would otherwise rest on the generic worldwide gateway claim."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No Latin America specific evidence found. Checked the Contact Us office list (no office in Brazil, Mexico or anywhere in Latin America), both VeloCloud Edge data sheets (no Anatel, no NOM, no IFT approvals in the regulatory list), the customer story library (no Latin American customer), the Cloud Gateway Advantages paper and the SD-WAN solution page. Only the generic 'covering over 30 regions globally' claim would apply, which per the brief is not evidence of a named region."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        38,
+        39,
+        50
+      ],
+      "confidence": "low",
+      "quote": "SRRC (China)",
+      "claimed_by": "vendor",
+      "note": "China-specific hardware evidence exists and is not a generic global claim: both VeloCloud Edge data sheets list SRRC (China) under EMC and GB-4943 (CCC) under safety, which are Chinese type approvals for the appliances. That is product importability, not service delivery. No mainland China gateway or point of presence is published, no licensed in-country SD-WAN service arrangement or Chinese carrier partner was found, and the Arista China site at arista.com/cn returned a page-not-found error. Graded partial on hardware approval alone; a buyer should assume a separate licensed carrier arrangement is required."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        36,
+        35,
+        33,
+        40
+      ],
+      "confidence": "high",
+      "quote": "Arista has a prestigious set of customers, including Fortune 500 global companies in markets such as cloud titans, enterprise, financials, and specialty cloud service providers",
+      "claimed_by": "vendor",
+      "note": "Unambiguous. Corporate positioning around Fortune 500 and cloud titans, more than 10,000 customers and over 100 million ports installed, named large-enterprise logos (Deutsche Boerse Group, ING Romania, Odeabank, FIBI Bank), and a partner in the July 2026 press release described as managing 7500+ sites in 98 countries. VeloCloud collateral consistently frames the buyer as a 'distributed enterprise'."
+    },
+    "organisation_fit.mid_market": {
+      "value": "partial",
+      "evidence": [
+        31
+      ],
+      "confidence": "low",
+      "quote": "enterprises of all sizes",
+      "claimed_by": "vendor",
+      "note": "The only size-inclusive language found is the VeloCloud SD-WAN data sheet phrase 'enterprises of all sizes', repeated in the Edge data sheets. That is a sentence in a list with nothing behind it: no mid-market product tier, no mid-market pricing, no mid-market case study. The three commercial editions (Standard, Enterprise, Premium) are feature tiers licensed by bandwidth, not organisation-size tiers. Graded partial strictly on the stated claim."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No small-business evidence found. Checked the VeloCloud SD-WAN data sheet, both Edge data sheets, the solution overview, the solution page and the July 2026 press release. The smallest platforms are described as serving 'small branches' and 'branch and remote workers', which is a small site inside a larger enterprise rather than a standalone small business. No SMB tier, no published entry price, no SMB case study, and no self-service or online purchase route was found. The supplier also does not explicitly say small business is out of scope, so this is unknown rather than not_primary."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

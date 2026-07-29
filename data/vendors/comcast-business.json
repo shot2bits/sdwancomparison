@@ -80,14 +80,14 @@
     "Commercial model bundles access, SD-WAN, SASE and SOC elements; explicit line-item costing required."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
-    "uk_ireland": "partner_integrated",
+    "uk_ireland": "partial",
     "europe": "partial",
     "north_america": "yes",
     "asia_pacific": "partial",
-    "middle_east_africa": "unknown",
+    "middle_east_africa": "partial",
     "latin_america": "partial",
     "china_mainland": "unknown"
   },
@@ -109,19 +109,19 @@
     "note": "4G LTE backup widely bundled; Masergy global core adds route diversity."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
     "retail_ecommerce": "yes",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
+    "manufacturing": "yes",
+    "energy_utilities": "unknown",
+    "government_public_sector": "yes",
+    "education": "yes",
+    "transport_logistics": "unknown",
+    "professional_services": "unknown",
     "hospitality_leisure": "yes"
   },
   "organisation_fit": {
-    "large_global_enterprise": "partial",
+    "large_global_enterprise": "yes",
     "mid_market": "yes",
     "small_business": "yes"
   },
@@ -291,6 +291,249 @@
       "published": null,
       "reliability": "Tier 1 supplier URL but content is now a redirect stub. Fetched specifically to find a PoP count and backbone statement; yielded neither.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "Enterprise Services & Solutions | Comcast Business",
+      "url": "https://business.comcast.com/enterprise",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own enterprise landing page. Carries the Fortune 500 and small business scale statement plus customer logos (HCA Healthcare, Brigham and Women's Hospital, Choice Hotels International, US Bank, Citizen M, RaceTrac, Morningstar, Goodwill, Oak Valley Bank)."
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "Industry Solutions for the Enterprise | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own industry hub. Fetched twice; both times returned the same eleven named industries, which is the basis for grading the three absent sectors as unknown."
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Healthcare Technology Solution | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/Healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated healthcare industry page. Explicitly ties SASE capability to the sector. No named healthcare customer on this page itself."
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Financial Services Solutions | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated financial services page with named case study (STAR Financial Bank), named customer quote (Philadelphia Federal Credit Union) and US Bank video."
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Retail Technology Solutions | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated retail page carrying named case studies for Burger King, Denny's, Jack in the Box and a testimonial from American Furniture Rental."
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Manufacturing Industry Technology Solutions | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated manufacturing page with an anonymised but published case study (Houston-based manufacturer)."
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Education Technology Solutions | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated education page with a named customer case study (University of Virginia)."
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Hospitality Technology Solutions | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/hospitality",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated hospitality page with named customers Choice Hotels International, Best Western Hotels (BWH), Citizen M and White Elephant."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Federal Government Technology Solutions | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/federal-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated federal government page naming GSA EIS, GSA MAS IT and DISA Commercial Ethernet Gateway contract vehicles."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "GSA MAS IT Contract | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/federal-government/gsa-mas-it-contract",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page publishing the GSA contract number GS-35F-184BA and the contracting entity. Strongest public sector accreditation evidence found."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "SD-WAN | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/products-services/sd-wan-solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product hub. Source of the single US site versus global multi-site framing and the businesses of all sizes claim. No country list."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "SD-WAN Software Defined Networking | Comcast Business",
+      "url": "https://business.comcast.com/enterprise/products-services/sd-wan-solutions/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier SD-WAN detail page. States a per site charging model and competitive pricing but publishes no figure. Also carries Vertical Systems Group 2024 US Managed SD-WAN ranking."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "SD-WAN solutions - Comcast Business",
+      "url": "https://business.comcast.com/enterprise/products-services/secure-networking/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier secure networking page. Confirms US-plus-global framing and all sizes positioning. No industry or pricing content."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Internet for Small Business | Comcast Business",
+      "url": "https://business.comcast.com/small-business",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier small business storefront with published monthly entry prices. Only place on the site where actual prices are published, and they cover access, not SD-WAN or SASE."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Comcast Business to Acquire Masergy, a Pioneer in Software-Defined Networking and Cloud Platforms",
+      "url": "https://corporate.comcast.com/press/releases/comcast-business-acquire-masergy-pioneer-software-defined-networking-cloud-platforms",
+      "published": "2021-08-25",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier corporate press release. Source of the nearly 100 countries service claim and the explicit large and mid-size company targeting statement. Dated and attributable."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Comcast Business and Masergy Overview, Solutions Advisor Program (PDF)",
+      "url": "https://business.comcast.com/~/media/business_comcast_com/PDFs/partner/solutions-advisor-program/CB_SAP_Comcast-Story-May-9-2023-Final.pdf",
+      "published": "2023-05-09",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier partner enablement deck. Gives network scale figures (1.8 million Ethernet-enabled buildings, 700+ connected data centres, 185k fibre route miles, nationwide coverage) and the over 100 countries claim. Still no region breakdown."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Comcast Business Expands Global Secure Networking Portfolio with Solutions Tailored for Small and Medium Businesses",
+      "url": "https://www.businesswire.com/news/home/20230331005040/en/Comcast-Business-Expands-Global-Secure-Networking-Portfolio-with-Solutions-Tailored-for-Small-and-Medium-Businesses",
+      "published": "2023-03-31",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release on the wire. Evidences a deliberate SD-WAN product tier aimed at small and medium businesses with single or standalone locations."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Masergy Acquisition Moves Comcast Business Into Elite Class of Managed Network Providers",
+      "url": "https://corporate.comcast.com/press/releases/comcast-business-2022-gartner-magic-quadrant-managed-network-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier corporate press release. Repeats global managed network positioning and vertical market breadth but names no country or region."
+    },
+    {
+      "n": 31,
+      "tier": 2,
+      "title": "Comcast Business Gobbles Masergy's Managed SD-WAN",
+      "url": "https://www.sdxcentral.com/news/comcast-business-gobbles-masergys-managed-sd-wan/",
+      "published": "2021-08-25",
+      "verified_on": "2026-07-29",
+      "reliability": "Named-author dated trade journalism (Tobias Mann). The only source found that names a specific non-US access geography, the UK, and it does so in a quoted analyst sentence rather than a coverage statement."
+    },
+    {
+      "n": 32,
+      "tier": 2,
+      "title": "Comcast Business ramps enterprise ambitions with Masergy acquisition",
+      "url": "https://www.fierce-network.com/operators/comcast-business-targets-large-enterprises-masergy-acquisition",
+      "published": "2021-08-25",
+      "verified_on": "2026-07-29",
+      "reliability": "Named-author dated trade journalism (Diana Goovaerts). Corroborates large and mid-sized enterprise targeting and Fortune 500 / Global 2000 ambition. Names no regions."
+    },
+    {
+      "n": 33,
+      "tier": 3,
+      "title": "Comcast Business Accelerates Focus on Global Enterprise and U.S. Public Sector",
+      "url": "https://tbri.com/special-reports/comcast-business-accelerates-focus-on-global-enterprise-and-us-public-sector/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Analyst commentary (TBRI). Corroboration only. Notably characterises the international strategy as disjointed and describes the international base as US-headquartered customers served in their non-US locations. Recorded because it disagrees in tone with the vendor's global framing."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Masergy is now part of Comcast Business",
+      "url": "https://business.comcast.com/masergy/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier transition page. Thin; only a generic global secure networking sentence. Retained to show the Masergy brand is now folded into Comcast Business."
+    },
+    {
+      "n": 35,
+      "tier": 4,
+      "title": "Countries where Masergy provides service (product sheet)",
+      "url": "https://business.comcast.com/masergy/product-sheet/countries-where-masergy-provides-service",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the page exists and is titled as a country list, but it is gated behind a login and returned no country names. This is the single document that would have settled the regional grades."
+    },
+    {
+      "n": 36,
+      "tier": 4,
+      "title": "Townlink - Global SD-WAN (AWS Marketplace listing)",
+      "url": "https://aws.amazon.com/marketplace/pp/prodview-adrewporhjfvo",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: surfaced on a Comcast SD-WAN pricing search but the listing belongs to a different vendor, Townlink, not Comcast Business or Masergy."
+    },
+    {
+      "n": 37,
+      "tier": 4,
+      "title": "Managed SD-WAN (Comcast Business managed solutions path)",
+      "url": "https://business.comcast.com/enterprise/products-services/managed-solutions/managed-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. Recorded so the dead path is not retried."
+    },
+    {
+      "n": 38,
+      "tier": 4,
+      "title": "State and Local Government Solutions (hyphenated path)",
+      "url": "https://business.comcast.com/enterprise/industry-solutions/state-and-local-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. The live path is /state-local-government, and the government grade rests on the federal government and GSA pages instead."
+    },
+    {
+      "n": 39,
+      "tier": 4,
+      "title": "Masergy global network page (Internet Archive capture)",
+      "url": "http://web.archive.org/web/2021/https://www.masergy.com/global-network",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the archive request was rejected with HTTP 403, so no historic Masergy point of presence list could be read."
     }
   ],
   "sourced_facts": {
@@ -512,6 +755,237 @@
       "quote": "Our service level agreements (SLAs) are trailblazing in the industry, with 100% uptime for all high availability-configured Masergy SD-WAN Secure sites, 100% cloud service reachability for AWS, Azure, and 200+ providers, along with an industry-leading 5-minute proactive outage notification.",
       "claimed_by": "vendor",
       "note": "The 100% figure is conditional: it applies only to high availability-configured Masergy SD-WAN Secure sites, not to all sites. A different figure, 99.99%, appears on the SASE page for dedicated connectivity solutions. Conflict recorded; not resolved."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        15,
+        13
+      ],
+      "confidence": "high",
+      "quote": "Help protect patients and your network with advanced security solutions that provide key SASE capabilities.",
+      "claimed_by": "vendor",
+      "note": "Dedicated healthcare industry page that ties SASE capability directly to the sector, which meets the dedicated industry page test. The healthcare page itself carries no named customer, but the enterprise landing page displays HCA Healthcare and Brigham and Women's Hospital among its customer logos and case studies. Graded on the dedicated page, not on the logos."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        16,
+        13
+      ],
+      "confidence": "high",
+      "quote": "STAR Financial Bank powers new technology",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services page with a named bank case study, a named CIO quote from Philadelphia Federal Credit Union and a US Bank feature. Three named customers in the sector."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        17
+      ],
+      "confidence": "high",
+      "quote": "Digital resilience: Inside the tech transformation at Burger King",
+      "claimed_by": "vendor",
+      "note": "Dedicated retail page with named case studies for Burger King, Denny's and Jack in the Box plus an American Furniture Rental testimonial. Note the retail evidence skews heavily to multi-site restaurant and physical store estates rather than pure ecommerce; no ecommerce-specific customer was found."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        18,
+        14
+      ],
+      "confidence": "medium",
+      "quote": "Manufacturers of any finished good need a fast and reliable network to ensure that their facilities can maintain daily production flows.",
+      "claimed_by": "vendor",
+      "note": "Dedicated manufacturing industry page, which meets the test. The supporting case study is anonymised as a Houston-based manufacturer rather than a named customer, so this is weaker evidence than the retail or financial services grades."
+    },
+    "sectors.energy_utilities": {
+      "value": "unknown",
+      "evidence": [
+        14
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Checked the industry solutions hub twice; the published list is Federal Government, State and Local Government, Education, Financial Services, Healthcare, Hospitality, Restaurants and Food Services, Manufacturing, Retail, Property Development and Sports and Entertainment. Energy and utilities is not among them, and no energy or utility customer, case study or page was found on the enterprise landing page or the SD-WAN pages. No inference drawn from general enterprise capability."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        22,
+        21
+      ],
+      "confidence": "high",
+      "quote": "Comcast Business Communications, LLC dba Comcast Business is the GSA-approved contract holder.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in the set: a published GSA MAS IT contract number (GS-35F-184BA), plus a federal government page naming GSA Enterprise Infrastructure Solutions (EIS) and DISA Commercial Ethernet Gateway (CEG), and a separate state and local government page in the industry list. All evidence is US public sector; nothing found for UK, EU or other national public sectors."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        19
+      ],
+      "confidence": "high",
+      "quote": "Enhancing connectivity at University of Virginia with Private Wireless Network solution",
+      "claimed_by": "vendor",
+      "note": "Dedicated education page with a named institution case study. The named deployment is a private wireless network rather than SD-WAN or SASE specifically, so the sector presence is proven but the SASE relevance is indirect."
+    },
+    "sectors.transport_logistics": {
+      "value": "unknown",
+      "evidence": [
+        14
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not present in the eleven published industry solutions. Checked the industry hub, the enterprise landing page customer logos and the SD-WAN product pages; no transport, fleet, logistics or distribution customer or case study found."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [
+        14,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Not present in the eleven published industry solutions. The enterprise landing page displays a Morningstar logo, which is a financial data and research firm, but there is no professional services industry page, no professional services framing and no case study read in this task that positions it as a served sector. Graded unknown rather than partial because a single logo without sector framing is not a sector claim."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        20,
+        14
+      ],
+      "confidence": "high",
+      "quote": "How Choice Hotels International expanded internet access and improved guest satisfaction",
+      "claimed_by": "vendor",
+      "note": "Dedicated hospitality page with a named case study and a named customer quote from Choice Hotels International, plus Best Western Hotels (BWH), Citizen M and White Elephant. The separate Restaurants and Food Services and Sports and Entertainment pages reinforce leisure coverage."
+    },
+    "regions.uk_ireland": {
+      "value": "partial",
+      "evidence": [
+        31,
+        27
+      ],
+      "confidence": "low",
+      "quote": "Comcast's significant access network in the U.S., and to a less extent the U.K., form the ideal partner for Masergy's global SDN network,",
+      "claimed_by": "third_party",
+      "note": "The UK is the only non-US access geography named in anything read in this task, and it is named by a dated named-author trade article quoting an analyst, not by a Comcast coverage page. No UK point of presence list, no UK service availability page and nothing at all for Ireland. Graded partial, not yes, because no supplier coverage publication was found."
+    },
+    "regions.europe": {
+      "value": "partial",
+      "evidence": [
+        27,
+        28
+      ],
+      "confidence": "low",
+      "quote": "Masergy has become a leading provider to companies worldwide – serving more than 1,400 customers in nearly 100 countries.",
+      "claimed_by": "vendor",
+      "note": "The vendor publishes a nearly 100 countries service claim (restated in the 2023 partner deck as over 100 countries) but publishes no region breakdown, no European point of presence list and no per-country availability page. The one document titled as a country list, the Masergy countries product sheet, is behind a login and returned no country names. Graded partial on a non-region-specific delivery claim; upgrade only if the country sheet is obtained."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        28,
+        25,
+        23
+      ],
+      "confidence": "high",
+      "quote": "Nationwide coverage",
+      "claimed_by": "vendor",
+      "note": "US delivery is unambiguous: nationwide coverage, 185k fibre route miles, over 1.8 million Ethernet-enabled buildings and 700+ connected data centres in the partner deck, and the SD-WAN pages frame the base case as a single U.S. location. Ranked number one US provider for Managed SD-WAN by Vertical Systems Group 2024 per the SD-WAN page. Caveat: all the specific evidence is United States; nothing Canada-specific or Mexico-specific was found."
+    },
+    "regions.asia_pacific": {
+      "value": "partial",
+      "evidence": [
+        27,
+        28
+      ],
+      "confidence": "low",
+      "quote": "Masergy has become a leading provider to companies worldwide – serving more than 1,400 customers in nearly 100 countries.",
+      "claimed_by": "vendor",
+      "note": "Same basis as Europe. No Asia Pacific point of presence, country list or in-region delivery page found across the SD-WAN, secure networking, Masergy transition and partner deck sources. The gated countries product sheet blocked confirmation."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        27,
+        28
+      ],
+      "confidence": "low",
+      "quote": "Masergy has become a leading provider to companies worldwide – serving more than 1,400 customers in nearly 100 countries.",
+      "claimed_by": "vendor",
+      "note": "Same basis as Europe and Asia Pacific. No Middle East or Africa point of presence, customer, office or coverage statement found in any page read. This is the weakest of the partial grades and rests entirely on an aggregate country count."
+    },
+    "regions.latin_america": {
+      "value": "partial",
+      "evidence": [
+        27,
+        28
+      ],
+      "confidence": "low",
+      "quote": "Masergy has become a leading provider to companies worldwide – serving more than 1,400 customers in nearly 100 countries.",
+      "claimed_by": "vendor",
+      "note": "Same basis as the other non-US regions. No Latin America specific coverage, point of presence or customer evidence found. Note also the TBRI analyst commentary (source 21) characterises the international base as US-headquartered customers served in their non-US locations rather than in-region acquisition, which cuts against reading the country count as independent regional presence."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        27,
+        35
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Treated the nearly 100 countries claim as evidence of nothing here, per the standing rule that mainland China requires a specific licensed arrangement. No ICP licence, no named Chinese carrier partner, no China point of presence and no China service page were found. The Masergy countries product sheet that might have listed China is gated behind a login."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        27,
+        13,
+        32
+      ],
+      "confidence": "high",
+      "quote": "The acquisition accelerates Comcast Business's increasing growth serving large and mid-size companies, particularly U.S.-based organizations with multi-site global operations.",
+      "claimed_by": "vendor",
+      "note": "Explicit vendor targeting statement, reinforced by the enterprise page claim of serving over 90% of the Fortune 500 and by dated trade coverage describing the Masergy deal as an upscale move toward the Fortune 500 and Global 2000. Worth flagging for buyers that the vendor's own framing is US-headquartered organisations with global sites, not natively global enterprises."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        27,
+        29
+      ],
+      "confidence": "high",
+      "quote": "The acquisition accelerates Comcast Business's increasing growth serving large and mid-size companies, particularly U.S.-based organizations with multi-site global operations.",
+      "claimed_by": "vendor",
+      "note": "Mid-size is named alongside large in the vendor's own targeting statement, and the 2023 press release adds a distinct SD-WAN product tier for small and medium businesses with single or standalone locations, which is a product tier aimed at this band."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        26,
+        29,
+        13
+      ],
+      "confidence": "high",
+      "quote": "Comcast Business provides business capabilities at affordable prices for small businesses.",
+      "claimed_by": "vendor",
+      "note": "Strong on all four tests: a dedicated small business storefront, published monthly list pricing, an explicit affordability positioning sentence, a purpose-built SD-WAN tier for small and medium businesses announced in 2023, and the claim of serving millions of small businesses. Comcast Business is unusual in this comparison set in genuinely covering all three size bands."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        26,
+        24,
+        23
+      ],
+      "confidence": "low",
+      "quote": "Comcast Business provides business capabilities at affordable prices for small businesses.",
+      "claimed_by": "vendor",
+      "note": "No price is published for the SD-WAN or SASE service anywhere read. The SD-WAN detail page discloses only the charging model, a single rate per site, plus generic competitive pricing language. The only actual figures published on the site are small business internet access plans, with entry points around $60 to $70 per month rising to $180 per month for 2 Gigabit, and Comcast Business Mobile from $24 per month per line. Graded value on that published access pricing plus the explicit affordability positioning, and held at low confidence because those figures cover access, not the managed SD-WAN or SASE product a buyer would actually be comparing. Treat as unknown for SASE-specific budgeting."
     }
   },
   "conflicts": [

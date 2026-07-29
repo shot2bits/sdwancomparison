@@ -80,15 +80,15 @@
     "Public cloud gateway and multi-cloud transit fabric capabilities are less prominent than cloud-native SASE vendors."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
-    "asia_pacific": "partial",
+    "asia_pacific": "yes",
     "middle_east_africa": "partial",
-    "latin_america": "partial",
+    "latin_america": "yes",
     "china_mainland": "unknown"
   },
   "supported_clouds": {
@@ -109,16 +109,16 @@
     "note": "HA appliance pairs; cloud security depth depends on partner SSE."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
     "energy_utilities": "partial",
-    "government_public_sector": "partial",
+    "government_public_sector": "yes",
     "education": "yes",
-    "transport_logistics": "partial",
+    "transport_logistics": "unknown",
     "professional_services": "yes",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "partial",
@@ -425,6 +425,465 @@
       "published": null,
       "reliability": "Not used as evidence: URL returned HTTP 404 and no content was retrieved. Recorded to show the path was attempted before the correct pages were located via the site navigation map.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "SonicWall - Essential Cybersecurity Solutions for Protecting Healthcare Organizations (healthcare industry page)",
+      "url": "https://www.sonicwall.com/solutions/industry/healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated healthcare industry page. Names HIPAA and carries two case studies (Women's Center for Radiology; Medium-Enterprise Health Care Company). Quote verified on a second fetch with an explicit literal-string check."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "SonicWall - Cyber Security for Financial Services",
+      "url": "https://www.sonicwall.com/solutions/industry/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated financial services industry page. The 6,000 customer figure is a self-reported vendor claim, unverified by any third party. Quote confirmed on a second fetch."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "SonicWall - Retail & Hospitality",
+      "url": "https://www.sonicwall.com/solutions/industry/retail-hospitality",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated retail and hospitality industry page. No customer named on the page itself. Quote confirmed literally present on a second fetch."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "SonicWall - K-12 Education Cybersecurity",
+      "url": "https://www.sonicwall.com/solutions/industry/k-12-education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated K-12 page. Names Ceiba Public Schools case study and E-rate and CARES Act ESSER funding eligibility. Quote confirmed on a second fetch."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "SonicWall - Higher Education Cybersecurity Solutions",
+      "url": "https://www.sonicwall.com/solutions/industry/higher-education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated higher education page. Carries three named institution case studies: University of Dundee, University of Hawaii (TASI), Endicott College. Quote confirmed on a second fetch."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "SonicWall - Federal Government Cybersecurity",
+      "url": "https://www.sonicwall.com/solutions/government-federal-institutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own federal government page. Lists FIPS 140-2, FIPS 140-3, Common Criteria, DoDIN APL, CSfC and USGv6 accreditations, which are externally awarded and independently checkable. Quote confirmed literally present on a second fetch. No federal agency is named as a customer."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "SonicWall - State Government Cybersecurity Solutions",
+      "url": "https://www.sonicwall.com/solutions/industry/state-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own state government page. Names LARES, Webel Technology and Department of Energy, Republic of the Philippines case studies. Quote confirmed on a second fetch."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "SonicWall - Local Government Cybersecurity Services",
+      "url": "https://www.sonicwall.com/solutions/industry/local-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own local government page. Names Lawrence County Department of Public Safety and Washington County Sheriff's Office case studies."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "SonicWall - Distributed Enterprises",
+      "url": "https://www.sonicwall.com/solutions/industry/distributed-enterprise",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own page. Generic on organisation size, names no customers. Used only as weak corroboration for branch and multi-site positioning."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "SonicWall - Next Generation Firewalls (product family page)",
+      "url": "https://www.sonicwall.com/products/firewalls",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product family page. Segments the range explicitly by organisation size (SOHO, SMB and branch, mid-sized enterprises, large enterprises). All three size taglines confirmed literally present on a second fetch with an explicit string check. No pricing published."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "SonicWall - TZ Series entry-level firewalls",
+      "url": "https://www.sonicwall.com/products/firewalls/entry-level",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own page. Source of the SMB positioning and the cost positioning language. Both target strings confirmed literally present on a second fetch. No list prices published."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "SonicWall Cloud Secure Edge technical documentation - Points of Presence",
+      "url": "https://www.sonicwall.com/support/technical-documentation/docs/cse/banyan-components/edge-network/pops/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own technical documentation, the strongest available service-delivery evidence. Enumerates named PoP cities for Secure Private Access and Secure Internet Access by region. This is the primary basis for every region grade."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "SonicWall - Contact Sales (global office directory)",
+      "url": "https://www.sonicwall.com/customers/contact-sales",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own page listing registered entities and addresses in the US, Germany, Ireland, Spain, UAE, UK, India, Japan, Shanghai, Singapore, South Korea and Taiwan. These are sales and corporate offices, not service delivery points, so used only as supporting context, never as a region grade on its own."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "SonicWall - Cloud Secure Edge product page",
+      "url": "https://www.sonicwall.com/products/cloud-secure-edge",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SSE product page. Carries three named customer case studies with attributed testimonials (ShowTech Solutions, Stronghold Data, Lemonade). Contains no geographic coverage or pricing information."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "SonicWall - Secure SD-WAN use case",
+      "url": "https://www.sonicwall.com/solutions/use-cases/secure-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SD-WAN page. No named customers, no pricing, no sector detail. Used only for cost-positioning corroboration."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Case study - Blue Tomato: Europe-Wide Security for Network, Stores and Offices",
+      "url": "https://www.sonicwall.com/resources/case-studies/blue-tomato-europe-wide-security-for-network-stores-and-offices",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named retail customer case study. Title and meta description quoted from the landing page HTML; the detailed narrative sits in an embedded PDF that could not be fetched."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Case study - Magrabi Hospitals and Centers Safeguard Valuable Assets with SonicWall",
+      "url": "https://www.sonicwall.com/resources/case-studies/magrabi-hospitals-and-centers-safeguard-valuable-assets-with-sonicwall",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named healthcare customer case study with a named IT Director. Meta description quoted from landing page HTML. States 32 hospitals in five countries but does not name the countries."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Case study - SonicWall Improves Network Efficiency and Security for Ajman University",
+      "url": "https://www.sonicwall.com/resources/case-studies/sonicwall-improves-network-efficiency-and-security-for-ajman-university",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named customer case study. Ajman University is in the United Arab Emirates. Primary Middle East delivery evidence, and secondary education evidence."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Case study - Leading Apparel Manufacturer and Exporter Secures Work from Home Operations with SonicWall's Advanced Solutions (Gokaldas Exports)",
+      "url": "https://www.sonicwall.com/resources/case-studies/leading-apparel-manufacturer-and-exporter-secures-work-from-home-operations-with-sonicwalls-advanced-solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published case study naming Gokaldas Exports as an apparel manufacturer. Sole clearly sector-labelled manufacturing evidence found. Also Asia Pacific (India) corroboration."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Case study - Holambra Cooperativa Agroindustrial protege seu ambiente de negocios com ajuda da SonicWall",
+      "url": "https://www.sonicwall.com/resources/case-studies/holambra-cooperativa-agroindustrial-protege-seu-ambiente-de-negocios-com-ajuda-da-sonicwall",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named Brazilian customer case study, delivered with named local partner Informo. Corroborates Latin America delivery alongside the Sao Paulo PoP."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Case study - Fosters Solicitors Boosts Network Resilience with SonicWall",
+      "url": "https://www.sonicwall.com/resources/case-studies/fosters-solicitors-strengthens-network-resilience-with-sonicwall-and-hfi-consulting-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named law firm case study delivered with named partner HFI Consulting. Fosters Solicitors is a UK law firm, but the page itself does not state the country, so this is used for professional services and not for the UK region grade."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "Case study - Zero Trust Security Case Study | XimpleIT & SonicWall CSE",
+      "url": "https://www.sonicwall.com/resources/case-studies/how-a-people-first-msp-is-securing-the-legal-industry-with-sonicwall-cloud-secure-edge",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published case study explicitly naming the legal industry and small law firms as the served vertical, delivered through named MSP XimpleIT. Strongest professional services evidence found."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "Case study - Crestline Sanitation District",
+      "url": "https://www.sonicwall.com/resources/case-studies/crestline-sanitation-district",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named customer case study for a water and sanitation district. Weak for energy and utilities: the page carries no sector label and a sanitation district is arguably local government rather than a utility. Recorded with that caveat, not treated as a full grade."
+    },
+    {
+      "n": 51,
+      "tier": 1,
+      "title": "Case study - Celtic Manor Resort: A Super Infrastructure for Superpowers",
+      "url": "https://www.sonicwall.com/resources/case-studies/celtic-manor-resort-a-super-infrastructure-for-superpowers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named hospitality customer case study. Title quoted from the landing page. The narrative PDF is hosted on assets-cms.sonicwall.com and could not be fetched."
+    },
+    {
+      "n": 52,
+      "tier": 1,
+      "title": "Case study landing page - Great American Restaurants",
+      "url": "https://www.sonicwall.com/resources/case-studies/great-american-restaurants",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named restaurant-group customer, linked as the featured case study from the SonicWall homepage navigation. Landing page carries the customer name only; body content is in a PDF that robots.txt blocked."
+    },
+    {
+      "n": 53,
+      "tier": 1,
+      "title": "SonicWall resources sitemap (post_resources-slug_usearch1.xml)",
+      "url": "https://www.sonicwall.com/post_resources-slug_usearch1.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own XML sitemap. Used to enumerate the full case study library rather than as a grading source. Reliable for what pages exist, silent on their content."
+    },
+    {
+      "n": 54,
+      "tier": 1,
+      "title": "SonicWall resources sitemap (post_resources-slug_usearch2.xml)",
+      "url": "https://www.sonicwall.com/post_resources-slug_usearch2.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own XML sitemap. Enumeration only. Confirms the sector spread of the case study library and, by absence, the sectors with no coverage."
+    },
+    {
+      "n": 55,
+      "tier": 1,
+      "title": "SonicWall resources sitemap (post_resources-slug_usearch3.xml)",
+      "url": "https://www.sonicwall.com/post_resources-slug_usearch3.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own XML sitemap. Enumeration only."
+    },
+    {
+      "n": 56,
+      "tier": 1,
+      "title": "SonicWall Cloud Secure Edge techdocs sitemap",
+      "url": "https://www.sonicwall.com/techdocs_cse_usearch.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own XML sitemap. Used to locate the PoP documentation. Navigation aid only."
+    },
+    {
+      "n": 57,
+      "tier": 1,
+      "title": "SonicWall homepage",
+      "url": "https://www.sonicwall.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own homepage. Used to enumerate the Solutions by Industry navigation, which is the definitive list of industries SonicWall chooses to market to. Its absences are meaningful."
+    },
+    {
+      "n": 58,
+      "tier": 3,
+      "title": "Case study landing page - Department of Energy, Republic of the Philippines",
+      "url": "https://www.sonicwall.com/resources/case-studies/department-of-energy-republic-of-the-philippines",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Corroboration only. The landing page carries the customer name but no meta description and no body text; the case study is an embedded PDF. Names a national government department in the Philippines, supporting government and Asia Pacific, but too thin to carry a grade alone."
+    },
+    {
+      "n": 59,
+      "tier": 4,
+      "title": "SonicWall - About SonicWall",
+      "url": "https://www.sonicwall.com/about-sonicwall",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the page contains no company statistics. No customer count, country count, office count or organisation-size statement could be extracted, so it cannot support a region or size grade."
+    },
+    {
+      "n": 60,
+      "tier": 4,
+      "title": "SonicWall - Leadership",
+      "url": "https://www.sonicwall.com/about-sonicwall/leadership",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: executive biographies only, with no company scale, geography or customer-size facts."
+    },
+    {
+      "n": 61,
+      "tier": 4,
+      "title": "SonicWall - Partners",
+      "url": "https://www.sonicwall.com/partners",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the SecureFirst partner programme page makes only an unquantified 'trusted global ecosystem' claim with no partner counts, country counts or regional breakdown, so it cannot substantiate partner-delivered coverage in any specific region."
+    },
+    {
+      "n": 62,
+      "tier": 4,
+      "title": "SonicWall - Partner Locator",
+      "url": "https://www.sonicwall.com/partner-locator",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the country dropdown is populated client-side and the option list is not present in the served HTML, so no country coverage list could be read."
+    },
+    {
+      "n": 63,
+      "tier": 4,
+      "title": "SonicWall - How to Buy / Contact Sales",
+      "url": "https://www.sonicwall.com/how-to-buy",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: resolves to a sales contact form and office directory with no pricing, no price list, no starting price and no published licensing tiers."
+    },
+    {
+      "n": 64,
+      "tier": 4,
+      "title": "SonicWall Cloud Secure Edge pricing (attempted)",
+      "url": "https://www.sonicwall.com/products/cloud-secure-edge/pricing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. No per-user or subscription pricing page exists at this path."
+    },
+    {
+      "n": 65,
+      "tier": 4,
+      "title": "SonicWall company page (attempted)",
+      "url": "https://www.sonicwall.com/about-sonicwall/company",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404."
+    },
+    {
+      "n": 66,
+      "tier": 4,
+      "title": "SonicWall case studies index (attempted)",
+      "url": "https://www.sonicwall.com/resources/case-studies",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. The case study library is only reachable via a client-side faceted search, so the XML sitemaps were used instead."
+    },
+    {
+      "n": 67,
+      "tier": 4,
+      "title": "SonicWall customers page (attempted)",
+      "url": "https://www.sonicwall.com/customers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. There is no consolidated customer logo or reference page on the site."
+    },
+    {
+      "n": 68,
+      "tier": 4,
+      "title": "Great American Restaurants case study PDF",
+      "url": "https://assets-cms.sonicwall.com/v3/assets/blt281ecbfc2563bf9b/blt53dc0514b332494a/66e8379bba71ee576ae0d97e/great-american-restaurants.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: fetch refused, robots.txt on assets-cms.sonicwall.com returned HTTP 503 and the fetcher would not proceed. Site count and deployment detail therefore unverified."
+    },
+    {
+      "n": 69,
+      "tier": 4,
+      "title": "Celtic Manor Resort case study PDF",
+      "url": "https://assets-cms.sonicwall.com/v3/assets/blt281ecbfc2563bf9b/blt66cc9f1388de1deb/66e83cb871482b295ccbacbe/celtic-manor-resort-a-super-infrastructure-for-superpowers.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: fetch refused by robots.txt on the assets host. Country and organisation size therefore unverified from the primary document."
+    },
+    {
+      "n": 70,
+      "tier": 4,
+      "title": "SonicWall - Zero Trust Security use case",
+      "url": "https://www.sonicwall.com/solutions/use-cases/zero-trust-security",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: contains no points of presence, region or service coverage detail despite describing Cloud Secure Edge."
+    },
+    {
+      "n": 71,
+      "tier": 4,
+      "title": "Case study - Miray Cruises Sails to Superb Security with SonicWall",
+      "url": "https://www.sonicwall.com/resources/case-studies/miray-cruises-sails-to-superb-security-with-sonicwall",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence for transport: a cruise operator is a leisure business and SonicWall applies no transport or logistics sector label to it. Recorded to show transport was actively looked for."
+    },
+    {
+      "n": 72,
+      "tier": 4,
+      "title": "Case study - Full Speed Ahead For Safer Cruise Ships",
+      "url": "https://www.sonicwall.com/resources/case-studies/full-speed-ahead-for-safer-cruise-ships",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: no customer is named and no meta description exists. Title alone, with the narrative locked in an unfetchable PDF."
+    },
+    {
+      "n": 73,
+      "tier": 4,
+      "title": "Case study - Waycool Foods And Products",
+      "url": "https://www.sonicwall.com/resources/case-studies/waycool-foods-and-products",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the meta description is a product testimonial from a named consultant with no sector label. Cannot be graded as logistics or food supply chain on this basis."
+    },
+    {
+      "n": 74,
+      "tier": 4,
+      "title": "Case study - Harsha Automotive Amplifies Cybersecurity with SonicWall",
+      "url": "https://www.sonicwall.com/resources/case-studies/harsha-automotive-amplifies-cybersecurity-simplifies-remote-branch-connectivity-with-sonicwall",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence for manufacturing: the page never states whether Harsha Automotive manufactures or retails. Gokaldas Exports was used instead because its page states the manufacturing role explicitly."
+    },
+    {
+      "n": 75,
+      "tier": 4,
+      "title": "Case study - Cavagna Group",
+      "url": "https://www.sonicwall.com/resources/case-studies/cavagna-group",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the meta description is a single product testimonial from a named CIO with no sector or country label."
+    },
+    {
+      "n": 76,
+      "tier": 4,
+      "title": "Case study - P Parking Secures Its Parking Station Networks with SonicWall Firewalls",
+      "url": "https://www.sonicwall.com/resources/case-studies/p-parking-secures-its-parking-station-networks-with-sonicwall-firewalls",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: landing page carries a PDF embed only, no readable customer, sector or country detail. Checked specifically for transport sector evidence."
+    },
+    {
+      "n": 77,
+      "tier": 4,
+      "title": "Case study - Hutt City Council: Citizens Gain Secure WiFi Access in Public Spaces",
+      "url": "https://www.sonicwall.com/resources/case-studies/hutt-city-council-citizens-gain-secure-wifi-access-in-public-spaces",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: title only, no meta description, no readable body. Would have corroborated New Zealand delivery but the page does not state the country."
+    },
+    {
+      "n": 78,
+      "tier": 4,
+      "title": "SonicWall sitemap index",
+      "url": "https://www.sonicwall.com/sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: navigation aid only. Lists child sitemap files and contains no substantive claims."
     }
   ],
   "sourced_facts": {
@@ -651,6 +1110,250 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed. No availability percentage of any kind appears on the Cloud Secure Edge, Secure Private Access, Secure Internet Access, Support Services, Contact Support or Legal pages, and the Legal index lists no Service Level Agreement document. There is not even a generic marketing mention of 'an SLA' to downgrade from; the figure is simply absent from the material read."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        28,
+        44
+      ],
+      "confidence": "high",
+      "quote": "As threat actors and state-sponsored ransomware gangs continue to target and disrupt healthcare services, every Healthcare Delivery Organization (HDO) worldwide is vulnerable to attack, risking the compromise of patient data.",
+      "claimed_by": "vendor",
+      "note": "Meets the bar on three counts: a dedicated healthcare industry page, HIPAA named as a compliance target, and named customer case studies. The industry page carries Women's Center for Radiology (with named IT Director Michael Brown) and a Medium-Enterprise Health Care Company study; the wider library adds Magrabi Hospitals and Centers, described as having more than 32 hospitals and centers in five countries with a named IT Director. The page states SonicWall solutions help meet HIPAA requirements, which is a vendor claim of assistance and not an accreditation."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        29,
+        41
+      ],
+      "confidence": "high",
+      "quote": "Trusted by more than 6,000 financial services organizations worldwide, SonicWall delivers robust, manageable network information security in financial services, with solutions that extend protection of network resources down to the branch level.",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services industry page, which alone meets the yes bar. The 6,000 figure is an unaudited vendor claim with no third-party corroboration found. The industry page itself names no customer, but the case study library contains Apple Federal Credit Union, Delta Insurance, a savings and loan company and a health insurance company, and the Cloud Secure Edge page carries insurer Lemonade with a named CISO, Jonathan Jaffe."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        30,
+        43
+      ],
+      "confidence": "high",
+      "quote": "Build consumer confidence with security that exceeds PCI compliance mandates",
+      "claimed_by": "vendor",
+      "note": "Dedicated Retail & Hospitality industry page plus named retail customer case studies. The Blue Tomato case study page is titled 'Blue Tomato: Europe-Wide Security - for Network, Stores and Offices' with the description 'Learn how SonicWall seamlessly protects retail networks of any sizes against cyberattacks.' The library also holds Bashas, Petland, Telebrands, Supermercado Mialich and several studies whose slugs are prefixed 'retail-'. Note this is physical and multi-site retail throughout; no ecommerce-specific evidence was found."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        46
+      ],
+      "confidence": "medium",
+      "quote": "Gokaldas Exports is recognized as one of India's largest apparel manufacturers and exporters.",
+      "claimed_by": "vendor",
+      "note": "Graded on a single clearly sector-labelled named customer. There is no manufacturing industry page in SonicWall's Solutions by Industry navigation, so manufacturing is not a marketed vertical. Several other library entries look like manufacturers (Cavagna Group, a Turkish sugar producer, poultry producer Bupilic, Monte Carlo Fashions, Harsha Automotive) but their pages carry no sector label and their narratives are in PDFs blocked by robots.txt, so they were rejected. Confidence is medium because the grade rests on one page's meta description."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        50,
+        57
+      ],
+      "confidence": "low",
+      "quote": "Deployment of SonicWall Secure Mobile Access has helped the district",
+      "claimed_by": "vendor",
+      "note": "Deliberately not graded yes. There is no energy or utilities industry page in the Solutions by Industry navigation. The only candidate found across the whole case study library is Crestline Sanitation District, a water and wastewater district, and its page carries no sector label; a sanitation district is arguably local government rather than a utility. Department of Energy, Republic of the Philippines is a government ministry, not an energy operator, and was not counted here. A reviewer could reasonably downgrade this to unknown; partial reflects that a utility-type named customer exists but nothing frames energy or utilities as a served sector."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        33,
+        34,
+        35,
+        58
+      ],
+      "confidence": "high",
+      "quote": "U.S. Government-certified cybersecurity solutions for administrative, intelligence, and military organizations and agencies.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in the set. Three separate government industry pages (federal, state, local) plus externally awarded accreditations listed on the federal page: FIPS 140-2, FIPS 140-3, COMMON CRITERIA, DoDIN APL, COMMERCIAL SOLUTIONS FOR CLASSIFIED (CSfC), USGv6 and IPv6 Ready Logo, and NDAA Section 889 compliance. Named public sector customers include Washington County Sheriff's Office, Lawrence County Department of Public Safety, LARES, Webel Technology, Department of Energy, Republic of the Philippines, Gulf County Florida Board of County Commissioners and Borough of Kutztown. No US federal agency is named as a customer, only the certifications."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        32,
+        31,
+        45
+      ],
+      "confidence": "high",
+      "quote": "Colleges and universities are not just educational institutions",
+      "claimed_by": "vendor",
+      "note": "Two dedicated industry pages, K-12 and higher education, plus a large body of named institutions. The higher education page carries University of Dundee ('University Secures Its Network Against 323,000 Attacks Per Day'), University of Hawaii (TASI) and Endicott College. The K-12 page carries Ceiba Public Schools and states that products are eligible for E-rate and CARES Act ESSER funding. Ajman University adds a Middle East institution with 7,000-plus users. Education is comfortably the deepest vertical in the case study library."
+    },
+    "sectors.transport_logistics": {
+      "value": "unknown",
+      "evidence": [
+        57,
+        71,
+        72,
+        76,
+        73
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Searched specifically and found nothing that qualifies. There is no transport or logistics industry page in the Solutions by Industry navigation, which lists only Distributed Enterprises, Retail & Hospitality, K-12 Education, Higher Education, Healthcare, Financial Services, Federal, State Government and Local Government. The whole case study library was enumerated via three XML sitemaps and the nearest candidates were rejected: Miray Cruises and 'Full Speed Ahead For Safer Cruise Ships' are cruise operators graded as leisure rather than transport, P Parking has no readable content, and Waycool Foods and various distributors carry no logistics label. No airline, rail, freight, shipping line, 3PL or fleet customer was found."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        49,
+        48
+      ],
+      "confidence": "medium",
+      "quote": "Learn how XimpleIT used SonicWall Cloud Secure Edge to replace legacy VPNs, stop breaches, and deliver Zero Trust security for small law firms.",
+      "claimed_by": "vendor",
+      "note": "Graded on legal-sector evidence specifically. The XimpleIT study names the legal industry and small law firms as the vertical served, delivered through a managed service provider rather than direct. Corroborated by Fosters Solicitors, a named law firm, delivered with named partner HFI Consulting. There is no professional services industry page. Note that much of the delivery here is partner-led, so a case could be made for partner_integrated; yes was chosen because the customers themselves are named and the sector is explicitly stated. Accountancy services firm MyCPE ONE also appears in the library but was not fetched."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        30,
+        51,
+        52
+      ],
+      "confidence": "medium",
+      "quote": "Build consumer confidence with security that exceeds PCI compliance mandates",
+      "claimed_by": "vendor",
+      "note": "Covered by the same dedicated Retail & Hospitality industry page as retail, plus named hospitality customers. Celtic Manor Resort has its own case study page titled 'Celtic Manor Resort: A Super Infrastructure for Superpowers', and Great American Restaurants is the case study SonicWall links from its homepage navigation. The library also holds 'Resort Adds Security and Reliability to Enhance Guest Experience' and Oncu Doner, described as securing hundreds of franchises. Confidence is medium because the narrative PDFs for both flagship hospitality studies are blocked by robots.txt on the assets host, so only titles could be verified. The quote shown is the industry page headline, which covers hospitality jointly with retail."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        39,
+        40
+      ],
+      "confidence": "high",
+      "quote": "The Cloud Secure Edge (CSE) Global Edge Network is distributed across our edge infrastructure providers, enabling us to use one of their 50+ global regions to provide fast and reliable connections to your users around the world.",
+      "claimed_by": "vendor",
+      "note": "Service delivery evidenced by named points of presence, not by an office. The Cloud Secure Edge PoP documentation lists London under Europe for both Secure Private Access and Secure Internet Access, and additionally lists Ireland as a Secure Internet Access PoP. Supported by two registered entities: SonicWall (UK) Limited in Basingstoke and a SonicWall site in Cork. UK-delivered case studies exist in the library (Bradford Grammar School, Bolton College, Luton College) though their pages do not state the country."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        39,
+        40
+      ],
+      "confidence": "high",
+      "quote": "The Cloud Secure Edge (CSE) Global Edge Network is distributed across our edge infrastructure providers, enabling us to use one of their 50+ global regions to provide fast and reliable connections to your users around the world.",
+      "claimed_by": "vendor",
+      "note": "The PoP documentation lists Frankfurt and Stockholm for Secure Private Access, and Frankfurt, Paris and Stockholm for Secure Internet Access. Corroborated by registered entities SonicWall GmbH in Munich and an office in Barcelona, and by continental case studies including Blue Tomato (Europe-wide), Alexander Buerkle, Eijerkamp, Alsco Italia, Scholengroep Sint Rembert and Ansfelden Municipality."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        39,
+        40
+      ],
+      "confidence": "high",
+      "quote": "The Cloud Secure Edge (CSE) Global Edge Network is distributed across our edge infrastructure providers, enabling us to use one of their 50+ global regions to provide fast and reliable connections to your users around the world.",
+      "claimed_by": "vendor",
+      "note": "Densest coverage of any region. Secure Private Access PoPs listed at Ashburn Virginia, Council Bluffs Iowa, Los Angeles California, Moncks Corner South Carolina, Montreal and The Dalles Oregon; Secure Internet Access PoPs at North Virginia, Ohio, Northern California, Oregon and Montreal. Corporate headquarters at 1033 McCarthy Blvd, Milpitas, California. The overwhelming majority of named case studies are US organisations, and Montreal gives Canadian coverage."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        39,
+        40,
+        46,
+        58
+      ],
+      "confidence": "high",
+      "quote": "The Cloud Secure Edge (CSE) Global Edge Network is distributed across our edge infrastructure providers, enabling us to use one of their 50+ global regions to provide fast and reliable connections to your users around the world.",
+      "claimed_by": "vendor",
+      "note": "Secure Private Access PoPs listed at Mumbai, Tokyo, Singapore and Sydney; Secure Internet Access adds Osaka and Seoul. Offices in Bengaluru, Tokyo, Singapore, Seoul and Taipei. Named regional customers include Gokaldas Exports in India, Department of Energy Republic of the Philippines, Hutt City Council in New Zealand, and Sri Lankan, Japanese and South Korean studies in the library."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        45,
+        44,
+        40,
+        39
+      ],
+      "confidence": "medium",
+      "quote": "Ajman University boosts connectivity and security with SonicWall, improving network efficiency, internet speeds and cyber protection for 7,000+ users.",
+      "claimed_by": "vendor",
+      "note": "Graded partial deliberately. The Cloud Secure Edge PoP list contains no Middle East or Africa location, so cloud-delivered SSE traffic from this region must hairpin to Europe or Asia. Delivery here is appliance and partner based rather than PoP based. Evidenced by named regional customers (Ajman University in the UAE, Magrabi Hospitals and Centers, Midmac Contracting, The Africa Institute, and several South African schools) and by the registered entity SonicWall MEA FZ-LLC in Dubai Internet City. Strong presence, but not equivalent service delivery to the four regions graded yes."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        39,
+        47
+      ],
+      "confidence": "medium",
+      "quote": "The Cloud Secure Edge (CSE) Global Edge Network is distributed across our edge infrastructure providers, enabling us to use one of their 50+ global regions to provide fast and reliable connections to your users around the world.",
+      "claimed_by": "vendor",
+      "note": "Sao Paulo appears as a point of presence in both the Secure Private Access and Secure Internet Access lists, which is direct in-region service delivery. Corroborated by the Holambra Cooperativa Agroindustrial case study, described as one of Brazil's leading agribusiness groups with 170 member companies, delivered with named local partner Informo, and by Universidad Autonoma de la Ciudad de Mexico and Supermercado Mialich in the library. No LATAM office is listed on the contact directory, and Sao Paulo is the only Latin American PoP, so coverage is Brazil-anchored."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        39,
+        40
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No mainland China point of presence appears in the Cloud Secure Edge PoP documentation, which is the only service-delivery coverage document SonicWall publishes. The Asia Pacific PoPs are Mumbai, Osaka, Seoul, Tokyo, Singapore and Sydney, none in mainland China. The only mainland China artefact found anywhere on the site is a sales address in the contact directory at Fudan Science and Technology Park Building, Shanghai, which is a sales office and not evidence of service delivery. No ICP licence, no local carrier partnership and no China-specific arrangement is published. The generic 50+ global regions claim was treated as evidence of nothing here, as instructed."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "partial",
+      "evidence": [
+        37,
+        36,
+        44
+      ],
+      "confidence": "medium",
+      "quote": "Scalable security that leverages the power of cloud intelligence and designed for large distributed enterprises, data centers and service providers",
+      "claimed_by": "vendor",
+      "note": "There is an explicit product tier for this size, the NSsp Series, sold under a 'Large Enterprises' heading on the firewall family page, plus a Distributed Enterprises solution page. However no named large global enterprise customer was found anywhere in the case study library, which was enumerated in full. The largest named customers are mid-sized: Magrabi with 32 hospitals in five countries, Ajman University with 7,000-plus users, Gokaldas Exports, and an unnamed 'Global Restaurant Chain'. Graded partial rather than yes because the evidence is product positioning and not a demonstrated customer of that scale."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        37,
+        38
+      ],
+      "confidence": "high",
+      "quote": "Enterprise-grade protection for your small to mid-size business or branch office",
+      "claimed_by": "vendor",
+      "note": "Explicit product tiering by size on the firewall family page, with the NSa Series sold under a 'Mid-Sized Enterprises' heading and the TZ Series covering small to mid-size business. Corroborated by named case studies of this size, including 'Medium-Enterprise Health Care Company', 'SABMD Medium Enterprise Retail Company', Ajman University and Magrabi. This is visibly SonicWall's centre of gravity."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        37,
+        38,
+        41
+      ],
+      "confidence": "high",
+      "quote": "Best-in-class Threat Protection for your small office, home office, IoT and Micro-SMBs",
+      "claimed_by": "vendor",
+      "note": "A dedicated entry-level product exists for this segment (TZ80), and the TZ series page states 'The SonicWall TZ series of firewalls is designed specifically for the needs of SMBs and branch locations, delivering enterprise-class security without the enterprise-grade complexity.' Reinforced by a large MSP-delivered SMB motion: the Cloud Secure Edge page carries 'Stronghold Data Secures SMBs with Cloud Secure Edge' with a named CTO, and the library holds 'Griffin Technology Group Strengthens SMB Cybersecurity with SonicWall' and 'Small Business Engineering Company'."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        38,
+        37,
+        42
+      ],
+      "confidence": "low",
+      "quote": "delivering threat block rates on par or better than competitors at a fraction of the cost",
+      "claimed_by": "vendor",
+      "note": "No price is published anywhere on sonicwall.com. There is no pricing page (the /products/cloud-secure-edge/pricing path returns 404), no price list, no starting price and no published subscription tiers; the how-to-buy path resolves to a sales contact form. This grade therefore rests entirely on the supplier's own positioning language, which is consistently cost-led: the entry-level page contains the verified string 'at a fraction of the cost' and also 'Make SonicWall TZ firewall the start of enterprise savings', the firewall family page states 'Instead of buying, integrating, and maintaining separate tools, SonicWall delivers essential bundled services that cut licensing, integration, and operational costs significantly', and the SD-WAN page leads on 'Lower costs by replacing expensive MPLS connections with cost-effective broadband options such as Ethernet, DSL and 3G/4G'. Combined with a product range that starts at micro-SMB and SOHO, 'value' is the honest reading, but confidence is low because no transactable price was found from the vendor, a marketplace or an analyst. If a stricter standard is applied, 'unknown' is defensible."
     }
   },
   "conflicts": []

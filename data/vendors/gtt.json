@@ -80,15 +80,15 @@
     "Commercial model is consultative; ensure cost lines for managed changes, security and SLAs are explicit."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
+    "middle_east_africa": "yes",
+    "latin_america": "yes",
     "china_mainland": "partial"
   },
   "supported_clouds": {
@@ -110,20 +110,20 @@
   },
   "sectors": {
     "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "unknown",
+    "government_public_sector": "yes",
+    "education": "unknown",
+    "transport_logistics": "yes",
     "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
     "mid_market": "partial",
-    "small_business": "not_primary"
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -354,6 +354,231 @@
       "published": null,
       "reliability": "Not used as evidence. The URL returned a 404 client error when fetched, so no content could be read; the same release was obtained from the gtt.net PDF at register 14 instead.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "GTT Managed SD-WAN service page",
+      "url": "https://www.gtt.net/services/secure-networking/managed-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier product page. Names industry solutions and states no published price. Used for value_tier and general positioning."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "GTT Secure Networking overview",
+      "url": "https://www.gtt.net/services/secure-networking/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Lists the five industry solution categories. Corroborates industry taxonomy only."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "GTT Industry Solutions index",
+      "url": "https://www.gtt.net/industry-solutions/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Definitive list of the verticals GTT markets to: Finance & Insurance, Manufacturing, Retail & E-Commerce, Wholesale, Public Sector. Absence of a vertical here is meaningful negative evidence."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "GTT Finance and Insurance Solutions",
+      "url": "https://www.gtt.net/industry-solutions/finance-insurance/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated industry page with a named customer (Saxo Bank) and named regulatory frameworks (DORA, PCI DSS). Strong for financial_services."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "GTT Manufacturing industry solutions",
+      "url": "https://www.gtt.net/us-en/solutions/industry-solutions/manufacturing/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated industry page with five named manufacturing customers. Strongest single sector page. Also carries the UK and Ireland delivery claim."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "GTT Retail & E-commerce Network Solutions",
+      "url": "https://www.gtt.net/us-en/solutions/industry-solutions/retail-ecommerce/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated industry page with five named retail customers (HMY Group, Mattress Warehouse, Cloetta, KIABI, Greenyard). Strong for retail_ecommerce."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "GTT Federal Government / Public Sector",
+      "url": "https://www.gtt.net/industry-solutions/public-sector/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dedicated public sector page publishing GSA MAS contract number, DITCO vehicles, CAGE/UEI/DUNS and NAICS codes. Contract vehicle is verifiable. No named agency customer."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "GTT About Us",
+      "url": "https://www.gtt.net/about-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 corporate page. Primary source for organisation-size targeting language and headline PoP counts."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "GTT's Network / Global Tier 1 IP Network",
+      "url": "https://www.gtt.net/about-us/network/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 coverage page. Publishes continent and country reach counts. Generic global claim only, so used as background not as per-region proof."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "GTT homepage",
+      "url": "https://www.gtt.net/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1. Customer logo wall and headline network stats. Logos alone are weak evidence so used only for corroboration."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "GTT Case Studies index",
+      "url": "https://www.gtt.net/resources/case-studies/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1. Publishes GTT's own industry filter taxonomy for its customer evidence, which is a useful negative signal for sectors absent from it."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "GTT Case Studies index page 2",
+      "url": "https://www.gtt.net/us-en/resources/case-studies/?sf_paged=2",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1. Full customer list checked for energy, education, transport and hospitality customers. Used to establish absence."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Animal Care Hospital Group Case Study",
+      "url": "https://www.gtt.net/us-en/resources/case-studies/animal-care-hospital-group-case-study/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 named case study, 150 sites and 2,400 employees. Note this is veterinary rather than human healthcare, which limits how far it carries."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "SASE for Healthcare Professionals white paper",
+      "url": "https://www.gtt.net/us-en/resources/white-papers/sase-for-healthcare-professionals/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 healthcare-specific collateral. No named healthcare customer and no HIPAA reference found on the landing page."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Mitsubishi Electric Case Study",
+      "url": "https://www.gtt.net/resources/case-studies/mitsubishi-electric-case-study-4/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 named case study. Source for a mid-sized customer employee count (UK entity) and European branch footprint."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "ESA (European Space Agency) Case Study",
+      "url": "https://www.gtt.net/us-en/resources/case-studies/esa-case-study/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 named case study listing seven European countries of delivery. Strongest evidence for European service delivery. GTT files it under Business Services, not Public Sector."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Setec Case Study",
+      "url": "https://www.gtt.net/resources/case-studies/setec-case-study/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 named case study, engineering consultancy, 40 subsidiaries and EUR 480M revenue. Filed by GTT under Business Services."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Radisson Hotel Group Selects GTT for Global SASE Deployment",
+      "url": "https://www.gtt.net/about-us/press-releases/radisson-hotel-group-selects-gtt-for-global-sase-deployment/",
+      "published": "2025-03-18",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dated press release with a named global hospitality customer and an explicit multi-region delivery statement. Best single source for hospitality and for Middle East and Africa delivery."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Air France-KLM Group Selects GTT to Connect Its Sites in 37 Countries",
+      "url": "https://www.gtt.net/us-en/about-us/press-releases/air-france-klm-group-selects-gtt-to-connect-its-sites-in-37-countries/",
+      "published": "2021-12-02",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dated press release, named airline customer. Reliable but dated to 2021 and predates GTT's restructuring, so treated as evidence of capability rather than a current contract."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "GTT Expands Global Network in Latin America and Asia Pacific",
+      "url": "https://www.gtt.net/about-us/press-releases/gtt-expands-global-network-latin-america-asia-pacific/",
+      "published": "2025-05-05",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 dated press release naming nine specific countries for metro network extension, including China. Country-specific rather than a generic global claim, so it carries per-region grades."
+    },
+    {
+      "n": 40,
+      "tier": 3,
+      "title": "ISG Names GTT a Leader for SASE and Managed SD-WAN in US and UK (Business Wire syndication)",
+      "url": "https://markets.financialcontent.com/woonsocketcall/article/bizwire-2025-7-24-isg-names-gtt-a-leader-for-sase-and-managed-sd-wan-in-us-and-uk",
+      "published": "2025-07-24",
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 3. Dated but it is a vendor-issued Business Wire release syndicated by a content aggregator, with no named journalist. Corroborates US and UK market presence only, never carries a grade alone."
+    },
+    {
+      "n": 41,
+      "tier": 2,
+      "title": "UK Digital Marketplace G-Cloud supplier profile, GTT - EMEA LTD.",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/supplier/722363",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 2 UK government procurement register, independently accountable. Confirms a GTT legal entity is an accredited UK public sector framework supplier. No service prices were exposed on the supplier profile page itself."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "GTT Industries Finance Insurance (guessed URL)",
+      "url": "https://www.gtt.net/industries/finance-insurance",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404, the page does not exist. The live equivalent is source 4."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "GTT Expands Global Network in North America & Asia-Pacific",
+      "url": "https://www.gtt.net/us-en/about-us/press-releases/gtt-expands-global-network-in-north-america-and-asia-pacific/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL resolved to a press release archive listing rather than the article body, so no verifiable verbatim sentence about PoP locations could be extracted."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "GTT Professional Services datasheet",
+      "url": "https://www.gtt.net/us-en/resources/datasheet/professional-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence for the professional_services sector. On reading, this describes GTT's own delivery and consulting practice (project management, penetration testing), not a professional services industry vertical. A search result that looked like vertical evidence and was not."
     }
   ],
   "sourced_facts": {
@@ -577,6 +802,219 @@
       "quote": "99.99% network availability",
       "claimed_by": "vendor",
       "note": "This figure appears as a benefit stat under the 'Resilient by design' comparison panel on the Connect page, not in a published SLA schedule. No availability percentage was found on the Managed SD-WAN or SASE Secure Connect pages; the SASE page uses Service Level Objective wording and '365/24/7 uptime assurance' with no number, and an exact string check for '99.9' on that page returned ABSENT. Treat 99.99 as a marketing claim rather than a verified contractual commitment."
+    },
+    "sectors.healthcare": {
+      "value": "partial",
+      "evidence": [
+        33,
+        32,
+        30,
+        22
+      ],
+      "confidence": "low",
+      "quote": "SASE ensures that healthcare organizations and enterprises have a comprehensive networking and security posture",
+      "claimed_by": "vendor",
+      "note": "Graded partial, not yes. GTT publishes a healthcare-specific white paper (source 14) and carries a Healthcare filter on its case study index (source 11), but no named human-healthcare customer was found. The one healthcare-adjacent case study is Animal Care Hospital Group (source 13), a veterinary hospital group of 150 sites, which is not the same buyer as a hospital trust or payer. Healthcare is also absent from GTT's own Industry Solutions index (source 3), which lists only Finance & Insurance, Manufacturing, Retail & E-Commerce, Wholesale and Public Sector. No HIPAA or clinical accreditation reference found."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        23,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Digital Operational Resilience Act (DORA)",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page with a named customer, Saxo Bank, described as requiring a secure global network for digital trading platforms. Page heading is \"Finance and Insurance Solutions\" and it cites both DORA and PCI DSS alignment. Also one of the five verticals on GTT's Industry Solutions index."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        25,
+        22
+      ],
+      "confidence": "high",
+      "quote": "modernized connectivity across its international retail estate with GTT Managed SD-WAN",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page naming five retail customers: HMY Group (quoted), Mattress Warehouse, Cloetta, KIABI and Greenyard. The quoted sentence refers to HMY Group. Retail & E-Commerce is also a named vertical on the Industry Solutions index."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        24,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Röchling Automotive partnered with GTT to modernize its global network and support Industry 4.0 initiatives",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence. Dedicated industry page naming five manufacturing customers: HMY Group, Mitsubishi Electric UK, Etex (160+ sites), Barry Callebaut (130+ sites) and Röchling Automotive. Page also claims TOP 3 Global 500 manufacturers as customers, though that claim is unnamed and I have not graded on it."
+    },
+    "sectors.energy_utilities": {
+      "value": "unknown",
+      "evidence": [
+        22,
+        30,
+        31
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. Checked the Industry Solutions index (source 3), which does not list energy or utilities among its five verticals; both pages of the case study index (sources 11 and 12), whose industry filter taxonomy has no Energy or Utilities category; and searched GTT's site for energy and utilities case studies, which returned only manufacturing customers such as KSB (pumps and valves). Do not infer capability from GTT's industrial manufacturing customer base."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        26,
+        41,
+        22
+      ],
+      "confidence": "medium",
+      "quote": "GSA MAS (Contract # GS35F516DA) / DITCO BOA and DITCO GNS",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the strength of a dedicated Federal Government page publishing verifiable procurement identifiers: GSA MAS contract number, DITCO BOA and DITCO GNS vehicles, CAGE code 7A5Z1, UEI NBF8QKTPY7J7 and NAICS codes. Independently corroborated by the UK G-Cloud register (source 22), where GTT - EMEA LTD. is listed as a supplier. Caveat: no named government agency customer is published, and no FedRAMP authorisation was found on the page. Note GTT files the European Space Agency case study (source 16) under Business Services rather than Public Sector, so I have not counted ESA here."
+    },
+    "sectors.education": {
+      "value": "unknown",
+      "evidence": [
+        22,
+        30,
+        31
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. Checked the Industry Solutions index (source 3), the case study industry filter taxonomy on both index pages (sources 11 and 12), which contains no Education or Higher Education category, and searched the site for university and education case studies with no sector-specific result."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        38,
+        30
+      ],
+      "confidence": "medium",
+      "quote": "connecting sites in 37 countries across five continents",
+      "claimed_by": "vendor",
+      "note": "Named airline customer, Air France-KLM Group, using GTT Wide Area Networking to connect offices and airports. GTT's case study index also carries a Transportation industry filter (source 11). Confidence held at medium because the Air France-KLM release is dated December 2021, predates GTT's Chapter 11 restructuring, and transport does not appear on the current Industry Solutions index. No current-generation SD-WAN or SASE transport case study was found."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        30,
+        36,
+        44
+      ],
+      "confidence": "low",
+      "quote": "Professional Services",
+      "claimed_by": "vendor",
+      "note": "Graded partial. \"Professional Services\" appears as an industry filter category on GTT's own case study index (source 11), but no case study was confirmed as tagged to it. The nearest named customers, Setec (engineering consultancy, 40 subsidiaries, EUR 480M revenue) and ESA, are both filed by GTT under Business Services. Source 25 was rejected: the GTT Professional Services datasheet describes GTT's own consulting and deployment practice, not a customer vertical."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        37
+      ],
+      "confidence": "medium",
+      "quote": "connects more than 800 hotels and offices, as well as cloud service points of presence, across Asia-Pacific, Europe, the Middle East and Africa",
+      "claimed_by": "vendor",
+      "note": "Named global hospitality customer, Radisson Hotel Group, deploying GTT Secure Connect (SASE) across more than 800 hotels and offices. Dated March 2025, so current. Confidence medium rather than high because this rests on a single press release: hospitality is not on the Industry Solutions index and there is no Hospitality filter on the case study index."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        24,
+        41,
+        40
+      ],
+      "confidence": "high",
+      "quote": "modernize its network across UK and Ireland",
+      "claimed_by": "vendor",
+      "note": "Explicit UK and Ireland delivery statement on the manufacturing industry page, referring to the Mitsubishi Electric UK deployment of SD-WAN and advanced security services. Corroborated by a UK legal entity, GTT - EMEA LTD., listed on the UK government G-Cloud register (source 22), and by ISG naming GTT a Leader in the United Kingdom (source 21, Tier 3, corroboration only)."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        26,
+        40,
+        27
+      ],
+      "confidence": "high",
+      "quote": "US-based engineering, program management, and 24x7x365 Federal NOC",
+      "claimed_by": "vendor",
+      "note": "US in-country delivery capability stated on the Federal Government page, alongside a GSA MAS contract vehicle and direct connectivity to AWS GovCloud and Azure Government. GTT is headquartered in Arlington, Virginia. Corroborated by ISG naming GTT a Leader in the United States (source 21, Tier 3)."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        39,
+        37
+      ],
+      "confidence": "high",
+      "quote": "GTT is extending its network reach and performance in key metropolitan markets, in Argentina, Chile, China, Colombia, India, Malaysia, the Philippines, South Korea and Thailand.",
+      "claimed_by": "vendor",
+      "note": "Named APAC countries for metro network extension: China, India, Malaysia, the Philippines, South Korea and Thailand, in a dated May 2025 release. Corroborated by the Radisson SASE deployment explicitly covering Asia-Pacific (source 18)."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        37
+      ],
+      "confidence": "medium",
+      "quote": "across Asia-Pacific, Europe, the Middle East and Africa",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a single but specific and dated source: the Radisson Hotel Group SASE deployment is stated to cover the Middle East and Africa. Confidence held at medium because no MEA points of presence, countries or cities are published anywhere on GTT's network or coverage pages, and no MEA-specific case study exists. This is customer-footprint evidence rather than published PoP coverage."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        39
+      ],
+      "confidence": "medium",
+      "quote": "GTT is extending its network reach and performance in key metropolitan markets, in Argentina, Chile, China, Colombia, India, Malaysia, the Philippines, South Korea and Thailand.",
+      "claimed_by": "vendor",
+      "note": "Three named Latin American countries, Argentina, Chile and Colombia, in a dated May 2025 metro network expansion release. Country-specific so it carries the grade. Confidence medium because there is no Latin American customer case study and no LatAm PoP list beyond this release."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        39
+      ],
+      "confidence": "low",
+      "quote": "GTT is extending its network reach and performance in key metropolitan markets, in Argentina, Chile, China, Colombia, India, Malaysia, the Philippines, South Korea and Thailand.",
+      "claimed_by": "vendor",
+      "note": "China is named explicitly, not as part of a generic global claim, in a dated May 2025 metro network extension release, so this is more than nothing. Graded partial rather than yes because GTT publishes no detail at all on how mainland China service is delivered: no ICP or IDC licence reference, no named domestic carrier partner, no city, and no statement of which services (IP transit only, versus SD-WAN or SASE overlay) are actually available in country. Mainland China SD-WAN and SASE requires a licensed local arrangement and GTT does not evidence one."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        27,
+        37,
+        38,
+        24
+      ],
+      "confidence": "high",
+      "quote": "GTT delivers networking and security as a service for distributed enterprises, on a global scale.",
+      "claimed_by": "vendor",
+      "note": "Explicit and consistent targeting. Corroborated by the size of the named customers: Radisson Hotel Group at more than 800 hotels and offices across four regions, Air France-KLM across 37 countries and five continents, Barry Callebaut at 130+ sites and Etex at 160+ sites. GTT also states it serves \"the world's most distributed enterprises\"."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        27,
+        20,
+        22
+      ],
+      "confidence": "medium",
+      "quote": "GTT serves the world's most distributed enterprises",
+      "claimed_by": "vendor",
+      "note": "No evidence found either way. Checked the About Us page, the Managed SD-WAN product page and the Industry Solutions index: there is no SMB tier, no self-service or entry-level product, and no small business pricing. The quote is included to show the framing I found, not as a grade. I have not graded this not_primary because GTT nowhere explicitly states that small business is out of scope, and the laws require an explicit exclusion for that value. The consistent enterprise and multinational framing nonetheless points away from small business."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

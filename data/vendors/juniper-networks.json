@@ -80,16 +80,16 @@
     "Cloud on-ramp and private backbone capabilities are less prominent than dedicated SASE platforms."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
-    "uk_ireland": "yes",
+    "uk_ireland": "partial",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "partial"
+    "latin_america": "unknown",
+    "china_mainland": "unknown"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -109,21 +109,21 @@
     "note": "Session Smart Routing fails over per session with no tunnel re-establishment; HA clustering."
   },
   "sectors": {
-    "healthcare": "partial",
+    "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
+    "government_public_sector": "yes",
     "education": "yes",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "transport_logistics": "unknown",
+    "professional_services": "unknown",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "partial"
+    "mid_market": "unknown",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -290,6 +290,276 @@
       "published": null,
       "reliability": "Not used as evidence: URL returned HTTP 404. Recorded as the second attempt to locate named compliance frameworks (ISO 27001, SOC 2, FedRAMP, Common Criteria).",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 13,
+      "tier": 1,
+      "title": "AI-Native SD-WAN Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/sd-wan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SD-WAN solution page. Carries the only named SD-WAN customer found (Seagate) and the industry navigation list. Undated."
+    },
+    {
+      "n": 14,
+      "tier": 1,
+      "title": "SASE (Secure Access Service Edge) | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE solution page. Capability and third-party test claims only. Contains no sector, region, size or pricing statements. Undated."
+    },
+    {
+      "n": 15,
+      "tier": 1,
+      "title": "Solutions & Technologies | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own solutions index. Source for the definitive list of industries Juniper publishes dedicated pages for, and for the industry page URLs. Undated."
+    },
+    {
+      "n": 16,
+      "tier": 1,
+      "title": "Education Networking Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/education.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated education page. Strongest sector evidence found: names Dartmouth as a customer and shows an Ashland School District logo. Undated."
+    },
+    {
+      "n": 17,
+      "tier": 1,
+      "title": "Healthcare Networking Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/healthcare.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated healthcare page. Sector-specific content but no named healthcare customer. Undated."
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "Healthcare and Life Sciences | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/industries/healthcare-and-life-sciences.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own healthcare and life sciences industry page. Confirms a dedicated sector page exists. No named customers or sector accreditations. Undated."
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Retail Networking Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/industries/retail.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated retail industry page. Sector-specific value propositions, no named retail customers. Undated."
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Financial Services Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/industries/financial-services.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated financial services industry page. Sector-specific framing, no named customers and no financial-sector compliance claims. Undated."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Manufacturing Networking Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/industries/manufacturing.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated manufacturing industry page. Sector-specific framing, no named customers. Undated."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Hospitality Networking Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/industries/hospitality.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated hospitality industry page. Names venue types (hotels, casinos, theme parks) but no customer organisations. Undated."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Energy and Utilities Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/energy-utilities.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated energy and utilities page. Sector-specific framing around ICS and critical infrastructure, no named customers. Undated."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Federal Government Networking Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/federal-government.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own federal government page. Carries a sector accreditation claim (FedRAMP for Juniper Mist Government Cloud), which is the strongest sector qualifier found outside education. No named agencies. Undated."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Government Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/industries/government.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own government industry index covering federal plus state and local. Confirms dedicated public sector coverage. No named customers. Undated."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Juniper Mist Cloud Status",
+      "url": "https://status.mist.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-operated live service status page for the Mist cloud. Best available evidence of actual service delivery instances by geography, since it names the operational regional clouds rather than sales offices. Region names confirmed identical across two separate fetches. Undated rolling page."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Retail Solutions | Juniper Networks",
+      "url": "https://www.juniper.net/us/en/solutions/retail.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own secondary retail page. Corroborates dedicated retail coverage. No named customers. Undated."
+    },
+    {
+      "n": 28,
+      "tier": 4,
+      "title": "Juniper Networks Customers page (302 redirect)",
+      "url": "https://www.juniper.net/us/en/customers.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The customer index now 302-redirects off-host to https://www.hpe.com/us/en/customer-case-studies.html following the HPE acquisition, so no Juniper-attributed customer list could be read at the cited URL."
+    },
+    {
+      "n": 29,
+      "tier": 4,
+      "title": "Seagate case study (302 redirect)",
+      "url": "https://www.juniper.net/us/en/customers/seagate-case-study.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. 302-redirects off-host to the HPE case study index, so the full Seagate case study could not be read. The Seagate quotes used instead come from the SD-WAN solution page [1]."
+    },
+    {
+      "n": 30,
+      "tier": 4,
+      "title": "Juniper Secure Edge product page (302 redirect to HPE store)",
+      "url": "https://www.juniper.net/us/en/products/security/secure-edge.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. 302-redirects off-host to buy.hpe.com. Intended as a source for SASE points of presence and licensing tiers; the destination did not resolve to a product."
+    },
+    {
+      "n": 31,
+      "tier": 4,
+      "title": "HPE Store listing for Juniper Secure Edge",
+      "url": "https://buy.hpe.com/us/en/software/networking-software/network-management-security-software/juniper-firewall-software-products/juniper-secure-edge/p/1014920076",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Fetched specifically to obtain published pricing. Returned a Product Not Found search fallback with no SKUs, no prices and no regional data."
+    },
+    {
+      "n": 32,
+      "tier": 4,
+      "title": "Juniper How to Buy page (302 redirect)",
+      "url": "https://www.juniper.net/us/en/how-to-buy.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. 302-redirects off-host to https://www.hpe.com/us/en/buy-parts-products.html, so no Juniper purchasing or pricing information was readable. This was the primary pricing avenue."
+    },
+    {
+      "n": 33,
+      "tier": 4,
+      "title": "Juniper Contact Us / office locations (302 redirect)",
+      "url": "https://www.juniper.net/us/en/company/contact-us.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. 302-redirects off-host to HPE contact pages. Would in any case have shown sales offices rather than service delivery, which the regional test excludes."
+    },
+    {
+      "n": 34,
+      "tier": 4,
+      "title": "Mist API documentation home",
+      "url": "https://api.mist.com/api/v1/docs/Home",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 401, authentication required. Fetched to enumerate Mist regional API endpoints as a cross-check on the status page regions."
+    },
+    {
+      "n": 35,
+      "tier": 4,
+      "title": "Juniper Networks company page",
+      "url": "https://www.juniper.net/us/en/company.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Contains no quantified statement of countries served, global footprint or customer numbers. Only a country site selector, which is website language and is explicitly excluded from the regional test."
+    },
+    {
+      "n": 36,
+      "tier": 4,
+      "title": "Juniper Mist Management Guide index",
+      "url": "https://www.juniper.net/documentation/us/en/software/mist/mist-management/index.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Fetched to locate a Mist cloud regions or data residency topic. The index exposed no such topic and no regional URLs."
+    },
+    {
+      "n": 37,
+      "tier": 4,
+      "title": "Dead Juniper industry URLs (404)",
+      "url": "https://www.juniper.net/us/en/solutions/financial-services.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Same 404 result for /solutions/finance.html, /solutions/manufacturing.html, /solutions/hospitality.html and /solutions/enterprise/financial-services.html. Correct industry URLs were then obtained from the solutions index [3]."
+    },
+    {
+      "n": 38,
+      "tier": 4,
+      "title": "Juniper transport and logistics solutions probe (404)",
+      "url": "https://www.juniper.net/us/en/solutions/transportation.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Fetched to test for a transport and logistics industry page; combined with the absence of transport from the published industry list [3], no sector evidence exists."
+    },
+    {
+      "n": 39,
+      "tier": 4,
+      "title": "Juniper small and medium business solutions probe (404)",
+      "url": "https://www.juniper.net/us/en/solutions/small-medium-business.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Fetched to test for an SMB or mid-market product tier or segment page; none found."
+    },
+    {
+      "n": 40,
+      "tier": 4,
+      "title": "Juniper Mist cloud regions documentation probes (404)",
+      "url": "https://www.juniper.net/documentation/us/en/software/mist/mist-management/topics/concept/mist-cloud-regions.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404, as did five further URL variants for Mist cloud regions, global regions, cloud overview and services regions. Regional evidence was sourced from the live status page [14] instead."
+    },
+    {
+      "n": 41,
+      "tier": 4,
+      "title": "Juniper Secure Edge datasheet PDF probe (404)",
+      "url": "https://www.juniper.net/content/dam/www/assets/datasheets/us/en/security/juniper-secure-edge-datasheet.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Fetched to obtain SASE points of presence and licensing tiers. The Mist WAN Assurance datasheet PDF and /products/cloud-services/mist-cloud.html also returned 404."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "Juniper SASE product page probe (404)",
+      "url": "https://www.juniper.net/us/en/products/security/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Fetched as an alternative route to SASE PoP and pricing data after the Secure Edge page redirected off-host."
     }
   ],
   "sourced_facts": {
@@ -497,6 +767,233 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed. No availability percentage was published on any page read. The managed SD-WAN page mentions customer SLAs only in the context of helping MSPs exceed the SLAs they offer their own customers, with no percentage figure, which per the rules is unknown rather than a grade. The Juniper Mist cloud services SLA URL attempted returned HTTP 404."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        17,
+        18,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "Sudheer Matta, SVP Product Management at Juniper Networks, Philip Bradley, Digital Health Strategist at HIMSS Analytics, and other healthcare IT leaders discuss the challenges to deliver quality patient care and the role of AI-native networking in digital transformation in healthcare.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test only. Juniper publishes two healthcare pages, /solutions/healthcare.html and /solutions/industries/healthcare-and-life-sciences.html, and lists Healthcare in its published industry set [3]. No named healthcare customer, no healthcare case study and no healthcare compliance accreditation was found on either page. The quoted sentence describes a webinar panel, not a customer. Confidence is medium because the sector qualification rests on page existence rather than a customer."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        20,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "The dynamic, high-stakes financial services sector demands reliable, secure connectivity to serve customers and ensure exceptional commerce experiences.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test. Financial services appears in Juniper's published industry list [3] and has its own page. No named bank, insurer or financial institution customer, no case study and no sector compliance claim (PCI DSS, DORA, FCA) was found. Note the original /solutions/financial-services.html and /solutions/finance.html URLs now 404 [25]; the live page sits under /solutions/industries/."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        19,
+        27,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "Smart connectivity increases retail revenue",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test, corroborated by two separate retail pages [7][15] and the published industry list [3]. No named retail customer and no retail case study found. Evidence is physical-store networking (point of sale, IoT sensors, location services) rather than ecommerce; nothing specific to ecommerce was found."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        21,
+        15,
+        13
+      ],
+      "confidence": "medium",
+      "quote": "Juniper's Mist AI-native networking platform empowers manufacturers to maximize production and supply chain velocity, streamline network operations, and protect employees, data, and devices through reliable, secure connectivity",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test. Manufacturing is in the published industry list [3]. The manufacturing page itself carries no named customer. Separately, the SD-WAN page [1] names Seagate Technology, a mass-data storage hardware manufacturer, as an SD-WAN customer, which is arguably a named manufacturing reference, but Juniper does not present Seagate as a manufacturing case study so this is not relied on for the grade."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        23,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "Critical infrastructure industries like energy and utilities are driving intelligence to the distributed edge network",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test. Energy and utilities is in the published industry list [3] and has its own page with sector-specific ICS and critical infrastructure content. No named utility customer, no case study and no sector accreditation (NERC CIP, IEC 62443) was found."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        24,
+        25,
+        15
+      ],
+      "confidence": "high",
+      "quote": "Federal agencies and the armed forces need highly-available networks with world-class performance and automated cyber defenses",
+      "claimed_by": "vendor",
+      "note": "Strongest sector grade after education. Qualifies on two independent tests: a dedicated industry page set covering federal plus state and local [13], and a published sector accreditation, namely FedRAMP authorisation at Moderate level for the Juniper Mist Government Cloud [12]. That accreditation is US-specific; no UK, EU or other national public sector framework (G-Cloud, NCSC, ISO for public sector) was found. No named agency customer."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        16,
+        15
+      ],
+      "confidence": "high",
+      "quote": "Dartmouth relies on Mist™, Juniper's AI-native networking platform, to power its academic excellence, groundbreaking research, and administration through fast, reliable, and secure connectivity.",
+      "claimed_by": "vendor",
+      "note": "The only sector with a named customer found in this task. Dartmouth is named directly in body copy and an Ashland School District logo also appears, covering both higher education and K-12. Confidence high because this meets the named customer test rather than only the dedicated page test. Note the underlying customer case study pages now redirect off-host to HPE [16], so the full Dartmouth study could not be read."
+    },
+    "sectors.transport_logistics": {
+      "value": "unknown",
+      "evidence": [
+        15,
+        38
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. Transport and logistics does not appear in Juniper's published industry list on the solutions index [3], which enumerates government, education, healthcare, retail, energy and utilities, media and entertainment, financial services, hospitality and manufacturing. A direct probe of /solutions/transportation.html returned HTTP 404 [26]. I did not infer capability from the general SD-WAN branch and multi-site messaging."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [
+        15
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. Professional services does not appear in Juniper's published industry list [3] and no dedicated page was located. Note the separate risk of confusion: Juniper uses the phrase professional services to describe its own delivery and partner services, not a customer vertical, and I have not treated that as sector evidence."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        22,
+        15
+      ],
+      "confidence": "medium",
+      "quote": "Juniper Mist™, our AI-native networking platform, personalizes the guest experience inside hotels, venues, and casinos through real-time analytics, seamless Wi-Fi connectivity, and reliable network operations.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on the dedicated industry page test. Hospitality is in the published industry list [3] and the page names venue types including hotels, casinos and theme parks. No named hotel group, venue operator or case study was found. The evidence is Wi-Fi and guest experience led rather than SD-WAN or SASE led, which is worth flagging given this comparison is about SASE and SD-WAN."
+    },
+    "regions.uk_ireland": {
+      "value": "partial",
+      "evidence": [
+        26
+      ],
+      "confidence": "low",
+      "quote": "MIST EMEA CLOUD",
+      "claimed_by": "vendor",
+      "note": "Graded partial, not yes. Juniper operates a distinct EMEA cloud instance which necessarily covers the UK and Ireland, but no UK or Ireland specific point of presence, data residency statement, service availability page or local case study was found. UK-specific corroboration was not obtainable because the corporate contact and customer pages now redirect off-host to HPE [21][16]. Confidence low: this is a grouped regional label, not a UK-specific delivery claim."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        26
+      ],
+      "confidence": "medium",
+      "quote": "MIST EMEA CLOUD",
+      "claimed_by": "vendor",
+      "note": "A named, separately monitored EMEA cloud instance on Juniper's own live service status page is direct evidence of service delivery, not a sales office or a website language. The status page does not publish the underlying city or country locations of that instance, so the specific European data centre siting is unverified. All Mist cloud region documentation URLs returned 404 [28]."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        26,
+        24
+      ],
+      "confidence": "high",
+      "quote": "MIST FEDERAL CLOUD",
+      "claimed_by": "vendor",
+      "note": "Strongest region. Two independent supplier signals: a dedicated Federal cloud instance on the live status page [14], and FedRAMP Moderate authorisation for the Juniper Mist Government Cloud [12], which is a US-only authorisation and therefore constitutes hard evidence of North American service delivery. The MIST GLOBAL CLOUD instance also appears on the same status page."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        26
+      ],
+      "confidence": "medium",
+      "quote": "MIST APAC CLOUD",
+      "claimed_by": "vendor",
+      "note": "A named, separately monitored APAC cloud instance on Juniper's own live service status page. As with EMEA, the underlying country locations are not published, so which APAC countries are served is unverified. Treated as distinct from mainland China, which is graded separately below."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        26
+      ],
+      "confidence": "low",
+      "quote": "MIST EMEA CLOUD",
+      "claimed_by": "vendor",
+      "note": "Graded partial on the same grouped EMEA label as UK and Ireland. The EMEA acronym nominally includes the Middle East and Africa, but no Middle East or Africa specific point of presence, coverage statement, local partner or customer was found, and the status page does not break EMEA down. Confidence low. This should not be read as confirmed MEA delivery."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        26,
+        35
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. Juniper's live cloud status page [14] lists only Global, EMEA, APAC and Federal instances, with no Latin America instance. The company page [23] carries no quantified geographic footprint. I did not treat the existence of a Brazil or Mexico country website as delivery evidence, since the regional test explicitly excludes website language and sales offices."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        26
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found, and per the brief a generic global claim is treated as evidence of nothing here. No China-specific cloud instance appears on the status page [14], and no ICP licence, Chinese data residency statement or named local carrier or partner arrangement was found. Mainland China delivery for a cloud-managed SASE or SD-WAN service requires a specific licensed arrangement that Juniper does not publish at any URL read in this task."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        13,
+        16
+      ],
+      "confidence": "high",
+      "quote": "Seagate, a world leader in mass-data storage infrastructure solutions, has multiple sites in 18 countries",
+      "claimed_by": "vendor",
+      "note": "Clear and direct. Juniper's SD-WAN page leads with a named multinational customer operating across 18 countries, and also states \"Seagate Technology® has selected Juniper's full stack AI-native enterprise portfolio\" and \"Seagate is moving from a traditional MPLS network to Juniper's AI-native SD-WAN solution\". Dartmouth [4] is a second large-institution reference. This meets the case-study-of-that-size test outright."
+    },
+    "organisation_fit.mid_market": {
+      "value": "unknown",
+      "evidence": [
+        13,
+        15,
+        39
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. The SD-WAN page [1] was checked specifically for the words enterprise, distributed enterprise, midsize, SMB and branch counts and returned no size segmentation, describing the audience only as future-thinking businesses. No mid-market product tier, no mid-market pricing and no mid-market case study was found, and a direct probe of /solutions/small-medium-business.html returned 404 [27]. I have deliberately not inferred mid-market fit from the Ashland School District logo on the education page, because no accompanying text describes that organisation or its size."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        13,
+        39
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence found. No small business product tier, entry-level bundle, published entry price or small business case study was located on any Juniper page read. The Branch-in-a-Box concept appears on the SD-WAN page [1] but is described as a deployment simplification for branch sites of larger organisations, not as a small business offer, so it has not been graded as such."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": []

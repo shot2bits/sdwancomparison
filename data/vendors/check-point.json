@@ -80,10 +80,10 @@
     "Managed delivery is partner-led."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
-    "uk_ireland": "yes",
+    "uk_ireland": "partial",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
@@ -109,21 +109,21 @@
     "note": "Cloud-delivered Harmony SASE with regional redundancy; on-prem HA via Quantum clusters."
   },
   "sectors": {
-    "healthcare": "partial",
+    "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
+    "government_public_sector": "yes",
+    "education": "yes",
     "transport_logistics": "partial",
     "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "partial"
+    "mid_market": "partial",
+    "small_business": "yes"
   },
   "pricing_units": [
     "per_user",
@@ -372,6 +372,204 @@
       "published": null,
       "reliability": "Not used as evidence: gated resource page returned no retrievable body text.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Check Point Harmony SASE product page",
+      "url": "https://www.checkpoint.com/harmony/sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product page. Marketing claims, unaudited. Source of \"80+ Data Centers\", \"12,000+ Customers Secured\", \"60% Reported TCO Reduction\" and named testimonials from NQM Funding, Visory, Southern Cyber and FutureSafe. Note this page disagrees with the sase.checkpoint.com microsite on both data centre count and customer count."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Check Point Customer Stories index (industry filter and story cards)",
+      "url": "https://www.checkpoint.com/customer-stories/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study index. Strongest sector source in this task: each card carries a named customer, an industry label and a headline, and the page exposes a full industry filter list. Individual story pages behind these cards would not render for fetching, so grading rests on the index card text."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Check Point Healthcare Cyber Security Solutions",
+      "url": "https://www.checkpoint.com/industry/healthcare/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated healthcare industry page. Names NHS England and Lightbeam Health Solutions, references HIPAA, and mentions securing SD-WAN connected remote medical clinics. Vendor claim, not independently verified."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Check Point Cyber Security for Financial Institutions",
+      "url": "https://www.checkpoint.com/industry/financial-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated financial services industry page. Names Aegean Baltic Bank, Covinoc, Emaar, BBVA and Miller Insurance, and references BASEL, SOX, NIST and GDPR. Vendor claim."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Check Point Education Security Solutions",
+      "url": "https://www.checkpoint.com/industry/education/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated education industry page. No named customers on the page itself and neither SASE nor SD-WAN is mentioned, so it evidences sector focus rather than SASE delivery."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Check Point Retail Security Solutions",
+      "url": "https://www.checkpoint.com/industry/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated retail industry page. References PoS, in-store and cloud data and PCI-DSS compliance. No named retail customer on the page. Note the trailing-slash variant of this URL repeatedly returned empty; this form rendered."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Check Point Industrial Control Systems (ICS) Security",
+      "url": "https://www.checkpoint.com/industry/industrial-control-systems/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's ICS/OT page. Names utility customer E-REDES with an attributed CISO quote, and labels the sectors Transportation, Oil, Manufacturing, Energy, Utilities and Smart Cities as icon headings rather than prose."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Check Point Cyber Security for Local Governments",
+      "url": "https://www.checkpoint.com/industry/government-state-local-security/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated state and local government page. No named government customers and no FedRAMP or Common Criteria certification stated on the page."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Check Point SD-WAN (Quantum)",
+      "url": "https://www.checkpoint.com/quantum/sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's SD-WAN product page. Names the Israeli Ministry of Environmental Protection with an attributed quote and an unnamed German-based manufacturing group. Vendor claim."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Check Point Small and Medium Business Security",
+      "url": "https://www.checkpoint.com/solutions/small-medium-business-security/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's SMB solutions page. Gives an explicit employee-count band for the Quantum Spark appliance line. Relates to firewall appliances, not to Harmony SASE, so it is size-targeting evidence for the supplier rather than for the SASE product."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Check Point Enterprise Network Security Solutions",
+      "url": "https://www.checkpoint.com/solutions/enterprise-network-security/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's enterprise solutions page. States enterprise positioning but carries no quantified claims about sites, Fortune rankings or global deployments."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Check Point SASE microsite (sase.checkpoint.com, former Perimeter 81 domain)",
+      "url": "https://sase.checkpoint.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE microsite, the destination of the perimeter81.com redirect. Source of \"70+ Global Data Centers\", \"5,000+ Customers Secured\" and the compliance list \"SOC 2 Type 2, GDPR, CCPA and ISO 27001\". Disagrees with the checkpoint.com SASE page on data centre and customer counts; disagreement recorded, not resolved."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Check Point SASE Administration Guide, Introduction (data residency regions)",
+      "url": "https://sc1.checkpoint.com/documents/Infinity_Portal/WebAdminGuides/EN/SASE-Admin-Guide/Content/Topics-SASE-AG/Introduction/Introduction.htm",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's product documentation rather than marketing, so more reliable for service availability. States SASE supports data residency in EU, US, Australia, India and Canada. Data residency is not the same as a points-of-presence list, but it is the only published region-by-region service statement found."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "checkpoint.com XML sitemap",
+      "url": "https://www.checkpoint.com/sitemap.xml",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Used for navigation, to enumerate the /industry/ and /solutions/ pages, and for the negative finding that no URL containing \"pricing\" exists in the checkpoint.com sitemap."
+    },
+    {
+      "n": 36,
+      "tier": 4,
+      "title": "Check Point SASE pricing page",
+      "url": "https://sase.checkpoint.com/pricing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the page exists (perimeter81.com/pricing 302-redirects to it) but renders entirely client-side and returned no readable text across three fetch attempts, including trailing-slash and alternative path variants. No price string could be quoted verbatim, so value_tier is graded unknown rather than inferred."
+    },
+    {
+      "n": 37,
+      "tier": 4,
+      "title": "Check Point Software Technologies Ltd Form 20-F for FY2025",
+      "url": "https://www.sec.gov/Archives/edgar/data/1015922/000117891326001932/zk2634942.htm",
+      "published": "2026-03-31",
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: this is a strong Tier 2 regulator-filed record, but the 3.1 MB document truncated on fetch at the cover page and risk factors, so the geographic revenue split and customer-type description in Items 4 and 5 could not be read or quoted."
+    },
+    {
+      "n": 38,
+      "tier": 4,
+      "title": "SEC EDGAR filing list for Check Point (CIK 0001015922)",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001015922&type=20-F&dateb=&owner=include&count=10",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: navigational index only, used to locate the 20-F filings. Carries no sector, region, size or price content."
+    },
+    {
+      "n": 39,
+      "tier": 4,
+      "title": "Check Point customer story pages (individual)",
+      "url": "https://www.checkpoint.com/customer-stories/theharriscenter/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: individual customer story pages returned empty content on every attempt (Harris Center, Athora, Clarks, Austrotherm, Alpine Energy, Finance Industry all tested). Sector grading therefore relies on the index card text at source 2, and no per-customer detail such as country, deployment size or product mix could be verified."
+    },
+    {
+      "n": 40,
+      "tier": 4,
+      "title": "Check Point Contact Us",
+      "url": "https://www.checkpoint.com/about-us/contact-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: contains only sales telephone numbers (\"North America: +1-866-488-6691\", \"International: +44-125-333-5558\") and website language options. Sales contact routes and website languages are not service delivery, per the region rule."
+    },
+    {
+      "n": 41,
+      "tier": 4,
+      "title": "Check Point Harmony Connect SASE (legacy page)",
+      "url": "https://www.checkpoint.com/harmony/connect-sase/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned empty content. Listed in the sitemap with a family of ZTNA sub-pages, so it may hold coverage detail, but nothing could be quoted."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "Perimeter 81 network locations documentation",
+      "url": "https://support.perimeter81.com/docs/network-locations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: 302-redirects to the Check Point SASE Administration Guide introduction (source 13). The legacy per-city gateway location list appears to have been retired, so no city-level points-of-presence list could be obtained."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "Check Point Harmony SASE pricing (checkpoint.com path)",
+      "url": "https://www.checkpoint.com/harmony/sase/pricing/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404. Consistent with the sitemap finding that checkpoint.com publishes no pricing URL."
     }
   ],
   "sourced_facts": {
@@ -596,6 +794,228 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed. The support programmes page publishes response-time SLAs (30 minutes for Severity 1) but no availability percentage for the SASE cloud service. The NGFW product page cites 99.999% resiliency and carrier-class 99.999% uptime, but those are appliance clustering and hardware resilience claims for on-premises gateways, not a contractual availability commitment for the SASE service, so they are not used here. No SASE service SLA document was reachable."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        23,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Harris Center Defends Assets, Data and Reputation From End to End",
+      "claimed_by": "vendor",
+      "note": "Two independent qualifying items: a named customer story card labelled Industry: Healthcare on the customer stories index, and a dedicated healthcare industry page naming NHS England and Lightbeam Health Solutions and referencing HIPAA. Caveat for a SASE and SD-WAN comparison: neither is a SASE case study. The healthcare page mentions SD-WAN only in passing, in the phrase about securing SD-WAN connected remote medical clinics. The Harris Center card headline does not name a product. Grade reflects sector reach, not proven SASE delivery in healthcare."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        23,
+        25
+      ],
+      "confidence": "high",
+      "quote": "How Insurance Giant Athora Enhanced Hybrid Cloud Security",
+      "claimed_by": "vendor",
+      "note": "Three qualifying items: customer story cards for Athora and NCACPA both labelled Industry: Financial Services, a further card headlined From Dashboard Chaos to a Single Risk Score under the same label, and a dedicated financial services industry page naming Aegean Baltic Bank, Covinoc, Emaar, BBVA and Miller Insurance with BASEL, SOX, NIST and GDPR referenced. Not SASE-specific: Athora is a hybrid cloud story. SASE appears on the financial services page only as a product navigation category."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        27
+      ],
+      "confidence": "medium",
+      "quote": "Retail Security Solutions",
+      "claimed_by": "vendor",
+      "note": "Qualifies on the dedicated industry page test alone. The page addresses PoS, in-store and cloud data and states it ensures PCI-DSS and regulatory compliance. Weaker than the other yes grades because no named retail customer was found anywhere: the customer stories index returned no cards under the Retail filter, and although Clarks appears on the index its industry label was reported inconsistently across fetches (Technology Solutions in one pass, absent in another), so it is not counted. Confidence medium for that reason."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        23,
+        30
+      ],
+      "confidence": "high",
+      "quote": "How Austrotherm Transformed IT Security Across 13 Countries with Unified SASE Architecture",
+      "claimed_by": "vendor",
+      "note": "The strongest sector evidence in this task and the only sector where SASE and SD-WAN are named in the case study headlines themselves. Three cards carry Industry: Manufacturing, namely Austrotherm (SASE, 13 countries), Cendres+Metaux, and an unnamed Manufacturing Company headlined Expand Cloud and SD-WAN Success: The Customer's Journey to Global Network Resilience. The Quantum SD-WAN product page corroborates with a quote from a team leader of network and security at a German-based manufacturing group. No dedicated manufacturing industry page exists in the sitemap."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        28,
+        23
+      ],
+      "confidence": "medium",
+      "quote": "we built security capabilities into our most important facilities",
+      "claimed_by": "vendor",
+      "note": "Named utility customer E-REDES on the ICS page with an attributed quote from CISO Nuno Medeiros, plus an Alpine Energy card under the Energy filter on the customer stories index. The ICS page also labels Energy and Utilities as target sectors. Confidence held at medium because the evidence is OT and rugged firewall gateway work, with no SASE or SD-WAN mention in either item, and there is no dedicated energy or utilities industry page."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        29,
+        23
+      ],
+      "confidence": "high",
+      "quote": "Check Point provides local governments and public services with consolidated cyber security",
+      "claimed_by": "vendor",
+      "note": "Dedicated pages exist for both state and local government and federal government (the sitemap also lists a federal grants office programme page and an E-Rate education programme page), plus a named case study card for The Council of Cadiz labelled Industry: Government. The Quantum SD-WAN page separately names the Israeli Ministry of Environmental Protection with an attributed quote, which is the closest thing to public sector SD-WAN proof. No FedRAMP or Common Criteria certification was stated on the local government page; I did not reach the federal page to check for accreditations there."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        26,
+        23
+      ],
+      "confidence": "high",
+      "quote": "Education Security Solutions",
+      "claimed_by": "vendor",
+      "note": "The best-populated sector by volume: seven named customer cards carry Industry: Education (Santillana Latam, SingAREN, Marple Newtown School District, Anglia Ruskin University, Charleston County School District, Spring Branch ISD, Anthology), alongside a dedicated education industry page and an E-Rate programme page in the sitemap. Caveat: the education page mentions neither SASE nor SD-WAN, and the card headlines that name a product point at email security rather than network edge."
+    },
+    "sectors.transport_logistics": {
+      "value": "partial",
+      "evidence": [
+        28,
+        23
+      ],
+      "confidence": "low",
+      "quote": "Transportation",
+      "claimed_by": "vendor",
+      "note": "Named in a list only, which is exactly the partial test. It appears as one of six icon headings on the ICS page (Transportation, Oil, Manufacturing, Energy, Utilities, Smart Cities) and as an option in the customer stories industry filter. Nothing sits behind it: a targeted pass over the customer stories index found no cards under Transportation, there is no transport or logistics industry page in the sitemap, and no transport customer is named anywhere I read. Deliberately not upgraded on the basis that the supplier serves large multi-site enterprises."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        23
+      ],
+      "confidence": "low",
+      "quote": "Professional Services",
+      "claimed_by": "vendor",
+      "note": "Present only as an option in the customer stories industry filter, with no cards returned under it on a targeted pass and no professional services industry page in the sitemap. NCACPA, an accountancy body and the nearest candidate, is filed by Check Point under Financial Services, so I have counted it there and not here. Legal is likewise a filter option with no visible cards. This is the weakest grade in the sector set and could reasonably be read as unknown."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        23
+      ],
+      "confidence": "medium",
+      "quote": "Shift from Legacy Defenses to Future-Proof Security Proves Winning Strategy",
+      "claimed_by": "vendor",
+      "note": "Named customer story card for Rotana labelled Industry: Hospitality, with a Space Needle card under Entertainment and Leisure and a Denver Broncos card under Sports Teams and Clubs as adjacent leisure evidence. Confidence medium not high because the Rotana headline describes phishing and threat protection rather than SASE or SD-WAN, and there is no hospitality industry page. The quote given is a verbatim substring of the full card headline, which continues Against Sophisticated Phishing Attacks and Cyber Threats."
+    },
+    "regions.uk_ireland": {
+      "value": "partial",
+      "evidence": [
+        23,
+        34
+      ],
+      "confidence": "medium",
+      "quote": "How Anglia Ruskin University Slashed IT Workloads",
+      "claimed_by": "vendor",
+      "note": "Deliberately not graded yes. A named UK customer exists (Anglia Ruskin University, a UK university, under Industry: Education) and Ireland falls inside the EU data residency region, but the UK itself is absent from the published SASE data residency list of EU, US, Australia, India and Canada. Since the UK left the EU that list does not cover UK data residency, and no UK-specific point of presence, data centre or availability statement was found on any page I read. The only other UK-facing item is an international sales phone number on the contact page, which does not count as delivery."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        34,
+        23
+      ],
+      "confidence": "high",
+      "quote": "Data Residency in EU ensures that data processing and storage occur entirely within the EU",
+      "claimed_by": "vendor",
+      "note": "Strongest region grade. The SASE administration guide, which is product documentation rather than marketing, states EU data residency and ties it to GDPR storage and processing requirements. Corroborated by European customer stories: Austrotherm across 13 countries on a unified SASE architecture, The Council of Cadiz in Spain, Cendres+Metaux in Switzerland, Athora, and a German-based manufacturing group on the SD-WAN page."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        34,
+        23
+      ],
+      "confidence": "high",
+      "quote": "How Bell Canada Provides Its Customers Continuous, Scalable Protection",
+      "claimed_by": "vendor",
+      "note": "The SASE data residency list names both US and Canada as supported regions, which is a published service availability statement covering both countries. Corroborated by a dense set of North American customer cards: Bell Canada, Denver Broncos, Marple Newtown School District, Charleston County School District, Spring Branch ISD, Space Needle, NCACPA and Dropbox. Check Point also files with the SEC and lists US offices in Redwood City, California."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        34,
+        23
+      ],
+      "confidence": "high",
+      "quote": "How SingAREN Secures Its High-Performance Research Network",
+      "claimed_by": "vendor",
+      "note": "The SASE data residency list names Australia and India as supported regions. Corroborated by named APAC customers: SingAREN, Singapore's national research and education network, and KKCompany. Note the grade covers Australia, India and Singapore specifically; no coverage statement was found for Japan, Korea or south-east Asia beyond Singapore, and mainland China is graded separately and remains unknown."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        25,
+        23
+      ],
+      "confidence": "low",
+      "quote": "Emaar",
+      "claimed_by": "vendor",
+      "note": "Held at partial on customer evidence only. Emaar, a Dubai-based group, is a named customer logo on the financial services page, and Rotana, an Abu Dhabi headquartered hotel group, has a customer story card, although neither page states the country so the MEA link rests on the identity of the companies rather than on a published statement. No MEA data residency region, point of presence or coverage claim exists in the SASE documentation, whose list stops at EU, US, Australia, India and Canada. Check Point is headquartered in Tel Aviv and the SD-WAN page names an Israeli government customer, which I have noted but not treated as regional service coverage."
+    },
+    "regions.latin_america": {
+      "value": "partial",
+      "evidence": [
+        23,
+        25
+      ],
+      "confidence": "low",
+      "quote": "Santillana Latam Safeguards Its Employees And Learners",
+      "claimed_by": "vendor",
+      "note": "Customer evidence only, no published coverage. Santillana Latam is an explicitly Latin American education customer, Grupo Reyes appears under the Other filter, and Covinoc, a Colombian firm, is a named customer on the financial services page. Against that, no Latin American data residency region, point of presence or availability statement was found, and the SASE documentation list does not include any Latin American location. Partial rather than yes for that reason."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No evidence either way, and per the rule the generic global claims are treated as evidence of nothing here. What I checked: the Harmony SASE product page (which claims 80+ Data Centers with no regional breakdown), the sase.checkpoint.com microsite (70+ Global Data Centers, likewise unbroken down), the SASE administration guide data residency list (EU, US, Australia, India, Canada, no China), the full customer stories index (no mainland China customer), and the retired Perimeter 81 network locations documentation, which now redirects away and no longer publishes a city-level gateway list. No ICP licence, no China-specific arrangement and no local carrier partner was named. Confidence high refers to the reliability of the unknown finding, not to any coverage claim."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        32,
+        23,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Check Point's enterprise network security solutions provide a comprehensive security architecture with flexible enforcement points",
+      "claimed_by": "vendor",
+      "note": "Explicit product tier plus case studies at that scale. A dedicated Enterprise Network Security solutions page exists, and multi-national deployments are documented: Austrotherm across 13 countries on a unified SASE architecture, Athora described in Check Point's own headline as an insurance giant, plus Dropbox, Bell Canada and World Wide Technology. The SASE page claims 12,000+ Customers Secured and cites the 2025 Gartner Magic Quadrant for Hybrid Mesh Firewalls leader position. Caveat: the enterprise page carries no quantified sizing claim, no Fortune ranking and no site count."
+    },
+    "organisation_fit.mid_market": {
+      "value": "partial",
+      "evidence": [
+        31,
+        22
+      ],
+      "confidence": "low",
+      "quote": "Small and Medium Business Security",
+      "claimed_by": "vendor",
+      "note": "Genuinely ambiguous and I have not resolved it upward. Check Point's SMB tier is defined as one to 500 employees, which stops at the bottom of most mid-market definitions, while the enterprise tier carries no stated lower bound, so the 500 to 5,000 employee band is not addressed by any named tier or page I found. Indirect signals only: the SASE page testimonials come from NQM Funding, Visory and the MSP FutureSafe, which read as mid-sized organisations, but none of those pages states an employee count, revenue or seat count, so none can be graded. No mid-market pricing tier could be read because the pricing page would not render."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        31
+      ],
+      "confidence": "medium",
+      "quote": "protection for businesses with one to 500 employees",
+      "claimed_by": "vendor",
+      "note": "An explicit, quantified size band, which is the clearest organisation-size statement found anywhere in this task. Two caveats keep confidence at medium rather than high. First, the claim attaches to the Quantum Spark next generation firewall appliance line, not to Harmony SASE, so it evidences the supplier targeting small business rather than the SASE product doing so. Second, the sitemap also lists a separate consumer and small business solutions page which I did not read. No small business pricing or entry point is published."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

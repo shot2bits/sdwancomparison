@@ -81,16 +81,16 @@
     "DIY/self-managed model is not the primary positioning."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
+    "middle_east_africa": "yes",
     "latin_america": "partial",
-    "china_mainland": "partial"
+    "china_mainland": "yes"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -110,21 +110,21 @@
     "note": "Global Tier 1 IP backbone with multi-vendor managed redundancy."
   },
   "sectors": {
-    "healthcare": "partial",
+    "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
+    "retail_ecommerce": "yes",
     "manufacturing": "yes",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "energy_utilities": "yes",
+    "government_public_sector": "yes",
+    "education": "yes",
+    "transport_logistics": "yes",
+    "professional_services": "yes",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
     "mid_market": "partial",
-    "small_business": "not_primary"
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -364,6 +364,303 @@
       "published": null,
       "reliability": "Not used as evidence. The listing turned out to belong to a different supplier (D2NA), not NTT DATA or NTT Ltd., so nothing on it can be attributed to this supplier. Retained in the register to record that a UK public procurement register was checked and did not yield an NTT SD-WAN or SASE entry at this URL.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "SD-WAN Service Portfolio | NTT Global Networks",
+      "url": "https://www.nttglobal.net/services/sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SD-WAN product page, the site named in the brief. Carries the core coverage and enterprise-targeting claims. No pricing published."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Managed SD-WAN delivers seamless store connectivity and turnover boost for Pick n Pay | NTT DATA",
+      "url": "https://services.global.ntt/en-us/about-us/case-studies/pick-n-pay",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named case study. Strongest single piece of retail and Africa service-delivery evidence found."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Managed SD-WAN links HUBER+SUHNER in China to rest of world | NTT DATA",
+      "url": "https://services.global.ntt/en-us/about-us/case-studies/huber-suhner",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named case study. Strongest manufacturing and mainland China SD-WAN delivery evidence found."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Stephenson Harwood | NTT Global Networks",
+      "url": "https://www.nttglobal.net/case-studies/stephenson-harwood/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named case study for a UK law firm. Dated 2010 rollout, so old, and describes MPLS rather than SD-WAN."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Enterprise Networking | NTT DATA Group",
+      "url": "https://www.nttdata.com/global/en/services/enterprise-networking",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's global enterprise networking page. Carries the 190+ country SD-WAN claim and the IDC MarketScape Asia/Pacific SD-WAN/SASE reference."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Managed Network Services | NTT DATA Group",
+      "url": "https://www.nttdata.com/global/en/services/enterprise-networking/managed-network-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page. Only page read that states a managed SASE offering in the supplier's own words."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Industries | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's industry index on the same site as the SD-WAN and SASE offers. Establishes which sectors have dedicated pages."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Healthcare | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries/healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated healthcare industry page with named health clients. Contains no SD-WAN or SASE content."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Banking and Financial Services | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries/banking",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated banking industry page with named client BBVA and client-count metrics. Contains no SD-WAN or SASE content."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Energy, Utilities and Natural Resources | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries/energy-utilities-and-natural-resources",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated energy industry page. Weakest of the industry pages read: no named customer, only an anonymised reference."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Public Sector and Education | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries/public-sector-and-education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated public sector page with three named public bodies. No SD-WAN or SASE content."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Education and Research | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated education industry page with one named university client and a network services section."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Travel, Transportation and Logistics | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries/transportation-and-logistics",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated transport industry page with named clients including Deutsche Bahn and Public Transport Victoria. No SD-WAN content."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Retail and Consumer Packaged Goods | NTT DATA",
+      "url": "https://services.global.ntt/en-us/industries/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated retail industry page. Named clients listed, but no networking content; the Pick n Pay case study is the stronger retail source."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "NTT builds network using SD-WAN for leading Indonesian bank | NTT",
+      "url": "https://services.global.ntt/en-us/newsroom/indonesia-bank-creates-high-visibility-network-using-sd-wan-with-ntt",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier newsroom item. SD-WAN specific and sector specific, but the bank is not named, which weakens it."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Hilton raises the bar for hospitality | NTT DATA",
+      "url": "https://www.nttdata.com/en-us/insights/case-studies/hilton-client-story",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier-published named hospitality case study. Application and cloud modernisation work; no network, SD-WAN or SASE content."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "About NTT DATA and the Global IP Network",
+      "url": "https://www.gin.ntt.net/about-the-global-ip-network/global-ip-network-worldwide/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's Tier 1 IP backbone page. Names continents carrying the backbone, so it is the closest thing found to published regional infrastructure coverage."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "NTT DATA for mid-market businesses",
+      "url": "https://nttdata-solutions.com/us/services/ntt-data-for-mid-market-clients/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier group company (NTT DATA Business Solutions) page explicitly targeting mid-market. SAP and IT services only; no network or SD-WAN mention."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Managed Network Services case studies for NTT and Virtela | NTT Global Networks",
+      "url": "https://www.nttglobal.net/case-studies/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's network case study index. Useful for identifying named network customers, mostly Japanese manufacturers and industrials."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "SD-WAN | NTT (connect.hello.global.ntt)",
+      "url": "https://connect.hello.global.ntt/SD-WAN",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier campaign microsite. Repeats the 190+ country, 1,000+ ISP and 75+ Local Cloud Centre figures. Corroborative only."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "In-Country Local Internet | NTT Global Networks",
+      "url": "https://www.nttglobal.net/services/network-services/in-country-local-internet/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier service page. Restates 190+ country coverage via 1,000+ providers without naming regions."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "SD-WAN Service Portfolio Platform | NTT Global Networks",
+      "url": "https://www.nttglobal.net/platforms/sd-wan-service-portfolio-platform/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier platform page. Checked specifically for a named regional or Local Cloud Centre location list; none published."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Global Network Services | NTT DATA",
+      "url": "https://services.global.ntt/en-us/services-and-products/network-services/global-network-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier service page. Restates 190+ countries and territories and references the IDC MarketScape managed SD-WAN/SASE assessment."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Secure Networking Solutions | NTT DATA Group",
+      "url": "https://www.nttdata.com/global/en/services/infrastructure-solutions/secure-networking-solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page. Carries an onsite support coverage claim of 165+ countries, which sits alongside but differs from the 190+ country connectivity claim."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "NTT Global Networks home",
+      "url": "https://www.nttglobal.net/home/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier home page. Reach and partner-network claims plus a customer roster skewed to large multinationals."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Enterprise Networking | NTT DATA (US)",
+      "url": "https://www.nttdata.com/en-us/services/enterprise-networking",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier US-facing page. States connectivity in over 190 countries and a Tier 1 IP backbone spanning five continents. No US-specific coverage detail."
+    },
+    {
+      "n": 47,
+      "tier": 4,
+      "title": "Our locations - Where to find us | NTT DATA",
+      "url": "https://services.global.ntt/en-us/about-us/locations/our-locations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: lists regional headquarters offices (London, Plano, Singapore, Madrid, Johannesburg) only. The brief requires service delivery evidence, not sales offices."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Case study | PSG Group | Healthcare | India | NTT DATA",
+      "url": "https://services.global.ntt/en-us/about-us/case-studies/psg-group",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: named healthcare customer but the engagement is an electronic health record integration with no network, SD-WAN or SASE element."
+    },
+    {
+      "n": 49,
+      "tier": 4,
+      "title": "Network Case Studies (ntt-sdwan.com)",
+      "url": "https://www.ntt-sdwan.com/network-case-studies",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the domain 302-redirects to an unrelated third-party site (courtyouththeatre.org), so no supplier content could be read."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "SD-WAN service page (services.global.ntt)",
+      "url": "https://services.global.ntt/en-us/services-and-products/network-services/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returns a 404 error page with navigation only, no SD-WAN content."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "Network services (nttdata.com global)",
+      "url": "https://www.nttdata.com/global/en/services/network",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: 404 client error, page does not exist."
+    },
+    {
+      "n": 52,
+      "tier": 4,
+      "title": "Managed Network Services (en-gb) | NTT DATA",
+      "url": "https://services.global.ntt/en-gb/services-and-products/network-services/managed-network-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the en-gb path serves the same global content with no UK or Ireland specific coverage statement, so it cannot support a UK delivery grade."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Our client stories | NTT DATA",
+      "url": "https://services.global.ntt/en-us/about-us/case-studies",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the case study index renders client-side and returned only two titles, so it could not be used to enumerate sector coverage."
     }
   ],
   "sourced_facts": {
@@ -576,6 +873,238 @@
       "quote": "The Global IP Network Backbone will be available to the customer free of Network Outages 100% of the time.",
       "claimed_by": "vendor",
       "note": "100% is the published availability commitment for NTT's Global IP Network Backbone (AS2914), accompanied by contractual latency figures per region (50ms Intra US, 80ms Trans-Atlantic, 130ms Trans-Pacific, 285ms Asia to Europe, 95ms Intra Asia, 35ms Intra Europe), average monthly packet loss not exceeding 0.1%, and jitter commitments. Caveat: this percentage is for the IP transit backbone product. No availability percentage specific to the managed SD-WAN or managed SASE service was found on any NTT page reviewed, so this figure should not be read as the SD-WAN service SLA."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        28,
+        27
+      ],
+      "confidence": "medium",
+      "quote": "Drive positive health outcomes through a connected healthcare ecosystem",
+      "claimed_by": "vendor",
+      "note": "Graded on a dedicated supplier healthcare industry page carrying named health clients (University Hospitals of Leicester, Independent Health). Important caveat for a SASE and SD-WAN comparison: that page contains no SD-WAN or SASE reference at all, and the only connectivity service named on it is Private 5G. The one healthcare case study found on the supplier site (PSG Group, evidence 28) is an electronic health record integration, not a network engagement. No healthcare SD-WAN or SASE customer was found."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        35,
+        29
+      ],
+      "confidence": "high",
+      "quote": "a leading Asian bank in Indonesia",
+      "claimed_by": "vendor",
+      "note": "Two independent supplier sources. The newsroom item (evidence 15) is SD-WAN specific but the bank is not named. The dedicated Banking and Financial Services industry page (evidence 9) names BBVA and states 320+ clients in this sector globally and 8 of top 15 global banks have been clients, but carries no networking content. Insurance also has its own industry page in the supplier's industry index."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        22,
+        34,
+        25
+      ],
+      "confidence": "high",
+      "quote": "The Pick n Pay Group is a leading retail company in South Africa, with more than 1,200 stores.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence found. A named retail customer with a published managed SD-WAN case study, quantified outcome, and a stated technology stack. The supplier also runs a dedicated Retail and Consumer Packaged Goods industry page (evidence 14) and features Pick n Pay on its global enterprise networking page (evidence 5)."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        23,
+        39,
+        25
+      ],
+      "confidence": "high",
+      "quote": "As a global manufacturer of fiber optic and radio frequency products, HUBER+SUHNER understands the power of connectivity.",
+      "claimed_by": "vendor",
+      "note": "Named manufacturer with a published managed SD-WAN case study. Corroborated by the supplier's network case study index (evidence 19), which is dominated by manufacturers and industrials including NXP Semiconductors, Honda Motor Co., Hitachi, Inteva Products and Asahi Glass, several tagged to NTT Global Network Services or Software-Defined Network Service. A dedicated Manufacturing industry page also exists in the industry index."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        30,
+        27
+      ],
+      "confidence": "low",
+      "quote": "Energy, Utilities and Natural Resources",
+      "claimed_by": "vendor",
+      "note": "Graded yes solely because a dedicated supplier industry page exists, which the grading rubric accepts. This is the thinnest of the sector grades: the page names no customer (the only case study reference is an anonymised Major energy sector organization), and it contains no SD-WAN, SASE or WAN content. Its single network reference is about digitising transmission and distribution grids using IoT and analytics, which is a different thing from enterprise WAN. Treat as corporate-level sector presence, not demonstrated SD-WAN or SASE delivery."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        31,
+        27
+      ],
+      "confidence": "medium",
+      "quote": "Streamline operations and deliver exceptional citizen and student experiences",
+      "claimed_by": "vendor",
+      "note": "Dedicated Public Sector and Education industry page naming three public bodies: The Crown Prosecution Service (CPS) in the UK, the Virginia Information Technologies Agency and the City of Brownsville in the US. The page lists Global Cellular Connectivity, Enterprise Internet Services and Global IP Network as service links but does not mention SD-WAN or SASE. No published government security accreditation for the network services was found in the pages read."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        32,
+        31
+      ],
+      "confidence": "medium",
+      "quote": "City, University of London",
+      "claimed_by": "vendor",
+      "note": "Dedicated Education and Research industry page with one named university client, plus a network services section headed Stay ahead with future-ready, robust networks. Education also appears in the combined Public Sector and Education page (evidence 11). No SD-WAN or SASE named customer in education was found."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        33,
+        27
+      ],
+      "confidence": "medium",
+      "quote": "Travel, Transportation and Logistics",
+      "claimed_by": "vendor",
+      "note": "Dedicated Travel, Transportation and Logistics industry page naming Deutsche Bahn, Public Transport Victoria, Trinity Industries, City of Las Vegas and Hilton. The named engagements read as SAP and application work; no SD-WAN or enterprise networking content appears on this page."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        24
+      ],
+      "confidence": "medium",
+      "quote": "Stephenson Harwood is a full service international law firm, with over 120 partners and 700 staff worldwide.",
+      "claimed_by": "vendor",
+      "note": "A named professional services customer with a published managed network case study covering the firm's entire global network across seven offices in Europe and Asia. Two weaknesses: the engagement is a fully-managed MPLS network rolled out in Q1, 2010, not SD-WAN or SASE, and there is no dedicated professional services industry page in the supplier's industry index (the nearest entries are Private Equity and Telco, Media and Technology)."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        36,
+        33
+      ],
+      "confidence": "low",
+      "quote": "Hilton Hotels & Resorts is one of the world's largest and fastest-growing hospitality companies",
+      "claimed_by": "vendor",
+      "note": "Graded on a single named case study. The Hilton engagement is website, mobile API and test automation modernisation with no network, SD-WAN or SASE element whatsoever. There is no dedicated hospitality industry page; Hilton is filed under Travel, Transportation and Logistics (evidence 13). A second hospitality client story (Sunburst Hospitality) was seen in search results but not read. Buyers should read this as brand-level sector presence only, not SD-WAN or SASE capability."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        24,
+        31,
+        28
+      ],
+      "confidence": "medium",
+      "quote": "was rolled out in Q1, 2010 and was chosen by Stephenson Harwood to provide its entire global network",
+      "claimed_by": "vendor",
+      "note": "UK delivery is evidenced by named UK customers rather than by any published UK coverage statement: a UK law firm's global managed network (evidence 4), The Crown Prosecution Service (evidence 11), University Hospitals of Leicester (evidence 8) and City, University of London. The supplier's en-gb network services path (evidence 32) serves identical global content with no UK-specific coverage claim. No Ireland-specific evidence of any kind was found, so this grade rests entirely on the UK half of the region."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        37,
+        23,
+        24
+      ],
+      "confidence": "high",
+      "quote": "North and South America, Europe, Asia and Australia all connect across a single backbone",
+      "claimed_by": "vendor",
+      "note": "Backbone-level coverage published by the supplier's own Global IP Network, plus two European delivery instances: SD-WAN terminating at HUBER+SUHNER's Swiss headquarters (evidence 3) and a managed network across seven offices in Europe and Asia (evidence 4). Mondi and BMW Group also appear as European clients on the enterprise networking page (evidence 5), though those case studies were not read."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        37,
+        46,
+        31
+      ],
+      "confidence": "medium",
+      "quote": "North and South America, Europe, Asia and Australia all connect across a single backbone",
+      "claimed_by": "vendor",
+      "note": "Continent-level backbone claim plus a US-facing enterprise networking page (evidence 26) describing a Tier 1 IP backbone spanning five continents, and named US public sector clients (Virginia Information Technologies Agency, City of Brownsville) on evidence 11. No North America specific point of presence list or country coverage page was published on any page read; the 190+ country claim is global and undifferentiated."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        35,
+        25,
+        23
+      ],
+      "confidence": "high",
+      "quote": "IDC MarketScape: Asia/Pacific Managed SD-WAN/SASE Services 2024-2025",
+      "claimed_by": "vendor",
+      "note": "The supplier cites a region-specific analyst assessment for managed SD-WAN and SASE in Asia Pacific (evidence 5), and publishes a region-specific SD-WAN engagement for a bank in Indonesia with 120+ branches (evidence 15). Further APAC delivery is implied by the Hong Kong connection point used for the HUBER+SUHNER SD-WAN (evidence 3) and by an APAC regional structure. Note this is the supplier citing an analyst title, not the analyst report itself, which was not accessible."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        22
+      ],
+      "confidence": "medium",
+      "quote": "The Pick n Pay Group is a leading retail company in South Africa, with more than 1,200 stores.",
+      "claimed_by": "vendor",
+      "note": "Evidenced for Africa specifically, and strongly so: a managed SD-WAN delivered across more than 1,200 South African stores with loadshedding-resilient satellite failover, and the customer's footprint spanning Botswana, Lesotho, Mauritius, Mozambique, Namibia, Swaziland and Zambia. The Middle East half of this region has no evidence at all beyond an undifferentiated global country count and a regional office; do not read this grade as Middle East coverage."
+    },
+    "regions.latin_america": {
+      "value": "partial",
+      "evidence": [
+        37,
+        47
+      ],
+      "confidence": "low",
+      "quote": "North and South America, Europe, Asia and Australia all connect across a single backbone",
+      "claimed_by": "vendor",
+      "note": "Only the continent-level backbone statement supports Latin America, and it names South America rather than Latin America and refers to IP transit infrastructure rather than SD-WAN or SASE service availability. Searches for Latin America specific SD-WAN or managed network coverage returned nothing from the supplier. The supplier does structure a region it calls IBIOL (Iberia, International Organizations, Latin America) with a Madrid headquarters (evidence 27), but that is an office, not published service delivery, so it was not used to grade."
+    },
+    "regions.china_mainland": {
+      "value": "yes",
+      "evidence": [
+        23
+      ],
+      "confidence": "medium",
+      "quote": "Their first and most pressing requirement was ensuring seamless connectivity between their operations in China and their Swiss headquarters.",
+      "claimed_by": "vendor",
+      "note": "This is the rare case where a supplier publishes a China-specific SD-WAN outcome rather than a generic global claim, and the case study is titled around linking the customer in China to the rest of the world. Important architectural caveat stated by the supplier itself: delivery was achieved By establishing a single point of connection in Hong Kong, we were able to deliver full SD-WAN capabilities. No page read discloses a mainland Chinese licence, ICP or domestic carrier partnership, so the mechanism for in-country mainland delivery is not published."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        21,
+        25,
+        26
+      ],
+      "confidence": "high",
+      "quote": "NTT SD-WAN Service Portfolio offers enterprise customers solutions designed to support their global network requirements",
+      "claimed_by": "vendor",
+      "note": "Unambiguous and consistent across every product page read. Reinforced by the customer roster (Honda, Hitachi, Mitsui, BMW Group, Pick n Pay at 1,200+ stores, HUBER+SUHNER across 80+ countries) and by scale language on the managed network services page: over 10K enterprise networks installed and 4.7K+ network engineers in 70+ countries. Every named SD-WAN customer found is a large multinational."
+    },
+    "organisation_fit.mid_market": {
+      "value": "partial",
+      "evidence": [
+        38
+      ],
+      "confidence": "low",
+      "quote": "Scalable, world-class IT services tailored for the Mid-Market",
+      "claimed_by": "vendor",
+      "note": "The group explicitly targets mid-market and claims over 3,000 mid-market clients worldwide, but this sits on an NTT DATA Business Solutions page covering SAP and IT services, and that page does not mention SD-WAN, SASE, network or connectivity anywhere. No mid-market tier, packaged offer or entry point was found for the SD-WAN or SASE portfolio itself. Graded partial rather than yes because the targeting is real at group level but unevidenced for the product in scope."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        21,
+        25,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "offers enterprise customers solutions designed to support their global network requirements",
+      "claimed_by": "none",
+      "note": "No evidence found either way. Checked the SD-WAN portfolio page, the SD-WAN platform page, the campaign microsite, both global and US enterprise networking pages and the managed network services page: all use enterprise, enterprises and global exclusively, with no SMB, small business, small or branch-only tier, and no self-serve or entry-level offer. Absence of small business language is not the same as the supplier saying it does not serve them, so this is unknown rather than not_primary."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

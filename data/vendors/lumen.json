@@ -79,15 +79,15 @@
     "Underlying SD-WAN platform should be confirmed; platform choice affects feature set."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
-    "uk_ireland": "partner_integrated",
-    "europe": "partner_integrated",
+    "uk_ireland": "partial",
+    "europe": "partial",
     "north_america": "yes",
-    "asia_pacific": "partial",
-    "middle_east_africa": "unknown",
-    "latin_america": "partial",
+    "asia_pacific": "unknown",
+    "middle_east_africa": "partial",
+    "latin_america": "unknown",
     "china_mainland": "unknown"
   },
   "supported_clouds": {
@@ -108,21 +108,21 @@
     "note": "Extensive owned fibre and PoP diversity across North America."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
     "energy_utilities": "partial",
     "government_public_sector": "yes",
-    "education": "partial",
+    "education": "yes",
     "transport_logistics": "partial",
-    "professional_services": "partial",
+    "professional_services": "yes",
     "hospitality_leisure": "partial"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "partial",
-    "small_business": "not_primary"
+    "mid_market": "yes",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -371,6 +371,312 @@
       "published": null,
       "reliability": "Not used as evidence. Undated partner page that would only corroborate the Fortinet relationship already evidenced on Lumen's own site.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Enterprise SD-WAN Solutions | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/services/sd-wan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own primary product page. Positions SD-WAN 'for enterprise', names CURE Auto Insurance, Accolade and SYNQ3 as featured stories, states per-vendor site minimums. No pricing."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Networking Case Studies and Customer Success Stories | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/resources/customer-success-stories.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study index. Large logo/testimonial wall covering ~65 named organisations, but no industry filter taxonomy and most entries are testimonials rather than titled case studies. Used for discovery of named customers only, not as a standalone sector grade."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Managed SASE Solutions | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/services/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own primary SASE page. Strongest single source in this task: carries published list pricing per location per month, explicit large-enterprise and midsize-business targeting, and a global-availability caveat tying delivery to US-headquartered customers."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Lumen SASE Solutions for the Retail Industry (data sheet)",
+      "url": "https://assets.lumen.com/is/content/Lumen/sase-data-sheet-retail?Creativeid=8b454bc2-2311-4c4f-af7c-773613b030ec.",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier collateral. A dedicated sector-specific SASE data sheet, which is the strongest form of sector evidence short of a named case study. Retail is the only sector for which such a dedicated SASE data sheet was found."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "SASE Solutions Service Guide",
+      "url": "https://assets.lumen.com/is/content/Lumen/sase-solutions-service-guide?Creativeid=4af4755b-f89d-476b-a0b7-879ea4015615",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier contractual service guide. Confirms Hosted Gateway is US-only and that service depends on location and connectivity type, but declines to enumerate supported countries."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Lumen SASE Solutions FAQ",
+      "url": "https://assets.lumen.com/is/content/Lumen/lumen-sase-solutions-faq",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier collateral and the most geographically specific source found. Enumerates SASE service reach as US, Canada and EMEA for US-sold customers. Notably does NOT list Asia Pacific or Latin America, which is why generic 'global availability' claims elsewhere were not accepted at face value."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Lumen SD-WAN Solutions Data Sheet",
+      "url": "https://assets.lumen.com/is/content/Lumen/sd-wan-solutions?Creativeid=5b72fe03-c3a1-46ae-a8c0-201ca1947858",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier collateral. States 'Global availability' for three of four SD-WAN platform options and 'Business customers only'. The global claim is unqualified and names no countries, so it was treated as weak regional evidence and recorded as conflicting with source 6."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Network Maps | Lumen",
+      "url": "https://www.lumen.com/en-us/resources/network-maps.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier network map tool. Claims a network 'spanning 5 continents' but names no continents and carries a disclaimer that maps are 'representative of our networks but in general terms'. Too generic to carry a regional grade alone."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Healthcare IT Solutions | Lumen",
+      "url": "https://www.lumen.com/en-us/industries/healthcare.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated healthcare industry page. Carries four named healthcare customers including an explicitly SD-WAN-attributed Accolade story, plus a SASE product block. Strong direct sector evidence."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Financial Services and Banking IT Solutions | Lumen",
+      "url": "https://www.lumen.com/en-us/industries/financial-services.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated financial services industry page with four named customers (Certegy, Horizon Bank, Euromoney, SELCO Community Credit Union) and explicit SASE and SD-WAN product blocks."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Retail IT Solutions | Lumen",
+      "url": "https://www.lumen.com/en-us/industries/retail.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated retail industry page with four named customers (CITY Furniture, Micro Center, Space Needle, VSP Vision) and an explicit SASE block. Corroborates source 4."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Manufacturing IT Solutions | Lumen",
+      "url": "https://www.lumen.com/en-us/industries/manufacturing.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated manufacturing industry page with four named customers (Upstate Niagara Cooperative, alphabroder, VSP Vision, Calgon Carbon) and explicit SASE and SD-WAN blocks."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "IT Solutions | Energy & Utilities Industries | Lumen Technologies",
+      "url": "https://www.lumen.com/en-us/industries/energy-utilities.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated energy industry page. Weaker than the other industry pages: no named customer, no case study, and only a single generic sentence pairing DIA with SASE. Sufficient for 'partial', not for 'yes'."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Industries index | Lumen",
+      "url": "https://www.lumen.com/en-us/industries.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier navigation index. Used to establish the definitive list of which industries Lumen maintains dedicated pages for, and equally which it does not (no transport, hospitality or professional services page exists)."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Public Sector | Federal Government | Lumen",
+      "url": "https://www.lumen.com/en-us/public-sector/federal-government.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated federal government page with explicit SD-WAN and SASE blocks. Case studies are anonymised ('Federal law enforcement agency'), so the named-customer test is not met here, but the dedicated page and product mapping are."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Higher Education | Public Sector | Lumen",
+      "url": "https://www.lumen.com/en-us/public-sector/education/higher-education.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated higher education page. Explicitly frames SASE and SD-WAN for campus use and names two customers (University of Denver, Link Oregon). Strong direct sector evidence."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "GSA EIS | Lumen",
+      "url": "https://www.lumen.com/gsaeis.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page for a US federal contract vehicle. Qualifies as a published framework for the public sector and explicitly lists SD-WAN and SASE among the services delivered under it."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Crowley | Customer Story | Lumen",
+      "url": "https://www.lumen.com/en-us/resources/customer-stories/crowley.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study naming a supply chain logistics customer. Downgraded as sector evidence because the solutions listed are Professional Security Services, Networking Solutions, Cloud and Database Management and DIA. Neither SD-WAN nor SASE appears."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Walsh Gallegos | Customer Story | Lumen",
+      "url": "https://www.lumen.com/en-us/resources/customer-stories/walshgallegos.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study of a law firm that explicitly names both Lumen SD-WAN and Lumen SASE Solutions. Also featured on the SASE product page (source 3). Meets the named-case-study test for professional services."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "SYNQ3 | Customer Story | Lumen",
+      "url": "https://www.lumen.com/en-us/resources/customer-stories/synq3.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study. Featured on the SD-WAN page as a restaurant industry story, but the story itself names only DIA, IP VPN and Contact Center Solutions, and SYNQ3 is a technology provider to restaurants rather than a hospitality operator. Sufficient for 'partial' only."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Enterprise SD-WAN Solutions | Lumen (Singapore locale)",
+      "url": "https://www.lumen.com/en-sg/services/sd-wan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier regional locale page. Confirms locale sites exist for Australia, Hong Kong, India, Japan, Singapore and the United States, but carries only an availability disclaimer and no Asia Pacific coverage, PoP or service-availability statement. Per the brief, a locale site is not delivery evidence."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Enterprise SD-WAN Solutions | Lumen (India locale)",
+      "url": "https://www.lumen.com/en-in/services/sd-wan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier regional locale page. Carries an India sales phone number but no India-specific coverage, availability or PoP statement. Checked specifically to test Asia Pacific delivery and found not to support it."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Networking Case Studies and Customer Success Stories | Lumen (Singapore locale)",
+      "url": "https://www.lumen.com/en-sg/resources/customer-success-stories.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier regional case study index. Checked for Asia Pacific customers; the content is identical to the US page and every identifiable customer is US-based. Negative result, used to justify 'unknown' for Asia Pacific."
+    },
+    {
+      "n": 45,
+      "tier": 2,
+      "title": "Lumen Completes Sale of EMEA Business to Colt Technology Services for $1.8B",
+      "url": "https://www.prnewswire.com/news-releases/lumen-completes-sale-of-emea-business-to-colt-technology-services-for-1-8b-301974782.html",
+      "published": "2023-11-01",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated corporate announcement on the wire of record, corroborated by Lightwave, DataCenterDynamics and Submarine Networks. Materially qualifies every European, UK and Middle East/Africa claim: Lumen divested the EMEA business entirely and retains only 'a small team' there."
+    },
+    {
+      "n": 46,
+      "tier": 2,
+      "title": "Lumen Closes Sale of its Latin American Business to Stonepeak",
+      "url": "https://www.prnewswire.com/news-releases/lumen-closes-sale-of-its-latin-american-business-to-stonepeak-301597230.html",
+      "published": "2022-08-01",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated corporate announcement on the wire of record, corroborated by Lightwave, Light Reading and Stonepeak's own release. The divested business now trades as Cirion Technologies. Decisive for grading Latin America."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Lumen Investor Relations: Lumen Completes Sale of EMEA Business to Colt Technology Services for $1.8B",
+      "url": "https://ir.lumen.com/news/news-details/2023/Lumen-Completes-Sale-of-EMEA-Business-to-Colt-Technology-Services-for-1-8B/default.aspx",
+      "published": "2023-11-01",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own investor relations copy of source 24. Confirms Lumen remains 'a key strategic partner for Colt's customers' needs in North America', i.e. the retained partnership flows into North America rather than out into EMEA."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Lumen SD-WAN Service Schedule",
+      "url": "https://assets.lumen.com/is/content/Lumen/sd-wan-service-schedule?Creativeid=914be424-577f-4a0d-97cd-3c9c00a783e4",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier contract schedule. Confirms services outside the United States may require a separate local country addendum with a local Lumen affiliate, implying non-uniform international delivery. Names no countries."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "Lumen SASE Solutions data sheet (Fully converged. Flexibly managed.)",
+      "url": "https://assets.lumen.com/is/content/Lumen/sase-data-sheet?Creativeid=8ee39d56-cbf7-48fb-ae95-ced79adb4134",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier collateral. Confirms distributed-enterprise targeting and a 'Business customers only' restriction with no consumer or micro-business tier. States no site minimums and no country list."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "Lumen SASE (security path) - 404",
+      "url": "https://www.lumen.com/en-us/security/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned a 404 client error and no content was retrieved. Superseded by source 3."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "Lumen Healthcare (solutions path) - 404",
+      "url": "https://www.lumen.com/en-us/solutions/healthcare.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned a 404 client error and no content was retrieved. Superseded by source 9 once the correct /industries/ path was found."
+    },
+    {
+      "n": 52,
+      "tier": 4,
+      "title": "Lumen SD-WAN (UK locale) - 404",
+      "url": "https://www.lumen.com/en-gb/services/sd-wan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned a 404 client error and no content was retrieved. Tested deliberately to see whether a UK locale site exists; it does not, and the Asia Pacific locale selector in source 21 lists no UK or European option. Recorded as a negative check, not graded from."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Lumen Small Business - 404",
+      "url": "https://www.lumen.com/en-us/small-business.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned a 404 client error and no content was retrieved. Attempted specifically to test small business targeting for SD-WAN and SASE."
+    },
+    {
+      "n": 54,
+      "tier": 4,
+      "title": "Lumen newsroom: EMEA sale completion - 404",
+      "url": "https://news.lumen.com/2023-11-01-Lumen-Completes-Sale-of-EMEA-Business-to-Colt-Technology-Services-for-1-8B",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned a 404 client error and no content was retrieved. Superseded by sources 24 and 26 which carry the same announcement."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "Lumen Public Sector (industries path) - 404",
+      "url": "https://www.lumen.com/en-us/industries/public-sector.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned a 404 client error and no content was retrieved. Superseded by sources 15, 16 and 17 once the correct /public-sector/ path was found."
     }
   ],
   "sourced_facts": {
@@ -593,6 +899,243 @@
       "quote": "99.99% availability SLA for single device; 100% service availability when purchases in High Availability configuration",
       "claimed_by": "vendor",
       "note": "This is the only Lumen page found stating an availability percentage for SD-WAN in prose. The contractual Lumen Service Level Agreement expresses availability as tiers in a table rather than as one figure: Platinum Managed Service 100%, Platinum 99.999%, Gold 99.99%, Silver 99.9%, Bronze 99.5%, with the applicable tier depending on the qualifying service ordered. So 99.99 is the single-device SD-WAN figure, not a portfolio-wide number, and 100% applies only in a high availability configuration."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        30,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Moving into the future of healthcare with network modernization",
+      "claimed_by": "vendor",
+      "note": "Dedicated healthcare industry page carrying four named customers: VSP Vision, American Family Care, Society of Diagnostic Medical Sonography and Accolade. The Accolade entry is explicitly SD-WAN attributed and is also featured on the main SD-WAN product page, so the sector evidence connects directly to the product under comparison rather than to Lumen's general portfolio. The quoted string is the American Family Care story headline. Note that other headlines on this page use a non-breaking hyphen in 'SD-WAN', so the hyphen-free quote was chosen deliberately for re-verification."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        31,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Expanding connectivity and security to minimize downtime and reduce TCO",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services industry page naming Certegy Payment Solutions, Horizon Bank, Euromoney and SELCO Community Credit Union, with explicit SASE and SD-WAN blocks. The quoted string is the Horizon Bank story headline. Separately, the SD-WAN product page features CURE Auto Insurance under 'Ensuring business continuity during digital transformation', giving a second insurance-side data point tied directly to SD-WAN."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        25,
+        32
+      ],
+      "confidence": "high",
+      "quote": "Transforming retail with fast, flexible connectivity",
+      "claimed_by": "vendor",
+      "note": "The strongest sector evidence in this assessment. Retail is the only sector with a dedicated SASE data sheet ('Lumen SASE Solutions for the Retail Industry', source 4), which is sector-specific collateral for the exact product under comparison, and it is backed by a dedicated retail industry page naming CITY Furniture, Micro Center, Space Needle and VSP Vision. The quoted string is the CITY Furniture story headline. The retail data sheet also carries the claim '98% of retailers surveyed currently use or plan to migrate their legacy network to SD-WAN in the next two years', which is an unattributed vendor survey stat and was not relied on."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Enhancing network performance for a cleaner world.",
+      "claimed_by": "vendor",
+      "note": "Dedicated manufacturing industry page with four named customers: Upstate Niagara Cooperative, alphabroder, VSP Vision and Calgon Carbon, plus explicit SASE and SD-WAN blocks. The quoted string is the Calgon Carbon story headline. Caveat worth recording for the buyer: the named customers skew to food co-operative, apparel distribution and activated carbon rather than heavy discrete manufacturing or OT/ICS environments, so this is not evidence of industrial control network capability."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        34,
+        35
+      ],
+      "confidence": "medium",
+      "quote": "Lumen IT solutions help some of the top global energy providers, offshore drilling companies and utility giants navigate change",
+      "claimed_by": "vendor",
+      "note": "Deliberately graded down from 'yes'. Lumen does maintain a dedicated energy and utilities industry page, which on a literal reading of the grading rule would qualify as 'yes'. It was not graded that way because the page contains no named customer, no case study, and no SD-WAN or SASE content beyond one generic sentence pairing DIA with SASE. The quoted claim about 'top global energy providers' is unattributed and names nobody. This is the sector named in a page with nothing behind it for the product under comparison, which is the definition of 'partial'. If a named energy SD-WAN or SASE customer surfaces later this should move to 'yes'."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        38,
+        36,
+        37
+      ],
+      "confidence": "high",
+      "quote": "EIS is one of the transformation contracts from the General Services Administration (GSA) at the forefront of modernizing federal government IT by providing next gen products and services.",
+      "claimed_by": "vendor",
+      "note": "Graded 'yes' on the published framework test rather than the named customer test. Lumen holds the GSA Enterprise Infrastructure Solutions contract vehicle and its EIS page explicitly lists both SD-WAN and SASE among the services delivered under it. This is reinforced by a full dedicated public sector structure: separate Federal, Defense and Intelligence Community, State and Local, Public Safety and Higher Education pages, each mapping SD-WAN and SASE. Recorded caveat: the federal page's own case studies are anonymised ('Federal law enforcement agency', 'Federal infrastructure customer'), so no named agency customer was found. This is US federal and US state and local evidence only, with nothing found for UK or other non-US public sectors."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        37
+      ],
+      "confidence": "high",
+      "quote": "The University of Denver unlocked digital transformation with reliable network infrastructure from Lumen to power innovation.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Higher Education page that explicitly frames the product under comparison for campus use ('Learn how a SASE framework with solutions like SD-WAN can help you keep your campus connected'), with two named customers: University of Denver and Link Oregon. The quoted string is the University of Denver entry. Corroborated indirectly by the Walsh Gallegos story, a law firm whose practice is serving educational institutions, and by 'State of New Mexico Statewide Education Network' and 'SABIS Educational Systems' appearing on the customer wall. Evidence is higher education and US K-12 network focused."
+    },
+    "sectors.transport_logistics": {
+      "value": "partial",
+      "evidence": [
+        39,
+        23
+      ],
+      "confidence": "medium",
+      "quote": "Crowley Maritime Corporation is a Florida based supply chain logistics company.",
+      "claimed_by": "vendor",
+      "note": "Graded 'partial' rather than 'yes' on a deliberate reading. Crowley is a genuine named logistics customer with a full case study page, which would normally meet the named-case-study test. It was held at 'partial' because the solutions listed for Crowley are Professional Security Services, Networking Solutions, Cloud and Database Management and DIA, and neither SD-WAN nor SASE appears anywhere in that story. There is no dedicated transport or logistics industry page (checked source 14). Rio Metro Regional Transit District, Arctic Glacier and Unical Aviation appear on the customer wall but with testimonials only, no product attribution."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        40,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Security and productivity are critical for any law firm, especially one handling sensitive data for educational institutions.",
+      "claimed_by": "vendor",
+      "note": "Meets the named-case-study test cleanly and specifically for the product under comparison. The Walsh Gallegos law firm story lists 'Lumen SD-WAN and Lumen SASE Solutions for added network visibility and resilience' in its solutions section, and the story is one of only three customer stories featured on the main SASE product page (alongside Ames Construction and United Direct Solutions). Note there is no dedicated professional services industry page; the grade rests on the case study. Troutman Pepper Locke, North Highland and Huitt-Zollars also appear on the customer wall without product attribution."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partial",
+      "evidence": [
+        41,
+        22
+      ],
+      "confidence": "medium",
+      "quote": "a virtual restaurant contact center",
+      "claimed_by": "vendor",
+      "note": "Held at 'partial' on two grounds. First, although SYNQ3 is featured on the SD-WAN product page under 'Creating convenience in the restaurant industry with bandwidth and innovation', the SYNQ3 story itself names only Dedicated Internet Access, IP VPN and Contact Center Solutions, with no SD-WAN or SASE mention. Second, SYNQ3 is a technology provider selling into restaurants rather than a hospitality operator, so it is weak evidence of hospitality sector delivery. No dedicated hospitality industry page exists (checked source 14). Space Needle appears on the retail page under 'Transforming guest experiences' and Little Rock Convention and Visitors Bureau appears on the customer wall, both without SD-WAN or SASE attribution."
+    },
+    "regions.uk_ireland": {
+      "value": "partial",
+      "evidence": [
+        27,
+        45,
+        52
+      ],
+      "confidence": "medium",
+      "quote": "Extend your service reach to EMEA and Canada locations and endpoints",
+      "claimed_by": "vendor",
+      "note": "No UK or Ireland specific coverage, PoP or availability statement was found anywhere. The grade rests entirely on UK and Ireland falling inside the generic 'EMEA' reach claimed in the SASE FAQ, and that claim is doubly qualified: it applies only to customers sold with a US headquarters, and Lumen divested its entire EMEA business to Colt Technology Services on 1 November 2023 (source 24), retaining only 'a small team of talented Lumen employees' there. Supporting negative checks: no en-gb locale site exists (source 31 returned 404) and the locale selector on the Asia Pacific site lists only Australia, Hong Kong, India, Japan, Singapore and the United States, with no UK or European option. A UK-headquartered buyer should treat this as reach-into rather than in-region delivery."
+    },
+    "regions.europe": {
+      "value": "partial",
+      "evidence": [
+        27,
+        45,
+        28
+      ],
+      "confidence": "high",
+      "quote": "US-sold (HQ in the US) customers can deploy SASE premise-based services across Canada and EMEA locations.",
+      "claimed_by": "vendor",
+      "note": "Explicitly partial, not 'yes', and the qualifier is the whole story: European delivery is available only to customers sold with a US headquarters and in US currency. The SASE page states separately that 'Global locations are available to customers sold with U.S. headquarters and U.S. currency only at this time.' This is consistent with the November 2023 divestiture of the EMEA business to Colt (source 24). Conflict recorded and not resolved, per instruction: the SD-WAN data sheet (source 7) claims unqualified 'Global availability' for three of four SD-WAN platform options, which sits awkwardly against the SASE FAQ's explicit enumeration and the US-HQ restriction. Also note the SASE FAQ states 'Lumen SASE with VMware offers cloud service availability to EMEA using VMware SASE hosted gateways', i.e. the European cloud gateway capability is the platform vendor's, not Lumen's."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        27,
+        24,
+        47
+      ],
+      "confidence": "high",
+      "quote": "Lumen hosted gateways for Versa and Fortinet are only available across the six U.S. regions.",
+      "claimed_by": "vendor",
+      "note": "The clear home region and the only one with infrastructure-level specificity. Lumen operates its own hosted SASE gateways across six US regions, quotes pricing in US dollars, sells the service to US-headquartered customers as the default case, and every identifiable named customer found across all industry and case study pages is US-based. Canada is explicitly included in the SASE service reach alongside the US. The EMEA divestiture release reinforces the North American centre of gravity, noting Lumen 'will remain a key strategic partner for Colt's customers' needs in North America', i.e. the retained partnership flows inbound to North America."
+    },
+    "regions.asia_pacific": {
+      "value": "unknown",
+      "evidence": [
+        27,
+        42,
+        43,
+        44,
+        28
+      ],
+      "confidence": "medium",
+      "quote": "Not all products and services are available in all regions and countries; please contact a representative near you for details.",
+      "claimed_by": "none",
+      "note": "Graded unknown after specific effort to find otherwise, and the negative result is itself informative. The most geographically detailed source (the SASE FAQ, source 6) enumerates service availability as the US, Canada and EMEA, and does not mention Asia Pacific at all. Lumen does run locale sites for Australia, Hong Kong, India, Japan and Singapore, but per the brief a locale site is a website language and not service delivery evidence: the Singapore and India SD-WAN pages (sources 21, 22) carry only a sales phone number and the quoted availability disclaimer, with no coverage, PoP or availability statement, and the Singapore case study index (source 23) is identical to the US one with no Asia Pacific customer. Conflict recorded and not resolved: the SD-WAN data sheet claims unqualified 'Global availability', which contradicts the SASE FAQ's US/Canada/EMEA enumeration. A buyer needing Asia Pacific SASE delivery should treat this as an open question for the supplier."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        27,
+        45
+      ],
+      "confidence": "low",
+      "quote": "Lumen SASE Solutions management systems are deployed in a redundant cloud environment with regional diversity across a global footprint with site and service availability across EMEA and Canada for US-sold businesses.",
+      "claimed_by": "vendor",
+      "note": "Lowest confidence grade in this set. No Middle East or Africa specific evidence of any kind was found: no country, no PoP, no customer, no locale site. The grade rests solely on the M and A of the acronym 'EMEA' in the quoted sentence, which is thin, and it carries the same two qualifiers as Europe: US-sold customers only, and Lumen divested the EMEA business to Colt in November 2023. In practice the EMEA reach claim appears oriented to European branch locations of US multinationals. Treat as effectively unverified for the Middle East and Africa specifically."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        46,
+        27
+      ],
+      "confidence": "high",
+      "quote": "Lumen Technologies (NYSE: LUMN) said today it has officially closed the sale of its Latin American operations to Stonepeak for $2.7 billion cash.",
+      "claimed_by": "none",
+      "note": "High confidence in the unknown grade because there is positive evidence of absence rather than merely missing evidence. Lumen sold its entire Latin American business to Stonepeak on 1 August 2022; that business now trades independently as Cirion Technologies. Consistent with this, the SASE FAQ's availability enumeration (US, Canada, EMEA) omits Latin America entirely, there is no Latin American locale site, and no Latin American customer was found on any case study page. Buyers requiring Latin American delivery should expect a partner or carrier arrangement, though no such arrangement was published anywhere I looked."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        42,
+        27,
+        29
+      ],
+      "confidence": "high",
+      "quote": "Not all products and services are available in all regions and countries; please contact a representative near you for details.",
+      "claimed_by": "none",
+      "note": "No evidence of any kind for mainland China. No ICP licence, no China-specific arrangement, no China PoP and no China customer were found. Per the brief's guidance, the generic claims found elsewhere were treated as evidence of nothing here: the SD-WAN data sheet's 'Global availability', the network map page's 'spanning 5 continents' (which names no continents and is disclaimed as 'representative of our networks but in general terms'), and the SASE page's '6,300+ unique interconnects globally' are all non-specific. Note that a Hong Kong locale site exists but Hong Kong is not mainland China and would not satisfy a mainland licensing requirement. The SD-WAN service schedule adds that services outside the US may require a separate local country addendum with a local Lumen affiliate, and that services are subject to US export control and economic sanctions law."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        24,
+        22,
+        49
+      ],
+      "confidence": "high",
+      "quote": "Lumen SASE is a cloud-based network and security experience designed for today's distributed enterprise that is centrally controlled, fully converged and flexibly managed.",
+      "claimed_by": "vendor",
+      "note": "Explicit and unambiguous primary target. The SASE page invites buyers to 'Explore next-gen connectivity and security solutions for your large, distributed enterprise' and the SD-WAN page positions 'fully managed or co-managed SD-WAN solutions for enterprise'. Backed by product design: multi-site branch, campus, data centre and colocation management, and site minimums of 10 locations on most SD-WAN platform options. One caveat on the word 'global' in this category: the enterprise targeting is real, but delivery outside the US, Canada and EMEA is unevidenced, so this is better read as large US-headquartered enterprise with international branch reach than as a fully global enterprise proposition."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        24
+      ],
+      "confidence": "high",
+      "quote": "Discover how to achieve speed, scale and security for your midsize business with resources and product recommendations.",
+      "claimed_by": "vendor",
+      "note": "Explicitly targeted with a dedicated content path on the SASE page, not merely implied. Reinforced by a second statement on the same page offering connectivity 'for midsize to large businesses', and by published per-location pricing, which is a mid-market buying signal since it lets a smaller buyer size the deal without a bid process. Product-side support is mixed: most SD-WAN platform options carry a 10-site minimum, though the Cisco Meraki option is listed with 'No minimum', which lowers the entry barrier for smaller multi-site estates."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        49,
+        22,
+        53
+      ],
+      "confidence": "medium",
+      "quote": "Services not available everywhere. Business customers only.",
+      "claimed_by": "none",
+      "note": "No SD-WAN or SASE product tier, pricing or case study aimed at small business was found. The evidence points away from it rather than toward it: the SD-WAN page positions the product 'for enterprise', the SASE page's smallest named segment is 'midsize business', most SD-WAN platform options require a 10-site minimum, and the published SASE entry point of $155 per location per month on a 12-month term is priced per site rather than per organisation. A dedicated small business URL was tested and returned 404 (source 32). Graded unknown rather than not_primary because Lumen nowhere explicitly states that small business is out of scope, and the quoted 'Business customers only' line excludes consumers rather than small firms."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        24
+      ],
+      "confidence": "high",
+      "quote": "starting at $155 per location, per month",
+      "claimed_by": "vendor",
+      "note": "Unusually well evidenced for this market, which mostly publishes nothing. Lumen publishes actual list entry pricing on its SASE page: $155 per location per month for the Fortinet option and $168 per location per month for the Versa option, both on a 12-month term, with Zero Trust Network Access added at 'Starting at $5 per user' or 'Starting at $9 per user' depending on platform. Graded 'mid' rather than 'value' or 'premium' because these are carrier-managed SASE list prices bundling appliance, security stack and management, which sits in the middle of the managed SASE range rather than at either extreme. Two caveats for a buyer modelling total cost: these are starting prices for the SASE component only and exclude the underlying access circuits, and the SD-WAN product pages and data sheets publish no pricing at all, so an SD-WAN-only comparison has no published anchor."
     }
   },
   "conflicts": [

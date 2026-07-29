@@ -80,7 +80,7 @@
     "Less mature than incumbents for very large multinational deployments with heavy legacy MPLS estates."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "hours",
   "regions": {
     "uk_ireland": "yes",
@@ -88,8 +88,8 @@
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "yes",
-    "latin_america": "partial",
-    "china_mainland": "partner_integrated"
+    "latin_america": "yes",
+    "china_mainland": "yes"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -109,21 +109,21 @@
     "note": "Self-healing backbone; sockets fail over between PoPs automatically with no customer action."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
     "retail_ecommerce": "yes",
     "manufacturing": "yes",
-    "energy_utilities": "partial",
+    "energy_utilities": "yes",
     "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
+    "education": "yes",
+    "transport_logistics": "yes",
     "professional_services": "yes",
     "hospitality_leisure": "partial"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
     "mid_market": "yes",
-    "small_business": "partial"
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -346,6 +346,258 @@
       "published": null,
       "reliability": "Not used as evidence. The fetch returned a 403 client error, so no content was read from it.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Customers | Cato Networks (main case study index with industry filter taxonomy)",
+      "url": "https://www.catonetworks.com/customers/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study index. Carries the supplier's own industry taxonomy, so both the presence and the absence of an industry label is meaningful evidence."
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Customers filtered by Healthcare",
+      "url": "https://www.catonetworks.com/customers/?industry=healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own filtered case study listing. Named healthcare customers with case study titles."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Customers filtered by Financial Services",
+      "url": "https://www.catonetworks.com/customers/?industry=financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own filtered case study listing."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Customers filtered by Credit Union",
+      "url": "https://www.catonetworks.com/customers/?industry=credit-union",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own filtered case study listing."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Customers filtered by Manufacturing",
+      "url": "https://www.catonetworks.com/customers/?industry=manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own filtered case study listing. Seven named manufacturers."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Customers filtered by Retail",
+      "url": "https://www.catonetworks.com/customers/?industry=retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own filtered case study listing."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Customers filtered by Wholesale/Distribution/Logistics",
+      "url": "https://www.catonetworks.com/customers/?industry=wholesale-distribution-logistics",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own filtered case study listing."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Customers filtered by Environmental Services",
+      "url": "https://www.catonetworks.com/customers/?industry=environmental-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own filtered listing. Read to test whether Construction, Media and Environmental Services filters carry any case studies. They returned none."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "The Ultimate Makeover: Ulta Beauty Reinvents its Network to Deliver a Seamless Retail Experience",
+      "url": "https://www.catonetworks.com/customers/ulta-beauty-reinvents-network-deliver-seamless-retail-experience/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named-customer case study page."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Waseda University Enables Universal Secure Remote Learning and Digital Transformation with Cato",
+      "url": "https://www.catonetworks.com/customers/waseda-university-achieves-universal-secure-remote-learning-and-jumpstarts-digital-transformation-with-cato/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named-customer case study page. Named higher education institution."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Swissport Elevates Security for Global Operations with Cato Networks",
+      "url": "https://www.catonetworks.com/customers/swissport-elevates-security-global-operations-with-cato-networks/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named-customer case study page. Aviation ground handling and cargo logistics."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Fidal Boosts WAN Performance, Cuts Costs in Half by Switching from MPLS to Cato",
+      "url": "https://www.catonetworks.com/customers/fidal-boosts-wan-performance-cuts-costs-in-half-by-switching-from-mpls-to-cato/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named-customer case study page. Named law firm."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Guardian Credit Union Improves Network Control & Security with Cato",
+      "url": "https://www.catonetworks.com/customers/guardian-credit-union-improves-network-control-security-with-cato/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named-customer case study page. Named regulated financial institution, and a mid-market sized one."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Oil and gas company implements SASE to energize IT resiliency, connection speed and network security (Ranger Energy Services)",
+      "url": "https://www.catonetworks.com/customers/ranger-energy-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named-customer case study page. Note the page carries the industry label Manufacturing while the body text describes the oil and gas industry."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Production PoP Guide - Cato Learning Center",
+      "url": "https://support.catonetworks.com/hc/en-us/articles/7784334332317-Production-PoP-Guide",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own operational documentation listing named production PoP cities by region. The strongest available service-delivery evidence because it is an operational document rather than marketing copy."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "China Connectivity | Cato Networks",
+      "url": "https://www.catonetworks.com/use-cases/china-connectivity/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own use case page making a specific licensed in-country claim rather than a generic global claim."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Global Private Backbone | Cato SASE Cloud",
+      "url": "https://www.catonetworks.com/cato-sase-cloud/global-private-backbone/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product page. Contains an internal inconsistency on PoP count, recorded but not resolved."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Cato Networks Exceeds $415M in ARR Fueled by 42% YoY Growth and Enterprise Demand",
+      "url": "https://www.catonetworks.com/news/cato-exceeds-415m-arr-fueled-42-yoy-growth-and-enterprise-demand/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release. Self-reported figures, but explicit about the customer size band being won."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Cato Networks Reports Near 100% Revenue Growth for Second Consecutive Year as Large Enterprises Embrace SASE",
+      "url": "https://www.catonetworks.com/news/cato-reports-near-100-percent-revenue-growth/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release, older. Self-reported customer and branch counts."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "The Cato Journey: Bringing SASE Transformation to the Largest Enterprises",
+      "url": "https://www.catonetworks.com/blog/the-cato-journey-bringing-sase-transformation-to-the-largest-enterprises/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier blog. Unusually candid first-party statement of the segment Cato started in and the segment it moved to."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Partners | Cato Networks",
+      "url": "https://www.catonetworks.com/partners/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own partner programme page. Read to test whether smaller organisations are served via MSPs. The page describes MSP, reseller and service provider routes but names no customer size segment."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Company | Cato Networks",
+      "url": "https://www.catonetworks.com/company/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own company page. Read for size and geography targeting, yielded nothing quantified."
+    },
+    {
+      "n": 41,
+      "tier": 2,
+      "title": "Cato SSE 360 - AWS Marketplace product listing",
+      "url": "https://aws.amazon.com/marketplace/pp/prodview-5ok2ndubntwcm",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Independently accountable marketplace listing with a published contract price dimension. The only genuinely published entry price found for this supplier."
+    },
+    {
+      "n": 42,
+      "tier": 3,
+      "title": "Cato Networks Software Pricing & Plans 2026 - Vendr",
+      "url": "https://www.vendr.com/marketplace/cato-networks",
+      "published": "2026-02",
+      "verified_on": "2026-07-29",
+      "reliability": "Corroboration only. Aggregated anonymised buyer transaction data, no named accountable author and the underlying contracts are not verifiable. Used only to sanity check the AWS Marketplace figure, never to carry a grade alone."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "Cato Networks Suite Pricing, Alternatives & More 2026 - Capterra",
+      "url": "https://www.capterra.com/p/173809/Cato-Networks/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The listed starting price of $1.00 per user per year is a directory placeholder rather than a real price, and the typical customers field reading Freelancers, Small businesses, Mid size businesses, Enterprises is Capterra's generic template applied to every listing, not a supplier statement. Using it would have produced a false small_business grade."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "Cato SASE Cloud Reviews & Ratings 2026 - Gartner Peer Insights",
+      "url": "https://www.gartner.com/reviews/market/single-vendor-sase/vendor/cato-networks/product/cato-sase-cloud",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 403 to the fetch, so no content was read in this task and nothing may be graded from it. It would have been the best third-party source for reviewer company-size distribution."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "Cato Networks industries page (attempted)",
+      "url": "https://www.catonetworks.com/industries/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. No dedicated per-industry solution section exists at this path, which is itself the reason sector grading here rests on case studies rather than industry landing pages."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "Cato Networks PoP locations page (attempted)",
+      "url": "https://www.catonetworks.com/cato-sase-cloud/pop-locations/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Replaced by the Learning Center Production PoP Guide at source 15."
     }
   ],
   "sourced_facts": {
@@ -553,6 +805,215 @@
       "quote": "Cato ensures the SASE cloud platform maintains optimal security posture, 99.999% service availability, and low-latency security processing for all users and locations, without any customer involvement.",
       "claimed_by": "vendor",
       "note": "The figure is contractual, not just marketing: Cato's Master Service Agreement defines the SLA Metric or Service Level as the overall Availability metric of 99.999%, with service level credits of 5%, 7% and 9% at defined availability bands, plus a separate processing time commitment of 10 milliseconds for IPS, CASB and NGFW for Internet Access. The quote given is taken from the MSASE partner page because the MSA rendering contained formatting characters that would not reproduce cleanly."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        20,
+        19
+      ],
+      "confidence": "high",
+      "quote": "Fullerton Health Builds a Secure SASE Linking 550 Locations and the Cloud, Thanks to Cato",
+      "claimed_by": "vendor",
+      "note": "Healthcare is one of Cato's own industry filter labels and returns two named customers with full case studies: Fullerton Health and Complete Care, whose case study is titled \"Healthcare Provider Complete Care Gains Control Over Its Network and Costs with Cato\". No healthcare-specific accreditation such as HIPAA or DSPT was found on the pages read, so this is graded on named customers only, not on published compliance."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        31,
+        21,
+        22
+      ],
+      "confidence": "high",
+      "quote": "Guardian Credit Union is a regional business that faced big network challenges.",
+      "claimed_by": "vendor",
+      "note": "Cato runs both a Financial Services and a separate Credit Union industry filter. Named customers found: Guardian Credit Union, Bank Avera and MoonPay, a crypto payments business. Conflict recorded and not resolved: the law firm Fidal is also filed under the Financial Services label on Cato's site, which inflates that filter, so the credit union and the bank are the cleaner evidence."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        27,
+        24
+      ],
+      "confidence": "high",
+      "quote": "Ulta Beauty is the largest specialty beauty retailer in the U.S. and a leading destination for cosmetics, fragrance, skin care, hair care, wellness and salon services.",
+      "claimed_by": "vendor",
+      "note": "Retail is a Cato industry filter with three named customers: Ulta Beauty, Redner's Markets and Brake Masters. Evidence is bricks-and-mortar multi-site retail rather than pure e-commerce. No dedicated e-commerce or PCI-DSS retail framework page was read, so the e-commerce half of this category is not separately evidenced."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        23,
+        19
+      ],
+      "confidence": "high",
+      "quote": "Vitesco Technologies Builds New Global Enterprise Network with Cato",
+      "claimed_by": "vendor",
+      "note": "The deepest sector on Cato's site. Manufacturing is an industry filter returning seven named customers: Darling Ingredients, Vitesco Technologies, O-I, ESI, Juki, Haulotte and Komax. Several are global multi-plant manufacturers, so this is the best-evidenced sector of the ten."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        32
+      ],
+      "confidence": "medium",
+      "quote": "Ranger Energy Services is one of the largest providers of high specification mobile rig well services, cased hole wireline services and ancillary services in the U.S. oil and gas industry.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a single named customer with a dedicated case study in oil and gas. Two caveats recorded rather than resolved. First, Cato labels this case study Manufacturing, not energy, and has no Energy or Utilities industry filter at all. Second, the evidence is oilfield services, not a regulated utility, so there is no evidence here for power, water or grid operators and no mention of OT or ICS security frameworks such as NERC CIP on the pages read. Confidence is medium because the depth is one customer."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        28,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "Based in Tokyo, Waseda University is one of top institutions of academic research and higher learning.",
+      "claimed_by": "vendor",
+      "note": "One named higher education customer with a full case study, Waseda University. Cato's industry taxonomy carries the label \"Education Technology\" rather than plain Education, and a second case study exists titled \"Leading EdTech Provider Replaces Global VPN and Optimizes Mobile Connectivity with Cato SD-WAN\" for an unnamed edtech vendor, which is a technology supplier to education rather than an institution. Confidence medium: one named institution, no schools or further education evidence, no education-sector framework or safeguarding accreditation found."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        29,
+        25,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "the world's largest ground-handling company, ensuring seamless operations across 279 airports in 45 countries",
+      "claimed_by": "vendor",
+      "note": "Swissport is a named customer with a full case study, and aviation ground handling and cargo handling sit squarely in transport and logistics. Cato also runs a \"Wholesale/Distribution/Logistics\" industry filter, under which the case study \"Low & Bonar Replace Global MPLS with Cato SASE Service from IPknowledge\" appears, and lists Q-Park, a parking operator, and Haefele in distribution. Confidence medium because that filter blends wholesale and distribution with logistics, so it overstates pure freight and transport depth."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        30,
+        19
+      ],
+      "confidence": "high",
+      "quote": "Fidal, a century-old French law firm with 1,300 lawyers at 90 locations in France and one each in Belgium and Morocco, was no exception.",
+      "claimed_by": "vendor",
+      "note": "Consulting is a Cato industry filter carrying two named customers, AKRF and Fidal. Fidal is a large multi-site law firm and AKRF is an engineering and environmental consultancy, so both legal and consulting professional services are covered by named case studies. Conflict recorded and not resolved: Cato files Fidal under the Financial Services label despite the body text describing it as a law firm."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Dublin, IE",
+      "claimed_by": "vendor",
+      "note": "Service delivery evidenced by named production PoPs in the supplier's own operational PoP guide rather than by an office or a website locale. The same guide lists \"London, UK\" and \"Manchester, UK\", so there is UK PoP redundancy plus a separate Republic of Ireland PoP. This is coverage evidence only; it says nothing about UK local carrier last-mile procurement, which was not evidenced on the pages read."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        33,
+        35
+      ],
+      "confidence": "high",
+      "quote": "Frankfurt, DE",
+      "claimed_by": "vendor",
+      "note": "Dense named PoP coverage across the continent in the operational PoP guide, including Amsterdam, Brussels, Bucharest, Copenhagen, Helsinki, Lisbon, Madrid, Marseille, Milan, Munich, Oslo, Paris, Prague, Rome, Stockholm, Vienna, Warsaw and Zurich. Multiple European named customers corroborate live delivery, including Fidal in France, Vitesco in Germany, Haulotte in France and Komax in Switzerland."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Ashburn, VA",
+      "claimed_by": "vendor",
+      "note": "Extensive named US PoP list plus Canadian PoPs at Calgary, Montreal, Toronto and Vancouver in the operational PoP guide. Corroborated by named North American customers Ulta Beauty, Redner's Markets, Brake Masters, Guardian Credit Union, Darling Ingredients and Ranger Energy Services."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        33,
+        34
+      ],
+      "confidence": "high",
+      "quote": "Sydney, AU",
+      "claimed_by": "vendor",
+      "note": "The PoP guide's Asia, Australia and Oceania grouping names PoPs including Auckland, Bangkok, Chennai, Ho Chi Minh City, Hong Kong, Jakarta, Kuala Lumpur, Manila, Melbourne, Mumbai, New Delhi, Osaka, Perth, Sapporo, Seoul, Singapore, Taipei and Tokyo. Corroborated by named APAC customers Waseda University in Japan, Juki in Japan and Fullerton Health across the region."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Dubai, UAE",
+      "claimed_by": "vendor",
+      "note": "Named PoPs in the operational guide across both halves of this region: Dubai and Tel Aviv in the Middle East, and Cape Town, Johannesburg, Lagos, Nairobi and Casablanca in Africa. Coverage is real but thin relative to Europe and North America, with large parts of central Africa and the Gulf beyond the UAE having no listed PoP."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Bogota, CO",
+      "claimed_by": "vendor",
+      "note": "Named PoPs in the operational guide at Bogota, Buenos Aires, Fortaleza, Lima, Mexico City, Monterrey, Quito, San Jose, Santiago and Sao Paulo, so coverage spans Mexico, Central America and both the Andean and Southern Cone markets. Recorded as a coverage claim only; no named Latin American customer case study was found on the pages read."
+    },
+    "regions.china_mainland": {
+      "value": "yes",
+      "evidence": [
+        34,
+        33
+      ],
+      "confidence": "high",
+      "quote": "Licensed PoPs in Beijing, Shanghai, and Shenzhen provide built-in regulatory alignment.",
+      "claimed_by": "vendor",
+      "note": "This is a specific licensed in-country claim, not a generic global claim, which is the standard this field demands. The operational PoP guide independently lists \"Beijing, CN\", \"Shanghai, CN\", \"Shenzhen, CN\" and \"Urumqi, CN\" as production PoPs. The same use case page states that enterprises connect without local contracts or multiple vendors and that security enforcement happens locally at China PoPs. Caveat: the nature and holder of the underlying Chinese telecoms licence is not disclosed on the pages read, and the claim is entirely first-party. No independent regulatory record was verified in this task."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        36,
+        38
+      ],
+      "confidence": "high",
+      "quote": "Enterprise momentum accelerated in Q2, with material growth from Fortune 500 and Global 2000 accounts",
+      "claimed_by": "vendor",
+      "note": "Explicit targeting plus scale evidence. The same release cites seven figure ARR deals and named examples including a Fortune 500 company with nearly 50,000 employees and a technology manufacturer with more than 150,000 employees, and quotes Carrefour on connecting two thousand locations. Named large enterprise case studies corroborate: Ulta Beauty, Swissport across 279 airports, O-I and Vitesco. All figures are self-reported and unaudited."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        31,
+        38,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "Guardian Credit Union is a regional business that faced big network challenges.",
+      "claimed_by": "vendor",
+      "note": "Evidenced by mid-market sized case studies rather than by a dedicated product tier. Guardian Credit Union runs around 20 sites across a dozen Alabama counties and Brake Masters is titled as covering 71 sites. Cato's own blog additionally describes finding its early customers at the bottom of the mid-market segment before moving upmarket, and states a mission to serve organisations of all sizes. Confidence is medium because the current published emphasis is clearly enterprise, no mid-market specific packaging or pricing tier was found, and the mid-market evidence skews to older case studies."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        41,
+        39,
+        43
+      ],
+      "confidence": "medium",
+      "quote": "A 1 GB pool of bandwidth that may be distributed across multiple sites.",
+      "claimed_by": "none",
+      "note": "No evidence of small business targeting found. Checked: the partner and MSP programme page, which describes reseller, MSP and service provider routes but names no customer size segment; the customer case study index, where the smallest named customers still run tens of sites; and the AWS Marketplace listing, whose smallest published contract dimension is the quoted 1 GB bandwidth pool at $22,800.00 per 12 months, a spend level that is not a small business entry point. Explicitly rejected: Capterra's typical customers field listing Freelancers and Small businesses, which is that directory's generic template rather than a supplier claim, recorded at source 25. Graded unknown rather than not_primary because Cato has published no statement excluding this segment."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        41,
+        42,
+        38
+      ],
+      "confidence": "medium",
+      "quote": "A 1 GB pool of bandwidth that may be distributed across multiple sites.",
+      "claimed_by": "vendor",
+      "note": "Cato publishes no price list on its own site. The only genuinely published price found is the AWS Marketplace listing for Cato SSE 360, where the quoted bandwidth pool dimension is priced at $22,800.00 per 12 months, with 12, 24 and 36 month contract options and the standard note that pricing is based on the duration and terms of your contract with the vendor. That places entry cost above budget and below top-of-market enterprise SASE, hence mid. Corroboration only, never carrying the grade alone: Vendr's aggregated buyer data gives a median annual payment of $42,228 with a range from $8,694 to $161,839, last updated February 2026. Conflict recorded and not resolved: the same Vendr page also carries much larger deployment-based estimates starting at $100,000 to $300,000 annually for 10 to 30 sites, which does not reconcile with its own median figure, so the Vendr numbers should not be relied on alone. Supplier positioning is cost-reduction led rather than premium, with case study titles such as Haulotte halving network costs, Fidal cutting costs in half and Darling Ingredients saving $750K+ annually. Confidence medium because no supplier-published list price exists and the marketplace SKU covers SSE 360 rather than the full SASE platform."
     }
   },
   "conflicts": [

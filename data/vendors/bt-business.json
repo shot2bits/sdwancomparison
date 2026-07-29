@@ -79,7 +79,7 @@
     "Co-managed model and customer control boundaries should be confirmed via RACI and portal demo."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "weeks",
   "regions": {
     "uk_ireland": "yes",
@@ -87,8 +87,8 @@
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "partner_integrated"
+    "latin_america": "partner_integrated",
+    "china_mainland": "partial"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -108,20 +108,20 @@
     "note": "Dual-hub designs, diverse UK last mile and 24x7 UK NOC under a single managed contract."
   },
   "sectors": {
-    "healthcare": "yes",
+    "healthcare": "partial",
     "financial_services": "yes",
     "retail_ecommerce": "yes",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
     "government_public_sector": "yes",
-    "education": "partial",
-    "transport_logistics": "partial",
+    "education": "unknown",
+    "transport_logistics": "yes",
     "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "unknown"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
+    "mid_market": "partial",
     "small_business": "partial"
   },
   "pricing_units": [
@@ -389,6 +389,321 @@
       "published": null,
       "reliability": "Not used as evidence: the legacy BT Global Services URL 302 redirects to the current business.bt.com SD-WAN page, so it is a superseded duplicate of source 1 with no independent content.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "SD-WAN | SD-WAN Solutions For Small & Large Businesses - BT Business",
+      "url": "https://business.bt.com/networks-digital-services/sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product page. Renders server-side. Used for size targeting and partner list."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "SD-WAN & SASE For Businesses | SD-WAN & SASE Solutions - BT Business",
+      "url": "https://business.bt.com/networks-digital-services/sd-wan-sase/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own hub page. Source of the 'over 200 countries' reach claim and segment labels."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Managed SASE Solutions | Secure Access Service Edge - BT Business",
+      "url": "https://business.bt.com/networks-digital-services/sd-wan-sase/sase/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE page. Thin: no pricing, sector or region detail beyond a UK network reference."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "BT launches a new managed SASE service powered by Fortinet",
+      "url": "https://newsroom.bt.com/bt-launches-a-new-managed-sase-service-powered-by-fortinet/",
+      "published": "2024-11-25",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release, dated. Explicitly scopes the managed SASE launch to UK business and public sector."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Digital industries index - BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own index of the 13 industries it publishes dedicated pages for. Useful as a negative signal for absent sectors."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Life sciences | BT (headline: Healthcare and life sciences solutions)",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/lifesciences",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page. Named customers are pharma and pharma distribution rather than care providers."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Financial services | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page listing two named network/SD-WAN case studies."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Retail | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page with a named customer (Walgreens Boots Alliance) and attributed executive quote."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Manufacturing | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page with named customers Rolls Royce, DP World Antwerp and Karcher."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Energy and natural resources | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/energy-and-natural-resources",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page with named customers Orica, Sasol and Anglo American."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "International government | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/international-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page naming Dutch, Spanish and New South Wales government engagements."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Transport and logistics | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/logistics-transportation",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page with named case studies for Alstom, DP World Antwerp and Belfast Harbour."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Business and professional services | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/business-and-professional-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page. Case studies listed overlap with those labelled retail and consumer goods elsewhere."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Consumer goods | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/digital-industries/consumer-goods",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated industry page naming Karcher and Rexel."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Helping Ixom on its digital transformation journey | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/insights/case-studies/helping-ixom-on-its-digital-transformation-journey",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named SD-WAN case study with industry label, site count, country count and an attributed CIO quote."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Delivering a secure and agile digital transformation for Orica | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/insights/case-studies/delivering-a-secure-and-agile-digital-transformation-for-orica",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named SD-WAN and Zero Trust case study with industry label and attributed CIO quote."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Transforming a global business to work with the agility of a startup | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/insights/case-studies/transforming-a-global-business-to-work-with-the-agility-of-a-startup",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Anonymised global SD-WAN rollout case study with industry label, employee band and cost saving figure."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Helping a global financial services company migrate to SD-WAN | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/insights/case-studies/helping-a-global-financial-services-company-migrate-to-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Anonymised SD-WAN case study. Customer not named, so weaker than a named reference."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Helping PHOENIX Group deliver medicines and health products quickly and safely | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/insights/case-studies/phoenix",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named managed WAN case study with a specific European country count. Life sciences label, not care provision."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Making Sasol a digital business in an analog industry | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/insights/case-studies/sasol",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named IP Connect case study, 68 sites, industry label 'Natural resources and utilities'."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Helping Anglo American connect the most remote parts of the world | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/insights/case-studies/anglo-american",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Named global network case study naming Chile, Africa, Johannesburg and Rio de Janeiro delivery locations."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Our transformative solutions | BT Federal",
+      "url": "https://www.globalservices.bt.com/btfederal/aboutus/our-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier statement of US federal government service delivery. Direct evidence for North America and government."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "SD-WAN Solutions | Managed SD-WAN Services | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/solutions/solution/sd-wan-solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's SD-WAN solution page. Source of the largest-multinationals positioning language and vendor partner list."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "IP Connect Global Service datasheet (PDF)",
+      "url": "https://business.bt.com/content/dam/bt-business/pdfs/connectivity/ip-vpn/global-mpls/ip-connect-global-service.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier datasheet. Source of the 198 countries and 5,000 PoPs claim. Global aggregate, not region specific."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "IP Connect Global - MPLS network services | BT",
+      "url": "https://www.globalservices.bt.com/btfederal/solutions/products/ip-connect",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page corroborating the 198 countries and territories figure."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "BT's Global Fabric goes live with customer traffic",
+      "url": "https://newsroom.bt.com/bts-global-fabric-goes-live-with-customer-traffic/",
+      "published": "2025-02-25",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release giving 140 PoPs in 40 countries. Countries not itemised, so no per-region grade."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "BT readies customers for Global Fabric so they can hit the cloud running",
+      "url": "https://newsroom.bt.com/bt-readies-customers-for-global-fabric-so-they-can-hit-the-cloud-running/",
+      "published": "2024-10-01",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release. Over 45 PoPs live rising to 140. Corroborates #26."
+    },
+    {
+      "n": 51,
+      "tier": 1,
+      "title": "BT continues transformation of Global with sale of selected domestic operations in Latin America",
+      "url": "https://newsroom.bt.com/bt-continues-transformation-of-global-with-sale-of-selected-domestic-operations-in-latin-america/",
+      "published": "2020-03-19",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release. Decisive evidence that Latin American delivery moved to a channel and wholesale model."
+    },
+    {
+      "n": 52,
+      "tier": 2,
+      "title": "BT Becomes First Foreign Telecom Firm to Provide Direct Services in China (author David Kirton)",
+      "url": "https://www.caixinglobal.com/2019-01-28/bt-becomes-first-foreign-telecom-firm-to-provide-direct-services-in-china-101375354.html",
+      "published": "2019-01-28",
+      "verified_on": "2026-07-29",
+      "reliability": "Named-author dated journalism describing the specific MIIT licences and their restrictions. Independently accountable."
+    },
+    {
+      "n": 53,
+      "tier": 1,
+      "title": "Case Studies - BT Ireland",
+      "url": "https://www.btireland.com/insights-resources/case-studies",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's Ireland property. Corroborates the SD-WAN financial services case study title and Ireland presence."
+    },
+    {
+      "n": 54,
+      "tier": 4,
+      "title": "BT Business case study pages (financial-services-sd-wan, ixom, global-sd-wan, orica, case-studies index)",
+      "url": "https://business.bt.com/insights/case-studies/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: these pages render their body content client-side and returned only metadata on fetch, so no verbatim string could be confirmed. Equivalent content was sourced from the globalservices.bt.com mirrors instead."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "Aston University case study and University of Warwick IT network case study - BT Business",
+      "url": "https://business.bt.com/solutions/resources/university-of-warwick-case-study/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: returned HTTP 404 and metadata-only respectively, so no education-sector string could be verified."
+    },
+    {
+      "n": 56,
+      "tier": 4,
+      "title": "Buying BT SD-WAN - The Network Union",
+      "url": "https://www.networkunion.co.uk/learning/bt-sd-wan-explained/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: 302 redirects to netify.co.uk, the commissioning party's own site, so it is self-referential for this comparison and cannot carry a grade."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "IP Connect Global | Global MPLS VPN Solutions - BT Business",
+      "url": "https://business.bt.com/connectivity/ip-vpn/global-mpls/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: page returned metadata and a hero image only, with no coverage sentences to quote."
+    },
+    {
+      "n": 58,
+      "tier": 4,
+      "title": "BT Global Services - Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/BT_Global_Services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: surfaced repeatedly in search but is an unaccountable tertiary source and no grade rests on it."
     }
   ],
   "sourced_facts": {
@@ -600,6 +915,245 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed for the SD-WAN or SASE service. I read the Fortinet SD-WAN Service Schedule Part A (service terms), Parts B of January and March 2025, both the Managed Fortinet and Managed Cisco SD-WAN annexes and the Managed Services Schedule. None publishes an availability percentage for this service, and two state the opposite, that service levels and service credits do not apply to the Fortinet Service and to the MC SD-WAN Service respectively. Availability instead flows in from whatever enabling access the customer buys. For context, and deliberately not graded here because it is a different product, BT's published BTnet SLA states 'We aim to provide your service with a target of 100% availability at all times, subject to the terms of this agreement', along with a 20ms UK core round-trip and 95ms transatlantic latency guarantee. So a BT SD-WAN customer on BTnet access inherits a real percentage, but BT publishes none for the SD-WAN/SASE layer itself."
+    },
+    "sectors.healthcare": {
+      "value": "partial",
+      "evidence": [
+        29,
+        42,
+        28
+      ],
+      "confidence": "medium",
+      "quote": "Healthcare and life sciences solutions",
+      "claimed_by": "vendor",
+      "note": "BT publishes a dedicated industry page whose headline names healthcare, and it also carries the line 'Intelligent network infrastructure is a key driver to create value-based healthcare.' Graded partial rather than yes because every named customer behind that page is pharmaceutical rather than a care provider: the PHOENIX Group case study (#19) is a medicines wholesaler and is labelled 'Life sciences', and Almirall is a pharma manufacturer. Checked the digital industries index (#5), the SD-WAN and SASE pages (#1, #2, #3) and the case study libraries and found no hospital, health system or NHS SD-WAN or SASE case study. Note that the BT Business case studies hub does reference the NHS in general navigation copy, but that page would not render its body content (#31) so nothing could be quoted from it."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        30,
+        41,
+        53
+      ],
+      "confidence": "high",
+      "quote": "Helping a global financial services company migrate to SD-WAN",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services industry page (#7) listing two network case studies, plus a full SD-WAN case study (#18) stating industry 'Financial services', size 'More than 100,000 employees' and operations in more than 30 countries, delivered with Agile Connect Nuage SD-WAN and BT Managed Fortinet Firewall. The case study title is independently corroborated on BT Ireland's listing (#30). The customer itself is not named, which is the one weakness."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        31,
+        40,
+        37
+      ],
+      "confidence": "high",
+      "quote": "Create an outstanding customer experience both in-store and online.",
+      "claimed_by": "vendor",
+      "note": "Dedicated retail industry page (#8) with a named customer, Walgreens Boots Alliance, and an attributed quote from Steve Rempel, Senior Vice President and International Chief Information Officer. Reinforced by the global SD-WAN rollout case study (#17) carrying the industry label 'Retail and consumer goods' and the separate consumer goods page (#14) naming Karcher and Rexel."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        32,
+        37
+      ],
+      "confidence": "high",
+      "quote": "BT delivers Managed Azure Network Services to help Rolls Royce",
+      "claimed_by": "vendor",
+      "note": "Dedicated manufacturing industry page (#9) headed 'Manufacturing solutions' with named case studies for Rolls Royce, DP World Antwerp and Karcher, and an attributed quote from Paul Knight, Lead Enterprise Architect at Rolls-Royce. Note the cited engagement is Managed Azure Network Services rather than SD-WAN or SASE specifically."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        33,
+        39,
+        43,
+        44
+      ],
+      "confidence": "high",
+      "quote": "Mining and metals",
+      "claimed_by": "vendor",
+      "note": "Dedicated energy and natural resources page (#10) naming Orica, Sasol and Anglo American. The Orica case study (#16) is explicitly an SD-WAN and Zero Trust transformation carrying the industry label quoted here. Sasol (#20) is labelled 'Natural resources and utilities' and Anglo American (#21) is a global IP Connect deployment. Ixom (#15) is separately labelled 'Energy and resources'. This is BT's single best evidenced sector for SD-WAN specifically."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        34,
+        45,
+        27
+      ],
+      "confidence": "high",
+      "quote": "Solutions that help governments protect, enable, and deliver for citizens in a connected world.",
+      "claimed_by": "vendor",
+      "note": "Dedicated international government page (#11) naming the Dutch government embassy and consulate connectivity, a Spanish Government contract and BT delivering cyber security services for icare in New South Wales. Separately BT Federal (#22) states it serves US Federal Government Agencies. The managed SASE launch (#4) is explicitly scoped to 'business and public sector customers in the UK', which ties the public sector claim directly to the SASE product rather than only to general networking."
+    },
+    "sectors.education": {
+      "value": "unknown",
+      "evidence": [
+        28,
+        55,
+        24
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No education-specific SD-WAN or SASE evidence found. Education does not appear among the thirteen industries BT publishes dedicated pages for on its digital industries index (#5): those are energy and natural resources, transport and logistics, banking, digital sustainability, life sciences, insurance, manufacturing, automotive, business and professional services, financial services, international government, retail and consumer goods. Two BT Business education case studies were located by search (Aston University and University of Warwick) but both URLs failed to yield quotable body text, one returning HTTP 404 (#32), so nothing could be graded from them. Also checked the SD-WAN product page (#1) and the SASE pages. Absence from the industry index is suggestive but BT nowhere states education is not a focus, so this stays unknown rather than not_primary."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        35,
+        32
+      ],
+      "confidence": "high",
+      "quote": "BT transports Alstom's global network to a digital future",
+      "claimed_by": "vendor",
+      "note": "Dedicated transport and logistics page (#12) headed 'Build a more digital, efficient and sustainable supply chain.' with three named customer case studies: Alstom (quoted, explicitly a global network engagement), DP World Antwerp ('BT delivers a wireless backbone solution for one of the largest container terminals in Europe') and Belfast Harbour ('Belfast Harbour and BT to build the UK and Ireland's first 5G Private Network for ports'). DP World Antwerp is also cross-listed on the manufacturing page (#9)."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        36,
+        40
+      ],
+      "confidence": "medium",
+      "quote": "Industry specific solutions to digitally transform business and professional services – securely and sustainably.",
+      "claimed_by": "vendor",
+      "note": "BT publishes a dedicated business and professional services page (#13) with an attributed statement from Simon Warner, Global Partnerships Director, BT. Graded partial rather than yes because the case studies listed on that page do not evidence a professional services customer: the only one I could open, 'Transforming a global business to work with the agility of a startup', is itself labelled 'Retail and consumer goods' on its own page (#17). Recording the disagreement rather than resolving it. No named professional services firm was found."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "unknown",
+      "evidence": [
+        28,
+        53,
+        24
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No hospitality or leisure SD-WAN or SASE evidence found. Hospitality is absent from BT's thirteen dedicated industry pages (#5). Searched BT Business and globalservices.bt.com for hotel, hospitality and leisure network case studies and found nothing on the SD-WAN or SASE side. The nearest item is on BT Ireland's case study list (#30), 'A global tech provider for world class hospitality brands improves their Customer Experience with Five9', which is a contact centre engagement with an unnamed technology supplier to hospitality brands, not a hospitality operator and not a network deployment, so it does not support a grade. Also checked the SD-WAN product page (#1)."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        27,
+        26,
+        53
+      ],
+      "confidence": "high",
+      "quote": "managed secure SD-WAN solution for business and public sector customers in the UK",
+      "claimed_by": "vendor",
+      "note": "BT is the UK incumbent and its managed SASE launch (#4, dated 25 November 2024) is explicitly scoped to UK business and public sector customers, with 'AI-powered proactive threat detection and data protection via BT's unified monitoring services in the UK'. The SASE product page (#3) describes bringing WAN and cloud security together 'with visibility across the UK network'. Ireland is covered by BT Ireland's own case study and terms library (#30), which publishes BT IP Connect Global terms and conditions for the Irish market. This is the strongest region for BT by a wide margin and is the only region where the SASE product itself is confirmed available."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        42,
+        47,
+        48
+      ],
+      "confidence": "high",
+      "quote": "medicines and health products will reach the customer quickly and safely in 26 European countries",
+      "claimed_by": "vendor",
+      "note": "The PHOENIX Group case study (#19) documents a delivered managed WAN and BT Continuity Services engagement spanning 26 European countries, which is service delivery rather than a sales claim. Corroborated at the portfolio level by the IP Connect Global datasheet (#24) and product page (#25). Note the specific evidence is for managed WAN and MPLS rather than SD-WAN or SASE, though the Ixom and Orica SD-WAN deployments also include European sites."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        45,
+        47
+      ],
+      "confidence": "high",
+      "quote": "We serve Federal Government Agencies with global security, cloud and managed network services in the US and around the world.",
+      "claimed_by": "vendor",
+      "note": "BT Federal (#22) is a dedicated US operating entity stating it delivers managed network, cloud and security services to US federal agencies, which is an explicit statement of in-country delivery rather than a sales presence. The Sasol case study (#20) additionally names Canada among its 33 countries. Corroborated at portfolio level by the IP Connect Global datasheet (#24)."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        38,
+        34
+      ],
+      "confidence": "high",
+      "quote": "Based in Australia and New Zealand",
+      "claimed_by": "vendor",
+      "note": "The Ixom case study (#15) is a delivered SD-WAN deployment for an Australia and New Zealand headquartered business, connecting 45 sites in 16 countries using Agile Connect based on Nokia's Nuage technology, with secure internet gateways and Azure VWAN integration. Separately the government page (#11) names 'BT to deliver cyber security services for icare' for the New South Wales government. Both are delivery evidence in the region, not office presence. Orica (#16) is also Australian headquartered."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        44,
+        43
+      ],
+      "confidence": "medium",
+      "quote": "We work in the remotest corners of the globe, like 3,500 metres up in the Chilean Andes or hard to reach parts of Africa.",
+      "claimed_by": "vendor",
+      "note": "Graded partial because the evidence is asymmetric across this combined region. Africa is well evidenced: the Anglo American case study (#21) describes delivery into hard to reach parts of Africa and lists Cisco TelePresence suites installed in Johannesburg, and the Sasol case study (#20) covers a South African headquartered business with sites in South Africa and Mozambique across a 68 site IP Connect network. For the Middle East I found no country-specific or PoP-specific evidence at all across the SD-WAN, SASE, IP Connect and Global Fabric material. The Global Fabric releases (#26, #27) give 140 PoPs in 40 countries but do not itemise which countries, so they cannot support a Middle East grade."
+    },
+    "regions.latin_america": {
+      "value": "partner_integrated",
+      "evidence": [
+        51,
+        44
+      ],
+      "confidence": "high",
+      "quote": "BT will retain a strong presence in the region after the sale, delivering next-generation networking, cloud and security services to multinational customers across 21 countries.",
+      "claimed_by": "vendor",
+      "note": "This is the region where a generic global claim would be most misleading. BT sold its selected domestic operations in Latin America (#28, dated 19 March 2020), and the same release states that the buyer CIH 'will act as a regional channel for BT's products and services and continue to supply domestic connectivity services to BT'. So BT retains a multinational-facing presence but the underlying domestic access is now supplied through a third party, which is precisely partner_integrated rather than yes. Historic direct delivery is evidenced by Anglo American (#21), which names Rio de Janeiro, Santiago and the Chilean Andes, but that engagement predates the divestment."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        52,
+        47
+      ],
+      "confidence": "medium",
+      "quote": "nationwide internet service provider licenses from the Ministry of Industry and Information Technology, and a license to provide virtual private network (VPN) services",
+      "claimed_by": "third_party",
+      "note": "Treated the supplier's generic 'over 200 countries' and '198 countries and territories' claims (#2, #24) as evidence of nothing for mainland China, per the brief. The actual qualifying evidence is dated named-author journalism from Caixin Global (#29, David Kirton, 28 January 2019) reporting that BT's China subsidiary obtained nationwide ISP licences from MIIT plus a VPN licence, enabling it to 'contract directly with its customers in the country and bill them in local currency'. Graded partial not yes because the same source records material restrictions: BT cannot 'build another network or provide information services', 'will not provide mobile services', and must rely on the three state-owned operators for underlying infrastructure. No BT-published page confirming current mainland China SD-WAN or SASE availability was found, and the licence report is now over seven years old, so a buyer should re-verify current status directly."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        46,
+        41,
+        44,
+        40
+      ],
+      "confidence": "high",
+      "quote": "we design, build, and deliver solutions to the world's largest multinational corporations",
+      "claimed_by": "vendor",
+      "note": "Explicit self-positioning on the SD-WAN solutions page (#23), backed by case study size bands published by BT itself: the financial services SD-WAN customer (#18) is 'More than 100,000 employees' across more than 30 countries, Anglo American (#21) is 'More than 100,000 employees', and the global SD-WAN rollout (#17) is '10,000 to 50,000' employees across 85 target sites with 15m dollars in operating cost savings. Orica (#16) is over 13,000 employees in over 120 countries. This is unambiguously BT's core target."
+    },
+    "organisation_fit.mid_market": {
+      "value": "partial",
+      "evidence": [
+        24,
+        25
+      ],
+      "confidence": "low",
+      "quote": "Small and medium business",
+      "claimed_by": "vendor",
+      "note": "Graded partial and low confidence deliberately. The quoted phrase is a customer segment label used in BT Business site navigation alongside 'Corporate' and 'Public sector' on the SD-WAN and SD-WAN and SASE pages (#1, #2). It is not a published SD-WAN or SASE product tier aimed at mid-market, and I found no mid-market case study, no mid-market pricing and no mid-market specific SD-WAN packaging. The one smaller reference on the SD-WAN page is FRC Group, a not for profit, quoted as 'As a not for profit, moving from a self managed WAN to a BT Managed SD-WAN felt like we expanded our IT team.' from Martyn Coleman, IT Business Partner. That single reference is suggestive but does not establish sustained mid-market targeting."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        24
+      ],
+      "confidence": "low",
+      "quote": "SD-WAN Solutions For Small & Large Businesses",
+      "claimed_by": "vendor",
+      "note": "The quoted string is the HTML page title of BT's SD-WAN product page (#1), so small business targeting is claimed in BT's own metadata. Graded partial and low confidence because nothing behind that title supports it: there is no small business SD-WAN tier, no entry-level package, no self-serve pricing and no small business case study anywhere in the SD-WAN or SASE material I read. All published SD-WAN customer evidence is 10,000 employees and above. Buyers should treat the title as SEO framing rather than as a genuine product commitment until BT publishes a small business SD-WAN tier."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

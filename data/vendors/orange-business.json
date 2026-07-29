@@ -80,15 +80,15 @@
     "DIY/self-managed model is not the primary positioning."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
-    "uk_ireland": "yes",
+    "uk_ireland": "partial",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "yes",
-    "latin_america": "partial",
+    "latin_america": "yes",
     "china_mainland": "partial"
   },
   "supported_clouds": {
@@ -109,21 +109,21 @@
     "note": "Global hybrid underlay of MPLS and internet with diverse PoPs."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
     "manufacturing": "yes",
     "energy_utilities": "partial",
     "government_public_sector": "partial",
     "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
+    "transport_logistics": "yes",
+    "professional_services": "yes",
     "hospitality_leisure": "partial"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
     "mid_market": "partial",
-    "small_business": "not_primary"
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -435,6 +435,312 @@
       "published": null,
       "reliability": "Not used as evidence: Wikipedia is excluded by the source-tier rules. Appeared in search results only and was not opened.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Flexible SD-WAN | Orange Business (product page)",
+      "url": "https://www.orange-business.com/en/solutions/internet-networks/flexible-sd-wan-international",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product page. Carries the only explicit SD-WAN coverage numbers found (220 countries and territories, 400 Points of Presence). Vendor self-claim, unaudited."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Business VPN | Orange Business",
+      "url": "https://www.orange-business.com/en/solutions/internet-networks/business-vpn",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product page. Source of the 220 countries reach claim and the explicit multinational targeting language. Vendor self-claim."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "International presence | Orange Business (Global presence, local service)",
+      "url": "https://www.orange-business.com/en/about-us/regional-presence",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier corporate page. Gives the headline network and staffed-country figures and the five region headings used by the office directory. Vendor self-claim but specific and checkable."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Our local offices | Orange Business (office directory, index)",
+      "url": "https://www.orange-business.com/en/where-we-are",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier office directory, paginated over five pages. Names individual cities, so it is the most granular regional evidence available. Lists offices, not necessarily network points of presence."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Our local offices, page 1 (Czech Republic, Denmark, Finland, France, Germany, Egypt)",
+      "url": "https://www.orange-business.com/en/where-we-are?page=1",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier office directory page. City-level European and Egyptian office listings."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Our local offices, page 3 (Luxembourg to Slovakia, Saudi Arabia, Lebanon, Senegal, South Africa, Kazakhstan, Malaysia, Mauritius, New Zealand, Singapore, South Korea, Mexico)",
+      "url": "https://www.orange-business.com/en/where-we-are?page=3",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier office directory page. Principal source for Middle East and Africa and additional Asia Oceania office locations."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Our local offices, page 4 (Spain, Sweden, Turkey, United Kingdom, Taiwan, Vietnam, United Arab Emirates, United States)",
+      "url": "https://www.orange-business.com/en/where-we-are?page=4",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier office directory page. Only page on which a UK office and US offices appear. No Ireland office appears anywhere in the directory."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Customer stories | Orange Business (index with sector filters)",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study index. Useful because each card carries an explicit sector tag and the page exposes the supplier's own twelve-item industry taxonomy. Tags are supplier-assigned."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Colgate-Palmolive adopts SD-WAN to help enable business agility and change",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/colgate-palmolive-adopts-sd-wan-enable-business-agility-change",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study, named global consumer goods customer, explicitly SD-WAN. No date shown on the page."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Enabling reliable remote heart monitoring through trusted connectivity (MicroPort CardioFlow)",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/microport-cardioflow-enabling-reliable-remote-heart-monitoring-through",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study tagged Health with a named medical device customer. Strongest healthcare evidence found. Scope is IoT connectivity rather than SASE or SD-WAN."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Sto: Sovereign services for banking and finance",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/sto-sovereign-services-banking-finance",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study tagged Bank & insurance, named Norwegian customer operating BankID and BankAxept. Cloud rather than network scope."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "From foundation to innovation: how Banqsoft builds on a European cloud platform",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/foundation-innovation-how-banqsoft-builds-european-cloud-platform",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study tagged Bank & insurance, named financial software customer. Corroborates financial services but is a cloud engagement."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Cainiao partners to prioritize customer privacy and improve trust",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/cainiao-partners-prioritize-customer-privacy-improve-trust",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study carrying three sector tags (Retail, Technology and business services, Transport) with a named Chinese logistics customer. Voice platform scope."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Driving intelligent CX: how Everise modernized contact center, communications, and network infrastructure",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/everise",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study tagged Technology and business services with a named BPO customer, including network infrastructure in scope."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Saint-Gobain Glass optimizes its supply chain with IoT technology",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/saint-gobain-glass",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study tagged Manufacturing with a named industrial customer and a stated European site count. IoT scope."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "An energy provider adopts generative AI to produce field service reports in a flash",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/energy-provider-adopts-generative-ai-produce-field-service-reports-flash",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study tagged Resources and energy. Customer is anonymised, which caps how far this can be graded."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "This travel management company streamlines operations and reduces costs with a unified framework",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/travel-management-company-transformed-its-operations-streamline-processes",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study tagged Tourism and personal services and tagged Security, covering connectivity and security transformation. Customer is anonymised."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "The Grand Paris Sud arenas: secure indoor, Europe's esports hub",
+      "url": "https://www.orange-business.com/en/about-us/customer-stories/grand-paris-sud-arenas-secure-indoor-europe-esports-hub",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study naming a French urban community (a public authority) and its president. Supplier tags it Media & gaming rather than Public sector, so it is indirect public sector evidence."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "BNP Paribas joins forces with Orange Business to deploy SD-WAN for 1,800 retail sites in France",
+      "url": "https://www.orange-business.com/en/press/bnp-paribas-joins-forces-orange-business-services-deploy-sd-wan-1800-retail-sites-france",
+      "published": "2021-01-13",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming a tier one bank and an explicit SD-WAN deployment with site counts. Strongest financial services and European SD-WAN evidence found."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Orange Business delivers Flexible SD-WAN to Siemens worldwide with majority of corporate applications accessed securely via Internet",
+      "url": "https://www.orange-business.com/en/press/orange-business-services-delivers-flexible-sd-wan-siemens-worldwide-majority-corporate",
+      "published": "2022-04-27",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming a global industrial customer with a specific site and country count. Strongest manufacturing and large enterprise evidence found."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "Weener Plastics chooses Flexible SD-WAN from Orange Business to improve agility",
+      "url": "https://www.orange-business.com/en/press/weener-plastics-chooses-flexible-sd-wan-orange-business-services-improve-agility",
+      "published": "2019-01-30",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming a mid-sized packaging manufacturer with a 24 site SD-WAN deployment spanning Europe, Asia and Latin America. Smallest named SD-WAN reference found. Now dated."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "Orange Business provides global network to shipping industry leader ZIM",
+      "url": "https://www.orange-business.com/en/press/orange-business-services-provides-global-network-to-shipping-industry-leader-zim",
+      "published": "2012-05-24",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated supplier press release naming a global shipping line. Corroborates transport and logistics but is fourteen years old and describes MPLS, not SD-WAN or SASE."
+    },
+    {
+      "n": 51,
+      "tier": 1,
+      "title": "GEANT selects Orange Business Services as its trusted cloud service provider for pan-European educational and research ecosystems",
+      "url": "https://www.orange-business.com/en/press/geant-selects-orange-business-services-its-trusted-cloud-service-provider-pan-european",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release naming the pan-European research and education networking body. Only the headline rendered on fetch; the body text and date did not load, so the grade rests on the headline alone."
+    },
+    {
+      "n": 52,
+      "tier": 1,
+      "title": "Orange Business is named a Leader in the IDC MarketScape: Asia/Pacific Managed SD-WAN/SASE Services 2024-2025 Vendor Assessment",
+      "url": "https://www.orange-business.com/en/orange-business-named-leader-idc-marketscape-asiapacific-managedsd-wansase-services-2024-2025",
+      "published": "2025-01-14",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page reporting a named third party analyst assessment (IDC MarketScape) that is specifically Asia Pacific and specifically managed SD-WAN and SASE. Vendor-hosted restatement of an analyst finding, so treated as Tier 1 rather than Tier 2; the underlying IDC document was not read."
+    },
+    {
+      "n": 53,
+      "tier": 1,
+      "title": "[Newsblog] Empowering growth: Orange Business accelerates the digital transformation for leading enterprises in China",
+      "url": "https://www.orange-business.com/en/press/empowering-growth-china-how-orange-business-accelerates-digital-transformation-leading",
+      "published": "2026-01-28",
+      "verified_on": "2026-07-29",
+      "reliability": "Recent dated supplier newsblog dedicated to China, naming four enterprise customers. Describes customer outcomes rather than Orange's own Chinese licences or in-country network assets."
+    },
+    {
+      "n": 54,
+      "tier": 1,
+      "title": "SD-WAN | Orange Business (solutions page)",
+      "url": "https://www.orange-business.com/en/solutions/network-solutions/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier solutions page. Returned largely global chrome and the customer carousel rather than distinct SD-WAN body copy, so used only for corroboration of named customers."
+    },
+    {
+      "n": 55,
+      "tier": 4,
+      "title": "SASE | Orange Business (attempted)",
+      "url": "https://www.orange-business.com/en/solutions/cybersecurity/sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The fetch resolved to the generic Orange Business homepage (title 'Your partner for digital transformation') rather than a SASE page, so no SASE-specific string could be verified."
+    },
+    {
+      "n": 56,
+      "tier": 4,
+      "title": "Overcome the challenges of the financial industry | Orange Business (attempted)",
+      "url": "https://www.orange-business.com/en/industries/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Appeared in search with a financial services title but the fetch returned the homepage, so no verbatim string from a dedicated financial services industry page could be confirmed."
+    },
+    {
+      "n": 57,
+      "tier": 4,
+      "title": "Industries index (attempted)",
+      "url": "https://www.orange-business.com/en/industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The fetch returned homepage business-needs navigation rather than an industry index, so the supplier's industry page set could not be enumerated."
+    },
+    {
+      "n": 58,
+      "tier": 4,
+      "title": "Deliver public value and strengthen citizen trust | Orange Business, eGovernment (attempted)",
+      "url": "https://www.orange-business.com/en/industries/egovernment",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Search indicates a dedicated eGovernment industry page exists, but the fetch returned the homepage, so no public sector copy could be quoted."
+    },
+    {
+      "n": 59,
+      "tier": 4,
+      "title": "Middle East and Africa | Orange Business (attempted)",
+      "url": "https://www.orange-business.com/en/regions/africa",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The fetch returned the homepage rather than a Middle East and Africa region page; regional grading therefore relies on the office directory instead."
+    },
+    {
+      "n": 60,
+      "tier": 4,
+      "title": "Latin America | Orange Business (attempted)",
+      "url": "https://www.orange-business.com/en/regions/latin-america",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The fetch returned the homepage; only country language selector entries were visible, which are not service delivery evidence."
+    },
+    {
+      "n": 61,
+      "tier": 4,
+      "title": "Orange Business provides 132-site global network for Aggreko (attempted)",
+      "url": "https://www.orange-business.com/en/press/orange-business-services-provides-132-site-global-network-for-aggreko",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL resolved to the current press release listing rather than the Aggreko release, so no energy sector customer detail could be verified from it."
+    },
+    {
+      "n": 62,
+      "tier": 4,
+      "title": "Orange Business to increase network capacity across Latin America by tenfold (attempted)",
+      "url": "https://www.orange-business.com/en/press/orange-business-services-to-increase-network-capacity-across-latin-america-by-tenfold",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL resolved to the current press release listing rather than the Latin America capacity release, so its coverage claims could not be quoted."
     }
   ],
   "sourced_facts": {
@@ -674,6 +980,239 @@
       "quote": "Our Service Level Agreements (SLAs) guarantee 100% site availability and quick issue resolution within five hours.",
       "claimed_by": "vendor",
       "note": "Graded from the Flexible SD-WAN page, which is the product in scope for this shortlist, and re-verified on a second fetch. Confidence is medium rather than high because Orange publishes different figures for adjacent products: 99.95% site availability for Business VPN, 100% availability with a four hour GTTR for Galerie, and 99,98% continuous network availability for Mobile Private Networks. All are recorded in conflicts; not resolved here."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        38,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "MicroPort CardioFlow is a pioneer in cardiac rhythm management.",
+      "claimed_by": "vendor",
+      "note": "Named healthcare customer with a published case study that the supplier itself tags 'Health' on the customer stories index. Caveat for a SASE and SD-WAN comparison: the engagement is roaming IoT SIMs and global connectivity for remote cardiac monitoring, not SASE or SD-WAN. The index also lists an anonymised 'global pharmaceutical manufacturer' story tagged Security. No healthcare-specific accreditation, framework or dedicated healthcare industry page was retrievable."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        47,
+        39,
+        40
+      ],
+      "confidence": "high",
+      "quote": "BNP Paribas has chosen Orange Business to deploy an SD-WAN solution in more than 1,800 bank branches across France.",
+      "claimed_by": "vendor",
+      "note": "Best-evidenced sector. A dated press release names a tier one bank and an explicit SD-WAN deployment with site counts, which is directly on point for this comparison. Corroborated by two further case studies tagged 'Bank & insurance': Sto, which operates BankID and BankAxept in Norway, and Banqsoft, a financial software supplier. A dedicated financial services industry page appears to exist but would not render, so it is recorded as Tier 4."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        41,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "Headquartered in eastern China, Cainiao is universally acknowledged as the world's largest cross-border e-commerce logistics company.",
+      "claimed_by": "vendor",
+      "note": "The Cainiao case study is tagged 'Retail' by the supplier alongside 'Technology and business services' and 'Transport'. The index also carries a Boulanger story (a French electricals retailer) delivered via Expertime. Note that the BNP Paribas '1,800 retail sites' wording refers to retail banking branches, not retail trade, and was not counted here. Scope is voice and privacy platform work, not SASE or SD-WAN."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        48,
+        43,
+        49,
+        37
+      ],
+      "confidence": "high",
+      "quote": "1,168 Siemens sites in 94 countries now successfully migrated to SD-WAN as part of its digital transformation program",
+      "claimed_by": "vendor",
+      "note": "Strongest sector for SD-WAN specifically. Siemens is a named global industrial customer with a stated site and country count. Corroborated by Weener Plastics (packaging manufacturer, Flexible SD-WAN across Europe, Asia and Latin America), Colgate-Palmolive (SD-WAN across offices, branches and manufacturing plants) and Saint-Gobain Glass, which the supplier tags 'Manufacturing'."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        44,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "An energy provider adopts generative AI to produce field service reports in a flash",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes because the customer is not named. The case study is tagged 'Resources and energy' and describes 'A European energy network operator' and 'A leading energy services company', but no named energy or utilities customer was found. An older Aggreko press release exists in search results, however the URL resolved to the press listing and could not be verified, so it is recorded as Tier 4. Scope is generative AI, not network."
+    },
+    "sectors.government_public_sector": {
+      "value": "partial",
+      "evidence": [
+        46,
+        58
+      ],
+      "confidence": "low",
+      "quote": "Grand Paris Sud, France's second-largest urban area",
+      "claimed_by": "vendor",
+      "note": "Graded partial deliberately. Grand Paris Sud is a named French urban community, that is a public authority, and its president is quoted, but the supplier tags the story 'Media & gaming' and the project is connectivity for an esports and events arena rather than a public administration engagement. Search results indicate a dedicated eGovernment industry page at /en/industries/egovernment, but every fetch of it returned the homepage, so no public sector copy could be quoted. 'Public sector' does appear as a filter option on the customer stories index, but a filter label alone is not a customer."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        41,
+        50,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "Cainiao is Alibaba Group's logistics arm and is recommended for Alibaba merchants and suppliers who need to deliver domestically and internationally.",
+      "claimed_by": "vendor",
+      "note": "The Cainiao case study is tagged 'Transport' by the supplier. Corroborated by a ZIM press release describing a global network for a container shipping line, although that release is dated 24 May 2012 and covers MPLS rather than SD-WAN or SASE, so it carries little current weight. The customer stories index also lists Aberg Connect (Europe-wide tyre pressure monitoring)."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        42,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "Everise, a leading global customer experience (CX) transformation company with strong management and sourcing operations in India, continues to expand its global footprint through strategic growth initiatives.",
+      "claimed_by": "vendor",
+      "note": "Named business services customer in a case study the supplier tags 'Technology and business services', and network infrastructure is explicitly in scope alongside contact centre and communications. TMF Group also appears as a named customer with a quoted executive (Head of Global Technology Services, Global Delivery) on the supplier's solutions and homepage carousel, which corroborates the sector."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partial",
+      "evidence": [
+        45,
+        46,
+        36
+      ],
+      "confidence": "low",
+      "quote": "This travel management company streamlines operations and reduces costs with a unified framework.",
+      "claimed_by": "vendor",
+      "note": "Graded partial because the customer is anonymised throughout, referred to only as 'A travel management company' and 'the multinational'. The story is tagged 'Tourism and personal services' and 'Security' and does cover connectivity and security transformation, which is relevant to this comparison. The Grand Paris Sud arena story touches leisure and events but is tagged 'Media & gaming'. No named hotel, airline, restaurant or leisure operator was found."
+    },
+    "regions.uk_ireland": {
+      "value": "partial",
+      "evidence": [
+        35,
+        29
+      ],
+      "confidence": "low",
+      "quote": "More than 220 countries and territories benefit from our SD-WAN expertise",
+      "claimed_by": "vendor",
+      "note": "Graded partial, not yes, because no UK or Ireland specific service delivery statement was found. The supplier's own office directory lists exactly one UK location, United Kingdom with the city Slough, and no Ireland office appears anywhere across the five directory pages that were read. The quoted 220 countries figure is a global SD-WAN coverage claim rather than a UK statement, so UK delivery is inferred from the office listing plus that global claim. No UK named customer, UK point of presence list, or UK public sector framework listing was found."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        47,
+        43,
+        33,
+        31
+      ],
+      "confidence": "high",
+      "quote": "BNP Paribas has chosen Orange Business to deploy an SD-WAN solution in more than 1,800 bank branches across France.",
+      "claimed_by": "vendor",
+      "note": "Clearest region. Concrete European SD-WAN delivery at scale in France, plus Saint-Gobain Glass with eleven European sites. The office directory lists European offices across Austria, Belgium, Bulgaria, Croatia, Czech Republic, Denmark, Finland, France (nine cities including Bordeaux, Lyon and Toulouse), Germany (seven cities), Luxembourg, Netherlands, Norway, Poland, Portugal, Romania, Switzerland, Slovakia, Spain, Sweden and Turkey. Orange Business is a French headquartered operator, so Europe is its home market."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        31,
+        35,
+        29
+      ],
+      "confidence": "medium",
+      "quote": "The Orange network covers more than 200 Countries and territories covered, and our teams are present in 65 countries to deploy and monitor your networks and digital solutions on a daily basis.",
+      "claimed_by": "vendor",
+      "note": "The office directory uses 'North America' as one of its five region headings and lists United States offices in Atlanta GA, New York NY and Reston VA, plus Mexico (Mexico, D.F.) under the same heading. No Canadian office appeared on the directory pages read. No North America specific named customer or points of presence list was published, so the grade rests on the office listings plus the global 220 countries and 400 points of presence SD-WAN claim rather than a region-specific coverage statement."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        52,
+        34,
+        53
+      ],
+      "confidence": "high",
+      "quote": "Orange Business is named a Leader in the IDC MarketScape: Asia/Pacific Managed SD-WAN/SASE Services 2024-2025 Vendor Assessment",
+      "claimed_by": "third_party",
+      "note": "Best evidenced region after Europe, and unusually the evidence is both region-specific and product-specific, covering managed SD-WAN and SASE rather than general connectivity. Assessment attributed to IDC and dated 14 January 2025; the underlying IDC document itself was not read, only the supplier's page reporting it. Corroborated by office listings under the 'Asia Oceania' heading covering Australia (Melbourne, Perth, Sydney), Singapore, South Korea (Seoul), Malaysia, Taiwan (Taipei), Vietnam (Ho Chi Minh City), New Zealand (Wellington) and Kazakhstan (Almaty), and by named APAC customers including Haier Smart Home across more than 20 countries in APAC."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        31,
+        34,
+        33,
+        35
+      ],
+      "confidence": "medium",
+      "quote": "The Orange network covers more than 200 Countries and territories covered, and our teams are present in 65 countries to deploy and monitor your networks and digital solutions on a daily basis.",
+      "claimed_by": "vendor",
+      "note": "'Middle East Africa' is one of the five region headings in the supplier's own office directory, with offices listed in Egypt (Cairo), Kingdom of Saudi Arabia (Riyadh), Lebanon (Beirut), Senegal (Dakar), South Africa (Johannesburg), United Arab Emirates (Dubai) and Mauritius (Ebene). Orange Group also operates its own African mobile networks, which is relevant context but was not verified in this task. A dedicated Middle East and Africa region page exists at /en/regions/africa but every fetch returned the homepage, so it is recorded as Tier 4 and no MEA-specific coverage sentence could be quoted. No MEA named enterprise customer was found."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        31,
+        49,
+        32,
+        34
+      ],
+      "confidence": "medium",
+      "quote": "The Orange network covers more than 200 Countries and territories covered, and our teams are present in 65 countries to deploy and monitor your networks and digital solutions on a daily basis.",
+      "claimed_by": "vendor",
+      "note": "'South America' is a region heading in the supplier's office directory, with offices listed in Argentina (Buenos Aires), Brasil (Curitiba, Petropolis, Rio de Janeiro and Sao Paulo), Chile (Las Condes, Santiago), Colombia (Santafe de Bogota) and Peru, with Mexico (Mexico, D.F.) filed under North America. The Weener Plastics Flexible SD-WAN deployment is described as spanning Europe, Asia and Latin America, which is the only named SD-WAN engagement touching the region, and it dates from January 2019. A press release on tenfold Latin America capacity expansion appears in search but the URL resolved to the press listing, so it is recorded as Tier 4."
+    },
+    "regions.china_mainland": {
+      "value": "partial",
+      "evidence": [
+        53,
+        32,
+        41
+      ],
+      "confidence": "medium",
+      "quote": "[Newsblog] Empowering growth: Orange Business accelerates the digital transformation for leading enterprises in China",
+      "claimed_by": "vendor",
+      "note": "Deliberately graded partial rather than yes, in line with the instruction to treat generic global claims as evidence of nothing in mainland China. What was actually verified: a recent dedicated China newsblog dated 28 January 2026 naming four enterprises served in or from China (Cainiao, Haier Smart Home, Lenovo Group and BIGO Technology), including local voice services delivered for Cainiao; and the office directory listing six China locations, Beijing, Guangzhou, Hangzhou, Hong Kong, Shanghai and Shenzhen. What was not found: any published statement of a Chinese IP-VPN or B13 licence, any Chinese joint venture arrangement, or any list of in-country SD-WAN or SASE points of presence in mainland China. The Cainiao story notes 'A service in China that supports direct callbacks was not readily available to support overseas markets', which hints at regulatory constraints rather than resolving them. Buyers should treat mainland China delivery as requiring direct confirmation."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        48,
+        47,
+        37,
+        30
+      ],
+      "confidence": "high",
+      "quote": "1,168 Siemens sites in 94 countries now successfully migrated to SD-WAN as part of its digital transformation program",
+      "claimed_by": "vendor",
+      "note": "Unambiguous. Every substantial published SD-WAN reference is a large multinational: Siemens at 1,168 sites across 94 countries, BNP Paribas at more than 1,800 branches, Colgate-Palmolive across global offices, branches and manufacturing plants, ZIM across more than 120 countries. The Business VPN page addresses itself to 'multinational companies to drive their business forward in the digital world'. This is the supplier's clear centre of gravity."
+    },
+    "organisation_fit.mid_market": {
+      "value": "partial",
+      "evidence": [
+        49,
+        29
+      ],
+      "confidence": "low",
+      "quote": "Weener Plastics, a global supplier of innovative and value-added packaging solutions",
+      "claimed_by": "vendor",
+      "note": "Graded partial and low confidence. No mid-market product tier, no mid-market pricing and no explicit mid-market targeting language was found on any page read. The only signal is that the smallest named Flexible SD-WAN reference, Weener Plastics, is a 24-site multinational manufacturer rather than a global giant, which shows the product is sold below the very largest accounts. That is an inference from deployment size, not a published claim, and should not be read as a mid-market proposition. The Flexible SD-WAN page was reported as describing the solution as suitable for businesses of all sizes, but that phrasing could not be confirmed as a literal on-page string and is therefore not relied on here."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        30,
+        29
+      ],
+      "confidence": "medium",
+      "quote": "multinational companies to drive their business forward in the digital world",
+      "claimed_by": "vendor",
+      "note": "No small business evidence of any kind was found: no SMB tier, no self-service or online purchase path, no published entry pricing, and no small business case study across the customer stories index, the SD-WAN and Business VPN product pages and the press releases read. The quoted line shows the targeting is aimed at multinationals. Graded unknown rather than not_primary because the supplier never explicitly states that small business is out of scope. Note that Orange Group serves smaller businesses through separate national Orange entities, which is outside the scope of the orange-business.com material assessed here."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

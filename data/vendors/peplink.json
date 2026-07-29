@@ -80,16 +80,16 @@
     "Best paired with a separate SSE platform if cloud-delivered security is required."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "unknown"
+    "middle_east_africa": "yes",
+    "latin_america": "yes",
+    "china_mainland": "partner_integrated"
   },
   "supported_clouds": {
     "aws": "partial",
@@ -109,16 +109,16 @@
     "note": "SpeedFusion bonding across cellular and fixed links keeps sessions alive on link failure."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
+    "government_public_sector": "yes",
+    "education": "yes",
     "transport_logistics": "yes",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "professional_services": "yes",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "partial",
@@ -380,6 +380,285 @@
       "published": null,
       "reliability": "Not used as evidence: the URL returned a fetch error (image-only content) and other InControl path variants returned HTTP 404, so no text could be read. The canonical InControl 2 page at register entry 7 was used instead.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Peplink homepage",
+      "url": "https://www.peplink.com",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own site. Used for navigation discovery only, no grades rest on it."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Peplink Case Studies index",
+      "url": "https://www.peplink.com/case-studies/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own case study library. Lists 20 industry/use-case filter categories and Americas / Asia Pacific / Europe, Middle East & Africa geographic filters. Used to locate sector evidence."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Peplink Solutions index",
+      "url": "https://www.peplink.com/solutions/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own solutions index. Names Public Safety, Enterprise Networks, Service Providers, Transportation, IoT, Private 5G, Starlink."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Peplink About Us",
+      "url": "https://www.peplink.com/company/about-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own corporate page. Gives partner count (\"Over 500+ Partners & Resellers\") but no office list, no headquarters detail and no customer count, so it carries no region grade."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Peplink Enterprise Networks / industry verticals page",
+      "url": "https://www.peplink.com/solutions/enterprise-solutions/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated industry page. Strongest single sector source: named vertical blocks for Hospitality, Healthcare, Education, Retail, Finance, Utilities & Energy, Construction, plus SME and Branch Edge organisation-size blocks."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Peplink case studies: Hospital Internet category",
+      "url": "https://www.peplink.com/case-studies/hospital-internet/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own healthcare case study category. Named healthcare customers include LVHN, Wesleyan Hospital / Build Health International, Anmed Health, Mission of Mercy, Clinica Mobile."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Peplink case studies: Banking Network category",
+      "url": "https://www.peplink.com/case-studies/banking-network/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own financial services case study category. Named customers include Clinton National Bank, Cantilan Bank, Country Builders Bank, Quálitas Seguros."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Peplink case studies: Retail / Point of Sale category",
+      "url": "https://www.peplink.com/case-studies/retail/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own retail case study category. Named customers include Hickory Farms, Salad and Go, Panos Stores."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Peplink case studies: School Internet category",
+      "url": "https://www.peplink.com/case-studies/school-internet/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own education case study category. Named customers include Endicott College, Colégio Next, Beebe School District, IE Teniente Cruz Paredes."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Peplink case studies: Logistics Internet category",
+      "url": "https://www.peplink.com/case-studies/logistics-internet/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own logistics case study category. Named customers include JR Shipping Group, Warehouse Specialists Inc., Viggo Petersen's Eftf., Ferrari Security Group."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Peplink case studies: Farming Internet category",
+      "url": "https://www.peplink.com/case-studies/farming-internet/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own agriculture case study category. Checked specifically for energy, utilities, oil, gas and mining content and found none, so it does not support the energy grade."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Peplink case studies: Public Safety Networks category",
+      "url": "https://www.peplink.com/case-studies/public-safety-network/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own public sector case study category. Named public bodies include Stillwater Police, Munhall Bureau of Fire, Greenville Sheriff's Office, Town of Tonawanda NY, Round Mountain Volunteer Fire Department, Protection & Rescue Zurich."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Peplink case studies: IT Services category",
+      "url": "https://www.peplink.com/case-studies/it-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own IT services case study category. Three case studies present but all end customers are anonymised, so it corroborates rather than carries the professional services grade."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Peplink case studies: Guest WiFi category",
+      "url": "https://www.peplink.com/case-studies/guest-wifi/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own guest WiFi case study category. Named hospitality customers include Comwell Korsør, Hoiana Resort, Destination Hotels and Resorts, Leighton Art Centre. Also carries the manufacturing plant and Scotland visitor centre case studies. Three target strings re-verified as literally present."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Peplink case studies: Robot Network category",
+      "url": "https://www.peplink.com/case-studies/robot-network/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own robotics case study category. Checked for manufacturing and industrial customers; only university robotics teams found, so it does not support the manufacturing grade."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Peplink case studies: Warehouse Internet category",
+      "url": "https://www.peplink.com/case-studies/warehouse-internet",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own warehousing case study category. Named customer Warehouse Specialists Inc. Supports transport and logistics."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Hyperlink Boosts SCADA Performance with Peplink in Remote Pipeline Operations (case study)",
+      "url": "https://www.peplink.com/case-studies/hyperlink-boosts-scada-performance-with-peplink-in-remote-pipeline-operations/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own full case study. Names the delivery partner (Hyperlink) and states the end sector as oil and gas pipelines in Western Canada. End customer anonymised."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Manufacturing Plant Assembles Complete Peplink Infrastructure for Reliable Connectivity (case study)",
+      "url": "https://www.peplink.com/case-studies/manufacturing-plant-assembles-complete-peplink-infrastructure-for-reliable-connectivity/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own full case study with deployment detail. End customer anonymised as a luxury automotive marque, which weakens it relative to the named-customer sectors."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Peplink case studies: Branch Office Internet category",
+      "url": "https://www.peplink.com/case-studies/branch-office-internet/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own multi-branch case study category. Named customers Carglass (21 branches in Greece), Quálitas Seguros (Mexico), Country Builders Bank (33 branches). Supports mid-market and the Europe and Latin America region grades."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Peplink Certified Distributors, Partners & Resellers directory",
+      "url": "https://www.peplink.com/buy/peplink-certified-partners/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own searchable partner directory with a region filter reading All, Africa, Asia, Europe, Latin America, Middle East, North America, Oceania and around 68 country labels. Evidence of partner-delivered reach, not of Peplink-operated presence. Three partner name strings re-verified as literally present."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Peplink SpeedFusion Connect service page (cloud PoP locations)",
+      "url": "https://www.peplink.com/services/speedfusion-connect/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own service page publishing the operated cloud location list. The best region evidence available because it is service delivery infrastructure rather than sales coverage. Lists cities including London, Frankfurt, Amsterdam, Toronto, Johannesburg, São Paulo, Singapore, Tokyo, Sydney, Hong Kong. No mainland China city listed."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Peplink Network & IT Solutions for MSPs",
+      "url": "https://www.peplink.com/solutions/service-provider-solutions/msp/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated page for managed service providers. Carries the professional services grade, which is IT managed services specifically."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Peplink Transportation with SpeedFusion",
+      "url": "https://www.peplink.com/solutions/solutions-transportation/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated transportation solutions page. Names Subaru Motorsports USA."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Peplink Services index",
+      "url": "https://www.peplink.com/services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own services index. Confirms Care Plans and subscription structure exist but publishes no amounts, so it cannot carry a price grade."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Peplink SpeedFusion Cloud service page",
+      "url": "https://www.peplink.com/services/speedfusion-cloud/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own page. States access is purchased via SpeedFusion Cloud Plans or a Care Plan but publishes no figures, so it cannot carry a price grade."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Peplink Products index",
+      "url": "https://www.peplink.com/products/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Checked specifically for list pricing and organisation-size language; the page contains neither, so nothing on it is gradeable."
+    },
+    {
+      "n": 49,
+      "tier": 4,
+      "title": "Peplink eStore",
+      "url": "https://estore.peplink.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The page returns only a JavaScript loading shell (\"You need to enable JavaScript to run this app\"), so no price string could be read or quoted verbatim."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "Peplink eStore Care Plans category",
+      "url": "https://estore.peplink.com/categories/care-plans",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Same JavaScript-only loading shell, so published care plan prices could not be retrieved. This is the single biggest gap in the price grade."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "Peplink Talk to Us",
+      "url": "https://www.peplink.com/talk-to-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Contains only a contact form with a generic country dropdown, which is not evidence of service delivery in any region."
+    },
+    {
+      "n": 52,
+      "tier": 4,
+      "title": "Peplink Contact Us",
+      "url": "https://www.peplink.com/contact-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned homepage-style content with no office addresses or regional detail. An unattributed \"100+ countries\" phrase appeared in the fetch but could not be tied to a stable quotable location, so it is deliberately excluded."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "Peplink Service Providers solutions page",
+      "url": "https://www.peplink.com/solutions/service-providers/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Navigation-level page with no gradeable sector, region, size or price statement; the MSP child page (source 22) was used instead."
     }
   ],
   "sourced_facts": {
@@ -595,6 +874,245 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed. Peplink's published Support Service Policy and Care Plans terms define response and closure Service Level Objectives only (Urgent under 1 hour, High under 4 hours, Normal under 12 hours, Low under 48 hours). No availability or uptime percentage of any kind appears in the policies index, the Care Plans page, the SpeedFusion Connect service page or the InControl 2 subscription terms. Per the brief, response-time targets without a published availability figure are graded unknown."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        27,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Enable real-time patient monitoring, telemedicine, and secure data transfer in clinics, ambulances, and remote facilities.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Healthcare vertical block on the enterprise solutions page, backed by a Hospital Internet case study category containing named healthcare customers including LVHN, Wesleyan Hospital with Build Health International, Anmed Health and Clinica Mobile. Note this is connectivity hardware and SD-WAN for clinical sites and vehicles; no HIPAA or clinical accreditation claim was found on any page read."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        27,
+        29,
+        41
+      ],
+      "confidence": "high",
+      "quote": "Protect transactions and maintain compliance with encrypted, always-on connectivity for ATMs, branch offices, and distributed financial networks.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector on the site. Dedicated Finance vertical plus a Banking Network case study category with named institutions: Clinton National Bank, Cantilan Bank, Country Builders Bank and Quálitas Seguros. Several other bank case studies are anonymised by region, which is common in this sector."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        27,
+        30
+      ],
+      "confidence": "high",
+      "quote": "Keep POS systems, kiosks, and digital signage online with automatic failover and always-on 5G connectivity.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Retail vertical plus a Retail / Point of Sale case study category with named customers Hickory Farms, Salad and Go and Panos Stores. Evidence is physical store and POS connectivity; nothing found on e-commerce platform or online retail infrastructure specifically."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        40,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "The American manufacturing plant of a globally known luxury automotive marque operates several storage and production facilities in the southeastern US.",
+      "claimed_by": "vendor",
+      "note": "Graded down to medium because the evidence is thinner than the other yes sectors. There is one full case study with deployment detail, but the end customer is anonymised, there is no dedicated manufacturing vertical on the enterprise solutions page, and there is no manufacturing filter among the 20 case study categories. The Robot Network category was checked specifically for factory or plant customers and contained only university robotics teams."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        27,
+        39
+      ],
+      "confidence": "high",
+      "quote": "Monitor pipelines, substations, and remote infrastructure in real time. Rugged hardware and InControl keep your operations connected and visible.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Utilities & Energy vertical block, backed by a full SCADA pipeline case study delivered with named partner Hyperlink for an oil and gas company in Western Canada. The end customer is anonymised, so the named element is the delivery partner rather than the operator."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        34,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Mobile Command Center for Protection & Rescue Zurich Locks In Secure Connectivity",
+      "claimed_by": "vendor",
+      "note": "Dedicated Public Safety solutions area plus a Public Safety Networks case study category naming multiple public bodies: Stillwater Police, Munhall Bureau of Fire, Greenville Sheriff's Office, Town of Tonawanda NY, Round Mountain Volunteer Fire Department and Protection & Rescue Zurich. Evidence is emergency services and municipal rather than central government or defence; no government framework or procurement accreditation was found on any page read."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        27,
+        31
+      ],
+      "confidence": "high",
+      "quote": "Keep students and researchers connected without interruption. Resilient, high-performance connectivity for campuses, fieldwork, and research deployments.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Education vertical plus a School Internet case study category naming Endicott College, Colégio Next, Beebe School District and IE Teniente Cruz Paredes. Covers both schools and higher education."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        45,
+        32,
+        38
+      ],
+      "confidence": "high",
+      "quote": "Transportation with SpeedFusion",
+      "claimed_by": "vendor",
+      "note": "Dedicated Transportation solutions page naming Subaru Motorsports USA, plus Logistics Internet and Warehouse Internet case study categories naming JR Shipping Group, Warehouse Specialists Inc., Viggo Petersen's Eftf. and Ferrari Security Group. Maritime and vehicle connectivity is clearly a core Peplink segment."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        44,
+        35
+      ],
+      "confidence": "medium",
+      "quote": "Network & IT Solutions for MSPs: Build Better Managed Services with Less Complexity",
+      "claimed_by": "vendor",
+      "note": "Graded medium and with an important caveat: the evidence is specific to IT managed service providers, via a dedicated MSP page and an IT Services case study category. Nothing was found for law firms, accountancy, consultancy or other classic professional services. If the taxonomy means non-IT professional services, treat this as unknown."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        27,
+        36
+      ],
+      "confidence": "high",
+      "quote": "Keep guests connected and reviews glowing. Deliver reliable Wi-Fi across hotels, resorts, and remote properties, even in locations without wired infrastructure such as cruise ships.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Hospitality vertical plus named hospitality customers in the Guest WiFi case study category: Comwell Korsør, Hoiana Resort, Destination Hotels and Resorts and Leighton Art Centre. Event and festival connectivity (EDC Las Vegas) also sits here."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        43,
+        36,
+        42
+      ],
+      "confidence": "high",
+      "quote": "Visitor Centre in Scotland Becomes Home to Reliable Connectivity",
+      "claimed_by": "vendor",
+      "note": "Three independent strands: a published SpeedFusion Connect cloud location in London under the United Kingdom heading, a Scotland customer case study, and certified partners labelled United Kingdom (Frontier UK, InTouch Systems, FluidOne Ltd) and Ireland (Twenty 47, WINNCOM Technologies EU LTD). Delivery is via partners and distributors, not a Peplink-operated UK service arm."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        41,
+        43,
+        42
+      ],
+      "confidence": "high",
+      "quote": "Centralized Network Control for 21 Branches in Greece, Powered by Peplink",
+      "claimed_by": "vendor",
+      "note": "Named European deployments (Carglass in Greece, Comwell Korsør in Denmark, Colégio Next, Viggo Petersen's Eftf.) plus published cloud locations in Frankfurt, Amsterdam, Paris, Madrid, Milan, Stockholm, Oslo, Helsinki, Warsaw and Zürich, plus a Europe region filter in the partner directory covering roughly 20 European countries."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        39,
+        43,
+        34
+      ],
+      "confidence": "high",
+      "quote": "For an oil and gas company in Western Canada, rough terrain and outdated satellite links hindered SCADA performance, prompting Hyperlink to deliver a Peplink-powered solution that ensures secure, high-speed communications in remote locations.",
+      "claimed_by": "vendor",
+      "note": "The densest region by evidence volume. Published cloud locations in Atlanta, Ashburn, Chicago, Dallas, Kansas City, Los Angeles, Miami, New York, Phoenix, San Francisco, San Jose, Seattle, Montreal, Toronto and Vancouver, plus a large number of named US and Canadian customers across public safety, retail, healthcare and banking."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        43,
+        34,
+        42
+      ],
+      "confidence": "high",
+      "quote": "Don Mueang Airport Emergency Response Plan Live Stream",
+      "claimed_by": "vendor",
+      "note": "Published cloud locations in Singapore, Hong Kong, Tokyo, Osaka, Seoul, Bangalore, Sydney and Melbourne, plus named customers in Thailand, the Philippines (Cantilan Bank, Country Builders Bank) and Vietnam (Hoiana Resort), plus Asia and Oceania partner filters. Peplink's own corporate centre of gravity is in this region."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        43,
+        42
+      ],
+      "confidence": "medium",
+      "quote": "Johannesburg",
+      "claimed_by": "vendor",
+      "note": "Graded medium because the evidence is infrastructure and partner coverage rather than named customer wins. The quoted string appears in the SpeedFusion Connect location list under the South Africa heading, and Tel Aviv is also listed. The partner directory carries Middle East and Africa region filters with country labels including South Africa (Netlogix Distribution), UAE (NGT Technology, Securna DMCC), Saudi Arabia, Qatar, Egypt, Morocco, Nigeria, Ghana, Kenya-adjacent East African states, Angola and Mozambique. No MEA customer case study was found."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        41,
+        43,
+        31
+      ],
+      "confidence": "high",
+      "quote": "Quálitas Seguros Confidently Banks On Peplink Branch Edge Infrastructure",
+      "claimed_by": "vendor",
+      "note": "Named Mexican customer (Quálitas Seguros, auto insurance), Brazilian customer (Colégio Next) and Peruvian customer (IE Teniente Cruz Paredes), plus published cloud locations in São Paulo, Santiago and Mexico City, plus a Latin America partner filter covering Argentina, Brazil, Chile, Colombia, Costa Rica, Guatemala, Mexico and Peru."
+    },
+    "regions.china_mainland": {
+      "value": "partner_integrated",
+      "evidence": [
+        42,
+        43
+      ],
+      "confidence": "low",
+      "quote": "Shenzhen SanYuanShi Tech",
+      "claimed_by": "vendor",
+      "note": "Treated strictly, per the instruction that a generic global claim proves nothing for mainland China. The only mainland-specific evidence is a single certified reseller listed under the country label China. Critically, the SpeedFusion Connect location list has no mainland China city: Hong Kong is listed, which is not mainland. No ICP licence, no mainland PoP and no mainland carrier arrangement was found on any page read. Confidence is low and a buyer with mainland requirements should verify directly."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "partial",
+      "evidence": [
+        32,
+        40,
+        45
+      ],
+      "confidence": "medium",
+      "quote": "Successful IoT solution for a Global Transportation Giant",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes deliberately. There are case studies at genuine global scale (a global container transportation company, a globally known luxury automotive marque, a multi-national fast food chain, Subaru Motorsports USA), but every one of the largest is anonymised, and there is no large-enterprise product tier, no named Fortune-scale logo wall and no enterprise-specific commercial page. Peplink's own size language on the enterprise solutions page runs to SME and Branch Edge, not large enterprise. The realistic pattern is large enterprises buying Peplink for branch, mobile and failover edge rather than as a core global SD-WAN backbone."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        27,
+        41
+      ],
+      "confidence": "high",
+      "quote": "Cut network costs without cutting performance. Peplink delivers higher availability and faster speeds across all your branch locations. Centrally managed, with no expensive infrastructure to maintain.",
+      "claimed_by": "vendor",
+      "note": "Clearest fit. A dedicated Branch Edge block on the enterprise solutions page, and the case study base is dominated by multi-branch organisations of exactly this size: Carglass with 21 branches in Greece, Country Builders Bank across 33 branches, regional banks and restaurant chains."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        27
+      ],
+      "confidence": "high",
+      "quote": "Enterprise-grade connectivity without enterprise complexity or cost. Peplink scales from single-site setups to multi-branch networks.",
+      "claimed_by": "vendor",
+      "note": "An explicit SME block on the enterprise solutions page that names single-site setups. Reinforced structurally by an authorised e-tailer directory and a direct eStore, which is a self-serve route small businesses can actually buy through, unlike most SASE and SD-WAN vendors in this comparison."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        27,
+        44,
+        46
+      ],
+      "confidence": "low",
+      "quote": "Enterprise-grade connectivity without enterprise complexity or cost. Peplink scales from single-site setups to multi-branch networks.",
+      "claimed_by": "vendor",
+      "note": "Confidence is low and this rests on positioning language only, not on any published figure. Peplink publishes no list prices, no starting price and no plan tiers anywhere on peplink.com: the services index and the SpeedFusion Cloud page both confirm Care Plans and SpeedFusion Cloud Plans exist but state no amounts, and the eStore and its care plans category (sources 27 and 28) return a JavaScript-only loading shell so no price string could be read or quoted. The grade is therefore inferred from two explicit cost-positioning statements, the quoted SME line and the Branch Edge line \"Cut network costs without cutting performance\", plus the MSP page phrase about \"fair subscription pricing, no device lock-in\". A defensible alternative reading is unknown. Anyone needing a hard number should price the hardware through the authorised e-tailer directory, since Peplink is a hardware-plus-subscription model rather than a per-user SASE licence."
     }
   },
   "conflicts": [

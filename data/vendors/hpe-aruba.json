@@ -80,16 +80,16 @@
     "Private global backbone is not vendor-owned; SASE transport uses public cloud gateways."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
-    "uk_ireland": "yes",
-    "europe": "yes",
+    "uk_ireland": "unknown",
+    "europe": "partial",
     "north_america": "yes",
-    "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "partial"
+    "asia_pacific": "partial",
+    "middle_east_africa": "unknown",
+    "latin_america": "unknown",
+    "china_mainland": "unknown"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -110,20 +110,20 @@
   },
   "sectors": {
     "healthcare": "yes",
-    "financial_services": "partial",
+    "financial_services": "yes",
     "retail_ecommerce": "yes",
-    "manufacturing": "partial",
+    "manufacturing": "yes",
     "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "yes",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "yes"
+    "government_public_sector": "yes",
+    "education": "unknown",
+    "transport_logistics": "yes",
+    "professional_services": "yes",
+    "hospitality_leisure": "partial"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "partial"
+    "mid_market": "unknown",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -425,6 +425,249 @@
       "published": null,
       "reliability": "Not used as evidence. Host could not be resolved from this session, so ISO 27001 and SOC 2 attestations could not be checked there.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "HPE Aruba Networking EdgeConnect SD-WAN (product page)",
+      "url": "https://www.hpe.com/us/en/aruba-edgeconnect-sd-wan.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Carries five named SD-WAN customer stories with verbatim blurbs and links to case study PDFs. No pricing, no region list."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "HPE Aruba Networking SASE (solution page)",
+      "url": "https://www.hpe.com/us/en/networking/sase.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Carries four named SASE customer stories and links to seven industry specific SASE documents. Primary source for sector grading."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "HPE Aruba Networking SSE (product page)",
+      "url": "https://www.hpe.com/us/en/aruba-networking-sse.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Carries four named SSE customer stories including a city government and a logistics operator, plus the only coverage claim found (500+ edge locations)."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "HPE store listing, HPE Aruba Networking EdgeConnect Enterprise SD-WAN Platform",
+      "url": "https://buy.hpe.com/us/en/networking/gateways/sd-wan-platforms/aruba-sd-wan-platforms/aruba-edgeconnect-enterprise-sd-wan-platform/p/1014658646",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier commerce page. Lists 18 SKUs but shows empty 'Price from' fields and directs to quote. Confirms no list price is published."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Deliver secure and modern healthcare experiences with unified SASE",
+      "url": "https://paths.ext.hpe.com/r/a00119884?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier industry document, linked from the SASE page. Title verified in the page title tag and og:title. Body is a gated PDF viewer so only the title was readable."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Building future-proof networks in retail with unified SASE",
+      "url": "https://paths.ext.hpe.com/r/a00119878?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier industry document linked from the SASE page. Title verified in title tag and og:title."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Unified SASE in financial services",
+      "url": "https://paths.ext.hpe.com/r/a00119883?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier industry document linked from the SASE page. Title verified in title tag and og:title."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Securing and modernizing networks in manufacturing with unified SASE",
+      "url": "https://paths.ext.hpe.com/r/a00119879?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier industry document linked from the SASE page. Title verified in title tag and og:title."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Delivering modern and secure digital experiences in hospitality with unified SASE",
+      "url": "https://paths.ext.hpe.com/r/a00119882?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier industry document linked from the SASE page. Title verified across title tag, og:title and twitter:title."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Securing and modernizing networks in oil and gas with unified SASE",
+      "url": "https://paths.ext.hpe.com/r/a00120460?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier industry document linked from the SASE page. Title verified in page metadata. Scope is oil and gas only, not utilities."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Unified SASE in state and local government",
+      "url": "https://paths.ext.hpe.com/r/a00120125?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier industry document linked from the SASE page. Title verified in title tag and og:title."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Securing the foundations of connected health, Hato Hone St John",
+      "url": "https://paths.ext.hpe.com/r/a50011617?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study landing page. Title readable, body gated. Names the customer but states no country on the page itself."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Digital backbone underpins global agility, Henkel",
+      "url": "https://paths.ext.hpe.com/r/a50009920?cc=us&lang=en",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study landing page. Title readable, body gated, no country stated in the readable metadata."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Enabling greater agility while improving quality of service (Barrett Steel Limited SD-WAN case study)",
+      "url": "https://www.hpe.com/psnow/doc/a50007501enw",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study landing page. Title and meta description readable. Notably the readable text describes only 'a steel stockholder' and names no country, so it does not support a UK grade on its own."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Mining industry finds a slick, digital layer, SCHAEFER KALK",
+      "url": "https://www.hpe.com/psnow/doc/a50013909enw",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study landing page. Title and meta description readable. Germany appears only in the meta-keywords field, which is too weak to carry a region grade alone."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "ZTNA strengthens security and business operations, Schnellecke Logistics",
+      "url": "https://www.hpe.com/psnow/doc/a50012934enw",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study landing page. Title and meta description readable. Target country metadata is set to worldwide, so no region grade is supported."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Corporate Business Solutions (cbs) SSE case study",
+      "url": "https://www.hpe.com/psnow/doc/a50013234enw?jumpid=in_pdfviewer-psnow",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study link identified from the SSE page. Used only to confirm the customer story exists behind the SSE page blurb."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "HPE Aruba Networking Central",
+      "url": "https://www.hpe.com/us/en/aruba-central.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page, checked specifically for regional cloud instances and data residency. Contains no region, country or data residency statement, so it produced no region evidence."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "HPE Networking solutions overview",
+      "url": "https://www.hpe.com/us/en/solutions/networking.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page, checked for an industry vertical index. No dedicated industry landing pages are linked from it, which is why sector evidence rests on the SASE industry documents instead."
+    },
+    {
+      "n": 47,
+      "tier": 4,
+      "title": "Universal Health Services EdgeConnect case study PDF",
+      "url": "https://www.hpe.com/psnow/doc/a50007497enw.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The PDF body could not be extracted by the fetch tool, only viewer metadata was returned, so no verbatim sentence could be quoted from it."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Barrett Steel EdgeConnect case study PDF",
+      "url": "https://www.hpe.com/psnow/doc/a50007501enw.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The PDF body could not be extracted, so the customer country could not be confirmed and no UK region grade could be made."
+    },
+    {
+      "n": 49,
+      "tier": 4,
+      "title": "Aruba Networks solutions index",
+      "url": "https://www.arubanetworks.com/solutions/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 403 to the fetch tool, so no content was read."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "HPE Networking industries index (attempted)",
+      "url": "https://www.hpe.com/us/en/networking/industries.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404, the page does not exist at that path."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "HPE Networking healthcare page (attempted)",
+      "url": "https://www.hpe.com/us/en/networking/healthcare.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Attempted in order to find a dedicated healthcare landing page."
+    },
+    {
+      "n": 52,
+      "tier": 4,
+      "title": "HPE Networking education page (attempted)",
+      "url": "https://www.hpe.com/us/en/networking/education.html",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. This was the targeted attempt to find education sector evidence, and it failed, which is why education is graded unknown."
+    },
+    {
+      "n": 53,
+      "tier": 4,
+      "title": "HPE Aruba Networking SSE technical documentation",
+      "url": "https://arubanetworking.hpe.com/techdocs/sse/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 403. Attempted in order to find a published list of SSE points of presence by region."
+    },
+    {
+      "n": 54,
+      "tier": 4,
+      "title": "AWS Marketplace search for HPE Aruba Networking EdgeConnect",
+      "url": "https://aws.amazon.com/marketplace/search/results?searchTerms=HPE+Aruba+Networking+EdgeConnect",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Blocked by robots.txt, so marketplace listed pricing could not be checked."
     }
   ],
   "sourced_facts": {
@@ -625,6 +868,254 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed. No availability percentage appears on the HPE Tech Care page, the HPE Aruba Networking Support Services page or the HPE GreenLake page, and the HPE GreenLake service level agreements URL returned 404. Support commitments are expressed as response and hardware replacement windows (next business day to 4-hour) rather than an uptime percentage, so the availability figure is unknown."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        32,
+        29,
+        28,
+        39
+      ],
+      "confidence": "high",
+      "quote": "Deliver secure and modern healthcare experiences with unified SASE",
+      "claimed_by": "vendor",
+      "note": "Strongest sector on the evidence. A dedicated healthcare SASE document exists, plus three named healthcare customers: Bethesda Health Group and Hato Hone St John on the SASE page, and Universal Health Services on the EdgeConnect SD-WAN page. The SASE page states verbatim: \"With a fully cloud-delivered SASE solution, Bethesda is achieving a six-figure cost savings versus MPLS and reducing management and troubleshooting overhead by 50%.\""
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        34,
+        29
+      ],
+      "confidence": "high",
+      "quote": "Unified SASE in financial services",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services SASE document, plus a named bank customer on the SASE page, quoted verbatim there as: \"First Bank deploys a secure, resilient, and high-performance SASE-based SD-WAN to reduce costs, boost application performance and support a cloud-smart technology strategy.\""
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        33,
+        29,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Building future-proof networks in retail with unified SASE",
+      "claimed_by": "vendor",
+      "note": "Dedicated retail SASE document, and Retail is also listed as an industry on the SASE page. Nearest named customer is C&S Wholesale Grocers on the EdgeConnect page, which is grocery wholesale distribution rather than pure retail, so the retail grade rests mainly on the dedicated industry document. No named store chain customer was found."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        35,
+        30,
+        42,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Securing and modernizing networks in manufacturing with unified SASE",
+      "claimed_by": "vendor",
+      "note": "Dedicated manufacturing SASE document plus named industrial customers. The SSE page states verbatim: \"The mining industry is becoming increasingly digital. Using digital touchpoints, SCHAEFER KALK is now able to share production data, track efficiency, and accelerate its Industry 4.0 initiatives. This is made possible by a unified network infrastructure with secure, segmented access from HPE Aruba Networking.\" Barrett Steel Limited on the EdgeConnect page is a further industrial reference."
+    },
+    "sectors.energy_utilities": {
+      "value": "partial",
+      "evidence": [
+        37,
+        29
+      ],
+      "confidence": "medium",
+      "quote": "Securing and modernizing networks in oil and gas with unified SASE",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes because the only evidence is an oil and gas document with no named customer behind it, and nothing at all was found for utilities, power or water. Oil and Gas is listed as an industry on the SASE page. If the buyer's need is utilities specifically, this evidence does not cover it."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        38,
+        30,
+        29
+      ],
+      "confidence": "high",
+      "quote": "The City of San Jose needed secure, fast application access for a hybrid workforce across 20+ departments during COVID-19. The HPE Aruba Networking SSE platform delivered a seamless zero-trust experience for all users, regardless of location or device, without the complexity of traditional security appliances.",
+      "claimed_by": "vendor",
+      "note": "Named public sector customer on the SSE page, backed by a dedicated industry document titled \"Unified SASE in state and local government\". Evidence is US municipal government. No national government, defence or public sector accreditation such as FedRAMP was found on the pages read."
+    },
+    "sectors.education": {
+      "value": "unknown",
+      "evidence": [
+        29,
+        30,
+        28,
+        52,
+        46
+      ],
+      "confidence": "high",
+      "quote": "Secure access for all users (employees, third-party, customers), from any device (managed, BYOD), for all applications (private, SaaS, internet), from anywhere (500+ edge locations).",
+      "claimed_by": "none",
+      "note": "Checked deliberately and found nothing. The SASE page lists seven industries and education is not among them. No education customer appears on the SASE, SSE or EdgeConnect SD-WAN pages, no education SASE document exists alongside the other seven, and a direct attempt at an HPE Networking education page returned 404. HPE Aruba is well known in campus wireless for education, but that is a different product line and inferring SASE or SD-WAN education capability from it is exactly the inference this exercise forbids."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        30,
+        43
+      ],
+      "confidence": "medium",
+      "quote": "Schnellecke Logistics, with over 80 locations across 12 countries, works with some of the world's largest automakers, serving as a critical link in the global supply chain. To protect access to its external consultants, on and off-premises employees, IoT devices, and digital workflows, the company is adopting zero trust access with HPE Aruba Networking Secure Service Edge (SSE), as it optimizes its security strategy.",
+      "claimed_by": "vendor",
+      "note": "One named logistics customer with a published case study, which meets the named customer bar. Confidence is medium rather than high because there is no dedicated transport or logistics industry document and only this single reference. Note the wording is \"is adopting\", which reads as in progress rather than completed."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        30,
+        44,
+        28
+      ],
+      "confidence": "medium",
+      "quote": "Corporate Business Solutions (cbs) has delivered more than 5000 client projects in its 30-year history. But digital transformation is changing the pace and scope of work. As the business becomes more international, cbs is strengthening network access and creating clear rules around who has access to what.",
+      "claimed_by": "vendor",
+      "note": "Two named customers in professional services: a consultancy (cbs) on the SSE page, and Cushman & Wakefield on the EdgeConnect page, described there verbatim as \"World's largest real estate services firm accelerates application performance and improves quality of experience for global end-users by eliminating backhauling branch office traffic across expensive MPLS circuits.\" Confidence is medium because there is no dedicated professional services industry document, and real estate services is an adjacent rather than exact fit."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partial",
+      "evidence": [
+        36,
+        29
+      ],
+      "confidence": "medium",
+      "quote": "Delivering modern and secure digital experiences in hospitality with unified SASE",
+      "claimed_by": "vendor",
+      "note": "Graded partial rather than yes. A dedicated hospitality SASE document does exist and Hospitality is listed as an industry on the SASE page, but no named hospitality customer or case study was found on any page read, so there is a document but nothing behind it."
+    },
+    "regions.uk_ireland": {
+      "value": "unknown",
+      "evidence": [
+        41,
+        28,
+        48
+      ],
+      "confidence": "medium",
+      "quote": "Learn how a steel stockholder delivers network efficiency and business agility by replacing MPLS and retiring legacy routers, adopting all broadband SD-WAN.",
+      "claimed_by": "none",
+      "note": "Deliberately checked and not confirmed. Barrett Steel Limited is a named EdgeConnect SD-WAN customer and the company suffix suggests a UK entity, but the case study landing page describes it only as \"a steel stockholder\" and names no country, and the underlying PDF could not be extracted. No UK or Ireland point of presence, coverage statement or service availability statement was found on any page read. This is very likely a false negative that a reader of the Barrett Steel PDF could resolve."
+    },
+    "regions.europe": {
+      "value": "partial",
+      "evidence": [
+        29,
+        30,
+        40,
+        42
+      ],
+      "confidence": "low",
+      "quote": "Unified SASE enables Henkel to establish a consistent network experience across 450 locations and reduce the time to diagnose and resolve network issues by 90%.",
+      "claimed_by": "vendor",
+      "note": "Graded partial on low confidence, and the grade is inferred from customer identity rather than a coverage statement. Several named SASE and SSE customers are European headquartered organisations (Henkel, SCHAEFER KALK, Corporate Business Solutions, Schnellecke Logistics), but not one of the pages read states a European point of presence, a European data centre, European data residency or European service availability. The SCHAEFER KALK case study page carries Germany only in a meta-keywords field, which is too weak to carry a grade. Conflict to note: HPE clearly operates across Europe as a company, yet its SASE and SD-WAN pages publish no European coverage detail."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        30,
+        29,
+        28
+      ],
+      "confidence": "medium",
+      "quote": "The City of San Jose needed secure, fast application access for a hybrid workforce across 20+ departments during COVID-19. The HPE Aruba Networking SSE platform delivered a seamless zero-trust experience for all users, regardless of location or device, without the complexity of traditional security appliances.",
+      "claimed_by": "vendor",
+      "note": "Strongest region on the evidence, though still by customer identity rather than by a published point of presence list. A US city government is a live SSE deployment, and the SASE and EdgeConnect pages add Bethesda Health Group, Universal Health Services, Builders FirstSource and C&S Wholesale Grocers, all US organisations. Confidence is medium because HPE publishes no North American PoP or coverage map on these pages."
+    },
+    "regions.asia_pacific": {
+      "value": "partial",
+      "evidence": [
+        39,
+        29
+      ],
+      "confidence": "low",
+      "quote": "Hato Hone St John is accelerating the digital transformation of healthcare operations, enabling remote working and securing access to critical applications.",
+      "claimed_by": "vendor",
+      "note": "Graded partial on low confidence. Hato Hone St John is New Zealand's ambulance service and is a named SASE customer, which points to a live Asia Pacific deployment, but neither the SASE page nor the case study landing page states New Zealand, Australia or Asia Pacific, and no Asia Pacific point of presence or coverage statement was found. The grade rests on knowing who the customer is, which is weaker than the standard this exercise asks for."
+    },
+    "regions.middle_east_africa": {
+      "value": "unknown",
+      "evidence": [
+        30,
+        29,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Secure access for all users (employees, third-party, customers), from any device (managed, BYOD), for all applications (private, SaaS, internet), from anywhere (500+ edge locations).",
+      "claimed_by": "none",
+      "note": "Checked the SASE, SSE and EdgeConnect SD-WAN pages and found no Middle East or Africa customer, point of presence, coverage statement or partner arrangement. The only coverage claim anywhere is the quoted 500+ edge locations figure, which names no region and is deliberately not being read as regional evidence."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        30,
+        29,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Secure access for all users (employees, third-party, customers), from any device (managed, BYOD), for all applications (private, SaaS, internet), from anywhere (500+ edge locations).",
+      "claimed_by": "none",
+      "note": "Checked the SASE, SSE and EdgeConnect SD-WAN pages and found no Latin American customer, point of presence, coverage statement or partner arrangement. The 500+ edge locations claim is unallocated by region and is not being counted here."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        28,
+        45,
+        30
+      ],
+      "confidence": "high",
+      "quote": "Simplify and automate secure multi-cloud connectivity to leading cloud and SaaS providers",
+      "claimed_by": "none",
+      "note": "Treated strictly as instructed. The EdgeConnect SD-WAN page lists Alibaba Cloud among its cloud and interconnect technology partners alongside AWS, Azure, Google Cloud, Equinix and Megaport, but a cloud interconnect partnership is not a licensed mainland China service arrangement and does not evidence in-country delivery. The HPE Aruba Networking Central page was checked specifically for a China instance or data residency statement and contains none. No ICP licence, local operating partner or China point of presence was found."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        28,
+        29,
+        30
+      ],
+      "confidence": "high",
+      "quote": "World's largest real estate services firm accelerates application performance and improves quality of experience for global end-users by eliminating backhauling branch office traffic across expensive MPLS circuits.",
+      "claimed_by": "vendor",
+      "note": "Unambiguous. Cushman & Wakefield is described by HPE as the world's largest firm in its category, Henkel is quoted at \"450 locations\", Schnellecke Logistics at \"over 80 locations across 12 countries\", and the flagship SKU is branded the EdgeConnect Enterprise SD-WAN Platform. Every published customer story is a large multi-site organisation."
+    },
+    "organisation_fit.mid_market": {
+      "value": "unknown",
+      "evidence": [
+        28,
+        31,
+        29
+      ],
+      "confidence": "medium",
+      "quote": "Pricing displayed for the products does not include applicable taxes and shipping.",
+      "claimed_by": "none",
+      "note": "Checked and not found. No page read uses the words mid-market, mid-sized or SMB, there is no mid-market product tier or price band, and every named customer is a large multi-site organisation. The EdgeConnect gateway range does span small, medium and large branch models, but that describes site size within an enterprise WAN, not the size of the buying organisation, and grading mid-market from it would be the inference this exercise forbids. Corporate Business Solutions may be mid-market but HPE does not state its size."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        31,
+        28,
+        29
+      ],
+      "confidence": "medium",
+      "quote": "Pricing displayed for the products does not include applicable taxes and shipping.",
+      "claimed_by": "none",
+      "note": "Checked and not found. No small business tier, no self-serve pricing, no small business customer story, and the store listing is quote-driven with no published entry price. The product is branded Enterprise throughout. Worth flagging for the comparison that HPE Networking Instant On is the group's small business line, but it is a separate product family and carries no SASE or SD-WAN evidence on the pages read, so it cannot be used to grade this supplier entry."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

@@ -80,16 +80,16 @@
     "CASB and DLP capabilities have partial public evidence; depth should be confirmed in RFP."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "yes"
+    "middle_east_africa": "yes",
+    "latin_america": "yes",
+    "china_mainland": "partner_integrated"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -110,15 +110,15 @@
   },
   "sectors": {
     "healthcare": "partial",
-    "financial_services": "partial",
+    "financial_services": "yes",
     "retail_ecommerce": "partial",
     "manufacturing": "yes",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "energy_utilities": "yes",
+    "government_public_sector": "unknown",
+    "education": "unknown",
+    "transport_logistics": "yes",
+    "professional_services": "yes",
+    "hospitality_leisure": "unknown"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
@@ -453,6 +453,330 @@
       "published": null,
       "reliability": "Not used as evidence. Trade article surfaced in search but not fetched, so no verbatim quote can be attested; retained because it may document a different PoP footprint claim.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Aryaka Unified SASE: Secure Network Access With Agility And Performance (home page)",
+      "url": "https://www.aryaka.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own home page. Used only to enumerate navigation to industries, customers, use cases and coverage pages."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Aryaka Customers",
+      "url": "https://www.aryaka.com/customers/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own customer index. Lists five named customer testimonials and three industry filter labels. Case study grid loads dynamically so the visible set may be incomplete."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Proven Success | Aryaka About Us",
+      "url": "https://www.aryaka.com/about-us/proven-success/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own. Same five named customers and the same three industry filters as the customers page."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Enhancing Manufacturing Connectivity and Security",
+      "url": "https://www.aryaka.com/industries/manufacturing-connectivity-security/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated manufacturing industry page carrying three named customer case studies. Strong for sector grading; vendor marketing so unaudited."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Secure, Simplify, and Scale Transportation & Logistics Networks",
+      "url": "https://www.aryaka.com/industries/transportation-logistics/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated transport and logistics industry page with three named customers. Also the only place an energy customer is surfaced by industry."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Unified SASE as a Service: For Business & Professional Services",
+      "url": "https://www.aryaka.com/industries/business-professional-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated professional services industry page with one named customer (Kleinfelder)."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Global Connectivity Solutions: Reliable, Secure, And High-Performance Networking",
+      "url": "https://www.aryaka.com/use-cases/global-connectivity/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own use-case page. Generic global claims only, no country or PoP counts, so of limited value for region grading."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Aryaka Global Points-of-Presence (PoPs)",
+      "url": "https://www.aryaka.com/about-us/global-pop-locations/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own published PoP city list grouped Americas, EMEA, APAC. The single best region-grading source. Ten specific city strings were re-verified as literally present on a second fetch. Undated, so currency is unconfirmed."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Aryaka Unified SASE As A Service Delivers High-Performance And Compliance For China",
+      "url": "https://www.aryaka.com/solution-brief/china-compliance-performance/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own China solution brief. Names the in-country partners that operate the mainland PoPs and states over 40 PoPs. Directly on point for the China licensing question."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Aryaka Global Connectivity: Secure, Reliable, And High-Performance Networking (datasheet)",
+      "url": "https://www.aryaka.com/datasheet/global-connectivity-solution/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own datasheet. Corroborates the PoP count and the regional city groupings on source 8."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "AL-KO Drastically Reduces TCO, Outages, and Onboarding Times",
+      "url": "https://www.aryaka.com/case-study/al-ko/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study. Useful for organisation size: describes a German mid-sized manufacturer of roughly 700 staff and 19 sites."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Thetford Drives SD-WAN ROI & Business Value",
+      "url": "https://www.aryaka.com/case-study/thetford/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named manufacturing case study, over 20 sites across North America, Europe and Asia."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "Albemarle Reduced Drop & Jitter Rates to <1%",
+      "url": "https://www.aryaka.com/case-study/albemarle/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study. Fortune 1000 chemical manufacturer, over 5,000 employees. Supports manufacturing and large enterprise."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Wabtec Supports Global Growth with Faster, More Flexible and Secure Managed SD-WAN Network",
+      "url": "https://www.aryaka.com/case-study/wabtec/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study. 29,000 employees, 50+ locations. Sits across manufacturing and rail transport."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Replacing MPLS With SD-WAN For Kleinfelder",
+      "url": "https://www.aryaka.com/case-study/kleinfelder/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study. Engineering consultancy, 3,100 employees, 100+ locations, North America and Australia."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Cathay Transforms Global Network and Security in Record Time with Aryaka Unified SASE as a Service",
+      "url": "https://www.aryaka.com/case-study/cathay-pacific-unified-sase/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study for a flag-carrier airline, 166 branch sites. Strongest single large-enterprise and APAC datapoint."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Improving Network, Security And Productivity (World Fuel Services / World Kinect case study)",
+      "url": "https://www.aryaka.com/resources/case-study-world-fuel-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study with an explicit company profile block giving Industry: Energy and roughly 4,700 employees across 75+ global sites."
+    },
+    {
+      "n": 48,
+      "tier": 1,
+      "title": "Resources | Aryaka SD-WAN & SASE",
+      "url": "https://www.aryaka.com/resources/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own resource library. Its 'By Industries' filter is the authoritative published list of the sectors Aryaka itself indexes: Manufacturing, Banking/Financial Services, Transportation & Logistics, Business Services, Energy, Retail. Useful as a negative check for the four sectors absent from it."
+    },
+    {
+      "n": 49,
+      "tier": 1,
+      "title": "See Why Customers Rank Aryaka #1 In SD-WAN On G2 Summer 2026",
+      "url": "https://www.aryaka.com/sase-reviews/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own review round-up page. Names Cathay, World Kinect, Hubbell, NVIDIA, Makino and Pilot, and states the industries customers span. Vendor-curated selection of third-party reviews, so treat the review scores as promotional."
+    },
+    {
+      "n": 50,
+      "tier": 1,
+      "title": "Affordable SD-WAN, SASE As A Service (SD-WAN and SASE as a service now affordable to companies of all sizes)",
+      "url": "https://www.aryaka.com/blog/sd-wan-and-sase-as-a-service-now-affordable-to-companies-of-all-sizes/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own blog and the only page found publishing a hard entry price. The exact string was re-verified on a second fetch with its surrounding paragraph. Undated on the page, and blog pricing is not a rate card, so treat the figure as indicative."
+    },
+    {
+      "n": 51,
+      "tier": 1,
+      "title": "Aryaka NaaS Boosts Mid-Market Growth",
+      "url": "https://www.aryaka.com/aryaka-naas-boosting-mid-market-enterprise-growth/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own mid-market landing page. Uses 'mid-market enterprises', 'mid-sized enterprises' and 'mid-sized company' throughout but publishes no employee or revenue band."
+    },
+    {
+      "n": 52,
+      "tier": 1,
+      "title": "Aryaka Enlighten Ep. 2: Simplifying Unified SASE As A Service Pricing And Packaging",
+      "url": "https://www.aryaka.com/blog/aryaka-enlighten-ep-2-unified-sase-pricing-packaging/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own. Confirms a three-tier packaging model (SD-WAN, Unified SASE, Advanced Security) and pricing philosophy, but publishes no figures."
+    },
+    {
+      "n": 53,
+      "tier": 1,
+      "title": "Products and Services | Aryaka",
+      "url": "https://www.aryaka.com/products-and-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own. Positioning language aimed at global enterprises; no size segmentation."
+    },
+    {
+      "n": 54,
+      "tier": 1,
+      "title": "About Us | Aryaka",
+      "url": "https://www.aryaka.com/about-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own. Gives a 500+ customer count and Santa Clara HQ. No regional office or Fortune-ranking breakdown."
+    },
+    {
+      "n": 55,
+      "tier": 1,
+      "title": "Aryaka Enables the Future of the Retail Customer Experience (managed SD-WAN and SASE in retail whitepaper)",
+      "url": "https://www.aryaka.com/whitepaper/managed-sd-wan-sase-in-retail-industry/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own retail whitepaper landing page. Sector-specific asset but names no retailer and offers no case study, so it carries only a partial grade."
+    },
+    {
+      "n": 56,
+      "tier": 1,
+      "title": "ARYAKA'S Global SD-WAN Powers AUGMEDIX IoT-Based Applications",
+      "url": "https://www.aryaka.com/press/aryakas-global-sd-wan-powers-augmedix-iot-based-application-worldwide-partner-collaboration/",
+      "published": "2016-08-31",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own press release, dated. Confirms Augmedix as a named customer in healthcare technology. Nearly ten years old, so weak evidence of current healthcare capability."
+    },
+    {
+      "n": 57,
+      "tier": 1,
+      "title": "Aryaka SVP Nikesh Kalra to Co-Present with Augmedix at Interop Vegas 2016",
+      "url": "https://www.aryaka.com/press/aryaka-svp-nikesh-kalra-co-present-augmedix-interop-vegas-2016/",
+      "published": "2016",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own press release. Corroborates source 26 and supplies the cleanest verbatim description of Augmedix as a healthcare company. Same age caveat."
+    },
+    {
+      "n": 58,
+      "tier": 1,
+      "title": "Aryaka Seals Partner-Led Deal with Cathay for Global SASE Deployment",
+      "url": "https://www.aryaka.com/press/aryaka-cathay-global-sase-deployment-partner-success/",
+      "published": "2023-12-14",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dated press release. Names the sourcing partner (Forge Technology Advisors) and puts the deployment at more than 150 locations. Also corroborated independently on PR Newswire and Intelligent CIO APAC, which were seen in search results but not fetched."
+    },
+    {
+      "n": 59,
+      "tier": 1,
+      "title": "Aryaka Extends Reach into China through Reseller Agreement with ChinaNetCloud",
+      "url": "https://www.aryaka.com/press/aryaka-extends-reach-into-china-through-reseller-agreement-with-chinanetcloud/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own press release, no date visible on the page. Historic and probably superseded by the current partner set in source 9, so used only as background on the partner-led China model, not as the graded evidence."
+    },
+    {
+      "n": 60,
+      "tier": 1,
+      "title": "Financial Services Company Calypso On Aryaka's Customer Support",
+      "url": "https://www.aryaka.com/videos/financial-services-company-calypso-on-aryakas-customer-support/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own customer video page. The only named financial services customer found. Undated video testimonial rather than a written case study, hence medium confidence."
+    },
+    {
+      "n": 61,
+      "tier": 4,
+      "title": "The Financial Case For Unified SASE As A Service",
+      "url": "https://www.aryaka.com/case-study/financial-company/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Despite sitting on a /case-study/ URL and surfacing on a search for financial services customers, the page is a gated ROI guide with no customer, no industry and no company detail. Citing it for financial services would be a false positive."
+    },
+    {
+      "n": 62,
+      "tier": 4,
+      "title": "Aryaka SmartConnect Pricing | TrustRadius",
+      "url": "https://www.trustradius.com/products/aryaka-smartconnect/pricing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The page states no pricing plans are currently listed and no free version or trial is available, so it contributes nothing to the price tier."
+    },
+    {
+      "n": 63,
+      "tier": 4,
+      "title": "Aryaka resources category: banking-financial-services",
+      "url": "https://www.aryaka.com/resources/category/banking-financial-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returns a 404 error page. The industry filter label exists on the resources index but this guessed category URL does not resolve, so no financial services asset list could be confirmed from it."
+    },
+    {
+      "n": 64,
+      "tier": 4,
+      "title": "Aryaka resources category: energy",
+      "url": "https://www.aryaka.com/resources/category/energy/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returns a 404 error page. Energy grading rests on sources 5 and 17 instead."
+    },
+    {
+      "n": 65,
+      "tier": 4,
+      "title": "Aryaka resources category: retail",
+      "url": "https://www.aryaka.com/resources/category/retail/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returns a 404 error page. Retail grading rests on sources 18 and 25 instead."
+    },
+    {
+      "n": 66,
+      "tier": 4,
+      "title": "Case Studies | Aryaka Resources",
+      "url": "https://www.aryaka.com/resources/case-studies/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence for any grade. The filtered grid renders 'No case studies found' to a non-JavaScript fetch, so the page cannot be relied on as a complete customer list. Its industry filter labels duplicate sources 2 and 3."
     }
   ],
   "sourced_facts": {
@@ -691,6 +1015,255 @@
       "quote": "Global SLAs: Uptime of 99.999% on Day 1",
       "claimed_by": "vendor",
       "note": "99.999% is the headline availability commitment and appears repeatedly in the SLA document as \"Uptime of 99.999%\" for PrivateCore services, NGFW-SWG, PrivateAccess and RemoteUser gateways and Internet Breakout. A lower 99.99% figure applies to certain site pair scenarios, so the number varies by service element rather than being a single blanket figure."
+    },
+    "sectors.healthcare": {
+      "value": "partial",
+      "evidence": [
+        57,
+        56,
+        48
+      ],
+      "confidence": "low",
+      "quote": "Augmedix was named the number one most innovative healthcare company of 2016 by Fast Company.",
+      "claimed_by": "vendor",
+      "note": "Weak and stale. The only healthcare-linked customer found anywhere on the site is Augmedix, and it is a healthcare technology vendor rather than a care provider or payer. Both press releases date from 2016. Healthcare does not appear in Aryaka's own published 'By Industries' filter on the resources index (source 18), there is no healthcare industry page alongside the three that do exist, and no HIPAA or HITRUST claim was found. I checked the three industry pages, the customers and proven-success pages, the resources industry filter and a site-scoped search for healthcare."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        60,
+        48,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "Financial Services Company Calypso",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a named customer (Calypso, a capital markets software firm) presented by Aryaka explicitly as a financial services company, plus 'Banking/Financial Services' being one of only six labels in Aryaka's own published industry filter. Confidence is medium not high because the evidence is an undated video testimonial rather than a written case study, there is no dedicated financial services industry page to sit alongside manufacturing, transport and professional services, and no banking accreditation or regulatory framework was found."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "partial",
+      "evidence": [
+        55,
+        48
+      ],
+      "confidence": "medium",
+      "quote": "Aryaka Enables the Future of the Retail Customer Experience",
+      "claimed_by": "vendor",
+      "note": "Retail is one of the six labels in Aryaka's own published industry filter and there is a retail-specific whitepaper, so this is more than a passing mention. It stops short of yes because no retailer is named anywhere, there is no retail case study, and there is no dedicated retail industry page. I checked the industry pages, customers page, resources industry filter and the retail whitepaper landing page."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        34,
+        43,
+        42,
+        44,
+        41
+      ],
+      "confidence": "high",
+      "quote": "Enhancing Manufacturing Connectivity and Security",
+      "claimed_by": "vendor",
+      "note": "The strongest sector by a distance. A dedicated industry page plus at least five named manufacturing customers with published case studies: Albemarle (Fortune 1000 chemicals), Hubbell, Thetford, AL-KO and Wabtec, with Lauridsen Group International also cited as a global manufacturer. The manufacturing page carries the case study line 'Hubbell Supercharges Global Application Performance, Visibility and Security'."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        47,
+        35,
+        48
+      ],
+      "confidence": "medium",
+      "quote": "Discover how a Fortune 500 energy company enabled secure hybrid work and reduced network TCO.",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a named case study: World Fuel Services, now World Kinect, whose case study company profile block states Industry: Energy with roughly 4,700 employees and 75+ global sites. 'Energy' is also one of the six labels in Aryaka's published industry filter. Important qualification: this is fuel distribution and logistics, not a regulated utility, and Aryaka surfaces the customer under its Transportation & Logistics industry page rather than an energy page. No utility, grid, water or OT/SCADA evidence was found, so do not read this as utilities capability."
+    },
+    "sectors.government_public_sector": {
+      "value": "unknown",
+      "evidence": [
+        48,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "Customers span manufacturing, transportation, logistics, financial services, and business & professional services industries with complex multi-site, multi-cloud network requirements.",
+      "claimed_by": "none",
+      "note": "No public sector evidence found. Government is absent from Aryaka's own six-label published industry filter and from the sentence quoted here. I checked the three industry pages, the customers and proven-success pages, the resources industry filter, and site-scoped searches for public sector, government and FedRAMP, which returned only unrelated partner and threat-research pages. No FedRAMP, StateRAMP, G-Cloud or comparable framework listing was found. Note that the Kleinfelder case study says that customer serves the public sector, but that describes Kleinfelder's own clients, not Aryaka's, and must not be read across."
+    },
+    "sectors.education": {
+      "value": "unknown",
+      "evidence": [
+        48,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "Customers span manufacturing, transportation, logistics, financial services, and business & professional services industries with complex multi-site, multi-cloud network requirements.",
+      "claimed_by": "none",
+      "note": "No education evidence found. Education is absent from Aryaka's published industry filter. A site-scoped search surfaced only a 2020 blog about coronavirus, universities and remote access, which is commentary on the sector with no named institution, no case study and no customer, so it does not even support partial. I checked the industry pages, customers page, resources industry filter and case study index."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        35,
+        46,
+        58,
+        44
+      ],
+      "confidence": "high",
+      "quote": "Trusted by Leading Transportation & Logistics Companies",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page headed 'Secure, Simplify, and Scale Transportation & Logistics Networks' with named customers Cathay Pacific (166 branch sites, deployment corroborated by a dated press release and by PR Newswire and Intelligent CIO APAC coverage seen in search), Wabtec (rail, 50+ locations) and World Fuel Services. Transportation & Logistics is also one of the six labels in the published industry filter."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        36,
+        45,
+        49
+      ],
+      "confidence": "high",
+      "quote": "Unified SASE as a Service: For Business & Professional Services",
+      "claimed_by": "vendor",
+      "note": "Dedicated industry page plus one named case study, Kleinfelder, a multi-disciplinary engineering consultancy of 3,100 staff across 100+ locations in North America and Australia. 'Business Services' is one of the six labels in the published industry filter. Slightly thinner on named customers than manufacturing or transport, resting on a single logo."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "unknown",
+      "evidence": [
+        48,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "Customers span manufacturing, transportation, logistics, financial services, and business & professional services industries with complex multi-site, multi-cloud network requirements.",
+      "claimed_by": "none",
+      "note": "No hospitality or leisure evidence found. The sector is absent from Aryaka's published industry filter and from the customer-span sentence quoted here. I checked the industry pages, customers and proven-success pages, resources industry filter, and a site-scoped search for hotel, hospitality and restaurant, which returned only unrelated award and analyst-recognition pages. Cathay Pacific is an airline and is presented as transport, not leisure, so it must not be counted here."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        38,
+        40
+      ],
+      "confidence": "high",
+      "quote": "Dublin, Ireland",
+      "claimed_by": "vendor",
+      "note": "Aryaka publishes named PoP locations in both the UK and Ireland. The same EMEA list on the PoP page carries 'London, England' alongside the Dublin entry quoted here, and the global connectivity datasheet independently repeats London and Dublin in its EMEA grouping. This is service delivery infrastructure, not a sales office. The PoP page is undated so the list currency is unconfirmed."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        38,
+        40
+      ],
+      "confidence": "high",
+      "quote": "Frankfurt, Germany",
+      "claimed_by": "vendor",
+      "note": "Continental European PoPs published on the EMEA list: Frankfurt, Amsterdam, Paris, Madrid and Stockholm. Corroborated by the same five appearing in the datasheet EMEA grouping. Coverage is western and northern Europe; no central or eastern European PoP is listed."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        38,
+        40,
+        54
+      ],
+      "confidence": "high",
+      "quote": "Toronto, ON, CA",
+      "claimed_by": "vendor",
+      "note": "The densest region in the published estate. The Americas list carries ten US PoPs (Ashburn, Atlanta, Chicago, Dallas, Denver, Los Angeles, Miami, Newark, San Jose, Seattle) plus the Toronto entry quoted here, and the company is headquartered in Santa Clara. No Mexico PoP is listed."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        38,
+        40,
+        46
+      ],
+      "confidence": "high",
+      "quote": "Singapore, Singapore",
+      "claimed_by": "vendor",
+      "note": "Extensive published APAC estate: Sydney, Melbourne, Tokyo, Seoul, Taipei, Ho Chi Minh City, Hong Kong, Singapore and four Indian PoPs (Bangalore, Chennai, Delhi, Mumbai). Backed by delivery evidence rather than PoPs alone, in the Cathay Pacific deployment out of Hong Kong. Mainland China is graded separately below."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        38,
+        40
+      ],
+      "confidence": "medium",
+      "quote": "Johannesburg, South Africa",
+      "claimed_by": "vendor",
+      "note": "Published PoPs at Johannesburg, Dubai and Tel Aviv within the EMEA list, corroborated by the datasheet. Confidence is medium rather than high because coverage is three cities for the whole of the Middle East and Africa, with nothing in west, east or north Africa, and no MEA customer or case study was found to demonstrate delivery."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        38,
+        40
+      ],
+      "confidence": "medium",
+      "quote": "Sao Paulo, Brazil",
+      "claimed_by": "vendor",
+      "note": "Meets the published-PoP test, but only just. The Americas list contains exactly two Latin American entries, the Sao Paulo entry quoted here and 'Santiago de Chile'. No Mexico, Colombia or Argentina PoP is listed and no Latin American customer or case study was found. Aryaka does not itself describe this coverage as limited, which is why it is graded yes rather than partial, but a buyer with Latin American sites should verify reach beyond Brazil and Chile."
+    },
+    "regions.china_mainland": {
+      "value": "partner_integrated",
+      "evidence": [
+        39,
+        38,
+        58,
+        59
+      ],
+      "confidence": "high",
+      "quote": "We have strategic partnerships with leading Chinese data-center and telecom providers Alibaba, IDCBC and Infoquick to operate our in country PoPs for ensuring full compliance with all privacy and data security laws and regulations.",
+      "claimed_by": "vendor",
+      "note": "This is the specific licensed arrangement the brief asks for, not a generic global claim. Aryaka publishes named mainland PoPs (Beijing, Shanghai, Shenzhen, plus Hong Kong) and states explicitly that those in-country PoPs are operated by named Chinese partners for regulatory compliance, which is why the grade is partner_integrated rather than yes. Aryaka's China experience is also cited as a selection factor in the dated Cathay press release. The older ChinaNetCloud reseller release shows the same partner-led model historically but is undated on the page and names a different partner, so it is background only, not a conflict to resolve."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        58,
+        46,
+        43,
+        44,
+        53
+      ],
+      "confidence": "high",
+      "quote": "Cathay was looking for an agile provider that could deliver a flexible, cost-effective, high-performance SD-WAN network along with security at the edge to support its organization across more than 150 locations.",
+      "claimed_by": "vendor",
+      "note": "Clearly the primary target. Evidenced by case studies rather than positioning alone: Cathay Pacific at 166 branch sites, Albemarle as a Fortune 1000 company with over 5,000 staff operating in more than 100 countries, Wabtec at 29,000 employees across 50+ locations, and World Kinect across 75+ global sites. The products and services page describes 'AI-powered solutions tailored for global enterprises.'"
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        51,
+        41,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "Managing a network in a mid-sized company is tough.",
+      "claimed_by": "vendor",
+      "note": "Aryaka runs a dedicated mid-market landing page using 'mid-market enterprises', 'mid-sized enterprises' and 'mid-sized company' throughout, and has a matching customer in AL-KO, described as a global German medium-sized company of roughly 700 employees across 19 locations. The sase-reviews page also carries a 'Head of Infrastructure, Mid-Market' reviewer label. Confidence is medium because Aryaka publishes no employee or revenue band defining what it means by mid-market, so the boundary against its enterprise segment is unstated."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        50,
+        52
+      ],
+      "confidence": "medium",
+      "quote": "Research shows that the three main networking and security challenges that small to medium-sized companies face are limited budgets, lack of skilled IT resources, and the need for operational simplicity.",
+      "claimed_by": "vendor",
+      "note": "Graded partial, not yes. Aryaka has published an explicitly SME-aimed offering with a stated entry price and a three-tier package structure, which is real targeting, but the language is consistently 'small to medium-sized enterprises' and the accompanying case studies start at roughly 700 employees. No customer, case study or self-service tier at genuine small-business scale was found, and the SME blog is undated so the offer's current status is unconfirmed. A per-site price of 150 US dollars per month also implies a multi-site business rather than a single-site small company."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        50,
+        52,
+        62
+      ],
+      "confidence": "medium",
+      "quote": "Our entry price begins at $150 per site/per month.",
+      "claimed_by": "vendor",
+      "note": "Unusually for this market, Aryaka does publish a hard entry point. The quoted string was re-verified on a second fetch together with its surrounding paragraph. Graded mid rather than budget or premium: 150 US dollars per site per month is an entry figure for a fully managed service that includes a global private backbone, application optimisation and lifecycle management, and it scales up through three published tiers (SD-WAN, then Unified SASE, then Advanced Security) plus add-ons, so realised cost for a typical buyer will sit above the entry point. Aryaka's own positioning pulls in two directions and I have not resolved it: the SME blog frames the service as affordable while the pricing and packaging material frames it as an enterprise-grade managed service with 'transparent, predictable pricing'. Caveats: the entry price sits in an undated blog rather than a rate card, no per-tier figures are published anywhere, and TrustRadius (source 32) confirms no pricing plans are listed on the main marketplace aggregator. A buyer should treat the figure as indicative only."
     }
   },
   "conflicts": [

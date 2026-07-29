@@ -81,7 +81,7 @@
     "Best-of-breed buyers may prefer integrating FortiGate SD-WAN with a separate SSE platform (Zscaler, Netskope) rather than adopting full FortiSASE."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
     "uk_ireland": "yes",
@@ -89,8 +89,8 @@
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "yes",
-    "latin_america": "partial",
-    "china_mainland": "partial"
+    "latin_america": "yes",
+    "china_mainland": "unknown"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -111,15 +111,15 @@
   },
   "sectors": {
     "healthcare": "yes",
-    "financial_services": "partial",
+    "financial_services": "yes",
     "retail_ecommerce": "yes",
     "manufacturing": "yes",
     "energy_utilities": "yes",
     "government_public_sector": "yes",
     "education": "yes",
-    "transport_logistics": "partial",
-    "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "transport_logistics": "yes",
+    "professional_services": "unknown",
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
@@ -354,6 +354,213 @@
       "published": null,
       "reliability": "Not used as evidence. Returned HTTP 404, so there was no content to read. The live equivalent is source 15.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Fortinet Secure SD-WAN product page",
+      "url": "https://www.fortinet.com/products/sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product page. Primary source for product positioning and cost claims. Marketing language, no independent verification."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Fortinet Global Customers and Case Studies",
+      "url": "https://www.fortinet.com/customers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own customer index. Lists named customers and an industry filter taxonomy. Self-selected sample."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Healthcare Cybersecurity Solutions | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated healthcare industry page carrying named healthcare customers. Vendor-authored."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Financial Services Cybersecurity | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated financial services industry page with customer testimonials. Vendor-authored."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Retail Cybersecurity Solutions | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated retail industry page with named retail customers quoted on Secure SD-WAN specifically. Vendor-authored."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Manufacturing Cybersecurity | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated manufacturing industry page with named manufacturer case studies. Vendor-authored."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Education Cybersecurity Solutions | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's education overview page. General sector language and compliance references only, no named institutions on this page."
+    },
+    {
+      "n": 27,
+      "tier": 4,
+      "title": "Fortinet federal government industry page (attempted)",
+      "url": "https://www.fortinet.com/solutions/industries/federal-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: URL returned HTTP 404. Correct path is /solutions/industries/government/federal. Superseded by source 10."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Secure SD-WAN Customer Success Stories (ebook PDF)",
+      "url": "https://www.fortinet.com/content/dam/fortinet/assets/ebook/eb-sd-wan-customer-stories.pdf",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SD-WAN case study ebook. Strongest SD-WAN-specific sector and scale evidence, though most customers are anonymised by descriptor rather than named."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "State and Local Government Cybersecurity Solutions | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/government/state-and-local",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated public sector page naming government customers and compliance frameworks. Vendor-authored."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Fliway case study | Fortinet (UK site)",
+      "url": "https://www.fortinet.com/uk/customers/fliway",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's named case study for a New Zealand logistics provider deploying Fortinet Secure SD-WAN. Vendor-authored, customer named and quoted."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Fortinet Unified SASE product page",
+      "url": "https://www.fortinet.com/products/sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SASE page. Source of aggregate PoP count claim. Aggregate figure, not a per-region breakdown."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Small and Midsize Business Security Solutions | Fortinet",
+      "url": "https://www.fortinet.com/solutions/small-business",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated SMB solutions page. Direct evidence of explicit small and mid-market targeting."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Global data centers | FortiSASE Reference Guide | Fortinet Document Library",
+      "url": "https://docs.fortinet.com/document/fortisase/latest/reference-guide/663044/global-data-centers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's technical documentation listing every FortiSASE PoP by city and country. Highest-quality regional delivery evidence available: operational detail rather than marketing. Verified exact string forms on re-fetch."
+    },
+    {
+      "n": 34,
+      "tier": 4,
+      "title": "Fortinet energy-utilities industry page (attempted)",
+      "url": "https://www.fortinet.com/solutions/industries/energy-utilities",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: URL returned HTTP 404. Correct path is /solutions/industries/power-utilities. Superseded by source 20."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Cybersecurity for Business and Industry | Fortinet industries index",
+      "url": "https://www.fortinet.com/solutions/industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's index of all dedicated industry pages. Used to establish which sectors have dedicated pages and which do not."
+    },
+    {
+      "n": 36,
+      "tier": 2,
+      "title": "AWS Marketplace: Fortinet FortiGate VM Next-Generation Firewall",
+      "url": "https://aws.amazon.com/marketplace/pp/prodview-wory773oau6wq",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Independently operated marketplace with listed transactable pricing. Accountable record of published rates, but covers the virtual firewall SKU rather than a full SD-WAN or SASE subscription, so it is indicative only."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Hospitality Cybersecurity Solutions | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/hospitality",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated hospitality page with a named hotel group customer quoted. Vendor-authored."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Transportation Cybersecurity | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/transportation",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated transportation page. Sector solution content but no named customers on the page itself."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Power and Utilities Cybersecurity | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/power-utilities",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated utilities page with multiple named utility customers and a NERC CIP resource. Vendor-authored."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Fortinet customers filtered by Business Services",
+      "url": "https://www.fortinet.com/customers?industry=business-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's customer index with sector filter applied. Filter label captured but no named professional services customer resolved from the returned content."
+    },
+    {
+      "n": 41,
+      "tier": 3,
+      "title": "Fortinet Recognized as a Leader in the 2025 Gartner Magic Quadrant for SASE Platforms (GlobeNewswire)",
+      "url": "https://www.globenewswire.com/news-release/2025/07/15/3115857/0/en/index.html",
+      "published": "2025-07-15",
+      "verified_on": "2026-07-29",
+      "reliability": "Vendor-issued press release distributed on a dated third-party wire. Corroboration only: the wire hosts but does not verify the claims. Note its PoP figure (over 160) disagrees with the 170+ on source 12."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Higher Education Cybersecurity | Fortinet",
+      "url": "https://www.fortinet.com/solutions/industries/higher-ed",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's dedicated higher education page with five named and quoted universities and colleges across the US, Netherlands and Mexico. Vendor-authored."
     }
   ],
   "sourced_facts": {
@@ -560,6 +767,231 @@
       "quote": "Fortinet delivers 99.999% SLA with latency guarantee for security inspection, which is possible because of global reach with hundreds of security PoPs.",
       "claimed_by": "vendor",
       "note": "The 99.999 headline figure is qualified in Fortinet's own G-Cloud service definition, which breaks availability down as Management Portal 99.99%, Individual Security POPs 99.99%, and Overall service (in high availability configuration) 99.999%. So five nines applies only where the customer buys a high availability configuration; a single PoP carries four nines. The FortiSASE product page also hedges, saying uptime is \"typically offering 99.999% uptime\". Buyers should read the figure as conditional. Recorded in conflicts."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        22,
+        28
+      ],
+      "confidence": "high",
+      "quote": "The healthcare industry is undergoing digital transformation with the adoption of Internet-of-Medical-Things (IoMT) devices and digital technology, expanding the attack surface.",
+      "claimed_by": "vendor",
+      "note": "Dedicated healthcare industry page. Re-fetch confirmed the exact strings \"Halifax Health\", \"Heartland Dental\" and \"Atrius Health\" all appear verbatim on the same page as named customers, alongside RWJBarnabas Health, Enzo Biochem and Mater Health North Queensland. The SD-WAN customer stories ebook [9] additionally carries an anonymised \"Largest Dental Services\" provider with 700+ locations, which is SD-WAN-specific rather than generic security. Grade rests on named customers plus a dedicated page, not on inference."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        23,
+        28
+      ],
+      "confidence": "high",
+      "quote": "The financial services sector is a high-value target for cyberattacks and highly regulated by jurisdictions around the world.",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services industry page. USI Insurance Services is named and quoted on that page saying \"Secure SD-WAN does what it is supposed to do.\" The SD-WAN customer stories ebook [9] names Itau Unibanco with 3,000+ locations across 20 countries, which is direct SD-WAN evidence. Other financial customers on the page are anonymised by descriptor (a Vietnamese bank, a US multinational institution)."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        24,
+        21
+      ],
+      "confidence": "high",
+      "quote": "With the Fortinet Secure SD-WAN solution in place, those stores stayed online. In fact, they were not even aware of the outage.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence in the set: The Paper Store is named on the dedicated retail page and quoted about Secure SD-WAN specifically, not generic security. Bozzuto's, Cub, Fat Brands, Checkers Drive-In Restaurants and Batteries Plus Bulbs are also named and quoted on the same page. Supertiendas Olimpica appears via the SD-WAN product page."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        25,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Our extended IT infrastructure is absolutely critical to everything we do, so it's invaluable to have the seamless protection that Fortinet provides across our physical and cloud-based domains.",
+      "claimed_by": "vendor",
+      "note": "Quote attributed to Steelcase on the dedicated manufacturing page. GEMU, Kalsec, Barnes Group and Toyota Material Handling are also named on that page. The SD-WAN ebook [9] carries a global auto parts company (~11,000 locations, 17 countries) and a bakery manufacturer (1,000 locations, 32 countries) as SD-WAN deployments. Note the Steelcase quote evidences platform security rather than SD-WAN specifically; the SD-WAN link comes from [9]."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        39,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Fortinet solutions are user friendly and easy to configure and deploy.",
+      "claimed_by": "vendor",
+      "note": "Quote attributed to Elektroprivreda BiH on the dedicated Power and Utilities page; chosen over the longer ENGIE Italia pull-quote because short testimonial strings verify more reliably. Echoenergia, Falu Energi & Vatten, Houston County Electric Cooperative and ENGIE Italia are also named on that page, and it hosts a NERC CIP deployment paper. Fortinet also runs separate dedicated Oil and Gas and SCADA/ICS pages [16], and the SD-WAN ebook [9] includes a global oil and gas company with 400+ locations. Plains All American Pipeline and ExxonMobil appear on the customers index [2]."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        29,
+        21
+      ],
+      "confidence": "high",
+      "quote": "Fortinet solutions meet government compliance requirements such as FISMA, NIST, and CJIS",
+      "claimed_by": "vendor",
+      "note": "Dedicated State and Local Government page plus a separate Federal Government page [16]. Named public sector customers on the page include City of Portland, Illinois Century Network, Felgueiras City Council and Hornsby Shire Council; Schenectady County appears on the customers index [2]. Compliance framework claim supports the grade. Caveat: this evidence is general Fortinet security rather than SD-WAN specifically, and I did not find a named government SD-WAN deployment."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        42,
+        21
+      ],
+      "confidence": "high",
+      "quote": "We did not experience any difference at all from the pre-sale to post-sale support, which speaks volumes about Fortinet's commitment to its customers.",
+      "claimed_by": "vendor",
+      "note": "Quote attributed to Dr. Mehran Basiratmand, Executive Director and CTO, Florida Atlantic University, on the dedicated Higher Education page. Wageningen University & Research, Anahuac University Network, Northeast Texas Community College and ITAM are also named and quoted there. Separate dedicated K-12 School Districts page exists [16]. Coomera Anglican College and St. Andrews Lutheran College appear on the customers index [2]. Worth noting the general /industries/education page [7] carries no named institutions at all, so the evidence sits on the higher-ed page."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        30,
+        38
+      ],
+      "confidence": "medium",
+      "quote": "With all those benefits and advantages over the previous managed WAN, perhaps the most astonishing result is the significant reduction in overall cost.",
+      "claimed_by": "vendor",
+      "note": "Quote attributed to Kevin Rowland, Chief Information Officer, Fliway, one of New Zealand's largest integrated logistics providers, in a case study explicitly about replacing a managed WAN with Fortinet Secure SD-WAN across 13 branches and 6 warehouses. Confidence is medium rather than high because the dedicated Transportation industry page [19] itself carries no named customers, so the grade rests on a single named case study. Waste Management also surfaced as a case study URL in search but I did not read that page, so it is not cited."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [
+        40,
+        35
+      ],
+      "confidence": "medium",
+      "quote": "Business Services",
+      "claimed_by": "none",
+      "note": "Honest unknown. I checked: the industries index [16] lists sixteen dedicated industry pages and none is professional services, consulting, legal or accounting. The customers index carries a \"Business Services\" filter label (quoted above, verbatim from the filter taxonomy) but the filtered view did not resolve any named professional services customer. A targeted search for a Fortinet law firm or consulting SD-WAN case study returned only Fortinet's own Professional Services support offering, which is a Fortinet service line and not a customer sector. No sector-specific customer, case study or accreditation found, so no grade is awarded."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        37,
+        28
+      ],
+      "confidence": "high",
+      "quote": "We have reservations coming in through the internet, through third party travel agencies, as well as local traffic.",
+      "claimed_by": "vendor",
+      "note": "Quote attributed to Harold Dibler, Vice President of Technology, Best Western Hotels and Resorts, on the dedicated Hospitality page. IHG Hotels & Resorts appears on the customers index [2] with a Secure SD-WAN deployment, and the SD-WAN ebook [9] leads with a global hospitality company at 4,000+ locations and 325,000+ employees. Majestic Resorts is cited on the SD-WAN product page [1]. Note the Best Western quote itself is about reservations security, not SD-WAN; the SD-WAN link comes from [2] and [9]."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "London (United Kingdom)",
+      "claimed_by": "vendor",
+      "note": "Taken from the FortiSASE global data centre table in Fortinet's technical documentation, which lists PoPs by city and country rather than sales offices. Three London PoPs are listed (LON-F4 on Fortinet's own cloud, plus LON-G2 and LON-O1 on public cloud). A separate Ireland entry (DUB-A2) also appears; the exact string \"Ireland\" was verified present, though that row is labelled by country only rather than by city. Exact string forms confirmed on a dedicated re-fetch."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Paris (France)",
+      "claimed_by": "vendor",
+      "note": "Dense European coverage in the FortiSASE PoP table: France (Paris, Valbonne), Germany (Frankfurt), Spain (Madrid), Italy (Milan), Netherlands (Amsterdam), Belgium, Sweden, Finland, Poland, Switzerland and Turkey. Verification caveat worth recording: the exact string \"Frankfurt (Germany)\" is NOT present; the page renders it as \"Frankfurt (German)\", which appears to be a typo in Fortinet's own documentation. I have therefore quoted the Paris row, which verified exactly."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Ashburn, Virginia (United States)",
+      "claimed_by": "vendor",
+      "note": "Heaviest concentration of PoPs of any region: roughly a dozen US locations (Ashburn, Dallas, Plano, Miami, San Jose, Chicago, Columbus, Las Vegas, Moncks Corner, Portland), four Canadian metros (Burnaby, Toronto, Ottawa, Montreal) and Queretaro in Mexico. Note the US rows use a city-plus-state format, so the exact string is \"Ashburn, Virginia (United States)\" and not \"Ashburn (United States)\"; this was confirmed on re-fetch."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Sydney (Australia)",
+      "claimed_by": "vendor",
+      "note": "Broad APAC coverage in the PoP table: Australia (Sydney, Melbourne, Perth), New Zealand (Auckland), Japan (Tokyo, Osaka, Komagome), Singapore, Hong Kong, India (Mumbai, Delhi, Bangalore, Pune), South Korea (Seoul), Taiwan (Taipei), Thailand, Indonesia, Philippines and Malaysia. Note the Singapore row renders as \"Singapore (Republic of Singapore)\", not bare \"Singapore\"."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Dubai (United Arab Emirates)",
+      "claimed_by": "vendor",
+      "note": "Middle East coverage is strong: UAE (Dubai has four PoPs including two on Fortinet's own cloud, plus Abu Dhabi), Saudi Arabia (Dammam, Jeddah), Qatar (Doha), Oman (Muscat) and Israel (Tel Aviv). African coverage is much thinner and effectively single-country: only Johannesburg (South Africa) appears, verified verbatim as \"Johannesburg (South Africa)\". Buyers needing West or East African delivery should treat this as unproven."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        33
+      ],
+      "confidence": "high",
+      "quote": "Sao Paulo (Brazil)",
+      "claimed_by": "vendor",
+      "note": "PoPs listed in Brazil (Sao Paulo, Vinhedo), Chile (Santiago), Colombia (Bogota), Peru (Lima), Argentina (Buenos Aires) and Mexico (Queretaro). Recording a rendering conflict rather than resolving it: the Fortinet-cloud row verified verbatim as \"Sao Paulo (Brazil)\" without a diacritic, while the public-cloud row for the same city appears as \"Sao Paulo (Brazil)\" with an accented a. I have quoted the unaccented form, which was explicitly confirmed present."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        33,
+        20
+      ],
+      "confidence": "high",
+      "quote": "Hong Kong",
+      "claimed_by": "none",
+      "note": "Deliberate unknown, and the evidence is unusually clean for it. A direct re-fetch of the FortiSASE global data centre table confirmed that no mainland Chinese city (Beijing, Shanghai or Shenzhen) appears anywhere on the page. The only nearby entries are Hong Kong (HKG-F1, HKG-G2) and Taipei (TPE-G2), quoted above, neither of which constitutes mainland delivery. Fortinet does publish a Mainland China simplified-Chinese locale on its website [1], but per method a website language is explicitly not evidence of service delivery, and the same applies to any generic global claim. Mainland China delivery would require a separately licensed arrangement that I found no evidence of."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        21,
+        28
+      ],
+      "confidence": "high",
+      "quote": "Fortinet secures the largest enterprise, service provider, and government organizations around the world.",
+      "claimed_by": "vendor",
+      "note": "Explicit vendor targeting statement, backed by scale evidence rather than assertion alone. The SD-WAN customer stories ebook [9] profiles deployments at Fortune 500 scale: a hospitality group at 4,000+ locations, 325,000+ employees and $19.4 billion revenue; a waste provider at 1,200+ locations described as a \"Fortune 500 large enterprise\"; Itau Unibanco at 3,000+ locations across 20 countries; and a claims manager operating in 70 countries. These are SD-WAN references specifically."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        32,
+        20
+      ],
+      "confidence": "high",
+      "quote": "Small and midsize businesses (SMBs) and managed security service providers (MSSPs) supporting SMB customers need a simple management tool to deploy, manage, and operate network security.",
+      "claimed_by": "vendor",
+      "note": "Fortinet runs a dedicated SMB solutions page and treats small and midsize as a single addressed segment, so mid-market and small business share the same evidence base. The SD-WAN product page [1] also surfaces a distinct \"Small & Midsize Business\" navigation entry alongside \"Enterprise\", indicating separate product routing rather than a single enterprise-only motion. The page does not publish employee or revenue thresholds, so the boundary between mid-market and small business is not defined by the supplier."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        32
+      ],
+      "confidence": "high",
+      "quote": "Fortinet delivers affordable, enterprise-grade security and networking in one easy-to-manage solution, tailored to the needs of SMBs.",
+      "claimed_by": "vendor",
+      "note": "Explicit small business targeting with affordability positioning, on a dedicated SMB page. Supporting language on the same page includes \"Get purpose-built security with the best price-per-performance, reducing costs and resource needs.\" Caveat for buyers: this is a whole-portfolio SMB claim covering security and networking generally, and I found no small business SD-WAN case study or published SMB SD-WAN price point, so the targeting is proven but SMB SD-WAN delivery is not separately evidenced."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        20,
+        32,
+        36
+      ],
+      "confidence": "medium",
+      "quote": "Easily transition to FortiSASE security service edge (SSE) with simplified licensing, also delivering lower costs; about one-third of competitor offerings.",
+      "claimed_by": "vendor",
+      "note": "Fortinet publishes no list price for Secure SD-WAN, so this is graded on positioning language plus one transactable marketplace listing. The quoted claim is an explicit undercut-the-competition statement (roughly a third of rivals' cost). The same page adds \"Fortinet Secure SD-WAN has a predictable cost model with no bandwidth licensing or data transfer charges or services tiering.\" The SMB page [13] reinforces this with \"affordable\" and \"best price-per-performance\". AWS Marketplace [17] gives the only hard published figures found, but for the FortiGate VM firewall SKU rather than an SD-WAN or SASE subscription, with rates from about $0.36 to $5.16 per hour by instance type and a 365-day contract option; it is indicative only. Confidence is medium, not high, because every figure is either vendor self-positioning or an adjacent SKU. Not graded budget: Fortinet positions on price-performance and low TCO against enterprise competitors, not as a cheap product. Buyers should expect appliance plus subscription pricing negotiated through partners, which is why no public entry point exists."
     }
   },
   "conflicts": [

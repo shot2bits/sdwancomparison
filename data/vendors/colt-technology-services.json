@@ -80,16 +80,16 @@
     "Underlying SD-WAN platform should be explicitly confirmed in RFP."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
-    "north_america": "partial",
+    "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "partial",
-    "latin_america": "unknown",
-    "china_mainland": "partial"
+    "latin_america": "partial",
+    "china_mainland": "unknown"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -109,21 +109,21 @@
     "note": "Owned Colt IQ Network fibre with diverse routing and on-demand failover."
   },
   "sectors": {
-    "healthcare": "partial",
+    "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
+    "retail_ecommerce": "yes",
     "manufacturing": "partial",
-    "energy_utilities": "partial",
+    "energy_utilities": "unknown",
     "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
+    "education": "yes",
+    "transport_logistics": "yes",
     "professional_services": "yes",
     "hospitality_leisure": "partial"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "partial",
-    "small_business": "not_primary"
+    "mid_market": "yes",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_site",
@@ -336,6 +336,267 @@
       "published": null,
       "reliability": "Not used as evidence: machine-generated encyclopaedia entry with no named author, no editorial accountability and no dated primary sourcing. Seen in search results only, not fetched.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 18,
+      "tier": 1,
+      "title": "SD WAN & SASE - Colt Technology Services (product page)",
+      "url": "https://www.colt.net/products/networking/sd-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product page. Names the six industries Colt fronts on the SD-WAN journey, the SD-WAN vendor choices, and the Europe/Asia/US platform footprint. Primary but promotional."
+    },
+    {
+      "n": 19,
+      "tier": 1,
+      "title": "Our story - Colt Technology Services",
+      "url": "https://www.colt.net/about/our-story/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier corporate page. Carries the headline network scale figures (40+ countries, 275+ PoPs, 12 cable landing stations, Europe's largest B2B fibre provider). Self-reported, undated."
+    },
+    {
+      "n": 20,
+      "tier": 1,
+      "title": "Solutions - Colt Technology Services (industries hub)",
+      "url": "https://www.colt.net/solutions/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier navigation hub. Definitive list of the only six industry pages Colt publishes: Capital Markets, Manufacturing, Pharma, Retail, Transport & Logistics, Defence. Used to establish absence of sector pages."
+    },
+    {
+      "n": 21,
+      "tier": 1,
+      "title": "Manufacturing Industry | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/industries/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier industry page with named customers (Hitachi, Decathlon, INEOS, Renault Group, Wanzl, HIT Tomato) and attributed quotes. Strong sector evidence."
+    },
+    {
+      "n": 22,
+      "tier": 1,
+      "title": "Capital Markets | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/industries/capital-markets",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier industry page. Named financial customers (Stuttgart Stock Exchange, Byblos Bank Europe, RCI Bank and Services) with attributed quotes plus a top-25-banks penetration claim. Strong but vendor-claimed."
+    },
+    {
+      "n": 23,
+      "tier": 1,
+      "title": "Retail | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/industries/retail",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier industry page. Attributed customer quotes (RRG, lm group) but the page renders names and job titles run together, so string matching needs care."
+    },
+    {
+      "n": 24,
+      "tier": 1,
+      "title": "Transport and Logistics | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/industries/transport-logistics",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier industry page with named customers All Nippon Airways, Cosco Shipping Lines and Eurovision, each with an attributed quote."
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Supporting the Defence Industry | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/industries/defence",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier industry page. Dedicated defence positioning and GDPR Binding Corporate Rules reference, but the logo carousel is the generic all-customer one and no defence customer or contract is named."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Pharmaceutical Industry | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/industries/pharma",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier industry page. Named customer Towa International with an attributed quote covering Japan, Europe and the US."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Leading provider of medical devices in the global healthcare sector - Colt Technology Services",
+      "url": "https://www.colt.net/resources/leading-provider-of-medical-devices-in-the-global-healthcare-sector/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study, industry-labelled Healthcare, solution stated as SD WAN with Cloud Access and Secure Enterprise Gateway (Zscaler). Customer is anonymised, which weakens it."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Customer Stories - Colt Technology Services",
+      "url": "https://www.colt.net/customers/customer-stories",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier index of published customer stories with dates and industry labels. Used to establish which sectors Colt does and does not publish stories for."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Esade customer story - Colt Technology Services",
+      "url": "https://www.colt.net/customer-stories/esade",
+      "published": "2025-11-06",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study, industry-labelled Education, named academic institution. Solutions listed are IP Access and infrastructure network services, not SD-WAN."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "INEOS customer story - Colt Technology Services",
+      "url": "https://www.colt.net/customer-stories/ineos",
+      "published": "2024-05-09",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study, industry-labelled Manufacturing. Describes INEOS as a global petrochemicals manufacturer and 128 managed sites globally."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Kinepolis on-demand connectivity customer story - Colt Technology Services",
+      "url": "https://www.colt.net/customer-stories/kinepolis-ondemand-connectivity-naas-for-events",
+      "published": "2026-04-23",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier case study for an international cinema group, but Colt labels it Media & Entertainment, not hospitality or leisure. Solution is NaaS, not SD-WAN."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Mid-market and high-growth enterprises | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/business-type/growth",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier segment page. Explicit mid-market targeting with named customers (Esade, Wempe, Classik Hotel Collection, Altares, CoStar Group, Arthur D. Little). Strong for organisation-size grading."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Enterprise | Colt Technology Services",
+      "url": "https://www.colt.net/solutions/business-type/enterprise",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier segment page for large enterprise with named customers Berlinale, Decathlon, Huisman and France Televisions."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Contact us - Colt Technology Services (office locations)",
+      "url": "https://www.colt.net/contact-us/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier office list covering London, Dublin, Amsterdam, Bangalore, Gurgaon, Hong Kong, Jersey City, Osaka, Seoul, Shanghai, Singapore, Tokyo and others. Offices only, so it evidences presence not service delivery."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Networking products - Colt Technology Services",
+      "url": "https://www.colt.net/products/networking/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier product hub. Repeats the Europe/Asia/US NaaS footprint and 32,000+ buildings, 1,100+ data centres figures. Names no country outside those three regions."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Why Colt - Colt Technology Services",
+      "url": "https://www.colt.net/why-colt/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier page giving 60+ offices in 32 countries. Conflicts in framing with the 40+ countries connected figure on the Our story page (offices versus network reach), so both are recorded rather than reconciled."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Networking News, Resources, Trends & Industry Insights - Colt",
+      "url": "https://www.colt.net/resources/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier resource library. Its industry filter taxonomy (Capital Markets, Defence, Manufacturing, Media & Entertainment, Pharma, Professional services, Retail, Transport & Logistics) is the fullest statement of the sectors Colt indexes content against."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Colt Technology Services expands its national UK network reach",
+      "url": "https://www.colt.net/resources/colt-technology-services-expands-its-national-uk-network-reach/",
+      "published": "2021-12-07",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release. Concrete UK metro delivery detail (Leeds, Bristol, Slough, Bracknell, Reading, Milton Keynes, Edinburgh, Glasgow) via CityFibre. Dated 2021 so possibly superseded."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Colt scales up Middle East operations to support surge in customer demand across the region",
+      "url": "https://www.colt.net/resources/insights/colt-scales-up-middle-east-operations",
+      "published": "2026-02-09",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release. Distinguishes existing markets (Turkey, Dubai) from planned partner-enabled markets (Saudi Arabia, wider UAE, Qatar, Bahrain, Kuwait, Oman). Recent and specific, but much of it is forward-looking intent."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Colt Technology Services expands its capital markets offering into Latin America",
+      "url": "https://www.colt.net/resources/colt-technology-services-expands-its-capital-markets-offering-into-latin-america/",
+      "published": "2021-10-28",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release. Describes extranet access to Brazil's B3 exchange from Colt's existing global PrizmNet PoPs. Evidences a reachable venue, not in-region network delivery."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Colt adds seven Mainland China Exchanges to its Market Data Services Portfolio",
+      "url": "https://www.colt.net/resources/colt-adds-seven-mainland-china-exchanges-to-its-market-data-services-portfolio/",
+      "published": "2021-08-31",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier press release. Mainland China exchange data is delivered from HKEX colocation and the PrizmNet extranet, so it evidences market-data reach into China rather than licensed in-country enterprise WAN delivery."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Case Study - SD WAN - Digital workspace between cranes (Implenia)",
+      "url": "https://www.colt.net/resources/digital-workspace-between-cranes/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier SD-WAN case study naming Implenia, a construction and real estate services group operating in DACH, France, Norway, Sweden and Italy. Sector (construction) is outside the ten graded sectors."
+    },
+    {
+      "n": 43,
+      "tier": 2,
+      "title": "Colt SD-WAN - G-Cloud 14, UK Digital Marketplace (Crown Commercial Service)",
+      "url": "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/231080253111893",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "UK government procurement register. Independently accountable: the listing is on a Crown Commercial Service system, carries a published unit price and states PSN Customer Certified and PSN Supplier Certified. Strongest single source in this set for both public sector fit and price tier."
+    },
+    {
+      "n": 44,
+      "tier": 2,
+      "title": "Arthur D. Little selects Colt Technology for offices in Asia - Consultancy.asia",
+      "url": "https://www.consultancy.asia/news/3669/arthur-d-little-selects-colt-technology-for-offices-in-asia",
+      "published": "2020-11-10",
+      "verified_on": "2026-07-29",
+      "reliability": "Dated trade journalism with a named customer contact (Haruya Kono, IT Manager). Corroborates a professional services customer and Asia delivery, though the services cited are SIP trunking and business internet rather than SD-WAN. 2020, so dated."
+    },
+    {
+      "n": 45,
+      "tier": 3,
+      "title": "Colt Technology Services expands its capital markets offering into Latin America - Telecom Ramblings newswire",
+      "url": "https://newswire.telecomramblings.com/2021/10/colt-technology-services-expands-its-capital-markets-offering-into-latin-america-2/",
+      "published": "2021-10-28",
+      "verified_on": "2026-07-29",
+      "reliability": "Newswire republication of the supplier press release. Corroboration only; carries no independent reporting and does not carry a grade alone."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "Colt Technology Services: European Fibre Network and SD-WAN | Netify",
+      "url": "https://netify.co.uk/marketplace/colt/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. This is Netify's own existing marketplace profile, which is the very content this exercise is replacing, so citing it would be circular. It asserts pricing geared to enterprise rather than SMB and 220+ metro networks across 31 countries, none of which is independently sourced on the page."
     }
   ],
   "sourced_facts": {
@@ -535,6 +796,236 @@
       "quote": "SLA (for on-net circuits) | 99.90% | 99.90% | 99.95% | 99.90% | 99.95% | 99.90% | 99.95%",
       "claimed_by": "vendor",
       "note": "99.90% is the baseline availability across the XS, S, M and L site packages; the S Plus, M Plus and L Plus packages carry 99.95%. I have recorded the baseline as the headline value since it applies to the majority of tiers. Two caveats for a buyer: the figure is qualified as applying to on-net circuits only, so off-net and internet-underlay sites are not covered by it, and the value is published in a table rather than prose, so the quote is a table row. No availability percentage appears on any of Colt's marketing-facing SD-WAN or SASE pages."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        27,
+        20,
+        28
+      ],
+      "confidence": "medium",
+      "quote": "SD WAN with Cloud Access and Secure Enterprise Gateway (Zscaler)",
+      "claimed_by": "vendor",
+      "note": "Colt publishes a healthcare-labelled SD-WAN case study titled \"Leading provider of medical devices in the global healthcare sector\", where the stated solution is SD WAN with Cloud Access and Secure Enterprise Gateway (Zscaler) alongside Colt Intelligent Communications and Colt Professional Services. The customer is anonymised, so there is no named healthcare reference. There is no healthcare industry page: /solutions/industries/healthcare returns 404 and healthcare is absent from both the six-item industries hub and the eight-item resources industry filter. Graded yes on the strength of a sector-labelled, SD-WAN-specific case study, but a buyer should note the anonymity."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        22,
+        20,
+        37
+      ],
+      "confidence": "high",
+      "quote": "18/25 of the top global banks trust us with their critical infrastructure and connectivity",
+      "claimed_by": "vendor",
+      "note": "Dedicated Capital Markets industry page with named customers Stuttgart Stock Exchange, Byblos Bank Europe and RCI Bank and Services. Byblos Bank Europe is quoted on a Colt and Zscaler SSE deployment: \"Compared to our previous VPN-based approach, the Colt and Zscaler solution is a real enhancement that delivers a faster and better user experience and helps increase productivity\" (Ramy Matar, Network Consultant, BBE). Note the focus is capital markets and trading connectivity rather than retail banking or insurance; the 18/25 top global banks figure is a vendor claim with no source cited on the page."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        23,
+        20,
+        21
+      ],
+      "confidence": "high",
+      "quote": "With Colt we have a reliable networking solution that meets our simplification and consolidation aims. It also allows us to centralise our billing & optimise our costs across Europe.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Retail industry page carrying attributed customer quotes, including the one cited from Thomas Laromiguiere, IT Systems Architect, RRG (Renault Retail Group). Decathlon appears as a named customer on both the Manufacturing and Enterprise pages. Caution: the retail page renders speaker names and job titles concatenated without separating punctuation, so the attribution line may not match a naive string search."
+    },
+    "sectors.energy_utilities": {
+      "value": "unknown",
+      "evidence": [
+        30,
+        20,
+        37,
+        28
+      ],
+      "confidence": "high",
+      "quote": "INEOS is a leading global petrochemicals manufacturer made up of 36 individual businesses which touch every aspect of modern-day life.",
+      "claimed_by": "none",
+      "note": "No energy or utilities evidence found. Checked: the industries hub, which lists only Capital Markets, Manufacturing, Pharma, Retail, Transport & Logistics and Defence; the resources library industry filter, which adds only Media & Entertainment and Professional services; and the customer stories index. The nearest adjacency is INEOS, a petrochemicals group, but Colt labels that story Manufacturing, not energy. No utility, grid, oil and gas or renewables customer, page or accreditation was found. Do not infer energy capability from the petrochemicals reference."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        29,
+        32,
+        28
+      ],
+      "confidence": "medium",
+      "quote": "Esade is a globally recognised academic institution, delivering top-tier education to over 15,000 students each year — 40% of whom are international.",
+      "claimed_by": "vendor",
+      "note": "Esade is a named customer with a Colt customer story dated 6 November 2025 that Colt labels Education, and it also appears on the mid-market segment page. This is a single named reference: there is no education industry page and education is not in the resources industry filter list. The solutions listed on the Esade story are IP Access and infrastructure network services, not SD-WAN or SASE, so this evidences sector reach rather than SD-WAN delivery into education."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        24,
+        20
+      ],
+      "confidence": "high",
+      "quote": "Colt's high-bandwidth cloud connectivity service has made it possible for us to transmit large volumes of reservation and ticketing data to our analytics system quickly and reliably.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Transport & Logistics industry page listing SD WAN + SASE among its networking services. Named customers with attributed quotes: All Nippon Airways (quoted, Takahiro Morishita, Manager, Information Security & IT Architecture Strategy), Cosco Shipping Lines (Johan De Wispelaere, IT Manager) and Eurovision (Graham Warren, Network Director). Brussels Airlines also appears in the logo set. The named engagements are cloud connectivity and voice rather than SD-WAN specifically."
+    },
+    "sectors.professional_services": {
+      "value": "yes",
+      "evidence": [
+        44,
+        32,
+        37
+      ],
+      "confidence": "medium",
+      "quote": "The Singapore and Tokyo offices of Arthur D. Little have recently been migrated to Colt's network.",
+      "claimed_by": "third_party",
+      "note": "Professional services is one of the eight industry filter categories in Colt's resources library, and Arthur D. Little, a global management consultancy, is named as a Colt customer both on Colt's mid-market segment page and in dated trade journalism from November 2020. Caveats: the published Arthur D. Little engagement is SIP trunking and business internet in Singapore and Japan, not SD-WAN or SASE; there is no professional services industry page; and the third-party report is nearly six years old. Altares and CoStar Group also appear as named mid-market customers but with no sector-labelled story behind them."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "partial",
+      "evidence": [
+        23,
+        31,
+        32
+      ],
+      "confidence": "low",
+      "quote": "We turned to Colt because it has good availability of proprietary fibre in all the main countries where lm group operates.",
+      "claimed_by": "vendor",
+      "note": "Evidence is indirect and conflicting. The quoted line is from Giuseppe Arcoraci, Network Manager at lm group (the lastminute.com online travel group), but it sits on Colt's Retail page rather than a hospitality page. Kinepolis, an international cinema and entertainment group with 122 cinemas, has a Colt customer story dated 23 April 2026, but Colt labels it Media & Entertainment and the solution is Network as a Service, not SD-WAN. Classik Business Space of the Classik Hotel Collection GmbH is listed among named customers on the mid-market page, but no hotel case study page was located. There is no hospitality or leisure industry page and no such filter in the resources library. Graded partial, not yes, because every reference is sector-adjacent or sector-mislabelled and none is a hospitality-labelled case study."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        38,
+        43,
+        19,
+        34
+      ],
+      "confidence": "high",
+      "quote": "establishes Edinburgh and Glasgow as the 53rd and 54th Colt Metro Cities",
+      "claimed_by": "vendor",
+      "note": "Colt was founded in London and lists London as HQ plus a Dublin office. UK metro delivery is documented through the CityFibre partnership extending on-net reach into Leeds, Bristol, Slough, Bracknell, Reading, Milton Keynes, Edinburgh and Glasgow, taking Colt to 54 metro cities. Independently corroborated by the live UK G-Cloud 14 listing for Colt SD-WAN, which is a UK-sold, UK-priced service with PSN certification. Ireland evidence is thinner than UK evidence: a Dublin office is listed but no Irish metro or PoP detail was found."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        19,
+        18,
+        35,
+        38
+      ],
+      "confidence": "high",
+      "quote": "We manage eight subsea cable systems, are Europe's largest B2B fibre provider and co-own the most widely peered network in the world.",
+      "claimed_by": "vendor",
+      "note": "Europe is Colt's core delivery region. Own-fibre metro networks across major European cities, 32,000+ buildings and 1,100+ data centres connected, offices in Amsterdam, Barcelona, Brussels, Lisbon, Copenhagen, Frankfurt, Madrid, Paris, Milan, Sibiu, Stockholm, Vienna and Zurich. Note a framing conflict left unresolved: the Our story page says Colt connects 40+ countries, while the Why Colt page says \"From our small beginnings in London in 1992, we've grown to over 60 offices in 32 countries.\" Both figures are recorded as published."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        18,
+        35,
+        22,
+        34
+      ],
+      "confidence": "medium",
+      "quote": "With Colt fibre and millions more available via our Colt Network as a Service platform across Europe, Asia and the US.",
+      "claimed_by": "vendor",
+      "note": "The US is named explicitly as one of three NaaS platform regions on both the SD-WAN page and the networking hub. Corroborated by a Jersey City office and, on the Capital Markets page, transatlantic subsea connectivity into New Jersey and New York. Graded yes for the US specifically. No Canadian or Mexican coverage, PoP or customer evidence was found, so treat the grade as US-centric rather than pan-North-American. The US footprint reads as financial-district and data-centre focused rather than broad national metro fibre."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        26,
+        18,
+        34,
+        44,
+        24
+      ],
+      "confidence": "high",
+      "quote": "We needed a partner who could provide a secure global network to support our expansion. Colt's expertise & reliability helped us connect our operations across Japan, Europe & the US.",
+      "claimed_by": "vendor",
+      "note": "Quote is Marc Carbones Gironella, Technology Director, Towa International, on the Pharma page. Asia is one of the three named NaaS platform regions. Corroborated by offices in Tokyo, Osaka, Singapore, Hong Kong, Seoul, Bangalore and Gurgaon; by All Nippon Airways, J Sports Corporation, TV Asahi and Air Internet Service as named Japanese customers; by a Nextrade partnership in Korea on the Capital Markets page; and by independent trade reporting of Arthur D. Little's Singapore and Tokyo offices being migrated onto Colt's network. Japan is clearly the strongest APAC market. No Australia or New Zealand evidence was found."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        39
+      ],
+      "confidence": "medium",
+      "quote": "Colt plans to expand its team and continue building its business in its existing markets including Turkey and Dubai.",
+      "claimed_by": "vendor",
+      "note": "Middle East only, and partly forward-looking. Colt's February 2026 announcement confirms existing markets in Turkey and Dubai and leased capacity in three subsea systems crossing the region (Europe India Gateway, FALCON, HAWK). Wider Gulf coverage is explicitly partner-dependent and future tense: \"Colt also plans to partner with local operators in markets including Saudi Arabia and additional regions of the United Arab Emirates, Qatar, Bahrain, Kuwait and Oman.\" No sub-Saharan or North African delivery evidence of any kind was found, so the Africa half of this region is unevidenced. A buyer needing Africa should treat this as unknown."
+    },
+    "regions.latin_america": {
+      "value": "partial",
+      "evidence": [
+        40,
+        45
+      ],
+      "confidence": "low",
+      "quote": "one of the first financial extranet providers to offer access to B3 from all of its 30+ Global PrizmNet PoPs",
+      "claimed_by": "vendor",
+      "note": "The only Latin America evidence found is a 2021 capital markets announcement extending PrizmNet extranet access to Brazil's B3 exchange. Read carefully, this describes reaching a Brazilian venue from Colt's existing global PoPs, not Colt PoPs or fibre inside Latin America. There is no Latin American office on the contact page, and Latin America is not named on the SD-WAN page, the networking hub or the Our story page. This is not evidence that Colt delivers SD-WAN or SASE to enterprise sites in Latin America. Graded partial to reflect a genuine but narrow capital-markets-only reach; the source is five years old."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        41,
+        34,
+        18
+      ],
+      "confidence": "high",
+      "quote": "available directly from within Hong Kong Stock Exchange's (HKEX) colocation facility",
+      "claimed_by": "none",
+      "note": "No evidence of licensed mainland China service delivery was found. Colt lists a Shanghai office on its contact page, but an office is not delivery. The only mainland China product evidence is a 2021 market data announcement adding seven mainland exchanges (SSE, SZSE, CFFEX, ZCE, SHFE, DCE, INE), and that page states the feeds are consumed from within HKEX colocation in Hong Kong or away via the PrizmNet extranet, which is delivery from outside the mainland. The SD-WAN page's footprint claim names only Europe, Asia and the US, with no China-specific licence, partner or PoP statement. Treat the generic global and Asia claims as evidence of nothing for mainland China."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        33,
+        22,
+        19,
+        30
+      ],
+      "confidence": "high",
+      "quote": "18/25 of the top global banks trust us with their critical infrastructure and connectivity",
+      "claimed_by": "vendor",
+      "note": "Colt runs a dedicated Enterprise segment page with named large-enterprise customers (Berlinale, Decathlon, Huisman, France Televisions) and cites G2000 statistics as its framing. The INEOS story records 128 managed sites globally for a group operating 194 facilities in 29 countries, which is a genuinely large multinational deployment. Network scale supports it: \"We connect 40+ countries, 32,000 enterprise buildings, 275+ points of presence, and 12 cable landing stations.\" This is unambiguously Colt's primary segment."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        32,
+        29
+      ],
+      "confidence": "high",
+      "quote": "Mid-market and high-growth enterprises",
+      "claimed_by": "vendor",
+      "note": "Colt publishes a dedicated mid-market segment page at /solutions/business-type/growth headed \"Mid-market and high-growth enterprises\", with the positioning line \"Fast growth brings big demands. We've got the people and expertise to help you build and manage the secure, scalable infrastructure you need.\" It cites \"$67m Average it budget for mid-market customers by 2030 - nearly 5% of revenue\" and lists named customers of that scale: Esade, Air Internet Service Co., Ltd, Berlinale, Wempe, Classik Hotel Collection, Altares, CoStar Group and Arthur D. Little. Explicit targeting plus a named customer set meets the test."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        32,
+        43
+      ],
+      "confidence": "medium",
+      "quote": "Mid-market and high-growth enterprises",
+      "claimed_by": "none",
+      "note": "No small business or SME targeting found. Colt's business-type segmentation covers Enterprise, Mid-market and high-growth, and Wholesale; the smallest named segment is mid-market, which is the quoted string. No SMB product tier, no self-serve purchase path and no SME case study were located on colt.net. The only published price point, the G-Cloud 14 figure of \"£178 to £451 a unit a month\", is a managed per-unit enterprise price rather than an SMB one. Recorded as unknown rather than not_primary because Colt nowhere explicitly states that small business is out of scope; the absence of any SMB tier is the finding, not a stated exclusion."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        43,
+        32,
+        33,
+        19
+      ],
+      "confidence": "medium",
+      "quote": "£178 to £451 a unit a month",
+      "claimed_by": "vendor",
+      "note": "The quoted figure is the only published price found anywhere for Colt SD-WAN: the G-Cloud 14 unit price on the UK Crown Commercial Service Digital Marketplace, for a fully managed service whose \"Service wrapper includes design, deployment, configuration, site activation, monitoring\" with 24/7 support and four-hour critical response. Nothing is published on colt.net itself; the product page routes to \"Contact us\" and \"Talk to an expert\". Graded premium on the combination of that per-unit range, the mandatory managed wrap, own-fibre tier-one carrier positioning, and segmentation that starts at mid-market with no SMB tier. Honest caveat: the £178 entry point sits in mid territory and only the upper end is clearly premium, so a mid grade is defensible from the same evidence. This is a Netify assessment derived from a vendor-submitted framework price, not a vendor positioning statement. Also note the price is a UK public sector framework rate and may not represent commercial enterprise pricing in other regions."
     }
   },
   "conflicts": [

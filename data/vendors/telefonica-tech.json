@@ -81,7 +81,7 @@
     "DIY/self-managed model is not the primary positioning."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "months",
   "regions": {
     "uk_ireland": "yes",
@@ -110,21 +110,21 @@
     "note": "Carrier-grade core across Europe and Latin America."
   },
   "sectors": {
-    "healthcare": "partial",
-    "financial_services": "partial",
-    "retail_ecommerce": "partial",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "partial",
-    "transport_logistics": "partial",
+    "healthcare": "yes",
+    "financial_services": "yes",
+    "retail_ecommerce": "yes",
+    "manufacturing": "yes",
+    "energy_utilities": "yes",
+    "government_public_sector": "yes",
+    "education": "yes",
+    "transport_logistics": "yes",
     "professional_services": "partial",
-    "hospitality_leisure": "partial"
+    "hospitality_leisure": "yes"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
     "mid_market": "partial",
-    "small_business": "not_primary"
+    "small_business": "partial"
   },
   "pricing_units": [
     "per_site",
@@ -409,6 +409,240 @@
       "published": null,
       "reliability": "Not used as evidence: undated third-party directory listing, no accountable author.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Secure connectivity with SASE, SD-WAN, and cloud WiFi (Cloud Networking and SASE)",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product page for the service under assessment. Describes Extended SASE, Secure SD-WAN and Cloud WiFi/SD-LAN and links three success stories (Cepsa, Valencia Marina, Gold Fields). Carries no geographic coverage, customer-size or pricing statements, which is itself informative."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Secure SD-WAN to connect branches and cloud services",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase/secure-sd-wan",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SD-WAN product page. Only page found carrying a commercial model statement. Quote re-verified character for character on a second fetch. No price points, no country list."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Extended SASE",
+      "url": "https://telefonicatech.com/en/solutions/cyber-security-and-naas/cloud-networking-and-sase/extended-sase",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own page. Read in full; contains no customer-size targeting, no geographic coverage and no pricing. Lists Renfe, Marvinpac and Marina de Valencia as related success stories. Used to establish absence rather than presence."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Digital Transformation for Key Industries by Telefónica Tech",
+      "url": "https://telefonicatech.com/en/industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own industries index, listing nine dedicated sector pages. All eight sector strapline quotes used in this assessment were re-verified character for character on a second fetch of this page. Strongest single source for sector grading."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Banking and Finance industry page",
+      "url": "https://telefonicatech.com/en/industries/banking-and-finance",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated sector page. Names BBVA, Grupo BC and Virgin Money as financial services customers. Confirms the sector page is real rather than a menu label."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Health and Social Care industry page",
+      "url": "https://telefonicatech.com/en/industries/health-and-social-care",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated health sector page. Names Vithas, Oxford University Hospitals and UKHSA. Note the slug is health-and-social-care; /en/industries/health returns 404."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Get inspired by real success stories by sector",
+      "url": "https://telefonicatech.com/en/successstories",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own success-story index carrying per-customer sector and country tags. Roughly 100 named customers. Eight specific label and customer strings were re-verified character for character on a second fetch. Sector tags are supplier-assigned and describe the engagement, not always the customer's own industry."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Cepsa, reinforcing the critical security systems of energy infrastructure",
+      "url": "https://telefonicatech.com/en/successstories/cepsa",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study, energy sector, Spain. Describes managed security over a single MPLS network, so it is network-security adjacent rather than a published SASE or SD-WAN deployment."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "DEKRA success story",
+      "url": "https://telefonicatech.com/en/successstories/dekra",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study tagged Transport & Logistics, Spain. Service delivered is a PKI platform for connected mobility, not SD-WAN or SASE."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Gold Fields success story",
+      "url": "https://telefonicatech.com/en/successstories/gold-fields",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study, mining, Peru. Full ICT infrastructure outsourcing with SOC-managed IT and OT security using Cisco technologies. Both quotes re-verified character for character on a second fetch. Best available evidence of large-enterprise scope and Latin American delivery."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Marvinpac success story",
+      "url": "https://telefonicatech.com/en/successstories/marvinpac",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study. Linked from the Secure SD-WAN page as a success story, but the case study itself covers Managed Detection and Response, not SD-WAN. Recorded as a caution against reading the SD-WAN page's story tiles as SD-WAN references."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "IE University success story",
+      "url": "https://telefonicatech.com/en/successstories/ie-university",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named education case study, Spain. Subject matter is a virtual reality teaching prototype, unrelated to networking or security."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "FRP Advisory success story",
+      "url": "https://telefonicatech.com/en/successstories/frp-advisory",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own named case study for a UK professional advisory firm. Engagement is Microsoft Dynamics 365 CRM. Tagged Others rather than a professional services sector, so it supports the sector only weakly."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Small Medium Enterprise solutions",
+      "url": "https://telefonicatech.com/en/solutions/sme",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own SME landing page. Quote re-verified character for character on a second fetch. Names SMB-oriented products (Secure Connection for SMBs, Your Small and Secure Business, Clean Email). No pricing published and no SD-WAN or SASE tier presented for this segment."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "We are Telefónica Tech",
+      "url": "https://telefonicatech.com/en/wearetech",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own corporate page. Gives headcount and nationality figures and a partner-ecosystem statement but no country count and no explicit region list, so it is weak for coverage grading."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Our partners",
+      "url": "https://telefonicatech.com/en/wearetech/partners",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own partner directory, 140+ partners. Geographic phrases on this page mostly describe the partners' own footprints rather than Telefónica Tech service delivery, so it was not used to grade regions."
+    },
+    {
+      "n": 42,
+      "tier": 1,
+      "title": "Telefónica has been named a Major Player in three IDC MarketScape reports",
+      "url": "https://telefonicatech.com/en/news/idc-marketscape-2025-sase-sdwan-sse",
+      "published": "2025",
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own news page reporting third-party analyst recognition in IDC MarketScape Worldwide Managed SASE, Managed SD-WAN and Managed SSE 2025 assessments. Analyst inclusion indicates enterprise-grade managed service scope. Underlying IDC reports were not read, so this is the supplier's account of them."
+    },
+    {
+      "n": 43,
+      "tier": 1,
+      "title": "GlobalData recognizes us a 'Very Strong' provider in Global WAN Services",
+      "url": "https://telefonicatech.com/en/news/global-data-very-strong-sd-wan-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own news page reporting a GlobalData rating. Mentions a Tier 1 global network but publishes no country list, PoP count, customer-size segmentation or pricing, so it could not carry a region grade."
+    },
+    {
+      "n": 44,
+      "tier": 1,
+      "title": "Home | Telefónica Tech USA",
+      "url": "https://us.telefonicatech.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own US entity site. Only source found that enumerates the regions in which Telefónica Tech itself holds offices. Both quotes re-verified character for character on a second fetch. Describes commercial and operational offices rather than network points of presence."
+    },
+    {
+      "n": 45,
+      "tier": 1,
+      "title": "Telefónica Tech UK&I home",
+      "url": "https://telefonicatech.uk/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own UK and Ireland entity site. Confirms a delivering UK entity with named UK customers including Heathrow Airport, Oxford University Hospitals and NHS Blood Transplant."
+    },
+    {
+      "n": 46,
+      "tier": 1,
+      "title": "Industries - Telefónica Tech UK",
+      "url": "https://telefonicatech.uk/industries/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own UK sector index listing Public Sector, Healthcare, Police, Financial Services & Insurance, Manufacturing and Retail. Corroborates the Spanish-site sector list for the UK market. Notably contains no education, hospitality or professional services page."
+    },
+    {
+      "n": 47,
+      "tier": 1,
+      "title": "Financial Services & Insurance | Telefónica Tech UK&I",
+      "url": "https://telefonicatech.uk/industries/financial-services-insurance/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated UK sector page naming Markel, Virgin Money, Beazley, Progressive Building Society, Martin Currie Investment and Ultimate Finance. Engagements are Microsoft applications and managed services rather than SASE or SD-WAN."
+    },
+    {
+      "n": 48,
+      "tier": 3,
+      "title": "Telefónica Tech UK&I Launches a Managed Service Based on Netskope's Security Service Edge Technology",
+      "url": "https://www.netskope.com/press-releases/telefonica-tech-uki-launches-a-managed-service-based-on-netskopes-security-service-edge-technology",
+      "published": "2026-01-27",
+      "verified_on": "2026-07-29",
+      "reliability": "Technology partner's press release, dated LONDON – January 27, 2026, no named author. Corroboration only: it is a joint vendor announcement, not independent journalism. Used alongside Tier 1 UK sources to support UK and Ireland service availability for the SSE component of the SASE portfolio. Quote corrected and re-verified character for character on a second fetch after an initial paraphrase was rejected."
+    },
+    {
+      "n": 49,
+      "tier": 2,
+      "title": "Telefónica Tech tees up Cisco security, SD-WAN, SASE",
+      "url": "https://www.sdxcentral.com/articles/news/telefonica-tech-tees-up-cisco-security-sd-wan-sase/2022/06/",
+      "published": "2022-06-09",
+      "verified_on": "2026-07-29",
+      "reliability": "Named-author dated trade journalism (By Dan Meyer, June 09, 2022). Independently accountable. Quote re-verified character for character on a second fetch. Dated 2022, so it describes the launch rollout plan rather than current coverage; it is the only source found that states a geographic sequence for the SD-WAN and SASE offering."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "Telefónica Cloud Networking and SASE Reviews & Ratings 2026 | TrustRadius",
+      "url": "https://www.trustradius.com/products/telefonica-cloud-networking-and-sase/reviews",
+      "published": "2026",
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The listing exists but contains zero reviews and no pricing data, so it supplies no reviewer company sizes, no industries and no price information. The headline score on the page is not backed by any published review."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "Virgin Money success story (attempted)",
+      "url": "https://telefonicatech.com/en/successstories/virgin-money",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The URL returns a 404 error page, so no case study content could be read. Virgin Money is nonetheless named as a customer on two Tier 1 sector pages, which were used instead."
     }
   ],
   "sourced_facts": {
@@ -640,6 +874,258 @@
       "quote": "",
       "claimed_by": "none",
       "note": "Not found in public sources reviewed. No availability percentage is published on any page read. The closest wording is ref 5, \"The service's international footprint of nodes guarantees close to 100% availability, with geographical redundancy\", which is a qualitative assurance and not a figure, and ref 3, which claims service level agreements exist without stating terms. Under the stated rule, a marketing mention of an SLA without a percentage is unknown. Secure SD-WAN (ref 2), Cloud WiFi/SD-LAN (ref 8) and the UK flexWAN page (ref 16) all returned NOT PRESENT for SLA."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        29,
+        31,
+        46,
+        32
+      ],
+      "confidence": "high",
+      "quote": "We drive safer, smarter, and more connected healthcare with IoT, data, and cybersecurity.",
+      "claimed_by": "vendor",
+      "note": "Cleared the bar on three counts: a dedicated health industry page at /en/industries/health-and-social-care, a separate dedicated Healthcare page on the UK and Ireland site, and named health customers (Vithas, Oxford University Hospitals, UKHSA, NHS Lancashire South Cumbria, Hospital del Mar, SESPA). Important caveat: none of these engagements is published as a SASE or SD-WAN deployment. They are cloud, AI and data, IoT and SOC projects. The grade records demonstrated healthcare sector presence, not healthcare SASE references."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        29,
+        30,
+        47
+      ],
+      "confidence": "high",
+      "quote": "We modernize architecture, automate processes, and ensure the security of financial operations.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Banking and Finance page on the Spanish-language corporate site and a separate dedicated Financial Services & Insurance page on the UK and Ireland site, both with named customers: BBVA, Grupo BC, Virgin Money, Markel, Beazley, Progressive Building Society, Martin Currie Investment, Ultimate Finance. Published engagements are Microsoft Dynamics 365, Power Platform, cloud and managed services. No SASE or SD-WAN financial services reference was found."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        29,
+        46,
+        32
+      ],
+      "confidence": "high",
+      "quote": "We transform retail with IoT, analytics, and cybersecurity for a more tailored experience.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Retail industry page on both the corporate site and the UK and Ireland site, plus named retail customers on the success-stories index tagged Retail: Dufry, VAUDE, Wortmann Fashion Retail, Semark AC Group, JAKO AG, Which?, Espacio Movistar, Torre Outlet. No retail SASE or SD-WAN case study found."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        29,
+        46,
+        35,
+        32
+      ],
+      "confidence": "high",
+      "quote": "We automate industry with smart solutions to boost efficiency, resilience, and competitiveness.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Industry page on the corporate site and a dedicated Manufacturing page on the UK and Ireland site, plus named customers tagged Industry: Gestamp, Viscofan, Ferrovial, Mahou San Miguel, Horse, Atosa, BMI, Marvinpac, Gold Fields. Gold Fields is the closest to network scope, being full ICT infrastructure outsourcing with SOC-managed IT and OT security, but it is not published as an SD-WAN or SASE deployment. Note the supplier files mining under Industry."
+    },
+    "sectors.energy_utilities": {
+      "value": "yes",
+      "evidence": [
+        29,
+        33,
+        32
+      ],
+      "confidence": "high",
+      "quote": "We optimize energy with connected solutions that improve efficiency and sustainability.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Energy & Utilities industry page plus a substantial named-customer list: Cepsa, Repsol, Viesgo, Canal Isabel II, EMASESA, Global Omnium, Aguas de Cadiz, Cetaqua, ELES, Principality of Asturias. Cepsa is the strongest for this comparison because it is one of the three success stories the Cloud Networking and SASE product page itself links to, and the delivered service is described as managed security over a single MPLS network, which is network-security work rather than SD-WAN or SASE."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        29,
+        46,
+        32
+      ],
+      "confidence": "high",
+      "quote": "We promote a more secure, efficient, and citizen-centered Public Administration through digital technology.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Public Sector page on the corporate site and on the UK and Ireland site (which also carries a separate dedicated Police page), plus the largest named-customer group on the success-stories index tagged Public administration: AEAT, INE, RTVE, ONCE, UKHSA, Ministry of Housing, Government of Navarra, Diputacion de Badajoz, Cordoba City Council, Lanbide, Abogacia del Estado, Miami Chamber of Commerce. No public sector SASE or SD-WAN case study found."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        32,
+        37
+      ],
+      "confidence": "medium",
+      "quote": "IE University",
+      "claimed_by": "vendor",
+      "note": "Graded on named customers only, which is a weaker basis than the sectors above. The success-stories index carries an Education sector tag (the strings IE University, Duoc UC and Education were each re-verified character for character on that page) and further education customers appear as Universitat Barcelona and Levan Center. There is no dedicated education industry page: education is absent from the nine sectors on /en/industries and from the six on the UK and Ireland industries index. The IE University engagement is a virtual reality teaching prototype, wholly unrelated to networking or security. Confidence held at medium for that reason."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        29,
+        34,
+        32
+      ],
+      "confidence": "high",
+      "quote": "We digitize logistics with smart tech to optimize routes and accelerate sustainability.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Transport & Logistics industry page plus named customers tagged to it: DEKRA, Renfe, Heathrow Airport, National Highways, ONS, CAF, REDUR, Joinup, PreZero, Vecttor, Econorent, Cobra Group, OnStar, INFRA S.A. DEKRA is linked from the Secure SD-WAN page as a success story, but the DEKRA case study itself describes a public key infrastructure platform for connected mobility, not SD-WAN. Treat the SD-WAN page's story tiles as portfolio cross-links, not SD-WAN references."
+    },
+    "sectors.professional_services": {
+      "value": "partial",
+      "evidence": [
+        32,
+        38
+      ],
+      "confidence": "medium",
+      "quote": "Consulting & Professional Services",
+      "claimed_by": "vendor",
+      "note": "Held at partial deliberately. The string above is a sector filter label on the success-stories index (re-verified character for character), but the only customer carrying it is Renfe, a railway operator, which strongly suggests the label describes the type of service Telefónica Tech delivered rather than the customer's own industry. FRP Advisory is a genuine UK professional advisory firm with a named case study, but it is tagged Others, not professional services, and the engagement is a Dynamics 365 CRM build. There is no dedicated professional services industry page on either the corporate or UK and Ireland site. Not enough to support yes."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "yes",
+      "evidence": [
+        29,
+        32
+      ],
+      "confidence": "high",
+      "quote": "We enhance tourism with digital tech to personalize, optimize, and connect with new travelers.",
+      "claimed_by": "vendor",
+      "note": "Dedicated Tourism and Leisure industry page plus named customers tagged Tourism & Leisure: Melia Hotels International, NH Hotels, Hoteles Silken, Sierra Nevada, Reina Sofia Museum, Valencia Conference Centre, AMB, Pueblos Bonitos Espana. The Melia Hotels International and Tourism & Leisure strings were re-verified character for character. Multi-site hospitality is a natural SD-WAN profile, but no hospitality SASE or SD-WAN case study is published, so the grade rests on the sector page and named customers alone."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        48,
+        45,
+        47
+      ],
+      "confidence": "high",
+      "quote": "Telefónica Tech UK&I has today announced the UK and Ireland launch of Telefónica Tech Security Edge service powered by Netskope technology.",
+      "claimed_by": "third_party",
+      "note": "The strongest region evidence in this assessment and the only one tied directly to the SASE portfolio. A dated partner press release (27 January 2026) states a UK and Ireland launch of a named Security Service Edge managed service, corroborated by a full UK and Ireland entity site with its own industries and case studies, and by UK customer names (Heathrow Airport, Oxford University Hospitals, Virgin Money, Markel, National Highways). The quote was corrected and re-verified character for character after an initial paraphrase was rejected. Marked third_party because a joint vendor press release is Tier 3 corroboration; the Tier 1 UK entity sites carry the grade with it."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        44,
+        49,
+        26,
+        32
+      ],
+      "confidence": "high",
+      "quote": "To stay close to our B2B clients and partners around the world, we have commercial and operational offices in various countries across Europe, North America, and South America.",
+      "claimed_by": "vendor",
+      "note": "Quote re-verified character for character. Europe is the home region: the SASE and SD-WAN offering was launched in Spain first, all three success stories on the Cloud Networking and SASE product page are European or Latin American, and the success-stories index carries customers tagged Spain, Germany, Austria and Slovenia. Note the statement above describes offices, not network points of presence; no PoP map or country list is published anywhere on the supplier's site."
+    },
+    "regions.north_america": {
+      "value": "partial",
+      "evidence": [
+        44,
+        49,
+        32
+      ],
+      "confidence": "medium",
+      "quote": "Our headquarters in the United States are in Miami, FL, a central hub for business between Europe and Americas.",
+      "claimed_by": "vendor",
+      "note": "Deliberately held below yes. There is a real US operating entity with its own site, a Miami headquarters and named US customers (Miami Chamber of Commerce, Levan Center, both cybersecurity), which is more than a sales presence. But no North American points of presence, coverage map or SASE and SD-WAN service availability statement is published. Disagreement recorded, not resolved: the US entity page positions Miami as a hub for Europe and the Americas, while the SDxCentral report of the SD-WAN and SASE launch names Spain, other European markets and Latin America and omits North America entirely. Note that source is dated June 2022 and may simply be out of date."
+    },
+    "regions.asia_pacific": {
+      "value": "unknown",
+      "evidence": [
+        44,
+        40,
+        43,
+        26
+      ],
+      "confidence": "high",
+      "quote": "To stay close to our B2B clients and partners around the world, we have commercial and operational offices in various countries across Europe, North America, and South America.",
+      "claimed_by": "none",
+      "note": "No Asia Pacific evidence found. Checked: the Cloud Networking and SASE, Secure SD-WAN and Extended SASE product pages (no country statements at all), the corporate We are Telefónica Tech page (headcount and nationalities only, no country count), the GlobalData WAN services news page (refers to a Tier 1 global network but publishes no country list or PoP count), the US entity page quoted above, and the full success-stories index of roughly 100 customers, which carries no Asia Pacific country tag. The quote is the supplier's own enumeration of where it holds offices and it stops at three regions, none of them Asia Pacific. Recorded as unknown rather than absent because absence of a published claim is not proof of no capability."
+    },
+    "regions.middle_east_africa": {
+      "value": "unknown",
+      "evidence": [
+        44,
+        41,
+        32,
+        43
+      ],
+      "confidence": "high",
+      "quote": "To stay close to our B2B clients and partners around the world, we have commercial and operational offices in various countries across Europe, North America, and South America.",
+      "claimed_by": "none",
+      "note": "No Middle East or Africa evidence found for Telefónica Tech service delivery. Checked the same pages as for Asia Pacific plus the 140-partner directory. Two near misses were examined and rejected: the partner page describes partner Qilimanjaro as having deployed quantum systems in Europe and the Middle East, and partner Contazara as present in North Africa and the Middle East, but both describe the partners' own footprints, not Telefónica Tech delivery, and neither concerns SASE or SD-WAN. The Gold Fields case study mentions the customer has operations in South Africa, but the delivered engagement is Peru. No MEA country tag appears on the success-stories index."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        44,
+        49,
+        35,
+        32
+      ],
+      "confidence": "high",
+      "quote": "To stay close to our B2B clients and partners around the world, we have commercial and operational offices in various countries across Europe, North America, and South America.",
+      "claimed_by": "vendor",
+      "note": "Well supported from three directions. The supplier's own office enumeration includes South America (quote re-verified character for character); the named-author SDxCentral report states the SD-WAN and SASE offering was planned to expand into Latin America; and the success-stories index carries delivered engagements tagged Peru (Gold Fields), Chile (Duoc UC, Econorent, Cobra Group), Brazil (INFRA S.A., Benjamin a Padaria) and Mexico (OnStar). Gold Fields in Peru is full ICT infrastructure outsourcing with SOC-managed IT and OT security, which is substantial delivered scope. Telefónica's Latin American operator heritage is consistent with this but was not used as evidence."
+    },
+    "regions.china_mainland": {
+      "value": "unknown",
+      "evidence": [
+        44,
+        36,
+        26,
+        43
+      ],
+      "confidence": "high",
+      "quote": "To stay close to our B2B clients and partners around the world, we have commercial and operational offices in various countries across Europe, North America, and South America.",
+      "claimed_by": "none",
+      "note": "No mainland China evidence found, and per the brief a generic global claim was treated as evidence of nothing here. The one China mention located anywhere in the material read is in the Marvinpac case study, which describes the customer as a Swiss based company active in Europe, in the USA and in People's Republic of China. That is the customer's own footprint, not Telefónica Tech delivery, and the Marvinpac engagement is Managed Detection and Response rather than SD-WAN. No licensed mainland China arrangement, ICP arrangement, local carrier partnership or in-China PoP is published on any page read. The GlobalData news page refers to a Tier 1 global network but names no countries."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        35,
+        33,
+        42,
+        32
+      ],
+      "confidence": "high",
+      "quote": "one of the top 10 gold mining firms in the world with operations in South Africa, Australia, Peru and Chile",
+      "claimed_by": "vendor",
+      "note": "Quote re-verified character for character. This is the clear primary segment. The two success stories the Cloud Networking and SASE product page links to are Cepsa (multinational energy, described as responsible for critical energy infrastructure with international offices) and Gold Fields (top ten global gold miner, full ICT outsourcing). The wider customer list is dominated by large enterprises and national institutions: Repsol, Ferrovial, Gestamp, BBVA, Renfe, Heathrow Airport, Melia Hotels International, Dufry, National Highways. Inclusion as a Major Player in the IDC MarketScape Worldwide Managed SASE, Managed SD-WAN and Managed SSE 2025 assessments is consistent with enterprise-grade managed service scope, though the underlying IDC reports were not read."
+    },
+    "organisation_fit.mid_market": {
+      "value": "partial",
+      "evidence": [
+        39,
+        27,
+        46
+      ],
+      "confidence": "medium",
+      "quote": "We offer comprehensive solutions that simplify and accelerate the digital transformation of SMEs",
+      "claimed_by": "vendor",
+      "note": "Partial rather than yes. Quote re-verified character for character. There is a dedicated SME solutions area, and the same page says Telefonica Tech approaches Cybersecurity with simple solutions that accompany the growth of small and medium-sized companies, which explicitly names the medium band. But nothing on that page is a SASE or SD-WAN offer, no mid-market product tier of the Cloud Networking and SASE portfolio is published, no pricing is aimed at the segment, and no mid-sized customer is identifiable as such in the case studies. Note the European SME definition spans small and medium, so this quote cannot be read as mid-market-specific targeting."
+    },
+    "organisation_fit.small_business": {
+      "value": "partial",
+      "evidence": [
+        39,
+        27
+      ],
+      "confidence": "medium",
+      "quote": "We offer comprehensive solutions that simplify and accelerate the digital transformation of SMEs",
+      "claimed_by": "vendor",
+      "note": "Partial. There is a genuine small-business product tier, which meets one of the four tests: the SME page names Secure Connection for SMBs, Your Small and Secure Business and Clean Email as discrete products. That is real small-business targeting by Telefónica Tech the company. It is not, however, targeting for the service under assessment: these are endpoint, browsing and email security products, not the Cloud Networking and SASE portfolio, and the SD-WAN page's commercial model presumes a managed multi-site estate. No pricing is published for any of them and no small-business customer is named. Held at partial to avoid overstating either way."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [

@@ -80,15 +80,15 @@
     "Managed and co-managed service models are partner-led; this is primarily a self-service platform."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "hours",
   "regions": {
     "uk_ireland": "yes",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
-    "middle_east_africa": "partial",
-    "latin_america": "partial",
+    "middle_east_africa": "yes",
+    "latin_america": "yes",
     "china_mainland": "partner_integrated"
   },
   "supported_clouds": {
@@ -110,15 +110,15 @@
   },
   "sectors": {
     "healthcare": "partial",
-    "financial_services": "partial",
+    "financial_services": "yes",
     "retail_ecommerce": "yes",
-    "manufacturing": "partial",
-    "energy_utilities": "partial",
-    "government_public_sector": "partial",
-    "education": "yes",
-    "transport_logistics": "partial",
-    "professional_services": "yes",
-    "hospitality_leisure": "partial"
+    "manufacturing": "yes",
+    "energy_utilities": "unknown",
+    "government_public_sector": "yes",
+    "education": "partial",
+    "transport_logistics": "yes",
+    "professional_services": "unknown",
+    "hospitality_leisure": "unknown"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
@@ -399,6 +399,195 @@
       "published": null,
       "reliability": "Not used as evidence. URL returned HTTP 404, so cellular and modem specifications could not be checked here.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Cloudflare | The agile SASE platform (Cloudflare One SASE product page)",
+      "url": "https://www.cloudflare.com/sase/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Primary SASE positioning page named in the brief. Carries the 300+ cities SASE delivery claim, the single global per-seat pricing claim and a large customer logo wall. Logo wall carries no sector labels, so it supports named customers but not sector grading on its own."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Cloudflare | The Cloudflare global network",
+      "url": "https://www.cloudflare.com/network/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Best available service delivery evidence: per region city counts plus an enumerated city list including UK and Ireland locations. Two separate fetches of this page returned different Latin America city counts (67 and 66), so the numeric counts are treated as soft."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Cloudflare | Plans and pricing",
+      "url": "https://www.cloudflare.com/plans/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Only page found that publishes SASE and Zero Trust plan tiers with an audience description and a per user price. Price string formatting differed between fetches, so the audience strings are used as the graded quotes."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Cloudflare | Zero Trust and SASE plans",
+      "url": "https://www.cloudflare.com/plans/zero-trust-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Confirms that full Cloudflare One SASE packaging is not publicly priced and directs buyers to sales. Useful as a negative: it corroborates that only the entry SSE tier is published."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Cloudflare | Solutions index",
+      "url": "https://www.cloudflare.com/solutions/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Used to enumerate which dedicated industry pages exist. Important negative evidence: only four industry pages are published (financial services, healthcare, public sector, retail)."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Cloudflare for Financial Services",
+      "url": "https://www.cloudflare.com/solutions/financial-services/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Dedicated industry page with a quantified customer count claim. Vendor self reported figure, not independently audited."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Cloudflare for Healthcare - Secure Access to Medical Systems",
+      "url": "https://www.cloudflare.com/solutions/healthcare/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Dedicated industry page with SASE specific healthcare language. Weaker than the other industry pages: no named healthcare customer, no healthcare case study and no explicit HIPAA accreditation statement found on it."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Cloudflare for Public Sector - Enhance Cyber Resilience",
+      "url": "https://www.cloudflare.com/solutions/public-sector/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Strongest sector page found: states a named accreditation status (FedRAMP), names US federal agencies and names a public research laboratory. Also the only place education is mentioned."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Cloudflare for Retail",
+      "url": "https://www.cloudflare.com/solutions/retail/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Dedicated industry page carrying a named retail customer with quantified outcomes. Note the named deployment is application security, not SASE."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Cloudflare WAN (Magic WAN) product page",
+      "url": "https://www.cloudflare.com/network-services/products/magic-wan/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. The SD-WAN side of the portfolio. Carries organisation size targeting language and a customer logo row including transport and logistics operators. Logo names are not accompanied by case study detail on this page."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "Cloudflare case study: Mitsubishi Gas Chemical",
+      "url": "https://www.cloudflare.com/case-studies/mitsubishi-gas-chemical/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study. Named manufacturing customer deploying Zero Trust, with an Asia Pacific region tag. Directly relevant to the SASE grading."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Cloudflare case study: Anadolu Efes",
+      "url": "https://www.cloudflare.com/case-studies/anadolu-efes/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study. Named manufacturer (brewing) explicitly deploying Cloudflare One, ZTNA, Magic WAN and Secure Web Gateway. The single best SASE plus SD-WAN sector case study found."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Cloudflare case study: Kaizen Gaming",
+      "url": "https://www.cloudflare.com/case-studies/kaizen-gaming/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier case study. Read and considered for hospitality and leisure. Not used to award a grade: the page carries no industry metadata and the deployment is Workers and Durable Objects, not SASE or SD-WAN."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Cloudflare case studies index",
+      "url": "https://www.cloudflare.com/case-studies/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier index. States 251 case studies exist but server renders only 12. Industry filtering is client side, so the full sector distribution could not be enumerated. This is a real coverage limitation on this assessment."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Cloudflare customers page",
+      "url": "https://www.cloudflare.com/customers/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Redirects to the same 12 rendered case studies as the index with no industry groupings. Added no sector evidence beyond source 14."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Cloudflare China Network",
+      "url": "https://www.cloudflare.com/china-network/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier page. Confirms mainland China is delivered with in country partners and mentions Zero Trust among the services. Does not name the partner or state licensing on this page."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Cloudflare China Network (developer documentation)",
+      "url": "https://developers.cloudflare.com/china-network/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Tier 1 supplier documentation. Names the operating partner (JD Cloud), states the ICP filing requirement and explicitly warns that not all products are available. More specific and more reliable than the marketing page at source 16."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "Cloudflare education landing page (attempted)",
+      "url": "https://www.cloudflare.com/lp/education/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned HTTP 404. Attempted to find a dedicated education page to test whether education deserved better than a list mention. Its absence supports the partial grade."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "Cloudflare Project Cybersafe Schools landing page (attempted)",
+      "url": "https://www.cloudflare.com/lp/project-cybersafe-schools/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned HTTP 404. Attempted to locate a schools specific Zero Trust programme page. Could not be verified in this task, so no education grade rests on it."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "Cloudflare Cybersafe Schools (attempted alternative URL)",
+      "url": "https://www.cloudflare.com/cybersafeschools/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the URL returned HTTP 404. Second attempt at the same schools programme, also unverifiable."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "Cloudflare case studies filtered by industry (attempted)",
+      "url": "https://www.cloudflare.com/case-studies/?industry=Energy%20%26%20Utilities",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence: the industry filter is applied client side, so the server returned the same unfiltered 12 case studies. No energy or utilities case study could be confirmed or ruled out by this route."
     }
   ],
   "sourced_facts": {
@@ -602,6 +791,235 @@
       "quote": "backed by dependable SLAs, 100% uptime, and reliable service you can trust.",
       "claimed_by": "vendor",
       "note": "The 100% uptime figure is published on the Enterprise plan page and is tied to Enterprise plans only. The underlying SLA contract with service credit mechanics was not reachable, as two candidate SLA URLs returned 404. No separate availability percentage specific to Cloudflare One or Magic Transit was found."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        30,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Cloudflare empowers over 1,700 financial services organizations to deliver secure digital experiences while meeting data sovereignty, regulatory, and resiliency requirements.",
+      "claimed_by": "vendor",
+      "note": "Dedicated financial services industry page with a quantified customer count and named financial logos (Visa, SoFi, NCR Voyix, Stripe). The 1,700 figure is vendor self reported and unaudited. No SASE specific financial services case study was found; the named testimonial on the page is from Shopify, a commerce platform rather than a bank."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "yes",
+      "evidence": [
+        33,
+        34
+      ],
+      "confidence": "high",
+      "quote": "Retail giant Carrefour replaced five separate security tools, put 400 e-commerce sites behind Cloudflare, and cut incident-resolution time by 75% after deploying the WAF (plus Bot Management).",
+      "claimed_by": "vendor",
+      "note": "Dedicated retail industry page plus a named retail customer with quantified outcomes. Caveat worth carrying forward: the Carrefour deployment described is WAF and Bot Management, which is application security rather than SASE or SD-WAN. Separately the Magic WAN page states connectivity across \"branch offices, retail locations, and factory floors\", which is the retail relevant SD-WAN claim."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        36,
+        35
+      ],
+      "confidence": "high",
+      "quote": "Mitsubishi Gas Chemical Company (MGC) is a unique technology-oriented manufacturer producing more than 90% of its products using proprietary technologies.",
+      "claimed_by": "vendor",
+      "note": "Two named manufacturing case studies, both with SASE relevant deployments. Mitsubishi Gas Chemical is tagged Asia-Pacific and lists Zero Trust, CDN, DNS and Gateway. Anadolu Efes, a brewer headquartered in Istanbul, is documented using Cloudflare One, ZTNA, Magic WAN and Secure Web Gateway, which is the strongest full SASE plus SD-WAN sector reference found in this task. Knauf, a building materials manufacturer, also appears as a logo on the Magic WAN page. There is no dedicated manufacturing industry page."
+    },
+    "sectors.energy_utilities": {
+      "value": "unknown",
+      "evidence": [
+        29,
+        38,
+        45
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No energy or utilities evidence found. Checked: the solutions index (only four industry pages exist and energy is not one of them), the SASE page logo wall, the Magic WAN customer logo row, the case studies index and an attempted industry filtered case study URL which the site resolves client side and therefore returned unfiltered results. The index states 251 case studies exist but only 12 render server side, so an energy case study may exist and simply be unreachable by this method."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        32,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Cloudflare is FedRAMP Moderate Authorized and 'In Process' for High, ensuring secure connectivity for public sector organizations.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector evidence of the set: a dedicated public sector page carrying a published accreditation (FedRAMP Moderate Authorized, In Process for High), stated alignment with NIST CSF 2.0 and TIC 3.0, named US federal agencies (Department of Commerce, Homeland Security, both also on the SASE logo wall) and a named public research customer, Lawrence Berkeley National Laboratory. The case studies index also lists an unnamed \"NYC government agency\". Note the accreditation is United States specific and says nothing about UK, EU or other national assurance schemes."
+    },
+    "sectors.education": {
+      "value": "partial",
+      "evidence": [
+        32,
+        29,
+        42,
+        43,
+        44
+      ],
+      "confidence": "medium",
+      "quote": "We are committed to helping governments, education institutions, and defense organizations secure and enhance their online presence.",
+      "claimed_by": "vendor",
+      "note": "Education is named only inside a three item list on the public sector page, with no education customer, no education case study and no dedicated education page behind it, which is the textbook definition of partial. Checked and failed to retrieve: /lp/education/, /lp/project-cybersafe-schools/ and /cybersafeschools/, all HTTP 404. A schools programme may exist under a URL not found in this task; nothing here rests on it."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        34,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "Japan Airlines",
+      "claimed_by": "vendor",
+      "note": "Graded yes on named customers rather than on a sector page or case study, hence medium confidence. The Cloudflare WAN (Magic WAN) SD-WAN product page displays a customer logo row containing Japan Airlines, JetBlue, RATP (the Paris public transport operator) and Werner Enterprises (a road freight carrier). The SASE page logo wall separately shows Uber and DoorDash. None of these logos is accompanied by a case study, an outcome, or a stated deployment scope on the pages read, and Cloudflare publishes no transport or logistics industry page. Treat as evidence of logo level reference customers only."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [
+        29,
+        25,
+        34,
+        38
+      ],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No professional services evidence found. Checked: the solutions index (no such industry page), the SASE logo wall, the Magic WAN logo row and the case studies index. Logos such as Workday, Asana and Atlassian are software vendors, not professional services firms, and grading the sector from them would be inference rather than evidence."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "unknown",
+      "evidence": [
+        37,
+        29,
+        38
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No hospitality or leisure evidence found that meets the bar. The closest candidate read in full was the Kaizen Gaming case study, an Athens based online sports betting technology company, but the page carries no industry metadata and the deployment described is Cloudflare Workers and Durable Objects rather than SASE or SD-WAN, so it was deliberately not used to award a grade. Also checked the solutions index (no hospitality page) and the case studies index."
+    },
+    "regions.uk_ireland": {
+      "value": "yes",
+      "evidence": [
+        26
+      ],
+      "confidence": "high",
+      "quote": "London, GB",
+      "claimed_by": "vendor",
+      "note": "The global network page enumerates individual points of presence by city and country code. UK and Ireland entries listed are Cork, IE; Dublin, IE; Edinburgh, GB; London, GB; Manchester, GB. This is service delivery infrastructure rather than a sales office. Note that the quote used is a single city list entry because the page presents these as list items rather than prose; the other four entries are verifiable on the same list."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        26,
+        36
+      ],
+      "confidence": "high",
+      "quote": "Europe — from Reykjavík to Istanbul, every major market covered.",
+      "claimed_by": "vendor",
+      "note": "Region shown with 57 cities on the network page. Corroborated operationally by the Anadolu Efes case study, an Istanbul headquartered customer running Cloudflare One, ZTNA and Magic WAN."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        26,
+        32
+      ],
+      "confidence": "high",
+      "quote": "North America — the densest concentration of Cloudflare data centers on the planet.",
+      "claimed_by": "vendor",
+      "note": "Region shown with 55 cities on the network page. Corroborated by the FedRAMP Moderate authorisation and named US federal customers on the public sector page, which imply US delivery under a government assurance regime."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        26,
+        35
+      ],
+      "confidence": "high",
+      "quote": "Asia — Tokyo, Singapore, Mumbai, and dozens more across the continent.",
+      "claimed_by": "vendor",
+      "note": "The network page splits this into Asia (60 cities) and Oceania (13 cities), so the Netify Asia Pacific bucket spans two of Cloudflare's own regions. Corroborated by the Mitsubishi Gas Chemical Zero Trust case study, which is tagged Asia-Pacific, and by the Hutchison Telecommunications (Hong Kong) entry on the case studies index. Mainland China is counted separately by Cloudflare and is graded separately below."
+    },
+    "regions.middle_east_africa": {
+      "value": "yes",
+      "evidence": [
+        26
+      ],
+      "confidence": "medium",
+      "quote": "19 cities across the Middle East — Dubai, Riyadh, Tel Aviv, and more.",
+      "claimed_by": "vendor",
+      "note": "Middle East coverage is stated in prose with named cities. Africa is listed on the same page as a region with 32 cities and a city list, but unlike the other regions it carries no descriptive sentence, so there is no prose quote available for the Africa half of this bucket. Confidence is medium for that reason: the Middle East half is well evidenced, the Africa half rests on a city count only. No Middle East or Africa customer, case study or in region data residency statement was found."
+    },
+    "regions.latin_america": {
+      "value": "yes",
+      "evidence": [
+        26,
+        37
+      ],
+      "confidence": "medium",
+      "quote": "Latin America & the Caribbean — deep presence across Brazil and beyond.",
+      "claimed_by": "vendor",
+      "note": "Conflict recorded and not resolved: two separate reads of the same network page returned different city counts for this region, 67 in the first read and 66 in the second. The descriptive sentence was stable across both reads and is what is quoted. The Kaizen Gaming case study separately discusses latency for Latin American users, which corroborates traffic delivery into the region but is a Workers deployment, not SASE."
+    },
+    "regions.china_mainland": {
+      "value": "partner_integrated",
+      "evidence": [
+        41,
+        40,
+        26
+      ],
+      "confidence": "high",
+      "quote": "operated by Cloudflare's partner JD Cloud",
+      "claimed_by": "vendor",
+      "note": "Mainland China is delivered through a licensed local partner, not by Cloudflare directly. The developer documentation names JD Cloud as the operator, states that \"You must have a valid ICP (Internet Content Provider) filing or license for each apex domain you wish to onboard to Cloudflare\", and explicitly warns that \"Not all Cloudflare products are available in the Cloudflare China Network.\" The network page counts 35 mainland China cities but gives no descriptive sentence. The marketing page mentions Zero Trust among China Network services, but no page read in this task confirms feature parity for the full Cloudflare One SASE stack inside mainland China, so buyers should treat SASE availability there as unverified. Do not read the generic 337 cities global claim as China coverage."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        27,
+        34,
+        25,
+        32
+      ],
+      "confidence": "high",
+      "quote": "Organizations building toward full-featured SASE or workspace security.",
+      "claimed_by": "vendor",
+      "note": "Explicit top tier aimed at full SASE buyers, priced as a custom annual price per user. The Magic WAN page carries the targeting string \"For large and medium organizations\". The SASE page logo wall names global enterprises including Visa, L'Oreal, Mars, Telefonica, Colgate Palmolive, Carrefour, Broadcom and Workday, and the public sector page names US federal agencies. Caveat: the logo wall is unlabelled, so it evidences enterprise scale customers generally rather than enterprise SASE deployments specifically."
+    },
+    "organisation_fit.mid_market": {
+      "value": "yes",
+      "evidence": [
+        27,
+        34
+      ],
+      "confidence": "high",
+      "quote": "Teams over 50 solving narrow SSE use cases without enterprise support.",
+      "claimed_by": "vendor",
+      "note": "A self serve per user tier is published specifically for organisations above the free tier ceiling that do not need enterprise support, which is a mid market product tier in all but name. Reinforced by the Magic WAN targeting string \"For large and medium organizations\". Note the tier is scoped to narrow SSE use cases, not full SASE, so mid market buyers wanting the complete Cloudflare One stack are pushed to the contract tier."
+    },
+    "organisation_fit.small_business": {
+      "value": "yes",
+      "evidence": [
+        27,
+        34
+      ],
+      "confidence": "medium",
+      "quote": "Teams under 50 users or enterprise proof-of-concept tests.",
+      "claimed_by": "vendor",
+      "note": "A free tier is published with a stated ceiling of under 50 users, and the Magic WAN page carries the targeting string \"For small organizations\". Confidence is medium because Cloudflare's own wording positions that free tier as serving two audiences at once, small teams and enterprise proof of concept, so it is not unambiguously a small business go to market. The separate application services \"Business\" plan at 200 USD per month is described as \"For small businesses operating online\" but that is CDN and application security, not SASE."
+    },
+    "published_pricing": {
+      "value": "documented",
+      "evidence": [
+        27,
+        28,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "Teams over 50 solving narrow SSE use cases without enterprise support.",
+      "claimed_by": "vendor",
+      "note": "Graded value, not budget and not premium. Cloudflare is one of very few vendors in this market that publishes any SASE or SSE list price at all: a free tier under 50 users and a self serve per user monthly tier above it, which sits at the low end of published SSE pricing. The published price string for that tier was returned as \"$7/user/month\" on one read of the plans page and \"$7 /user/month\" on a second read of the same page; that formatting discrepancy is recorded rather than resolved, which is why the stable audience string is used as the graded quote. The grade is capped at value rather than budget because full Cloudflare One SASE is contract only: the Zero Trust plans page directs buyers to \"Contact us to learn more about SASE packaging options\" and the top tier is a custom annual price per user, so the real enterprise SASE cost is unpublished. Supporting positioning from the SASE page: \"Give every user a fast, low-latency connection across our global network for one price, with zero complex regional surcharges.\" No analyst or marketplace listed pricing was consulted in this task."
     }
   },
   "conflicts": [

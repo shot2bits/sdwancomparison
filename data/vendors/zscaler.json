@@ -80,16 +80,16 @@
     "Buyers needing one vendor for both SD-WAN and security may prefer a converged platform (Cato, FortiSASE, Prisma)."
   ],
   "last_verified": "2026-07-29",
-  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Facts that could not be sourced are published as unknown with the reason stated. Sources found and rejected are listed in the evidence register at tier 4.",
+  "verification_notes": "Re-verified 2026-07-29 against named primary sources. Every graded fact carries a source, a tier and a verbatim quote confirmed present on the cited page by an independent check. Industry, region, organisation-size and pricing evidence was sourced on the same basis. Facts that could not be sourced are published as unknown with the reason. The value_tier field is a Netify assessment of relative cost position, not a supplier claim: most of this market publishes no price. Sources found and rejected are listed at tier 4.",
   "deployment_speed": "days",
   "regions": {
-    "uk_ireland": "yes",
+    "uk_ireland": "partial",
     "europe": "yes",
     "north_america": "yes",
     "asia_pacific": "yes",
     "middle_east_africa": "partial",
-    "latin_america": "partial",
-    "china_mainland": "partner_integrated"
+    "latin_america": "unknown",
+    "china_mainland": "yes"
   },
   "supported_clouds": {
     "aws": "yes",
@@ -111,19 +111,19 @@
   "sectors": {
     "healthcare": "yes",
     "financial_services": "yes",
-    "retail_ecommerce": "partial",
+    "retail_ecommerce": "unknown",
     "manufacturing": "yes",
-    "energy_utilities": "partial",
+    "energy_utilities": "unknown",
     "government_public_sector": "yes",
-    "education": "partial",
-    "transport_logistics": "partial",
-    "professional_services": "yes",
-    "hospitality_leisure": "partial"
+    "education": "yes",
+    "transport_logistics": "yes",
+    "professional_services": "unknown",
+    "hospitality_leisure": "unknown"
   },
   "organisation_fit": {
     "large_global_enterprise": "yes",
-    "mid_market": "yes",
-    "small_business": "not_primary"
+    "mid_market": "unknown",
+    "small_business": "unknown"
   },
   "pricing_units": [
     "per_user",
@@ -398,6 +398,249 @@
       "published": null,
       "reliability": "Not used as evidence: returned HTTP 404, no content retrieved.",
       "verified_on": "2026-07-29"
+    },
+    {
+      "n": 25,
+      "tier": 1,
+      "title": "Zscaler Industries index",
+      "url": "https://www.zscaler.com/industries",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own industries hub. Used to establish which industries Zscaler actually publishes dedicated pages for: banking and financial services, healthcare, US public sector (federal, state and local), Australian government, China, education, manufacturing. Absence of retail, energy, transport, professional services and hospitality pages is itself informative."
+    },
+    {
+      "n": 26,
+      "tier": 1,
+      "title": "Zscaler Customer Journeys",
+      "url": "https://www.zscaler.com/customers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own customer index. Large logo wall with named customers but no verbatim sector labelling per customer, so it supports scale claims rather than per-sector grading."
+    },
+    {
+      "n": 27,
+      "tier": 1,
+      "title": "Zscaler for Healthcare",
+      "url": "https://www.zscaler.com/industries/healthcare",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated healthcare industry page with four named healthcare customers and named executives, plus HIPAA/HITECH framework claims. Strong for sector grading, vendor-claimed."
+    },
+    {
+      "n": 28,
+      "tier": 1,
+      "title": "Zscaler for Financial Services",
+      "url": "https://www.zscaler.com/industries/financial-services",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated financial services page with four named customers and attributed quotes. Strong for sector grading, vendor-claimed."
+    },
+    {
+      "n": 29,
+      "tier": 1,
+      "title": "Zscaler for Manufacturing",
+      "url": "https://www.zscaler.com/industries/manufacturing",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated manufacturing page with four named manufacturers (Siemens AG, AkzoNobel, Coats, Sanmina) and attributed executive quotes. Strong for sector grading, vendor-claimed."
+    },
+    {
+      "n": 30,
+      "tier": 1,
+      "title": "Zscaler for Public Sector",
+      "url": "https://www.zscaler.com/industries/public-sector",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own public sector page. Carries verifiable third-party accreditation claims (FedRAMP JAB-High, FedRAMP Moderate, TIC 3.0, CJIS) plus named agency case studies (FCC, State of Oklahoma). Accreditation claims are checkable against the FedRAMP marketplace, raising reliability above ordinary marketing copy."
+    },
+    {
+      "n": 31,
+      "tier": 1,
+      "title": "Zscaler for Education (public sector)",
+      "url": "https://www.zscaler.com/industries/public-sector/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own education page with named institutions (New York City Department of Education, University of South Carolina, Virginia Commonwealth University, MCNC) and CIPA compliance claim. Strong for sector grading, vendor-claimed."
+    },
+    {
+      "n": 32,
+      "tier": 1,
+      "title": "Zscaler China Premium Access",
+      "url": "https://www.zscaler.com/industries/zscaler-china-premium-access",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own dedicated mainland China product page. Establishes a specific named China offering rather than a generic global claim. Does NOT disclose the licensing arrangement, in-country data centres or local carrier partner, so it evidences a service offering but not the regulatory mechanism behind it."
+    },
+    {
+      "n": 33,
+      "tier": 1,
+      "title": "Zscaler Pricing and Plans",
+      "url": "https://www.zscaler.com/pricing-and-plans",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own pricing page. Names bundles (Essentials Platform, Zscaler Platform) and add-on modules but publishes no per-user or list prices. Reliable evidence that pricing is NOT published."
+    },
+    {
+      "n": 34,
+      "tier": 1,
+      "title": "Zscaler digital transformation for the banking sector",
+      "url": "https://www.zscaler.com/digital-transformation-for-banking-sector",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own banking landing page, linked from the industries index. Corroborates the same four named financial services customers as source 4."
+    },
+    {
+      "n": 35,
+      "tier": 1,
+      "title": "About Zscaler",
+      "url": "https://www.zscaler.com/company/about-zscaler",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own corporate page. Customer count and Forbes Global 2000 penetration figure are the clearest published statement of target organisation size."
+    },
+    {
+      "n": 36,
+      "tier": 1,
+      "title": "Zscaler Company FAQ",
+      "url": "https://www.zscaler.com/learn/company-faq",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own FAQ. Contains employee and customer counts that CONFLICT with sources 11 and 15 (states 'nearly 8,000 customers' against 9.4K+ elsewhere), suggesting a stale page. Recorded, not relied on. Contains no data centre or country figures."
+    },
+    {
+      "n": 37,
+      "tier": 1,
+      "title": "Zscaler for Australian Government",
+      "url": "https://www.zscaler.com/industries/australian-government",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own page carrying an IRAP assessment at PROTECTED plus a long list of named Australian government and education bodies. The IRAP claim is an independently checkable accreditation, making this the strongest single region-specific delivery evidence found."
+    },
+    {
+      "n": 38,
+      "tier": 1,
+      "title": "Zscaler Unified Platform",
+      "url": "https://www.zscaler.com/products-and-services/zscaler-unified-platform",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own platform page carrying named customer story headlines (United Airlines, NOV, Baker & Baker, Careem) with attributed CIO/CISO quotes. Used for transport evidence. Headlines do not state each customer's industry label."
+    },
+    {
+      "n": 39,
+      "tier": 1,
+      "title": "Zscaler Investor Relations",
+      "url": "https://ir.zscaler.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own investor relations site. Infrastructure and scale figures aimed at investors carry securities-disclosure exposure, so more accountable than marketing copy. However the data centre figure is a global aggregate with no regional breakdown, so it cannot grade an individual region on its own."
+    },
+    {
+      "n": 40,
+      "tier": 1,
+      "title": "Zscaler Products and Solutions",
+      "url": "https://www.zscaler.com/products-and-solutions",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own product hub. Checked specifically for SMB or mid-market segmentation and found none. Used as negative evidence for organisation fit."
+    },
+    {
+      "n": 41,
+      "tier": 1,
+      "title": "Zscaler Company News blog",
+      "url": "https://www.zscaler.com/blogs/company-news",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Supplier's own news index. Checked for Latin America, Brazil and Mexico coverage or expansion announcements; none present. Used as negative evidence for the Latin America region."
+    },
+    {
+      "n": 42,
+      "tier": 4,
+      "title": "Zscaler industries/education (guessed URL)",
+      "url": "https://www.zscaler.com/industries/education",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. The real education page sits under the public sector path (source 7)."
+    },
+    {
+      "n": 43,
+      "tier": 4,
+      "title": "Zscaler industries/education-cybersecurity (guessed URL)",
+      "url": "https://www.zscaler.com/industries/education-cybersecurity",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Speculative URL tried before the real link list was extracted."
+    },
+    {
+      "n": 44,
+      "tier": 4,
+      "title": "Zscaler data centres (guessed URL)",
+      "url": "https://www.zscaler.com/company/data-protection/data-centers",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404."
+    },
+    {
+      "n": 45,
+      "tier": 4,
+      "title": "Zscaler Experience Center data centre locations (guessed URL)",
+      "url": "https://www.zscaler.com/experience-center/data-center-locations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404."
+    },
+    {
+      "n": 46,
+      "tier": 4,
+      "title": "Zscaler Cloud Enforcement Node ranges (config portal)",
+      "url": "https://config.zscaler.com/zscaler.net/cenr",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. This is the authoritative per-city data centre list, but the page is a JavaScript single-page application and returned only an 'enable JS' stub to a text fetcher. This is the main reason region grading rests on named customers and accreditations rather than a published points-of-presence list."
+    },
+    {
+      "n": 47,
+      "tier": 4,
+      "title": "Zscaler Trust Portal",
+      "url": "https://trust.zscaler.com/",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. JavaScript-only application; returned an 'enable JS' stub with no retrievable cloud or data centre content."
+    },
+    {
+      "n": 48,
+      "tier": 4,
+      "title": "Zscaler help portal, ZIA data centre locations",
+      "url": "https://help.zscaler.com/zia/data-center-locations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. JavaScript-only documentation portal; returned an 'enable JS' stub."
+    },
+    {
+      "n": 49,
+      "tier": 4,
+      "title": "Zscaler customer success stories index (guessed URL)",
+      "url": "https://www.zscaler.com/resources/customer-success-stories",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404. Was sought specifically to obtain per-customer industry filter labels that would have allowed retail, energy, professional services and hospitality grading."
+    },
+    {
+      "n": 50,
+      "tier": 4,
+      "title": "Zscaler company data centre locations (guessed URL)",
+      "url": "https://www.zscaler.com/company/data-center-locations",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. Returned HTTP 404."
+    },
+    {
+      "n": 51,
+      "tier": 4,
+      "title": "AWS Marketplace Zscaler listing attempt",
+      "url": "https://aws.amazon.com/marketplace/pp/prodview-jvzhmr6mhqqoi",
+      "published": null,
+      "verified_on": "2026-07-29",
+      "reliability": "Not used as evidence. The fetch resolved to the AWS Marketplace navigation shell rather than the product detail pane, returning no listed contract pricing. Marketplace pricing remains the most likely route to a real price point and was not obtainable in this task."
     }
   ],
   "sourced_facts": {
@@ -620,6 +863,248 @@
       "quote": "The SaaS will be available to accept Customer's Transactions and Sessions 99.999% of the total hours during every month Customer uses the SaaS",
       "claimed_by": "vendor",
       "note": "99.999% applies to ZIA, ZPA, ZDX and Zero Trust Device Segmentation or Microsegmentation. Lower figures apply to other Zscaler products in the same schedule: 99.99% for DNS-based guest WiFi and 99.9% for Posture Control, Risk360, Business Insights, UVM, DSPM, Breach Predictor, EASM, Cellular, MDR and Identity Protection. The ZIA datasheet corroborates with Availability 99.999%, measured by transactions lost. A separate latency commitment of 100 milliseconds or less for the 95th percentile of traffic is also published."
+    },
+    "sectors.healthcare": {
+      "value": "yes",
+      "evidence": [
+        27,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Leverage a HIPAA- and HITECH-compliant zero trust architecture",
+      "claimed_by": "vendor",
+      "note": "Dedicated healthcare industry page carrying four named healthcare customers with attributed executives: Seattle Children's Hospital (Dr Zafar Chaudry, Chief Digital Officer), Atlantic Health System (Dr Devon Klein), Ramsay Health Care (Julian Zelones) and Keiju Medical Center (Masahiro Kamino). Meets the 'named case study plus dedicated industry page plus published framework' bar several times over. All evidence is vendor-published; no independent verification of the deployments was found."
+    },
+    "sectors.financial_services": {
+      "value": "yes",
+      "evidence": [
+        28,
+        34,
+        25
+      ],
+      "confidence": "high",
+      "quote": "We embraced security as a journey that ran in parallel with our exploration of our applications, data, and transaction processing.",
+      "claimed_by": "vendor",
+      "note": "Quote is attributed to Fannie Mae on the dedicated financial services page. Four named customers across three continents: Fannie Mae (US), Hastings Direct (UK insurance), Capitec (South Africa) and L&T Financial Services (India). A second banking landing page corroborates the same set. Regulatory frameworks named on the page include PCI DSS, SOX, NIST CSF and ISO 27001."
+    },
+    "sectors.retail_ecommerce": {
+      "value": "unknown",
+      "evidence": [
+        25,
+        26,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No retail or ecommerce industry page exists on the industries index, which lists only banking and financial services, healthcare, US public sector, Australian government, China, education and manufacturing. Retail-looking names (Kingfisher, Belkin International, J&P Cycles, Sunkist) appear in the customers logo wall, but that page carries no per-customer industry labelling and no case study behind those names, so there is nothing to quote. The customer success stories index that would have carried industry filter labels returned 404. Graded unknown rather than partial because the word 'retail' was not found in any sector list or sentence on the pages read."
+    },
+    "sectors.manufacturing": {
+      "value": "yes",
+      "evidence": [
+        29,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Zero trust principles are incredibly relevant to smart factory initiatives.",
+      "claimed_by": "vendor",
+      "note": "Quote attributed to Herbert Wegmann, General Manager, Siemens AG, on the dedicated manufacturing industry page. Three further named manufacturers with attributed CISO-level quotes: AkzoNobel (Raffaele Maresca, CISO), Coats (Benjamin Corll, VP of Cybersecurity) and Sanmina (Matt Ramberg, VP of Information Security). Page headline 'Siemens secures digital transformation in modern factory environments' confirms these are full case studies, not logos."
+    },
+    "sectors.energy_utilities": {
+      "value": "unknown",
+      "evidence": [
+        25,
+        38,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No energy or utilities industry page on the industries index and the words energy and utilities were not found as a sector label on any page read. NOV, an oilfield equipment company, appears as a named customer on the platform page under the headline 'NOV secures access for 27,000 employees across 60 countries', and Viridor Waste Management and SemGroup Corporation appear in the customer logo wall, but none of these is presented by Zscaler as energy sector evidence. Deliberately not inferring an energy grade from a customer that happens to operate in that industry."
+    },
+    "sectors.government_public_sector": {
+      "value": "yes",
+      "evidence": [
+        30,
+        37,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Zscaler Internet Access (ZIA) and Zscaler Private Access (ZPA) have been FedRAMP Moderate authorized since 2018.",
+      "claimed_by": "vendor",
+      "note": "Strongest sector in the set. Dedicated public sector page plus separate federal, state and local, and Australian government pages. Named agency case studies include the Federal Communications Commission and the State of Oklahoma (34,000 employees across 90+ agencies). Accreditations claimed include FedRAMP JAB-High, FedRAMP Moderate, TIC 3.0 and CJIS, and separately IRAP at PROTECTED for Australia. The FedRAMP claims are independently checkable on the FedRAMP marketplace, which was not done in this task."
+    },
+    "sectors.education": {
+      "value": "yes",
+      "evidence": [
+        31,
+        37,
+        25
+      ],
+      "confidence": "high",
+      "quote": "Comply with CIPA, StateRAMP, CMMC, and more",
+      "claimed_by": "vendor",
+      "note": "Dedicated education page sits under the public sector path, not at /industries/education which returns 404. Named institutions with figures: New York City Department of Education (1 million users, 2 million devices), Virginia Commonwealth University (28,000 students), University of South Carolina, and MCNC ('Helps Protect More than 1.1 Million Students and Educators'). The Australian government page separately names CEnet (education, 330K users) and NSW Government Education, so education evidence spans two regions."
+    },
+    "sectors.transport_logistics": {
+      "value": "yes",
+      "evidence": [
+        38,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "United Airlines detects and blocks evolving threats",
+      "claimed_by": "vendor",
+      "note": "Graded yes on a named case study rather than a dedicated industry page, so confidence is medium rather than high. The United Airlines story on the platform page carries an attributed quote from Deneen DeFiore, VP and CISO. Air France-KLM, Ocean Shipholdings and Pitney Bowes also appear in the customer logo wall without case studies. There is no transport or logistics industry page, so Zscaler is not marketing to this sector as a named vertical."
+    },
+    "sectors.professional_services": {
+      "value": "unknown",
+      "evidence": [
+        25,
+        26,
+        49
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No professional services industry page and the sector is not named in any list or sentence on the pages read. Intertek, MindTree, AGC Partners and Applied Systems appear in the customer logo wall with no case study or industry label behind them. Nothing quotable, so unknown rather than partial."
+    },
+    "sectors.hospitality_leisure": {
+      "value": "unknown",
+      "evidence": [
+        25,
+        26
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No hospitality or leisure industry page and no named hospitality customer or case study found. The closest names in the customer logo wall are sports and entertainment organisations (Houston Rockets, Miami Heat, Village Roadshow, NBC Universal), which are not hospitality or leisure operators in the sense this field measures. No evidence either way."
+    },
+    "regions.uk_ireland": {
+      "value": "partial",
+      "evidence": [
+        39,
+        28,
+        26
+      ],
+      "confidence": "low",
+      "quote": "160+ Global data centers, with users in 185 countries",
+      "claimed_by": "vendor",
+      "note": "Graded partial with low confidence deliberately. No UK or Ireland specific coverage, points-of-presence or data centre page was found, and the authoritative per-city data centre list at config.zscaler.com is a JavaScript application that could not be read. UK customers do appear: Hastings Direct is a named case study on the financial services page, and British Council, HCA Healthcare UK, Kingfisher and Dairy Crest appear in the customer logo wall. That indicates delivery in the UK but falls short of published regional coverage. No Ireland-specific evidence at all."
+    },
+    "regions.europe": {
+      "value": "yes",
+      "evidence": [
+        29,
+        38,
+        39
+      ],
+      "confidence": "medium",
+      "quote": "Zero trust principles are incredibly relevant to smart factory initiatives.",
+      "claimed_by": "vendor",
+      "note": "Quote is attributed to Siemens AG (Germany) on the manufacturing page. Graded yes on the strength of multiple named European case studies rather than a published European points-of-presence list, which was not obtainable. European case studies include Siemens AG, AkzoNobel (Netherlands) and Baker & Baker (headline 'Baker & Baker boosts enterprise data security by nearly 90%'); LVMH, Michelin Group, Eramet and Pernod Ricard appear in the logo wall. Confidence medium because coverage is inferred from customer presence plus a global aggregate, not from a regional coverage statement."
+    },
+    "regions.north_america": {
+      "value": "yes",
+      "evidence": [
+        30,
+        31,
+        27
+      ],
+      "confidence": "high",
+      "quote": "Zscaler Internet Access (ZIA) and Zscaler Private Access (ZPA) are both JAB-High authorized.",
+      "claimed_by": "vendor",
+      "note": "Strongest region. US federal authorisation at FedRAMP JAB-High is a delivery-grade credential, not a marketing claim, and is backed by named US public sector deployments (FCC, State of Oklahoma, New York City Department of Education) and US healthcare deployments (Seattle Children's Hospital, Atlantic Health System). Zscaler is US-headquartered. No Canada-specific evidence was sought or found."
+    },
+    "regions.asia_pacific": {
+      "value": "yes",
+      "evidence": [
+        37,
+        27
+      ],
+      "confidence": "high",
+      "quote": "The Zscaler Zero Trust Exchange™ has completed its IRAP assessment at PROTECTED, providing details on the implementation, appropriateness, and effectiveness of the system's security controls.",
+      "claimed_by": "vendor",
+      "note": "IRAP assessment at PROTECTED is an Australian government scheme credential and is the best region-specific delivery evidence found outside North America. Backed by a long list of named Australian bodies including Services Australia, Australia Post, Department of Foreign Affairs and Trade, Queensland Government, CENITEX (36,000 users, 450 sites) and CEnet (330K users). Japan is separately evidenced by Keiju Medical Center on the healthcare page, and India by L&T Financial Services on the financial services page."
+    },
+    "regions.middle_east_africa": {
+      "value": "partial",
+      "evidence": [
+        28,
+        38,
+        39
+      ],
+      "confidence": "low",
+      "quote": "…we're constantly asking ourselves, 'What is the best thing we can do to serve our clients?'",
+      "claimed_by": "vendor",
+      "note": "Quote is attributed to Capitec, a South African bank, on the financial services page. Note the quote begins with an ellipsis character as published, which is part of the verbatim string. Careem, a Middle East mobility operator, appears on the platform page under the headline 'Careem leverages global talent with secure work-from-anywhere'. Graded partial not yes because no MEA coverage page, data centre list or regional accreditation was found, and both data points are single customers rather than a stated coverage claim."
+    },
+    "regions.latin_america": {
+      "value": "unknown",
+      "evidence": [
+        41,
+        39,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Actively checked and not found. The company news blog index was searched specifically for Latin America, Brazil and Mexico coverage or expansion announcements and returned nothing. No Latin American customer appears in the customer logo wall, no Spanish or Portuguese language regional page was surfaced, and the investor relations global figure of '160+ Global data centers, with users in 185 countries' is an aggregate that says nothing about the region. The unreadable config.zscaler.com node list would very likely show Latin American cities, so this unknown reflects a retrieval limit, not a claim that coverage is absent."
+    },
+    "regions.china_mainland": {
+      "value": "yes",
+      "evidence": [
+        32,
+        25
+      ],
+      "confidence": "medium",
+      "quote": "Zscaler helps multinational organizations provide fast, consistent, reliable, and secure internet connectivity to international websites and SaaS applications, such as Microsoft 365, Salesforce, and ServiceNow, for their employees in mainland China.",
+      "claimed_by": "vendor",
+      "note": "This clears the bar set for China because it is a specifically named mainland China product (Zscaler China Premium Access) with its own page linked from the industries index, not a generic global claim. Important caveat: the page does not disclose the licensing arrangement, the in-country data centre footprint or the local carrier partner, and a linked technical note ('Zscaler in China | Tech Note') was not retrieved. So the offering is evidenced but the regulatory mechanism behind it is not. A buyer with a China requirement should ask for that tech note. Confidence medium for that reason."
+    },
+    "organisation_fit.large_global_enterprise": {
+      "value": "yes",
+      "evidence": [
+        35,
+        39,
+        26
+      ],
+      "confidence": "high",
+      "quote": "9.4K+ customers, including 40% of the Forbes Global 2000",
+      "claimed_by": "vendor",
+      "note": "Unambiguous. Reinforced across the whole site by the profile of the named case studies: Siemens AG, United Airlines, LVMH, Michelin, Ramsay Health Care (90,000+ employees, 10 countries), NOV (27,000 employees, 60 countries), New York City Department of Education (1 million users). Every case study found was a large or very large organisation. The company FAQ page conflicts, stating 'nearly 8,000 customers around the world' against 9.4K+ on the about and investor pages; recorded per the no-conflict-resolution rule, and the FAQ page appears simply to be stale."
+    },
+    "organisation_fit.mid_market": {
+      "value": "unknown",
+      "evidence": [
+        33,
+        40,
+        35
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "Checked deliberately and found nothing. The pricing page names bundles (Essentials Platform marked 'RECOMMENDED', and Zscaler Platform) but does not segment them by organisation size, and the products and solutions hub contains no mid-market or SMB language. No case study of a mid-sized organisation was found; the smallest named deployment encountered was Seattle Children's Hospital at '4,000+ users47 sites4 US states'. The Essentials Platform bundle could plausibly be a mid-market entry point but Zscaler does not describe it that way, and inferring that would be exactly the reasoning this exercise exists to remove."
+    },
+    "organisation_fit.small_business": {
+      "value": "unknown",
+      "evidence": [
+        40,
+        33,
+        35
+      ],
+      "confidence": "medium",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No small business or SMB targeting language found on the products hub, the pricing page or the about page. Zscaler does not explicitly say small business is out of scope, so this is unknown rather than not_primary. The observable evidence, a customer base described by Global 2000 penetration and a case study set consisting entirely of large organisations, points away from small business, but there is no published statement to grade against."
+    },
+    "published_pricing": {
+      "value": "not_published",
+      "evidence": [],
+      "confidence": "high",
+      "quote": "",
+      "claimed_by": "none",
+      "note": "No price is published that we could quote. The value_tier field on this record is a Netify assessment of relative cost position, not a supplier claim."
     }
   },
   "conflicts": [
