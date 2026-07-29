@@ -13,13 +13,13 @@ const EDITORIAL = bestEditorial as unknown as Editorial;
 import { FEATURE_NAMES, getAllVendors, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
-import { datasetVerifiedLong } from "@/lib/dataset-date";
   SITE_URL,
   getBreadcrumbSchema,
   getOrganizationSchema,
   getShortlistFaqSchema,
   getSpeakableSchema,
 } from "@/lib/structured-data";
+import { datasetVerifiedLong } from "@/lib/dataset-date";
 
 export const dynamic = "force-static";
 
