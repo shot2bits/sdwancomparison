@@ -394,8 +394,19 @@ export function explainShortlist(args: unknown): unknown {
     return { error: `Give two known supplier slugs as a and b. Unknown: ${[slugA, slugB].filter((s) => !known.includes(s)).join(", ") || "(none given)"}. Call list_sase_vendors.` };
   }
   const result = buildShortlist(getShortlistDataset(), a.criteria ?? {}, FEATURE_NAMES);
-  const find = (s: string) => result.shortlist.find((x) => x.slug === s) ?? result.near_misses.find((x) => x.slug === s);
-  const rA = find(slugA), rB = find(slugB);
+  // buildShortlist numbers the shortlist and leaves near misses at rank 0. A
+  // model reading rank 0 reports the supplier as ranked zero rather than absent,
+  // which is worse than saying nothing, so placement is stated explicitly and
+  // rank is null whenever the supplier is not on the list. Caught live 29 Jul.
+  const place = (slug: string) => {
+    const onList = result.shortlist.find((x) => x.slug === slug);
+    if (onList) return { rec: onList, rank: onList.rank as number | null, placement: "in_shortlist" };
+    const near = result.near_misses.find((x) => x.slug === slug);
+    if (near) return { rec: near, rank: null, placement: near.eligible ? "eligible_but_outside_shortlist" : "excluded_by_criteria" };
+    return { rec: undefined, rank: null, placement: "not_returned_for_these_criteria" };
+  };
+  const pA = place(slugA), pB = place(slugB);
+  const rA = pA.rec, rB = pB.rec;
   const vA = getVendor(slugA), vB = getVendor(slugB);
   const fA = factsOf(vA), fB = factsOf(vB);
   const regA = new Map(registerOf(vA).map((e) => [e.n, e])), regB = new Map(registerOf(vB).map((e) => [e.n, e]));
@@ -418,8 +429,9 @@ export function explainShortlist(args: unknown): unknown {
 
   return {
     criteria: result.input,
-    a: { slug: slugA, name: vA.name, rank: rA?.rank ?? null, score: rA?.score ?? null, eligible: rA?.eligible ?? null, gating_failures: rA?.gating_failures ?? [] },
-    b: { slug: slugB, name: vB.name, rank: rB?.rank ?? null, score: rB?.score ?? null, eligible: rB?.eligible ?? null, gating_failures: rB?.gating_failures ?? [] },
+    shortlist_size: result.shortlist.length,
+    a: { slug: slugA, name: vA.name, rank: pA.rank, placement: pA.placement, score: rA?.score ?? null, eligible: rA?.eligible ?? null, gating_failures: rA?.gating_failures ?? [] },
+    b: { slug: slugB, name: vB.name, rank: pB.rank, placement: pB.placement, score: rB?.score ?? null, eligible: rB?.eligible ?? null, gating_failures: rB?.gating_failures ?? [] },
     sourced_differences: differences,
     differences_count: differences.length,
     scoring_note: result.methodology_note,
