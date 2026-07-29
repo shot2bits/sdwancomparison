@@ -184,10 +184,14 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
       </section>
 
       <p className="text-sm text-[var(--ink-600,#5b636e)]">
+        <Link href="/admin/records" className="underline">
+          All 30 records
+        </Link>
+        {" · "}
         <Link href="/admin/record-queue" className="underline">
           Review queue
         </Link>{" "}
-        for pending proposals.
+        for supplier proposals.
       </p>
     </div>
   );

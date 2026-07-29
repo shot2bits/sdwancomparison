@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import RecordEditLink from "@/components/RecordEditLink";
 import type { Metadata } from "next";
 import {
   getAllVendorSlugs,
@@ -152,6 +153,9 @@ export default async function VendorPage({ params }: Props) {
           <span className="mx-2 text-[var(--ink-300)]">/</span>
           <span className="text-[var(--ink-700)]">{vendor.name}</span>
         </nav>
+
+        {/* Netify only, renders nothing for anyone else. See RecordEditLink. */}
+        <RecordEditLink slug={vendor.slug} />
 
         {/* Hero */}
         <header className="mb-16 grid md:grid-cols-12 gap-8 fade-rise">

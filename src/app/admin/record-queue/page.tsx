@@ -124,6 +124,10 @@ export default async function RecordQueuePage({
           Sign in with a Netify address to review proposals. Suppliers can propose corrections to
           facts about their own company from their profile page; only Netify approves them.
         </p>
+        <Link href="/account" className="underline">
+          Sign in
+        </Link>
+        {" · "}
         <Link href="/vendors" className="underline">
           Back to the supplier index
         </Link>
@@ -139,6 +143,12 @@ export default async function RecordQueuePage({
     <div className="max-w-4xl mx-auto px-6 py-12">
       <p className="eyebrow mb-3">Netify only</p>
       <h1 className="mb-3">Record review queue</h1>
+      <p className="text-sm mb-6">
+        <Link href="/admin/records" className="underline">
+          All 30 records
+        </Link>{" "}
+        <span className="text-[var(--ink-600,#5b636e)]">to edit one directly.</span>
+      </p>
       <WikiOutcome code={r} />
       <p className="text-[var(--ink-700)] max-w-3xl mb-8">
         {pending.length === 0
