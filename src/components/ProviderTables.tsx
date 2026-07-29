@@ -15,13 +15,19 @@ import type { Vendor } from "@data/schema";
  *
  * The split is by the BUYER'S QUESTION, not by the company's identity. Eleven
  * of the thirty suppliers both build a platform and operate it as a service.
- * Forcing them into one table would be us deciding what a company mostly is.
  * Naming the tables after the two questions lets them appear in both, which is
  * correct, and makes "eleven of thirty do both" a fact worth stating.
  *
+ * COLLAPSED BY DEFAULT (Robert, 29 July 2026): thirty rows of nine columns
+ * opening cold is a wall, so each table sits inside a native <details>.
+ * <details> is not a JavaScript reveal: the rows are in the server HTML either
+ * way, so a crawler or an assistant parsing the response sees exactly the same
+ * bytes it saw when the tables were open. Only the visual state changes. The
+ * extractable answer paragraph deliberately stays OUTSIDE the collapse, because
+ * that is the passage an engine quotes.
+ *
  * Alphabetical, not ranked. These facts are defensible today; an order is not,
- * until the scoring rework lands. Ranking a table on scores that tied seven
- * ways is what produced average position 13.9 in the first place.
+ * until the scoring rework lands.
  */
 
 const LABELS: Record<string, string> = {
@@ -105,61 +111,73 @@ function ComparisonTable({
 }) {
   const sorted = [...vendors].sort((a, b) => a.name.localeCompare(b.name));
   return (
-    <div className="mb-12">
-      <h3 id={id} className="text-lg font-medium mb-2">
-        {title}
-      </h3>
-      <p className="text-sm text-[var(--ink-700)] mb-4 max-w-3xl">{intro}</p>
-      <div className="overflow-x-auto border border-[var(--ink-200,#e8ebef)] rounded-lg">
-        <table className="w-full text-sm border-collapse min-w-[860px]">
-          <caption className="sr-only">
-            {title}. {sorted.length} suppliers compared on{" "}
-            {cols.map((c) => c.head.toLowerCase()).join(", ")}. Verified{" "}
-            {sorted[0]?.last_verified ?? ""}.
-          </caption>
-          <thead>
-            <tr className="bg-[var(--ink-50,#f6f8fa)] border-b-2 border-[var(--ink-300,#c9ced6)]">
-              <th scope="col" className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)] whitespace-nowrap">
-                Supplier
-              </th>
-              {cols.map((c) => (
-                <th
-                  key={c.key}
-                  scope="col"
-                  title={c.help}
-                  className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)] whitespace-nowrap"
-                >
-                  {c.head}
+    <details className="mb-4 border border-[var(--ink-200,#e8ebef)] rounded-lg overflow-hidden group">
+      <summary className="cursor-pointer list-none px-4 py-3.5 bg-[var(--ink-50,#f6f8fa)] hover:bg-[var(--ink-100,#eef1f5)] flex items-baseline gap-3">
+        <span aria-hidden="true" className="text-[var(--ink-500)] text-xs mt-0.5 transition-transform group-open:rotate-90">
+          ▶
+        </span>
+        <span className="flex-1">
+          <h3 id={id} className="text-base font-medium inline">
+            {title}
+          </h3>{" "}
+          <span className="text-sm text-[var(--ink-600,#5b636e)]">
+            {sorted.length} suppliers, compared on {cols.length} points
+          </span>
+        </span>
+      </summary>
+      <div className="px-4 pt-4 pb-2">
+        <p className="text-sm text-[var(--ink-700)] mb-4 max-w-3xl">{intro}</p>
+        <div className="overflow-x-auto border border-[var(--ink-200,#e8ebef)] rounded-lg mb-2">
+          <table className="w-full text-sm border-collapse min-w-[860px]">
+            <caption className="sr-only">
+              {title}. {sorted.length} suppliers compared on{" "}
+              {cols.map((c) => c.head.toLowerCase()).join(", ")}. Verified{" "}
+              {sorted[0]?.last_verified ?? ""}.
+            </caption>
+            <thead>
+              <tr className="bg-[var(--ink-50,#f6f8fa)] border-b-2 border-[var(--ink-300,#c9ced6)]">
+                <th scope="col" className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)] whitespace-nowrap">
+                  Supplier
                 </th>
-              ))}
-              <th scope="col" title="Named sources in this supplier's evidence register" className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)]">
-                Sources
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((v) => {
-              const reg = (v as unknown as { evidence_register?: unknown[] }).evidence_register;
-              return (
-                <tr key={v.slug} className="border-b border-[var(--ink-200,#e8ebef)]">
-                  <th scope="row" className="text-left px-3.5 py-2.5 font-medium whitespace-nowrap">
-                    <Link href={`/vendors/${v.slug}`} className="underline">
-                      {v.name}
-                    </Link>
+                {cols.map((c) => (
+                  <th
+                    key={c.key}
+                    scope="col"
+                    title={c.help}
+                    className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)] whitespace-nowrap"
+                  >
+                    {c.head}
                   </th>
-                  {cols.map((c) => (
-                    <Cell key={c.key} v={v} k={c.key} />
-                  ))}
-                  <td className="px-3.5 py-2.5 text-[var(--ink-600,#5b636e)] tabular-nums">
-                    {reg?.length ?? 0}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                ))}
+                <th scope="col" title="Named sources in this supplier's evidence register" className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)]">
+                  Sources
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((v) => {
+                const reg = (v as unknown as { evidence_register?: unknown[] }).evidence_register;
+                return (
+                  <tr key={v.slug} className="border-b border-[var(--ink-200,#e8ebef)]">
+                    <th scope="row" className="text-left px-3.5 py-2.5 font-medium whitespace-nowrap">
+                      <Link href={`/vendors/${v.slug}`} className="underline">
+                        {v.name}
+                      </Link>
+                    </th>
+                    {cols.map((c) => (
+                      <Cell key={c.key} v={v} k={c.key} />
+                    ))}
+                    <td className="px-3.5 py-2.5 text-[var(--ink-600,#5b636e)] tabular-nums">
+                      {reg?.length ?? 0}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </details>
   );
 }
 
@@ -189,13 +207,14 @@ export default function ProviderTables({ vendors }: { vendors: Vendor[] }) {
   );
 
   return (
-    <section className="mt-16" id="comparison-tables">
+    <section className="mt-20" id="comparison-tables">
       <p className="eyebrow mb-3">The market, compared</p>
       <h2 className="mb-4">SD-WAN and SASE providers compared</h2>
 
       {/* The extractable answer block. Under 80 words, stating the distinction
-          the head query actually turns on. This is the sentence an engine
-          lifts, so it stays first and it stays short. */}
+          the head query actually turns on. Never inside a collapse: this is the
+          passage an engine lifts and a reader needs before the tables mean
+          anything. */}
       <p className="text-base text-[var(--ink-800,#222)] mb-4 max-w-3xl">
         The word provider means two different things in this market. Some suppliers build the
         SD-WAN or SASE platform and sell it as a product. Others operate a managed service on top
@@ -204,7 +223,7 @@ export default function ProviderTables({ vendors }: { vendors: Vendor[] }) {
         question rather than by company.
       </p>
 
-      <p className="text-sm text-[var(--ink-600,#5b636e)] mb-8 max-w-3xl">
+      <p className="text-sm text-[var(--ink-600,#5b636e)] mb-6 max-w-3xl">
         {vendors.length} suppliers. {builders.length} build the technology, {runners.length} run it
         as a service, {both} do both and appear in both tables. Every value is graded from the
         supplier&apos;s own published material or an independently accountable record, with a
@@ -229,22 +248,17 @@ export default function ProviderTables({ vendors }: { vendors: Vendor[] }) {
       />
 
       {unplaced.length > 0 && (
-        <div className="mb-12">
-          <h3 className="text-lg font-medium mb-2">Not currently listed</h3>
-          <p className="text-sm text-[var(--ink-700)] max-w-3xl">
-            {unplaced.length === 1 ? "One supplier is" : `${unplaced.length} suppliers are`} held
-            back from the tables above:{" "}
-            {unplaced.map((v) => v.name).join(", ")}. Their delivery model could not be confirmed
-            from a sentence we could quote on their own published material. Saying so is more
-            useful to a buyer than a confident row we cannot stand behind.
-          </p>
-        </div>
+        <p className="text-sm text-[var(--ink-700)] max-w-3xl mt-5">
+          {unplaced.length === 1 ? "One supplier is" : `${unplaced.length} suppliers are`} held back
+          from the tables above: {unplaced.map((v) => v.name).join(", ")}. Their delivery model
+          could not be confirmed from a sentence we could quote on their own published material.
+        </p>
       )}
 
-      <p className="text-sm text-[var(--ink-600,#5b636e)] max-w-3xl">
-        Where evidence was not found, a cell reads Not published rather than being inferred.
-        Full sources for each supplier sit on its profile page, including the sources we found
-        and rejected.
+      <p className="text-sm text-[var(--ink-600,#5b636e)] max-w-3xl mt-4">
+        Where evidence was not found, a cell reads Not published rather than being inferred. Full
+        sources for each supplier sit on its profile page, including the sources we found and
+        rejected.
       </p>
     </section>
   );

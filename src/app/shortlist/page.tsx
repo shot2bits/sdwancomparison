@@ -98,9 +98,11 @@ export default function ShortlistPage() {
         </p>
       </div>
 
-      <ProviderTables vendors={fullVendors} />
-
       <ShortlistBuilder vendors={vendors} features={features} />
+
+      {/* Below the ranked list, per Robert 29 Jul: the builder answers the
+          buyer's question, these tables are the reference behind it. */}
+      <ProviderTables vendors={fullVendors} />
 
       <section className="mt-20">
         <p className="eyebrow mb-3">Ranked shortlists</p>
@@ -131,10 +133,21 @@ export default function ShortlistPage() {
           Every provider is graded against the same 40 capabilities. One sentence on what each row
           measures; grades reflect public evidence, so always confirm via RFP.
         </p>
+        {/* One <details> per category. Native, so every definition stays in
+            the server HTML for crawlers and assistants; only the visual state
+            collapses. No JavaScript reveal. */}
         {FEATURE_CATEGORIES_LIST.map((cat) => (
-          <div key={cat} className="mb-6">
-            <h3 className="text-base font-medium mb-2">{cat}</h3>
-            <dl className="space-y-2 max-w-3xl">
+          <details key={cat} className="mb-2 border border-[var(--ink-200,#e8ebef)] rounded-lg overflow-hidden group">
+            <summary className="cursor-pointer list-none px-4 py-3 bg-[var(--ink-50,#f6f8fa)] hover:bg-[var(--ink-100,#eef1f5)] flex items-baseline gap-3">
+              <span aria-hidden="true" className="text-[var(--ink-500)] text-xs transition-transform group-open:rotate-90">▶</span>
+              <span className="flex-1">
+                <h3 className="text-base font-medium inline">{cat}</h3>{" "}
+                <span className="text-sm text-[var(--ink-600,#5b636e)]">
+                  {FEATURES.filter((f) => f.category === cat).length} capabilities
+                </span>
+              </span>
+            </summary>
+            <dl className="space-y-2 max-w-3xl px-4 py-4">
               {FEATURES.filter((f) => f.category === cat).map((f) => (
                 <div key={f.id} id={f.id}>
                   <dt className="text-sm font-medium inline">{f.name}.</dt>{" "}
@@ -142,19 +155,25 @@ export default function ShortlistPage() {
                 </div>
               ))}
             </dl>
-          </div>
+          </details>
         ))}
       </section>
 
       <section className="mt-20 max-w-3xl">
         <p className="eyebrow mb-3">Questions</p>
         <h2 className="mb-6">How the shortlist builder works</h2>
-        <div className="space-y-6">
+        {/* Each question its own <details>. The answers remain in the served
+            HTML and in the FAQPage JSON-LD above, so nothing is hidden from a
+            machine; the page just stops being a wall of text. */}
+        <div className="space-y-2">
           {SHORTLIST_FAQS.map((f) => (
-            <div key={f.q}>
-              <h3 className="text-base font-medium mb-1">{f.q}</h3>
-              <p className="text-sm text-[var(--ink-700)]">{f.a}</p>
-            </div>
+            <details key={f.q} className="border border-[var(--ink-200,#e8ebef)] rounded-lg overflow-hidden group">
+              <summary className="cursor-pointer list-none px-4 py-3 bg-[var(--ink-50,#f6f8fa)] hover:bg-[var(--ink-100,#eef1f5)] flex items-baseline gap-3">
+                <span aria-hidden="true" className="text-[var(--ink-500)] text-xs transition-transform group-open:rotate-90">▶</span>
+                <h3 className="text-base font-medium flex-1">{f.q}</h3>
+              </summary>
+              <p className="text-sm text-[var(--ink-700)] px-4 py-4">{f.a}</p>
+            </details>
           ))}
         </div>
       </section>
