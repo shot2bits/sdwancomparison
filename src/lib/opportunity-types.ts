@@ -52,7 +52,12 @@ export const PricingSchema = z.object({
 }).strict();
 export type Pricing = z.infer<typeof PricingSchema>;
 
-export const FEED_TYPES = ["post", "comment", "pricing", "interest", "decline", "award", "closed", "response", "question"] as const;
+// "introduction" (29 Jul 2026, Robert's E4 ruling): the buyer's acceptance
+// of an introduction to one supplier, recorded append-only on the feed.
+// Visible only to the buyer and the introduced supplier (maskedFeed drops
+// it for everyone else); contact details pass on this event and never
+// before it.
+export const FEED_TYPES = ["post", "comment", "pricing", "interest", "decline", "award", "closed", "response", "question", "introduction"] as const;
 export type FeedType = (typeof FEED_TYPES)[number];
 
 export const FeedItemSchema = z.object({
@@ -154,6 +159,12 @@ export const OpportunitySchema = z.object({
   awarded_vendor_slug: z.string().nullable().default(null),
   buyer_token: z.string(),       // buyer manage token
   invited: z.array(z.string()).default([]),  // vendor slugs invited
+  // Vendor slugs the buyer has accepted an introduction with (Robert's E4
+  // ruling, 29 Jul 2026): contact details pass to a supplier only after
+  // the buyer accepts, and never before. The queryable state; the feed's
+  // "introduction" item is the append-only record of each acceptance.
+  // Never in any public projection.
+  introduced: z.array(z.string()).default([]),
   feed: z.array(FeedItemSchema).default([]),
 
   /* --- Project notice fields (2026 marketplace rebuild). All defaulted. --- */

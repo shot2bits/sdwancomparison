@@ -25,11 +25,21 @@ export async function GET(req: Request, ctx: Ctx) {
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
   const { buyer_token: _bt, owner_email: _oe, ...rest } = opp;
+  // Contact details pass only after the buyer accepts an introduction
+  // (Robert's E4 ruling, 29 Jul 2026). The spread above strips
+  // owner_email unconditionally so it can never leak by accident; the
+  // introduction object below is the ONE gate that carries it, and only
+  // to the introduced supplier. Until then the supplier sees the fact of
+  // the rule, not the address.
+  const introduced = (opp.introduced ?? []).includes(ref.vendor_slug);
   const supplierView = {
     ...rest,
     buyer_token: "",
     buyer_org: opp.buyer_visibility === "anonymous" ? "" : opp.buyer_org,
     feed: maskedFeed(opp, ref.vendor_slug),
+    introduction: introduced
+      ? { accepted: true, contact_email: opp.owner_email || null, organisation: opp.buyer_org || null }
+      : { accepted: false },
   };
   return Response.json({ opportunity: supplierView, vendor_slug: ref.vendor_slug, vendor_name: vendorName(ref.vendor_slug) }, { headers: cors });
 }
@@ -59,12 +69,17 @@ export async function POST(req: Request, ctx: Ctx) {
     type === "response" ? (body.answers ?? {}) : {},
   );
   // Same masking as the GET: never return buyer credentials or other
-  // suppliers' pricing amounts in the post-action snapshot.
+  // suppliers' pricing amounts in the post-action snapshot. The
+  // introduction object mirrors the GET so the room state never flickers.
   const { buyer_token: _bt2, owner_email: _oe2, ...rest2 } = updated;
+  const introducedNow = (updated.introduced ?? []).includes(ref.vendor_slug);
   return Response.json({
     ...rest2,
     buyer_token: "",
     buyer_org: updated.buyer_visibility === "anonymous" ? "" : updated.buyer_org,
     feed: maskedFeed(updated, ref.vendor_slug),
+    introduction: introducedNow
+      ? { accepted: true, contact_email: updated.owner_email || null, organisation: updated.buyer_org || null }
+      : { accepted: false },
   }, { headers: cors });
 }

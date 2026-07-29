@@ -31,7 +31,13 @@ export function maskFeedItem(f: FeedItem, opts: { anonymousBuyer: boolean; ownVe
 
 export function maskedFeed(opp: Opportunity, ownVendorSlug: string | null = null): FeedItem[] {
   const anonymousBuyer = opp.buyer_visibility === "anonymous";
-  return opp.feed.map((f) => maskFeedItem(f, { anonymousBuyer, ownVendorSlug }));
+  return opp.feed
+    // An introduction is between the buyer and ONE supplier (Robert's E4
+    // ruling, 29 Jul 2026): the acceptance item (its actor_slug carries
+    // the introduced vendor) is dropped for every other viewer, so
+    // competitors and the public never learn who the buyer chose to meet.
+    .filter((f) => f.type !== "introduction" || (ownVendorSlug != null && f.actor_slug === ownVendorSlug))
+    .map((f) => maskFeedItem(f, { anonymousBuyer, ownVendorSlug }));
 }
 
 /** Buyer actor name for feed posts: never the organisation name when anonymous. */
@@ -97,6 +103,36 @@ export async function addFeedItem(
     try { await pingIndexNow(noticePingPaths(saved.id)); } catch { /* accelerant, never a dependency */ }
   }
   return saved;
+}
+
+/**
+ * The buyer accepts an introduction with one supplier (Robert's E4 ruling,
+ * 29 Jul 2026): the fourth promise made mechanical. Contact details pass
+ * to this supplier and never before this moment; the acceptance is
+ * recorded append-only on the feed (actor buyer, actor_slug carrying the
+ * introduced vendor so masking scopes it) and in the queryable introduced
+ * list. Idempotent: accepting twice records once.
+ */
+export async function acceptIntroduction(opp: Opportunity, vendorSlug: string): Promise<Opportunity | { error: string }> {
+  const name = vendorName(vendorSlug);
+  const engaged = opp.invited.includes(vendorSlug) || opp.feed.some((f) => f.actor_type === "supplier" && f.actor_slug === vendorSlug);
+  if (!name && !engaged) return { error: `Unknown vendor slug: ${vendorSlug}` };
+  if ((opp.introduced ?? []).includes(vendorSlug)) return opp;
+  const item: FeedItem = {
+    id: newId("feed"),
+    actor_type: "buyer",
+    actor_slug: vendorSlug, // scopes the item to the introduced supplier in maskedFeed
+    actor_name: buyerActorName(opp),
+    type: "introduction",
+    // Rendered to the buyer and the introduced supplier only. WORDING
+    // PROVISIONAL pending Harry.
+    body: `Introduction accepted: contact details shared with ${name ?? vendorSlug}.`,
+    pricing: null,
+    links: [],
+    answers: {},
+    created: Date.now(),
+  };
+  return saveOpportunity({ ...opp, introduced: [...(opp.introduced ?? []), vendorSlug], feed: [...opp.feed, item] });
 }
 
 export async function inviteSupplierToOpportunity(opp: Opportunity, vendorSlug: string): Promise<{ token: string; opp: Opportunity } | { error: string }> {

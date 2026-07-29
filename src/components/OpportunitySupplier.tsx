@@ -26,9 +26,12 @@ function deadlineText(opp: { engagement_type?: string; auction_format?: string; 
   return h < 48 ? `Closes in ${h}h` : `Closes in ${Math.round(h / 24)}d`;
 }
 
+type Introduction = { accepted: boolean; contact_email?: string | null; organisation?: string | null };
+
 export default function OpportunitySupplier({ token }: { token: string }) {
   const [opp, setOpp] = useState<Opp | null>(null);
   const [vendor, setVendor] = useState<string>("");
+  const [intro, setIntro] = useState<Introduction | null>(null);
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [comment, setComment] = useState("");
   const [links, setLinks] = useState("");
@@ -50,6 +53,7 @@ export default function OpportunitySupplier({ token }: { token: string }) {
         const data = await res.json();
         if (!active) return;
         setOpp(data.opportunity); setVendor(data.vendor_name ?? data.vendor_slug);
+        setIntro(data.opportunity.introduction ?? null);
         setFeed(data.opportunity.feed); lastTs.current = Math.max(0, ...data.opportunity.feed.map((f: FeedItem) => f.created));
       } catch { setError("Could not load the opportunity."); }
     })();
@@ -70,8 +74,9 @@ export default function OpportunitySupplier({ token }: { token: string }) {
     try {
       const res = await fetch(`/sase/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing, answers, links: parseLinks() }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.auth_required ? "Please sign in above with your supplier work email first." : (e.error ?? "Could not send.")); }
-      const updated = (await res.json()) as Opp;
+      const updated = (await res.json()) as Opp & { introduction?: Introduction };
       setFeed(updated.feed); lastTs.current = Math.max(0, ...updated.feed.map((f) => f.created));
+      if (updated.introduction) setIntro(updated.introduction);
       setLinks("");
     } catch (e) { setError(e instanceof Error ? e.message : "Could not send."); }
   }
@@ -90,6 +95,24 @@ export default function OpportunitySupplier({ token }: { token: string }) {
         {(opp.budget_note || opp.timeline_note) && <p className="text-sm text-[var(--ink-500)] mt-1">{opp.budget_note}{opp.budget_note && opp.timeline_note ? " · " : ""}{opp.timeline_note}</p>}
         <p className="text-xs text-emerald-700 mt-2">● Live, updates every few seconds</p>
       </div>
+
+      {/* Contact passes only on the buyer's acceptance (Robert's E4 ruling,
+          29 Jul 2026): the introduced state carries the details; before it,
+          the supplier sees the rule, never an address. WORDING PROVISIONAL
+          pending Harry. */}
+      {intro?.accepted ? (
+        <div className="rounded-sm border border-emerald-300 bg-emerald-50 px-4 py-3">
+          <p className="m-0 text-sm font-semibold text-emerald-900">The buyer has accepted an introduction with {vendor}.</p>
+          <p className="m-0 mt-1 text-sm text-emerald-900">
+            {intro.organisation ? `Organisation: ${intro.organisation}. ` : ""}
+            {intro.contact_email ? <>Contact them directly at <a href={`mailto:${intro.contact_email}`} className="underline">{intro.contact_email}</a>.</> : "Contact details will appear here."}
+          </p>
+        </div>
+      ) : (
+        <p className="rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--ink-50,#fafafa)] px-4 py-2.5 text-xs text-[var(--ink-600)]">
+          The buyer&rsquo;s identity and contact details are shared only if they accept an introduction with you. Until then, everything happens in this room.
+        </p>
+      )}
 
       <FeedView items={feed} />
 

@@ -5,7 +5,7 @@ import { FeedView, type FeedItem } from "@/components/OpportunityFeed";
 import { OPP_SCOPE_TAGS, SECTORS as NOTICE_SECTORS, labelFor, labelsFor } from "@/lib/notice-options";
 import BidComparison from "@/components/BidComparison";
 
-type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; buyer_token: string; invited: string[]; feed: FeedItem[]; awarded_vendor_slug: string | null; engagement_type?: string; auction_format?: string; deadline?: number | null };
+type Opp = { id: string; title: string; scope: string[]; sites: number | null; regions: string[]; summary: string; budget_note: string; timeline_note: string; status: string; buyer_token: string; invited: string[]; introduced?: string[]; feed: FeedItem[]; awarded_vendor_slug: string | null; engagement_type?: string; auction_format?: string; deadline?: number | null };
 
 function deadlineText(opp: { engagement_type?: string; auction_format?: string; deadline?: number | null; status: string }): string | null {
   if (opp.engagement_type !== "auction" || opp.auction_format !== "timed" || !opp.deadline) return null;
@@ -142,11 +142,11 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     } catch { /* ignore */ }
   }
 
-  async function buyerAction(action: string, body: string, award_slug?: string) {
+  async function buyerAction(action: string, body: string, award_slug?: string, vendor_slug?: string) {
     if (!opp) return;
     try {
-      const res = await fetch(`/sase/api/opportunity/${opp.id}/buyer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ buyer_token: opp.buyer_token, action, body, award_slug }) });
-      if (res.ok) { const o = (await res.json()) as Opp; setOpp(o); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); setComment(""); }
+      const res = await fetch(`/sase/api/opportunity/${opp.id}/buyer`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ buyer_token: opp.buyer_token, action, body, award_slug, vendor_slug }) });
+      if (res.ok) { const o = (await res.json()) as Opp; setOpp((prev) => ({ ...o, buyer_token: prev?.buyer_token || o.buyer_token })); setFeed(o.feed); lastTs.current = Math.max(0, ...o.feed.map((f) => f.created)); setComment(""); }
     } catch { /* ignore */ }
   }
 
@@ -278,6 +278,39 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
             </div>
           </div>
         )}
+        {/* Introductions (Robert's E4 ruling, 29 Jul 2026): the fourth
+            promise made mechanical. The buyer chooses which suppliers
+            receive their contact details, and when; nothing passes until
+            they choose here. Engaged suppliers = anyone invited or active
+            in the feed. WORDING PROVISIONAL pending Harry. */}
+        {opp.status === "open" && (() => {
+          const engaged = [...new Set([
+            ...opp.invited,
+            ...feed.filter((f) => f.actor_type === "supplier" && f.actor_slug).map((f) => String(f.actor_slug)),
+          ])];
+          if (engaged.length === 0) return null;
+          return (
+            <div className="mt-4">
+              <p className="eyebrow mb-1">Introductions</p>
+              <p className="text-xs text-[var(--ink-500)] mb-2">Your contact details pass to a supplier only when you accept an introduction here. Until then, suppliers reach you only through this room.</p>
+              <div className="flex flex-wrap gap-1.5">
+                {engaged.map((slug) => {
+                  const done = (opp.introduced ?? []).includes(slug);
+                  return (
+                    <button
+                      key={slug}
+                      onClick={() => { if (!done) buyerAction("accept_introduction", "", undefined, slug); }}
+                      disabled={done}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${done ? "border-emerald-500 text-emerald-700" : "border-[var(--ink-900)] hover:bg-[var(--ink-900)] hover:text-white"}`}
+                    >
+                      {done ? `Introduced: ${slug}` : `Accept introduction: ${slug}`}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
         <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a supplier copies their private room link. Suppliers reply live with comments and pricing.</p>
         {opp.status === "open" && (
           <div className="mt-6 border-t border-[var(--ink-200,#e5e5e5)] pt-4">
