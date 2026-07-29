@@ -903,7 +903,7 @@ export function buildComparison(
   const names = Object.fromEntries(chosen.map((v) => [v.slug, v.name]));
   const summary = `${chosen
     .map((v) => `${v.name} scores ${scoreOf(v.slug)}`)
-    .join("; ")} on the Netify 40-feature balanced matrix (June 2026). ${chosen
+    .join("; ")} on the Netify 40-feature balanced matrix. ${chosen
     .map((v) => `${v.name} leads on ${wins[v.slug].length} features`)
     .join("; ")}; ${even.length} features are level.`;
 

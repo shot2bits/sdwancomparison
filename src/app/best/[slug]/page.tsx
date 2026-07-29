@@ -10,7 +10,7 @@ type EditorialPage = { intro?: string; faqs?: { q: string; a: string }[] };
 type EditorialVendor = { commentary: string[]; watch_out?: string };
 type Editorial = Record<string, Record<string, EditorialVendor> & { _page?: EditorialPage }>;
 const EDITORIAL = bestEditorial as unknown as Editorial;
-import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURE_NAMES, getAllVendors, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import {
   SITE_URL,
@@ -63,9 +63,25 @@ export default async function BestPage({ params }: Props) {
   // 16 July 2026; the 10 June date is the ranking dataset alone. Harry's
   // audit (17 July) read the stale date as proof his rewrite never landed,
   // so the date must reflect the editorial, not just the scores.
+  // Two dates, deliberately not conflated: when the writer last touched the
+  // prose, and when the ranking dataset was last verified. The visible date is
+  // the later of the two, because either one going stale misleads. Derived, so
+  // a data refresh can never leave a hardcoded month behind again (29 Jul 2026).
   const hasEditorial = Boolean(EDITORIAL[base.slug]);
-  const reviewedDate = hasEditorial ? "16 July 2026" : "10 June 2026";
-  const reviewedMonth = hasEditorial ? "July 2026" : "June 2026";
+  const dataVerified =
+    getAllVendors()
+      .map((v) => v.last_verified)
+      .sort()
+      .slice(-1)[0] ?? "2026-06-10";
+  const editorialIso = hasEditorial ? "2026-07-16" : "";
+  const reviewedIso = [dataVerified, editorialIso].filter(Boolean).sort().slice(-1)[0]!;
+  const reviewedOn = new Date(`${reviewedIso}T00:00:00Z`);
+  const reviewedDate = reviewedOn.toLocaleDateString("en-GB", {
+    day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+  });
+  const reviewedMonth = reviewedOn.toLocaleDateString("en-GB", {
+    month: "long", year: "numeric", timeZone: "UTC",
+  });
 
   const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
@@ -109,7 +125,7 @@ export default async function BestPage({ params }: Props) {
     author: { "@type": "Organization", name: "Netify research team", url: "https://netify.co.uk/about-netify/" },
     reviewedBy: { "@id": `${SITE_URL}/#person-robert-sturt` },
     publisher: { "@id": `${SITE_URL}/#organization` },
-    dateModified: "2026-06-10",
+    dateModified: reviewedIso,
     mainEntityOfPage: `${SITE_URL}/best/${page.slug}`,
   };
 
@@ -151,7 +167,7 @@ export default async function BestPage({ params }: Props) {
         <h1 id="page-h1" className="mb-4">{page.h1}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">{page.intro}</p>
         <p className="mt-4 text-[var(--ink-700)]" id="ranked-summary">
-          {`Netify's June 2026 evaluation ranks: `}
+          {`Netify's ${reviewedMonth} evaluation ranks: `}
           {result.shortlist
             .map((v) => `${v.rank}. ${v.name} (${v.score})`)
             .join("; ")}

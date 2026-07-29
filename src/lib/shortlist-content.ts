@@ -22,7 +22,7 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How accurate are the extended dimensions?",
-    a: "We've ensured that everything from the likes of regional coverage, cloud support, AI capability, resilience and deployment speed grades are all indicative research from June 2026, though to be absolutely sure that everything is 100% up to date, we'd strongly recommend confirming offerings via a structured RFP, which Netify can also assist in creating and issue on your behalf to your shortlisted vendors.",
+    a: "There are two different levels of evidence here and we would rather be plain about which is which. Eighteen facts per provider were re-sourced on 29 July 2026 from the provider's own published material or an independently accountable record, and each one carries a named source, a reliability tier and a sentence quoted from that source which we then re-checked against the live page: the thirteen capabilities that genuinely separate this market, who owns the underlay, whose security service edge stack it is, whether real compliance documentation exists rather than a general assurance, plus published points of presence and availability SLA. The remaining grades, including regional coverage, cloud support, AI capability and resilience, are still indicative desk research rather than individually sourced, and we say so rather than dress them up. Where we could not evidence something we publish it as unknown with the reason. For anything you are going to sign a contract on, confirm it through a structured RFP, which Netify can create and issue to your shortlisted providers.",
   },
 ];
 

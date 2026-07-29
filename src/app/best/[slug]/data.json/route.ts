@@ -1,5 +1,5 @@
 import { BEST_PAGES, getBestPage } from "@/lib/best-pages";
-import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURE_NAMES, getShortlistDataset, getAllVendors } from "@/lib/vendors";
 import { buildShortlist, encodeScenario, SECTOR_LABELS } from "@/lib/shortlist-core";
 import { deriveContinuationSector } from "@/lib/continuation/derive";
 import { continuationForTwin } from "@/lib/continuation/types";
@@ -34,7 +34,12 @@ export async function GET(_req: Request, ctx: Ctx) {
       title: page.title,
       description: page.metaDescription,
       publisher: "Netify Group Limited",
-      last_reviewed: "2026-06-10",
+      // Derived from the vendor records, never typed (29 Jul 2026).
+      last_reviewed:
+        getAllVendors()
+          .map((v) => v.last_verified)
+          .sort()
+          .slice(-1)[0] ?? "2026-06-10",
       criteria: page.input,
       interactive_equivalent: `${SITE_URL}/shortlist?${encodeScenario(result.input)}`,
       result,
