@@ -188,12 +188,12 @@ export default async function DemandIndexPage() {
             <p className="text-sm text-[var(--ink-700)] max-w-3xl">
               {index.funnel_all_time.created} projects created on the marketplace to date;{" "}
               {index.funnel_all_time.progressed_beyond_draft} progressed beyond draft;{" "}
-              {index.funnel_all_time.published} published to suppliers
+              {index.funnel_all_time.published} published to vendors and service providers
               {index.funnel_all_time.publish_rate_pct !== null
                 ? ` (a publish rate of ${index.funnel_all_time.publish_rate_pct}%)`
                 : ""}.
               A published RFP is the marketplace&apos;s unit of real demand: a structured requirement sent to
-              matched, verified suppliers.
+              matched, verified vendors and service providers.
             </p>
           </section>
 
@@ -261,7 +261,7 @@ export default async function DemandIndexPage() {
           publish timestamp exists, a published project&apos;s most recent update dates it within a window, and
           the index states that approximation. Anonymisation is structural: the computation reads sector,
           technology scope, status and dates only, and publishes counts and thresholded shares. No project
-          titles, buyer identities, supplier identities or prices are read into the index at all. Suppression
+          titles, buyer identities, vendor identities or prices are read into the index at all. Suppression
           minimum for shares: {SUPPRESSION_MIN}.
         </p>
       </section>
@@ -294,7 +294,7 @@ export default async function DemandIndexPage() {
         <p className="text-sm text-[var(--ink-700)]">
           Every project on the marketplace is counted anonymously here. Post a{" "}
           <Link className="underline" href="/opportunities/new/">project notice</Link> for early pricing and
-          supplier interest, build a full{" "}
+          vendor interest, build a full{" "}
           <Link className="underline" href="/rfp-builder/new/">SASE / SD-WAN RFP</Link> in about two minutes, or
           browse the <Link className="underline" href="/opportunities/board/">open opportunity board</Link>.
         </p>

@@ -34,11 +34,11 @@ const APEX = "https://netify.co.uk";
 const ENGINE_H1 = "The global SASE and SD-WAN sourcing engine";
 /** The supporting paragraph (his exact copy, 29 Jul). */
 const ENGINE_PROMISE =
-  "Describe your requirement in your own words. Netify structures it, identifies what’s missing, evaluates suitable suppliers and prepares an anonymous opportunity for the market.";
+  "Describe your requirement in your own words. Netify structures it, identifies what’s missing, evaluates suitable vendors and service providers and prepares an anonymous opportunity for the market.";
 /** The trust paragraph (his exact copy, 29 Jul): plain centred text,
  *  never a card or border, never uppercase, no heading of its own. */
 const ENGINE_VALUE =
-  "Connected to 30+ leading vendors and managed service providers, Netify combines specialist AI with continuously updated supplier intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors.";
+  "Connected to 30+ leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors.";
 /** The two-buyer line and the control line (ruled v2 door). Geography
  *  retired as a separate line (Robert, 29 Jul: one message); it lives in
  *  the value card's title. */
@@ -48,7 +48,7 @@ const ENGINE_AGENT =
  *  review): the analyst-review claim retired with the approval queue; the
  *  sentence that replaces it is ruled promise wording. Twin of workspace. */
 const ENGINE_CONTROL =
-  "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. Only vetted suppliers can respond.";
+  "Free for buyers. Anonymous until you choose. Pricing private to you. Nothing publishes without your signature. Only vetted vendors and service providers can respond.";
 const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALUE} ${ENGINE_AGENT} ${ENGINE_CONTROL}`;
 
 export const metadata: Metadata = {
@@ -83,7 +83,7 @@ function getHomeSchemas() {
       url: `${APEX}/`,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
-      description: `${ENGINE_DESCRIPTION} Provenance on every claim, evidence-graded supplier fit, and one human signature publishes the anonymous notice. Fully agent-accessible via MCP and llms.txt.`,
+      description: `${ENGINE_DESCRIPTION} Provenance on every claim, evidence-graded vendor fit, and one human signature publishes the anonymous notice. Fully agent-accessible via MCP and llms.txt.`,
       offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
       provider: { "@id": `${APEX}/#organization` },
     },
@@ -123,8 +123,8 @@ function getHomeSchemas() {
         {
           "@type": "HowToStep",
           position: 3,
-          name: "Identify suitable suppliers",
-          text: "Evaluated fit across 30 SASE and SD-WAN suppliers reorders around your stated requirement, with the reasons stated and every grade dated.",
+          name: "Identify suitable vendors and service providers",
+          text: "Evaluated fit across 30 SASE and SD-WAN vendors and service providers reorders around your stated requirement, with the reasons stated and every grade dated.",
         },
         {
           "@type": "HowToStep",

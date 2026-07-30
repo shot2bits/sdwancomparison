@@ -22,7 +22,7 @@ export default function PublishPromises({ compact = false }: { compact?: boolean
       </ul>
       <p className={compact ? "m-0 mt-1.5 text-[10.5px] text-zinc-500" : "m-0 mt-2 text-xs text-[var(--ink-500)]"}>
         Vetted means our published standard:{" "}
-        <a href={`/sase${VETTING_STANDARD_PATH}/`} className="underline">how Netify vets suppliers</a>.
+        <a href={`/sase${VETTING_STANDARD_PATH}/`} className="underline">how Netify vets vendors and service providers</a>.
       </p>
     </div>
   );

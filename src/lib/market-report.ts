@@ -148,11 +148,11 @@ function estimateForProject(p: ProjectDetails): { result: EstimateResult | null;
 function gapChecks(p: ProjectDetails): string[] {
   const gaps: string[] = [];
   const b = p.buyer;
-  if (!b.sector) gaps.push("No sector stated. Sector context sharpens supplier answers and reference cases.");
-  if (!b.site_count) gaps.push("No site count stated. Suppliers will price more accurately with an estate size.");
+  if (!b.sector) gaps.push("No sector stated. Sector context sharpens vendor answers and reference cases.");
+  if (!b.site_count) gaps.push("No site count stated. Vendors will price more accurately with an estate size.");
   if ((b.regions ?? []).length === 0) gaps.push("No regions stated. Coverage answers cannot be checked without them.");
-  if ((b.compliance ?? []).length === 0) gaps.push("No compliance requirements listed. If any apply (PCI DSS, ISO 27001, Cyber Essentials), suppliers should evidence them.");
-  if (!/Timeline|go-live|golive/i.test(b.notes ?? "")) gaps.push("No timeline stated. A target go-live focuses supplier responses.");
+  if ((b.compliance ?? []).length === 0) gaps.push("No compliance requirements listed. If any apply (PCI DSS, ISO 27001, Cyber Essentials), vendors should evidence them.");
+  if (!/Timeline|go-live|golive/i.test(b.notes ?? "")) gaps.push("No timeline stated. A target go-live focuses vendor responses.");
   const sections = includedSections(p);
   const mandatory = sections.reduce((n, s) => n + s.questions.filter((q) => q.mandatory).length, 0);
   if (mandatory === 0) gaps.push("No questions are flagged as hard requirements yet. Marking your deal-breakers improves the scoring matrix.");

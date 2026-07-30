@@ -65,6 +65,6 @@ export function regionHintFromEmail(email: string | null | undefined): RegionHin
   return {
     region,
     label,
-    assumption: `Delivery region assumed as ${label} from your email address (.${tld}); supplier ranking was weighted accordingly. Edit your project's regions if delivery is elsewhere.`,
+    assumption: `Delivery region assumed as ${label} from your email address (.${tld}); vendor ranking was weighted accordingly. Edit your project's regions if delivery is elsewhere.`,
   };
 }

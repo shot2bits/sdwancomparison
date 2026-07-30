@@ -52,8 +52,8 @@ export default function AccountPage() {
         <p className="eyebrow mb-2">Already published with us?</p>
         <SignIn role="buyer" prompt="Sign in with the work email you published under, to reach your record and your responses." />
         <p className="mt-3 text-xs text-[var(--ink-500)]">
-          Supplier? <Link href="/for-suppliers#register" className="underline">Register or sign in to bid</Link> · your dashboard is at{" "}
-          <Link href="/supplier" className="underline">Supplier area</Link>.
+          Vendor or service provider? <Link href="/for-suppliers#register" className="underline">Register or sign in to bid</Link> · your dashboard is at{" "}
+          <Link href="/supplier" className="underline">Vendor area</Link>.
         </p>
       </div>
 
@@ -67,7 +67,7 @@ export default function AccountPage() {
 
       <div className="mt-12 mb-6">
         <h2 className="text-xl mb-1">Agent digests</h2>
-        <p className="text-sm text-[var(--ink-600)]">The following recommendations have been made based on what our agent has monitored from your live RFPs. Please note: our agent will never contact a supplier without your approval.</p>
+        <p className="text-sm text-[var(--ink-600)]">The following recommendations have been made based on what our agent has monitored from your live RFPs. Please note: our agent will never contact a vendor without your approval.</p>
       </div>
       <BuyerDigests />
     </div>

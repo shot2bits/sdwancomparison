@@ -202,7 +202,7 @@ export default async function BestPage({ params }: Props) {
 
       {/* The Continuation (DEF wave one): the shipped Sector Bridge,
           rebuilt as the derived component. Same prefill law, same healthcare
-          deep-claim rule, and this page's own ranked suppliers arrive
+          deep-claim rule, and this page's own ranked vendors arrive
           pinned. No derivation, no rendering. */}
       <div className="mb-10">
         <Continuation
@@ -234,7 +234,7 @@ export default async function BestPage({ params }: Props) {
 
       {/* The legacy "Issue this shortlist as a real RFP" editorial box is
           retired (DEF wave one, One Door): the Continuation above carries
-          this page's suppliers and sector into the Workspace, which
+          this page's vendors and sector into the Workspace, which
           recommends the formal RFP path when the position warrants it. */}
 
       {/* The extractable form of the ranking above. Added 29 July 2026: the

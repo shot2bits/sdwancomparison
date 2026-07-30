@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     return Response.json({ ok: true, status: "netify_all", message: "Netify staff act for any vendor; no claim needed." }, { headers: cors });
   }
   if (session.role !== "supplier" || !session.vendor_slug) {
-    return Response.json({ error: "Sign in with your domain-verified supplier email to claim a profile." }, { status: 403, headers: cors });
+    return Response.json({ error: "Sign in with your domain-verified vendor email to claim a profile." }, { status: 403, headers: cors });
   }
   const domain = emailDomain(session.email) ?? "";
   const claim = await requestVendorClaim(session.vendor_slug, session.email, domain);

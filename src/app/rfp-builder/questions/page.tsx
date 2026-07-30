@@ -53,7 +53,7 @@ export default function QuestionBankPage() {
       "@id": `${SITE_URL}/rfp-builder/questions/#dataset`,
       name: "Netify SASE and SD-WAN RFP Question Bank",
       description:
-        "Analyst-written RFP question bank for SASE, SSE and SD-WAN procurement: canonical questions with evidence requirements, sector applicability, weighting hints and red-flag answers, plus sector packs with buyer and supplier lenses.",
+        "Analyst-written RFP question bank for SASE, SSE and SD-WAN procurement: canonical questions with evidence requirements, sector applicability, weighting hints and red-flag answers, plus sector packs with buyer and vendor lenses.",
       version: SASE_EXTENDED_BANK.question_bank_version,
       dateModified: SASE_EXTENDED_BANK.last_reviewed,
       license: "Public methodology. Reuse permitted with attribution to Netify and the canonical URL.",
@@ -82,10 +82,10 @@ export default function QuestionBankPage() {
         <h1 id="page-h1" className="mb-4">The Netify SASE &amp; SD-WAN RFP question bank</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           These questions were written by our analyst team, and they are the same set the RFP Builder and the
-          marketplace run on. Every question tells you what evidence a supplier should be able to show you, which
+          marketplace run on. Every question tells you what evidence a vendor should be able to show you, which
           sectors it is mandatory for, how much weight to give the answer, the responses that should ring alarm bells
           and the follow-up worth asking. Alongside the main set sit four sector packs, each written with a buyer lens
-          and a supplier lens. You are welcome to use the questions in your own procurement with attribution, or{" "}
+          and a vendor lens. You are welcome to use the questions in your own procurement with attribution, or{" "}
           <a href="/sase/rfp-builder/" className="underline">let the builder assemble everything for you</a>.
         </p>
       </div>
@@ -146,7 +146,7 @@ export default function QuestionBankPage() {
       <div className="mb-12">
         <h2 className="mb-1 text-lg font-semibold">Sector packs</h2>
         <p className="mb-5 text-sm text-[var(--ink-600)]">
-          Deep, sector-specific question sets with buyer and supplier lenses on every question. Browse them in full
+          Deep, sector-specific question sets with buyer and vendor lenses on every question. Browse them in full
           inside the <a href="/sase/rfp-builder/" className="underline">RFP Builder</a> or via the <a href="/sase/question-bank.json" className="underline">machine-readable bank</a>.
         </p>
         <div className="space-y-3">

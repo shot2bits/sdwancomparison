@@ -27,7 +27,7 @@ export default function BidComparison({ feed, onAward }: { feed: FeedItem[]; onA
   }
   const bids = [...latest.values()];
   if (bids.length === 0) {
-    return <p className="text-sm text-[var(--ink-500)]">No bids yet. Ranked bids will appear here as suppliers submit pricing.</p>;
+    return <p className="text-sm text-[var(--ink-500)]">No bids yet. Ranked bids will appear here as vendors submit pricing.</p>;
   }
 
   // Group by model, rank ascending by amount within each model (nulls last).
@@ -49,7 +49,7 @@ export default function BidComparison({ feed, onAward }: { feed: FeedItem[]; onA
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="text-left text-[var(--ink-500)] border-b border-[var(--ink-200,#e5e5e5)]">
-                <th className="py-1.5 pr-4">#</th><th className="py-1.5 pr-4">Supplier</th><th className="py-1.5 pr-4">Bid</th><th className="py-1.5 pr-4">Note</th>{onAward && <th className="py-1.5"></th>}
+                <th className="py-1.5 pr-4">#</th><th className="py-1.5 pr-4">Vendor</th><th className="py-1.5 pr-4">Bid</th><th className="py-1.5 pr-4">Note</th>{onAward && <th className="py-1.5"></th>}
               </tr></thead>
               <tbody>
                 {arr.map((b, i) => (

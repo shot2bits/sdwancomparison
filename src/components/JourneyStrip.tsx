@@ -21,7 +21,7 @@ import type { ReactNode } from "react";
 const STATIONS: { n: string; title: string; detail: string }[] = [
   { n: "01", title: "Describe your project", detail: "Your words start it. One sentence is enough." },
   { n: "02", title: "Develop the requirement", detail: "Facts, named inferences and open questions, one at a time." },
-  { n: "03", title: "Identify suitable suppliers", detail: "Evaluated fit across the market, with the reasons stated." },
+  { n: "03", title: "Identify suitable vendors", detail: "Evaluated fit across the market, with the reasons stated." },
   { n: "04", title: "Publish anonymously", detail: "Your notice, your signature. Your identity stays off it." },
   { n: "05", title: "Compare responses", detail: "Structured responses side by side. Pricing private to you." },
 ];

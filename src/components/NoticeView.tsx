@@ -102,7 +102,7 @@ export default function NoticeView({
               {o.has_full_rfp && <Chip tone="amber">Full RFP included</Chip>}
             </>
           )}
-          {o.eligibility === "open" ? <Chip>Open to verified suppliers</Chip> : <Chip>Invite-only</Chip>}
+          {o.eligibility === "open" ? <Chip>Open to verified vendors</Chip> : <Chip>Invite-only</Chip>}
           {o.buyer_visibility === "anonymous" && <Chip>Anonymous buyer</Chip>}
         </div>
         <h1 id="page-h1" className="mb-3 text-2xl leading-snug">{o.title}</h1>
@@ -118,7 +118,7 @@ export default function NoticeView({
             WORDING PROVISIONAL pending Harry's status-language pass. */}
         {!isSample && o.status === "open" && o.invited_count > 0 && (
           <p className="mt-3 mb-0 text-sm text-[var(--ink-600)]">
-            {o.invited_count} vetted supplier{o.invited_count === 1 ? " was" : "s were"} matched and invited when this
+            {o.invited_count} vetted vendor{o.invited_count === 1 ? " was" : "s were"} matched and invited when this
             notice published on {new Date(o.created).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
             Responses go privately to the buyer{o.response_deadline
               ? `; the response window closes on ${new Date(o.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`
@@ -189,9 +189,9 @@ export default function NoticeView({
           question set opens to participating suppliers. Renders only when
           the notice carries a document, and only its real numbers. */}
       {o.rfp_shape && o.rfp_shape.sections.length > 0 && (
-        <Section title="What suppliers answer">
+        <Section title="What vendors answer">
           <p className="mb-2 text-sm text-[var(--ink-700)]">
-            The issued document holds {o.rfp_shape.total} question{o.rfp_shape.total === 1 ? "" : "s"} across {o.rfp_shape.sections.length} section{o.rfp_shape.sections.length === 1 ? "" : "s"}{o.methodology_version ? `, Netify methodology v${o.methodology_version}` : ""}. The full question set opens to participating suppliers; pricing stays private to the buyer.
+            The issued document holds {o.rfp_shape.total} question{o.rfp_shape.total === 1 ? "" : "s"} across {o.rfp_shape.sections.length} section{o.rfp_shape.sections.length === 1 ? "" : "s"}{o.methodology_version ? `, Netify methodology v${o.methodology_version}` : ""}. The full question set opens to participating vendors; pricing stays private to the buyer.
           </p>
           <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
             {o.rfp_shape.sections.map((s) => (
@@ -201,14 +201,14 @@ export default function NoticeView({
         </Section>
       )}
 
-      <Section title="How suppliers respond">
+      <Section title="How vendors respond">
         <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-700)]">
           <li>
             Response mode: <strong>{RESPONSE_MODE_LABELS[o.response_mode] ?? o.response_mode}</strong>.
           </li>
-          <li>Browsing this opportunity is open to everyone. Responding requires supplier sign-in with a verified work email.</li>
-          <li>Pricing submitted by suppliers is private to the buyer and never shown publicly.</li>
-          {o.eligibility === "invited" && <li>This opportunity is invite-only: the buyer selects which suppliers may respond.</li>}
+          <li>Browsing this opportunity is open to everyone. Responding requires vendor sign-in with a verified work email.</li>
+          <li>Pricing submitted by vendors is private to the buyer and never shown publicly.</li>
+          {o.eligibility === "invited" && <li>This opportunity is invite-only: the buyer selects which vendors may respond.</li>}
           {o.evidence_requested.length > 0 && (
             <li>
               Evidence requested: {labelsFor(EVIDENCE_OPTIONS, o.evidence_requested).join("; ")}.
@@ -237,7 +237,7 @@ export default function NoticeView({
             </ul>
           )}
           {o.ai_gap_flags.length > 0 && (
-            <p className="text-sm text-[var(--ink-600)]">Suppliers may ask for clarification on: {o.ai_gap_flags.join("; ")}.</p>
+            <p className="text-sm text-[var(--ink-600)]">Vendors may ask for clarification on: {o.ai_gap_flags.join("; ")}.</p>
           )}
         </Section>
       )}

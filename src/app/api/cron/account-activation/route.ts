@@ -44,7 +44,7 @@ function emailBodies(unsubUrl: string) {
   ];
   const text = [
     "Your account is ready. Your first project takes about two minutes.",
-    "You signed in to the Netify marketplace earlier but have not started a project yet. Publishing an RFP is the simplest way to compare the market: one submission replaces five separate sales conversations, and the suppliers do the hard work for you.",
+    "You signed in to the Netify marketplace earlier but have not started a project yet. Publishing an RFP is the simplest way to compare the market: one submission replaces five separate sales conversations, and the vendors and service providers do the hard work for you.",
     ...benefits.map((b) => `- ${b}`),
     `Start your project: ${startUrl}`,
     "Free for buyers. Takes about two minutes.",
@@ -54,7 +54,7 @@ function emailBodies(unsubUrl: string) {
   ].join("\n\n");
   const html = [
     `<p style="font-size:18px;font-weight:600;color:#13294b;">Your account is ready. Your first project takes about two minutes.</p>`,
-    `<p>You signed in to the Netify marketplace earlier but have not started a project yet. Publishing an RFP is the simplest way to compare the market: one submission replaces five separate sales conversations, and the suppliers do the hard work for you.</p>`,
+    `<p>You signed in to the Netify marketplace earlier but have not started a project yet. Publishing an RFP is the simplest way to compare the market: one submission replaces five separate sales conversations, and the vendors and service providers do the hard work for you.</p>`,
     `<ul>${benefits.map((b) => `<li style="margin-bottom:6px;">${b}</li>`).join("")}</ul>`,
     `<p style="text-align:center;"><a href="${startUrl}" style="display:inline-block;background:#f59e0b;color:#111;padding:12px 30px;border-radius:999px;text-decoration:none;font-weight:600;">Start your project</a></p>`,
     `<p style="text-align:center;font-size:12px;color:#78716c;">Free for buyers. Takes about two minutes.</p>`,

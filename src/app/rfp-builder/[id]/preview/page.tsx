@@ -74,8 +74,8 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
         <p className="mb-6 text-sm text-[var(--ink-600)]">
           The RFP preview and download belong to the buyer who created the RFP. If that is you, open the preview from
           your builder page (it carries your private key), or sign in with the email you used when creating it.
-          If you are a supplier, the buyer&apos;s invitation contains your response link — that is where you read the
-          RFP and reply.
+          If you are a vendor or service provider, the buyer&apos;s invitation contains your response link. That is
+          where you read the RFP and reply.
         </p>
         <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this RFP." /></div>
         <p className="text-sm"><Link href="/rfp-builder" className="underline">Go to the RFP builder</Link></p>
@@ -171,7 +171,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
         <div className="mb-6 rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4 print:hidden">
           <p className="m-0 text-sm font-semibold text-emerald-900">This requirement is live on the Netify board</p>
           <p className="m-0 mt-0.5 text-sm text-emerald-900">
-            {invitedCount} supplier{invitedCount === 1 ? "" : "s"} invited, {responses.length} response{responses.length === 1 ? "" : "s"} so far. Your identity and contact details stay private until you reply to a supplier.
+            {invitedCount} vendor{invitedCount === 1 ? "" : "s"} invited, {responses.length} response{responses.length === 1 ? "" : "s"} so far. Your identity and contact details stay private until you reply to one.
           </p>
           <p className="m-0 mt-2 text-sm">
             {boardOppId && (
@@ -194,7 +194,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
         <section className="mb-8 print:hidden">
           <p className="eyebrow mb-1">What publishing looks like</p>
           <p className="m-0 mb-3 text-sm text-[var(--ink-600,#555)]">
-            One publish, two views. The open board shows an anonymous notice; verified suppliers sign in to read this full statement of requirements and respond. Your identity, contact details and pricing stay private until you reply.
+            One publish, two views. The open board shows an anonymous notice; verified vendors and service providers sign in to read this full statement of requirements and respond. Your identity, contact details and pricing stay private until you reply.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base,#faf9f7)] p-4">
@@ -216,7 +216,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               {project.buyer.site_count != null && siteFigureIsIdentifying({ buyer_visibility: "anonymous", buyer_sector: project.buyer.sector ?? "", regions: project.buyer.regions ?? [] }) && (
                 <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-[var(--ink-500)]">
                   Together, your sector, single region and exact site count could identify you, so the public notice
-                  shows the range instead. Participating suppliers see the exact count after the gate.
+                  shows the range instead. Participating vendors see the exact count after the gate.
                 </p>
               )}
               {activeSectionNames.length > 0 && (
@@ -230,13 +230,13 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               <span className="mt-2.5 inline-block rounded-full border border-[var(--ink-300,#ccc)] px-3 py-1 text-xs text-[var(--ink-700)]">Sign in to respond</span>
             </div>
             <div className="rounded-lg border-2 border-amber-300 bg-white p-4">
-              <p className="m-0 mb-2 text-[10px] font-semibold uppercase tracking-wide text-amber-700">Signed-in suppliers · full details</p>
+              <p className="m-0 mb-2 text-[10px] font-semibold uppercase tracking-wide text-amber-700">Signed-in vendors · full details</p>
               <p className="m-0 text-sm font-semibold text-[var(--ink-900,#111)]">{project.title}</p>
               <p className="m-0 mt-1 text-xs text-[var(--ink-600,#555)]">
                 The complete statement of requirements below: {totalQuestions} questions across {sections.length} sections, evidence checklist and scoring approach.
               </p>
               <p className="m-0 mt-2 text-xs text-[var(--ink-600,#555)]">
-                Suppliers answer question by question with evidence; their pricing is private to you. Your identity and contact details are still withheld until you choose to reply.
+                They answer question by question with evidence; their pricing is private to you. Your identity and contact details are still withheld until you choose to reply.
               </p>
               <span className="mt-2.5 inline-block rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-zinc-950">Respond to this requirement</span>
             </div>
@@ -304,7 +304,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
           {evidence.length > 0 && (
             <section className="mb-8">
               <h2 className="mb-2 text-lg font-semibold">Evidence checklist</h2>
-              <p className="mb-2 text-sm text-[var(--ink-600)]">Suppliers should return these artefacts with their response:</p>
+              <p className="mb-2 text-sm text-[var(--ink-600)]">Vendors should return these artefacts with their response:</p>
               <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-800)]">
                 {evidence.map((e) => (
                   <li key={e.item}>{e.item} <span className="text-xs text-[var(--ink-400,#9ca3af)]">({e.questionIds.length} {e.questionIds.length === 1 ? "question" : "questions"})</span></li>
@@ -357,7 +357,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
             <p className="eyebrow mb-2">Provenance and review</p>
             <p className="mb-1">Question sources: Netify question bank v{BANK_VERSION} and the extended SASE canonical bank ({SASE_EXTENDED_BANK.question_bank_version}), plus buyer-specific questions generated from the project context. Per-question provenance is carried in the rationale lines.</p>
             <p className="mb-1">Canonical methodology: <a href="https://netify.co.uk/methodology/" className="underline">netify.co.uk/methodology</a> · Question bank: <Link href={`/rfp-builder/questions`} className="underline">/sase/rfp-builder/questions</Link></p>
-            <p><strong>Human review required.</strong> This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing to suppliers.</p>
+            <p><strong>Human review required.</strong> This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing it.</p>
           </section>
         </article>
 
@@ -373,7 +373,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
                 <div className="rounded-sm border-2 border-emerald-300 bg-emerald-50/50 p-5">
                   <p className="mb-1 text-sm font-semibold text-emerald-900">Published and live</p>
                   <p className="mb-3 text-sm text-emerald-900">
-                    Matched suppliers can now respond. Pricing and supplier answers stay private to you.
+                    Matched vendors and service providers can now respond. Their pricing and answers stay private to you.
                   </p>
                   <Link
                     href={`/rfp-builder/${id}/review${keyQs}`}
@@ -387,7 +387,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
                   <p className="mb-1 text-sm font-semibold">Publish this requirement</p>
                   <p className="mb-3 text-sm text-[var(--ink-700)]">
                     Publishing lists the anonymous notice on the board and opens this statement of requirements
-                    to matched, verified suppliers. Responses and pricing come back private to you.
+                    to matched, verified vendors and service providers. Responses and pricing come back private to you.
                   </p>
                   {gaps.length > 0 && (
                     <div className="mb-3">
@@ -402,7 +402,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               <div className="rounded-sm border-2 border-amber-400 bg-amber-50/40 p-5">
                 <p className="mb-1 text-sm font-semibold">Get responses, not just a document</p>
                 <p className="mb-3 text-sm text-[var(--ink-700)]">
-                  Submitting to the marketplace turns this document into competing bids: structured supplier
+                  Submitting to the marketplace turns this document into competing bids: structured vendor
                   responses side by side, pricing private to you, and your Netify Market Report the moment you
                   submit. Downloading alone ends the process here.
                 </p>
@@ -410,7 +410,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
                   href={`/rfp-builder/${id}${keyQs}`}
                   className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400"
                 >
-                  Submit to your matched suppliers
+                  Submit to your matched vendors
                 </Link>
               </div>
             )}
@@ -418,7 +418,7 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
               {signedIn ? (
                 <>
                   <p className="mb-1 text-sm font-medium">Download this RFP</p>
-                  <p className="mb-4 text-sm text-[var(--ink-600)]">Signed in as {session?.email}. The document is yours either way; downloading shares nothing with suppliers.</p>
+                  <p className="mb-4 text-sm text-[var(--ink-600)]">Signed in as {session?.email}. The document is yours either way; downloading shares nothing with vendors.</p>
                   <a href={`/sase/rfp-builder/${id}/preview/download${keyQs}${keyQs ? "&" : "?"}format=doc`} className="mb-2 inline-flex w-full items-center justify-center rounded-full border border-zinc-400 px-5 py-2.5 text-sm font-medium text-zinc-800 no-underline transition-colors hover:bg-zinc-100">
                     Download as Word (.doc)
                   </a>
@@ -431,8 +431,8 @@ export default async function RfpPreviewPage({ params, searchParams }: Props) {
                 <>
                   <p className="mb-1 text-sm font-medium">Download this RFP</p>
                   <p className="mb-4 text-sm text-[var(--ink-600)]">
-                    Create an account to download the final RFP, save versions and invite suppliers.
-                    You can keep editing the preview before signing in — nothing is lost.
+                    Create an account to download the final RFP, save versions and invite vendors.
+                    You can keep editing the preview before signing in. Nothing is lost.
                   </p>
                   <SignIn role="buyer" prompt="Sign in with your work email to download and manage this RFP." />
                 </>

@@ -61,7 +61,7 @@ export async function POST(req: Request, ctx: Ctx) {
       {
         error: "sign_in_required",
         auth_required: true,
-        message: "Listing on the board makes this RFP visible to verified suppliers, so it needs a verified work email. Sign in and try again; nothing has been listed.",
+        message: "Listing on the board makes this RFP visible to verified vendors and service providers, so it needs a verified work email. Sign in and try again; nothing has been listed.",
         sign_in_url: `${SITE_URL}/rfp-builder/${project.id}/`,
       },
       { status: 401, headers: cors },

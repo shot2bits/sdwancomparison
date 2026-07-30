@@ -30,8 +30,8 @@ export default function OpportunityOwnerBanner({ id }: { id: string }) {
     <div className="mb-6 rounded-sm border border-emerald-300 bg-emerald-50 p-4">
       <p className="m-0 text-sm text-emerald-900">
         <span className="font-semibold">This is your listing.</span> You are viewing the public notice exactly as
-        suppliers and visitors see it: the buyer shows as anonymous by design, and the sign-in prompts on this page
-        are for suppliers, not for you.
+        vendors and visitors see it: the buyer shows as anonymous by design, and the sign-in prompts on this page
+        are for them, not for you.
       </p>
       <p className="m-0 mt-2 text-sm">
         <a href={`/sase/opportunities/${id}/room`} className="font-medium text-emerald-900 underline">

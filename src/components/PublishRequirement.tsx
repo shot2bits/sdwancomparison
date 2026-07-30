@@ -78,7 +78,7 @@ export default function PublishRequirement({ projectId, manage, gapCount }: { pr
           </button>
           {needAuth && (
             <div className="mt-3">
-              <p className="m-0 mb-2 text-xs text-[var(--ink-700)]">One step first: publishing reaches named suppliers, so it needs a verified sign-in. Your work here is untouched.</p>
+              <p className="m-0 mb-2 text-xs text-[var(--ink-700)]">One step first: publishing reaches named vendors, so it needs a verified sign-in. Your work here is untouched.</p>
               <SignIn
                 role="buyer"
                 prompt="Verify yourself to publish."

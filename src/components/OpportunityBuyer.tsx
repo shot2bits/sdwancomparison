@@ -156,7 +156,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     return (
       <div className="max-w-2xl">
         <h2 className="text-xl mb-2">Post an opportunity</h2>
-        <p className="text-[var(--ink-700)] mb-5">Describe what you need, from just underlay circuits to full SASE. Invite graded suppliers and watch them reply with comments and pricing in real time.</p>
+        <p className="text-[var(--ink-700)] mb-5">Describe what you need, from just underlay circuits to full SASE. Invite graded vendors and watch them reply with comments and pricing in real time.</p>
         <div className="space-y-4">
           <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Title, e.g. Underlay circuits for 40 UK retail sites" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
           <input value={form.buyer_org} onChange={(e) => setForm({ ...form, buyer_org: e.target.value })} placeholder="Your organisation (optional)" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
@@ -235,7 +235,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
         <FeedView items={feed} buyerLabel={isOwner ? "You (the buyer)" : undefined} />
         {opp.status === "open" && isOwner && (
           <div className="mt-4 flex gap-2">
-            <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Post a comment to all suppliers" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
+            <input value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Post a comment to all vendors" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
             <button onClick={() => buyerAction("comment", comment)} disabled={!comment} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
           </div>
         )}
@@ -243,13 +243,13 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
       {!isOwner ? (
         <div>
           <p className="eyebrow mb-2">Respond to this opportunity</p>
-          <p className="text-sm text-[var(--ink-600)] mb-3">Suppliers sign in with a verified work email to submit comments, pricing or clarification questions. Pricing stays private to the buyer.</p>
+          <p className="text-sm text-[var(--ink-600)] mb-3">Vendors and service providers sign in with a verified work email to submit comments, pricing or clarification questions. Pricing stays private to the buyer.</p>
           <a href="/sase/for-suppliers/" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Sign in to respond</a>
           <p className="text-xs text-[var(--ink-500)] mt-3">Posted this opportunity yourself? Sign in with the email you published with and reload this page; your manage controls will be restored automatically.</p>
         </div>
       ) : (
       <div>
-        <p className="eyebrow mb-2">Invite suppliers</p>
+        <p className="eyebrow mb-2">Invite vendors</p>
         <div className="flex gap-2 mb-2">
           <select value={sector} onChange={(e) => setSector(e.target.value)} className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm flex-1">
             <option value="">Any sector</option>
@@ -292,7 +292,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           return (
             <div className="mt-4">
               <p className="eyebrow mb-1">Introductions</p>
-              <p className="text-xs text-[var(--ink-500)] mb-2">Your contact details pass to a supplier only when you accept an introduction here. Until then, suppliers reach you only through this room.</p>
+              <p className="text-xs text-[var(--ink-500)] mb-2">Your contact details pass to a vendor only when you accept an introduction here. Until then, they reach you only through this room.</p>
               <div className="flex flex-wrap gap-1.5">
                 {engaged.map((slug) => {
                   const done = (opp.introduced ?? []).includes(slug);
@@ -311,7 +311,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
             </div>
           );
         })()}
-        <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a supplier copies their private room link. Suppliers reply live with comments and pricing.</p>
+        <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a vendor copies their private room link. They reply live with comments and pricing.</p>
         {opp.status === "open" && (
           <div className="mt-6 border-t border-[var(--ink-200,#e5e5e5)] pt-4">
             <p className="eyebrow mb-1">Close this notice</p>

@@ -131,7 +131,7 @@ export async function POST(req: Request) {
   const slug = (body.vendor_slug ?? "").trim();
   const field = (body.field ?? "").trim();
   const value = (body.value ?? "").trim();
-  if (!getAllVendorSlugs().includes(slug)) return out("unknown_vendor", { error: `Unknown supplier: ${slug}` }, 400);
+  if (!getAllVendorSlugs().includes(slug)) return out("unknown_vendor", { error: `Unknown vendor: ${slug}` }, 400);
   if (!field || !value) return out("missing", { error: "Give a field and a value." }, 400);
 
   const cls = classifyField(field);
@@ -151,7 +151,7 @@ export async function POST(req: Request) {
       return json(
         {
           error:
-            "This field is the Netify View and cannot be proposed by a supplier. Summaries, differentiators, best-fit statements and watch-outs are written by Netify and are not open to the companies they describe. If you believe one is factually wrong, propose a correction to the underlying fact and cite the page that proves it.",
+            "This field is the Netify View and cannot be proposed by the company it describes. Summaries, differentiators, best-fit statements and watch-outs are written by Netify and are not open to the companies they describe. If you believe one is factually wrong, propose a correction to the underlying fact and cite the page that proves it.",
           field_class: "judgement",
         },
         403,
@@ -163,7 +163,7 @@ export async function POST(req: Request) {
       return json(
         {
           error:
-            "A supplier proposal needs a source URL and the exact sentence on that page. We check the sentence is really there before anything is applied, which is the same standard we hold ourselves to.",
+            "A proposal from a vendor or service provider needs a source URL and the exact sentence on that page. We check the sentence is really there before anything is applied, which is the same standard we hold ourselves to.",
         },
         400,
       );

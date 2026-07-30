@@ -60,7 +60,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "SD-WAN RFI Builder App", href: "/sd-wan-rfi-builder-app/" },
-      { label: "For suppliers", href: "/sase/for-suppliers/" },
+      { label: "For vendors and providers", href: "/sase/for-suppliers/" },
     ],
   },
   {
@@ -68,7 +68,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     links: [
       { label: "Build your shortlist", href: "/sase/shortlist/" },
       { label: "Evaluated providers", href: "/sase/vendors/" },
-      { label: "All listed suppliers", href: "/marketplace/" },
+      { label: "All listed vendors", href: "/marketplace/" },
       { label: "Provider comparisons", href: "/vendor-comparison/" },
       { label: "Best providers by sector", href: "/sase/best/" },
       { label: "What the market is buying", href: "/sase/demand/" },

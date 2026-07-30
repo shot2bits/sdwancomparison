@@ -90,7 +90,7 @@ export default function SampleRfpPage() {
       </p>
       <div className="mb-6 flex max-w-3xl flex-wrap items-center gap-3">
         <a href="/sase/rfp-builder/sample-rfp/template.doc" className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 no-underline hover:bg-amber-400 transition-colors">Download this template (Word, free)</a>
-        <span className="text-xs text-[var(--ink-600,#555)]">No sign-up. The tailored version — your sector, estate and compliance, sent to matched suppliers — is the <a href="/sase/rfp-builder/new/" className="underline">RFP Builder</a>.</span>
+        <span className="text-xs text-[var(--ink-600,#555)]">No sign-up. The tailored version, your sector, estate and compliance, sent to matched vendors, is the <a href="/sase/rfp-builder/new/" className="underline">RFP Builder</a>.</span>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-3">
@@ -137,7 +137,7 @@ export default function SampleRfpPage() {
           {evidence.length > 0 && (
             <section className="mb-8">
               <h2 className="mb-2 text-lg font-semibold">Evidence checklist</h2>
-              <p className="mb-2 text-sm text-[var(--ink-600)]">Suppliers should return these artefacts with their response:</p>
+              <p className="mb-2 text-sm text-[var(--ink-600)]">Vendors should return these artefacts with their response:</p>
               <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--ink-800)]">
                 {evidence.map((e) => (
                   <li key={e.item}>{e.item} <span className="text-xs text-[var(--ink-400,#9ca3af)]">({e.questionIds.length} {e.questionIds.length === 1 ? "question" : "questions"})</span></li>

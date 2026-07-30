@@ -24,7 +24,7 @@ import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 
 export const CREATE_CONSENT_TEXT =
-  "Create my Security Sourcing project: Netify stores this requirement and scoping verdict so I can build and publish an RFP to matched suppliers. No supplier is contacted until I publish.";
+  "Create my Security Sourcing project: Netify stores this requirement and scoping verdict so I can build and publish an RFP to matched vendors. No vendor is contacted until I publish.";
 
 export interface CreateSecurityProjectInput {
   /** Optional buyer-chosen project title (Harry's 22 Jul workflow gap:

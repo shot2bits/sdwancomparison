@@ -23,7 +23,7 @@ import { chunkForIngest } from "@/lib/workspace/ingest";
 const CYCLE_DEFINITION = {
   name: "workspace_cycle",
   description:
-    `Netify Live Sourcing Workspace: run one drafting cycle over a buyer's free-text requirement, exactly as the page at ${SITE_URL}/workspace/ runs it. Input the buyer's words (and the requirement built so far, to iterate); output the validated field updates each carrying provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the merged requirement in the exact shape assess_security_requirement takes, the ${RULEBOOK_VERSION} verdict when the scope is security, the evidence-graded supplier fit (real evaluation dates from the Netify dataset; for managed-security scope the dataset boundary is stated instead of an invented MSSP ranking), and the assembled statement of requirements as text with provenance marked. Read and compute only; nothing is stored and no supplier is contacted. Iterate by passing the returned requirement back with the buyer's next words; corrections are new cycles. To proceed: create_security_project (consented) for security scope, or send the buyer to ${SITE_URL}/workspace/?q={their sentence} to take over the same draft on the page. Every claim carries provenance; relay inferred and assumed markers to the buyer rather than presenting them as their own words.`,
+    `Netify Live Sourcing Workspace: run one drafting cycle over a buyer's free-text requirement, exactly as the page at ${SITE_URL}/workspace/ runs it. Input the buyer's words (and the requirement built so far, to iterate); output the validated field updates each carrying provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the merged requirement in the exact shape assess_security_requirement takes, the ${RULEBOOK_VERSION} verdict when the scope is security, the evidence-graded vendor fit (real evaluation dates from the Netify dataset; for managed-security scope the dataset boundary is stated instead of an invented MSSP ranking), and the assembled statement of requirements as text with provenance marked. Read and compute only; nothing is stored and no vendor is contacted. Iterate by passing the returned requirement back with the buyer's next words; corrections are new cycles. To proceed: create_security_project (consented) for security scope, or send the buyer to ${SITE_URL}/workspace/?q={their sentence} to take over the same draft on the page. Every claim carries provenance; relay inferred and assumed markers to the buyer rather than presenting them as their own words.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -40,7 +40,7 @@ const CYCLE_DEFINITION = {
           operatingModel: { type: "string", enum: ["managed", "co_managed", "diy"] },
         },
       },
-      include_fit: { type: "boolean", description: "Set false to skip the supplier fit block. Default true." },
+      include_fit: { type: "boolean", description: "Set false to skip the vendor fit block. Default true." },
     },
     required: ["text"],
   },
@@ -96,7 +96,7 @@ const CYCLE_DEFINITION = {
 const INGEST_DEFINITION = {
   name: "workspace_ingest",
   description:
-    `Netify Live Sourcing Workspace: read a WHOLE document or conversation into a requirement in one call, where workspace_cycle takes a sentence. Paste the buyer's existing material verbatim: a ChatGPT, Perplexity, Gemini or Claude conversation, an existing SASE or SD-WAN RFP, SSE requirements, meeting notes or an email thread (plain text, up to 14,000 characters; longer material is read to the budget and the summary says so honestly). The text is cut on paragraph boundaries and run through the IDENTICAL extraction cycles the page runs, so every claim lands with provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the same validation and magnitude guards apply, and clauses the engine cannot place are reported rather than dropped. Output: the merged requirement, all provenance-marked updates, the ${RULEBOOK_VERSION} verdict for security scope, evidence-graded supplier fit, the earned follow-up questions to relay, the assembled statement of requirements, and a read_summary to show the buyer. Read and compute only; nothing is stored and no supplier is contacted. Continue with workspace_cycle for corrections, or hand the buyer the workspace_url; a human always signs before anything publishes.`,
+    `Netify Live Sourcing Workspace: read a WHOLE document or conversation into a requirement in one call, where workspace_cycle takes a sentence. Paste the buyer's existing material verbatim: a ChatGPT, Perplexity, Gemini or Claude conversation, an existing SASE or SD-WAN RFP, SSE requirements, meeting notes or an email thread (plain text, up to 14,000 characters; longer material is read to the budget and the summary says so honestly). The text is cut on paragraph boundaries and run through the IDENTICAL extraction cycles the page runs, so every claim lands with provenance (stated with the buyer's verbatim quote, or inferred with the inference named), the same validation and magnitude guards apply, and clauses the engine cannot place are reported rather than dropped. Output: the merged requirement, all provenance-marked updates, the ${RULEBOOK_VERSION} verdict for security scope, evidence-graded vendor fit, the earned follow-up questions to relay, the assembled statement of requirements, and a read_summary to show the buyer. Read and compute only; nothing is stored and no vendor is contacted. Continue with workspace_cycle for corrections, or hand the buyer the workspace_url; a human always signs before anything publishes.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -110,7 +110,7 @@ const INGEST_DEFINITION = {
           operatingModel: { type: "string", enum: ["managed", "co_managed", "diy"] },
         },
       },
-      include_fit: { type: "boolean", description: "Set false to skip the supplier fit block. Default true." },
+      include_fit: { type: "boolean", description: "Set false to skip the vendor fit block. Default true." },
     },
     required: ["text"],
   },

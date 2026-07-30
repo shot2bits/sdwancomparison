@@ -24,17 +24,17 @@ export async function GET() {
     tasks: [
       {
         intent: "post_a_project_notice",
-        description: "Publish a short project notice for early pricing and supplier interest. Counted in the index anonymously.",
+        description: "Publish a short project notice for early pricing and vendor interest. Counted in the index anonymously.",
         page: aiActionUrl(`${SITE_URL}/opportunities/new/`, "twin"),
       },
       {
         intent: "build_and_publish_an_rfp",
-        description: "Build a full SASE / SD-WAN RFP in about two minutes; publishing sends it to matched verified suppliers and returns a Netify Market Report.",
+        description: "Build a full SASE / SD-WAN RFP in about two minutes; publishing sends it to matched verified vendors and service providers and returns a Netify Market Report.",
         page: aiActionUrl(`${SITE_URL}/rfp-builder/new/`, "twin"),
       },
       {
         intent: "browse_open_opportunities",
-        description: "See the open opportunities suppliers can respond to now.",
+        description: "See the open opportunities vendors and service providers can respond to now.",
         page: aiActionUrl(`${SITE_URL}/opportunities/board/`, "twin"),
       },
       {

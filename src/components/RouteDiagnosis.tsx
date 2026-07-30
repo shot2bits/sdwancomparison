@@ -29,7 +29,7 @@ const QUESTIONS = [
     options: [
       { key: "vague", label: "Rough idea — we know the problem, not the solution" },
       { key: "partial", label: "Partly defined — scope is clear, details are not" },
-      { key: "defined", label: "Well defined — we could brief suppliers today" },
+      { key: "defined", label: "Well defined: we could brief vendors today" },
     ],
   },
   {
@@ -37,8 +37,8 @@ const QUESTIONS = [
     q: "What do you need first?",
     options: [
       { key: "pricing", label: "Indicative pricing or budget validation" },
-      { key: "shortlist", label: "A shortlist of credible suppliers" },
-      { key: "responses", label: "Full supplier proposals we can score" },
+      { key: "shortlist", label: "A shortlist of credible vendors" },
+      { key: "responses", label: "Full vendor proposals we can score" },
     ],
   },
 ];
@@ -61,7 +61,7 @@ function recommend(a: Answer): { path: string; href: string; cta: string; why: s
       path: "Build a full RFP",
       href: "https://netify.co.uk/",
       cta: "Open the RFP Builder",
-      why: "You want structured, comparable supplier proposals — that needs methodology-backed questions, evidence requests and a scoring matrix. You can still post a notice first to warm up the market.",
+      why: "You want structured, comparable vendor proposals, which needs methodology-backed questions, evidence requests and a scoring matrix. You can still post a notice first to warm up the market.",
     };
   }
   if (a.urgency === "shortlist" && a.knowledge !== "vague") {

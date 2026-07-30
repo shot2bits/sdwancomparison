@@ -30,7 +30,7 @@ const STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
   review: "In review",
   published: "Published",
-  qa: "Supplier Q&A",
+  qa: "Vendor Q&A",
   evaluation: "Evaluation",
 };
 
@@ -137,8 +137,8 @@ export default function MyProcurements() {
           Describe your project once and Netify builds it into a living Statement of Requirements you can
           raise to an RFI or a full RFP. Publishing is free and pays out instantly: an indicative market price
           band for your estate, your document as Word and PDF, and structured responses from your matched
-          suppliers, side by side, with pricing private to you. You stay anonymous until you reply, and only
-          vetted suppliers can respond.
+          vendors, side by side, with pricing private to you. You stay anonymous until you reply, and only
+          vetted vendors and service providers can respond.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           {/* The One Door (Harry, 24 July 2026): the desk at the apex is the
@@ -216,7 +216,7 @@ export default function MyProcurements() {
       <h2 className="text-xl mb-1">Your procurements</h2>
       <p className="text-sm text-[var(--ink-600)] mb-4">
         One row per procurement, grouped by stage, carrying every door it has: the project record, the public
-        notice and the manage room. Manage responses, invite suppliers or close a notice from its room.
+        notice and the manage room. Manage responses, invite vendors or close a notice from its room.
       </p>
       <div className="space-y-6">
         {grouped.map((g) => (

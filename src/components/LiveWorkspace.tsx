@@ -68,7 +68,7 @@ const DRAFT_KEY = "netify_workspace_draft_v1";
 const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const WORKSPACE_AGREEMENT_TEXT =
-  "Publish this requirement: Netify lists an anonymous notice on the open board and invites the best-fit evaluated suppliers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
+  "Publish this requirement: Netify lists an anonymous notice on the open board and invites the best-fit evaluated vendors and service providers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
 
 type FitSupplier = {
   slug: string;
@@ -639,7 +639,7 @@ export default function LiveWorkspace() {
         throw new Error(data.error || "Could not publish; try again.");
       }
     } catch (e) {
-      setSignError(e instanceof Error ? e.message : "Something failed; nothing has been sent to suppliers. Try again.");
+      setSignError(e instanceof Error ? e.message : "Something failed; nothing has been sent to vendors. Try again.");
     } finally {
       setSignStage(null);
     }
@@ -739,9 +739,9 @@ export default function LiveWorkspace() {
           <p className="mt-6 max-w-2xl text-sm leading-relaxed text-[var(--ink-500)]">
             Type one sentence and a draft statement of requirements assembles itself: solid underlines are your words,
             dotted underlines are Netify&rsquo;s inferences, and tapping either strikes it out. Your network draws
-            itself beside the brief, evaluated suppliers appear with their evidence dates, and when the draft says what
+            itself beside the brief, evaluated vendors appear with their evidence dates, and when the draft says what
             you mean, one signature publishes it: an anonymous notice on the open board, the full brief to matched
-            signed-in suppliers. Free to draft, no sign-in until you publish.
+            signed-in vendors and service providers. Free to draft, no sign-in until you publish.
           </p>
         </div>
       )}
@@ -780,7 +780,7 @@ export default function LiveWorkspace() {
       {testMode && (
         <p className="mt-3 max-w-2xl rounded-sm border border-amber-400 bg-amber-50 p-2.5 text-xs text-amber-900">
           Test mode: signing creates a self-expiring test project and never publishes to the live board or contacts any
-          supplier.
+          vendor.
         </p>
       )}
 
@@ -858,7 +858,7 @@ export default function LiveWorkspace() {
                 <p className="mb-3 max-w-2xl text-sm leading-relaxed text-[var(--ink-700)]">{fit.note}</p>
               ) : (
                 <p className="mb-3 text-sm text-[var(--ink-500)]">
-                  {fit.count} of {fit.total} evaluated suppliers fit this scope
+                  {fit.count} of {fit.total} evaluated vendors fit this scope
                   {(requirement.organisation?.regions ?? []).length ? " in your regions" : ""}; the strongest coverage
                   leads. Grades and dates come from the Netify evaluation dataset, never from marketing.
                 </p>
@@ -908,7 +908,7 @@ export default function LiveWorkspace() {
                 />
               )}
               <p className="mt-2 text-xs text-[var(--ink-500)]">
-                Suppliers you add are pinned into the invitation list at publish (up to five, always invited). The
+                Vendors you add are pinned into the invitation list at publish (up to five, always invited). The
                 published shortlist itself is graded automatically, and you control final invitations from your project.
               </p>
             </section>
@@ -937,7 +937,7 @@ export default function LiveWorkspace() {
               <div className="rounded-sm border-2 border-emerald-300 bg-emerald-50 p-4">
                 <p className="m-0 text-sm font-semibold text-emerald-900">This requirement is live on the Netify board</p>
                 <p className="m-0 mt-1 text-sm text-emerald-900">
-                  {published.invited} supplier{published.invited === 1 ? "" : "s"} invited. Your identity and contact
+                  {published.invited} vendor{published.invited === 1 ? "" : "s"} invited. Your identity and contact
                   details stay private until you reply. Responses, clarifications and comparison now continue in your
                   project workspace; corrections after publish arrive there with the next phase of this page.
                 </p>
@@ -959,7 +959,7 @@ export default function LiveWorkspace() {
               <div className="rounded-sm border border-amber-400 bg-amber-50 p-4">
                 <p className="m-0 text-sm font-semibold text-amber-900">Test project created; publishing stayed off</p>
                 <p className="m-0 mt-1 text-sm text-amber-900">
-                  It self-expires in two hours, touched no live board and contacted no supplier.{" "}
+                  It self-expires in two hours, touched no live board and contacted no vendor.{" "}
                   <a href={`/sase/project/${created.id}?manage=${encodeURIComponent(created.manage)}`} className="underline">
                     Inspect the test project
                   </a>{" "}
@@ -1002,7 +1002,7 @@ export default function LiveWorkspace() {
                   </div>
                   <div className="rounded-sm border-2 border-amber-300 bg-white p-3.5">
                     <p className="m-0 mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
-                      Signed-in suppliers · full details
+                      Signed-in vendors · full details
                     </p>
                     <p className="m-0 text-sm font-semibold text-[var(--ink-900,#111)]">{brief.title}</p>
                     <p className="m-0 mt-1 text-xs text-[var(--ink-600,#555)]">
@@ -1010,7 +1010,7 @@ export default function LiveWorkspace() {
                       published labelled as assumptions.
                     </p>
                     <p className="m-0 mt-1.5 text-xs text-[var(--ink-600,#555)]">
-                      Suppliers answer with evidence; their pricing is private to you. Your identity stays withheld until
+                      They answer with evidence; their pricing is private to you. Your identity stays withheld until
                       you choose to reply.
                     </p>
                   </div>
@@ -1053,7 +1053,7 @@ export default function LiveWorkspace() {
                 {needAuth && (
                   <div className="mt-4 rounded-sm border border-[var(--ink-300,#ccc)] p-3.5">
                     <p className="m-0 mb-2 text-xs text-[var(--ink-700)]">
-                      One step first: publishing reaches named suppliers, so it needs a verified work email. Sign in
+                      One step first: publishing reaches named vendors, so it needs a verified work email. Sign in
                       below, then press the publish button again; your draft and signature are untouched.
                     </p>
                     <SignIn role="buyer" prompt="Sign in with your work email to publish." />
@@ -1089,7 +1089,7 @@ function AddSupplier({ directory, onAdd }: { directory: Array<{ slug: string; na
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && commit()}
         list="ws-supplier-directory"
-        placeholder="Add a supplier by name"
+        placeholder="Add a vendor by name"
         className="w-56 border-b border-dashed border-[var(--ink-300,#ccc)] bg-transparent px-1 py-0.5 text-sm focus:border-amber-500 focus:outline-none"
       />
       <datalist id="ws-supplier-directory">

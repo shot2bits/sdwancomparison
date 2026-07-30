@@ -24,7 +24,7 @@ export async function GET(req: Request) {
         note: "Extended SASE canonical bank: each question carries evidence_required, mandatory_for/optional_for sectors, weighting_hint, why_it_matters, red_flag_answers and follow_up_questions. The top-level `canonical` array is a condensed subset kept for compatibility.",
       },
       publisher: "Netify Group Limited",
-      note: "Analyst-written SASE and SD-WAN RFP question bank with buyer and supplier lenses.",
+      note: "Analyst-written SASE and SD-WAN RFP question bank with buyer and vendor lenses.",
     },
     { headers: { ...corsHeaders(req), "cache-control": "public, max-age=3600" } },
   );

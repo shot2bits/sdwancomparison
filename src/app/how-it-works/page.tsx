@@ -29,7 +29,7 @@ const PATHS = [
   {
     name: "Open a live quote room",
     when: "I want a fast conversation and indicative quotes.",
-    get: "Post a need and watch suppliers reply live with comments and indicative pricing.",
+    get: "Post a need and watch vendors and service providers reply live with comments and indicative pricing.",
     href: "/opportunities",
     cta: "Open a quote room",
   },
@@ -60,15 +60,15 @@ const FEATURES = [
   ["AI advisor", "Describe a need in plain language; the agent shortlists vendors and drafts RFP questions."],
   ["Methodology v2026.1", "40 features across 6 categories, with sector and compliance maps, served openly at /methodology.json."],
   ["Compliance mapping", "DORA, NIS2, UK GDPR, PCI DSS, IEC 62443, ISO 27001 and the UK Cyber Resilience Bill mapped to questions."],
-  ["Independent grades", "30+ vendors graded by Netify, used to cross-check supplier claims against the evidence."],
+  ["Independent grades", "30+ vendors graded by Netify, used to cross-check their claims against the evidence."],
   ["Agent-ready (MCP)", "AI agents read the board, vendor grades and RFPs, and bid, over a public MCP endpoint."],
   ["Open and ungated", "Browsing, research, building and the machine twins need no login. Only submitting a bid needs a verified sign-in."],
 ];
 
 const FAQS = [
   ["Why not just cold-call vendors?", "One posting reaches every matching verified vendor at once and brings comparable responses back to you, instead of repeating the same conversation many times."],
-  ["Why not just prompt a generic AI to write an RFP?", "A generic prompt cannot see Netify's independent vendor grades, the 386-question analyst bank, the compliance maps, or run a live competitive process with real suppliers. This does."],
-  ["Do I have to sign in?", "Not to explore. Researching, building an RFP, drafting and previewing a project notice, and reading the board are all open. Signing in is needed to publish a notice, download the final RFP, or respond as a supplier — your draft is carried through sign-in, nothing is lost."],
+  ["Why not just prompt a generic AI to write an RFP?", "A generic prompt cannot see Netify's independent vendor grades, the 386-question analyst bank, the compliance maps, or run a live competitive process with real vendors and service providers. This does."],
+  ["Do I have to sign in?", "Not to explore. Researching, building an RFP, drafting and previewing a project notice, and reading the board are all open. Signing in is needed to publish a notice, download the final RFP, or respond as a vendor. Your draft is carried through sign-in, nothing is lost."],
   ["Is pricing public?", "No. The need is public so vendors can find it, but bid and quote amounts are private to the buyer who posted."],
 ];
 
@@ -82,7 +82,7 @@ const STORY_STEPS = [
   { step: "1", title: "Describe it once", body: "Say you run IT for a 40-site retailer, you are moving off MPLS, you need PCI DSS, and you would rather it was fully managed. Type that one sentence, or tick a few boxes. That is the whole brief, and you only give it once." },
   { step: "2", title: "Pick how you want to hear back", body: "Just researching? Get a graded shortlist in seconds. Want prices? Run a reverse auction. In a hurry? Open a live quote room and watch replies come in. Running a formal process? Let the AI agent build you a full RFP. Same brief, four different doors, and you can use more than one." },
   { step: "3", title: "The vendors come to you", body: "Verified providers see your need and respond, with a quote, an answer to your questions, or a request for a demo. You are not on the phone repeating yourself five times; everything lands in one place where you can keep track of it." },
-  { step: "4", title: "Compare like for like, then award", body: "Every vendor is graded independently by Netify against the same 40-feature framework. So when a supplier claims something, you can see whether the public evidence backs it up. You compare on substance rather than sales decks, then award the work." },
+  { step: "4", title: "Compare like for like, then award", body: "Every vendor is graded independently by Netify against the same 40-feature framework. So when a vendor claims something, you can see whether the public evidence backs it up. You compare on substance rather than sales decks, then award the work." },
 ];
 
 const STORY_OUTRO =
@@ -97,7 +97,7 @@ const UNDER_THE_BONNET = [
   },
   {
     title: "How vendor verification works",
-    body: "Vendors can browse the opportunity board without signing in, the same as buyers. To actually submit a bid or quote, suppliers sign in with a verified work email, and our experts manually process and vet each one against real-world experience before access is granted.",
+    body: "Vendors can browse the opportunity board without signing in, the same as buyers. To actually submit a bid or quote, vendors and service providers sign in with a verified work email, and our experts manually process and vet each one against real-world experience before access is granted.",
   },
   {
     title: "How the AI advisor and RFP agent work",
@@ -195,7 +195,7 @@ export default function HowItWorksPage() {
           </ol>
         </div>
         <div>
-          <h2 className="text-2xl font-semibold mb-4">Supplier flow</h2>
+          <h2 className="text-2xl font-semibold mb-4">Vendor and provider flow</h2>
           <ol className="space-y-4">
             {SUPPLIER_FLOW.map((s) => (
               <li key={s.step} className="flex gap-4">

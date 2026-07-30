@@ -57,7 +57,7 @@ export default function HomeHeroForm() {
           onClick={go}
           className="shrink-0 rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-400"
         >
-          Get supplier bids
+          Get vendor bids
         </button>
       </div>
       {emailCaught ? (

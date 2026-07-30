@@ -65,7 +65,7 @@ export default function GapActions({
               {busy === g.field ? "Recording…" : "Accept and proceed"}
             </button>
             <span className="text-xs text-[var(--ink-500)]">
-              Accepting is recorded on the project and visible in the story; suppliers see accepted gaps as stated assumptions.
+              Accepting is recorded on the project and visible in the story; vendors see accepted gaps as stated assumptions.
             </span>
           </div>
         </div>

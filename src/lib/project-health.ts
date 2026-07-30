@@ -39,13 +39,13 @@ export function projectHealth(p: ProjectDetails, ctx: HealthContext = {}): Proje
   if (phase === "closed") return { tone: "neutral", label: "Closed", detail: "This project was closed; the record stays readable." };
   if (phase === "complete") return { tone: "green", label: "Procurement complete", detail: "The full story is in the record." };
   if (phase === "transacting") return { tone: "green", label: "Transacting", detail: "Award accepted; the engagement is underway." };
-  if (phase === "awarded") return { tone: "green", label: "Awarded", detail: "A supplier has been selected; awaiting acceptance." };
+  if (phase === "awarded") return { tone: "green", label: "Awarded", detail: "A vendor has been selected; awaiting acceptance." };
   if (phase === "evaluation") return { tone: "purple", label: "Evaluating bids", detail: `${responses} response${responses === 1 ? "" : "s"} to compare.` };
-  if (phase === "qa") return { tone: "yellow", label: "Clarifications open", detail: "Suppliers are asking questions; answers go to everyone." };
+  if (phase === "qa") return { tone: "yellow", label: "Clarifications open", detail: "Vendors are asking questions; answers go to everyone." };
   if (phase === "published") {
     return responses > 0
       ? { tone: "green", label: "Responses arriving", detail: `${responses} response${responses === 1 ? "" : "s"} so far.` }
-      : { tone: "blue", label: "Awaiting supplier responses", detail: "Published; invited suppliers have the response link." };
+      : { tone: "blue", label: "Awaiting vendor responses", detail: "Published; invited vendors have the response link." };
   }
 
   // Pre-publication: the engine states that need the buyer's attention.

@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Live SASE, SSE & SD-WAN opportunity board",
-  description: "Open SASE, SSE, SD-WAN, circuit and managed service opportunities from buyers. Listings are anonymous and visible to signed-in suppliers; verified vendors bid and quote.",
+  description: "Open SASE, SSE, SD-WAN, circuit and managed service opportunities from buyers. Listings are anonymous and visible to signed-in vendors and service providers, who bid and quote.",
   alternates: { canonical: `${SITE_URL}/opportunities/board/` },
   openGraph: { title: "Live SASE and SD-WAN opportunity board", description: "Open buyer opportunities; verified vendors bid and quote.", url: `${SITE_URL}/opportunities/board`, type: "website", locale: "en_GB" },
 };
@@ -61,12 +61,12 @@ export default async function OpportunityBoardPage() {
             {openCount} opportunit{openCount === 1 ? "y is" : "ies are"} genuinely open on the board right now.
           </p>
           <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-zinc-600">
-            Listings are anonymous about the buyer and private to Netify&rsquo;s signed-in supplier community. Sign in
+            Listings are anonymous about the buyer and private to Netify&rsquo;s signed-in vendor and provider community. Sign in
             to see the open notices and respond; buyers publish from the workspace and stay anonymous until they choose
             otherwise. The sample notices below show the shape of a listing.
           </p>
           <a href="/sase/account/?return_to=/sase/opportunities/board/" className="mt-3 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white no-underline hover:bg-black">
-            Supplier sign in
+            Vendor sign in
           </a>
         </div>
       )}
@@ -124,7 +124,7 @@ export default async function OpportunityBoardPage() {
           Repo twin: docs/netify-public-gated-line-2026-07-28.md. */}
       <div className="mt-12">
         <h2 className="text-lg font-semibold mb-1">What is public and what stays gated</h2>
-        <p className="text-sm text-[var(--ink-600)] mb-4">Every notice keeps the same line between its public record and its gated room. Site counts publish exactly unless the combination of an anonymous buyer, a stated sector and a single region could identify the buyer; then the range publishes instead. Exact figures always stay with the buyer and participating suppliers.</p>
+        <p className="text-sm text-[var(--ink-600)] mb-4">Every notice keeps the same line between its public record and its gated room. Site counts publish exactly unless the combination of an anonymous buyer, a stated sector and a single region could identify the buyer; then the range publishes instead. Exact figures always stay with the buyer and participating vendors.</p>
         <div className="overflow-x-auto rounded-sm border border-[var(--ink-200,#e5e5e5)]">
           <table className="w-full text-sm">
             <thead>
@@ -143,13 +143,13 @@ export default async function OpportunityBoardPage() {
             <thead>
               <tr className="border-b border-t border-[var(--ink-200,#e5e5e5)] bg-[var(--ink-50,#fafafa)] text-left">
                 <th className="px-4 py-2.5 font-semibold w-44">Gated</th>
-                <th className="px-4 py-2.5 font-normal text-[var(--ink-600)]">Sign-in, or the supplier&rsquo;s issued token</th>
+                <th className="px-4 py-2.5 font-normal text-[var(--ink-600)]">Sign-in, or the vendor&rsquo;s issued token</th>
               </tr>
             </thead>
             <tbody className="align-top">
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Buyer identity</td><td className="px-4 py-2 text-[var(--ink-700)]">The organisation name where the buyer chose anonymity, and any contact route. Publishing emails are never rendered anywhere</td></tr>
               <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">Exact figures</td><td className="px-4 py-2 text-[var(--ink-700)]">The exact counts behind any published range</td></tr>
-              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">The room</td><td className="px-4 py-2 text-[var(--ink-700)]">Supplier responses and the feed, the full RFP question set, all pricing (each supplier sees only its own; the buyer sees all)</td></tr>
+              <tr className="border-b border-[var(--ink-100,#f0f0f0)]"><td className="px-4 py-2 font-medium">The room</td><td className="px-4 py-2 text-[var(--ink-700)]">Vendor responses and the feed, the full RFP question set, all pricing (each vendor sees only its own; the buyer sees all)</td></tr>
               <tr><td className="px-4 py-2 font-medium">The controls</td><td className="px-4 py-2 text-[var(--ink-700)]">Responding, inviting, closing. Tokens and infrastructure are never public</td></tr>
             </tbody>
           </table>

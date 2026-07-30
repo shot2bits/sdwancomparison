@@ -59,7 +59,7 @@ export default function HeroBlocks() {
           </h3>
           <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-zinc-600">
             <Strong>Netify</Strong> is a UK research and procurement platform for SASE, SD-WAN and network security:
-            evaluated supplier intelligence with dates on every grade, and an anonymous route to market that only you
+            evaluated vendor intelligence with dates on every grade, and an anonymous route to market that only you
             can sign.
           </p>
         </section>

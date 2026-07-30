@@ -22,7 +22,7 @@ export default function BuyerDigests() {
   if (digests === null) return <p className="text-sm text-[var(--ink-500)]">Loading digests…</p>;
   if (digests.length === 0) return (
     <div className="rounded-md border border-[var(--ink-200,#e5e5e5)] p-5">
-      <p className="text-sm text-[var(--ink-600)]">No agent digests yet. When you have a live RFP with a goal, the agent reviews it on a schedule and posts a digest of risks and recommended next actions here. It never contacts a supplier without your approval.</p>
+      <p className="text-sm text-[var(--ink-600)]">No agent digests yet. When you have a live RFP with a goal, the agent reviews it on a schedule and posts a digest of risks and recommended next actions here. It never contacts a vendor without your approval.</p>
     </div>
   );
 

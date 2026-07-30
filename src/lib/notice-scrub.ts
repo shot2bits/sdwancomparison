@@ -57,7 +57,7 @@ function flagsIn(field: string, text: string): ScrubFlag[] {
         field,
         kind: "named_vendor",
         match: m[0],
-        why: `Naming your incumbent (${m[0]}) narrows who you could be, especially combined with your sector and region. It also tells every supplier who they are bidding against.`,
+        why: `Naming your incumbent (${m[0]}) narrows who you could be, especially combined with your sector and region. It also tells every bidder who they are bidding against.`,
       });
     }
   }
@@ -68,7 +68,7 @@ function flagsIn(field: string, text: string): ScrubFlag[] {
     out.push({ field, kind: "uniqueness", match: m[0], why: `"${m[0]}" can identify you on its own: phrases of uniqueness describe exactly one organisation.` });
   }
   for (const m of text.matchAll(COMPANY_SHAPE)) {
-    out.push({ field, kind: "company_name", match: m[0], why: `"${m[0]}" reads as a named organisation. If that is you or a supplier, the public notice shows it verbatim.` });
+    out.push({ field, kind: "company_name", match: m[0], why: `"${m[0]}" reads as a named organisation. If that is you or a vendor, the public notice shows it verbatim.` });
   }
   return out;
 }

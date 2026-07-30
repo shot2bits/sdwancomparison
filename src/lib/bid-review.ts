@@ -157,8 +157,8 @@ function evidenceLayer(project: ProjectDetails, resp: RfpResponse, goal: Procure
             netify_grade: STATUS_LABELS[grade] ?? grade,
             overreach,
             note: overreach
-              ? "Supplier asserts capability that Netify's independent grade does not fully support. Ask for evidence."
-              : "Netify has no independent grade for this feature; supplier claim is unverified.",
+              ? "The vendor asserts capability that Netify's independent grade does not fully support. Ask for evidence."
+              : "Netify has no independent grade for this feature; the vendor claim is unverified.",
           });
         }
       }
@@ -215,8 +215,8 @@ async function judgementLayer(project: ProjectDetails, resp: RfpResponse, goal: 
     const res = await client.messages.create({
       model: MODEL,
       max_tokens: 600,
-      system: "You are a procurement analyst giving a qualitative second opinion on a supplier's RFP response. This is model judgement, separate from the deterministic evidence checks already computed. Be sceptical and specific. Do not invent facts. Output a tight assessment (max 120 words) of overall response quality against the buyer goal, then on a final line 'SCORE: n' where n is 0 to 100.",
-      messages: [{ role: "user", content: `${goalLine}\n\nSupplier: ${resp.vendor}.\n\nResponse:\n${qa}` }],
+      system: "You are a procurement analyst giving a qualitative second opinion on a vendor's RFP response. This is model judgement, separate from the deterministic evidence checks already computed. Be sceptical and specific. Do not invent facts. Output a tight assessment (max 120 words) of overall response quality against the buyer goal, then on a final line 'SCORE: n' where n is 0 to 100.",
+      messages: [{ role: "user", content: `${goalLine}\n\nVendor: ${resp.vendor}.\n\nResponse:\n${qa}` }],
     });
     const text = res.content.filter((c): c is Anthropic.TextBlock => c.type === "text").map((c) => c.text).join(" ").trim();
     const m = text.match(/SCORE:\s*(\d{1,3})/i);
@@ -237,7 +237,7 @@ export function computeRiskFlags(project: ProjectDetails, allResponseCount: numb
     flags.push({
       kind: "single_bidder", severity: allResponseCount <= 1 ? "high" : "warn",
       message: `Only ${allResponseCount} bid(s) received against a target of ${minBids}.`,
-      recommendation: "Consider inviting additional matching suppliers before evaluating.",
+      recommendation: "Consider inviting additional matching vendors before evaluating.",
     });
   }
   if (review.coverage_ratio < 0.8) {
@@ -285,7 +285,7 @@ export async function reviewBid(project: ProjectDetails, resp: RfpResponse, goal
   await recordAudit({
     rfp_id: project.id, action: "bid_review",
     summary: `Reviewed ${resp.vendor}'s bid: ${Math.round(coverage * 100)}% coverage, ${gaps.length} gap(s), ${claims.filter((c) => c.overreach).length} claim overreach(es).`,
-    rationale: "Reactive review triggered by supplier bid submission. Evidence checks are deterministic; LLM judgement is a separate, labelled second opinion.",
+    rationale: "Reactive review triggered by vendor bid submission. Evidence checks are deterministic; LLM judgement is a separate, labelled second opinion.",
     ref: review.id,
   });
 

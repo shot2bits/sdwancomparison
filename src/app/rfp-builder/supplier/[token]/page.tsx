@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SupplierPortal from "@/components/SupplierPortal";
 import SignIn from "@/components/SignIn";
 
-export const metadata: Metadata = { title: "Supplier portal", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Vendor portal", robots: { index: false, follow: false } };
 type Props = { params: Promise<{ token: string }> };
 
 export default async function SupplierPortalPage({ params }: Props) {

@@ -19,7 +19,7 @@ import { listProposals, editingConfigured } from "@/lib/vendor-edit";
  */
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Supplier records", robots: { index: false, follow: false } };
+export const metadata = { title: "Vendor records", robots: { index: false, follow: false } };
 
 export default async function RecordsPage() {
   const h = await headers();
@@ -30,7 +30,7 @@ export default async function RecordsPage() {
   if (!isAdminEmail(session?.email)) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="mb-3">Supplier records</h1>
+        <h1 className="mb-3">Vendor records</h1>
         <p className="text-[var(--ink-700)] mb-4">
           Sign in with a Netify address to edit the records.{" "}
           <Link href="/account" className="underline">
@@ -39,7 +39,7 @@ export default async function RecordsPage() {
           .
         </p>
         <Link href="/vendors" className="underline">
-          Back to the supplier index
+          Back to the vendor index
         </Link>
       </div>
     );
@@ -59,9 +59,9 @@ export default async function RecordsPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <p className="eyebrow mb-3">Netify only</p>
-      <h1 className="mb-3">Supplier records</h1>
+      <h1 className="mb-3">Vendor records</h1>
       <p className="text-[var(--ink-700)] max-w-3xl mb-3">
-        {vendors.length} records. Everything you change in one of them reaches that supplier&apos;s
+        {vendors.length} records. Everything you change in one of them reaches that company&apos;s
         profile, its alternatives page, every comparison it appears in and every ranked list it
         qualifies for, because all of those are generated from this one record.
       </p>
@@ -74,13 +74,13 @@ export default async function RecordsPage() {
         <Link href="/admin/record-queue" className="underline">
           Review queue
         </Link>{" "}
-        for supplier proposals.
+        for proposals from vendors and service providers.
       </p>
 
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="text-left border-b border-[var(--ink-300,#c9ced6)]">
-            <th className="py-2 pr-4 font-medium">Supplier</th>
+            <th className="py-2 pr-4 font-medium">Vendor</th>
             <th className="py-2 pr-4 font-medium">Category</th>
             <th className="py-2 pr-4 font-medium">Facts verified</th>
             <th className="py-2 pr-4 font-medium">Changed here</th>

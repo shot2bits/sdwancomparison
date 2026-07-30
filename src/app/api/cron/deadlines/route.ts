@@ -66,7 +66,7 @@ export async function GET(req: Request) {
         const ok = await sendBuyerEmail(
           owner,
           `Your RFP response window closes ${closeDate}`,
-          `<p>The response window for "${p.title}" closes on ${closeDate}.</p><p>${viewed} of ${conns.length} invited suppliers have viewed your RFP so far. Responses received are scored and waiting in your workspace.</p><p><a href="${url}">Open your RFP workspace</a></p><p>Netify</p>`,
+          `<p>The response window for "${p.title}" closes on ${closeDate}.</p><p>${viewed} of ${conns.length} invited vendors and service providers have viewed your RFP so far. Responses received are scored and waiting in your workspace.</p><p><a href="${url}">Open your RFP workspace</a></p><p>Netify</p>`,
         );
         if (ok) { await kvSetJson(flag, now); reminders += 1; }
       }
@@ -80,7 +80,7 @@ export async function GET(req: Request) {
         const ok = await sendBuyerEmail(
           owner,
           "Your RFP response window has closed",
-          `<p>The response window for "${p.title}" has closed. ${viewed} of ${conns.length} invited suppliers viewed your RFP.</p><p>Responses are scored under Evaluate supplier responses in your workspace. Want more responses? Re-send to your matched suppliers or invite more from the marketplace and a new window opens.</p><p><a href="${url}">Review your responses</a></p><p>Netify</p>`,
+          `<p>The response window for "${p.title}" has closed. ${viewed} of ${conns.length} invited vendors and service providers viewed your RFP.</p><p>Responses are scored under Evaluate vendor responses in your workspace. Want more responses? Re-send to your matched vendors or invite more from the marketplace and a new window opens.</p><p><a href="${url}">Review your responses</a></p><p>Netify</p>`,
         );
         if (ok) { await kvSetJson(flag, now); closes += 1; }
       }

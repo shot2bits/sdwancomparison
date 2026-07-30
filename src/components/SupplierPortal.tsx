@@ -50,7 +50,7 @@ export default function SupplierPortal({ token }: { token: string }) {
   return (
     <div className="space-y-8">
       <div>
-        <p className="eyebrow mb-1">Supplier portal</p>
+        <p className="eyebrow mb-1">Vendor portal</p>
         <h1 className="text-2xl mb-1">{conn.vendor_name}</h1>
         {rfp && <p className="text-sm text-[var(--ink-500)]">RFP: {rfp.title} · {rfp.status} · {rfp.question_count} questions · scope {rfp.product_scope} · {rfp.operating_model}{rfp.sector ? ` · ${rfp.sector}` : ""}</p>}
         <p className="text-sm text-[var(--ink-500)] mt-1">Connection status: {conn.status}</p>

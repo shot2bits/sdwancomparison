@@ -76,8 +76,8 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
 
   return (
     <div className="rounded-sm border border-[var(--ink-300,#ccc)] p-4 max-w-md">
-      <p className="eyebrow mb-1">{role === "supplier" ? "Supplier sign-in" : "Sign in"}</p>
-      <p className="text-sm text-[var(--ink-600,#555)] mb-2">{prompt ?? (role === "supplier" ? "Sign in with your work email to respond. We verify your email domain against the listed supplier." : "Verify yourself once and everything you build stays yours.")}</p>
+      <p className="eyebrow mb-1">{role === "supplier" ? "Vendor sign-in" : "Sign in"}</p>
+      <p className="text-sm text-[var(--ink-600,#555)] mb-2">{prompt ?? (role === "supplier" ? "Sign in with your work email to respond. We verify your email domain against the listed vendor." : "Verify yourself once and everything you build stays yours.")}</p>
 
       <div className="flex gap-2">
         <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@yourcompany.com" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" onKeyDown={(e) => { if (e.key === "Enter") void request(); }} />

@@ -446,7 +446,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         if (!d?.ok || !d.board) return;
         const next = d.board.listed
           ? { listed: true, url: d.board.url }
-          : { listed: false, reason: "Verified suppliers browsing the board cannot see this RFP." };
+          : { listed: false, reason: "Verified vendors browsing the board cannot see this RFP." };
         setBoardNote((prev) => prev ?? next);
       })
       .catch(() => {});
@@ -969,7 +969,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               sessionStorage.removeItem("netify_pending_email");
             } catch { /* ignore */ }
             setPublishAuthNeeded(false);
-            setPublishMsg("Submitted. Your RFP is with your matched suppliers now; their responses will appear under \"Evaluate supplier responses\" below.");
+            setPublishMsg("Submitted. Your RFP is with your matched vendors now; their responses will appear under \"Evaluate vendor responses\" below.");
             refreshConnections();
             loadMarketReport();
             return;
@@ -1017,7 +1017,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         localStorage.removeItem(`rfp_publish_opts_${project.id}`);
         sessionStorage.removeItem("netify_pending_email");
       } catch { /* ignore */ }
-      setPublishMsg(`Submitted to ${data.invited?.length ?? 0} matched suppliers. What happens next: the suppliers appear under "Suppliers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate supplier responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
+      setPublishMsg(`Submitted to ${data.invited?.length ?? 0} matched vendors. What happens next: they appear under "Vendors and service providers" below, each with a private link (they don't need an account, they reply via that link). When they respond, their answers appear under "Evaluate vendor responses" automatically. There's no separate account or portal: this page is your dashboard, so bookmark your private link above to come back and track replies any time.`);
       if (data.board) setBoardNote(data.board as { listed: boolean; url?: string; reason?: string });
       refreshConnections();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not publish."); }
@@ -1098,7 +1098,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           The builder is the buyer&apos;s private workspace: only the person who created this RFP can read or edit it here.
         </p>
         <ul className="list-disc pl-5 text-sm text-[var(--ink-700)] space-y-1.5 mb-5">
-          <li><strong>Invited to respond as a supplier?</strong> Use the response link from your invitation (it ends <code>/respond?token=…</code>). That page shows you the RFP and takes your answers.</li>
+          <li><strong>Invited to respond as a vendor?</strong> Use the response link from your invitation (it ends <code>/respond?token=…</code>). That page shows you the RFP and takes your answers.</li>
           <li><strong>Is this your RFP?</strong> Sign in below with the email you used when you created it, or reopen the private builder link you bookmarked (it carries your key).</li>
         </ul>
         <div className="mb-5"><SignIn role="buyer" prompt="Sign in with the email that created this RFP." /></div>
@@ -1112,13 +1112,13 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       <div className="rounded-2xl border border-[var(--ink-900)] p-8">
         <h2 className="text-xl mb-2">Start your RFP</h2>
         <p className="text-[var(--ink-700)] mb-5 max-w-2xl">
-          An <strong>RFP</strong> (request for proposal) is the set of questions you send to suppliers so you can compare them fairly. This tool helps you write one for SASE, SSE or SD-WAN, invite the right suppliers, and compare their replies. It takes about four steps:
+          An <strong>RFP</strong> (request for proposal) is the set of questions you send to vendors and service providers so you can compare them fairly. This tool helps you write one for SASE, SSE or SD-WAN, invite the right ones, and compare their replies. It takes about four steps:
         </p>
         <div className="grid sm:grid-cols-4 gap-3 mb-6 max-w-3xl">
           {[
             ["1. Describe", "Your sector, number of sites, regions and any rules you must meet."],
             ["2. Build questions", "We draft them for you. Add or remove any you like."],
-            ["3. Invite suppliers", "Send your RFP to the best-fit vendors in one click."],
+            ["3. Invite vendors", "Send your RFP to the best-fit vendors in one click."],
             ["4. Compare replies", "We flag any answers that need a closer look."],
           ].map(([t, d]) => (
             <div key={t} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3">
@@ -1128,7 +1128,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           ))}
         </div>
         <p className="text-sm text-[var(--ink-600,#555)] mb-5 max-w-2xl">
-          Two ways to build it, and you can switch between them at any time: <strong>AI agent</strong> (chat in plain English and it writes the RFP for you) or <strong>Build it myself</strong> (pick the questions by hand, with AI help when you want it). Nothing is sent to any supplier until you choose to invite them.
+          Two ways to build it, and you can switch between them at any time: <strong>AI agent</strong> (chat in plain English and it writes the RFP for you) or <strong>Build it myself</strong> (pick the questions by hand, with AI help when you want it). Nothing is sent to any vendor until you choose to invite them.
         </p>
         <button onClick={() => startRfp()} disabled={creating} className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
           {creating ? "Starting..." : "Start my RFP"}
@@ -1137,7 +1137,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <div className="mt-6 pt-5 border-t border-[var(--ink-200,#e5e5e5)] max-w-2xl">
           <p className="text-sm font-medium mb-1">Not ready for a full RFP?</p>
           <p className="text-sm text-[var(--ink-600,#555)]">
-            Do what an RFI does, the marketplace way: post a short RFI describing your need, gather supplier
+            Do what an RFI does, the marketplace way: post a short RFI describing your need, gather vendor
             interest, information and indicative pricing, then turn the RFI into a full RFP when you&apos;re ready.{" "}
             <a href="/sase/opportunities/new/" className="underline">Publish an RFI instead</a>.
           </p>
@@ -1158,11 +1158,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const published = project.status !== "draft" && project.status !== "review";
   const stripStage: FlowStage = published ? "responses" : "review";
   const stripNow = published
-    ? `Your RFP is live. ${connections.length > 0 ? `${connections.length} invited supplier${connections.length === 1 ? "" : "s"} hold` : "Invited suppliers hold"} private response links, and replies land on this page.`
+    ? `Your RFP is live. ${connections.length > 0 ? `${connections.length} invited vendor${connections.length === 1 ? "" : "s"} hold` : "Invited vendors hold"} private response links, and replies land on this page.`
     : `You are reviewing your draft RFP: ${includedQuestionCount} questions across ${includedSections.length} sections. Add, remove or reword anything.`;
   const stripNext = published
-    ? "Responses are scored against your questions under Evaluate supplier responses below. We also email you when activity arrives."
-    : `submit${matchInfo && matchInfo.count > 0 ? `, so your ${matchInfo.count} matched suppliers can respond` : ", so matched suppliers can respond"}. Nothing is shared until you press submit in the panel below.`;
+    ? "Responses are scored against your questions under Evaluate vendor responses below. We also email you when activity arrives."
+    : `submit${matchInfo && matchInfo.count > 0 ? `, so your ${matchInfo.count} matched vendors can respond` : ", so matched vendors can respond"}. Nothing is shared until you press submit in the panel below.`;
 
   return (
     <div className={!published && !stickyGone ? "pb-16" : undefined}>
@@ -1191,8 +1191,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             ? (signinNote === 1 ? "Your draft RFP is saved to your account." : `${signinNote} draft RFPs are saved to your account.`)
             : "Your work here saves to your account."}{" "}
           {project.status === "published"
-            ? "This RFP is published; supplier responses appear below as they arrive."
-            : "When you are ready, submit below to invite your matched suppliers."}
+            ? "This RFP is published; vendor responses appear below as they arrive."
+            : "When you are ready, submit below to invite your matched vendors."}
           <button onClick={() => setSigninNote(null)} className="ml-2 underline">Dismiss</button>
         </div>
       )}
@@ -1205,10 +1205,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <p className="text-sm text-[var(--ink-700)] mb-3">
             {includedQuestionCount} questions across {includedSections.length} sections, assembled from the Netify
             question bank (Methodology v{project.methodology_version}) around what you described. Review and trim
-            anything below, then choose who sees it. Nothing reaches a supplier until you submit or invite them.
+            anything below, then choose who sees it. Nothing reaches a vendor until you submit or invite them.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <a href="#publish" onClick={() => setGeneratedWelcome(false)} className="inline-flex items-center px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors">Submit to suppliers</a>
+            <a href="#publish" onClick={() => setGeneratedWelcome(false)} className="inline-flex items-center px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors">Submit to vendors</a>
             <button onClick={() => setGeneratedWelcome(false)} className="text-sm underline text-[var(--ink-600,#555)]">Review first</button>
           </div>
         </div>
@@ -1221,11 +1221,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       <section id="publish" ref={publishPanelRef} className={`mb-6 rounded-sm border p-4 ${published ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
         {published ? (
           <div>
-            <p className="text-base font-semibold mb-1">Submitted. Your RFP is with your suppliers now.</p>
+            <p className="text-base font-semibold mb-1">Submitted. Your RFP is with your vendors now.</p>
             <p className="text-sm text-[var(--ink-700)]">
-              {connections.length > 0 ? `${connections.filter((c) => c.viewed_at).length} of ${connections.length} suppliers have viewed your RFP.` : "Invited suppliers hold private response links."}{" "}
+              {connections.length > 0 ? `${connections.filter((c) => c.viewed_at).length} of ${connections.length} vendors have viewed your RFP.` : "Invited vendors hold private response links."}{" "}
               {project.response_deadline ? `Responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left). ` : ""}
-              Structured responses land on this page and are scored under Evaluate supplier responses below. We email you when activity arrives, and you can invite more suppliers at any time under Suppliers.
+              Structured responses land on this page and are scored under Evaluate vendor responses below. We email you when activity arrives, and you can invite more at any time under Vendors and service providers.
             </p>
             {/* The Market Report: the instant publish reward (18 July 2026).
                 Price band from the TCO methodology with its assumptions
@@ -1235,7 +1235,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               <div className="mt-3 rounded-sm border border-amber-300 bg-white p-4">
                 <p className="text-sm font-semibold mb-1">Your Market Report preview</p>
                 <p className="text-sm text-[var(--ink-800)] mb-1">
-                  <strong>{marketReport.matched.count} matched supplier{marketReport.matched.count === 1 ? "" : "s"}</strong> on the marketplace for this project
+                  <strong>{marketReport.matched.count} matched vendor{marketReport.matched.count === 1 ? "" : "s"}</strong> on the marketplace for this project
                   {marketReport.matched.names.length > 0 ? <> including {marketReport.matched.names.join(", ")}</> : null}.
                 </p>
                 {marketReport.estimate && (
@@ -1247,7 +1247,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 {marketReport.gaps.length > 0 && (
                   <p className="text-xs text-[var(--ink-600,#555)] mb-2">Gap check: {marketReport.gaps[0]}</p>
                 )}
-                <p className="text-xs text-[var(--ink-500)] mb-2">The full supplier list, complete gap detail, your document as Word and PDF, and delivery to these suppliers unlock when you publish. Publishing is free.</p>
+                <p className="text-xs text-[var(--ink-500)] mb-2">The full vendor list, complete gap detail, your document as Word and PDF, and delivery to them unlock when you publish. Publishing is free.</p>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder="you@company.com" className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm" />
                   <button onClick={emailDraftLink} disabled={emailingLink || !draftEmail.trim()} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{emailingLink ? "Sending..." : "Email me this report and my draft link"}</button>
@@ -1262,7 +1262,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                   <p className="text-sm text-[var(--ink-800)] mb-1">
                     Indicative market price band: <strong>{fmtBand(marketReport.estimate.monthly_band_gbp)} per month</strong>
                     {" · "}3-year TCO <strong>{fmtBand(marketReport.estimate.three_year_tco_band_gbp)}</strong>
-                    <span className="text-xs text-[var(--ink-500)]"> (Netify TCO Methodology {marketReport.estimate.methodology_version}; a modelled band from your estate profile, not a quote — supplier responses give you the real numbers)</span>
+                    <span className="text-xs text-[var(--ink-500)]"> (Netify TCO Methodology {marketReport.estimate.methodology_version}; a modelled band from your estate profile, not a quote, and vendor responses give you the real numbers)</span>
                   </p>
                 )}
                 {marketReport.assumptions.length > 0 && (
@@ -1270,7 +1270,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 )}
                 {marketReport.gaps.length > 0 && (
                   <div className="mb-2 text-sm">
-                    <p className="font-medium mb-0.5">Gaps worth closing (edit below any time; suppliers always see the latest version):</p>
+                    <p className="font-medium mb-0.5">Gaps worth closing (edit below any time; vendors always see the latest version):</p>
                     <ul className="list-disc list-inside space-y-0.5 text-[var(--ink-700)]">
                       {marketReport.gaps.map((g) => <li key={g}>{g}</li>)}
                     </ul>
@@ -1297,7 +1297,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </h2>
             <p className="text-sm text-[var(--ink-700)] mb-3">
               Click the link we emailed{pendingEmail ? ` to ${pendingEmail}` : " you"} and your RFP goes to your matched
-              suppliers automatically, exactly as you agreed. Wrong address, or no email after a minute? Use the form below.
+              vendors automatically, exactly as you agreed. Wrong address, or no email after a minute? Use the form below.
             </p>
             <SignIn role="buyer" prompt="Sign in with your work email to complete the submission." />
             <CodeEntry defaultEmail={pendingEmail} onVerified={() => publishToCurated("signin_resume")} />
@@ -1313,8 +1313,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <p className="eyebrow mb-1.5">Next step</p>
             <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">Give your RFP content before it goes anywhere</h2>
             <p className="text-sm text-[var(--ink-700)] mb-2">
-              This RFP has no questions yet, so there is nothing for suppliers to respond to and submission stays
-              locked. Set what you know in step 1 and the agent generates your question set; your matched suppliers
+              This RFP has no questions yet, so there is nothing for vendors to respond to and submission stays
+              locked. Set what you know in step 1 and the agent generates your question set; your matched vendors
               appear here once the RFP has content.
             </p>
             <p className="text-xs text-[var(--ink-600,#555)]">
@@ -1325,7 +1325,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <div>
             <p className="eyebrow mb-1.5">Next step</p>
             <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
-              Submit this RFP{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched supplier${matchInfo.count === 1 ? "" : "s"}` : " to your matched suppliers"}
+              Submit this RFP{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched vendor${matchInfo.count === 1 ? "" : "s"}` : " to your matched vendors"}
             </h2>
             {matchInfo && matchInfo.names.length > 0 && (
               <p className="text-base text-[var(--ink-800)] leading-snug mb-3">
@@ -1334,7 +1334,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               </p>
             )}
             <p className="text-sm text-[var(--ink-700)] mb-2">
-              This is the fastest and simplest way to see whether your requirements match the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. Suppliers never see your email or phone number, and your data is only shared with a vetted account manager from each vendor or managed service provider. Every conversation starts in this app, on your terms, only when you choose.
+              This is the fastest and simplest way to see whether your requirements match the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. They never see your email or phone number, and your data is only shared with a vetted account manager from each vendor or managed service provider. Every conversation starts in this app, on your terms, only when you choose.
             </p>
             <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
               {["Indicative pricing, private to you", "Demo requests", "Proof-of-concept scoping", "Message vendors and managed providers in-app", "Evidence, documents and PDF collateral", "Sales and account contact, when you choose", "Independent response scoring"].map((c) => (
@@ -1342,22 +1342,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               ))}
             </p>
             <ol className="text-sm text-[var(--ink-700)] mb-3 space-y-1 list-decimal list-inside">
-              <li><strong>Submit.</strong> Each matched supplier gets a private link to your {includedQuestionCount} questions. Until then, your RFP is invisible to the market and nothing has been shared.</li>
+              <li><strong>Submit.</strong> Each matched vendor gets a private link to your {includedQuestionCount} questions. Until then, your RFP is invisible to the market and nothing has been shared.</li>
               <li><strong>Responses arrive here.</strong> Structured, comparable answers with pricing kept private to you.</li>
-              <li><strong>Compare and choose.</strong> Replies are scored against your questions; message suppliers, request demos, collateral or a proof of concept from this page.</li>
+              <li><strong>Compare and choose.</strong> Replies are scored against your questions; message vendors, request demos, collateral or a proof of concept from this page.</li>
             </ol>
             {publishAuthNeeded && (
               <div className="mb-3 rounded-sm border border-amber-400 bg-white p-3 text-sm text-[var(--ink-800)]">
-                <p className="mb-2"><strong>One step before your RFP goes out.</strong> Submitting sends this RFP to suppliers, so it needs a verified work email. Sign in and the submission continues automatically. Your draft is exactly as you left it.</p>
-                <SignIn role="buyer" prompt="Sign in with your work email to submit to your matched suppliers." />
+                <p className="mb-2"><strong>One step before your RFP goes out.</strong> Submitting sends this RFP to vendors and service providers, so it needs a verified work email. Sign in and the submission continues automatically. Your draft is exactly as you left it.</p>
+                <SignIn role="buyer" prompt="Sign in with your work email to submit to your matched vendors." />
                 <CodeEntry defaultEmail={pendingEmail} onVerified={() => publishToCurated("signin_resume")} />
               </div>
             )}
             <div className="flex flex-wrap items-center gap-3">
               <button onClick={() => publishToCurated("panel")} disabled={publishing} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
-                {publishing ? "Submitting..." : matchInfo && matchInfo.count > 0 ? `Submit to your ${matchInfo.count} matched suppliers` : "Submit to your matched suppliers"}
+                {publishing ? "Submitting..." : matchInfo && matchInfo.count > 0 ? `Submit to your ${matchInfo.count} matched vendors` : "Submit to your matched vendors"}
               </button>
-              <span className="text-xs text-[var(--ink-600,#555)]">Free, no obligation to award, nothing shared until you press it. <a href="https://netify.co.uk/how-netify-makes-money/" className="underline">How Netify makes money</a>. Prefer control? <a href="#suppliers" className="underline">Invite suppliers one at a time</a>.</span>
+              <span className="text-xs text-[var(--ink-600,#555)]">Free, no obligation to award, nothing shared until you press it. <a href="https://netify.co.uk/how-netify-makes-money/" className="underline">How Netify makes money</a>. Prefer control? <a href="#suppliers" className="underline">Invite vendors one at a time</a>.</span>
             </div>
             {publishMsg && <p className="mt-2 text-sm text-emerald-700">{publishMsg}</p>}
           </div>
@@ -1367,7 +1367,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {/* The FlowStageStrip above carries orientation (where you are, what
           happens next) from live state, replacing the old static "How this
           works" box. One line of reassurance stays. */}
-      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a supplier until you submit or invite them.</p>
+      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a vendor until you submit or invite them.</p>
 
       <p className="eyebrow mb-2">Step 1: the basics</p>
       <p className="-mt-1 mb-3 text-xs text-[var(--ink-500)]">All optional. Set what you know; the AI agent fills in the rest as you chat, and you can change any of it later.</p>
@@ -1448,7 +1448,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <a href={`/sase/rfp-builder/${project.id}/preview${keyQs}`} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors no-underline">Preview &amp; download</a>
           <a href={`/sase/rfp-builder/${project.id}/review${keyQs}`} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors no-underline">Agent review</a>
           <button onClick={exportDocument} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Export</button>
-          <button onClick={copyShare} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{copied ? "Copied" : "Supplier link"}</button>
+          <button onClick={copyShare} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{copied ? "Copied" : "Response link"}</button>
         </div>
       </div>
 
@@ -1501,7 +1501,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                   <span className="eyebrow">Netify question bank (v{bank.version})</span>
                   <span aria-hidden="true">{bankOpen ? "−" : "+"}</span>
                 </button>
-                <p className="text-xs text-[var(--ink-500)] mt-1">Analyst-written questions with buyer and supplier lenses. The matching sector pack is suggested first; the SASE canonical bank below carries evidence checklists, weighting and red-flag answers for each question.</p>
+                <p className="text-xs text-[var(--ink-500)] mt-1">Analyst-written questions with buyer and vendor lenses. The matching sector pack is suggested first; the SASE canonical bank below carries evidence checklists, weighting and red-flag answers for each question.</p>
                 {bankOpen && (
                   <div className="mt-3 space-y-2 max-h-96 overflow-y-auto">
                     {project.buyer.sector && bank.sector_packs[project.buyer.sector] && (
@@ -1515,7 +1515,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                                 <div key={q.id} className="text-sm border-b border-[var(--ink-100,#f1f1f1)] pb-2">
                                   <p>{q.text}</p>
                                   {q.buyer_lens && <p className="text-xs text-[var(--ink-500)] mt-0.5">Buyer: {q.buyer_lens}</p>}
-                                  {q.supplier_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5">Supplier: {q.supplier_lens}</p>}
+                                  {q.supplier_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5">Vendor: {q.supplier_lens}</p>}
                                   <button onClick={() => addBankQuestion(sec.title, q)} className="mt-1 px-2.5 py-1 text-xs border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Add</button>
                                 </div>
                               ))}
@@ -1583,7 +1583,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             {/* Write your own question — no AI required, AI drafting optional */}
             <div className="border border-[var(--ink-900)] rounded-sm p-4">
               <p className="eyebrow mb-2">Write your own question</p>
-              <p className="text-xs text-[var(--ink-500)] mb-2">Type it exactly as you want suppliers to see it. No AI involved unless you ask for a draft below.</p>
+              <p className="text-xs text-[var(--ink-500)] mb-2">Type it exactly as you want vendors to see it. No AI involved unless you ask for a draft below.</p>
               <textarea value={ownText} onChange={(e) => setOwnText(e.target.value)} rows={2} placeholder="Your question, e.g. Describe how you would migrate our 12 warehouse sites with no downtime during trading hours." className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <input value={ownEvidence} onChange={(e) => setOwnEvidence(e.target.value)} placeholder="Evidence to request (optional)" className="flex-1 min-w-[12rem] border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
@@ -1690,7 +1690,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </button>
           )}
           <p className="text-sm text-[var(--ink-500)] mb-1">Sector: {project.buyer.sector ?? "not set"}. Sites: {project.buyer.site_count ?? "not set"}. Compliance: {project.buyer.compliance.map((c) => securityCodeLabel(c)).join(", ") || "none set"}.</p>
-          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and suppliers respond.</p>
+          <p className="text-xs text-[var(--ink-400,#9ca3af)] mb-4">Stage: <span className="uppercase">{project.status}</span>. An RFP moves through {STATUS_FLOW.join(" → ")} as you publish and vendors respond.</p>
           <div className="space-y-3">
             {project.rfp_sections.filter((s) => s.included).map((s) => {
               const active = s.questions.filter((q) => q.priority !== "optional");
@@ -1707,7 +1707,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                         </p>
                         {q.evidence_requested && <p className="text-xs text-[var(--ink-500)] mt-0.5">Evidence: {q.evidence_requested}</p>}
                         {q.buyer_lens && <p className="text-xs text-[var(--ink-500)] mt-0.5">Buyer: {q.buyer_lens}</p>}
-                        {q.supplier_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5">Supplier: {q.supplier_lens}</p>}
+                        {q.supplier_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5">Vendor: {q.supplier_lens}</p>}
                         {!q.buyer_lens && <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-0.5 italic">{humaniseSecurityCodes(q.rationale)}</p>}
                       </div>
                     ))}
@@ -1723,7 +1723,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <h2 className="text-lg mb-2">Confidentiality (NDA)</h2>
         <label className="flex items-start gap-2 text-sm text-[var(--ink-700)] mb-3">
           <input type="checkbox" checked={nda.required} onChange={(e) => updateNda({ required: e.target.checked })} className="mt-1" />
-          <span>Require suppliers to accept an NDA before they can see the full RFP and respond. Suppliers see only a short scope summary until they accept.</span>
+          <span>Require vendors to accept an NDA before they can see the full RFP and respond. They see only a short scope summary until they accept.</span>
         </label>
 
         {nda.required && (
@@ -1749,10 +1749,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               <input value={nda.link} onChange={(e) => updateNda({ link: e.target.value })} placeholder="https://…" className="w-full max-w-lg border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
             </div>
 
-            <p className="text-xs text-[var(--ink-500)]">Current version: v{nda.version}. Changing the wording, link or source bumps the version, so suppliers who accepted earlier are asked to re-accept the new terms.</p>
+            <p className="text-xs text-[var(--ink-500)]">Current version: v{nda.version}. Changing the wording, link or source bumps the version, so anyone who accepted earlier is asked to re-accept the new terms.</p>
 
             <div>
-              <p className="eyebrow mb-2">Suppliers who have accepted ({ndaAccepts.length})</p>
+              <p className="eyebrow mb-2">Vendors who have accepted ({ndaAccepts.length})</p>
               {ndaAccepts.length === 0 ? (
                 <p className="text-sm text-[var(--ink-500)]">No acceptances yet.</p>
               ) : (
@@ -1775,15 +1775,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {/* Suppliers: two-sided marketplace */}
       <section id="suppliers" className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
         <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-          <h2 className="text-lg">Suppliers</h2>
+          <h2 className="text-lg">Vendors and service providers</h2>
           <div className="flex gap-2">
-            <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit suppliers</button>
-            <button onClick={() => publishToCurated("suppliers")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : project.status === "published" ? "Re-send to your matched suppliers" : "Submit to your matched suppliers"}</button>
+            <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit vendors</button>
+            <button onClick={() => publishToCurated("suppliers")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : project.status === "published" ? "Re-send to your matched vendors" : "Submit to your matched vendors"}</button>
           </div>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> Suppliers are the graded vendors from the Netify marketplace. <strong>Suggest best-fit suppliers</strong> finds the closest matches to what you described. <strong>Submit to your matched suppliers</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each supplier gets a private link to read your RFP and reply.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> These are the graded vendors and service providers from the Netify marketplace. <strong>Suggest best-fit vendors</strong> finds the closest matches to what you described. <strong>Submit to your matched vendors</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each one gets a private link to read your RFP and reply.</p>
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed: this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track supplier replies. Don&apos;t share it: suppliers get their own links.</span>
+          <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed: this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track replies. Don&apos;t share it: vendors get their own links.</span>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
           <span className="flex items-center gap-1.5">
             <input value={draftEmail} onChange={(e) => setDraftEmail(e.target.value)} type="email" placeholder="you@company.com" className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm" />
@@ -1803,7 +1803,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </p>
           ) : (
             <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">
-              <p className="mb-2"><strong>Not on the public board yet.</strong> {boardNote.reason ?? "Verified suppliers browsing the board cannot see this RFP."} Listing is anonymous: the notice shows sector, estate and requirement only, never your company name or contact details, and pricing stays private to you.</p>
+              <p className="mb-2"><strong>Not on the public board yet.</strong> {boardNote.reason ?? "Verified vendors browsing the board cannot see this RFP."} Listing is anonymous: the notice shows sector, estate and requirement only, never your company name or contact details, and pricing stays private to you.</p>
               <button
                 onClick={listOnBoardNow}
                 disabled={listingBusy}
@@ -1813,7 +1813,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               </button>
               {listAuthNeeded && (
                 <div className="mt-2">
-                  <p className="mb-1 text-xs text-[var(--ink-700)]">Listing reaches verified suppliers, so it needs your signed-in work email first.</p>
+                  <p className="mb-1 text-xs text-[var(--ink-700)]">Listing reaches verified vendors, so it needs your signed-in work email first.</p>
                   <SignIn role="buyer" prompt="Sign in with your work email, then press List on the board again." />
                 </div>
               )}
@@ -1834,22 +1834,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         )}
 
-        {connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No suppliers invited yet.</p>}
+        {connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No vendors invited yet.</p>}
         {connections.length > 0 && (
           <p className="mb-2 text-sm text-[var(--ink-700)]">
-            <strong>{connections.filter((c) => c.viewed_at).length} of {connections.length}</strong> suppliers have viewed your RFP
+            <strong>{connections.filter((c) => c.viewed_at).length} of {connections.length}</strong> vendors have viewed your RFP
             {connections.filter((c) => c.status === "declined").length > 0 ? ` · ${connections.filter((c) => c.status === "declined").length} declined` : ""}
             {project.response_deadline ? ` · responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left)` : ""}.
           </p>
         )}
         {(() => {
           const HINTS: Record<string, string> = {
-            out_of_region: "Consider widening the supplier set or checking your region selections match where you need delivery.",
-            sector_not_served: "Your sector filter may be narrowing the match; sector context in the background section helps suppliers self-qualify.",
+            out_of_region: "Consider widening the vendor set or checking your region selections match where you need delivery.",
+            sector_not_served: "Your sector filter may be narrowing the match; sector context in the background section helps vendors self-qualify.",
             scope_unclear: "Add a sentence or two to the project background: current estate, what is changing and why.",
-            commercially_unattractive: "Consider adding budget context or site counts so suppliers can size the opportunity.",
+            commercially_unattractive: "Consider adding budget context or site counts so vendors can size the opportunity.",
             no_capacity: "Timing, not fit. Re-send to the remaining matches or extend your deadline.",
-            other: "Read the supplier's note below for the detail.",
+            other: "Read the vendor's note below for the detail.",
           };
           const declines = connections
             .filter((c) => c.status === "declined")
@@ -1860,7 +1860,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           if (declines.length === 0) return null;
           return (
             <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm">
-              <p className="mb-1 font-medium text-[var(--ink-800)]">Why suppliers declined, and what would improve this RFP</p>
+              <p className="mb-1 font-medium text-[var(--ink-800)]">Why vendors declined, and what would improve this RFP</p>
               <ul className="space-y-1 text-[var(--ink-700)]">
                 {declines.map((d, i) => (
                   <li key={i}>
@@ -1890,12 +1890,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                     </div>
                   ))}
                 </div>
-                <textarea value={msgDraft[c.vendor_slug] ?? ""} onChange={(e) => setMsgDraft({ ...msgDraft, [c.vendor_slug]: e.target.value })} rows={2} placeholder="Message to the supplier" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
+                <textarea value={msgDraft[c.vendor_slug] ?? ""} onChange={(e) => setMsgDraft({ ...msgDraft, [c.vendor_slug]: e.target.value })} rows={2} placeholder="Message to the vendor" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
                 <div className="mt-2 flex gap-2 flex-wrap">
                   <button onClick={() => connectAction(c.vendor_slug, "message", msgDraft[c.vendor_slug] ?? "")} disabled={!msgDraft[c.vendor_slug]} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
                   <button onClick={() => connectAction(c.vendor_slug, "demo_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request demo</button>
                   <button onClick={() => connectAction(c.vendor_slug, "contact_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request contact</button>
-                  <button onClick={() => copySupplierLink(c.token)} className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Copy supplier link</button>
+                  <button onClick={() => copySupplierLink(c.token)} className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Copy response link</button>
                 </div>
               </div>
             </details>
@@ -1906,17 +1906,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {/* Evaluation: independent cross-check of supplier responses */}
       <section className="mt-10 border-t border-[var(--ink-300,#ccc)] pt-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg">Evaluate supplier responses</h2>
+          <h2 className="text-lg">Evaluate vendor responses</h2>
           <button onClick={loadEvaluations} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Refresh responses</button>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 4.</strong> Supplier replies appear here once the RFP is published. Their answers are cross-checked against Netify&#39;s independent capability grades, and any claim that goes beyond the evidence is flagged for you to question. Refresh responses checks for new replies.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 4.</strong> Vendor replies appear here once the RFP is published. Their answers are cross-checked against Netify&#39;s independent capability grades, and any claim that goes beyond the evidence is flagged for you to question. Refresh responses checks for new replies.</p>
         {!published && (
           <div className="mb-3">
             <p className="text-sm text-[var(--ink-700)] mb-2"><strong>This is what you are publishing for.</strong> Each response arrives structured like this, ready to compare:</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {[0, 1].map((i) => (
                 <div key={i} className="rounded-sm border border-dashed border-[var(--ink-300,#ccc)] bg-[var(--paper-base)] p-3 text-sm text-[var(--ink-400,#9ca3af)]">
-                  <p className="font-medium mb-1">Supplier response · locked until you publish</p>
+                  <p className="font-medium mb-1">Vendor response · locked until you publish</p>
                   <p>Answers to your {includedQuestionCount} questions · graded coverage</p>
                   <p>Pricing, private to you · evidence documents · demo availability</p>
                 </div>
@@ -1925,7 +1925,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <p className="mt-2 text-sm"><a href="#publish" className="underline">Publish to unlock responses</a></p>
           </div>
         )}
-        {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">{project.status === "published" ? "No responses yet. Invited suppliers reply through their private links, and replies appear here automatically." : "No responses yet. Publish the RFP to invite suppliers, or share the supplier link."}</p>}
+        {evaluations && evaluations.length === 0 && <p className="text-sm text-[var(--ink-500)]">{project.status === "published" ? "No responses yet. Invited vendors reply through their private links, and replies appear here automatically." : "No responses yet. Publish the RFP to invite vendors, or share the response link."}</p>}
         {/* Scoring surface (deal room slice 2): executive summary and a
             side-by-side matrix generated deterministically from the
             evaluation data, decline reasons and the response window, with
@@ -1944,14 +1944,14 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           if (ranked.length > 1) sentences.push(`${ranked.slice(1).map((ev) => `${ev.vendor} ${pct(ev)}%`).join(", ")} follow${ranked.length === 2 ? "s" : ""}.`);
           if (flagged.length > 0) sentences.push(`Claims to verify: ${flagged.map((ev) => `${ev.vendor} (${(ev.red_flags ?? 0) > 0 ? `${ev.red_flags} red flag${(ev.red_flags ?? 0) === 1 ? "" : "s"}` : `${ev.flags} item${ev.flags === 1 ? "" : "s"}`})`).join(", ")}; ask each to substantiate before shortlisting.`);
           if (evidenceGaps.length > 0) sentences.push(`Evidence gaps: ${evidenceGaps.map((ev) => `${ev.vendor} (${ev.missing_evidence})`).join(", ")}; request documents through the message thread.`);
-          if (declined.length > 0) sentences.push(`${declined.length} supplier${declined.length === 1 ? "" : "s"} declined; reasons and improvement hints are under Suppliers above.`);
-          if (pendingSuppliers.length > 0 && project.response_deadline && project.response_deadline > Date.now()) sentences.push(`${pendingSuppliers.length} invited supplier${pendingSuppliers.length === 1 ? " has" : "s have"} not yet responded; the window closes ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`);
+          if (declined.length > 0) sentences.push(`${declined.length} vendor${declined.length === 1 ? "" : "s"} declined; reasons and improvement hints are listed above.`);
+          if (pendingSuppliers.length > 0 && project.response_deadline && project.response_deadline > Date.now()) sentences.push(`${pendingSuppliers.length} invited vendor${pendingSuppliers.length === 1 ? " has" : "s have"} not yet responded; the window closes ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`);
           return (
             <div className="mb-4">
               <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3">
                 <p className="eyebrow mb-1">Executive summary</p>
                 <p className="text-sm text-[var(--ink-800)]">{sentences.join(" ")}</p>
-                <p className="mt-1 text-xs text-[var(--ink-500)]">Generated from the response evaluations, Netify capability grades (Methodology v{project.methodology_version}) and this RFP&apos;s response window. Every figure appears in the matrix and per-supplier detail below.</p>
+                <p className="mt-1 text-xs text-[var(--ink-500)]">Generated from the response evaluations, Netify capability grades (Methodology v{project.methodology_version}) and this RFP&apos;s response window. Every figure appears in the matrix and per-vendor detail below.</p>
               </div>
               <div className="mt-3 overflow-x-auto">
                 <table className="w-full min-w-[480px] border-collapse text-sm">
@@ -2012,7 +2012,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                         ))}
                       </tbody>
                     </table>
-                    <p className="mt-1 text-[11px] text-[var(--ink-500)]">⚑ marks answers where the claim goes beyond Netify&apos;s independent evidence; the note is in the per-supplier detail below.</p>
+                    <p className="mt-1 text-[11px] text-[var(--ink-500)]">⚑ marks answers where the claim goes beyond Netify&apos;s independent evidence; the note is in the per-vendor detail below.</p>
                   </div>
                 </details>
               )}
@@ -2046,7 +2046,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <p className="eyebrow mb-2">Benchmark signal</p>
           <p className="text-sm text-[var(--ink-600,#555)]">
             From {benchmark.total_rfps} RFPs built with this tool.
-            {benchmark.median_response_completeness != null && ` Median supplier response completeness: ${Math.round(benchmark.median_response_completeness * 100)}%.`}
+            {benchmark.median_response_completeness != null && ` Median vendor response completeness: ${Math.round(benchmark.median_response_completeness * 100)}%.`}
             {benchmark.top_mandatory_questions && benchmark.top_mandatory_questions.length > 0 && ` Most-required capabilities: ${benchmark.top_mandatory_questions.slice(0, 5).map((q) => q.name).join(", ")}.`}
           </p>
           <p className="text-xs text-[var(--ink-400,#9ca3af)] mt-1">Anonymised aggregate, counts only.</p>
@@ -2060,7 +2060,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {!published && !stickyGone && !submitFlow && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-300 bg-white/95 backdrop-blur px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
-            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> submit{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched suppliers` : " to your matched suppliers"}. Competing bids, no sales calls.</span>
+            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> submit{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched vendors` : " to your matched vendors"}. Competing bids, no sales calls.</span>
             <span className="flex items-center gap-2">
               <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : "Submit"}</button>
               <button onClick={() => { setStickyGone(true); try { sessionStorage.setItem(`rfp_publish_bar_${project.id}`, "1"); } catch { /* ignore */ } }} aria-label="Hide publish bar" className="text-sm text-[var(--ink-500)] underline">Hide</button>

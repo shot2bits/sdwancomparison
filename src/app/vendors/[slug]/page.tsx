@@ -111,7 +111,7 @@ export default async function VendorPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "CreateAction",
     name: `Evaluate ${vendor.name} with a structured RFP`,
-    description: `Netify's free RFP builder pre-loads ${vendor.name} for an evidence-graded evaluation against its closest alternatives, sent to matched suppliers with responses side by side.`,
+    description: `Netify's free RFP builder pre-loads ${vendor.name} for an evidence-graded evaluation against its closest alternatives, sent to matched vendors and service providers with responses side by side.`,
     target: `${SITE_URL}/rfp-builder/new/?vendors=${vendor.slug}`,
   };
 
@@ -245,7 +245,7 @@ export default async function VendorPage({ params }: Props) {
             {" "}{vendor.name} and its closest competitors. Describe your requirement once at{" "}
             <a className="underline" href={continuation ? continuationUrl(continuation.sentence, continuation.pins) : "https://netify.co.uk/"}>netify.co.uk</a>{" "}
             and {vendor.name} arrives pinned for an evidence-graded evaluation: the market takes position
-            around your words, one signature publishes an anonymous notice free, and matched suppliers
+            around your words, one signature publishes an anonymous notice free, and matched vendors
             respond side by side with pricing private to you.
           </p>
           <p className="mt-2 text-sm text-[var(--ink-700)] max-w-3xl">
@@ -528,7 +528,7 @@ export default async function VendorPage({ params }: Props) {
               <h3 className="text-base font-medium mb-2">Claims that disagree</h3>
               <p className="text-sm text-[var(--ink-700)] mb-3 max-w-3xl">
                 Where two sources conflict, both are recorded rather than one being chosen
-                quietly. Confirm these directly with the supplier.
+                quietly. Confirm these directly with the vendor.
               </p>
               <ul className="space-y-3 text-sm text-[var(--ink-700)]">
                 {conflicts.map((c, i) => (

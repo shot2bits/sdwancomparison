@@ -134,7 +134,7 @@ export const MCP_SECURITY_TOOL_DEFINITIONS = [
 const CREATE_PROJECT_DEFINITION = {
   name: "create_security_project",
   description:
-    `Create a Netify Security Sourcing Project from a requirement: runs the ${RULEBOOK_VERSION} assessment server-side, attaches the verdict as the project's first immutable artefact, GENERATES THE RFP DOCUMENT from that verdict (question bank sections for required and recommended capabilities, plus a scoping-and-exclusions record carrying the against-interest statements and provenance), and returns the project with its builder link: the buyer lands in the existing RFP Builder with the document already populated. CONSENT REQUIRED: only call with the buyer's explicit agreement in this conversation; pass consent: true to confirm, and show the buyer the recorded consent wording (returned as consent_text). Creates an anonymous draft claimable when the buyer signs in; no emails are sent and no supplier is contacted until the buyer publishes. The returned manage_token is the creator's credential: hand it to the buyer with the builder link. TEST MODE for integration developers: pass test: true for a two-hour self-expiring project with no side effects.`,
+    `Create a Netify Security Sourcing Project from a requirement: runs the ${RULEBOOK_VERSION} assessment server-side, attaches the verdict as the project's first immutable artefact, GENERATES THE RFP DOCUMENT from that verdict (question bank sections for required and recommended capabilities, plus a scoping-and-exclusions record carrying the against-interest statements and provenance), and returns the project with its builder link: the buyer lands in the existing RFP Builder with the document already populated. CONSENT REQUIRED: only call with the buyer's explicit agreement in this conversation; pass consent: true to confirm, and show the buyer the recorded consent wording (returned as consent_text). Creates an anonymous draft claimable when the buyer signs in; no emails are sent and no vendor is contacted until the buyer publishes. The returned manage_token is the creator's credential: hand it to the buyer with the builder link. TEST MODE for integration developers: pass test: true for a two-hour self-expiring project with no side effects.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -307,7 +307,7 @@ export async function callSecurityTool(
         ...(project.test ? { test: true } : {}),
         note: project.test
           ? "Test project: self-expires in two hours, no emails, no side effects."
-          : "Anonymous draft created; the buyer claims it by signing in from the builder link. No supplier is contacted until the buyer publishes.",
+          : "Anonymous draft created; the buyer claims it by signing in from the builder link. No vendor is contacted until the buyer publishes.",
       };
     }
     case "generate_security_rfp": {

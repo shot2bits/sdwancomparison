@@ -36,7 +36,7 @@ function Row({ p }: { p: Proposal }) {
           {judgement ? "Netify View" : "fact"}
         </span>
         <span className="text-xs text-[var(--ink-600,#5b636e)]">
-          {p.proposed_by === "supplier" ? "proposed by the supplier" : "proposed by Netify"} ·{" "}
+          {p.proposed_by === "supplier" ? "proposed by the vendor" : "proposed by Netify"} ·{" "}
           {p.proposer_email} · {p.proposed_at.slice(0, 16).replace("T", " ")}
         </span>
       </div>
@@ -121,15 +121,16 @@ export default async function RecordQueuePage({
       <div className="max-w-3xl mx-auto px-6 py-16">
         <h1 className="mb-3">Record review queue</h1>
         <p className="text-[var(--ink-700)] mb-4">
-          Sign in with a Netify address to review proposals. Suppliers can propose corrections to
-          facts about their own company from their profile page; only Netify approves them.
+          Sign in with a Netify address to review proposals. Vendors and service providers can propose
+          corrections to facts about their own company from their profile page; only Netify approves
+          them.
         </p>
         <Link href="/account" className="underline">
           Sign in
         </Link>
         {" · "}
         <Link href="/vendors" className="underline">
-          Back to the supplier index
+          Back to the vendor index
         </Link>
       </div>
     );
@@ -155,10 +156,10 @@ export default async function RecordQueuePage({
           ? "Nothing waiting."
           : `${pending.length} proposal${pending.length === 1 ? "" : "s"} waiting.`}{" "}
         Your own edits are not here: a Netify edit applies on save and appears below under what was
-        decided, logged under your name. This queue is for supplier proposals. Approving one writes
-        the value to the overlay, and the next build folds it into the record, so
-        it reaches the supplier&apos;s profile and every generated page at once. Check any cited
-        sentence against the page before approving: a supplier proposal is only as good as its
+        decided, logged under your name. This queue is for proposals from vendors and service
+        providers. Approving one writes the value to the overlay, and the next build folds it into
+        the record, so it reaches that company&apos;s profile and every generated page at once. Check
+        any cited sentence against the page before approving: a proposal is only as good as its
         source, which is the standard we hold ourselves to.
       </p>
 

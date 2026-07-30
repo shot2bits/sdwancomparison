@@ -17,12 +17,12 @@ import {
 export const metadata: Metadata = {
   title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
   description:
-    "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched suppliers respond with structured answers and private pricing.",
+    "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched vendors respond with structured answers and private pricing.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/new/` },
   openGraph: {
     title: "Start a SASE or SD-WAN Project: Two-Minute Brief",
     description:
-      "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched suppliers respond with structured answers and private pricing.",
+      "Compare SASE and SD-WAN across 30+ vendors and service providers. One two-minute brief and your five best-matched vendors respond with structured answers and private pricing.",
     url: `${SITE_URL}/rfp-builder/new/`,
     type: "website",
     locale: "en_GB",
@@ -37,12 +37,12 @@ export default function NewProjectPage() {
     {
       "@context": "https://schema.org",
       "@type": "HowTo",
-      name: "How to get competing SASE and SD-WAN supplier bids on Netify",
+      name: "How to get competing SASE and SD-WAN vendor bids on Netify",
       totalTime: "PT2M",
       step: [
         { "@type": "HowToStep", position: 1, name: "Describe your project", text: "Pick what you are buying, then answer five quick questions on estate size, regions, current setup, timescale and optional compliance. Netify drafts the project title for you. No account is needed." },
         { "@type": "HowToStep", position: 2, name: "Review the generated RFP", text: "Netify assembles a complete RFP from its question bank (Methodology v2026.1). You review, trim and tailor the document." },
-        { "@type": "HowToStep", position: 3, name: "Publish to matched suppliers", text: "Publishing emails each matched vendor and managed service provider a private response link. One sign-in with a business email is required at this point." },
+        { "@type": "HowToStep", position: 3, name: "Publish to matched vendors and service providers", text: "Publishing emails each matched vendor and managed service provider a private response link. One sign-in with a business email is required at this point." },
         { "@type": "HowToStep", position: 4, name: "Compare the bids", text: "Structured responses come back scored against your questions. Pricing stays private to the buyer." },
       ],
     },
@@ -63,7 +63,7 @@ export default function NewProjectPage() {
         "@type": "CreateAction",
         name: "Create and publish a SASE, SSE or SD-WAN RFP",
         description:
-          "Answer six questions, the first a single click; Netify assembles a complete RFP from its question bank (Methodology v2026.1) and submits it to matched, verified suppliers. Drafting is open; publishing requires a business email sign-in. Publishing returns a Netify Market Report: an indicative price band, gap check and the RFP as Word and PDF.",
+          "Answer six questions, the first a single click; Netify assembles a complete RFP from its question bank (Methodology v2026.1) and submits it to matched, verified vendors and service providers. Drafting is open; publishing requires a business email sign-in. Publishing returns a Netify Market Report: an indicative price band, gap check and the RFP as Word and PDF.",
         target: {
           "@type": "EntryPoint",
           urlTemplate: `${SITE_URL}/rfp-builder/new/?scope={scope}&sector={sector}&vendors={vendors}`,
@@ -92,7 +92,7 @@ export default function NewProjectPage() {
                 Compare SASE &amp; SD-WAN across 30+ vendors and service providers
               </h1>
               <p id="page-subhead" className="mb-5 text-[15px] text-[var(--ink-700)]">
-                One two-minute brief and your five best-matched suppliers respond with structured
+                One two-minute brief and your five best-matched vendors respond with structured
                 answers and <strong>private pricing</strong>, side by side.<sup>1</sup>
               </p>
               <a href="#describe-wizard" className="inline-flex items-center rounded-lg bg-[#13294b] px-7 py-3 text-[15px] font-semibold text-white no-underline transition-colors hover:bg-[#1e3a5f]">
@@ -108,7 +108,7 @@ export default function NewProjectPage() {
               </p>
             </div>
             <p className="mt-4 text-[11px] text-[var(--ink-600,#555)]">
-              1. Up to five matched suppliers per submission, with more available after submitting.
+              1. Up to five matched vendors and service providers per submission, with more available after submitting.
               Free for buyers with no obligation to award. Netify marketplace dataset, July 2026.
               Vendors cannot pay to influence scores or matching.
             </p>
@@ -118,7 +118,7 @@ export default function NewProjectPage() {
               <span aria-hidden="true" className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">✓</span>
               <span>
                 <span className="block text-[13.5px] font-semibold leading-snug text-[#13294b]">No sales calls until you reply</span>
-                <span className="mt-0.5 block text-[12px] leading-snug text-[var(--ink-600,#555)]">Suppliers respond in the app; you choose who to speak with.</span>
+                <span className="mt-0.5 block text-[12px] leading-snug text-[var(--ink-600,#555)]">They respond in the app; you choose who to speak with.</span>
               </span>
             </div>
             <svg viewBox="0 0 340 210" aria-hidden="true" className="mt-auto w-full max-w-[340px] self-center">
@@ -155,7 +155,7 @@ export default function NewProjectPage() {
       <div className="mb-10 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-md border border-[var(--ink-200,#e5e5e5)] bg-white px-5 py-3 text-[13px]">
         <span className="font-bold text-[#13294b]">Jump to...</span>
         <a className="underline" href="https://netify.co.uk/insights/sase-cost-tco-global-enterprise/">How much does SASE and SD-WAN cost?</a>
-        <Link className="underline" href="/how-it-works/">How do supplier responses work?</Link>
+        <Link className="underline" href="/how-it-works/">How do vendor responses work?</Link>
         <Link className="underline" href="/rfp-builder/sample-rfp/">What does the RFP include?</Link>
         <Link className="underline" href="/connector/">Can my AI assistant do this for me?</Link>
       </div>
@@ -176,12 +176,12 @@ export default function NewProjectPage() {
           Netify assembles a complete RFP from its question bank (Methodology v2026.1), tailored to
           your scope, estate, regions and compliance answers. The final step is the agreement: your
           RFP is generated and submitted to your matched vendors and managed service providers, each
-          of whom receives a private response link; suppliers do not need an account to reply.
+          of whom receives a private response link; they do not need an account to reply.
           Responses come back structured against your questions and are scored side by side. Bid
           amounts stay private to you.
         </p>
         <p className="text-sm text-[var(--ink-700)]">
-          Nothing is shared with any supplier until you agree the submission at the final step, and
+          Nothing is shared with any vendor until you agree the submission at the final step, and
           no account is needed to build. One business-email sign-in confirms the submission, which
           also saves the RFP to your account. Prefer to review first? A generate-only option sits
           under the submit button.
@@ -192,7 +192,7 @@ export default function NewProjectPage() {
         <h2 className="text-xl font-semibold mb-2">For AI agents</h2>
         <p className="text-sm text-[var(--ink-700)]">
           Agents can run this flow programmatically: <code className="text-[13px]">GET /sase/api/rfp/match</code> returns
-          the live supplier match for a scope, region set and delivery model; <code className="text-[13px]">POST /sase/api/rfp</code> creates
+          the live vendor match for a scope, region set and delivery model; <code className="text-[13px]">POST /sase/api/rfp</code> creates
           a draft RFP from a title and buyer context and returns the manage token; the Netify MCP
           server at <code className="text-[13px]">/sase/api/mcp/</code> exposes the full toolset for drafting, validating and
           publishing on a buyer&apos;s behalf. The methodology behind the generated questions is served

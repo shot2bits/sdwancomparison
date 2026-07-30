@@ -21,7 +21,7 @@ export default function EngineFlowGuide({
   const stage: "publish" | "responses" = published ? "responses" : "publish";
   return (
     <div className="mb-6">
-      <div className="flex flex-wrap items-stretch gap-2" aria-label="Your route to supplier responses">
+      <div className="flex flex-wrap items-stretch gap-2" aria-label="Your route to vendor responses">
         <div className="min-w-[160px] flex-1 rounded-lg border border-emerald-300 bg-white p-2.5">
           <p className="m-0 text-xs font-semibold text-emerald-800">✓ 1 · Assess</p>
           <p className="m-0 mt-0.5 text-[11.5px] leading-snug text-[var(--ink-600,#555)]">Verdict attached from your answers</p>
@@ -35,7 +35,7 @@ export default function EngineFlowGuide({
               ? gapCount > 0
                 ? `Resolve ${gapCount} scoping gap${gapCount === 1 ? "" : "s"}, preview, then publish to the board`
                 : "Preview your requirement, then publish it to the board"
-              : `Live on the board, ${invitedCount} supplier${invitedCount === 1 ? "" : "s"} invited`}
+              : `Live on the board, ${invitedCount} vendor${invitedCount === 1 ? "" : "s"} invited`}
           </p>
         </div>
         <div className={`min-w-[160px] flex-1 rounded-lg border p-2.5 ${stage === "responses" ? "border-2 border-amber-400 bg-white" : "border-[var(--ink-200,#e5e5e5)] bg-white"}`}>
@@ -43,7 +43,7 @@ export default function EngineFlowGuide({
             3 · Compare responses{stage === "responses" ? " — you are here" : ""}
           </p>
           <p className={`m-0 mt-0.5 text-[11.5px] leading-snug ${stage === "responses" ? "text-[var(--ink-600,#555)]" : "text-[var(--ink-400,#9ca3af)]"}`}>
-            {stage === "responses" ? `${responseCount} response${responseCount === 1 ? "" : "s"} so far, pricing private to you` : "Suppliers reply here, pricing private to you"}
+            {stage === "responses" ? `${responseCount} response${responseCount === 1 ? "" : "s"} so far, pricing private to you` : "Vendors reply here, pricing private to you"}
           </p>
         </div>
       </div>

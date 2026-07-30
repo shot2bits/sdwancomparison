@@ -53,8 +53,8 @@ const COLS: { key: string; head: string; help: string }[] = [
   { key: "delivery_model", head: "Type", help: "Builds the platform, operates a managed service, or both" },
   { key: "underlay_ownership", head: "Underlay", help: "Owns the circuits and core routing, or rides someone else's" },
   { key: "sse_layer_ownership", head: "SSE layer", help: "Built its own security service edge stack, or uses another vendor's" },
-  { key: "f21_private_global_backbone", head: "Backbone", help: "Traffic between regions rides a backbone the supplier owns or controls" },
-  { key: "pop_count", head: "PoPs", help: "Points of presence the supplier publishes" },
+  { key: "f21_private_global_backbone", head: "Backbone", help: "Traffic between regions rides a backbone the vendor owns or controls" },
+  { key: "pop_count", head: "PoPs", help: "Points of presence the vendor publishes" },
   { key: "f01_fully_managed_service", head: "Fully managed", help: "Designs, deploys, monitors, changes and reports end to end" },
   { key: "regulatory_documentation", head: "Compliance docs", help: "Named framework documentation found, not just a general assurance" },
   { key: "sla_availability_pct", head: "Published SLA", help: "Availability percentage stated publicly" },
@@ -91,7 +91,7 @@ export default function SourcedTable({
       <h2 className="mb-3">{caption}</h2>
       {intro && <p className="text-sm text-[var(--ink-700)] mb-4 max-w-3xl">{intro}</p>}
       <p className="text-sm text-[var(--ink-600,#5b636e)] mb-4 max-w-3xl">
-        {rows.length} suppliers. Each value below is graded from the supplier&apos;s own published
+        {rows.length} vendors. Each value below is graded from the vendor&apos;s own published
         material or an independently accountable record, with a sentence quoted from that source
         and confirmed present on the page. {sources} sources behind this table. Verified {verified}.
         Where evidence was not found a cell reads Not published rather than being inferred.
@@ -99,7 +99,7 @@ export default function SourcedTable({
       <div className="overflow-x-auto border border-[var(--ink-200,#e8ebef)] rounded-lg">
         <table className="w-full text-sm border-collapse min-w-[880px]">
           <caption className="sr-only">
-            {caption}. {rows.length} suppliers compared on{" "}
+            {caption}. {rows.length} vendors compared on{" "}
             {COLS.map((c) => c.head.toLowerCase()).join(", ")}. Verified {verified}.
           </caption>
           <thead>
@@ -110,7 +110,7 @@ export default function SourcedTable({
                 </th>
               )}
               <th scope="col" className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)] whitespace-nowrap">
-                Supplier
+                Vendor
               </th>
               {COLS.map((c) => (
                 <th
@@ -122,7 +122,7 @@ export default function SourcedTable({
                   {c.head}
                 </th>
               ))}
-              <th scope="col" title="Named sources in this supplier's evidence register" className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)]">
+              <th scope="col" title="Named sources in this vendor's evidence register" className="text-left px-3.5 py-2.5 font-semibold text-xs text-[var(--ink-700)]">
                 Sources
               </th>
             </tr>
@@ -162,7 +162,7 @@ export default function SourcedTable({
         </table>
       </div>
       <p className="text-sm text-[var(--ink-600,#5b636e)] mt-3 max-w-3xl">
-        Full sources for each supplier, including the sources we found and rejected and any claims
+        Full sources for each vendor, including the sources we found and rejected and any claims
         that disagree, are on its{" "}
         <Link href="/vendors" className="underline">
           profile page

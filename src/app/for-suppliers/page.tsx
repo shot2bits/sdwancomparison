@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 const VALUE = [
   ["Real demand, not leads", "Opportunities are posted by buyers describing a live need, from circuits to full managed SASE."],
   ["Compete on your terms", "Submit a competitive bid in an auction or an indicative quote in a live room. Your pricing stays private to the buyer."],
-  ["Verified, low-noise", "Buyers and suppliers sign in with a domain-verified business email, so you engage with real organisations."],
+  ["Verified, low-noise", "Buyers, vendors and service providers sign in with a domain-verified business email, so you engage with real organisations."],
   ["Agent-ready", "Your AI agent can read the board and bid over the marketplace MCP, no portal clicking required."],
 ];
 
@@ -31,7 +31,7 @@ const STEPS = [
 
 export default async function ForSuppliersPage() {
   const opps = (await listPublicOpportunities()).slice(0, 8);
-  const schemas = [getOrganizationSchema(), getBreadcrumbSchema("For suppliers", "/for-suppliers"), getSpeakableSchema("/for-suppliers")];
+  const schemas = [getOrganizationSchema(), getBreadcrumbSchema("For vendors and providers", "/for-suppliers"), getSpeakableSchema("/for-suppliers")];
   const card = "rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5";
 
   return (
@@ -68,8 +68,8 @@ export default async function ForSuppliersPage() {
             <p className="font-medium mb-1">How verification works</p>
             <ul className="list-disc space-y-1 pl-5">
               <li><strong>Your organisation is already listed</strong> (graded vendor or provider): your work-email domain matches the profile and the sign-in link arrives straight away.</li>
-              <li><strong>Domain not recognised yet</strong> (new provider, MSP or a different domain): your request is queued for the Netify team. Once approved — usually within one working day — your sign-in link is emailed and you can bid on any open opportunity.</li>
-              <li><strong>No listed profile at all?</strong> The same queue covers you: the Netify team reviews new suppliers and links your domain to a new or claimed profile. You can also email <a className="underline" href="mailto:support@netify.com">support@netify.com</a> with your company name and website to speed it up.</li>
+              <li><strong>Domain not recognised yet</strong> (new provider, MSP or a different domain): your request is queued for the Netify team. Once approved, usually within one working day, your sign-in link is emailed and you can bid on any open opportunity.</li>
+              <li><strong>No listed profile at all?</strong> The same queue covers you: the Netify team reviews new vendors and service providers and links your domain to a new or claimed profile. You can also email <a className="underline" href="mailto:support@netify.com">support@netify.com</a> with your company name and website to speed it up.</li>
             </ul>
           </div>
           <p className="text-sm text-[var(--ink-600)] mt-4">Prefer agent-to-agent? Your AI agent can read open opportunities with the <code>list_opportunities</code> tool and bid with <code>opportunity_respond</code> over the marketplace MCP at <a className="underline" href="/sase/api/mcp/">/sase/api/mcp/</a>.</p>

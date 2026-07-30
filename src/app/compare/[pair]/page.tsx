@@ -164,7 +164,7 @@ export default async function ComparePage({ params }: Props) {
 
       {/* Who owns it and who runs it. The 40-feature grid below answers what
           the platforms do; this answers who actually owns the network and the
-          security stack, which is what separates two suppliers whose feature
+          security stack, which is what separates two vendors whose feature
           rows look identical. Added 29 July 2026. */}
       <SourcedTable
         slugs={[a, b]}

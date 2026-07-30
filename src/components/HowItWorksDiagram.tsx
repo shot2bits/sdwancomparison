@@ -28,7 +28,7 @@ export default function HowItWorksDiagram() {
         <desc id="hiw-desc">
           Four steps: describe your project in about two minutes with no account, Netify builds the
           complete RFP from its question bank for you to review, publishing emails each matched
-          supplier a private response link, and structured bids come back scored side by side with
+          vendor a private response link, and structured bids come back scored side by side with
           pricing private to you.
         </desc>
         <defs>
@@ -68,7 +68,7 @@ export default function HowItWorksDiagram() {
         <circle cx="410" cy="32" r="12" fill="#f59e0b" />
         <text x="410" y="36.5" textAnchor="middle" fontSize="12.5" fontWeight="700" fill="#09090b">3</text>
         <text x="430" y="30" {...title}>Publish to matched</text>
-        <text x="430" y="46" {...title}>suppliers</text>
+        <text x="430" y="46" {...title}>vendors</text>
         <text x="400" y="72" {...body}>Each matched provider</text>
         <text x="400" y="87" {...body}>gets a private response</text>
         <text x="400" y="102" {...body}>link by email.</text>
@@ -91,10 +91,10 @@ export default function HowItWorksDiagram() {
         <rect x="8" y="170" width="744" height="66" rx="6" fill="var(--ink-100, #f4f4f5)" />
         <text x="380" y="192" textAnchor="middle" {...title}>Why this is the simple route to bids</text>
         <text x="380" y="210" textAnchor="middle" {...body}>One brief instead of five vendor calls · Free for buyers · Nothing is shared until you publish</text>
-        <text x="380" y="226" textAnchor="middle" {...body}>Suppliers respond without creating an account</text>
+        <text x="380" y="226" textAnchor="middle" {...body}>Vendors respond without creating an account</text>
       </svg>
       <figcaption className="sr-only">
-        The Netify buying flow: describe your project, Netify builds the RFP, publish to matched suppliers, compare competing bids.
+        The Netify buying flow: describe your project, Netify builds the RFP, publish to matched vendors, compare competing bids.
       </figcaption>
     </figure>
   );

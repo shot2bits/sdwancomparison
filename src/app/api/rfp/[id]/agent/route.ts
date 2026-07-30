@@ -106,12 +106,12 @@ function tools(): Anthropic.Tool[] {
     },
     {
       name: "engage_supplier",
-      description: "Invite a graded vendor from the marketplace to engage with this RFP, with a short drafted intro message. Use after suggesting vendors when the buyer wants to connect with one. The supplier can then reply, share contact details or propose a demo.",
+      description: "Invite a graded vendor from the marketplace to engage with this RFP, with a short drafted intro message. Use after suggesting vendors when the buyer wants to connect with one. The vendor can then reply, share contact details or propose a demo.",
       input_schema: cast({
         type: "object",
         properties: {
           vendor_slug: { type: "string", description: "Marketplace vendor slug, e.g. cato-networks." },
-          intro: { type: "string", description: "A short, specific opening message to the supplier referencing the buyer's needs." },
+          intro: { type: "string", description: "A short, specific opening message to the vendor referencing the buyer's needs." },
         },
         required: ["vendor_slug", "intro"],
       }),
@@ -123,7 +123,7 @@ function tools(): Anthropic.Tool[] {
     },
     {
       name: "answer_supplier_question",
-      description: "Propose and record a buyer answer to an open supplier clarification thread.",
+      description: "Propose and record a buyer answer to an open vendor clarification thread.",
       input_schema: cast({
         type: "object",
         properties: { thread_id: { type: "string" }, answer: { type: "string" } },
@@ -155,7 +155,7 @@ function tools(): Anthropic.Tool[] {
 const CATEGORIES = buildMethodology().categories;
 
 function systemPrompt(project: ProjectDetails, threadsSummary: string, memorySummary: string, signedIn: boolean): string {
-  return `You are the Netify RFP advisor, an agentic assistant that guides a buyer from a vague business need to a market-ready SASE and SD-WAN RFP, and helps manage supplier clarifications. You work on RFP "${project.title}" (id ${project.id}, status ${project.status}).
+  return `You are the Netify RFP advisor, an agentic assistant that guides a buyer from a vague business need to a market-ready SASE and SD-WAN RFP, and helps manage vendor clarifications. You work on RFP "${project.title}" (id ${project.id}, status ${project.status}).
 
 Buyer memory ${signedIn ? "(signed in, persistent across their RFPs)" : "(buyer not signed in, so memory is unavailable this session)"}: ${memorySummary}
 ${signedIn ? "Use this memory to avoid re-asking what you already know. When you learn a durable preference (a vendor to favour or avoid, a compliance rule always in scope, region, operating model, risk tolerance, budget pattern), call remember so it persists. If remember reports a conflict with an existing saved value, do not overwrite it silently: tell the buyer what changed and ask which is correct." : "Encourage the buyer to sign in if they want their preferences remembered across projects, but never gate RFP building on it."}
@@ -166,7 +166,7 @@ Operating rules:
 3. Always cite. When you add or justify a question, state the reason and the methodology reference, for example: "Adding the TLS inspection question (f31_secure_web_gateway) because you flagged healthcare compliance, per SASE Methodology v${METHODOLOGY_VERSION}."
 4. Dynamic state. You have full tool access to this RFP. When the buyer asks to change focus ("make it more cloud-security focused"), call set_section_focus or add_question directly rather than only describing the change.
 5. Conversational flow. No submit buttons. When a section looks complete, offer the next step: "Security looks set. Shall we move to Commercials?"
-6. Clarification loop. For supplier questions, categorise them and propose buyer answers via answer_supplier_question.
+6. Clarification loop. For vendor questions, categorise them and propose buyer answers via answer_supplier_question.
 
 Methodology categories: ${CATEGORIES.join("; ")}.
 
@@ -178,7 +178,7 @@ Efficiency. Work in as few steps as possible. When the buyer already gives enoug
 
 Consistency. The stored buyer context is the source of truth shown throughout the app. Whenever you set or change a title, or the conversation reveals the sector, scope or regions, the same turn MUST also call update_buyer_context so the stored fields match what the title and conversation say. A title that says manufacturing while the stored sector says healthcare is a defect; never leave them out of step.
 
-Keep replies concise and in UK English. Never use em or en dashes; use commas or full stops. No marketing filler. Format for a chat window: short paragraphs of one to three sentences separated by blank lines, and a hyphen list when you enumerate more than two items. Never send one long unbroken block of text. After using tools, tell the buyer what you changed and why, then offer the next step.`;
+Keep replies concise and in UK English. Never use em or en dashes; use commas or full stops. Never write "supplier" or "supply side": say "vendors and service providers", or "vendors" where the context is clear. No marketing filler. Format for a chat window: short paragraphs of one to three sentences separated by blank lines, and a hyphen list when you enumerate more than two items. Never send one long unbroken block of text. After using tools, tell the buyer what you changed and why, then offer the next step.`;
 }
 
 export async function POST(req: Request, ctx: Ctx) {
@@ -216,8 +216,8 @@ export async function POST(req: Request, ctx: Ctx) {
   const threads = await listThreads(id);
   const openThreads = threads.filter((t) => t.status === "open");
   const threadsSummary = openThreads.length
-    ? `Open supplier questions: ${openThreads.map((t) => `[${t.id}] ${t.vendor} (${t.category}): ${t.question}`).join(" | ")}.`
-    : "No open supplier questions.";
+    ? `Open vendor questions: ${openThreads.map((t) => `[${t.id}] ${t.vendor} (${t.category}): ${t.question}`).join(" | ")}.`
+    : "No open vendor questions.";
 
   // Buyer identity drives persistent memory. Reading and building stay open;
   // memory simply activates when the buyer is signed in.
