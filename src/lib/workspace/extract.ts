@@ -335,7 +335,14 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   // (28 Jul 2026: "looking to move to SASE" reached the ledger only via
   // the model layer; the rail's own verbs never matched). The negation
   // window already keeps "moving away" and "moved off" out.
-  const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|move to|moving to|migrat\\w+ to|replace \\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
+  // "replacing X with Y" joined the seeking verbs on the P1 rail check
+  // (30 Jul 2026): only the bare infinitive "replace X with" was listed, so
+  // "we are replacing MPLS with fully managed SASE" reached the ledger with
+  // its sector, sites, users and regions and no scope at all, which is one
+  // of the core five a notice cannot publish without (R7). Present
+  // participle only: "replaced X with Y" is an estate they already have,
+  // not a purchase they are making, and must keep reading that way.
+  const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|move to|moving to|migrat\\w+ to|replac(?:e|ing) \\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
   const buyRe = (term: string) => new RegExp(`${seek}[^.!?]{0,60}\\b${term}|\\b${term}\\b[^.!?]{0,30}(?:rollout|roll-out|project|procurement|tender|rfp)`);
   if (hit(/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/)) {
     say("procurement.buying", "managed_security", "managed security");

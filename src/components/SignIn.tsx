@@ -98,11 +98,12 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
       )}
       {!sent && codeOpen && <CodeEntry defaultEmail={email.includes("@") ? email : ""} onVerified={verified} />}
       <p className="text-xs text-[var(--ink-500)] mt-2">We only email you about your RFPs, opportunities and RFP Builder and Marketplace features and benefits. No third-party marketing, and you can opt out at any time.</p>
-      {role === "buyer" && (
-        <p className="text-xs text-[var(--ink-500)] mt-1">
-          Netify is the SASE and SD-WAN procurement marketplace for UK and North American businesses. Looking for Netlify website hosting (netlify.com) or Netify network intelligence (netify.ai)? Those are separate companies.
-        </p>
-      )}
+      {/* The Netlify and netify.ai disambiguation used to stand here (R9,
+          Robert's ruling 30 Jul 2026: it is gone from sign-in). Somebody
+          reaching a sign-in box has already decided who we are; the
+          sentence only planted a doubt at the worst moment. The guard now
+          lives at the desk, where it fires quietly and only for a person
+          whose own words say they came for the other company. */}
     </div>
   );
 }

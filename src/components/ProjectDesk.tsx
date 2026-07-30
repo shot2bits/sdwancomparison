@@ -72,16 +72,20 @@ import { diagramModel } from "@/lib/workspace/diagram";
 import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
-import JourneyStrip from "@/components/JourneyStrip";
+import JourneyRail, { type RailStep, type RailStepId } from "@/components/JourneyRail";
 import SignIn from "@/components/SignIn";
-import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
+import { fireNetifyEvent } from "@/components/NetifyEvents";
 
 /* ------------------------------------------------------------------ */
 /* Constants                                                           */
 /* ------------------------------------------------------------------ */
 
-const DRAFT_KEY = "netify_workspace_draft_v1";
-const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+/* R2, Robert's ruling 30 Jul 2026: NO PERSISTENCE. The draft key, the
+ * seven-day restore, the save-lite prompt and the claim-at-sign-in are
+ * all gone. A project is one sitting, from the first sentence to the
+ * publish, and the refresh risk is accepted deliberately: a saved draft
+ * that nobody returns to was 447 drafts in ninety days and one publish.
+ * Nothing on this desk writes to localStorage. */
 
 const WORKSPACE_AGREEMENT_TEXT =
   "Publish this requirement: Netify lists an anonymous notice visible to signed-in suppliers and invites the best-fit evaluated suppliers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
@@ -102,6 +106,22 @@ const GOAL_CHIPS: Array<{ label: string; text: string }> = [
   { label: "PCI DSS compliance", text: "needing a PCI DSS compliant network" },
   { label: "Zero trust SASE", text: "consolidating security into zero trust SASE" },
 ];
+
+/* The wrong-company guard (R9, Robert's ruling 30 Jul 2026). The
+ * disambiguation sentence used to stand in the sign-in box, where it
+ * planted a doubt in somebody who had already decided who we are. It
+ * belongs at the desk instead, and only for a person whose own words say
+ * they came for one of the other companies. Deliberately narrow: every
+ * pattern here is a phrase a SASE or SD-WAN buyer would not write. */
+const OTHER_NETIFY = [
+  /netlify/i,
+  /netify\.ai/i,
+  /\bjamstack\b/i,
+  /\bstatic site\b/i,
+  /\bweb(site)? hosting\b/i,
+  /\bdeploy (my|our) (site|website)\b/i,
+];
+const looksLikeAnotherNetify = (text: string) => OTHER_NETIFY.some((r) => r.test(text));
 
 /** The blocks compose one editable sentence; the buyer owns every word. */
 function composeIntent(sector: string | null, goals: string[]): string {
@@ -226,12 +246,16 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   /* The constellation's reading key (Robert's R3 on Harry's Section 1 ask,
    * 28 Jul 2026): a quiet toggle, granular detail, no marketing modal. */
   const [constellationKey, setConstellationKey] = useState(false);
-  const [restored, setRestored] = useState(false);
   /** True once the mount effect has decided between draft, link and the
    *  pristine example, so pre-start controls never flash before a
    *  restore (Robert, 23 Jul: the button flashed then vanished). */
   const [booted, setBooted] = useState(false);
   const [testMode, setTestMode] = useState(false);
+  /* The three ruled steps (R5, 30 Jul 2026): Requirement, Who fits,
+   * Generate and publish. Publish is the only exit. Step state is
+   * session-local like everything else on this desk now (R2). */
+  const [step, setStep] = useState<RailStepId>(1);
+  const [wrongCompany, setWrongCompany] = useState(false);
   const [flash, setFlash] = useState<Set<string>>(new Set());
   /* The applied-changes strip (F2, 29 Jul 2026, adopted from the mockup
    * review Robert approved): after a machine pass the desk names what it
@@ -265,8 +289,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [weights, setWeights] = useState<string[]>([]);
   const [editingTitle, setEditingTitle] = useState(false);
 
-  const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
-  const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
   const [signedIn, setSignedIn] = useState(false);
   // Who the signature will publish as (29 Jul 2026, Robert's mockup
   // review: the buyer sees their verification state at the decision, not
@@ -334,7 +356,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
   /* ---- preview_rendered (v7 funnel, step two): the desk first holds
    * structure. Fires once per mount, whatever route started it: typing,
-   * a chip, a paste, a ?q= arrival or a restored draft. ---- */
+   * a chip, a paste or a ?q= arrival. ---- */
   useEffect(() => {
     if (!started || previewFired.current) return;
     previewFired.current = true;
@@ -343,7 +365,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const brief = useMemo(() => briefModel({ facts, verdict }), [facts, verdict]);
   const diagram = useMemo(() => diagramModel(requirement, verdict, buying), [requirement, verdict, buying]);
 
-  /* ---- Arrival: market, params, restored draft, session ---- */
+  /* ---- Arrival: market, params, session ---- */
   useEffect(() => {
     fetch("/sase/api/workspace/market")
       .then((r) => (r.ok ? r.json() : null))
@@ -377,45 +399,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     const q = p.get("q");
     /* The Continuation contract (DEF wave one, 23 Jul): ?vendors= names
        suppliers that arrive pinned into invitations alongside ?q=. Applied
-       only on a ?q= arrival so a restored draft's own pins are never
-       overwritten by a stray parameter. Sanitised, capped at five. */
+       only on a ?q= arrival, so a stray parameter can never overwrite
+       pins the buyer chose themselves. Sanitised, capped at five. */
     const vendorsParam = (p.get("vendors") ?? "")
       .split(",")
       .map((s) => s.trim().toLowerCase())
       .filter((s) => /^[a-z0-9-]{2,60}$/.test(s))
       .slice(0, 5);
-    let base: WorkspaceFact[] = [];
-    if (!q) {
-      try {
-        const raw = window.localStorage.getItem(DRAFT_KEY);
-        if (raw) {
-          const saved = JSON.parse(raw) as {
-            facts?: WorkspaceFact[]; added?: string[]; removed?: string[];
-            noted?: NotedItem[]; receipts?: Receipt[]; moveLog?: MoveLogEntry[]; dismissedQ?: string[]; declinedSug?: string[]; customTitle?: string; weights?: string[];
-            passLog?: Array<{ at: string; text: string; changes: number; undone?: boolean }>; ts?: number;
-          };
-          if (saved.ts && Date.now() - saved.ts < DRAFT_MAX_AGE_MS && ((saved.facts?.length ?? 0) > 0 || (saved.noted?.length ?? 0) > 0)) {
-            base = saved.facts ?? [];
-            setAdded(saved.added ?? []);
-            setRemoved(saved.removed ?? []);
-            setNoted(saved.noted ?? []);
-            setReceipts(saved.receipts ?? []);
-            setMoveLog(saved.moveLog ?? []);
-            setDismissedQ(saved.dismissedQ ?? []);
-            setDeclinedSug(saved.declinedSug ?? []);
-            setCustomTitle(saved.customTitle ?? "");
-            setWeights(saved.weights ?? []);
-            setPassLog(saved.passLog ?? []);
-            receiptId.current = Math.max(0, ...(saved.receipts ?? []).map((r) => r.id));
-            setRestored(true);
-          }
-        }
-      } catch { /* a broken draft never blocks the desk */ }
-    }
-    if (base.length) {
-      factsRef.current = base;
-      setFacts(base);
-    }
+    /* R2: nothing is restored. The desk starts empty every time except
+       for what the link itself carries. */
     if (seedFacts.length) applyMerge(seedFacts, "link");
     if (q) {
       setInput(q);
@@ -456,19 +448,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     return () => { cancelled = true; };
   }, []);
 
-  /* ---- Persist the draft ---- */
-  useEffect(() => {
-    if (!started || published) return;
-    try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, passLog, ts: Date.now() }));
-    } catch { /* best effort */ }
-  }, [facts, added, removed, noted, receipts, moveLog, dismissedQ, declinedSug, customTitle, weights, passLog, started, published]);
-
   /* ---- The extraction cycle (the same organ), now with the receipt ---- */
   const runCycle = useCallback(
     async (text: string, opts: { fromEnter?: boolean; fromLink?: boolean } = {}) => {
       const trimmed = text.trim();
       if (trimmed.length < 3 || busy) return;
+      if (looksLikeAnotherNetify(trimmed)) setWrongCompany(true);
       lastRunText.current = trimmed;
       setBusy(true);
       setCycleError(null);
@@ -938,29 +923,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       })
       .catch(() => {});
   }, []);
-  useEffect(() => {
-    if (saveLite !== "hidden" || signedIn || published || created) return;
-    if (started && (Boolean(verdict) || live.length >= 3)) {
-      // Once per session (v7): a dismissed prompt that returns on the next
-      // fact reads as nagging; the second sight of it costs more trust
-      // than the email is worth.
-      try {
-        if (window.sessionStorage.getItem("netify_savelite_once")) return;
-        window.sessionStorage.setItem("netify_savelite_once", "1");
-      } catch { /* storage denied: show it, never crash */ }
-      setSaveLite("shown");
-      ev("workspace_save_lite_shown", { facts: live.length });
-    }
-  }, [saveLite, signedIn, published, created, verdict, live.length, started]);
-  // And the other half of Harry's catch: a prompt already on screen must
-  // stand down the moment the person signs in, creates or publishes.
-  // Asking someone to keep a position they have just signed for is the
-  // single most confusing moment testing found.
-  useEffect(() => {
-    if ((saveLite === "shown" || saveLite === "sent") && (signedIn || published || created)) {
-      setSaveLite("dismissed");
-    }
-  }, [saveLite, signedIn, published, created]);
+  /* The save-lite prompt stood here and is gone with R2. It asked for an
+     email in the middle of the work, which is the "give us your address
+     and we will give you the value" pitch Robert banned outright. The
+     work email is now the signature inside the publish act and nowhere
+     else. */
 
   /* ---- Corrections: strike, answer, click ---- */
   const toggleFact = useCallback(
@@ -1038,11 +1005,57 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     ev("workspace_pass_undone", { changes: u.changes.length });
   };
 
+  /* ---- The rail's sub-steps: the core five (R7) and nothing else.
+          Every tick is a fact standing in the ledger, so the percentage
+          the rail prints can only move when the requirement moves. ---- */
+  const coreFive = useMemo(() => {
+    const stands = (path: string) => facts.some((f) => !f.struck && f.path === path);
+    return {
+      sector: stands("organisation.sector"),
+      sites: stands("estate.sites"),
+      regions: stands("organisation.regions"),
+      scope: stands("procurement.buying"),
+      timeline: stands("constraints.timeline"),
+    };
+  }, [facts]);
+  /** What a notice still needs, in the buyer's language, for the footers. */
+  const missingCore = useMemo(() => {
+    const out: string[] = [];
+    if (!coreFive.sector) out.push("your sector");
+    if (!coreFive.sites) out.push("how many sites");
+    if (!coreFive.regions) out.push("which regions");
+    if (!coreFive.scope) out.push("what you are buying");
+    if (!coreFive.timeline) out.push("your timeline");
+    return out;
+  }, [coreFive]);
+
   /* ---- Fit sets, pins, readiness ---- */
   const fitSlugs = (fit?.mode === "graded" ? fit.suppliers.map((s) => s.slug) : []).filter((s) => !removed.includes(s));
   const shownFit = new Set([...fitSlugs, ...added].slice(0, 8));
   const pins = [...new Set([...added, ...fitSlugs])].slice(0, 5);
   const unansweredGaps = brief.openGaps;
+
+  /* The suppliers your requirement reaches, A to Z (R1b): named, with
+   * the date each record was graded, and nothing that implies an order.
+   * A pinned supplier the fit set never reached still belongs here,
+   * because the buyer put it there. */
+  const clusterRows = useMemo(() => {
+    const byMarket = new Map((market?.vendors ?? []).map((v) => [v.slug, v]));
+    const rows = new Map<string, { slug: string; name: string; category: string; graded: string; pinned: boolean }>();
+    for (const sup of fit?.mode === "graded" ? fit.suppliers : []) {
+      if (removed.includes(sup.slug)) continue;
+      rows.set(sup.slug, {
+        slug: sup.slug, name: sup.name, category: sup.category,
+        graded: sup.last_verified, pinned: added.includes(sup.slug),
+      });
+    }
+    for (const slug of added) {
+      if (rows.has(slug) || removed.includes(slug)) continue;
+      const v = byMarket.get(slug);
+      if (v) rows.set(slug, { slug, name: v.name, category: v.category, graded: v.last_verified, pinned: true });
+    }
+    return [...rows.values()].sort((a, b) => a.name.localeCompare(b.name, "en"));
+  }, [fit, market, added, removed]);
 
   /* ---- The instrument ladder (the consolidation, wave two): the
           position's covered areas summon their question set from the
@@ -1096,6 +1109,49 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         : !securityScope && !buying
           ? "Choose what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
           : "It unlocks when the position holds enough truth to stand on.";
+
+  /* ---- The rail (P1): three steps, seven ticks, no formula. Sub-steps
+          come straight from coreFive; steps two and three each hold the
+          one real thing that can happen there. ---- */
+  const railSteps: RailStep[] = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "Your requirement",
+        detail: "One sentence starts it. The details below fill themselves from your words, and you can correct any of them.",
+        checks: [
+          { id: "sentence", label: "Your project, in your own words", done: facts.length > 0 },
+          { id: "sector", label: "Sector", done: coreFive.sector, goesTo: "sec-organisation" },
+          { id: "sites", label: "Sites and regions", done: coreFive.sites && coreFive.regions, goesTo: "sec-organisation" },
+          { id: "scope", label: "Scope", done: coreFive.scope, goesTo: "sec-objectives" },
+          { id: "timeline", label: "Timeline", done: coreFive.timeline, goesTo: "sec-commercial" },
+        ],
+      },
+      {
+        id: 2,
+        title: "Who fits",
+        detail: "The evaluated suppliers your requirement reaches, named, with the date each record was graded.",
+        checks: [{ id: "matched", label: "Suppliers matched to your requirement", done: clusterRows.length > 0 }],
+      },
+      {
+        id: 3,
+        title: "Generate and publish",
+        detail: "Publishing generates the shortlist, the price band and your document, and posts your notice anonymously.",
+        checks: [{ id: "published", label: "Published", done: Boolean(published) }],
+      },
+    ],
+    [facts.length, coreFive, clusterRows.length, published],
+  );
+  const goToStep = useCallback((id: RailStepId) => {
+    setStep(id);
+    ev("journey_step", { to: id });
+    try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch { /* scrolling is a courtesy */ }
+  }, []);
+  /* A publish is the exit, so the desk shows the step the result lives on
+   * whichever step the buyer signed from. Derived, not pushed: an effect
+   * that set state after publish would re-render for no reason and read
+   * as two sources of truth for one fact. */
+  const shownStep: RailStepId = published ? 3 : step;
 
   /* ---- The artefact, with the notes appended honestly ---- */
   const artefactText = useCallback(() => {
@@ -1249,7 +1305,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         crewLog(`Registrar: signature recorded, verbatim · notice live on the board`, "em");
         crewLog(`Scout: ${invited.length} supplier${invited.length === 1 ? "" : "s"} invited · responses arrive against your position`);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
-        try { window.localStorage.removeItem(DRAFT_KEY); } catch { /* done */ }
       } else if (data.auth_required) {
         setNeedAuth(true);
         ev("workspace_auth_required", { scope: buying ?? "security" });
@@ -1264,7 +1319,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   }
 
   const startAfresh = () => {
-    try { window.localStorage.removeItem(DRAFT_KEY); } catch { /* fine */ }
+    /* Nothing to clear (R2): a reload IS a fresh desk. */
     window.location.assign(window.location.pathname);
   };
 
@@ -1420,7 +1475,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   /* Micro-reactivity (the conversion pass, 23 Jul): when a section first
    * turns live (example ink giving way to stated or inferred), one amber
    * ring breathes out around it, once. The first computation only records
-   * the baseline, so a restored draft never fires a page of rings. */
+   * the baseline, so an arrival never fires a page of rings. */
   const prevLiveRef = useRef<Set<string> | null>(null);
   const [liveRing, setLiveRing] = useState<Set<string>>(() => new Set());
   const ringTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -1722,6 +1777,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           )}
           {voiceError && !busy && voiceState === "idle" && <span aria-live="polite" className="text-zinc-500">{voiceError}</span>}
           {pasteSummary && !busy && <span aria-live="polite" className="text-zinc-700">{pasteSummary}</span>}
+          {/* The wrong-company guard (R9): quiet, once, and only for words
+              that say the person came for Netlify or netify.ai. */}
+          {wrongCompany && (
+            <span aria-live="polite" className="text-zinc-500">
+              Netify here is the SASE and SD-WAN procurement marketplace. Netlify website hosting (netlify.com) and
+              Netify network intelligence (netify.ai) are separate companies.{" "}
+              <button type="button" onClick={() => setWrongCompany(false)} className="underline hover:text-zinc-900">Got it</button>
+            </span>
+          )}
           {!busy && started && engineUsed === "deterministic_fallback" && <span>Read without the model this turn; everything still works.</span>}
           {cycleError && <span className="text-red-600">{cycleError}</span>}
           {booted && !started && !busy && (
@@ -1785,12 +1849,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 ))}
               </span>
             </>
-          )}
-          {restored && !published && (
-            <span>
-              Draft restored.{" "}
-              <button type="button" onClick={startAfresh} className="underline hover:text-zinc-900">Start afresh</button>
-            </span>
           )}
           {testMode && <span className="font-medium text-amber-700">Test mode: signing creates a self-expiring test position and never touches the live board.</span>}
         </div>
@@ -1908,288 +1966,18 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           face (slice two) reshapes them. */}
       {(started || Boolean(published)) && (<>
 
-      {/* ---- One journey strip (Robert's R1 ruling on Harry's Section 1
-              test, 28 Jul 2026): the ruled five stations replace the old
-              procurement-spine numbering, the current station follows the
-              project's real state, and the spine's earned live sublines
-              ride under their stations. Nothing renders that is not
-              earned: counts come from the live market feed and the
-              publish response, never a promise. ---- */}
-      <JourneyStrip
-        current={published ? 5 : 2}
-        notes={{
-          1: started && live.length > 0 ? <>{published ? "SoR live" : "SoR forming"} · {live.length} claim{live.length === 1 ? "" : "s"} held</> : undefined,
-          3: market ? <>{market.counts.vendors} suppliers evaluated against this position</> : undefined,
-          4: published
-            ? <>live on the board{published.invited.length > 0 ? ` · ${published.invited.length} supplier${published.invited.length === 1 ? "" : "s"} invited` : " · anonymous"}</>
-            : <>anonymous to {market ? `${market.counts.vendors}${market.counts.vendors >= 30 ? "+" : ""}` : "30+"} suppliers</>,
-          5: published && created?.id
-            ? <a className="underline hover:text-amber-800" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>responses land in your record</a>
-            : undefined,
-        }}
-      />
-
-      {/* ---- The listing in formation (Robert, 23 Jul: the opportunity
-              listing returns to the top): the notice as the market will see
-              it, updating with every sentence. Example-labelled until the
-              buyer starts; anonymous always; never publishes by itself. ---- */}
-      <div className="mx-auto mt-5 w-[min(760px,100%)]">
-        <section aria-label="Your opportunity, as the market will see it" className={`rounded-xl border p-5 ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">
-              {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />Published · live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
-            </p>
-            <span className={`rounded-full px-2 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] ${published ? "border border-amber-200 bg-amber-50 text-amber-800" : started ? "bg-zinc-100 text-zinc-500" : "border border-zinc-200 bg-white text-zinc-500"}`}>
-              {published ? "open on the board" : started ? "updating as you speak" : "make it yours"}
-            </span>
-          </div>
-          <p className={`m-0 mt-1.5 text-[15px] font-semibold leading-snug ${started ? "text-zinc-900" : "text-zinc-400"}`}>
-            {started ? publishTitle : "SASE and SD-WAN transformation · UK retailer"}
-          </p>
-          {/* The facts as chips (the 24 Jul translation of "tag nodes"): each
-              carries its real provenance in the ink language (solid border
-              stated, dotted inferred) and opens its own section on touch. No
-              emojis, no confidence numbers: provenance IS the confidence. */}
-          {(() => {
-            const B = { sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>;
-            const chips: { v: string; paths: string[]; sec: string }[] = started
-              ? ([
-                  { v: requirement.organisation?.sector ?? "", paths: ["organisation.sector"], sec: "organisation" },
-                  { v: usersBandLabel(requirement.estate?.users) ?? "", paths: ["estate.users"], sec: "organisation" },
-                  { v: typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : "", paths: ["estate.sites"], sec: "organisation" },
-                  { v: buying ? B[buying] ?? buying : "", paths: ["procurement.buying"], sec: "objectives" },
-                  { v: opModel === "managed" ? "Fully managed" : opModel === "co_managed" ? "Co-managed" : "", paths: ["procurement.operatingModel"], sec: "model" },
-                  { v: (requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", "), paths: ["organisation.regions"], sec: "organisation" },
-                  { v: (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", "), paths: ["constraints.complianceRequirements"], sec: "compliance" },
-                ].filter((c) => c.v))
-              : [
-                  { v: "Retail", paths: [], sec: "organisation" },
-                  { v: "1,900 users", paths: [], sec: "organisation" },
-                  { v: "42 sites", paths: [], sec: "organisation" },
-                  { v: "UK", paths: [], sec: "organisation" },
-                  { v: "SASE and SD-WAN", paths: [], sec: "objectives" },
-                  { v: "Fully managed", paths: [], sec: "model" },
-                  { v: "PCI DSS", paths: [], sec: "compliance" },
-                ];
-            if (!chips.length) {
-              return <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">your first sentence starts this listing</p>;
-            }
-            return (
-              <p className="m-0 mt-1.5 leading-loose">
-                {chips.map((c) => {
-                  const pf = c.paths.length ? facts.find((f) => !f.struck && c.paths.includes(f.path)) : undefined;
-                  const prov = pf?.provenance;
-                  const cls = !started
-                    ? "border-zinc-200 text-zinc-400"
-                    : prov === "stated"
-                      ? "border-zinc-400 text-zinc-800"
-                      : prov === "inferred"
-                        ? "border-dotted border-zinc-400 text-zinc-700"
-                        : "border-zinc-200 text-zinc-600";
-                  return (
-                    <button
-                      key={c.v}
-                      type="button"
-                      onClick={() => {
-                        ev("workspace_card_chip", { sec: c.sec });
-                        document.getElementById(`sec-${c.sec}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                      }}
-                      title={
-                        !started
-                          ? "Example content · opens the section it lives in"
-                          : prov === "stated"
-                            ? "Your words · opens the section it lives in"
-                            : prov === "inferred"
-                              ? "Inferred, reason attached · opens the section it lives in"
-                              : "Opens the section it lives in"
-                      }
-                      className={`mr-1.5 inline-block rounded-full border bg-white px-2.5 py-[2px] text-[11px] transition-colors hover:border-amber-500 ${cls}`}
-                    >
-                      {c.v}
-                    </button>
-                  );
-                })}
-              </p>
-            );
-          })()}
-          <p className="m-0 mt-1.5 text-[11px] text-zinc-400">
-            {published && published.boardId
-              ? (<>published: signed-in suppliers can now see your anonymous notice · <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
-              : started
-              ? "anonymous on publish: no name, no contacts · signed-in suppliers see it, never public visitors · nothing is sent without your signature"
-              : "a worked example · it becomes yours the moment you speak, paste or touch the document below · never publishes"}
-          </p>
-        </section>
+      {/* ---- The journey rail (P1 of the CTM pivot, Robert's rulings
+              30 Jul 2026; reference netify-ctm-p1-reference). Compare the
+              Market's journey sidebar, adapted to the three ruled steps. The
+              sub-steps are the core five (R7) and nothing else, so the
+              percentage beside them cannot move unless something true moves
+              first, and one sentence can tick several of them at once where
+              the buyer can watch it happen. ---- */}
+      <div className="mx-auto mt-6 w-[min(760px,100%)]">
+        <JourneyRail steps={railSteps} current={shownStep} onGoTo={goToStep} published={Boolean(published)} />
       </div>
 
-      {/* ---- The Netify SASE Constellation: the market takes position ---- */}
-      <div className={`mx-auto mt-16 w-full ${started ? "" : "max-w-[880px]"}`}>
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">
-            The Netify SASE Constellation
-          </p>
-          <p className="m-0 text-[11px] text-zinc-400">
-            distance is fit · every position computed from graded evidence · a supplier only moves on its own evidence
-            {" · "}
-            <button type="button" onClick={() => setConstellationKey((o) => !o)} className="underline hover:text-zinc-600">
-              {constellationKey ? "close the key" : "how to read this"}
-            </button>
-          </p>
-        </div>
-        {/* The reading key (Harry's Section 1 ask, Robert's R3, 28 Jul 2026):
-            every sentence traces to this component's own laws; nothing here
-            promises what the map does not do. */}
-        {constellationKey && (
-          <div className="mt-2 rounded-md border border-zinc-200 bg-white p-4 text-[11.5px] leading-relaxed text-zinc-600">
-            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">You</span> are the dot at the centre. Everything on the map positions itself against your stated requirements.</p>
-            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Diamonds</span> are requirements created from your own words. Each one exists because you said it; strike the fact and its diamond goes with it.</p>
-            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Circles</span> are technology vendors. <span className="font-semibold text-zinc-800">Squares</span> are managed service providers.</p>
-            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Distance is fit.</span> A supplier sits closer when its graded evidence against your named requirements is stronger. Before you name requirements, suppliers hold one honest ring, because there is nothing yet to rank them against.</p>
-            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Lines are evidence.</span> A line exists only where the Netify dataset grades that supplier for that requirement: solid means evidenced, dashed means partial. No line means no graded evidence, never a guess.</p>
-            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Movement.</span> A supplier moves only when its own evidence changes, and only towards or away from you. Nothing shuffles for effect.</p>
-            <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Colour</span> follows the supplier, never its rank. Amber marks your market activity, such as invited suppliers. Emerald is reserved for advice given against Netify&rsquo;s own interest.</p>
-            <p className="m-0"><span className="font-semibold text-zinc-800">Hover</span> a supplier or a requirement to isolate its evidence. The evidence source and its latest evaluation date sit beneath the map.</p>
-          </div>
-        )}
-        {marketRows.shown.length === 0 && (
-          <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-400">
-            Empty until you describe your project. Then the evaluated market takes position around your words: the
-            closest fit sits nearest, each supplier keeps its own fixed place and colour, and evidence draws the lines.
-          </p>
-        )}
-        {marketRows.shown.length > 0 && (
-          <svg
-            viewBox={`0 0 ${SCENE.w} ${SCENE.h}`}
-            className="mt-1 block w-full"
-            role="img"
-            aria-label="The Netify SASE Constellation: suppliers positioned by evidence against your named requirements, capability lines where the dataset grades them"
-            onMouseLeave={() => { setFocusV(null); setFocusC(null); }}
-          >
-            {/* Evidence lines: vendor to capability, only where a grade exists.
-                Re-keyed on the fit order so a re-rank fades the layer in while
-                bodies glide (no line ever points at a stale position for long). */}
-            <g key={`lines:${fitSlugs.join(",")}:${capNodes.length}`} className="pd-emerge">
-              {capNodes.length > 0 && sceneBodies.map((b) => {
-                const fs = fitBySlug.get(b.slug);
-                if (!fs) return null;
-                const hue = vendorHue(b.slug);
-                return fs.matched.map((m) => {
-                  const cap = capById.get(m.id);
-                  if (!cap) return null;
-                  const focused = focusV === b.slug || focusC === m.id;
-                  const faded = (focusV !== null || focusC !== null) && !focused;
-                  const full = m.grade === "yes";
-                  return (
-                    <line
-                      key={`${b.slug}:${m.id}`}
-                      x1={b.x} y1={b.y} x2={cap.x} y2={cap.y}
-                      stroke={hue}
-                      strokeWidth={focused ? (full ? 1.9 : 1.5) : full ? 1.25 : 1}
-                      strokeDasharray={full ? undefined : "5 4"}
-                      opacity={faded ? 0.05 : focused ? 0.9 : 0.24}
-                      style={{ transition: "opacity .25s" }}
-                    />
-                  );
-                });
-              })}
-            </g>
-
-            {/* Your position, the centre. Breath only on a genuinely open notice. */}
-            <circle
-              cx={SCENE.cx} cy={SCENE.cy} r={7}
-              className={published ? "pd-breath" : undefined}
-              fill={started ? "#18181b" : "none"}
-              stroke={started ? "none" : "#a1a1aa"}
-              strokeDasharray={started ? undefined : "3 3"}
-            />
-            <text x={SCENE.cx} y={SCENE.cy + 20} fontSize={7.5} textAnchor="middle" fill="#a1a1aa" style={{ letterSpacing: ".12em" }}>YOU</text>
-
-            {/* Capability nodes: the requirements your own words created. */}
-            {capNodes.map((c) => {
-              const faded = (focusV !== null && !(fitBySlug.get(focusV)?.matched.some((m) => m.id === c.id))) || (focusC !== null && focusC !== c.id);
-              const above = c.y <= SCENE.cy;
-              return (
-                <g
-                  key={c.id}
-                  className="pd-emerge"
-                  style={{ opacity: faded ? 0.22 : 1, transition: "opacity .25s", cursor: "default" }}
-                  onMouseEnter={() => { setFocusC(c.id); setFocusV(null); }}
-                >
-                  <rect x={c.x - 3.2} y={c.y - 3.2} width={6.4} height={6.4} transform={`rotate(45 ${c.x} ${c.y})`} fill="#18181b" />
-                  <text
-                    x={c.x} y={(above ? c.y - 8 : c.y + 14) + (sceneLabels[c.id] ?? 0)}
-                    fontSize={8}
-                    textAnchor="middle"
-                    fill="#3f3f46"
-                  >{c.label.length > 30 ? `${c.label.slice(0, 29)}…` : c.label}</text>
-                </g>
-              );
-            })}
-
-            {/* The suppliers: hue is the vendor, ink of the name is recency,
-                shape is what they are (circle a technology vendor, square a
-                managed provider), amber ring is invited. */}
-            {sceneBodies.map((b) => {
-              const v = marketRows.shown.find((s) => s.slug === b.slug);
-              if (!v) return null;
-              const isFit = shownFit.has(v.slug);
-              const bright = v.last_verified === marketRows.latest && marketRows.latest !== "";
-              const recent = !bright && marketRows.latest && daysBetween(v.last_verified, marketRows.latest) < 60;
-              const dim = started && fitBuying && !isFit;
-              const invited = invitedSet.has(v.slug);
-              const hue = vendorHue(v.slug);
-              const labelInk = bright ? "#18181b" : recent ? "#52525b" : "#a8a29e";
-              const size = bright || invited ? 5.5 : 4.8;
-              const provider = /provider/i.test(v.category);
-              const faded = (focusV !== null && focusV !== b.slug) || (focusC !== null && !(fitBySlug.get(b.slug)?.matched.some((m) => m.id === focusC)));
-              const anchorEnd = b.x > SCENE.w - 120 ? true : b.x < 120 ? false : Math.cos((b.angle * Math.PI) / 180) < 0;
-              const name = v.name.length > 22 ? `${v.name.slice(0, 21)}…` : v.name;
-              return (
-                <g
-                  key={b.slug}
-                  className="pd-move pd-emerge"
-                  style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: faded ? 0.16 : dim ? 0.38 : 1, transition: "transform .6s cubic-bezier(.34,1.56,.64,1), opacity .25s" }}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}
-                  onClick={() => setVendorCard(v)}
-                  onKeyDown={(e) => { if (e.key === "Enter") setVendorCard(v); }}
-                  onMouseEnter={() => { setFocusV(b.slug); setFocusC(null); }}
-                >
-                  {invited && (
-                    <>
-                      <line x1={0} y1={0} x2={SCENE.cx - b.x} y2={SCENE.cy - b.y} stroke="#f59e0b" strokeWidth={1.3} opacity={0.5} />
-                      <circle r={size + 3.2} fill="none" stroke="#f59e0b" strokeWidth={1.4} className={published ? "pd-breath" : undefined} />
-                    </>
-                  )}
-                  {added.includes(v.slug) && <circle r={size + 3} fill="none" stroke="#a1a1aa" strokeWidth={0.8} />}
-                  {provider ? (
-                    <rect x={-size} y={-size} width={size * 2} height={size * 2} rx={1.5} fill={hue} />
-                  ) : (
-                    <circle r={size} fill={hue} />
-                  )}
-                  <text
-                    x={anchorEnd ? -(size + 5) : size + 5}
-                    y={3 + (sceneLabels[b.slug] ?? 0)}
-                    fontSize={9}
-                    textAnchor={anchorEnd ? "end" : "start"}
-                    fill={labelInk}
-                    style={namedSlugs.has(v.slug) ? { fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" } : undefined}
-                  >{name}</text>
-                </g>
-              );
-            })}
-          </svg>
-        )}
-        <p className="m-0 mt-1 text-[11px] leading-snug text-zinc-400">
-          {capNodes.length > 0 ? (
-            <>Diamonds are the requirements your own words created; a line exists only where Netify&rsquo;s dataset grades that supplier for that requirement (solid evidenced, dashed partial). Hover a supplier or a requirement to isolate its evidence. Circles are technology vendors, squares managed providers.</>
-          ) : (
-            <>Name what you need and the market takes position around it: your requirements appear here as points of gravity, with a line from every supplier the evidence supports. Circles are technology vendors, squares managed providers; no supplier is closer than the evidence puts it.</>
-          )}
-          {market?.latest_evaluation ? ` Evidence: Netify vendor dataset, live · latest evaluation ${fmtDate(market.latest_evaluation)}.` : ""}
-        </p>
-      </div>
+      {shownStep === 1 && (<>
 
       {/* ---- Readiness: three things first, from real state only ---- */}
       {started && (
@@ -2570,6 +2358,763 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             )}
           </div>
 
+
+          {/* The document's own legend stays with the document. The
+              signature that used to sit under it is step three now. */}
+          <div className="mt-6 border-t border-zinc-200 pt-5">
+            {/* The four truth classes, stated once */}
+            <p className="m-0 mt-3 text-[11px] leading-relaxed text-zinc-400">
+              <span className="text-zinc-300">grey</span> example, never publishes · <span className="italic text-zinc-600">&ldquo;quoted&rdquo;</span> captured, awaiting interpretation ·{" "}
+              <span className="border-b border-zinc-900 text-zinc-900">solid ink</span> stated, your words or your touch ·{" "}
+              <span className="border-b border-dotted border-zinc-500 text-zinc-600">dotted</span> inferred, reason attached, one tap strikes ·{" "}
+              <span className="text-emerald-700">✓ dated</span> verified, evidence stands behind it. Strike anything; a strike is never overridden by re-inference, only by your own words. Nothing on this desk moves without saying what changed.
+            </p>
+          </div>
+        </div>
+
+        {/* ============ THE RESPONDING ORGANS ============ */}
+        <div className="space-y-7 lg:sticky lg:top-6 lg:border-l lg:border-zinc-200 lg:pl-6">
+
+          {/* Your estate */}
+          <div>
+            <p className="m-0 mb-2 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
+              Your estate <span className="text-right font-normal text-zinc-400">{diagram.empty ? "example plan · becomes yours as you speak" : "drawn from your words only"}</span>
+            </p>
+            {diagram.empty ? (
+              <svg viewBox="0 0 300 120" className="block w-full" role="img" aria-label="Example estate plan">
+                <rect x="103" y="8" width="94" height="18" rx="4" fill="none" stroke="#e4e4e7" />
+                <text x="150" y="20" textAnchor="middle" fontSize="8.5" fill="#d4d4d8">Internet</text>
+                <line x1="150" y1="26" x2="150" y2="50" stroke="#e4e4e7" />
+                <rect x="85" y="50" width="130" height="30" rx="5" fill="none" stroke="#e4e4e7" />
+                <text x="150" y="63" textAnchor="middle" fontSize="8.5" fill="#d4d4d8">12 sites · example</text>
+                <g fill="none" stroke="#e4e4e7">
+                  {Array.from({ length: 8 }, (_, i) => <rect key={i} x={94 + i * 14} y={68} width={9} height={7} />)}
+                </g>
+                <text x="150" y="104" textAnchor="middle" fontSize="7.5" fill="#d4d4d8">example content · never publishes</text>
+              </svg>
+            ) : (
+              <WorkspaceDiagram model={diagram} />
+            )}
+            <p className="m-0 mt-1 text-[11px] leading-snug text-zinc-500">Redraws on every correction; never invents topology.</p>
+          </div>
+
+          {/* We noticed: emerald, only advice that costs Netify */}
+          {verdict && verdict.againstInterest.length > 0 && started && (
+            <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3">
+              <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-emerald-700">We noticed · against Netify&rsquo;s own interest</p>
+              <p className="m-0 text-[13px] leading-relaxed text-emerald-900">{verdict.againstInterest[0].statement}</p>
+              {verdict.againstInterest.length > 1 && (
+                <p className="m-0 mt-1 text-[11px] text-emerald-700/80">{verdict.againstInterest.length - 1} more ruling{verdict.againstInterest.length === 2 ? "" : "s"} on your record.</p>
+              )}
+            </div>
+          )}
+
+          {/* Sector notes (24 Jul): the pack's advice with its provenance.
+              Evidence and advice, never requirements; nothing here publishes
+              or feeds verdict or fit. Grey, not emerald: this advice costs
+              Netify nothing and earns the buyer caution. */}
+          {pack && packNotes.length > 0 && (
+            <div>
+              <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
+                Sector notes · {pack.label}{packFlavours.length ? ` · ${packFlavours.map((f) => pack.flavours.find((x) => x.id === f)?.label ?? f).join(" · ")}` : ""}
+                <span className="font-normal text-zinc-400">{pack.version}</span>
+              </p>
+              {packNotes.map((n) => (
+                <p key={n.id} className="m-0 mb-1.5 text-[11px] leading-relaxed text-zinc-600">{n.text}</p>
+              ))}
+              <p className="m-0 text-[10px] leading-snug text-zinc-400">Advice with provenance, never requirements; nothing here publishes.</p>
+            </div>
+          )}
+
+          {/* The crew */}
+          <div>
+            <p className="m-0 mb-1.5 text-[11px] font-semibold text-zinc-600">The crew · the activity log · completed work only</p>
+            <div className="space-y-0.5 font-mono text-[11px] leading-relaxed text-zinc-500" style={{ fontFamily: "'SF Mono',ui-monospace,Menlo,monospace" }}>
+              {crew.slice(-6).map((l, i) => (
+                <div key={i}>
+                  <span className="mr-2 text-zinc-300">{l.t}</span>
+                  <span className={l.cls === "em" ? "text-emerald-700" : l.cls === "you" ? "text-zinc-900" : undefined}>{l.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ---- The destination: where the finished position goes (below the desk so the document stays the hero, Robert 23 Jul)
+              (the reference concept made live, Robert's word, 23 Jul; every
+              claim renders from real data and no em dashes anywhere). ---- */}
+      <div className="mt-20">
+        <h2 className="m-0" style={{ fontSize: "19px", lineHeight: 1.2, fontWeight: 700, color: "#18181b", letterSpacing: "-0.015em" }}>
+          Publish to our SASE Opportunities Board
+        </h2>
+        <p className="m-0 mt-3 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
+          Your completed Statement of Requirements becomes a live opportunity in a curated SASE marketplace, where
+          leading vendors and managed service providers can compete for your business. The public listing remains
+          anonymous, while the private procurement view is made available only to suitable suppliers from
+          Netify&rsquo;s curated community of {market ? market.counts.vendors : "evaluated"} UK, North American and
+          global SASE partners.
+        </p>
+        <svg viewBox="0 0 1060 150" className="mt-4 hidden w-full sm:block" role="img"
+          aria-label="The journey: a living Statement of Requirements becomes an anonymous published opportunity in a curated marketplace; supplier responses return for comparison and a decision you sign.">
+          <line x1="30" y1="62" x2="1030" y2="62" stroke="#e4e4e7" strokeWidth="1" />
+          <g>
+            <rect x="52" y="44" width="28" height="36" rx="3" fill="#fff" stroke="#3f3f46" strokeWidth="1.2" />
+            <line x1="58" y1="54" x2="74" y2="54" stroke="#3f3f46" strokeWidth="1" />
+            <line x1="58" y1="61" x2="74" y2="61" stroke="#a1a1aa" strokeWidth="1" />
+            <line x1="58" y1="68" x2="68" y2="68" stroke="#a1a1aa" strokeWidth="1" />
+            <text x="66" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Living Statement</text>
+            <text x="66" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">yours, word for word</text>
+          </g>
+          <g>
+            <circle cx="240" cy="62" r="7" fill="#f59e0b" />
+            <text x="240" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Published opportunity</text>
+            <text x="240" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">anonymous, to signed-in suppliers</text>
+          </g>
+          <g>
+            <circle cx="455" cy="36" r="4.5" fill="#2a78d6" /><circle cx="486" cy="28" r="4.5" fill="#e34948" />
+            <circle cx="516" cy="36" r="4.5" fill="#0891b2" /><circle cx="470" cy="52" r="4.5" fill="#7c3aed" />
+            <circle cx="501" cy="50" r="4.5" fill="#1d4ed8" /><circle cx="440" cy="50" r="4.5" fill="#be123c" />
+            <circle cx="530" cy="52" r="4.5" fill="#4a3aa7" /><circle cx="458" cy="66" r="4.5" fill="#d946ef" />
+            <circle cx="490" cy="68" r="4.5" fill="#e87ba4" />
+            <text x="512" y="70" fontSize="9.5" fill="#52525b">and more</text>
+            <text x="485" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Curated SASE marketplace</text>
+            <text x="485" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">{market ? `${market.counts.vendors} evaluated partners` : "evaluated partners"} · UK · North America · Global</text>
+            <text x="485" y="129" textAnchor="middle" fontSize="8.5" fill="#c4c2bc">quality over quantity, never a directory</text>
+          </g>
+          <g>
+            <path d="M 700 48 L 686 62 L 700 76" fill="none" stroke="#3f3f46" strokeWidth="1.3" />
+            <path d="M 716 48 L 702 62 L 716 76" fill="none" stroke="#a1a1aa" strokeWidth="1.1" />
+            <text x="706" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Supplier responses</text>
+            <text x="706" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">answering your requirements</text>
+          </g>
+          <g>
+            <line x1="856" y1="48" x2="856" y2="76" stroke="#3f3f46" strokeWidth="2" />
+            <line x1="866" y1="54" x2="866" y2="76" stroke="#71717a" strokeWidth="2" />
+            <line x1="876" y1="60" x2="876" y2="76" stroke="#a1a1aa" strokeWidth="2" />
+            <text x="866" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Comparison</text>
+            <text x="866" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">side by side, evidence first</text>
+          </g>
+          <g>
+            <path d="M 985 64 L 991 71 L 1003 52" fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round" />
+            <text x="994" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Decision</text>
+            <text x="994" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">you sign; agents never do</text>
+          </g>
+        </svg>
+        <p className="m-0 mt-2 text-[11px] leading-relaxed text-zinc-400 sm:mt-1">
+          <span className="font-semibold text-zinc-500">You stay in control throughout:</span> public listings are
+          anonymous · detailed procurement information is restricted to approved suppliers · supplier access and
+          invitations remain under your control · every response stays connected to this workspace.
+        </p>
+      </div>
+
+      {/* ---- The way on. Publish is the only exit (R5), so each step but
+              the last carries one forward control and the plain truth about
+              what is still missing. The old fixed publish card that floated
+              over this page has gone with it: a card that follows you down
+              the screen is the last piece of 2005 behaviour here (R1b). ---- */}
+      <div className="mt-14 border-t border-zinc-200 pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <p className="m-0 max-w-xl text-[12px] leading-relaxed text-zinc-500">
+            {missingCore.length === 0
+              ? "All five details a notice needs are standing. You can keep correcting any of them right up to the moment you publish."
+              : `Still open: ${missingCore.join(", ")}. Say it in the box at the top and it lands in the document itself.`}
+          </p>
+          <button
+            type="button"
+            onClick={() => goToStep(2)}
+            className="rounded-full bg-zinc-900 px-5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-zinc-700"
+          >
+            See who fits
+          </button>
+        </div>
+      </div>
+
+      </>)}
+
+
+      {shownStep === 2 && (<>
+
+      {/* ---- Who fits (step two; R1b, the half-a-coke rule, Robert 30 Jul
+              2026). The matched suppliers are NAMED, each with the date its
+              record was graded, in alphabetical order. Alphabetical is not a
+              ranking and this panel never implies that it is. The ranked
+              order, the scores and the per-supplier reasons are the half of
+              the coke a buyer does not drink for free: they generate at
+              publish. That is written here as a calm fact in the desk's own
+              evidence language, with no blur, no padlock and no teaser. ---- */}
+      <div className="mt-8 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_336px]">
+        <div>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-b-2 border-zinc-900 pb-2">
+            <h2 className="m-0" style={{ fontSize: "19px", lineHeight: 1.2, fontWeight: 700, color: "#18181b", letterSpacing: "-0.015em" }}>
+              Who fits
+            </h2>
+            <p className="m-0 text-[11px] text-zinc-500">
+              {clusterRows.length > 0
+                ? `${clusterRows.length} evaluated supplier${clusterRows.length === 1 ? "" : "s"} reach your requirement`
+                : market
+                  ? `${market.counts.vendors} suppliers evaluated; none matched yet`
+                  : "the evaluated market"}
+            </p>
+          </div>
+
+          {clusterRows.length === 0 ? (
+            <p className="m-0 mt-4 max-w-xl text-[13px] leading-relaxed text-zinc-500">
+              Nothing has matched yet. Suppliers arrive here as your requirement names things the Netify dataset grades them
+              on, so the fastest way to fill this is to go back and say more about what you need.
+            </p>
+          ) : (
+            <>
+              <p className="m-0 mt-3 max-w-xl text-[12.5px] leading-relaxed text-zinc-600">
+                These are the suppliers your requirement reaches, listed A to Z. The order on this page carries no meaning.
+              </p>
+              <ul className="m-0 mt-4 grid list-none grid-cols-1 gap-x-6 gap-y-0 p-0 sm:grid-cols-2">
+                {clusterRows.map((r) => (
+                  <li key={r.slug} className="border-b border-zinc-100 py-2.5">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <a href={`/sase/vendors/${r.slug}/`} className="text-[14px] font-semibold leading-snug text-zinc-900 underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-900">
+                        {r.name}
+                      </a>
+                      {r.pinned && (
+                        <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">pinned</span>
+                      )}
+                    </div>
+                    <p className="m-0 mt-0.5 text-[11px] leading-snug text-zinc-500">
+                      {r.category} · record graded {fmtDate(r.graded)}
+                    </p>
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+                      {!published && (r.pinned ? (
+                        <button type="button" onClick={() => setAdded((x) => x.filter((s) => s !== r.slug))} className="text-zinc-500 underline hover:text-zinc-900">
+                          Unpin
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdded((x) => (x.includes(r.slug) ? x : [...x, r.slug]));
+                            setRemoved((x) => x.filter((s) => s !== r.slug));
+                            ev("workspace_supplier_added", { slug: r.slug });
+                            crewLog(`Registrar: pinned to your direct invitations: ${r.name}`, "you");
+                          }}
+                          className="text-zinc-500 underline hover:text-zinc-900"
+                        >
+                          Pin to my invitations
+                        </button>
+                      ))}
+                      {!published && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRemoved((x) => (x.includes(r.slug) ? x : [...x, r.slug]));
+                            setAdded((x) => x.filter((s) => s !== r.slug));
+                            ev("workspace_supplier_excluded", { slug: r.slug });
+                            crewLog(`Registrar: left out of direct invites at your word: ${r.name} · the public notice is unaffected`, "you");
+                          }}
+                          className="text-zinc-400 underline hover:text-zinc-700"
+                        >
+                          Leave out of direct invites
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {removed.length > 0 && (
+                <p className="m-0 mt-3 text-[11px] leading-relaxed text-zinc-500">
+                  {removed.length} left out of your direct invitations at your word. The anonymous notice on the board is unaffected,
+                  and a left-out seat is filled by the next best evidenced supplier.
+                </p>
+              )}
+            </>
+          )}
+
+          {/* What publish generates from this set. Stated, not teased: the
+              machinery is real and named, and the buyer can read exactly what
+              the act produces before deciding to perform it (R1a, R1b). */}
+          {!published && clusterRows.length > 0 && (
+            <div className="mt-6 border-t border-zinc-200 pt-4">
+              <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Generates at publish</p>
+              <ul className="m-0 mt-1.5 list-none space-y-1 p-0 text-[12.5px] leading-relaxed text-zinc-600">
+                <li>The ranked order of these {clusterRows.length} suppliers against your requirement.</li>
+                <li>The reason each one is in or out, named requirement by named requirement.</li>
+                <li>Your indicative price band, computed under the Netify TCO methodology.</li>
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-7 lg:sticky lg:top-6 lg:border-l lg:border-zinc-200 lg:pl-6">
+
+          {/* The market, live */}
+          <div>
+            <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
+              The market, live <span className="text-right font-normal text-zinc-400">movement is written</span>
+            </p>
+            <p className="m-0 mb-2 text-[11px] text-zinc-500">
+              {market ? (
+                <>
+                  {market.counts.notices > 0 && <span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />}
+                  {market.counts.vendors} suppliers evaluated{market.latest_evaluation ? `, latest ${fmtDate(market.latest_evaluation)}` : ""} · {market.counts.notices} notice{market.counts.notices === 1 ? "" : "s"} open ·{" "}
+                  <a href="/sase/opportunities/board/" className="underline hover:text-zinc-900">the board</a>
+                </>
+              ) : "Reaching the market…"}
+            </p>
+            {/* Article 14: the movement explains itself beside the movement,
+                written, naming the supplier. The scene itself is the Netify
+                SASE Constellation band above the document; this pane is its
+                written ledger. */}
+            {marketRows.shown.some((v) => moveNow[v.slug]) && (
+              <div className="mt-1 border-t border-zinc-100 pt-1">
+                {marketRows.shown.filter((v) => moveNow[v.slug]).map((v) => {
+                  const mv = moveNow[v.slug];
+                  return (
+                    <p key={v.slug} className={`m-0 mb-0.5 text-[11px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
+                      {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
+                      {v.name} · {mv.label}: {gradeWord(mv.grade) || "no longer required"}
+                      {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
+                    </p>
+                  );
+                })}
+              </div>
+            )}
+            {marketRows.more > 0 && (
+              <p className="m-0 mt-1 text-[11px] text-zinc-400">and {marketRows.more} more evaluated suppliers, all in the running.</p>
+            )}
+            <p className="m-0 mt-1.5 text-[10px] leading-snug text-zinc-400">
+              {published
+                ? "Every movement in the Constellation is written here the moment it happens, with its evidence and date. Nothing moves without a truthful answer to \u201cwhat changed?\u201d. Touch any supplier in the scene for its record."
+                : "Every movement is written here the moment it happens, with its evidence and date. Nothing moves without a truthful answer to \u201cwhat changed?\u201d. The Constellation, which places these suppliers by evidence against your requirement, is one of the things publishing generates."}
+            </p>
+            {vendorCard && (
+              <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
+                <button type="button" onClick={() => setVendorCard(null)} className="float-right text-zinc-400 hover:text-zinc-900">✕</button>
+                <p className="m-0 text-[13px] font-semibold text-zinc-900">
+                  {vendorCard.name}
+                  {namedSlugs.has(vendorCard.slug) && <span className="ml-1.5 rounded-full bg-zinc-200 px-1.5 text-[10px] font-normal text-zinc-600">named in your position</span>}
+                </p>
+                <p className="m-0 mt-0.5 text-[11px] text-zinc-500">{vendorCard.category}</p>
+                <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">
+                  Evaluated {fmtDate(vendorCard.last_verified)} · {vendorCard.yes_count} of 40 capabilities fully met.
+                </p>
+                {(() => {
+                  /* Evidence language, never a score (the reference concept,
+                     live): counts come straight from the graded checks. */
+                  const fs = fitBySlug.get(vendorCard.slug);
+                  if (!fs || !sceneRanked) return null;
+                  const full = fs.matched.filter((m) => m.grade === "yes").length;
+                  const part = fs.matched.length - full;
+                  return (
+                    <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">
+                      Against your named requirements: {full} evidenced
+                      {part > 0 ? `, ${part} partially evidenced` : ""}
+                      {fs.missed.length > 0 ? `, ${fs.missed.length} without evidence on file` : ""}.
+                      Missing evidence is a supplier gap, never a verdict.
+                    </p>
+                  );
+                })()}
+                {/* Article 14, the four answers: what changed, why it moved,
+                    what evidence, and the challenge. */}
+                {(() => {
+                  const fs = fit?.suppliers.find((s) => s.slug === vendorCard.slug);
+                  const mv = moveNow[vendorCard.slug];
+                  const hist = moveLog.filter((l) => l.slug === vendorCard.slug).slice(-4).reverse();
+                  return (
+                    <>
+                      {mv && (
+                        <div className="mt-1.5 border-t border-zinc-200 pt-1.5 text-[11px] leading-relaxed text-zinc-600">
+                          <p className="m-0"><b className="text-zinc-800">What changed:</b> your requirement {mv.grade ? "gained" : "withdrew"} {mv.label}.</p>
+                          <p className="m-0"><b className="text-zinc-800">Why it moved:</b> {mv.label} is {gradeWord(mv.grade) || "no longer checked"} for {vendorCard.name}.</p>
+                          <p className="m-0"><b className="text-zinc-800">Evidence:</b> evaluated {fmtDate(vendorCard.last_verified)}.</p>
+                        </div>
+                      )}
+                      {fs && (fs.matched.length > 0 || fs.missed.length > 0) && (
+                        <div className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
+                          {fs.matched.length > 0 && <p className="m-0">Evidences: {fs.matched.map((m) => m.label).join(", ")}.</p>}
+                          {fs.missed.length > 0 && <p className="m-0 text-zinc-400">Not evidenced: {fs.missed.map((m) => m.label).join(", ")}.</p>}
+                        </div>
+                      )}
+                      {hist.length > 0 && (
+                        <div className="mt-1.5 text-[10px] leading-relaxed text-zinc-400">
+                          {hist.map((h, i) => (
+                            <p key={i} className="m-0">{h.at} · {h.dir === "up" ? "rose" : h.dir === "down" ? "fell" : "held"} · {h.text}</p>
+                          ))}
+                        </div>
+                      )}
+                      <a href={`/sase/${vendorCard.slug}/`} className="mt-1 inline-block text-[11px] text-zinc-700 underline">
+                        Challenge it: compare the evidence
+                      </a>
+                    </>
+                  );
+                })()}
+                {!published && (
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {added.includes(vendorCard.slug) ? (
+                      <button
+                        type="button"
+                        onClick={() => { setAdded((x) => x.filter((s) => s !== vendorCard.slug)); setVendorCard(null); }}
+                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
+                      >
+                        Unpin
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdded((x) => (x.includes(vendorCard.slug) ? x : [...x, vendorCard.slug]));
+                          setRemoved((x) => x.filter((r) => r !== vendorCard.slug));
+                          ev("workspace_supplier_added", { slug: vendorCard.slug });
+                          setVendorCard(null);
+                        }}
+                        className="rounded-full border border-amber-400 px-2.5 py-1 text-[11px] text-amber-700 hover:border-amber-600"
+                      >
+                        Pin into invitations (up to five)
+                      </button>
+                    )}
+                    {/* The distribution list is the buyer's (F3, 29 Jul 2026,
+                        from the mockup review Robert approved): leaving a
+                        supplier out governs the DIRECT invites only. The
+                        anonymous public notice, the grading and this record
+                        are untouched: an exclusion is distribution control,
+                        never a judgement on the supplier. */}
+                    {removed.includes(vendorCard.slug) ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoved((x) => x.filter((s) => s !== vendorCard.slug));
+                          ev("workspace_supplier_included", { slug: vendorCard.slug });
+                          crewLog(`Registrar: back in the running for direct invites: ${vendorCard.name}`, "you");
+                          setVendorCard(null);
+                        }}
+                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
+                      >
+                        Include again
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRemoved((x) => (x.includes(vendorCard.slug) ? x : [...x, vendorCard.slug]));
+                          setAdded((x) => x.filter((s) => s !== vendorCard.slug));
+                          ev("workspace_supplier_excluded", { slug: vendorCard.slug });
+                          crewLog(`Registrar: left out of direct invites at your word: ${vendorCard.name} · the public notice is unaffected`, "you");
+                          setVendorCard(null);
+                        }}
+                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-500 hover:border-zinc-500 hover:text-zinc-700"
+                      >
+                        Leave out of direct invites
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+        {/* The Constellation is the ranked view, and a ranked view is the
+            half of the coke that generates at publish (R1b). So it renders
+            here once the notice is live and not before: distance IS fit, and
+            showing it early would answer for free the question publishing is
+            the route to. Nothing is hidden behind a padlock; it simply does
+            not exist yet. */}
+        {Boolean(published) && (<>
+
+        {/* ---- The Netify SASE Constellation: the market takes position ---- */}
+        <div className={`mx-auto mt-16 w-full ${started ? "" : "max-w-[880px]"}`}>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">
+              The Netify SASE Constellation
+            </p>
+            <p className="m-0 text-[11px] text-zinc-400">
+              distance is fit · every position computed from graded evidence · a supplier only moves on its own evidence
+              {" · "}
+              <button type="button" onClick={() => setConstellationKey((o) => !o)} className="underline hover:text-zinc-600">
+                {constellationKey ? "close the key" : "how to read this"}
+              </button>
+            </p>
+          </div>
+          {/* The reading key (Harry's Section 1 ask, Robert's R3, 28 Jul 2026):
+              every sentence traces to this component's own laws; nothing here
+              promises what the map does not do. */}
+          {constellationKey && (
+            <div className="mt-2 rounded-md border border-zinc-200 bg-white p-4 text-[11.5px] leading-relaxed text-zinc-600">
+              <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">You</span> are the dot at the centre. Everything on the map positions itself against your stated requirements.</p>
+              <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Diamonds</span> are requirements created from your own words. Each one exists because you said it; strike the fact and its diamond goes with it.</p>
+              <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Circles</span> are technology vendors. <span className="font-semibold text-zinc-800">Squares</span> are managed service providers.</p>
+              <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Distance is fit.</span> A supplier sits closer when its graded evidence against your named requirements is stronger. Before you name requirements, suppliers hold one honest ring, because there is nothing yet to rank them against.</p>
+              <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Lines are evidence.</span> A line exists only where the Netify dataset grades that supplier for that requirement: solid means evidenced, dashed means partial. No line means no graded evidence, never a guess.</p>
+              <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Movement.</span> A supplier moves only when its own evidence changes, and only towards or away from you. Nothing shuffles for effect.</p>
+              <p className="m-0 mb-1.5"><span className="font-semibold text-zinc-800">Colour</span> follows the supplier, never its rank. Amber marks your market activity, such as invited suppliers. Emerald is reserved for advice given against Netify&rsquo;s own interest.</p>
+              <p className="m-0"><span className="font-semibold text-zinc-800">Hover</span> a supplier or a requirement to isolate its evidence. The evidence source and its latest evaluation date sit beneath the map.</p>
+            </div>
+          )}
+          {marketRows.shown.length === 0 && (
+            <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-400">
+              Empty until you describe your project. Then the evaluated market takes position around your words: the
+              closest fit sits nearest, each supplier keeps its own fixed place and colour, and evidence draws the lines.
+            </p>
+          )}
+          {marketRows.shown.length > 0 && (
+            <svg
+              viewBox={`0 0 ${SCENE.w} ${SCENE.h}`}
+              className="mt-1 block w-full"
+              role="img"
+              aria-label="The Netify SASE Constellation: suppliers positioned by evidence against your named requirements, capability lines where the dataset grades them"
+              onMouseLeave={() => { setFocusV(null); setFocusC(null); }}
+            >
+              {/* Evidence lines: vendor to capability, only where a grade exists.
+                  Re-keyed on the fit order so a re-rank fades the layer in while
+                  bodies glide (no line ever points at a stale position for long). */}
+              <g key={`lines:${fitSlugs.join(",")}:${capNodes.length}`} className="pd-emerge">
+                {capNodes.length > 0 && sceneBodies.map((b) => {
+                  const fs = fitBySlug.get(b.slug);
+                  if (!fs) return null;
+                  const hue = vendorHue(b.slug);
+                  return fs.matched.map((m) => {
+                    const cap = capById.get(m.id);
+                    if (!cap) return null;
+                    const focused = focusV === b.slug || focusC === m.id;
+                    const faded = (focusV !== null || focusC !== null) && !focused;
+                    const full = m.grade === "yes";
+                    return (
+                      <line
+                        key={`${b.slug}:${m.id}`}
+                        x1={b.x} y1={b.y} x2={cap.x} y2={cap.y}
+                        stroke={hue}
+                        strokeWidth={focused ? (full ? 1.9 : 1.5) : full ? 1.25 : 1}
+                        strokeDasharray={full ? undefined : "5 4"}
+                        opacity={faded ? 0.05 : focused ? 0.9 : 0.24}
+                        style={{ transition: "opacity .25s" }}
+                      />
+                    );
+                  });
+                })}
+              </g>
+  
+              {/* Your position, the centre. Breath only on a genuinely open notice. */}
+              <circle
+                cx={SCENE.cx} cy={SCENE.cy} r={7}
+                className={published ? "pd-breath" : undefined}
+                fill={started ? "#18181b" : "none"}
+                stroke={started ? "none" : "#a1a1aa"}
+                strokeDasharray={started ? undefined : "3 3"}
+              />
+              <text x={SCENE.cx} y={SCENE.cy + 20} fontSize={7.5} textAnchor="middle" fill="#a1a1aa" style={{ letterSpacing: ".12em" }}>YOU</text>
+  
+              {/* Capability nodes: the requirements your own words created. */}
+              {capNodes.map((c) => {
+                const faded = (focusV !== null && !(fitBySlug.get(focusV)?.matched.some((m) => m.id === c.id))) || (focusC !== null && focusC !== c.id);
+                const above = c.y <= SCENE.cy;
+                return (
+                  <g
+                    key={c.id}
+                    className="pd-emerge"
+                    style={{ opacity: faded ? 0.22 : 1, transition: "opacity .25s", cursor: "default" }}
+                    onMouseEnter={() => { setFocusC(c.id); setFocusV(null); }}
+                  >
+                    <rect x={c.x - 3.2} y={c.y - 3.2} width={6.4} height={6.4} transform={`rotate(45 ${c.x} ${c.y})`} fill="#18181b" />
+                    <text
+                      x={c.x} y={(above ? c.y - 8 : c.y + 14) + (sceneLabels[c.id] ?? 0)}
+                      fontSize={8}
+                      textAnchor="middle"
+                      fill="#3f3f46"
+                    >{c.label.length > 30 ? `${c.label.slice(0, 29)}…` : c.label}</text>
+                  </g>
+                );
+              })}
+  
+              {/* The suppliers: hue is the vendor, ink of the name is recency,
+                  shape is what they are (circle a technology vendor, square a
+                  managed provider), amber ring is invited. */}
+              {sceneBodies.map((b) => {
+                const v = marketRows.shown.find((s) => s.slug === b.slug);
+                if (!v) return null;
+                const isFit = shownFit.has(v.slug);
+                const bright = v.last_verified === marketRows.latest && marketRows.latest !== "";
+                const recent = !bright && marketRows.latest && daysBetween(v.last_verified, marketRows.latest) < 60;
+                const dim = started && fitBuying && !isFit;
+                const invited = invitedSet.has(v.slug);
+                const hue = vendorHue(v.slug);
+                const labelInk = bright ? "#18181b" : recent ? "#52525b" : "#a8a29e";
+                const size = bright || invited ? 5.5 : 4.8;
+                const provider = /provider/i.test(v.category);
+                const faded = (focusV !== null && focusV !== b.slug) || (focusC !== null && !(fitBySlug.get(b.slug)?.matched.some((m) => m.id === focusC)));
+                const anchorEnd = b.x > SCENE.w - 120 ? true : b.x < 120 ? false : Math.cos((b.angle * Math.PI) / 180) < 0;
+                const name = v.name.length > 22 ? `${v.name.slice(0, 21)}…` : v.name;
+                return (
+                  <g
+                    key={b.slug}
+                    className="pd-move pd-emerge"
+                    style={{ transform: `translate(${b.x}px, ${b.y}px)`, cursor: "pointer", opacity: faded ? 0.16 : dim ? 0.38 : 1, transition: "transform .6s cubic-bezier(.34,1.56,.64,1), opacity .25s" }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${v.name}, evaluated ${fmtDate(v.last_verified)}`}
+                    onClick={() => setVendorCard(v)}
+                    onKeyDown={(e) => { if (e.key === "Enter") setVendorCard(v); }}
+                    onMouseEnter={() => { setFocusV(b.slug); setFocusC(null); }}
+                  >
+                    {invited && (
+                      <>
+                        <line x1={0} y1={0} x2={SCENE.cx - b.x} y2={SCENE.cy - b.y} stroke="#f59e0b" strokeWidth={1.3} opacity={0.5} />
+                        <circle r={size + 3.2} fill="none" stroke="#f59e0b" strokeWidth={1.4} className={published ? "pd-breath" : undefined} />
+                      </>
+                    )}
+                    {added.includes(v.slug) && <circle r={size + 3} fill="none" stroke="#a1a1aa" strokeWidth={0.8} />}
+                    {provider ? (
+                      <rect x={-size} y={-size} width={size * 2} height={size * 2} rx={1.5} fill={hue} />
+                    ) : (
+                      <circle r={size} fill={hue} />
+                    )}
+                    <text
+                      x={anchorEnd ? -(size + 5) : size + 5}
+                      y={3 + (sceneLabels[b.slug] ?? 0)}
+                      fontSize={9}
+                      textAnchor={anchorEnd ? "end" : "start"}
+                      fill={labelInk}
+                      style={namedSlugs.has(v.slug) ? { fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" } : undefined}
+                    >{name}</text>
+                  </g>
+                );
+              })}
+            </svg>
+          )}
+          <p className="m-0 mt-1 text-[11px] leading-snug text-zinc-400">
+            {capNodes.length > 0 ? (
+              <>Diamonds are the requirements your own words created; a line exists only where Netify&rsquo;s dataset grades that supplier for that requirement (solid evidenced, dashed partial). Hover a supplier or a requirement to isolate its evidence. Circles are technology vendors, squares managed providers.</>
+            ) : (
+              <>Name what you need and the market takes position around it: your requirements appear here as points of gravity, with a line from every supplier the evidence supports. Circles are technology vendors, squares managed providers; no supplier is closer than the evidence puts it.</>
+            )}
+            {market?.latest_evaluation ? ` Evidence: Netify vendor dataset, live · latest evaluation ${fmtDate(market.latest_evaluation)}.` : ""}
+          </p>
+        </div>
+        </>)}
+
+        </div>
+      </div>
+
+      <div className="mt-14 border-t border-zinc-200 pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <p className="m-0 max-w-xl text-[12px] leading-relaxed text-zinc-500">
+            {ready ? "Your requirement holds enough to stand on." : publishBarLock}
+          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <button type="button" onClick={() => goToStep(1)} className="text-[12px] text-zinc-500 underline hover:text-zinc-900">
+              Back to your requirement
+            </button>
+            <button
+              type="button"
+              onClick={() => goToStep(3)}
+              className="rounded-full bg-zinc-900 px-5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-zinc-700"
+            >
+              Continue to publish
+            </button>
+          </div>
+        </div>
+      </div>
+
+      </>)}
+
+
+      {shownStep === 3 && (<>
+
+      {/* ---- Step three, the glass front. The notice preview stands first
+              as Compare the Market's "check your answers" does: it is the
+              buyer's own content, public by design once live, so it is fully
+              visible before publish (R1b). The value list, the core-five gate
+              and the GDPR acceptance line arrive with P2. ---- */}
+
+      {/* ---- The listing in formation (Robert, 23 Jul: the opportunity
+              listing returns to the top): the notice as the market will see
+              it, updating with every sentence. Example-labelled until the
+              buyer starts; anonymous always; never publishes by itself. ---- */}
+      <div className="mx-auto mt-5 w-[min(760px,100%)]">
+        <section aria-label="Your opportunity, as the market will see it" className={`rounded-xl border p-5 ${published ? "border-amber-300 bg-amber-50/40" : "border-zinc-200 bg-white"}`}>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="m-0 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">
+              {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />Published · live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
+            </p>
+            <span className={`rounded-full px-2 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] ${published ? "border border-amber-200 bg-amber-50 text-amber-800" : started ? "bg-zinc-100 text-zinc-500" : "border border-zinc-200 bg-white text-zinc-500"}`}>
+              {published ? "open on the board" : started ? "updating as you speak" : "make it yours"}
+            </span>
+          </div>
+          <p className={`m-0 mt-1.5 text-[15px] font-semibold leading-snug ${started ? "text-zinc-900" : "text-zinc-400"}`}>
+            {started ? publishTitle : "SASE and SD-WAN transformation · UK retailer"}
+          </p>
+          {/* The facts as chips (the 24 Jul translation of "tag nodes"): each
+              carries its real provenance in the ink language (solid border
+              stated, dotted inferred) and opens its own section on touch. No
+              emojis, no confidence numbers: provenance IS the confidence. */}
+          {(() => {
+            const B = { sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>;
+            const chips: { v: string; paths: string[]; sec: string }[] = started
+              ? ([
+                  { v: requirement.organisation?.sector ?? "", paths: ["organisation.sector"], sec: "organisation" },
+                  { v: usersBandLabel(requirement.estate?.users) ?? "", paths: ["estate.users"], sec: "organisation" },
+                  { v: typeof requirement.estate?.sites === "number" ? `${requirement.estate.sites} sites` : "", paths: ["estate.sites"], sec: "organisation" },
+                  { v: buying ? B[buying] ?? buying : "", paths: ["procurement.buying"], sec: "objectives" },
+                  { v: opModel === "managed" ? "Fully managed" : opModel === "co_managed" ? "Co-managed" : "", paths: ["procurement.operatingModel"], sec: "model" },
+                  { v: (requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", "), paths: ["organisation.regions"], sec: "organisation" },
+                  { v: (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", "), paths: ["constraints.complianceRequirements"], sec: "compliance" },
+                ].filter((c) => c.v))
+              : [
+                  { v: "Retail", paths: [], sec: "organisation" },
+                  { v: "1,900 users", paths: [], sec: "organisation" },
+                  { v: "42 sites", paths: [], sec: "organisation" },
+                  { v: "UK", paths: [], sec: "organisation" },
+                  { v: "SASE and SD-WAN", paths: [], sec: "objectives" },
+                  { v: "Fully managed", paths: [], sec: "model" },
+                  { v: "PCI DSS", paths: [], sec: "compliance" },
+                ];
+            if (!chips.length) {
+              return <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">your first sentence starts this listing</p>;
+            }
+            return (
+              <p className="m-0 mt-1.5 leading-loose">
+                {chips.map((c) => {
+                  const pf = c.paths.length ? facts.find((f) => !f.struck && c.paths.includes(f.path)) : undefined;
+                  const prov = pf?.provenance;
+                  const cls = !started
+                    ? "border-zinc-200 text-zinc-400"
+                    : prov === "stated"
+                      ? "border-zinc-400 text-zinc-800"
+                      : prov === "inferred"
+                        ? "border-dotted border-zinc-400 text-zinc-700"
+                        : "border-zinc-200 text-zinc-600";
+                  return (
+                    <button
+                      key={c.v}
+                      type="button"
+                      onClick={() => {
+                        ev("workspace_card_chip", { sec: c.sec });
+                        document.getElementById(`sec-${c.sec}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                      title={
+                        !started
+                          ? "Example content · opens the section it lives in"
+                          : prov === "stated"
+                            ? "Your words · opens the section it lives in"
+                            : prov === "inferred"
+                              ? "Inferred, reason attached · opens the section it lives in"
+                              : "Opens the section it lives in"
+                      }
+                      className={`mr-1.5 inline-block rounded-full border bg-white px-2.5 py-[2px] text-[11px] transition-colors hover:border-amber-500 ${cls}`}
+                    >
+                      {c.v}
+                    </button>
+                  );
+                })}
+              </p>
+            );
+          })()}
+          <p className="m-0 mt-1.5 text-[11px] text-zinc-400">
+            {published && published.boardId
+              ? (<>published: signed-in suppliers can now see your anonymous notice · <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
+              : started
+              ? "anonymous on publish: no name, no contacts · signed-in suppliers see it, never public visitors · nothing is sent without your signature"
+              : "a worked example · it becomes yours the moment you speak, paste or touch the document below · never publishes"}
+          </p>
+        </section>
+      </div>
+
           {/* ---- The signature: where the document ends ---- */}
           <div id="pd-signature" className="mt-6 border-t border-zinc-200 pt-5" style={{ scrollMarginTop: "70px" }}>
             {!published && !created?.test && (
@@ -2768,390 +3313,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               </div>
             )}
 
-            {/* The four truth classes, stated once */}
-            <p className="m-0 mt-3 text-[11px] leading-relaxed text-zinc-400">
-              <span className="text-zinc-300">grey</span> example, never publishes · <span className="italic text-zinc-600">&ldquo;quoted&rdquo;</span> captured, awaiting interpretation ·{" "}
-              <span className="border-b border-zinc-900 text-zinc-900">solid ink</span> stated, your words or your touch ·{" "}
-              <span className="border-b border-dotted border-zinc-500 text-zinc-600">dotted</span> inferred, reason attached, one tap strikes ·{" "}
-              <span className="text-emerald-700">✓ dated</span> verified, evidence stands behind it. Strike anything; a strike is never overridden by re-inference, only by your own words. Nothing on this desk moves without saying what changed.
-            </p>
-          </div>
-        </div>
-
-        {/* ============ THE RESPONDING ORGANS ============ */}
-        <div className="space-y-7 lg:sticky lg:top-6 lg:border-l lg:border-zinc-200 lg:pl-6">
-
-          {/* Your estate */}
-          <div>
-            <p className="m-0 mb-2 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
-              Your estate <span className="text-right font-normal text-zinc-400">{diagram.empty ? "example plan · becomes yours as you speak" : "drawn from your words only"}</span>
-            </p>
-            {diagram.empty ? (
-              <svg viewBox="0 0 300 120" className="block w-full" role="img" aria-label="Example estate plan">
-                <rect x="103" y="8" width="94" height="18" rx="4" fill="none" stroke="#e4e4e7" />
-                <text x="150" y="20" textAnchor="middle" fontSize="8.5" fill="#d4d4d8">Internet</text>
-                <line x1="150" y1="26" x2="150" y2="50" stroke="#e4e4e7" />
-                <rect x="85" y="50" width="130" height="30" rx="5" fill="none" stroke="#e4e4e7" />
-                <text x="150" y="63" textAnchor="middle" fontSize="8.5" fill="#d4d4d8">12 sites · example</text>
-                <g fill="none" stroke="#e4e4e7">
-                  {Array.from({ length: 8 }, (_, i) => <rect key={i} x={94 + i * 14} y={68} width={9} height={7} />)}
-                </g>
-                <text x="150" y="104" textAnchor="middle" fontSize="7.5" fill="#d4d4d8">example content · never publishes</text>
-              </svg>
-            ) : (
-              <WorkspaceDiagram model={diagram} />
-            )}
-            <p className="m-0 mt-1 text-[11px] leading-snug text-zinc-500">Redraws on every correction; never invents topology.</p>
           </div>
 
-          {/* The market, live */}
-          <div>
-            <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
-              The market, live <span className="text-right font-normal text-zinc-400">movement is written</span>
-            </p>
-            <p className="m-0 mb-2 text-[11px] text-zinc-500">
-              {market ? (
-                <>
-                  {market.counts.notices > 0 && <span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-amber-400 align-[0px]" />}
-                  {market.counts.vendors} suppliers evaluated{market.latest_evaluation ? `, latest ${fmtDate(market.latest_evaluation)}` : ""} · {market.counts.notices} notice{market.counts.notices === 1 ? "" : "s"} open ·{" "}
-                  <a href="/sase/opportunities/board/" className="underline hover:text-zinc-900">the board</a>
-                </>
-              ) : "Reaching the market…"}
-            </p>
-            {/* Article 14: the movement explains itself beside the movement,
-                written, naming the supplier. The scene itself is the Netify
-                SASE Constellation band above the document; this pane is its
-                written ledger. */}
-            {marketRows.shown.some((v) => moveNow[v.slug]) && (
-              <div className="mt-1 border-t border-zinc-100 pt-1">
-                {marketRows.shown.filter((v) => moveNow[v.slug]).map((v) => {
-                  const mv = moveNow[v.slug];
-                  return (
-                    <p key={v.slug} className={`m-0 mb-0.5 text-[11px] leading-snug ${mv.dir === "down" ? "text-zinc-400" : "text-zinc-600"}`}>
-                      {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
-                      {v.name} · {mv.label}: {gradeWord(mv.grade) || "no longer required"}
-                      {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
-                    </p>
-                  );
-                })}
-              </div>
-            )}
-            {marketRows.more > 0 && (
-              <p className="m-0 mt-1 text-[11px] text-zinc-400">and {marketRows.more} more evaluated suppliers, all in the running.</p>
-            )}
-            <p className="m-0 mt-1.5 text-[10px] leading-snug text-zinc-400">
-              Every movement in the Constellation is written here the moment it happens, with its evidence and date.
-              Nothing moves without a truthful answer to &ldquo;what changed?&rdquo;. Touch any supplier in the scene for its record.
-            </p>
-            {vendorCard && (
-              <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
-                <button type="button" onClick={() => setVendorCard(null)} className="float-right text-zinc-400 hover:text-zinc-900">✕</button>
-                <p className="m-0 text-[13px] font-semibold text-zinc-900">
-                  {vendorCard.name}
-                  {namedSlugs.has(vendorCard.slug) && <span className="ml-1.5 rounded-full bg-zinc-200 px-1.5 text-[10px] font-normal text-zinc-600">named in your position</span>}
-                </p>
-                <p className="m-0 mt-0.5 text-[11px] text-zinc-500">{vendorCard.category}</p>
-                <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">
-                  Evaluated {fmtDate(vendorCard.last_verified)} · {vendorCard.yes_count} of 40 capabilities fully met.
-                </p>
-                {(() => {
-                  /* Evidence language, never a score (the reference concept,
-                     live): counts come straight from the graded checks. */
-                  const fs = fitBySlug.get(vendorCard.slug);
-                  if (!fs || !sceneRanked) return null;
-                  const full = fs.matched.filter((m) => m.grade === "yes").length;
-                  const part = fs.matched.length - full;
-                  return (
-                    <p className="m-0 mt-1 text-[11px] leading-relaxed text-zinc-600">
-                      Against your named requirements: {full} evidenced
-                      {part > 0 ? `, ${part} partially evidenced` : ""}
-                      {fs.missed.length > 0 ? `, ${fs.missed.length} without evidence on file` : ""}.
-                      Missing evidence is a supplier gap, never a verdict.
-                    </p>
-                  );
-                })()}
-                {/* Article 14, the four answers: what changed, why it moved,
-                    what evidence, and the challenge. */}
-                {(() => {
-                  const fs = fit?.suppliers.find((s) => s.slug === vendorCard.slug);
-                  const mv = moveNow[vendorCard.slug];
-                  const hist = moveLog.filter((l) => l.slug === vendorCard.slug).slice(-4).reverse();
-                  return (
-                    <>
-                      {mv && (
-                        <div className="mt-1.5 border-t border-zinc-200 pt-1.5 text-[11px] leading-relaxed text-zinc-600">
-                          <p className="m-0"><b className="text-zinc-800">What changed:</b> your requirement {mv.grade ? "gained" : "withdrew"} {mv.label}.</p>
-                          <p className="m-0"><b className="text-zinc-800">Why it moved:</b> {mv.label} is {gradeWord(mv.grade) || "no longer checked"} for {vendorCard.name}.</p>
-                          <p className="m-0"><b className="text-zinc-800">Evidence:</b> evaluated {fmtDate(vendorCard.last_verified)}.</p>
-                        </div>
-                      )}
-                      {fs && (fs.matched.length > 0 || fs.missed.length > 0) && (
-                        <div className="mt-1.5 text-[11px] leading-relaxed text-zinc-500">
-                          {fs.matched.length > 0 && <p className="m-0">Evidences: {fs.matched.map((m) => m.label).join(", ")}.</p>}
-                          {fs.missed.length > 0 && <p className="m-0 text-zinc-400">Not evidenced: {fs.missed.map((m) => m.label).join(", ")}.</p>}
-                        </div>
-                      )}
-                      {hist.length > 0 && (
-                        <div className="mt-1.5 text-[10px] leading-relaxed text-zinc-400">
-                          {hist.map((h, i) => (
-                            <p key={i} className="m-0">{h.at} · {h.dir === "up" ? "rose" : h.dir === "down" ? "fell" : "held"} · {h.text}</p>
-                          ))}
-                        </div>
-                      )}
-                      <a href={`/sase/${vendorCard.slug}/`} className="mt-1 inline-block text-[11px] text-zinc-700 underline">
-                        Challenge it: compare the evidence
-                      </a>
-                    </>
-                  );
-                })()}
-                {!published && (
-                  <div className="mt-1.5 flex flex-wrap gap-1.5">
-                    {added.includes(vendorCard.slug) ? (
-                      <button
-                        type="button"
-                        onClick={() => { setAdded((x) => x.filter((s) => s !== vendorCard.slug)); setVendorCard(null); }}
-                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
-                      >
-                        Unpin
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAdded((x) => (x.includes(vendorCard.slug) ? x : [...x, vendorCard.slug]));
-                          setRemoved((x) => x.filter((r) => r !== vendorCard.slug));
-                          ev("workspace_supplier_added", { slug: vendorCard.slug });
-                          setVendorCard(null);
-                        }}
-                        className="rounded-full border border-amber-400 px-2.5 py-1 text-[11px] text-amber-700 hover:border-amber-600"
-                      >
-                        Pin into invitations (up to five)
-                      </button>
-                    )}
-                    {/* The distribution list is the buyer's (F3, 29 Jul 2026,
-                        from the mockup review Robert approved): leaving a
-                        supplier out governs the DIRECT invites only. The
-                        anonymous public notice, the grading and this record
-                        are untouched: an exclusion is distribution control,
-                        never a judgement on the supplier. */}
-                    {removed.includes(vendorCard.slug) ? (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRemoved((x) => x.filter((s) => s !== vendorCard.slug));
-                          ev("workspace_supplier_included", { slug: vendorCard.slug });
-                          crewLog(`Registrar: back in the running for direct invites: ${vendorCard.name}`, "you");
-                          setVendorCard(null);
-                        }}
-                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-600 hover:border-zinc-500"
-                      >
-                        Include again
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRemoved((x) => (x.includes(vendorCard.slug) ? x : [...x, vendorCard.slug]));
-                          setAdded((x) => x.filter((s) => s !== vendorCard.slug));
-                          ev("workspace_supplier_excluded", { slug: vendorCard.slug });
-                          crewLog(`Registrar: left out of direct invites at your word: ${vendorCard.name} · the public notice is unaffected`, "you");
-                          setVendorCard(null);
-                        }}
-                        className="rounded-full border border-zinc-300 px-2.5 py-1 text-[11px] text-zinc-500 hover:border-zinc-500 hover:text-zinc-700"
-                      >
-                        Leave out of direct invites
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* We noticed: emerald, only advice that costs Netify */}
-          {verdict && verdict.againstInterest.length > 0 && started && (
-            <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3">
-              <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-emerald-700">We noticed · against Netify&rsquo;s own interest</p>
-              <p className="m-0 text-[13px] leading-relaxed text-emerald-900">{verdict.againstInterest[0].statement}</p>
-              {verdict.againstInterest.length > 1 && (
-                <p className="m-0 mt-1 text-[11px] text-emerald-700/80">{verdict.againstInterest.length - 1} more ruling{verdict.againstInterest.length === 2 ? "" : "s"} on your record.</p>
-              )}
-            </div>
-          )}
-
-          {/* Save-lite */}
-          {saveLite === "shown" && (
-            <div className="rounded-lg bg-zinc-50 p-3">
-              <p className="m-0 mb-1.5 text-[13px] font-medium text-zinc-800">Want to keep this position?</p>
-              <SaveLiteInline
-                facts={meter.total}
-                onDone={(email) => {
-                  setSaveLite("sent");
-                  setSaveLiteSentTo(email);
-                  ev("workspace_save_lite_sent", { facts: meter.total });
-                }}
-                onDismiss={() => {
-                  setSaveLite("dismissed");
-                  ev("workspace_save_lite_dismissed", {});
-                }}
-              />
-            </div>
-          )}
-          {saveLite === "sent" && (
-            <p className="m-0 text-[11px] text-emerald-700">
-              Sign-in link sent to {saveLiteSentTo}. The position stays right here; the link signs you in on any device.
-            </p>
-          )}
-
-          {/* Sector notes (24 Jul): the pack's advice with its provenance.
-              Evidence and advice, never requirements; nothing here publishes
-              or feeds verdict or fit. Grey, not emerald: this advice costs
-              Netify nothing and earns the buyer caution. */}
-          {pack && packNotes.length > 0 && (
-            <div>
-              <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-zinc-600">
-                Sector notes · {pack.label}{packFlavours.length ? ` · ${packFlavours.map((f) => pack.flavours.find((x) => x.id === f)?.label ?? f).join(" · ")}` : ""}
-                <span className="font-normal text-zinc-400">{pack.version}</span>
-              </p>
-              {packNotes.map((n) => (
-                <p key={n.id} className="m-0 mb-1.5 text-[11px] leading-relaxed text-zinc-600">{n.text}</p>
-              ))}
-              <p className="m-0 text-[10px] leading-snug text-zinc-400">Advice with provenance, never requirements; nothing here publishes.</p>
-            </div>
-          )}
-
-          {/* The crew */}
-          <div>
-            <p className="m-0 mb-1.5 text-[11px] font-semibold text-zinc-600">The crew · the activity log · completed work only</p>
-            <div className="space-y-0.5 font-mono text-[11px] leading-relaxed text-zinc-500" style={{ fontFamily: "'SF Mono',ui-monospace,Menlo,monospace" }}>
-              {crew.slice(-6).map((l, i) => (
-                <div key={i}>
-                  <span className="mr-2 text-zinc-300">{l.t}</span>
-                  <span className={l.cls === "em" ? "text-emerald-700" : l.cls === "you" ? "text-zinc-900" : undefined}>{l.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ---- The publish bar (the conversion pass, 23 Jul): the same gate
-              the signature enforces, carried with you as you work. It names
-              the first real lock in the gate's own words, counts only the
-              suppliers the live fit actually holds, and never invents a
-              percentage. Amber is the market's colour; nothing pulses here
-              because nothing here is a live notice. ---- */}
-      {booted && started && !published && !created?.test && (
-        <div className="fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-auto sm:right-5 sm:w-[330px]">
-          <div className={`rounded-xl border bg-white/95 p-3 shadow-[0_8px_30px_-12px_rgba(24,24,27,.35)] backdrop-blur ${ready ? "border-amber-400" : "border-zinc-200"}`}>
-            <div className="flex items-baseline justify-between gap-2">
-              <p className="m-0 text-[13px] font-semibold text-zinc-900">
-                {ready
-                  ? instrument === "rfp" ? "Ready to issue your full RFP" : instrument === "rfi" ? "Ready to issue your RFI" : "Ready to publish your SoR notice"
-                  : "Not ready to publish yet"}
-              </p>
-              {ready && <span className="rounded-full bg-amber-100 px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">unlocked</span>}
-            </div>
-            <p className="m-0 mt-0.5 text-[11px] leading-relaxed text-zinc-500">
-              {ready
-                ? instrument === "rfp"
-                  ? "The RFP goes out anonymous with your priorities and question set declared: no name, no contacts. Signed-in vendors and service providers see it; public visitors never do."
-                  : instrument === "rfi"
-                    ? "The RFI goes out anonymous with your question set declared: no name, no contacts. Signed-in vendors and service providers see it; public visitors never do."
-                    : "The SoR notice goes out anonymous: no name, no contacts. Signed-in vendors and service providers see it; public visitors never do."
-                : publishBarLock}
-            </p>
-            {(fitSlugs.length > 0 || market) && (
-              <p className="m-0 mt-1 text-[11px] text-zinc-600">
-                {fitSlugs.length > 0
-                  ? `${fitSlugs.length} evaluated supplier${fitSlugs.length === 1 ? "" : "s"} currently in the running`
-                  : `${market?.counts.vendors} evaluated suppliers on the curated market`}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                ev("workspace_publish_bar_cta", { ready: ready ? 1 : 0 });
-                document.getElementById("pd-signature")?.scrollIntoView({ behavior: "smooth", block: "center" });
-              }}
-              className={`mt-2 w-full rounded-full px-4 py-2 text-[13px] font-bold transition-colors ${
-                ready
-                  ? "bg-amber-500 text-zinc-950 hover:bg-amber-400"
-                  : "border border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400 hover:text-zinc-900"
-              }`}
-            >
-              {ready ? (instrument === "rfp" ? "Issue your full RFP" : instrument === "rfi" ? "Issue the RFI" : "Publish the SoR notice") : "See what remains"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ---- The destination: where the finished position goes (below the desk so the document stays the hero, Robert 23 Jul)
-              (the reference concept made live, Robert's word, 23 Jul; every
-              claim renders from real data and no em dashes anywhere). ---- */}
-      <div className="mt-20">
-        <h2 className="m-0" style={{ fontSize: "19px", lineHeight: 1.2, fontWeight: 700, color: "#18181b", letterSpacing: "-0.015em" }}>
-          Publish to our SASE Opportunities Board
-        </h2>
-        <p className="m-0 mt-3 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
-          Your completed Statement of Requirements becomes a live opportunity in a curated SASE marketplace, where
-          leading vendors and managed service providers can compete for your business. The public listing remains
-          anonymous, while the private procurement view is made available only to suitable suppliers from
-          Netify&rsquo;s curated community of {market ? market.counts.vendors : "evaluated"} UK, North American and
-          global SASE partners.
-        </p>
-        <svg viewBox="0 0 1060 150" className="mt-4 hidden w-full sm:block" role="img"
-          aria-label="The journey: a living Statement of Requirements becomes an anonymous published opportunity in a curated marketplace; supplier responses return for comparison and a decision you sign.">
-          <line x1="30" y1="62" x2="1030" y2="62" stroke="#e4e4e7" strokeWidth="1" />
-          <g>
-            <rect x="52" y="44" width="28" height="36" rx="3" fill="#fff" stroke="#3f3f46" strokeWidth="1.2" />
-            <line x1="58" y1="54" x2="74" y2="54" stroke="#3f3f46" strokeWidth="1" />
-            <line x1="58" y1="61" x2="74" y2="61" stroke="#a1a1aa" strokeWidth="1" />
-            <line x1="58" y1="68" x2="68" y2="68" stroke="#a1a1aa" strokeWidth="1" />
-            <text x="66" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Living Statement</text>
-            <text x="66" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">yours, word for word</text>
-          </g>
-          <g>
-            <circle cx="240" cy="62" r="7" fill="#f59e0b" />
-            <text x="240" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Published opportunity</text>
-            <text x="240" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">anonymous, to signed-in suppliers</text>
-          </g>
-          <g>
-            <circle cx="455" cy="36" r="4.5" fill="#2a78d6" /><circle cx="486" cy="28" r="4.5" fill="#e34948" />
-            <circle cx="516" cy="36" r="4.5" fill="#0891b2" /><circle cx="470" cy="52" r="4.5" fill="#7c3aed" />
-            <circle cx="501" cy="50" r="4.5" fill="#1d4ed8" /><circle cx="440" cy="50" r="4.5" fill="#be123c" />
-            <circle cx="530" cy="52" r="4.5" fill="#4a3aa7" /><circle cx="458" cy="66" r="4.5" fill="#d946ef" />
-            <circle cx="490" cy="68" r="4.5" fill="#e87ba4" />
-            <text x="512" y="70" fontSize="9.5" fill="#52525b">and more</text>
-            <text x="485" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Curated SASE marketplace</text>
-            <text x="485" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">{market ? `${market.counts.vendors} evaluated partners` : "evaluated partners"} · UK · North America · Global</text>
-            <text x="485" y="129" textAnchor="middle" fontSize="8.5" fill="#c4c2bc">quality over quantity, never a directory</text>
-          </g>
-          <g>
-            <path d="M 700 48 L 686 62 L 700 76" fill="none" stroke="#3f3f46" strokeWidth="1.3" />
-            <path d="M 716 48 L 702 62 L 716 76" fill="none" stroke="#a1a1aa" strokeWidth="1.1" />
-            <text x="706" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Supplier responses</text>
-            <text x="706" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">answering your requirements</text>
-          </g>
-          <g>
-            <line x1="856" y1="48" x2="856" y2="76" stroke="#3f3f46" strokeWidth="2" />
-            <line x1="866" y1="54" x2="866" y2="76" stroke="#71717a" strokeWidth="2" />
-            <line x1="876" y1="60" x2="876" y2="76" stroke="#a1a1aa" strokeWidth="2" />
-            <text x="866" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Comparison</text>
-            <text x="866" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">side by side, evidence first</text>
-          </g>
-          <g>
-            <path d="M 985 64 L 991 71 L 1003 52" fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round" />
-            <text x="994" y="104" textAnchor="middle" fontSize="10.5" fill="#18181b" fontWeight="600">Decision</text>
-            <text x="994" y="117" textAnchor="middle" fontSize="9" fill="#a1a1aa">you sign; agents never do</text>
-          </g>
-        </svg>
-        <p className="m-0 mt-2 text-[11px] leading-relaxed text-zinc-400 sm:mt-1">
-          <span className="font-semibold text-zinc-500">You stay in control throughout:</span> public listings are
-          anonymous · detailed procurement information is restricted to approved suppliers · supplier access and
-          invitations remain under your control · every response stays connected to this workspace.
-        </p>
-      </div>
+      </>)}
 
       </>)}
 
@@ -3375,58 +3539,6 @@ function GapLine(props: { gap: BriefGap; onAnswer: (gap: BriefGap, value: string
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Save-lite, inline (same machinery, same policy)                     */
-/* ------------------------------------------------------------------ */
-
-function SaveLiteInline({ facts, onDone, onDismiss }: { facts: number; onDone: (email: string) => void; onDismiss: () => void }) {
-  const [email, setEmail] = useState("");
-  const [company, setCompany] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  // One lane only (29 Jul 2026, Robert's ruling with the mockup review):
-  // the LinkedIn door that used to sit here is removed. Business email
-  // only, and the copy below says the position is safe either way.
-  const send = async () => {
-    if (busy || !email.includes("@")) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await fetch("/sase/api/auth/request", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: "/sase/workspace/", attribution: firstTouch() }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? "Could not send a link.");
-      void fetch("/sase/api/workspace/save-lite", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), company: company.trim(), facts }),
-      }).catch(() => {});
-      onDone(email.trim());
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not send a link.");
-    } finally {
-      setBusy(false);
-    }
-  };
-  const cls = "w-full rounded-md border border-zinc-300 bg-white px-2.5 py-1.5 text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-amber-500";
-  return (
-    <div className="space-y-1.5">
-      <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@yourcompany.com" className={cls} aria-label="Work email" />
-      <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className={cls} aria-label="Company" />
-      <div className="flex items-center gap-2">
-        <button type="button" onClick={() => void send()} disabled={busy || !email.includes("@")} className="rounded-full bg-amber-500 px-3 py-1 text-[11px] font-semibold text-zinc-950 disabled:opacity-50">
-          {busy ? "Sending…" : "Email me a sign-in link"}
-        </button>
-        <button type="button" onClick={onDismiss} className="text-[11px] text-zinc-500 underline hover:text-zinc-900">Not now</button>
-      </div>
-      <p className="m-0 text-[11px] leading-snug text-zinc-400">The position stays right here either way. Work email only; we only email you about your own projects.</p>
-      {error && <p className="m-0 text-[11px] text-red-600">{error}</p>}
-    </div>
-  );
-}
 
 /** The artefact, rendered for reading (Harry's Section 1 finding, 28 Jul
  *  2026: the printout rendered raw markdown in a pre). The generator's
