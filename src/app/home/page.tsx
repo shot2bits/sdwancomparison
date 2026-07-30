@@ -146,8 +146,26 @@ function getHomeSchemas() {
 
 export default function Page() {
   const schemas = getHomeSchemas();
+  /* THE DOOR SITS IN NORMAL FLOW (Robert's ruling, 30 Jul 2026: "the
+     footer is missing from the main front page, this will impact EEAT").
+     It used to be `fixed inset-0 overflow-y-auto`, a full-viewport overlay
+     with its own internal scroll. Nothing looked wrong, but a fixed
+     element is out of flow, so the layout's <main> collapsed to zero
+     height and the site footer rendered UNDERNEATH the overlay where no
+     amount of scrolling could reach it. Measured live before the change:
+     main 0px tall, footer starting at 149px with the hero and the FAQ
+     drawn over it.
+
+     That footer carries the whole experience, expertise, authoritativeness
+     and trust surface: About, Our Team, Editorial Policy, Research
+     Methodology, Corrections, How Netify makes money, the company number,
+     the registered address and the trademark. On the one page most likely
+     to be cited by an AI, none of it was reachable.
+
+     The layout's own MegaNav returns null on the takeover routes, so this
+     page still renders exactly one navigation. */
   return (
-    <div className="fixed inset-0 z-[70] overflow-y-auto overscroll-contain bg-[#fbfaf8]">
+    <div className="relative z-[70] bg-[#fbfaf8]">
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
