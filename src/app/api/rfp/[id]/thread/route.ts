@@ -67,7 +67,7 @@ export async function POST(req: Request, ctx: Ctx) {
 
   // Supplier asking a question: needs the share token from the response link.
   if (!shareTokenOk(req, project.share_token, body)) {
-    return Response.json({ error: "Asking a question needs the response link token. Open this RFP via your supplier link and try again." }, { status: 401, headers: cors });
+    return Response.json({ error: "Asking a question needs the response link token. Open this RFP via your response link and try again." }, { status: 401, headers: cors });
   }
   if (!body.vendor || !body.question) {
     return Response.json({ error: "vendor and question are required." }, { status: 422, headers: cors });

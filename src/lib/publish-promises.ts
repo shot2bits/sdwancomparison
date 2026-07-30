@@ -29,7 +29,7 @@ export const FOLLOW_UP_NOTE =
 
 /** The ruled paragraph, one voice, used where prose fits (the email, compact strips). */
 export const PROMISES_PARAGRAPH =
-  "Your project publishes anonymously. Nobody browsing Netify, and no search engine, sees your company name or your contact details. Only vendors and service providers we have vetted can respond, and your details are never shared with anyone we have not vetted. You choose which suppliers receive your contact details, and when.";
+  "Your project publishes anonymously. Nobody browsing Netify, and no search engine, sees your company name or your contact details. Only vendors and service providers we have vetted can respond, and your details are never shared with anyone we have not vetted. You choose which of them receive your contact details, and when.";
 
 /** The same four promises as discrete statements, for structured rendering. */
 export const PROMISES: ReadonlyArray<{ key: string; short: string; full: string }> = [
@@ -40,7 +40,7 @@ export const PROMISES: ReadonlyArray<{ key: string; short: string; full: string 
   },
   {
     key: "vetted_only",
-    short: "Only vetted suppliers respond",
+    short: "Only vetted vendors respond",
     full: "Only vendors and service providers we have vetted can respond.",
   },
   {
@@ -51,6 +51,6 @@ export const PROMISES: ReadonlyArray<{ key: string; short: string; full: string 
   {
     key: "buyer_chooses",
     short: "You choose who gets your contact details",
-    full: "You choose which suppliers receive your contact details, and when.",
+    full: "You choose which vendors receive your contact details, and when.",
   },
 ];

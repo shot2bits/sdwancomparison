@@ -62,7 +62,7 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
             <p className="mt-2 max-w-2xl text-sm text-[var(--ink-600,#555)]">
               Generated from your security assessment and opened here, in the Netify RFP builder, for review.
               Refine the document as you need; your project home keeps the assessment, story and timeline
-              alongside it, and nothing goes to suppliers until you publish.
+              alongside it, and nothing goes to vendors until you publish.
             </p>
           )}
         </div>
@@ -133,7 +133,7 @@ export default async function RfpProjectOrPathPage({ params, searchParams }: Pro
         <h2 className="text-lg font-semibold mb-1">Sample questions from the Netify bank</h2>
         <p className="text-sm text-[var(--ink-600)] mb-4">
           Drawn from the {SASE_EXTENDED_BANK.question_bank_version} canonical bank ({saseExtendedQuestions().length} questions).
-          Every question carries the evidence suppliers should provide and the red-flag answers to watch for.
+          Every question carries the evidence vendors should provide and the red-flag answers to watch for.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {previewQuestions.map((q) => (

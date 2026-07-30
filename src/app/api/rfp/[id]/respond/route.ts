@@ -26,7 +26,7 @@ export async function GET(req: Request, ctx: Ctx) {
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   const access = await requireRfpOwner(req, project);
-  if (!access.ok) return ownerRequired("Reading supplier responses", cors);
+  if (!access.ok) return ownerRequired("Reading vendor responses", cors);
   return Response.json({ responses: await listResponses(id) }, { headers: cors });
 }
 

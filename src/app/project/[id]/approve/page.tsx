@@ -49,7 +49,7 @@ export default async function ApprovePage({ params, searchParams }: Props) {
       <h1 className="mb-1 text-2xl">{project.title || "Untitled project"}</h1>
       <p className="mb-6 text-sm text-[var(--ink-600)]">
         {signoff.name}, you have been asked as {signoff.role} to review this RFP before it is published to the
-        Netify marketplace. The document below is exactly what suppliers will receive. Read only.
+        Netify marketplace. The document below is exactly what vendors and service providers will receive. Read only.
       </p>
 
       {signoff.decision ? (

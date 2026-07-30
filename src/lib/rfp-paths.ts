@@ -25,14 +25,14 @@ export const RFP_PATHS: RfpPath[] = [
     scopeValue: "full_sase",
     title: "Build a SASE RFP",
     description:
-      "A structured SASE RFP: ZTNA, SWG, CASB, DLP, FWaaS and SD-WAN integration questions from the Netify question bank, with evidence checklists, gap checking and supplier comparison.",
+      "A structured SASE RFP: ZTNA, SWG, CASB, DLP, FWaaS and SD-WAN integration questions from the Netify question bank, with evidence checklists, gap checking and vendor comparison.",
     intro:
-      "A SASE procurement covers both networking and security, which is why generic RFP templates fail: they miss the integration questions (single policy plane, PoP performance, identity integration) where SASE projects actually go wrong. This builder starts from your estate and generates a methodology-backed RFP you can publish to verified suppliers.",
+      "A SASE procurement covers both networking and security, which is why generic RFP templates fail: they miss the integration questions (single policy plane, PoP performance, identity integration) where SASE projects actually go wrong. This builder starts from your estate and generates a methodology-backed RFP you can publish to verified vendors and service providers.",
     whoFor: [
       "Replacing VPN with ZTNA for a hybrid workforce",
       "Consolidating web proxy, CASB and DLP point products",
       "Combining an SD-WAN refresh with cloud-delivered security",
-      "Regulated buyers needing evidence and audit trails from suppliers",
+      "Regulated buyers needing evidence and audit trails from vendors",
     ],
     covers: [
       "Identity and ZTNA, including device posture and third-party access",
@@ -44,7 +44,7 @@ export const RFP_PATHS: RfpPath[] = [
     ],
     extendedCategories: ["identity_ztna", "swg_casb_dlp", "fwaas_threat", "sdwan_integration"],
     faq: [
-      { q: "Do I need a full SASE RFP or a shorter project notice?", a: "If you mainly need pricing signals or discovery calls, post a project notice first — it takes minutes and you can turn it into a full RFP later. Use the RFP when you need structured, scored supplier comparison." },
+      { q: "Do I need a full SASE RFP or a shorter project notice?", a: "If you mainly need pricing signals or discovery calls, post a project notice first. It takes minutes and you can turn it into a full RFP later. Use the RFP when you need structured, scored vendor comparison." },
       { q: "Single-vendor or best-of-breed?", a: "The builder lets you set vendor approach (no preference, unified single vendor, or best-of-breed) and adjusts the integration questions accordingly." },
     ],
   },
@@ -56,7 +56,7 @@ export const RFP_PATHS: RfpPath[] = [
     description:
       "A structured SD-WAN RFP: underlay, path selection, breakout, failover, managed service and commercial questions mapped to the Netify SD-WAN methodology and scoring model.",
     intro:
-      "SD-WAN tenders live or die on operational detail: underlay coverage per site, failover behaviour during real link events, who answers the phone at 2am, and what a mid-term site addition costs. This builder generates those questions from your estate profile so supplier responses come back comparable.",
+      "SD-WAN tenders live or die on operational detail: underlay coverage per site, failover behaviour during real link events, who answers the phone at 2am, and what a mid-term site addition costs. This builder generates those questions from your estate profile so vendor responses come back comparable.",
     whoFor: [
       "Replacing MPLS with SD-WAN over internet underlay",
       "Multi-site estates (retail, manufacturing, logistics) needing managed service",
@@ -73,8 +73,8 @@ export const RFP_PATHS: RfpPath[] = [
     ],
     extendedCategories: ["sdwan_integration", "service_model", "deployment", "commercials"],
     faq: [
-      { q: "Does this cover underlay circuits too?", a: "Yes — include underlay in scope and the RFP carries circuit coverage and lead-time questions. If you only need circuit pricing, a quick project notice is faster." },
-      { q: "How does this relate to the Netify SD-WAN question bank?", a: "Questions are drawn from and cite the published Netify SD-WAN question bank and scoring model (2026.1), so suppliers can see the rubric behind the tender." },
+      { q: "Does this cover underlay circuits too?", a: "Yes. Include underlay in scope and the RFP carries circuit coverage and lead-time questions. If you only need circuit pricing, a quick project notice is faster." },
+      { q: "How does this relate to the Netify SD-WAN question bank?", a: "Questions are drawn from and cite the published Netify SD-WAN question bank and scoring model (2026.1), so vendors can see the rubric behind the tender." },
     ],
   },
   {

@@ -16,7 +16,7 @@ export async function GET(req: Request) {
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const session = await sessionFromRequest(req);
   if (!session) return Response.json({ error: "Sign in required.", auth_required: true }, { status: 401, headers: cors });
-  if (session.role === "buyer") return Response.json({ error: "Supplier sign-in required." }, { status: 403, headers: cors });
+  if (session.role === "buyer") return Response.json({ error: "Vendor sign-in required." }, { status: 403, headers: cors });
   const slug = session.vendor_slug;
   if (!slug) return Response.json({ ok: true, vendor_slug: null, invited: [], open: [] }, { headers: cors });
 

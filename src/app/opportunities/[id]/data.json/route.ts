@@ -41,6 +41,6 @@ export async function GET(_req: Request, ctx: Ctx) {
     canonical: `${SITE_URL}/opportunities/${id}/`,
     generated: new Date().toISOString(),
     opportunity: toPublicOpportunity(opp),
-    note: "Public projection. Supplier pricing amounts and buyer contact details are private. Respond via supplier sign-in or the marketplace MCP at /sase/api/mcp/.",
+    note: "Public projection. Vendor pricing amounts and buyer contact details are private. Respond via vendor sign-in or the marketplace MCP at /sase/api/mcp/.",
   });
 }

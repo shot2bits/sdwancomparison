@@ -77,7 +77,7 @@ export async function POST(req: Request, ctx: Ctx) {
   }
   // Accepting is a supplier action performed from the response link.
   if (!shareTokenOk(req, project.share_token, body.token)) {
-    return Response.json({ error: "Accepting the NDA needs the response link token. Open this RFP via your supplier link and try again." }, { status: 401, headers: cors });
+    return Response.json({ error: "Accepting the NDA needs the response link token. Open this RFP via your response link and try again." }, { status: 401, headers: cors });
   }
   const vendor = (body.vendor ?? "").trim();
   const signatory = (body.signatory_name ?? "").trim();

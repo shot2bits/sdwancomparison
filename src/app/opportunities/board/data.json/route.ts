@@ -33,7 +33,7 @@ export async function GET() {
     description: "Open buyer opportunities. Verified vendors respond and quote. Pricing amounts are private to the posting buyer.",
     generated: new Date().toISOString(),
     methodology_version: "sase-marketplace-2026.1",
-    public_record_note: "Site counts are published exactly unless the combination of an anonymous buyer, a stated sector and a single region could identify the buyer; then the site_band range is published and sites is null. Exact figures always stay with the buyer and participating suppliers. Closed and awarded notices remain published permanently in the archived array, each with its closed_at date.",
+    public_record_note: "Site counts are published exactly unless the combination of an anonymous buyer, a stated sector and a single region could identify the buyer; then the site_band range is published and sites is null. Exact figures always stay with the buyer and participating vendors. Closed and awarded notices remain published permanently in the archived array, each with its closed_at date.",
     count: opportunities.length,
     archived_count: archived.length,
     opportunities: opportunities.map((o) => ({
@@ -66,7 +66,7 @@ export async function GET() {
           suppression: demand.suppression,
         }
       : null,
-    how_to_respond: "Suppliers browse without signing in and sign in with a verified work email to respond. Agents can use the marketplace MCP at /sase/api/mcp/ (list_opportunities, opportunity_respond).",
+    how_to_respond: "Vendors and service providers browse without signing in and sign in with a verified work email to respond. Agents can use the marketplace MCP at /sase/api/mcp/ (list_opportunities, opportunity_respond).",
     how_to_post: `Buyers draft and preview a project notice in the clear at ${SITE_URL}/opportunities/new/ and sign in to publish.`,
   });
 }

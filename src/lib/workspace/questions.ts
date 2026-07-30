@@ -102,7 +102,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
           position has taken shape, and dismisses forever. ---- */
   {
     id: "q-root-sector",
-    question: `Which sector are you in? It changes the questions we put to suppliers: your sector adds between ${MIN_PACK} and ${MAX_PACK} of its own.`,
+    question: `Which sector are you in? It changes the questions we put to vendors: your sector adds between ${MIN_PACK} and ${MAX_PACK} of its own.`,
     section: "organisation",
     weight: 95,
     earnedBy: (c) => !c.requirement.organisation?.sector && c.buying !== null,
@@ -110,11 +110,11 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
       { label: "type it", answer: { kind: "path", path: "organisation.sector", control: "text", placeholder: "e.g. Healthcare, Retail, Financial services" } },
       { label: "Prefer not to say", answer: { kind: "dismiss" } },
     ],
-    evidence: [{ source: "buyer_archetype", query: "Which sector is the buyer in? The sector selects its supplier question pack." }],
+    evidence: [{ source: "buyer_archetype", query: "Which sector is the buyer in? The sector selects its vendor question pack." }],
   },
   {
     id: "q-root-scope",
-    question: "Are you buying SASE, SD-WAN or SSE? The technology scope selects which question sets suppliers answer.",
+    question: "Are you buying SASE, SD-WAN or SSE? The technology scope selects which question sets vendors answer.",
     section: "objectives",
     weight: 93,
     earnedBy: (c) =>
@@ -130,7 +130,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
       { label: "Managed security", answer: { kind: "items", itemIds: ["buy-sec"] } },
       { label: "Not sure yet", answer: { kind: "dismiss" } },
     ],
-    evidence: [{ source: "buyer_archetype", query: "What technology scope is being bought? The scope selects the supplier question sets." }],
+    evidence: [{ source: "buyer_archetype", query: "What technology scope is being bought? The scope selects the vendor question sets." }],
   },
   {
     id: "q-fca",
@@ -210,7 +210,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
       { label: "Standard hours are fine", answer: { kind: "dismiss" } },
     ],
     evidence: [
-      { source: "buyer_archetype", query: "Which suppliers offer 24x7 UK support?" },
+      { source: "buyer_archetype", query: "Which vendors offer 24x7 UK support?" },
       { source: "bing_ai_2107", query: "MSSP UK", citations: 60 },
     ],
   },

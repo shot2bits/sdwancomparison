@@ -23,7 +23,7 @@ export async function GET(req: Request, ctx: Ctx) {
   const url = new URL(req.url);
   const token = (url.searchParams.get("token") ?? "").trim();
   if (!token || token !== project.share_token) {
-    return Response.json({ error: "A valid supplier response token is required." }, { status: 401, headers: cors });
+    return Response.json({ error: "A valid response token is required." }, { status: 401, headers: cors });
   }
   const vendor = (url.searchParams.get("vendor") ?? "").trim();
   if (!vendor) return Response.json({ error: "vendor is required (your organisation name)." }, { status: 422, headers: cors });

@@ -67,7 +67,7 @@ export async function requireRfpOwner(
 export function ownerRequired(actionLabel: string, cors: Record<string, string>): Response {
   return Response.json(
     {
-      error: `${actionLabel} is limited to this RFP's owner. Sign in with the email that created it, or pass the RFP manage_token (issued once at creation). Suppliers: use your response link instead.`,
+      error: `${actionLabel} is limited to this RFP's owner. Sign in with the email that created it, or pass the RFP manage_token (issued once at creation). Vendors and service providers: use your response link instead.`,
       auth_required: true,
       owner_only: true,
     },

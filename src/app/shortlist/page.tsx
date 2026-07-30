@@ -89,7 +89,7 @@ export default function ShortlistPage() {
           <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No obligation to award</li>
         </ul>
         <p className="text-sm text-[var(--ink-500)] mt-3">
-          Written and reviewed by the Netify research team. Every supplier record
+          Written and reviewed by the Netify research team. Every vendor record
           was re-verified against named primary sources on {verified}, with a
           quoted sentence behind each graded fact. To act on a shortlist, describe the project once at{" "}
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>

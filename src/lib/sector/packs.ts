@@ -116,13 +116,13 @@ export const HEALTHCARE_PACK: SectorPack = {
     },
     {
       id: "q-hc-iam",
-      question: "Identity questions follow healthcare procurements. Should suppliers state how they integrate with your identity provider?",
+      question: "Identity questions follow healthcare procurements. Should vendors state how they integrate with your identity provider?",
       section: "security",
       weight: 74,
       earnedBy: (c) => sectorIs(c.requirement, /health|pharma/i) && !hasNoted(c.notedIds, "qn-q-hc-iam"),
       earnedByProse: "the buyer's sector is healthcare",
       options: [
-        { label: "Yes, ask bidders", answer: { kind: "note", text: "Suppliers to state identity provider integration (IAM) in their response" } },
+        { label: "Yes, ask bidders", answer: { kind: "note", text: "Vendors to state identity provider integration (IAM) in their response" } },
         { label: "Not needed", answer: { kind: "dismiss" } },
       ],
       evidence: [{ source: "console_sector_2407", query: "healthcare identity and access management" }],
@@ -168,7 +168,7 @@ export const HEALTHCARE_PACK: SectorPack = {
       id: "hs-cep",
       section: "compliance",
       label: "Cyber Essentials Plus expected of bidders",
-      reason: "healthcare buyers commonly require it of suppliers handling patient-adjacent systems",
+      reason: "healthcare buyers commonly require it of vendors handling patient-adjacent systems",
       accept: { kind: "items", itemIds: ["c-cep"] },
       evidence: [{ source: "console_sector_2407", query: "healthcare managed services" }],
     },
@@ -198,7 +198,7 @@ export const HEALTHCARE_PACK: SectorPack = {
   ],
   flavourRiskNotes: {
     nhs: [
-      { id: "nr-hscn-lead", text: "HSCN peering and information governance sign-off commonly add lead time; suppliers should evidence NHS onboarding experience." },
+      { id: "nr-hscn-lead", text: "HSCN peering and information governance sign-off commonly add lead time; vendors should evidence NHS onboarding experience." },
     ],
   },
 };

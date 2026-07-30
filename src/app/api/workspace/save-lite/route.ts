@@ -33,7 +33,7 @@ export async function POST(req: Request) {
   if (!domain) return Response.json({ error: "Enter a valid email." }, { status: 422, headers: cors });
   if (await isBlockedDomainLive(domain)) {
     return Response.json(
-      { error: "Suppliers respond to verified work emails, so saving needs one too." },
+      { error: "Vendors and service providers respond to verified work emails, so saving needs one too." },
       { status: 422, headers: cors },
     );
   }

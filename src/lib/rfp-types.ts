@@ -241,7 +241,7 @@ export type NdaAcceptance = z.infer<typeof NdaAcceptanceSchema>;
 /** Netify standard mutual NDA, offered to buyers who don't have their own. */
 export const NETIFY_NDA_TEMPLATE = `MUTUAL NON-DISCLOSURE AGREEMENT
 
-This agreement is between the buyer organisation that issued this RFP ("Discloser") and the responding supplier organisation ("Recipient"), together the "Parties".
+This agreement is between the buyer organisation that issued this RFP ("Discloser") and the responding vendor organisation ("Recipient"), together the "Parties".
 
 1. Purpose. The Parties wish to exchange confidential information so the Recipient can assess and respond to the Discloser's SASE / SD-WAN requirement.
 

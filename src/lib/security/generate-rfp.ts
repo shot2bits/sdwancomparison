@@ -145,7 +145,7 @@ export function generateRfpSections(v: SecurityScopeVerdict): RfpSection[] {
         ? "Provenance (Article 3): the verdict digest makes this document independently checkable."
         : isAi
           ? `Against-interest record (Article 14): the rulebook routed away from a Netify-monetised option${cap ? `; rules: ${cap.firedRules.join(", ")}` : ""}.`
-          : `Exclusion with reason (Article 6): recorded so suppliers do not quote for it and the buyer knows why.`,
+          : `Exclusion with reason (Article 6): recorded so vendors do not quote for it and the buyer knows why.`,
       lens,
     ));
   }

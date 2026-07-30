@@ -49,8 +49,8 @@ export default function SupplierDashboard() {
   if (session && (!session.authenticated || session.role === "buyer")) {
     return (
       <div className="space-y-4 max-w-md">
-        {session.authenticated && session.role === "buyer" && <p className="text-sm text-red-700">You are signed in as a buyer. Use a supplier work email to access the supplier dashboard.</p>}
-        <SignIn role="supplier" prompt="Sign in with your work email to see opportunities you can bid on. We verify your domain against the listed supplier." />
+        {session.authenticated && session.role === "buyer" && <p className="text-sm text-red-700">You are signed in as a buyer. Use a vendor work email to access the vendor dashboard.</p>}
+        <SignIn role="supplier" prompt="Sign in with your work email to see opportunities you can bid on. We verify your domain against the listed vendor." />
       </div>
     );
   }
@@ -86,7 +86,7 @@ export default function SupplierDashboard() {
 
         {/* Profile claim status */}
         {session.role === "netify" ? (
-          <p className="mt-4 text-sm rounded-sm bg-[var(--ink-100,#f0f0f0)] px-3 py-2 text-[var(--ink-700)]">Netify staff: you can act on behalf of any supplier. No claim needed.</p>
+          <p className="mt-4 text-sm rounded-sm bg-[var(--ink-100,#f0f0f0)] px-3 py-2 text-[var(--ink-700)]">Netify staff: you can act on behalf of any vendor. No claim needed.</p>
         ) : slug && claim ? (
           claim.status === "approved" ? (
             <p className="mt-4 text-sm rounded-sm bg-emerald-50 px-3 py-2 text-emerald-800">✓ Profile claimed and verified. You can bid, quote and respond as {vendorTitle(slug)}.</p>

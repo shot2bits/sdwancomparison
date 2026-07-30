@@ -709,7 +709,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           <p className="eyebrow mb-1">Next step</p>
           <p className="text-sm text-[var(--ink-700)] mb-3">
             A shortlist names the right providers. The workspace makes them respond: describe your
-            requirement once, publish it as an anonymous position, and suppliers answer with their
+            requirement once, publish it as an anonymous position, and vendors answer with their
             bids. What you have built on this page travels with you.
           </p>
           <a

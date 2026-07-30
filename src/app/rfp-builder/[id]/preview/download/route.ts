@@ -16,7 +16,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const session = await sessionFromRequest(req);
   if (!session) {
     return Response.json(
-      { error: "Create an account to download the final RFP, save versions and invite suppliers. You can keep editing the preview before signing in.", auth_required: true },
+      { error: "Create an account to download the final RFP, save versions and invite vendors. You can keep editing the preview before signing in.", auth_required: true },
       { status: 401 },
     );
   }

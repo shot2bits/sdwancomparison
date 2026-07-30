@@ -16,7 +16,7 @@
  * not a readiness score (the mockup's readiness maths are banned). It is
  * the ticks on this rail divided by the ticks this rail has, and the rail
  * says so in words beside it. Every tick is a real fact standing in the
- * ledger, a real matched supplier set, or a real publish. Nothing here
+ * ledger, a real matched vendor set, or a real publish. Nothing here
  * can move without something true moving first.
  *
  * The register is CTM's and the instrument-grade law's: numbered circles,
@@ -103,7 +103,7 @@ export default function JourneyRail({
       </div>
       <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <p className="m-0 text-[13px] font-semibold text-zinc-900">{pct}% complete</p>
-        <p className="m-0 text-[11px] text-zinc-500" title="Every tick on this rail is a fact standing in your requirement, a real matched supplier set, or a real publish. Nothing else counts towards it.">
+        <p className="m-0 text-[11px] text-zinc-500" title="Every tick on this rail is a fact standing in your requirement, a real matched vendor set, or a real publish. Nothing else counts towards it.">
           {done} of {total} things this rail asks for
         </p>
       </div>

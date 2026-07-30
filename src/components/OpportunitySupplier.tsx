@@ -73,7 +73,7 @@ export default function OpportunitySupplier({ token }: { token: string }) {
     setError(null);
     try {
       const res = await fetch(`/sase/api/opportunity/supplier/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type, body, pricing, answers, links: parseLinks() }) });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.auth_required ? "Please sign in above with your supplier work email first." : (e.error ?? "Could not send.")); }
+      if (!res.ok) { const e = await res.json(); throw new Error(e.auth_required ? "Please sign in above with your work email first." : (e.error ?? "Could not send.")); }
       const updated = (await res.json()) as Opp & { introduction?: Introduction };
       setFeed(updated.feed); lastTs.current = Math.max(0, ...updated.feed.map((f) => f.created));
       if (updated.introduction) setIntro(updated.introduction);

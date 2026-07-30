@@ -33,7 +33,7 @@ export default function Home() {
       <div className="mb-12 fade-rise">
         <p className="eyebrow mb-4">SASE, SSE and SD-WAN marketplace</p>
         <h1 id="page-h1" className="display mb-5" style={{ fontSize: "var(--text-display)", fontWeight: 600, letterSpacing: "-0.02em" }}>
-          Get competing bids from SASE and SD-WAN suppliers.
+          Get competing bids from SASE and SD-WAN vendors and service providers.
         </h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)] mb-8 max-w-2xl">
           Describe your project in about two minutes. Netify builds the RFP for you and publishes
@@ -46,7 +46,7 @@ export default function Home() {
           <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
           <li>2. Netify builds the RFP</li>
           <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
-          <li>3. Publish to curated suppliers</li>
+          <li>3. Publish to curated vendors</li>
           <li aria-hidden="true" className="text-[var(--ink-300,#d4d4d8)]">→</li>
           <li className="font-medium text-[var(--ink-900)]">4. Compare the bids</li>
         </ol>

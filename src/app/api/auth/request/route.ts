@@ -88,7 +88,7 @@ export async function POST(req: Request) {
         if (!admin) {
           try { await recordPendingRequest(email, domain); } catch { /* best effort */ }
           return Response.json(
-            { ok: true, message: "Thanks. Your registration request is queued. Your email domain isn't yet linked to a supplier profile, so the Netify team will review it (usually within one working day) and email your sign-in link once approved. No need to do anything else." },
+            { ok: true, message: "Thanks. Your registration request is queued. Your email domain isn't yet linked to a vendor profile, so the Netify team will review it (usually within one working day) and email your sign-in link once approved. No need to do anything else." },
             { headers: cors },
           );
         }

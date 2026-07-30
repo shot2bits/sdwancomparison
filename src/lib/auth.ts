@@ -48,7 +48,7 @@ export async function sendMagicLink(email: string, token: string, role: string, 
   // 15 July 2026).
   const isSubmission = returnTo.includes("welcome=submitting");
   const subject = isSubmission
-    ? "Confirm and submit your RFP to your matched suppliers"
+    ? "Confirm and submit your RFP to your matched vendors"
     : "Your Netify marketplace sign-in link";
   // The same-screen code block: entering the code on the page the person is
   // already on has the same effect as clicking the link (same token), which
@@ -57,7 +57,7 @@ export async function sendMagicLink(email: string, token: string, role: string, 
     ? `<p>On a different device, or the button not working? Enter this code on the Netify page you were on instead:</p><p style="font-size:26px;letter-spacing:6px;font-weight:bold">${code}</p><p style="font-size:12px;color:#555">The code is valid for 15 minutes and does exactly what the button does.</p>`
     : "";
   const html = isSubmission
-    ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched suppliers, who review your requirements and make contact through the Netify app. Your contact details are never shown to suppliers, and you can edit the RFP afterwards; suppliers always see the latest version.</p>${codeBlock}<p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
+    ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched vendors, who review your requirements and make contact through the Netify app. Your contact details are never shown to them, and you can edit the RFP afterwards; they always see the latest version.</p>${codeBlock}<p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
     : `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p>${codeBlock}<p>If you did not request this, ignore this email.</p>`;
   try {
     await fetch("https://api.resend.com/emails", {
@@ -92,7 +92,7 @@ export async function notifyNewSignup(
   if (!key) return false;
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
-  const status = role === "supplier" ? "Supplier" : "Buyer";
+  const status = role === "supplier" ? "Vendor" : "Buyer";
   // Attribution block (16 July 2026): every sign-up alert states where the
   // person came from and whether an RFP draft is attached, so a qualified
   // buyer and a wandering sign-in are distinguishable at a glance. Name and
@@ -164,11 +164,11 @@ export async function notifyCompanyAdded(email: string, name: string | undefined
  */
 export function requireSupplierFor(session: AuthSession | null, vendorSlug: string, cors: Record<string, string>): Response | null {
   if (!session) {
-    return Response.json({ error: "Sign in as this supplier to respond.", auth_required: true }, { status: 401, headers: cors });
+    return Response.json({ error: "Sign in as this vendor to respond.", auth_required: true }, { status: 401, headers: cors });
   }
   if (session.role === "netify") return null; // Netify relay can act for any vendor
   if (session.role === "supplier" && session.vendor_slug === vendorSlug) return null;
-  return Response.json({ error: "Your sign-in does not match this supplier.", auth_required: true }, { status: 403, headers: cors });
+  return Response.json({ error: "Your sign-in does not match this vendor.", auth_required: true }, { status: 403, headers: cors });
 }
 
 /**
@@ -185,7 +185,7 @@ export async function requireClaimedSupplierFor(
   cors: Record<string, string>,
 ): Promise<Response | null> {
   if (!session) {
-    return Response.json({ error: "Sign in as this supplier to respond.", auth_required: true }, { status: 401, headers: cors });
+    return Response.json({ error: "Sign in as this vendor to respond.", auth_required: true }, { status: 401, headers: cors });
   }
   if (session.role === "netify") return null; // Netify relay/admin acts for any vendor
   if (session.role === "supplier" && session.vendor_slug === vendorSlug) {
@@ -193,12 +193,12 @@ export async function requireClaimedSupplierFor(
     if (claim && claim.status === "approved") return null;
     return Response.json(
       {
-        error: "Claim your company profile and wait for Netify to approve it before acting as this supplier.",
+        error: "Claim your company profile and wait for Netify to approve it before acting as this vendor.",
         claim_required: true,
         claim_status: claim?.status ?? "unclaimed",
       },
       { status: 403, headers: cors },
     );
   }
-  return Response.json({ error: "Your sign-in does not match this supplier.", auth_required: true }, { status: 403, headers: cors });
+  return Response.json({ error: "Your sign-in does not match this vendor.", auth_required: true }, { status: 403, headers: cors });
 }

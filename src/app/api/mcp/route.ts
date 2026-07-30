@@ -266,7 +266,7 @@ export async function GET(req: Request) {
     protocolVersions: SUPPORTED_PROTOCOLS,
     endpoint: `${SITE_URL}/api/mcp/`,
     connector_page: `${SITE_URL}/connector`,
-    authentication: "none for research, drafting and estimating; write actions that reach named suppliers are token-gated per tool",
+    authentication: "none for research, drafting and estimating; write actions that reach named vendors are token-gated per tool",
     tools: annotatedTools().map((t) => t.name),
     resources: ESTATE_RESOURCES.map((r) => ({ uri: `${SITE_URL}${r.path}`, name: r.name })),
     resourceTemplates: RESOURCE_TEMPLATES.map((t) => t.uriTemplate),

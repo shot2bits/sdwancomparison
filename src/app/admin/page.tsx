@@ -13,7 +13,7 @@ export default function AdminPage() {
       <div className="mb-10 max-w-3xl">
         <p className="eyebrow mb-3">Internal</p>
         <h1 id="page-h1" className="mb-4">Marketplace admin</h1>
-        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Manage signed-in users, supplier email domains, the blocked-domain policy and pending access requests. Visible to Netify admins only.</p>
+        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Manage signed-in users, vendor email domains, the blocked-domain policy and pending access requests. Visible to Netify admins only.</p>
       </div>
       <AdminClient />
     </div>

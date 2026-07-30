@@ -100,7 +100,7 @@ export function deriveContinuationComparison(
     `Continue from this comparison · ${a.name} vs ${b.name}`,
     `We are deciding between ${a.name} and ${b.name} for our estate.`,
     [a.slug, b.slug],
-    `Both suppliers arrive pinned; the desk's evidence lines show where each stands against the requirements your own words create. Take the position to an RFI or a full RFP when you are ready.`,
+    `Both vendors arrive pinned; the desk's evidence lines show where each stands against the requirements your own words create. Take the position to an RFI or a full RFP when you are ready.`,
   );
 }
 
@@ -139,7 +139,7 @@ export function deriveContinuationSector(src: {
     mapped ?? SECTOR_GENERIC,
     src.pins ?? [],
     src.pins?.length
-      ? `The suppliers ranked on this page arrive pinned; your ${label.toLowerCase()} sector becomes part of the conversation from your first sentence.`
+      ? `The vendors ranked on this page arrive pinned; your ${label.toLowerCase()} sector becomes part of the conversation from your first sentence.`
       : `Your ${label.toLowerCase()} sector becomes part of the conversation from your first sentence; raise the position to an RFI or a full RFP, and nothing reaches the curated marketplace until you sign.`,
     src.sectorKey === "healthcare"
       ? "The workspace already understands healthcare: NHS DSPT, clinical change windows and HSCN are part of the conversation."
@@ -158,10 +158,10 @@ export function deriveContinuationTool(src: {
   return build(
     "tool_shortlist",
     `tool:shortlist:${src.slugs.slice(0, 5).join(",")}`,
-    `Continue from your shortlist · ${src.slugs.length >= 5 ? 5 : src.slugs.length} of ${src.considered} suppliers`,
+    `Continue from your shortlist · ${src.slugs.length >= 5 ? 5 : src.slugs.length} of ${src.considered} vendors`,
     `Take our shortlist (${shown.join(", ")}) to market.`,
     src.slugs,
-    `The shortlist's own criteria seed the position; nothing retyped, and the suppliers arrive pinned.`,
+    `The shortlist's own criteria seed the position; nothing retyped, and the vendors arrive pinned.`,
   );
 }
 
@@ -181,7 +181,7 @@ export function deriveContinuationCost(src: {
     `Continue from your estimate · ${src.sites} sites · ${src.users} users`,
     `We are budgeting ${src.managed ? "a managed network and security estate" : "a network and security estate"} for ${src.users.toLocaleString("en-GB")} users across ${src.sites} sites.`,
     [],
-    `Your scenario's own numbers seed the position; real supplier responses replace the model's bands.`,
+    `Your scenario's own numbers seed the position; real vendor responses replace the model's bands.`,
   );
 }
 

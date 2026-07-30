@@ -59,17 +59,17 @@ export const OUTCOMES: Record<string, { tone: "ok" | "no"; text: string }> = {
   rejected: { tone: "ok", text: "Rejected. The proposal stays on the record with your note." },
   judgement: {
     tone: "no",
-    text: "That field is the Netify View and cannot be proposed by a supplier. Summaries, differentiators, best-fit statements and watch-outs are written by Netify and are not open to the companies they describe. If one is factually wrong, propose a correction to the underlying fact and cite the page that proves it.",
+    text: "That field is the Netify View and cannot be proposed by the company it describes. Summaries, differentiators, best-fit statements and watch-outs are written by Netify and are not open to the companies they describe. If one is factually wrong, propose a correction to the underlying fact and cite the page that proves it.",
   },
   evidence: {
     tone: "no",
-    text: "A supplier proposal needs a source URL and the exact sentence on that page. We check the sentence is really there before anything is applied, which is the same standard we hold ourselves to.",
+    text: "A proposal from a vendor or service provider needs a source URL and the exact sentence on that page. We check the sentence is really there before anything is applied, which is the same standard we hold ourselves to.",
   },
-  signin: { tone: "no", text: "Sign in as this supplier, with an approved claim, to propose a change to its record." },
+  signin: { tone: "no", text: "Sign in as this vendor, with an approved claim, to propose a change to its record." },
   notadmin: { tone: "no", text: "Only Netify can approve or reject a proposal." },
   badfield: { tone: "no", text: "That is not an editable field." },
   missing: { tone: "no", text: "Give a field and a value." },
-  unknown_vendor: { tone: "no", text: "That supplier is not in the dataset." },
+  unknown_vendor: { tone: "no", text: "That vendor is not in the dataset." },
   notconfigured: { tone: "no", text: "The editing store is not configured, so nothing was saved." },
   failed: { tone: "no", text: "That did not save. Nothing was changed." },
 };
@@ -123,38 +123,38 @@ export type FieldGuidance = { question: string; standard: string; good: string; 
 
 export const GUIDANCE: Record<string, FieldGuidance> = {
   shortlist_summary: {
-    question: "In two or three sentences, what is this supplier actually for, and who should not buy it?",
+    question: "In two or three sentences, what is this vendor actually for, and who should not buy it?",
     standard: "Judgement, not description. It should be useful to a buyer who has already read the feature grid and still cannot choose.",
     good: "Strongest where a distributed retail or branch estate wants MPLS and local firewalls gone in one move. Weakest for an agent-only remote workforce, where paying for edge hardware and a private backbone buys nothing.",
     bad: "A leading provider of innovative SASE solutions for the modern enterprise.",
   },
   key_differentiators: {
-    question: "What can this supplier do that its closest three rivals cannot?",
+    question: "What can this vendor do that its closest three rivals cannot?",
     standard: "Each point must be falsifiable and specific. If a rival could claim the same sentence, it is not a differentiator.",
     good: "Licensed in-country PoPs in Beijing, Shanghai and Shenzhen, which is rare and matters for cross-border performance into mainland China.",
     bad: "Best-in-class performance and security.",
   },
   best_fit_for: {
-    question: "Describe the buyer who should shortlist this supplier first.",
+    question: "Describe the buyer who should shortlist this vendor first.",
     standard: "Name the shape of the estate, the team, and the constraint. Not the industry alone.",
     good: "Mid-market multi-site organisations with a lean IT team that wants one console for network and security rather than two.",
     bad: "Enterprises of all sizes.",
   },
   watch_outs: {
-    question: "What would make a buyer regret choosing this supplier, and what should they ask before signing?",
+    question: "What would make a buyer regret choosing this vendor, and what should they ask before signing?",
     standard: "This is the against-interest section and it is why we get cited. Vague hedging is worse than saying nothing. Name the specific question to ask.",
     good: "Tier-to-feature mapping is not published, so confirm in writing which tier includes DLP and CASB before comparing prices.",
     bad: "As with any provider, buyers should carefully evaluate their requirements.",
   },
   category: {
-    question: "Which of the agreed categories does this supplier belong in?",
+    question: "Which of the agreed categories does this vendor belong in?",
     standard: "One of the agreed set, mutually exclusive. Not a description.",
     good: "Managed provider and carrier",
     bad: "Global managed SD-WAN / SASE provider with security capability",
   },
   evidence_summary: {
-    question: "One sentence on what the sources collectively establish about this supplier.",
-    standard: "What the evidence supports, not what the supplier claims.",
+    question: "One sentence on what the sources collectively establish about this vendor.",
+    standard: "What the evidence supports, not what the vendor claims.",
     good: "Cato's own sources evidence a cloud-native private backbone and a Private PoP option; the pricing position rests on a single marketplace listing.",
     bad: "Cato is a leading SASE vendor.",
   },
@@ -163,8 +163,8 @@ export const GUIDANCE: Record<string, FieldGuidance> = {
 export const FACT_GUIDANCE: FieldGuidance = {
   question: "What is the correct value, and which page proves it?",
   standard:
-    "A source URL and the exact sentence on that page are both required. We check the sentence is really there before anything is applied. A supplier's own published page is the strongest source for a claim about itself.",
-  good: 'Value 180. Source: the supplier\'s network page. Quote: "Our backbone now spans 180 points of presence worldwide."',
+    "A source URL and the exact sentence on that page are both required. We check the sentence is really there before anything is applied. A vendor's own published page is the strongest source for a claim about itself.",
+  good: 'Value 180. Source: the vendor\'s network page. Quote: "Our backbone now spans 180 points of presence worldwide."',
   bad: "Value 180. Source: our internal roadmap.",
 };
 

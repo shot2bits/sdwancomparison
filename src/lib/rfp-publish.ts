@@ -62,8 +62,8 @@ export class SavedUnpublishedError extends Error {
   constructor(verification: BusinessVerification, returnUrl: string) {
     super(
       verification.failed_check === "mx" || verification.failed_check === "website"
-        ? "We could not verify that email address's company domain, so nothing has been published. Your requirement is saved and will keep. Publishing needs a working business email address because suppliers need to know which business they are responding to."
-        : "Publishing needs a business email address, because suppliers need to know which business they are responding to. Nothing has been published. Your requirement is saved and will keep; come back with your work address and it publishes without redoing anything.",
+        ? "We could not verify that email address's company domain, so nothing has been published. Your requirement is saved and will keep. Publishing needs a working business email address because vendors and service providers need to know which business they are responding to."
+        : "Publishing needs a business email address, because vendors and service providers need to know which business they are responding to. Nothing has been published. Your requirement is saved and will keep; come back with your work address and it publishes without redoing anything.",
     );
     this.verification = verification;
     this.return_url = returnUrl;
@@ -131,7 +131,7 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
   const sectionCount = activeSections.length;
   const summary =
     `The buyer has issued a full structured RFP (${questionCount} questions across ${sectionCount} sections, ` +
-    `Netify SASE Methodology v${p.methodology_version}). Suppliers respond to the RFP question set with evidence; ` +
+    `Netify SASE Methodology v${p.methodology_version}). Vendors respond to the RFP question set with evidence; ` +
     `pricing stays private to the buyer.`;
 
   // No two identical open titles on the board (Harry's Section 1 finding,
@@ -184,7 +184,7 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     buyer_size_band: p.buyer.organisation_size === "any" ? "" : p.buyer.organisation_size,
     compliance_requirements: p.buyer.compliance,
     response_mode: "full_rfp",
-    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${p.buyer.site_count ? ` across ${p.buyer.site_count} sites` : ""}. A full RFP with methodology-mapped questions has been issued; sign in as a verified supplier to register interest.`,
+    ai_summary: `Buyer seeks ${p.buyer.product_scope === "sse_only" ? "an SSE" : p.buyer.product_scope === "sdwan_only" ? "an SD-WAN" : "a SASE"} solution${p.buyer.operating_model === "managed" ? " as a managed service" : ""}${p.buyer.sector ? ` in the ${sectorLabel(p.buyer.sector)} sector` : ""}${p.buyer.site_count ? ` across ${p.buyer.site_count} sites` : ""}. A full RFP with methodology-mapped questions has been issued; sign in as a verified vendor to register interest.`,
     methodology_version: p.methodology_version,
     // The instrument's true shape rides the notice (Robert's R8 ruling,
     // 28 Jul 2026): section titles and counts only, never the questions;
@@ -303,8 +303,8 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
     from,
     to,
     reply_to: ownerEmail,
-    subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} suppliers`,
-    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Suppliers auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}${pinnedNoteFor(p)}<p><a href="${rfpUrl}">Open the RFP</a></p>`,
+    subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} vendors`,
+    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Vendors auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}${pinnedNoteFor(p)}<p><a href="${rfpUrl}">Open the RFP</a></p>`,
   });
 
   // Confirmation to the buyer, carrying the Market Report (18 July 2026):
@@ -317,7 +317,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       (report.assumptions.length ? `<p style="font-size:12px;color:#555">Band assumptions: ${report.assumptions.join(" ")}</p>` : "")
     : "";
   const gapsBlock = report && report.gaps.length
-    ? `<p><strong>Gaps worth closing</strong> (edit your RFP any time; suppliers always see the latest version):</p><ul>${report.gaps.map((g) => `<li>${g}</li>`).join("")}</ul>`
+    ? `<p><strong>Gaps worth closing</strong> (edit your RFP any time; they always see the latest version):</p><ul>${report.gaps.map((g) => `<li>${g}</li>`).join("")}</ul>`
     : "";
   // The confirmation email is the first interaction, not a receipt
   // (Robert's Ruling Three, 29 Jul 2026): it carries the requirement, the
@@ -337,11 +337,11 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
       `<p>Hello,</p>` +
       `<p><strong>What you published:</strong> "${p.title}"${questionCountForEmail ? `, a structured requirement of ${questionCountForEmail} questions across ${activeSectionsForEmail.length} section${activeSectionsForEmail.length === 1 ? "" : "s"}` : ""}. It is attached to your workspace and nothing about it can change without you.</p>` +
       `<p><strong>What happens to your information:</strong> ${PROMISES_PARAGRAPH} The vetting standard is published at <a href="${SITE_URL}/supplier-vetting-standard/">${SITE_URL}/supplier-vetting-standard/</a>.</p>` +
-      `<p><strong>What happens next:</strong> ${invited.length} evaluated supplier${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>` +
+      `<p><strong>What happens next:</strong> ${invited.length} evaluated vendor${invited.length === 1 ? "" : "s"} ${invited.length === 1 ? "has" : "have"} been matched and invited${invited.length ? ` (${invited.map((v) => v.name).join(", ")})` : ""}. Their responses arrive side by side in your workspace, and pricing stays private to you.${deadlineLine ? ` The response window closes on ${deadlineLine}.` : ""}</p>` +
       bandBlock +
       (report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : "") +
       pinnedNoteFor(p) +
-      `<p>To make replying fast, each invited supplier starts from a response Netify pre-drafted from its public-evidence evaluation of that vendor. They confirm, correct and add their pricing; capabilities Netify could not evidence are left blank for them to answer.</p>` +
+      `<p>To make replying fast, each invited vendor starts from a response Netify pre-drafted from its public-evidence evaluation of that company. They confirm, correct and add their pricing; capabilities Netify could not evidence are left blank for them to answer.</p>` +
       gapsBlock +
       `<p><strong>Your document:</strong> download your requirement as Word or PDF from your workspace to circulate internally.</p>` +
       `<p><a href="${rfpUrl}">Open your workspace</a></p>` +
@@ -368,7 +368,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     .reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
   if (activeQuestionCount === 0) {
     throw new Error(
-      "This RFP has no questions yet, so there is nothing for suppliers to respond to. Describe your project and generate the question set first; nothing has been sent.",
+      "This RFP has no questions yet, so there is nothing for vendors to respond to. Describe your project and generate the question set first; nothing has been sent.",
     );
   }
 
@@ -534,7 +534,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // 15 July 2026).
   let board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
   if (opts.list_on_board === false) {
-    board = { listed: false, reason: "Matched suppliers only; not listed on the public board." };
+    board = { listed: false, reason: "Matched vendors only; not listed on the public board." };
   } else {
     try {
       const listed = await listRfpOnBoard(published, sessionEmail);

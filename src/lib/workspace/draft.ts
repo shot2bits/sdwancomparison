@@ -611,7 +611,7 @@ export function briefModel(opts: {
     };
     paras.push([t(scopeSentence[buying])]);
     paras.push([
-      t("Publishing issues the Netify question set for this scope under methodology v2026.1, matched to the sector and compliance stated above, and invites the best-fit evaluated suppliers alongside any you pin below."),
+      t("Publishing issues the Netify question set for this scope under methodology v2026.1, matched to the sector and compliance stated above, and invites the best-fit evaluated vendors alongside any you pin below."),
     ]);
     blocks.push({ key: "scope", heading: "Scope of supply", paras });
   }

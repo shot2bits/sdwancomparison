@@ -82,10 +82,10 @@ export default async function OpportunityNoticePage({ params }: Props) {
           <div className="sticky top-6 space-y-4">
             {/* Supplier CTA */}
             <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
-              <p className="text-sm font-medium mb-1">Suppliers</p>
+              <p className="text-sm font-medium mb-1">Vendors and service providers</p>
               <p className="text-sm text-[var(--ink-600)] mb-3">
-                This {isSample ? "is what an open notice looks like" : "opportunity is open for supplier responses"}. Sign in as a
-                verified supplier to submit comments, pricing or clarification questions. Pricing stays private to the buyer.
+                This {isSample ? "is what an open notice looks like" : "opportunity is open for responses"}. Sign in as a
+                verified vendor to submit comments, pricing or clarification questions. Pricing stays private to the buyer.
               </p>
               {isSample ? (
                 <Link href="/opportunities/board" className="inline-flex w-full items-center justify-center rounded-full bg-amber-500 px-5 py-2.5 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">
@@ -97,7 +97,7 @@ export default async function OpportunityNoticePage({ params }: Props) {
                 </Link>
               )}
               <Link href="/for-suppliers#register" className="mt-2 inline-flex w-full items-center justify-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2.5 text-sm no-underline text-[var(--ink-800)] transition-colors hover:bg-[var(--ink-100,#f5f5f5)]">
-                Register as a verified supplier
+                Register as a verified vendor
               </Link>
             </div>
 

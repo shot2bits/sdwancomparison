@@ -18,7 +18,7 @@ export async function GET(req: Request, ctx: Ctx) {
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   const access = await requireRfpOwner(req, project);
-  if (!access.ok) return ownerRequired("Listing supplier connections", cors);
+  if (!access.ok) return ownerRequired("Listing vendor connections", cors);
   return Response.json({ connections: await listConnections(id) }, { headers: cors });
 }
 
@@ -38,7 +38,7 @@ export async function POST(req: Request, ctx: Ctx) {
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
 
   const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
-  if (!access.ok) return ownerRequired("Inviting or messaging suppliers", cors);
+  if (!access.ok) return ownerRequired("Inviting or messaging vendors", cors);
   if (!body.vendor_slug) return Response.json({ error: "vendor_slug is required." }, { status: 422, headers: cors });
 
   if (!body.action) {
@@ -48,7 +48,7 @@ export async function POST(req: Request, ctx: Ctx) {
   }
 
   const conn = await getConnection(id, body.vendor_slug);
-  if (!conn) return Response.json({ error: "Invite the supplier first." }, { status: 404, headers: cors });
+  if (!conn) return Response.json({ error: "Invite the vendor first." }, { status: 404, headers: cors });
   const type = body.action === "demo_request" ? "demo_request" : body.action === "contact_request" ? "contact_request" : "message";
   const defaults: Record<string, string> = {
     demo_request: "The buyer requests a product demonstration.",

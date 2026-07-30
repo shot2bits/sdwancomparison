@@ -166,7 +166,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   return (
     <div className="space-y-8">
       <div>
-        <p className="eyebrow mb-1">Supplier response</p>
+        <p className="eyebrow mb-1">Vendor response</p>
         <h1 className="text-2xl mb-1">{project.title}</h1>
         <p className="text-sm text-[var(--ink-500)]">Status: {project.status}. {open ? "Open for responses." : "Not yet open for responses."}</p>
       </div>
@@ -182,7 +182,7 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
           <div>
             <p className="eyebrow mb-1">NDA required</p>
             <h2 className="text-lg mb-1">Accept the buyer&rsquo;s NDA to see the full RFP</h2>
-            <p className="text-sm text-[var(--ink-700)]">The buyer has asked responding suppliers to accept a non-disclosure agreement before the full requirements and the response form are shown. Below is a summary of the opportunity.</p>
+            <p className="text-sm text-[var(--ink-700)]">The buyer has asked responders to accept a non-disclosure agreement before the full requirements and the response form are shown. Below is a summary of the opportunity.</p>
           </div>
 
           {t && (

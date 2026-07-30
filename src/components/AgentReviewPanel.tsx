@@ -136,7 +136,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
         <p className="text-sm text-[var(--ink-600)]">
           Bid reviews, goals and approvals belong to the buyer who created this RFP. If that is you, open this page
           from your builder (the Agent review button carries your private key), or sign in with the email you used
-          when creating the RFP. Suppliers respond via their response link instead.
+          when creating the RFP. Vendors respond via their response link instead.
         </p>
       </div>
     );
@@ -149,7 +149,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
       <p className="text-sm text-[var(--ink-600)]">
         Set a goal here and the agent reads incoming bids against it on a schedule: it flags risks, drafts
         clarification questions and posts a digest of what moved. Everything it wants to send queues below for your
-        approval; it never contacts a supplier itself.
+        approval; it never contacts a vendor itself.
       </p>
       {/* Goal */}
       <section className={card}>
@@ -161,7 +161,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
           <div>
             <label className="block text-sm font-medium mb-1">Must-haves (comma-separated)</label>
             <input value={mustHave} onChange={(e) => setMustHave(e.target.value)} placeholder="e.g. PCI DSS, zero trust network access, 24/7 UK support" className="w-full rounded border border-[var(--ink-300,#ccc)] p-2 text-sm" />
-            <p className="mt-1 text-xs text-[var(--ink-500)]">Plain English is fine — each one is matched against your compliance obligations, the methodology features and the supplier&apos;s answers.</p>
+            <p className="mt-1 text-xs text-[var(--ink-500)]">Plain English is fine. Each one is matched against your compliance obligations, the methodology features and the vendor&apos;s answers.</p>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Minimum bids wanted</label>
@@ -199,7 +199,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
               </li>
             ))}
           </ul>
-          <p className="text-xs text-[var(--ink-500)] mt-3">The agent monitors this RFP between your visits. It recommends and drafts, but never contacts a supplier without your approval.</p>
+          <p className="text-xs text-[var(--ink-500)] mt-3">The agent monitors this RFP between your visits. It recommends and drafts, but never contacts a vendor without your approval.</p>
         </section>
       )}
 
@@ -221,9 +221,9 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
       {/* Approval queue */}
       <section className={card}>
         <h3 className="font-semibold mb-1">Pending approvals {pending.length > 0 && <span className="ml-1 rounded-full bg-amber-500 text-zinc-950 text-xs px-2 py-0.5">{pending.length}</span>}</h3>
-        <p className="text-sm text-[var(--ink-600)] mb-3">Supplier-facing actions the agent has drafted. Nothing is sent until you approve it.</p>
+        <p className="text-sm text-[var(--ink-600)] mb-3">Vendor-facing actions the agent has drafted. Nothing is sent until you approve it.</p>
         {pending.length === 0 ? (
-          <p className="text-sm text-[var(--ink-500)]">No actions waiting. When a supplier bids, the agent drafts clarifications here.</p>
+          <p className="text-sm text-[var(--ink-500)]">No actions waiting. When a vendor bids, the agent drafts clarifications here.</p>
         ) : (
           <ul className="space-y-4">
             {pending.map((item) => (
@@ -236,7 +236,7 @@ export default function AgentReviewPanel({ rfpId }: { rfpId: string }) {
       {/* Bid reviews */}
       <section className={card}>
         <h3 className="font-semibold mb-1">Bid reviews</h3>
-        <p className="text-sm text-[var(--ink-600)] mb-3">Each review separates deterministic, evidence-based checks from the AI's qualitative second opinion. Netify&apos;s independent grade is shown distinctly from the supplier&apos;s own claim.</p>
+        <p className="text-sm text-[var(--ink-600)] mb-3">Each review separates deterministic, evidence-based checks from the AI's qualitative second opinion. Netify&apos;s independent grade is shown distinctly from the vendor&apos;s own claim.</p>
         {reviews.length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No bids reviewed yet.</p>
         ) : (
@@ -301,12 +301,12 @@ function ReviewCard({ rv }: { rv: Review }) {
       {/* Claim vs grade */}
       {rv.claim_vs_grade.length > 0 && (
         <div className="mb-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-500)] mb-1">Supplier claim vs Netify independent grade</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-500)] mb-1">Vendor claim vs Netify independent grade</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="text-left text-xs text-[var(--ink-500)]">
-                  <th className="py-1 pr-3">Feature</th><th className="py-1 pr-3">Supplier claim</th><th className="py-1 pr-3">Netify grade</th><th className="py-1">Flag</th>
+                  <th className="py-1 pr-3">Feature</th><th className="py-1 pr-3">Vendor claim</th><th className="py-1 pr-3">Netify grade</th><th className="py-1">Flag</th>
                 </tr>
               </thead>
               <tbody>

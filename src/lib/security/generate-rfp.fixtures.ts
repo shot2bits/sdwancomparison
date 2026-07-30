@@ -300,7 +300,7 @@ export async function runGenerateRfpTests(): Promise<GenerateTestResult> {
     if (h2.label !== "Ready for publication" || h2.tone !== "green") throw new Error(`gap-clear drafted project not green/ready: ${h2.label}`);
     // Published states: awaiting vs arriving; evaluation and completion.
     const pub: ProjectDetails = { ...clear, phase: "published", status: "published" };
-    if (projectHealth(pub, { responseCount: 0 }).label !== "Awaiting supplier responses") throw new Error("published+0 not awaiting");
+    if (projectHealth(pub, { responseCount: 0 }).label !== "Awaiting vendor responses") throw new Error("published+0 not awaiting");
     if (projectHealth(pub, { responseCount: 2 }).tone !== "green") throw new Error("published+2 not green");
     const evalp: ProjectDetails = { ...clear, phase: "evaluation", status: "evaluation" };
     if (projectHealth(evalp, { responseCount: 3 }).label !== "Evaluating bids") throw new Error("evaluation not evaluating-bids");

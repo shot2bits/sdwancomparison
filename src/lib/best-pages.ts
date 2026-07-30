@@ -149,15 +149,15 @@ export const BEST_PAGES: BestPage[] = [
       },
       {
         q: "SASE or SD-WAN: what is right for the NHS?",
-        a: "They solve different halves of the same problem. SD-WAN replaces or augments legacy WAN connectivity across hospital, clinic and administrative sites, which matters during HSCN transition and MPLS contract end. SASE adds cloud-delivered security, zero trust network access, secure web gateway and related controls, for clinical and hybrid staff working from any location. Many NHS bodies phase SD-WAN first and add the security service edge after, or procure both together as a managed SASE service. The practical answer is to state both scopes in the requirement so suppliers price the journey rather than a single endpoint.",
+        a: "They solve different halves of the same problem. SD-WAN replaces or augments legacy WAN connectivity across hospital, clinic and administrative sites, which matters during HSCN transition and MPLS contract end. SASE adds cloud-delivered security, zero trust network access, secure web gateway and related controls, for clinical and hybrid staff working from any location. Many NHS bodies phase SD-WAN first and add the security service edge after, or procure both together as a managed SASE service. The practical answer is to state both scopes in the requirement so bidders price the journey rather than a single endpoint.",
       },
       {
         q: "How do UK public sector bodies usually procure SD-WAN and SASE?",
-        a: "Most buy through established public procurement frameworks or run a further competition, evaluating structured supplier responses against published criteria. A clear requirements document is the common thread: it defines scope, sites, compliance needs, evaluation weighting and evidence requests. The Netify RFP Builder generates one from a guided set of questions, and the output can be used inside a framework competition or a direct procurement.",
+        a: "Most buy through established public procurement frameworks or run a further competition, evaluating structured vendor responses against published criteria. A clear requirements document is the common thread: it defines scope, sites, compliance needs, evaluation weighting and evidence requests. The Netify RFP Builder generates one from a guided set of questions, and the output can be used inside a framework competition or a direct procurement.",
       },
       {
         q: "Do these providers offer UK data residency and UK-based support?",
-        a: "Every provider in this ranking has confirmed UK and Ireland coverage, but residency commitments, UK points of presence and the location of monitoring and support teams vary by provider and by service tier. Treat each as an evidence item: ask for contractual data residency options, named NOC and SOC locations and UK support hours in the supplier response, rather than relying on marketing statements.",
+        a: "Every provider in this ranking has confirmed UK and Ireland coverage, but residency commitments, UK points of presence and the location of monitoring and support teams vary by provider and by service tier. Treat each as an evidence item: ask for contractual data residency options, named NOC and SOC locations and UK support hours in the vendor response, rather than relying on marketing statements.",
       },
     ],
   },

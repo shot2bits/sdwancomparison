@@ -19,7 +19,7 @@ const STAGES = [
   { key: "describe", label: "Describe" },
   { key: "review", label: "Review your RFP" },
   { key: "publish", label: "Submit" },
-  { key: "responses", label: "Supplier responses" },
+  { key: "responses", label: "Vendor responses" },
 ] as const;
 
 export type FlowStage = (typeof STAGES)[number]["key"];

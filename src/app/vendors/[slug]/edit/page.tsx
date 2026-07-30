@@ -92,7 +92,7 @@ function Field({
         {lane === "fact" && (
           <>
             <label className="block">
-              <span className="text-xs font-medium block mb-1">Source URL, required for a supplier proposal</span>
+              <span className="text-xs font-medium block mb-1">Source URL, required for a proposal from the company</span>
               <input name="source_url" placeholder="https://" className="w-full text-sm border border-[var(--ink-300,#c9ced6)] rounded p-2" />
             </label>
             <label className="block">
@@ -150,7 +150,7 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
           : "Changes are proposed here, never applied directly. Netify reviews each one, checks the sentence you cite against the page, and publishes it at the next build or explains why not."}
       </p>
       <p className="text-sm text-[var(--ink-600,#5b636e)] max-w-3xl mb-8">
-        Everything you change here reaches this supplier&apos;s profile, its alternatives page, the
+        Everything you change here reaches this company&apos;s profile, its alternatives page, the
         comparison pages it appears in and every ranked list it qualifies for, because they are all
         generated from this one record.{" "}
         <Link href={`/vendors/${slug}`} className="underline">
@@ -162,8 +162,8 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
       <section className="mb-10">
         <h2 className="mb-1 text-xl">Facts</h2>
         <p className="text-sm text-[var(--ink-700)] mb-4 max-w-3xl">
-          Open to the supplier as well as to Netify. A supplier proposal must carry a source and the
-          sentence on it, which is the same standard we hold ourselves to.
+          Open to the vendor or service provider as well as to Netify. Their proposal must carry a source
+          and the sentence on it, which is the same standard we hold ourselves to.
         </p>
         {FACT_FIELDS.filter((f) => classifyField(f) === "fact").map((f) => (
           <Field key={f} vendorSlug={slug} field={f} current={str(f)} lane="fact" netify={netify} />
@@ -175,7 +175,7 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
         <p className="text-sm text-[var(--ink-700)] mb-4 max-w-3xl">
           Written by Netify and never by the company it describes, not even as a suggestion. These
           are the judgements a buyer cannot get from a datasheet, and the reason an assistant cites
-          this page rather than a vendor&apos;s own. A supplier attempting to edit them is refused
+          this page rather than a vendor&apos;s own. A vendor attempting to edit them is refused
           by the server, not just by this screen.
         </p>
         {JUDGEMENT_FIELDS.map((f) => (
@@ -191,7 +191,7 @@ export default async function VendorEditPage({ params, searchParams }: Props) {
         <Link href="/admin/record-queue" className="underline">
           Review queue
         </Link>{" "}
-        for supplier proposals.
+        for proposals from vendors and service providers.
       </p>
     </div>
   );

@@ -34,7 +34,7 @@ async function sendDraftLink(email: string, p: { id: string; title: string; mana
       body: JSON.stringify({
         from, to: email,
         subject: "Your Netify RFP draft link",
-        html: `<p>Here is the link back to your RFP draft "${p.title}".</p>${reportLine ? `<p>${reportLine}</p>` : ""}<p><a href="${link}">Reopen your draft</a> on any device — the link carries your private manage key, so keep it to yourself.</p><p>When you are ready to send the RFP to suppliers, sign in with this address and press Publish. Publishing is free and returns your full Netify Market Report with the complete supplier list and your document as Word and PDF.</p><p>If you did not request this, ignore this email.</p>`,
+        html: `<p>Here is the link back to your RFP draft "${p.title}".</p>${reportLine ? `<p>${reportLine}</p>` : ""}<p><a href="${link}">Reopen your draft</a> on any device. The link carries your private manage key, so keep it to yourself.</p><p>When you are ready to send the RFP to vendors and service providers, sign in with this address and press Publish. Publishing is free and returns your full Netify Market Report with the complete vendor list and your document as Word and PDF.</p><p>If you did not request this, ignore this email.</p>`,
       }),
     });
     return true;
@@ -104,7 +104,7 @@ export async function POST(req: Request, ctx: Ctx) {
   try {
     const rep = buildMarketReport(project);
     const band = rep.estimate ? `an indicative market band of £${rep.estimate.monthly_band_gbp[0].toLocaleString("en-GB")} to £${rep.estimate.monthly_band_gbp[1].toLocaleString("en-GB")} per month` : "an indicative market band";
-    reportLine = `Your Market Report preview: ${rep.matched.count} matched supplier${rep.matched.count === 1 ? "" : "s"} on the Netify marketplace and ${band} for a project like yours.`;
+    reportLine = `Your Market Report preview: ${rep.matched.count} matched vendor${rep.matched.count === 1 ? "" : "s"} on the Netify marketplace and ${band} for a project like yours.`;
   } catch { /* the email still sends without the numbers */ }
   const sent = await sendDraftLink(email, project, reportLine);
   if (sent) { try { await kvSetJson(limitKey, Date.now()); } catch { /* best effort */ } }

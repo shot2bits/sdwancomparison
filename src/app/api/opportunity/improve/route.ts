@@ -64,16 +64,16 @@ export async function POST(req: Request) {
   const tool = {
     name: "improve_notice",
     description:
-      "Return an improved project notice. Use ONLY facts present in the draft. Anything you infer goes in assumptions. Anything missing that suppliers would need goes in gaps. Never invent sites, budgets, technologies, compliance obligations or dates.",
+      "Return an improved project notice. Use ONLY facts present in the draft. Anything you infer goes in assumptions. Anything missing that vendors would need goes in gaps. Never invent sites, budgets, technologies, compliance obligations or dates.",
     input_schema: {
       type: "object" as const,
       properties: {
         title: { type: "string", description: "Clear public notice title, max 90 characters, no buyer name if the draft has none." },
         summary: { type: "string", description: "Improved public summary in the buyer's voice, 2-4 sentences, plain English, preserving every stated fact and adding none." },
         ai_summary: { type: "string", description: "One-paragraph third-person AI-readable summary: what the buyer needs, who should respond, what evidence is expected. Note that pricing responses stay private to the buyer." },
-        suggested_evidence: { type: "array", items: { type: "string", enum: evidenceKeys }, description: "Evidence suppliers should be asked to provide, chosen from the catalogue keys only." },
+        suggested_evidence: { type: "array", items: { type: "string", enum: evidenceKeys }, description: "Evidence vendors should be asked to provide, chosen from the catalogue keys only." },
         assumptions: { type: "array", items: { type: "string" }, description: "Explicit assumptions made while rewriting, each starting 'Assumed:'." },
-        gaps: { type: "array", items: { type: "string" }, description: "Missing information suppliers would likely need before responding, most critical first." },
+        gaps: { type: "array", items: { type: "string" }, description: "Missing information vendors would likely need before responding, most critical first." },
         recommend_full_rfp: { type: "boolean", description: "True only if the need is complex enough (multi-category scope, formal evaluation, compliance-heavy) that a structured RFP would serve the buyer better than a notice." },
         recommend_reason: { type: "string", description: "One sentence explaining the routing recommendation." },
       },

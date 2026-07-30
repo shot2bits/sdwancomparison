@@ -110,7 +110,7 @@ export function publicNoticeQualityGate(n: QualityGateInput): string[] {
   const summary = String(n.summary ?? "").trim();
   if (TITLE_MARKERS.test(title)) failures.push('title: reads as test or placeholder content. A public notice needs a real project title.');
   if (org && TITLE_MARKERS.test(org)) failures.push('buyer_org: reads as test or placeholder content. Name the organisation, or publish as anonymous.');
-  if (GIBBERISH_MARKERS.test(summary)) failures.push('summary: contains placeholder or test wording. Describe the real need; suppliers read this verbatim.');
+  if (GIBBERISH_MARKERS.test(summary)) failures.push('summary: contains placeholder or test wording. Describe the real need; vendors read this verbatim.');
 
   if (typeof n.sites === "number" && Number.isFinite(n.sites) && (n.sites < 1 || n.sites > 20000)) {
     failures.push(`sites: ${n.sites} is outside the plausible estate range (1 to 20,000). State the real count or leave it unstated.`);
@@ -119,7 +119,7 @@ export function publicNoticeQualityGate(n: QualityGateInput): string[] {
   const rd = toEpoch(n.response_deadline ?? null);
   const dt = toEpoch(n.decision_target ?? null);
   const gl = toEpoch(n.go_live_target ?? null);
-  if (rd != null && dt != null && rd > dt) failures.push("dates: the response deadline falls after the decision target. Suppliers cannot respond to a decision already due.");
+  if (rd != null && dt != null && rd > dt) failures.push("dates: the response deadline falls after the decision target. Vendors cannot respond to a decision already due.");
   if (dt != null && gl != null && dt > gl) failures.push("dates: the decision target falls after the go-live target. The plan decides before it goes live.");
   if (rd != null && gl != null && rd > gl) failures.push("dates: the response deadline falls after the go-live target.");
 
@@ -191,7 +191,7 @@ export function normaliseNoticeDraft(input: NoticeDraftInput): { notice: Normali
   if (notice.scope.length === 0) critical.push("scope: pick at least one category (underlay_circuits, sd_wan, sse, sase, managed_service, firewall_fwaas, ztna, swg, casb, connectivity, managed_security, not_sure).");
   if (notice.summary.trim().length < 40) critical.push("summary: describe the need in plain English (a few sentences).");
   if (!notice.title) critical.push("title: a clear one-line project title.");
-  if (notice.regions.length === 0) critical.push("regions: where suppliers must deliver.");
+  if (notice.regions.length === 0) critical.push("regions: where vendors must deliver.");
   // The public quality gate (Robert's ruling, 28 Jul 2026): no test data,
   // coherent figures, sector stated or explicitly not stated. Reported as
   // critical gaps so every client, web wizard or agent, hears the same
@@ -199,10 +199,10 @@ export function normaliseNoticeDraft(input: NoticeDraftInput): { notice: Normali
   critical.push(...publicNoticeQualityGate(notice));
 
   const recommended: string[] = [];
-  if (notice.sites == null && !notice.users_band) recommended.push("sites or users_band: scale is the first thing every supplier asks.");
+  if (notice.sites == null && !notice.users_band) recommended.push("sites or users_band: scale is the first thing every vendor asks.");
   if (!notice.response_deadline) recommended.push("response_deadline: undated notices get slower responses.");
   if (notice.evidence_requested.length === 0) recommended.push("evidence_requested: asking for evidence up front makes replies comparable.");
-  if (notice.evaluation_priorities.length === 0) recommended.push("evaluation_priorities: tell suppliers what will win.");
+  if (notice.evaluation_priorities.length === 0) recommended.push("evaluation_priorities: tell vendors what will win.");
   if (!notice.current_environment) recommended.push("current_environment: what you run today (contracts ending, known pain).");
 
   // Denominators reflect the checks actually run (4 baseline critical checks

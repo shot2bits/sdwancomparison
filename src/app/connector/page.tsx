@@ -44,12 +44,12 @@ const TOOL_GROUPS: { name: string; blurb: string; tools: string[] }[] = [
   },
   {
     name: "Create and publish",
-    blurb: "Draft project notices and RFPs without an account. Publishing to suppliers requires the buyer to sign in on the website; the assistant hands over a link.",
+    blurb: "Draft project notices and RFPs without an account. Publishing to vendors and service providers requires the buyer to sign in on the website; the assistant hands over a link.",
     tools: ["draft_opportunity_notice", "validate_opportunity_notice", "generate_rfp_from_opportunity", "publish_rfp"],
   },
   {
-    name: "Respond as a supplier",
-    blurb: "Invited suppliers hold a share token. Netify pre-drafts evidence answers so a supplier agent starts from a grounded draft, never a blank form.",
+    name: "Respond as a vendor",
+    blurb: "Invited vendors and service providers hold a share token. Netify pre-drafts evidence answers so their agent starts from a grounded draft, never a blank form.",
     tools: ["list_opportunities", "get_opportunity", "opportunity_inbox", "opportunity_respond", "get_rfp", "list_rfp_questions", "get_rfp_evidence_draft", "respond_to_rfp", "get_rfp_status", "supplier_inbox", "supplier_reply"],
   },
 ];
@@ -105,8 +105,8 @@ export default function ConnectorPage() {
       <p id="answer" className="max-w-3xl text-lg text-[var(--ink-700)]">
         Add one URL to Claude, ChatGPT or Copilot and your assistant can compare 30 evidence-graded SASE and
         SD-WAN vendors, build ranked shortlists, estimate cost and TCO bands, and draft a complete RFP on the
-        Netify marketplace. Research needs no account. Publishing to suppliers always ends with you signing in
-        on netify.co.uk, so nothing reaches a supplier without your say-so.
+        Netify marketplace. Research needs no account. Publishing always ends with you signing in on
+        netify.co.uk, so nothing reaches a vendor or service provider without your say-so.
       </p>
 
       <div className="mt-6 rounded-sm border border-amber-300 bg-amber-50 p-4">
@@ -194,7 +194,7 @@ export default function ConnectorPage() {
         <h2 className="text-xl mb-2">Privacy and safety, plainly</h2>
         <ul className="list-disc space-y-1.5 pl-5 text-sm text-[var(--ink-700)]">
           <li>Research, drafting and estimating are anonymous. No account, no tracking identity, no stored conversation data on Netify&rsquo;s side.</li>
-          <li>Actions that reach named suppliers require tokens only the rightful holder has, and publishing an RFP always requires the buyer to sign in on netify.co.uk with a business email.</li>
+          <li>Actions that reach named vendors require tokens only the rightful holder has, and publishing an RFP always requires the buyer to sign in on netify.co.uk with a business email.</li>
           <li>Pricing amounts are private to the posting buyer. This server never returns one party&rsquo;s pricing to another.</li>
           <li>Capability answers come from Netify&rsquo;s public-evidence evaluation with dates stated; unconfirmed capabilities are labelled unknown, never guessed.</li>
           <li>Full policies: <a href="https://netify.co.uk/privacy-policy/" className="underline">privacy</a>, <a href="https://netify.co.uk/terms-conditions/" className="underline">terms</a>. Support: support@netify.com.</li>
@@ -208,7 +208,7 @@ export default function ConnectorPage() {
           <Link href="/shortlist" className="underline">shortlist builder</Link>, the{" "}
           <Link href="/cost-estimator" className="underline">cost and TCO estimator</Link> and the{" "}
           <Link href="/rfp-builder/new" className="underline">RFP Builder</Link>, which creates and publishes a
-          complete RFP in about two minutes, free, with supplier responses side by side and pricing private to
+          complete RFP in about two minutes, free, with vendor responses side by side and pricing private to
           you.
         </p>
       </section>

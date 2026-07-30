@@ -13,7 +13,7 @@ export default function NotFound() {
       <p className="mb-6 max-w-xl text-sm text-[var(--ink-700)]">
         The link you followed is broken or the page has moved. The fastest way forward: describe your project
         once and Netify assembles a complete SASE or SD-WAN RFP in about two minutes, free, with structured
-        supplier responses and pricing kept private to you.
+        vendor responses and pricing kept private to you.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <Link

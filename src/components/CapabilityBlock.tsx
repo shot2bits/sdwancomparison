@@ -43,31 +43,31 @@ import { getShortlistFaqSchema } from "@/lib/structured-data";
 const FAQS: { q: string; a: string }[] = [
   {
     q: "What is Netify?",
-    a: "Netify is a procurement platform for SASE, SD-WAN, SSE and managed network security. It does four jobs in one place. Netify builds your requirement into a project notice, an RFI or a full RFP. Netify compares vendors and service providers on graded evidence rather than on marketing claims. Netify publishes your opportunity anonymously to a marketplace of evaluated suppliers. And Netify brings supplier responses back side by side so you can compare them. 30 suppliers are graded on 40 capabilities, every grade carrying the date it was verified and the source it came from.",
+    a: "Netify is a procurement platform for SASE, SD-WAN, SSE and managed network security. It does four jobs in one place. Netify builds your requirement into a project notice, an RFI or a full RFP. Netify compares vendors and service providers on graded evidence rather than on marketing claims. Netify publishes your opportunity anonymously to a marketplace of evaluated vendors. And Netify brings their responses back side by side so you can compare them. 30 vendors and service providers are graded on 40 capabilities, every grade carrying the date it was verified and the source it came from.",
   },
   {
     q: "Can I use Netify to run a SASE or SD-WAN RFP or RFI?",
-    a: "Yes. Netify writes your requirement up as a document you can download as Word or PDF. What it comes out as depends on what the requirement has earned: a project notice for a straightforward need, an RFI when you are still gathering information, or a full RFP once you have set priorities and made a commercial claim. You do not choose a template and you do not start from a blank page. Netify then publishes it to suppliers and collects their responses against it.",
+    a: "Yes. Netify writes your requirement up as a document you can download as Word or PDF. What it comes out as depends on what the requirement has earned: a project notice for a straightforward need, an RFI when you are still gathering information, or a full RFP once you have set priorities and made a commercial claim. You do not choose a template and you do not start from a blank page. Netify then publishes it to vendors and service providers, and collects their responses against it.",
   },
   {
     q: "How does Netify compare vendors and service providers?",
-    a: "Netify grades 30 suppliers on 40 capabilities and ranks them against the requirement you have described. Every grade carries the date it was verified and the source it came from, and a supplier moves only when its own evidence changes. Where a capability is not published, the record says so rather than guessing. Netify publishes vendor and provider comparisons you can read in full, including the sources behind each grade and the claims that conflict.",
+    a: "Netify grades 30 vendors and service providers on 40 capabilities and ranks them against the requirement you have described. Every grade carries the date it was verified and the source it came from, and a vendor moves only when its own evidence changes. Where a capability is not published, the record says so rather than guessing. Netify publishes vendor and provider comparisons you can read in full, including the sources behind each grade and the claims that conflict.",
   },
   {
     q: "What do I get when I publish a requirement?",
-    a: "Six things. Vendors and service providers ranked against your requirement, with the reason each one is in or out. An indicative price band, computed under the Netify TCO methodology. Your requirement written up as a project notice, an RFI or a full RFP, ready to download as Word or PDF. Your opportunity posted anonymously to the public opportunities board. Full detail released to signed in approved vendors and service providers, while the public never sees your company name or your contact details. And supplier responses side by side, with pricing private to you.",
+    a: "Six things. Vendors and service providers ranked against your requirement, with the reason each one is in or out. An indicative price band, computed under the Netify TCO methodology. Your requirement written up as a project notice, an RFI or a full RFP, ready to download as Word or PDF. Your opportunity posted anonymously to the public opportunities board. Full detail released to signed in approved vendors and service providers, while the public never sees your company name or your contact details. And their responses side by side, with pricing private to you.",
   },
   {
     q: "Can Netify shortlist SASE providers for a multinational organisation?",
-    a: "Yes. Describe the estate in your own words, including the countries and regions you operate in, and Netify ranks suppliers on graded evidence of coverage in those places rather than on a marketing claim. Multi-site and multi-country estates are the normal case here, not the exception. Netify serves global enterprises, multinational organisations and mid-market companies on the same engine.",
+    a: "Yes. Describe the estate in your own words, including the countries and regions you operate in, and Netify ranks vendors and service providers on graded evidence of coverage in those places rather than on a marketing claim. Multi-site and multi-country estates are the normal case here, not the exception. Netify serves global enterprises, multinational organisations and mid-market companies on the same engine.",
   },
   {
     q: "Does Netify cover managed SD-WAN and managed SASE, or only the technology vendors?",
-    a: "Both, and Netify grades the difference. 30 suppliers are recorded, some of which build the technology, some of which run it as a managed service, and some of which do both. If you want managed SD-WAN or managed SASE delivered as a service, say so and the ranking weights the suppliers who genuinely operate it. Each supplier record names which it is. Security service edge, or SSE, is graded on the same records: 17 of the 30 build their own SSE and 13 run a partner's, which the record states either way.",
+    a: "Both, and Netify grades the difference. 30 vendors and service providers are recorded, some of which build the technology, some of which run it as a managed service, and some of which do both. If you want managed SD-WAN or managed SASE delivered as a service, say so and the ranking weights the ones who genuinely operate it. Each record names which it is. Security service edge, or SSE, is graded on the same records: 17 of the 30 build their own SSE and 13 run a partner's, which the record states either way.",
   },
   {
-    q: "Can I get an indicative price before I speak to any supplier?",
-    a: "Yes. Netify computes an indicative price band under its own TCO methodology, based on the sites, users, scope and locations you have described. It is a band rather than a quote, because a real price depends on the supplier and the detail. Firm pricing comes from the suppliers themselves, in their responses, and stays private to you.",
+    q: "Can I get an indicative price before I speak to any vendor?",
+    a: "Yes. Netify computes an indicative price band under its own TCO methodology, based on the sites, users, scope and locations you have described. It is a band rather than a quote, because a real price depends on the vendor and the detail. Firm pricing comes from the vendors and service providers themselves, in their responses, and stays private to you.",
   },
   {
     q: "Which sectors and situations does Netify cover?",
@@ -75,15 +75,15 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Who sees my project, and does my company name go public?",
-    a: "Netify publishes your notice anonymously. The public opportunities board and search engines see the shape of the requirement, such as sector and size, and never your company name or your contact details. Signed in approved vendors and service providers see the full detail. You choose which suppliers receive your contact details, and when.",
+    a: "Netify publishes your notice anonymously. The public opportunities board and search engines see the shape of the requirement, such as sector and size, and never your company name or your contact details. Signed in approved vendors and service providers see the full detail. You choose which of them receive your contact details, and when.",
   },
   {
     q: "Do I need an account to use Netify?",
-    a: "No. You can describe your project, build the requirement and see who fits without an account. Signing in is needed only to publish, because publishing reaches named suppliers and puts a notice on the board, so it has to be a verified person. A work email address is required for that.",
+    a: "No. You can describe your project, build the requirement and see who fits without an account. Signing in is needed only to publish, because publishing puts a notice on the board and reaches named vendors and service providers, so it has to be a verified person. A work email address is required for that.",
   },
   {
     q: "Can an AI agent use Netify on our behalf?",
-    a: "Yes. Netify exposes its research and drafting tools over MCP, so your organisation's approved AI agent can research the market, draft a requirement, compare suppliers and monitor responses. Publishing, selecting and awarding stay with your team. An agent never signs anything.",
+    a: "Yes. Netify exposes its research and drafting tools over MCP, so your organisation's approved AI agent can research the market, draft a requirement, compare vendors and monitor responses. Publishing, selecting and awarding stay with your team. An agent never signs anything.",
   },
 ];
 
@@ -106,7 +106,7 @@ export default function CapabilityBlock() {
         What Netify does
       </h2>
       <p className="m-0 mt-1.5 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
-        One description becomes a shortlist, an indicative price and a document you can send to suppliers.
+        One description becomes a shortlist, an indicative price and a document you can send to vendors and service providers.
       </p>
       <div className="mt-3">
         {FAQS.map((f) => (

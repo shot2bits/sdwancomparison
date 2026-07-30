@@ -103,10 +103,10 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: "For suppliers",
+    label: "For vendors and providers",
     items: [
       { label: "Open opportunities", href: "/sase/opportunities/board/" },
-      { label: "Supplier sign-in", href: "/sase/supplier/" },
+      { label: "Vendor sign-in", href: "/sase/supplier/" },
     ],
   },
 ];
@@ -168,12 +168,12 @@ export const MEGA_GROUPS: MegaGroup[] = [
     label: "Compare providers",
     columns: 2,
     items: [
-      { label: "Build your shortlist", href: "/sase/shortlist/", desc: "Score every evaluated supplier against your exact requirements, or describe them and let the advisor rank." },
-      { label: "Evaluated providers", href: "/sase/vendors/", desc: "30 suppliers graded on 40 capabilities, every grade dated and sourced." },
+      { label: "Build your shortlist", href: "/sase/shortlist/", desc: "Score every evaluated vendor against your exact requirements, or describe them and let the advisor rank." },
+      { label: "Evaluated providers", href: "/sase/vendors/", desc: "30 vendors and service providers graded on 40 capabilities, every grade dated and sourced." },
       { label: "Provider comparisons", href: "/vendor-comparison/", desc: "Head-to-head capability comparisons, graded from evidence." },
       { label: "Best providers by sector", href: "/sase/best/", desc: "Ranked shortlists for 20 sectors and situations, from healthcare to MPLS migration." },
-      { label: "All listed suppliers", href: "/marketplace/", desc: "The wider supplier directory, including managed service providers." },
-      { label: "What the market is buying", href: "/sase/demand/", desc: "Enterprise demand and supplier interest, measured." },
+      { label: "All listed vendors", href: "/marketplace/", desc: "The wider directory, including managed service providers." },
+      { label: "What the market is buying", href: "/sase/demand/", desc: "Enterprise demand and vendor interest, measured." },
     ],
   },
   {

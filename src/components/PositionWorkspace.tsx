@@ -67,7 +67,7 @@ const DRAFT_KEY = "netify_workspace_draft_v1";
 const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 const WORKSPACE_AGREEMENT_TEXT =
-  "Publish this requirement: Netify lists an anonymous notice on the open board and invites the best-fit evaluated suppliers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
+  "Publish this requirement: Netify lists an anonymous notice on the open board and invites the best-fit evaluated vendors and service providers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
 
 // The four intent seeds: the actual top grounding queries (spec section 3).
 const SEEDS: Array<{ label: string; text: string }> = [
@@ -208,7 +208,7 @@ export default function PositionWorkspace() {
         if (!d) return;
         setMarket(d);
         setCrew([
-          { t: "today", text: `Scout: ${d.counts.vendors} suppliers evaluated · latest ${fmtDate(d.latest_evaluation)}` },
+          { t: "today", text: `Scout: ${d.counts.vendors} vendors evaluated · latest ${fmtDate(d.latest_evaluation)}` },
           { t: "now", text: `Registrar: ${d.counts.notices} notice${d.counts.notices === 1 ? "" : "s"} genuinely open on the board` },
           { t: "now", text: "holding, honestly. nothing here pulses that is not open." },
         ]);
@@ -373,7 +373,7 @@ export default function PositionWorkspace() {
         .then((d) => {
           if (d && d.ok) {
             setFit(d as FitState);
-            if (d.mode === "graded") crewLog(`Scout: ${d.count} of ${d.total} evaluated suppliers fit this scope · dates on approach`);
+            if (d.mode === "graded") crewLog(`Scout: ${d.count} of ${d.total} evaluated vendors fit this scope · dates on approach`);
           }
         })
         .catch(() => {});
@@ -523,7 +523,7 @@ export default function PositionWorkspace() {
         setPublished({ invited, boardId: data.board?.opportunity_id });
         setNeedAuth(false);
         crewLog(`Registrar: signature recorded, verbatim · notice live on the board`, "em");
-        crewLog(`Scout: ${invited.length} supplier${invited.length === 1 ? "" : "s"} invited · responses arrive against your position`);
+        crewLog(`Scout: ${invited.length} vendor${invited.length === 1 ? "" : "s"} invited · responses arrive against your position`);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
         try { window.localStorage.removeItem(DRAFT_KEY); } catch { /* done */ }
       } else if (data.auth_required) {
@@ -533,7 +533,7 @@ export default function PositionWorkspace() {
         throw new Error(data.error || "Could not publish; try again.");
       }
     } catch (e) {
-      setSignError(e instanceof Error ? e.message : "Something failed; nothing has been sent to suppliers. Try again.");
+      setSignError(e instanceof Error ? e.message : "Something failed; nothing has been sent to vendors. Try again.");
     } finally {
       setSignStage(null);
     }
@@ -685,7 +685,7 @@ export default function PositionWorkspace() {
                 ? "Published. Breath marks your open notice. Everything from here renders real events only."
                 : started
                   ? "Working on your words. Every motion is a computation."
-                  : `Idle, honestly: ${market.counts.vendors} suppliers evaluated, ${market.counts.notices} notice${market.counts.notices === 1 ? "" : "s"} open. Nothing pulses that is not open.`
+                  : `Idle, honestly: ${market.counts.vendors} vendors evaluated, ${market.counts.notices} notice${market.counts.notices === 1 ? "" : "s"} open. Nothing pulses that is not open.`
               : "Reaching the market…"}{" "}
             <button type="button" onClick={() => setLegendOpen((o) => !o)} className="underline hover:text-zinc-700">
               What am I looking at?
@@ -694,7 +694,7 @@ export default function PositionWorkspace() {
         </div>
         {legendOpen && (
           <div className="absolute right-0 top-8 z-30 w-72 rounded-lg border border-zinc-200 bg-white p-3 text-[10.5px] leading-relaxed text-zinc-600 shadow-sm">
-            <b className="text-zinc-900">Ink</b> is evidence recency: recently evaluated suppliers are darker and named; stale ones fade.{" "}
+            <b className="text-zinc-900">Ink</b> is evidence recency: recently evaluated vendors are darker and named; stale ones fade.{" "}
             <b className="text-zinc-900">Distance</b> is computed fit. <b className="text-zinc-900">Thickness</b> is capabilities met.{" "}
             <b className="text-zinc-900">Solidity</b> is your own words; the small circles with a question mark are your open questions.{" "}
             <b className="text-zinc-900">Breath</b> marks a genuinely open notice; nothing else moves. Serif type is always a human voice.{" "}
@@ -911,7 +911,7 @@ export default function PositionWorkspace() {
                 {requirement.organisation?.sector ? ` (${requirement.organisation.sector}` : ""}
                 {usersBandLabel(requirement.estate?.users) ? `${requirement.organisation?.sector ? ", " : "("}${usersBandLabel(requirement.estate?.users)}` : ""}
                 {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users) ? ", no name, no contacts)" : ""}
-                , and the full position to matched signed-in suppliers. Assumptions publish labelled as assumptions.{" "}
+                , and the full position to matched signed-in vendors and service providers. Assumptions publish labelled as assumptions.{" "}
                 <button type="button" className="underline" onClick={() => setSelection({ kind: "artefact" })}>View the artefact</button> it produces.
               </p>
               <label className="mb-1.5 flex items-start gap-2 text-[10.5px] leading-relaxed text-zinc-600">
@@ -946,7 +946,7 @@ export default function PositionWorkspace() {
               {needAuth && (
                 <div className="mt-2 rounded-md border border-zinc-200 bg-zinc-50 p-2">
                   <p className="m-0 mb-1 text-[10.5px] text-zinc-600">
-                    One step first: publishing reaches named suppliers, so it needs a verified work email. Sign in, then press publish again; your position is untouched.
+                    One step first: publishing reaches named vendors, so it needs a verified work email. Sign in, then press publish again; your position is untouched.
                   </p>
                   <SignIn role="buyer" prompt="Sign in with your work email to publish." />
                   <CodeEntry onVerified={() => setNeedAuth(false)} />
@@ -958,7 +958,7 @@ export default function PositionWorkspace() {
             <div className="relative z-30 mx-auto my-3 w-[min(330px,92%)] rounded-lg border border-amber-400 bg-amber-50 p-4 md:absolute md:bottom-2 md:right-1 md:mx-0 md:my-0">
               <p className="m-0 text-[12px] font-semibold text-amber-900">Test position created; publishing stayed off</p>
               <p className="m-0 mt-1 text-[10.5px] leading-relaxed text-amber-900">
-                It self-expires in two hours, touched no live board and contacted no supplier.{" "}
+                It self-expires in two hours, touched no live board and contacted no vendor.{" "}
                 <a href={`/sase/project/${created.id}?manage=${encodeURIComponent(created.manage)}`} className="underline">Inspect it</a> or{" "}
                 <button type="button" onClick={startAfresh} className="underline">start a real one</button>.
               </p>
@@ -1003,7 +1003,7 @@ function Dossier(props: {
     return (
       <div className="relative">
         {close}
-        <K>Evaluated supplier · live: dataset</K>
+        <K>Evaluated vendor · live: dataset</K>
         <p className="m-0 text-[13.5px] font-semibold text-zinc-900">{v.name}</p>
         <p className="m-0 mt-0.5 text-[10.5px] text-zinc-500">{v.category}</p>
         <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-zinc-600">

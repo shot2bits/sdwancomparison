@@ -142,7 +142,7 @@ const EV = {
   suite: "BT SMB security suite public claims (Web Threat Protect, Cloud Threat Protect; renamed 20 May 2026)",
   fwOptions: "Published BT Fortinet and Meraki managed options; BTnet Security attach prices (£100/£200 per month)",
   grades: "Netify marketplace vendor evidence grades (SSE, SASE, MDR depth)",
-  gradesLimit: "Netify dataset boundary: supplier grading is deepest in network security; managed SIEM shortlists are compiled per project",
+  gradesLimit: "Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project",
   bank: "Netify question bank v2026.1, security and monitoring sections",
   amendment: "Approved amendment, Robert Sturt, 21 July 2026",
   precedence: "Existing-control precedence: never replace a graded control without a consolidation driver",
@@ -388,7 +388,7 @@ export async function assessSecurityRequirement(
           routeDetail:
             route === "other_bt"
               ? "BT Managed EDR via a Netify written consult"
-              : "Endpoint within a managed detection service from marketplace suppliers",
+              : "Endpoint within a managed detection service from marketplace vendors",
           firedRules: ["END-1", "END-4", ...(excluded ? ["END-5"] : [])],
         });
       }
@@ -417,7 +417,7 @@ export async function assessSecurityRequirement(
         reasoning: "An active or recent incident is direct evidence of detection and response need.",
         evidence: [{ source: EV.amendment, claim: "Incident always indicates MDR (MDR-1a)." }],
         route: "marketplace_service",
-        routeDetail: "24/7 managed detection and response from marketplace suppliers",
+        routeDetail: "24/7 managed detection and response from marketplace vendors",
         firedRules: ["MDR-1a"],
       });
     } else if (compliance.length > 0 && soc === "none") {
@@ -490,14 +490,14 @@ export async function assessSecurityRequirement(
         needed: drivers.includes("consolidation") ? "required" : "recommended",
         reasoning: smb
           ? "Cloud apps with remote working: web and cloud protection fits at SMB scale through the BT suite."
-          : "Cloud apps with a distributed or consolidating estate point to a secure service edge from graded suppliers.",
+          : "Cloud apps with a distributed or consolidating estate point to a secure service edge from graded vendors.",
         evidence: [
           smb
             ? { source: EV.suite, claim: "Web Threat Protect and Cloud Threat Protect cover web and cloud app protection for SMBs." }
-            : { source: EV.grades, claim: "Evidence-graded SSE suppliers on the marketplace." },
+            : { source: EV.grades, claim: "Evidence-graded SSE vendors on the marketplace." },
         ],
         route: smb ? "bt_product" : "marketplace_service",
-        routeDetail: smb ? "BT Web Threat Protect and Cloud Threat Protect" : "Evidence-graded SSE suppliers; ZTNA and CASB assessed in the criteria",
+        routeDetail: smb ? "BT Web Threat Protect and Cloud Threat Protect" : "Evidence-graded SSE vendors; ZTNA and CASB assessed in the criteria",
         firedRules: ["SSE-1", smb ? "SSE-2" : "SSE-3"],
       });
     } else if (cloud.length > 0) {
@@ -531,7 +531,7 @@ export async function assessSecurityRequirement(
             : "In-house security operations need the tooling to see with.",
         evidence: [
           { source: EV.bank, claim: "Monitoring and reporting obligations in the security sections." },
-          { source: EV.gradesLimit, claim: "SIEM supplier shortlists are compiled per project; grading depth is honest." },
+          { source: EV.gradesLimit, claim: "SIEM vendor shortlists are compiled per project; grading depth is honest." },
         ],
         route: "marketplace_service",
         routeDetail: "Managed SIEM shortlist compiled with you; Netify's grading is deepest in network security, so confidence is capped (SIEM-2)",
@@ -576,7 +576,7 @@ export async function assessSecurityRequirement(
         route: bt ? "bt_product" : "either",
         routeDetail: bt
           ? "BT Fortinet or Meraki managed options alongside the existing BT estate; BTnet Security attach at the published £100/£200 monthly where BTnet is the circuit"
-          : "Both the BT managed options and marketplace suppliers genuinely satisfy this; the service path puts matched suppliers in competition for it, with the BT option assessed alongside (COMPETE-1)",
+          : "Both the BT managed options and marketplace vendors genuinely satisfy this; the service path puts matched vendors in competition for it, with the BT option assessed alongside (COMPETE-1)",
         firedRules: ["FW-1", bt ? "FW-2" : "FW-3"],
       });
     } else {
@@ -623,7 +623,7 @@ export async function assessSecurityRequirement(
       againstInterest.push({
         capabilityId: "email_security",
         routeDenied: "marketplace_service",
-        statement: "Netify does not maintain graded evidence for dedicated email security suppliers, so we decline the category rather than recommend blind. Source via your MSP or direct.",
+        statement: "Netify does not maintain graded evidence for dedicated email security vendors, so we decline the category rather than recommend blind. Source via your MSP or direct.",
         evidence: EV.gradesLimit,
       });
     }
@@ -714,7 +714,7 @@ export async function assessSecurityRequirement(
     }
     if (requiredService.length > 0 || pathRecommendation === "service_path" || pathRecommendation === "hybrid") {
       nextSteps.push({
-        action: "Service path: build the security requirement into an RFP and publish it to matched suppliers.",
+        action: "Service path: build the security requirement into an RFP and publish it to matched vendors.",
         page: "https://netify.co.uk/sase/rfp-builder/new/",
       });
     }

@@ -136,7 +136,7 @@ export default function VerifyClient() {
         <h1 className="text-xl mb-2">You are signed in{info.email ? ` as ${info.email}` : ""}.</h1>
         <p className="text-[var(--ink-700)] mb-5">
           {info.role === "supplier"
-            ? `Supplier access${info.vendor_slug ? ` for ${info.vendor_slug}` : ""}. Browse open projects and respond from the board.`
+            ? `Vendor access${info.vendor_slug ? ` for ${info.vendor_slug}` : ""}. Browse open projects and respond from the board.`
             : "Your RFPs and projects are saved to your account."}
         </p>
         <div className="flex flex-wrap justify-center gap-3">
@@ -189,7 +189,7 @@ export default function VerifyClient() {
         )}
         <p className="text-[var(--ink-700)] mb-4">
           {supplier
-            ? `Signed in as a supplier${info.vendor_slug ? ` (${info.vendor_slug})` : ""}. Taking you to the opportunity board...`
+            ? `Signed in as a vendor${info.vendor_slug ? ` (${info.vendor_slug})` : ""}. Taking you to the opportunity board...`
             : claimedCount > 0
               ? "Taking you back to your RFP..."
               : "Taking you to your account..."}

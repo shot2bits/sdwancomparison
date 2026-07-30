@@ -87,7 +87,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
         <h1 className="mb-3 text-2xl">This project is private to the buyer</h1>
         <p className="mb-6 text-sm text-[var(--ink-600)]">
           Open it from your builder link (it carries your private key), or sign in with the email that created it.
-          Suppliers respond through the invitation link instead.
+          Vendors and service providers respond through the invitation link instead.
         </p>
         <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this project." /></div>
         <p className="text-sm"><a href="https://netify.co.uk/" className="underline">Start a project on the desk</a></p>
@@ -171,7 +171,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
         <div className="mb-6 rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4">
           <p className="m-0 text-sm font-semibold text-emerald-900">Your requirement is live on the Netify board</p>
           <p className="m-0 mt-0.5 text-sm text-emerald-900">
-            {invitedCount} supplier{invitedCount === 1 ? "" : "s"} invited, {responses.length} response{responses.length === 1 ? "" : "s"} so far. The public listing is anonymous; suppliers sign in to see the full requirement, and your identity stays private until you reply.
+            {invitedCount} vendor{invitedCount === 1 ? "" : "s"} invited, {responses.length} response{responses.length === 1 ? "" : "s"} so far. The public listing is anonymous; vendors sign in to see the full requirement, and your identity stays private until you reply.
           </p>
           <p className="m-0 mt-2 text-sm">
             {boardOppId && (
@@ -223,7 +223,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
                 : "Not yet generated from your assessment."}
             </p>
             <p className="m-0 mt-1.5 text-xs text-[var(--ink-600,#555)]">
-              This is the page suppliers see and respond to. Review it, adjust what is in scope, then publish it to the board.
+              This is the page vendors and service providers see and respond to. Review it, adjust what is in scope, then publish it to the board.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Link
@@ -234,7 +234,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
               </Link>
               {project.share_token && (
                 <Link href={`/rfp-builder/${id}/respond?token=${encodeURIComponent(project.share_token)}`} className="text-sm underline">
-                  View as suppliers will see it
+                  View as vendors will see it
                 </Link>
               )}
             </div>
@@ -250,7 +250,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
                   : "Not yet drafted."}
             </p>
             <p className="m-0 mt-1.5 text-xs text-[var(--ink-600,#555)]">
-              Opens in the Netify RFP builder with your assessment carried through; you review and refine there before anything goes to suppliers.
+              Opens in the Netify RFP builder with your assessment carried through; you review and refine there before anything goes to vendors and service providers.
             </p>
             <p className="m-0 mt-2 text-sm">
               <Link href={`/rfp-builder/${id}${qs}`} className="underline">Review and edit</Link>
@@ -280,8 +280,8 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
           <p className="eyebrow mb-1">Publication</p>
           <p className="m-0 text-sm text-[var(--ink-800)]">
             {phase === "published" || phaseIdx > PROJECT_PHASE.indexOf("published")
-              ? `Published. ${(project.invited_vendors ?? []).length} suppliers invited.`
-              : "Not yet published. Publishing invites matched suppliers; pricing stays private to you."}
+              ? `Published. ${(project.invited_vendors ?? []).length} vendors invited.`
+              : "Not yet published. Publishing invites matched vendors and service providers; pricing stays private to you."}
           </p>
           {signoffs.length > 0 && (
             <ul className="m-0 mt-2 list-none space-y-1 p-0 text-xs text-[var(--ink-700)]">
@@ -324,7 +324,7 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
         </section>
 
         <section className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
-          <p className="eyebrow mb-1">Supplier responses</p>
+          <p className="eyebrow mb-1">Vendor responses</p>
           <p className="m-0 text-sm text-[var(--ink-800)]">
             {responses.length === 0 ? "No responses yet." : `${responses.length} response${responses.length === 1 ? "" : "s"} received.`}
           </p>

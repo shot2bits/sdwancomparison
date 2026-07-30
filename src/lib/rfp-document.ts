@@ -157,7 +157,7 @@ export function buyerProfileSentence(p: ProjectDetails): string {
   let s = bits.join(" ") + ".";
   s += ` The requirement covers ${scopeLabel(p)}, delivered as ${modelLabel(p).toLowerCase()}.`;
   if (b.compliance.length) s += ` Responses must address the buyer's stated obligations: ${complianceLabelList(b.compliance)}.`;
-  if (sector) s += ` Suppliers should tailor answers, references and evidence to the ${sector} sector.`;
+  if (sector) s += ` Vendors should tailor answers, references and evidence to the ${sector} sector.`;
   return s;
 }
 
@@ -212,7 +212,7 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
 
   // Evidence checklist
   if (evidence.length) {
-    L.push(`## Evidence checklist`, "", `Suppliers should return the following artefacts with their response:`, "");
+    L.push(`## Evidence checklist`, "", `Vendors should return the following artefacts with their response:`, "");
     for (const e of evidence) L.push(`- [ ] ${e.item} (${e.questionIds.length} ${e.questionIds.length === 1 ? "question" : "questions"})`);
     L.push("");
   }
@@ -237,7 +237,7 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
   L.push(`- Question sources: Netify question bank v${BANK_VERSION} and the extended SASE canonical bank (${SASE_EXTENDED_BANK.question_bank_version}), plus buyer-specific questions generated from the context above. Question rationale lines carry per-question provenance.`);
   L.push(`- Buyer inputs: scope, sector, estate profile, compliance and notes as recorded in the project background.`);
   L.push(`- Canonical methodology: https://netify.co.uk/methodology/ · Question bank: https://netify.co.uk/sase/rfp-builder/questions/`);
-  L.push(`- **Human review required.** This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing to suppliers.`);
+  L.push(`- **Human review required.** This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing it.`);
   L.push("");
 
   return L.join("\n");
@@ -298,7 +298,7 @@ export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; aut
   }
 
   if (evidence.length) {
-    B.push(`<h2>Evidence checklist</h2><p>Suppliers should return the following artefacts with their response:</p><ul>`);
+    B.push(`<h2>Evidence checklist</h2><p>Vendors should return the following artefacts with their response:</p><ul>`);
     for (const e of evidence) B.push(`<li>☐ ${esc(e.item)} (${e.questionIds.length} ${e.questionIds.length === 1 ? "question" : "questions"})</li>`);
     B.push(`</ul>`);
   }
@@ -317,7 +317,7 @@ export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; aut
   B.push(`<li>Question sources: Netify question bank v${BANK_VERSION} and the extended SASE canonical bank (${SASE_EXTENDED_BANK.question_bank_version}), plus buyer-specific questions generated from the context above.</li>`);
   B.push(`<li>Buyer inputs: scope, sector, estate profile, compliance and notes as recorded in the project background.</li>`);
   B.push(`<li>Canonical methodology: https://netify.co.uk/methodology/ · Question bank: https://netify.co.uk/sase/rfp-builder/questions/</li>`);
-  B.push(`<li><strong>Human review required.</strong> This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing to suppliers.</li>`);
+  B.push(`<li><strong>Human review required.</strong> This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing it.</li>`);
   B.push(`</ul>`);
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>${esc(p.title)}</title><style>

@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: "SASE & SD-WAN RFP Builder: AI Agent (2026)",
   description:
-    "Build a market-ready SASE and SD-WAN RFP with an AI agent: requirement synthesis, methodology-backed questions, vendor suggestions and supplier Q&A.",
+    "Build a market-ready SASE and SD-WAN RFP with an AI agent: requirement synthesis, methodology-backed questions, vendor suggestions and vendor Q&A.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/` },
   openGraph: {
     title: "SASE & SD-WAN RFP Builder: AI Agent (2026)",
@@ -35,7 +35,7 @@ export default function RfpBuilderPage() {
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
-      "Agentic RFP builder for SASE and SD-WAN procurement. Synthesises requirements from business context, generates methodology-backed questions, suggests best-fit vendors and manages the supplier clarification loop through the RFP lifecycle.",
+      "Agentic RFP builder for SASE and SD-WAN procurement. Synthesises requirements from business context, generates methodology-backed questions, suggests best-fit vendors and manages the clarification loop through the RFP lifecycle.",
     offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
     provider: { "@id": `${SITE_URL}/#organization` },
     softwareVersion: m.version,
@@ -53,7 +53,7 @@ export default function RfpBuilderPage() {
         <h1 id="page-h1" className="mb-4">Post a SASE or SD-WAN project, build an RFP, and invite verified providers.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           Start with a short RFI or create a full RFP. Netify helps you structure
-          the requirement, publish it to the right suppliers and compare responses, with
+          the requirement, publish it to the right vendors and compare responses, with
           questions mapped to the{" "}
           <a href="https://netify.co.uk/methodology/" className="underline">Netify SASE Methodology v{m.version}</a>.
         </p>
@@ -66,12 +66,12 @@ export default function RfpBuilderPage() {
         <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <a href="/sase/opportunities/new/" className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
             <h2 className="text-base font-semibold mb-1">Publish an RFI</h2>
-            <p className="text-sm text-[var(--ink-700)]">Publish a short RFI in minutes. Best for early pricing, discovery calls or supplier interest.</p>
+            <p className="text-sm text-[var(--ink-700)]">Publish a short RFI in minutes. Best for early pricing, discovery calls or vendor interest.</p>
           </a>
           <a href="/sase/rfp-builder/new/" className="relative block rounded-sm border border-amber-500 bg-amber-50 p-5 no-underline text-inherit transition-colors hover:bg-amber-100">
             <span className="absolute -top-2.5 left-4 rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-950">Fastest route</span>
             <h2 className="text-base font-semibold mb-1">Start your project</h2>
-            <p className="text-sm text-[var(--ink-700)]">Describe it in two minutes. Netify builds the full RFP from its question bank and shows which verified suppliers match before you publish.</p>
+            <p className="text-sm text-[var(--ink-700)]">Describe it in two minutes. Netify builds the full RFP from its question bank and shows which verified vendors and service providers match before you publish.</p>
           </a>
           <a href="/sase/opportunities/board/" className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit transition-colors hover:border-[var(--ink-400,#999)]">
             <h2 className="text-base font-semibold mb-1">Browse opportunities</h2>

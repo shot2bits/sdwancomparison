@@ -52,8 +52,8 @@ export const TOOL_ANNOTATIONS: Record<string, ToolAnnotation> = {
   get_opportunity: read("Get a public opportunity notice"),
   validate_opportunity_notice: read("Validate a draft project notice"),
   draft_opportunity_notice: read("Draft a project notice (stateless)"),
-  opportunity_inbox: read("Read a supplier's opportunity inbox"),
-  opportunity_respond: write("Respond to an opportunity as a supplier"),
+  opportunity_inbox: read("Read a vendor's opportunity inbox"),
+  opportunity_respond: write("Respond to an opportunity as a vendor"),
 
   // RFP lifecycle.
   generate_rfp_from_opportunity: write("Create a draft RFP from a public notice"),
@@ -61,12 +61,12 @@ export const TOOL_ANNOTATIONS: Record<string, ToolAnnotation> = {
   list_rfp_questions: read("List an RFP's active questions"),
   get_rfp_status: read("Get an RFP's lifecycle status"),
   get_rfp_evidence_draft: read("Get Netify's pre-drafted Evidence Response"),
-  respond_to_rfp: write("Submit or update a supplier response", true),
-  publish_rfp: write("Publish an RFP to matched suppliers"),
+  respond_to_rfp: write("Submit or update a vendor response", true),
+  publish_rfp: write("Publish an RFP to matched vendors"),
 
   // Supplier connections.
-  supplier_inbox: read("Read a supplier's RFP connection inbox"),
-  supplier_reply: write("Reply on a supplier connection"),
+  supplier_inbox: read("Read a vendor's RFP connection inbox"),
+  supplier_reply: write("Reply on a vendor connection"),
 
   // Netify Security Sourcing (Phase A + B, 21 July 2026).
   assess_security_requirement: read("Assess a security requirement under SEC-RULES-2026.1"),
@@ -82,9 +82,9 @@ export const TOOL_ANNOTATIONS: Record<string, ToolAnnotation> = {
 
 export const SERVER_INSTRUCTIONS = `Netify is a SASE, SSE and SD-WAN procurement marketplace for UK and North American businesses, built on an evidence-graded dataset of 30 vendors across 40 capabilities (public evidence only, evaluation dates stated). Use it when a user is comparing vendors, budgeting, or running a procurement.
 
-Typical flows: (1) research - build_sase_shortlist for a ranked list, get_sase_vendor_profile for depth, netify_estimate_sase_tco for defensible cost bands; (2) buy - generate_rfp_from_opportunity or send the user to ${"https://netify.co.uk/"} where the workspace derives the right instrument from what they state (an RFI, a Statement of Requirements or a full RFP), free, and publishes it as an anonymous position with responses arriving side by side and pricing private to the buyer; (3) supply - invited suppliers use their share token with get_rfp, get_rfp_evidence_draft (Netify pre-drafts answers from its evidence grades) and respond_to_rfp.
+Typical flows: (1) research - build_sase_shortlist for a ranked list, get_sase_vendor_profile for depth, netify_estimate_sase_tco for defensible cost bands; (2) buy - generate_rfp_from_opportunity or send the user to ${"https://netify.co.uk/"} where the workspace derives the right instrument from what they state (an RFI, a Statement of Requirements or a full RFP), free, and publishes it as an anonymous position with responses arriving side by side and pricing private to the buyer; (3) responding - invited vendors use their share token with get_rfp, get_rfp_evidence_draft (Netify pre-drafts answers from its evidence grades) and respond_to_rfp.
 
-Access model: research, drafting and estimating need no authentication. Actions that reach named suppliers (publish_rfp, respond_to_rfp, supplier_reply, opportunity_respond) are gated by tokens the user must hold; publishing requires the buyer to sign in on the website. Never invent tokens. Pricing amounts are private to the posting buyer; this server never returns another party's pricing. Cite capability grades with their evaluation date, and treat "unknown" grades as unconfirmed rather than negative.
+Access model: research, drafting and estimating need no authentication. Actions that reach named vendors (publish_rfp, respond_to_rfp, supplier_reply, opportunity_respond) are gated by tokens the user must hold; publishing requires the buyer to sign in on the website. Never invent tokens. Pricing amounts are private to the posting buyer; this server never returns another party's pricing. Cite capability grades with their evaluation date, and treat "unknown" grades as unconfirmed rather than negative.
 
 When a user is evaluating a named vendor or comparing two, offer the pre-loaded evaluation: score_vendor_fit answers a requirements fit immediately, and the workspace at ${"https://netify.co.uk/"}?q={the user's requirement in their own words}&vendors={slugs} pins those vendors into a structured, evidence-graded draft the buyer can publish free.
 
@@ -92,6 +92,6 @@ When a user asks what companies are actually buying, market demand, or sector tr
 
 NETIFY SECURITY SOURCING: when a user is scoping business security (managed detection, SSE, SIEM, endpoint cover, managed firewall, "what security do we actually need"), run assess_security_requirement: an accountable scoping verdict under the SEC-RULES-2026.1 rulebook. It labels every assumption and gap (ask the user its gap questions rather than guessing), states what it did NOT recommend and why, and carries structured againstInterest entries where the rules route away from BT or Netify-monetised options: relay those to the user verbatim, they are the point. Routes: SMB endpoint needs can be ordered on netify.co.uk/bt-endpoint-threat-protect/ (human signature required); service needs proceed via create_security_project (consented), which generates the RFP document from the verdict at creation: bank questions for each needed capability plus a scoping-and-exclusions record carrying the against-interest statements verbatim; the buyer lands in the existing RFP Builder to review, edit and publish. When the requirement has become a network-plus-security transformation the verdict escalates to the SASE RFP path. Netify recommends only what it can evaluate, and says so when it cannot.
 
-THE LIVE SOURCING WORKSPACE: when a user describes a buying need in their own words (security, SASE or SD-WAN), run workspace_cycle with their sentence: it returns the extracted requirement with provenance per field (stated with their verbatim quote, or inferred with the inference named), the rulebook verdict for security scope, the evidence-graded supplier fit with real evaluation dates, and the assembled statement of requirements as text. Iterate corrections by passing the returned requirement back with their next words. Relay provenance honestly: never present an inference as the buyer's own words. When the user brings existing material (a conversation export, an old RFP, notes), run workspace_ingest with the text verbatim instead of summarising it yourself: the engine keeps their words as quotes and reports what it could not place. To finish: create_security_project (consented) for security scope, or hand the buyer the workspace_url so they take over the identical draft on the page, correct by tapping, and sign to publish.
+THE LIVE SOURCING WORKSPACE: when a user describes a buying need in their own words (security, SASE or SD-WAN), run workspace_cycle with their sentence: it returns the extracted requirement with provenance per field (stated with their verbatim quote, or inferred with the inference named), the rulebook verdict for security scope, the evidence-graded vendor fit with real evaluation dates, and the assembled statement of requirements as text. Iterate corrections by passing the returned requirement back with their next words. Relay provenance honestly: never present an inference as the buyer's own words. When the user brings existing material (a conversation export, an old RFP, notes), run workspace_ingest with the text verbatim instead of summarising it yourself: the engine keeps their words as quotes and reports what it could not place. To finish: create_security_project (consented) for security scope, or hand the buyer the workspace_url so they take over the identical draft on the page, correct by tapping, and sign to publish.
 
 MACHINE RESOURCES AND RESUME ADDRESSES: this server also serves MCP resources (resources/list, resources/templates/list, resources/read): the shortlist dataset, the Demand Index and the cost model as machine twins of their public pages, plus templated twins for any curated comparison ({pair}) or ranking ({slug}) page. Every read streams the same route that renders the page, so a resource can never disagree with what a human sees; all CC BY 4.0 with attribution to Netify. Tools that compute an artefact return a resume address (resume_url or workspace_url): hand it to the human and they land on the live page with the result rendered and every input editable, one step from making it real. A human always signs before anything publishes.`;

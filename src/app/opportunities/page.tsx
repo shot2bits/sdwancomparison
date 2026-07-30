@@ -8,13 +8,13 @@ const UNDERLAY = "/opportunities/new?prefill=1&engagement=quote_room&scope=under
 const OVERLAY = "/opportunities/new?prefill=1&engagement=quote_room&scope=sd_wan.sse.sase&summary=" + encodeURIComponent("Quick pricing request: overlay SD-WAN, SSE and SASE. Please quote a managed solution and indicative pricing.");
 
 export const metadata: Metadata = {
-  title: "Publish a SASE or SD-WAN RFI: Supplier Interest",
+  title: "Publish a SASE or SD-WAN RFI: Vendor Interest",
   description:
-    "Publish a short SASE or SD-WAN RFI: what you need, where and by when. Verified suppliers respond with interest and indicative pricing. Draft in the clear; sign in only to publish.",
+    "Publish a short SASE or SD-WAN RFI: what you need, where and by when. Verified vendors and service providers respond with interest and indicative pricing. Draft in the clear; sign in only to publish.",
   alternates: { canonical: `${SITE_URL}/opportunities/` },
   openGraph: {
-    title: "Publish a SASE or SD-WAN RFI: Supplier Interest",
-    description: "A short public listing of what you need. Verified suppliers respond; pricing stays private.",
+    title: "Publish a SASE or SD-WAN RFI: Vendor Interest",
+    description: "A short public listing of what you need. Verified vendors respond; pricing stays private.",
     url: `${SITE_URL}/opportunities`,
     type: "website",
     locale: "en_GB",
@@ -25,7 +25,7 @@ const CARDS = [
   {
     href: "/opportunities/new",
     title: "Publish an RFI",
-    body: "Publish a short RFI in minutes. Use this when you need pricing, discovery calls or supplier interest before writing a full RFP.",
+    body: "Publish a short RFI in minutes. Use this when you need pricing, discovery calls or vendor interest before writing a full RFP.",
     cta: "Start an RFI",
     primary: true,
   },
@@ -59,10 +59,10 @@ export default function OpportunitiesPage() {
       {schemas.map((s, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />)}
       <div className="mb-10 max-w-3xl">
         <p className="eyebrow mb-3">Publish an RFI</p>
-        <h1 id="page-h1" className="mb-4">Publish a SASE or SD-WAN RFI and gather supplier interest.</h1>
+        <h1 id="page-h1" className="mb-4">Publish a SASE or SD-WAN RFI and gather vendor interest.</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          An RFI (request for information) is a short public listing: what you need, where and by when. Verified suppliers
-          respond with interest and indicative pricing, and you never write a full document. Draft in the
+          An RFI (request for information) is a short public listing: what you need, where and by when. Verified vendors and
+          service providers respond with interest and indicative pricing, and you never write a full document. Draft in the
           clear, sign in only to publish, and pricing stays private to you. Need the complete RFP instead?
           The RFP Builder creates one from your answers in about two minutes.
         </p>
@@ -86,7 +86,7 @@ export default function OpportunitiesPage() {
 
       <div className="mb-12 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
         <p className="eyebrow mb-1">Quick pricing request</p>
-        <p className="text-sm text-[var(--ink-700)] mb-3">Need a fast indicative price? Tap one and we prefill the RFI for you to review, preview and publish. Verified suppliers then pick it up and quote.</p>
+        <p className="text-sm text-[var(--ink-700)] mb-3">Need a fast indicative price? Tap one and we prefill the RFI for you to review, preview and publish. Verified vendors and service providers then pick it up and quote.</p>
         <div className="flex flex-wrap gap-3">
           <Link href={UNDERLAY} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Request underlay pricing (circuits)</Link>
           <Link href={OVERLAY} className="inline-flex items-center rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Request overlay pricing (SD-WAN / SASE)</Link>

@@ -45,7 +45,7 @@ const COMPLIANCE = [["uk_gdpr", "UK GDPR"], ["pci_dss", "PCI DSS"], ["iec_62443"
 const OUTCOMES = [
   { key: "shortlist", title: "Compare a shortlist", when: "Understand the market", body: "A ranked, graded shortlist of matching vendors. No sign-in." },
   { key: "auction", title: "Run a reverse auction", when: "Get competitive prices", body: "Verified vendors compete on price. Open-ended or timed." },
-  { key: "quote_room", title: "Open a live quote room", when: "Fast indicative quotes", body: "Post and watch suppliers reply live with quotes." },
+  { key: "quote_room", title: "Open a live quote room", when: "Fast indicative quotes", body: "Post and watch vendors reply live with quotes." },
 ];
 
 type Sel = { needs: string[]; sector: string | null; regions: string[]; project: "new" | "migration" | null; orgSize: string | null; delivery: string; sdwan: string[]; sase: string[]; compliance: string[]; sites: string; budget: string; description: string };

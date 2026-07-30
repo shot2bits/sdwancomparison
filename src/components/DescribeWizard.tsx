@@ -333,12 +333,12 @@ export default function DescribeWizard() {
 
   // Walkthrough line per step: what this answer does, and what follows.
   const STRIP: { now: string; next: string }[] = [
-    { now: "Choosing what is in scope, so the right supplier types match.", next: "Estate size and regions." },
-    { now: "Sizing the estate. Suppliers use this to shape their response.", next: "What you run today, and why change." },
+    { now: "Choosing what is in scope, so the right vendor types match.", next: "Estate size and regions." },
+    { now: "Sizing the estate. Vendors use this to shape their response.", next: "What you run today, and why change." },
     { now: "Capturing today's setup and the drivers. This becomes the RFP background.", next: "Timescale and delivery model." },
     { now: "Setting the timescale and who runs the service day to day.", next: "Optional extras, then Netify builds your RFP." },
-    { now: "Optional detail that sharpens the compliance questions.", next: "The agreement: generate your RFP and submit it to your matched suppliers." },
-    { now: "The agreement: your RFP generates and goes to your matched suppliers, who make contact through this app.", next: "Netify builds the document and submits it. You can review and refine afterwards; suppliers always see the latest version." },
+    { now: "Optional detail that sharpens the compliance questions.", next: "The agreement: generate your RFP and submit it to your matched vendors." },
+    { now: "The agreement: your RFP generates and goes to your matched vendors, who make contact through this app.", next: "Netify builds the document and submits it. You can review and refine afterwards; they always see the latest version." },
   ];
 
   return (
@@ -358,13 +358,13 @@ export default function DescribeWizard() {
                 </button>
               ))}
             </div>
-            <p className="mt-4 text-xs text-[var(--ink-500)]">Free for buyers. No sign-in until you submit to suppliers.</p>
+            <p className="mt-4 text-xs text-[var(--ink-500)]">Free for buyers. No sign-in until you submit to vendors.</p>
           </div>
         )}
 
         {step === 1 && (
           <div>
-            {heading("How big is the estate?", "Bands are fine. Suppliers use this to size their response.")}
+            {heading("How big is the estate?", "Bands are fine. Vendors use this to size their response.")}
             <p className="text-sm font-medium mb-2">Sites</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {SITES_BANDS.map((b) => (
@@ -414,7 +414,7 @@ export default function DescribeWizard() {
 
         {step === 3 && (
           <div>
-            {heading("When do you need it, and who runs it?", "Rough is fine. Suppliers plan their response around this.")}
+            {heading("When do you need it, and who runs it?", "Rough is fine. Vendors plan their response around this.")}
             <p className="text-sm font-medium mb-2">Timescale</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {TIMELINES.map((t) => (
@@ -485,7 +485,7 @@ export default function DescribeWizard() {
                 placeholder="e.g. Managed SD-WAN for 40 UK retail sites"
                 className="w-full max-w-md border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-base"
               />
-              <p className="mt-1 text-xs text-[var(--ink-500)]">Drafted from your answers. Suppliers see this first; edit it if you like.</p>
+              <p className="mt-1 text-xs text-[var(--ink-500)]">Drafted from your answers. Vendors see this first; edit it if you like.</p>
             </div>
             {authed === true ? (
               <p className="mb-3 text-sm text-emerald-700">You are signed in, so submission fires as soon as your RFP is generated.</p>
@@ -510,21 +510,21 @@ export default function DescribeWizard() {
               <ul className="space-y-1.5 text-sm text-[var(--ink-700)]">
                 <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> <span>Your <strong>Netify Market Report</strong>, instantly: an indicative market price band for your estate (Netify TCO Methodology), plus a gap check on your requirement</span></li>
                 <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> <span>Your RFP as a <strong>Word and PDF document</strong> to circulate internally</span></li>
-                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched suppliers, each with a private response link; structured responses come back side by side</li>
-                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing stays private to you; you stay anonymous until you reply, and your contact details are never shown to suppliers</li>
+                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched vendors, each with a private response link; structured responses come back side by side</li>
+                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing stays private to you; you stay anonymous until you reply, and your contact details are never shown to them</li>
               </ul>
-              <p className="mt-2 text-xs text-[var(--ink-600,#555)]">Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted suppliers</a> can respond, and you choose who receives your contact details.</p>
+              <p className="mt-2 text-xs text-[var(--ink-600,#555)]">Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted vendors and service providers</a> can respond, and you choose who receives your contact details.</p>
             </div>
             <p className="mb-3 text-xs text-[var(--ink-600,#555)]">
-              Suppliers make contact only through this app and conversations start when you reply. You can edit
-              your RFP after submitting and suppliers always see the latest version. Your data goes only to a
+              Vendors make contact only through this app and conversations start when you reply. You can edit
+              your RFP after submitting and they always see the latest version. Your data goes only to a
               vetted account manager at each matched vendor or managed service provider. We only email you about
               your RFPs, opportunities and RFP Builder and Marketplace features. No third-party marketing.{" "}
               <a href="https://netify.co.uk/privacy-policy/" className="underline" target="_blank" rel="noreferrer">Privacy policy</a>.
             </p>
             <label className="mb-2 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
               <input type="checkbox" checked={listBoard} onChange={(e) => setListBoard(e.target.checked)} className="mt-0.5" />
-              <span>Also list this RFP <strong>anonymously</strong> on the opportunity board so additional verified suppliers can register interest. The board shows your sector, estate size and requirement only, never your company name or contact details, and pricing stays private to you. Untick to go to your matched suppliers only.</span>
+              <span>Also list this RFP <strong>anonymously</strong> on the opportunity board so additional verified vendors can register interest. The board shows your sector, estate size and requirement only, never your company name or contact details, and pricing stays private to you. Untick to go to your matched vendors only.</span>
             </label>
             <label className="mb-4 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
               <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5" />
@@ -537,7 +537,7 @@ export default function DescribeWizard() {
                 disabled={creating || (authed !== true && !email.includes("@"))}
                 className={nextBtn}
               >
-                {creating ? "Submitting..." : `Generate and submit to your ${Math.min(5, match?.count ?? 5) || 5} matched suppliers`}
+                {creating ? "Submitting..." : `Generate and submit to your ${Math.min(5, match?.count ?? 5) || 5} matched vendors`}
               </button>
               <button onClick={() => setStep(4)} className={backBtn}>Back</button>
             </div>
@@ -556,7 +556,7 @@ export default function DescribeWizard() {
           {match && match.count > 0 ? (
             <>
               <p className="text-2xl font-semibold mb-1">{match.count}</p>
-              <p className="text-sm text-[var(--ink-700)] mb-1">verified suppliers on the Netify marketplace match this project so far.</p>
+              <p className="text-sm text-[var(--ink-700)] mb-1">verified vendors on the Netify marketplace match this project so far.</p>
               <p className="mb-3 text-xs text-[var(--ink-500)]">
                 Matching on: {SCOPES.find((s) => s.key === scope)?.label ?? scope}
                 {" · "}{MODELS.find((m) => m.key === model)?.label ?? model}

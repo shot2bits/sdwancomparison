@@ -404,7 +404,7 @@ export default function NoticeBuilder() {
 
       {step === 0 && (
         <div className="max-w-2xl space-y-5">
-          <Field label="What is this project about?" hint="Pick everything in scope. 'Not sure yet' is fine — suppliers and Netify can help refine it.">
+          <Field label="What is this project about?" hint="Pick everything in scope. 'Not sure yet' is fine, and vendors and Netify can help refine it.">
             <div className="flex flex-wrap gap-2">
               {OPP_SCOPES.map((s) => (
                 <ChipToggle key={s} active={draft.scope.includes(s)} onClick={() => toggleIn("scope", s)}>{OPP_SCOPE_LABELS[s]}</ChipToggle>
@@ -493,7 +493,7 @@ export default function NoticeBuilder() {
 
       {step === 3 && (
         <div className="max-w-2xl space-y-5">
-          <Field label="What do you want from suppliers?">
+          <Field label="What do you want from vendors and service providers?">
             <div className="grid gap-2 sm:grid-cols-2">
               {RESPONSE_MODES.filter((m) => m !== "quote_room").map((m) => (
                 <button
@@ -504,12 +504,12 @@ export default function NoticeBuilder() {
                 >
                   <span className="block text-sm font-medium">{RESPONSE_MODE_LABELS[m]}</span>
                   <span className="block text-xs text-[var(--ink-600)]">
-                    {m === "indicative_pricing" && "Fast budget signals. Suppliers reply with indicative pricing, private to you."}
-                    {m === "discovery_calls" && "Short calls with matching suppliers to explore the requirement."}
+                    {m === "indicative_pricing" && "Fast budget signals. Vendors reply with indicative pricing, private to you."}
+                    {m === "discovery_calls" && "Short calls with matching vendors to explore the requirement."}
                     {m === "written_responses" && "Structured written replies against your RFI."}
-                    {m === "reverse_auction" && "Suppliers compete on price; bids are ranked."}
+                    {m === "reverse_auction" && "Vendors compete on price; bids are ranked."}
                     {m === "shortlist" && "Netify builds you a graded shortlist from the marketplace."}
-                    {m === "full_rfp" && "You plan to issue a full RFP; suppliers register interest now."}
+                    {m === "full_rfp" && "You plan to issue a full RFP; vendors register interest now."}
                   </span>
                 </button>
               ))}
@@ -518,8 +518,8 @@ export default function NoticeBuilder() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Who can respond?">
               <select value={draft.eligibility} onChange={(e) => set("eligibility", e.target.value as Draft["eligibility"])} className={selectCls}>
-                <option value="open">Any matching verified supplier</option>
-                <option value="invited">Invite-only — I pick the suppliers</option>
+                <option value="open">Any matching verified vendor</option>
+                <option value="invited">Invite-only: I pick the vendors</option>
               </select>
             </Field>
             <Field label="Board visibility">
@@ -529,7 +529,7 @@ export default function NoticeBuilder() {
               </select>
             </Field>
           </div>
-          <p className="text-xs text-[var(--ink-500)]">Whatever you choose, supplier pricing stays private to you and your contact details are never shown publicly.</p>
+          <p className="text-xs text-[var(--ink-500)]">Whatever you choose, vendor pricing stays private to you and your contact details are never shown publicly.</p>
         </div>
       )}
 
@@ -546,7 +546,7 @@ export default function NoticeBuilder() {
               <input type="date" value={draft.go_live_target} onChange={(e) => set("go_live_target", e.target.value)} className={inputCls} />
             </Field>
           </div>
-          <Field label="Timeline note (optional)" hint="Context suppliers should know, e.g. 'MPLS contract expires in nine months'.">
+          <Field label="Timeline note (optional)" hint="Context vendors should know, e.g. 'MPLS contract expires in nine months'.">
             <input value={draft.timeline_note} onChange={(e) => set("timeline_note", e.target.value)} className={inputCls} />
           </Field>
         </div>
@@ -561,7 +561,7 @@ export default function NoticeBuilder() {
               ))}
             </div>
           </Field>
-          <Field label="Evidence suppliers should provide" hint="Asking for evidence up front makes replies comparable.">
+          <Field label="Evidence vendors should provide" hint="Asking for evidence up front makes replies comparable.">
             <div className="flex flex-wrap gap-2">
               {EVIDENCE_OPTIONS.map((c) => (
                 <ChipToggle key={c.key} active={draft.evidence_requested.includes(c.key)} onClick={() => toggleIn("evidence_requested", c.key)}>{c.label}</ChipToggle>
@@ -583,7 +583,7 @@ export default function NoticeBuilder() {
           <div className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
             <p className="text-sm font-medium mb-1">Improve this brief before publishing</p>
             <p className="text-sm text-[var(--ink-600)] mb-4">
-              The AI tidies your RFI, writes a supplier-facing summary, flags missing information and suggests evidence to request.
+              The AI tidies your RFI, writes a vendor-facing summary, flags missing information and suggests evidence to request.
               It never invents facts: anything inferred is listed as an assumption you can review.
             </p>
             {!improve && (
@@ -608,7 +608,7 @@ export default function NoticeBuilder() {
                 </div>
                 {improve.gaps.length > 0 && (
                   <div>
-                    <p className="eyebrow mb-1">Suppliers will probably ask about</p>
+                    <p className="eyebrow mb-1">Vendors will probably ask about</p>
                     <ul className="list-disc pl-5 text-sm space-y-0.5">{improve.gaps.map((g, i) => <li key={i}>{g}</li>)}</ul>
                   </div>
                 )}
@@ -647,7 +647,7 @@ export default function NoticeBuilder() {
             {preview.site_band && (
               <p className="mb-3 rounded-sm border border-[var(--ink-300,#ccc)] bg-[var(--ink-50,#fafafa)] px-4 py-2.5 text-sm text-[var(--ink-700)]">
                 Together, your sector, single region and exact site count could identify you, so the public notice shows{" "}
-                <strong>{preview.site_band}</strong> instead of the exact figure. Participating suppliers see the exact
+                <strong>{preview.site_band}</strong> instead of the exact figure. Participating vendors see the exact
                 count after the gate. Widen the regions or remove the sector and the exact figure shows instead.
               </p>
             )}
@@ -688,7 +688,7 @@ export default function NoticeBuilder() {
                   <p className="text-sm font-medium mb-1">Ready to publish?</p>
                   <p className="text-sm text-[var(--ink-600)] mb-4">
                     Publishing creates a public RFI page, lists it on the opportunity board and opens your private response room.
-                    Supplier pricing stays private to you.
+                    Vendor pricing stays private to you.
                   </p>
                   <button type="button" onClick={publish} disabled={publishing} className="w-full px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
                     {publishing ? "Publishing…" : "Publish opportunity"}
@@ -699,7 +699,7 @@ export default function NoticeBuilder() {
                 <>
                   <p className="text-sm font-medium mb-1">Sign in to publish</p>
                   <p className="text-sm text-[var(--ink-600)] mb-4">
-                    Create an account to publish this opportunity, manage supplier responses and keep pricing private. Your draft is saved and will be carried through.
+                    Create an account to publish this opportunity, manage vendor responses and keep pricing private. Your draft is saved and will be carried through.
                   </p>
                   <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Work email" className={`${inputCls} mb-2`} />
                   <button type="button" onClick={requestMagicLink} disabled={!email.includes("@")} className="w-full px-5 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">

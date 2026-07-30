@@ -17,7 +17,7 @@ export async function OPTIONS(req: Request) {
 }
 
 function acceptGapConsentText(question: string): string {
-  return `I accept proceeding without answering: "${question}" This gap stays recorded on the project and is shown to suppliers as a stated assumption.`;
+  return `I accept proceeding without answering: "${question}" This gap stays recorded on the project and is shown to vendors and service providers as a stated assumption.`;
 }
 
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {

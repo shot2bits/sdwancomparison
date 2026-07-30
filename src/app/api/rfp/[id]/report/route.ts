@@ -42,7 +42,7 @@ export async function GET(req: Request, ctx: Ctx) {
       ok: true,
       preview: true,
       market_report: preview,
-      unlocked_at_publish: "The full supplier list, complete gap detail, the Word and PDF documents and delivery to your matched suppliers unlock when you publish. Publishing is free.",
+      unlocked_at_publish: "The full vendor list, complete gap detail, the Word and PDF documents and delivery to your matched vendors and service providers unlock when you publish. Publishing is free.",
     }, { headers: cors });
   }
   return Response.json({ ok: true, market_report: buildMarketReport(project) }, { headers: cors });

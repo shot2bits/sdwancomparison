@@ -57,7 +57,7 @@ export async function notifyBuyerOfSupplierActivity(
       body: JSON.stringify({
         from,
         to: opp.owner_email,
-        subject: `Supplier activity on "${opp.title}"`,
+        subject: `Vendor activity on "${opp.title}"`,
         html:
           `<p><strong>${supplierName}</strong> ${label} your opportunity <strong>${opp.title}</strong>.</p>` +
           `<p><a href="${roomUrl}">Open your response room</a> to see the details. Pricing details are only visible in the room, never in email.</p>` +

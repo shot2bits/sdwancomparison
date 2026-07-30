@@ -86,7 +86,7 @@ async function processRfp(id: string, runId: string, budget: Budget): Promise<Pr
   const project = await getProject(id);
   if (!project) return { skipped: "missing project", proposals: 0 };
   if (project.status !== "published" && project.status !== "qa") {
-    await recordAudit({ rfp_id: id, action: "run_skip", actor: "agent", summary: `Skipped: RFP is ${project.status}, not open for responses.`, rationale: "Only published/qa RFPs have supplier activity to inspect." });
+    await recordAudit({ rfp_id: id, action: "run_skip", actor: "agent", summary: `Skipped: RFP is ${project.status}, not open for responses.`, rationale: "Only published/qa RFPs have vendor activity to inspect." });
     return { skipped: "not open", proposals: 0 };
   }
   // Per-RFP digest cooldown (also the source of re-run idempotency).
@@ -106,11 +106,11 @@ async function processRfp(id: string, runId: string, budget: Budget): Promise<Pr
   const deadline = goal.targets.response_deadline_ts ?? goal.targets.deadline_ts;
   if (deadline && deadline > now && deadline - now <= DEADLINE_WINDOW_MS) {
     const hrs = Math.round((deadline - now) / 3_600_000);
-    items.push({ kind: "deadline_risk", severity: hrs <= 24 ? "high" : "warn", message: `The response deadline is about ${hrs}h away.`, recommendation: "Review outstanding suppliers; chasing or extending the deadline can be queued for your approval.", ref: "" });
+    items.push({ kind: "deadline_risk", severity: hrs <= 24 ? "high" : "warn", message: `The response deadline is about ${hrs}h away.`, recommendation: "Review outstanding vendors; chasing or extending the deadline can be queued for your approval.", ref: "" });
   }
   // 2. Missing bids
   if (submitted.length < goal.targets.min_bids) {
-    items.push({ kind: "missing_bids", severity: submitted.length <= 1 ? "high" : "warn", message: `${submitted.length} of a target ${goal.targets.min_bids} bids received.`, recommendation: "Inviting additional matching suppliers can be queued for your approval.", ref: "" });
+    items.push({ kind: "missing_bids", severity: submitted.length <= 1 ? "high" : "warn", message: `${submitted.length} of a target ${goal.targets.min_bids} bids received.`, recommendation: "Inviting additional matching vendors can be queued for your approval.", ref: "" });
   }
   // 3. Weak answers
   const weak = weakGapsByVendor(reviews);
@@ -150,7 +150,7 @@ async function processRfp(id: string, runId: string, budget: Budget): Promise<Pr
   }
 
   if (!items.length && !created) {
-    await recordAudit({ rfp_id: id, action: "run_noop", actor: "agent", summary: "Inspected, nothing actionable. No digest created.", rationale: "Did not contact any supplier or send anything: outbound is disabled in Slice 2." });
+    await recordAudit({ rfp_id: id, action: "run_noop", actor: "agent", summary: "Inspected, nothing actionable. No digest created.", rationale: "Did not contact any vendor or send anything: outbound is disabled in Slice 2." });
     return { proposals: 0 };
   }
 
@@ -163,8 +163,8 @@ async function processRfp(id: string, runId: string, budget: Budget): Promise<Pr
   });
 
   await recordAudit({ rfp_id: id, action: "run_inspect", actor: "agent", summary: `Inspected: ${submitted.length}/${goal.targets.min_bids} bids, ${reviews.length} review(s), ${pending.length} pending approval(s), ${items.length} digest item(s).`, rationale: "Deterministic checks: deadline, missing bids, weak answers, pending gaps, stale approvals." });
-  if (created) await recordAudit({ rfp_id: id, action: "run_propose", actor: "agent", summary: `Queued ${created} clarification proposal(s) as pending approval.`, rationale: "Supplier-facing actions are queued for buyer approval, never sent.", ref: digest.id });
-  await recordAudit({ rfp_id: id, action: "run_noop", actor: "agent", summary: "Did not contact any supplier, send any message or chase anyone.", rationale: "Outbound and automatic chasing are disabled in Slice 2; all supplier-facing actions remain approval-only." });
+  if (created) await recordAudit({ rfp_id: id, action: "run_propose", actor: "agent", summary: `Queued ${created} clarification proposal(s) as pending approval.`, rationale: "Vendor-facing actions are queued for buyer approval, never sent.", ref: digest.id });
+  await recordAudit({ rfp_id: id, action: "run_noop", actor: "agent", summary: "Did not contact any vendor, send any message or chase anyone.", rationale: "Outbound and automatic chasing are disabled in Slice 2; all vendor-facing actions remain approval-only." });
 
   return { digest, proposals: created };
 }

@@ -52,7 +52,7 @@ export type TaxonomySection = {
 };
 
 const RULEBOOK = "in the Netify security rulebook vocabulary";
-const FEATURES = "graded across Netify's 40-feature supplier evaluations";
+const FEATURES = "graded across Netify's 40-feature vendor evaluations";
 const SEARCH = "asked repeatedly in AI search evidence (Bing AI grounding, Jul 2026)";
 const ENGINE = "an engine field the workspace already extracts";
 
@@ -229,7 +229,7 @@ export const TAXONOMY: TaxonomySection[] = [
   },
   {
     key: "suppliers",
-    title: "Supplier requirements",
+    title: "Vendor requirements",
     exampleNote: "who may respond",
     paths: [],
     items: [

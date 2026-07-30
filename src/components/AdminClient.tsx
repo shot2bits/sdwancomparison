@@ -154,7 +154,7 @@ export default function AdminClient() {
       {(data.broker_queue ?? []).length > 0 && (
         <section className={card}>
           <h2 className={h2}>Brokering queue</h2>
-          <p className={sub}>Every published RFP with its supplier links. Copy the link, send it to the supplier contact, then mark it forwarded so the team can see delivery state at a glance.</p>
+          <p className={sub}>Every published RFP with its response links. Copy the link, send it to the vendor contact, then mark it forwarded so the team can see delivery state at a glance.</p>
           <div className="space-y-4">
             {(data.broker_queue ?? []).map((b) => (
               <div key={b.rfp_id} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3">
@@ -239,13 +239,13 @@ export default function AdminClient() {
       {data.funnel && (
         <section className={card}>
           <h2 className={h2}>Buyer funnel</h2>
-          <p className={sub}>Sign up, create an RFP, publish to the marketplace, get supplier responses. Everything below feeds one of these four numbers.</p>
+          <p className={sub}>Sign up, create an RFP, publish to the marketplace, get vendor responses. Everything below feeds one of these four numbers.</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-4">
             {([
               ["Buyer accounts", data.funnel.buyer_accounts],
               ["Accounts with an RFP", data.funnel.accounts_with_rfp],
               ["RFPs published", data.funnel.rfps_published],
-              ["Supplier responses", data.funnel.supplier_responses],
+              ["Vendor responses", data.funnel.supplier_responses],
             ] as const).map(([label, value]) => (
               <div key={label} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-3 text-center">
                 <div className="text-2xl font-semibold">{value}</div>
@@ -303,7 +303,7 @@ export default function AdminClient() {
       {/* Pending access requests */}
       <section className={card}>
         <h2 className={h2}>Pending access requests</h2>
-        <p className={sub}>Business domains that tried supplier sign-in but are not yet mapped to a vendor. Approve to add the domain to a vendor, or reject (optionally blocking it).</p>
+        <p className={sub}>Business domains that tried vendor sign-in but are not yet mapped to a vendor. Approve to add the domain to a vendor, or reject (optionally blocking it).</p>
         {data.pending.length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No pending requests.</p>
         ) : (
@@ -318,7 +318,7 @@ export default function AdminClient() {
       {/* Profile claims */}
       <section className={card}>
         <h2 className={h2}>Profile claims</h2>
-        <p className={sub}>Suppliers claiming ownership of their company profile. Approve to let that company bid, quote and respond as the vendor; reject to revoke. Netify staff can act for any supplier regardless of claim status.</p>
+        <p className={sub}>Companies claiming ownership of their own profile. Approve to let that company bid, quote and respond as the vendor; reject to revoke. Netify staff can act for any vendor regardless of claim status.</p>
         {data.claims.length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No profile claims yet.</p>
         ) : (
@@ -343,7 +343,7 @@ export default function AdminClient() {
       {/* Opportunity board moderation */}
       <section className={card}>
         <h2 className={h2}>Opportunity board ({(data.opportunities ?? []).length})</h2>
-        <p className={sub}>Every notice, including closed and unlisted ones. Close ends an open notice cleanly: it leaves the live board and joins the closed archive, page and record intact (test posts, stale needs). Remove permanently deletes — the public page 404s and supplier room links stop working. Use Remove only when something inappropriate or commercially sensitive was posted by mistake.</p>
+        <p className={sub}>Every notice, including closed and unlisted ones. Close ends an open notice cleanly: it leaves the live board and joins the closed archive, page and record intact (test posts, stale needs). Remove permanently deletes: the public page 404s and vendor room links stop working. Use Remove only when something inappropriate or commercially sensitive was posted by mistake.</p>
         {(data.opportunities ?? []).length === 0 ? (
           <p className="text-sm text-[var(--ink-500)]">No opportunities posted yet.</p>
         ) : (
@@ -470,8 +470,8 @@ export default function AdminClient() {
 
       {/* Vendor domains */}
       <section className={card}>
-        <h2 className={h2}>Supplier email domains</h2>
-        <p className={sub}>Who can sign in as each supplier. Comma separated. Changes take effect immediately, no redeploy. A customised vendor is marked.</p>
+        <h2 className={h2}>Vendor email domains</h2>
+        <p className={sub}>Who can sign in as each vendor. Comma separated. Changes take effect immediately, no redeploy. A customised vendor is marked.</p>
         <input value={vendorFilter} onChange={(e) => setVendorFilter(e.target.value)} placeholder="Filter vendors..." className="border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm mb-4 w-full max-w-xs" />
         <div className="space-y-2">
           {vendors.map((v) => (

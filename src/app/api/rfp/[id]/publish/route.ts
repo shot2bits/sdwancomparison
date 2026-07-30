@@ -39,7 +39,7 @@ export async function POST(req: Request, ctx: Ctx) {
       {
         error: "sign_in_required",
         auth_required: true,
-        message: "Publishing sends this RFP to suppliers, so it needs a verified work email. Open the builder, sign in and publish again; your draft is untouched.",
+        message: "Publishing sends this RFP to vendors and service providers, so it needs a verified work email. Open the builder, sign in and publish again; your draft is untouched.",
         sign_in_url: `${SITE_URL}/rfp-builder/${project.id}/`,
       },
       { status: 401, headers: cors },
