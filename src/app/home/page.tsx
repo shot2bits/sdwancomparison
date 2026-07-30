@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
 import JourneyStrip from "@/components/JourneyStrip";
 import CapabilityBlock from "@/components/CapabilityBlock";
-import MegaNav from "@/components/MegaNav";
 import { getOrganizationSchema } from "@/lib/structured-data";
 
 /**
@@ -162,16 +161,15 @@ export default function Page() {
      the registered address and the trademark. On the one page most likely
      to be cited by an AI, none of it was reachable.
 
-     The layout's own MegaNav returns null on the takeover routes, so this
-     page still renders exactly one navigation. */
+     This page renders no navigation of its own. The root layout's MegaNav
+     serves every route, which is what keeps it to exactly one. Removing
+     the overlay exposed a second sticky header here that the overlay had
+     been covering. */
   return (
-    <div className="relative z-[70] bg-[#fbfaf8]">
+    <div className="relative bg-[#fbfaf8]">
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
-      {/* One header everywhere (Robert, 24 Jul): the mega navigation IS
-          "the homepage must never hide the company", done properly. */}
-      <MegaNav takeover />
       <main className="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-6 sm:pt-12">
 
         {/* One visual hierarchy (Robert, 29 Jul, exact-copy prompt): H1,

@@ -91,12 +91,17 @@ function PanelItems({ group, onNavigate }: { group: MegaGroup; onNavigate?: () =
   );
 }
 
-export default function MegaNav({ takeover = false }: { takeover?: boolean }) {
+export default function MegaNav() {
   const pathname = usePathname();
-  /* The takeover routes (/home, /workspace) render their own MegaNav inside
-   * the z-70 overlay; the root layout's instance must yield there, or a
-   * second, buried header sits in the keyboard tab order under the overlay. */
-  const onTakeoverRoute = pathname === "/home" || pathname === "/workspace" || pathname === "/home/" || pathname === "/workspace/";
+  /* ONE NAVIGATION, ALWAYS, RENDERED BY THE ROOT LAYOUT (30 Jul 2026).
+   * This used to take a `takeover` prop and return null on /home and
+   * /workspace, because those routes rendered their own copy inside a
+   * fixed z-70 overlay. The overlay is gone (it was burying the site
+   * footer), and the moment it went, the apex root showed TWO sticky
+   * headers: the layout's and the door's. The pathname test could not fix
+   * it, because netify.co.uk/ and /sase/ are BOTH "/" once the basePath is
+   * stripped, and /sase/ has no nav of its own. So the doors no longer
+   * render a nav at all and this instance serves every route. */
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -129,7 +134,6 @@ export default function MegaNav({ takeover = false }: { takeover?: boolean }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (!takeover && onTakeoverRoute) return null;
 
   const hold = (label: string | null) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
