@@ -72,7 +72,7 @@ import { diagramModel } from "@/lib/workspace/diagram";
 import { BAND, capabilityRing, constellation, labelOffsets, vendorHue } from "@/lib/workspace/constellation";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import WorkspaceDiagram from "@/components/WorkspaceDiagram";
-import JourneyRail, { type RailStep, type RailStepId } from "@/components/JourneyRail";
+import { type RailStep, type RailStepId } from "@/components/JourneyRail";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 
@@ -335,13 +335,35 @@ const SECTION_TECH: Record<string, string> = {
   suppliers: "who may respond, and the evidence they carry",
 };
 
-/** What a tap on a candidate line does. Described, not closed over, so the
- *  list can be built in the render body without carrying handlers with it. */
-type CandAction =
-  | { kind: "item"; item: TaxonomyItem }
-  | { kind: "gap"; gap: BriefGap; value: string; label: string }
-  | { kind: "earned"; q: EarnedQuestion; answer: QuestionAnswer }
-  | { kind: "note"; id: string };
+/** Section notes for the document headings, in the handoff's register:
+ *  a few words on what each section is, in vendor terms. Copy only. */
+const SECTION_NOTES: Record<string, string> = {
+  organisation: "who you are, in vendor terms",
+  drivers: "why this project exists",
+  objectives: "what a good outcome looks like",
+  estate: "what vendors and service providers are replacing",
+  security: "written out as SASE capabilities",
+  compliance: "mapped to the frameworks that apply",
+  model: "who operates it",
+  change: "how change is allowed to happen",
+  support: "who answers, and how fast",
+  commercial: "how responses get scored",
+  services: "the delivery work around the service",
+  success: "the targets the service is judged against",
+  suppliers: "who may respond",
+};
+
+/** The three walkthrough cards. One source: the modal and the empty
+ *  document's "Where this is going" strip both render from here. */
+const WALK_STEPS = [
+  { n: "01", t: "Build the requirement", b: "Prompt in plain English, or add elements by hand. Netify applies your sector's regulation, writes the technical wording, and asks only for what is missing.", o: "A requirement that vendors and service providers can price consistently, not a blank RFP template." },
+  { n: "02", t: "See who fits", b: "Evaluated vendors and service providers are graded independently against 40 capabilities, with every grade dated. Netify matches them against your requirement.", o: "A shortlist you can defend internally, and a distribution list you control." },
+  { n: "03", t: "Publish to the board", b: "Verify once from your work email, then sign. Vetted vendors and service providers who sign in see the full requirement. Anyone not signed in sees a summary listing only.", o: "Comparable replies and pricing, private to you, from vendors and service providers who were vetted before they saw it." },
+] as const;
+
+/** The organisation fields render as labelled rows (Industry, Users,
+ *  Sites, Countries); the generic row loop must not repeat them. */
+const ORG_FIELD_PATHS = new Set(["organisation.sector", "estate.users", "estate.sites", "organisation.regions"]);
 
 /** Validator notes, humanised for the crew (Harry's 22 Jul finding: raw
  *  "Dropped estate.users: not a sensible number" is not buyer copy).
@@ -397,6 +419,14 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   /** 1b: sections whose "+N more" has been opened. Display state only. */
   const [openedSecs, setOpenedSecs] = useState<string[]>([]);
+  /** The workspace (CORRECTIONS.md, 30 Jul): right panel tab, the one
+   *  question currently showing its options, the document filter, and
+   *  the walkthrough. All display state; nothing here persists. */
+  const [rightTab, setRightTab] = useState<"add" | "sector" | "documents" | "ask">("add");
+  const [activeQ, setActiveQ] = useState<string | null>(null);
+  const [docFilter, setDocFilter] = useState<"all" | "open" | "stated" | "inferred">("all");
+  const [walkOpen, setWalkOpen] = useState(false);
+  const [addFilter, setAddFilter] = useState("");
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
@@ -426,7 +456,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
    * requirement to publishing and never see Who fits at all. Going BACK is
    * always free, which is CTM's pencil; going FORWARD happens through the
    * step's own control, so nobody skips the proof. */
-  const [maxStep, setMaxStep] = useState<RailStepId>(1);
   const [wrongCompany, setWrongCompany] = useState(false);
   const [flash, setFlash] = useState<Set<string>>(new Set());
   /* The applied-changes strip (F2, 29 Jul 2026, adopted from the mockup
@@ -447,8 +476,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   } | null>(null);
   /* What changed, pass by pass: newest first, capped at ten, persisted
    * with the draft so the history survives a reload. */
-  const [passLog, setPassLog] = useState<Array<{ at: string; text: string; changes: number; undone?: boolean }>>([]);
-  const [passLogOpen, setPassLogOpen] = useState(false);
 
   const [moveNow, setMoveNow] = useState<Record<string, Move>>({});
   const [moveLog, setMoveLog] = useState<MoveLogEntry[]>([]);
@@ -658,7 +685,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             .filter((c): c is NonNullable<typeof c> => c !== null)
             .slice(0, 12);
           setLastPass({ source: opts.fromLink ? "link" : "extract", changes, prevFacts: factsBefore, factsAtSet: merged.facts });
-          setPassLog((l) => [{ at: stamp(), text: trimmed.slice(0, 90), changes: merged.changed.length }, ...l].slice(0, 10));
         }
 
         for (const u of updates.slice(0, 4)) {
@@ -1186,7 +1212,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     factsRef.current = u.prevFacts;
     setFacts(u.prevFacts);
     setLastPass(null);
-    setPassLog((l) => (l.length ? [{ ...l[0], undone: true }, ...l.slice(1)] : l));
     crewLog(`Registrar: undone · this pass's ${u.changes.length} change${u.changes.length === 1 ? "" : "s"} reverted, your words stay yours to re-run`, "em");
     ev("workspace_pass_undone", { changes: u.changes.length });
   };
@@ -1371,7 +1396,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   );
   const goToStep = useCallback((id: RailStepId) => {
     setStep(id);
-    setMaxStep((m) => (id > m ? id : m));
     ev("journey_step", { to: id });
     try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch { /* scrolling is a courtesy */ }
   }, []);
@@ -1627,6 +1651,18 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
    *  gaps plus the earned questions currently standing, nothing invented. */
   const openQuestionCount = unansweredGaps.length + earnedShown.length;
 
+  /** Every open question in document order; the FIRST is the one showing
+   *  its options unless the buyer tapped another (CORRECTIONS.md rule 2). */
+  const openHeads = useMemo(() => {
+    const list: Array<{ key: string; section: string }> = [];
+    for (const sec of TAXONOMY) {
+      for (const g of gapsBySection.get(sec.key) ?? []) list.push({ key: `g-${g.key}`, section: sec.key });
+      for (const q of earnedBySection.get(sec.key) ?? []) list.push({ key: q.id, section: sec.key });
+    }
+    return list;
+  }, [gapsBySection, earnedBySection]);
+  const activeHeadKey = activeQ && openHeads.some((h) => h.key === activeQ) ? activeQ : openHeads[0]?.key ?? null;
+
 
   const answerEarned = useCallback(
     (q: EarnedQuestion, answer: QuestionAnswer, value?: string) => {
@@ -1680,18 +1716,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       ev("workspace_own_words", { section: sectionKey, routed: target ? "field" : "note" });
     },
     [published, ownWordsBySection, answerEarned, crewLog],
-  );
-
-  /** One tap on one candidate line, whatever kind of answer it carries.
-   *  Every route is the desk's existing machinery, unchanged. */
-  const runCandidate = useCallback(
-    (a: CandAction, sectionKey: string) => {
-      if (a.kind === "item") clickItem(a.item, sectionKey);
-      else if (a.kind === "gap") answerGap(a.gap, a.value, a.label);
-      else if (a.kind === "earned") answerEarned(a.q, a.answer);
-      else removeNote(a.id);
-    },
-    [clickItem, answerGap, answerEarned, removeNote],
   );
 
   const dismissQuestion = useCallback((id: string) => {
@@ -1756,34 +1780,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     [factsBySection, notedBySection, gapsBySection],
   );
 
-  /* Micro-reactivity (the conversion pass, 23 Jul): when a section first
-   * turns live (example ink giving way to stated or inferred), one amber
-   * ring breathes out around it, once. The first computation only records
-   * the baseline, so an arrival never fires a page of rings. */
-  const prevLiveRef = useRef<Set<string> | null>(null);
-  const [liveRing, setLiveRing] = useState<Set<string>>(() => new Set());
-  const ringTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  useEffect(() => {
-    const now = new Set(TAXONOMY.filter((s) => sectionLive(s.key)).map((s) => s.key));
-    if (prevLiveRef.current === null) {
-      prevLiveRef.current = now;
-      return;
-    }
-    const prev = prevLiveRef.current;
-    const fresh = [...now].filter((k) => !prev.has(k));
-    prevLiveRef.current = now;
-    if (!fresh.length) return;
-    setLiveRing((s) => new Set([...s, ...fresh]));
-    const t = setTimeout(() => {
-      setLiveRing((s) => {
-        const n = new Set(s);
-        for (const k of fresh) n.delete(k);
-        return n;
-      });
-    }, 1500);
-    ringTimers.current.push(t);
-  }, [sectionLive]);
-  useEffect(() => () => { for (const t of ringTimers.current) clearTimeout(t); }, []);
 
   const factFor = useCallback(
     (item: TaxonomyItem): WorkspaceFact | undefined => {
@@ -1923,7 +1919,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   /* ------------------------------------------------------------------ */
 
   return (
-    <div className="pd-root mt-10">
+    <div className="pd-root mt-10" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}>
       <style>{`
         @keyframes pdink{0%{background:rgba(245,162,27,.16)}100%{background:transparent}}
         .pd-ink{animation:pdink 1.1s ease forwards}
@@ -1946,7 +1942,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         @media(prefers-reduced-motion:reduce){.pd-wave rect{animation:none}}
       `}</style>
 
-      {/* ---- The one line in: the page's one control, framed as such ---- */}
+      {/* ---- The one line in: pre-start it is the page's one control;
+              once a project exists the prompt moves into the workspace
+              dock (CORRECTIONS.md rule 1). ---- */}
+      {!started && (
       <div className="mx-auto w-[min(760px,100%)]">
         <section
           id="describe"
@@ -1968,7 +1967,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             the caption; the field itself now reads as a field (v7: one
             hero start from fifteen thousand visitors said the card read
             as a brochure). */}
-        <p className="m-0 mb-2 text-[10.5px] font-mono font-semibold uppercase tracking-[.12em] text-[#8C8A85]">Your first sentence becomes your Statement of Requirements</p>
+        <p className="m-0 mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.11em] text-[#8C8A85]">Your first sentence becomes your Statement of Requirements</p>
         {/* Focus is a border change alone (instrument-grade law, 28 Jul:
             no glow ring; the field is alive because words land in it). */}
         <div className="relative rounded-xl border-[1.5px] border-[#E3E0DA] bg-white px-3 py-3 text-left shadow-[inset_0_1px_2px_rgba(15,23,42,.04)] focus-within:border-[#F5A21B]">
@@ -2149,47 +2148,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           )}
           {testMode && <span className="font-medium text-[#B4650B]">Test mode: signing creates a self-expiring test position and never touches the live board.</span>}
         </div>
-        {/* The applied-changes strip (F2): what the last pass did, with one
-            Undo. Renders only while the ledger is exactly the array that
-            pass produced, so it can never offer a stale revert. */}
-        {lastPass && facts === lastPass.factsAtSet && !published && (
-          <div className="mx-auto mt-2 flex max-w-2xl flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-md bg-[#FFF7E8]/80 px-3 py-1.5 text-[11.5px] text-[#5F5D59]">
-            <span className="font-medium text-[#33302C]">
-              This pass: {lastPass.changes.filter((c) => c.kind === "placed").length} placed
-              {lastPass.changes.some((c) => c.kind === "revised") ? `, ${lastPass.changes.filter((c) => c.kind === "revised").length} revised` : ""}
-              {lastPass.source === "link" ? " · from the link you arrived on" : ""}
-            </span>
-            {lastPass.changes.slice(0, 5).map((c) => (
-              <span
-                key={c.id}
-                title={`${c.kind === "placed" ? "placed" : "revised"} this pass · ${c.provenance}`}
-                className={`rounded-full border bg-white px-2 py-[1px] text-[11px] ${c.provenance === "stated" ? "border-[#E3E0DA] text-[#33302C]" : "border-dashed border-[#E3E0DA] text-[#6E6C67]"}`}
-              >
-                {c.label.slice(0, 34)}
-              </span>
-            ))}
-            {lastPass.changes.length > 5 && <span className="text-[#8C8A85]">+{lastPass.changes.length - 5} more</span>}
-            <button type="button" onClick={undoPass} className="font-semibold text-[#8A4D08] underline hover:text-[#8A4D08]">Undo</button>
-            <button type="button" onClick={() => setLastPass(null)} className="text-[#8C8A85] hover:text-[#33302C]" title="Keep these changes">✕</button>
-          </div>
-        )}
-        {passLog.length > 0 && !published && (
-          <p className="m-0 mt-1.5 text-center text-[11px] text-[#8C8A85]">
-            <button type="button" onClick={() => setPassLogOpen((v) => !v)} className="underline hover:text-[#33302C]">
-              What changed, pass by pass ({passLog.length})
-            </button>
-          </p>
-        )}
-        {passLogOpen && passLog.length > 0 && !published && (
-          <div className="mx-auto mt-1 max-w-2xl rounded-md bg-[#FBFAF8] px-3 py-2">
-            {passLog.map((p, i) => (
-              <p key={i} className={`m-0 py-[2px] text-[11px] leading-snug ${p.undone ? "text-[#8C8A85] line-through" : "text-[#5F5D59]"}`}>
-                {p.at} · &ldquo;{p.text}&rdquo; · {p.changes} change{p.changes === 1 ? "" : "s"}{p.undone ? " · undone" : ""}
-              </p>
-            ))}
-            <p className="m-0 pt-1 text-[10px] text-[#8C8A85]">Every pass logs what it changed. Undo reverts the ledger only; your verbatim notes stay yours.</p>
-          </div>
-        )}
         {/* The gate, the live proof and the machine line (v7): the three
             doubts a first visitor holds, answered where the doubt sits.
             The gate states the true flow: draft and preview are free of
@@ -2201,12 +2159,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             retire once the visitor starts: the draft is the proof then. */}
         {!started && !published && (
           <div className="mt-4 border-t border-[#EAE7E1] pt-3">
-            <p className="m-0 text-center text-[11.5px] text-[#6E6C67]">
+            <p className="m-0 text-center text-[12.5px] text-[#6E6C67]">
               Draft and preview without an account. Sign in only to publish, anonymously, with pricing private to you.
               Only vetted vendors and service providers can respond, and you choose who receives your contact details.
             </p>
             {boardProof && boardProof.open > 0 && (
-              <p className="m-0 mt-2 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1.5 text-center text-[12px] text-[#5F5D59]">
+              <p className="m-0 mt-2 flex flex-wrap items-baseline justify-center gap-x-2 gap-y-1.5 text-center text-[12.5px] text-[#5F5D59]">
                 <span>
                   <span aria-hidden="true" className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#2E9E52] align-middle" />
                   {boardProof.open === 1 ? "1 project open to vendors now" : `${boardProof.open} projects open to vendors now`}
@@ -2215,7 +2173,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   <a
                     key={o.id}
                     href={`/sase/opportunities/${o.id}`}
-                    className="rounded-[7px] border border-[#EAE7E1] bg-[#FBFAF8] px-2 py-0.5 text-[11.5px] text-[#33302C] no-underline transition-colors hover:border-[#141414] hover:text-[#141414]"
+                    className="rounded-[7px] border border-[#EAE7E1] bg-[#FBFAF8] px-2 py-0.5 text-[12.5px] text-[#33302C] no-underline transition-colors hover:border-[#141414] hover:text-[#141414]"
                   >
                     {o.title}
                     {o.full && <span className="ml-1.5 text-[9px] font-mono font-bold tracking-[.08em] text-[#B4650B]">FULL RFP</span>}
@@ -2226,9 +2184,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             {/* The two-buyer line (Robert's ruling, 28 Jul): outcome
                 language on the consumer surface; the tool ids moved to
                 the connection details (llms.txt, the agents' door). */}
-            <p className="m-0 mt-2 text-center text-[11px] text-[#6E6C67]">
-              Use Netify directly, or connect your organisation&rsquo;s approved AI agent through MCP. Agents research,
-              draft, compare and monitor. Your team publishes, selects and awards.
+            <p className="m-0 mt-2 text-center text-[12.5px] text-[#6E6C67]">
+              Use Netify directly, or connect your organisation&rsquo;s approved AI agent through MCP.
             </p>
             <p className="m-0 mt-1 text-center text-[10.5px] text-[#8C8A85]">
               Connecting an agent? <a href="/llms.txt" className="underline hover:text-[#5F5D59]">View agent connection details</a>
@@ -2236,6 +2193,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           </div>
         )}
         </section>
+      </div>
+      )}
         {published && (
           <p className="m-0 mt-3 text-[13px] text-[#33302C]">
             <span className="text-[15px] italic">Live. The market answers here.</span>{" "}
@@ -2246,8 +2205,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             <a href={`/sase/project/${created?.id}${created?.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`} className="underline">your position&rsquo;s record</a>
           </p>
         )}
-      </div>
-
       {/* One strip only (Robert's R1 ruling on Harry's Section 1 test,
           28 Jul 2026): the door's server-rendered journey strip stands
           down once a project exists; the state-aware strip below takes
@@ -2283,57 +2240,66 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               ? "The evaluated vendors and service providers your requirement reaches, named with dated grades. The ranked order and fit reasons generate at publish."
               : "Verify once from your work email, then sign. The public listing stays anonymous; vetted vendors and service providers who sign in see the detail."}
         </span>
+        {shownStep > 1 && !published && (
+          <button
+            type="button"
+            onClick={() => goToStep((shownStep - 1) as RailStepId)}
+            className="rounded-full border border-[#3A3A3A] px-3 py-1 text-[12.5px] text-white transition-colors hover:border-white"
+          >
+            Back
+          </button>
+        )}
         <button
           type="button"
-          onClick={() => {
-            if (shownStep !== 1) goToStep(1);
-            requestAnimationFrame(() => {
-              document.getElementById("how-this-goes")?.scrollIntoView({ behavior: "smooth", block: "start" });
-            });
-          }}
-          className="rounded-full border border-[#3A3A3A] px-3 py-1 text-[11.5px] text-white transition-colors hover:border-white"
+          onClick={() => setWalkOpen(true)}
+          className="rounded-full border border-[#3A3A3A] px-3 py-1 text-[12.5px] text-white transition-colors hover:border-white"
         >
           How it works
         </button>
       </div>
 
-      {/* ---- The journey rail (P1 of the CTM pivot, Robert's rulings
-              30 Jul 2026; reference netify-ctm-p1-reference). Compare the
-              Market's journey sidebar, adapted to the three ruled steps. The
-              sub-steps are the core five (R7) and nothing else, so the
-              percentage beside them cannot move unless something true moves
-              first, and one sentence can tick several of them at once where
-              the buyer can watch it happen. ---- */}
-      <div className="mx-auto mt-6 w-[min(760px,100%)]">
-        <JourneyRail steps={railSteps} current={shownStep} onGoTo={goToStep} published={Boolean(published)} maxStep={published ? 3 : maxStep} />
-      </div>
-
-      {shownStep === 1 && (<>
-
-      {/* ---- Readiness: three things first, from real state only ---- */}
-      {started && (
-        <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-2">
-          <span><span className="font-mono text-[19px] font-semibold tracking-tight text-[#141414]">{meter.confirmed}</span>
-            <span className="ml-1.5 text-[11px] text-[#6E6C67]">requirement{meter.confirmed === 1 ? "" : "s"} in your words</span></span>
-          {meter.inferred > 0 && (
-            <span><span className="font-mono text-[19px] font-semibold tracking-tight text-[#B4650B]">{meter.inferred}</span>
-              <span className="ml-1.5 text-[11px] text-[#6E6C67]">inferred, yours to confirm or strike</span></span>
-          )}
-          {openQuestionCount > 0 && (
-            <span><span className="font-mono text-[19px] font-semibold tracking-tight text-[#B4650B]">{openQuestionCount}</span>
-              <span className="ml-1.5 text-[11px] text-[#6E6C67]">open question{openQuestionCount === 1 ? "" : "s"} waiting below</span></span>
-          )}
-          <span className="ml-auto text-right text-[11px] leading-relaxed text-[#8C8A85]">
-            {receipts.length > 0 ? `${receipts.length} note${receipts.length === 1 ? "" : "s"} kept verbatim in Notes below · ` : ""}
-            {market ? `${market.counts.vendors} vendors and service providers evaluated against this position` : ""}
-          </span>
+      {walkOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(20,20,20,.42)] p-4" role="dialog" aria-modal="true" aria-label="How Netify works" onClick={() => setWalkOpen(false)}>
+          <div className="max-h-[88vh] w-full max-w-[880px] overflow-y-auto rounded-[18px] bg-white px-6 pb-6 pt-6 sm:px-9 sm:pb-7 sm:pt-8" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="m-0 font-mono text-[10.5px] font-semibold uppercase tracking-[0.11em] text-[#8C8A85]">How Netify works</p>
+              <button type="button" onClick={() => setWalkOpen(false)} className="text-[13px] text-[#6E6C67] underline hover:text-[#141414]">Skip</button>
+            </div>
+            <h2 className="m-0 mt-2" style={{ fontSize: "27px", lineHeight: 1.22, fontWeight: 600, letterSpacing: "-0.02em", color: "#141414" }}>
+              Describe your project once. Netify matches it to the vendors and service providers that can actually deliver it.
+            </h2>
+            <p className="m-0 mt-2.5 max-w-2xl text-[15px] leading-[1.62] text-[#6E6C67]">
+              Netify sits between you and the market. It applies your sector&rsquo;s regulation, evaluates
+              {market ? ` ${market.counts.vendors}` : ""} vendors and service providers on graded evidence, and brings
+              their replies back in one format so you can compare them.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {WALK_STEPS.map((c) => (
+                <div key={c.n} className="rounded-[13px] border border-[#EAE7E1] bg-[#FDFCFA] p-4">
+                  <p className="m-0 font-mono text-[12px] font-semibold text-[#B4650B]">{c.n}</p>
+                  <p className="m-0 mt-1 text-[16px] font-semibold leading-[1.25] text-[#141414]">{c.t}</p>
+                  <p className="m-0 mt-1.5 text-[13px] leading-[1.55] text-[#5F5D59]">{c.b}</p>
+                  <p className="m-0 mt-3 border-t border-[#F0EEE9] pt-2 font-mono text-[10.5px] font-semibold uppercase tracking-[0.11em] text-[#8C8A85]">You end up with</p>
+                  <p className="m-0 mt-1 text-[12.5px] font-medium leading-snug text-[#33302C]">{c.o}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button type="button" onClick={() => setWalkOpen(false)} className="rounded-full bg-[#F5A21B] px-4 py-2 text-[13.5px] font-semibold text-[#141414] transition-colors hover:bg-[#E5940F]">
+                Start with one sentence
+              </button>
+              <p className="m-0 text-[13px] text-[#6E6C67]">Nothing is sent to anyone until you sign.</p>
+            </div>
+          </div>
         </div>
       )}
+
+      {shownStep === 1 && (<>
 
       {/* ---- The areas: a second view of the same position (slice four).
               Every state derives from the fixtured module, never styling. ---- */}
       {started && (
-        <div className="mt-4 xl:hidden">
+        <div className="mt-4 lg:hidden">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
             {areaStates.map((a) => {
               const dot =
@@ -2355,7 +2321,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     setAreaDetail(areaDetail === a.key ? null : a.key);
                     document.getElementById(`sec-${a.key}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
                   }}
-                  className={`flex items-center gap-1.5 text-[11px] ${ink} hover:text-[#141414]`}
+                  className={`flex items-center gap-1.5 text-[12.5px] ${ink} hover:text-[#141414]`}
                   aria-label={`${a.title}: ${a.state.replace("_", " ")}`}
                 >
                   <span className={`inline-block h-[8px] w-[8px] rounded-full ${dot}`} />
@@ -2376,7 +2342,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               organisation: "sets the scale band vendors and service providers are matched at",
             };
             return (
-              <p className="m-0 mt-1.5 border-t border-[#F5F3EE] pt-1.5 text-[11px] leading-relaxed text-[#6E6C67]" role="status">
+              <p className="m-0 mt-1.5 border-t border-[#F5F3EE] pt-1.5 text-[12.5px] leading-relaxed text-[#6E6C67]" role="status">
                 <span className="font-semibold text-[#33302C]">{a.title}</span>: {a.state.replace("_", " ")} ·{" "}
                 {a.standingN} standing fact{a.standingN === 1 ? "" : "s"}
                 {a.notedN > 0 ? `, ${a.notedN} noted` : ""}
@@ -2394,15 +2360,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               ZIP's third column appears: a section index on the left, the
               same areaStates the chip row shows below xl, one organ in two
               responsive presentations, never two organs. ---- */}
-      <div className="mt-16 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_336px] xl:grid-cols-[188px_minmax(0,1fr)_320px]">
+      <div className="mt-6 overflow-hidden rounded-[13px] border border-[#EAE7E1] bg-white lg:grid lg:h-[calc(100vh-170px)] lg:min-h-[520px] lg:grid-cols-[204px_minmax(0,1fr)_330px]">
 
         {/* ---- The section index (xl only; the ZIP's left rail). Every row
                 is the same navigation the area chips carry: scroll to the
                 section that holds it. Counts are standing facts; the orange
                 dot is an open question waiting in that section. ---- */}
         {started ? (
-          <nav aria-label="Sections of your requirement" className="hidden xl:sticky xl:top-6 xl:block">
-            <p className="m-0 mb-2 font-mono text-[10px] font-semibold uppercase tracking-[.12em] text-[#8C8A85]">Your requirement</p>
+          <nav aria-label="Sections of your requirement" className="hidden border-r border-[#EAE7E1] bg-white p-4 lg:flex lg:flex-col lg:overflow-y-auto">
+            <p className="m-0 mb-2 font-mono text-[10.5px] font-semibold uppercase tracking-[.11em] text-[#8C8A85]">Your requirement</p>
             <ul className="m-0 list-none space-y-[2px] p-0">
               {areaStates.map((a) => (
                 <li key={a.key}>
@@ -2424,17 +2390,57 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 </li>
               ))}
             </ul>
-            <p className="m-0 mt-4 border-t border-[#F0EEE9] pt-3 text-[11.5px] leading-snug text-[#8C8A85]">
-              Netify holds the regulation, benchmarks and vendor evidence that matter in your sector.
-            </p>
+            <div className="mt-4 border-t border-[#F0EEE9] pt-3">
+              <p className="m-0 mb-2 px-1.5 text-[12.5px] font-semibold text-[#141414]">Sector expertise</p>
+              {pack ? (
+                <div className="px-1.5">
+                  <p className="m-0 rounded-[8px] border border-[#F2DFB6] bg-[#FFF7E8] px-2.5 py-2 text-[13px] font-semibold leading-snug text-[#8A4D08]">{pack.label}</p>
+                  <p className="m-0 mt-2 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                    {packNotes.length > 0 ? `${packNotes.length} sector note${packNotes.length === 1 ? "" : "s"} applied` : "Pack loaded"}
+                    {(() => {
+                      const n = TAXONOMY.flatMap((s) => packSugsBySection.get(s.key) ?? []).length;
+                      return n > 0 ? ` · ${n} more sector requirement${n === 1 ? "" : "s"} ready` : "";
+                    })()}
+                  </p>
+                </div>
+              ) : (
+                <p className="m-0 px-1.5 text-[12.5px] leading-[1.5] text-[#A3A099]">
+                  Netify holds the regulation, benchmarks and vendor evidence that matter in your sector. Say what you do in one line and it loads the pack.
+                </p>
+              )}
+            </div>
+            {instrumentLadder && (
+              <div className="mt-4 border-t border-[#F0EEE9] pt-3">
+                <p className="m-0 mb-1.5 px-1.5 text-[12.5px] font-semibold text-[#141414]">Output</p>
+                {([
+                  { k: "sor", label: "Statement of requirements", state: published ? "live" : "forming", on: true, full: published ? "Live on the opportunity board" : "Forming as you describe" },
+                  { k: "rfi", label: "RFI", state: instrumentLadder.rfi.state === "ready" ? "ready" : openQuestionCount > 0 ? "when open questions land" : "waiting", on: false, full: instrumentLadder.rfi.note },
+                  { k: "rfp", label: "Full RFP", state: instrumentLadder.rfp.state === "ready" ? "ready" : "needs priorities", on: false, full: instrumentLadder.rfp.note },
+                ] as const).map((f) => (
+                  <div
+                    key={f.k}
+                    title={f.full}
+                    className={`mb-1 flex items-baseline gap-2 rounded-[8px] border px-2 py-[6px] text-[12.5px] text-[#33302C] ${
+                      f.on ? "border-[#F5A21B] bg-[#FFF7E8]" : "border-transparent"
+                    }`}
+                  >
+                    <span className="min-w-0 flex-1">{f.label}</span>
+                    <span className="shrink-0 font-mono text-[10.5px] text-[#A3A099]">{f.state}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </nav>
         ) : (
-          <div className="hidden xl:block" aria-hidden="true" />
+          <div className="hidden lg:block" aria-hidden="true" />
         )}
 
         {/* ============ THE PROJECT: the living Statement of Requirements ============ */}
-        <div>
-          <div className="flex items-baseline justify-between gap-3 border-b-2 border-[#141414] pb-2">
+        <div className="flex min-h-0 min-w-0 flex-col">
+          {/* The header row (the handoff's single fixed band): title, the
+              one counts line, then the filter chips scrolling on the right.
+              One row, one source for every number on it. */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-[#EAE7E1] bg-white px-5 py-3 sm:px-[26px]">
             {editingTitle && !published ? (
               <input
                 autoFocus
@@ -2445,15 +2451,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   if (e.key === "Escape") setEditingTitle(false);
                 }}
                 placeholder="Name your project"
-                className="m-0 w-full border-b border-dashed border-[#141414] bg-transparent tracking-tight outline-none focus:border-[#F5A21B]"
-                style={{ fontSize: "19px", lineHeight: 1.3, fontWeight: 600, color: "#09090b" }}
+                className="m-0 min-w-0 flex-1 border-b border-dashed border-[#141414] bg-transparent tracking-tight outline-none focus:border-[#F5A21B]"
+                style={{ fontSize: "18px", lineHeight: 1.3, fontWeight: 600, letterSpacing: "-0.014em", color: "#141414" }}
                 aria-label="Project title"
               />
             ) : (
               <span className="flex min-w-0 items-baseline gap-2">
                 <h2
                   className={`m-0 tracking-tight ${published ? "" : "cursor-text"}`}
-                  style={{ fontSize: "19px", lineHeight: 1.3, fontWeight: 600, color: facts.length || customTitle.trim() ? "#09090b" : "#8C8A85" }}
+                  style={{ fontSize: "18px", lineHeight: 1.3, fontWeight: 600, letterSpacing: "-0.014em", textWrap: "balance", color: facts.length || customTitle.trim() ? "#141414" : "#8C8A85" }}
                   onClick={() => !published && setEditingTitle(true)}
                   title={published ? undefined : "Click to name your project"}
                 >{title}</h2>
@@ -2465,98 +2471,115 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   <button
                     type="button"
                     onClick={() => setEditingTitle(true)}
-                    className="shrink-0 text-[10px] uppercase tracking-[.08em] text-[#8C8A85] underline decoration-dotted underline-offset-2 hover:text-[#33302C]"
+                    className="shrink-0 text-[12.5px] text-[#8C8A85] underline decoration-dotted underline-offset-2 hover:text-[#33302C]"
                     aria-label="Rename this project"
                   >rename</button>
                 )}
               </span>
             )}
-            <span className="whitespace-nowrap text-[10px] uppercase tracking-[.12em] text-[#8C8A85]">Statement of Requirements · living</span>
-          </div>
-          <p className="m-0 mb-4 mt-1.5 text-[11px] text-[#6E6C67]">
-            {facts.length === 0 && noted.length === 0
-              ? "Empty, honestly. Grey is example content: it shows the destination, never publishes, never counts."
-              : <>
-                  {meter.total} fact{meter.total === 1 ? "" : "s"} · {meter.confirmed} stated · {meter.inferred} inferred
-                  {/* The struck counter earns its explanation (Harry's
-                      Section 1 question, 28 Jul 2026: struck or decrement?
-                      Both: the stated count drops AND the strike stays on
-                      the record, because nothing is silently dropped). */}
-                  {meter.struck > 0 ? <> · <span className="cursor-help underline decoration-dotted underline-offset-2" title="Struck items stay on the record and never publish; the stated count already excludes them. Nothing is silently dropped.">{meter.struck} struck</span></> : ""}
-                  {unansweredGaps.length > 0 ? <> · <span className="text-[#B4650B]">{unansweredGaps.length} question{unansweredGaps.length === 1 ? "" : "s"} open</span></> : ""}
-                  {noted.length > 0 ? ` · ${noted.length} noted` : ""}
-                  {" · "}
-                  <button type="button" className="underline hover:text-[#141414]" onClick={() => setArtefactOpen((o) => !o)}>
-                    {artefactOpen ? "close the artefact" : "view the artefact"}
-                  </button>
-                </>}
-          </p>
-
-          {/* ---- The instrument rail (the consolidation, waves one and
-                  two): one desk, three instruments. Derived from the
-                  position's own state or absent entirely; every note is a
-                  fact about THIS position. Earned instruments wear the
-                  market's colour; horizons stay quiet and name what they
-                  need. ---- */}
-          {instrumentLadder && (
-            <div data-instrument-rail className="-mt-2.5 mb-3 flex flex-wrap items-center gap-1.5">
-              {/* "SOR · LIVE" before anything was published read as a claim
-                  of publication (Harry's Section 1 finding, 28 Jul 2026).
-                  Forming until the signature; live on the board after. */}
-              <span className="rounded-full border border-[#F5A21B] bg-white px-2.5 py-[2px] text-[10px] font-mono font-semibold uppercase tracking-[.08em] text-[#8A4D08]">{published ? "SoR · live on the board" : "SoR · forming"}</span>
-              <span
-                data-instrument-rfi={instrumentLadder.rfi.state}
-                className={`rounded-full px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] ${
-                  instrumentLadder.rfi.state === "ready"
-                    ? "border border-[#F5A21B] bg-white font-semibold text-[#8A4D08]"
-                    : "border border-[#EAE7E1] bg-[#FBFAF8] text-[#8C8A85]"
-                }`}
-              >
-                RFI · <span className="normal-case tracking-normal">{instrumentLadder.rfi.note}</span>
-              </span>
-              <span
-                data-instrument-rfp={instrumentLadder.rfp.state}
-                className={`rounded-full px-2.5 py-[2px] text-[10px] uppercase tracking-[.08em] ${
-                  instrumentLadder.rfp.state === "ready"
-                    ? "border border-[#F5A21B] bg-white font-semibold text-[#8A4D08]"
-                    : "border border-[#EAE7E1] bg-[#FBFAF8] text-[#8C8A85]"
-                }`}
-              >
-                Full RFP · <span className="normal-case tracking-normal">{instrumentLadder.rfp.note}</span>
-              </span>
-            </div>
-          )}
-
-          {/* ---- Scoring priorities (wave two): the covered areas become
-                  weightable once the RFI stands ready. The buyer weights;
-                  nothing weights itself. ---- */}
-          {instrumentLadder && instrumentLadder.rfi.state === "ready" && !published && (
-            <div data-priorities className="mb-4 flex flex-wrap items-center gap-1.5">
-              <span className="text-[10px] font-mono font-semibold uppercase tracking-[.12em] text-[#8C8A85]">Scoring weights</span>
-              <span className="text-[10.5px] text-[#8C8A85]">weight the sections that matter most when scoring vendors and service providers:</span>
-              {coveredSections
-                .map((k) => TAXONOMY.find((s) => s.key === k))
-                .filter((s): s is (typeof TAXONOMY)[number] => Boolean(s))
-                .map((sec) => {
-                  const on = weights.includes(sec.key);
-                  return (
-                    <button
-                      key={sec.key}
-                      type="button"
-                      onClick={() => {
-                        setWeights((w) => (on ? w.filter((k) => k !== sec.key) : [...w, sec.key]));
-                        ev("workspace_priority_weighted", { section: sec.key, high: on ? 0 : 1 });
-                      }}
-                      className={`rounded-full border px-2.5 py-[2px] text-[10.5px] transition-colors ${
-                        on
-                          ? "border-[#F5A21B] bg-[#FFF7E8] font-semibold text-[#8A4D08]"
-                          : "border-[#EAE7E1] bg-white text-[#6E6C67] hover:border-[#141414] hover:text-[#33302C]"
-                      }`}
-                    >
-                      {sectionTitle(sec.key, sec.title)}{on ? " · high" : ""}
+            <p className="m-0 text-[12.5px] text-[#6E6C67]">
+              {meter.total + noted.length === 0
+                ? "Nothing captured yet."
+                : <>
+                    {meter.total + noted.length} captured · {meter.confirmed + noted.length} stated · {meter.inferred} inferred
+                    {openQuestionCount > 0 ? <> · <button type="button" className="text-[#B4650B] underline decoration-[#F2DFB6] underline-offset-2 hover:text-[#8A4D08]" onClick={() => setDocFilter("open")}>{openQuestionCount} question{openQuestionCount === 1 ? "" : "s"} open</button></> : ""}
+                    {" · "}
+                    <button type="button" className="underline hover:text-[#141414]" onClick={() => setArtefactOpen((o) => !o)}>
+                      {artefactOpen ? "close the document" : "view the document"}
                     </button>
-                  );
-                })}
+                  </>}
+            </p>
+            <div className="min-w-[1em] flex-1" />
+            <div className="flex max-w-full items-center gap-1.5 overflow-x-auto lg:max-w-[60%]">
+              {([["all", "Everything"], ["open", `Open (${openQuestionCount})`], ["stated", "Stated"], ["inferred", "Inferred"]] as const).map(([k, label]) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setDocFilter(k)}
+                  className={`shrink-0 rounded-full border px-[13px] py-[5px] text-[12.5px] font-medium transition-colors ${
+                    docFilter === k ? "border-[#141414] bg-[#141414] text-white" : "border-[#DDDAD3] bg-white text-[#33302C] hover:border-[#141414]"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        {/* The applied-changes band: the last batch, with one Undo and a
+            Dismiss. Renders only while the ledger is exactly the array that
+            batch produced, so it can never offer a stale revert. */}
+        {lastPass && facts === lastPass.factsAtSet && !published && (
+          <div className="max-h-[92px] overflow-y-auto border-b border-[#F2DFB6] bg-[#FFF7E8] px-5 py-2 sm:px-[26px]">
+            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <span className="text-[12.5px] font-semibold text-[#141414]">
+                {lastPass.changes.length} change{lastPass.changes.length === 1 ? "" : "s"} applied
+              </span>
+              <span className="text-[12px] text-[#8A4D08]">
+                {lastPass.source === "link" ? "from the link you arrived on" : "from your prompt"}
+              </span>
+              <span className="min-w-[1em] flex-1" />
+              <button type="button" onClick={undoPass} className="text-[12.5px] font-semibold text-[#B4650B] underline hover:text-[#8A4D08]">Undo</button>
+              <button type="button" onClick={() => setLastPass(null)} className="text-[12.5px] text-[#8C8A85] hover:text-[#33302C]">Dismiss</button>
+            </div>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {lastPass.changes.map((c) => (
+                <span
+                  key={c.id}
+                  title={c.provenance}
+                  className="rounded-[7px] border border-[#F2DFB6] bg-white px-2.5 py-[3px] text-[12.5px] text-[#33302C]"
+                >
+                  {c.label.slice(0, 34)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+          <div className="min-h-[180px] flex-1 overflow-y-auto px-5 pb-14 pt-4 sm:px-[26px] lg:min-h-0">
+          {meter.total + noted.length === 0 && openQuestionCount === 0 && (
+            <div>
+              <div className="max-w-[44em]">
+                <p className="m-0 text-[17px] font-semibold text-[#141414]">Your requirement builds here</p>
+                <p className="m-0 mt-2 text-[14px] leading-[1.6] text-[#6E6C67]">
+                  Say what you do and what you need in the bar below. Netify turns it into a structured requirement,
+                  loads the regulation pack for your sector, and asks only for what is missing. Everything it writes is
+                  yours to change or remove.
+                </p>
+                <div className="mt-4 flex flex-col items-start gap-2">
+                  {["We're a UK retailer with 240 stores, MPLS ends March 2027", "5 year term, 5G backup at every store, UK support only", "We run Defender P2 and Entra ID, cost matters most"].map((ex) => (
+                    <button
+                      key={ex}
+                      type="button"
+                      onClick={() => setInput(ex)}
+                      className="rounded-[10px] border border-[#DDDAD3] bg-white px-[15px] py-3 text-left text-[14px] text-[#33302C] transition-colors hover:border-[#141414]"
+                    >
+                      &ldquo;{ex}&rdquo;
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-6 border-t border-[#EAE7E1] pt-5">
+                <div className="mb-3 flex flex-wrap items-baseline gap-3">
+                  <span className="text-[11.5px] font-semibold uppercase tracking-[.11em] text-[#8C8A85]">Where this is going</span>
+                  <button type="button" onClick={() => setWalkOpen(true)} className="text-[12.5px] font-semibold text-[#B4650B] underline hover:text-[#8A4D08]">
+                    Who sees what, in detail
+                  </button>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {WALK_STEPS.map((c) => (
+                    <div key={c.n} className="flex flex-col gap-1.5 rounded-[13px] border border-[#EAE7E1] bg-white p-4">
+                      <p className="m-0 font-mono text-[11px] text-[#B4650B]">{c.n}</p>
+                      <p className="m-0 text-[14.5px] font-semibold leading-[1.25] text-[#141414]">{c.t}</p>
+                      <p className="m-0 text-[12.5px] leading-[1.55] text-[#6E6C67]">{c.b}</p>
+                      <div className="mt-auto border-t border-[#F0EEE9] pt-2">
+                        <p className="m-0 font-mono text-[10.5px] uppercase tracking-[.07em] text-[#A3A099]">You end up with</p>
+                        <p className="m-0 mt-1 text-[12.5px] font-medium leading-[1.5] text-[#33302C]">{c.o}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -2597,7 +2620,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             </div>
           )}
 
-          <div className="pd-cols">
+          <div>
             {TAXONOMY.map((sec) => {
               const isLive = sectionLive(sec.key);
               const secFacts = factsBySection.get(sec.key) ?? [];
@@ -2608,336 +2631,608 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               const optionValueIds = new Set(sec.items.filter((i) => i.path).map((i) => factId(i.path as AllowedPath, i.value)));
               const looseFacts = secFacts.filter((f) => !optionValueIds.has(f.id));
 
-              /* 1a: THE LIST IS THE SELECTOR. One list of candidate lines,
-                 each one the tap target for its own answer. The chip cloud
-                 that used to repeat these same candidates under the question
-                 is gone; an option that only ever lived in that cloud is a
-                 line here instead, so nothing was lost with it. */
-              type Cand = {
-                key: string;
-                label: string;
-                state: "example" | "exampleStruck" | "option" | "stated" | "inferred" | "struck" | "noted";
-                fact?: WorkspaceFact;
-                flashing: boolean;
-                title: string;
-                trailing?: string;
-                quote?: string;
-                act: CandAction;
-              };
-              const cands: Cand[] = [];
-              const seenValue = new Set<string>();
-
+              /* The document (CORRECTIONS.md rules 2 and 3): an answered
+                 element is a single tagged row; an open question renders
+                 as a row and shows its options ONLY while it is the one
+                 being answered; the add-vocabulary lives in the right
+                 panel, not inline. Three tags: stated, inferred, open. */
+              type Row = { key: string; label: string; tag: "stated" | "inferred"; quote?: string; reason?: string; flashing: boolean; remove: () => void };
+              const rows: Row[] = [];
               for (const item of sec.items) {
                 const f = factFor(item);
-                const isNoted = secNoted.has(item.id);
-                if (item.path) seenValue.add(`${item.path}:${String(item.value)}`);
-                cands.push({
-                  key: item.id,
-                  label: item.label,
-                  state: f ? (f.struck ? "struck" : f.provenance === "stated" ? "stated" : "inferred")
-                    : isNoted ? "noted"
-                    : item.exampleTick && !isLive ? "example"
-                    : item.exampleStruck && !isLive ? "exampleStruck"
-                    : "option",
-                  fact: f,
-                  flashing: Boolean(f && flash.has(f.id)),
-                  title: item.why,
-                  trailing: item.exampleStruck,
-                  act: { kind: "item", item },
+                if (f && !f.struck) {
+                  rows.push({
+                    key: item.id, label: item.label,
+                    tag: f.provenance === "stated" ? "stated" : "inferred",
+                    quote: f.provenance === "stated" ? f.quote ?? undefined : undefined,
+                    reason: f.provenance === "stated" ? undefined : f.reason ?? "inferred",
+                    flashing: flash.has(f.id), remove: () => toggleFact(f.id),
+                  });
+                } else if (!f && secNoted.has(item.id)) {
+                  rows.push({ key: item.id, label: item.label, tag: "stated", flashing: false, remove: () => removeNote(item.id) });
+                }
+              }
+              for (const f of looseFacts) {
+                if (f.struck) continue;
+                /* The organisation fields (Industry, Users, Sites,
+                   Countries) already render as labelled rows above;
+                   repeating them here would double the document. */
+                if (sec.key === "organisation" && f.path && ORG_FIELD_PATHS.has(String(f.path))) continue;
+                rows.push({
+                  key: f.id, label: factLabel(f),
+                  tag: f.provenance === "stated" ? "stated" : "inferred",
+                  quote: f.provenance === "stated" ? f.quote ?? String(f.value) : undefined,
+                  reason: f.provenance === "stated" ? undefined : f.reason ?? "inferred",
+                  flashing: flash.has(f.id), remove: () => toggleFact(f.id),
                 });
               }
-
-              /* Candidates the open question carried that the framework does
-                 not already hold: they join the same list rather than living
-                 in a second one. */
-              const chipGaps = secGaps.filter((g) => g.path && g.control === "chips" && (g.options?.length ?? 0) > 0);
-              const inlineGaps = secGaps.filter((g) => !chipGaps.includes(g));
-              for (const g of chipGaps) {
-                for (const o of g.options ?? []) {
-                  if (seenValue.has(`${g.path}:${o.value}`)) continue;
-                  seenValue.add(`${g.path}:${o.value}`);
-                  cands.push({
-                    key: `gap-${g.key}-${o.value}`,
-                    label: o.label,
-                    state: "option",
-                    flashing: false,
-                    title: `Choose this · answers: ${g.question}`,
-                    act: { kind: "gap", gap: g, value: o.value, label: o.label },
-                  });
-                }
-              }
-              for (const q of secEarned) {
-                for (const o of q.options) {
-                  if (o.answer.kind !== "note") continue;
-                  cands.push({
-                    key: `q-${q.id}-${o.label}`,
-                    label: o.label,
-                    state: "option",
-                    flashing: false,
-                    title: `Choose this · answers: ${q.question}`,
-                    act: { kind: "earned", q, answer: o.answer },
-                  });
-                }
-              }
-              /* Answers already given that have no framework line of their
-                 own: an answer to a question, or the buyer's own words. */
               for (const n of secNotes) {
                 if (taxonomyItemIds.has(n.id)) continue;
-                cands.push({
-                  key: `note-${n.id}`,
-                  label: n.label,
-                  state: "noted",
-                  flashing: false,
-                  title: n.own ? "Your words, kept as you said them. One tap removes" : "One tap removes",
-                  trailing: n.own ? undefined : "your answer, kept with your position",
-                  quote: n.own ? n.label : undefined,
-                  act: { kind: "note", id: n.id },
-                });
+                rows.push({ key: `note-${n.id}`, label: n.label, tag: "stated", quote: n.own ? n.label : undefined, flashing: false, remove: () => removeNote(n.id) });
               }
 
-              /* 1b: ranked. The candidates the sector pack says are likely
-                 come first, slightly larger, each with the line that says
-                 why. Nothing is reordered by what is already chosen, so a
-                 tap never moves the row under the finger. */
+              /* Open questions, in one shape. Chip gaps and earned questions
+                 carry tap options; figure gaps carry a field. */
+              type Opt = { key: string; label: string; lead?: string; run: () => void };
+              type Head = {
+                key: string; question: string; count: "one" | "any";
+                evidence?: string; dismiss?: () => void;
+                options: Opt[]; field?: BriefGap; negatives: Array<{ key: string; label: string; run: () => void }>;
+              };
               const leads = (sectorFamily && LEADS[sectorFamily.key]?.[sec.key]) || [];
               const reasonOf = new Map(leads.map((l) => [l.id, l.reason]));
-              const leadCands = leads.map((l) => cands.find((c) => c.key === l.id)).filter(Boolean) as Cand[];
-              /* A candidate the open question is actually asking about stays
-                 on screen while the question stands: a question whose answers
-                 sit behind a count is a question nobody can answer. It keeps
-                 its own place in the list rather than being promoted, so
-                 answering the question never moves a line. */
-              const askedKeys = new Set<string>();
-              for (const g of chipGaps) for (const o of g.options ?? []) askedKeys.add(`gap-${g.key}-${o.value}`);
+              const heads: Head[] = [];
+              for (const g of secGaps) {
+                if (g.path && g.control === "chips" && (g.options?.length ?? 0) > 0) {
+                  heads.push({
+                    key: `g-${g.key}`, question: g.question,
+                    count: LIST_FACT_PATHS.has(String(g.path)) ? "any" : "one",
+                    options: (g.options ?? []).map((o) => ({ key: `gap-${g.key}-${o.value}`, label: o.label, run: () => answerGap(g, o.value, o.label) })),
+                    negatives: [],
+                  });
+                } else {
+                  heads.push({ key: `g-${g.key}`, question: g.question, count: "one", options: [], field: g, negatives: [] });
+                }
+              }
               for (const q of secEarned) {
+                const opts: Opt[] = [];
                 for (const o of q.options) {
-                  if (o.answer.kind === "items") for (const id of o.answer.itemIds) askedKeys.add(id);
-                  if (o.answer.kind === "note") askedKeys.add(`q-${q.id}-${o.label}`);
+                  if (o.answer.kind === "items") {
+                    const first = o.answer.itemIds[0];
+                    opts.push({ key: `q-${q.id}-${o.label}`, label: o.label, lead: first ? reasonOf.get(first) : undefined, run: () => answerEarned(q, o.answer) });
+                  } else if (o.answer.kind === "note") {
+                    opts.push({ key: `q-${q.id}-${o.label}`, label: o.label, run: () => answerEarned(q, o.answer) });
+                  }
                 }
-              }
-              for (const g of chipGaps) {
-                for (const o of g.options ?? []) {
-                  const twin = cands.find((c) => c.act.kind === "item" && c.act.item.path === g.path && String(c.act.item.value) === o.value);
-                  if (twin) askedKeys.add(twin.key);
-                }
-              }
-              const leadKeys = new Set(leadCands.map((c) => c.key));
-              const ordered = [...leadCands, ...cands.filter((c) => !leadKeys.has(c.key))];
-
-              /* 1b: the rest collapse behind a count. Everything the buyer
-                 has touched stays on screen, the questions' own answers stay
-                 with it, and the example lines stay too. */
-              const budget = Math.max(6, leadCands.length + 4);
-              const lastTouched = ordered.reduce((m, c, i) => (c.state === "option" ? m : i), -1);
-              const lastAsked = ordered.reduce((m, c, i) => (askedKeys.has(c.key) ? i : m), -1);
-              const opened = openedSecs.includes(sec.key);
-              const cut = opened ? ordered.length : Math.max(budget, lastTouched + 1, lastAsked + 1);
-              const hidden = Math.max(0, ordered.length - cut);
-              const shown = hidden > 1 ? ordered.slice(0, cut) : ordered;
-
-              /* The question, above the list it is asking about. */
-              const heads: Array<{ key: string; question: string; count: "one" | "any"; evidence?: string; dismissId?: string }> = [
-                ...chipGaps.map((g) => ({
-                  key: `g-${g.key}`,
-                  question: g.question,
-                  count: (LIST_FACT_PATHS.has(String(g.path)) ? "any" : "one") as "one" | "any",
-                })),
-                ...secEarned.map((q) => ({
-                  key: q.id,
-                  question: q.question,
-                  count: answerCountOf(q),
+                heads.push({
+                  key: q.id, question: q.question, count: answerCountOf(q),
                   evidence: evidenceLine(q),
-                  dismissId: q.id,
-                })),
-              ];
-              const negatives = secEarned.flatMap((q) =>
-                q.options.filter((o) => o.answer.kind === "dismiss").map((o) => ({ key: `${q.id}-${o.label}`, label: o.label, q, answer: o.answer })),
-              );
-              const ownWords = ownWordsBySection.get(sec.key);
+                  dismiss: published ? undefined : () => dismissQuestion(q.id),
+                  options: opts,
+                  negatives: q.options.filter((o) => o.answer.kind === "dismiss").map((o) => ({ key: `${q.id}-${o.label}`, label: o.label, run: () => answerEarned(q, o.answer) })),
+                });
+              }
+              heads.sort((a, b) => Number(Boolean(b.options.find((o) => o.lead))) - Number(Boolean(a.options.find((o) => o.lead))));
+
+              const showRows = docFilter === "all" || docFilter === "stated" || docFilter === "inferred";
+              const shownRows = rows.filter((r) => (docFilter === "stated" ? r.tag === "stated" : docFilter === "inferred" ? r.tag === "inferred" : true));
+              const showHeads = docFilter === "all" || docFilter === "open";
+              if (!isLive && rows.length === 0 && heads.length === 0 && sec.key !== "organisation") return null;
 
               return (
-                <section key={sec.key} id={`sec-${sec.key}`} className={`pd-sec mb-5${liveRing.has(sec.key) ? " pd-live-in" : ""}`} style={{ scrollMarginTop: "70px" }}>
+                <section key={sec.key} id={`sec-${sec.key}`} className="pd-sec mb-6" style={{ scrollMarginTop: "16px" }}>
                   <h3
-                    className="mb-1.5 flex items-baseline justify-between border-b border-[#141414] pb-1 font-mono uppercase"
-                    style={{ fontSize: "11px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".11em", color: "#141414" }}
+                    className="mb-0 flex items-baseline gap-3 border-b border-[#141414] pb-[9px] uppercase"
+                    style={{ fontSize: "11.5px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".11em", color: "#141414" }}
                   >
-                    {sectionTitle(sec.key, sec.title)}
-                    <span className={`text-[10px] font-normal normal-case tracking-normal ${isLive ? "invisible" : "text-[#A3A099]"}`}>{sec.exampleNote}</span>
+                    <span className="shrink-0">{sectionTitle(sec.key, sec.title)}</span>
+                    {SECTION_NOTES[sec.key] && (
+                      <span className="hidden min-w-0 truncate text-[12.5px] font-normal normal-case tracking-normal text-[#A3A099] sm:inline">{SECTION_NOTES[sec.key]}</span>
+                    )}
+                    <span className="min-w-0 flex-1" />
+                    {!published && (
+                      <button
+                        type="button"
+                        onClick={() => setRightTab("add")}
+                        className="shrink-0 font-sans text-[12.5px] font-semibold normal-case tracking-normal text-[#B4650B] hover:text-[#8A4D08]"
+                      >
+                        + add
+                      </button>
+                    )}
                   </h3>
 
-                  {/* Organisation renders as fields */}
-                  {sec.key === "organisation" && (
+                  {/* Organisation keeps its labelled fields */}
+                  {sec.key === "organisation" && showRows && (
                     <OrganisationFields facts={facts} isLive={isLive} flash={flash} onStrike={toggleFact} />
                   )}
 
-                  {/* The open question sits above the list that answers it */}
-                  {heads.map((h, i) => (
-                    <OpenQuestion
-                      key={h.key}
-                      question={h.question}
-                      count={h.count}
-                      hint={i === 0 && shown.length > 0
-                        ? `${h.count === "any" ? "Tap any line below that applies." : "Tap the line below that applies."}${leadCands.length && sectorFamily ? ` Ordered by what applies to ${sectorFamily.word}.` : ""} These are the usual answers, not a fixed list.`
-                        : undefined}
-                      evidence={h.evidence}
-                      onDismiss={published || !h.dismissId ? undefined : () => dismissQuestion(String(h.dismissId))}
-                    />
-                  ))}
-
-                  {/* The list: every candidate is its own tap target */}
-                  {shown.map((c) => (
-                    <ItemLine
-                      key={c.key}
-                      label={c.label}
-                      state={c.state}
-                      fact={c.fact}
-                      quote={c.quote}
-                      trailing={c.trailing}
-                      lead={reasonOf.has(c.key)}
-                      reason={reasonOf.get(c.key)}
-                      flashing={c.flashing}
-                      disabled={Boolean(published)}
-                      title={c.title}
-                      onClick={() => runCandidate(c.act, sec.key)}
-                    />
-                  ))}
-                  {shown.length < ordered.length && (
-                    <button
-                      type="button"
-                      onClick={() => setOpenedSecs((s) => [...s, sec.key])}
-                      className="mt-1 rounded-[8px] border border-dashed border-[#E3E0DA] px-2.5 py-1 text-[12px] text-[#8C8A85] transition-colors hover:border-[#141414] hover:text-[#141414]"
-                    >
-                      + {ordered.length - shown.length} more
-                    </button>
-                  )}
-
-                  {/* Facts with no matching option (free values) render in place */}
-                  {sec.key !== "organisation" && looseFacts.map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      disabled={Boolean(published)}
-                      onClick={() => toggleFact(f.id)}
-                      title={f.struck ? "Restore" : "Strike out"}
-                      className={`block w-full rounded-[6px] py-[3px] text-left text-[13px] leading-snug hover:bg-[#FDFCFA] ${flash.has(f.id) ? "pd-ink" : ""} ${f.struck ? "text-[#A3A099] line-through" : "text-[#141414]"}`}
-                    >
-                      <span className={`mr-2 inline-block w-3 text-center text-[11px] ${f.struck ? "text-[#A3A099]" : f.provenance === "stated" ? "text-[#F5A21B]" : "text-[#33302C]"}`}>{f.struck ? "×" : "✓"}</span>
-                      <span className={f.struck ? "" : f.provenance === "stated" ? "border-b border-[#F5A21B]" : "border-b border-dotted border-[#A3A099]"}>{factLabel(f)}</span>
-                      {!f.struck && (
-                        <span className="ml-2 text-[11px] text-[#6E6C67]">
-                          {f.provenance === "stated" ? <em>&ldquo;{f.quote ?? String(f.value)}&rdquo;</em> : (f.reason ?? "inferred")}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-
-                  {/* A question with a figure of its own keeps its own field:
-                      it is not a choice between candidates, so it never had a
-                      chip cloud to lose. */}
-                  {inlineGaps.map((g) => (
-                    <GapLine key={g.key} gap={g} onAnswer={answerGap} />
-                  ))}
-
-                  {/* The plain negative: an answer, not a dismissal */}
-                  {!published && negatives.length > 0 && (
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                      {negatives.map((n) => (
+                  {/* Answered elements: one row each, no options, no input,
+                      no helper text. Value first, then the tag, then the
+                      evidence, then the remove control. */}
+                  {showRows && shownRows.map((r) => (
+                    <div key={r.key} className={`flex items-start gap-3.5 border-b border-[#F5F3EE] py-[10px] ${r.flashing ? "pd-ink" : ""}`}>
+                      <span className="min-w-0 flex-1 text-[14px] font-medium leading-[1.5] text-[#141414]" style={{ textWrap: "pretty" }}>
+                        {r.label}
+                        <span className={`ml-2 inline-block rounded-[4px] px-[6px] py-[2px] align-[1px] font-mono text-[10.5px] font-semibold uppercase tracking-[.06em] ${
+                          r.tag === "stated" ? "bg-[#EAF6EE] text-[#256B3E]" : "bg-[#F2F0EB] text-[#5F5F5F]"
+                        }`}>{r.tag}</span>
+                        {r.quote && <span className="ml-2 text-[12px] font-normal italic text-[#A3A099]">&ldquo;{r.quote}&rdquo;</span>}
+                        {r.reason && <span className="ml-2 text-[12px] font-normal text-[#8C8A85]">{r.reason}</span>}
+                      </span>
+                      {!published && (
                         <button
-                          key={n.key}
                           type="button"
-                          onClick={() => answerEarned(n.q, n.answer)}
-                          className="text-[12px] font-semibold text-[#B4650B] underline underline-offset-2 hover:text-[#8A4D08]"
+                          onClick={r.remove}
+                          className="flex h-[25px] w-[25px] shrink-0 items-center justify-center rounded-full border border-[#EFEDE8] bg-white text-[13px] leading-none text-[#A3A099] transition-colors hover:border-[#141414] hover:text-[#141414]"
+                          aria-label={`Remove ${r.label}`}
                         >
-                          {n.label}
+                          ×
                         </button>
-                      ))}
+                      )}
                     </div>
-                  )}
+                  ))}
 
-                  {/* 1f: the list is never the only way through */}
-                  {!published && (
-                    <OwnWordsRow
-                      sectionKey={sec.key}
-                      question={ownWords?.question}
-                      placeholder={ownWords?.placeholder ?? "Say it in your own words"}
-                      tech={SECTION_TECH[sec.key] ?? "the requirement in this section"}
-                      onCommit={(text) => answerInOwnWords(sec.key, text)}
-                    />
-                  )}
-
-                  {/* Sector pack suggestions (24 Jul): offered clauses under
-                      the pack law. The pack never writes; the buyer's touch
-                      does. Declining is permanent and stays on the record. */}
-                  {!published && (packSugsBySection.get(sec.key) ?? []).map((sg) => (
-                    <div key={sg.id} className="my-1.5 rounded-md border border-dashed border-[#E3E0DA] bg-[#FBFAF8]/80 px-2.5 py-2">
-                      <p className="m-0 text-[13px] leading-snug text-[#33302C]">
-                        <span className="mr-1.5 inline-block rounded-sm bg-[#EAE7E1] px-1 py-[1px] align-[1px] text-[10px] font-mono font-semibold uppercase tracking-[.08em] text-[#5F5D59]">Suggested · {pack?.label.toLowerCase()}</span>
-                        {sg.label}
-                      </p>
-                      <p className="m-0 mt-0.5 text-[11px] leading-snug text-[#6E6C67]">{sg.reason}</p>
-                      <div className="mt-1.5 flex gap-2">
-                        <button type="button" onClick={() => acceptSuggestion(sg)} className="rounded-full border border-[#33302C] bg-[#141414] px-2.5 py-[3px] text-[11px] font-semibold text-white transition-colors hover:bg-black">
-                          Add to the record
+                  {/* Open questions: rows; options only on the one being
+                      answered, as chips, the sector's likely answers first. */}
+                  {showHeads && heads.map((h) => {
+                    const active = h.key === activeHeadKey;
+                    const expanded = openedSecs.includes(h.key);
+                    const leadsFirst = [...h.options].sort((a, b) => Number(Boolean(b.lead)) - Number(Boolean(a.lead)));
+                    const cutAt = Math.max(3, leadsFirst.filter((o) => o.lead).length);
+                    const visible = active ? (expanded ? leadsFirst : leadsFirst.slice(0, cutAt)) : [];
+                    const hiddenN = active && !expanded ? Math.max(0, leadsFirst.length - cutAt) : 0;
+                    const topLead = visible.find((o) => o.lead);
+                    return (
+                      <div key={h.key} className={`border-b border-[#F5F3EE] py-[10px] ${active ? "bg-[#FFFDF7]" : ""}`} title={h.evidence}>
+                        <button
+                          type="button"
+                          onClick={() => setActiveQ(h.key)}
+                          className="flex w-full items-baseline gap-2 text-left"
+                        >
+                          <span className="inline-block shrink-0 rounded-[4px] bg-[#FFF7E8] px-[6px] py-[2px] font-mono text-[10.5px] font-semibold uppercase tracking-[.06em] text-[#B4650B]">open</span>
+                          <span className={`min-w-0 text-[14px] leading-[1.5] ${active ? "text-[#8A4D08]" : "text-[#B4650B] hover:text-[#8A4D08]"}`}>{h.question}</span>
+                          {active && (
+                            <span className="ml-auto shrink-0 font-mono text-[10.5px] uppercase tracking-[.07em] text-[#A3A099]">
+                              {h.count === "one" ? "Pick one" : "Pick any"}
+                            </span>
+                          )}
+                          {active && h.dismiss && (
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(e) => { e.stopPropagation(); h.dismiss?.(); }}
+                              onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); h.dismiss?.(); } }}
+                              className={`shrink-0 cursor-pointer text-[12.5px] text-[#A3A099] hover:text-[#141414] ${active ? "" : "ml-auto"}`}
+                              title="Not relevant to this project"
+                            >
+                              ×
+                            </span>
+                          )}
                         </button>
-                        <button type="button" onClick={() => declineSuggestion(sg)} className="rounded-full border border-[#E3E0DA] bg-white px-2.5 py-[3px] text-[11px] text-[#5F5D59] transition-colors hover:border-[#A3A099] hover:text-[#141414]">
-                          Decline, keep on record
-                        </button>
+                        {active && !published && (
+                          <div className="mt-2.5">
+                            {h.field ? (
+                              <div className="flex items-center gap-2">
+                                <GapField gap={h.field} onAnswer={answerGap} />
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex flex-wrap gap-[7px]">
+                                  {visible.map((o) => (
+                                    <button
+                                      key={o.key}
+                                      type="button"
+                                      onClick={o.run}
+                                      className="rounded-[9px] border border-[#DDDAD3] bg-white px-3.5 py-[8px] text-[13.5px] text-[#141414] transition-colors hover:border-[#141414]"
+                                    >
+                                      {o.label}
+                                    </button>
+                                  ))}
+                                  {hiddenN > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setOpenedSecs((x) => [...x, h.key])}
+                                      className="rounded-[9px] border border-dashed border-[#DDDAD3] bg-transparent px-3.5 py-[8px] text-[13.5px] text-[#6E6C67] transition-colors hover:border-[#141414] hover:text-[#141414]"
+                                    >
+                                      {hiddenN} more
+                                    </button>
+                                  )}
+                                </div>
+                                {topLead && (
+                                  <p className="m-0 mt-2 text-[12.5px] leading-[1.5] text-[#A3A099]">
+                                    Common in {sectorFamily?.word}: {topLead.lead}
+                                  </p>
+                                )}
+                                {h.negatives.length > 0 && (
+                                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                                    {h.negatives.map((n) => (
+                                      <button key={n.key} type="button" onClick={n.run} className="text-[12.5px] font-medium text-[#B4650B] underline underline-offset-2 hover:text-[#8A4D08]">
+                                        {n.label}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="mt-2.5 flex items-center gap-2 rounded-[9px] border border-[#DDDAD3] bg-white py-[5px] pl-3 pr-[5px] focus-within:border-[#F5A21B]">
+                                  <OwnWordsInput
+                                    placeholder="Or say it in your own words"
+                                    onCommit={(text) => answerInOwnWords(sec.key, text)}
+                                  />
+                                </div>
+                                <p className="m-0 mt-1.5 text-[12.5px] leading-snug text-[#8C8A85]">
+                                  Kept in your words. Vendors and service providers answer on {SECTION_TECH[sec.key] ?? "this part of the requirement"}.
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
-                  {(packDeclinedBySection.get(sec.key) ?? []).map((sg) => (
-                    <p key={`dec-${sg.id}`} className="m-0 py-[3px] text-[13px] leading-snug text-[#A3A099]">
-                      <span className="mr-2 inline-block w-3 text-center text-[11px]">×</span>
-                      <span className="line-through">{sg.label}</span>
-                      <span className="ml-2 text-[10px] no-underline">suggested for {pack?.label.toLowerCase()}, declined; kept on the record</span>
-                    </p>
-                  ))}
+                    );
+                  })}
                 </section>
               );
             })}
 
-            {/* Notes, unplaced: the receipt (13.6) */}
-            {receipts.length > 0 && (
-              <section className="pd-sec mb-5">
-                <h3
-                  className="mb-1.5 flex items-baseline justify-between border-b border-[#EAE7E1] pb-1 uppercase"
-                  style={{ fontSize: "10px", lineHeight: 1.3, fontWeight: 600, letterSpacing: ".12em", color: "#8C8A85" }}
+
+          </div>
+
+
+          </div>
+
+          {/* The prompt dock: pinned to the foot of the centre column once
+              a project exists. Same input, same cycle, nothing new. */}
+          {!published && (
+            <div className="max-h-[200px] overflow-y-auto border-t border-[#EAE7E1] bg-white px-4 py-3 sm:px-5">
+              <div className="flex flex-wrap items-center gap-[11px] rounded-[12px] border border-[#DDDAD3] bg-[#FDFCFA] py-[5px] pl-[15px] pr-[5px] focus-within:border-[#F5A21B] focus-within:bg-white">
+                <span aria-hidden="true" className="h-[8px] w-[8px] shrink-0 rounded-full bg-[#F5A21B]" />
+                <input
+                  type="text"
+                  name="project-brief-dock"
+                  autoComplete="off"
+                  data-1p-ignore="true"
+                  data-lpignore="true"
+                  data-form-type="other"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void runCycle(input, { fromEnter: true });
+                    }
+                  }}
+                  onPaste={(e) => {
+                    const t = e.clipboardData?.getData("text/plain") ?? "";
+                    if (t.length > 300 || /\n/.test(t.trim())) {
+                      e.preventDefault();
+                      void ingestText(t, "paste");
+                    }
+                  }}
+                  placeholder="Keep prompting: &ldquo;add 5G backup at every site, 5 year term, UK support only&rdquo;"
+                  className="min-w-[6em] flex-1 bg-transparent text-[15px] text-[#141414] outline-none placeholder:text-[#A3A099]"
+                  aria-label="Add or correct anything about your project"
+                />
+                <button
+                  type="button"
+                  onClick={() => input.trim() && !busy && void runCycle(input, { fromEnter: true })}
+                  className="shrink-0 rounded-[8px] bg-[#141414] px-[17px] py-[9px] text-[13.5px] font-semibold text-white transition-colors hover:bg-[#3A3A3A]"
                 >
-                  Notes, unplaced
-                  <span className="text-[10px] font-normal normal-case tracking-normal text-[#8C8A85]">heard, no home yet</span>
-                </h3>
-                {receipts.map((r) => (
-                  <div key={r.id} className="flex items-baseline gap-2 py-[3px] text-[13px] leading-snug text-[#5F5D59]">
-                    <span className="text-[#8C8A85]">•</span>
-                    <span className="italic">&ldquo;{r.text}&rdquo;</span>
-                    <button type="button" onClick={() => dismissReceipt(r.id)} className="ml-auto text-[11px] text-[#8C8A85] hover:text-[#141414]" title="Remove this note">✕</button>
-                  </div>
-                ))}
-                <p className="m-0 mt-1 text-[11px] leading-snug text-[#8C8A85]">Kept verbatim with your position. Nothing you say is silently dropped.</p>
-              </section>
-            )}
-          </div>
-
-
-          {/* The document's own legend stays with the document. The
-              signature that used to sit under it is step three now. */}
-          <div className="mt-6 border-t border-[#EAE7E1] pt-5">
-            {/* The four truth classes, stated once */}
-            <p className="m-0 mt-3 text-[11px] leading-relaxed text-[#8C8A85]">
-              <span className="text-[#A3A099]">grey</span> example, never publishes · <span className="italic text-[#5F5D59]">&ldquo;quoted&rdquo;</span> captured, awaiting interpretation ·{" "}
-              <span className="border-b border-[#F5A21B] text-[#141414]">solid ink</span> stated, your words or your touch ·{" "}
-              <span className="border-b border-dotted border-[#A3A099] text-[#5F5D59]">dotted</span> inferred, reason attached, one tap strikes ·{" "}
-              <span className="text-[#256B3E]">✓ dated</span> verified, evidence stands behind it. Strike anything; a strike is never overridden by re-inference, only by your own words. Nothing on this desk moves without saying what changed.
-            </p>
-          </div>
+                  Apply
+                </button>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-[#6E6C67]">
+                {busy && <span aria-live="polite" className="text-[#33302C]">Reading&hellip;</span>}
+                {pasteSummary && !busy && <span aria-live="polite" className="text-[#33302C]">{pasteSummary}</span>}
+                {cycleError && <span className="text-red-600">{cycleError}</span>}
+                <button type="button" onClick={() => setRightTab("documents")} className="rounded-full border border-[#DDDAD3] bg-white px-3 py-[5px] font-medium text-[#141414] transition-colors hover:border-[#141414]">
+                  Upload documentation
+                </button>
+                <span className="ml-auto text-[12px] text-[#A3A099]">Everything here is editable by hand</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* ============ THE RESPONDING ORGANS ============ */}
-        <div className="space-y-7 lg:sticky lg:top-6 lg:rounded-[14px] lg:border lg:border-[#EAE7E1] lg:bg-white lg:p-5">
+        {/* ============ THE PANEL: Add, Sector, Documents, Ask; then the
+                one readiness figure and the quiet instruments ============ */}
+        <div className="flex min-h-0 min-w-0 flex-col border-t border-[#EAE7E1] bg-white lg:overflow-y-auto lg:border-l lg:border-t-0">
+          <div className="flex shrink-0 flex-wrap gap-[2px] border-b border-[#F0EEE9] bg-[#FDFCFA] px-2.5 py-[9px]">
+            {([["add", "Add"], ["sector", "Sector"], ["documents", "Documents"], ["ask", "Ask"]] as const).map(([k, label]) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setRightTab(k)}
+                className={`rounded-full px-3 py-[7px] text-[12.5px] font-semibold transition-colors ${
+                  rightTab === k ? "bg-white text-[#141414] shadow-[0_1px_2px_rgba(20,20,20,.08)]" : "text-[#6E6C67] hover:text-[#141414]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
+          <div className="px-[15px] pb-[26px] pt-[15px]">
+            {rightTab === "add" && (
+              <div>
+                <p className="m-0 text-[13.5px] font-semibold text-[#141414]">Add it yourself</p>
+                <p className="m-0 mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                  Anything the prompt can do, you can do by hand. Netify writes the technical wording for vendors and service providers either way.
+                </p>
+                <input
+                  value={addFilter}
+                  onChange={(e) => setAddFilter(e.target.value)}
+                  placeholder="Search requirement elements"
+                  aria-label="Search requirement elements"
+                  className="mt-3 w-full rounded-[9px] border border-[#DDDAD3] bg-white px-3 py-[8px] text-[13px] text-[#141414] outline-none placeholder:text-[#A3A099] focus:border-[#F5A21B]"
+                />
+                {TAXONOMY.map((sec) => {
+                  const q = addFilter.trim().toLowerCase();
+                  const items = sec.items.filter((item) => !factFor(item) && !noted.some((n) => n.id === item.id) && (!q || item.label.toLowerCase().includes(q)));
+                  if (!items.length) return null;
+                  return (
+                    <div key={sec.key} className="mt-3.5">
+                      <p className="m-0 mb-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[.11em] text-[#8C8A85]">{sectionTitle(sec.key, sec.title)}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {items.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            disabled={Boolean(published)}
+                            title={item.why}
+                            onClick={() => clickItem(item, sec.key)}
+                            className="rounded-[8px] border border-[#EAE7E1] bg-white px-2.5 py-1 text-[12.5px] text-[#33302C] transition-colors hover:border-[#141414] hover:text-[#141414] disabled:opacity-40"
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {rightTab === "sector" && (
+              <div className="space-y-4">
+                <div>
+                  <p className="m-0 text-[13.5px] font-semibold text-[#141414]">{pack ? `${pack.label} expertise` : "Sector expertise"}</p>
+                  <p className="m-0 mt-1 text-[12.5px] leading-[1.55] text-[#6E6C67]">
+                    {requirement.organisation?.sector
+                      ? `${requirement.organisation.sector}. The pack below carries the regulation and benchmarks that usually apply.`
+                      : "Say your sector in the prompt and Netify loads its regulation and benchmark pack."}
+                  </p>
+                </div>
+                {!published && TAXONOMY.some((sec) => (packSugsBySection.get(sec.key) ?? []).length > 0) && (
+                  <div>
+                    <p className="m-0 mb-1 font-mono text-[10.5px] font-semibold uppercase tracking-[.08em] text-[#A3A099]">Sector requirements not in your project yet</p>
+                    {TAXONOMY.flatMap((sec) => (packSugsBySection.get(sec.key) ?? [])).map((sg) => (
+                      <div key={sg.id} className="flex items-start gap-2.5 border-b border-[#F5F3EE] py-[9px]">
+                        <div className="min-w-0 flex-1">
+                          <p className="m-0 text-[13px] font-medium leading-snug text-[#141414]">{sg.label}</p>
+                          <p className="m-0 mt-0.5 text-[12px] leading-[1.45] text-[#8C8A85]">{sg.reason}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <button type="button" onClick={() => acceptSuggestion(sg)} className="rounded-full border border-[#DDDAD3] bg-white px-[11px] py-[4px] text-[12.5px] font-semibold text-[#141414] transition-colors hover:border-[#141414]">
+                            Add
+                          </button>
+                          <button type="button" onClick={() => declineSuggestion(sg)} className="text-[12.5px] text-[#A3A099] underline underline-offset-2 transition-colors hover:text-[#141414]">
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {TAXONOMY.flatMap((sec) => (packDeclinedBySection.get(sec.key) ?? [])).map((sg) => (
+                  <p key={`dec-${sg.id}`} className="m-0 text-[12.5px] leading-snug text-[#A3A099]">
+                    <span className="line-through">{sg.label}</span>
+                    <span className="ml-2">declined</span>
+                  </p>
+                ))}
+          {/* Sector notes (24 Jul): the pack's advice with its provenance.
+              Evidence and advice, never requirements; nothing here publishes
+              or feeds verdict or fit. Grey, not emerald: this advice costs
+              Netify nothing and earns the buyer caution. */}
+          {pack && packNotes.length > 0 && (
+            <div>
+              <p className="m-0 mb-1 flex items-baseline justify-between gap-2 font-mono text-[10.5px] font-semibold uppercase tracking-[.08em] text-[#A3A099]">
+                <span>Sector notes · {pack.label}{packFlavours.length ? ` · ${packFlavours.map((f) => pack.flavours.find((x) => x.id === f)?.label ?? f).join(" · ")}` : ""}</span>
+                <span className="font-normal normal-case tracking-normal">{pack.version}</span>
+              </p>
+              {packNotes.map((n) => (
+                <p key={n.id} className="m-0 border-b border-[#F5F3EE] py-[8px] text-[12.5px] leading-[1.5] text-[#5F5D59]">{n.text}</p>
+              ))}
+              <p className="m-0 mt-1.5 text-[12px] leading-snug text-[#A3A099]">Advice with provenance, never requirements; nothing here publishes.</p>
+            </div>
+          )}
+          {/* We noticed: emerald, only advice that costs Netify */}
+          {verdict && verdict.againstInterest.length > 0 && started && (
+            <div className="rounded-lg border border-[#BFE0CB] bg-[#EAF6EE] p-3">
+              <p className="m-0 mb-1 text-[10px] font-mono font-semibold uppercase tracking-[.12em] text-[#256B3E]">We noticed · against Netify&rsquo;s own interest</p>
+              <p className="m-0 text-[13px] leading-relaxed text-[#3A5A44]">{verdict.againstInterest[0].statement}</p>
+              {verdict.againstInterest.length > 1 && (
+                <p className="m-0 mt-1 text-[12.5px] text-[#256B3E]/80">{verdict.againstInterest.length - 1} more ruling{verdict.againstInterest.length === 2 ? "" : "s"} on your record.</p>
+              )}
+            </div>
+          )}
+              </div>
+            )}
+
+            {rightTab === "documents" && (
+              <div className="space-y-4">
+                <div>
+                  <p className="m-0 text-[13.5px] font-semibold text-[#141414]">Your documentation</p>
+                  <p className="m-0 mt-1 text-[12.5px] leading-[1.55] text-[#6E6C67]">
+                    Drop in what you already have: an inventory note, audit findings, last time&rsquo;s RFP. Netify reads it and adds the requirements it finds.
+                  </p>
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (published) return;
+                      const f = e.dataTransfer?.files?.[0];
+                      if (f && (f.type.startsWith("text/") || /\.(txt|md|markdown)$/i.test(f.name))) {
+                        void f.text().then((t) => ingestText(t, "drop"));
+                        return;
+                      }
+                      const t = e.dataTransfer?.getData("text/plain");
+                      if (t && t.trim().length > 0) void ingestText(t, "drop");
+                    }}
+                    className="mt-2.5 rounded-[10px] border border-dashed border-[#DDDAD3] bg-[#FBFAF8] px-3 py-5 text-center text-[13px] leading-snug text-[#6E6C67]"
+                  >
+                    <span className="block font-semibold text-[#141414]">Drop a text or markdown file here</span>
+                    <span className="mt-0.5 block text-[12px] text-[#8C8A85]">or paste it into the prompt · you can remove any line it writes</span>
+                  </div>
+                </div>
+                {/* Scoring weights: how responses get scored, so it lives
+                    with the outputs. Feature unchanged; home changed. */}
+                {instrumentLadder && instrumentLadder.rfi.state === "ready" && !published && (
+                  <div data-priorities>
+                    <p className="m-0 mb-1 font-mono text-[10.5px] font-semibold uppercase tracking-[.08em] text-[#A3A099]">Scoring weights</p>
+                    <p className="m-0 mb-1.5 text-[12.5px] leading-[1.5] text-[#6E6C67]">Weight the sections that matter most when scoring vendors and service providers.</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {coveredSections
+                        .map((k) => TAXONOMY.find((s) => s.key === k))
+                        .filter((s): s is (typeof TAXONOMY)[number] => Boolean(s))
+                        .map((sec) => {
+                          const on = weights.includes(sec.key);
+                          return (
+                            <button
+                              key={sec.key}
+                              type="button"
+                              onClick={() => {
+                                setWeights((w) => (on ? w.filter((k) => k !== sec.key) : [...w, sec.key]));
+                                ev("workspace_priority_weighted", { section: sec.key, high: on ? 0 : 1 });
+                              }}
+                              className={`rounded-full border px-2.5 py-[3px] text-[12.5px] transition-colors ${
+                                on
+                                  ? "border-[#F5A21B] bg-[#FFF7E8] font-semibold text-[#8A4D08]"
+                                  : "border-[#DDDAD3] bg-white text-[#6E6C67] hover:border-[#141414] hover:text-[#33302C]"
+                              }`}
+                            >
+                              {sectionTitle(sec.key, sec.title)}{on ? " · high" : ""}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                )}
+            {/* Notes, unplaced: the receipt (13.6) */}
+            {receipts.length > 0 && (
+              <section className="pd-sec">
+                <p className="m-0 mb-1 flex items-baseline justify-between gap-2 font-mono text-[10.5px] font-semibold uppercase tracking-[.08em] text-[#A3A099]">
+                  <span>Notes, unplaced</span>
+                  <span className="font-normal normal-case tracking-normal">heard, no home yet</span>
+                </p>
+                {receipts.map((r) => (
+                  <div key={r.id} className="flex items-baseline gap-2 border-b border-[#F5F3EE] py-[7px] text-[12.5px] leading-[1.5] text-[#5F5D59]">
+                    <span className="text-[#A3A099]">·</span>
+                    <span className="italic">&ldquo;{r.text}&rdquo;</span>
+                    <button type="button" onClick={() => dismissReceipt(r.id)} className="ml-auto text-[12.5px] text-[#A3A099] hover:text-[#141414]" title="Remove this note">×</button>
+                  </div>
+                ))}
+                <p className="m-0 mt-1.5 text-[12px] leading-snug text-[#A3A099]">Kept verbatim with your position. Nothing you say is silently dropped.</p>
+              </section>
+            )}
+              </div>
+            )}
+
+            {rightTab === "ask" && (
+              <div>
+                <div className="flex items-center gap-2">
+                  <span aria-hidden="true" className="h-[7px] w-[7px] rounded-full bg-[#2E9E52]" />
+                  <span className="text-[13.5px] font-semibold text-[#141414]">Ask</span>
+                  <span className="font-mono text-[10.5px] text-[#A3A099]">plain English, one thing at a time</span>
+                </div>
+                {openHeads.length === 0 ? (
+                  <p className="m-0 mt-2 text-[12.5px] leading-snug text-[#6E6C67]">Nothing is open. Everything asked has an answer.</p>
+                ) : (
+                  <>
+                    <p className="m-0 mt-2 text-[12.5px] leading-snug text-[#6E6C67]">
+                      {openHeads.length === 1 ? "One question is open." : `${openHeads.length} questions are open, answered one at a time.`}
+                    </p>
+                    <div className="mt-2.5 rounded-[11px] border border-[#EAE7E1] bg-[#FAF9F7] p-[13px]">
+                      <p className="m-0 text-[13.5px] leading-[1.6] text-[#141414]">
+                        {(() => {
+                          const h = openHeads.find((x) => x.key === activeHeadKey);
+                          if (!h) return null;
+                          for (const g of gapsBySection.get(h.section) ?? []) if (`g-${g.key}` === h.key) return g.question;
+                          for (const q of earnedBySection.get(h.section) ?? []) if (q.id === h.key) return q.question;
+                          return null;
+                        })()}
+                      </p>
+                      <div className="mt-2.5 flex flex-wrap items-center gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const h = openHeads.find((x) => x.key === activeHeadKey);
+                            if (!h) return;
+                            setDocFilter("all");
+                            document.getElementById(`sec-${h.section}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          }}
+                          className="rounded-full bg-[#141414] px-3 py-[5px] text-[12.5px] font-semibold text-white transition-colors hover:bg-[#33302C]"
+                        >
+                          Answer it in the document
+                        </button>
+                        {activeHeadKey && !activeHeadKey.startsWith("g-") && !published && (
+                          <button type="button" onClick={() => dismissQuestion(activeHeadKey)} className="text-[12.5px] text-[#6E6C67] underline hover:text-[#141414]">
+                            Skip for now
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* The one readiness figure (CORRECTIONS.md rule 3): the ticks
+                over the ticks, nothing else, with the checklist under it. */}
+            {(() => {
+              const all = railSteps.flatMap((st) => st.checks);
+              const done = all.filter((c) => c.done).length;
+              const pct = all.length === 0 ? 0 : Math.round((done / all.length) * 100);
+              return (
+                <div className="mt-6 border-t border-[#EAE7E1] pt-4">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="m-0 font-mono text-[10.5px] font-semibold uppercase tracking-[.11em] text-[#8C8A85]">Readiness</p>
+                    <p className="m-0 font-mono text-[20px] font-semibold tracking-tight text-[#141414]">{pct}%</p>
+                  </div>
+                  <div className="mt-1.5 h-[5px] overflow-hidden rounded-full bg-[#F0EEE9]">
+                    <div className="h-full rounded-full bg-[#F5A21B] transition-[width] duration-500 ease-out" style={{ width: `${Math.max(2, pct)}%` }} />
+                  </div>
+                  <ul className="m-0 mt-3 list-none space-y-[5px] p-0">
+                    {all.map((c) => (
+                      <li key={c.id} className="flex items-baseline gap-2 text-[12.5px] leading-snug">
+                        <span
+                          aria-hidden="true"
+                          className={`mt-[3px] inline-block h-[11px] w-[11px] shrink-0 rounded-full border text-center text-[8px] leading-[9px] ${
+                            c.done ? "border-[#2E9E52] bg-[#2E9E52] text-white" : "border-[#E3E0DA] bg-white"
+                          }`}
+                        >
+                          {c.done ? "✓" : ""}
+                        </span>
+                        {c.goesTo && !c.done ? (
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById(c.goesTo as string)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                            className="text-left text-[#5F5D59] underline decoration-[#E3E0DA] underline-offset-2 hover:text-[#141414] hover:decoration-[#141414]"
+                          >
+                            {c.label}
+                          </button>
+                        ) : (
+                          <span className={c.done ? "text-[#33302C]" : "text-[#8C8A85]"}>{c.label}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  {!published && lockReason && <p className="m-0 mt-2.5 text-[12.5px] leading-snug text-[#6E6C67]">{lockReason}</p>}
+                </div>
+              );
+            })()}
+
+            <div className="mt-5 border-t border-[#EAE7E1] pt-4">
           {/* Your estate */}
           <div>
-            <p className="m-0 mb-2 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-[#5F5D59]">
+            <p className="m-0 mb-2 flex items-baseline justify-between gap-2 text-[12.5px] font-semibold text-[#5F5D59]">
               Your estate <span className="text-right font-normal text-[#8C8A85]">{diagram.empty ? "example plan · becomes yours as you speak" : "drawn from your words only"}</span>
             </p>
             {diagram.empty ? (
@@ -2955,40 +3250,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             ) : (
               <WorkspaceDiagram model={diagram} />
             )}
-            <p className="m-0 mt-1 text-[11px] leading-snug text-[#6E6C67]">Redraws on every correction; never invents topology.</p>
+            <p className="m-0 mt-1 text-[12.5px] leading-snug text-[#6E6C67]">Redraws on every correction; never invents topology.</p>
           </div>
-
-          {/* We noticed: emerald, only advice that costs Netify */}
-          {verdict && verdict.againstInterest.length > 0 && started && (
-            <div className="rounded-lg border border-[#BFE0CB] bg-[#EAF6EE] p-3">
-              <p className="m-0 mb-1 text-[10px] font-mono font-semibold uppercase tracking-[.12em] text-[#256B3E]">We noticed · against Netify&rsquo;s own interest</p>
-              <p className="m-0 text-[13px] leading-relaxed text-[#3A5A44]">{verdict.againstInterest[0].statement}</p>
-              {verdict.againstInterest.length > 1 && (
-                <p className="m-0 mt-1 text-[11px] text-[#256B3E]/80">{verdict.againstInterest.length - 1} more ruling{verdict.againstInterest.length === 2 ? "" : "s"} on your record.</p>
-              )}
             </div>
-          )}
-
-          {/* Sector notes (24 Jul): the pack's advice with its provenance.
-              Evidence and advice, never requirements; nothing here publishes
-              or feeds verdict or fit. Grey, not emerald: this advice costs
-              Netify nothing and earns the buyer caution. */}
-          {pack && packNotes.length > 0 && (
-            <div>
-              <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-[#5F5D59]">
-                Sector notes · {pack.label}{packFlavours.length ? ` · ${packFlavours.map((f) => pack.flavours.find((x) => x.id === f)?.label ?? f).join(" · ")}` : ""}
-                <span className="font-normal text-[#8C8A85]">{pack.version}</span>
-              </p>
-              {packNotes.map((n) => (
-                <p key={n.id} className="m-0 mb-1.5 text-[11px] leading-relaxed text-[#5F5D59]">{n.text}</p>
-              ))}
-              <p className="m-0 text-[10px] leading-snug text-[#8C8A85]">Advice with provenance, never requirements; nothing here publishes.</p>
-            </div>
-          )}
-
+            <details className="mt-5 border-t border-[#EAE7E1] pt-3">
+              <summary className="cursor-pointer list-none font-mono text-[10.5px] font-semibold uppercase tracking-[.11em] text-[#8C8A85] hover:text-[#141414]">Activity</summary>
+              <div className="mt-2">
           {/* The crew */}
           <div>
-            <p className="m-0 mb-1.5 text-[11px] font-semibold text-[#5F5D59]">The crew · the activity log · completed work only</p>
+            <p className="m-0 mb-1.5 text-[12.5px] font-semibold text-[#5F5D59]">The crew · the activity log · completed work only</p>
             <div className="space-y-0.5 font-mono text-[11px] leading-relaxed text-[#6E6C67]" style={{ fontFamily: "'SF Mono',ui-monospace,Menlo,monospace" }}>
               {crew.slice(-6).map((l, i) => (
                 <div key={i}>
@@ -2998,75 +3268,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               ))}
             </div>
           </div>
+              </div>
+            </details>
+          </div>
         </div>
       </div>
 
-      {/* ---- The destination: where the finished position goes (below the desk so the document stays the hero, Robert 23 Jul)
-              (the reference concept made live, Robert's word, 23 Jul; every
-              claim renders from real data and no em dashes anywhere). ---- */}
-      <div id="how-this-goes" className="mt-20 scroll-mt-24">
-        <h2 className="m-0" style={{ fontSize: "19px", lineHeight: 1.2, fontWeight: 700, color: "#141414", letterSpacing: "-0.015em" }}>
-          Publish to our SASE Opportunities Board
-        </h2>
-        <p className="m-0 mt-3 max-w-2xl text-[13px] leading-relaxed text-[#5F5D59]">
-          Your completed Statement of Requirements becomes a live opportunity in a curated SASE marketplace, where
-          leading vendors and managed service providers can compete for your business. The public listing remains
-          anonymous, while the private procurement view is made available only to suitable vendors and service providers from
-          Netify&rsquo;s curated community of {market ? market.counts.vendors : "evaluated"} UK, North American and
-          global SASE partners.
-        </p>
-        <svg viewBox="0 0 1060 150" className="mt-4 hidden w-full sm:block" role="img"
-          aria-label="The journey: a living Statement of Requirements becomes an anonymous published opportunity in a curated marketplace; responses return for comparison and a decision you sign.">
-          <line x1="30" y1="62" x2="1030" y2="62" stroke="#EAE7E1" strokeWidth="1" />
-          <g>
-            <rect x="52" y="44" width="28" height="36" rx="3" fill="#fff" stroke="#33302C" strokeWidth="1.2" />
-            <line x1="58" y1="54" x2="74" y2="54" stroke="#33302C" strokeWidth="1" />
-            <line x1="58" y1="61" x2="74" y2="61" stroke="#8C8A85" strokeWidth="1" />
-            <line x1="58" y1="68" x2="68" y2="68" stroke="#8C8A85" strokeWidth="1" />
-            <text x="66" y="104" textAnchor="middle" fontSize="10.5" fill="#141414" fontWeight="600">Living Statement</text>
-            <text x="66" y="117" textAnchor="middle" fontSize="9" fill="#8C8A85">yours, word for word</text>
-          </g>
-          <g>
-            <circle cx="240" cy="62" r="7" fill="#F5A21B" />
-            <text x="240" y="104" textAnchor="middle" fontSize="10.5" fill="#141414" fontWeight="600">Published opportunity</text>
-            <text x="240" y="117" textAnchor="middle" fontSize="9" fill="#8C8A85">anonymous, to signed-in vendors</text>
-          </g>
-          <g>
-            <circle cx="455" cy="36" r="4.5" fill="#2a78d6" /><circle cx="486" cy="28" r="4.5" fill="#e34948" />
-            <circle cx="516" cy="36" r="4.5" fill="#0891b2" /><circle cx="470" cy="52" r="4.5" fill="#7c3aed" />
-            <circle cx="501" cy="50" r="4.5" fill="#1d4ed8" /><circle cx="440" cy="50" r="4.5" fill="#be123c" />
-            <circle cx="530" cy="52" r="4.5" fill="#4a3aa7" /><circle cx="458" cy="66" r="4.5" fill="#d946ef" />
-            <circle cx="490" cy="68" r="4.5" fill="#e87ba4" />
-            <text x="512" y="70" fontSize="9.5" fill="#52525b">and more</text>
-            <text x="485" y="104" textAnchor="middle" fontSize="10.5" fill="#141414" fontWeight="600">Curated SASE marketplace</text>
-            <text x="485" y="117" textAnchor="middle" fontSize="9" fill="#8C8A85">{market ? `${market.counts.vendors} evaluated partners` : "evaluated partners"} · UK · North America · Global</text>
-            <text x="485" y="129" textAnchor="middle" fontSize="8.5" fill="#c4c2bc">quality over quantity, never a directory</text>
-          </g>
-          <g>
-            <path d="M 700 48 L 686 62 L 700 76" fill="none" stroke="#33302C" strokeWidth="1.3" />
-            <path d="M 716 48 L 702 62 L 716 76" fill="none" stroke="#8C8A85" strokeWidth="1.1" />
-            <text x="706" y="104" textAnchor="middle" fontSize="10.5" fill="#141414" fontWeight="600">Vendor responses</text>
-            <text x="706" y="117" textAnchor="middle" fontSize="9" fill="#8C8A85">answering your requirements</text>
-          </g>
-          <g>
-            <line x1="856" y1="48" x2="856" y2="76" stroke="#33302C" strokeWidth="2" />
-            <line x1="866" y1="54" x2="866" y2="76" stroke="#8C8A85" strokeWidth="2" />
-            <line x1="876" y1="60" x2="876" y2="76" stroke="#8C8A85" strokeWidth="2" />
-            <text x="866" y="104" textAnchor="middle" fontSize="10.5" fill="#141414" fontWeight="600">Comparison</text>
-            <text x="866" y="117" textAnchor="middle" fontSize="9" fill="#8C8A85">side by side, evidence first</text>
-          </g>
-          <g>
-            <path d="M 985 64 L 991 71 L 1003 52" fill="none" stroke="#141414" strokeWidth="2" strokeLinecap="round" />
-            <text x="994" y="104" textAnchor="middle" fontSize="10.5" fill="#141414" fontWeight="600">Decision</text>
-            <text x="994" y="117" textAnchor="middle" fontSize="9" fill="#8C8A85">you sign; agents never do</text>
-          </g>
-        </svg>
-        <p className="m-0 mt-2 text-[11px] leading-relaxed text-[#8C8A85] sm:mt-1">
-          <span className="font-semibold text-[#6E6C67]">You stay in control throughout:</span> public listings are
-          anonymous · detailed procurement information is restricted to approved vendors and service providers · their access and
-          invitations remain under your control · every response stays connected to this workspace.
-        </p>
-      </div>
 
       {/* ---- The way on. Publish is the only exit (R5), so each step but
               the last carries one forward control and the plain truth about
@@ -3075,10 +3282,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               the screen is the last piece of 2005 behaviour here (R1b). ---- */}
       <div className="mt-14 border-t border-[#EAE7E1] pt-5">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <p className="m-0 max-w-xl text-[12px] leading-relaxed text-[#6E6C67]">
+          <p className="m-0 max-w-xl text-[12.5px] leading-relaxed text-[#6E6C67]">
             {missingCore.length === 0
               ? "All five details a notice needs are standing. You can keep correcting any of them right up to the moment you publish."
-              : `Still open: ${missingCore.join(", ")}. Say it in the box at the top and it lands in the document itself.`}
+              : `Still open: ${missingCore.join(", ")}. Say it in the prompt and it lands in the document itself.`}
           </p>
           <button
             type="button"
@@ -3101,7 +3308,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               ranking and this panel never implies that it is. The ranked
               order, the scores and the per-supplier reasons are the half of
               the coke a buyer does not drink for free: they generate at
-              publish. That is written here as a calm fact in the desk's own
+              publish. That is written here as a calm fact in the document's own
               evidence language, with no blur, no padlock and no teaser. ---- */}
       <div className="mt-8 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_336px]">
         <div>
@@ -3109,7 +3316,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             <h2 className="m-0" style={{ fontSize: "19px", lineHeight: 1.2, fontWeight: 700, color: "#141414", letterSpacing: "-0.015em" }}>
               Who fits
             </h2>
-            <p className="m-0 text-[11px] text-[#6E6C67]">
+            <p className="m-0 text-[12.5px] text-[#6E6C67]">
               {clusterRows.length > 0
                 ? `${clusterRows.length} evaluated ${clusterRows.length === 1 ? "vendor or service provider reaches" : "vendors and service providers reach"} your requirement`
                 : market
@@ -3150,7 +3357,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     <p className="m-0 mt-[2px] font-mono text-[10.5px] uppercase tracking-[.06em] leading-snug text-[#8C8A85]">
                       {r.category}
                     </p>
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px]">
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[12.5px]">
                       {!published && (r.pinned ? (
                         <button type="button" onClick={() => setAdded((x) => x.filter((s) => s !== r.slug))} className="text-[#6E6C67] underline hover:text-[#141414]">
                           Unpin
@@ -3190,7 +3397,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 ))}
               </ul>
               {removed.length > 0 && (
-                <p className="m-0 mt-3 text-[11px] leading-relaxed text-[#6E6C67]">
+                <p className="m-0 mt-3 text-[12.5px] leading-relaxed text-[#6E6C67]">
                   {removed.length} left out of your direct invitations at your word. The anonymous notice on the board is unaffected,
                   and a left-out seat is filled by the next best evidenced vendor or service provider.
                 </p>
@@ -3217,13 +3424,13 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
           {/* The market, live */}
           <div>
-            <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[11px] font-semibold text-[#5F5D59]">
+            <p className="m-0 mb-1.5 flex items-baseline justify-between gap-2 text-[12.5px] font-semibold text-[#5F5D59]">
               The market, live <span className="text-right font-normal text-[#8C8A85]">movement is written</span>
             </p>
-            <p className="m-0 mb-2 text-[11px] text-[#6E6C67]">
+            <p className="m-0 mb-2 text-[12.5px] text-[#6E6C67]">
               {market ? (
                 <>
-                  {market.counts.notices > 0 && <span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-[#F5A21B] align-[0px]" />}
+                  {market.counts.notices > 0 && <span className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-[#F5A21B] align-[0px]" />}
                   {market.counts.vendors} vendors and service providers evaluated{market.latest_evaluation ? `, latest ${fmtDate(market.latest_evaluation)}` : ""} · {market.counts.notices} notice{market.counts.notices === 1 ? "" : "s"} open ·{" "}
                   <a href="/sase/opportunities/board/" className="underline hover:text-[#141414]">the board</a>
                 </>
@@ -3238,7 +3445,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 {marketRows.shown.filter((v) => moveNow[v.slug]).map((v) => {
                   const mv = moveNow[v.slug];
                   return (
-                    <p key={v.slug} className={`m-0 mb-0.5 text-[11px] leading-snug ${mv.dir === "down" ? "text-[#8C8A85]" : "text-[#5F5D59]"}`}>
+                    <p key={v.slug} className={`m-0 mb-0.5 text-[12.5px] leading-snug ${mv.dir === "down" ? "text-[#8C8A85]" : "text-[#5F5D59]"}`}>
                       {mv.dir === "up" ? `▲${mv.places > 0 ? ` +${mv.places}` : ""}` : mv.dir === "down" ? `▼${mv.places > 0 ? ` −${mv.places}` : ""}` : "· holds"}{" "}
                       {v.name} · {mv.label}: {gradeWord(mv.grade) || "no longer required"}
                       {mv.grade === "yes" || mv.grade === "partial" ? ` · evaluated ${fmtDate(mv.date)}` : ""}
@@ -3248,7 +3455,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               </div>
             )}
             {marketRows.more > 0 && (
-              <p className="m-0 mt-1 text-[11px] text-[#8C8A85]">and {marketRows.more} more evaluated vendors and service providers, all in the running.</p>
+              <p className="m-0 mt-1 text-[12.5px] text-[#8C8A85]">and {marketRows.more} more evaluated vendors and service providers, all in the running.</p>
             )}
             <p className="m-0 mt-1.5 text-[10px] leading-snug text-[#8C8A85]">
               {published
@@ -3262,8 +3469,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   {vendorCard.name}
                   {namedSlugs.has(vendorCard.slug) && <span className="ml-1.5 rounded-full bg-[#EAE7E1] px-1.5 text-[10px] font-normal text-[#5F5D59]">named in your position</span>}
                 </p>
-                <p className="m-0 mt-0.5 text-[11px] text-[#6E6C67]">{vendorCard.category}</p>
-                <p className="m-0 mt-1 text-[11px] leading-relaxed text-[#5F5D59]">
+                <p className="m-0 mt-0.5 text-[12.5px] text-[#6E6C67]">{vendorCard.category}</p>
+                <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#5F5D59]">
                   Evaluated {fmtDate(vendorCard.last_verified)} · {vendorCard.yes_count} of 40 capabilities fully met.
                 </p>
                 {(() => {
@@ -3274,7 +3481,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   const full = fs.matched.filter((m) => m.grade === "yes").length;
                   const part = fs.matched.length - full;
                   return (
-                    <p className="m-0 mt-1 text-[11px] leading-relaxed text-[#5F5D59]">
+                    <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#5F5D59]">
                       Against your named requirements: {full} evidenced
                       {part > 0 ? `, ${part} partially evidenced` : ""}
                       {fs.missed.length > 0 ? `, ${fs.missed.length} without evidence on file` : ""}.
@@ -3291,14 +3498,14 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   return (
                     <>
                       {mv && (
-                        <div className="mt-1.5 border-t border-[#EAE7E1] pt-1.5 text-[11px] leading-relaxed text-[#5F5D59]">
+                        <div className="mt-1.5 border-t border-[#EAE7E1] pt-1.5 text-[12.5px] leading-relaxed text-[#5F5D59]">
                           <p className="m-0"><b className="text-[#33302C]">What changed:</b> your requirement {mv.grade ? "gained" : "withdrew"} {mv.label}.</p>
                           <p className="m-0"><b className="text-[#33302C]">Why it moved:</b> {mv.label} is {gradeWord(mv.grade) || "no longer checked"} for {vendorCard.name}.</p>
                           <p className="m-0"><b className="text-[#33302C]">Evidence:</b> evaluated {fmtDate(vendorCard.last_verified)}.</p>
                         </div>
                       )}
                       {fs && (fs.matched.length > 0 || fs.missed.length > 0) && (
-                        <div className="mt-1.5 text-[11px] leading-relaxed text-[#6E6C67]">
+                        <div className="mt-1.5 text-[12.5px] leading-relaxed text-[#6E6C67]">
                           {fs.matched.length > 0 && <p className="m-0">Evidences: {fs.matched.map((m) => m.label).join(", ")}.</p>}
                           {fs.missed.length > 0 && <p className="m-0 text-[#8C8A85]">Not evidenced: {fs.missed.map((m) => m.label).join(", ")}.</p>}
                         </div>
@@ -3310,7 +3517,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                           ))}
                         </div>
                       )}
-                      <a href={`/sase/${vendorCard.slug}/`} className="mt-1 inline-block text-[11px] text-[#33302C] underline">
+                      <a href={`/sase/${vendorCard.slug}/`} className="mt-1 inline-block text-[12.5px] text-[#33302C] underline">
                         Challenge it: compare the evidence
                       </a>
                     </>
@@ -3322,7 +3529,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                       <button
                         type="button"
                         onClick={() => { setAdded((x) => x.filter((s) => s !== vendorCard.slug)); setVendorCard(null); }}
-                        className="rounded-full border border-[#E3E0DA] px-2.5 py-1 text-[11px] text-[#5F5D59] hover:border-[#A3A099]"
+                        className="rounded-full border border-[#E3E0DA] px-2.5 py-1 text-[12.5px] text-[#5F5D59] hover:border-[#A3A099]"
                       >
                         Unpin
                       </button>
@@ -3335,7 +3542,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                           ev("workspace_supplier_added", { slug: vendorCard.slug });
                           setVendorCard(null);
                         }}
-                        className="rounded-full border border-[#F5A21B] px-2.5 py-1 text-[11px] text-[#B4650B] hover:border-[#E5940F]"
+                        className="rounded-full border border-[#F5A21B] px-2.5 py-1 text-[12.5px] text-[#B4650B] hover:border-[#E5940F]"
                       >
                         Pin into invitations (up to five)
                       </button>
@@ -3355,7 +3562,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                           crewLog(`Registrar: back in the running for direct invites: ${vendorCard.name}`, "you");
                           setVendorCard(null);
                         }}
-                        className="rounded-full border border-[#E3E0DA] px-2.5 py-1 text-[11px] text-[#5F5D59] hover:border-[#A3A099]"
+                        className="rounded-full border border-[#E3E0DA] px-2.5 py-1 text-[12.5px] text-[#5F5D59] hover:border-[#A3A099]"
                       >
                         Include again
                       </button>
@@ -3369,7 +3576,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                           crewLog(`Registrar: left out of direct invites at your word: ${vendorCard.name} · the public notice is unaffected`, "you");
                           setVendorCard(null);
                         }}
-                        className="rounded-full border border-[#E3E0DA] px-2.5 py-1 text-[11px] text-[#6E6C67] hover:border-[#A3A099] hover:text-[#33302C]"
+                        className="rounded-full border border-[#E3E0DA] px-2.5 py-1 text-[12.5px] text-[#6E6C67] hover:border-[#A3A099] hover:text-[#33302C]"
                       >
                         Leave out of direct invites
                       </button>
@@ -3394,7 +3601,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             <p className="m-0 text-[10px] font-mono font-semibold uppercase tracking-[.12em] text-[#6E6C67]">
               The Netify SASE Constellation
             </p>
-            <p className="m-0 text-[11px] text-[#8C8A85]">
+            <p className="m-0 text-[12.5px] text-[#8C8A85]">
               distance is fit · every position computed from graded evidence · nothing moves except on its own evidence
               {" · "}
               <button type="button" onClick={() => setConstellationKey((o) => !o)} className="underline hover:text-[#5F5D59]">
@@ -3406,7 +3613,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               every sentence traces to this component's own laws; nothing here
               promises what the map does not do. */}
           {constellationKey && (
-            <div className="mt-2 rounded-md border border-[#EAE7E1] bg-white p-4 text-[11.5px] leading-relaxed text-[#5F5D59]">
+            <div className="mt-2 rounded-md border border-[#EAE7E1] bg-white p-4 text-[12.5px] leading-relaxed text-[#5F5D59]">
               <p className="m-0 mb-1.5"><span className="font-semibold text-[#33302C]">You</span> are the dot at the centre. Everything on the map positions itself against your stated requirements.</p>
               <p className="m-0 mb-1.5"><span className="font-semibold text-[#33302C]">Diamonds</span> are requirements created from your own words. Each one exists because you said it; strike the fact and its diamond goes with it.</p>
               <p className="m-0 mb-1.5"><span className="font-semibold text-[#33302C]">Circles</span> are technology vendors. <span className="font-semibold text-[#33302C]">Squares</span> are managed service providers.</p>
@@ -3418,7 +3625,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             </div>
           )}
           {marketRows.shown.length === 0 && (
-            <p className="m-0 mt-1 text-[11px] leading-relaxed text-[#8C8A85]">
+            <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#8C8A85]">
               Empty until you describe your project. Then the evaluated market takes position around your words: the
               closest fit sits nearest, each vendor and service provider keeps its own fixed place and colour, and evidence draws the lines.
             </p>
@@ -3463,7 +3670,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               {/* Your position, the centre. Breath only on a genuinely open notice. */}
               <circle
                 cx={SCENE.cx} cy={SCENE.cy} r={7}
-                className={published ? "pd-breath" : undefined}
+                className={undefined}
                 fill={started ? "#141414" : "none"}
                 stroke={started ? "none" : "#8C8A85"}
                 strokeDasharray={started ? undefined : "3 3"}
@@ -3525,7 +3732,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     {invited && (
                       <>
                         <line x1={0} y1={0} x2={SCENE.cx - b.x} y2={SCENE.cy - b.y} stroke="#F5A21B" strokeWidth={1.3} opacity={0.5} />
-                        <circle r={size + 3.2} fill="none" stroke="#F5A21B" strokeWidth={1.4} className={published ? "pd-breath" : undefined} />
+                        <circle r={size + 3.2} fill="none" stroke="#F5A21B" strokeWidth={1.4} className={undefined} />
                       </>
                     )}
                     {added.includes(v.slug) && <circle r={size + 3} fill="none" stroke="#8C8A85" strokeWidth={0.8} />}
@@ -3547,7 +3754,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               })}
             </svg>
           )}
-          <p className="m-0 mt-1 text-[11px] leading-snug text-[#8C8A85]">
+          <p className="m-0 mt-1 text-[12.5px] leading-snug text-[#8C8A85]">
             {capNodes.length > 0 ? (
               <>Diamonds are the requirements your own words created; a line exists only where Netify&rsquo;s dataset grades that vendor or service provider for that requirement (solid evidenced, dashed partial). Hover any of them, or a requirement, to isolate its evidence. Circles are technology vendors, squares managed providers.</>
             ) : (
@@ -3563,11 +3770,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
       <div className="mt-14 border-t border-[#EAE7E1] pt-5">
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-          <p className="m-0 max-w-xl text-[12px] leading-relaxed text-[#6E6C67]">
+          <p className="m-0 max-w-xl text-[12.5px] leading-relaxed text-[#6E6C67]">
             {ready ? "Your requirement holds enough to stand on." : publishBarLock}
           </p>
           <div className="flex flex-wrap items-center gap-4">
-            <button type="button" onClick={() => goToStep(1)} className="text-[12px] text-[#6E6C67] underline hover:text-[#141414]">
+            <button type="button" onClick={() => goToStep(1)} className="text-[12.5px] text-[#6E6C67] underline hover:text-[#141414]">
               Back to your requirement
             </button>
             <button
@@ -3600,7 +3807,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         <section aria-label="Your opportunity, as the market will see it" className={`rounded-xl border p-5 ${published ? "border-[#F2DFB6] bg-[#FFFDF7]" : "border-[#EAE7E1] bg-white"}`}>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="m-0 text-[10px] font-mono font-semibold uppercase tracking-[.12em] text-[#8C8A85]">
-              {published ? (<><span className="pd-breath mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-[#F5A21B] align-[0px]" />Published · live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
+              {published ? (<><span className="mr-1.5 inline-block h-[7px] w-[7px] rounded-full bg-[#F5A21B] align-[0px]" />Published · live on the board</>) : started ? "Your opportunity · as the market will see it" : "Example listing"}
             </p>
             <span className={`rounded-full px-2 py-[1px] text-[10px] font-mono font-semibold uppercase tracking-[.08em] ${published ? "border border-[#F2DFB6] bg-[#FFF7E8] text-[#8A4D08]" : started ? "bg-[#F0EEE9] text-[#6E6C67]" : "border border-[#EAE7E1] bg-white text-[#6E6C67]"}`}>
               {published ? "open on the board" : started ? "updating as you speak" : "make it yours"}
@@ -3635,7 +3842,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   { v: "PCI DSS", paths: [], sec: "compliance" },
                 ];
             if (!chips.length) {
-              return <p className="m-0 mt-1 text-[11px] leading-relaxed text-[#5F5D59]">your first sentence starts this listing</p>;
+              return <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#5F5D59]">your first sentence starts this listing</p>;
             }
             return (
               <p className="m-0 mt-1.5 leading-loose">
@@ -3666,7 +3873,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                               ? "Inferred, reason attached · opens the section it lives in"
                               : "Opens the section it lives in"
                       }
-                      className={`mr-1.5 inline-block rounded-full border bg-white px-2.5 py-[2px] text-[11px] transition-colors hover:border-[#F5A21B] ${cls}`}
+                      className={`mr-1.5 inline-block rounded-full border bg-white px-2.5 py-[2px] text-[12.5px] transition-colors hover:border-[#F5A21B] ${cls}`}
                     >
                       {c.v}
                     </button>
@@ -3675,7 +3882,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               </p>
             );
           })()}
-          <p className="m-0 mt-1.5 text-[11px] text-[#8C8A85]">
+          <p className="m-0 mt-1.5 text-[12.5px] text-[#8C8A85]">
             {published && published.boardId
               ? (<>published: signed-in vendors and service providers can now see your anonymous notice · <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></>)
               : started
@@ -3716,14 +3923,14 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                             <a href={`/sase/vendors/${r.slug}/`} className="text-[14px] font-semibold text-[#141414] underline decoration-[#C9C5BC] underline-offset-2 hover:decoration-[#141414]">
                               {r.name}
                             </a>
-                            <span className="text-[11px] text-[#6E6C67]">{r.category} · graded {fmtDate(r.graded)}</span>
+                            <span className="text-[12.5px] text-[#6E6C67]">{r.category} · graded {fmtDate(r.graded)}</span>
                             {r.invited && (
                               <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-mono font-semibold uppercase tracking-[.08em] text-[#8A4D08]">invited</span>
                             )}
                           </div>
                           {r.matched.length > 0 ? (
                             <details className="group mt-0.5 pl-6">
-                              <summary className="cursor-pointer list-none text-[11.5px] leading-relaxed text-[#5F5D59] marker:hidden hover:text-[#8A4D08]">
+                              <summary className="cursor-pointer list-none text-[12.5px] leading-relaxed text-[#5F5D59] marker:hidden hover:text-[#8A4D08]">
                                 Evidenced for {r.matched.slice(0, 3).join(", ")}
                                 {r.matched.length > 3 ? ` and ${r.matched.length - 3} more` : ""}.{" "}
                                 <span className="text-[#8C8A85] underline group-open:hidden">why this position</span>
@@ -3732,35 +3939,35 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                                   (Harry asked for the rationale, not just the
                                   evidence line). Counts are the fit engine's,
                                   never a narrative. */}
-                              <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-[#5F5D59]">
+                              <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#5F5D59]">
                                 Position {i + 1} of {payoutRows.length}. Ranked on {r.matched.length} of your named requirement
                                 {r.matched.length === 1 ? "" : "s"} met with graded evidence
                                 {r.missed.length > 0 ? `, and ${r.missed.length} not evidenced` : ""}. Across the whole dataset this
                                 record fully meets {r.yes} of 40 capabilities. Its record was graded {fmtDate(r.graded)}.
                               </p>
-                              <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-[#5F5D59]">
+                              <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#5F5D59]">
                                 <span className="font-semibold text-[#33302C]">Evidenced for:</span> {r.matched.join(", ")}.
                               </p>
                               {r.missed.length > 0 && (
-                                <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-[#6E6C67]">
+                                <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#6E6C67]">
                                   <span className="font-semibold text-[#5F5D59]">Not evidenced for:</span> {r.missed.join(", ")}.
                                 </p>
                               )}
-                              <p className="m-0 mt-1 text-[11.5px]">
+                              <p className="m-0 mt-1 text-[12.5px]">
                                 <a href={`/sase/vendors/${r.slug}/`} className="text-[#33302C] underline hover:text-[#8A4D08]">
                                   Read the full record, with every source behind these grades
                                 </a>
                               </p>
                             </details>
                           ) : (
-                            <p className="m-0 mt-0.5 pl-6 text-[11.5px] leading-relaxed text-[#6E6C67]">
+                            <p className="m-0 mt-0.5 pl-6 text-[12.5px] leading-relaxed text-[#6E6C67]">
                               On the curated market for this scope. No graded evidence against your named requirements yet.
                             </p>
                           )}
                         </li>
                       ))}
                     </ol>
-                    <p className="m-0 mt-3 text-[11px] leading-relaxed text-[#6E6C67]">
+                    <p className="m-0 mt-3 text-[12.5px] leading-relaxed text-[#6E6C67]">
                       Ranked by graded evidence against the requirements your own words created. Every grade carries its
                       date and its source on the vendor record.
                     </p>
@@ -3772,7 +3979,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   </p>
                 )}
                 {created?.id && (
-                  <p className="m-0 mt-3 text-[12px] leading-relaxed text-[#33302C]">
+                  <p className="m-0 mt-3 text-[12.5px] leading-relaxed text-[#33302C]">
                     <a className="underline hover:text-[#8A4D08]" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
                       Open your project record
                     </a>{" "}
@@ -3804,7 +4011,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         <path d="M7 1 L13 3.2 V8 C13 11.8 10.4 14.2 7 15 C3.6 14.2 1 11.8 1 8 V3.2 Z" fill="none" stroke="#a16207" strokeWidth="1.3" />
                         <path d="M4.6 8 L6.4 9.8 L9.6 6.2" fill="none" stroke="#a16207" strokeWidth="1.3" strokeLinecap="round" />
                       </svg>
-                      <p className="m-0 text-[11px] leading-relaxed text-[#5F5D59]">
+                      <p className="m-0 text-[12.5px] leading-relaxed text-[#5F5D59]">
                         <span className="font-semibold text-[#33302C]">Your project publishes anonymously.</span>{" "}
                         Nobody browsing Netify, and no search engine, sees your company name or your contact details
                         {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
@@ -3820,7 +4027,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-[#141414]">
                           {fitSlugs.length > 0 ? fitSlugs.length : market?.counts.vendors ?? "Evaluated"}
                         </p>
-                        <p className="m-0 mt-0.5 text-[11px] leading-snug text-[#6E6C67]">
+                        <p className="m-0 mt-0.5 text-[12.5px] leading-snug text-[#6E6C67]">
                           {fitSlugs.length > 0
                             ? `evaluated ${fitSlugs.length === 1 ? "vendor or service provider" : "vendors and service providers"} currently in the running, evidence graded with dates${removed.length ? `; ${removed.length} left out at your word` : ""}`
                             : "vendors and service providers on the curated market, evidence graded with dates"}
@@ -3828,11 +4035,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                       </div>
                       <div className="rounded-md bg-[#FBFAF8] px-3 py-2.5">
                         <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-[#141414]">Anonymous</p>
-                        <p className="m-0 mt-0.5 text-[11px] leading-snug text-[#6E6C67]">sector and size only; your identity and contacts never publish</p>
+                        <p className="m-0 mt-0.5 text-[12.5px] leading-snug text-[#6E6C67]">sector and size only; your identity and contacts never publish</p>
                       </div>
                       <div className="rounded-md bg-[#FBFAF8] px-3 py-2.5">
                         <p className="m-0 text-[15px] font-bold leading-tight tracking-tight text-[#141414]">Yours to close</p>
-                        <p className="m-0 mt-0.5 text-[11px] leading-snug text-[#6E6C67]">the notice closes from your project record whenever you choose</p>
+                        <p className="m-0 mt-0.5 text-[12.5px] leading-snug text-[#6E6C67]">the notice closes from your project record whenever you choose</p>
                       </div>
                     </div>
                     {/* Slice three (the reference concept): the notice inherits
@@ -3849,7 +4056,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         exact count identifying, the chip carries the range
                         the notice will carry, and the caption says so.
                         Everything else carries exactly as written. */}
-                    <p className="m-0 mb-1.5 text-[11px] leading-loose">
+                    <p className="m-0 mb-1.5 text-[12.5px] leading-loose">
                       {[
                         typeof requirement.estate?.sites === "number"
                           ? (siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
@@ -3862,15 +4069,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", ")}` : null,
                         (requirement.constraints?.complianceRequirements ?? []).length ? (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") : null,
                       ].filter(Boolean).map((chip) => (
-                        <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-[#EAE7E1] bg-white px-2 py-[1px] text-[11px] text-[#33302C]">{chip}</span>
+                        <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-[#EAE7E1] bg-white px-2 py-[1px] text-[12.5px] text-[#33302C]">{chip}</span>
                       ))}
-                      <span className="text-[11px] text-[#8C8A85]">
+                      <span className="text-[12.5px] text-[#8C8A85]">
                         {typeof requirement.estate?.sites === "number" && siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
                           ? "as written, except the site count: sector plus one region could identify you, so the notice shows the range, and the exact count is seen only after the gate"
                           : "exactly as written, nothing retyped"}
                       </span>
                     </p>
-                    <p className="m-0 mb-2 text-[11px] leading-relaxed text-[#8C8A85]">
+                    <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#8C8A85]">
                       <span className="font-semibold text-[#6E6C67]">Stays private:</span> your identity and contacts, your notes,
                       {unansweredGaps.length > 0 ? ` ${unansweredGaps.length} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
                       {" "}and anything you have struck from the record.
@@ -3908,12 +4115,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         click, and only then wrote the reason into signError.
                         The reason now stands beside the button instead. */}
                     {testMode && !securityScope && (
-                      <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-[#B4650B]">
+                      <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">
                         Test mode covers the security engine today, and this is a network requirement. Drop{" "}
                         <span className="font-mono">?test=1</span> from the address to publish it for real.
                       </p>
                     )}
-                    {signError && <p className="m-0 mt-1.5 text-[11px] text-red-600">{signError}</p>}
+                    {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
                     {/* The identity read-back (29 Jul 2026, from the mockup
                         review's two adopted pieces: the identity chip and the
                         resolve-the-company card, fused into one quiet line).
@@ -3925,25 +4132,25 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         Advisory only: the publish chain remains the gate. */}
                     {signedIn && sessId && (
                       sessId.work ? (
-                        <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-[#6E6C67]">
+                        <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#6E6C67]">
                           Publishing as <span className="font-medium text-[#33302C]">{sessId.email}</span>
                           {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
                         </p>
                       ) : (
-                        <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-[#B4650B]">
+                        <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">
                           Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays saved while you switch.
                         </p>
                       )
                     )}
                     {removed.length > 0 && (
-                      <p className="m-0 mt-1 text-[11px] leading-relaxed text-[#6E6C67]">
+                      <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#6E6C67]">
                         Direct invites leave out {removed.length} {removed.length === 1 ? "vendor or service provider" : "vendors and service providers"} at your word; the ranked fill tops back up
                         from the next best evidenced. The anonymous public notice is unaffected.
                       </p>
                     )}
                     {needAuth && (
                       <div className="mt-2 rounded-md bg-[#FBFAF8] p-3">
-                        <p className="m-0 mb-1 text-[11px] text-[#5F5D59]">
+                        <p className="m-0 mb-1 text-[12.5px] text-[#5F5D59]">
                           One step first: publishing reaches named vendors and service providers, so it needs a verified sign-in. Your position is untouched.
                         </p>
                         <SignIn
@@ -3974,7 +4181,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   <div className="rounded-lg border border-[#E3E0DA] bg-[#FBFAF8] p-5">
                   <p className="m-0 mb-1 text-[10px] font-mono font-semibold uppercase tracking-[.12em] text-[#6E6C67]">Not ready to publish</p>
                   <p className="m-0 text-[13px] leading-relaxed text-[#5F5D59]">
-                    <span className="font-semibold text-[#33302C]">A person signs here.</span> One signature publishes an anonymous notice to the open board and the full position to matched vendors and service providers.{" "}
+                    <span className="font-semibold text-[#33302C]">One signature</span> publishes an anonymous notice to the open board and the full position to matched vendors and service providers.{" "}
                     {lockReason ?? "It unlocks when the position holds enough truth to stand on."}
                   </p>
                   </div>
@@ -3984,7 +4191,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             {created?.test && !published && (
               <div className="rounded-lg border border-[#F5A21B] bg-[#FFF7E8] p-4">
                 <p className="m-0 text-[13px] font-semibold text-[#8A4D08]">Test position created; publishing stayed off</p>
-                <p className="m-0 mt-1 text-[11px] leading-relaxed text-[#8A4D08]">
+                <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#8A4D08]">
                   It self-expires in two hours, touched no live board and contacted no vendor or service provider.{" "}
                   <a href={`/sase/project/${created.id}?manage=${encodeURIComponent(created.manage)}`} className="underline">Inspect it</a> or{" "}
                   <button type="button" onClick={startAfresh} className="underline">start a real one</button>.
@@ -4006,111 +4213,41 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 /* Pieces (top-level, so focus survives re-renders)                    */
 /* ------------------------------------------------------------------ */
 
-/** One line of the framework, and the tap target for its own answer (1a).
- *  The four truth classes still render distinctly: example grey, stated the
- *  buyer's touch in solid ink, inferred dotted with its reason, struck out.
- *  What a CHOICE adds is the Orange rule beneath it. The border never
- *  thickens and no state changes the line's height, so choosing something
- *  never moves the line under the finger. */
-function ItemLine(props: {
-  label: string;
-  state: "example" | "exampleStruck" | "option" | "stated" | "inferred" | "struck" | "noted";
-  fact?: WorkspaceFact;
-  /** The buyer's own words, where this line is the words themselves (1f). */
-  quote?: string;
-  /** A quiet note after the label (an example's history, an answer's home). */
-  trailing?: string;
-  /** 1b: ranked first for this sector, one size up, with the reason. */
-  lead?: boolean;
-  reason?: string;
-  flashing: boolean;
-  disabled: boolean;
-  title: string;
-  onClick: () => void;
-}) {
-  const { label, state, fact, lead } = props;
-  const chosen = state === "stated" || state === "noted";
-  const mark = chosen || state === "inferred" ? "✓" : state === "struck" || state === "exampleStruck" ? "×" : state === "example" ? "✓" : "·";
-  const markCls =
-    chosen ? "text-[#F5A21B]"
-    : state === "inferred" ? "text-[#33302C]"
-    : state === "struck" || state === "exampleStruck" ? "text-[#A3A099]"
-    : state === "example" ? "text-[#A3A099]"
-    : "text-[#A3A099] group-hover:text-[#F5A21B]";
-  const labelCls =
-    chosen ? "border-b border-[#F5A21B] text-[#141414]"
-    : state === "inferred" ? "border-b border-dotted border-[#A3A099] text-[#33302C]"
-    : state === "struck" || state === "exampleStruck" ? "text-[#A3A099] line-through"
-    : state === "example" ? "text-[#A3A099]"
-    : "text-[#A3A099] group-hover:text-[#141414]";
+/** The field a figure question carries (a site count, a date, a band).
+ *  A question with no ledger home publishes as a stated assumption at the
+ *  signature; the line says so plainly. */
+function GapField(props: { gap: BriefGap; onAnswer: (gap: BriefGap, value: string, label?: string) => void }) {
+  const { gap } = props;
+  const [val, setVal] = useState("");
+  if (!gap.path) {
+    return <p className="m-0 text-[12.5px] text-[#6E6C67]">Accepted at the signature; publishes as a stated assumption.</p>;
+  }
   return (
-    <button
-      type="button"
-      disabled={props.disabled}
-      onClick={props.onClick}
-      title={props.title}
-      className={`group block w-full rounded-[6px] py-[3px] text-left leading-snug hover:bg-[#FDFCFA] ${lead ? "text-[14px]" : "text-[13px]"} ${props.flashing ? "pd-ink" : ""}`}
-    >
-      <span className={`mr-2 inline-block w-3 text-center text-[11px] ${markCls}`}>{mark}</span>
-      <span className={labelCls}>{label}</span>
-      {state === "example" && <span className="ml-2 text-[10px] text-[#A3A099]">example</span>}
-      {state === "exampleStruck" && <span className="ml-2 text-[10px] text-[#A3A099]">example · {props.trailing}</span>}
-      {state === "noted" && (
-        <span className="ml-2 text-[11px] text-[#6E6C67]">
-          {props.quote ? "your words, kept as you said them" : (props.trailing ?? "noted with your position")}
-        </span>
-      )}
-      {state === "stated" && fact && (
-        <span className="ml-2 text-[11px] text-[#6E6C67]"><em>&ldquo;{fact.quote ?? label}&rdquo;</em></span>
-      )}
-      {state === "inferred" && fact && (
-        <span className="ml-2 text-[11px] text-[#6E6C67]">{fact.reason ?? "inferred"}</span>
-      )}
-      {lead && props.reason && (
-        <span className="mt-[1px] block pl-5 text-[11.5px] leading-snug text-[#8C8A85]">{props.reason}</span>
-      )}
-    </button>
+    <>
+      <span className="flex items-center gap-2 rounded-[9px] border border-[#DDDAD3] bg-white py-[5px] pl-3 pr-[5px] focus-within:border-[#F5A21B]">
+        <input
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && val.trim() && props.onAnswer(gap, val.trim())}
+          inputMode={gap.control === "number" ? "numeric" : undefined}
+          placeholder={gap.control === "number" ? "0" : "Type it"}
+          className="w-32 bg-transparent py-[2px] text-[13px] text-[#141414] outline-none placeholder:text-[#A3A099]"
+          aria-label={gap.question}
+        />
+        <button
+          type="button"
+          onClick={() => val.trim() && props.onAnswer(gap, val.trim())}
+          className="shrink-0 rounded-[7px] bg-[#141414] px-3 py-[6px] text-[12.5px] font-semibold text-white transition-colors hover:bg-[#3A3A3A]"
+        >
+          Add
+        </button>
+      </span>
+    </>
   );
 }
 
-/** The open question, above the list that answers it (1a), saying plainly
- *  whether it takes one answer or several (1b). It carries no options of
- *  its own: the candidate lines below ARE the options. */
-function OpenQuestion(props: {
-  question: string;
-  count: "one" | "any";
-  hint?: string;
-  evidence?: string;
-  onDismiss?: () => void;
-}) {
-  return (
-    <div className="mb-1 mt-1.5" title={props.evidence}>
-      <div className="flex items-baseline gap-2">
-        <span className="inline-block w-3 flex-none text-center text-[11px] font-bold text-[#B4650B]">?</span>
-        <span className="flex-1 text-[13.5px] leading-snug text-[#B4650B]">{props.question}</span>
-        <span className="flex-none rounded-[4px] bg-[#FFF7E8] px-[6px] py-[2px] font-mono text-[10px] uppercase tracking-[.07em] text-[#8A4D08]">
-          {props.count === "one" ? "Pick one" : "Pick any"}
-        </span>
-        {props.onDismiss && (
-          <button type="button" onClick={props.onDismiss} className="flex-none text-[11px] text-[#8C8A85] hover:text-[#141414]" title="Not relevant to this project">✕</button>
-        )}
-      </div>
-      {props.hint && <p className="m-0 ml-5 mt-[2px] text-[11.5px] leading-snug text-[#A3A099]">{props.hint}</p>}
-    </div>
-  );
-}
-
-/** 1f: answer in your own words. The typing sits with the candidates, not
- *  behind them. What is typed is kept exactly as it was typed; Netify's
- *  technical wording sits beneath it and never over it. */
-function OwnWordsRow(props: {
-  sectionKey: string;
-  /** The open question this row answers, where there is one. */
-  question?: string;
-  placeholder: string;
-  tech: string;
-  onCommit: (text: string) => void;
-}) {
+/** Typing is always a way through; what is typed is kept verbatim. */
+function OwnWordsInput(props: { placeholder: string; onCommit: (text: string) => void }) {
   const [val, setVal] = useState("");
   const commit = () => {
     if (!val.trim()) return;
@@ -4118,28 +4255,23 @@ function OwnWordsRow(props: {
     setVal("");
   };
   return (
-    <div className="mt-1.5 border-t border-[#F0EEE9] pt-1.5">
-      <div className="flex items-center gap-2">
-        <input
-          value={val}
-          onChange={(e) => setVal(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
-          placeholder={props.placeholder}
-          aria-label={props.question ?? `Answer in your own words: ${props.sectionKey}`}
-          className="min-w-0 flex-1 border-b border-dashed border-[#E3E0DA] bg-transparent py-[2px] text-[13px] text-[#141414] outline-none placeholder:text-[#A3A099] focus:border-[#F5A21B]"
-        />
-        <button
-          type="button"
-          onClick={commit}
-          className="flex-none rounded-[7px] border border-[#E3E0DA] bg-white px-2.5 py-[3px] text-[12px] font-semibold text-[#141414] transition-colors hover:border-[#141414]"
-        >
-          Add
-        </button>
-      </div>
-      <p className="m-0 mt-[3px] text-[11px] leading-snug text-[#8C8A85]">
-        Kept in your words. Vendors and service providers are asked to answer on {props.tech}.
-      </p>
-    </div>
+    <>
+      <input
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }}
+        placeholder={props.placeholder}
+        aria-label={props.placeholder}
+        className="min-w-0 flex-1 bg-transparent py-[2px] text-[13px] text-[#141414] outline-none placeholder:text-[#A3A099]"
+      />
+      <button
+        type="button"
+        onClick={commit}
+        className="shrink-0 rounded-[7px] bg-[#141414] px-3 py-[6px] text-[12.5px] font-semibold text-white transition-colors hover:bg-[#3A3A3A]"
+      >
+        Add
+      </button>
+    </>
   );
 }
 
@@ -4167,22 +4299,22 @@ function OrganisationFields(props: {
       {rows.map((r) => {
         const fs = r.facts ?? (r.fact ? [r.fact] : []);
         return (
-          <div key={r.k} className="flex items-baseline gap-2 py-[3px] text-[13px] leading-snug">
-            <span className="w-[72px] flex-none text-[11px] text-[#6E6C67]">{r.k}</span>
+          <div key={r.k} className="flex items-baseline gap-3.5 border-b border-[#F5F3EE] py-[8px] leading-[1.5]">
+            <span className="w-[9.5em] flex-none text-[12.5px] font-semibold text-[#8C8A85]">{r.k}</span>
             {fs.length === 0 ? (
-              <span className={isLive ? "text-[11px] text-[#A3A099]" : "text-[#A3A099]"}>
+              <span className="text-[12.5px] text-[#A3A099]">
                 {isLive ? "not stated" : r.ex}
-                {!isLive && r.was && <span className="ml-2 text-[10px] text-[#A3A099]">example · {r.was}</span>}
+                {!isLive && r.was && <span className="ml-2 text-[12px] text-[#A3A099]">example · {r.was}</span>}
               </span>
             ) : (
-              <span className="flex flex-wrap items-baseline gap-x-2">
+              <span className="flex min-w-0 flex-wrap items-baseline gap-x-2">
                 {fs.map((f) => (
                   <button
                     key={f.id}
                     type="button"
                     onClick={() => props.onStrike(f.id)}
                     title={f.struck ? "Restore" : "One tap strikes"}
-                    className={`${props.flash.has(f.id) ? "pd-ink" : ""} ${
+                    className={`text-[14px] font-medium ${props.flash.has(f.id) ? "pd-ink" : ""} ${
                       f.struck
                         ? "text-[#A3A099] line-through"
                         : f.provenance === "stated"
@@ -4194,7 +4326,12 @@ function OrganisationFields(props: {
                   </button>
                 ))}
                 {fs[0] && !fs[0].struck && (
-                  <span className="text-[11px] text-[#6E6C67]">
+                  <span className={`inline-block rounded-[4px] px-[6px] py-[2px] font-mono text-[10.5px] font-semibold uppercase tracking-[.06em] ${
+                    fs[0].provenance === "stated" ? "bg-[#EAF6EE] text-[#256B3E]" : "bg-[#F2F0EB] text-[#5F5F5F]"
+                  }`}>{fs[0].provenance === "stated" ? "stated" : "inferred"}</span>
+                )}
+                {fs[0] && !fs[0].struck && (
+                  <span className="text-[12px] text-[#A3A099]">
                     {fs[0].provenance === "stated" ? <em>&ldquo;{fs[0].quote ?? String(fs[0].value)}&rdquo;</em> : (fs[0].reason ?? "inferred")}
                   </span>
                 )}
@@ -4207,43 +4344,6 @@ function OrganisationFields(props: {
   );
 }
 
-/** A question with a figure of its own: a site count, a date, a band. It is
- *  not a choice between candidates, so it keeps its own field and never had
- *  a chip cloud to lose. Choices are answered by the list above it (1a). */
-function GapLine(props: { gap: BriefGap; onAnswer: (gap: BriefGap, value: string, label?: string) => void }) {
-  const { gap } = props;
-  const [val, setVal] = useState("");
-  return (
-    <div className="py-[3px]">
-      <div className="flex items-baseline gap-2 text-[13px] leading-snug text-[#B4650B]">
-        <span className="inline-block w-3 flex-none text-center text-[11px] font-bold">?</span>
-        <span>{gap.question}</span>
-      </div>
-      {gap.path ? (
-        <div className="ml-5 mt-1 flex items-center gap-2">
-          <input
-            value={val}
-            onChange={(e) => setVal(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && val.trim() && props.onAnswer(gap, val.trim())}
-            inputMode={gap.control === "number" ? "numeric" : undefined}
-            placeholder={gap.control === "number" ? "0" : "type it"}
-            className="w-28 border-b border-dashed border-[#E3E0DA] bg-transparent px-1 py-0.5 text-[13px] text-[#141414] outline-none focus:border-[#F5A21B]"
-            aria-label={gap.question}
-          />
-          <button
-            type="button"
-            onClick={() => val.trim() && props.onAnswer(gap, val.trim())}
-            className="rounded-[7px] border border-[#E3E0DA] bg-white px-2.5 py-[3px] text-[12px] font-semibold text-[#141414] transition-colors hover:border-[#141414]"
-          >
-            Add
-          </button>
-        </div>
-      ) : (
-        <p className="m-0 ml-5 mt-0.5 text-[11px] text-[#6E6C67]">Accepted at the signature; publishes as a stated assumption.</p>
-      )}
-    </div>
-  );
-}
 
 
 /** The artefact, rendered for reading (Harry's Section 1 finding, 28 Jul
@@ -4264,9 +4364,9 @@ function ArtefactPrint({ text }: { text: string }) {
     );
   };
   return (
-    <div className="max-h-72 overflow-auto text-[12px] leading-relaxed text-[#33302C]">
+    <div className="max-h-72 overflow-auto text-[12.5px] leading-relaxed text-[#33302C]">
       {text.split("\n").map((line, i) => {
-        if (line.startsWith("### ")) return <p key={i} className="m-0 mb-0.5 mt-2.5 text-[11px] font-semibold text-[#33302C]">{line.slice(4)}</p>;
+        if (line.startsWith("### ")) return <p key={i} className="m-0 mb-0.5 mt-2.5 text-[12.5px] font-semibold text-[#33302C]">{line.slice(4)}</p>;
         if (line.startsWith("## ")) return <p key={i} className="m-0 mb-1 mt-3.5 text-[10px] font-mono font-semibold uppercase tracking-[.12em] text-[#6E6C67]">{line.slice(3)}</p>;
         if (line.startsWith("# ")) return <p key={i} className="m-0 text-[13px] font-semibold text-[#141414]">{line.slice(2)}</p>;
         if (line.startsWith("- ")) return <p key={i} className="m-0 pl-3.5">{mark(line.slice(2), i)}</p>;

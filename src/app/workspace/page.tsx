@@ -3,6 +3,7 @@ import ProjectDesk from "@/components/ProjectDesk";
 import JourneyStrip from "@/components/JourneyStrip";
 import CapabilityBlock from "@/components/CapabilityBlock";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
+import { getAllVendors } from "@/lib/vendors";
 
 /**
  * /workspace/ (public path /sase/workspace/): the door of the sourcing
@@ -13,7 +14,7 @@ import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchem
  * promise, input, journey strip, live proof, control lines, nothing
  * else on first paint. ONE HIERARCHY (Robert, 29 Jul, exact-copy
  * prompt): one H1, one supporting paragraph, one trust paragraph, then
- * the input — no card, no second heading, geography stays retired.
+ * the input: no card, no second heading, geography stays retired.
  * Copy is his exact wording; the constants are kept verbatim-identical
  * with the home twin.
  */
@@ -27,7 +28,7 @@ const ENGINE_PROMISE =
 /** The trust paragraph (his exact copy, 29 Jul): plain centred text,
  *  never a card or border, never uppercase, no heading of its own. */
 const ENGINE_VALUE =
-  "Connected to 30+ leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors.";
+  `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors.`;
 /** Geography retired as a separate line (Robert, 29 Jul: one message);
  *  it lives in the value card's title. Twin of home. */
 const ENGINE_AGENT =
@@ -147,7 +148,7 @@ export default function Page() {
       <main className="mx-auto max-w-6xl px-5 pb-16 pt-6 sm:px-6">
 
         {/* One visual hierarchy (Robert, 29 Jul, exact-copy prompt): H1,
-            supporting paragraph, trust paragraph, input — nothing else.
+            supporting paragraph, trust paragraph, input: nothing else.
             Twin of home, same fluid clamps; gap before the input is
             trust mb 12px + ProjectDesk's mt-10 = 52px. */}
         <h1
