@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
 import JourneyStrip from "@/components/JourneyStrip";
+import CapabilityBlock from "@/components/CapabilityBlock";
 import MegaNav from "@/components/MegaNav";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 
@@ -152,7 +153,7 @@ export default function Page() {
           {ENGINE_VALUE}
         </p>
 
-        <ProjectDesk afterPrompt={<JourneyStrip />} />
+        <ProjectDesk afterPrompt={<><JourneyStrip /><CapabilityBlock /></>} />
       </main>
     </div>
   );
