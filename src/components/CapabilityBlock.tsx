@@ -42,39 +42,43 @@ import { getShortlistFaqSchema } from "@/lib/structured-data";
  *  a query with real volume. Rephrase freely around them; do not drop them. */
 const FAQS: { q: string; a: string }[] = [
   {
+    q: "What is Netify?",
+    a: "Netify is a procurement platform for SASE, SD-WAN, SSE and managed network security. It does four jobs in one place. Netify builds your requirement into a project notice, an RFI or a full RFP. Netify compares vendors and service providers on graded evidence rather than on marketing claims. Netify publishes your opportunity anonymously to a marketplace of evaluated suppliers. And Netify brings supplier responses back side by side so you can compare them. 30 suppliers are graded on 40 capabilities, every grade carrying the date it was verified and the source it came from.",
+  },
+  {
+    q: "Can I use Netify to run a SASE or SD-WAN RFP or RFI?",
+    a: "Yes. Netify writes your requirement up as a document you can download as Word or PDF. What it comes out as depends on what the requirement has earned: a project notice for a straightforward need, an RFI when you are still gathering information, or a full RFP once you have set priorities and made a commercial claim. You do not choose a template and you do not start from a blank page. Netify then publishes it to suppliers and collects their responses against it.",
+  },
+  {
+    q: "How does Netify compare vendors and service providers?",
+    a: "Netify grades 30 suppliers on 40 capabilities and ranks them against the requirement you have described. Every grade carries the date it was verified and the source it came from, and a supplier moves only when its own evidence changes. Where a capability is not published, the record says so rather than guessing. Netify publishes vendor and provider comparisons you can read in full, including the sources behind each grade and the claims that conflict.",
+  },
+  {
     q: "What do I get when I publish a requirement?",
     a: "Six things. Vendors and service providers ranked against your requirement, with the reason each one is in or out. An indicative price band, computed under the Netify TCO methodology. Your requirement written up as a project notice, an RFI or a full RFP, ready to download as Word or PDF. Your opportunity posted anonymously to the public opportunities board. Full detail released to signed in approved vendors and service providers, while the public never sees your company name or your contact details. And supplier responses side by side, with pricing private to you.",
   },
   {
     q: "Can Netify shortlist SASE providers for a multinational organisation?",
-    a: "Yes. Describe the estate in your own words, including the countries and regions you operate in, and the shortlist ranks suppliers on graded evidence of coverage in those places rather than on a marketing claim. Multi-site and multi-country estates are the normal case here, not the exception, and global enterprises and multinational organisations sit alongside mid-market companies on the same engine.",
+    a: "Yes. Describe the estate in your own words, including the countries and regions you operate in, and Netify ranks suppliers on graded evidence of coverage in those places rather than on a marketing claim. Multi-site and multi-country estates are the normal case here, not the exception. Netify serves global enterprises, multinational organisations and mid-market companies on the same engine.",
   },
   {
-    q: "Do you cover managed SD-WAN and managed SASE, or only the technology vendors?",
-    a: "Both, and the difference is graded. 30 suppliers are recorded, some of which build the technology, some of which run it as a managed service, and some of which do both. If you want managed SD-WAN or managed SASE delivered as a service, say so and the ranking weights the suppliers who genuinely operate it. Each supplier record names which it is. Security service edge, or SSE, is graded on the same records: 17 of the 30 build their own SSE and 13 run a partner's, which the record states either way.",
+    q: "Does Netify cover managed SD-WAN and managed SASE, or only the technology vendors?",
+    a: "Both, and Netify grades the difference. 30 suppliers are recorded, some of which build the technology, some of which run it as a managed service, and some of which do both. If you want managed SD-WAN or managed SASE delivered as a service, say so and the ranking weights the suppliers who genuinely operate it. Each supplier record names which it is. Security service edge, or SSE, is graded on the same records: 17 of the 30 build their own SSE and 13 run a partner's, which the record states either way.",
   },
   {
     q: "Can I get an indicative price before I speak to any supplier?",
-    a: "Yes. Publishing computes an indicative price band under the Netify TCO methodology, based on the sites, users, scope and locations you have described. It is a band rather than a quote, because a real price depends on the supplier and the detail. Firm pricing comes from the suppliers themselves, in their responses, and stays private to you.",
+    a: "Yes. Netify computes an indicative price band under its own TCO methodology, based on the sites, users, scope and locations you have described. It is a band rather than a quote, because a real price depends on the supplier and the detail. Firm pricing comes from the suppliers themselves, in their responses, and stays private to you.",
   },
   {
-    q: "Can I produce a SASE or SD-WAN RFP document?",
-    a: "Yes. Your requirement is written up as a document you can download as Word or PDF. What it comes out as depends on what your requirement has earned: a project notice for a straightforward need, an RFI when you are still gathering information, or a full RFP once you have set priorities and made a commercial claim. You do not choose a template, and you do not start from a blank page.",
-  },
-  {
-    q: "Which sectors and situations do you cover?",
-    a: "Ranked shortlists cover 20 sectors and situations, including healthcare, retail, financial services and manufacturing, along with situations such as MPLS migration, security consolidation, remote and hybrid work, and regulated industries with residency or audit requirements. Sector shapes the requirement itself, not just the label on it, so a PCI DSS retail estate and an audited financial services network produce different shortlists.",
-  },
-  {
-    q: "How are suppliers actually compared?",
-    a: "30 suppliers are graded on 40 capabilities. Every grade carries the date it was verified and the source it came from, and a supplier moves only when its own evidence changes. Where a capability is not published, the record says so rather than guessing. You can read any supplier record in full, including the sources behind it and the claims that conflict.",
+    q: "Which sectors and situations does Netify cover?",
+    a: "Netify publishes ranked shortlists for 20 sectors and situations, including healthcare, retail, financial services and manufacturing, along with situations such as MPLS migration, security consolidation, remote and hybrid work, and regulated industries with residency or audit requirements. Sector shapes the requirement itself, not just the label on it, so a PCI DSS retail estate and an audited financial services network produce different shortlists.",
   },
   {
     q: "Who sees my project, and does my company name go public?",
-    a: "Your notice is published anonymously. The public opportunities board and search engines see the shape of the requirement, such as sector and size, and never your company name or your contact details. Signed in approved vendors and service providers see the full detail. You choose which suppliers receive your contact details, and when.",
+    a: "Netify publishes your notice anonymously. The public opportunities board and search engines see the shape of the requirement, such as sector and size, and never your company name or your contact details. Signed in approved vendors and service providers see the full detail. You choose which suppliers receive your contact details, and when.",
   },
   {
-    q: "Do I need an account to use it?",
+    q: "Do I need an account to use Netify?",
     a: "No. You can describe your project, build the requirement and see who fits without an account. Signing in is needed only to publish, because publishing reaches named suppliers and puts a notice on the board, so it has to be a verified person. A work email address is required for that.",
   },
   {
