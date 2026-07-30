@@ -1057,8 +1057,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         category: sup.category,
         graded: sup.last_verified,
         invited: invited.has(sup.slug),
-        matched: sup.matched.slice(0, 4).map((m) => m.label),
-        missed: sup.missed.slice(0, 2).map((m) => m.label),
+        matched: sup.matched.map((m) => m.label),
+        missed: sup.missed.map((m) => m.label),
+        yes: sup.yes_count,
       }));
   }, [fit, removed, published]);
 
@@ -1115,15 +1116,27 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   );
   const instrument = earnedInstrument(instrumentLadder);
 
+  /* R7 MADE REAL (Robert's ruling; Harry's round two, 30 Jul 2026). He
+   * stripped a project back to almost nothing, saw 14 per cent and 1 of 7
+   * filled, and still found "Published" sitting in the stage list with no
+   * distinction, so the page read as somewhere between not ready and
+   * published at once. The five details a notice cannot publish without
+   * now genuinely hold the signature shut, and the refusal names them.
+   * Safe to enforce only since the timeline question became earnable by
+   * every project earlier today; before that this would have locked out
+   * anyone who never mentioned a renewal. */
+  const coreFiveComplete = missingCore.length === 0;
   const signLocked =
-    !started || facts.length === 0 || Boolean(published) || (securityScope && (!verdict || verdict.confidence === "low")) || (!securityScope && !buying);
+    !started || facts.length === 0 || Boolean(published) || !coreFiveComplete || (securityScope && (!verdict || verdict.confidence === "low")) || (!securityScope && !buying);
   const lockReason = !started
     ? null
     : facts.length === 0
       ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
-      : securityScope && verdict?.confidence === "low"
-        ? "Answer the open questions on the position first: nothing is recorded on guesswork."
-        : null;
+      : !coreFiveComplete
+        ? `A notice cannot publish without five details, and ${missingCore.length} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it in the box at the top, or answer the open questions on the document.`
+        : securityScope && verdict?.confidence === "low"
+          ? "Answer the open questions on the position first: nothing is recorded on guesswork."
+          : null;
   const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGaps.length === 0 || consentGaps) : consentCreate;
   const ready = !signLocked && started && (securityScope ? Boolean(verdict) : true);
   /* The publish bar names the first real lock in the gate's own order;
@@ -1131,6 +1144,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const publishBarLock =
     facts.length === 0
       ? "Say one sentence about the organisation and publishing unlocks."
+      : !coreFiveComplete
+        ? `Still open before you can publish: ${missingCore.join(", ")}.`
       : securityScope && (!verdict || verdict.confidence === "low")
         ? "Answer the open questions on the position first: nothing publishes on guesswork."
         : !securityScope && !buying
@@ -1163,11 +1178,17 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       {
         id: 3,
         title: "Generate and publish",
-        detail: "Publishing generates the shortlist, the price band and your document, and posts your notice anonymously.",
-        checks: [{ id: "published", label: "Published", done: Boolean(published) }],
+        /* The detail carries the gate, so a stripped-back project cannot
+           read as though publishing is one click away (Harry, round two). */
+        detail: published
+          ? "Live on the board. Your shortlist and the responses are below."
+          : missingCore.length > 0
+            ? `Not available yet. A notice needs five details and ${missingCore.length} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}.`
+            : "Publishing generates the shortlist, the price band and your document, and posts your notice anonymously.",
+        checks: [{ id: "published", label: published ? "Published" : "Not published yet", done: Boolean(published) }],
       },
     ],
-    [facts.length, coreFive, clusterRows.length, published],
+    [facts.length, coreFive, clusterRows.length, published, missingCore],
   );
   const goToStep = useCallback((id: RailStepId) => {
     setStep(id);
@@ -3180,10 +3201,36 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                             )}
                           </div>
                           {r.matched.length > 0 ? (
-                            <p className="m-0 mt-0.5 pl-6 text-[11.5px] leading-relaxed text-zinc-600">
-                              Evidenced for {r.matched.join(", ")}.
-                              {r.missed.length > 0 ? <span className="text-zinc-400"> Not evidenced for {r.missed.join(", ")}.</span> : null}
-                            </p>
+                            <details className="group mt-0.5 pl-6">
+                              <summary className="cursor-pointer list-none text-[11.5px] leading-relaxed text-zinc-600 marker:hidden hover:text-amber-800">
+                                Evidenced for {r.matched.slice(0, 3).join(", ")}
+                                {r.matched.length > 3 ? ` and ${r.matched.length - 3} more` : ""}.{" "}
+                                <span className="text-zinc-400 underline group-open:hidden">why this position</span>
+                              </summary>
+                              {/* Why it ranks HERE, in the engine's own terms
+                                  (Harry asked for the rationale, not just the
+                                  evidence line). Counts are the fit engine's,
+                                  never a narrative. */}
+                              <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-zinc-600">
+                                Position {i + 1} of {payoutRows.length}. Ranked on {r.matched.length} of your named requirement
+                                {r.matched.length === 1 ? "" : "s"} met with graded evidence
+                                {r.missed.length > 0 ? `, and ${r.missed.length} not evidenced` : ""}. Across the whole dataset this
+                                supplier fully meets {r.yes} of 40 capabilities. Its record was graded {fmtDate(r.graded)}.
+                              </p>
+                              <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-zinc-600">
+                                <span className="font-semibold text-zinc-700">Evidenced for:</span> {r.matched.join(", ")}.
+                              </p>
+                              {r.missed.length > 0 && (
+                                <p className="m-0 mt-1 text-[11.5px] leading-relaxed text-zinc-500">
+                                  <span className="font-semibold text-zinc-600">Not evidenced for:</span> {r.missed.join(", ")}.
+                                </p>
+                              )}
+                              <p className="m-0 mt-1 text-[11.5px]">
+                                <a href={`/sase/vendors/${r.slug}/`} className="text-zinc-700 underline hover:text-amber-800">
+                                  Read the full record, with every source behind these grades
+                                </a>
+                              </p>
+                            </details>
                           ) : (
                             <p className="m-0 mt-0.5 pl-6 text-[11.5px] leading-relaxed text-zinc-500">
                               On the curated market for this scope. No graded evidence against your named requirements yet.
@@ -3403,10 +3450,13 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     )}
                   </>
                 ) : (
-                  <p className="m-0 text-[13px] leading-relaxed text-zinc-500">
-                    <span className="font-semibold text-zinc-700">A person signs here.</span> One signature publishes an anonymous notice to the open board and the full position to matched suppliers.{" "}
+                  <div className="rounded-lg border border-zinc-300 bg-zinc-50 p-5">
+                  <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-500">Not ready to publish</p>
+                  <p className="m-0 text-[13px] leading-relaxed text-zinc-600">
+                    <span className="font-semibold text-zinc-800">A person signs here.</span> One signature publishes an anonymous notice to the open board and the full position to matched suppliers.{" "}
                     {lockReason ?? "It unlocks when the position holds enough truth to stand on."}
                   </p>
+                  </div>
                 )}
               </div>
             )}
