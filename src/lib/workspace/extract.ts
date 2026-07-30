@@ -144,7 +144,16 @@ function validate(path: string, value: unknown, notes: string[]): { path: Allowe
     }
     case "constraints.timeline":
     case "constraints.budgetBand": {
-      const s = clean(value, 80);
+      /* The model sometimes returns a compound free-text answer as an id,
+       * because the prompt asks for ids on the enumerated paths and it
+       * over-applies the habit: "contract signed by December 2026, live by
+       * March 2027" came back as
+       * contract_signed_december_2026_live_march_2027 and would have
+       * rendered verbatim in the buyer's own downloaded document (30 Jul
+       * 2026). These two paths are FREE TEXT, so an underscored token with
+       * no spaces is always a slugged sentence, never a real answer. */
+      let s = clean(value, 80);
+      if (!/\s/.test(s) && s.includes("_")) s = s.replace(/_+/g, " ").trim();
       return /[a-zA-Z0-9]{2,}/.test(s) ? { path: p, value: s } : null;
     }
     case "procurement.buying": {
@@ -289,10 +298,19 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     const ie = hit(/(?<!northern )ireland|\bdublin\b/);
     if (ie) say("organisation.regions", ["ie"], ie[0].trim());
   }
+  /* US and CHINA, the two Harry named and the rail could not see (30 Jul
+   * 2026). China was absent from the map entirely, and a bare "US" is
+   * unmatchable once the text is lowercased because "us" is the English
+   * pronoun and would fire on "tell us" or "for us". So on any turn where
+   * the model over-reached (his run recorded four regions quoting the
+   * single word "Global"), nothing could override it. The country test
+   * runs against the RAW text, where the pronoun is lower case and the
+   * country is not. */
+  if (/\bUS\b|\bU\.S\.\b/.test(text)) say("organisation.regions", ["us"], "US");
   for (const [re, region] of [
     [/\bfrance\b|\bgermany\b|\bspain\b|\bitaly\b|netherlands|\bholland\b|\bbelgium\b|\bpoland\b|\bportugal\b|\bsweden\b|\bdenmark\b|\baustria\b|switzerland|\bnorway\b|\bfinland\b|luxembourg|\beurope\b|\bemea\b/, "eu"],
     [/\busa\b|\bu\.s\.\b|united states|north america|\bcanada\b/, "us"],
-    [/\baustralia\b|\bsingapore\b|\bjapan\b|\bindia\b|hong kong|\bmalaysia\b|new zealand|\bapac\b|asia pacific/, "apac"],
+    [/\baustralia\b|\bsingapore\b|\bjapan\b|\bindia\b|hong kong|\bmalaysia\b|new zealand|\bapac\b|asia pacific|\bchina\b|\bshanghai\b|\bbeijing\b|\bshenzhen\b|south korea|\bvietnam\b|\bthailand\b|\bindonesia\b|\bphilippines\b|\btaiwan\b/, "apac"],
     [/\buae\b|\bdubai\b|\bsaudi\b|\bqatar\b|\bbahrain\b|\bkuwait\b|\bisrael\b|south africa|\bnigeria\b|\bkenya\b|\begypt\b/, "me"],
   ] as Array<[RegExp, string]>) {
     const m = hit(re);

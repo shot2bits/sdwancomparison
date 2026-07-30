@@ -255,6 +255,13 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
    * Generate and publish. Publish is the only exit. Step state is
    * session-local like everything else on this desk now (R2). */
   const [step, setStep] = useState<RailStepId>(1);
+  /* The furthest step reached. Harry's read, 30 Jul 2026: he never found
+   * anywhere showing which suppliers fit, and the reason is that the rail
+   * made every step clickable, so a buyer could go straight from the
+   * requirement to publishing and never see Who fits at all. Going BACK is
+   * always free, which is CTM's pencil; going FORWARD happens through the
+   * step's own control, so nobody skips the proof. */
+  const [maxStep, setMaxStep] = useState<RailStepId>(1);
   const [wrongCompany, setWrongCompany] = useState(false);
   const [flash, setFlash] = useState<Set<string>>(new Set());
   /* The applied-changes strip (F2, 29 Jul 2026, adopted from the mockup
@@ -1035,6 +1042,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const pins = [...new Set([...added, ...fitSlugs])].slice(0, 5);
   const unansweredGaps = brief.openGaps;
 
+  /* What publishing generated: the SAME fit engine, in its own ranked
+   * order, with the reason each supplier is in. Pre-publish this order is
+   * the half of the coke the buyer does not drink (R1b); once published it
+   * is the thing they published to get. Exclusions the buyer made are
+   * honoured here exactly as they are in the invite list. */
+  const payoutRows = useMemo(() => {
+    const invited = new Set(published?.invited ?? []);
+    return (fit?.mode === "graded" ? fit.suppliers : [])
+      .filter((sup) => !removed.includes(sup.slug))
+      .map((sup) => ({
+        slug: sup.slug,
+        name: sup.name,
+        category: sup.category,
+        graded: sup.last_verified,
+        invited: invited.has(sup.slug),
+        matched: sup.matched.slice(0, 4).map((m) => m.label),
+        missed: sup.missed.slice(0, 2).map((m) => m.label),
+      }));
+  }, [fit, removed, published]);
+
   /* The suppliers your requirement reaches, A to Z (R1b): named, with
    * the date each record was graded, and nothing that implies an order.
    * A pinned supplier the fit set never reached still belongs here,
@@ -1144,6 +1171,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   );
   const goToStep = useCallback((id: RailStepId) => {
     setStep(id);
+    setMaxStep((m) => (id > m ? id : m));
     ev("journey_step", { to: id });
     try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch { /* scrolling is a courtesy */ }
   }, []);
@@ -1974,7 +2002,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               first, and one sentence can tick several of them at once where
               the buyer can watch it happen. ---- */}
       <div className="mx-auto mt-6 w-[min(760px,100%)]">
-        <JourneyRail steps={railSteps} current={shownStep} onGoTo={goToStep} published={Boolean(published)} />
+        <JourneyRail steps={railSteps} current={shownStep} onGoTo={goToStep} published={Boolean(published)} maxStep={published ? 3 : maxStep} />
       </div>
 
       {shownStep === 1 && (<>
@@ -3117,6 +3145,75 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
           {/* ---- The signature: where the document ends ---- */}
           <div id="pd-signature" className="mt-6 border-t border-zinc-200 pt-5" style={{ scrollMarginTop: "70px" }}>
+            {/* ---- What publishing generated (Harry's read, 30 Jul 2026:
+                    "no visible place to see which suppliers Netify considers
+                    a fit"). He was right, and it was worse than a gap: once
+                    published, this whole block rendered NOTHING, so the
+                    ranked shortlist the front page and step two both promise
+                    did not exist on any screen. This is the promise kept.
+                    The order is the fit engine's own ranking, the reason is
+                    the named requirements each supplier is evidenced
+                    against, and the invited list is what the publish route
+                    actually returned, never a claim. ---- */}
+            {published && (
+              <div className="rounded-lg border-2 border-amber-300 bg-white p-5">
+                <p className="m-0 mb-1 text-[10px] font-semibold uppercase tracking-[.12em] text-amber-700">Your shortlist</p>
+                {payoutRows.length > 0 ? (
+                  <>
+                    <p className="m-0 mb-3 text-[14px] leading-relaxed text-zinc-900">
+                      {payoutRows.length} evaluated supplier{payoutRows.length === 1 ? "" : "s"} ranked against your requirement
+                      {published.invited.length > 0
+                        ? <>, and {published.invited.length} invited directly.</>
+                        : <>. Signed in approved suppliers see your notice on the board.</>}
+                    </p>
+                    <ol className="m-0 list-none p-0">
+                      {payoutRows.map((r, i) => (
+                        <li key={r.slug} className="border-t border-zinc-100 py-2.5 first:border-t-0 first:pt-0">
+                          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                            <span className="font-mono text-[11px] text-zinc-400">{String(i + 1).padStart(2, "0")}</span>
+                            <a href={`/sase/vendors/${r.slug}/`} className="text-[14px] font-semibold text-zinc-900 underline decoration-zinc-300 underline-offset-2 hover:decoration-zinc-900">
+                              {r.name}
+                            </a>
+                            <span className="text-[11px] text-zinc-500">{r.category} · graded {fmtDate(r.graded)}</span>
+                            {r.invited && (
+                              <span className="rounded-full bg-amber-100 px-1.5 py-[1px] text-[10px] font-semibold uppercase tracking-[.08em] text-amber-800">invited</span>
+                            )}
+                          </div>
+                          {r.matched.length > 0 ? (
+                            <p className="m-0 mt-0.5 pl-6 text-[11.5px] leading-relaxed text-zinc-600">
+                              Evidenced for {r.matched.join(", ")}.
+                              {r.missed.length > 0 ? <span className="text-zinc-400"> Not evidenced for {r.missed.join(", ")}.</span> : null}
+                            </p>
+                          ) : (
+                            <p className="m-0 mt-0.5 pl-6 text-[11.5px] leading-relaxed text-zinc-500">
+                              On the curated market for this scope. No graded evidence against your named requirements yet.
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                    <p className="m-0 mt-3 text-[11px] leading-relaxed text-zinc-500">
+                      Ranked by graded evidence against the requirements your own words created. Every grade carries its
+                      date and its source on the supplier record.
+                    </p>
+                  </>
+                ) : (
+                  <p className="m-0 text-[13px] leading-relaxed text-zinc-600">
+                    Your notice is live on the board. No supplier has been graded against these requirements yet, so
+                    there is no ranking to show rather than a ranking built on nothing.
+                  </p>
+                )}
+                {created?.id && (
+                  <p className="m-0 mt-3 text-[12px] leading-relaxed text-zinc-700">
+                    <a className="underline hover:text-amber-800" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
+                      Open your project record
+                    </a>{" "}
+                    to see responses as they arrive.
+                  </p>
+                )}
+              </div>
+            )}
+
             {!published && !created?.test && (
               <div className={ready ? "rounded-lg border-2 border-amber-300 bg-white p-5" : ""}>
                 {ready ? (
@@ -3232,11 +3329,22 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     <button
                       type="button"
                       onClick={() => void signAndPublish()}
-                      disabled={!consentsOk || Boolean(signStage)}
+                      disabled={!consentsOk || Boolean(signStage) || (testMode && !securityScope)}
                       className="mt-1 w-full rounded-full bg-amber-500 px-5 py-2.5 text-[13px] font-bold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
                     >
-                      {signStage ?? (testMode ? "Sign · create the test position" : "Sign and publish your opportunity to the board")}
+                      {signStage ?? (testMode ? "Sign · create the test position" : "Generate and publish")}
                     </button>
+                    {/* A disabled control must say why it is disabled. Until
+                        30 Jul 2026 this button was live for a network
+                        requirement under ?test=1, did nothing at all on
+                        click, and only then wrote the reason into signError.
+                        The reason now stands beside the button instead. */}
+                    {testMode && !securityScope && (
+                      <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-amber-700">
+                        Test mode covers the security engine today, and this is a network requirement. Drop{" "}
+                        <span className="font-mono">?test=1</span> from the address to publish it for real.
+                      </p>
+                    )}
                     {signError && <p className="m-0 mt-1.5 text-[11px] text-red-600">{signError}</p>}
                     {/* The identity read-back (29 Jul 2026, from the mockup
                         review's two adopted pieces: the identity chip and the

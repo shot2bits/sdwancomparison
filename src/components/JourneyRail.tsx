@@ -51,11 +51,17 @@ export default function JourneyRail({
   current,
   onGoTo,
   published = false,
+  maxStep = 3,
 }: {
   steps: RailStep[];
   current: RailStepId;
   onGoTo: (id: RailStepId) => void;
   published?: boolean;
+  /** The furthest step reached. Steps beyond it are shown but not
+   *  clickable: going back is free, going forward happens through the
+   *  step's own control, so the step that proves the value cannot be
+   *  skipped (Harry's read, 30 Jul 2026). */
+  maxStep?: RailStepId;
 }) {
   const all = steps.flatMap((s) => s.checks);
   const total = all.length;
@@ -132,10 +138,10 @@ export default function JourneyRail({
               </span>
 
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                {isCurrent ? (
+                {isCurrent || step.id > maxStep ? (
                   <p
-                    aria-current="step"
-                    className={`m-0 text-[14px] font-semibold leading-6 ${state === "todo" ? "text-zinc-500" : "text-zinc-900"}`}
+                    aria-current={isCurrent ? "step" : undefined}
+                    className={`m-0 text-[14px] font-semibold leading-6 ${isCurrent ? "text-zinc-900" : "text-zinc-400"}`}
                   >
                     {step.title}
                   </p>
@@ -152,7 +158,7 @@ export default function JourneyRail({
                 )}
                 {/* CTM's pencil: a step you have been through is a step you
                     can walk back into. Never shown on the step you are on. */}
-                {!isCurrent && (state === "done" || state === "visited") && !published && (
+                {!isCurrent && step.id <= maxStep && (state === "done" || state === "visited") && !published && (
                   <button
                     type="button"
                     onClick={() => onGoTo(step.id)}
@@ -206,7 +212,7 @@ export default function JourneyRail({
 
               {/* A step you are not on still says how much of it stands, so
                   walking back is an informed decision rather than a hunt. */}
-              {!isCurrent && step.checks.length > 1 && (
+              {!isCurrent && step.id <= maxStep && step.checks.length > 1 && (
                 <p className="m-0 mt-0.5 text-[11px] leading-snug text-zinc-400">
                   {step.checks.filter((c) => c.done).length} of {step.checks.length} filled
                 </p>

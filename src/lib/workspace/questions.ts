@@ -254,10 +254,23 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
   },
   {
     id: "q-contract-end",
-    question: "A renewal is driving this. When does the current contract end?",
+    question: "When do you need this live, or when does the current contract end?",
     section: "commercial",
-    weight: 84,
-    earnedBy: (c) => (c.requirement.drivers ?? []).includes("renewal") && !c.requirement.constraints?.timeline,
+    /* 92, raised from 84 on 30 Jul 2026. The desk shows the top TWO earned
+     * questions by weight, so at 84 this sat below FCA (90), DSPT (90),
+     * SASE shape (89) and SSE scope (88) and was crowded out of every
+     * session, Harry's included. A detail that BLOCKS PUBLICATION (R7)
+     * must outrank a refinement that improves an answer, which is the same
+     * principle that already puts sector at 95 and scope at 93. It stays
+     * below those two so the opening questions do not change. */
+    weight: 92,
+    /* Timeline is one of the five details a notice cannot publish without
+     * (R7), and until 30 Jul 2026 this question was only earned when the
+     * drivers already named a renewal. Everyone else was never asked, and
+     * the deterministic rail does not read dates, so the only route in was
+     * mentioning timing unprompted. It is now earned by any project that
+     * has said something real and still has no timeline. */
+    earnedBy: (c) => !c.requirement.constraints?.timeline,
     options: [{ label: "type it", answer: { kind: "path", path: "constraints.timeline", control: "text", placeholder: "e.g. March 2027" } }],
     evidence: [{ source: "buyer_archetype", query: "Our contract renews soon, which providers can migrate in time?" }],
   },
