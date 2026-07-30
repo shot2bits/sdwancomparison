@@ -26,8 +26,31 @@ export default function AccountPage() {
         <p className="text-sm text-[var(--ink-600)]">Your procurements and what the agent remembers, all tied to your signed-in email and recoverable from any device.</p>
       </div>
 
+      {/* ONE ROUTE TO PUBLISH, AND THEREFORE ONE ROUTE TO AN ACCOUNT
+          (Robert's ruling, 30 Jul 2026, after a buyer in Mauritius arrived
+          from Google, clicked Sign in and verified an email address without
+          ever describing a project). An account is what publishing
+          PRODUCES. This page stops presenting itself as a place to join.
+
+          The old prompt offered to "recover your opportunities and RFPs on
+          this device", which R2 made untrue this morning when it removed
+          saved drafts. There is nothing on a device to recover.
+
+          The sign-in box stays, deliberately and secondary, because people
+          who HAVE published must be able to get back to their record when
+          the link in their confirmation email is gone. What has gone is
+          the invitation to a stranger. */}
+      <div className="mb-8 rounded-md border border-[var(--ink-200,#e5e5e5)] p-5">
+        <p className="m-0 text-sm text-[var(--ink-600,#555)]">
+          Accounts are created by publishing a project, not before it. If you have not published yet,{" "}
+          <a href="/#describe" className="underline">describe your project on the front page</a> and your account is
+          made when you sign the publish.
+        </p>
+      </div>
+
       <div className="mb-8">
-        <SignIn role="buyer" prompt="Sign in to recover your opportunities and RFPs on this device." />
+        <p className="eyebrow mb-2">Already published with us?</p>
+        <SignIn role="buyer" prompt="Sign in with the work email you published under, to reach your record and your responses." />
         <p className="mt-3 text-xs text-[var(--ink-500)]">
           Supplier? <Link href="/for-suppliers#register" className="underline">Register or sign in to bid</Link> · your dashboard is at{" "}
           <Link href="/supplier" className="underline">Supplier area</Link>.
