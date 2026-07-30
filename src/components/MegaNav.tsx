@@ -20,7 +20,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { MEGA_GROUPS, BOARD_LINK, NAV_CTA, SIGN_IN, type MegaGroup } from "@/lib/nav";
+import { MEGA_GROUPS, BOARD_LINK, NAV_CTA, SIGN_IN, ACCOUNT, type MegaGroup } from "@/lib/nav";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null; admin?: boolean };
 
@@ -119,7 +119,10 @@ export default function MegaNav() {
       .catch(() => { if (live) setSession({ authenticated: false }); });
     return () => { live = false; };
   }, [pathname]);
-  const accountLabel = session?.authenticated ? "My account" : SIGN_IN.label;
+  const accountLabel = session?.authenticated ? ACCOUNT.label : SIGN_IN.label;
+  /* Signed in goes to the record. Signed out goes to the prompt, not to a
+     sign-in box: an account is produced by publishing (30 Jul 2026). */
+  const accountHref = session?.authenticated ? ACCOUNT.href : SIGN_IN.href;
 
   useEffect(() => { setMobileOpen(false); setOpenGroup(null); }, [pathname]);
   useEffect(() => {
@@ -204,7 +207,7 @@ export default function MegaNav() {
               Admin
             </a>
           )}
-          <a href={SIGN_IN.href} className="hidden items-center text-[12.5px] font-medium text-zinc-600 no-underline transition-colors hover:text-zinc-950 sm:inline-flex">
+          <a href={accountHref} className="hidden items-center text-[12.5px] font-medium text-zinc-600 no-underline transition-colors hover:text-zinc-950 sm:inline-flex">
             {accountLabel}
             <ProjectsBadge />
           </a>
@@ -266,7 +269,7 @@ export default function MegaNav() {
               </a>
             </nav>
             <div className="mt-5 space-y-3">
-              <a href={SIGN_IN.href} onClick={() => setMobileOpen(false)} className="flex items-center py-1 text-sm font-medium text-zinc-900 no-underline">
+              <a href={accountHref} onClick={() => setMobileOpen(false)} className="flex items-center py-1 text-sm font-medium text-zinc-900 no-underline">
                 {accountLabel}
                 <ProjectsBadge />
               </a>

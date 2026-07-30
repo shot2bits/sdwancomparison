@@ -1702,6 +1702,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       {/* ---- The one line in: the page's one control, framed as such ---- */}
       <div className="mx-auto w-[min(760px,100%)]">
         <section
+          id="describe"
           aria-label="Describe your project"
           onDragOver={(e) => { e.preventDefault(); }}
           onDrop={(e) => {

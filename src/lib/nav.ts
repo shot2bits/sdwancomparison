@@ -114,7 +114,21 @@ export const NAV_GROUPS: NavGroup[] = [
 /** Retained for compatibility; all groups now live in NAV_GROUPS. */
 export const APP_GROUPS: NavGroup[] = [];
 
-export const SIGN_IN: NavLink = { label: "Sign in", href: "/sase/account/" };
+/* NO ACCOUNT WITHOUT A PUBLISH (Robert's ruling, 30 Jul 2026, emphatic:
+ * "No more free signups with no publish"). A buyer arrived from Google,
+ * landed on the front page, clicked Sign in, verified an email address and
+ * created an account without ever describing a project. Nothing was
+ * broken; this link simply led to a standalone sign-in box, so the nav was
+ * a second door into an empty room. An account is what publishing
+ * PRODUCES, and the work email is the signature inside that act, never the
+ * price of getting in (R1a). So the signed-out label now anchors to the
+ * prompt on the front page, where a project starts.
+ *
+ * ACCOUNT is the signed-in destination and is unchanged: anyone who has
+ * published still reaches their record, and the magic links in their
+ * confirmation emails still land there. */
+export const SIGN_IN: NavLink = { label: "Sign in", href: "/#describe" };
+export const ACCOUNT: NavLink = { label: "My account", href: "/sase/account/" };
 // One universal CTA everywhere (navigation architecture, 14 July 2026):
 // the top bar, drawer and sidebar all say Start a project. Since 21 July
 // 2026 (W0 slice 3) it opens the Live Sourcing Workspace, the one door
