@@ -129,7 +129,7 @@ type Receipt = { id: number; text: string };
 /* ---- The stream (the reference's four beat kinds, plus two honest
         additions: an info beat for a command's answer, and a working
         beat for "why is X first", both in the system's own voice). ---- */
-type ReadItem = { factId: string; label: string; provenance: WorkspaceFact["provenance"]; meta: string | null };
+type ReadItem = { factId: string; path: string; label: string; provenance: WorkspaceFact["provenance"]; meta: string | null };
 type NoteItem = { factId: string | null; label: string; reason: string };
 type Beat =
   | { k: "you"; text: string }
@@ -137,6 +137,28 @@ type Beat =
   | { k: "note"; lead: string; items: NoteItem[] }
   | { k: "info"; text: string; lines?: string[] }
   | { k: "working"; title: string; lines: string[]; href?: string; hrefLabel?: string };
+
+/** Field names for the read-back and the sheet: a bare "20" or "the UK"
+ *  says nothing on its own (Robert's first live test, 31 Jul: the ledger
+ *  values rendered raw and read as broken). Display side only; factLabel
+ *  stays the single value voice. */
+const PATH_LABELS: Record<string, string> = {
+  "organisation.sector": "Sector",
+  "organisation.sizeBand": "Size",
+  "organisation.regions": "Regions",
+  "estate.users": "People",
+  "estate.sites": "Sites",
+  "estate.cloud": "Cloud",
+  "estate.existingSecurity": "Existing security",
+  "estate.existingNetwork": "Existing network",
+  "drivers": "Driver",
+  "constraints.complianceRequirements": "Compliance",
+  "constraints.inHouseSocCapacity": "In-house SOC",
+  "constraints.timeline": "Timeline",
+  "constraints.budgetBand": "Budget",
+  "procurement.buying": "Buying",
+  "procurement.operatingModel": "Who runs it",
+};
 
 /** The dataset's grade words, humanised (the same table the desk has
  *  always used; the working beat states evidence in these words). */
@@ -462,6 +484,19 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     return () => clearInterval(t);
   }, []);
 
+  /* The dock is position:fixed per the reference (Robert's first live test
+   * proved the sticky compromise wrong: the dock floated mid-page the
+   * moment the stream started, and a footer-visibility hide then stole
+   * the dock during work on short pages). The EEAT ruling is honoured by
+   * padding the document instead: the estate footer's last line scrolls
+   * clear above the dock, so the whole trust surface stays readable and
+   * the prompt never leaves the screen. Cleaned up on unmount. */
+  useEffect(() => {
+    const prev = document.body.style.paddingBottom;
+    document.body.style.paddingBottom = "220px";
+    return () => { document.body.style.paddingBottom = prev; };
+  }, []);
+
   /* ---- Assess (the rulebook, client side, one truth) ---- */
   useEffect(() => {
     if (!securityScope || live.length === 0) {
@@ -778,6 +813,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             .slice(0, 12)
             .map((f) => ({
               factId: f.id,
+              path: f.path,
               label: factLabel(f),
               provenance: f.provenance,
               meta: f.provenance === "stated" ? (f.quote ? `“${f.quote}”` : null) : f.reason ?? "my inference",
@@ -1249,7 +1285,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       for (const f of facts) {
         if (f.struck || sectionForPath(f.path) !== sec.key) continue;
         rows.push({
-          text: factLabel(f),
+          text: PATH_LABELS[f.path] ? `${PATH_LABELS[f.path]}: ${factLabel(f)}` : factLabel(f),
           meta: f.provenance === "stated" ? (f.quote ? `“${f.quote}”` : "your words") : f.reason ?? "my inference",
         });
       }
@@ -1360,7 +1396,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       {/* ── THE STREAM ── beats 28px apart, one focal question, answered
           material collapsed into prose above it. */}
       {phase === "stream" && (
-        <div className="mx-auto flex w-full max-w-[720px] flex-col gap-7 px-[26px] pb-[240px]" style={{ minHeight: "calc(100dvh - 120px)" }}>
+        <div className="mx-auto flex w-full max-w-[720px] flex-col gap-7 px-[26px] pb-[250px]">
           {beats.map((b, i) => {
             if (b.k === "you") {
               return (
@@ -1380,6 +1416,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     {rows.map((it) => (
                       <div key={it.factId} className="flex items-baseline gap-2.5 py-[7px]">
                         <span className="min-w-0 flex-1 text-[15px] leading-normal text-[#22201D]" style={{ textWrap: "pretty" }}>
+                          {PATH_LABELS[it.path] && <span className="font-medium text-[#8C8A85]">{PATH_LABELS[it.path]}: </span>}
                           {it.label}
                           {it.meta && <span className="ml-2 text-[12.5px] italic text-[#A3A099]">{it.meta}</span>}
                         </span>
@@ -1519,7 +1556,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       {/* ── WHO FITS ── ranked by graded evidence, every date real, the
           publish organ at the end because publish is the only exit. */}
       {phase === "fits" && (
-        <div className="mx-auto w-full max-w-[720px] px-[26px] pb-[240px]" style={{ minHeight: "calc(100dvh - 120px)" }}>
+        <div className="mx-auto w-full max-w-[720px] px-[26px] pb-[250px]">
           <button
             type="button"
             onClick={() => { setPhase("stream"); scrollToWorkspace(); }}
@@ -1784,7 +1821,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       )}
 
       {/* The door keeps the page's journey strip and capability block
-          beneath the workspace; the working stream never carries them. */}
+          beneath the workspace; the working stream never carries them. The
+          spacer keeps their tail clear of the fixed dock until the footer
+          takes over. */}
       {phase === "door" && afterPrompt}
 
       {/* ── THE PROMPT DOCK ── sticky at the end of the workspace, so it
@@ -1793,10 +1832,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           backdrop, matching feather, no backdrop-filter, no gradient. */}
       <div
         data-dock="1"
-        className="sticky bottom-0 z-30 flex justify-center px-[26px] pt-3.5"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-[26px] pt-3.5"
         style={{ background: "#fbfaf8", boxShadow: "0 -18px 22px 10px #fbfaf8", paddingBottom: "max(22px, env(safe-area-inset-bottom))" }}
       >
-        <div className="w-full max-w-[720px]">
+        <div className="pointer-events-auto w-full max-w-[720px]">
           {phase !== "door" && (
             <div className="hidden flex-wrap gap-[7px] px-0.5 pb-[9px] sm:flex">
               {shortcuts.map((label) => (
