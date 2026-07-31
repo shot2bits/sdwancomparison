@@ -11,7 +11,7 @@ import {
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { ACCEPT_GAP_PREFIX } from "@/components/GapActions";
-import { statedObjectivesIn, type AllowedPath, type BuyingId, type FieldUpdate } from "@/lib/workspace/extract";
+import { statedObjectivesIn, WORKSPACE_SECTORS, type AllowedPath, type BuyingId, type FieldUpdate } from "@/lib/workspace/extract";
 import {
   briefModel,
   buyingOf,
@@ -29,11 +29,10 @@ import {
   wizardSectorKey,
   COMPLIANCE_LABELS,
   regionStandalone,
-  type BriefGap,
   type WorkspaceFact,
 } from "@/lib/workspace/draft";
 import { TAXONOMY, sectionForGapKey, sectionForPath, type TaxonomyItem } from "@/lib/workspace/taxonomy";
-import { earnedQuestions, type EarnedQuestion, type QuestionAnswer } from "@/lib/workspace/questions";
+import { earnedQuestions } from "@/lib/workspace/questions";
 import { activePack, activeFlavours, visibleSuggestions } from "@/lib/sector/derive";
 import { type PackSuggestion } from "@/lib/sector/packs";
 import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
@@ -42,49 +41,53 @@ import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 
 /* ================================================================== */
-/* THE PROMPT WORKSPACE (round 3, 31 Jul 2026).                        */
+/* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
 /*                                                                     */
-/* Robert's 007 handoff (design_handoff_netify_prompt_workspace)       */
-/* WITHDRAWS the three-column workspace of c36f148. The reference is   */
-/* netify-prompt-workspace-standalone.html; where this file and that   */
-/* one disagree, the reference is correct. The shape: one centred      */
-/* 720px column, a prompt dock pinned to the bottom of the viewport,   */
-/* exactly one focal question on screen at any moment, the requirement */
-/* in a deliberately opened overlay sheet, and a typed command layer   */
-/* so that EVERY action is achievable by typing. Clicking is a         */
-/* shortcut, never a requirement.                                      */
+/* Robert's handoff (design_handoff_requirement_twin) WITHDRAWS BOTH   */
+/* previous designs: the three-column workspace of c36f148 AND the     */
+/* scrolling prompt workspace of 7b74e0c/b2a4e1d. The reference is     */
+/* netify-requirement-twin-standalone.html; where this file and that   */
+/* one disagree, the reference is correct.                             */
 /*                                                                     */
-/* Two dry runs of the reference (one clicking only, one typing only,  */
-/* Robert's instruction before any code was written) proved the        */
-/* prototype dead-ends every phase transition when typed: "show me     */
-/* who fits", "drop the ones that need a partner", "why is Cato        */
-/* first" and "publish it" all landed as dead you-beats, and Enter     */
-/* did not send. This build closes every one of those gaps: Enter      */
-/* sends, and each sentence the surface advertises genuinely works.    */
+/* THE DESIGN LAW: the conversation is transient, the understanding is */
+/* permanent. There is NO conversation log, no "you said", no read-back*/
+/* beat, no message bubble anywhere. The screen IS the project: five   */
+/* groups of labelled slots, filled slots carrying their value and     */
+/* provenance, empty slots visible, dashed and clickable. A prompt     */
+/* changes slots; the changed slots take a warm tint and a 2px orange  */
+/* left edge, and that marker moves on the next change and never       */
+/* accumulates. Understanding is a weighted percentage over twelve     */
+/* ticks; the market card narrows live and states why, never by what   */
+/* anyone pays. One focal question ever, in a bottom edit sheet with   */
+/* its full option set. Both paths complete: click-only reaches        */
+/* publish, and typing plus the send button reaches publish.           */
 /*                                                                     */
 /* What survives unchanged underneath: the extraction cycle and its    */
-/* provenance classes, the earned-question bank, the client rulebook   */
-/* verdict, the evidence-dated fit engine, the R9 wrong-company        */
-/* guard, ingest for pasted and dropped documents, voice, the ?q=      */
-/* doors (R3), no persistence of any kind (R2), and the whole ruled    */
+/* provenance classes, the fact ledger with tombstones (a dropped      */
+/* guess never returns), the sector pack asserting COMPLIANCE          */
+/* REQUIREMENTS ONLY (a pack adds a requirement with a reason; it      */
+/* never invents a fact about the buyer's estate), the evidence-dated  */
+/* fit organ, the R9 wrong-company guard, ingest for pasted and        */
+/* dropped documents, voice, the ?q=/?scope=/?vendors=/?test=1 doors   */
+/* (R3), no persistence of any kind (R2), and the whole ruled          */
 /* signature chain: consents recorded verbatim, core five holding the  */
 /* signature shut (R7), business email only, publish as the only exit. */
 /*                                                                     */
-/* Divergences from the reference, each deliberate and flagged in the  */
-/* handover rather than resolved quietly:                              */
-/* - The dock is sticky at the end of the workspace container, not     */
-/*   position:fixed, so the estate footer (Robert's 30 Jul EEAT        */
-/*   ruling: the trust surface must be reachable) is never painted     */
-/*   over. Pinned to the viewport bottom the whole working scroll,     */
-/*   it releases only past the workspace's end.                        */
-/* - The estate MegaNav and footer stay (his one-navigation and        */
-/*   footer rulings); the workspace itself carries no chrome of its    */
-/*   own beyond the understand link and Start again.                   */
-/* - Option rows carry no invented "narrows to N" figures: a          */
-/*   consequence renders only when an engine can genuinely count it.   */
-/* - Dropping an inference removes the row (the README's rule; the     */
-/*   reference's neutered filter keeps the text and looks like a       */
-/*   leftover debug clause) and it is never re-inferred.               */
+/* Robert's go, 31 Jul ("you decide"): the eight open decisions and    */
+/* their reasons are recorded in the netify-requirement-twin memory.   */
+/* Divergences from the reference, each deliberate and flagged:        */
+/* - The estate MegaNav, ruled door H1 and footer stay above and below */
+/*   (his one-navigation and EEAT rulings beat the bare header).       */
+/* - "Saved just now" would be false under R2 (no persistence), so the */
+/*   header states the truth instead: nothing leaves this page.        */
+/* - Option consequences render only when true by definition or        */
+/*   genuinely computed; no invented "narrows to N" figures.           */
+/* - The fixture's letter grades do not exist as data; rows carry the  */
+/*   real n-of-checks tag and dated evaluation instead.                */
+/* - Enter sends (the reference's newline-only Enter read as broken in */
+/*   the 007 dry runs; Shift+Enter keeps the newline).                 */
+/* - The fixture re-infers a dropped guess; rule 7 and done-check 5    */
+/*   say never, so the ledger tombstones win.                          */
 /* ================================================================== */
 
 /* R2 (Robert, 30 Jul 2026): NO PERSISTENCE. Nothing here writes to    */
@@ -126,22 +129,9 @@ type FitState = {
 type NotedItem = { id: string; label: string; section: string; own?: boolean };
 type Receipt = { id: number; text: string };
 
-/* ---- The stream (the reference's four beat kinds, plus two honest
-        additions: an info beat for a command's answer, and a working
-        beat for "why is X first", both in the system's own voice). ---- */
-type ReadItem = { factId: string; path: string; label: string; provenance: WorkspaceFact["provenance"]; meta: string | null };
-type NoteItem = { factId: string | null; label: string; reason: string };
-type Beat =
-  | { k: "you"; text: string }
-  | { k: "read"; lead: string; items: ReadItem[] }
-  | { k: "note"; lead: string; items: NoteItem[] }
-  | { k: "info"; text: string; lines?: string[] }
-  | { k: "working"; title: string; lines: string[]; href?: string; hrefLabel?: string };
-
-/** Field names for the read-back and the sheet: a bare "20" or "the UK"
- *  says nothing on its own (Robert's first live test, 31 Jul: the ledger
- *  values rendered raw and read as broken). Display side only; factLabel
- *  stays the single value voice. */
+/** Field names for the requirement sheet: a bare "20" or "the UK" says
+ *  nothing on its own (Robert's first live test, 31 Jul). Display side
+ *  only; factLabel stays the single value voice. */
 const PATH_LABELS: Record<string, string> = {
   "organisation.sector": "Sector",
   "organisation.sizeBand": "Size",
@@ -161,7 +151,7 @@ const PATH_LABELS: Record<string, string> = {
 };
 
 /** The dataset's grade words, humanised (the same table the desk has
- *  always used; the working beat states evidence in these words). */
+ *  always used; the fit working states evidence in these words). */
 const GRADE_WORDS: Record<string, string> = {
   yes: "evidenced yes",
   partial: "partial evidence",
@@ -179,33 +169,32 @@ const WANT_BY_ITEM: Record<string, string> = (() => {
   return out;
 })();
 
-/** Item lookup: an earned answer lands through the desk's own machinery. */
+/** Item lookup: pack asserts land through the desk's own machinery. */
 const ITEM_BY_ID: Record<string, { item: TaxonomyItem; section: string }> = (() => {
   const out: Record<string, { item: TaxonomyItem; section: string }> = {};
   for (const s of TAXONOMY) for (const i of s.items) out[i.id] = { item: i, section: s.key };
   return out;
 })();
 
-/* ---- The three example openers (the reference's hero): plain text
-        with a mono "try" prefix, and clicking one EXECUTES it, unlike
-        the dock chips, which only populate. Each is a sentence the
-        live extractor genuinely reads (drive-tested). ---- */
-const EXAMPLES = [
-  "We run 240 UK retail sites on MPLS and the contract ends March 2027",
-  "We have 15 NHS clinic sites, 10 in the UK and 5 international, already on SD-WAN",
-  "Our audit flagged remote access for 1,900 staff and we need SASE to fix it",
+/* ---- The three example openers (the reference's empty state): sector-
+        tagged cards; clicking one EXECUTES it, exactly as typing it
+        would. Each is a sentence the live extractor genuinely reads. ---- */
+const EXAMPLE_CARDS = [
+  { tag: "Retail", label: "We run 240 UK retail sites on MPLS and the contract ends March 2027" },
+  { tag: "Healthcare", label: "We have 15 NHS clinic sites, 10 in the UK and 5 international, already on SD-WAN" },
+  { tag: "Audit driven", label: "Our audit flagged remote access for 1,900 staff and we need SASE to fix it" },
 ];
 
 /* The dock placeholder rotates through correction and interrogation,
- * not instruction (the reference's rule); on the door it is the full
- * first example so the register is visible before anyone types. */
+ * not instruction; on the door it is the full first example so the
+ * register is visible before anyone types. */
 const PLACEHOLDERS = [
-  "Tell me anything. “Add PCI DSS”, “actually 246 sites”, “who fits?”",
-  "Say what you want changed and it changes here",
-  "“Drop the users guess” · “we use CrowdStrike” · “show me who fits”",
+  "Change anything. “Add PCI DSS”, “actually 246 sites”, “who fits?”",
+  "Say what you want changed and the project changes above",
+  "“Drop the people guess” · “we use CrowdStrike” · “show me who fits”",
 ];
 
-/** Small counts in words, the reference's register ("Nine of thirty-four"). */
+/** Small counts in words, the estate's register. */
 const NUM_WORDS = [
   "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
   "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
@@ -214,6 +203,8 @@ const NUM_WORDS = [
 ];
 const numWord = (n: number): string => NUM_WORDS[n] ?? String(n);
 const cap = (s: string): string => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const listJoin = (xs: string[]): string =>
+  xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
 
 /** Validator notes, humanised (Harry's 22 Jul finding). Display only. */
 const FIELD_PHRASES: Record<string, string> = {
@@ -244,11 +235,205 @@ const fmtDate = (iso: string): string => {
 };
 
 /* ================================================================== */
-/* The typed command layer. Rule two of the handoff: every action must  */
-/* be possible by typing. Each pattern here is a sentence the surface   */
-/* itself advertises, so nothing is promised that does not work. The    */
-/* parser is deliberately literal: anything it does not recognise goes  */
-/* to the extractor, which is the older and wiser reader.               */
+/* The twin's slot map: every slot is a labelled home the ledger (or    */
+/* the noted tier) genuinely holds. Weights are the reference's: the    */
+/* answers that decide who can bid weigh 3, refinements 2, detail 1,    */
+/* and the sector's rule pack 3 on its own, so the percentage cannot    */
+/* read 60 while the deciding questions are still open.                 */
+/* ================================================================== */
+
+type TwinLand =
+  | { kind: "fact"; path: AllowedPath; value: string | number }
+  | { kind: "note"; id: string; text: string; section: string };
+type TwinOption = { label: string; effect: string; land: TwinLand };
+type TwinSlot = {
+  id: string;
+  group: "org" | "estate" | "why" | "buying";
+  label: string;
+  w: number;
+  cta: string;
+  q: string;
+  why: string;
+  path?: AllowedPath;
+  notePrefix?: string;
+  options: TwinOption[];
+};
+
+/** Sector option consequences: computed from the live pack data, never
+ *  typed. A sector with no pack gets no invented promise. */
+const SECTOR_EFFECTS: Record<string, string> = (() => {
+  const out: Record<string, string> = {};
+  for (const s of WORKSPACE_SECTORS) {
+    const p = activePack({ organisation: { sector: s } });
+    if (!p) { out[s] = ""; continue; }
+    const n = p.suggestions.filter(
+      (sg) => sg.accept.kind === "items" && sg.accept.itemIds.some((id) => ITEM_BY_ID[id]?.item.path === "constraints.complianceRequirements"),
+    ).length;
+    out[s] = n ? `asserts ${numWord(n)} ${p.label.toLowerCase()} rule${n === 1 ? "" : "s"}` : `loads the ${p.label.toLowerCase()} questions`;
+  }
+  if (!out["Financial services"]) out["Financial services"] = "earns the FCA obligations question";
+  return out;
+})();
+
+const fact = (path: AllowedPath, value: string | number): TwinLand => ({ kind: "fact", path, value });
+const note = (id: string, text: string, section: string): TwinLand => ({ kind: "note", id, text, section });
+
+const TWIN_GROUPS: Array<{ id: TwinSlot["group"] | "rules"; title: string; note: string }> = [
+  { id: "org", title: "Organisation", note: "who is buying, and at what scale" },
+  { id: "estate", title: "Estate today", note: "what is being replaced or extended" },
+  { id: "why", title: "Why now", note: "what vendors and service providers price against" },
+  { id: "buying", title: "What you are buying", note: "the answers that decide who can bid" },
+  { id: "rules", title: "Rules you are held to", note: "applied from your sector, evidenced not claimed" },
+];
+
+const TWIN_SLOTS: TwinSlot[] = [
+  {
+    id: "sector", group: "org", label: "Sector", w: 3, cta: "Which sector?", q: "Which sector are you in?",
+    why: "It loads the rules and questions Netify holds for your sector, and it changes what vendors and service providers are asked.",
+    path: "organisation.sector",
+    options: WORKSPACE_SECTORS.map((s) => ({ label: s, effect: SECTOR_EFFECTS[s] ?? "", land: fact("organisation.sector", s) })),
+  },
+  {
+    id: "region", group: "org", label: "Where", w: 2, cta: "Which countries?", q: "Where are the sites?",
+    why: "Coverage and field engineering vary sharply by country, and where it runs filters who can serve it.",
+    path: "organisation.regions",
+    options: [
+      { label: "United Kingdom", effect: "", land: fact("organisation.regions", "uk") },
+      { label: "Ireland", effect: "", land: fact("organisation.regions", "ie") },
+      { label: "Europe", effect: "", land: fact("organisation.regions", "eu") },
+      { label: "North America", effect: "", land: fact("organisation.regions", "us") },
+      { label: "Asia Pacific", effect: "", land: fact("organisation.regions", "apac") },
+      { label: "Middle East", effect: "", land: fact("organisation.regions", "me") },
+    ],
+  },
+  {
+    id: "sites", group: "org", label: "Sites", w: 3, cta: "How many sites?", q: "How many sites are in scope?",
+    why: "Volume changes cost per site more than any other single number. A round figure is fine; correct it any time.",
+    path: "estate.sites",
+    options: [10, 25, 50, 100, 250, 500, 1000].map((n) => ({
+      label: `About ${n.toLocaleString("en-GB")}`, effect: "", land: fact("estate.sites", n),
+    })),
+  },
+  {
+    id: "people", group: "org", label: "People", w: 1, cta: "How many staff?", q: "Roughly how many people?",
+    why: "Cloud security is licensed per user, so the user count drives a large part of any quote.",
+    path: "estate.users",
+    options: [50, 100, 250, 500, 1000, 2500, 5000].map((n) => ({
+      label: `About ${n.toLocaleString("en-GB")}`, effect: "", land: fact("estate.users", n),
+    })),
+  },
+  {
+    id: "network", group: "estate", label: "Network today", w: 3, cta: "What is there now?", q: "What are you running today?",
+    why: "A migration and a new build are priced and staged completely differently.",
+    path: "estate.existingNetwork",
+    options: [
+      { label: "MPLS", effect: "a migration project", land: fact("estate.existingNetwork", "mpls") },
+      { label: "SD-WAN already in place", effect: "a refresh or extension", land: fact("estate.existingNetwork", "sdwan") },
+      { label: "Internet and VPN", effect: "", land: fact("estate.existingNetwork", "vpn") },
+      { label: "Leased lines", effect: "", land: fact("estate.existingNetwork", "leased_line") },
+      { label: "Broadband", effect: "", land: fact("estate.existingNetwork", "broadband") },
+    ],
+  },
+  {
+    id: "cloud", group: "estate", label: "Cloud", w: 2, cta: "Which cloud?", q: "Where do your applications sit?",
+    why: "Cloud on-ramps and peering differ by vendor, and it changes the design.",
+    path: "estate.cloud",
+    options: [
+      { label: "Microsoft 365", effect: "", land: fact("estate.cloud", "m365") },
+      { label: "Azure", effect: "", land: fact("estate.cloud", "azure") },
+      { label: "AWS", effect: "", land: fact("estate.cloud", "aws") },
+      { label: "Google Workspace", effect: "", land: fact("estate.cloud", "google") },
+      { label: "Mostly on premise", effect: "", land: fact("estate.cloud", "other_saas") },
+    ],
+  },
+  {
+    id: "security", group: "estate", label: "Security in place", w: 2, cta: "What do you already run?", q: "What security are you already paying for?",
+    why: "It decides whether consolidation or an overlay scores higher, and it stops you buying twice.",
+    path: "estate.existingSecurity",
+    options: [
+      { label: "Microsoft Defender", effect: "", land: fact("estate.existingSecurity", "Microsoft Defender") },
+      { label: "CrowdStrike", effect: "", land: fact("estate.existingSecurity", "CrowdStrike") },
+      { label: "Firewalls only", effect: "", land: fact("estate.existingSecurity", "firewalls only") },
+      { label: "A provider runs it today", effect: "", land: fact("estate.existingSecurity", "a provider runs it today") },
+    ],
+  },
+  {
+    id: "driver", group: "why", label: "Driver", w: 2, cta: "What is pushing this?", q: "What is pushing this now?",
+    why: "It decides what vendors and service providers lead with, and whether this is a migration or a refresh.",
+    path: "drivers",
+    options: [
+      { label: "Contract ending", effect: "sets the timeline anchor", land: fact("drivers", "renewal") },
+      { label: "An audit finding", effect: "adds evidence requirements", land: fact("drivers", "audit") },
+      { label: "A security incident", effect: "reprioritises security scope", land: fact("drivers", "incident") },
+      { label: "Compliance obligations", effect: "", land: fact("drivers", "compliance") },
+      { label: "Growth or change", effect: "", land: fact("drivers", "growth") },
+      { label: "Consolidating point tools", effect: "", land: fact("drivers", "consolidation") },
+    ],
+  },
+  {
+    id: "timeline", group: "why", label: "Deadline", w: 3, cta: "When must it land?", q: "When does this have to be live?",
+    why: "A hard date rules out anyone who cannot stage your sites in time, and it anchors every quote.",
+    path: "constraints.timeline",
+    options: [
+      { label: "Within 6 months", effect: "", land: fact("constraints.timeline", "within 6 months") },
+      { label: "6 to 18 months", effect: "", land: fact("constraints.timeline", "6 to 18 months") },
+      { label: "Over 18 months", effect: "", land: fact("constraints.timeline", "over 18 months") },
+      { label: "No fixed date yet", effect: "", land: fact("constraints.timeline", "no fixed date yet") },
+    ],
+  },
+  {
+    id: "scope", group: "buying", label: "Scope", w: 3, cta: "What are you buying?", q: "What are you actually buying?",
+    why: "It splits the market more cleanly than any other answer: one contract or several, one platform or parts.",
+    path: "procurement.buying",
+    options: [
+      { label: "Full SASE, one platform", effect: "network and security in one contract", land: fact("procurement.buying", "sase") },
+      { label: "SD-WAN only", effect: "the network layer; security stays as is", land: fact("procurement.buying", "sdwan") },
+      { label: "SSE, cloud security only", effect: "the security half, over your network", land: fact("procurement.buying", "sse") },
+      { label: "Managed security service", effect: "a service need; the engine scopes it", land: fact("procurement.buying", "managed_security") },
+    ],
+  },
+  {
+    id: "model", group: "buying", label: "Who runs it", w: 3, cta: "Who operates it?", q: "Who runs it day to day once it is live?",
+    why: "The one answer that decides whether you buy from vendors, from service providers, or both.",
+    path: "procurement.operatingModel",
+    options: [
+      { label: "A provider runs it", effect: "day two sits with a provider", land: fact("procurement.operatingModel", "managed") },
+      { label: "We share it with a provider", effect: "shared operations, both markets", land: fact("procurement.operatingModel", "co_managed") },
+      { label: "We run it ourselves", effect: "vendor direct; your team operates", land: fact("procurement.operatingModel", "diy") },
+    ],
+  },
+  {
+    id: "term", group: "buying", label: "Term", w: 1, cta: "What term?", q: "How long a term should they quote?",
+    why: "Three and five years price differently at scale, and naming it makes the quotes comparable.",
+    notePrefix: "twin-term",
+    options: [
+      { label: "3 years", effect: "", land: note("twin-term-3", "Quote a 3 year term", "commercial") },
+      { label: "5 years", effect: "", land: note("twin-term-5", "Quote a 5 year term", "commercial") },
+      { label: "Quote both", effect: "side-by-side pricing", land: note("twin-term-both", "Quote 3 and 5 year terms side by side", "commercial") },
+    ],
+  },
+  {
+    id: "resilience", group: "buying", label: "Cannot go down", w: 2, cta: "What must stay up?", q: "What must never go down?",
+    why: "It sets the resilience design, and it is the most common reason quotes are not comparable.",
+    notePrefix: "twin-res",
+    options: [
+      { label: "Everything", effect: "raises cost across the estate", land: note("twin-res-all", "Dual-circuit resilience per site required", "estate") },
+      { label: "Critical sites only", effect: "", land: note("twin-res-crit", "Dual-circuit resilience at critical sites only", "estate") },
+      { label: "Head office and data centre", effect: "", land: note("twin-res-hq", "Resilience at head office and data centre only", "estate") },
+      { label: "Single circuits are fine", effect: "", land: note("twin-res-none", "Single-circuit sites acceptable", "estate") },
+    ],
+  },
+];
+
+const SLOT_BY_ID: Record<string, TwinSlot> = Object.fromEntries(TWIN_SLOTS.map((s) => [s.id, s]));
+const SLOT_BY_PATH: Record<string, string> = Object.fromEntries(TWIN_SLOTS.filter((s) => s.path).map((s) => [s.path as string, s.id]));
+/** Weighted completeness: slot weights plus 3 for the sector's rule state.
+ *  Total is derived, never typed. */
+const TOTAL_WEIGHT = TWIN_SLOTS.reduce((a, s) => a + s.w, 0) + 3;
+
+/* ================================================================== */
+/* The typed command layer. Every action is possible by typing; each    */
+/* pattern is a sentence the surface itself advertises.                 */
 /* ================================================================== */
 
 type Command =
@@ -257,8 +442,7 @@ type Command =
   | { kind: "sheet"; open: boolean }
   | { kind: "reset" }
   | { kind: "back" }
-  | { kind: "skip" }
-  | { kind: "note"; open: boolean }
+  | { kind: "closeEdit" }
   | { kind: "missing" }
   | { kind: "cost" }
   | { kind: "dropPartner" }
@@ -269,16 +453,13 @@ type Command =
 function parseCommand(raw: string): Command | null {
   const t = raw.trim().toLowerCase().replace(/[?.!]+$/, "").replace(/\s+/g, " ");
   if (!t) return null;
-  if (/^(show me )?who fits$/.test(t) || /^show me who fits$/.test(t)) return { kind: "whoFits" };
+  if (/^(show me )?who fits$/.test(t)) return { kind: "whoFits" };
   if (/^(publish( it| this| to the board)?|generate and publish)$/.test(t)) return { kind: "publish" };
   if (/^(see|show( me)?|open) the requirement( sheet)?$/.test(t) || t === "open the sheet") return { kind: "sheet", open: true };
   if (/^close the (requirement( sheet)?|sheet)$/.test(t)) return { kind: "sheet", open: false };
   if (/^(start (again|over|afresh)|reset)$/.test(t)) return { kind: "reset" };
-  if (/^back( to the conversation)?$/.test(t)) return { kind: "back" };
-  if (/^(not sure( yet)?|skip( it| this( one)?)?)$/.test(t)) return { kind: "skip" };
-  const showN = /^show( me)? the (\w+)$/.exec(t);
-  if (showN) return { kind: "note", open: true };
-  if (/^hide( me)? the \w+$/.test(t)) return { kind: "note", open: false };
+  if (/^back( to the (conversation|project))?$/.test(t)) return { kind: "back" };
+  if (/^(not sure( yet)?|skip( it| this( one)?)?)$/.test(t)) return { kind: "closeEdit" };
   if (/^what( am i| are we)? ?(am i |are we )?(still )?(missing|left|outstanding)$/.test(t) || /^what are you still missing$/.test(t)) return { kind: "missing" };
   if (/^what (will|would) (this|it) cost$/.test(t) || /^(price|cost)( it| this)?$/.test(t)) return { kind: "cost" };
   if (/^drop (the ones|anyone|those) (that need|needing) a partner$/.test(t)) return { kind: "dropPartner" };
@@ -295,12 +476,10 @@ function parseCommand(raw: string): Command | null {
 /* The component                                                       */
 /* ================================================================== */
 
-/** afterPrompt: the pages slot the journey strip and the capability
- *  block beneath the workspace; they render on the door only, so the
- *  working stream never carries a marketing block (the handoff's law). */
+/** afterPrompt: the page slots the journey strip and the capability
+ *  block beneath the twin; they render on the door only. */
 export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }) {
-  const [phase, setPhase] = useState<"door" | "stream" | "fits">("door");
-  const [beats, setBeats] = useState<Beat[]>([]);
+  const [phase, setPhase] = useState<"door" | "live" | "fits">("door");
   const [market, setMarket] = useState<Market | null>(null);
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
   const [noted, setNoted] = useState<NotedItem[]>([]);
@@ -312,11 +491,18 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [fit, setFit] = useState<FitState | null>(null);
   const [added, setAdded] = useState<string[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
-  const [dismissedQ, setDismissedQ] = useState<string[]>([]);
-  const [deferred, setDeferred] = useState<string[]>([]);
-  const [noteOpen, setNoteOpen] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [fitsCard, setFitsCard] = useState<Beat | null>(null);
+  /** THE CHANGE MARKER (reference rule 9): the slots changed by the most
+   *  recent action only. REPLACED whole on every transition, never
+   *  appended, so nothing accumulates and no history builds up. */
+  const [changedSlots, setChangedSlots] = useState<string[]>([]);
+  /** The one transient voice line, in the dock's caption position: a
+   *  command's answer or a nothing-landed acknowledgment. One at a time,
+   *  replaced by the next event, never a message, never echoing the
+   *  buyer's words back. */
+  const [notice, setNotice] = useState<string | null>(null);
+  const [edit, setEdit] = useState<string | null>(null);
+  const [reqOpen, setReqOpen] = useState(false);
+  const [expandedFit, setExpandedFit] = useState<string | null>(null);
   const [ph, setPh] = useState(0);
   const [booted, setBooted] = useState(false);
   const [testMode, setTestMode] = useState(false);
@@ -341,6 +527,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const dockRef = useRef<HTMLDivElement | null>(null);
   const firstKeyAt = useRef<number | null>(null);
   const firstVerdictSent = useRef(false);
   const previewFired = useRef(false);
@@ -348,30 +535,27 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const receiptId = useRef(0);
   const factsRef = useRef<WorkspaceFact[]>([]);
   const receiptsRef = useRef<Receipt[]>([]);
-  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const assertedPacks = useRef<Set<string>>(new Set());
   const acceptedGaps = useRef<Set<string>>(new Set());
-  /** Dropped inferences never return (handoff rule six): once a guess is
-   *  dropped, the extractor may not re-infer the same path and value. A
-   *  later STATED assertion still lands: saying it is the buyer's own act. */
+  /** Dropped inferences never return (rule 7): once a guess is dropped,
+   *  the extractor may not re-infer the same path and value. A later
+   *  STATED assertion still lands: saying it is the buyer's own act. */
   const neverReinfer = useRef<Set<string>>(new Set());
   const nrKey = (path: string, value: unknown) => `${path}::${String(value)}`;
 
   useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
 
-  const pushBeat = useCallback((b: Beat) => setBeats((bs) => [...bs, b]), []);
+  /** The transient voice line: replaced whole, self-clearing. */
+  const say = useCallback((text: string) => {
+    setNotice(text);
+    if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    noticeTimer.current = setTimeout(() => setNotice(null), 7000);
+  }, []);
+  useEffect(() => () => { if (noticeTimer.current) clearTimeout(noticeTimer.current); }, []);
 
-  /* ---- Focus management (README section 8): after a commit, the one
-     focal element is measured and the viewport repositioned so it sits
-     clear of the dock. scrollTop written directly; smooth behaviour and
-     requestAnimationFrame both proved unreliable in embedded documents. */
-  const setTop = (top: number) => {
-    const el = document.scrollingElement || document.documentElement;
-    el.scrollTop = top;
-    if (document.body) document.body.scrollTop = top;
-  };
-  /** Entering or leaving Who fits lands at the workspace's own top, not
-   *  the page's: the door hero above is the estate's, not the journey's. */
+  /** Phase transitions land at the twin's own top, not the page's: the
+   *  door hero above is the estate's, not the journey's. */
   const scrollToWorkspace = useCallback(() => {
     setTimeout(() => {
       const root = document.querySelector(".pd-root");
@@ -381,25 +565,23 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       el.scrollTop = Math.max(0, top);
     }, 30);
   }, []);
-  const afterCommit = useCallback((fixed: number | null) => {
-    if (scrollTimer.current) clearTimeout(scrollTimer.current);
-    const run = () => setTimeout(() => {
-      if (fixed !== null) { setTop(fixed); return; }
-      const card = document.querySelector("[data-focal]");
-      if (!card) return;
-      const el = document.scrollingElement || document.documentElement;
-      const before = el.scrollTop;
-      const r = card.getBoundingClientRect();
-      const dock = document.querySelector("[data-dock]");
-      const usable = (dock ? dock.getBoundingClientRect().top : window.innerHeight) - 90;
-      let top = r.top + before - 90;
-      if (r.height <= usable) top += Math.max(0, r.height - usable);
-      setTop(Math.max(0, top));
-    }, 0);
-    run();
-    scrollTimer.current = setTimeout(run, 140);
+
+  /** Map changed fact ids to twin slot ids (compliance facts mark their
+   *  own rule cells). The marker set is REPLACED, never merged. */
+  const markChanged = useCallback((changedFactIds: string[], allFacts: WorkspaceFact[]) => {
+    const byId = new Map(allFacts.map((f) => [f.id, f]));
+    const slots = new Set<string>();
+    for (const id of changedFactIds) {
+      const f = byId.get(id);
+      if (!f) continue;
+      if (f.path === "constraints.complianceRequirements") slots.add(`rule:${f.id}`);
+      else {
+        const sid = SLOT_BY_PATH[f.path];
+        if (sid) slots.add(sid);
+      }
+    }
+    setChangedSlots([...slots]);
   }, []);
-  useEffect(() => () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); }, []);
 
   const applyMerge = useCallback((updates: FieldUpdate[], source: "extract" | "answer" | "link") => {
     const allowed = updates.filter((u) => !(u.provenance === "inferred" && neverReinfer.current.has(nrKey(u.path, u.value))));
@@ -458,9 +640,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       .map((s) => s.trim().toLowerCase())
       .filter((s) => /^[a-z0-9-]{2,60}$/.test(s))
       .slice(0, 5);
-    /* R2: nothing is restored. The desk starts empty every time except
+    /* R2: nothing is restored. The twin starts empty every time except
        for what the link itself carries. */
-    if (seedFacts.length) applyMerge(seedFacts, "link");
+    if (seedFacts.length) {
+      const m = applyMerge(seedFacts, "link");
+      if (m.changed.length) { setPhase("live"); markChanged(m.changed, m.facts); }
+    }
     if (q) {
       firstKeyAt.current = Date.now();
       if (vendorsParam.length) setAdded(vendorsParam);
@@ -478,23 +663,44 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     } catch { /* focus is a courtesy, never a dependency */ }
   }, []);
 
-  /* The rotating placeholder (5.2s, the reference's cadence). */
+  /* The rotating placeholder (the reference's cadence). */
   useEffect(() => {
     const t = setInterval(() => setPh((n) => (n + 1) % PLACEHOLDERS.length), 5200);
     return () => clearInterval(t);
   }, []);
 
-  /* The dock is position:fixed per the reference (Robert's first live test
-   * proved the sticky compromise wrong: the dock floated mid-page the
-   * moment the stream started, and a footer-visibility hide then stole
-   * the dock during work on short pages). The EEAT ruling is honoured by
-   * padding the document instead: the estate footer's last line scrolls
-   * clear above the dock, so the whole trust surface stays readable and
-   * the prompt never leaves the screen. Cleaned up on unmount. */
+  /* The dock is position:fixed per the reference (round 4 proved the
+   * sticky compromise wrong). The EEAT ruling is honoured by padding the
+   * document instead: the estate footer's last line scrolls clear above
+   * the dock, so the whole trust surface stays readable and the prompt
+   * never leaves the screen. 240px is the reference's reservation. */
   useEffect(() => {
     const prev = document.body.style.paddingBottom;
-    document.body.style.paddingBottom = "220px";
+    document.body.style.paddingBottom = "240px";
     return () => { document.body.style.paddingBottom = prev; };
+  }, []);
+
+  /* The mobile keyboard: iOS Safari keeps position:fixed elements pinned
+   * to the LAYOUT viewport, so when the keyboard shrinks the visual
+   * viewport the dock can sink beneath it. Translate the dock up by the
+   * hidden gap so the prompt rides above the keyboard. No-op where the
+   * visual viewport already behaves. */
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onChange = () => {
+      const el = dockRef.current;
+      if (!el) return;
+      const gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      el.style.transform = gap > 1 ? `translateY(-${gap}px)` : "";
+    };
+    vv.addEventListener("resize", onChange);
+    vv.addEventListener("scroll", onChange);
+    onChange();
+    return () => {
+      vv.removeEventListener("resize", onChange);
+      vv.removeEventListener("scroll", onChange);
+    };
   }, []);
 
   /* ---- Assess (the rulebook, client side, one truth) ---- */
@@ -515,7 +721,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     return () => { cancelled = true; };
   }, [requirement, securityScope, live.length]);
 
-  /* ---- Fit (evidence dated, the same organ, simplified surface) ---- */
+  /* ---- Fit (evidence dated, the same organ) ---- */
   const sseSignal = Boolean(
     verdict?.capabilities.some((c) => c.id === "sse" && (c.needed === "required" || c.needed === "recommended")) ||
       verdict?.pathRecommendation === "escalate_sase",
@@ -543,17 +749,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     return () => { ctrl.abort(); clearTimeout(timer); };
   }, [fitParams]);
 
-  /* ---- The sector note (handoff rule seven: compliance is applied and
-     explained, not offered as a checklist). When the sector pack wakes,
-     its COMPLIANCE REQUIREMENTS, and only those, land in the requirement
-     as inferences, each carrying the pack's own applicability reason, and
-     the stream says so against the orange rule. A pack may add a
+  /* ---- The sector pack (rule 8: asserted, not offered). When the pack
+     wakes, its COMPLIANCE REQUIREMENTS, and only those, land in the
+     requirement as inferences, each carrying the pack's applicability
+     reason. They appear as applied rows in "Rules you are held to" with
+     the change marker on them; nothing is narrated. A pack may add a
      requirement with a reason; it may never invent a fact about the
      buyer's estate, so nothing outside constraints.complianceRequirements
      is ever asserted. Every asserted row is individually droppable and a
-     dropped one is never re-inferred. This supersedes, for compliance
-     requirements only, the offered-suggestion presentation; flagged to
-     Robert in the round-three handover rather than resolved quietly. ---- */
+     dropped one is never re-inferred. ---- */
   const corpus = useMemo(
     () =>
       [
@@ -588,50 +792,14 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     const landed = compliance.filter(({ item }) => merged.changed.includes(factId(item.path as AllowedPath, item.value)));
     const shown = landed.length ? landed : compliance;
     for (const { sg } of shown) ev("workspace_pack_suggestion", { id: sg.id, verdict: "asserted" });
-    pushBeat({
-      k: "note",
-      lead: `Because you are ${pack.label.toLowerCase()}, ${numWord(shown.length)} ${shown.length === 1 ? "thing is" : "things are"} now in your requirement whether or not you asked. Vendors and service providers will be asked to evidence each one, not claim it.`,
-      items: shown.map(({ sg, item }) => ({
-        factId: factId(item.path as AllowedPath, item.value),
-        label: item.label,
-        reason: sg.reason,
-      })),
-    });
+    /* Change is shown, not narrated: the new rule rows carry the marker
+       alongside whatever else this cycle changed. */
+    setChangedSlots((prev) => [...new Set([...prev, ...merged.changed.map((id) => `rule:${id}`)])]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack, packFlavours]);
 
-  /* ---- The open questions: real gaps plus the earned bank, one focal
-     at a time, in document order, deferred ones cycling to the end. ---- */
-  const unansweredGaps = brief.openGaps;
-  const earnedAll = useMemo(() => {
-    const notedIds = noted.map((n) => n.id);
-    return earnedQuestions(requirement, buying, opModel, notedIds, dismissedQ, corpus);
-  }, [requirement, buying, opModel, noted, dismissedQ, corpus]);
-  type Focal = { key: string; section: string; gap?: BriefGap; q?: EarnedQuestion };
-  const openHeads = useMemo(() => {
-    const gapsBySec = new Map<string, BriefGap[]>();
-    for (const g of unansweredGaps) {
-      const s = sectionForGapKey(g.key);
-      gapsBySec.set(s, [...(gapsBySec.get(s) ?? []), g]);
-    }
-    const earnedBySec = new Map<string, EarnedQuestion[]>();
-    for (const q of earnedAll) earnedBySec.set(q.section, [...(earnedBySec.get(q.section) ?? []), q]);
-    const list: Focal[] = [];
-    for (const sec of TAXONOMY) {
-      for (const g of gapsBySec.get(sec.key) ?? []) list.push({ key: `gap:${g.key}`, section: sec.key, gap: g });
-      for (const q of earnedBySec.get(sec.key) ?? []) list.push({ key: `q:${q.id}`, section: sec.key, q });
-    }
-    const head = list.filter((f) => !deferred.includes(f.key));
-    const tail = deferred.map((k) => list.find((f) => f.key === k)).filter((f): f is Focal => Boolean(f));
-    return [...head, ...tail];
-  }, [unansweredGaps, earnedAll, deferred]);
-  const focal = phase === "stream" && !published ? openHeads[0] ?? null : null;
-  const focalRef = useRef<Focal | null>(null);
-  useEffect(() => { focalRef.current = focal; }, [focal]);
-
   /* ---- Core five (R7): the five details a notice cannot publish
-     without genuinely hold the signature shut, and the refusal names
-     them. ---- */
+     without genuinely hold the signature shut. ---- */
   const coreFive = useMemo(() => {
     const stands = (path: string) => facts.some((f) => !f.struck && f.path === path);
     return {
@@ -653,7 +821,32 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   }, [coreFive]);
   const coreFiveComplete = missingCore.length === 0;
 
-  /* ---- The ranked fits (the reference's Who fits view) ---- */
+  /* ---- The twin derivations: filled slots, weighted understanding,
+     the top gaps line ---- */
+  const standingAt = useCallback((path: AllowedPath) => live.filter((f) => f.path === path), [live]);
+  const slotFilled = useCallback(
+    (s: TwinSlot): boolean =>
+      s.path ? standingAt(s.path).length > 0 : s.notePrefix ? noted.some((n) => n.id.startsWith(s.notePrefix as string)) : false,
+    [standingAt, noted],
+  );
+  const rulesResolved = coreFive.sector;
+  const ruleFacts = useMemo(() => standingAt("constraints.complianceRequirements"), [standingAt]);
+  const gotWeight = TWIN_SLOTS.reduce((a, s) => a + (slotFilled(s) ? s.w : 0), 0) + (rulesResolved ? 3 : 0);
+  const pct = Math.round((gotWeight / TOTAL_WEIGHT) * 100);
+  const topMissing = TWIN_SLOTS.filter((s) => !slotFilled(s))
+    .sort((a, b) => b.w - a.w)
+    .slice(0, 3)
+    .map((s) => s.label.toLowerCase());
+  const pctNote =
+    pct >= 78
+      ? "Complete enough to price. What is left will not stop anyone quoting."
+      : topMissing.length
+        ? `Still needed: ${topMissing.join(", ")}. Say it below, or fill it in above.`
+        : "Everything the twin tracks is in.";
+
+  /* ---- The market card: derived, never decorative. The count is the
+     live fit organ's, scored against the project; before a scope is
+     known it is the whole evaluated market. ---- */
   const rankedFits = useMemo(() => (fit?.mode === "graded" ? fit.suppliers : []), [fit]);
   const keptFits = useMemo(() => rankedFits.filter((s) => !removed.includes(s.slug)), [rankedFits, removed]);
   const fitSlugs = keptFits.map((s) => s.slug);
@@ -663,8 +856,18 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     () => keptFits.filter((s) => s.matched.some((m) => m.grade === "partner_integrated")),
     [keptFits],
   );
+  const marketTotal = fit?.total ?? market?.counts.vendors ?? null;
+  const fittingCount = buying && fit?.mode === "graded" ? rankedFits.length : marketTotal;
+  const narrowedBy = [
+    buying ? "what you are buying" : null,
+    opModel ? "who runs it" : null,
+    buying && (requirement.organisation?.regions ?? []).length ? "where it runs" : null,
+  ].filter((x): x is string => Boolean(x));
+  const marketNote = narrowedBy.length
+    ? `Narrowed by ${listJoin(narrowedBy)}. Never by what anyone pays.`
+    : "The whole evaluated market, until you tell it more. Never narrowed by what anyone pays.";
 
-  /* ---- The publish gate (identical law to round two) ---- */
+  /* ---- The publish gate (identical law to every round) ---- */
   const signLocked =
     !started || facts.length === 0 || Boolean(published) || !coreFiveComplete || (securityScope && (!verdict || verdict.confidence === "low")) || (!securityScope && !buying);
   const lockLine = !started
@@ -672,13 +875,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     : facts.length === 0
       ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
       : !coreFiveComplete
-        ? `A notice cannot publish without five details, and ${numWord(missingCore.length)} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it in the box below.`
+        ? `A notice cannot publish without five details, and ${numWord(missingCore.length)} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it below, or click the open slots above.`
         : securityScope && (!verdict || verdict.confidence === "low")
           ? "Answer the open questions first: nothing is recorded on guesswork."
           : !securityScope && !buying
             ? "Say what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
             : null;
-  const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGaps.length === 0 || consentGaps) : consentCreate;
+  const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGapsLenOk() || consentGaps) : consentCreate;
+  function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
+  const unansweredGaps = brief.openGaps;
 
   /* ---- Instruments and the publish payload (unchanged wiring) ---- */
   const coveredSections = useMemo(() => {
@@ -709,81 +914,50 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const instrument = earnedInstrument(instrumentLadder);
   const publishTitle = brief.title;
 
-  /* ---- Corrections: the drop that never returns, answers, receipts ---- */
+  /* ---- Corrections: the drop that never returns ---- */
   const dropFact = useCallback((id: string) => {
     const f = factsRef.current.find((x) => x.id === id);
     if (!f || f.struck) return;
     if (f.provenance === "inferred") neverReinfer.current.add(nrKey(f.path, f.value));
     factsRef.current = factsRef.current.map((x) => (x.id === id ? { ...x, struck: true } : x));
     setFacts(factsRef.current);
+    setChangedSlots([]);
     ev("workspace_fact_struck", { path: f.path, provenance: f.provenance, undo: "0" });
   }, []);
 
-  const answerGap = useCallback(
-    (gap: BriefGap, value: string, label?: string) => {
-      if (!gap.path) return false;
-      const v = gap.control === "number" ? Number(value) : value;
-      if (gap.control === "number" && (!Number.isFinite(v as number) || (v as number) < 0)) return false;
-      applyMerge([{ path: gap.path as AllowedPath, value: v, provenance: "stated", quote: label ?? String(value) }], "answer");
-      ev("workspace_gap_answered", { field: gap.key });
-      return true;
-    },
-    [applyMerge],
-  );
-
-  const answerEarned = useCallback(
-    (q: EarnedQuestion, answer: QuestionAnswer, value?: string) => {
-      if (answer.kind === "items") {
-        for (const id of answer.itemIds) {
-          const e = ITEM_BY_ID[id];
-          if (!e) continue;
-          if (e.item.path) {
-            applyMerge([{ path: e.item.path as AllowedPath, value: e.item.value, provenance: "stated", quote: e.item.label }], "answer");
-          } else {
-            setNoted((ns) => (ns.some((n) => n.id === e.item.id) ? ns : [...ns, { id: e.item.id, label: e.item.label, section: e.section }]));
-          }
-        }
-      } else if (answer.kind === "note") {
-        setNoted((ns) => (ns.some((n) => n.id === `qn-${q.id}`) ? ns : [...ns, { id: `qn-${q.id}`, label: answer.text, section: q.section }]));
-      } else if (answer.kind === "path" && value && value.trim()) {
-        applyMerge([{ path: answer.path, value: value.trim(), provenance: "stated", quote: value.trim() }], "answer");
-      }
-      setDismissedQ((d) => (d.includes(q.id) ? d : [...d, q.id]));
-      ev("workspace_earned_answered", { q: q.id, kind: answer.kind });
-    },
-    [applyMerge],
-  );
-
-  /** An option click on the focal card: the label lands as a you-beat,
-   *  the answer through the same machinery a typed answer uses. */
-  const pickOption = (q: EarnedQuestion, opt: { label: string; answer: QuestionAnswer }) => {
-    pushBeat({ k: "you", text: opt.label });
-    if (opt.answer.kind === "dismiss") setDismissedQ((d) => (d.includes(q.id) ? d : [...d, q.id]));
-    else answerEarned(q, opt.answer);
-    afterCommit(null);
-  };
-
-  const skipFocal = useCallback(() => {
-    const f = focalRef.current;
-    if (!f) return;
-    if (f.q) {
-      const qid = f.q.id;
-      setDismissedQ((d) => (d.includes(qid) ? d : [...d, qid]));
-      ev("workspace_earned_dismissed", { q: qid });
-    } else if (f.gap) {
-      setDeferred((d) => (d.includes(f.key) ? d : [...d, f.key]));
-    }
-    afterCommit(null);
-  }, [afterCommit]);
+  const clearNotes = useCallback((prefix: string) => {
+    setNoted((ns) => ns.filter((n) => !n.id.startsWith(prefix)));
+    setChangedSlots([]);
+  }, []);
 
   const keepReceipt = useCallback((text: string) => {
     setReceipts((rs) => [...rs, { id: ++receiptId.current, text }]);
   }, []);
 
-  /* ---- The extraction cycle (the same organ, feeding the stream) ---- */
-  const beatsHasRead = useRef(false);
+  /** An edit-sheet option lands through the same machinery a typed
+   *  answer uses, tagged as the buyer's own choice. */
+  const landOption = useCallback(
+    (slot: TwinSlot, opt: TwinOption) => {
+      if (opt.land.kind === "fact") {
+        const m = applyMerge([{ path: opt.land.path, value: opt.land.value, provenance: "stated", quote: opt.label }], "answer");
+        markChanged(m.changed.length ? m.changed : [factId(opt.land.path, opt.land.value)], m.facts);
+        ev("workspace_gap_answered", { field: opt.land.path });
+      } else {
+        const l = opt.land;
+        setNoted((ns) => (ns.some((n) => n.id === l.id) ? ns : [...ns, { id: l.id, label: l.text, section: l.section, own: true }]));
+        setChangedSlots([slot.id]);
+        ev("workspace_earned_answered", { q: l.id, kind: "note" });
+      }
+      setEdit(null);
+      if (phase === "door") setPhase("live");
+    },
+    [applyMerge, markChanged, phase],
+  );
+
+  /* ---- The extraction cycle (the same organ; change is shown in the
+     slots, never narrated back) ---- */
   const runCycle = useCallback(
-    async (text: string, opts: { quiet?: boolean } = {}): Promise<number> => {
+    async (text: string): Promise<number> => {
       const trimmed = text.trim();
       if (trimmed.length < 3 || busy) return 0;
       if (looksLikeAnotherNetify(trimmed)) setWrongCompany(true);
@@ -805,37 +979,17 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           setNoted((ns) => (ns.some((n) => n.id === obj.id) ? ns : [...ns, { id: obj.id, label: obj.label, section: "objectives" }]));
         }
 
-        if (merged.changed.length && !opts.quiet) {
-          const byId = new Map(merged.facts.map((f) => [f.id, f]));
-          const items: ReadItem[] = merged.changed
-            .map((id) => byId.get(id))
-            .filter((f): f is WorkspaceFact => Boolean(f))
-            .slice(0, 12)
-            .map((f) => ({
-              factId: f.id,
-              path: f.path,
-              label: factLabel(f),
-              provenance: f.provenance,
-              meta: f.provenance === "stated" ? (f.quote ? `“${f.quote}”` : null) : f.reason ?? "my inference",
-            }));
-          const firstRead = beatsHasRead.current === false;
-          beatsHasRead.current = true;
-          pushBeat({
-            k: "read",
-            lead: firstRead
-              ? "Here is what I took from that. Anything marked as my guess, drop it and it will not come back."
-              : "Taken. Here is what changed.",
-            items,
-          });
-        }
-        /* Engine notes reach the buyer only in buyer words: the two
-           humanisable classes translate, everything else (key warnings,
-           internal diagnostics) stays off the surface entirely. */
+        /* Change is shown, not narrated: the changed slots take the
+           marker; nothing else appears. */
+        markChanged(merged.changed, merged.facts);
+
+        /* Engine notes reach the buyer only in buyer words, one transient
+           line; everything else stays off the surface entirely. */
         const notes = (data.notes ?? [])
           .filter((n) => /^Dropped /.test(n))
           .slice(0, 2)
           .map(humaniseNote);
-        if (notes.length && !opts.quiet) pushBeat({ k: "info", text: notes.join(" ") });
+        if (notes.length) say(cap(notes.join("; ") + "."));
         return merged.changed.length;
       } catch {
         setCycleError("The engine did not answer; your words are unchanged, say it again in a moment.");
@@ -844,116 +998,75 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         setBusy(false);
       }
     },
-    [busy, applyMerge, pushBeat],
+    [busy, applyMerge, markChanged, say],
   );
 
   /* ---- Ingest (The Threshold): a paste or a dropped text file runs
-     through the same cycles a sentence runs, chunked on paragraph
-     boundaries, so provenance, guards and receipts hold unchanged. ---- */
+     through the same cycles a sentence runs. ---- */
   const ingestText = useCallback(
     async (raw: string, source: "paste" | "drop") => {
       const plan = chunkForIngest(raw);
       if (!plan.chunks.length) return;
       setPasteSummary(null);
-      if (phase === "door") setPhase("stream");
+      if (phase === "door") setPhase("live");
       const factsBefore = factsRef.current.filter((f) => !f.struck).length;
       const receiptsBefore = receiptsRef.current.length;
       ev("workspace_ingest", { source, chunks: plan.chunks.length, chars: plan.readChars, truncated: plan.truncated ? 1 : 0 });
       if (!firstKeyAt.current) firstKeyAt.current = Date.now();
       for (const chunk of plan.chunks) {
         // Sequential on purpose: each cycle merges before the next reads.
-        await runCycle(chunk, {});
+        await runCycle(chunk);
       }
       const landed = Math.max(0, factsRef.current.filter((f) => !f.struck).length - factsBefore);
       const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
       setPasteSummary(ingestSummary(landed, kept, plan));
-      afterCommit(null);
     },
-    [phase, runCycle, afterCommit],
+    [phase, runCycle],
   );
 
   /* ---- The send: one entry for everything typed, spoken or clicked
-     through an example. Commands first; the extractor for the rest; a
-     sentence that lands nothing becomes the focal question's own-words
-     answer, or a receipt kept verbatim. ---- */
+     through an example. Commands first; the extractor for the rest. A
+     sentence that lands nothing is kept verbatim with the notes, and
+     the dock's caption says so once: no echo, no transcript. ---- */
   async function send(raw: string) {
-      const text = raw.trim();
-      if (!text || busy) return;
-      setDraft("");
-      if (!firstKeyAt.current) firstKeyAt.current = Date.now();
-      pushBeat({ k: "you", text });
-      if (phase === "door") setPhase("stream");
-      const say = (b: Beat) => { if (phase === "fits") setFitsCard(b); else pushBeat(b); };
+    const text = raw.trim();
+    if (!text || busy) return;
+    setDraft("");
+    if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+    if (phase === "door") setPhase("live");
 
-      const cmd = parseCommand(text);
-      if (cmd) {
-        handleCommand(cmd);
-        return;
-      }
+    const cmd = parseCommand(text);
+    if (cmd) {
+      handleCommand(cmd);
+      return;
+    }
 
-      const focalNow = focalRef.current;
-      const landed = await runCycle(text);
-      if (landed > 0) {
-        if (phase === "fits") {
-          setFitsCard({ k: "info", text: "Placed. The list re-scores against what you just said." });
-        }
-        afterCommit(null);
-        return;
-      }
+    const landed = await runCycle(text);
+    if (landed > 0) return;
 
-      /* Nothing landed: the box takes anything (the card's own promise).
-         The words become the focal question's answer in the buyer's own
-         voice, or failing that a receipt kept verbatim. */
-      if (focalNow?.q) {
-        const q = focalNow.q;
-        const pathOpt = q.options.find((o) => o.answer.kind === "path");
-        if (pathOpt && pathOpt.answer.kind === "path") {
-          answerEarned(q, pathOpt.answer, text);
-        } else {
-          setNoted((ns) => (ns.some((n) => n.id === `qn-${q.id}`) ? ns : [...ns, { id: `qn-${q.id}`, label: text, section: q.section }]));
-          setDismissedQ((d) => (d.includes(q.id) ? d : [...d, q.id]));
-        }
-        ev("workspace_own_words", { section: focalNow.section, routed: pathOpt ? "field" : "note" });
-        say({ k: "info", text: "Kept, in your words. The technical wording sits beneath them on the requirement." });
-      } else if (focalNow?.gap) {
-        const g = focalNow.gap;
-        const numMatch = /(\d[\d,]*)/.exec(text.replace(/,/g, ""));
-        const ok = g.control === "number"
-          ? (numMatch ? answerGap(g, numMatch[1], text) : false)
-          : answerGap(g, text, text);
-        if (ok) {
-          ev("workspace_own_words", { section: focalNow.section, routed: "field" });
-          say({ k: "info", text: "Taken as your answer, in your words." });
-        } else {
-          keepReceipt(text);
-          say({ k: "info", text: "Kept verbatim with your notes; I could not place it on a field." });
-        }
-      } else {
-        keepReceipt(text);
-        say({ k: "info", text: "Kept verbatim with your notes. Say “see the requirement” to read everything I am holding." });
-      }
-      afterCommit(null);
+    /* Nothing landed: kept verbatim, said once, never echoed. */
+    keepReceipt(text);
+    say("Kept with your notes, word for word. Nothing else in that changed the project; say “see the requirement” to read everything held.");
   }
 
   /* ---- The commands, each one true ---- */
   function handleCommand(cmd: Command) {
-    const answer = (b: Beat) => { if (phase === "fits") setFitsCard(b); else pushBeat(b); afterCommit(null); };
     switch (cmd.kind) {
       case "whoFits": {
         if (!fitBuying) {
-          answer({ k: "info", text: "Tell me what you are buying first, SASE, SD-WAN, SSE or managed security, and the evaluated market scores against it." });
+          say("Say what you are buying first, SASE, SD-WAN, SSE or managed security, and the evaluated market scores against it.");
           return;
         }
         ev("workspace_command", { kind: "who_fits" });
         setPhase("fits");
-        setFitsCard(null);
+        setExpandedFit(null);
         scrollToWorkspace();
         return;
       }
       case "publish": {
         ev("workspace_command", { kind: "publish" });
         if (signLocked && !published) {
-          answer({ k: "info", text: lockLine ?? "Publishing is not open yet." });
+          say(lockLine ?? "Publishing is not open yet.");
           return;
         }
         setPhase("fits");
@@ -961,26 +1074,22 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           const el = document.querySelector("[data-publish]");
           if (el) el.scrollIntoView({ block: "start" });
         }, 60);
-        setFitsCard({ k: "info", text: "The signature is yours, never mine: review what publishes, tick the consents and press Generate and publish." });
+        say("The signature is yours, never mine: review what publishes, tick the consents and press Generate and publish.");
         return;
       }
       case "sheet":
         ev("workspace_command", { kind: cmd.open ? "sheet_open" : "sheet_close" });
-        setSheetOpen(cmd.open);
+        setReqOpen(cmd.open);
         return;
       case "reset":
         window.location.assign(window.location.pathname);
         return;
       case "back":
-        setPhase("stream");
+        setPhase("live");
         scrollToWorkspace();
         return;
-      case "skip":
-        skipFocal();
-        return;
-      case "note":
-        setNoteOpen(cmd.open);
-        afterCommit(null);
+      case "closeEdit":
+        setEdit(null);
         return;
       case "missing": {
         const lines: string[] = [];
@@ -989,24 +1098,25 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             ? `Before it can publish, the notice needs ${missingCore.join(", ")}.`
             : "The five details a notice needs are all in.",
         );
-        const openCount = openHeads.length;
-        if (openCount) lines.push(`${cap(numWord(openCount))} question${openCount === 1 ? "" : "s"} ${openCount === 1 ? "is" : "are"} open on the document; answering them sharpens the scoring, and only the five above hold publishing shut.`);
-        answer({ k: "info", text: lines.join(" ") });
+        if (topMissing.length) lines.push(`The open slots above name the rest: ${topMissing.join(", ")}.`);
+        ev("workspace_command", { kind: "missing" });
+        say(lines.join(" "));
         return;
       }
       case "cost":
-        answer({ k: "info", text: "The price band computes at publish, under the Netify TCO methodology (v2026.1). Publishing generates it alongside your document and the anonymous notice; nothing here invents a number early." });
+        ev("workspace_command", { kind: "cost" });
+        say("The price band computes at publish, under the Netify TCO methodology (v2026.1). Publishing generates it alongside your document and the anonymous notice; nothing here invents a number early.");
         return;
       case "dropPartner": {
-        if (phase !== "fits") { answer({ k: "info", text: "Say “who fits” first and I will show the list this works on." }); return; }
+        if (phase !== "fits") { say("Say “who fits” first and I will show the list this works on."); return; }
         if (!partnerDependent.length) {
-          answer({ k: "info", text: "Nobody in the list relies on a partner for what you asked: no row carries partner-or-integrated evidence against your checks." });
+          say("Nobody in the list relies on a partner for what you asked: no row carries partner-or-integrated evidence against your checks.");
           return;
         }
         const names = partnerDependent.map((s) => s.name);
         setRemoved((r) => [...new Set([...r, ...partnerDependent.map((s) => s.slug)])]);
         ev("workspace_command", { kind: "drop_partner" });
-        answer({ k: "info", text: `Dropped ${names.join(", ")}: their evidence for one or more of your checks is graded via partner or integrated.` });
+        say(`Dropped ${names.join(", ")}: their evidence for one or more of your checks is graded via partner or integrated.`);
         return;
       }
       case "dropName":
@@ -1017,15 +1127,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         if (inFits) {
           if (cmd.kind === "dropName") {
             setRemoved((r) => (r.includes(inFits.slug) ? r : [...r, inFits.slug]));
-            answer({ k: "info", text: `${inFits.name} dropped. Direct invites leave them out; the anonymous public notice is unaffected.` });
+            say(`${inFits.name} dropped. Direct invites leave them out; the anonymous public notice is unaffected.`);
           } else {
             setRemoved((r) => r.filter((s) => s !== inFits.slug));
-            answer({ k: "info", text: `${inFits.name} kept back in.` });
+            say(`${inFits.name} kept back in.`);
           }
           ev("workspace_command", { kind: cmd.kind === "dropName" ? "drop_vendor" : "keep_vendor" });
           return;
         }
-        /* In the stream, "drop X" reaches a guess: the inference whose
+        /* In the twin, "drop X" reaches a guess: the inference whose
            label carries the words is struck and never re-inferred. */
         if (cmd.kind === "dropName") {
           const f = factsRef.current.find(
@@ -1033,32 +1143,33 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           );
           if (f) {
             dropFact(f.id);
-            answer({ k: "info", text: `Dropped: ${factLabel(f)}. It will not come back unless you say it yourself.` });
+            say(`Dropped: ${factLabel(f)}. It will not come back unless you say it yourself.`);
             return;
           }
         }
-        answer({ k: "info", text: `I could not find “${cmd.name}” in the list or among my inferences. Say the name as the list shows it.` });
+        say(`I could not find “${cmd.name}” in the list or among the guesses. Say the name as the page shows it.`);
         return;
       }
       case "why": {
         const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
         const target = norm(cmd.name);
         const idx = rankedFits.findIndex((s) => norm(s.name).includes(target) || target.includes(norm(s.name)));
-        if (idx < 0) { answer({ k: "info", text: `“${cap(cmd.name)}” is not in the scored list. Say “who fits” to see it.` }); return; }
+        if (idx < 0) { say(`“${cap(cmd.name)}” is not in the scored list. Say “who fits” to see it.`); return; }
         const s = rankedFits[idx];
-        const lines: string[] = [];
-        lines.push(`Position ${idx + 1} of ${rankedFits.length}, ordered by graded evidence against your named checks, never by what anyone pays.`);
-        if (s.matched.length) lines.push(`Evidenced for: ${s.matched.map((m) => `${m.label} (${gradeWord(m.grade)})`).join(", ")}.`);
-        if (s.missed.length) lines.push(`Not evidenced for: ${s.missed.map((m) => m.label).join(", ")}.`);
-        lines.push(`Across the whole dataset this record fully meets ${s.yes_count} of 40 capabilities. Graded ${fmtDate(s.last_verified)}.`);
         ev("workspace_command", { kind: "why_vendor" });
-        answer({ k: "working", title: `Why ${s.name} sits at ${idx + 1}`, lines, href: `/sase/vendors/${s.slug}/`, hrefLabel: "Read the full record, with every source behind these grades" });
+        setPhase("fits");
+        setExpandedFit(s.slug);
+        setTimeout(() => {
+          const el = document.querySelector(`[data-fit="${s.slug}"]`);
+          if (el) el.scrollIntoView({ block: "center" });
+        }, 60);
+        say(`${s.name}'s working is open in the list: position, evidence and dates, never what anyone pays.`);
         return;
       }
     }
   }
 
-  /* ---- The signature chain (the same organs as round two; the desk
+  /* ---- The signature chain (the same organs as every round; the twin
      changed its face, never its law: consents verbatim, humans sign,
      agents never, publish is the only exit). ---- */
   async function signAndPublish() {
@@ -1267,7 +1378,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   };
 
   /* ---- Files: the arrow reads plain text documents; a drop anywhere
-     on the dock does the same. ---- */
+     on the twin does the same. ---- */
   const readFile = (f: File | null | undefined) => {
     if (!f) return;
     if (f.size > 2_000_000) { setPasteSummary("That file is too large to read here; paste the part that matters."); return; }
@@ -1276,8 +1387,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     reader.readAsText(f);
   };
 
-  /* ---- Sheet sections: every row with its provenance (the core data
-     concept; nothing renders without its origin). ---- */
+  /* ---- The requirement sheet sections: every row with provenance ---- */
+  const earnedAll = useMemo(() => {
+    const notedIds = noted.map((n) => n.id);
+    return earnedQuestions(requirement, buying, opModel, notedIds, [], corpus);
+  }, [requirement, buying, opModel, noted, corpus]);
   const sheetSections = useMemo(() => {
     const out: Array<{ key: string; title: string; rows: Array<{ text: string; meta: string | null; open?: boolean }> }> = [];
     for (const sec of TAXONOMY) {
@@ -1286,7 +1400,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         if (f.struck || sectionForPath(f.path) !== sec.key) continue;
         rows.push({
           text: PATH_LABELS[f.path] ? `${PATH_LABELS[f.path]}: ${factLabel(f)}` : factLabel(f),
-          meta: f.provenance === "stated" ? (f.quote ? `“${f.quote}”` : "your words") : f.reason ?? "my inference",
+          meta: f.provenance === "stated" ? (f.source === "answer" ? "you chose this" : f.quote ? `“${f.quote}”` : "your words") : f.reason ?? "netify guessed",
         });
       }
       for (const n of noted) {
@@ -1310,37 +1424,152 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   }, [facts, noted, unansweredGaps, earnedAll, receipts]);
 
   const understood = live.length + noted.length;
-  const factById = useMemo(() => new Map(facts.map((f) => [f.id, f])), [facts]);
 
-  const queueRest = Math.max(0, openHeads.length - 1);
-  const queueLabel =
-    focal === null
-      ? ""
-      : queueRest === 0
-        ? missingCore.length
-          ? `The last open question. Still needed to publish: ${missingCore.join(", ")}.`
-          : "The last open question, and it does not stop you publishing."
-        : missingCore.length
-          ? `${cap(numWord(queueRest))} more after this. Still needed to publish: ${missingCore.join(", ")}.`
-          : `${cap(numWord(queueRest))} more after this, and none of them stop you publishing.`;
+  /* ---- The header's derived name (the reference: the project names
+     itself from what it holds) ---- */
+  const sectorShort = (() => {
+    const s = standingAt("organisation.sector")[0];
+    if (!s) return null;
+    return String(s.value).replace(/\s*&.*$/, "").toLowerCase();
+  })();
+  const sitesVal = standingAt("estate.sites").slice(-1)[0];
+  const projectName = (sitesVal ? `${sitesVal.value} sites` : "New project") + (sectorShort ? `, ${sectorShort}` : "");
 
   const firstFit = rankedFits[0] ?? null;
   const shortcuts: string[] =
     phase === "fits"
       ? [
           ...(firstFit ? [`Why is ${firstFit.name} first?`] : []),
-          partnerDependent.length ? "Drop the ones that need a partner" : rankedFits.length ? `Drop ${rankedFits[rankedFits.length - 1].name}` : "Back to the conversation",
+          partnerDependent.length ? "Drop the ones that need a partner" : rankedFits.length ? `Drop ${rankedFits[rankedFits.length - 1].name}` : "Back to the project",
           "What will this cost?",
         ]
       : ["Add PCI DSS", "Actually it is 250 sites", "What are you still missing?"];
 
   const sendReady = draft.trim().length > 0 && !busy;
+  const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
 
   if (!booted) return <div className="pd-root mt-10" />;
 
+  const mono: React.CSSProperties = { fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' };
+  const editSlot = edit ? SLOT_BY_ID[edit] ?? null : null;
+
+  /* ---- Slot cell renderers ---- */
+  const slotCell = (s: TwinSlot) => {
+    const isNew = changedSlots.includes(s.id);
+    const cellCls = "flex flex-col px-5 py-[15px] border-b border-r border-[#EFECE5]";
+    const cellStyle: React.CSSProperties = isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B" } : {};
+    const tagBase: React.CSSProperties = { ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none" };
+
+    if (s.path) {
+      const fs = standingAt(s.path);
+      if (fs.length) {
+        const anyInferred = fs.some((f) => f.provenance === "inferred");
+        const latest = fs[fs.length - 1];
+        const value = fs.length === 1
+          ? cap(factLabel(latest))
+          : `${fs.slice(0, 3).map((f) => cap(factLabel(f))).join(", ")}${fs.length > 3 ? ` and ${numWord(fs.length - 3)} more` : ""}`;
+        const meta = latest.provenance === "stated"
+          ? (latest.source === "answer" ? "you chose this" : latest.quote ? `“${latest.quote}”` : "your words")
+          : latest.reason ?? "netify guessed";
+        const single = fs.length === 1;
+        return (
+          <div key={s.id} className={cellCls} style={cellStyle}>
+            <div className="flex items-baseline gap-2">
+              <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">{s.label}</span>
+              <span style={{ ...tagBase, ...(anyInferred ? { background: "#F1EFE9", color: "#7A7770" } : { background: "#EAF6EE", color: "#256B3E" }) }}>
+                {anyInferred ? "netify guessed" : "your words"}
+              </span>
+            </div>
+            <div className="mt-2 flex items-start gap-2">
+              <button
+                type="button"
+                onClick={() => setEdit(s.id)}
+                className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left text-[16.5px] font-medium leading-[1.35] text-[#141414]"
+                style={{ textWrap: "pretty" }}
+                title={s.q}
+              >
+                {value}
+              </button>
+              {single ? (
+                <button
+                  type="button"
+                  onClick={() => dropFact(latest.id)}
+                  className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                  style={{ ...mono, letterSpacing: "0.07em" }}
+                >
+                  {latest.provenance === "inferred" ? "drop" : "clear"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEdit(s.id)}
+                  className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#141414] hover:text-[#141414]"
+                  style={{ ...mono, letterSpacing: "0.07em" }}
+                >
+                  edit
+                </button>
+              )}
+            </div>
+            <div className="mt-1.5 text-[12px] italic leading-[1.45] text-[#A3A099]">{meta}</div>
+          </div>
+        );
+      }
+    } else if (s.notePrefix) {
+      const ns = noted.filter((n) => n.id.startsWith(s.notePrefix as string));
+      if (ns.length) {
+        const opt = s.options.find((o) => o.land.kind === "note" && o.land.id === ns[0].id);
+        return (
+          <div key={s.id} className={cellCls} style={cellStyle}>
+            <div className="flex items-baseline gap-2">
+              <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">{s.label}</span>
+              <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
+            </div>
+            <div className="mt-2 flex items-start gap-2">
+              <button
+                type="button"
+                onClick={() => setEdit(s.id)}
+                className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left text-[16.5px] font-medium leading-[1.35] text-[#141414]"
+                style={{ textWrap: "pretty" }}
+              >
+                {opt ? opt.label : ns[0].label}
+              </button>
+              <button
+                type="button"
+                onClick={() => clearNotes(s.notePrefix as string)}
+                className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                style={{ ...mono, letterSpacing: "0.07em" }}
+              >
+                clear
+              </button>
+            </div>
+            <div className="mt-1.5 text-[12px] italic leading-[1.45] text-[#A3A099]">you chose this</div>
+          </div>
+        );
+      }
+    }
+
+    /* Empty: visible, dashed, directly actionable (rule 4). */
+    return (
+      <div key={s.id} className={cellCls} style={cellStyle}>
+        <div className="flex items-baseline gap-2">
+          <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">{s.label}</span>
+          <span style={{ ...tagBase, background: "transparent", color: "#B4650B", border: "1px solid #EBDCC0" }}>open</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setEdit(s.id)}
+          className="mt-2 flex w-full cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[11px] text-left text-[14px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+        >
+          <span className="text-[13px] text-[#C4C0B8]" style={mono}>+</span>
+          {s.cta}
+        </button>
+      </div>
+    );
+  };
+
   /* ================================================================ */
-  /* Render: one centred 720px column at every width, no chrome of its */
-  /* own beyond the understand link, the reference's tokens throughout. */
+  /* Render: the project occupies the screen; the prompt is fixed to   */
+  /* the bottom and is the input method, not the subject.              */
   /* ================================================================ */
   return (
     <div
@@ -1349,13 +1578,17 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       onDragOver={(e) => { e.preventDefault(); }}
       onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
     >
-      {/* The workspace's two text links (the reference's header, minus
-          the logotype the estate header already carries). */}
+      {/* The twin's own header row (the estate MegaNav carries the
+          logotype): the project names itself, the state line is true
+          under R2, and Start again is always reachable. */}
       {started && (
-        <div className="mx-auto flex w-full max-w-[720px] items-center justify-end gap-4 px-[26px] pb-4">
+        <div className="mx-auto flex w-full max-w-[1000px] flex-wrap items-baseline gap-x-4 gap-y-1 px-[26px] pb-4">
+          <span className="text-[14.5px] font-medium text-[#33302C]">{projectName}</span>
+          <span className="text-[11.5px] text-[#A3A099]" style={mono}>nothing leaves this page</span>
+          <span className="flex-1" />
           <button
             type="button"
-            onClick={() => { setSheetOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}
+            onClick={() => { setReqOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}
             className="flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[13.5px] text-[#6E6C67] hover:text-[#141414]"
           >
             <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#2E9E52]" aria-hidden="true" />
@@ -1372,273 +1605,268 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       )}
 
       {/* ── THE DOOR ── the page renders the ruled H1, promise and trust
-          paragraphs above; the workspace adds the three example openers
-          (clicking one starts the project with that sentence, exactly as
-          typing it would) and the dock waits below. */}
+          paragraphs above; the twin adds the three sector-tagged example
+          cards (clicking one starts the project with that sentence,
+          exactly as typing it would) and the dock waits below. */}
       {phase === "door" && (
-        <div className="mx-auto w-full max-w-[720px] px-[26px] pb-10 pt-2">
-          <div className="flex flex-col gap-[9px]">
-            {EXAMPLES.map((label) => (
+        <div className="mx-auto w-full max-w-[860px] px-[26px] pb-10 pt-2">
+          <div className="grid gap-2.5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
+            {EXAMPLE_CARDS.map((e) => (
               <button
-                key={label}
+                key={e.tag}
                 type="button"
-                onClick={() => void send(label)}
-                className="flex cursor-pointer items-baseline gap-[11px] border-0 bg-transparent p-0 text-left text-[#8C8A85] hover:text-[#141414]"
+                onClick={() => void send(e.label)}
+                className="flex cursor-pointer flex-col gap-[7px] rounded-[12px] border border-[#E0DCD3] bg-[#FBFAF8] p-4 text-left hover:border-[#141414] hover:bg-white"
               >
-                <span className="flex-none text-[12px] text-[#C4C0B8]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' }}>try</span>
-                <span className="text-[16px] leading-normal">{label}</span>
+                <span className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.09em" }}>{e.tag}</span>
+                <span className="text-[14.5px] leading-[1.5] text-[#33302C]">{e.label}</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* ── THE STREAM ── beats 28px apart, one focal question, answered
-          material collapsed into prose above it. */}
-      {phase === "stream" && (
-        <div className="mx-auto flex w-full max-w-[720px] flex-col gap-7 px-[26px] pb-[250px]">
-          {beats.map((b, i) => {
-            if (b.k === "you") {
+      {/* ── THE LIVE TWIN ── the project as a structured, living object:
+          understanding and the market side by side, then the five groups
+          of labelled slots. No log, no narration; change is shown. */}
+      {phase === "live" && (
+        <div className="mx-auto flex w-full max-w-[1000px] flex-col gap-[18px] px-[26px] pb-6">
+          <div className="grid gap-3.5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+            <div className="rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] px-[22px] py-5">
+              <div className="flex items-baseline gap-2.5">
+                <span className="text-[11px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.1em" }}>Project understanding</span>
+                <span className="flex-1" />
+                <span className="text-[26px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>
+                  {pct}<span className="text-[15px] text-[#A3A099]">%</span>
+                </span>
+              </div>
+              <div className="mt-3.5 flex gap-[3px]">
+                {Array.from({ length: 12 }, (_, i) => (
+                  <span key={i} className="h-[7px] flex-1 rounded-[2px]" style={{ background: (i * 100) / 12 < pct ? "#F5A21B" : "#E8E4DC" }} />
+                ))}
+              </div>
+              <div className="mt-3 text-[13.5px] leading-[1.55] text-[#5F5D59]">{pctNote}</div>
+            </div>
+            <div className="rounded-[14px] bg-[#141414] px-[22px] py-5 text-white">
+              <div className="text-[11px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.1em" }}>The market, narrowing</div>
+              <div className="mt-3 flex items-baseline gap-2">
+                <span className="text-[26px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>
+                  {fittingCount ?? "…"}
+                </span>
+                {marketTotal !== null && <span className="text-[13.5px] text-[#B8B5AF]">of {marketTotal} still fit</span>}
+              </div>
+              <div className="mt-[11px] text-[13px] leading-[1.5] text-[#B8B5AF]">{marketNote}</div>
+            </div>
+          </div>
+
+          {TWIN_GROUPS.map((g) => {
+            if (g.id === "rules") {
+              const rows = ruleFacts;
+              const state = coreFive.sector ? (rows.length ? `${rows.length} applied` : "none yet") : "waiting";
               return (
-                <div key={i} className="flex flex-col items-end gap-[7px]">
-                  <span className="text-[10.5px] uppercase text-[#A3A099]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.09em" }}>You said</span>
-                  <span className="max-w-[30em] rounded-[14px] bg-[#141414] px-[17px] py-[13px] text-[16px] leading-[1.55] text-white" style={{ textWrap: "pretty" }}>{b.text}</span>
-                </div>
-              );
-            }
-            if (b.k === "read") {
-              const rows = b.items.filter((it) => !factById.get(it.factId)?.struck);
-              if (!rows.length) return null;
-              return (
-                <div key={i}>
-                  <div className="mb-4 max-w-[36em] text-[16.5px] leading-[1.6] text-[#141414]" style={{ textWrap: "pretty" }}>{b.lead}</div>
-                  <div className="flex flex-col border-l-2 border-[#E3E0DA] pl-4">
-                    {rows.map((it) => (
-                      <div key={it.factId} className="flex items-baseline gap-2.5 py-[7px]">
-                        <span className="min-w-0 flex-1 text-[15px] leading-normal text-[#22201D]" style={{ textWrap: "pretty" }}>
-                          {PATH_LABELS[it.path] && <span className="font-medium text-[#8C8A85]">{PATH_LABELS[it.path]}: </span>}
-                          {it.label}
-                          {it.meta && <span className="ml-2 text-[12.5px] italic text-[#A3A099]">{it.meta}</span>}
-                        </span>
-                        {it.provenance === "inferred" && (
-                          <button
-                            type="button"
-                            onClick={() => { dropFact(it.factId); afterCommit(null); }}
-                            className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[10px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
-                            style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.07em" }}
+                <div key={g.id} className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8]">
+                  <div className="flex items-baseline gap-2.5 border-b border-[#EFECE5] px-5 py-3.5">
+                    <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
+                    <span className="min-w-0 flex-1 text-[13px] text-[#A3A099]">{g.note}</span>
+                    <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{state}</span>
+                  </div>
+                  <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(232px, 1fr))" }}>
+                    {rows.length > 0 ? (
+                      rows.map((f) => {
+                        const isNew = changedSlots.includes(`rule:${f.id}`);
+                        return (
+                          <div
+                            key={f.id}
+                            className="flex flex-col border-b border-r border-[#EFECE5] px-5 py-[15px]"
+                            style={isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B" } : {}}
                           >
-                            my guess · drop it
-                          </button>
-                        )}
+                            <div className="flex items-baseline gap-2">
+                              <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">Applied</span>
+                              <span
+                                className="flex-none rounded-[4px] px-[5px] py-[3px] text-[9.5px] font-semibold uppercase"
+                                style={{ ...mono, letterSpacing: "0.07em", ...(f.provenance === "inferred" ? { background: "#FFF3DC", color: "#8A4D08" } : { background: "#EAF6EE", color: "#256B3E" }) }}
+                              >
+                                {f.provenance === "inferred" ? "from your sector" : "your words"}
+                              </span>
+                            </div>
+                            <div className="mt-2 flex items-start gap-2">
+                              <span className="min-w-0 flex-1 text-[16.5px] font-medium leading-[1.35]" style={{ textWrap: "pretty" }}>
+                                {COMPLIANCE_LABELS[String(f.value)] ?? String(f.value)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => dropFact(f.id)}
+                                className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                                style={{ ...mono, letterSpacing: "0.07em" }}
+                              >
+                                {f.provenance === "inferred" ? "drop" : "clear"}
+                              </button>
+                            </div>
+                            <div className="mt-1.5 text-[12px] italic leading-[1.45] text-[#A3A099]">
+                              {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : coreFive.sector ? (
+                      <div className="border-b border-[#EFECE5] px-5 py-[15px] text-[13.5px] leading-[1.55] text-[#8C8A85]">
+                        No asserted rule pack for this sector yet. Any rule you state, “Add PCI DSS”, lands here with your words as its provenance.
                       </div>
-                    ))}
+                    ) : (
+                      <div className="flex flex-col border-b border-[#EFECE5] px-5 py-[15px]">
+                        <div className="flex items-baseline gap-2">
+                          <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">Sector rules</span>
+                          <span className="flex-none text-[9.5px] uppercase text-[#A3A099]" style={{ ...mono, letterSpacing: "0.07em" }}>waiting</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEdit("sector")}
+                          className="mt-2 flex w-full cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[11px] text-left text-[14px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                        >
+                          <span className="text-[13px] text-[#C4C0B8]" style={mono}>+</span>
+                          Set your sector to load these
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
             }
-            if (b.k === "note") {
-              const rows = b.items.filter((it) => !it.factId || !factById.get(it.factId)?.struck);
-              return (
-                <div key={i} className="border-l-2 border-[#F5A21B] pl-4">
-                  <div className="max-w-[36em] text-[16px] leading-[1.6] text-[#141414]" style={{ textWrap: "pretty" }}>{b.lead}</div>
-                  <button
-                    type="button"
-                    onClick={() => setNoteOpen((o) => !o)}
-                    className="mt-[9px] cursor-pointer border-0 bg-transparent p-0 text-[14px] font-medium text-[#B4650B] underline"
-                  >
-                    {noteOpen ? `Hide the ${numWord(rows.length)}` : `Show me the ${numWord(rows.length)}`}
-                  </button>
-                  {noteOpen && (
-                    <div className="mt-3 flex flex-col">
-                      {rows.map((it, j) => (
-                        <div key={j} className="flex items-baseline gap-2.5 border-t border-[#F0EEE9] py-[7px]">
-                          <span className="min-w-0 flex-1 text-[14.5px] leading-normal">{it.label}</span>
-                          <span className="min-w-0 flex-[1.2] text-[13px] leading-[1.45] text-[#8C8A85]">{it.reason}</span>
-                          {it.factId && (
-                            <button
-                              type="button"
-                              onClick={() => { dropFact(it.factId as string); afterCommit(null); }}
-                              className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[10px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
-                              style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.07em" }}
-                            >
-                              drop it
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-            if (b.k === "working") {
-              return (
-                <div key={i} className="border-l-2 border-[#E3E0DA] pl-4">
-                  <div className="mb-1.5 text-[15px] font-semibold">{b.title}</div>
-                  {b.lines.map((l, j) => (
-                    <p key={j} className="m-0 mb-1 max-w-[36em] text-[14.5px] leading-[1.55] text-[#5F5D59]">{l}</p>
-                  ))}
-                  {b.href && <a href={b.href} className="text-[13.5px]">{b.hrefLabel ?? b.href}</a>}
-                </div>
-              );
-            }
+            const slots = TWIN_SLOTS.filter((s) => s.group === g.id);
+            const filled = slots.filter(slotFilled).length;
             return (
-              <div key={i} className="max-w-[36em] text-[15px] leading-[1.6] text-[#6E6C67]" style={{ textWrap: "pretty" }}>
-                {b.text}
-                {b.lines?.map((l, j) => <span key={j}><br />{l}</span>)}
+              <div key={g.id} className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8]">
+                <div className="flex items-baseline gap-2.5 border-b border-[#EFECE5] px-5 py-3.5">
+                  <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
+                  <span className="min-w-0 flex-1 text-[13px] text-[#A3A099]">{g.note}</span>
+                  <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{filled} of {slots.length}</span>
+                </div>
+                <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(232px, 1fr))" }}>
+                  {slots.map(slotCell)}
+                </div>
               </div>
             );
           })}
 
-          {/* The one focal question. Never two. */}
-          {focal && (
-            <div>
-              <div data-focal="1" className="rounded-[18px] border border-[#E8E4DC] bg-white px-7 pb-[22px] pt-[26px]" style={{ boxShadow: "0 3px 18px rgba(20,20,20,.05)" }}>
-                <div className="mb-2 max-w-[24em] text-[22px] font-semibold leading-[1.35]" style={{ letterSpacing: "-0.015em", textWrap: "pretty" }}>
-                  {focal.q ? focal.q.question : focal.gap?.question}
-                </div>
-                {focal.q && (
-                  <div className="mt-4 flex flex-col gap-2">
-                    {focal.q.options.filter((o) => o.answer.kind !== "dismiss").map((o) => (
-                      <button
-                        key={o.label}
-                        type="button"
-                        onClick={() => pickOption(focal.q as EarnedQuestion, o)}
-                        className="flex w-full cursor-pointer items-center gap-3.5 rounded-[12px] border border-[#E3E0DA] bg-white px-[17px] py-[15px] hover:border-[#141414] hover:bg-[#FDFCFA]"
-                      >
-                        <span className="flex-1 text-left text-[16px] leading-[1.45]">{o.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div className="mt-[18px] flex flex-wrap items-center gap-3">
-                  <span className="min-w-[14em] flex-1 text-[14px] leading-normal text-[#8C8A85]">
-                    {focal.q ? "Or just tell me in the box below. These are only the answers I hear most." : "Tell me in the box below, in your own words."}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={skipFocal}
-                    className="flex-none cursor-pointer border-0 bg-transparent text-[14px] text-[#A3A099] hover:text-[#141414]"
-                  >
-                    Not sure yet
-                  </button>
-                </div>
-              </div>
-              {queueLabel && <div className="mt-3.5 text-[14px] leading-normal text-[#A3A099]">{queueLabel}</div>}
-            </div>
-          )}
-
-          {/* Ready: the green rule, only when nothing is open. */}
-          {!focal && started && !published && (
-            <div data-focal="1" className="border-l-2 border-[#2E9E52] pl-4">
-              <div className="mb-[7px] max-w-[26em] text-[18px] font-semibold leading-[1.4]">That is everything I need to score the market.</div>
-              <div className="mb-4 max-w-[36em] text-[15px] leading-[1.6] text-[#6E6C67]">
-                Nothing has left this page. When you are ready I will score the
-                {market?.counts.vendors ? ` ${market.counts.vendors}` : ""} evaluated vendors and service providers against what you have told me, and show why each one fits.
+          {/* Readiness: once weighted completeness passes the threshold,
+              the action into the vendor list. */}
+          {readyToFit && (
+            <div className="border-l-2 border-[#2E9E52] pl-[17px]">
+              <div className="mb-1.5 text-[18px] font-semibold leading-[1.4]">Enough to be priced consistently.</div>
+              <div className="mb-[15px] max-w-[38em] text-[14.5px] leading-[1.6] text-[#5F5D59]">
+                The gaps left are ones vendors and service providers can quote around. Nothing has left this page.
               </div>
               <button
                 type="button"
                 onClick={() => handleCommand({ kind: "whoFits" })}
-                className="cursor-pointer rounded-full border-0 bg-[#F5A21B] px-6 py-3.5 text-[16px] font-semibold text-[#141414] hover:bg-[#E5940F]"
+                className="cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[23px] py-[13px] text-[15.5px] font-semibold text-[#141414] hover:bg-[#E5940F]"
               >
-                Show me who fits
+                Show the {fittingCount ?? ""} that fit
               </button>
-            </div>
-          )}
-          {focal && coreFiveComplete && (
-            <div className="-mt-4 text-[13.5px] text-[#8C8A85]">
-              The five details a notice needs are in. Say “who fits” whenever you want the scored market.
             </div>
           )}
         </div>
       )}
 
-      {/* ── WHO FITS ── ranked by graded evidence, every date real, the
-          publish organ at the end because publish is the only exit. */}
+      {/* ── WHO FITS ── the count, scored against the project and never
+          against what anyone pays, then the ranked list with dated
+          evidence and one reason per row; the publish organ at the end
+          because publish is the only exit. */}
       {phase === "fits" && (
-        <div className="mx-auto w-full max-w-[720px] px-[26px] pb-[250px]">
+        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-6">
           <button
             type="button"
-            onClick={() => { setPhase("stream"); scrollToWorkspace(); }}
-            className="mb-[22px] cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#8C8A85] hover:text-[#141414]"
+            onClick={() => { setPhase("live"); scrollToWorkspace(); }}
+            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#8C8A85] hover:text-[#141414]"
           >
-            Back to the conversation
+            Back to the project
           </button>
-          {fitsCard && (
-            <div className="mb-5 rounded-[12px] border border-[#E8E4DC] bg-white px-5 py-4">
-              {fitsCard.k === "working" ? (
-                <>
-                  <div className="mb-1.5 text-[15px] font-semibold">{fitsCard.title}</div>
-                  {fitsCard.lines.map((l, j) => (
-                    <p key={j} className="m-0 mb-1 text-[14px] leading-[1.55] text-[#5F5D59]">{l}</p>
-                  ))}
-                  {fitsCard.href && <a href={fitsCard.href} className="text-[13.5px]">{fitsCard.hrefLabel ?? fitsCard.href}</a>}
-                </>
-              ) : (
-                fitsCard.k === "info" && <p className="m-0 text-[14px] leading-[1.55] text-[#5F5D59]">{fitsCard.text}</p>
-              )}
-              <button type="button" onClick={() => setFitsCard(null)} className="mt-2 cursor-pointer border-0 bg-transparent p-0 text-[12.5px] text-[#A3A099] hover:text-[#141414]">Dismiss</button>
-            </div>
-          )}
           {rankedFits.length === 0 ? (
             <div className="max-w-[36em] text-[16px] leading-[1.6] text-[#6E6C67]">
               The market has not scored yet: say what you are buying and where it runs, and the evaluated vendors and service providers rank against it here.
             </div>
           ) : (
             <>
-              <h2 className="m-0 mb-2.5 max-w-[22em] text-[28px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
-                {cap(numWord(rankedFits.length))} of {numWord(fit?.total ?? rankedFits.length)} fit what you described.
+              <h2 className="m-0 mb-2.5 max-w-[24em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
+                {rankedFits.length} of {fit?.total ?? rankedFits.length} fit the project as it stands.
               </h2>
-              <p className="m-0 mb-2 max-w-[36em] text-[16px] leading-[1.6] text-[#6E6C67]">
-                Ordered by graded evidence against your requirement, not by what anyone pays. Every grade is dated.
-                {firstFit ? <> Say <em>why is {firstFit.name} first</em> and I will show the working.</> : null}
+              <p className="m-0 mb-2 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
+                Scored against the project above, not against what anyone pays. Change anything in the project and this list changes with it.
               </p>
-              <p className="m-0 mb-[26px] max-w-[36em] text-[14.5px] leading-[1.6] text-[#8C8A85]">
-                {cap(numWord(keptFits.length))} of {numWord(rankedFits.length)} kept. Untick anyone you do not want to hear from
-                {partnerDependent.length ? <>, or say <em>drop the ones that need a partner</em>.</> : rankedFits.length ? <>, or say <em>drop {rankedFits[rankedFits.length - 1].name}</em>.</> : "."}
+              <p className="m-0 mb-6 max-w-[38em] text-[14px] leading-[1.6] text-[#8C8A85]">
+                {cap(numWord(keptFits.length))} of {numWord(rankedFits.length)} kept for direct invites. Untick anyone you do not want to hear from
+                {partnerDependent.length ? <>, or say <em>drop the ones that need a partner</em>.</> : "."}
               </p>
-              <div className="flex flex-col">
-                {rankedFits.map((s) => {
+              <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8]">
+                {rankedFits.map((s, i) => {
                   const on = !removed.includes(s.slug);
                   const full = checksCount > 0 && s.matched.length === checksCount;
+                  const open = expandedFit === s.slug;
                   return (
-                    <button
-                      key={s.slug}
-                      type="button"
-                      onClick={() => setRemoved((r) => (on ? [...r, s.slug] : r.filter((x) => x !== s.slug)))}
-                      className="flex w-full cursor-pointer items-start gap-3.5 border-0 border-b border-solid border-[#F0EEE9] bg-transparent px-1 py-4 text-left hover:bg-[#FDFCFA]"
-                    >
-                      <span
-                        className={`mt-[3px] flex h-[19px] w-[19px] flex-none items-center justify-center rounded-[5px] text-[11px] font-bold ${on ? "bg-[#141414] text-white" : "border border-[#DDD9D1] text-transparent"}`}
-                        aria-hidden="true"
-                      >
-                        {on ? "✓" : ""}
-                      </span>
-                      <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
-                        <span className="flex flex-wrap items-baseline gap-2.5">
-                          <span className="text-[17px] font-semibold">{s.name}</span>
-                          <span className="text-[13px] text-[#A3A099]">{s.category}</span>
-                        </span>
-                        <span className="text-[14.5px] leading-[1.55] text-[#5F5D59]" style={{ textWrap: "pretty" }}>
-                          {s.matched.length
-                            ? `Evidenced for ${s.matched.slice(0, 3).map((m) => m.label).join(", ")}${s.matched.length > 3 ? ` and ${numWord(s.matched.length - 3)} more` : ""}.`
-                            : "On the curated market for this scope; no graded evidence against your named checks yet."}
-                        </span>
-                      </span>
-                      <span className="flex flex-none flex-col items-end gap-[5px]">
-                        {checksCount > 0 && (
-                          <span
-                            className={`rounded-[6px] px-2 py-1 text-[12px] font-semibold ${full ? "bg-[#EAF6EE] text-[#256B3E]" : "bg-[#F2F0EB] text-[#5F5F5F]"}`}
-                            style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' }}
-                          >
-                            {s.matched.length} of {checksCount}
+                    <div key={s.slug} data-fit={s.slug} className="border-b border-[#EFECE5]">
+                      <div className="flex w-full items-start gap-3.5 px-5 py-4">
+                        <button
+                          type="button"
+                          onClick={() => setRemoved((r) => (on ? [...r, s.slug] : r.filter((x) => x !== s.slug)))}
+                          aria-label={on ? `Drop ${s.name} from direct invites` : `Keep ${s.name} in direct invites`}
+                          className={`mt-[3px] flex h-[19px] w-[19px] flex-none cursor-pointer items-center justify-center rounded-[5px] border-0 text-[11px] font-bold ${on ? "bg-[#141414] text-white" : "border border-solid border-[#DDD9D1] bg-transparent text-transparent"}`}
+                        >
+                          {on ? "✓" : ""}
+                        </button>
+                        <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
+                          <span className="flex flex-wrap items-baseline gap-2.5">
+                            <span className="text-[16.5px] font-semibold">{s.name}</span>
+                            <span className="text-[12.5px] text-[#A3A099]">{s.category}</span>
                           </span>
-                        )}
-                        <span className="text-[11px] text-[#A3A099]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' }}>
-                          evaluated {fmtDate(s.last_verified)}
-                        </span>
-                      </span>
-                    </button>
+                          <span className="text-[14px] leading-[1.55] text-[#5F5D59]" style={{ textWrap: "pretty" }}>
+                            {s.matched.length
+                              ? `Evidenced for ${s.matched.slice(0, 3).map((m) => m.label).join(", ")}${s.matched.length > 3 ? ` and ${numWord(s.matched.length - 3)} more` : ""}.`
+                              : "On the curated market for this scope; no graded evidence against your named checks yet."}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setExpandedFit(open ? null : s.slug)}
+                            className="cursor-pointer self-start border-0 bg-transparent p-0 text-[12.5px] text-[#B4650B] underline hover:text-[#8A4D08]"
+                          >
+                            {open ? "Close the working" : `Why position ${i + 1}`}
+                          </button>
+                        </div>
+                        <div className="flex flex-none flex-col items-end gap-[5px]">
+                          {checksCount > 0 && (
+                            <span
+                              className={`rounded-[6px] px-2 py-1 text-[12px] font-semibold ${full ? "bg-[#EAF6EE] text-[#256B3E]" : "bg-[#F2F0EB] text-[#5F5F5F]"}`}
+                              style={mono}
+                            >
+                              {s.matched.length} of {checksCount}
+                            </span>
+                          )}
+                          <span className="text-[11px] text-[#A3A099]" style={mono}>
+                            evaluated {fmtDate(s.last_verified)}
+                          </span>
+                        </div>
+                      </div>
+                      {open && (
+                        <div className="border-t border-[#F0EEE9] bg-white px-5 py-4 pl-[52px]">
+                          <p className="m-0 mb-1 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
+                            Position {i + 1} of {rankedFits.length}, ordered by graded evidence against your named checks, never by what anyone pays.
+                          </p>
+                          {s.matched.length > 0 && (
+                            <p className="m-0 mb-1 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
+                              Evidenced for: {s.matched.map((m) => `${m.label} (${gradeWord(m.grade)})`).join(", ")}.
+                            </p>
+                          )}
+                          {s.missed.length > 0 && (
+                            <p className="m-0 mb-1 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
+                              Not evidenced for: {s.missed.map((m) => m.label).join(", ")}.
+                            </p>
+                          )}
+                          <p className="m-0 mb-1.5 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
+                            Across the whole dataset this record fully meets {s.yes_count} of 40 capabilities. Graded {fmtDate(s.last_verified)}.
+                          </p>
+                          <a href={`/sase/vendors/${s.slug}/`} className="text-[13.5px]">Read the full record, with every source behind these grades</a>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -1664,16 +1892,16 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 </div>
                 {keptFits.length > 0 && (
                   <div className="mt-3">
-                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase text-[#B4650B]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: ".12em" }}>Your shortlist</p>
+                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: ".12em" }}>Your shortlist</p>
                     <ol className="m-0 list-none p-0">
                       {keptFits.map((r, i) => (
                         <li key={r.slug} className="border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
                           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                            <span className="text-[11px] text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' }}>{String(i + 1).padStart(2, "0")}</span>
+                            <span className="text-[11px] text-[#8C8A85]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
                             <a href={`/sase/vendors/${r.slug}/`} className="text-[14px] font-semibold text-[#141414] underline decoration-[#C9C5BC] underline-offset-2 hover:decoration-[#141414]">{r.name}</a>
                             <span className="text-[12.5px] text-[#6E6C67]">{r.category} · graded {fmtDate(r.last_verified)}</span>
                             {published.invited.includes(r.slug) && (
-                              <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: ".08em" }}>invited</span>
+                              <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
                             )}
                           </div>
                           {r.matched.length > 0 && (
@@ -1712,7 +1940,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     : ""}
                   . You choose which of them receive your contact details, and when. Assumptions publish labelled as assumptions; example content never publishes at all.
                 </p>
-                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: ".12em" }}>What the notice carries</p>
+                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
                 <p className="m-0 mb-1.5 text-[12.5px] leading-loose">
                   {[
                     typeof requirement.estate?.sites === "number"
@@ -1771,7 +1999,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 </button>
                 {testMode && !securityScope && (
                   <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">
-                    Test mode covers the security engine today, and this is a network requirement. Drop <span style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' }}>?test=1</span> from the address to publish it for real.
+                    Test mode covers the security engine today, and this is a network requirement. Drop <span style={mono}>?test=1</span> from the address to publish it for real.
                   </p>
                 )}
                 {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
@@ -1821,29 +2049,112 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       )}
 
       {/* The door keeps the page's journey strip and capability block
-          beneath the workspace; the working stream never carries them. The
-          spacer keeps their tail clear of the fixed dock until the footer
-          takes over. */}
+          beneath the twin; the working surface never carries them. */}
       {phase === "door" && afterPrompt}
 
-      {/* ── THE PROMPT DOCK ── sticky at the end of the workspace, so it
-          pins to the viewport bottom for the whole working scroll and
-          releases before the estate footer (the EEAT ruling): opaque
-          backdrop, matching feather, no backdrop-filter, no gradient. */}
+      {/* ── THE EDIT SHEET ── bottom-anchored, one focal question with
+          its rationale and full option set; closing returns to the
+          project. It contains no text input by design: the own-words
+          path is the dock below. */}
+      {editSlot && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center px-[26px] pb-[26px]"
+          style={{ background: "rgba(20,20,20,.3)" }}
+          onClick={() => setEdit(null)}
+        >
+          <div
+            className="w-full max-w-[620px] rounded-[18px] border border-[#DDD9D1] bg-white px-6 pb-5 pt-[22px]"
+            style={{ boxShadow: "0 14px 44px rgba(20,20,20,.18)", maxHeight: "min(76vh, 640px)", overflowY: "auto" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-baseline gap-3">
+              <span className="min-w-0 flex-1 text-[19px] font-semibold leading-[1.35]" style={{ textWrap: "pretty" }}>{editSlot.q}</span>
+              <button
+                type="button"
+                onClick={() => setEdit(null)}
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#A3A099] hover:text-[#141414]"
+              >
+                Close
+              </button>
+            </div>
+            <div className="mb-4 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#6E6C67]">{editSlot.why}</div>
+            {(() => {
+              const held = editSlot.path
+                ? standingAt(editSlot.path).map((f) => ({
+                    key: f.id,
+                    label: cap(factLabel(f)),
+                    meta: f.provenance === "stated" ? (f.source === "answer" ? "you chose this" : f.quote ? `“${f.quote}”` : "your words") : f.reason ?? "netify guessed",
+                    kind: f.provenance === "inferred" ? "drop" : "clear",
+                    act: () => dropFact(f.id),
+                  }))
+                : (editSlot.notePrefix
+                    ? noted.filter((n) => n.id.startsWith(editSlot.notePrefix as string)).map((n) => ({
+                        key: n.id,
+                        label: n.label,
+                        meta: "you chose this",
+                        kind: "clear",
+                        act: () => clearNotes(editSlot.notePrefix as string),
+                      }))
+                    : []);
+              if (!held.length) return null;
+              return (
+                <div className="mb-4">
+                  <div className="mb-1 text-[10px] font-semibold uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: ".11em" }}>Held now</div>
+                  {held.map((h) => (
+                    <div key={h.key} className="flex items-baseline gap-2.5 border-t border-[#F0EEE9] py-2">
+                      <span className="min-w-0 flex-1 text-[14.5px]">{h.label}</span>
+                      <span className="min-w-0 flex-[1.1] text-[12px] italic text-[#A3A099]">{h.meta}</span>
+                      <button
+                        type="button"
+                        onClick={h.act}
+                        className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                        style={{ ...mono, letterSpacing: "0.07em" }}
+                      >
+                        {h.kind}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+            <div className="flex flex-col gap-[7px]">
+              {editSlot.options.map((o) => (
+                <button
+                  key={o.label}
+                  type="button"
+                  onClick={() => landOption(editSlot, o)}
+                  className="flex w-full cursor-pointer items-center gap-3.5 rounded-[11px] border border-[#E3E0DA] bg-white px-[15px] py-[13px] hover:border-[#141414] hover:bg-[#FDFCFA]"
+                >
+                  <span className="flex-1 text-left text-[15.5px] leading-[1.45]">{o.label}</span>
+                  {o.effect && <span className="max-w-[15em] flex-none text-right text-[12.5px] leading-[1.4] text-[#8C8A85]">{o.effect}</span>}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3.5 text-[13px] leading-[1.5] text-[#A3A099]">
+              Or close this and say it in your own words below. These are only the answers heard most.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── THE PROMPT DOCK ── fixed to the viewport bottom: opaque
+          backdrop, matching feather, no backdrop-filter, no gradient.
+          The document's bottom padding keeps the estate footer clear. */}
       <div
+        ref={dockRef}
         data-dock="1"
         className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-[26px] pt-3.5"
         style={{ background: "#fbfaf8", boxShadow: "0 -18px 22px 10px #fbfaf8", paddingBottom: "max(22px, env(safe-area-inset-bottom))" }}
       >
-        <div className="pointer-events-auto w-full max-w-[720px]">
+        <div className="pointer-events-auto w-full max-w-[1000px]">
           {phase !== "door" && (
-            <div className="hidden flex-wrap gap-[7px] px-0.5 pb-[9px] sm:flex">
+            <div className="flex gap-[7px] overflow-x-auto px-0.5 pb-[9px]" style={{ scrollbarWidth: "none" }}>
               {shortcuts.map((label) => (
                 <button
                   key={label}
                   type="button"
                   onClick={() => { setDraft(label); inputRef.current?.focus(); }}
-                  className="cursor-pointer rounded-full border border-[#E3E0DA] bg-white px-[13px] py-[7px] text-[13.5px] text-[#5F5D59] hover:border-[#141414] hover:text-[#141414]"
+                  className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E3E0DA] bg-white px-[13px] py-[7px] text-[13.5px] text-[#5F5D59] hover:border-[#141414] hover:text-[#141414]"
                 >
                   {label}
                 </button>
@@ -1858,7 +2169,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           {pasteSummary && <p className="m-0 px-1 pb-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{pasteSummary}</p>}
           {cycleError && <p className="m-0 px-1 pb-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">{cycleError}</p>}
           {voiceError && <p className="m-0 px-1 pb-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{voiceError}</p>}
-          <div className="flex items-end gap-2.5 rounded-[16px] border border-[#DDD9D1] bg-white py-1.5 pl-[18px] pr-2" style={{ boxShadow: "0 6px 26px rgba(20,20,20,.09)" }}>
+          <div className="flex items-end gap-2.5 rounded-[15px] border border-[#DDD9D1] bg-white py-1.5 pl-[18px] pr-2" style={{ boxShadow: "0 6px 26px rgba(20,20,20,.09)" }}>
             <textarea
               ref={inputRef}
               value={draft}
@@ -1876,9 +2187,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   void ingestText(text, "paste");
                 }
               }}
-              placeholder={phase === "door" ? EXAMPLES[0] : PLACEHOLDERS[ph]}
+              placeholder={phase === "door" ? EXAMPLE_CARDS[0].label : PLACEHOLDERS[ph]}
               rows={1}
-              className="h-[52px] flex-1 resize-none border-0 bg-transparent py-3.5 text-[17px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
+              className="h-[52px] flex-1 resize-none border-0 bg-transparent py-3.5 text-[16.5px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
             />
             {voiceSupported && (
               <button
@@ -1900,7 +2211,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              title="Drop or choose a plain-text document and I will read it"
+              title="Drop or choose a plain-text document and it will be read into the project"
               className="mb-[7px] h-[38px] w-[38px] flex-none cursor-pointer rounded-[10px] border border-[#E3E0DA] bg-white text-[15px] text-[#8C8A85] hover:border-[#141414] hover:text-[#141414]"
             >
               ↑
@@ -1912,19 +2223,20 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               disabled={!sendReady}
               className={`mb-[7px] flex-none cursor-pointer rounded-[11px] border-0 px-[18px] py-[11px] text-[15px] font-semibold ${sendReady ? "bg-[#F5A21B] text-[#141414] hover:bg-[#E5940F]" : "bg-[#F0EEE9] text-[#A3A099]"} disabled:cursor-not-allowed`}
             >
-              {busy ? "Reading…" : phase === "door" ? "Start" : "Send"}
+              {busy ? "Reading…" : phase === "door" ? "Start" : "Apply"}
             </button>
           </div>
-          <p className="m-0 px-1 pb-0 pt-[9px] text-[13px] leading-normal text-[#A3A099]">
-            Everything on this page can be done by saying it. Drop a plain-text document on the arrow and I will read it. Nothing is published without your signature.
+          <p className="m-0 px-1 pb-0 pt-[9px] text-[12.5px] leading-normal text-[#A3A099]">
+            {notice ??
+              "Type to change the project above; everything on this page can be done by saying it. Drop a plain-text document on the arrow and it will be read in. Nothing publishes without your signature."}
           </p>
         </div>
       </div>
 
       {/* ── THE REQUIREMENT SHEET ── a deliberately opened overlay, never
           a column; every row carries its provenance. */}
-      {sheetOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end" style={{ background: "rgba(20,20,20,.34)" }} onClick={() => setSheetOpen(false)}>
+      {reqOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end" style={{ background: "rgba(20,20,20,.34)" }} onClick={() => setReqOpen(false)}>
           <div
             className="flex h-full flex-col bg-white"
             style={{ width: "min(660px, 100%)", boxShadow: "-14px 0 44px rgba(20,20,20,.18)" }}
@@ -1939,7 +2251,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               </div>
               <button
                 type="button"
-                onClick={() => setSheetOpen(false)}
+                onClick={() => setReqOpen(false)}
                 className="flex-none cursor-pointer border-0 bg-transparent text-[15px] text-[#8C8A85] hover:text-[#141414]"
               >
                 Close
@@ -1951,7 +2263,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               )}
               {sheetSections.map((sec) => (
                 <div key={sec.key} className="pb-6">
-                  <div className="border-b border-[#141414] pb-2 text-[11px] uppercase text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.11em" }}>
+                  <div className="border-b border-[#141414] pb-2 text-[11px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.11em" }}>
                     {sec.title}
                   </div>
                   {sec.rows.map((r, j) => (
