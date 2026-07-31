@@ -176,18 +176,18 @@ const ITEM_BY_ID: Record<string, { item: TaxonomyItem; section: string }> = (() 
   return out;
 })();
 
-/* ---- The three example openers (the reference's empty state): sector-
-        tagged cards; clicking one EXECUTES it, exactly as typing it
-        would. Each is a sentence the live extractor genuinely reads. ---- */
-const EXAMPLE_CARDS = [
-  { tag: "Retail", label: "We run 240 UK retail sites on MPLS and the contract ends March 2027" },
-  { tag: "Healthcare", label: "We have 15 NHS clinic sites, 10 in the UK and 5 international, already on SD-WAN" },
-  { tag: "Audit driven", label: "Our audit flagged remote access for 1,900 staff and we need SASE to fix it" },
-];
+/* NO EXAMPLE OPENERS (Robert's live ruling, 31 Jul 2026, overriding the
+ * reference's empty state): nobody's estate matches a fictional sentence,
+ * so three oddly specific cards read as nonsense at first contact, and
+ * clicking one wrote invented facts into the ledger as "your words".
+ * The empty state is THE PROJECT ITSELF: every slot visible, dashed and
+ * clickable at zero, the whole evaluated market beside a 0% meter. The
+ * first thing a buyer meets is their own project's shape, not someone
+ * else's sentence. Before anything lands, the dock placeholder instructs
+ * rather than demonstrates. */
 
 /* The dock placeholder rotates through correction and interrogation,
- * not instruction; on the door it is the full first example so the
- * register is visible before anyone types. */
+ * not instruction, once the project is live. */
 const PLACEHOLDERS = [
   "Change anything. “Add PCI DSS”, “actually 246 sites”, “who fits?”",
   "Say what you want changed and the project changes above",
@@ -479,7 +479,7 @@ function parseCommand(raw: string): Command | null {
 /** afterPrompt: the page slots the journey strip and the capability
  *  block beneath the twin; they render on the door only. */
 export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }) {
-  const [phase, setPhase] = useState<"door" | "live" | "fits">("door");
+  const [phase, setPhase] = useState<"live" | "fits">("live");
   const [market, setMarket] = useState<Market | null>(null);
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
   const [noted, setNoted] = useState<NotedItem[]>([]);
@@ -644,7 +644,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
        for what the link itself carries. */
     if (seedFacts.length) {
       const m = applyMerge(seedFacts, "link");
-      if (m.changed.length) { setPhase("live"); markChanged(m.changed, m.facts); }
+      if (m.changed.length) markChanged(m.changed, m.facts);
     }
     if (q) {
       firstKeyAt.current = Date.now();
@@ -837,8 +837,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     .sort((a, b) => b.w - a.w)
     .slice(0, 3)
     .map((s) => s.label.toLowerCase());
-  const pctNote =
-    pct >= 78
+  const pctNote = !started
+    ? "Nothing yet. Say one sentence below, or answer any question here."
+    : pct >= 78
       ? "Complete enough to price. What is left will not stop anyone quoting."
       : topMissing.length
         ? `Still needed: ${topMissing.join(", ")}. Say it below, or fill it in above.`
@@ -949,9 +950,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         ev("workspace_earned_answered", { q: l.id, kind: "note" });
       }
       setEdit(null);
-      if (phase === "door") setPhase("live");
     },
-    [applyMerge, markChanged, phase],
+    [applyMerge, markChanged],
   );
 
   /* ---- The extraction cycle (the same organ; change is shown in the
@@ -1008,7 +1008,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const plan = chunkForIngest(raw);
       if (!plan.chunks.length) return;
       setPasteSummary(null);
-      if (phase === "door") setPhase("live");
       const factsBefore = factsRef.current.filter((f) => !f.struck).length;
       const receiptsBefore = receiptsRef.current.length;
       ev("workspace_ingest", { source, chunks: plan.chunks.length, chars: plan.readChars, truncated: plan.truncated ? 1 : 0 });
@@ -1021,7 +1020,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
       setPasteSummary(ingestSummary(landed, kept, plan));
     },
-    [phase, runCycle],
+    [runCycle],
   );
 
   /* ---- The send: one entry for everything typed, spoken or clicked
@@ -1033,7 +1032,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     if (!text || busy) return;
     setDraft("");
     if (!firstKeyAt.current) firstKeyAt.current = Date.now();
-    if (phase === "door") setPhase("live");
 
     const cmd = parseCommand(text);
     if (cmd) {
@@ -1604,31 +1602,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         </div>
       )}
 
-      {/* ── THE DOOR ── the page renders the ruled H1, promise and trust
-          paragraphs above; the twin adds the three sector-tagged example
-          cards (clicking one starts the project with that sentence,
-          exactly as typing it would) and the dock waits below. */}
-      {phase === "door" && (
-        <div className="mx-auto w-full max-w-[860px] px-[26px] pb-10 pt-2">
-          <div className="grid gap-2.5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
-            {EXAMPLE_CARDS.map((e) => (
-              <button
-                key={e.tag}
-                type="button"
-                onClick={() => void send(e.label)}
-                className="flex cursor-pointer flex-col gap-[7px] rounded-[12px] border border-[#E0DCD3] bg-[#FBFAF8] p-4 text-left hover:border-[#141414] hover:bg-white"
-              >
-                <span className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.09em" }}>{e.tag}</span>
-                <span className="text-[14.5px] leading-[1.5] text-[#33302C]">{e.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── THE LIVE TWIN ── the project as a structured, living object:
-          understanding and the market side by side, then the five groups
-          of labelled slots. No log, no narration; change is shown. */}
+      {/* ── THE LIVE TWIN ── the project as a structured, living object,
+          from the very first paint (Robert's ruling: the empty project IS
+          the door): understanding and the market side by side, then the
+          five groups of labelled slots, every empty one clickable. No
+          log, no narration; change is shown. */}
       {phase === "live" && (
         <div className="mx-auto flex w-full max-w-[1000px] flex-col gap-[18px] px-[26px] pb-6">
           <div className="grid gap-3.5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
@@ -2048,9 +2026,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         </div>
       )}
 
-      {/* The door keeps the page's journey strip and capability block
-          beneath the twin; the working surface never carries them. */}
-      {phase === "door" && afterPrompt}
+      {/* Until the first real fact lands, the page's journey strip and
+          capability block sit beneath the empty project; the working
+          surface never carries them. */}
+      {phase === "live" && !started && afterPrompt}
 
       {/* ── THE EDIT SHEET ── bottom-anchored, one focal question with
           its rationale and full option set; closing returns to the
@@ -2147,7 +2126,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         style={{ background: "#fbfaf8", boxShadow: "0 -18px 22px 10px #fbfaf8", paddingBottom: "max(22px, env(safe-area-inset-bottom))" }}
       >
         <div className="pointer-events-auto w-full max-w-[1000px]">
-          {phase !== "door" && (
+          {started && (
             <div className="flex gap-[7px] overflow-x-auto px-0.5 pb-[9px]" style={{ scrollbarWidth: "none" }}>
               {shortcuts.map((label) => (
                 <button
@@ -2187,7 +2166,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   void ingestText(text, "paste");
                 }
               }}
-              placeholder={phase === "door" ? EXAMPLE_CARDS[0].label : PLACEHOLDERS[ph]}
+              placeholder={started ? PLACEHOLDERS[ph] : "Describe your project in your own words. One sentence is enough."}
               rows={1}
               className="h-[52px] flex-1 resize-none border-0 bg-transparent py-3.5 text-[16.5px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
             />
@@ -2223,7 +2202,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               disabled={!sendReady}
               className={`mb-[7px] flex-none cursor-pointer rounded-[11px] border-0 px-[18px] py-[11px] text-[15px] font-semibold ${sendReady ? "bg-[#F5A21B] text-[#141414] hover:bg-[#E5940F]" : "bg-[#F0EEE9] text-[#A3A099]"} disabled:cursor-not-allowed`}
             >
-              {busy ? "Reading…" : phase === "door" ? "Start" : "Apply"}
+              {busy ? "Reading…" : started ? "Apply" : "Start"}
             </button>
           </div>
           <p className="m-0 px-1 pb-0 pt-[9px] text-[12.5px] leading-normal text-[#A3A099]">
