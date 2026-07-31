@@ -255,6 +255,27 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?)\\b`));
   if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim());
 
+  /* Timeline (round three, 31 Jul 2026; the P1 lane's finding made real:
+   * nothing here ever landed constraints.timeline, while R7 holds the
+   * signature shut on it, so every buyer who stated their date naturally
+   * was told the timeline was missing. Buyers state time as a date with a
+   * delivery verb ("live by June 2027"), a contract event ("the MPLS
+   * contract ends March 2027": the work must land before the estate goes
+   * dark, so the phrase IS the timeline), a horizon ("within 9 months")
+   * or a bare deadline ("before Q2 2027"). Every pattern requires a dated
+   * anchor, so "by our team" can never land. The buyer's whole clause is
+   * the value: the path is free text and their words beat normalisation. */
+  {
+    const DATEISH = "(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+20\\d\\d|(?:q[1-4]|h[12])\\s*20\\d\\d|(?:spring|summer|autumn|winter)\\s+20\\d\\d|20\\d\\d)";
+    const timeline =
+      hit(new RegExp(`(?:live|go[- ]?live|in place|delivered|deployed|migrat(?:ed|ing)|rolled out|completed?|operational|finished|cut(?:ting)? over|ready|working|done)[^.,;]{0,25}?(?:by|before|during|in|for)\\s+(?:the\\s+)?(?:end of\\s+)?${DATEISH}`)) ??
+      hit(new RegExp(`(?:contract|term|agreement|mpls|circuits?)[^.,;]{0,30}?(?:ends?|expir(?:es?|y|ing)|renews?|renewal|up)[^.,;]{0,12}?${DATEISH}`)) ??
+      hit(new RegExp(`(?:timeline|deadline|target)[^.,;]{0,12}?(?:is|:)?[^.,;]{0,20}?${DATEISH}`)) ??
+      hit(new RegExp(`(?:by|before|no later than)\\s+(?:the\\s+)?(?:end of\\s+)?${DATEISH}`)) ??
+      hit(/within\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)/);
+    if (timeline) say("constraints.timeline", timeline[0].trim(), timeline[0].trim());
+  }
+
   /* The sector inference map, widened under Robert's intake-truth ruling
    * (28 Jul 2026, mapping reviewed and approved by him): buyers describe
    * their ESTATE, not their sector, so the estate vocabulary carries the
