@@ -39,6 +39,7 @@ import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
+import ConstellationScene from "@/components/ConstellationScene";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -140,17 +141,17 @@ const OTHER_NETIFY = [
 ];
 const looksLikeAnotherNetify = (text: string) => OTHER_NETIFY.some((r) => r.test(text));
 
-type MarketVendor = { slug: string; name: string; category: string; last_verified: string; yes_count: number; scopes: string[] };
+export type MarketVendor = { slug: string; name: string; category: string; last_verified: string; yes_count: number; scopes: string[] };
 type MarketNotice = { id: string; title: string; scope: string[]; sites: number | null; created: number };
-type Market = { rulebook_version: string; vendors: MarketVendor[]; latest_evaluation: string; notices: MarketNotice[]; counts: { vendors: number; notices: number } };
+export type Market = { rulebook_version: string; vendors: MarketVendor[]; latest_evaluation: string; notices: MarketNotice[]; counts: { vendors: number; notices: number } };
 
-type FitEvidence = { id: string; label: string; grade: string };
-type FitSupplier = {
+export type FitEvidence = { id: string; label: string; grade: string };
+export type FitSupplier = {
   slug: string; name: string; category: string; last_verified: string;
   evidence_coverage_pct: number; yes_count: number; coverage: Record<string, string>;
   matched: FitEvidence[]; missed: FitEvidence[];
 };
-type FitState = {
+export type FitState = {
   mode: "graded" | "compiled"; count?: number; total?: number; note?: string;
   suppliers: FitSupplier[]; directory: Array<{ slug: string; name: string }>;
   checks?: Array<{ id: string; label: string }>;
@@ -347,22 +348,26 @@ const TWIN_SLOTS: TwinSlot[] = [
   },
   {
     id: "sites", group: "org", label: "Sites", w: 3, cta: "How many sites?", q: "How many sites are in scope?",
-    why: "Volume changes cost per site more than any other single number. A round figure is fine; correct it any time.",
+    why: "Volume changes cost per site more than any other single number. Type the exact figure, or pick the range it falls in; correct it any time.",
     path: "estate.sites",
+    /* Robert, 1 Aug 2026: "About" read as a guess dressed up as a
+     * question. "Up to N" is an honest range label for the same landed
+     * value; the edit sheet also carries a manual number entry now
+     * (round the site count itself never changed, only the words). */
     options: [10, 25, 50, 100, 250, 500, 1000].map((n) => ({
-      label: `About ${n.toLocaleString("en-GB")}`, effect: "", land: fact("estate.sites", n),
+      label: `Up to ${n.toLocaleString("en-GB")}`, effect: "", land: fact("estate.sites", n),
     })),
   },
   {
     id: "people", group: "org", label: "People", w: 1, cta: "How many staff?", q: "Roughly how many people?",
-    why: "Cloud security is licensed per user, so the user count drives a large part of any quote.",
+    why: "Cloud security is licensed per user, so the user count drives a large part of any quote. Type the exact figure, or pick the range it falls in.",
     path: "estate.users",
     /* The Mid-market chip lands here as a noted band: the ledger holds
      * real counts only, and a band is not a count. A stated number
      * always wins the line. */
     notePrefix: "chip-mid",
     options: [50, 100, 250, 500, 1000, 2500, 5000].map((n) => ({
-      label: `About ${n.toLocaleString("en-GB")}`, effect: "", land: fact("estate.users", n),
+      label: `Up to ${n.toLocaleString("en-GB")}`, effect: "", land: fact("estate.users", n),
     })),
   },
   {
@@ -913,6 +918,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   );
   const marketTotal = fit?.total ?? market?.counts.vendors ?? null;
   const fittingCount = buying && fit?.mode === "graded" ? rankedFits.length : marketTotal;
+
+  /** Vendors the buyer has NAMED in their own retained words (quotes,
+   *  receipts). A tag for the Constellation, never a rank change: naming
+   *  is not evidence. Restored 1 Aug 2026 alongside the Constellation
+   *  itself (see ConstellationScene.tsx). */
+  const namedSlugs = useMemo(() => {
+    const text = [
+      ...facts.map((f) => `${f.quote ?? ""} ${f.reason ?? ""}`),
+      ...receipts.map((r) => r.text),
+    ].join(" ").toLowerCase();
+    const out = new Set<string>();
+    if (text.trim())
+      for (const v of market?.vendors ?? []) {
+        const full = v.name.toLowerCase();
+        const first = full.split(/[\s/]+/)[0];
+        const hit = text.includes(full) || (first.length >= 4 && !["check", "orange"].includes(first) && new RegExp(`\\b${first}\\b`).test(text));
+        if (hit) out.add(v.slug);
+      }
+    return out;
+  }, [facts, receipts, market]);
   const narrowedBy = [
     buying ? "what you are buying" : null,
     opModel ? "who runs it" : null,
@@ -2379,6 +2404,23 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           surface never carries them. */}
       {phase === "live" && !started && afterPrompt}
 
+      {/* ── THE CONSTELLATION ── restored 1 Aug 2026. R1b (30 Jul,
+          Robert's half-a-coke rule): distance is fit, and a ranked view
+          is the half that generates at publish, so it renders here, at
+          the bottom of the page, once the notice is live and not
+          before. Nothing is hidden behind a padlock; it simply does not
+          exist yet. */}
+      <ConstellationScene
+        market={market}
+        fit={fit}
+        published={published}
+        buying={buying}
+        added={added}
+        namedSlugs={namedSlugs}
+        started={started}
+        fitSlugs={fitSlugs}
+      />
+
       {/* ── THE EDIT SHEET ── bottom-anchored, one focal question with
           its rationale and full option set; closing returns to the
           project. It contains no text input by design: the own-words
@@ -2446,6 +2488,39 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 </div>
               );
             })()}
+            {/* Manual exact-number entry (Robert, 1 Aug 2026): the ranges
+                below are a fast pick, not the only path. Count-type slots
+                (Sites, People) get a real number field so a known figure
+                never has to be approximated into a bucket. */}
+            {(editSlot.path === "estate.sites" || editSlot.path === "estate.users") && (
+              <form
+                className="mb-2.5 flex items-center gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const input = e.currentTarget.elements.namedItem("manualCount") as HTMLInputElement;
+                  const n = Math.round(Number(input.value));
+                  if (!Number.isFinite(n) || n <= 0) return;
+                  landOption(editSlot, { label: n.toLocaleString("en-GB"), effect: "", land: fact(editSlot.path as AllowedPath, n) });
+                }}
+              >
+                <input
+                  key={editSlot.id}
+                  name="manualCount"
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  placeholder="Type the exact number"
+                  className="w-full rounded-[11px] border border-[#E3E0DA] bg-white px-[15px] py-[13px] text-[15.5px] outline-none focus:border-[#141414]"
+                />
+                <button
+                  type="submit"
+                  className="flex-none cursor-pointer rounded-[11px] border-0 bg-[#141414] px-[18px] py-[13px] text-[14px] font-semibold text-white hover:bg-[#2b2b2b]"
+                >
+                  Set
+                </button>
+              </form>
+            )}
             <div className="flex flex-col gap-[7px]">
               {editSlot.options.map((o) => (
                 <button
