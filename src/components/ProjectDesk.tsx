@@ -2253,10 +2253,25 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           sections of labelled rows, from the very first paint (Robert's
           ruling: the empty project IS the door): every empty line
           visible, dashed and clickable at zero. Change is shown in the
-          rows; the thread above only ever repeats the diff. */}
+          rows; the thread above only ever repeats the diff.
+
+          Round 13 catch (2 Aug 2026, Robert, a ChatGPT screenshot: "does
+          this look like ChatGPT? I want it in one section"). Rounds
+          10-12 closed the seam between the composer and the conversation
+          thread, but this document was still its own bordered, shadowed
+          card -- a third box on the page, the exact thing the ChatGPT
+          reference never does (one continuous canvas, no boxes at all).
+          Asked directly rather than guessed, since this panel had been
+          ruled a deliberately distinct "document" earlier in the
+          project: his answer was to drop the boundary here too. The
+          card's own background was already #FBFAF8, the same value as
+          the page's #fbfaf8 (round 12) -- only the border and the drop
+          shadow were drawing a line that color alone no longer needed
+          to. Both are gone; the padding stays, so the document still
+          reads as its own paragraph, just without a frame around it. */}
       {phase === "live" && (
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-6 pt-[22px]">
-          <div className="rounded-[16px] border border-[#E5E1D9] bg-[#FBFAF8] px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]" style={{ boxShadow: "0 2px 10px rgba(20,20,20,.04)" }}>
+          <div className="px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]">
           <div className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
           <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
           <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#8C8A85]">
