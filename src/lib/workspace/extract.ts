@@ -348,7 +348,17 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   if (hit(/azure/)) say("estate.cloud", ["azure"], "Azure");
   if (hit(/google workspace|gsuite/)) say("estate.cloud", ["google"], "Google Workspace");
   if (hit(/\baws\b/)) say("estate.cloud", ["aws"], "AWS");
-  if (hit(/sd-?wan/)) say("estate.existingNetwork", ["sdwan"], "SD-WAN");
+  /* 1 Aug 2026, Robert's live catch: a bare "SD-WAN" (his very first word in
+   * a brand-new project) landed as estate.existingNetwork -- "you already
+   * run this" -- when he meant the opposite, he wanted to buy it. The
+   * unqualified mention is genuinely ambiguous, but a fresh project with no
+   * existing-estate language is buying intent far more often than not, so
+   * the existing-network read now requires one of its own signal words.
+   * Qualified mentions ("we're on SD-WAN already", "replacing our SD-WAN")
+   * still land here exactly as before; the buying-intent fallback below
+   * covers the bare case, symmetrically with SASE/SSE/managed security. */
+  const existingEstateSignal = /\b(?:already|currently|current|existing|today|right now|at the moment|in place|we (?:run|have|use|are on)|running on|our current|legacy)\b/;
+  if (hit(/sd-?wan/) && existingEstateSignal.test(t)) say("estate.existingNetwork", ["sdwan"], "SD-WAN");
   if (hit(/\bmpls\b/)) say("estate.existingNetwork", ["mpls"], "MPLS");
 
   if (hit(/incident|breach|phishing|attack|compromis|hacked/)) say("drivers", ["incident"], "incident");
@@ -384,7 +394,13 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   // of the core five a notice cannot publish without (R7). Present
   // participle only: "replaced X with Y" is an estate they already have,
   // not a purchase they are making, and must keep reading that way.
-  const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|move to|moving to|migrat\\w+ to|replac(?:e|ing) \\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
+  // 1 Aug 2026, Robert's live catch continued: "replac(?:e|ing) \w+ with"
+  // only ever matched a single bare word between "replacing" and "with",
+  // so real sentences ("replacing our legacy MPLS with SD-WAN") never
+  // qualified and the whole clause silently missed procurement.buying.
+  // Widened to up to four words, still bounded so it cannot run past a
+  // clause boundary and swallow an unrelated "with" later in the sentence.
+  const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|move to|moving to|migrat\\w+ to|replac(?:e|ing) (?:\\w+\\s+){0,3}\\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
   const buyRe = (term: string) => new RegExp(`${seek}[^.!?]{0,60}\\b${term}|\\b${term}\\b[^.!?]{0,30}(?:rollout|roll-out|project|procurement|tender|rfp)`);
   if (hit(/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/)) {
     say("procurement.buying", "managed_security", "managed security");
@@ -396,6 +412,17 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     // the estate: withdraw the blanket existing-network claim above.
     const i = out.findIndex((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
     if (i >= 0) out.splice(i, 1);
+  } else if (!existingEstateSignal.test(t)) {
+    /* 1 Aug 2026, Robert's live catch: none of the seeking-verb patterns
+     * above require one, so a buyer who typed nothing but the bare term --
+     * "SASE" on its own reached the ledger not at all; "SD-WAN" on its own
+     * reached it as the wrong field (see above) -- got silence or a lie.
+     * A bare mention with no existing-estate language is buying intent:
+     * this is the parity fallback, same four terms, same priority order,
+     * landed with the bare word as its own quote. */
+    if (hit(/\bsase\b/)) say("procurement.buying", "sase", "SASE");
+    else if (hit(/\bsse\b|security service edge|secure service edge/)) say("procurement.buying", "sse", "SSE");
+    else if (hit(/sd-?wan/)) say("procurement.buying", "sdwan", "SD-WAN");
   }
 
   // Operating model: the managed words must attach to the SERVICE BEING

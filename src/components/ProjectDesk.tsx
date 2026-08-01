@@ -285,10 +285,15 @@ const fmtDate = (iso: string): string => {
 type TwinLand =
   | { kind: "fact"; path: AllowedPath; value: string | number }
   | { kind: "note"; id: string; text: string; section: string };
-type TwinOption = { label: string; effect: string; land: TwinLand };
+/** sectorOnly (round 7, restore): an option that only earns its place once
+ *  the buyer's own standing sector matches — the same "influence, never a
+ *  second ledger" law the sector packs already keep (Robert, 1 Aug 2026:
+ *  "we only need Healthcare compliance questions if the user selects
+ *  Healthcare"). Undefined means the option applies to every sector. */
+type TwinOption = { label: string; effect: string; land: TwinLand; sectorOnly?: RegExp };
 type TwinSlot = {
   id: string;
-  group: "org" | "estate" | "why" | "buying";
+  group: "org" | "estate" | "why" | "buying" | "change" | "support" | "commercial" | "services" | "success" | "suppliers" | "compliance";
   label: string;
   w: number;
   cta: string;
@@ -323,6 +328,12 @@ const TWIN_GROUPS: Array<{ id: TwinSlot["group"] | "rules"; title: string; note:
   { id: "estate", title: "Estate today", note: "what is being replaced or extended" },
   { id: "why", title: "Why now", note: "what vendors and service providers price against" },
   { id: "buying", title: "What you are buying", note: "the answers that decide who can bid" },
+  { id: "change", title: "Change model", note: "how changes will run once it is live" },
+  { id: "support", title: "Support", note: "what good looks like, day to day" },
+  { id: "commercial", title: "Commercial preferences", note: "how you would rather pay" },
+  { id: "services", title: "Professional services", note: "the delivery work around the platform" },
+  { id: "success", title: "Success criteria", note: "resiliency, uptime and how this will be judged" },
+  { id: "suppliers", title: "Vendor requirements", note: "who may respond" },
   { id: "rules", title: "Rules you are held to", note: "applied from your sector, evidenced not claimed" },
 ];
 
@@ -469,6 +480,104 @@ const TWIN_SLOTS: TwinSlot[] = [
       { label: "Critical sites only", effect: "", land: note("twin-res-crit", "Dual-circuit resilience at critical sites only", "estate") },
       { label: "Head office and data centre", effect: "", land: note("twin-res-hq", "Resilience at head office and data centre only", "estate") },
       { label: "Single circuits are fine", effect: "", land: note("twin-res-none", "Single-circuit sites acceptable", "estate") },
+    ],
+  },
+  /* ---- Round 7 (1 Aug 2026): restoring the categories the pre-31-Jul
+     three-column workspace carried and the current design dropped
+     (Robert: "compliance, regulation, security, resiliency and uptime,
+     managed services, co-managed.. I could go on"). Built INTO today's
+     architecture — one multi-select slot per taxonomy section, the same
+     note()+notePrefix+"Held now" mechanism Term and Resilience already
+     use — not a reversion to the old three-column layout. Each option
+     lands into its taxonomy `section` key, so the existing sheetSections
+     side panel picks it up without any change there. */
+  {
+    id: "change", group: "change", label: "How changes run", w: 1, cta: "How should changes be handled?", q: "How should changes to the live service run?",
+    why: "It sets the change process vendors and service providers are quoted against, and it is a common source of disputes once live.",
+    notePrefix: "twin-change",
+    options: [
+      { label: "Standard changes", effect: "", land: note("twin-change-std", "Standard, pre-approved changes required", "change") },
+      { label: "Emergency changes", effect: "", land: note("twin-change-emg", "Emergency change process required", "change") },
+      { label: "CAB approval", effect: "", land: note("twin-change-cab", "Changes require CAB approval", "change") },
+      { label: "Out-of-hours windows", effect: "", land: note("twin-change-ooh", "Changes restricted to out-of-hours windows", "change") },
+    ],
+  },
+  {
+    id: "support", group: "support", label: "Support", w: 1, cta: "What support do you need?", q: "What does good support look like?",
+    why: "It decides who can bid at all: not every provider staffs 24x7 or a UK desk.",
+    notePrefix: "twin-support",
+    options: [
+      { label: "24x7 support", effect: "", land: note("twin-support-247", "24x7 support required", "support") },
+      { label: "UK-based support", effect: "", land: note("twin-support-uk", "UK-based support desk required", "support") },
+      { label: "Named engineer", effect: "", land: note("twin-support-eng", "A named engineer or TAM required", "support") },
+      { label: "Service reviews", effect: "", land: note("twin-support-rev", "Regular service reviews required", "support") },
+    ],
+  },
+  {
+    id: "commercial", group: "commercial", label: "How you would rather pay", w: 1, cta: "Any commercial preference?", q: "Is there a commercial shape you would rather buy under?",
+    why: "OPEX, subscription and evergreen terms rule some providers' commercial models in or out before price is even discussed.",
+    notePrefix: "twin-commercial",
+    options: [
+      { label: "OPEX preferred", effect: "", land: note("twin-commercial-opex", "OPEX commercial model preferred", "commercial") },
+      { label: "Subscription", effect: "", land: note("twin-commercial-sub", "Subscription pricing preferred", "commercial") },
+      { label: "Evergreen refresh", effect: "", land: note("twin-commercial-ever", "Evergreen refresh (no forklift renewals) preferred", "commercial") },
+    ],
+  },
+  {
+    id: "services", group: "services", label: "Professional services", w: 1, cta: "What delivery work is in scope?", q: "What professional services should be in scope?",
+    why: "Migration, project management and training are commonly quoted separately; naming them keeps quotes comparable.",
+    notePrefix: "twin-services",
+    options: [
+      { label: "Migration", effect: "", land: note("twin-services-mig", "Migration services in scope", "services") },
+      { label: "Project management", effect: "", land: note("twin-services-pm", "Project management in scope", "services") },
+      { label: "Training", effect: "", land: note("twin-services-trn", "Training in scope", "services") },
+      { label: "Change requests", effect: "", land: note("twin-services-chg", "Ongoing change requests in scope", "services") },
+    ],
+  },
+  {
+    id: "success", group: "success", label: "Success criteria", w: 2, cta: "How will this be judged?", q: "How should success be measured once this is live?",
+    why: "Resiliency and uptime targets are the most commonly lost questions; stating them here is what makes vendor SLAs comparable.",
+    notePrefix: "twin-success",
+    options: [
+      { label: "Availability target", effect: "", land: note("twin-success-avail", "A stated availability target is required", "success") },
+      { label: "Latency targets", effect: "", land: note("twin-success-lat", "Latency targets are required", "success") },
+      { label: "Support SLA", effect: "", land: note("twin-success-sla", "A stated support SLA is required", "success") },
+      { label: "Reporting", effect: "", land: note("twin-success-rpt", "Regular reporting is required", "success") },
+      { label: "Migration timeline", effect: "", land: note("twin-success-mig", "A stated migration timeline is required", "success") },
+    ],
+  },
+  {
+    id: "suppliers", group: "suppliers", label: "Vendor requirements", w: 1, cta: "Any requirements of who may respond?", q: "Are there requirements of who may respond?",
+    why: "UK references, framework status and financial standing decide who is even eligible to bid.",
+    notePrefix: "twin-suppliers",
+    options: [
+      { label: "UK references", effect: "", land: note("twin-suppliers-ref", "UK references required", "suppliers") },
+      { label: "Framework agreements", effect: "", land: note("twin-suppliers-fw", "Must hold relevant framework agreements", "suppliers") },
+      { label: "Partner or direct", effect: "", land: note("twin-suppliers-pd", "Must state whether responding as partner or direct", "suppliers") },
+      { label: "Financial standing", effect: "", land: note("twin-suppliers-fin", "Evidence of financial standing required", "suppliers") },
+    ],
+  },
+  /* Compliance (round 7): the clickable UI the extractor and sector packs
+     always had a ledger home for (`constraints.complianceRequirements`,
+     already multi-value: see estate.cloud/estate.existingNetwork for the
+     same pattern) but never had a manual way in. Rendered as a "+" inside
+     the existing "Rules you are held to" group, NOT as its own generic
+     group, so applied-rule rows never show twice. NHS DSPT and FCA are
+     sector-shaped: they only earn a place once the buyer's own standing
+     sector matches (Robert: "we only need Healthcare compliance questions
+     if the user selects Healthcare as an example"). */
+  {
+    id: "compliance", group: "compliance", label: "Compliance", w: 2, cta: "Add a compliance requirement", q: "What compliance requirements should bidders meet?",
+    why: "It rules bidders in or out before price is even discussed, and it is what your sector's rule pack cannot assert on its own.",
+    path: "constraints.complianceRequirements",
+    options: [
+      { label: "ISO 27001", effect: "", land: fact("constraints.complianceRequirements", "iso27001") },
+      { label: "Cyber Essentials Plus", effect: "", land: fact("constraints.complianceRequirements", "cyber_essentials_plus") },
+      { label: "PCI DSS", effect: "", land: fact("constraints.complianceRequirements", "pci_dss") },
+      { label: "NHS DSPT", effect: "", land: fact("constraints.complianceRequirements", "nhs_dspt"), sectorOnly: /health|pharma/i },
+      { label: "FCA obligations", effect: "", land: fact("constraints.complianceRequirements", "fca"), sectorOnly: /financial/i },
+      { label: "NIS2", effect: "", land: fact("constraints.complianceRequirements", "nis2") },
+      { label: "UK GDPR", effect: "", land: fact("constraints.complianceRequirements", "uk_gdpr") },
     ],
   },
 ];
@@ -1763,7 +1872,14 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     }
     const ns = s.notePrefix ? noted.filter((n) => n.id.startsWith(s.notePrefix as string)) : [];
     if (ns.length) {
-      const opt = s.options.find((o) => o.land.kind === "note" && o.land.id === ns[0].id);
+      /* Round 7: several notes can hold under one prefix (a buyer can pick
+         both "24x7 support" and "Named engineer"); show every held label,
+         not just the first, mirroring the multi-fact case above. */
+      const labelFor = (n: (typeof ns)[number]) => s.options.find((o) => o.land.kind === "note" && o.land.id === n.id)?.label ?? n.label;
+      const value = ns.length === 1
+        ? labelFor(ns[0])
+        : `${ns.slice(0, 3).map(labelFor).join(", ")}${ns.length > 3 ? ` and ${numWord(ns.length - 3)} more` : ""}`;
+      const single = ns.length === 1;
       return (
         <div key={s.id} className={rowCls} style={rowStyle}>
           <span className={labCls}>{s.label}</span>
@@ -1774,19 +1890,25 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               className="cursor-pointer border-0 bg-transparent p-0 text-left text-[16px] font-medium leading-[1.4] text-[#141414]"
               style={{ textWrap: "pretty" }}
             >
-              {opt ? opt.label : ns[0].label}
+              {value}
             </button>
             <span className="text-[12px] italic text-[#A3A099]">you chose this</span>
           </div>
           <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
-          <button
-            type="button"
-            onClick={() => { clearNotes(s.notePrefix as string); say(`${s.label} cleared. It is an open line in the statement again.`); }}
-            className={`${ctlCls} hover:border-[#B4650B] hover:text-[#B4650B]`}
-            style={{ ...mono, letterSpacing: "0.07em" }}
-          >
-            clear
-          </button>
+          {single ? (
+            <button
+              type="button"
+              onClick={() => { clearNotes(s.notePrefix as string); say(`${s.label} cleared. It is an open line in the statement again.`); }}
+              className={`${ctlCls} hover:border-[#B4650B] hover:text-[#B4650B]`}
+              style={{ ...mono, letterSpacing: "0.07em" }}
+            >
+              clear
+            </button>
+          ) : (
+            <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#141414] hover:text-[#141414]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+              edit
+            </button>
+          )}
         </div>
       );
     }
@@ -2076,6 +2198,24 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         </button>
                       </div>
                     )}
+                    {/* Round 7 restore: the sector pack can only offer or
+                        assert; a compliance requirement the buyer knows
+                        outright (an auditor named it, a client mandates
+                        it) needs a manual way in. Same click-to-fact
+                        machinery every other slot uses; sector-shaped
+                        options (NHS DSPT, FCA) only appear once the
+                        standing sector matches. */}
+                    <div className="flex items-start gap-3.5 py-[9px]">
+                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Compliance</span>
+                      <button
+                        type="button"
+                        onClick={() => setEdit("compliance")}
+                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                      >
+                        <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
+                        Add a compliance requirement
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -2522,7 +2662,16 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               </form>
             )}
             <div className="flex flex-col gap-[7px]">
-              {editSlot.options.map((o) => (
+              {(() => {
+                /* Round 7: a sector-shaped option (NHS DSPT, FCA) only
+                   earns its place once the buyer's own standing sector
+                   matches — the same influence-not-authority law the
+                   sector packs keep. No sector stated yet, no sector-only
+                   option shown; nothing invented ahead of the buyer's
+                   own answer. */
+                const sectorVal = String(standingAt("organisation.sector").slice(-1)[0]?.value ?? "");
+                return editSlot.options.filter((o) => !o.sectorOnly || o.sectorOnly.test(sectorVal));
+              })().map((o) => (
                 <button
                   key={o.label}
                   type="button"
