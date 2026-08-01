@@ -1942,11 +1942,13 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       onDragOver={(e) => { e.preventDefault(); }}
       onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
     >
-      {/* ── THE TOP BLOCK (round 6) ── sticky under the estate MegaNav:
-          the identity row, the always-visible understanding band with
-          the live market count, the prompt, the sector chips until a
-          sector stands, and the bounded thread. The statement scrolls
-          beneath it; the prompt never leaves the screen. */}
+      {/* ── THE TOP BLOCK (round 6, thread moved out round 7) ── sticky
+          under the estate MegaNav: the identity row, the always-visible
+          understanding band with the live market count, the prompt, and
+          the sector chips until a sector stands. The thread now scrolls
+          in its own panel below (round 7: a Claude/ChatGPT-sized panel
+          cannot live in a permanently pinned dock). The prompt never
+          leaves the screen. */}
       <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#F4F2EE", boxShadow: "0 16px 18px -14px rgba(20,20,20,.10)" }}>
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">
           {started && (
@@ -2100,9 +2102,30 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             </div>
           )}
 
-          {/* The thread: bounded, scrolls, newest in view. The statement
-              below is the record; this is the feedback. */}
-          <div ref={threadRef} className="flex max-h-[110px] flex-col gap-[9px] overflow-y-auto pt-3 sm:max-h-[150px]">
+        </div>
+      </div>
+
+      {/* ── THE THREAD (round 7, 1 Aug 2026: Robert — "the idea was
+          this section had a memory and users could keep typing to
+          generate the living statement, so there would be a scrolling
+          window as per Claude, ChatGPT interface etc"). The memory was
+          already unbounded (say/sayYou only ever append, nothing is
+          dropped) — the gap was purely visual: a 110-150px sliver from
+          his 31 Jul ruling ("small persistent chat window"). Chose a
+          large panel (his pick, ~600px+) but pulled it OUT of the sticky
+          dock rather than growing the dock itself: the dock stays pinned
+          to the viewport top on every scroll position, so a Claude-sized
+          panel living inside it would permanently cover most of the
+          screen. Here it scrolls with the page like the statement below
+          it, and scrolls internally once its own history outgrows the
+          panel, the same way a real chat column does. */}
+      <div className="mx-auto w-full max-w-[1000px] px-[26px] pt-4">
+        <div className="rounded-[16px] border border-[#E5E1D9] bg-[#FBFAF8] px-6 pb-5 pt-5 sm:px-[30px]" style={{ boxShadow: "0 2px 10px rgba(20,20,20,.04)" }}>
+          <div className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.11em" }}>Conversation</div>
+          <p className="m-0 mb-3 mt-1 text-[12.5px] leading-[1.5] text-[#A3A099]">
+            Feedback only, kept for this sitting — the statement below is the record.
+          </p>
+          <div ref={threadRef} className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto sm:max-h-[620px]">
             {msgs.map((m, i) => (
               <div key={i} className="flex items-start gap-2.5">
                 <span
