@@ -314,13 +314,37 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     if (m) { infer("organisation.sector", sector, `"${m[0].trim()}" indicates this sector`); break; }
   }
 
+  /* Round 9 catch (2 Aug 2026, live QA finding): "24x7 UK-based support"
+   * landed organisation.regions=uk off the bare word "UK", with nothing
+   * checking WHAT the mention describes. "UK-based support" names where
+   * a VENDOR must operate, not where the buyer is -- the exact same
+   * mistake as every operating-model/timeline guard above, just living
+   * in the rail instead of the vetting layer, and worse here because
+   * "UK"/"US"/country names are common words that show up constantly in
+   * requirement clauses that have nothing to do with the buyer's own
+   * location (support, vendors, references, data residency). A region
+   * only counts as the buyer's own location when the words right after
+   * it are not naming a requirement the vendor/service must meet; there
+   * is no field yet for "the vendor must be UK-based", so those clauses
+   * are left alone and fall through to their receipt rather than being
+   * forced into the wrong home. */
+  const regionRequirementNoun = /^[\s,-]*(?:based\s+)?(?:support|engineers?|vendors?|suppliers?|providers?|references?|coverage|cover\b|presence|data\s*(?:centre|center)|hosting|response|help\s*desk|helpdesk|\bsla\b)\b/i;
+  const regionIsBuyerLocation = (m: RegExpExecArray | null, src: string): boolean => {
+    if (!m) return false;
+    const after = src.slice(m.index + m[0].length, m.index + m[0].length + 30);
+    return !regionRequirementNoun.test(after);
+  };
+
   // Regions, including country names (F-C: "France and Germany" must not
   // vanish inside a clause credited to other facts). The mapped region is
   // stated with the country as its quote: operating there is their claim.
-  if (hit(/\buk\b|united kingdom|britain|northern ireland|\blondon\b/)) say("organisation.regions", ["uk"], "UK");
+  {
+    const uk = hit(/\buk\b|united kingdom|britain|northern ireland|\blondon\b/);
+    if (uk && regionIsBuyerLocation(uk, t)) say("organisation.regions", ["uk"], "UK");
+  }
   {
     const ie = hit(/(?<!northern )ireland|\bdublin\b/);
-    if (ie) say("organisation.regions", ["ie"], ie[0].trim());
+    if (ie && regionIsBuyerLocation(ie, t)) say("organisation.regions", ["ie"], ie[0].trim());
   }
   /* US and CHINA, the two Harry named and the rail could not see (30 Jul
    * 2026). China was absent from the map entirely, and a bare "US" is
@@ -330,7 +354,10 @@ export function deterministicExtract(text: string): FieldUpdate[] {
    * single word "Global"), nothing could override it. The country test
    * runs against the RAW text, where the pronoun is lower case and the
    * country is not. */
-  if (/\bUS\b|\bU\.S\.\b/.test(text)) say("organisation.regions", ["us"], "US");
+  {
+    const us = /\bUS\b|\bU\.S\.\b/.exec(text);
+    if (us && regionIsBuyerLocation(us, text)) say("organisation.regions", ["us"], "US");
+  }
   for (const [re, region] of [
     [/\bfrance\b|\bgermany\b|\bspain\b|\bitaly\b|netherlands|\bholland\b|\bbelgium\b|\bpoland\b|\bportugal\b|\bsweden\b|\bdenmark\b|\baustria\b|switzerland|\bnorway\b|\bfinland\b|luxembourg|\beurope\b|\bemea\b/, "eu"],
     [/\busa\b|\bu\.s\.\b|united states|north america|\bcanada\b/, "us"],
@@ -338,7 +365,7 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     [/\buae\b|\bdubai\b|\bsaudi\b|\bqatar\b|\bbahrain\b|\bkuwait\b|\bisrael\b|south africa|\bnigeria\b|\bkenya\b|\begypt\b/, "me"],
   ] as Array<[RegExp, string]>) {
     const m = hit(re);
-    if (m) say("organisation.regions", [region], m[0].trim());
+    if (m && regionIsBuyerLocation(m, t)) say("organisation.regions", [region], m[0].trim());
   }
 
   {
@@ -377,8 +404,30 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   if (hit(/\bgdpr\b/)) say("constraints.complianceRequirements", ["uk_gdpr"], "GDPR");
   if (hit(/\bfca\b/)) say("constraints.complianceRequirements", ["fca"], "FCA");
 
-  if (hit(/24\/7|24x7|around.the.clock|twenty.four/)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7");
-  else if (/nobody watching|no out.of.hours|no overnight|no soc\b|no security team/.test(t)) say("constraints.inHouseSocCapacity", "none", "no out-of-hours cover");
+  {
+    const soc = hit(/24\/7|24x7|around.the.clock|twenty.four/);
+    if (soc) {
+      /* Round 9 catch (2 Aug 2026, live QA finding): "24x7 UK-based
+       * support" -- a want, aimed at the vendor -- landed
+       * inHouseSocCapacity=twenty_four_seven, a claim that the BUYER
+       * already runs 24/7 security operations in house. Same shape of
+       * mistake as the SD-WAN existing-vs-buying bug fixed in round 2:
+       * this field is about what the buyer already has, so a "24/7"
+       * immediately next to a support/cover/response word, or right
+       * after a need/want verb, reads as a requirement of the vendor,
+       * not a statement of the buyer's own capability, and is left
+       * alone (there is no field yet for "vendor must offer 24/7
+       * support", so it falls through to its receipt instead). */
+      const after = t.slice(soc.index + soc[0].length, soc.index + soc[0].length + 30);
+      const before = t.slice(Math.max(0, soc.index - 30), soc.index);
+      // The requirement noun may sit right after a region qualifier
+      // ("24x7 UK-based support"), so an optional "<word>-based" is
+      // allowed between the match and the noun that actually matters.
+      const requirementNoun = /^[\s,-]*(?:[a-z]+-?based\s+)?(?:support|cover(?:age)?|engineers?|response|help\s*desk|helpdesk)\b/;
+      const needSignal = /\b(?:need|want|require|looking for|must have)\s*$/;
+      if (!requirementNoun.test(after) && !needSignal.test(before)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7");
+    } else if (/nobody watching|no out.of.hours|no overnight|no soc\b|no security team/.test(t)) say("constraints.inHouseSocCapacity", "none", "no out-of-hours cover");
+  }
 
   // What they are BUYING (distinct from what they have). Seeking verbs near
   // a product term read as procurement intent; security service terms are
