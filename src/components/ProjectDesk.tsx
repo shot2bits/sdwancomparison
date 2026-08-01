@@ -2004,16 +2004,25 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           Round 11 catch (2 Aug 2026, Robert, second screenshot: "still
           not 1 section as requested"). Round 10 removed the conversation
           panel's own border/card/shadow, but this dock was still painted
-          its own solid colour (#F4F2EE, a warm beige) against the page's
-          actual white (--paper-base, #fff) everywhere else -- so the
-          dock read as a distinct shaded block sitting on top of a
-          white page, the exact same "two sections" look, just from a
-          colour seam instead of a border. The dock's background is now
-          the same white as the page it sits on, so scrolled content
-          still disappears cleanly behind it (it must stay opaque, being
-          sticky), but there is no colour boundary left between the
-          composer and the conversation below it. */}
-      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#fff", boxShadow: "0 16px 18px -14px rgba(20,20,20,.10)" }}>
+          its own solid colour (#F4F2EE, a warm beige) -- a real seam,
+          but the first attempt at the fix (this comment, initially)
+          mis-cited the page's colour: globals.css's --paper-base is
+          #ffffff, but that is not what actually paints this page. Both
+          src/app/home/page.tsx and src/app/workspace/page.tsx wrap their
+          entire route in `<div className="relative bg-[#fbfaf8]">` --
+          an explicit override, so the true page background under the
+          dock, the conversation thread and the statement of requirements
+          is #fbfaf8, a warm off-white, never pure white. Setting the
+          dock to #fff (the first attempt) actually painted a NEW seam,
+          a white island on a cream page, in the opposite direction.
+          Caught live on production, not assumed: the dock now matches
+          #fbfaf8, the colour every other inch of this route already
+          uses. It stays opaque (scrolled content still needs to
+          disappear cleanly behind it, being sticky) and keeps its soft
+          drop shadow, but there is no colour boundary left anywhere --
+          not above the dock, not between the composer and the
+          conversation below it. */}
+      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#fbfaf8", boxShadow: "0 16px 18px -14px rgba(20,20,20,.10)" }}>
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">
           {started && (
             <div className="flex w-full flex-wrap items-baseline gap-x-4 gap-y-1 pb-2">
