@@ -2018,11 +2018,25 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           Caught live on production, not assumed: the dock now matches
           #fbfaf8, the colour every other inch of this route already
           uses. It stays opaque (scrolled content still needs to
-          disappear cleanly behind it, being sticky) and keeps its soft
-          drop shadow, but there is no colour boundary left anywhere --
-          not above the dock, not between the composer and the
-          conversation below it. */}
-      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#fbfaf8", boxShadow: "0 16px 18px -14px rgba(20,20,20,.10)" }}>
+          disappear cleanly behind it, being sticky).
+
+          Round 14 catch (2 Aug 2026, Robert, re-testing this exact
+          screenshot after round 13 shipped: "no different"). Rounds
+          11-13 closed every colour and border seam on this route, but
+          the dock's own soft drop shadow -- kept deliberately through
+          all three of those rounds as a depth cue for a sticky element
+          -- was itself still reading as a boxed card: box-shadow with
+          blur exceeding its negative spread doesn't stay confined to
+          the bottom edge, it feathers out a few px on every side, which
+          is exactly the rounded-corner-card impression a zoomed
+          screenshot of the live page showed. The dock's background and
+          border were already proven identical to the page (verified
+          via computed style, not assumed) -- the shadow was the one
+          remaining thing drawing a boundary around it. It's gone. The
+          dock is still sticky and still opaque, so scrolled content
+          still disappears behind it cleanly; it just no longer looks
+          like a card floating over the page it's part of. */}
+      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#fbfaf8" }}>
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">
           {started && (
             <div className="flex w-full flex-wrap items-baseline gap-x-4 gap-y-1 pb-2">
