@@ -543,6 +543,37 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
         if ((value as string[]).length === 0) continue;
       }
     }
+    /* Round 8 catch (2 Aug 2026, live QA finding): the model proposed a
+     * managed operating model off "a dedicated account manager who
+     * visits our sites quarterly for a face to face review" — a support
+     * want, not an operating-model decision, and it landed as "your
+     * words" on the statement. Same law as every guard above: the claim
+     * must trace to real operating-model words, the exact vocabulary the
+     * deterministic rail itself requires for this same field, not mere
+     * proximity to "manager"/"manage" used in an unrelated sense. */
+    if (ok.path === "procurement.operatingModel") {
+      const opAnchor = /\b(?:fully managed|managed service|manage it for us|no in.house it|outsourced?|co-?managed|diy|self-?managed|manage (?:it )?ourselves|in-?house managed|runs? it (?:for us|day to day|themselves)|operates? it (?:for us|themselves)|vendor(?:-| )run)\b/i;
+      if (!opAnchor.test(lower)) {
+        notes.push("Dropped an operating-model claim: no operating-model words (managed, co-managed, self-managed) in your description.");
+        continue;
+      }
+    }
+    /* Round 8 catch (2 Aug 2026, live QA finding): the model proposed
+     * constraints.timeline "30 day poc" off "a 30 day proof-of-concept
+     * trial before we sign a contract" — a procurement condition, not a
+     * date the project must land by, and unreadable besides.
+     * constraints.timeline is deliberately free text (see the 30 Jul
+     * finding above), so nothing here validates its WORDS, only that it
+     * traces to an actual dated or horizon anchor: the same vocabulary
+     * the deterministic rail already requires for this same field. */
+    if (ok.path === "constraints.timeline") {
+      const DATEISH =
+        "(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+20\\d\\d|(?:q[1-4]|h[12])\\s*20\\d\\d|(?:spring|summer|autumn|winter)\\s+20\\d\\d|\\b20\\d\\d\\b|within\\s+(?:the\\s+next\\s+)?\\d{1,3}\\s+(?:days?|weeks?|months?)|no fixed date|as soon as possible|\\basap\\b";
+      if (!new RegExp(DATEISH, "i").test(lower)) {
+        notes.push("Dropped a timeline claim: no dated anchor (a month, quarter, year, or a stated number of days/weeks/months) in your description.");
+        continue;
+      }
+    }
     out.push({
       path: ok.path,
       value,

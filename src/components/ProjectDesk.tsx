@@ -1131,14 +1131,37 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     [dropFact, say],
   );
 
+  /** Clears every note sharing a slot prefix (round 6): the row-level
+   *  control for a slot that only ever holds one note at a time (Term,
+   *  Resilience). */
   const clearNotes = useCallback((prefix: string) => {
     setNoted((ns) => ns.filter((n) => !n.id.startsWith(prefix)));
     setChangedSlots([]);
     setSaveDirty(true);
   }, []);
 
+  /** Clears exactly one held note by id (round 8, 2 Aug 2026 bug found in
+   *  QA): the genuinely multi-select slots restored in round 7 (Support,
+   *  Change model, and so on) can hold several notes under one prefix at
+   *  once. The "Held now" list's per-row clear button was calling
+   *  clearNotes(prefix) and wiping every note in the slot, not just the
+   *  one the buyer clicked clear on. This is the correct per-item form. */
+  const clearNote = useCallback((id: string) => {
+    setNoted((ns) => ns.filter((n) => n.id !== id));
+    setChangedSlots([]);
+    setSaveDirty(true);
+  }, []);
+
   const keepReceipt = useCallback((text: string) => {
     setReceipts((rs) => [...rs, { id: ++receiptId.current, text }]);
+    setSaveDirty(true);
+  }, []);
+
+  /** Drops one kept-verbatim note (round 8): the same removal every other
+   *  row on the statement already has, now that receipts render as their
+   *  own "Other requirements" group instead of only in the side sheet. */
+  const dropReceipt = useCallback((id: number) => {
+    setReceipts((rs) => rs.filter((r) => r.id !== id));
     setSaveDirty(true);
   }, []);
 
@@ -1421,17 +1444,33 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           ev("workspace_command", { kind: cmd.kind === "dropName" ? "drop_vendor" : "keep_vendor" });
           return;
         }
-        /* In the twin, "drop X" reaches a guess: the inference whose
-           label carries the words is struck and never re-inferred. */
+        /* Round 8 (2 Aug 2026, Robert: "if someone types... remove this...
+           it should work"): "drop X"/"remove X" now reaches anything on
+           the statement, not just a vendor or a guess — a stated fact, a
+           noted multi-select item (Support, Change model, and so on), or
+           a kept-verbatim note, matched the same way a vendor name is:
+           against the words the page itself shows, either direction. Each
+           removal fires the exact same function its own row's own button
+           calls, so the thread reads exactly as if the buyer had clicked
+           it, with the correct "dropped"/"cleared" wording for whether it
+           was netify's guess or the buyer's own stated word. */
         if (cmd.kind === "dropName") {
-          const f = factsRef.current.find(
-            (x) => !x.struck && x.provenance === "inferred" && factLabel(x).toLowerCase().includes(cmd.name.toLowerCase()),
-          );
-          if (f) {
-            dropFact(f.id);
-            say(`Dropped: ${factLabel(f)}. It will not come back unless you say it yourself.`);
-            return;
-          }
+          const liveFacts = factsRef.current.filter((x) => !x.struck);
+          const f = liveFacts.find((x) => {
+            const l = norm(factLabel(x));
+            return l.length > 0 && (l.includes(target) || target.includes(l));
+          });
+          if (f) { dropRow(f); return; }
+          const n = noted.find((x) => {
+            const l = norm(x.label);
+            return l.length > 0 && (l.includes(target) || target.includes(l));
+          });
+          if (n) { clearNote(n.id); say(`Cleared: ${n.label}. It is an open line in the statement again.`); return; }
+          const rcpt = receipts.find((x) => {
+            const l = norm(x.text);
+            return l.length > 0 && (l.includes(target) || target.includes(l));
+          });
+          if (rcpt) { dropReceipt(rcpt.id); say(`Cleared: “${rcpt.text}”. It will not come back unless you say it yourself.`); return; }
         }
         say(`I could not find “${cmd.name}” in the list or among the guesses. Say the name as the page shows it.`);
         return;
@@ -2257,6 +2296,58 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             );
           })}
 
+          {/* Round 8 (2 Aug 2026, Robert: "the AI Prompt should allow
+              users to add sections and areas to the statement that don't
+              exist in placeholder format"). This IS the placeholder: any
+              sentence that lands nowhere else was already being kept
+              verbatim (the receipts array, unchanged), but only surfaced
+              in the side "See the requirement" sheet under "Your notes" —
+              never as a real, always-visible line on the statement
+              itself. It now renders here as its own group, same shape as
+              every other one, present and dashed even at zero so it reads
+              as an open door rather than something that only appears
+              after the fact. Nothing new is invented: still the buyer's
+              own words, still kept, still feeding the published document
+              exactly as it already did. */}
+          <div className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+            <div className="mb-2 flex items-baseline gap-[11px]">
+              <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>Other requirements</span>
+              <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">anything the statement above has no line for</span>
+              <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
+            </div>
+            <div className="flex flex-col">
+              {receipts.length > 0 ? (
+                receipts.map((r) => (
+                  <div key={r.id} className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]">
+                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]">Noted</span>
+                    <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                      <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>{r.text}</span>
+                      <span className="text-[12px] italic text-[#A3A099]">kept verbatim</span>
+                    </div>
+                    <span style={{ ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none", background: "#EAF6EE", color: "#256B3E" }}>
+                      your words
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => { dropReceipt(r.id); say(`Cleared: “${r.text}”. It will not come back unless you say it yourself.`); }}
+                      className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                      style={{ ...mono, letterSpacing: "0.07em" }}
+                    >
+                      clear
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-start gap-3.5 py-[9px]">
+                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Anything else</span>
+                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85]">
+                    Say it in the prompt above. Anything that doesn&apos;t fit a line elsewhere is kept here, word for word.
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Readiness: once weighted completeness passes the threshold,
               the action into the vendor list, inside the document. */}
           {readyToFit && (
@@ -2626,7 +2717,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     label: n.label,
                     meta: "you chose this",
                     kind: "clear",
-                    act: () => { clearNotes(editSlot.notePrefix as string); say(`${editSlot.label} cleared. It is an open line in the statement again.`); },
+                    /* Round 8 fix: clear THIS note only, not every note the
+                       slot holds — a multi-select slot (Support, Change
+                       model, and so on) can hold several at once. */
+                    act: () => { clearNote(n.id); say(`Cleared: ${n.label}. It is an open line in the statement again.`); },
                   }))
                 : [];
               const held = pathHeld.length ? pathHeld : noteHeld;
