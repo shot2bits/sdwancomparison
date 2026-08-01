@@ -607,6 +607,45 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
         continue;
       }
     }
+    /* Round 9 catch, part two (2 Aug 2026, live QA finding): fixing the
+     * deterministic rail's "24x7 UK-based support" bug (see the comment
+     * above deterministicExtract's regionIsBuyerLocation) only closed the
+     * regex path. The MODEL runs independently and can reach the exact
+     * same wrong conclusion its own way — live evidence showed
+     * organisation.regions=uk landing as an INFERRED claim with reason
+     * "24x7 UK-based support implies UK operations", never touching the
+     * rail at all. Same law as every guard in this function: the words
+     * the model cites as evidence (its quote if stated, its reason if
+     * inferred) must read as the buyer describing their OWN location, not
+     * as a requirement clause aimed at the vendor. A quote/reason naming
+     * a requirement noun (support, engineers, vendors, coverage, presence,
+     * hosting, SLA...) with no location language of its own is omitted;
+     * the receipt keeps the buyer's actual words and the question stays
+     * open. */
+    if (ok.path === "organisation.regions") {
+      const evidence = (quote || String(f.reason ?? "")).toLowerCase();
+      const requirementWords = /\b(?:support|engineers?|vendors?|suppliers?|providers?|references?|coverage|cover\b|presence|data\s*(?:centre|center)|hosting|response|help\s*desk|helpdesk|\bsla\b)\b/;
+      const locationWords = /\b(?:based in|headquartered|operations? (?:span|cover|are)|offices? in|sites? (?:are|in|based)|located|our (?:hq|headquarters)|we (?:are|operate) in|head office)\b/;
+      if (requirementWords.test(evidence) && !locationWords.test(evidence)) {
+        notes.push("Dropped a region claim: the words describe a requirement (support, engineers, coverage...) aimed at the vendor, not the buyer's own location.");
+        continue;
+      }
+    }
+    /* Same live finding, same law, for the SOC-capacity field: a 24/7
+     * claim the model justifies with support/coverage/response words (a
+     * want aimed at the vendor) rather than the buyer's own in-house
+     * capability is omitted, mirroring the deterministic rail's
+     * requirementNoun/needSignal guard above. */
+    if (ok.path === "constraints.inHouseSocCapacity" && value === "twenty_four_seven") {
+      const evidence = (quote || String(f.reason ?? "")).toLowerCase();
+      const requirementNoun = /\b(?:[a-z]+-?based\s+)?(?:support|cover(?:age)?|engineers?|response|help\s*desk|helpdesk)\b/;
+      const needSignal = /\b(?:need|want|require|looking for|must have)\b/;
+      const capabilityWords = /\b(?:we (?:run|have|operate)|our (?:soc|security team|team)|in-?house|already)\b/;
+      if ((requirementNoun.test(evidence) || needSignal.test(evidence)) && !capabilityWords.test(evidence)) {
+        notes.push("Dropped a 24/7 in-house capability claim: the words describe a requirement aimed at the vendor, not the buyer's own capability.");
+        continue;
+      }
+    }
     /* Round 8 catch (2 Aug 2026, live QA finding): the model proposed
      * constraints.timeline "30 day poc" off "a 30 day proof-of-concept
      * trial before we sign a contract" — a procurement condition, not a
