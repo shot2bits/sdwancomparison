@@ -90,8 +90,39 @@ import { fireNetifyEvent } from "@/components/NetifyEvents";
 /*   say never, so the ledger tombstones win.                          */
 /* ================================================================== */
 
-/* R2 (Robert, 30 Jul 2026): NO PERSISTENCE. Nothing here writes to    */
-/* localStorage or sessionStorage. A project is one sitting.           */
+/* ================================================================== */
+/* THE LIVING STATEMENT OF REQUIREMENTS (round 6, 31 Jul 2026).        */
+/*                                                                     */
+/* Robert's handoff (design_handoff_living_sor) keeps the twin's law   */
+/* and organs and moves the face: the prompt lives at the TOP of the   */
+/* surface under the understanding band, and a BOUNDED conversation    */
+/* thread returns beneath it (his ruling, 31 Jul eve: "small           */
+/* persistent chat window with history"). The reference is             */
+/* netify-living-sor-standalone.html. His six rulings on the gate:     */
+/* 1. Same mount, organs retained whole: extraction, ledger,           */
+/*    tombstones, packs, fit, publish chain, doors, voice, ingest.     */
+/* 2. The thread stays: user messages echo, replies are TEMPLATE       */
+/*    lines composed from the diff, never model prose. The law         */
+/*    holds: everything important lands in the statement; the thread   */
+/*    is feedback, not the record.                                     */
+/* 3. The header never lies about persistence. An OPT-IN SAVE with a   */
+/*    verified work email creates the real project record early        */
+/*    (existing create machinery, unpublished); until then the truth   */
+/*    stays "nothing leaves this page". This amends R2 by his word:    */
+/*    still no browser storage, ever; the record is the save.          */
+/* 4. No letter grades: n-of-checks and dated evaluation stand.        */
+/* 5. NINE sector quick-start chips (Regulated industries removed);    */
+/*    every chip writes a real value through the same machinery a      */
+/*    click-answer uses, never an invented fact.                       */
+/* 6. No em dashes, no filler, and no example answers anywhere: no     */
+/*    placeholder or control carries a specific number of sites, a     */
+/*    date, or a named product. Placeholders ask open questions.       */
+/* ================================================================== */
+
+/* R2 (Robert, 30 Jul 2026): NO BROWSER PERSISTENCE. Nothing here      */
+/* writes to localStorage or sessionStorage. Amended 31 Jul: the       */
+/* buyer may opt in to saving as a real project record with a          */
+/* verified work email; without that, a project is one sitting.       */
 
 const WORKSPACE_AGREEMENT_TEXT =
   "Publish this requirement: Netify lists an anonymous notice visible to signed-in vendors and service providers, and invites the best-fit evaluated vendors and service providers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
@@ -186,13 +217,21 @@ const ITEM_BY_ID: Record<string, { item: TaxonomyItem; section: string }> = (() 
  * else's sentence. Before anything lands, the dock placeholder instructs
  * rather than demonstrates. */
 
-/* The dock placeholder rotates through correction and interrogation,
- * not instruction, once the project is live. */
-const PLACEHOLDERS = [
-  "Change anything. “Add PCI DSS”, “actually 246 sites”, “who fits?”",
-  "Say what you want changed and the project changes above",
-  "“Drop the people guess” · “we use CrowdStrike” · “show me who fits”",
-];
+/* Placeholders ask open questions only (round 6 law: no example
+ * answers anywhere; the old rotating examples carried a site count, a
+ * named standard and a named product, and they are dead). */
+const PLACEHOLDER_EMPTY = "Describe what you are buying, in your own words…";
+const PLACEHOLDER_LIVE = "Say what changed, add a rule, or correct anything in the statement…";
+
+/** The thread (round 6, Robert's ruling: the small persistent chat
+ *  window stays). User messages echo verbatim; every Netify line is a
+ *  TEMPLATE composed from the diff, never model prose, so the thread
+ *  can only ever describe what actually landed in the statement. */
+type ThreadMsg = { who: "you" | "netify"; text: string };
+const THREAD_WELCOME =
+  "Describe what you are buying, in your own words. Every sentence you write fills in the statement below, or answer any open line in it directly.";
+const THREAD_NO_CATCH =
+  "I did not catch anything new in that; your words are kept with your notes. Try naming a number of sites, a deadline, what you run today, or who should operate it, or answer any open line in the statement.";
 
 /** Small counts in words, the estate's register. */
 const NUM_WORDS = [
@@ -318,6 +357,10 @@ const TWIN_SLOTS: TwinSlot[] = [
     id: "people", group: "org", label: "People", w: 1, cta: "How many staff?", q: "Roughly how many people?",
     why: "Cloud security is licensed per user, so the user count drives a large part of any quote.",
     path: "estate.users",
+    /* The Mid-market chip lands here as a noted band: the ledger holds
+     * real counts only, and a band is not a count. A stated number
+     * always wins the line. */
+    notePrefix: "chip-mid",
     options: [50, 100, 250, 500, 1000, 2500, 5000].map((n) => ({
       label: `About ${n.toLocaleString("en-GB")}`, effect: "", land: fact("estate.users", n),
     })),
@@ -427,6 +470,27 @@ const TWIN_SLOTS: TwinSlot[] = [
 
 const SLOT_BY_ID: Record<string, TwinSlot> = Object.fromEntries(TWIN_SLOTS.map((s) => [s.id, s]));
 const SLOT_BY_PATH: Record<string, string> = Object.fromEntries(TWIN_SLOTS.filter((s) => s.path).map((s) => [s.path as string, s.id]));
+
+/** The nine sector quick-start chips (round 6; the reference's ten,
+ *  Regulated industries removed by Robert's ruling because it cannot
+ *  write a value honestly). Shown until a sector stands. Every chip
+ *  writes a real value through the same machinery a click-answer uses,
+ *  tagged as the buyer's own choice with the chip's words as the quote;
+ *  the slot mapping is the reference's, the values are the ledger's own.
+ *  Mid-market has no honest numeric home, so it lands as a noted band
+ *  and the People line carries it until a real count is said. */
+type ChipDef = { label: string; lands: TwinLand[] };
+const SECTOR_CHIPS: ChipDef[] = [
+  { label: "Multinational / global enterprise", lands: [fact("organisation.regions", "uk"), fact("organisation.regions", "eu"), fact("organisation.regions", "us")] },
+  { label: "Financial services", lands: [fact("organisation.sector", "Financial services")] },
+  { label: "Mid-market", lands: [note("chip-mid-band", "500 to 2,000 people", "estate")] },
+  { label: "Healthcare", lands: [fact("organisation.sector", "Healthcare & pharma")] },
+  { label: "Hybrid / remote workforces", lands: [fact("procurement.buying", "sse")] },
+  { label: "Manufacturing", lands: [fact("organisation.sector", "Manufacturing")] },
+  { label: "Retail", lands: [fact("organisation.sector", "Retail & e-commerce")] },
+  { label: "Professional services", lands: [fact("organisation.sector", "Professional services")] },
+  { label: "Education", lands: [fact("organisation.sector", "Education")] },
+];
 /** Weighted completeness: slot weights plus 3 for the sector's rule state.
  *  Total is derived, never typed. */
 const TOTAL_WEIGHT = TWIN_SLOTS.reduce((a, s) => a + s.w, 0) + 3;
@@ -495,15 +559,13 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
    *  recent action only. REPLACED whole on every transition, never
    *  appended, so nothing accumulates and no history builds up. */
   const [changedSlots, setChangedSlots] = useState<string[]>([]);
-  /** The one transient voice line, in the dock's caption position: a
-   *  command's answer or a nothing-landed acknowledgment. One at a time,
-   *  replaced by the next event, never a message, never echoing the
-   *  buyer's words back. */
-  const [notice, setNotice] = useState<string | null>(null);
+  /** The thread (round 6): the buyer's messages verbatim and Netify's
+   *  template lines, bounded on screen, persistent for the sitting.
+   *  Nothing important lives only here; the statement is the record. */
+  const [msgs, setMsgs] = useState<ThreadMsg[]>([{ who: "netify", text: THREAD_WELCOME }]);
   const [edit, setEdit] = useState<string | null>(null);
   const [reqOpen, setReqOpen] = useState(false);
   const [expandedFit, setExpandedFit] = useState<string | null>(null);
-  const [ph, setPh] = useState(0);
   const [booted, setBooted] = useState(false);
   const [testMode, setTestMode] = useState(false);
   const [wrongCompany, setWrongCompany] = useState(false);
@@ -519,6 +581,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const [needAuth, setNeedAuth] = useState(false);
   const [created, setCreated] = useState<{ id: string; manage: string; test: boolean } | null>(null);
   const [published, setPublished] = useState<{ invited: string[]; boardId?: string } | null>(null);
+  /** The early save (round 6, Robert's ruling: an option to save when a
+   *  verified work email is given). Saving creates the real project
+   *  record through the existing create machinery, unpublished; edits
+   *  after a save mark the record stale until the next save or publish. */
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveDirty, setSaveDirty] = useState(false);
+  const [consentSave, setConsentSave] = useState(false);
 
   const [voiceState, setVoiceState] = useState<"idle" | "starting" | "listening">("idle");
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -527,7 +598,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const dockRef = useRef<HTMLDivElement | null>(null);
+  const threadRef = useRef<HTMLDivElement | null>(null);
   const firstKeyAt = useRef<number | null>(null);
   const firstVerdictSent = useRef(false);
   const previewFired = useRef(false);
@@ -535,9 +606,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const receiptId = useRef(0);
   const factsRef = useRef<WorkspaceFact[]>([]);
   const receiptsRef = useRef<Receipt[]>([]);
-  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const assertedPacks = useRef<Set<string>>(new Set());
   const acceptedGaps = useRef<Set<string>>(new Set());
+  /** Which scope class the saved record was created under: a class flip
+   *  after a save means the next save or publish creates a fresh record
+   *  rather than rescoping across engines. */
+  const savedSecurity = useRef<boolean | null>(null);
   /** Dropped inferences never return (rule 7): once a guess is dropped,
    *  the extractor may not re-infer the same path and value. A later
    *  STATED assertion still lands: saying it is the buyer's own act. */
@@ -546,13 +620,21 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
   useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
 
-  /** The transient voice line: replaced whole, self-clearing. */
+  /** Netify's voice is a thread line now (round 6): one template
+   *  sentence per event, appended, never model prose, never a summary
+   *  the statement does not already show. */
   const say = useCallback((text: string) => {
-    setNotice(text);
-    if (noticeTimer.current) clearTimeout(noticeTimer.current);
-    noticeTimer.current = setTimeout(() => setNotice(null), 7000);
+    setMsgs((ms) => [...ms, { who: "netify", text }]);
   }, []);
-  useEffect(() => () => { if (noticeTimer.current) clearTimeout(noticeTimer.current); }, []);
+  /** The buyer's words echo verbatim (Robert's ruling: messages stay). */
+  const sayYou = useCallback((text: string) => {
+    setMsgs((ms) => [...ms, { who: "you", text }]);
+  }, []);
+  /** The thread keeps its newest line in view. */
+  useEffect(() => {
+    const el = threadRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [msgs]);
 
   /** Phase transitions land at the twin's own top, not the page's: the
    *  door hero above is the estate's, not the journey's. */
@@ -589,6 +671,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     const m = mergeUpdates(factsRef.current, allowed, cycleRef.current, source);
     factsRef.current = m.facts;
     setFacts(m.facts);
+    if (m.changed.length) setSaveDirty(true);
     return m;
   }, []);
 
@@ -663,45 +746,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     } catch { /* focus is a courtesy, never a dependency */ }
   }, []);
 
-  /* The rotating placeholder (the reference's cadence). */
-  useEffect(() => {
-    const t = setInterval(() => setPh((n) => (n + 1) % PLACEHOLDERS.length), 5200);
-    return () => clearInterval(t);
-  }, []);
-
-  /* The dock is position:fixed per the reference (round 4 proved the
-   * sticky compromise wrong). The EEAT ruling is honoured by padding the
-   * document instead: the estate footer's last line scrolls clear above
-   * the dock, so the whole trust surface stays readable and the prompt
-   * never leaves the screen. 240px is the reference's reservation. */
-  useEffect(() => {
-    const prev = document.body.style.paddingBottom;
-    document.body.style.paddingBottom = "240px";
-    return () => { document.body.style.paddingBottom = prev; };
-  }, []);
-
-  /* The mobile keyboard: iOS Safari keeps position:fixed elements pinned
-   * to the LAYOUT viewport, so when the keyboard shrinks the visual
-   * viewport the dock can sink beneath it. Translate the dock up by the
-   * hidden gap so the prompt rides above the keyboard. No-op where the
-   * visual viewport already behaves. */
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const onChange = () => {
-      const el = dockRef.current;
-      if (!el) return;
-      const gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      el.style.transform = gap > 1 ? `translateY(-${gap}px)` : "";
-    };
-    vv.addEventListener("resize", onChange);
-    vv.addEventListener("scroll", onChange);
-    onChange();
-    return () => {
-      vv.removeEventListener("resize", onChange);
-      vv.removeEventListener("scroll", onChange);
-    };
-  }, []);
+  /* Round 6: the prompt lives at the TOP of the surface, sticky under
+   * the understanding band, so the round-4 bottom-dock architecture
+   * (position:fixed, body padding, visualViewport translate) is retired
+   * whole. A top-stuck prompt cannot sink under the mobile keyboard and
+   * the estate footer needs no clearance reservation. */
 
   /* ---- Assess (the rulebook, client side, one truth) ---- */
   useEffect(() => {
@@ -792,9 +841,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     const landed = compliance.filter(({ item }) => merged.changed.includes(factId(item.path as AllowedPath, item.value)));
     const shown = landed.length ? landed : compliance;
     for (const { sg } of shown) ev("workspace_pack_suggestion", { id: sg.id, verdict: "asserted" });
-    /* Change is shown, not narrated: the new rule rows carry the marker
-       alongside whatever else this cycle changed. */
+    /* The change carries the marker AND one thread line (round 6): the
+       rules are already written in when the line appears. */
     setChangedSlots((prev) => [...new Set([...prev, ...merged.changed.map((id) => `rule:${id}`)])]);
+    const n = merged.changed.length;
+    say(`Your sector writes ${numWord(n)} rule${n === 1 ? "" : "s"} into the statement; they are in already, each with its reason, and any one can be dropped.`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack, packFlavours]);
 
@@ -826,7 +877,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const standingAt = useCallback((path: AllowedPath) => live.filter((f) => f.path === path), [live]);
   const slotFilled = useCallback(
     (s: TwinSlot): boolean =>
-      s.path ? standingAt(s.path).length > 0 : s.notePrefix ? noted.some((n) => n.id.startsWith(s.notePrefix as string)) : false,
+      Boolean(
+        (s.path && standingAt(s.path).length > 0) ||
+          (s.notePrefix && noted.some((n) => n.id.startsWith(s.notePrefix as string))),
+      ),
     [standingAt, noted],
   );
   const rulesResolved = coreFive.sector;
@@ -838,12 +892,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     .slice(0, 3)
     .map((s) => s.label.toLowerCase());
   const pctNote = !started
-    ? "Nothing yet. Say one sentence below, or answer any question here."
+    ? "Nothing yet. Say one sentence, or answer any open line in the statement."
     : pct >= 78
       ? "Complete enough to price. What is left will not stop anyone quoting."
       : topMissing.length
-        ? `Still needed: ${topMissing.join(", ")}. Say it below, or fill it in above.`
-        : "Everything the twin tracks is in.";
+        ? `Still needed: ${topMissing.join(", ")}.`
+        : "Everything the statement tracks is in.";
 
   /* ---- The market card: derived, never decorative. The count is the
      live fit organ's, scored against the project; before a scope is
@@ -876,7 +930,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     : facts.length === 0
       ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
       : !coreFiveComplete
-        ? `A notice cannot publish without five details, and ${numWord(missingCore.length)} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it below, or click the open slots above.`
+        ? `A notice cannot publish without five details, and ${numWord(missingCore.length)} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it in the prompt, or answer the open lines in the statement.`
         : securityScope && (!verdict || verdict.confidence === "low")
           ? "Answer the open questions first: nothing is recorded on guesswork."
           : !securityScope && !buying
@@ -923,16 +977,35 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     factsRef.current = factsRef.current.map((x) => (x.id === id ? { ...x, struck: true } : x));
     setFacts(factsRef.current);
     setChangedSlots([]);
+    setSaveDirty(true);
     ev("workspace_fact_struck", { path: f.path, provenance: f.provenance, undo: "0" });
   }, []);
+
+  /** A row control's drop, with its thread line (the command path says
+   *  its own line, so it calls dropFact directly). */
+  const dropRow = useCallback(
+    (f: WorkspaceFact) => {
+      const inferred = f.provenance === "inferred";
+      const label = cap(factLabel(f));
+      dropFact(f.id);
+      say(
+        inferred
+          ? `Dropped: ${label}. It will not come back unless you say it yourself.`
+          : `Cleared: ${label}. It is an open line in the statement again.`,
+      );
+    },
+    [dropFact, say],
+  );
 
   const clearNotes = useCallback((prefix: string) => {
     setNoted((ns) => ns.filter((n) => !n.id.startsWith(prefix)));
     setChangedSlots([]);
+    setSaveDirty(true);
   }, []);
 
   const keepReceipt = useCallback((text: string) => {
     setReceipts((rs) => [...rs, { id: ++receiptId.current, text }]);
+    setSaveDirty(true);
   }, []);
 
   /** An edit-sheet option lands through the same machinery a typed
@@ -947,19 +1020,62 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         const l = opt.land;
         setNoted((ns) => (ns.some((n) => n.id === l.id) ? ns : [...ns, { id: l.id, label: l.text, section: l.section, own: true }]));
         setChangedSlots([slot.id]);
+        setSaveDirty(true);
         ev("workspace_earned_answered", { q: l.id, kind: "note" });
       }
+      say(`${slot.label} set to “${opt.label}”.`);
       setEdit(null);
     },
-    [applyMerge, markChanged],
+    [applyMerge, markChanged, say],
   );
 
-  /* ---- The extraction cycle (the same organ; change is shown in the
-     slots, never narrated back) ---- */
+  /** A sector chip lands real values through the same machinery a
+   *  click-answer uses (round 6, ruling 5): stated provenance, the
+   *  chip's words as the quote, never an invented fact. */
+  const pickChip = useCallback(
+    (chip: ChipDef) => {
+      const factLands = chip.lands.filter((l): l is Extract<TwinLand, { kind: "fact" }> => l.kind === "fact");
+      const noteLands = chip.lands.filter((l): l is Extract<TwinLand, { kind: "note" }> => l.kind === "note");
+      const landedSlots: string[] = [];
+      if (factLands.length) {
+        const m = applyMerge(
+          factLands.map((l) => ({ path: l.path, value: l.value, provenance: "stated" as const, quote: chip.label })),
+          "answer",
+        );
+        markChanged(m.changed.length ? m.changed : factLands.map((l) => factId(l.path, l.value)), m.facts);
+        for (const l of factLands) {
+          ev("workspace_gap_answered", { field: l.path });
+          const sid = SLOT_BY_PATH[l.path];
+          if (sid && !landedSlots.includes(SLOT_BY_ID[sid].label)) landedSlots.push(SLOT_BY_ID[sid].label);
+        }
+      }
+      if (noteLands.length) {
+        for (const l of noteLands) {
+          setNoted((ns) => (ns.some((n) => n.id === l.id) ? ns : [...ns, { id: l.id, label: l.text, section: l.section, own: true }]));
+          ev("workspace_earned_answered", { q: l.id, kind: "note" });
+        }
+        if (!factLands.length) setChangedSlots(["people"]);
+        setSaveDirty(true);
+        if (!landedSlots.includes("People")) landedSlots.push("People");
+      }
+      const sectorLand = factLands.find((l) => l.path === "organisation.sector");
+      say(
+        sectorLand
+          ? `Sector set to “${String(sectorLand.value)}”.`
+          : `${listJoin(landedSlots)} written from “${chip.label}”.`,
+      );
+    },
+    [applyMerge, markChanged, say],
+  );
+
+  /* ---- The extraction cycle (the same organ). Round 6: the cycle
+     reports which slots it changed so the thread can say exactly that,
+     a template line composed from the diff and nothing else. ---- */
+  type CycleResult = { landed: number; labels: string[]; rules: number; error: boolean };
   const runCycle = useCallback(
-    async (text: string): Promise<number> => {
+    async (text: string): Promise<CycleResult> => {
       const trimmed = text.trim();
-      if (trimmed.length < 3 || busy) return 0;
+      if (trimmed.length < 3 || busy) return { landed: 0, labels: [], rules: 0, error: false };
       if (looksLikeAnotherNetify(trimmed)) setWrongCompany(true);
       setBusy(true);
       setCycleError(null);
@@ -983,17 +1099,31 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
            marker; nothing else appears. */
         markChanged(merged.changed, merged.facts);
 
-        /* Engine notes reach the buyer only in buyer words, one transient
+        /* Engine notes reach the buyer only in buyer words, one thread
            line; everything else stays off the surface entirely. */
         const notes = (data.notes ?? [])
           .filter((n) => /^Dropped /.test(n))
           .slice(0, 2)
           .map(humaniseNote);
         if (notes.length) say(cap(notes.join("; ") + "."));
-        return merged.changed.length;
+
+        /* The diff, named for the thread: slot labels for slot facts,
+           a count for rule facts. */
+        const byId = new Map(merged.facts.map((f) => [f.id, f]));
+        const labels: string[] = [];
+        let rules = 0;
+        for (const id of merged.changed) {
+          const f = byId.get(id);
+          if (!f) continue;
+          if (f.path === "constraints.complianceRequirements") { rules += 1; continue; }
+          const sid = SLOT_BY_PATH[f.path];
+          const lbl = (sid ? SLOT_BY_ID[sid].label : PATH_LABELS[f.path] ?? f.path).toLowerCase();
+          if (!labels.includes(lbl)) labels.push(lbl);
+        }
+        return { landed: merged.changed.length, labels, rules, error: false };
       } catch {
         setCycleError("The engine did not answer; your words are unchanged, say it again in a moment.");
-        return 0;
+        return { landed: 0, labels: [], rules: 0, error: true };
       } finally {
         setBusy(false);
       }
@@ -1023,15 +1153,30 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     [runCycle],
   );
 
+  /** What is most useful next, computed off the fresh refs so the reply
+   *  after a cycle names the right gaps. */
+  const missingNow = useCallback((): string[] => {
+    const factsLive = factsRef.current.filter((f) => !f.struck);
+    const has = (p: string) => factsLive.some((f) => f.path === p);
+    return TWIN_SLOTS.filter(
+      (s) => !((s.path && has(s.path)) || (s.notePrefix && noted.some((n) => n.id.startsWith(s.notePrefix as string)))),
+    )
+      .sort((a, b) => b.w - a.w)
+      .map((s) => s.label.toLowerCase());
+  }, [noted]);
+
   /* ---- The send: one entry for everything typed, spoken or clicked
-     through an example. Commands first; the extractor for the rest. A
-     sentence that lands nothing is kept verbatim with the notes, and
-     the dock's caption says so once: no echo, no transcript. ---- */
+     through. Commands first; the extractor for the rest. Round 6: the
+     buyer's words echo in the thread, and the reply is a template line
+     composed from the diff, exactly what was written in and what is
+     most useful next. A sentence that lands nothing is kept verbatim
+     with the notes and the thread says so once. ---- */
   async function send(raw: string) {
     const text = raw.trim();
     if (!text || busy) return;
     setDraft("");
     if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+    sayYou(text);
 
     const cmd = parseCommand(text);
     if (cmd) {
@@ -1039,12 +1184,21 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       return;
     }
 
-    const landed = await runCycle(text);
-    if (landed > 0) return;
+    const r = await runCycle(text);
+    if (r.landed > 0) {
+      const parts: string[] = [];
+      if (r.labels.length) parts.push(`Written in: ${r.labels.join(", ")}.`);
+      if (r.rules > 0) parts.push(`${cap(numWord(r.rules))} rule${r.rules === 1 ? "" : "s"} landed in the statement with your words as provenance.`);
+      const miss = missingNow();
+      parts.push(miss.length ? `Most useful next: ${miss.slice(0, 2).join(" and ")}.` : "Everything the statement tracks is in.");
+      say(parts.join(" "));
+      return;
+    }
+    if (r.error) return; /* the caption carries the engine error; the words stay in the prompt's history */
 
-    /* Nothing landed: kept verbatim, said once, never echoed. */
+    /* Nothing landed: kept verbatim, said once in the thread. */
     keepReceipt(text);
-    say("Kept with your notes, word for word. Nothing else in that changed the project; say “see the requirement” to read everything held.");
+    say(THREAD_NO_CATCH);
   }
 
   /* ---- The commands, each one true ---- */
@@ -1096,7 +1250,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             ? `Before it can publish, the notice needs ${missingCore.join(", ")}.`
             : "The five details a notice needs are all in.",
         );
-        if (topMissing.length) lines.push(`The open slots above name the rest: ${topMissing.join(", ")}.`);
+        if (topMissing.length) lines.push(`The open lines in the statement name the rest: ${topMissing.join(", ")}.`);
         ev("workspace_command", { kind: "missing" });
         say(lines.join(" "));
         return;
@@ -1167,6 +1321,128 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     }
   }
 
+  /* ---- The create step, shared by the early save and the publish
+     chain (round 6): the same payloads, the same records, unpublished.
+     The wizard-store payload only carries the submit-agreement consent
+     when the publish chain is running; a save records no agreement the
+     buyer has not ticked. ---- */
+  function rfpPayload(withSubmitConsent: boolean) {
+    const sectorKey = wizardSectorKey(requirement.organisation?.sector);
+    const notesLine = [
+      typeof requirement.estate?.users === "number" ? `Staff: ${requirement.estate.users}.` : "",
+      requirement.estate?.existingSecurity?.length ? `Existing security tooling: ${requirement.estate.existingSecurity.join(", ")}.` : "",
+      requirement.estate?.existingNetwork?.length ? `Network estate: ${requirement.estate.existingNetwork.join(", ")}.` : "",
+      noted.length ? `Buyer selections (structured fields pending): ${noted.map((n) => n.label).join(", ")}.` : "",
+      receipts.length ? `Buyer notes, kept verbatim: ${receipts.map((r) => r.text).join(" | ")}.` : "",
+      instrumentNotesLine({
+        instrument,
+        set: rfiSet,
+        weightedHigh: [],
+        commercialClaims,
+      }) ?? "",
+      "Drafted on Netify, the SASE & SD-WAN procurement marketplace.",
+    ].filter(Boolean).join(" ");
+    return {
+      title: publishTitle,
+      buyer: {
+        sector: sectorKey,
+        site_count: requirement.estate?.sites ?? null,
+        regions: wizardRegions(requirement.organisation?.regions ?? []),
+        compliance: builderCompliance(requirement.constraints?.complianceRequirements ?? []),
+        operating_model: opModel ?? "any",
+        product_scope: productScopeFor(buying as BuyingId),
+        pinned_vendors: pins,
+        notes: notesLine,
+      },
+      ...(withSubmitConsent
+        ? { consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" } }
+        : {}),
+      position: {
+        covered_sections: coveredSections,
+        sector: (requirement.organisation?.sector as string | undefined) ?? null,
+      },
+    };
+  }
+
+  async function createRecord(withSubmitConsent: boolean): Promise<{ id: string; manage: string; test: boolean }> {
+    if (securityScope) {
+      const res = await fetch("/sase/api/security-sourcing/project", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ requirement, consent: true, preferred_vendors: pins, ...(testMode ? { test: true } : {}) }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.project?.id) throw new Error(data.error || "Could not create the project; try again.");
+      return { id: data.project.id, manage: data.project.manage_token || "", test: testMode || Boolean(data.project.test) };
+    }
+    const res = await fetch("/sase/api/rfp", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(rfpPayload(withSubmitConsent)),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.id) throw new Error(data.error || "Could not create the requirement; try again.");
+    return { id: data.id, manage: data.manage_token ?? "", test: false };
+  }
+
+  /** Bring a saved record up to the statement as it stands: the wizard
+   *  store through its own PUT, the engine through its own re-scope. */
+  async function refreshRecord(proj: { id: string; manage: string; test: boolean }) {
+    if (securityScope) {
+      const res = await fetch(`/sase/api/security-sourcing/project/${proj.id}/rescope`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ manage_token: proj.manage, requirement, consent: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
+      return;
+    }
+    const res = await fetch(`/sase/api/rfp/${proj.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ manage_token: proj.manage, ...rfpPayload(false), regenerate: true }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
+  }
+
+  /* ---- The early save (round 6, Robert's ruling): a verified work
+     email may create the real project record before any publish. The
+     header stays honest either way; nothing is invited and nothing is
+     listed until the signature chain runs. ---- */
+  async function saveNow() {
+    if (!started || saveBusy) return;
+    if (securityScope && !consentSave) return;
+    setSaveBusy(true);
+    setSaveError(null);
+    try {
+      const scopeChanged = created !== null && savedSecurity.current !== null && savedSecurity.current !== securityScope;
+      if (!created || scopeChanged) {
+        const proj = await createRecord(false);
+        setCreated(proj);
+        savedSecurity.current = securityScope;
+        setSaveDirty(false);
+        ev("workspace_saved", { scope: buying ?? "security", id: proj.id });
+        say(
+          scopeChanged
+            ? "What you are buying changed class, so saving made a fresh record; the earlier draft stays yours from its own link."
+            : "Saved. Your project record now holds this statement; open it from the header any time. Nothing is published and nobody has been invited.",
+        );
+      } else {
+        await refreshRecord(created);
+        setSaveDirty(false);
+        ev("workspace_saved", { scope: buying ?? "security", id: created.id });
+        say("Saved again: your project record matches the statement.");
+      }
+      setSaveOpen(false);
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Could not save; nothing has left this page.");
+    } finally {
+      setSaveBusy(false);
+    }
+  }
+
   /* ---- The signature chain (the same organs as every round; the twin
      changed its face, never its law: consents verbatim, humans sign,
      agents never, publish is the only exit). ---- */
@@ -1180,61 +1456,20 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     ev("workspace_sign_click", { scope: buying ?? "security", facts: meter.total, inferred: meter.inferred, gaps_accepted: unansweredGaps.length });
     try {
       let proj = created;
-      if (!proj) {
+      const scopeChanged = proj !== null && savedSecurity.current !== null && savedSecurity.current !== securityScope;
+      if (!proj || scopeChanged) {
         setSignStage("Creating your position on the record…");
-        if (securityScope) {
-          const res = await fetch("/sase/api/security-sourcing/project", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ requirement, consent: true, preferred_vendors: pins, ...(testMode ? { test: true } : {}) }),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.project?.id) throw new Error(data.error || "Could not create the project; try again.");
-          proj = { id: data.project.id, manage: data.project.manage_token || "", test: testMode || Boolean(data.project.test) };
-        } else {
-          const sectorKey = wizardSectorKey(requirement.organisation?.sector);
-          const notesLine = [
-            typeof requirement.estate?.users === "number" ? `Staff: ${requirement.estate.users}.` : "",
-            requirement.estate?.existingSecurity?.length ? `Existing security tooling: ${requirement.estate.existingSecurity.join(", ")}.` : "",
-            requirement.estate?.existingNetwork?.length ? `Network estate: ${requirement.estate.existingNetwork.join(", ")}.` : "",
-            noted.length ? `Buyer selections (structured fields pending): ${noted.map((n) => n.label).join(", ")}.` : "",
-            receipts.length ? `Buyer notes, kept verbatim: ${receipts.map((r) => r.text).join(" | ")}.` : "",
-            instrumentNotesLine({
-              instrument,
-              set: rfiSet,
-              weightedHigh: [],
-              commercialClaims,
-            }) ?? "",
-            "Drafted on Netify, the SASE & SD-WAN procurement marketplace.",
-          ].filter(Boolean).join(" ");
-          const res = await fetch("/sase/api/rfp", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              title: publishTitle,
-              buyer: {
-                sector: sectorKey,
-                site_count: requirement.estate?.sites ?? null,
-                regions: wizardRegions(requirement.organisation?.regions ?? []),
-                compliance: builderCompliance(requirement.constraints?.complianceRequirements ?? []),
-                operating_model: opModel ?? "any",
-                product_scope: productScopeFor(buying as BuyingId),
-                pinned_vendors: pins,
-                notes: notesLine,
-              },
-              consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" },
-              position: {
-                covered_sections: coveredSections,
-                sector: (requirement.organisation?.sector as string | undefined) ?? null,
-              },
-            }),
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || !data.id) throw new Error(data.error || "Could not create the requirement; try again.");
-          proj = { id: data.id, manage: data.manage_token ?? "", test: false };
-        }
+        proj = await createRecord(true);
         setCreated(proj);
+        savedSecurity.current = securityScope;
+        setSaveDirty(false);
         ev(proj.test ? "workspace_created_test" : "workspace_created", { scope: buying ?? "security", id: proj.id });
+      } else if (saveDirty) {
+        /* Saved earlier, edited since: the record must match the
+           statement before anything publishes from it. */
+        setSignStage("Refreshing your saved record…");
+        await refreshRecord(proj);
+        setSaveDirty(false);
       }
 
       if (proj.test) {
@@ -1432,16 +1667,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   })();
   const sitesVal = standingAt("estate.sites").slice(-1)[0];
   const projectName = (sitesVal ? `${sitesVal.value} sites` : "New project") + (sectorShort ? `, ${sectorShort}` : "");
+  /* The document names itself from the sector (the reference's title,
+     the estate's punctuation). */
+  const docTitle = `Statement of requirements${sectorShort ? `, ${sectorShort}` : ""}`;
 
-  const firstFit = rankedFits[0] ?? null;
-  const shortcuts: string[] =
-    phase === "fits"
-      ? [
-          ...(firstFit ? [`Why is ${firstFit.name} first?`] : []),
-          partnerDependent.length ? "Drop the ones that need a partner" : rankedFits.length ? `Drop ${rankedFits[rankedFits.length - 1].name}` : "Back to the project",
-          "What will this cost?",
-        ]
-      : ["Add PCI DSS", "Actually it is 250 sites", "What are you still missing?"];
+  /* Round 6: the shortcut chips are dead. Two carried example answers
+     (a named standard, a specific site count), which the no-example law
+     forbids, and the reference carries no chips once a sector is set.
+     Every advertised sentence still works typed; the surface copy
+     advertises them where they apply. */
 
   const sendReady = draft.trim().length > 0 && !busy;
   const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
@@ -1451,114 +1685,98 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const mono: React.CSSProperties = { fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' };
   const editSlot = edit ? SLOT_BY_ID[edit] ?? null : null;
 
-  /* ---- Slot cell renderers ---- */
+  /* ---- Slot row renderers (round 6: the reference's document rows,
+     label on the left, value with its provenance, tag, one control) ---- */
   const slotCell = (s: TwinSlot) => {
     const isNew = changedSlots.includes(s.id);
-    const cellCls = "flex flex-col px-5 py-[15px] border-b border-r border-[#EFECE5]";
-    const cellStyle: React.CSSProperties = isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B" } : {};
+    const rowCls = "flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]";
+    const rowStyle: React.CSSProperties = isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {};
+    const labCls = "w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]";
     const tagBase: React.CSSProperties = { ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none" };
+    const ctlCls = "flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099]";
 
-    if (s.path) {
-      const fs = standingAt(s.path);
-      if (fs.length) {
-        const anyInferred = fs.some((f) => f.provenance === "inferred");
-        const latest = fs[fs.length - 1];
-        const value = fs.length === 1
-          ? cap(factLabel(latest))
-          : `${fs.slice(0, 3).map((f) => cap(factLabel(f))).join(", ")}${fs.length > 3 ? ` and ${numWord(fs.length - 3)} more` : ""}`;
-        const meta = latest.provenance === "stated"
-          ? (latest.source === "answer" ? "you chose this" : latest.quote ? `“${latest.quote}”` : "your words")
-          : latest.reason ?? "netify guessed";
-        const single = fs.length === 1;
-        return (
-          <div key={s.id} className={cellCls} style={cellStyle}>
-            <div className="flex items-baseline gap-2">
-              <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">{s.label}</span>
-              <span style={{ ...tagBase, ...(anyInferred ? { background: "#F1EFE9", color: "#7A7770" } : { background: "#EAF6EE", color: "#256B3E" }) }}>
-                {anyInferred ? "netify guessed" : "your words"}
-              </span>
-            </div>
-            <div className="mt-2 flex items-start gap-2">
-              <button
-                type="button"
-                onClick={() => setEdit(s.id)}
-                className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left text-[16.5px] font-medium leading-[1.35] text-[#141414]"
-                style={{ textWrap: "pretty" }}
-                title={s.q}
-              >
-                {value}
-              </button>
-              {single ? (
-                <button
-                  type="button"
-                  onClick={() => dropFact(latest.id)}
-                  className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
-                  style={{ ...mono, letterSpacing: "0.07em" }}
-                >
-                  {latest.provenance === "inferred" ? "drop" : "clear"}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setEdit(s.id)}
-                  className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#141414] hover:text-[#141414]"
-                  style={{ ...mono, letterSpacing: "0.07em" }}
-                >
-                  edit
-                </button>
-              )}
-            </div>
-            <div className="mt-1.5 text-[12px] italic leading-[1.45] text-[#A3A099]">{meta}</div>
+    const fs = s.path ? standingAt(s.path) : [];
+    if (s.path && fs.length) {
+      const anyInferred = fs.some((f) => f.provenance === "inferred");
+      const latest = fs[fs.length - 1];
+      const value = fs.length === 1
+        ? cap(factLabel(latest))
+        : `${fs.slice(0, 3).map((f) => cap(factLabel(f))).join(", ")}${fs.length > 3 ? ` and ${numWord(fs.length - 3)} more` : ""}`;
+      const meta = latest.provenance === "stated"
+        ? (latest.source === "answer" ? "you chose this" : latest.quote ? `“${latest.quote}”` : "your words")
+        : latest.reason ?? "netify guessed";
+      const single = fs.length === 1;
+      return (
+        <div key={s.id} className={rowCls} style={rowStyle}>
+          <span className={labCls}>{s.label}</span>
+          <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
+            <button
+              type="button"
+              onClick={() => setEdit(s.id)}
+              title={s.q}
+              className="cursor-pointer border-0 bg-transparent p-0 text-left text-[16px] font-medium leading-[1.4] text-[#141414]"
+              style={{ textWrap: "pretty" }}
+            >
+              {value}
+            </button>
+            <span className="text-[12px] italic text-[#A3A099]">{meta}</span>
           </div>
-        );
-      }
-    } else if (s.notePrefix) {
-      const ns = noted.filter((n) => n.id.startsWith(s.notePrefix as string));
-      if (ns.length) {
-        const opt = s.options.find((o) => o.land.kind === "note" && o.land.id === ns[0].id);
-        return (
-          <div key={s.id} className={cellCls} style={cellStyle}>
-            <div className="flex items-baseline gap-2">
-              <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">{s.label}</span>
-              <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
-            </div>
-            <div className="mt-2 flex items-start gap-2">
-              <button
-                type="button"
-                onClick={() => setEdit(s.id)}
-                className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left text-[16.5px] font-medium leading-[1.35] text-[#141414]"
-                style={{ textWrap: "pretty" }}
-              >
-                {opt ? opt.label : ns[0].label}
-              </button>
-              <button
-                type="button"
-                onClick={() => clearNotes(s.notePrefix as string)}
-                className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
-                style={{ ...mono, letterSpacing: "0.07em" }}
-              >
-                clear
-              </button>
-            </div>
-            <div className="mt-1.5 text-[12px] italic leading-[1.45] text-[#A3A099]">you chose this</div>
+          <span style={{ ...tagBase, ...(anyInferred ? { background: "#F1EFE9", color: "#7A7770" } : { background: "#EAF6EE", color: "#256B3E" }) }}>
+            {anyInferred ? "netify guessed" : "your words"}
+          </span>
+          {single ? (
+            <button type="button" onClick={() => dropRow(latest)} className={`${ctlCls} hover:border-[#B4650B] hover:text-[#B4650B]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+              {latest.provenance === "inferred" ? "drop" : "clear"}
+            </button>
+          ) : (
+            <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#141414] hover:text-[#141414]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+              edit
+            </button>
+          )}
+        </div>
+      );
+    }
+    const ns = s.notePrefix ? noted.filter((n) => n.id.startsWith(s.notePrefix as string)) : [];
+    if (ns.length) {
+      const opt = s.options.find((o) => o.land.kind === "note" && o.land.id === ns[0].id);
+      return (
+        <div key={s.id} className={rowCls} style={rowStyle}>
+          <span className={labCls}>{s.label}</span>
+          <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
+            <button
+              type="button"
+              onClick={() => setEdit(s.id)}
+              className="cursor-pointer border-0 bg-transparent p-0 text-left text-[16px] font-medium leading-[1.4] text-[#141414]"
+              style={{ textWrap: "pretty" }}
+            >
+              {opt ? opt.label : ns[0].label}
+            </button>
+            <span className="text-[12px] italic text-[#A3A099]">you chose this</span>
           </div>
-        );
-      }
+          <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
+          <button
+            type="button"
+            onClick={() => { clearNotes(s.notePrefix as string); say(`${s.label} cleared. It is an open line in the statement again.`); }}
+            className={`${ctlCls} hover:border-[#B4650B] hover:text-[#B4650B]`}
+            style={{ ...mono, letterSpacing: "0.07em" }}
+          >
+            clear
+          </button>
+        </div>
+      );
     }
 
-    /* Empty: visible, dashed, directly actionable (rule 4). */
+    /* Empty: visible, dashed, directly actionable, and an open question
+       only (round 6 law: no example answers in the buyer's mouth). */
     return (
-      <div key={s.id} className={cellCls} style={cellStyle}>
-        <div className="flex items-baseline gap-2">
-          <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">{s.label}</span>
-          <span style={{ ...tagBase, background: "transparent", color: "#B4650B", border: "1px solid #EBDCC0" }}>open</span>
-        </div>
+      <div key={s.id} className={rowCls} style={rowStyle}>
+        <span className={`${labCls} pt-[10px]`}>{s.label}</span>
         <button
           type="button"
           onClick={() => setEdit(s.id)}
-          className="mt-2 flex w-full cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[11px] text-left text-[14px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
         >
-          <span className="text-[13px] text-[#C4C0B8]" style={mono}>+</span>
+          <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
           {s.cta}
         </button>
       </div>
@@ -1566,8 +1784,9 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   };
 
   /* ================================================================ */
-  /* Render: the project occupies the screen; the prompt is fixed to   */
-  /* the bottom and is the input method, not the subject.              */
+  /* Render (round 6): the prompt rides sticky at the top under the    */
+  /* estate nav with the band and the bounded thread; the statement    */
+  /* is one document card scrolling beneath it.                        */
   /* ================================================================ */
   return (
     <div
@@ -1576,132 +1795,258 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       onDragOver={(e) => { e.preventDefault(); }}
       onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
     >
-      {/* The twin's own header row (the estate MegaNav carries the
-          logotype): the project names itself, the state line is true
-          under R2, and Start again is always reachable. */}
-      {started && (
-        <div className="mx-auto flex w-full max-w-[1000px] flex-wrap items-baseline gap-x-4 gap-y-1 px-[26px] pb-4">
-          <span className="text-[14.5px] font-medium text-[#33302C]">{projectName}</span>
-          <span className="text-[11.5px] text-[#A3A099]" style={mono}>nothing leaves this page</span>
-          <span className="flex-1" />
-          <button
-            type="button"
-            onClick={() => { setReqOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}
-            className="flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[13.5px] text-[#6E6C67] hover:text-[#141414]"
-          >
-            <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#2E9E52]" aria-hidden="true" />
-            {understood} {understood === 1 ? "thing" : "things"} understood · see the requirement
-          </button>
-          <button
-            type="button"
-            onClick={() => window.location.assign(window.location.pathname)}
-            className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#A3A099] hover:text-[#141414]"
-          >
-            Start again
-          </button>
-        </div>
-      )}
+      {/* ── THE TOP BLOCK (round 6) ── sticky under the estate MegaNav:
+          the identity row, the always-visible understanding band with
+          the live market count, the prompt, the sector chips until a
+          sector stands, and the bounded thread. The statement scrolls
+          beneath it; the prompt never leaves the screen. */}
+      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#F4F2EE", boxShadow: "0 16px 18px -14px rgba(20,20,20,.10)" }}>
+        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">
+          {started && (
+            <div className="flex w-full flex-wrap items-baseline gap-x-4 gap-y-1 pb-2">
+              <span className="text-[14.5px] font-medium text-[#33302C]">{projectName}</span>
+              {created ? (
+                <a
+                  href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}
+                  className="text-[11.5px] text-[#256B3E] underline decoration-[#BCD9C6] underline-offset-2 hover:decoration-[#256B3E]"
+                  style={mono}
+                >
+                  {saveDirty ? "saved, edits since" : "saved"} · open your project record
+                </a>
+              ) : (
+                <span className="text-[11.5px] text-[#A3A099]" style={mono}>nothing leaves this page</span>
+              )}
+              <span className="flex-1" />
+              <button
+                type="button"
+                onClick={() => { setReqOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}
+                className="flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[13.5px] text-[#6E6C67] hover:text-[#141414]"
+              >
+                <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#2E9E52]" aria-hidden="true" />
+                {understood} {understood === 1 ? "thing" : "things"} understood · see the requirement
+              </button>
+              {(!created || saveDirty) && (
+                <button
+                  type="button"
+                  onClick={() => { setSaveOpen(true); setSaveError(null); }}
+                  className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#6E6C67] underline decoration-[#C9C5BC] underline-offset-2 hover:text-[#141414]"
+                >
+                  {created ? "Save changes" : "Save this project"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => window.location.assign(window.location.pathname)}
+                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#A3A099] hover:text-[#141414]"
+              >
+                Start again
+              </button>
+            </div>
+          )}
 
-      {/* ── THE LIVE TWIN ── the project as a structured, living object,
-          from the very first paint (Robert's ruling: the empty project IS
-          the door): understanding and the market side by side, then the
-          five groups of labelled slots, every empty one clickable. No
-          log, no narration; change is shown. */}
-      {phase === "live" && (
-        <div className="mx-auto flex w-full max-w-[1000px] flex-col gap-[18px] px-[26px] pb-6">
-          <div className="grid gap-3.5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
-            <div className="rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] px-[22px] py-5">
+          {/* The understanding band and the market count: always visible,
+              derived, never decorative. */}
+          <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
+            <div className="min-w-[220px] flex-1">
               <div className="flex items-baseline gap-2.5">
-                <span className="text-[11px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.1em" }}>Project understanding</span>
-                <span className="flex-1" />
-                <span className="text-[26px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>
-                  {pct}<span className="text-[15px] text-[#A3A099]">%</span>
-                </span>
+                <span className="text-[10.5px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
+                <span className="text-[15px] font-semibold" style={mono}>{pct}%</span>
+                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#A3A099]">{pctNote}</span>
               </div>
-              <div className="mt-3.5 flex gap-[3px]">
+              <div className="mt-2 flex gap-[3px]">
                 {Array.from({ length: 12 }, (_, i) => (
-                  <span key={i} className="h-[7px] flex-1 rounded-[2px]" style={{ background: (i * 100) / 12 < pct ? "#F5A21B" : "#E8E4DC" }} />
+                  <span key={i} className="h-[6px] flex-1 rounded-[2px]" style={{ background: (i * 100) / 12 < pct ? "#F5A21B" : "#E8E4DC" }} />
                 ))}
               </div>
-              <div className="mt-3 text-[13.5px] leading-[1.55] text-[#5F5D59]">{pctNote}</div>
             </div>
-            <div className="rounded-[14px] bg-[#141414] px-[22px] py-5 text-white">
-              <div className="text-[11px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.1em" }}>The market, narrowing</div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-[26px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>
-                  {fittingCount ?? "…"}
-                </span>
-                {marketTotal !== null && <span className="text-[13.5px] text-[#B8B5AF]">of {marketTotal} still fit</span>}
+            <div className="flex-none border-l border-[#E5E1D9] pl-[22px]">
+              <div className="flex items-baseline gap-2">
+                <span className="text-[22px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>{fittingCount ?? "…"}</span>
+                <span className="text-[12.5px] text-[#8C8A85]">of {marketTotal ?? "…"} still fit</span>
               </div>
-              <div className="mt-[11px] text-[13px] leading-[1.5] text-[#B8B5AF]">{marketNote}</div>
+              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#A3A099]">{marketNote}</div>
             </div>
           </div>
+
+          {/* The prompt (the input method, never the subject). */}
+          <div className="flex items-end gap-2.5 rounded-[15px] border border-[#DDD9D1] bg-white py-1 pl-[18px] pr-1.5" style={{ boxShadow: "0 4px 18px rgba(20,20,20,.06)" }}>
+            <textarea
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => { setDraft(e.target.value); if (!firstKeyAt.current) firstKeyAt.current = Date.now(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void send(draft);
+                }
+              }}
+              onPaste={(e) => {
+                const text = e.clipboardData?.getData("text") ?? "";
+                if (text.length > 400) {
+                  e.preventDefault();
+                  void ingestText(text, "paste");
+                }
+              }}
+              placeholder={started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
+              rows={1}
+              className="h-[46px] flex-1 resize-none border-0 bg-transparent py-3 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
+            />
+            {voiceSupported && (
+              <button
+                type="button"
+                onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}
+                title={voiceState === "idle" ? "Say it out loud" : "Stop listening"}
+                className={`mb-[6px] flex h-[36px] w-[36px] flex-none cursor-pointer items-center justify-center rounded-[10px] border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[#B4650B]" : "border-[#E3E0DA] text-[#8C8A85] hover:border-[#141414] hover:text-[#141414]"}`}
+              >
+                {voiceState === "listening" ? (
+                  <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#B4650B]" aria-hidden="true" />
+                ) : (
+                  <svg width="14" height="18" viewBox="0 0 14 18" fill="none" aria-hidden="true">
+                    <rect x="4.5" y="1" width="5" height="10" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M1.5 8.5c0 3 2.4 5 5.5 5s5.5-2 5.5-5M7 13.5V17M4.5 17h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                )}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              title="Drop or choose a plain-text document and it will be read into the statement"
+              className="mb-[6px] h-[36px] w-[36px] flex-none cursor-pointer rounded-[10px] border border-[#E3E0DA] bg-white text-[15px] text-[#8C8A85] hover:border-[#141414] hover:text-[#141414]"
+            >
+              ↑
+            </button>
+            <input ref={fileRef} type="file" accept=".txt,.md,.csv,text/plain" className="hidden" onChange={(e) => { readFile(e.target.files?.[0]); e.target.value = ""; }} />
+            <button
+              type="button"
+              onClick={() => void send(draft)}
+              disabled={!sendReady}
+              className={`mb-[6px] flex-none cursor-pointer rounded-[11px] border-0 px-[17px] py-[10px] text-[15px] font-semibold ${sendReady ? "bg-[#F5A21B] text-[#141414] hover:bg-[#E5940F]" : "bg-[#F0EEE9] text-[#A3A099]"} disabled:cursor-not-allowed`}
+            >
+              {busy ? "Reading…" : started ? "Apply" : "Start"}
+            </button>
+          </div>
+          {wrongCompany && (
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
+              Looking for website hosting? That is Netlify, a different company. This is Netify, the SASE and SD-WAN procurement marketplace; carry on if the network is what you came for.
+            </p>
+          )}
+          {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{pasteSummary}</p>}
+          {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">{cycleError}</p>}
+          {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{voiceError}</p>}
+
+          {/* The nine sector quick-start chips: shown until a sector
+              stands; one scrollable row on small screens. */}
+          {!coreFive.sector && (
+            <div className="flex items-center gap-[7px] overflow-x-auto pt-2.5 sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
+              <span className="flex-none text-[12.5px] text-[#A3A099]">Or start from your sector:</span>
+              {SECTOR_CHIPS.map((c) => (
+                <button
+                  key={c.label}
+                  type="button"
+                  onClick={() => pickChip(c)}
+                  className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E0DCD3] bg-[#FBFAF8] px-3.5 py-[7px] text-[13px] text-[#33302C] hover:border-[#141414] hover:bg-white"
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* The thread: bounded, scrolls, newest in view. The statement
+              below is the record; this is the feedback. */}
+          <div ref={threadRef} className="flex max-h-[110px] flex-col gap-[9px] overflow-y-auto pt-3 sm:max-h-[150px]">
+            {msgs.map((m, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <span
+                  className="w-[52px] flex-none pt-[3px] text-[10px] font-semibold uppercase"
+                  style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#A3A099" : "#B4650B" }}
+                >
+                  {m.who === "you" ? "You" : "Netify"}
+                </span>
+                <span className="max-w-[56em] text-[13.5px] leading-[1.55]" style={{ textWrap: "pretty", color: m.who === "you" ? "#141414" : "#5F5D59" }}>
+                  {m.text}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── THE LIVING STATEMENT ── one document card, five ruled
+          sections of labelled rows, from the very first paint (Robert's
+          ruling: the empty project IS the door): every empty line
+          visible, dashed and clickable at zero. Change is shown in the
+          rows; the thread above only ever repeats the diff. */}
+      {phase === "live" && (
+        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-6 pt-[22px]">
+          <div className="rounded-[16px] border border-[#E5E1D9] bg-[#FBFAF8] px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]" style={{ boxShadow: "0 2px 10px rgba(20,20,20,.04)" }}>
+          <div className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
+          <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
+          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#8C8A85]">
+            This document is the project. It fills in as you talk, every line shows where it came from, and vendors and service providers bid against exactly what is on this page.
+          </p>
 
           {TWIN_GROUPS.map((g) => {
             if (g.id === "rules") {
               const rows = ruleFacts;
               const state = coreFive.sector ? (rows.length ? `${rows.length} applied` : "none yet") : "waiting";
               return (
-                <div key={g.id} className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8]">
-                  <div className="flex items-baseline gap-2.5 border-b border-[#EFECE5] px-5 py-3.5">
+                <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+                  <div className="mb-2 flex items-baseline gap-[11px]">
                     <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                    <span className="min-w-0 flex-1 text-[13px] text-[#A3A099]">{g.note}</span>
+                    <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">{g.note}</span>
                     <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{state}</span>
                   </div>
-                  <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(232px, 1fr))" }}>
+                  <div className="flex flex-col">
                     {rows.length > 0 ? (
                       rows.map((f) => {
                         const isNew = changedSlots.includes(`rule:${f.id}`);
                         return (
                           <div
                             key={f.id}
-                            className="flex flex-col border-b border-r border-[#EFECE5] px-5 py-[15px]"
-                            style={isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B" } : {}}
+                            className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]"
+                            style={isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {}}
                           >
-                            <div className="flex items-baseline gap-2">
-                              <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">Applied</span>
-                              <span
-                                className="flex-none rounded-[4px] px-[5px] py-[3px] text-[9.5px] font-semibold uppercase"
-                                style={{ ...mono, letterSpacing: "0.07em", ...(f.provenance === "inferred" ? { background: "#FFF3DC", color: "#8A4D08" } : { background: "#EAF6EE", color: "#256B3E" }) }}
-                              >
-                                {f.provenance === "inferred" ? "from your sector" : "your words"}
-                              </span>
-                            </div>
-                            <div className="mt-2 flex items-start gap-2">
-                              <span className="min-w-0 flex-1 text-[16.5px] font-medium leading-[1.35]" style={{ textWrap: "pretty" }}>
+                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]">Applied</span>
+                            <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                              <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>
                                 {COMPLIANCE_LABELS[String(f.value)] ?? String(f.value)}
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => dropFact(f.id)}
-                                className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
-                                style={{ ...mono, letterSpacing: "0.07em" }}
-                              >
-                                {f.provenance === "inferred" ? "drop" : "clear"}
-                              </button>
+                              <span className="text-[12px] italic text-[#A3A099]">
+                                {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
+                              </span>
                             </div>
-                            <div className="mt-1.5 text-[12px] italic leading-[1.45] text-[#A3A099]">
-                              {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
-                            </div>
+                            <span
+                              className="flex-none rounded-[4px] px-[5px] py-[3px] text-[9.5px] font-semibold uppercase"
+                              style={{ ...mono, letterSpacing: "0.07em", ...(f.provenance === "inferred" ? { background: "#FFF3DC", color: "#8A4D08" } : { background: "#EAF6EE", color: "#256B3E" }) }}
+                            >
+                              {f.provenance === "inferred" ? "from your sector" : "your words"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => dropRow(f)}
+                              className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                              style={{ ...mono, letterSpacing: "0.07em" }}
+                            >
+                              {f.provenance === "inferred" ? "drop" : "clear"}
+                            </button>
                           </div>
                         );
                       })
                     ) : coreFive.sector ? (
-                      <div className="border-b border-[#EFECE5] px-5 py-[15px] text-[13.5px] leading-[1.55] text-[#8C8A85]">
-                        No asserted rule pack for this sector yet. Any rule you state, “Add PCI DSS”, lands here with your words as its provenance.
+                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#8C8A85]">
+                        No asserted rule pack for this sector yet. Any rule you state lands here with your words as its provenance.
                       </div>
                     ) : (
-                      <div className="flex flex-col border-b border-[#EFECE5] px-5 py-[15px]">
-                        <div className="flex items-baseline gap-2">
-                          <span className="min-w-0 flex-1 text-[12.5px] text-[#8C8A85]">Sector rules</span>
-                          <span className="flex-none text-[9.5px] uppercase text-[#A3A099]" style={{ ...mono, letterSpacing: "0.07em" }}>waiting</span>
-                        </div>
+                      <div className="flex items-start gap-3.5 py-[9px]">
+                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Sector rules</span>
                         <button
                           type="button"
                           onClick={() => setEdit("sector")}
-                          className="mt-2 flex w-full cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[11px] text-left text-[14px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
                         >
-                          <span className="text-[13px] text-[#C4C0B8]" style={mono}>+</span>
+                          <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
                           Set your sector to load these
                         </button>
                       </div>
@@ -1713,36 +2058,39 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             const slots = TWIN_SLOTS.filter((s) => s.group === g.id);
             const filled = slots.filter(slotFilled).length;
             return (
-              <div key={g.id} className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8]">
-                <div className="flex items-baseline gap-2.5 border-b border-[#EFECE5] px-5 py-3.5">
+              <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+                <div className="mb-2 flex items-baseline gap-[11px]">
                   <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                  <span className="min-w-0 flex-1 text-[13px] text-[#A3A099]">{g.note}</span>
+                  <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">{g.note}</span>
                   <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{filled} of {slots.length}</span>
                 </div>
-                <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(232px, 1fr))" }}>
-                  {slots.map(slotCell)}
-                </div>
+                <div className="flex flex-col">{slots.map(slotCell)}</div>
               </div>
             );
           })}
 
           {/* Readiness: once weighted completeness passes the threshold,
-              the action into the vendor list. */}
+              the action into the vendor list, inside the document. */}
           {readyToFit && (
-            <div className="border-l-2 border-[#2E9E52] pl-[17px]">
-              <div className="mb-1.5 text-[18px] font-semibold leading-[1.4]">Enough to be priced consistently.</div>
-              <div className="mb-[15px] max-w-[38em] text-[14.5px] leading-[1.6] text-[#5F5D59]">
-                The gaps left are ones vendors and service providers can quote around. Nothing has left this page.
+            <div className="flex flex-wrap items-center gap-4 border-t border-[#EFECE5] pt-5">
+              <div className="min-w-[240px] flex-1">
+                <div className="text-[16px] font-semibold leading-[1.4]">Complete enough to be priced consistently.</div>
+                <div className="mt-[3px] max-w-[38em] text-[13.5px] leading-[1.55] text-[#5F5D59]">
+                  {created
+                    ? "The gaps left are ones vendors and service providers can quote around."
+                    : "The gaps left are ones vendors and service providers can quote around. Nothing has left this page."}
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => handleCommand({ kind: "whoFits" })}
-                className="cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[23px] py-[13px] text-[15.5px] font-semibold text-[#141414] hover:bg-[#E5940F]"
+                className="flex-none cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[21px] py-3 text-[15px] font-semibold text-[#141414] hover:bg-[#E5940F]"
               >
                 Show the {fittingCount ?? ""} that fit
               </button>
             </div>
           )}
+          </div>
         </div>
       )}
 
@@ -1757,7 +2105,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             onClick={() => { setPhase("live"); scrollToWorkspace(); }}
             className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#8C8A85] hover:text-[#141414]"
           >
-            Back to the project
+            Back to the statement
           </button>
           {rankedFits.length === 0 ? (
             <div className="max-w-[36em] text-[16px] leading-[1.6] text-[#6E6C67]">
@@ -1766,10 +2114,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           ) : (
             <>
               <h2 className="m-0 mb-2.5 max-w-[24em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
-                {rankedFits.length} of {fit?.total ?? rankedFits.length} fit the project as it stands.
+                {rankedFits.length} of {fit?.total ?? rankedFits.length} fit the requirement as it stands.
               </h2>
               <p className="m-0 mb-2 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
-                Scored against the project above, not against what anyone pays. Change anything in the project and this list changes with it.
+                Scored against the statement, never against what anyone pays. Change anything in it and this list changes with it.
               </p>
               <p className="m-0 mb-6 max-w-[38em] text-[14px] leading-[1.6] text-[#8C8A85]">
                 {cap(numWord(keptFits.length))} of {numWord(rankedFits.length)} kept for direct invites. Untick anyone you do not want to hear from
@@ -2058,23 +2406,25 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             </div>
             <div className="mb-4 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#6E6C67]">{editSlot.why}</div>
             {(() => {
-              const held = editSlot.path
+              const pathHeld = editSlot.path
                 ? standingAt(editSlot.path).map((f) => ({
                     key: f.id,
                     label: cap(factLabel(f)),
                     meta: f.provenance === "stated" ? (f.source === "answer" ? "you chose this" : f.quote ? `“${f.quote}”` : "your words") : f.reason ?? "netify guessed",
                     kind: f.provenance === "inferred" ? "drop" : "clear",
-                    act: () => dropFact(f.id),
+                    act: () => dropRow(f),
                   }))
-                : (editSlot.notePrefix
-                    ? noted.filter((n) => n.id.startsWith(editSlot.notePrefix as string)).map((n) => ({
-                        key: n.id,
-                        label: n.label,
-                        meta: "you chose this",
-                        kind: "clear",
-                        act: () => clearNotes(editSlot.notePrefix as string),
-                      }))
-                    : []);
+                : [];
+              const noteHeld = editSlot.notePrefix
+                ? noted.filter((n) => n.id.startsWith(editSlot.notePrefix as string)).map((n) => ({
+                    key: n.id,
+                    label: n.label,
+                    meta: "you chose this",
+                    kind: "clear",
+                    act: () => { clearNotes(editSlot.notePrefix as string); say(`${editSlot.label} cleared. It is an open line in the statement again.`); },
+                  }))
+                : [];
+              const held = pathHeld.length ? pathHeld : noteHeld;
               if (!held.length) return null;
               return (
                 <div className="mb-4">
@@ -2110,107 +2460,89 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               ))}
             </div>
             <div className="mt-3.5 text-[13px] leading-[1.5] text-[#A3A099]">
-              Or close this and say it in your own words below. These are only the answers heard most.
+              Or close this and say it in your own words in the prompt above. These are only the answers heard most.
             </div>
           </div>
         </div>
       )}
 
-      {/* ── THE PROMPT DOCK ── fixed to the viewport bottom: opaque
-          backdrop, matching feather, no backdrop-filter, no gradient.
-          The document's bottom padding keeps the estate footer clear. */}
-      <div
-        ref={dockRef}
-        data-dock="1"
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-[26px] pt-3.5"
-        style={{ background: "#fbfaf8", boxShadow: "0 -18px 22px 10px #fbfaf8", paddingBottom: "max(22px, env(safe-area-inset-bottom))" }}
-      >
-        <div className="pointer-events-auto w-full max-w-[1000px]">
-          {started && (
-            <div className="flex gap-[7px] overflow-x-auto px-0.5 pb-[9px]" style={{ scrollbarWidth: "none" }}>
-              {shortcuts.map((label) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => { setDraft(label); inputRef.current?.focus(); }}
-                  className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E3E0DA] bg-white px-[13px] py-[7px] text-[13.5px] text-[#5F5D59] hover:border-[#141414] hover:text-[#141414]"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-          {wrongCompany && (
-            <p className="m-0 px-1 pb-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
-              Looking for website hosting? That is Netlify, a different company. This is Netify, the SASE and SD-WAN procurement marketplace; carry on if the network is what you came for.
-            </p>
-          )}
-          {pasteSummary && <p className="m-0 px-1 pb-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{pasteSummary}</p>}
-          {cycleError && <p className="m-0 px-1 pb-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">{cycleError}</p>}
-          {voiceError && <p className="m-0 px-1 pb-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{voiceError}</p>}
-          <div className="flex items-end gap-2.5 rounded-[15px] border border-[#DDD9D1] bg-white py-1.5 pl-[18px] pr-2" style={{ boxShadow: "0 6px 26px rgba(20,20,20,.09)" }}>
-            <textarea
-              ref={inputRef}
-              value={draft}
-              onChange={(e) => { setDraft(e.target.value); if (!firstKeyAt.current) firstKeyAt.current = Date.now(); }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  void send(draft);
-                }
-              }}
-              onPaste={(e) => {
-                const text = e.clipboardData?.getData("text") ?? "";
-                if (text.length > 400) {
-                  e.preventDefault();
-                  void ingestText(text, "paste");
-                }
-              }}
-              placeholder={started ? PLACEHOLDERS[ph] : "Describe your project in your own words. One sentence is enough."}
-              rows={1}
-              className="h-[52px] flex-1 resize-none border-0 bg-transparent py-3.5 text-[16.5px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
-            />
-            {voiceSupported && (
+      {/* ── THE SAVE SHEET (round 6) ── the opt-in early save: a
+          verified work email creates the real project record from this
+          statement, unpublished. Nothing is invited, nothing is listed,
+          and the header link opens the record from then on. */}
+      {saveOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-end justify-center px-[26px] pb-[26px]"
+          style={{ background: "rgba(20,20,20,.3)" }}
+          onClick={() => setSaveOpen(false)}
+        >
+          <div
+            className="w-full max-w-[560px] rounded-[18px] border border-[#DDD9D1] bg-white px-6 pb-5 pt-[22px]"
+            style={{ boxShadow: "0 14px 44px rgba(20,20,20,.18)", maxHeight: "min(76vh, 640px)", overflowY: "auto" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-baseline gap-3">
+              <span className="min-w-0 flex-1 text-[19px] font-semibold leading-[1.35]">Save this project</span>
               <button
                 type="button"
-                onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}
-                title={voiceState === "idle" ? "Say it out loud" : "Stop listening"}
-                className={`mb-[7px] flex h-[38px] w-[38px] flex-none cursor-pointer items-center justify-center rounded-[10px] border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[#B4650B]" : "border-[#E3E0DA] text-[#8C8A85] hover:border-[#141414] hover:text-[#141414]"}`}
+                onClick={() => setSaveOpen(false)}
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#A3A099] hover:text-[#141414]"
               >
-                {voiceState === "listening" ? (
-                  <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#B4650B]" aria-hidden="true" />
-                ) : (
-                  <svg width="14" height="18" viewBox="0 0 14 18" fill="none" aria-hidden="true">
-                    <rect x="4.5" y="1" width="5" height="10" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
-                    <path d="M1.5 8.5c0 3 2.4 5 5.5 5s5.5-2 5.5-5M7 13.5V17M4.5 17h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                  </svg>
-                )}
+                Close
               </button>
+            </div>
+            {!signedIn || !sessId?.work ? (
+              <div>
+                <p className="m-0 mb-2 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#6E6C67]">
+                  Saving creates your private project record from this statement. It needs a verified work email; vendors and service
+                  providers respond to verified work emails, so saving uses one too. Nothing is published and nobody is invited by saving.
+                </p>
+                {signedIn && sessId && !sessId.work && (
+                  <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#B4650B]">
+                    Signed in as {sessId.email}, a personal address. Saving needs a work email; everything here stays as it is while you switch.
+                  </p>
+                )}
+                <SignIn
+                  role="buyer"
+                  prompt="Verify your work email to save. Everything here stays on this page until you choose to publish."
+                  onAuthed={() => {
+                    setSignedIn(true);
+                    fetch("/sase/api/auth/session")
+                      .then((r) => r.json())
+                      .then((d: { authenticated?: boolean; email?: string; work_address?: boolean; company_hint?: string | null }) => {
+                        setSessId(d?.authenticated ? { email: d.email ?? "", work: Boolean(d.work_address), company: d.company_hint ?? null } : null);
+                      })
+                      .catch(() => {});
+                  }}
+                />
+              </div>
+            ) : (
+              <div>
+                <p className="m-0 mb-2 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#6E6C67]">
+                  Saving creates your private project record from this statement, owned by{" "}
+                  <span className="font-medium text-[#33302C]">{sessId.email}</span>. It is not published, nobody is invited, and you can
+                  open or continue it any time from the link in the header.
+                </p>
+                {securityScope && (
+                  <label className="mb-2 flex items-start gap-2 text-[13px] leading-relaxed text-[#5F5D59]">
+                    <input type="checkbox" checked={consentSave} onChange={(e) => setConsentSave(e.target.checked)} className="mt-0.5" />
+                    <span>{CREATE_CONSENT_TEXT}</span>
+                  </label>
+                )}
+                {saveError && <p className="m-0 mb-2 text-[12.5px] text-red-600">{saveError}</p>}
+                <button
+                  type="button"
+                  onClick={() => void saveNow()}
+                  disabled={saveBusy || (securityScope && !consentSave)}
+                  className="cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[20px] py-[11px] text-[14.5px] font-semibold text-[#141414] hover:bg-[#E5940F] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {saveBusy ? "Saving…" : created ? "Save changes" : "Save"}
+                </button>
+              </div>
             )}
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              title="Drop or choose a plain-text document and it will be read into the project"
-              className="mb-[7px] h-[38px] w-[38px] flex-none cursor-pointer rounded-[10px] border border-[#E3E0DA] bg-white text-[15px] text-[#8C8A85] hover:border-[#141414] hover:text-[#141414]"
-            >
-              ↑
-            </button>
-            <input ref={fileRef} type="file" accept=".txt,.md,.csv,text/plain" className="hidden" onChange={(e) => { readFile(e.target.files?.[0]); e.target.value = ""; }} />
-            <button
-              type="button"
-              onClick={() => void send(draft)}
-              disabled={!sendReady}
-              className={`mb-[7px] flex-none cursor-pointer rounded-[11px] border-0 px-[18px] py-[11px] text-[15px] font-semibold ${sendReady ? "bg-[#F5A21B] text-[#141414] hover:bg-[#E5940F]" : "bg-[#F0EEE9] text-[#A3A099]"} disabled:cursor-not-allowed`}
-            >
-              {busy ? "Reading…" : started ? "Apply" : "Start"}
-            </button>
           </div>
-          <p className="m-0 px-1 pb-0 pt-[9px] text-[12.5px] leading-normal text-[#A3A099]">
-            {notice ??
-              "Type to change the project above; everything on this page can be done by saying it. Drop a plain-text document on the arrow and it will be read in. Nothing publishes without your signature."}
-          </p>
         </div>
-      </div>
+      )}
 
       {/* ── THE REQUIREMENT SHEET ── a deliberately opened overlay, never
           a column; every row carries its provenance. */}

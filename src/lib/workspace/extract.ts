@@ -252,7 +252,10 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     Math.round(Number(digits.replace(/,/g, "")) * (mag ? (mag.startsWith("k") || mag.startsWith("t") ? 1e3 : 1e6) : 1));
   const users = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:users?|staff|employees?|people|seats?|heads)\\b`));
   if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim());
-  const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?)\\b`));
+  /* "clinics" joined the noun list 31 Jul 2026 (round 6 dry run: "60
+   * clinics" from an NHS buyer landed nothing while "60 shops" landed;
+   * same in-lane precedent as the timeline patterns). */
+  const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?|clinics?)\\b`));
   if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim());
 
   /* Timeline (round three, 31 Jul 2026; the P1 lane's finding made real:
