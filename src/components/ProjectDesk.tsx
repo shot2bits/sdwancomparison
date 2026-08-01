@@ -2190,28 +2190,40 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           panel living inside it would permanently cover most of the
           screen. Here it scrolls with the page like the statement below
           it, and scrolls internally once its own history outgrows the
-          panel, the same way a real chat column does. */}
-      <div className="mx-auto w-full max-w-[1000px] px-[26px] pt-4">
-        <div className="rounded-[16px] border border-[#E5E1D9] bg-[#FBFAF8] px-6 pb-5 pt-5 sm:px-[30px]" style={{ boxShadow: "0 2px 10px rgba(20,20,20,.04)" }}>
-          <div className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.11em" }}>Conversation</div>
-          <p className="m-0 mb-3 mt-1 text-[12.5px] leading-[1.5] text-[#A3A099]">
+          panel, the same way a real chat column does.
+
+          Round 10 catch (2 Aug 2026, Robert, pointing at the screenshot:
+          "I said I wanted a single chat as per ChatGPT, there's 2
+          separate sections"). Round 9 restyled the input to look like a
+          chat composer but this panel kept its own rounded border, card
+          background and drop shadow, so the composer and the thread
+          still read as two framed boxes with a visible seam between
+          them — no chat app boxes its input separately from its own
+          history. The fix is visual only: this panel no longer carries
+          a border, card background or shadow of its own, so it reads as
+          the same continuous surface the sticky composer sits on, one
+          chat column rather than two stacked cards. Nothing about the
+          data, the memory, or the scroll behaviour changes. */}
+      <div className="mx-auto w-full max-w-[1000px] px-[26px] pt-3">
+        {msgs.length > 0 && (
+          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#A3A099]">
             Feedback only, kept for this sitting — the statement below is the record.
           </p>
-          <div ref={threadRef} className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto sm:max-h-[620px]">
-            {msgs.map((m, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <span
-                  className="w-[52px] flex-none pt-[3px] text-[10px] font-semibold uppercase"
-                  style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#A3A099" : "#B4650B" }}
-                >
-                  {m.who === "you" ? "You" : "Netify"}
-                </span>
-                <span className="max-w-[56em] text-[13.5px] leading-[1.55]" style={{ textWrap: "pretty", color: m.who === "you" ? "#141414" : "#5F5D59" }}>
-                  {m.text}
-                </span>
-              </div>
-            ))}
-          </div>
+        )}
+        <div ref={threadRef} className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto px-1 sm:max-h-[620px]">
+          {msgs.map((m, i) => (
+            <div key={i} className="flex items-start gap-2.5">
+              <span
+                className="w-[52px] flex-none pt-[3px] text-[10px] font-semibold uppercase"
+                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#A3A099" : "#B4650B" }}
+              >
+                {m.who === "you" ? "You" : "Netify"}
+              </span>
+              <span className="max-w-[56em] text-[13.5px] leading-[1.55]" style={{ textWrap: "pretty", color: m.who === "you" ? "#141414" : "#5F5D59" }}>
+                {m.text}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
