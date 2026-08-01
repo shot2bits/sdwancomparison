@@ -750,6 +750,18 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     if (el) el.scrollTop = el.scrollHeight;
   }, [msgs]);
 
+  /** The composer grows with what you type, like ChatGPT/Gemini's input,
+   *  instead of a fixed one-line box (round 9, 2 Aug 2026, Robert: "style
+   *  it exactly the same as a ChatGPT input or gemini"). Keyed on `draft`
+   *  rather than only the onChange handler so a programmatic clear after
+   *  send() also collapses the box back down, not just typing. */
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, [draft]);
+
   /** Phase transitions land at the twin's own top, not the page's: the
    *  door hero above is the estate's, not the journey's. */
   const scrollToWorkspace = useCallback(() => {
@@ -2056,8 +2068,17 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             </div>
           </div>
 
-          {/* The prompt (the input method, never the subject). */}
-          <div className="flex items-end gap-2.5 rounded-[15px] border border-[#DDD9D1] bg-white py-1 pl-[18px] pr-1.5" style={{ boxShadow: "0 4px 18px rgba(20,20,20,.06)" }}>
+          {/* The prompt (the input method, never the subject). Styled as a
+              real chat composer (round 9, 2 Aug 2026, Robert: "style it
+              exactly the same as a ChatGPT input or gemini"), not a form
+              row: one growing textarea, one primary round send button
+              carrying the arrow (the icon a chat app's send button is
+              actually supposed to mean), attach/mic as smaller secondary
+              icons beside it. The old layout had this backwards — the
+              up-arrow triggered a file picker, and the real send action
+              was a separate text-labelled pill button ("Apply") to its
+              right, which is not how any chat surface reads. */}
+          <div className="flex items-end gap-2 rounded-[24px] border border-[#DDD9D1] bg-white py-2 pl-[18px] pr-2" style={{ boxShadow: "0 4px 18px rgba(20,20,20,.06)" }}>
             <textarea
               ref={inputRef}
               value={draft}
@@ -2077,42 +2098,54 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               }}
               placeholder={started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
               rows={1}
-              className="h-[46px] flex-1 resize-none border-0 bg-transparent py-3 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
+              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
             />
-            {voiceSupported && (
+            <div className="flex flex-none items-center gap-1.5">
+              {voiceSupported && (
+                <button
+                  type="button"
+                  onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}
+                  title={voiceState === "idle" ? "Say it out loud" : "Stop listening"}
+                  className={`flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[#B4650B]" : "border-transparent text-[#8C8A85] hover:border-[#E3E0DA] hover:text-[#141414]"}`}
+                >
+                  {voiceState === "listening" ? (
+                    <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#B4650B]" aria-hidden="true" />
+                  ) : (
+                    <svg width="14" height="18" viewBox="0 0 14 18" fill="none" aria-hidden="true">
+                      <rect x="4.5" y="1" width="5" height="10" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
+                      <path d="M1.5 8.5c0 3 2.4 5 5.5 5s5.5-2 5.5-5M7 13.5V17M4.5 17h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                    </svg>
+                  )}
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}
-                title={voiceState === "idle" ? "Say it out loud" : "Stop listening"}
-                className={`mb-[6px] flex h-[36px] w-[36px] flex-none cursor-pointer items-center justify-center rounded-[10px] border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[#B4650B]" : "border-[#E3E0DA] text-[#8C8A85] hover:border-[#141414] hover:text-[#141414]"}`}
+                onClick={() => fileRef.current?.click()}
+                title="Drop or choose a plain-text document and it will be read into the statement"
+                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#8C8A85] hover:border-[#E3E0DA] hover:text-[#141414]"
               >
-                {voiceState === "listening" ? (
-                  <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#B4650B]" aria-hidden="true" />
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M11.5 5.5 6 11a2.5 2.5 0 1 0 3.54 3.54L15 9.08a4 4 0 1 0-5.66-5.66L4 8.76" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+              </button>
+              <input ref={fileRef} type="file" accept=".txt,.md,.csv,text/plain" className="hidden" onChange={(e) => { readFile(e.target.files?.[0]); e.target.value = ""; }} />
+              <button
+                type="button"
+                onClick={() => void send(draft)}
+                disabled={!sendReady}
+                title={busy ? "Reading…" : started ? "Send" : "Start"}
+                aria-label={busy ? "Reading" : started ? "Send" : "Start"}
+                className={`flex h-[36px] w-[36px] flex-none cursor-pointer items-center justify-center rounded-full border-0 transition-colors ${sendReady ? "bg-[#F5A21B] text-[#141414] hover:bg-[#E5940F]" : "bg-[#F0EEE9] text-[#C7C3BA]"} disabled:cursor-not-allowed`}
+              >
+                {busy ? (
+                  <span className="inline-block h-[14px] w-[14px] animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
                 ) : (
-                  <svg width="14" height="18" viewBox="0 0 14 18" fill="none" aria-hidden="true">
-                    <rect x="4.5" y="1" width="5" height="10" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
-                    <path d="M1.5 8.5c0 3 2.4 5 5.5 5s5.5-2 5.5-5M7 13.5V17M4.5 17h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M8 13V3M8 3L3.5 7.5M8 3l4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              title="Drop or choose a plain-text document and it will be read into the statement"
-              className="mb-[6px] h-[36px] w-[36px] flex-none cursor-pointer rounded-[10px] border border-[#E3E0DA] bg-white text-[15px] text-[#8C8A85] hover:border-[#141414] hover:text-[#141414]"
-            >
-              ↑
-            </button>
-            <input ref={fileRef} type="file" accept=".txt,.md,.csv,text/plain" className="hidden" onChange={(e) => { readFile(e.target.files?.[0]); e.target.value = ""; }} />
-            <button
-              type="button"
-              onClick={() => void send(draft)}
-              disabled={!sendReady}
-              className={`mb-[6px] flex-none cursor-pointer rounded-[11px] border-0 px-[17px] py-[10px] text-[15px] font-semibold ${sendReady ? "bg-[#F5A21B] text-[#141414] hover:bg-[#E5940F]" : "bg-[#F0EEE9] text-[#A3A099]"} disabled:cursor-not-allowed`}
-            >
-              {busy ? "Reading…" : started ? "Apply" : "Start"}
-            </button>
+            </div>
           </div>
           {wrongCompany && (
             <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
