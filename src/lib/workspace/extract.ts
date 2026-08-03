@@ -89,6 +89,21 @@ const ALLOWED_PATHS = [
   "constraints.budgetBand",
   "procurement.buying",
   "procurement.operatingModel",
+  /* PKM extension (Netify Project Architecture v1.0 s2.2): named
+   * technologies/providers, vendors under consideration, named locations
+   * and their criticality/resilience, and a bespoke catch-all. All seven
+   * are workspace-level facts, same footing as procurement.buying/
+   * operatingModel above: they live in the ledger and the Statement of
+   * Requirements, but applyUpdates() never writes them into
+   * SecurityRequirementInput, so the rulebook engine's contract is
+   * unchanged. */
+  "estate.namedTechnologies",
+  "estate.existingProviders",
+  "procurement.vendorsUnderConsideration",
+  "estate.namedLocations",
+  "estate.locationCriticality",
+  "estate.siteResilience",
+  "requirements.bespoke",
 ] as const;
 export type AllowedPath = (typeof ALLOWED_PATHS)[number];
 
@@ -164,6 +179,34 @@ function validate(path: string, value: unknown, notes: string[]): { path: Allowe
       const s = clean(value, 24).toLowerCase().replace(/[\s-]+/g, "_");
       return (OPERATING_MODEL_IDS as readonly string[]).includes(s) ? { path: p, value: s } : null;
     }
+    /* PKM extension: named free text (technologies, providers, vendors
+     * under consideration, locations). Same shape as estate.existingSecurity
+     * above: loosely validated, list-accumulating, capped at 8 values. */
+    case "estate.namedTechnologies":
+    case "estate.existingProviders":
+    case "procurement.vendorsUnderConsideration":
+    case "estate.namedLocations": {
+      const v = asList(value).map((x) => clean(x, 60)).filter((x) => /[a-zA-Z]{2,}/.test(x)).slice(0, 8);
+      return v.length ? { path: p, value: v } : null;
+    }
+    /* PKM extension: free-text clauses (location criticality, site
+     * resilience, bespoke requirements). Same philosophy as
+     * constraints.timeline/budgetBand: the buyer's whole clause is the
+     * value, never paraphrased or normalised away, because the scoping
+     * words ("other sites", a named site) are exactly what must survive. */
+    case "estate.locationCriticality":
+    case "estate.siteResilience":
+    case "requirements.bespoke": {
+      const v = asList(value)
+        .map((x) => {
+          let s = clean(x, 200);
+          if (!/\s/.test(s) && s.includes("_")) s = s.replace(/_+/g, " ").trim();
+          return s;
+        })
+        .filter((x) => /[a-zA-Z0-9]{2,}/.test(x))
+        .slice(0, 6);
+      return v.length ? { path: p, value: v } : null;
+    }
   }
 }
 
@@ -195,6 +238,18 @@ export function applyUpdates(base: SecurityRequirementInput, updates: FieldUpdat
       case "procurement.operatingModel":
         // Workspace-level facts: they steer the surface and the publish
         // route; the requirement object stays exactly the engine's shape.
+        break;
+      case "estate.namedTechnologies":
+      case "estate.existingProviders":
+      case "procurement.vendorsUnderConsideration":
+      case "estate.namedLocations":
+      case "estate.locationCriticality":
+      case "estate.siteResilience":
+      case "requirements.bespoke":
+        // PKM extension: workspace-level facts, same footing as
+        // procurement.buying/operatingModel above. They live in the ledger
+        // and the Statement of Requirements, never in SecurityRequirementInput
+        // -- the rulebook engine's contract is unchanged.
         break;
     }
   }
@@ -491,6 +546,73 @@ export function deterministicExtract(text: string): FieldUpdate[] {
     else if (hit(/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/)) say("procurement.operatingModel", "diy", "self-managed");
   }
 
+  /* PKM extension (vendors/products under consideration, named locations,
+   * location criticality, site resilience, one named bespoke phrase): the
+   * model is the primary source for all of these -- proper-noun
+   * recognition and "does this fit no other field" judgement are model
+   * strengths, not regex strengths -- so the deterministic rail below is a
+   * narrow, best-effort safety net in the file's existing style (a single
+   * hit()/say() per clause), not a general-purpose detector. Every pattern
+   * here runs against the RAW-CASE text, not the lowercased t, because
+   * capitalisation is the only signal that separates a proper noun from an
+   * ordinary word (the same reason the US-region check above uses raw
+   * text). Each still passes through the SAME negation window as every
+   * lowercase pattern above (F-B: "the ledger must never briefly say X
+   * when the buyer said the opposite"), reindexed onto the padded lowercase
+   * t so "we are NOT considering Meraki" is not recorded as consideration. */
+  const rawHit = (re: RegExp): RegExpExecArray | null => {
+    const m = re.exec(text);
+    return m && !negatedAt(t, m.index + 1, m[0].length) ? m : null;
+  };
+
+  const consideringRe = /\b(?:considering|evaluating|looking at|shortlisting|comparing)\s+([A-Z][\w&+-]*(?:\s+[A-Z][\w&+-]*){0,2})/;
+  const consider = rawHit(consideringRe);
+  if (consider) say("procurement.vendorsUnderConsideration", [consider[1].trim()], consider[0].trim());
+
+  const providerRe = /\b(?:provided by|our (?:current|existing) provider is|incumbent (?:provider|vendor) is|currently with)\s+([A-Z][\w&+-]*(?:\s+[A-Z][\w&+-]*){0,2})/;
+  const provider = rawHit(providerRe);
+  if (provider) say("estate.existingProviders", [provider[1].trim()], provider[0].trim());
+
+  /* Named locations + criticality. Both need the case-insensitive flag:
+   * a buyer writes the abbreviation "HQ" capitalised, and a bare lowercase
+   * literal in the pattern would silently never match it. */
+  const hqRe = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\s+(?:hq|headquarters|head office)\b/i;
+  const hq = rawHit(hqRe);
+  if (hq) say("estate.namedLocations", [`${hq[1].trim()} HQ`], hq[0].trim());
+
+  const criticalRe = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2}(?:\s+HQ)?)\s+is\s+(?:our\s+)?(business[- ]critical|critical|our main site|our primary site|flagship)\b/i;
+  const critical = rawHit(criticalRe);
+  if (critical) say("estate.locationCriticality", [critical[0].trim()], critical[0].trim());
+
+  /* Site resilience / backup connectivity: the whole clause containing a
+   * mobile-connectivity term and "backup", captured verbatim so whatever
+   * scoping words the buyer used ("other sites", "remaining sites", a
+   * named subset) survive untouched. The boundary class stops at a comma
+   * or semicolon as well as sentence punctuation -- deliberately, because
+   * a comma-joined clause naming a DIFFERENT location (e.g. "Reading HQ is
+   * business-critical, while other sites can use 4G or 5G backup") must
+   * never be captured as one fact: that would apply one location's
+   * resilience statement to another location's criticality statement.
+   * Matched against the RAW-CASE text (via rawHit), not the lowercased t:
+   * the 4g/5g/backup terms are matched case-insensitively (the /i flag),
+   * but the CAPTURED VALUE must keep the buyer's own capitalisation
+   * ("4G or 5G", not "4g or 5g") -- preserving their wording exactly, not
+   * just the words. */
+  const resilienceRe = /[^.,!?;]*\b(?:4g|5g)\b[^.,!?;]*\bbackup\b[^.,!?;]*/i;
+  const resilience = rawHit(resilienceRe);
+  if (resilience) say("estate.siteResilience", [resilience[0].trim()], resilience[0].trim());
+
+  /* Bespoke requirements: one narrow, named deterministic exception, named
+   * because the acceptance case names it directly. The general case (a
+   * requirement that fits no other path) is not reliably detectable by
+   * regex and is left to the model. The captured VALUE is the buyer's own
+   * surrounding clause, comma/period-bounded exactly like the resilience
+   * clause above -- never an invented paraphrase standing in for their
+   * words. */
+  const bespokeThreatRe = /[^.,!?;]*threat protection[^.,!?;]*/i;
+  const bespokeThreat = rawHit(bespokeThreatRe);
+  if (bespokeThreat) say("requirements.bespoke", [bespokeThreat[0].trim()], bespokeThreat[0].trim());
+
   return out;
 }
 
@@ -512,6 +634,9 @@ Rules:
 - procurement.buying is what they SEEK to buy (managed_security covers MDR, SOC, SIEM, MSSP and managed security services); estate.existingNetwork and estate.existingSecurity are what they already HAVE. Never confuse the two.
 - Drivers are exact meanings, not intensities: "incident" only for an actual or ongoing incident (phishing, breach, compromise); "ransomware_concern" only when the buyer names ransomware. Do not escalate one into the other. "renewal" only when the buyer names a contract, renewal, expiry or agreement ending; replacing outdated, legacy or end-of-life equipment is NOT a renewal, and if no driver fits, omit drivers entirely.
 - Mobile connectivity (4G, 5G) is not "broadband". If the estate runs on mobile and no listed network id fits, omit the field rather than approximating.
+- procurement.vendorsUnderConsideration is a vendor or product the buyer is evaluating or thinking about -- never one already in place or already chosen. Never propose this path for a vendor the buyer describes as already deployed or already selected (use estate.namedTechnologies / estate.existingProviders instead), and never imply selection just because a vendor is named.
+- estate.namedLocations, estate.locationCriticality and estate.siteResilience must each be scoped to the specific location or group of locations the buyer names -- copy their scoping words in full (a named site, or an exclusion like "other sites" or "the rest of our sites"). Never generalise a statement about one location to the whole estate, and never let a clause about one location apply to a different named location the buyer did not include in it.
+- requirements.bespoke is for a concrete requirement in the buyer's own words that does not fit any other allowed path. Only propose it when the text states a real requirement with no better home; never invent one.
 - "quote": if the buyer literally said it, copy their exact words (a short verbatim substring). If you inferred it, set quote to null and give a one-line "reason".
 - Never invent facts. Omit what the text does not support. Fewer, correct fields beat many guesses.`;
 
@@ -646,6 +771,20 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
         continue;
       }
     }
+    /* PKM extension: a vendor proposed as "under consideration" must not be
+     * one the model's own evidence describes as already in place or
+     * already chosen -- that is estate.namedTechnologies /
+     * estate.existingProviders territory, not this path. Same law as every
+     * guard above: the claim is dropped, not relabelled, and the clause
+     * keeps its receipt. */
+    if (ok.path === "procurement.vendorsUnderConsideration") {
+      const evidence = (quote || String(f.reason ?? "")).toLowerCase();
+      const alreadyThere = /\b(?:already|currently|existing|incumbent|signed with|going with|selected|chosen|our current)\b/;
+      if (alreadyThere.test(evidence)) {
+        notes.push("Dropped a vendor-under-consideration claim: the words describe an existing or already-chosen vendor, not one being considered.");
+        continue;
+      }
+    }
     /* Round 8 catch (2 Aug 2026, live QA finding): the model proposed
      * constraints.timeline "30 day poc" off "a 30 day proof-of-concept
      * trial before we sign a contract" — a procurement condition, not a
@@ -736,6 +875,16 @@ export const LIST_FACT_PATHS: ReadonlySet<string> = new Set([
   "estate.existingNetwork",
   "drivers",
   "constraints.complianceRequirements",
+  // PKM extension: all seven new paths accumulate (a buyer may name more
+  // than one technology, provider, vendor under consideration, location,
+  // criticality clause, resilience clause or bespoke requirement).
+  "estate.namedTechnologies",
+  "estate.existingProviders",
+  "procurement.vendorsUnderConsideration",
+  "estate.namedLocations",
+  "estate.locationCriticality",
+  "estate.siteResilience",
+  "requirements.bespoke",
 ]);
 
 /**
