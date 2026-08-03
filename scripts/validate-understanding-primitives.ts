@@ -1,6 +1,17 @@
 /**
  * Build gate for the Understanding presentational primitives (Milestone 1,
- * Commit 5): FactInspector and UnderstandingGroup.
+ * Commit 5, extended in Commit 7): FactInspector and UnderstandingGroup.
+ *
+ * Commit 7 addition: FactInspector's value line now calls draft.ts's
+ * authoritative factLabel(fact) instead of String(fact.value), so an
+ * enum-coded fact (e.g. constraints.complianceRequirements = "iso27001")
+ * shows the same humanised text ("ISO 27001") the buyer-facing sentence
+ * already shows, instead of the raw internal enum id. Tests 13-24 below
+ * cover that fix directly; test 5 (struck-fact distinguishability) was
+ * adjusted because its old fixture's assertion depended on the raw
+ * lowercase enum id ("aws") being rendered verbatim, which is exactly the
+ * behaviour Commit 7 fixes — the assertion now checks for the correct,
+ * humanised value ("AWS") instead.
  *
  * Tooling limitation, reported honestly rather than worked around: this
  * repository has no React rendering test tooling (no jsdom, no
@@ -192,8 +203,10 @@ const gapChips: BriefGap = {
   expect(flatStruck.includes("line-through"), `[5] expected a struck fact to carry a line-through style, got: ${flatStruck}`);
   expect(flatStruck.includes("Superseded"), `[5] expected a struck fact to be labelled Superseded, got: ${flatStruck}`);
   expect(!flatLive.includes("Superseded"), `[5] expected a live (non-struck) fact NOT to be labelled Superseded`);
-  // Not hidden: the fact's own value/quote must still be present.
-  expect(flatStruck.includes("aws") && flatStruck.includes("we use AWS"), `[5] expected the struck fact's value and quote to still be rendered, got: ${flatStruck}`);
+  // Not hidden: the fact's own value/quote must still be present. The
+  // value is the humanised label ("AWS"), not the raw stored enum id
+  // ("aws") — Commit 7's fix, exercised here incidentally.
+  expect(flatStruck.includes("AWS") && flatStruck.includes("we use AWS"), `[5] expected the struck fact's humanised value and quote to still be rendered, got: ${flatStruck}`);
 }
 
 /* 6. Text Seg renders supplied text. -------------------------------------- */
@@ -286,6 +299,241 @@ const gapChips: BriefGap = {
 
   expect(JSON.stringify([block]) === blocksBefore, `[12] the input BriefBlock/Seg structure was mutated`);
   expect(JSON.stringify(fact) === factBefore, `[12] the input WorkspaceFact was mutated`);
+}
+
+/* ---- Commit 7: FactInspector value humanisation ------------------------ */
+
+/* 13. ISO 27001 stored as iso27001 renders as ISO 27001. ------------------ */
+{
+  const fact: WorkspaceFact = {
+    id: "constraints.complianceRequirements:iso27001",
+    path: "constraints.complianceRequirements",
+    value: "iso27001",
+    provenance: "stated",
+    quote: "we need to hit ISO 27001",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("ISO 27001"), `[13] expected the humanised label "ISO 27001", got: ${flat}`);
+  expect(!flat.includes("iso27001"), `[13] the raw enum id "iso27001" leaked into rendered output: ${flat}`);
+}
+
+/* 14. PCI DSS renders correctly. ------------------------------------------ */
+{
+  const fact: WorkspaceFact = {
+    id: "constraints.complianceRequirements:pci_dss",
+    path: "constraints.complianceRequirements",
+    value: "pci_dss",
+    provenance: "stated",
+    quote: "we take card payments, so PCI DSS applies",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("PCI DSS"), `[14] expected the humanised label "PCI DSS", got: ${flat}`);
+  expect(!flat.includes("pci_dss"), `[14] the raw enum id "pci_dss" leaked into rendered output: ${flat}`);
+}
+
+/* 15. A sector value renders its existing human label. -------------------- */
+/*     organisation.sector is not one of factLabel()'s enum-mapped paths — */
+/*     the workspace already stores the canonical human-readable sector    */
+/*     string itself (e.g. "Retail & e-commerce"), not a slug, so the      */
+/*     "existing human label" for this path is the stored value unchanged, */
+/*     via factLabel()'s own default case. Verified, not assumed. --------- */
+{
+  const fact: WorkspaceFact = {
+    id: "organisation.sector",
+    path: "organisation.sector",
+    value: "Retail & e-commerce",
+    provenance: "stated",
+    quote: "we're a retail business",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("Retail & e-commerce"), `[15] expected the sector's existing human label to render unchanged, got: ${flat}`);
+}
+
+/* 16. The buying/scope enum renders its existing human label. ------------- */
+{
+  const fact: WorkspaceFact = {
+    id: "procurement.buying",
+    path: "procurement.buying",
+    value: "sdwan",
+    provenance: "stated",
+    quote: "we're after an SD-WAN service",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("an SD-WAN service"), `[16] expected the buying enum's existing human label "an SD-WAN service", got: ${flat}`);
+  expect(!flat.includes("sdwan"), `[16] the raw enum id "sdwan" leaked into rendered output: ${flat}`);
+}
+
+/* 17. The operating-model enum renders its existing human label. --------- */
+{
+  const fact: WorkspaceFact = {
+    id: "procurement.operatingModel",
+    path: "procurement.operatingModel",
+    value: "managed",
+    provenance: "stated",
+    quote: "we want it fully managed",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("fully managed"), `[17] expected the operating-model enum's existing human label "fully managed", got: ${flat}`);
+}
+
+/* 18. A region value renders correctly. ------------------------------------ */
+{
+  const fact: WorkspaceFact = {
+    id: "organisation.regions:uk",
+    path: "organisation.regions",
+    value: "uk",
+    provenance: "stated",
+    quote: "we operate across the UK",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("the UK"), `[18] expected the region's existing human label "the UK", got: ${flat}`);
+}
+
+/* 19. A free-text value is unchanged. -------------------------------------- */
+{
+  const fact: WorkspaceFact = {
+    id: "estate.namedTechnologies:cisco meraki",
+    path: "estate.namedTechnologies",
+    value: "Cisco Meraki",
+    provenance: "stated",
+    quote: "we run Cisco Meraki",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("Cisco Meraki"), `[19] expected the free-text value to render unchanged, got: ${flat}`);
+}
+
+/* 20. A numeric value is unchanged. ---------------------------------------- */
+{
+  const fact: WorkspaceFact = {
+    id: "estate.sites",
+    path: "estate.sites",
+    value: 42,
+    provenance: "stated",
+    quote: "42 sites",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(flat.includes("42"), `[20] expected the numeric value 42 to render unchanged, got: ${flat}`);
+}
+
+/* 21. List values preserve every item (each list-path fact is its own    */
+/*     WorkspaceFact — WorkspaceFact.value is never an array, confirmed in */
+/*     Commit 5 — so "preserve every item" means every fact's own          */
+/*     FactInspector render keeps its own distinct value; none merge or   */
+/*     drop). ---------------------------------------------------------------*/
+{
+  const factA: WorkspaceFact = {
+    id: "estate.namedTechnologies:cisco meraki",
+    path: "estate.namedTechnologies",
+    value: "Cisco Meraki",
+    provenance: "stated",
+    quote: "we run Cisco Meraki",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const factB: WorkspaceFact = {
+    id: "estate.namedTechnologies:fortinet",
+    path: "estate.namedTechnologies",
+    value: "Fortinet",
+    provenance: "stated",
+    quote: "and Fortinet too",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flatA = flatten(FactInspector({ fact: factA, labelFor })).join(" | ");
+  const flatB = flatten(FactInspector({ fact: factB, labelFor })).join(" | ");
+  expect(flatA.includes("Cisco Meraki") && !flatA.includes("Fortinet"), `[21] expected factA to render only its own value, got: ${flatA}`);
+  expect(flatB.includes("Fortinet") && !flatB.includes("Cisco Meraki"), `[21] expected factB to render only its own value, got: ${flatB}`);
+}
+
+/* 22. The original WorkspaceFact object remains unmodified. --------------- */
+{
+  const fact: WorkspaceFact = {
+    id: "constraints.complianceRequirements:iso27001",
+    path: "constraints.complianceRequirements",
+    value: "iso27001",
+    provenance: "stated",
+    quote: "we need to hit ISO 27001",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const before = JSON.stringify(fact);
+  FactInspector({ fact, labelFor });
+  expect(JSON.stringify(fact) === before, `[22] the input WorkspaceFact was mutated by value humanisation`);
+  expect(fact.value === "iso27001", `[22] the underlying WorkspaceFact.value must stay the raw enum id, not be rewritten to the label`);
+}
+
+/* 23. Quote/reason/provenance rendering remains unchanged for an          */
+/*     enum-coded fact (the fix touches only the value line). -------------- */
+{
+  const statedEnum: WorkspaceFact = {
+    id: "constraints.complianceRequirements:iso27001",
+    path: "constraints.complianceRequirements",
+    value: "iso27001",
+    provenance: "stated",
+    quote: "we need to hit ISO 27001",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const inferredEnum: WorkspaceFact = {
+    id: "procurement.operatingModel",
+    path: "procurement.operatingModel",
+    value: "co_managed",
+    provenance: "inferred",
+    reason: "buyer described shared responsibility with an MSP",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flatStated = flatten(FactInspector({ fact: statedEnum, labelFor })).join(" | ");
+  const flatInferred = flatten(FactInspector({ fact: inferredEnum, labelFor })).join(" | ");
+  expect(flatStated.includes("Stated") && flatStated.includes("we need to hit ISO 27001"), `[23] expected provenance and quote unchanged for a stated enum fact, got: ${flatStated}`);
+  expect(flatInferred.includes("Inferred") && flatInferred.includes("buyer described shared responsibility with an MSP"), `[23] expected provenance and reason unchanged for an inferred enum fact, got: ${flatInferred}`);
+  expect(flatInferred.includes("co-managed"), `[23] expected the inferred enum's humanised value "co-managed" to still render, got: ${flatInferred}`);
+}
+
+/* 24. No raw AllowedPath is exposed for an enum-coded fact. ---------------- */
+{
+  const fact: WorkspaceFact = {
+    id: "constraints.complianceRequirements:iso27001",
+    path: "constraints.complianceRequirements",
+    value: "iso27001",
+    provenance: "stated",
+    quote: "we need to hit ISO 27001",
+    struck: false,
+    source: "extract",
+    cycle: 1,
+  };
+  const flat = flatten(FactInspector({ fact, labelFor })).join(" | ");
+  expect(!flat.includes("constraints.complianceRequirements"), `[24] raw AllowedPath leaked into rendered output: ${flat}`);
+  expect(flat.includes(labelFor("constraints.complianceRequirements")), `[24] expected the human path label to be present`);
 }
 
 console.log(`understanding-primitives: ${pass} checks pass (${fail} fail)`);

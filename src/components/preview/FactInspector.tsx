@@ -19,11 +19,29 @@
  * every FactInspector it renders) — one injected label source per render
  * tree, not two components each independently importing labels.ts.
  *
- * Value rendering: a WorkspaceFact's `value` is always a single already-
- * exploded value, never an array — confirmed from draft.ts's explode(),
- * which splits a list-path update into one fact per array element before
- * merge. String(fact.value) is therefore always a plain scalar rendering,
- * never a comma-joined array artefact.
+ * Value rendering (Milestone 1, Commit 7 fix): a WorkspaceFact's `value`
+ * is always a single already-exploded value, never an array — confirmed
+ * from draft.ts's explode(), which splits a list-path update into one
+ * fact per array element before merge — so there is never a comma-joined
+ * array artefact to worry about here. But the raw value itself is not
+ * always human-readable: for enum-coded paths (constraints.
+ * complianceRequirements, drivers, estate.cloud, estate.existingNetwork,
+ * organisation.regions, procurement.buying, procurement.operatingModel)
+ * WorkspaceFact.value holds the internal enum id ("iso27001"), while the
+ * buyer-facing Understanding sentence displays the humanised label
+ * ("ISO 27001") via draft.ts's own `factLabel(fact)` — the single
+ * authoritative value-formatting function, already used consistently by
+ * StatementOfRequirements.tsx, briefModel() itself (`fs()`'s default
+ * text), and every value display in the live ProjectDesk.tsx (verified:
+ * ProjectDesk.tsx calls factLabel() at every point it shows a fact's
+ * value — lines 1135, 1472, 1820, 1888-1889, 2804 — there is no second,
+ * competing enum-label system to reconcile). This file previously used
+ * `String(fact.value)` directly, which bypassed that humanisation and
+ * showed the raw enum id — a buyer-visible inconsistency against the
+ * same sentence's own wording, fixed here by calling factLabel(fact)
+ * instead. For every path with no enum table (free text, numbers, and
+ * every PKM path), factLabel()'s own default case returns String(value)
+ * unchanged, so this fix changes nothing for those paths.
  *
  * Struck facts are shown, not hidden (the existing preview renderer,
  * StatementOfRequirements.tsx's renderSeg, also never hides a struck
@@ -37,7 +55,7 @@
  * no source detail is available rather than inventing one.
  */
 
-import type { WorkspaceFact } from "@/lib/workspace/draft";
+import { factLabel, type WorkspaceFact } from "@/lib/workspace/draft";
 import type { AllowedPath } from "@/lib/workspace/extract";
 
 export default function FactInspector({
@@ -48,7 +66,7 @@ export default function FactInspector({
   labelFor: (path: AllowedPath) => string;
 }) {
   const label = labelFor(fact.path);
-  const value = String(fact.value);
+  const value = factLabel(fact);
   const provenanceLabel = fact.provenance === "stated" ? "Stated" : "Inferred";
 
   return (
