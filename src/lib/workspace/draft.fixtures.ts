@@ -933,6 +933,53 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(Boolean(criticality) && String((criticality!.value as string[])[0]).includes("Reading HQ") && String((criticality!.value as string[])[0]).includes("business-critical"), "the criticality clause stands on its own, naming Reading HQ");
   });
 
+  /* ---- Duplicate-handling fix (live-preview finding, 3 Aug 2026): the
+          model and the deterministic rail can each find the same
+          site-resilience clause worded slightly differently (a leading
+          "while" the rail keeps because its match starts right after the
+          previous clause's comma). unionUpdates must merge these into one
+          fact, keeping the fuller wording, while two genuinely different
+          resilience statements must never be merged. ---- */
+  await ok("PKM extension: near-duplicate site-resilience wording from the model and the rail merges into one fact, keeping the fuller wording", () => {
+    const model: FieldUpdate[] = [
+      { path: "estate.siteResilience", value: ["other sites can use 4G or 5G backup"], provenance: "stated", quote: "other sites can use 4G or 5G backup" },
+    ];
+    const det: FieldUpdate[] = [
+      { path: "estate.siteResilience", value: ["while other sites can use 4G or 5G backup"], provenance: "stated", quote: "while other sites can use 4G or 5G backup" },
+    ];
+    const merged = unionUpdates(model, det);
+    const vals = merged.filter((u) => u.path === "estate.siteResilience").flatMap((u) => u.value as string[]);
+    expect(vals.length === 1, `want exactly one surviving resilience fact, got ${vals.length}: ${vals.join(" | ")}`);
+    expect(vals[0] === "while other sites can use 4G or 5G backup", `the fuller wording (with "while") should survive verbatim, got "${vals[0]}"`);
+    const survivor = merged.find((u) => u.path === "estate.siteResilience")!;
+    expect(survivor.provenance === "stated" && survivor.quote === "while other sites can use 4G or 5G backup", "the surviving fact keeps real, unweakened provenance");
+  });
+
+  await ok("PKM extension: genuinely different site-resilience statements are never merged", () => {
+    const model: FieldUpdate[] = [
+      { path: "estate.siteResilience", value: ["the London office has 4G backup"], provenance: "stated", quote: "the London office has 4G backup" },
+    ];
+    const det: FieldUpdate[] = [
+      { path: "estate.siteResilience", value: ["the Leeds warehouse has 5G backup"], provenance: "stated", quote: "the Leeds warehouse has 5G backup" },
+    ];
+    const merged = unionUpdates(model, det);
+    const vals = merged.filter((u) => u.path === "estate.siteResilience").flatMap((u) => u.value as string[]);
+    expect(vals.length === 2, `two genuinely different resilience statements must both survive, got ${vals.length}: ${vals.join(" | ")}`);
+    expect(vals.includes("the London office has 4G backup") && vals.includes("the Leeds warehouse has 5G backup"), "both distinct statements keep their own wording");
+  });
+
+  await ok("PKM extension: other list paths keep their ordinary exact-match dedup, untouched by the resilience fix", () => {
+    const model: FieldUpdate[] = [
+      { path: "procurement.vendorsUnderConsideration", value: ["Meraki"], provenance: "stated", quote: "considering Meraki" },
+    ];
+    const det: FieldUpdate[] = [
+      { path: "procurement.vendorsUnderConsideration", value: ["and Meraki"], provenance: "stated", quote: "and Meraki" },
+    ];
+    const merged = unionUpdates(model, det);
+    const vals = merged.filter((u) => u.path === "procurement.vendorsUnderConsideration").flatMap((u) => u.value as string[]);
+    expect(vals.length === 2, "a leading conjunction is only stripped for estate.siteResilience's comparison, no other path");
+  });
+
   /* ---- The full acceptance sentence, end to end: extraction, merge and
           the Statement of Requirements projection together. ---- */
   await ok("PKM extension acceptance sentence: every expected fact lands, scoped and unexpanded", async () => {
