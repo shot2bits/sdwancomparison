@@ -544,6 +544,36 @@ export function briefModel(opts: {
     if (paras.length) blocks.push({ key: "estate", heading: "Estate and current position", paras });
   }
 
+  /* ---- Providers and vendors (PKM extension) ---- */
+  {
+    const paras: Seg[][] = [];
+    const tech = at("estate.namedTechnologies");
+    if (tech.length) paras.push([t("Named technologies already in place: "), ...joinSegs(tech.map((f) => fs(f))), t(".")]);
+    const providers = at("estate.existingProviders");
+    if (providers.length) paras.push([t("Existing providers: "), ...joinSegs(providers.map((f) => fs(f))), t(".")]);
+    const considering = at("procurement.vendorsUnderConsideration");
+    // "Under consideration, not yet selected" is hard-coded into the
+    // projection's own prose, not derived from the buyer's words: the
+    // document itself carries the same guarantee the path name carries,
+    // so a mention here can never read as a selection.
+    if (considering.length) paras.push([t("Under consideration, not yet selected: "), ...joinSegs(considering.map((f) => fs(f))), t(".")]);
+    if (paras.length) blocks.push({ key: "vendors", heading: "Providers and vendors", paras });
+  }
+
+  /* ---- Locations and site resilience (PKM extension) ---- */
+  {
+    const paras: Seg[][] = [];
+    const locations = at("estate.namedLocations");
+    if (locations.length) paras.push([t("Named locations: "), ...joinSegs(locations.map((f) => fs(f))), t(".")]);
+    // Each criticality clause and each resilience clause renders as its own
+    // paragraph, in the order captured: nothing here joins a criticality
+    // clause to a resilience clause, or infers that a resilience clause
+    // applies to a location named in a different clause.
+    for (const f of at("estate.locationCriticality")) paras.push([fs(f), t(".")]);
+    for (const f of at("estate.siteResilience")) paras.push([fs(f), t(".")]);
+    if (paras.length) blocks.push({ key: "locations", heading: "Locations and site resilience", paras });
+  }
+
   /* ---- Why now ---- */
   {
     const paras: Seg[][] = [];
@@ -614,6 +644,18 @@ export function briefModel(opts: {
       t("Publishing issues the Netify question set for this scope under methodology v2026.1, matched to the sector and compliance stated above, and invites the best-fit evaluated vendors alongside any you pin below."),
     ]);
     blocks.push({ key: "scope", heading: "Scope of supply", paras });
+  }
+
+  /* ---- Additional requirements (PKM extension bespoke catch-all) ---- */
+  {
+    const bespoke = at("requirements.bespoke");
+    if (bespoke.length) {
+      blocks.push({
+        key: "bespoke",
+        heading: "Additional requirements",
+        paras: bespoke.map((f) => [fs(f), t(".")]),
+      });
+    }
   }
 
   const openGaps = [...gapByField.entries()].filter(([f]) => !consumedGaps.has(f)).map(([, g]) => g);
