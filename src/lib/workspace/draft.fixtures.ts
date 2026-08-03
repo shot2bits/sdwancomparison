@@ -845,5 +845,145 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(typeof out.read_summary === "string" && out.read_summary.startsWith("Read "), "the read summary is present and honest");
   });
 
+  /* ================================================================== */
+  /* PKM extension: named vendors under consideration, named locations,   */
+  /* location criticality, site resilience, bespoke requirements.         */
+  /* Netify Project Architecture v1.0 s2.2; PKM Extension Implementation  */
+  /* Plan s2-s9.                                                          */
+  /* ================================================================== */
+
+  /* ---- Validator boundary tests (through the public vetModelProposals
+          entry point, exactly as the existing "Harry's sentence" test
+          already exercises validate() indirectly) ---- */
+  await ok("PKM extension validator: named free-text paths accept real values and reject garbage", () => {
+    const good = vetModelProposals(
+      [{ path: "estate.namedLocations", value: ["Reading HQ"], quote: "Reading HQ" }],
+      "Reading HQ is our main office.",
+      [],
+    );
+    expect(good.some((u) => u.path === "estate.namedLocations" && (u.value as string[]).includes("Reading HQ")), "a real location name is kept");
+    const notes: string[] = [];
+    const bad = vetModelProposals(
+      [{ path: "estate.namedLocations", value: ["1"], quote: "1" }],
+      "text mentioning 1",
+      notes,
+    );
+    expect(!bad.some((u) => u.path === "estate.namedLocations"), "a garbage value with no letters is dropped");
+  });
+
+  await ok("PKM extension validator: clause paths accept a full sentence and de-slug an underscored echo", () => {
+    const clauseOk = vetModelProposals(
+      [{ path: "estate.siteResilience", value: ["other sites can use 4G or 5G backup"], quote: "other sites can use 4G or 5G backup" }],
+      "Other sites can use 4G or 5G backup.",
+      [],
+    );
+    expect(clauseOk.some((u) => u.path === "estate.siteResilience" && (u.value as string[])[0] === "other sites can use 4G or 5G backup"), "the full clause is kept verbatim");
+    const deslug = vetModelProposals(
+      [{ path: "requirements.bespoke", value: ["a_focus_on_threat_protection"], quote: null, reason: "threat protection" }],
+      "a focus on threat protection",
+      [],
+    );
+    expect(deslug.some((u) => u.path === "requirements.bespoke" && (u.value as string[])[0] === "a focus on threat protection"), "an underscored slug de-slugs into a readable clause");
+  });
+
+  /* ---- Merge-mechanics parity: the new list paths get tombstone,
+          resurrection and correction behaviour for free, with zero new
+          code in mergeUpdates() -- proving Requirement #1 (WorkspaceFact,
+          mergeUpdates, provenance and tombstones are unchanged). ---- */
+  await ok("PKM extension: mergeUpdates handles a new list path identically to an existing one, unmodified", () => {
+    let m = mergeUpdates([], [{ path: "procurement.vendorsUnderConsideration", value: ["Meraki"], provenance: "stated", quote: "considering Meraki" }], 1);
+    expect(m.facts.some((f) => f.id === "procurement.vendorsUnderConsideration:meraki"), "per-value identity, same as any other list path");
+    m = { ...m, facts: m.facts.map((f) => (f.path === "procurement.vendorsUnderConsideration" ? { ...f, struck: true } : f)) };
+    let m2 = mergeUpdates(m.facts, [{ path: "procurement.vendorsUnderConsideration", value: ["Meraki"], provenance: "inferred", reason: "mentioned again" }], 2);
+    expect(m2.facts.find((f) => f.id === "procurement.vendorsUnderConsideration:meraki")!.struck === true, "a struck vendor-under-consideration fact resists a re-inference");
+    m2 = mergeUpdates(m2.facts, [{ path: "procurement.vendorsUnderConsideration", value: ["Meraki"], provenance: "stated", quote: "still considering Meraki" }], 3);
+    expect(m2.facts.find((f) => f.id === "procurement.vendorsUnderConsideration:meraki")!.struck === false, "the buyer's own words resurrect it, exactly as any other path");
+  });
+
+  /* ---- Vetting guard: a vendor already in place is never proposed as
+          "under consideration" (Requirement #5). ---- */
+  await ok("PKM extension: a vendor described as already chosen is dropped from vendorsUnderConsideration, not relabelled", () => {
+    const notes: string[] = [];
+    const dropped = vetModelProposals(
+      [{ path: "procurement.vendorsUnderConsideration", value: ["Meraki"], quote: "we are already using Meraki" }],
+      "We are already using Meraki across our sites.",
+      notes,
+    );
+    expect(!dropped.some((u) => u.path === "procurement.vendorsUnderConsideration"), "an already-in-place vendor is dropped from the consideration path");
+    expect(notes.some((n) => n.includes("vendor-under-consideration")), "the drop is spoken, never silent");
+    const kept = vetModelProposals(
+      [{ path: "procurement.vendorsUnderConsideration", value: ["Meraki"], quote: "considering Meraki" }],
+      "We are considering Meraki.",
+      [],
+    );
+    expect(kept.some((u) => u.path === "procurement.vendorsUnderConsideration"), "a genuine consideration claim still lands");
+  });
+
+  /* ---- Scope preservation: a resilience clause never absorbs a
+          different location's criticality clause across a comma
+          (Requirement #7) ---- */
+  await ok("PKM extension: site resilience stays comma-scoped and never absorbs a different location's clause", () => {
+    const out = deterministicExtract("Reading HQ is business-critical, while other sites can use 4G or 5G backup.");
+    const resilience = out.find((u) => u.path === "estate.siteResilience");
+    expect(Boolean(resilience), "a resilience clause lands");
+    const value = String((resilience!.value as string[])[0]);
+    expect(value.includes("other sites") && value.includes("backup"), "the resilience clause keeps its own scoping words");
+    expect(!value.includes("Reading"), "the resilience clause never absorbs the Reading HQ criticality clause across the comma");
+    const criticality = out.find((u) => u.path === "estate.locationCriticality");
+    expect(Boolean(criticality) && String((criticality!.value as string[])[0]).includes("Reading HQ") && String((criticality!.value as string[])[0]).includes("business-critical"), "the criticality clause stands on its own, naming Reading HQ");
+  });
+
+  /* ---- The full acceptance sentence, end to end: extraction, merge and
+          the Statement of Requirements projection together. ---- */
+  await ok("PKM extension acceptance sentence: every expected fact lands, scoped and unexpanded", async () => {
+    const ACCEPTANCE =
+      "We are a UK retail business with 50 sites and 200 remote users. We need PCI DSS compliance, SD-WAN and full SASE with a focus on threat protection. Reading HQ is business-critical, while other sites can use 4G or 5G backup. We are considering Meraki.";
+    const out = deterministicExtract(ACCEPTANCE);
+    const values = (path: string) => out.filter((u) => u.path === path).flatMap((u) => (Array.isArray(u.value) ? u.value : [u.value]));
+
+    expect(values("organisation.sector").includes("Retail & e-commerce"), "sector: Retail & e-commerce");
+    expect(values("organisation.regions").length === 1 && values("organisation.regions").includes("uk"), "region: exactly one UK fact, not doubled by Reading");
+    expect(values("estate.sites").includes(50), "50 sites");
+    expect(values("estate.users").includes(200), "200 remote users");
+    expect(values("constraints.complianceRequirements").includes("pci_dss"), "PCI DSS");
+    expect(values("procurement.buying").includes("sase"), "SASE (with SD-WAN as its component)");
+    expect(values("requirements.bespoke").some((v) => String(v).includes("threat protection")), "threat protection as a bespoke requirement");
+    expect(values("estate.namedLocations").includes("Reading HQ"), "Reading HQ captured as a named location");
+    const critVals = values("estate.locationCriticality").map(String);
+    expect(critVals.some((v) => v.includes("Reading HQ") && v.toLowerCase().includes("business-critical")), "Reading HQ's criticality is its own fact");
+    const resVals = values("estate.siteResilience").map(String);
+    expect(resVals.some((v) => v.includes("other sites") && /4g|5g/i.test(v) && v.includes("backup")), "resilience clause for other sites");
+    expect(!resVals.some((v) => v.includes("Reading")), "resilience never applies to Reading HQ");
+    const consider = values("procurement.vendorsUnderConsideration").map(String);
+    expect(consider.includes("Meraki"), "Meraki captured as under consideration");
+    expect(!consider.includes("Cisco Meraki"), "Meraki is never expanded to Cisco Meraki -- the buyer never said Cisco");
+
+    // Every stated fact's quote must be a verbatim substring of the buyer's
+    // own sentence (the existing provenance-proof discipline, extended).
+    for (const u of out) {
+      if (u.provenance === "stated" && u.quote) {
+        expect(ACCEPTANCE.toLowerCase().includes(u.quote.toLowerCase()), `quote not verbatim for ${u.path}: "${u.quote}"`);
+      }
+    }
+
+    // Merge into the ledger and confirm SecurityRequirementInput never sees
+    // the new paths (Requirement #8/#9), then confirm the Statement of
+    // Requirements projects the new facts, correctly scoped.
+    const merged = mergeUpdates([], out, 1, "extract");
+    const req = requirementFrom(merged.facts) as Record<string, unknown>;
+    expect(!("requirements" in req) && !("namedLocations" in (req.estate as object ?? {})), "SecurityRequirementInput stays exactly the engine's shape");
+
+    const brief = briefModel({ facts: merged.facts, verdict: null });
+    const briefJson = JSON.stringify(brief.blocks);
+    expect(briefJson.includes("Under consideration, not yet selected"), "the SoR labels Meraki as under consideration, never as selected");
+    expect(briefJson.includes("Reading HQ"), "the SoR names Reading HQ");
+    const locBlock = brief.blocks.find((b) => b.key === "locations");
+    expect(Boolean(locBlock), "a locations-and-resilience block renders");
+    const locText = JSON.stringify(locBlock);
+    expect(locText!.includes("business-critical") && locText!.includes("backup"), "both clauses render in the locations block");
+    const bespokeBlock = brief.blocks.find((b) => b.key === "bespoke");
+    expect(Boolean(bespokeBlock) && JSON.stringify(bespokeBlock).includes("threat protection"), "the bespoke block carries the threat-protection requirement");
+  });
+
   return r;
 }
