@@ -914,7 +914,59 @@ export function unionUpdates(model: FieldUpdate[], det: FieldUpdate[]): FieldUpd
     const vals = (Array.isArray(u.value) ? u.value : [u.value]).filter((v) => !seen?.has(String(v).toLowerCase()));
     if (vals.length) extra.push({ ...u, value: vals });
   }
-  return [...model, ...extra];
+  return dedupeSiteResilience([...model, ...extra]);
+}
+
+/* PKM extension (live-preview finding, 3 Aug 2026): the model and the
+ * deterministic rail can each find the SAME site-resilience clause worded
+ * slightly differently. The rail's match starts right after the previous
+ * clause's comma, so it keeps a leading conjunction ("while other sites
+ * can use 4G or 5G backup"); the model's own phrasing typically drops it
+ * ("other sites can use 4G or 5G backup"). unionUpdates' ordinary list
+ * dedup compares raw lowercased strings, so these two never matched and
+ * both landed as separate facts, duplicating one requirement on the
+ * document. A leading conjunction carries no meaning of its own for THIS
+ * comparison, so it is stripped only for the equality check below -- the
+ * surviving fact always keeps its own true, unmodified wording (never a
+ * conjunction-stripped or otherwise rewritten value), and the fuller of
+ * the two wordings wins so nothing the buyer said is lost. Scoped to
+ * estate.siteResilience alone: no other path's dedup behaviour changes,
+ * and two clauses whose remaining wording differs (different site sets,
+ * different connectivity) keep different keys and both still survive. */
+const RESILIENCE_LEADING_CONJUNCTION = /^(?:while|and|but)\s+/i;
+const resilienceDedupeKey = (s: string): string =>
+  String(s).trim().toLowerCase().replace(RESILIENCE_LEADING_CONJUNCTION, "");
+
+function dedupeSiteResilience(updates: FieldUpdate[]): FieldUpdate[] {
+  const path: AllowedPath = "estate.siteResilience";
+  const slots: Array<{ entryIndex: number; valueIndex: number; text: string; key: string }> = [];
+  updates.forEach((u, entryIndex) => {
+    if (u.path !== path || !Array.isArray(u.value)) return;
+    (u.value as unknown[]).forEach((v, valueIndex) => {
+      const text = String(v);
+      slots.push({ entryIndex, valueIndex, text, key: resilienceDedupeKey(text) });
+    });
+  });
+  if (slots.length < 2) return updates;
+
+  const byKey = new Map<string, typeof slots>();
+  for (const s of slots) byKey.set(s.key, [...(byKey.get(s.key) ?? []), s]);
+
+  const drop = new Set<string>(); // "entryIndex:valueIndex" of the shorter, redundant wording
+  for (const group of byKey.values()) {
+    if (group.length < 2) continue; // no collision under this key: nothing to drop
+    const keep = group.reduce((fullest, s) => (s.text.length > fullest.text.length ? s : fullest));
+    for (const s of group) if (s !== keep) drop.add(`${s.entryIndex}:${s.valueIndex}`);
+  }
+  if (drop.size === 0) return updates;
+
+  return updates
+    .map((u, entryIndex) => {
+      if (u.path !== path || !Array.isArray(u.value)) return u;
+      const kept = (u.value as unknown[]).filter((_, valueIndex) => !drop.has(`${entryIndex}:${valueIndex}`));
+      return kept.length ? { ...u, value: kept } : null;
+    })
+    .filter((u): u is FieldUpdate => u !== null);
 }
 
 export async function extractRequirement(text: string, base: SecurityRequirementInput = {}): Promise<ExtractResult> {
