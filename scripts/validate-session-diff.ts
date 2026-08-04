@@ -15,7 +15,12 @@
 
 import { mergeUpdates, factId, type WorkspaceFact } from "../src/lib/workspace/draft";
 import type { FieldUpdate } from "../src/lib/workspace/extract";
-import { computeSessionChanges } from "../src/components/preview/session-diff";
+import {
+  computeSessionChanges,
+  type SessionChange,
+  type BoundedClarification,
+  type SessionActivityEntry,
+} from "../src/components/preview/session-diff";
 
 let pass = 0;
 let fail = 0;
@@ -241,6 +246,156 @@ function expect(cond: boolean, msg: string) {
     `[10] expected previousValue === nextValue === "renewal" for this same-value resurrection`,
   );
 }
+
+/* ---------------------------------------------------------------------- */
+/* Commit 9A: BoundedClarification / SessionActivityEntry.                */
+/*                                                                        */
+/* These are type-only additions — no constructor, no function, nothing  */
+/* that runs. Two different kinds of guarantee are being checked below,  */
+/* and they are NOT the same strength:                                   */
+/*                                                                        */
+/* COMPILE-TIME (enforced by `npx tsc --noEmit`, not by this script at   */
+/* runtime): that a `SessionActivityEntry` object literal with a given   */
+/* `kind` is structurally assignable to the type at all — i.e. that      */
+/* `cycle` is a number, `kind` is one of the three literal strings,      */
+/* `changes` is a `SessionChange[]`, and `clarification`, when present,  */
+/* matches `BoundedClarification`. Tests 11-13 below only compile in the */
+/* first place because of this — if, say, `cycle` were assigned a        */
+/* string, `tsc --noEmit` would fail this whole script before it ever    */
+/* ran. That is the compile-time half of the contract.                   */
+/*                                                                        */
+/* RUNTIME ONLY, NOT COMPILE-TIME ENFORCED: the "by convention" rules in  */
+/* session-diff.ts's SessionActivityEntry doc comment — that a            */
+/* "clarification" entry's `changes` is empty, that a "no_change" entry's */
+/* `changes` is empty AND `clarification` is absent, that a "changes"     */
+/* entry's `clarification` is normally absent. The type as specified is   */
+/* `{ cycle: number; kind: "changes" | "clarification" | "no_change";     */
+/* changes: SessionChange[]; clarification?: BoundedClarification }` —    */
+/* `kind` and `clarification`/`changes` are NOT linked by a discriminated */
+/* union (that would require, e.g., three separate object types unioned   */
+/* on `kind`, each with its own required/absent fields). Structurally,    */
+/* nothing stops `{ cycle: 1, kind: "no_change", changes: [...], clarification: {...} }` */
+/* from compiling — `tsc --noEmit` will accept it. So the convention      */
+/* rules can only be checked by constructing fixtures and asserting on    */
+/* them at runtime, which is what tests 11-13 do; they are NOT a          */
+/* guarantee the type system enforces for every possible caller.         */
+/* ---------------------------------------------------------------------- */
+
+/* 11. Valid "changes" entry: built from computeSessionChanges()'s own   */
+/*     output (scenario 1's addition), clarification normally absent.    */
+{
+  const before: WorkspaceFact[] = [];
+  const updates: FieldUpdate[] = [
+    { path: "organisation.sizeBand", value: "51-250", provenance: "stated", quote: "about 200 staff" },
+  ];
+  const after = mergeUpdates(before, updates, 1, "extract").facts;
+  const changes: SessionChange[] = computeSessionChanges(before, after, updates, 1);
+
+  const entry: SessionActivityEntry = {
+    cycle: 1,
+    kind: "changes",
+    changes,
+  };
+
+  expect(entry.kind === "changes", `[11] expected kind "changes", got ${entry.kind}`);
+  expect(entry.changes.length === 1, `[11] expected 1 change carried on the entry, got ${entry.changes.length}`);
+  expect(entry.changes[0] === changes[0], `[11] entry.changes should carry the same SessionChange objects, not copies`);
+  expect(entry.clarification === undefined, `[11] a "changes" entry should normally have no clarification`);
+}
+
+/* 12. Valid "clarification" entry: changes empty, clarification carries */
+/*     the given question/explanation preserved exactly (including       */
+/*     punctuation/whitespace, to catch any accidental trimming or       */
+/*     reformatting). ---------------------------------------------------*/
+{
+  const clarification: BoundedClarification = {
+    question: "How many sites need coverage?",
+    explanation: "  Recorded from the buyer's reply — kept exactly as typed, extra spaces and all.  ",
+  };
+  const entry: SessionActivityEntry = {
+    cycle: 3,
+    kind: "clarification",
+    changes: [],
+    clarification,
+  };
+
+  expect(entry.kind === "clarification", `[12] expected kind "clarification", got ${entry.kind}`);
+  expect(entry.changes.length === 0, `[12] a "clarification" entry's changes should be empty by convention, got ${entry.changes.length}`);
+  expect(entry.clarification !== undefined, `[12] expected clarification to be present`);
+  expect(
+    entry.clarification?.question === "How many sites need coverage?",
+    `[12] question not preserved exactly, got ${JSON.stringify(entry.clarification?.question)}`,
+  );
+  expect(
+    entry.clarification?.explanation ===
+      "  Recorded from the buyer's reply — kept exactly as typed, extra spaces and all.  ",
+    `[12] explanation not preserved exactly (byte-for-byte, including surrounding whitespace), got ${JSON.stringify(entry.clarification?.explanation)}`,
+  );
+}
+
+/* 12b. `question` is optional on BoundedClarification — a clarification */
+/*      entry with only `explanation` must also be valid and preserved.  */
+{
+  const clarification: BoundedClarification = {
+    explanation: "No open question for this turn, just a recorded explanation.",
+  };
+  const entry: SessionActivityEntry = {
+    cycle: 4,
+    kind: "clarification",
+    changes: [],
+    clarification,
+  };
+
+  expect(entry.clarification?.question === undefined, `[12b] expected no question when none was supplied`);
+  expect(
+    entry.clarification?.explanation === "No open question for this turn, just a recorded explanation.",
+    `[12b] explanation not preserved exactly when question is absent`,
+  );
+}
+
+/* 13. Valid "no_change" entry: changes empty, clarification absent. ---- */
+{
+  const entry: SessionActivityEntry = {
+    cycle: 5,
+    kind: "no_change",
+    changes: [],
+  };
+
+  expect(entry.kind === "no_change", `[13] expected kind "no_change", got ${entry.kind}`);
+  expect(entry.changes.length === 0, `[13] a "no_change" entry's changes should be empty, got ${entry.changes.length}`);
+  expect(entry.clarification === undefined, `[13] a "no_change" entry should have no clarification`);
+}
+
+/* 14. Entry and nested arrays remain unmodified: constructing a          */
+/*     SessionActivityEntry around computeSessionChanges()'s output must  */
+/*     not copy or mutate that output — the entry carries the same        */
+/*     `changes` array/objects its caller already computed. --------------*/
+{
+  const before = mergeUpdates(
+    [],
+    [{ path: "estate.users", value: 50, provenance: "stated", quote: "we have 50 staff" }],
+    1,
+    "extract",
+  ).facts;
+  const updates: FieldUpdate[] = [
+    { path: "estate.users", value: 52, provenance: "stated", quote: "sorry, actually 52 staff" },
+  ];
+  const after = mergeUpdates(before, updates, 2, "extract").facts;
+  const changes = computeSessionChanges(before, after, updates, 2);
+  const changesSnapshot = JSON.stringify(changes);
+
+  const entry: SessionActivityEntry = { cycle: 2, kind: "changes", changes };
+
+  expect(JSON.stringify(changes) === changesSnapshot, `[14] "changes" array was mutated by being carried on an entry`);
+  expect(JSON.stringify(entry.changes) === changesSnapshot, `[14] entry.changes diverged from the original changes array`);
+  expect(entry.changes === changes, `[14] entry.changes should be the exact same array reference, not a copy`);
+}
+
+/* 15. computeSessionChanges() itself is completely unchanged by Commit   */
+/*     9A: tests 1-10 above are the original Commit 2 assertions, run     */
+/*     verbatim with no edits. Their pass/fail is folded into the same    */
+/*     pass/fail counters checked below, so this script fails as a whole  */
+/*     if Commit 9A regressed any pre-existing behaviour. ------------------*/
 
 console.log(`session-diff: ${pass} checks pass (${fail} fail)`);
 if (fail > 0) {

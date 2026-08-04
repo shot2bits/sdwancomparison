@@ -65,6 +65,49 @@ export type SessionChange = {
 };
 
 /**
+ * Already-generated presentation data for one clarification turn (Milestone
+ * 1, Commit 9A). This module does not generate or select clarification
+ * content — nothing here decides WHAT the explanation says or WHICH gap or
+ * question it answers (that remains explicitly out of scope, per Ruling 2:
+ * a bounded explanation built from BriefGap/EarnedQuestion structured
+ * metadata, not implemented yet). This type only names the shape a caller
+ * must already have filled in before a SessionActivityEntry can carry it.
+ */
+export type BoundedClarification = {
+  question?: string;
+  explanation: string;
+};
+
+/**
+ * One "Session activity" turn (Milestone 1, Commit 9A — the type Revision
+ * 3 specified but Commit 2 did not implement; the buyer-facing renderer,
+ * built in a later commit, needs one shared contract for a fact-changing
+ * cycle, a clarification-only cycle, and a cycle that changed nothing).
+ * Temporary and session-scoped only (Ruling 1/4) — never "history": this
+ * is not, and must never become, Article 9's append-only record, which
+ * only begins at real Project creation.
+ *
+ * This type adds no behaviour of its own: nothing here constructs,
+ * stores, persists, ranks, or selects a SessionActivityEntry. It is a
+ * pure data shape a future orchestrator will populate from
+ * computeSessionChanges()'s own output (for "changes") or from
+ * already-generated clarification data (for "clarification") — both
+ * unchanged by this commit.
+ *
+ * Contract, by convention (not compiler-enforced — see the Commit 9A
+ * report for exactly which guarantees are compile-time versus runtime):
+ * - kind: "changes"     -> changes has 1+ items; clarification normally absent.
+ * - kind: "clarification" -> changes is empty; clarification is present.
+ * - kind: "no_change"   -> changes is empty; clarification is absent.
+ */
+export type SessionActivityEntry = {
+  cycle: number;
+  kind: "changes" | "clarification" | "no_change";
+  changes: SessionChange[];
+  clarification?: BoundedClarification;
+};
+
+/**
  * Mirrors draft.ts's private explode(): a list-path update carrying an
  * array value becomes one id per array element; every other update is one
  * id for its own (path, value). Reproduced locally because explode() is
