@@ -33,6 +33,36 @@
  * UnderstandingDocument now serve those same two purposes without
  * duplicating a second label table or a second brief-rendering path).
  *
+ * Milestone 1, Commit 11A — first-load hierarchy only, composition and
+ * conditional-mounting changes in this file, no new derivation:
+ *
+ * Journey selector: JourneySelector.tsx itself is untouched (it is not in
+ * this commit's allowed file list). Instead this file now decides WHETHER
+ * to mount it: `journeyExpanded` (new, presentational-only local state)
+ * defaults to false, so first load — and every load thereafter, unless the
+ * buyer opts in — renders one quiet "Netify · Quick Understanding" line
+ * plus a restrained "Other ways to work" toggle instead of the three
+ * peer-weight cards. Choosing to reveal <JourneySelector current={journey}
+ * onSelect={setJourney} /> unmodified, exactly as before, is what "not
+ * showing the two inactive Coming Soon cards by default" means here — the
+ * component and its props are unchanged; only its mount point is
+ * conditional now.
+ *
+ * Empty-surface suppression: UnderstandingDocument, unlike
+ * EarnedQuestionsList and SessionActivity, has no internal `return null`
+ * for "nothing yet" — its own empty state is a rendered dashed placeholder
+ * (see UnderstandingDocument.tsx's own header comment on why its gate is
+ * `facts.length`, not `blocks.length`). Modifying that placeholder away
+ * would mean editing UnderstandingDocument.tsx, which is outside this
+ * commit's allowed files, so instead this file simply does not mount
+ * UnderstandingDocument, EarnedQuestionsList or SessionActivity at all
+ * until `started` (the existing `entries.length > 0` signal this
+ * orchestrator already computed before this commit) is true — matching
+ * this commit's own definition of "first load" ("no facts and no Session
+ * Activity"). EarnedQuestionsList and SessionActivity already self-null on
+ * empty input and are unaffected in substance; gating their wrapper divs
+ * too is just removing a stray empty margin, not a behaviour change.
+ *
  * earnedQuestions() call shape — verified from source, not guessed: the
  * real signature is positional,
  *   earnedQuestions(requirement, buying, opModel, notedIds, dismissed, corpus?)
@@ -166,6 +196,14 @@ export default function QuickSorWorkspace() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Commit 11A, presentational only: whether the full three-card
+  // JourneySelector is revealed. Defaults closed so the quiet single-line
+  // mode indicator is what renders by default; JourneySelector itself is
+  // neither modified nor given new props — this only decides whether it
+  // mounts. Does not participate in extraction, facts, or any state
+  // transition runCycle() reads or writes.
+  const [journeyExpanded, setJourneyExpanded] = useState(false);
+
   // Preview tombstone parity (Commit 3), owned for the life of this preview
   // session only — same ownership convention as the live desk's own
   // useRef<Set<string>>, mirrored (not reimplemented) by tombstone-preview.ts.
@@ -263,7 +301,20 @@ export default function QuickSorWorkspace() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <JourneySelector current={journey} onSelect={setJourney} />
+      {journeyExpanded ? (
+        <JourneySelector current={journey} onSelect={setJourney} />
+      ) : (
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <p className="m-0 text-[13px] font-medium text-[#141414]">Netify &middot; Quick Understanding</p>
+          <button
+            type="button"
+            onClick={() => setJourneyExpanded(true)}
+            className="m-0 shrink-0 text-[12px] text-[#8C8A85] underline decoration-[#D8D5CE] underline-offset-2 transition-colors hover:text-[#141414]"
+          >
+            Other ways to work
+          </button>
+        </div>
+      )}
 
       {journey !== "quick_sor" ? (
         <div className="rounded-[13px] border border-dashed border-[#EAE7E1] p-6 text-center">
@@ -283,15 +334,25 @@ export default function QuickSorWorkspace() {
             error={error}
           />
 
-          <div className="mt-6">
-            <UnderstandingDocument facts={facts} />
-          </div>
+          {/* Commit 11A: nothing below the input mounts until the buyer's
+              first successful turn — this commit's own definition of
+              first load ("no facts and no Session Activity"). Each
+              component's existing render logic (including
+              UnderstandingDocument's own internal empty-state placeholder)
+              is unchanged; this only decides whether they mount at all. */}
+          {started && (
+            <>
+              <div className="mt-6">
+                <UnderstandingDocument facts={facts} />
+              </div>
 
-          <div className="mt-6">
-            <EarnedQuestionsList questions={questions} />
-          </div>
+              <div className="mt-6">
+                <EarnedQuestionsList questions={questions} />
+              </div>
 
-          <SessionActivity entries={entries} labelFor={labelFor} />
+              <SessionActivity entries={entries} labelFor={labelFor} />
+            </>
+          )}
         </>
       )}
     </div>

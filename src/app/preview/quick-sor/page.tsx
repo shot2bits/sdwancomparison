@@ -5,15 +5,15 @@ import QuickSorWorkspace from "@/components/preview/QuickSorWorkspace";
  * /preview/quick-sor/ (public path /sase/preview/quick-sor/ once merged and
  * deployed from this branch — NOT linked from any nav, NOT the live /home
  * or /workspace route). Phase 0, vertical slice 1: journey choice → Quick
- * Statement of Requirements → real extraction/merge cycle → capture
- * receipt → readable living Statement of Requirements → persistent input
- * for corrections and clarification.
+ * Understanding → real extraction/merge cycle → capture receipt →
+ * readable living Understanding → persistent input for corrections and
+ * clarification.
  *
  * noindex: this is a preview route for review, not a public page.
  */
 
 export const metadata: Metadata = {
-  title: "Netify preview — Quick Statement of Requirements",
+  title: "Netify preview — Quick Understanding",
   robots: { index: false, follow: false },
 };
 
@@ -31,8 +31,8 @@ export default function Page() {
           Describe your project
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-center text-[15px] leading-relaxed text-[#52525b]">
-          Netify structures your words into a living Statement of Requirements — facts in your own words, named
-          inferences, and nothing invented.
+          Netify structures your words into a living Understanding — facts in your own words, named inferences, and
+          nothing invented.
         </p>
         <QuickSorWorkspace />
       </main>
