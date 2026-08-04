@@ -28,6 +28,7 @@ import type { SessionActivityEntry, SessionChange, BoundedClarification } from "
 import { labelFor } from "../src/lib/workspace/labels";
 import type { AllowedPath } from "../src/lib/workspace/extract";
 import { readFileSync } from "node:fs";
+import { explanationForInput } from "../src/lib/workspace/explanations";
 
 let pass = 0;
 let fail = 0;
@@ -513,6 +514,153 @@ function codeOnly(src: string): string {
   const ceSrc = codeOnly(readFileSync(new URL("../src/components/preview/ClarificationEntry.tsx", import.meta.url), "utf8"));
   expect(!/confirmed/i.test(saSrc), `[28] SessionActivity.tsx introduces "confirmed" wording/action`);
   expect(!/confirmed/i.test(ceSrc), `[28] ClarificationEntry.tsx introduces "confirmed" wording/action`);
+}
+
+/* ------------------------------------------------------------------------ */
+/* Commit 11C — bounded explanation treatment. Checks 29-36 below cover the */
+/* 8 items the Commit 11C brief asks Session Activity validation to add    */
+/* (numbered 13-20 there; renumbered here to continue this file's own       */
+/* sequence without colliding with checks 1-28 above). ClarificationEntry   */
+/* is still called directly as a plain function (stateless/hookless), same  */
+/* technique as every check above.                                          */
+/* ------------------------------------------------------------------------ */
+
+const glossaryClarification: BoundedClarification = {
+  question: "What is SASE?",
+  explanation:
+    "Secure Access Service Edge combines networking and security capabilities in a cloud-delivered architecture, commonly bringing together SD-WAN, secure web access, private application access and related security controls.",
+  kind: "glossary",
+  term: "SASE",
+};
+
+const fallbackClarification: BoundedClarification = {
+  explanation:
+    "There isn’t a specific Netify question or recognised term selected to explain. You can continue adding or correcting information about your project.",
+  kind: "fallback",
+};
+
+/* 29. Glossary clarification renders "Netify explained". ------------------- */
+{
+  const el = ClarificationEntry({ clarification: glossaryClarification });
+  const flat = textOf(el);
+  expect(flat.includes("Netify explained"), `[29] expected the "Netify explained" heading for a glossary clarification, got: ${flat}`);
+}
+
+/* 30. The fixed explanation renders exactly. -------------------------------- */
+{
+  const el = ClarificationEntry({ clarification: glossaryClarification });
+  const flat = textOf(el);
+  expect(
+    flat.includes(
+      "Secure Access Service Edge combines networking and security capabilities in a cloud-delivered architecture, commonly bringing together SD-WAN, secure web access, private application access and related security controls.",
+    ),
+    `[30] expected the exact fixed SASE explanation, got: ${flat}`,
+  );
+}
+
+/* 31. The question renders when present (glossary case). -------------------- */
+{
+  const el = ClarificationEntry({ clarification: glossaryClarification });
+  const flat = textOf(el);
+  expect(flat.includes("What is SASE?"), `[31] expected the buyer's original question to render, got: ${flat}`);
+}
+
+/* 32. "No changes to your Understanding." still renders for a glossary      */
+/*     clarification. ----------------------------------------------------------*/
+{
+  const el = ClarificationEntry({ clarification: glossaryClarification });
+  const flat = textOf(el);
+  expect(flat.includes("No changes to your Understanding."), `[32] expected the exact no-change line for a glossary clarification, got: ${flat}`);
+}
+
+/* 33. Fallback clarification renders the exact approved fallback (and the  */
+/*     same "Netify explained" heading, and the no-change line). ------------- */
+{
+  const el = ClarificationEntry({ clarification: fallbackClarification });
+  const flat = textOf(el);
+  expect(flat.includes("Netify explained"), `[33] expected the "Netify explained" heading for a fallback clarification, got: ${flat}`);
+  expect(
+    flat.includes(
+      "There isn’t a specific Netify question or recognised term selected to explain. You can continue adding or correcting information about your project.",
+    ),
+    `[33] expected the exact approved fallback text, got: ${flat}`,
+  );
+  expect(flat.includes("No changes to your Understanding."), `[33] expected the no-change line for a fallback clarification, got: ${flat}`);
+}
+
+/* 34. No fact value, quote or reason is fabricated: ClarificationEntry      */
+/*     renders only fields present on the supplied BoundedClarification —    */
+/*     no "quote"/"reason"/fact-value text appears from nowhere. Checked      */
+/*     both behaviourally (nothing beyond the four known strings appears)     */
+/*     and via static source inspection (the component never references      */
+/*     SessionChange's quote/reason/previousValue/nextValue fields, which     */
+/*     belong to a different, unrelated data shape). --------------------------*/
+{
+  const el = ClarificationEntry({ clarification: glossaryClarification });
+  const flat = flatten(el);
+  // Positive assertion: every leaf of substantial length is one of the four
+  // known strings (heading, term, question, explanation) or the fixed
+  // no-change line, or a className.
+  const knownStrings = [
+    "Netify explained",
+    glossaryClarification.term!,
+    glossaryClarification.question!,
+    glossaryClarification.explanation,
+    "No changes to your Understanding.",
+  ];
+  const unexpected = flat.filter(
+    (s) => s.length > 20 && !knownStrings.some((k) => s.includes(k)) && !k_isClassName(s),
+  );
+  function k_isClassName(s: string): boolean {
+    return /[a-z]-\[|text-\[|border-|rounded-|font-|tracking-|leading-/.test(s);
+  }
+  expect(unexpected.length === 0, `[34] found unexpected/fabricated text in glossary clarification output: ${JSON.stringify(unexpected)}`);
+  const ceSrc = readFileSync(new URL("../src/components/preview/ClarificationEntry.tsx", import.meta.url), "utf8");
+  const ceCode = codeOnly(ceSrc);
+  expect(!/\.quote\b/.test(ceCode), `[34] ClarificationEntry.tsx references a ".quote" field (belongs to SessionChange, not BoundedClarification)`);
+  expect(!/\.reason\b/.test(ceCode), `[34] ClarificationEntry.tsx references a ".reason" field (belongs to SessionChange, not BoundedClarification)`);
+  expect(!/\.previousValue\b|\.nextValue\b/.test(ceCode), `[34] ClarificationEntry.tsx references SessionChange value fields`);
+}
+
+/* 35. No input/control/callback appears in either clarification shape       */
+/*     (glossary or fallback) — same technique as check [22] above, run      */
+/*     specifically against both new fixtures for extra assurance. ------------*/
+{
+  for (const clarification of [glossaryClarification, fallbackClarification]) {
+    const el = ClarificationEntry({ clarification });
+    const domTypes: string[] = [];
+    (function collect(node: AnyEl) {
+      if (node === null || node === undefined || typeof node === "boolean" || typeof node === "string" || typeof node === "number") return;
+      if (Array.isArray(node)) { node.forEach(collect); return; }
+      const e = node as { type: unknown; props?: Record<string, unknown> };
+      if (typeof e.type === "string") domTypes.push(e.type);
+      if (typeof e.type === "function") {
+        collect((e.type as (p: unknown) => AnyEl)(e.props ?? {}));
+        return;
+      }
+      if (e.props && "children" in e.props) collect(e.props.children as AnyEl);
+    })(el);
+    const forbiddenTags = ["button", "input", "select", "textarea", "form", "a"];
+    for (const tag of forbiddenTags) {
+      expect(!domTypes.includes(tag), `[35] found a forbidden interactive element <${tag}> in a ${clarification.kind ?? "legacy"} clarification`);
+    }
+  }
+}
+
+/* 36. explanationForInput() itself is not called from ClarificationEntry.  */
+/*     or SessionActivity.tsx — those components only render already-       */
+/*     produced BoundedClarification data (Article 17: explanation lookup    */
+/*     stays solely in explanations.ts). ---------------------------------------*/
+{
+  const saSrc = codeOnly(readFileSync(new URL("../src/components/preview/SessionActivity.tsx", import.meta.url), "utf8"));
+  const ceSrc = codeOnly(readFileSync(new URL("../src/components/preview/ClarificationEntry.tsx", import.meta.url), "utf8"));
+  expect(!/explanationForInput/.test(saSrc), `[36] SessionActivity.tsx references explanationForInput`);
+  expect(!/explanationForInput/.test(ceSrc), `[36] ClarificationEntry.tsx references explanationForInput`);
+  // Sanity: explanationForInput itself still resolves the fixture used
+  // above, so this file's fixtures are not silently drifting from the real
+  // glossary module.
+  const real = explanationForInput("What is SASE?");
+  expect(real?.term === "SASE", `[36] sanity check: explanationForInput("What is SASE?") did not resolve to SASE`);
 }
 
 console.log(`session-activity: ${pass} checks pass (${fail} fail)`);

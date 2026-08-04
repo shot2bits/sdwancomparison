@@ -66,16 +66,29 @@ export type SessionChange = {
 
 /**
  * Already-generated presentation data for one clarification turn (Milestone
- * 1, Commit 9A). This module does not generate or select clarification
- * content — nothing here decides WHAT the explanation says or WHICH gap or
- * question it answers (that remains explicitly out of scope, per Ruling 2:
- * a bounded explanation built from BriefGap/EarnedQuestion structured
- * metadata, not implemented yet). This type only names the shape a caller
+ * 1, Commit 9A; extended in Commit 11C). This module does not generate or
+ * select clarification content — nothing here decides WHAT the explanation
+ * says or WHICH gap or question it answers (that remains explicitly out of
+ * scope, per Ruling 2: a bounded explanation built from BriefGap/
+ * EarnedQuestion structured metadata is not implemented here, and never
+ * will be from this type alone). This type only names the shape a caller
  * must already have filled in before a SessionActivityEntry can carry it.
+ *
+ * Commit 11C adds `kind` and `term`, both optional, so a caller can supply
+ * bounded fixed-glossary explanation data (src/lib/workspace/
+ * explanations.ts) truthfully alongside the pre-existing narrow-phrase
+ * fallback, without turning this into a general response object:
+ * - kind "glossary" + term: a recognised, fixed-glossary term explanation.
+ * - kind "fallback" (or omitted, for pre-Commit-11C callers): the fixed
+ *   "nothing specific to explain" copy, unchanged in shape.
+ * Nothing here selects, generates, or invents an explanation — a caller
+ * still supplies `explanation` fully formed, exactly as before.
  */
 export type BoundedClarification = {
   question?: string;
   explanation: string;
+  kind?: "fallback" | "glossary";
+  term?: string;
 };
 
 /**

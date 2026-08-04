@@ -65,6 +65,7 @@ import {
   classifyTurnEntry,
   CLARIFICATION_FALLBACK_EXPLANATION,
 } from "../src/components/preview/QuickSorWorkspace";
+import { explanationForInput } from "../src/lib/workspace/explanations";
 
 let pass = 0;
 let fail = 0;
@@ -233,14 +234,15 @@ let turns!: {
   expect(withChanges.kind === "changes", `[9] a real change must win over a clarification-shaped message`);
 }
 
-/* 9b. The revised buyer-facing fallback wording (post-review correction:  */
-/*      Milestone 1 exposes no selectable gaps, so the fallback must not   */
-/*      say "select a gap"). Checked against the literal required text,    */
-/*      not just self-equality against the same exported constant, so a    */
+/* 9b. The revised buyer-facing fallback wording (Commit 11C: the fallback */
+/*      now names both "nothing to explain" cases — no current Netify      */
+/*      question AND no recognised glossary term — and must still not say  */
+/*      "select a gap"). Checked against the literal required text, not    */
+/*      just self-equality against the same exported constant, so a        */
 /*      future accidental wording drift is actually caught here. -----------*/
 {
   const REQUIRED_FALLBACK_TEXT =
-    "There isn’t a current Netify question selected to explain. You can add or correct information about your project below.";
+    "There isn’t a specific Netify question or recognised term selected to explain. You can continue adding or correcting information about your project.";
   expect(
     CLARIFICATION_FALLBACK_EXPLANATION === REQUIRED_FALLBACK_TEXT,
     `[9b] expected the exact revised fallback text, got: ${JSON.stringify(CLARIFICATION_FALLBACK_EXPLANATION)}`,
@@ -467,6 +469,229 @@ let turns!: {
   const snapshot = JSON.stringify(changesArg);
   classifyTurnEntry(1, changesArg, "some message");
   expect(JSON.stringify(changesArg) === snapshot, `[extra] classifyTurnEntry() mutated its "changes" argument`);
+}
+
+/* ------------------------------------------------------------------------ */
+/* Commit 11C — bounded explanation treatment. Checks below cover the 10   */
+/* items the Commit 11C brief asks this script to add (numbered 21-30      */
+/* there; kept as [21]-[30] here too since this file has no naming clash).  */
+/* ------------------------------------------------------------------------ */
+
+/* [21] Recognised glossary question + no updates creates a clarification   */
+/*      entry (end-to-end through the real mergeUpdates()/                  */
+/*      computeSessionChanges()/classifyTurnEntry() pipeline, fixture        */
+/*      updates standing in for a live extraction call that would            */
+/*      correctly return no updates for a pure glossary question). --------- */
+{
+  const glossaryText = "What is SASE?";
+  const before: WorkspaceFact[] = turns.merged2.facts;
+  const beforeSnapshot = JSON.stringify(before);
+  const noUpdates: FieldUpdate[] = [];
+  const merged = mergeUpdates(before, noUpdates, 21, "extract");
+  const changes = computeSessionChanges(before, merged.facts, noUpdates, 21);
+  const entry = classifyTurnEntry(21, changes, glossaryText);
+
+  expect(entry.kind === "clarification", `[21] expected kind "clarification" for "${glossaryText}", got ${entry.kind}`);
+  expect(entry.changes.length === 0, `[21] expected empty changes for the glossary clarification`);
+  expect(entry.clarification?.kind === "glossary", `[21] expected clarification.kind === "glossary", got ${entry.clarification?.kind}`);
+  expect(entry.clarification?.term === "SASE", `[21] expected clarification.term === "SASE", got ${entry.clarification?.term}`);
+  expect(entry.clarification?.question === glossaryText, `[21] expected the original question preserved, got ${entry.clarification?.question}`);
+
+  /* [22] Glossary clarification leaves facts byte-for-byte unchanged. ------ */
+  expect(JSON.stringify(before) === beforeSnapshot, `[22] the pre-turn facts array was mutated`);
+  expect(JSON.stringify(merged.facts) === beforeSnapshot, `[22] facts changed as a result of a glossary clarification turn, expected no change`);
+}
+
+/* [23] Glossary clarification does not call a second API — static: still   */
+/*      exactly one fetch() call in the whole orchestrator file, and         */
+/*      explanationForInput() itself performs no I/O (also proven by         */
+/*      validate-workspace-explanations.ts check 11). ------------------------ */
+{
+  const fetchCalls = workspaceCode.match(/\bfetch\s*\(/g) ?? [];
+  expect(fetchCalls.length === 1, `[23] expected exactly one fetch() call even with glossary support added, found ${fetchCalls.length}`);
+  expect(!/explanationForInput[\s\S]{0,40}fetch/.test(workspaceCode), `[23] explanationForInput usage appears adjacent to a fetch() call`);
+}
+
+/* [24] A substantive requirement statement containing a glossary term is   */
+/*      processed normally — i.e. explanationForInput() returns null for    */
+/*      it, so classification falls through to whatever real extraction     */
+/*      changes (or their absence) actually determine, exactly as before    */
+/*      this commit. ---------------------------------------------------------- */
+{
+  const substantive = [
+    "We need SASE across 50 sites.",
+    "Suppliers must explain their SASE design.",
+    "PCI DSS applies to our payment environment.",
+    "We need the provider to explain SD-WAN pricing.",
+    "Our SOC operates 24/7.",
+  ];
+  for (const msg of substantive) {
+    expect(explanationForInput(msg) === null, `[24] expected "${msg}" NOT to be recognised as a glossary question`);
+    // With no real changes, these must fall through to ordinary no_change —
+    // never swallowed as a glossary explanation.
+    const entry = classifyTurnEntry(24, [], msg);
+    expect(entry.kind === "no_change", `[24] expected "${msg}" to classify as no_change (not glossary/clarification), got ${entry.kind}`);
+  }
+}
+
+/* [25] Real extraction changes win over glossary classification. ----------- */
+{
+  // "What is SASE?" would ordinarily be a glossary match, but a real change
+  // must take priority (rule A in classifyTurnEntry's own doc comment).
+  const entry = classifyTurnEntry(25, turns.changes1, "What is SASE?");
+  expect(entry.kind === "changes", `[25] a real change must win over a glossary-shaped message, got ${entry.kind}`);
+  expect(entry.changes === turns.changes1, `[25] entry.changes should be the exact same array computeSessionChanges() returned`);
+}
+
+/* [26] Commit 11C correction: the three direct-explanation-request         */
+/*      phrases ("Why are you asking?", "Why does Netify need this?", "Why  */
+/*      is that relevant?") now receive the honest fallback clarification   */
+/*      — the externally reported UX gap this correction fixes — instead    */
+/*      of the pre-correction "no_change" behaviour. Covers brief items      */
+/*      1-9 (creates a clarification entry; case/trailing-punctuation        */
+/*      variants; exact existing fallback explanation; changes: []; facts    */
+/*      unchanged; no question selected; no EarnedQuestion rationale         */
+/*      fabricated). ------------------------------------------------------------ */
+{
+  const whyQuestions = [
+    "Why are you asking?",
+    "Why does Netify need this?",
+    "Why is that relevant?",
+    // Case and trailing-punctuation variants (item 4).
+    "why are you asking",
+    "WHY ARE YOU ASKING",
+    "  Why Are You Asking?  ",
+    "why are you asking...",
+    "Why does netify need this.",
+    "WHY IS THAT RELEVANT!",
+  ];
+  for (const msg of whyQuestions) {
+    expect(isNarrowClarificationMessage(msg), `[26] expected "${msg}" to be recognised as a narrow clarification phrase`);
+    expect(explanationForInput(msg) === null, `[26] expected "${msg}" NOT to be recognised as a glossary question (item 12: glossary recognition unchanged)`);
+
+    // Item 7: facts remain byte-for-byte unchanged, driven through the
+    // real merge pipeline with no real extraction update (a "why" message
+    // earns no real update, exactly like the pre-existing fallback
+    // phrases).
+    const before: WorkspaceFact[] = turns.merged2.facts;
+    const beforeSnapshot = JSON.stringify(before);
+    const noUpdates: FieldUpdate[] = [];
+    const merged = mergeUpdates(before, noUpdates, 26, "extract");
+    const changes = computeSessionChanges(before, merged.facts, noUpdates, 26);
+    expect(JSON.stringify(before) === beforeSnapshot, `[26] the pre-turn facts array was mutated for "${msg}"`);
+    expect(JSON.stringify(merged.facts) === beforeSnapshot, `[26] facts changed for a "why" clarification turn ("${msg}"), expected no change`);
+
+    // Item 1/2/3/6: creates one clarification entry with changes: [].
+    const entry = classifyTurnEntry(26, changes, msg);
+    expect(entry.kind === "clarification", `[26] expected kind "clarification" for "${msg}", got ${entry.kind}`);
+    expect(entry.changes.length === 0, `[26] expected changes: [] for "${msg}", got ${entry.changes.length}`);
+
+    // Item 5: the exact existing fallback explanation, and kind "fallback"
+    // (not "glossary" — no term was recognised).
+    expect(
+      entry.clarification?.explanation === CLARIFICATION_FALLBACK_EXPLANATION,
+      `[26] expected the exact fixed fallback explanation for "${msg}", got ${JSON.stringify(entry.clarification?.explanation)}`,
+    );
+    expect(entry.clarification?.kind === "fallback", `[26] expected clarification.kind === "fallback" for "${msg}", got ${entry.clarification?.kind}`);
+
+    // Item 8/9: no question selected, no EarnedQuestion rationale
+    // fabricated — no "term", and the explanation is the fixed constant,
+    // not a per-question generated string.
+    expect(entry.clarification?.term === undefined, `[26] expected no term selected for "${msg}"`);
+  }
+}
+
+/* [26b] Substantive statements that merely contain "why"/"asking"/          */
+/*       "relevant"/"need" must not be swallowed as fallback clarification   */
+/*       requests (brief item 10 — the five named negative examples). ---------- */
+{
+  const substantive = [
+    "Suppliers must explain why their design is suitable.",
+    "We need to know why the current network is failing.",
+    "Explain why PCI DSS applies to our payment environment.",
+    "The provider should explain why this architecture is recommended.",
+    "We are asking suppliers for relevant implementation evidence.",
+  ];
+  for (const msg of substantive) {
+    expect(!isNarrowClarificationMessage(msg), `[26b] expected "${msg}" NOT to be recognised as a narrow clarification phrase`);
+    expect(explanationForInput(msg) === null, `[26b] expected "${msg}" NOT to be recognised as a glossary question`);
+    const entry = classifyTurnEntry(26, [], msg);
+    expect(entry.kind === "no_change", `[26b] expected "${msg}" to classify as no_change (not swallowed as fallback), got ${entry.kind}`);
+    expect(entry.clarification === undefined, `[26b] expected no invented clarification/rationale for "${msg}"`);
+  }
+}
+
+/* [26c] Real extraction changes still win over the new "why" phrases        */
+/*       (brief item 11). ---------------------------------------------------------*/
+{
+  const entry = classifyTurnEntry(26, turns.changes1, "Why are you asking?");
+  expect(entry.kind === "changes", `[26c] a real change must win over a "why" clarification-shaped message, got ${entry.kind}`);
+  expect(entry.changes === turns.changes1, `[26c] entry.changes should be the exact same array computeSessionChanges() returned`);
+}
+
+/* [27] Existing narrow clarification phrases still work (regression,       */
+/*      re-run against the fixed fallback with its updated Commit 11C       */
+/*      wording, plus explicit confirmation kind === "fallback"). ------------- */
+{
+  const phrases = ["What do you mean?", "Can you explain?", "please explain"];
+  for (const msg of phrases) {
+    expect(isNarrowClarificationMessage(msg), `[27] expected "${msg}" to still be recognised as a narrow clarification phrase`);
+    const entry = classifyTurnEntry(27, [], msg);
+    expect(entry.kind === "clarification", `[27] expected kind "clarification" for "${msg}", got ${entry.kind}`);
+    expect(entry.clarification?.kind === "fallback", `[27] expected clarification.kind === "fallback" for "${msg}", got ${entry.clarification?.kind}`);
+    expect(
+      entry.clarification?.explanation === CLARIFICATION_FALLBACK_EXPLANATION,
+      `[27] expected the exact fixed fallback explanation for "${msg}"`,
+    );
+  }
+}
+
+/* [28] The exact acceptance-sequence clarification still works: "I don't   */
+/*      know what you mean, can you explain?" (comma-joined variant). -------- */
+{
+  const msg = "I don't know what you mean, can you explain?";
+  expect(isNarrowClarificationMessage(msg), `[28] expected the acceptance-sequence comma-joined message to still be recognised`);
+  expect(explanationForInput(msg) === null, `[28] the acceptance-sequence message must not be misread as a glossary question`);
+  const entry = classifyTurnEntry(28, [], msg);
+  expect(entry.kind === "clarification", `[28] expected kind "clarification", got ${entry.kind}`);
+  expect(
+    entry.clarification?.explanation === CLARIFICATION_FALLBACK_EXPLANATION,
+    `[28] expected the exact fixed fallback explanation for the acceptance-sequence message`,
+  );
+}
+
+/* [29] No EarnedQuestion rationale is invented — static: neither           */
+/*      classifyTurnEntry() nor explanationForInput() import or call         */
+/*      earnedQuestions() or reference EarnedQuestion, and no "why"-shaped   */
+/*      recognition was added anywhere in this file. --------------------------- */
+{
+  const explanationsSrc = readFileSync(new URL("../src/lib/workspace/explanations.ts", import.meta.url), "utf8");
+  const explanationsCode = codeOnly(explanationsSrc);
+  expect(!/earnedQuestions/.test(explanationsCode), `[29] explanations.ts references earnedQuestions`);
+  expect(!/EarnedQuestion\b/.test(explanationsCode), `[29] explanations.ts references the EarnedQuestion type`);
+  expect(!/\bwhy\b/i.test(explanationsCode), `[29] explanations.ts contains "why"-shaped recognition text`);
+  // classifyTurnEntry's own explanation-selection call sites: only the
+  // glossary lookup and the fixed fallback constant, nothing else.
+  const classifyFnMatch = workspaceCode.match(/export function classifyTurnEntry\([\s\S]*?\n\}/);
+  expect(!!classifyFnMatch, `[29] could not locate classifyTurnEntry() via static source inspection`);
+  const classifyBody = classifyFnMatch?.[0] ?? "";
+  expect(!/earnedQuestions\s*\(/.test(classifyBody), `[29] classifyTurnEntry() calls earnedQuestions()`);
+}
+
+/* [30] No question is selected or ranked — classifyTurnEntry() and         */
+/*      explanationForInput() never sort/rank/select from a candidate list   */
+/*      of questions; the only "selection" is the fixed glossary lookup      */
+/*      itself, proven elsewhere to be an exact-match table read, not a      */
+/*      ranking. --------------------------------------------------------------- */
+{
+  const explanationsSrc = readFileSync(new URL("../src/lib/workspace/explanations.ts", import.meta.url), "utf8");
+  const explanationsCode = codeOnly(explanationsSrc);
+  expect(!/\.sort\s*\(/.test(explanationsCode), `[30] explanations.ts calls .sort()`);
+  expect(!/weight/i.test(explanationsCode), `[30] explanations.ts references question "weight" (ranking metadata)`);
+  const classifyFnMatch2 = workspaceCode.match(/export function classifyTurnEntry\([\s\S]*?\n\}/);
+  const classifyBody2 = classifyFnMatch2?.[0] ?? "";
+  expect(!/\.sort\s*\(/.test(classifyBody2), `[30] classifyTurnEntry() calls .sort()`);
+  expect(!/questions\b/.test(classifyBody2), `[30] classifyTurnEntry() references a "questions" variable (would imply selecting from EarnedQuestion[])`);
 }
 
 console.log(`quick-understanding-workspace: ${pass} checks pass (${fail} fail)`);

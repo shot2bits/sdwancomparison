@@ -84,6 +84,28 @@
  * orchestrator follows that same, already-established call shape rather
  * than inventing a third resolution; see the Commit 10 report for the full
  * reasoning trail.
+ *
+ * Milestone 1, Commit 11C — bounded explanation treatment. classifyTurnEntry()
+ * now also recognises a small, fixed glossary question set (src/lib/
+ * workspace/explanations.ts's explanationForInput(), narrow deterministic
+ * matching only) and, when matched with no real extraction changes,
+ * appends a "clarification" entry carrying that fixed reviewed definition
+ * instead of falling through to the generic fallback. A real change always
+ * wins over a glossary or fallback classification (see classifyTurnEntry's
+ * own doc comment for the full priority order). This file does not decide
+ * WHAT any glossary definition says (that lives solely in explanations.ts)
+ * and does not select, rank or explain the rationale for any EarnedQuestion.
+ *
+ * Commit 11C correction — three exact direct-explanation-request phrases
+ * ("Why are you asking?", "Why does Netify need this?", "Why is that
+ * relevant?") were added to CLARIFICATION_PHRASES so they now receive the
+ * same honest fallback clarification as the original five narrow phrases,
+ * instead of silently landing as "no_change" (the externally reported gap
+ * this correction fixes). Still exact-phrase recognition only — no
+ * rationale is invented, no question is selected, and a substantive
+ * statement that merely contains "why"/"asking"/"relevant"/"need" (e.g.
+ * "Suppliers must explain why their design is suitable.") still lands as
+ * "no_change", unchanged from before this correction.
  */
 
 import { useRef, useState } from "react";
@@ -104,27 +126,45 @@ import { earnedQuestions } from "@/lib/workspace/questions";
 import { labelFor } from "@/lib/workspace/labels";
 import { computeSessionChanges, type SessionActivityEntry, type SessionChange } from "./session-diff";
 import { createTombstoneSet, filterTombstonedUpdates, type TombstoneSet } from "./tombstone-preview";
+import { explanationForInput } from "@/lib/workspace/explanations";
 
 type ExtractResponse = { updates: FieldUpdate[]; engine: string; notes: string[] };
 
 /**
  * Deliberately narrow, deterministic clarification detection (no model
- * call, no keyword scan). Accepts only the five phrases the task names,
- * normalised by trim/lowercase/trailing-punctuation-strip only — no
- * stemming, no substring matching, no broad "contains explain" rule. Two
- * apostrophe spellings of "don't" are listed as literal accepted strings
- * (not a general normalisation step) purely because the acceptance
- * sequence's own Turn 3 example could plausibly be typed either way.
+ * call, no keyword scan). Accepts only the eight phrases named below —
+ * the original five from Commit 10, plus three direct-explanation-request
+ * phrases added in the Commit 11C correction ("Why are you asking?", "Why
+ * does Netify need this?", "Why is that relevant?") — normalised by
+ * trim/lowercase/trailing-punctuation-strip only — no stemming, no
+ * substring matching, no broad "contains why/asking/relevant/need" rule.
+ * Two apostrophe spellings of "don't" are listed as literal accepted
+ * strings (not a general normalisation step) purely because the
+ * acceptance sequence's own Turn 3 example could plausibly be typed
+ * either way.
+ *
+ * The three "why" phrases are treated exactly like the original five: an
+ * honest statement that no specific question or recognised glossary term
+ * is currently available to explain, using the same fixed fallback
+ * explanation (CLARIFICATION_FALLBACK_EXPLANATION below). Nothing here
+ * invents a reason for any EarnedQuestion, selects a question, or claims
+ * why a particular fact or answer is needed — this remains exact-phrase
+ * recognition only, so a substantive statement that happens to contain
+ * "why", "asking", "relevant" or "need" (e.g. "Suppliers must explain why
+ * their design is suitable.", "We need to know why the current network is
+ * failing.") is correctly rejected: none of those sentences, taken whole
+ * or as a comma-separated segment, is byte-for-byte one of the eight
+ * accepted phrases.
  *
  * The acceptance sequence's own Turn 3 message ("I don't know what you
- * mean, can you explain?") joins two of the five accepted phrases with a
+ * mean, can you explain?") joins two of the accepted phrases with a
  * comma. To honour that exact required case without adding broad matching,
  * a message is also accepted when EVERY comma-separated segment (after the
- * same narrow normalisation) is, on its own, one of the five accepted
+ * same narrow normalisation) is, on its own, one of the accepted
  * phrases — still fully deterministic, and still false for any segment
  * that isn't an exact accepted phrase (so "We use Meraki, can you explain
  * the pricing?" is correctly rejected: its first segment is a substantive
- * fact, not one of the five phrases).
+ * fact, not one of the accepted phrases).
  */
 const CLARIFICATION_PHRASES = new Set([
   "what do you mean",
@@ -133,6 +173,9 @@ const CLARIFICATION_PHRASES = new Set([
   "i don’t know what you mean",
   "i do not know what you mean",
   "please explain",
+  "why are you asking",
+  "why does netify need this",
+  "why is that relevant",
 ]);
 
 function normaliseForClarificationCheck(raw: string): string {
@@ -154,16 +197,44 @@ export function isNarrowClarificationMessage(raw: string): boolean {
   return parts.length > 0 && parts.every((p) => CLARIFICATION_PHRASES.has(p));
 }
 
-/** Fixed, approved fallback only — no model call, no gap/question chosen. */
+/**
+ * Fixed, approved fallback only — no model call, no gap/question chosen,
+ * no EarnedQuestion rationale invented. Commit 11C's exact required
+ * wording (replacing the earlier Commit 9A/10 text): now explicitly names
+ * BOTH things this fallback covers — no current Netify question AND no
+ * recognised glossary term — since Commit 11C adds a second, distinct
+ * "nothing to explain" path (an unrecognised direct question, as opposed
+ * to a recognised glossary term or a currently-selected question, neither
+ * of which this Milestone implements).
+ */
 export const CLARIFICATION_FALLBACK_EXPLANATION =
-  "There isn’t a current Netify question selected to explain. You can add or correct information about your project below.";
+  "There isn’t a specific Netify question or recognised term selected to explain. You can continue adding or correcting information about your project.";
 
 /**
  * The submitted-turn classification rule (entry types A/B/C from the
- * Commit 10 instructions), extracted as its own pure function for the
- * same testability reason as isNarrowClarificationMessage above. Takes
- * the REAL computeSessionChanges() output and the raw buyer text; invents
- * nothing, chooses no gap, calls no model.
+ * Commit 10 instructions, extended in Commit 11C with a bounded glossary
+ * branch inside C), extracted as its own pure function for the same
+ * testability reason as isNarrowClarificationMessage above. Takes the REAL
+ * computeSessionChanges() output and the raw buyer text; invents nothing,
+ * chooses no gap, selects or ranks no EarnedQuestion, calls no model.
+ *
+ * Priority, unchanged in spirit from Commit 10, extended for glossary and
+ * (Commit 11C correction) the three direct-explanation-request phrases:
+ *   A. changes.length > 0            -> "changes" (a real change always wins,
+ *                                        even if the same text also happens
+ *                                        to look like a glossary question or
+ *                                        a narrow clarification phrase).
+ *   C1. a recognised glossary question (explanationForInput(rawMessage) !=
+ *       null) AND no changes         -> "clarification", glossary-shaped.
+ *   C2. one of the eight narrow clarification phrases — including "why are
+ *       you asking", "why does netify need this", "why is that relevant"
+ *       — AND no changes AND not already handled by C1
+ *                                     -> "clarification", fixed fallback.
+ *   B. anything else                 -> "no_change" (not an error; this is
+ *                                        where any OTHER, unrecognised
+ *                                        direct question lands — no
+ *                                        rationale is invented for it
+ *                                        here).
  */
 export function classifyTurnEntry(
   cycle: number,
@@ -171,19 +242,41 @@ export function classifyTurnEntry(
   rawMessage: string,
 ): SessionActivityEntry {
   if (changes.length > 0) {
-    // A. Changes entry.
+    // A. Changes entry — a real change always wins over any clarification
+    // classification, glossary or fallback.
     return { cycle, kind: "changes", changes };
   }
-  if (isNarrowClarificationMessage(rawMessage)) {
-    // C. Clarification entry: fixed fallback only.
+
+  // C1. Bounded, fixed-glossary explanation: narrow deterministic
+  // recognition only (src/lib/workspace/explanations.ts) — never a
+  // substantive project statement that merely mentions an approved term.
+  const glossary = explanationForInput(rawMessage);
+  if (glossary) {
     return {
       cycle,
       kind: "clarification",
       changes: [],
-      clarification: { explanation: CLARIFICATION_FALLBACK_EXPLANATION },
+      clarification: {
+        question: glossary.question,
+        explanation: glossary.explanation,
+        kind: "glossary",
+        term: glossary.term,
+      },
     };
   }
-  // B. No-change entry — not an error.
+
+  if (isNarrowClarificationMessage(rawMessage)) {
+    // C2. Clarification entry: fixed fallback only.
+    return {
+      cycle,
+      kind: "clarification",
+      changes: [],
+      clarification: { explanation: CLARIFICATION_FALLBACK_EXPLANATION, kind: "fallback" },
+    };
+  }
+  // B. No-change entry — not an error. Also where any OTHER, unrecognised
+  // direct question (e.g. "Why does the desk want this level of detail?")
+  // lands: no rationale is invented for it here.
   return { cycle, kind: "no_change", changes: [] };
 }
 
