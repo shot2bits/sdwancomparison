@@ -223,9 +223,24 @@ export const SOC_LABELS: Record<string, string> = {
   twenty_four_seven: "24/7 in-house security operations",
 };
 
-export function factLabel(f: WorkspaceFact): string {
-  const v = String(f.value);
-  switch (f.path) {
+/**
+ * Authoritative path+value -> buyer-facing text formatter (Milestone 1,
+ * Commit 9B prerequisite): the same switch that used to live directly
+ * inside factLabel(), extracted unchanged so a caller that has a path and
+ * a value — but not a full WorkspaceFact (id/struck/source/cycle) — can
+ * still reach the one true formatting rule instead of either fabricating
+ * those missing fact fields or standing up a second, independently
+ * maintained copy of this dispatch (see the Commit 9B-prep stop report).
+ *
+ * Behaviour-preserving extraction only: every branch, every table
+ * reference and the default `String(value)` fallback are identical to
+ * factLabel()'s pre-Commit-9B-prerequisite body. Nothing here is new
+ * formatting, and no label table was copied, altered or added — every
+ * case still reads from the same exported tables above.
+ */
+export function humaniseWorkspaceValue(path: AllowedPath, value: unknown): string {
+  const v = String(value);
+  switch (path) {
     case "estate.cloud": return CLOUD_LABELS[v] ?? v;
     case "estate.existingNetwork": return NETWORK_LABELS[v] ?? v;
     case "organisation.regions": return REGION_LABELS[v] ?? v;
@@ -236,6 +251,15 @@ export function factLabel(f: WorkspaceFact): string {
     case "procurement.operatingModel": return OPERATING_MODEL_LABELS[v as OperatingModelId] ?? v;
     default: return v;
   }
+}
+
+/** The single buyer-facing value voice (ProjectDesk.tsx's own description
+ *  of this function, unchanged): delegates every path/value decision to
+ *  humaniseWorkspaceValue() above, reading only fact.path and fact.value —
+ *  no other WorkspaceFact field (id/struck/source/cycle/provenance/quote/
+ *  reason) has ever been part of this function's output. */
+export function factLabel(f: WorkspaceFact): string {
+  return humaniseWorkspaceValue(f.path, f.value);
 }
 
 /* ------------------------------------------------------------------ */
