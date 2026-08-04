@@ -1,11 +1,12 @@
 "use client";
 
 /**
- * EarnedQuestionsList (Milestone 1, Commit 8): renders an already-computed
- * `EarnedQuestion[]` exactly as supplied — the presentational half of the
- * approved ruling that `earnedQuestions()` (src/lib/workspace/questions.ts)
- * is the authoritative pre-verdict source for "what Netify would still ask
- * a buyer" when no security verdict exists yet.
+ * EarnedQuestionsList (Milestone 1, Commit 8; zero-state rendering added in
+ * Commit 11B): renders an already-computed `EarnedQuestion[]` exactly as
+ * supplied — the presentational half of the approved ruling that
+ * `earnedQuestions()` (src/lib/workspace/questions.ts) is the authoritative
+ * pre-verdict source for "what Netify would still ask a buyer" when no
+ * security verdict exists yet.
  *
  * This component does NOT call `earnedQuestions()` itself, does not derive
  * `requirement`/`buying`/`opModel` from a fact ledger, and does not accept
@@ -41,6 +42,24 @@
  * buyer-facing rationale. `section`/`weight` are internal placement/cap
  * metadata with no buyer-safe rendering defined yet.
  *
+ * Commit 11B — zero-question rendering. Previously `questions.length === 0`
+ * returned `null`, producing a silent gap in the layout that Harry's test
+ * read as confusing ("No questions provided?"). Returning null was never a
+ * readiness, completeness or "all done" signal — `earnedQuestions()`
+ * returning nothing only means the current earned-question rules do not
+ * suggest another question from the current facts, which proves nothing
+ * about whether the Understanding is complete, market-ready or
+ * publication-ready (a separate, not-yet-built authoritative readiness
+ * policy owns that question — see the diagnosis-correction report). This
+ * commit does not build that policy; it only replaces silence with an
+ * honest, neutral statement of the current question state, using the same
+ * neutral card treatment as the non-empty state — no success colour, no
+ * checkmark, no completion badge, no percentage, no meter. The supporting
+ * line for the non-empty state was also reworded from "Questions that
+ * would sharpen this further" to a count-based sentence that avoids
+ * "outstanding"/"remaining" (both of which would imply the buyer is
+ * required to answer, which is not true — see EARNED-QUESTION LAW).
+ *
  * Stateless, hookless, callback-free, presentational only — no API
  * calls, no ledger writes, no mutation of the input array or its
  * objects.
@@ -53,22 +72,33 @@ export type EarnedQuestionsListProps = {
 };
 
 export default function EarnedQuestionsList({ questions }: EarnedQuestionsListProps) {
-  if (questions.length === 0) return null;
+  const count = questions.length;
 
   return (
     <section className="mb-6 rounded-[13px] border border-[#EAE7E1] bg-white p-5 sm:p-6">
       <h3 className="m-0 mb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-500)]">
         Questions
       </h3>
-      <p className="m-0 mb-4 text-[13px] text-[#8C8A85]">Questions that would sharpen this further.</p>
+      {count === 0 ? (
+        <p className="m-0 text-[13px] leading-relaxed text-[#8C8A85]">
+          No questions are currently suggested from the information captured so far. You can continue adding or
+          correcting detail at any time.
+        </p>
+      ) : (
+        <>
+          <p className="m-0 mb-4 text-[13px] text-[#8C8A85]">
+            {`${count} ${count === 1 ? "question" : "questions"} could still sharpen this Understanding.`}
+          </p>
 
-      <ul className="m-0 list-none space-y-2 p-0">
-        {questions.map((q, i) => (
-          <li key={`${q.id}-${i}`} className="text-[14.5px] leading-relaxed text-[#18181b]">
-            {q.question}
-          </li>
-        ))}
-      </ul>
+          <ul className="m-0 list-none space-y-2 p-0">
+            {questions.map((q, i) => (
+              <li key={`${q.id}-${i}`} className="text-[14.5px] leading-relaxed text-[#18181b]">
+                {q.question}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   );
 }
