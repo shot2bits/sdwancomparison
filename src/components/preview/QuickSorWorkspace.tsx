@@ -127,6 +127,7 @@ import { labelFor } from "@/lib/workspace/labels";
 import { computeSessionChanges, type SessionActivityEntry, type SessionChange } from "./session-diff";
 import { createTombstoneSet, filterTombstonedUpdates, type TombstoneSet } from "./tombstone-preview";
 import { explanationForInput } from "@/lib/workspace/explanations";
+import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 
 type ExtractResponse = { updates: FieldUpdate[]; engine: string; notes: string[] };
 
@@ -440,6 +441,15 @@ export default function QuickSorWorkspace() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Bridge (Quick Understanding -> real Project): a completely separate
+  // busy/error pair from the extraction turn above. Continuing calls a
+  // different endpoint (POST /api/security-sourcing/project) than
+  // runCycle's extraction call, so it must not share `busy`/`error` and
+  // risk either disabling the wrong control or clobbering an extraction
+  // error message with a continue error or vice versa.
+  const [continueBusy, setContinueBusy] = useState(false);
+  const [continueError, setContinueError] = useState<string | null>(null);
+
   // Correction pass 2, Priority 5: the one EarnedQuestion id this preview
   // can now resolve from typed text (see isDualCircuitNotRequiredAnswer's
   // header comment) — mirrors the exact `dismissed` shape earnedQuestions()
@@ -585,6 +595,65 @@ export default function QuickSorWorkspace() {
     }
   }
 
+  // Bridge (Quick Understanding -> real Project): turns this session's
+  // facts into a real, persisted Project via the existing Security
+  // Sourcing creation route rather than any new backend. That route
+  // already accepts exactly the SecurityRequirementInput shape
+  // requirementFrom(facts) produces, already validates confidence
+  // server-side (rejecting with actionable gap-question text this UI
+  // simply surfaces, not reinterprets), and already returns a
+  // builder_path redirect target plus a manage_token for anonymous
+  // continued editing.
+  //
+  // Ownership handoff on success deliberately mirrors DescribeWizard.tsx's
+  // own two established patterns exactly (netify_mtok_{id} in
+  // localStorage, then a /sase-prefixed window.location.assign) so this
+  // project is indistinguishable, from the platform's perspective, from
+  // any other anonymous draft created via the existing Describe flow.
+  // `?welcome=generated` is deliberately NOT appended: RfpBuilder.tsx
+  // treats that exact string as "just came from the Describe wizard's
+  // generate step" and fires an rfp_generated analytics event that would
+  // misreport this session's true origin. A dedicated welcome state for
+  // this entry point is an explicit follow-up, not part of this increment.
+  async function handleContinue() {
+    if (continueBusy || facts.length === 0) return;
+    setContinueBusy(true);
+    setContinueError(null);
+    try {
+      const res = await fetch("/sase/api/security-sourcing/project", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ requirement: requirementFrom(facts), consent: true }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { project?: { id?: string; manage_token?: string }; builder_path?: string; error?: string }
+        | null;
+      if (!res.ok) {
+        const message = data && typeof data.error === "string" ? data.error : "Could not create your project just now. Try again.";
+        throw new Error(message);
+      }
+      const project = data?.project;
+      const builderPath = data?.builder_path;
+      if (!project?.id || !builderPath) {
+        throw new Error("Could not create your project just now. Try again.");
+      }
+      if (project.manage_token) {
+        try {
+          localStorage.setItem(`netify_mtok_${project.id}`, project.manage_token);
+        } catch {
+          // Private browsing / storage disabled: the project still exists
+          // server-side, the buyer just won't see it auto-recovered on a
+          // later visit from this browser. Not fatal to this turn.
+        }
+      }
+      window.location.assign(`/sase${builderPath}/`);
+    } catch (e) {
+      setContinueError(e instanceof Error ? e.message : "Could not create your project just now. Try again.");
+    } finally {
+      setContinueBusy(false);
+    }
+  }
+
   const requirement = requirementFrom(facts);
   const buying = buyingOf(facts);
   const opModel = operatingModelOf(facts);
@@ -656,6 +725,35 @@ export default function QuickSorWorkspace() {
                   this only reverses what is handed to the presentational
                   component. */}
               <SessionActivity entries={[...entries].reverse()} labelFor={labelFor} />
+
+              {/* Bridge (Quick Understanding -> real Project): the only
+                  exit from this otherwise-isolated preview into the real
+                  platform. Deliberately its own card, after Session
+                  Activity, so it reads as the natural next step rather
+                  than competing with the Understanding/Questions content
+                  above it. */}
+              <div className="mt-6 rounded-[13px] border border-[#EAE7E1] bg-white p-5 sm:p-6">
+                <h3 className="m-0 mb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-500)]">
+                  Continue
+                </h3>
+                <p className="m-0 mb-4 text-[13px] leading-relaxed text-[#8C8A85]">
+                  Ready to take this further? Continuing creates a real, saved project from what you&rsquo;ve told
+                  Netify so far, and takes you to the full Statement of Requirements builder &mdash; nothing here is
+                  lost.
+                </p>
+                <button
+                  type="button"
+                  disabled={continueBusy || facts.length === 0}
+                  onClick={() => void handleContinue()}
+                  className="rounded-full bg-[#141414] px-5 py-2 text-[14px] font-medium text-white transition-opacity disabled:opacity-40"
+                >
+                  {continueBusy ? "Creating your project…" : "Continue to full project"}
+                </button>
+                <p className="m-0 mt-3 text-[12px] leading-relaxed text-[#8C8A85]">
+                  <span>{CREATE_CONSENT_TEXT}</span>
+                </p>
+                {continueError && <p className="m-0 mt-2 text-[12.5px] text-red-700">{continueError}</p>}
+              </div>
             </>
           )}
         </>
