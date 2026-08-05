@@ -18,6 +18,7 @@
  */
 
 import type { SecurityRequirementInput, SecurityDriver, SocCapacity } from "@/lib/security/rulebook";
+import { explanationForInput } from "@/lib/workspace/explanations";
 
 export type Provenance = "stated" | "inferred";
 
@@ -113,7 +114,83 @@ export type AllowedPath = (typeof ALLOWED_PATHS)[number];
 
 const clean = (s: unknown, max = 120) => String(s ?? "").replace(/[\r\n\t]+/g, " ").trim().slice(0, max);
 
-function validate(path: string, value: unknown, notes: string[]): { path: AllowedPath; value: unknown } | null {
+/* Correction pass 2, Priority 2 (Tests 70/71): a marker prefix, not just
+ * human prose, so a caller can reliably detect "a quantity was proposed
+ * and rejected" without re-parsing note text or duplicating the reasons
+ * this function already knows. Every estate.users/estate.sites rejection
+ * below uses it, whatever the specific reason (negative, fractional, or
+ * merely implausible) — one consistent, greppable shape (Priority 3 reads
+ * this same prefix to decide whether a turn needs a buyer-visible "no
+ * precise quantity added" activity entry, rather than the note silently
+ * existing only in notes[] as before this pass). */
+export const QUANTITY_NOT_RECORDED_PREFIX = "Quantity not recorded: ";
+
+/* Correction pass 2, Priority 2 (Tests 70/71): matches a negative or
+ * decimal number ANYWHERE in a short source string — deliberately looser
+ * than deterministicExtract()'s own NEGATIVE_OR_DECIMAL_COUNT (which must
+ * sit immediately before a specific noun, because it has to decide
+ * whether to attempt a match at all). This one only ever runs against a
+ * short quote/reason already scoped to a single proposed count, so a bare
+ * shape check is precise enough and needs no noun anchor. */
+const NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE = /-\s?\d+(?:\.\d+)?|\b\d+\.\d+\b/;
+
+/* Fix (correction pass 2, Priority 3 — Test 73, "quite a few sites, maybe
+ * a dozen or so"): a hedged, deliberately-imprecise estimate is a
+ * different failure mode from Test 72's out-of-range number and from
+ * Priority 2's negative/decimal shapes -- here the buyer is explicitly
+ * signalling they do NOT know an exact count, so a model that resolves "a
+ * dozen or so" to a clean integer (e.g. value:12) would be inventing
+ * precision the buyer never gave, which Priority 3 explicitly forbids
+ * ("Do not invent a number"). Checked only against sourceText -- the
+ * model's own quote/reason for THIS specific proposed count (or the
+ * deterministic path's own regex match, which can never contain hedge
+ * words since it requires literal digits to match at all) -- never against
+ * the buyer's full message, so an unrelated hedge word elsewhere in a
+ * longer sentence ("Budget is roughly £200k but we have 45 sites.") can
+ * never wrongly reject a genuinely precise count quoted elsewhere in it. */
+const VAGUE_QUANTITY_HEDGE =
+  /\b(?:quite a few|a few|a couple(?:\s+of)?|several|around|about|roughly|approximately|or so|or thereabouts|or thereabout|give or take|ballpark|not sure exactly|hard to say exactly|maybe|perhaps|possibly)\b/i;
+
+/* Hoisted to module scope (correction pass 2, Priority 2) from inside
+ * deterministicExtract(), which still defines its own local NUM-based
+ * matching against these same two noun groups — unchanged. Hoisting only
+ * lets validate()'s own raw-text check below share the identical noun
+ * vocabulary rather than duplicating or drifting from it. */
+const USER_NOUN = "users?|staff|employees?|people|seats?|heads";
+const SITE_NOUN = "sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?|clinics?";
+
+/* Fix (correction pass 2, Priority 2 — Tests 70/71, the actual mechanism):
+ * live evidence this pass showed the MODEL itself already strips a
+ * negative sign or a decimal fraction from its OWN quote before validate()
+ * ever sees it — "We need SASE across -5 sites." came back as
+ * {value: 5, quote: "5 sites"}, so a check against the model's quote alone
+ * (NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.test(sourceText) below) never fires,
+ * because by that point every trace of the sign is already gone from BOTH
+ * the value AND the model's own quote. The only place the original "-5"
+ * still exists is the buyer's actual raw text, which the model proposal
+ * never carries at all. This mirrors deterministicExtract's own
+ * NEGATIVE_OR_DECIMAL_COUNT shape check exactly (a negative or decimal
+ * number, at most one word before the noun) but runs it against the FULL
+ * ORIGINAL buyer text instead of a model-mediated quote, which is the only
+ * reliable source left once a model has already "corrected" the number
+ * for us. Scoped tightly (the number must sit right before a
+ * site/user noun) specifically so an unrelated negative or decimal number
+ * elsewhere in a longer sentence — "Our budget is -£5,000 and we need 15
+ * sites." — can never wrongly reject a genuine, unrelated whole count. */
+function rawTextShowsNegativeOrDecimalNear(path: AllowedPath, rawBuyerText: string): boolean {
+  const noun = path === "estate.users" ? USER_NOUN : path === "estate.sites" ? SITE_NOUN : null;
+  if (!noun) return false;
+  const re = new RegExp(`(?:${NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.source})\\s*(?:\\w+\\s+)?(?:${noun})\\b`, "i");
+  return re.test(rawBuyerText);
+}
+
+function validate(
+  path: string,
+  value: unknown,
+  notes: string[],
+  sourceText?: string,
+  rawBuyerText?: string,
+): { path: AllowedPath; value: unknown } | null {
   if (!(ALLOWED_PATHS as readonly string[]).includes(path)) {
     notes.push(`Dropped a proposal for unknown field "${clean(path, 40)}".`);
     return null;
@@ -128,8 +205,73 @@ function validate(path: string, value: unknown, notes: string[]): { path: Allowe
   switch (p) {
     case "estate.users":
     case "estate.sites": {
-      const n = Math.round(Number(value));
-      if (!Number.isFinite(n) || n < 1 || n > (p === "estate.users" ? 500000 : 20000)) { notes.push(`Dropped ${p}: not a sensible number.`); return null; }
+      /* Fix (correction pass 2, Priority 2 — Tests 70/71): the first
+       * fix only touched deterministicExtract()'s own regex match, but
+       * unionUpdates() always prefers the MODEL's proposal for a path
+       * once the model proposes one — and the model was independently
+       * turning "-5 sites" into estate.sites=5 (quote "5 sites",
+       * silently dropping the minus sign) and "12.5 sites" into a value
+       * this function then rounded to 13, so the deterministic-only fix
+       * never ran for either reported case. validate() is the one gate
+       * BOTH the model and deterministic paths share (this file's own
+       * design law — see this function's header comment), so the fix
+       * belongs here: inspect the buyer's own quoted source text (never
+       * available on the deterministic path in a form that could show
+       * this, since that path already omits the field upstream — see
+       * deterministicExtract's own NEGATIVE_OR_DECIMAL_COUNT guard —
+       * but always available on the model path via `sourceText`) AND
+       * the numeric value itself, BEFORE any rounding, for a negative
+       * or non-integer shape. Reject outright rather than silently
+       * coercing a sign away or rounding a fraction — same "omitted,
+       * never mangled" outcome every other out-of-bounds value already
+       * gets below, just checked earlier, before Math.round can hide
+       * the evidence. The earlier ledger value, if any, is left
+       * completely alone; nothing here writes a corrected/rounded
+       * number in its place. */
+      const raw = Number(value);
+      const sourceShowsNegativeOrDecimal = sourceText ? NEGATIVE_OR_DECIMAL_COUNT_ANYWHERE.test(sourceText) : false;
+      const valueShowsNegativeOrDecimal = Number.isFinite(raw) && (raw < 0 || !Number.isInteger(raw));
+      /* Fix (correction pass 2, Priority 2 continued): sourceText and value
+       * are both MODEL-mediated — live evidence proved the model already
+       * strips the sign/decimal from its own self-reported quote too
+       * ("-5 sites" -> {value:5, quote:"5 sites"}), so neither of the two
+       * checks above can ever see the original shape for a model-path
+       * proposal. The buyer's own original message is the only place the
+       * sign/decimal reliably still exists, so check that directly as a
+       * third, independent signal. */
+      const rawTextShowsIt = rawBuyerText ? rawTextShowsNegativeOrDecimalNear(p, rawBuyerText) : false;
+      const what = p === "estate.users" ? "user" : "site";
+      if (sourceShowsNegativeOrDecimal || valueShowsNegativeOrDecimal || rawTextShowsIt) {
+        /* Quote whichever text actually shows the negative/decimal shape,
+         * preferring the buyer's own original words (rawBuyerText) when
+         * that's the only place it's visible — sourceText/value are
+         * model-sanitised by the time we get here (see comment above), so
+         * quoting them back in this case would misleadingly show a plain
+         * positive integer next to the words "is negative or not a whole
+         * number". */
+        const quoteFor =
+          sourceShowsNegativeOrDecimal || valueShowsNegativeOrDecimal
+            ? sourceText || String(value)
+            : rawBuyerText || sourceText || String(value);
+        notes.push(
+          `${QUANTITY_NOT_RECORDED_PREFIX}"${clean(quoteFor, 60)}" is negative or not a whole number, so no ${what} count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`,
+        );
+        return null;
+      }
+      const sourceIsVagueEstimate = sourceText ? VAGUE_QUANTITY_HEDGE.test(sourceText) : false;
+      if (sourceIsVagueEstimate) {
+        notes.push(
+          `${QUANTITY_NOT_RECORDED_PREFIX}"${clean(sourceText || String(value), 60)}" reads as an estimate rather than a precise count, so nothing precise was recorded. The earlier value, if any, is unchanged — restate a specific whole number to set it.`,
+        );
+        return null;
+      }
+      const n = Math.round(raw);
+      if (!Number.isFinite(n) || n < 1 || n > (p === "estate.users" ? 500000 : 20000)) {
+        notes.push(
+          `${QUANTITY_NOT_RECORDED_PREFIX}"${clean(sourceText || String(value), 60)}" isn't a plausible ${what} count, so nothing precise was recorded. The earlier value, if any, is unchanged.`,
+        );
+        return null;
+      }
       return { path: p, value: n };
     }
     case "organisation.sector": {
@@ -275,20 +417,40 @@ function negatedAt(t: string, i: number, len: number): boolean {
   return false;
 }
 
-export function deterministicExtract(text: string): FieldUpdate[] {
+/**
+ * `externalNotes` (correction pass 2, Priority 3): optional, backward
+ * compatible — every existing caller (draft.fixtures.ts, verify-*.ts
+ * scripts, the `text` regression battery above) calls this with one
+ * argument and is completely unaffected. When supplied, this is the SAME
+ * array extractRequirement() already returns as `notes` for the model
+ * path, so a validate() rejection on the deterministic path (a negative
+ * count, a decimal, an implausibly large number, a hedged estimate) is
+ * pushed straight into it too, instead of only ever reaching the local
+ * `sink` this function used to discard on return. Without this, Priority
+ * 3's "do not silently discard validation notes" held for the model path
+ * (which already threaded its own `notes` parameter through) but not for
+ * the deterministic path, where the exact same rejection happened with no
+ * way for the buyer to ever see it. */
+export function deterministicExtract(text: string, externalNotes?: string[]): FieldUpdate[] {
   const t = ` ${text.toLowerCase()} `;
   const out: FieldUpdate[] = [];
-  const sink: string[] = []; // validator notes; omissions surface via the receipt
+  const sink: string[] = externalNotes ?? []; // validator notes; omissions surface via the receipt
   /** F-D (design integrity, Robert: "the validator exists so every path
    *  reaches the same truth; the rail shouldn't be exempt"): every rail
    *  statement passes the SAME validate() a model proposal passes. What
    *  fails validation is omitted, and the receipt keeps the clause. */
   const say = (path: AllowedPath, value: unknown, quote: string) => {
-    const ok = validate(path, value, sink);
+    /* rawBuyerText = text (this function's own input) — defence in depth
+     * only; the deterministic path already guards estate.users/sites
+     * negative-or-decimal shapes upstream of this call (see
+     * NEGATIVE_OR_DECIMAL_COUNT below), but passing it keeps this call
+     * consistent with the model path and covers any future deterministic
+     * rule that doesn't add its own upstream guard. */
+    const ok = validate(path, value, sink, quote, text);
     if (ok) out.push({ path: ok.path, value: ok.value, provenance: "stated", quote });
   };
   const infer = (path: AllowedPath, value: unknown, reason: string) => {
-    const ok = validate(path, value, sink);
+    const ok = validate(path, value, sink, reason, text);
     if (ok) out.push({ path: ok.path, value: ok.value, provenance: "inferred", reason });
   };
   /** A match that lands only outside the negation window. */
@@ -302,16 +464,70 @@ export function deterministicExtract(text: string): FieldUpdate[] {
   // multiply; one describing word may still sit between the number and its
   // noun ("50 remote users"). A value outside the validator's bounds is
   // OMITTED rather than mangled, so the clause lands in Notes, unplaced.
-  const NUM = "(\\d{1,3}(?:,\\d{3})+|\\d{1,7})\\s*(k\\b|thousand\\b|m\\b|million\\b)?";
+  /* Fix (correction pass 2, Priority 3 — Test 72, "50000000 sites"): the
+   * bare-digit alternative was capped at 7 digits (\d{1,7}, max 9,999,999),
+   * so an implausibly large but comma-free count like "50000000" (8 digits)
+   * never matched NUM at all -- not "matched and rejected as implausible"
+   * (which validate()'s existing magnitude bound below already handles
+   * correctly and explains to the buyer) but "never recognised as a number
+   * in the first place", which produced total silence instead of the
+   * honest "not recorded" note Priority 3 requires. Widening the cap to 9
+   * digits (max 999,999,999 -- comfortably past any real site/user count)
+   * costs nothing: it does not change what counts as a VALID count
+   * (validate()'s 20,000/500,000 ceilings, untouched, still reject it) --
+   * it only lets an obviously-too-large typed number reach that existing
+   * check instead of silently vanishing before it. */
+  const NUM = "(\\d{1,3}(?:,\\d{3})+|\\d{1,9})\\s*(k\\b|thousand\\b|m\\b|million\\b)?";
   const magnitude = (digits: string, mag: string | undefined): number =>
     Math.round(Number(digits.replace(/,/g, "")) * (mag ? (mag.startsWith("k") || mag.startsWith("t") ? 1e3 : 1e6) : 1));
-  const users = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:users?|staff|employees?|people|seats?|heads)\\b`));
-  if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim());
+
+  /* Fix (negative/decimal counts silently mangled, not omitted — the
+   * externally reported gap this closes): NUM above is digits-only, so
+   * "-5 sites" quietly drops the minus sign and lands 5, and "12.5 sites"
+   * quietly drops the ".5" and lands 12 (or, once the regex backtracks
+   * looking for a noun immediately after the integer part, can land on the
+   * fractional digits instead and lose the whole number entirely). Both
+   * outcomes are a mangled, confidently-wrong count — exactly what the two
+   * lines above this promise never happens ("OMITTED rather than
+   * mangled"). A site or user count can never legitimately be negative or
+   * fractional, so this checks for that shape FIRST, ahead of the ordinary
+   * NUM match, and when found, omits the field entirely (same silent-omit
+   * outcome every other out-of-bounds value already gets via validate())
+   * instead of letting the ordinary match run and pick up a wrong number.
+   * A ordinary whole positive count is completely unaffected — this only
+   * ever short-circuits the two matches below when the text shape genuinely
+   * cannot be a valid whole positive count. */
+  const NEGATIVE_OR_DECIMAL_COUNT = "(?:-\\s?\\d{1,7}(?:\\.\\d+)?|\\d{1,7}\\.\\d+)";
+  const negativeOrDecimalCountMatch = (noun: string) =>
+    hit(new RegExp(`${NEGATIVE_OR_DECIMAL_COUNT}\\s*(?:\\w+\\s+)?(?:${noun})\\b`));
+
+  const USER_NOUN = "users?|staff|employees?|people|seats?|heads";
+  const negUserMatch = negativeOrDecimalCountMatch(USER_NOUN);
+  if (negUserMatch) {
+    /* Fix (correction pass 2, Priority 3): use the same buyer-visible
+     * QUANTITY_NOT_RECORDED_PREFIX and quoted-match wording validate()
+     * itself uses for the identical rejection reason on the model path,
+     * now that this note reaches extractRequirement's returned `notes`
+     * (via the externalNotes param above) instead of being discarded --
+     * so classifyTurnEntry()'s droppedQuantityNote detection (which keys
+     * off this exact prefix) picks it up here too. */
+    sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negUserMatch[0].trim(), 60)}" is negative or not a whole number, so no user count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
+  } else {
+    const users = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:${USER_NOUN})\\b`));
+    if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim());
+  }
+
   /* "clinics" joined the noun list 31 Jul 2026 (round 6 dry run: "60
    * clinics" from an NHS buyer landed nothing while "60 shops" landed;
    * same in-lane precedent as the timeline patterns). */
-  const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?|clinics?)\\b`));
-  if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim());
+  const SITE_NOUN = "sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?|clinics?";
+  const negSiteMatch = negativeOrDecimalCountMatch(SITE_NOUN);
+  if (negSiteMatch) {
+    sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negSiteMatch[0].trim(), 60)}" is negative or not a whole number, so no site count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
+  } else {
+    const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:${SITE_NOUN})\\b`));
+    if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim());
+  }
 
   /* Timeline (round three, 31 Jul 2026; the P1 lane's finding made real:
    * nothing here ever landed constraints.timeline, while R7 holds the
@@ -325,12 +541,41 @@ export function deterministicExtract(text: string): FieldUpdate[] {
    * the value: the path is free text and their words beat normalisation. */
   {
     const DATEISH = "(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+20\\d\\d|(?:q[1-4]|h[12])\\s*20\\d\\d|(?:spring|summer|autumn|winter)\\s+20\\d\\d|20\\d\\d)";
+    /* Fix (relative/yearless dates silently dropped — reproduced live with
+     * "Q1 next year" and "by October", and the acceptance sentence "...
+     * consolidating across 18 branches by Q2 next year."): DATEISH above
+     * always required an explicit four-digit 20xx year, so a quarter,
+     * half, season or month named WITHOUT a year — or a plain relative
+     * reference ("next year", "this quarter") — landed no timeline at all,
+     * even though the comment above already names "a horizon" as one of
+     * the buyer date shapes this block exists to catch. Two narrow,
+     * additive shapes only: a quarter/half/season plus "next"/"this year"
+     * ("Q2 next year", "this autumn"), and a bare month name with no year
+     * ("by October"). "may" is deliberately left out of the bare-month
+     * list — with no year to anchor it and the text already lowercased,
+     * "may" collides with the modal verb ("we may need...") too often to
+     * treat as a date on its own; the year-anchored DATEISH above still
+     * matches "may 2027" fine, since a year makes that reading safe. As
+     * with every timeline match, the captured VALUE stays the buyer's own
+     * clause verbatim — this never computes or invents an actual date. */
+    const DATEISH_NO_YEAR =
+      "(?:(?:q[1-4]|h[12])\\s*(?:next|this)\\s+year|(?:spring|summer|autumn|winter)\\s+(?:next|this)\\s+year|(?:next|this)\\s+(?:spring|summer|autumn|winter|year|quarter|month)|(?:jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?)";
+    const ANY_DATEISH = `(?:${DATEISH}|${DATEISH_NO_YEAR})`;
     const timeline =
-      hit(new RegExp(`(?:live|go[- ]?live|in place|delivered|deployed|migrat(?:ed|ing)|rolled out|completed?|operational|finished|cut(?:ting)? over|ready|working|done)[^.,;]{0,25}?(?:by|before|during|in|for)\\s+(?:the\\s+)?(?:end of\\s+)?${DATEISH}`)) ??
-      hit(new RegExp(`(?:contract|term|agreement|mpls|circuits?)[^.,;]{0,30}?(?:ends?|expir(?:es?|y|ing)|renews?|renewal|up)[^.,;]{0,12}?${DATEISH}`)) ??
-      hit(new RegExp(`(?:timeline|deadline|target)[^.,;]{0,12}?(?:is|:)?[^.,;]{0,20}?${DATEISH}`)) ??
-      hit(new RegExp(`(?:by|before|no later than)\\s+(?:the\\s+)?(?:end of\\s+)?${DATEISH}`)) ??
-      hit(/within\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)/);
+      hit(new RegExp(`(?:live|go[- ]?live|in place|delivered|deployed|migrat(?:ed|ing)|rolled out|completed?|operational|finished|cut(?:ting)? over|ready|working|done)[^.,;]{0,25}?(?:by|before|during|in|for)\\s+(?:the\\s+)?(?:end of\\s+)?${ANY_DATEISH}`)) ??
+      hit(new RegExp(`(?:contract|term|agreement|mpls|circuits?)[^.,;]{0,30}?(?:ends?|expir(?:es?|y|ing)|renews?|renewal|up)[^.,;]{0,12}?${ANY_DATEISH}`)) ??
+      hit(new RegExp(`(?:timeline|deadline|target)[^.,;]{0,12}?(?:is|:)?[^.,;]{0,20}?${ANY_DATEISH}`)) ??
+      hit(new RegExp(`(?:by|before|no later than)\\s+(?:the\\s+)?(?:end of\\s+)?${ANY_DATEISH}`)) ??
+      hit(/within\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)/) ??
+      /* Fix (correction pass 2, Priority 5 — "We need this live in 3
+       * months."): the buyer's own relative target, captured as their
+       * own words, exactly like every other timeline shape above — no
+       * absolute calendar date is computed or invented here, since this
+       * product has no agreed rule yet for turning "in 3 months" into a
+       * specific date. `\bin\b` cannot accidentally match inside
+       * "within" (no word boundary sits between its "h" and "i"), so
+       * this never double-fires on the "within" case immediately above. */
+      hit(/\bin\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)\b/);
     if (timeline) say("constraints.timeline", timeline[0].trim(), timeline[0].trim());
   }
 
@@ -653,17 +898,37 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
   const lower = text.toLowerCase();
   const out: FieldUpdate[] = [];
   for (const f of fields.slice(0, 30)) {
-    const ok = validate(String(f.path ?? ""), f.value, notes);
+    /* Correction pass 2, Priority 2: quote computed BEFORE validate() now
+     * (previously computed after), so validate() can inspect the buyer's
+     * own quoted words for estate.sites/estate.users — see this
+     * function's header comment and validate()'s own comment on that
+     * case for why the boundary moved here. Every other use of `quote`
+     * below this loop is completely unchanged. */
+    const quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
+    /* Correction pass 2, Priority 2 (Tests 70/71 — the actual fix): pass
+     * `text`, this function's own full raw buyer message, as validate()'s
+     * 5th argument. This is the critical wiring — live evidence showed the
+     * model sanitises the sign/decimal out of BOTH f.value and its own
+     * f.quote before this line ever runs, so sourceText (from `quote`
+     * above) can no longer be trusted alone; only the buyer's original,
+     * unprocessed text still shows the original shape. */
+    const ok = validate(String(f.path ?? ""), f.value, notes, quote || String(f.reason ?? ""), text);
     if (!ok) continue;
     let value = ok.value;
-    const quote = typeof f.quote === "string" ? clean(f.quote, 160) : "";
     const stated = quote.length > 2 && lower.includes(quote.toLowerCase());
     /* F-A extension (24 Jul live catch: "across our sites" proposed
      * sites=1): a numeric estate count must trace to a digit in the
      * words it cites, or in the buyer's text at all. Otherwise OMIT:
      * the receipt keeps the clause verbatim, and no count is invented. */
     if ((ok.path === "estate.sites" || ok.path === "estate.users") && !/\d/.test(`${quote} ${String(f.reason ?? "")}`)) {
-      notes.push(`Dropped ${ok.path === "estate.sites" ? "a site" : "a user"} count with no stated number.`);
+      /* Correction pass 2, Priority 3 (Test 73 — "quite a few sites,
+       * maybe a dozen or so"): same QUANTITY_NOT_RECORDED_PREFIX marker
+       * as validate()'s own rejections, so the client can surface a
+       * neutral "no precise quantity added" activity entry for this
+       * case too, not just the negative/decimal/out-of-range ones. No
+       * number is invented here — this branch is reached precisely
+       * because the buyer gave none. */
+      notes.push(`${QUANTITY_NOT_RECORDED_PREFIX}no whole number was given for ${ok.path === "estate.sites" ? "a site" : "a user"} count, so nothing precise was recorded.`);
       continue;
     }
     /* Harry's 24 July catch: "replacing outdated firewalls and remote
@@ -795,7 +1060,7 @@ export function vetModelProposals(fields: ModelProposal[], text: string, notes: 
      * the deterministic rail already requires for this same field. */
     if (ok.path === "constraints.timeline") {
       const DATEISH =
-        "(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+20\\d\\d|(?:q[1-4]|h[12])\\s*20\\d\\d|(?:spring|summer|autumn|winter)\\s+20\\d\\d|\\b20\\d\\d\\b|within\\s+(?:the\\s+next\\s+)?\\d{1,3}\\s+(?:days?|weeks?|months?)|no fixed date|as soon as possible|\\basap\\b";
+        "(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s+20\\d\\d|(?:q[1-4]|h[12])\\s*20\\d\\d|(?:spring|summer|autumn|winter)\\s+20\\d\\d|\\b20\\d\\d\\b|within\\s+(?:the\\s+next\\s+)?\\d{1,3}\\s+(?:days?|weeks?|months?)|in\\s+(?:the\\s+next\\s+)?\\d{1,3}\\s+(?:days?|weeks?|months?)|no fixed date|as soon as possible|\\basap\\b";
       if (!new RegExp(DATEISH, "i").test(lower)) {
         notes.push("Dropped a timeline claim: no dated anchor (a month, quarter, year, or a stated number of days/weeks/months) in your description.");
         continue;
@@ -971,7 +1236,43 @@ function dedupeSiteResilience(updates: FieldUpdate[]): FieldUpdate[] {
 
 export async function extractRequirement(text: string, base: SecurityRequirementInput = {}): Promise<ExtractResult> {
   const notes: string[] = [];
-  const det = deterministicExtract(text);
+  /* Fix (correction pass 2, Priority 1 — Tests 21, 22, 23, 24, 26, 31,
+   * 34): a message explanationForInput() recognises as a glossary
+   * question must never be able to mutate the Understanding, however it
+   * might otherwise be read. Before this fix, "What is SASE?"/"What is
+   * MDR?"/etc. were correctly recognised as glossary questions by
+   * classifyTurnEntry()'s C1 branch downstream in QuickSorWorkspace.tsx —
+   * but deterministicExtract() ALSO independently fires an unrelated
+   * "bare mention = buying/compliance intent" rule for exactly those same
+   * seven inputs (SASE/SD-WAN/SSE/MDR/PCI DSS bare-mention rules), and
+   * whichever real fact change wins priority over any clarification
+   * classification, so the buyer silently got a wrong fact instead of
+   * the glossary answer. The model path has no equivalent guard either —
+   * nothing stops it independently reaching the same conclusion its own
+   * way for a term it happens to recognise.
+   *
+   * Rather than adding a per-term regex exclusion inside
+   * deterministicExtract() for each of the seven (which would need
+   * re-discovering and re-patching for every future bare-mention rule,
+   * and still wouldn't guard the model path at all), this is ONE
+   * precedence rule at the ONE boundary every extraction call already
+   * passes through — this function, called identically by the API route
+   * and any script — checked first, before either extraction path or the
+   * model ever runs: if the text is a recognised glossary question,
+   * extraction is skipped entirely, so there is no proposal of any kind
+   * for unionUpdates()/validate() to ever consider, and nothing downstream
+   * needs to guess which update might have been "the glossary one". A
+   * substantive statement that merely mentions an approved term ("We need
+   * SASE across 50 sites.", "Suppliers must explain their SD-WAN
+   * design.") is not a recognised glossary question — explanationForInput()
+   * requires an exact "what is X" / "what does X mean" / "explain X" /
+   * "can you explain X" shape after narrow normalisation — so extraction
+   * for those proceeds completely unaffected below. */
+  if (explanationForInput(text)) {
+    notes.push("Recognised as a glossary question; no extraction was attempted so the answer can't be read as a new project fact.");
+    return { requirement: base, updates: [], engine: "deterministic_fallback", notes };
+  }
+  const det = deterministicExtract(text, notes);
   const modelUpdates = await modelExtract(text, notes);
   const modelSpoke = Boolean(modelUpdates && modelUpdates.length > 0);
   const updates = modelSpoke ? unionUpdates(modelUpdates!, det) : det;

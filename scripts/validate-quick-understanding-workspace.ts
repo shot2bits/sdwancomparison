@@ -327,7 +327,12 @@ let turns!: {
   expect(workspaceCode.includes("buyingOf(facts)"), `[13] expected buyingOf(facts)`);
   expect(workspaceCode.includes("operatingModelOf(facts)"), `[13] expected operatingModelOf(facts)`);
   expect(
-    workspaceCode.includes("earnedQuestions(requirement, buying, opModel, [], [])"),
+    /* Correction pass 2, Priority 5: `dismissed` (the 5th positional arg)
+     * is no longer hardcoded `[]` — it now carries dismissedQuestionIds,
+     * the session-local state a typed dual-circuit answer populates (see
+     * QuickSorWorkspace.tsx's own header comment on this call). `notedIds`
+     * (4th arg) is unchanged and still hardcoded `[]`. */
+    workspaceCode.includes("earnedQuestions(requirement, buying, opModel, [], dismissedQuestionIds)"),
     `[13] expected earnedQuestions() called with the facts-derived requirement/buying/opModel`,
   );
 }
@@ -350,11 +355,18 @@ let turns!: {
   expect(workspaceCode.includes("<EarnedQuestionsList questions={questions} />"), `[16] expected <EarnedQuestionsList questions={questions} />`);
 }
 
-/* 17. SessionActivity receives accumulated entries. ------------------------ */
+/* 17. SessionActivity receives accumulated entries, newest first. ---------- */
 {
+  /* Fix (placement bug — a "Netify explained" entry for the buyer's most
+   * recent message rendered at the bottom of a chronological, oldest-first
+   * list, off-screen once a session had any history): entries are now
+   * reversed before reaching SessionActivity, which still just renders
+   * whatever order it is given (see SessionActivity.tsx's own header
+   * comment). This assertion was stale after that fix landed — updated to
+   * match the actual prop expression instead of the pre-fix one. */
   expect(
-    workspaceCode.includes("<SessionActivity entries={entries} labelFor={labelFor} />"),
-    `[17] expected <SessionActivity entries={entries} labelFor={labelFor} />`,
+    workspaceCode.includes("<SessionActivity entries={[...entries].reverse()} labelFor={labelFor} />"),
+    `[17] expected <SessionActivity entries={[...entries].reverse()} labelFor={labelFor} />`,
   );
 }
 

@@ -121,7 +121,7 @@ import {
   operatingModelOf,
   type WorkspaceFact,
 } from "@/lib/workspace/draft";
-import type { FieldUpdate } from "@/lib/workspace/extract";
+import { QUANTITY_NOT_RECORDED_PREFIX, type FieldUpdate } from "@/lib/workspace/extract";
 import { earnedQuestions } from "@/lib/workspace/questions";
 import { labelFor } from "@/lib/workspace/labels";
 import { computeSessionChanges, type SessionActivityEntry, type SessionChange } from "./session-diff";
@@ -211,6 +211,107 @@ export const CLARIFICATION_FALLBACK_EXPLANATION =
   "There isn’t a specific Netify question or recognised term selected to explain. You can continue adding or correcting information about your project.";
 
 /**
+ * Fix (retraction requests are a silent no-op — the externally reported
+ * gap this closes): a message like "Ignore the budget I mentioned
+ * earlier." currently extracts no changes (correctly — there is nothing
+ * for the model or the deterministic rail to add), and previously fell
+ * straight through to "no_change", rendering the same bare "No changes to
+ * your Understanding." line as any ordinary no-op turn. That is honest
+ * about the ledger but not about the request: the buyer asked Netify to
+ * remove something, and nothing told them whether that happened or why
+ * not. Retracting a SPECIFIC already-recorded fact is not implemented in
+ * this preview (there is no removal semantics in mergeUpdates()/the fact
+ * ledger to hook into without a much larger change), so this says that
+ * plainly instead of staying silent, and offers the one workaround that
+ * already works today (restate the correct value; a correction already
+ * overwrites the old one).
+ *
+ * Deliberately narrow and deterministic, same philosophy as
+ * isNarrowClarificationMessage above: the message must both START with a
+ * retraction verb (ignore/forget/disregard/scratch/remove/delete,
+ * optionally after "please") AND separately reference the buyer's own
+ * earlier statement (e.g. "i mentioned", "we said", "i told you", "that").
+ * Requiring both halves is what keeps a real requirement sentence that
+ * merely contains "ignore" from misfiring — e.g. "Suppliers should ignore
+ * legacy hardware in their proposal." starts with "Suppliers", not a
+ * retraction verb, so it correctly does not match; "Please ignore what I
+ * said about the budget" matches both halves and correctly does.
+ */
+const RETRACTION_LEAD = /^(?:please\s+)?(?:ignore|forget|disregard|scratch|remove|delete)\b/;
+/* Fix (correction pass 2, Priority 6 — the brief's own required exact
+ * sequence): "Ignore what I just said, forget the 15 sites." is the
+ * literal second message the brief specifies, and it did not match this
+ * check before this fix — "i just said" sat one filler word away from the
+ * bare "i said"/"we said" the pattern required, so RETRACTION_SELF_REFERENCE
+ * never fired, isRetractionRequest() returned false, and the message fell
+ * through to an ordinary (silent, no-op-looking) turn instead of the
+ * honest retraction acknowledgment Priority 6 requires. A small, bounded
+ * filler-word gap (one of "just/already/previously/earlier", at most one)
+ * between the pronoun and the verb closes exactly that gap without loosening
+ * the match into a general "mentions time" scan — "i mentioned", "we said",
+ * "i just said", "i already said" all now match; nothing else does. */
+const RETRACTION_SELF_REFERENCE =
+  /\b(?:i|we)\s+(?:just\s+|already\s+|previously\s+|earlier\s+)?(?:mentioned|said|told\s+you|noted|wrote|typed)\b|\bthat\b/;
+
+export function isRetractionRequest(raw: string): boolean {
+  const normalised = raw.trim().toLowerCase();
+  return RETRACTION_LEAD.test(normalised) && RETRACTION_SELF_REFERENCE.test(normalised);
+}
+
+export const RETRACTION_FALLBACK_EXPLANATION =
+  "Netify can’t remove a specific earlier statement in this preview yet, so nothing was deleted. To change it, restate the correct value instead (for example, “Actually, our budget is £150,000”) and Netify will update it.";
+
+/**
+ * Fix (correction pass 2, Priority 5 — "No, dual-circuit isn't
+ * required."): the q-resilience EarnedQuestion ("At your site count, is
+ * dual-circuit resilience per site required?") already has a "Not
+ * required" option in questions.ts, but that option is only reachable by
+ * clicking a chip — EarnedQuestionsList renders it presentation-only
+ * (Commit 8), and this preview's own earnedQuestions() call has always
+ * passed `dismissed` as a hardcoded `[]` (see this file's header
+ * comment), so nothing could ever resolve any EarnedQuestion by any
+ * route before this fix. A free-text "No, dual-circuit isn't required."
+ * answer previously matched no recognised phrase at all, so it fell
+ * through to a bare, unacknowledged "No changes to your Understanding."
+ * and the question stayed listed forever, unresolved and unaffected —
+ * matching Harry's report exactly.
+ *
+ * Deliberately narrow and deterministic, same philosophy as
+ * isRetractionRequest/isNarrowClarificationMessage above: this
+ * recognises only a negative answer to the dual-circuit question
+ * specifically, not resilience language in general, so an ordinary
+ * requirement sentence that happens to mention resilience is never
+ * misread as answering a question that may not even be showing. The
+ * caller (runCycle, below) only acts on a match here when q-resilience
+ * was actually an active EarnedQuestion the moment the buyer answered —
+ * recognising the phrase alone is not enough to change anything.
+ */
+const DUAL_CIRCUIT_NOT_REQUIRED = /^no,?\s*dual[- ]circuit(?:\s+resilience)?\s+(?:isn'?t|is\s+not)\s+required$/;
+
+export function isDualCircuitNotRequiredAnswer(raw: string): boolean {
+  const normalised = raw
+    .trim()
+    .toLowerCase()
+    .replace(/[‘’]/g, "'")
+    .replace(/[\s.?!]+$/g, "")
+    .replace(/\s+/g, " ");
+  return DUAL_CIRCUIT_NOT_REQUIRED.test(normalised);
+}
+
+/**
+ * Fixed copy for the dual-circuit answer above: names the question
+ * answered, in the buyer's own words that a real chip click would
+ * already have recorded via the existing "Not required" option (see
+ * questions.ts) — same outcome as that option (the question resolves;
+ * no new fact is written to the ledger, exactly like that option's own
+ * `{ kind: "dismiss" }` behaviour), just reached from typed text instead
+ * of a click, and now actually acknowledged instead of silently
+ * discarded.
+ */
+export const RESILIENCE_ANSWER_EXPLANATION =
+  "Recorded: dual-circuit resilience per site isn’t required. This question is now resolved and won’t be asked again this session.";
+
+/**
  * The submitted-turn classification rule (entry types A/B/C from the
  * Commit 10 instructions, extended in Commit 11C with a bounded glossary
  * branch inside C), extracted as its own pure function for the same
@@ -226,25 +327,51 @@ export const CLARIFICATION_FALLBACK_EXPLANATION =
  *                                        a narrow clarification phrase).
  *   C1. a recognised glossary question (explanationForInput(rawMessage) !=
  *       null) AND no changes         -> "clarification", glossary-shaped.
- *   C2. one of the eight narrow clarification phrases — including "why are
+ *   C2. a narrow retraction request (isRetractionRequest(rawMessage)) AND
+ *       no changes AND not already handled by C1
+ *                                     -> "clarification", retraction-shaped
+ *                                        (fix: previously fell through to
+ *                                        B with no acknowledgment at all).
+ *   C3. one of the eight narrow clarification phrases — including "why are
  *       you asking", "why does netify need this", "why is that relevant"
- *       — AND no changes AND not already handled by C1
+ *       — AND no changes AND not already handled by C1/C2
  *                                     -> "clarification", fixed fallback.
  *   B. anything else                 -> "no_change" (not an error; this is
  *                                        where any OTHER, unrecognised
  *                                        direct question lands — no
  *                                        rationale is invented for it
  *                                        here).
+ *
+ * Correction pass 2 additions:
+ *   C2.5. isDualCircuitNotRequiredAnswer(rawMessage) AND the caller
+ *       confirms q-resilience was an active EarnedQuestion this turn
+ *       (`resilienceQuestionActive`) AND no changes AND not already
+ *       handled by C1/C2      -> "clarification", resilience-answer-shaped
+ *       (Priority 5: the question resolves; see isDualCircuitNotRequired
+ *       Answer's own comment for why this needs the caller-supplied
+ *       context instead of matching on text alone).
+ *   `notes` (Priority 3, Tests 72/73): independent of A/B/C above — any
+ *       entry, whichever kind it lands as, gets `droppedQuantityNote`
+ *       attached when `notes` contains a QUANTITY_NOT_RECORDED_PREFIX
+ *       marker, so a turn that both adds a real fact (kind "changes")
+ *       AND had an implausible quantity rejected in the same sentence
+ *       shows both, never just one.
  */
 export function classifyTurnEntry(
   cycle: number,
   changes: SessionChange[],
   rawMessage: string,
+  notes: string[] = [],
+  resilienceQuestionActive = false,
 ): SessionActivityEntry {
+  const droppedQuantityNote = notes.find((n) => n.startsWith(QUANTITY_NOT_RECORDED_PREFIX));
+  const withDroppedNote = (entry: SessionActivityEntry): SessionActivityEntry =>
+    droppedQuantityNote ? { ...entry, droppedQuantityNote } : entry;
+
   if (changes.length > 0) {
     // A. Changes entry — a real change always wins over any clarification
-    // classification, glossary or fallback.
-    return { cycle, kind: "changes", changes };
+    // classification, glossary, retraction or fallback.
+    return withDroppedNote({ cycle, kind: "changes", changes });
   }
 
   // C1. Bounded, fixed-glossary explanation: narrow deterministic
@@ -252,7 +379,7 @@ export function classifyTurnEntry(
   // substantive project statement that merely mentions an approved term.
   const glossary = explanationForInput(rawMessage);
   if (glossary) {
-    return {
+    return withDroppedNote({
       cycle,
       kind: "clarification",
       changes: [],
@@ -262,22 +389,46 @@ export function classifyTurnEntry(
         kind: "glossary",
         term: glossary.term,
       },
-    };
+    });
+  }
+
+  // C2. Narrow retraction request: an honest "can't remove that here yet"
+  // instead of the previously-silent "no_change" fall-through.
+  if (isRetractionRequest(rawMessage)) {
+    return withDroppedNote({
+      cycle,
+      kind: "clarification",
+      changes: [],
+      clarification: { question: rawMessage.trim(), explanation: RETRACTION_FALLBACK_EXPLANATION, kind: "retraction" },
+    });
+  }
+
+  // C2.5. Dual-circuit resilience answer: only acts when the caller
+  // confirms the question was actually active this turn (see this
+  // function's header comment) — recognising the phrase alone is not
+  // enough, so an out-of-context match never fires.
+  if (resilienceQuestionActive && isDualCircuitNotRequiredAnswer(rawMessage)) {
+    return withDroppedNote({
+      cycle,
+      kind: "clarification",
+      changes: [],
+      clarification: { question: rawMessage.trim(), explanation: RESILIENCE_ANSWER_EXPLANATION, kind: "resilience_answer" },
+    });
   }
 
   if (isNarrowClarificationMessage(rawMessage)) {
-    // C2. Clarification entry: fixed fallback only.
-    return {
+    // C3. Clarification entry: fixed fallback only.
+    return withDroppedNote({
       cycle,
       kind: "clarification",
       changes: [],
       clarification: { explanation: CLARIFICATION_FALLBACK_EXPLANATION, kind: "fallback" },
-    };
+    });
   }
   // B. No-change entry — not an error. Also where any OTHER, unrecognised
   // direct question (e.g. "Why does the desk want this level of detail?")
   // lands: no rationale is invented for it here.
-  return { cycle, kind: "no_change", changes: [] };
+  return withDroppedNote({ cycle, kind: "no_change", changes: [] });
 }
 
 export default function QuickSorWorkspace() {
@@ -288,6 +439,14 @@ export default function QuickSorWorkspace() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Correction pass 2, Priority 5: the one EarnedQuestion id this preview
+  // can now resolve from typed text (see isDualCircuitNotRequiredAnswer's
+  // header comment) — mirrors the exact `dismissed` shape earnedQuestions()
+  // already accepts, so this is additive local state, not a new concept.
+  // Every other question remains unresolvable via any route, exactly as
+  // before this pass.
+  const [dismissedQuestionIds, setDismissedQuestionIds] = useState<string[]>([]);
 
   // Commit 11A, presentational only: whether the full three-card
   // JourneySelector is revealed. Defaults closed so the quiet single-line
@@ -332,7 +491,13 @@ export default function QuickSorWorkspace() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ text, requirement: requirementFrom(facts) }),
       });
-      if (!res.ok) throw new Error(`Could not read that just now (${res.status}). Try again.`);
+      // Fix (raw HTTP status leaking to buyers): res.status is logged, not
+      // shown — a buyer-facing error names no status code, matching the
+      // wording of every other thrown error in this function.
+      if (!res.ok) {
+        console.error(`Quick Understanding extraction request failed: HTTP ${res.status}`);
+        throw new Error("Could not read that just now. Try again.");
+      }
 
       const data = (await res.json()) as Partial<ExtractResponse> | null;
       // Invalid response shape -> extraction failure, no partial merge.
@@ -367,13 +532,26 @@ export default function QuickSorWorkspace() {
       // it can be unit-tested directly (facts merged above are whatever
       // filteredUpdates produced; for a genuine clarification message
       // that is always nothing, since extraction earns no real update
-      // from a bare "what do you mean?").
-      const entry = classifyTurnEntry(newCycle, changes, text);
+      // from a bare "what do you mean?"). `resilienceQuestionActive` is
+      // read from `questions` (computed below, from `facts` as of the
+      // PREVIOUS render — i.e. before this turn's merge, exactly the
+      // question set the buyer was actually looking at when they typed
+      // their answer) via closure, same pattern this file already uses
+      // for `requirementFrom(facts)` above. `data.notes` threads Priority
+      // 3's dropped-quantity marker through, independent of `changes`.
+      const resilienceQuestionActive = questions.some((q) => q.id === "q-resilience");
+      const entry = classifyTurnEntry(newCycle, changes, text, data.notes ?? [], resilienceQuestionActive);
 
       setFacts(afterFacts);
       setCycle(newCycle);
       setEntries((prev) => [...prev, entry]);
       setInput("");
+      // Priority 5: the dual-circuit answer resolves q-resilience the same
+      // way its "Not required" chip option already would — no new ledger
+      // fact, the question just stops being asked again this session.
+      if (entry.clarification?.kind === "resilience_answer") {
+        setDismissedQuestionIds((prev) => (prev.includes("q-resilience") ? prev : [...prev, "q-resilience"]));
+      }
     } catch (e) {
       // Facts, cycle and activity are all untouched here by construction —
       // none of the setters above are reached when this branch runs.
@@ -388,9 +566,13 @@ export default function QuickSorWorkspace() {
   const buying = buyingOf(facts);
   const opModel = operatingModelOf(facts);
   // Positional call, verified from src/lib/workspace/questions.ts — see
-  // this file's header comment for why notedIds/dismissed are [] here,
-  // matching the MCP client's own resolution of the identical situation.
-  const questions = earnedQuestions(requirement, buying, opModel, [], []);
+  // this file's header comment for why notedIds stays [] here, matching
+  // the MCP client's own resolution of the identical situation.
+  // `dismissed` (correction pass 2, Priority 5) is no longer hardcoded —
+  // it now carries whatever this session has actually resolved via typed
+  // text (currently just q-resilience; see isDualCircuitNotRequiredAnswer
+  // and the runCycle branch that populates dismissedQuestionIds).
+  const questions = earnedQuestions(requirement, buying, opModel, [], dismissedQuestionIds);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -443,7 +625,14 @@ export default function QuickSorWorkspace() {
                 <EarnedQuestionsList questions={questions} />
               </div>
 
-              <SessionActivity entries={entries} labelFor={labelFor} />
+              {/* Newest-first (see SessionActivity.tsx's "Fix" doc-comment
+                  note): keeps the most recent turn's clarification/change
+                  card visible at the top of this section instead of
+                  sinking to the bottom of a growing list. `entries` itself
+                  (React state, chronological append order) is untouched —
+                  this only reverses what is handed to the presentational
+                  component. */}
+              <SessionActivity entries={[...entries].reverse()} labelFor={labelFor} />
             </>
           )}
         </>

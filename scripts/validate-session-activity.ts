@@ -165,7 +165,11 @@ function entry(overrides: Partial<SessionActivityEntry> & { cycle: number; kind:
 {
   const el = SessionActivity({ entries: [entry({ cycle: 1, kind: "no_change" })], labelFor });
   const flat = textOf(el);
-  expect(flat.includes("Changes captured during this session."), `[3] expected supporting copy, got: ${flat}`);
+  /* Fix (placement bug): copy updated to name the newest-first ordering
+   * explicitly once entries started rendering that way (see
+   * SessionActivity.tsx's own header comment). This assertion was stale
+   * after that fix landed — updated to match the actual rendered copy. */
+  expect(flat.includes("Changes captured during this session, most recent first."), `[3] expected supporting copy, got: ${flat}`);
 }
 
 /* 4. Temporary/session-only wording is rendered. -------------------------- */

@@ -196,7 +196,7 @@ const sessionActivityTagIdx = sessionActivityTagMatch ? (sessionActivityTagMatch
     "// 5. filter through the preview tombstone helper",
     "// 8. mergeUpdates() exactly once, same source value",
     "// 11. append exactly one SessionActivityEntry for this turn",
-    "const entry = classifyTurnEntry(newCycle, changes, text);",
+    "const entry = classifyTurnEntry(newCycle, changes, text, data.notes ?? [], resilienceQuestionActive);",
     "setFacts(afterFacts);",
     "setCycle(newCycle);",
     "setEntries((prev) => [...prev, entry]);",

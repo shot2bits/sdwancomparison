@@ -81,13 +81,28 @@ export type SessionChange = {
  * - kind "glossary" + term: a recognised, fixed-glossary term explanation.
  * - kind "fallback" (or omitted, for pre-Commit-11C callers): the fixed
  *   "nothing specific to explain" copy, unchanged in shape.
+ * - kind "retraction" (fix, this commit): a narrow, deterministic-only
+ *   recognition that the buyer's message asked Netify to ignore/forget/
+ *   disregard something they said earlier — retracting a specific already-
+ *   recorded fact is not implemented in this preview, so this exists to
+ *   say that honestly (fixed copy, QuickSorWorkspace.tsx) instead of the
+ *   turn silently landing as an unexplained "No changes to your
+ *   Understanding.", which is exactly what buyers reported as confusing
+ *   (nothing acknowledged the request was even understood).
+ * - kind "resilience_answer" (correction pass 2, Priority 5): a narrow,
+ *   deterministic-only recognition that the buyer answered "No, dual-
+ *   circuit isn't required" while that EarnedQuestion was active — the
+ *   same outcome the question's existing "Not required" chip option
+ *   already produces (a `{ kind: "dismiss" }` answer: the question
+ *   resolves, no new ledger fact is written), just reached from typed
+ *   text and now actually acknowledged instead of silently discarded.
  * Nothing here selects, generates, or invents an explanation — a caller
  * still supplies `explanation` fully formed, exactly as before.
  */
 export type BoundedClarification = {
   question?: string;
   explanation: string;
-  kind?: "fallback" | "glossary";
+  kind?: "fallback" | "glossary" | "retraction" | "resilience_answer";
   term?: string;
 };
 
@@ -118,6 +133,20 @@ export type SessionActivityEntry = {
   kind: "changes" | "clarification" | "no_change";
   changes: SessionChange[];
   clarification?: BoundedClarification;
+  /** Correction pass 2, Priority 3 (Tests 72/73 — a site/user count
+   *  rejected as implausible, negative, non-integer, or simply not given
+   *  as a number): a neutral, buyer-visible note that Netify did not add
+   *  a precise quantity, carried alongside whatever `kind` this turn
+   *  already has — deliberately independent of `kind` rather than a
+   *  fourth kind of its own, because the SAME turn can both add a real,
+   *  unrelated fact (kind "changes", e.g. "buying: SASE") AND have a
+   *  quantity rejected in the same sentence ("...quite a few sites,
+   *  maybe a dozen or so.") — Priority 3's explicit requirement to
+   *  "preserve any other valid intent in the same sentence" needs both
+   *  to render on the one entry, not a competing entry that could only
+   *  show one or the other. Optional and additive: every existing
+   *  caller/entry that never sets this is unaffected. */
+  droppedQuantityNote?: string;
 };
 
 /**

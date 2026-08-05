@@ -38,6 +38,17 @@
  * React `key`s; no cycle number is displayed as progress, a completion
  * count, or a ranking signal.
  *
+ * Fix (visibility of glossary/fallback explanations): the caller
+ * (QuickSorWorkspace.tsx) now supplies `entries` newest-first, not
+ * chronological. This component still just renders whatever order it is
+ * given — no sort was added here — but flagging it explicitly because a
+ * card-placement bug was traced to the previous chronological order: a
+ * "Netify explained" clarification card for the buyer's most recent
+ * message rendered at the very bottom of a growing list, below the
+ * Understanding and Questions cards too, making it easy to miss without
+ * scrolling all the way down. Newest-first keeps the buyer's latest
+ * answer immediately visible at the top of this section.
+ *
  * The three same-value/different-value/added/inferred renderings below
  * mirror the exact behaviours specified for Commit 9B — see each branch's
  * comment for the specific rule it implements, including the "corrected,
@@ -126,12 +137,33 @@ function renderChangeLine(change: SessionChange, labelFor: (path: AllowedPath) =
   );
 }
 
+/* Correction pass 2, Priority 3 (Tests 72/73): rendered under whichever
+ * `kind` the turn already has, never a kind of its own — see this note's
+ * field-level comment on SessionActivityEntry (session-diff.ts) for why.
+ * Neutral, muted styling matching the existing quote/reason sublines
+ * elsewhere in this file; no number is ever shown here, since none was
+ * recorded. */
+function renderDroppedQuantityNote(note: string, key: string) {
+  return (
+    <p key={key} className="m-0 mt-1.5 text-[13px] text-[#6E6C67]">
+      {note}
+    </p>
+  );
+}
+
 function renderEntry(entry: SessionActivityEntry, labelFor: (path: AllowedPath) => string, key: string) {
+  const droppedNote = entry.droppedQuantityNote
+    ? renderDroppedQuantityNote(entry.droppedQuantityNote, `${key}-dropped-qty`)
+    : null;
+
   if (entry.kind === "changes") {
     return (
-      <ul key={key} className="m-0 list-none space-y-1.5 p-0">
-        {entry.changes.map((change, ci) => renderChangeLine(change, labelFor, `${key}-${ci}`))}
-      </ul>
+      <div key={key}>
+        <ul className="m-0 list-none space-y-1.5 p-0">
+          {entry.changes.map((change, ci) => renderChangeLine(change, labelFor, `${key}-${ci}`))}
+        </ul>
+        {droppedNote}
+      </div>
     );
   }
 
@@ -142,20 +174,24 @@ function renderEntry(entry: SessionActivityEntry, labelFor: (path: AllowedPath) 
     // rather than reading a property off `undefined`: the one fact that
     // is always true regardless — no ledger change happened this turn —
     // is shown, and nothing is invented in its place.
-    return entry.clarification ? (
-      <ClarificationEntry key={key} clarification={entry.clarification} />
-    ) : (
-      <p key={key} className="m-0 text-[13.5px] text-[#6E6C67]">
-        {NO_CHANGE_LINE}
-      </p>
+    return (
+      <div key={key}>
+        {entry.clarification ? (
+          <ClarificationEntry clarification={entry.clarification} />
+        ) : (
+          <p className="m-0 text-[13.5px] text-[#6E6C67]">{NO_CHANGE_LINE}</p>
+        )}
+        {droppedNote}
+      </div>
     );
   }
 
   // kind === "no_change": not an error, no explanation invented.
   return (
-    <p key={key} className="m-0 text-[13.5px] text-[#6E6C67]">
-      {NO_CHANGE_LINE}
-    </p>
+    <div key={key}>
+      <p className="m-0 text-[13.5px] text-[#6E6C67]">{NO_CHANGE_LINE}</p>
+      {droppedNote}
+    </div>
   );
 }
 
@@ -172,7 +208,7 @@ export default function SessionActivity({ entries, labelFor }: SessionActivityPr
       <h3 className="m-0 mb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-500)]">
         Session activity
       </h3>
-      <p className="m-0 mb-1 text-[13px] text-[#8C8A85]">Changes captured during this session.</p>
+      <p className="m-0 mb-1 text-[13px] text-[#8C8A85]">Changes captured during this session, most recent first.</p>
       <p className="m-0 mb-4 text-[12px] text-[#8C8A85]">
         Temporary — this activity is cleared when you leave or refresh until the Project is saved.
       </p>
