@@ -494,8 +494,31 @@ export default function QuickSorWorkspace() {
       // Fix (raw HTTP status leaking to buyers): res.status is logged, not
       // shown — a buyer-facing error names no status code, matching the
       // wording of every other thrown error in this function.
+      //
+      // Tidy-up fix (Harry's tracker, row 104 — typing "UK" alone produced
+      // a confusing "(400) Try again" with no explanation): a 400 from this
+      // endpoint is always a client-correctable input problem (e.g. the API's
+      // own 3-character minimum — see api/workspace/extract/route.ts), and
+      // the API already returns a clear, actionable `error` string for it
+      // ("Describe your requirement in a sentence or two."). Previously this
+      // branch discarded that message unconditionally and always showed the
+      // same generic "Could not read that just now," which reads as a
+      // system failure even when the buyer's own next move (add a few more
+      // words) is obvious from the API's real response. Any other non-ok
+      // status (5xx, network-adjacent failures) still gets the generic,
+      // status-code-free message, since those aren't the buyer's to fix.
       if (!res.ok) {
         console.error(`Quick Understanding extraction request failed: HTTP ${res.status}`);
+        if (res.status === 400) {
+          let apiMessage: string | undefined;
+          try {
+            const body = (await res.json()) as { error?: unknown };
+            if (typeof body?.error === "string" && body.error.trim()) apiMessage = body.error.trim();
+          } catch {
+            // Malformed/non-JSON 400 body — fall through to the generic message.
+          }
+          throw new Error(apiMessage ?? "Could not read that just now. Try again.");
+        }
         throw new Error("Could not read that just now. Try again.");
       }
 

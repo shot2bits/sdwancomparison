@@ -27,6 +27,21 @@
  * ruling in ProjectDesk.tsx (no fictional site counts, named standards,
  * named products, or example companies proposed to the buyer). Replaced
  * with an open instruction that guides without proposing project facts.
+ *
+ * Tidy-up fix (post Milestone-1 tester feedback): Harry's Final Verdict
+ * flagged that the input box "could do with more styling to show that's
+ * where to input." Root cause: the box's white fill sits on a near-white
+ * #FBFAF8 page and its default border (#D8D5CE) is low-contrast by design
+ * (matching the "one continuous surface, no boxes" styling direction taken
+ * elsewhere on this route) — so before a buyer interacts with it, it can
+ * read as flat page background rather than an obviously-clickable field.
+ * Conservative, reversible fix, deliberately NOT a redesign: a soft
+ * `shadow-sm` lifts the box off the page at rest, and a `hover:border`
+ * darkening gives an affordance cue on approach, on top of the existing
+ * `focus:border-[#141414]`. Only the pre-started (first-load) box gets the
+ * shadow — the smaller in-conversation composer keeps its original flat
+ * treatment so it doesn't compete visually with Understanding/Questions/
+ * Session Activity once the buyer is mid-conversation.
  */
 
 import { useEffect, useRef } from "react";
@@ -142,7 +157,7 @@ export default function PersistentAssistantInput({
         className={
           started
             ? "w-full max-h-[min(260px,45vh)] overflow-y-auto resize-none rounded-[10px] border border-[#EAE7E1] bg-white p-3.5 text-[15px] leading-relaxed text-[#141414] outline-none transition-colors focus:border-[#141414] disabled:opacity-60"
-            : "w-full max-h-[min(260px,45vh)] overflow-y-auto resize-none rounded-[14px] border-2 border-[#D8D5CE] bg-white p-5 text-[16.5px] leading-relaxed text-[#141414] outline-none transition-colors focus:border-[#141414] disabled:opacity-60 sm:text-[17px]"
+            : "w-full max-h-[min(260px,45vh)] overflow-y-auto resize-none rounded-[14px] border-2 border-[#D8D5CE] bg-white p-5 text-[16.5px] leading-relaxed text-[#141414] shadow-sm outline-none transition-colors hover:border-[#B8B4AB] focus:border-[#141414] disabled:opacity-60 sm:text-[17px]"
         }
       />
       <div className={started ? "mt-2 flex items-center justify-between" : "mt-3 flex items-center justify-between"}>
