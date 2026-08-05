@@ -25,6 +25,7 @@ import { fireNetifyEvent, firstTouch } from "@/components/NetifyEvents";
 import WizardProgressRail, { WizardProgressBar } from "@/components/WizardProgressRail";
 import FlowStageStrip from "@/components/FlowStageStrip";
 import { REGIONS, SITES_BANDS, USERS_BANDS, SECTORS } from "@/lib/notice-options";
+import { withManageToken } from "@/lib/manage-redirect";
 
 const SCOPES = [
   { key: "sdwan", label: "SD-WAN", sub: "Replace or refresh the wide area network" },
@@ -259,6 +260,15 @@ export default function DescribeWizard() {
     };
     try {
       let id = createdId;
+      // Manage-token continuity follow-up: this holds the token to redirect
+      // with. Preferred source is the creation response itself (`p` below),
+      // set in the same branch that receives it -- never read back out of
+      // localStorage when the value is already sitting in scope. It is
+      // `undefined` here only when `id` was already set on an earlier call
+      // to create() (the fetch below is then skipped entirely, so there is
+      // no fresh response to prefer); the fallback read a few lines down
+      // only ever runs in that specific case.
+      let freshManageToken: string | undefined;
       if (!id) {
         // Consent wording version stamped onto submitted RFPs. Bump when the
         // agreement copy on step 6 changes materially.
@@ -276,14 +286,40 @@ export default function DescribeWizard() {
         const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ title: finalTitle, buyer, consent, pending_submit, contact_email }) });
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e as { error?: string }).error ?? "Could not create your project."); }
         const p = (await res.json()) as { id: string; manage_token?: string };
+        // POST /api/rfp returns manage_token directly in this same response
+        // (it is not a helper that hides the token behind an id-only
+        // return) -- p.manage_token is provably the token for p.id, since
+        // it is the server's own response to the create call that produced
+        // p.id. The localStorage write is a side effect for later visits,
+        // not the read path used by the redirect below.
         if (p.manage_token) { try { localStorage.setItem(`netify_mtok_${p.id}`, p.manage_token); } catch { /* private mode */ } }
         id = p.id;
+        freshManageToken = p.manage_token;
         setCreatedId(p.id);
         fireNetifyEvent("describe_completed", { scope: scope || "unset" });
       }
 
       if (!submit) {
-        window.location.assign(`/sase/rfp-builder/${id}/?welcome=generated`);
+        // Prefer the token returned directly by the creation call above
+        // (freshManageToken). Only fall back to localStorage when `id` was
+        // already set on an earlier call to create() and the fetch above
+        // was skipped -- there is no in-scope response to prefer in that
+        // case. That fallback cannot select a stale token: the key is
+        // netify_mtok_{id}, namespaced by this exact project id, and the
+        // only code that ever writes to that key is the block just above,
+        // writing p.manage_token under netify_mtok_{p.id} at the moment
+        // p.id is minted. No other project's token can occupy this key,
+        // and this project's token is never rotated after creation (see
+        // rfp-store.ts: manage_token is set once, at creation). See
+        // manage-redirect.ts for why this specific redirect is where the
+        // token needs to be seeded: every server-rendered Project page and
+        // ProjectNav's tab links derive their own `?manage=` purely from
+        // this first request's URL, with no localStorage fallback.
+        let tok: string | undefined = freshManageToken;
+        if (!tok) {
+          try { tok = localStorage.getItem(`netify_mtok_${id}`) ?? undefined; } catch { /* private mode */ }
+        }
+        window.location.assign(withManageToken(`/sase/rfp-builder/${id}/?welcome=generated`, tok));
         return;
       }
 

@@ -128,6 +128,7 @@ import { computeSessionChanges, type SessionActivityEntry, type SessionChange } 
 import { createTombstoneSet, filterTombstonedUpdates, type TombstoneSet } from "./tombstone-preview";
 import { explanationForInput } from "@/lib/workspace/explanations";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
+import { withManageToken } from "@/lib/manage-redirect";
 
 type ExtractResponse = { updates: FieldUpdate[]; engine: string; notes: string[] };
 
@@ -450,6 +451,17 @@ export default function QuickSorWorkspace() {
   const [continueBusy, setContinueBusy] = useState(false);
   const [continueError, setContinueError] = useState<string | null>(null);
 
+  // Same-tick reentrancy guard as busyRef below, and for the same reason:
+  // `continueBusy` state alone can still read false for a second click that
+  // lands before React commits the first setContinueBusy(true). Set BEFORE
+  // the state update, checked BEFORE either. Deliberately never reset on
+  // the success path (see handleContinue's finally-free success branch) --
+  // once a project is actually created, this guard must stay tripped for
+  // the rest of this component's lifetime, since the page is navigating
+  // away and any further click here would create a second, unwanted
+  // project from the same facts.
+  const continueBusyRef = useRef(false);
+
   // Correction pass 2, Priority 5: the one EarnedQuestion id this preview
   // can now resolve from typed text (see isDualCircuitNotRequiredAnswer's
   // header comment) — mirrors the exact `dismissed` shape earnedQuestions()
@@ -606,17 +618,31 @@ export default function QuickSorWorkspace() {
   // continued editing.
   //
   // Ownership handoff on success deliberately mirrors DescribeWizard.tsx's
-  // own two established patterns exactly (netify_mtok_{id} in
-  // localStorage, then a /sase-prefixed window.location.assign) so this
-  // project is indistinguishable, from the platform's perspective, from
-  // any other anonymous draft created via the existing Describe flow.
+  // own established pattern (netify_mtok_{id} in localStorage, then a
+  // /sase-prefixed window.location.assign) so this project is
+  // indistinguishable, from the platform's perspective, from any other
+  // anonymous draft created via the existing Describe flow.
   // `?welcome=generated` is deliberately NOT appended: RfpBuilder.tsx
   // treats that exact string as "just came from the Describe wizard's
   // generate step" and fires an rfp_generated analytics event that would
   // misreport this session's true origin. A dedicated welcome state for
   // this entry point is an explicit follow-up, not part of this increment.
+  //
+  // Manage-token continuity (follow-up, verified against the live click-
+  // through Robert reviewed): the redirect target now carries
+  // `?manage=<token>` via withManageToken(), not just the localStorage
+  // write above. RfpBuilder.tsx's own client code already recovers the
+  // token from localStorage for ITS OWN API calls, which is why the
+  // builder page itself worked even without this -- but ProjectNav's tab
+  // links (Overview, Assessment, Story, Timeline) and every other
+  // server-rendered Project page derive their own `?manage=` purely from
+  // that request's URL, with no localStorage fallback (see
+  // manage-redirect.ts's header comment for the full trace). Seeding it
+  // here, on this first redirect, is what those pages need -- nothing
+  // downstream needed to change.
   async function handleContinue() {
-    if (continueBusy || facts.length === 0) return;
+    if (continueBusyRef.current || facts.length === 0) return;
+    continueBusyRef.current = true;
     setContinueBusy(true);
     setContinueError(null);
     try {
@@ -646,10 +672,17 @@ export default function QuickSorWorkspace() {
           // later visit from this browser. Not fatal to this turn.
         }
       }
-      window.location.assign(`/sase${builderPath}/`);
+      // Success: deliberately no finally-reset here. continueBusyRef and
+      // continueBusy both stay tripped for the rest of this component's
+      // lifetime -- the button stays disabled and showing "Creating your
+      // project..." until the browser actually navigates away, so a click
+      // landing in the gap between assign() and unload cannot fire a
+      // second create call from the same (now-stale) facts.
+      window.location.assign(withManageToken(`/sase${builderPath}/`, project.manage_token));
+      return;
     } catch (e) {
       setContinueError(e instanceof Error ? e.message : "Could not create your project just now. Try again.");
-    } finally {
+      continueBusyRef.current = false;
       setContinueBusy(false);
     }
   }
