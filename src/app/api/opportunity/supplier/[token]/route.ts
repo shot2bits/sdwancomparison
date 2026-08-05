@@ -24,7 +24,21 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!ref) return Response.json({ error: "Invalid token." }, { status: 404, headers: cors });
   const opp = await getOpportunity(ref.opp_id);
   if (!opp) return Response.json({ error: "Opportunity not found." }, { status: 404, headers: cors });
-  const { buyer_token: _bt, owner_email: _oe, ...rest } = opp;
+  // Fix (supplier-isolation leak, found 5 Aug 2026 during Base44 build
+  // scoping): `introduced` and `invited` are both full arrays of vendor
+  // slugs -- competitor identity, not this supplier's own business. The
+  // spread below previously stripped only buyer_token/owner_email, so
+  // both arrays passed through unredacted to ANY supplier holding a valid
+  // token, letting them see exactly which other suppliers the buyer chose
+  // to introduce or invite. That directly contradicts this file's own
+  // stated intent one paragraph down ("competitors... never learn who the
+  // buyer chose to meet" -- maskedFeed's own comment, opportunity.ts) and
+  // the pattern already established elsewhere in this codebase:
+  // PublicOpportunity (opportunity-types.ts) only ever exposes
+  // `invited_count`, a number, never the raw `invited` slug list. Excluded
+  // here the same way buyer_token/owner_email already are, so it can
+  // never leak by accident again.
+  const { buyer_token: _bt, owner_email: _oe, introduced: _in, invited: _inv, ...rest } = opp;
   // Contact details pass only after the buyer accepts an introduction
   // (Robert's E4 ruling, 29 Jul 2026). The spread above strips
   // owner_email unconditionally so it can never leak by accident; the
@@ -68,10 +82,11 @@ export async function POST(req: Request, ctx: Ctx) {
     body.links ?? [],
     type === "response" ? (body.answers ?? {}) : {},
   );
-  // Same masking as the GET: never return buyer credentials or other
-  // suppliers' pricing amounts in the post-action snapshot. The
-  // introduction object mirrors the GET so the room state never flickers.
-  const { buyer_token: _bt2, owner_email: _oe2, ...rest2 } = updated;
+  // Same masking as the GET: never return buyer credentials, other
+  // suppliers' identities (introduced/invited), or other suppliers'
+  // pricing amounts in the post-action snapshot. The introduction object
+  // mirrors the GET so the room state never flickers.
+  const { buyer_token: _bt2, owner_email: _oe2, introduced: _in2, invited: _inv2, ...rest2 } = updated;
   const introducedNow = (updated.introduced ?? []).includes(ref.vendor_slug);
   return Response.json({
     ...rest2,
