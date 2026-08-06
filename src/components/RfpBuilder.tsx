@@ -11,19 +11,22 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { NETIFY_NDA_TEMPLATE } from "@/lib/rfp-types";
+import {
+  NETIFY_NDA_TEMPLATE,
+  type ProjectDetails,
+  type BuyerContext,
+  type RfpSection,
+  type RfpQuestion,
+  type NdaConfig,
+  type NdaAcceptance,
+  type ProductScope,
+} from "@/lib/rfp-types";
 import { FOLLOW_UP_NOTE } from "@/lib/publish-promises";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
 import FlowStageStrip, { type FlowStage } from "@/components/FlowStageStrip";
 
-type RfpQuestion = { id: string; feature_id: string; text: string; evidence_requested: string; rationale: string; priority: "required" | "recommended" | "optional"; source: "methodology" | "custom" | "bank"; mandatory: boolean; weight: number; buyer_lens?: string; supplier_lens?: string };
-type RfpSection = { category: string; included: boolean; questions: RfpQuestion[] };
-type Buyer = { organisation: string; sector: string | null; organisation_size: string; site_count: number | null; regions: string[]; compliance: string[]; operating_model: string; product_scope: string };
-type Nda = { required: boolean; source: "template" | "buyer"; text: string; link: string; version: number; updated: number };
-type NdaAcceptance = { id: string; vendor: string; signatory_name: string; email: string; nda_version: number; accepted: number };
-type Project = { id: string; status: string; title: string; buyer: Buyer; rfp_sections: RfpSection[]; share_token: string; manage_token?: string; methodology_version: string; nda?: Nda; response_deadline?: number };
 /** The instant publish reward, mirrored from lib/market-report (server). */
 type MarketReportT = {
   matched: { count: number; names: string[] };
@@ -59,7 +62,7 @@ const SASE_APPROACHES = [
 ] as const;
 const scopeToProduct = (scope: string) =>
   scope === "sdwan_only" ? "sdwan" : scope === "sse_only" ? "sse" : "sase";
-const productToScope = (product: string, currentScope: string) => {
+const productToScope = (product: string, currentScope: ProductScope): ProductScope => {
   if (product === "sdwan") return "sdwan_only";
   if (product === "sse") return "sse_only";
   // switching to SASE: keep an existing SASE approach, else default
@@ -121,7 +124,7 @@ const EXT_SECTOR_MAP: Record<string, string> = {
 };
 
 export default function RfpBuilder({ initialId }: { initialId?: string }) {
-  const [project, setProject] = useState<Project | null>(null);
+  const [project, setProject] = useState<ProjectDetails | null>(null);
   const [creating, setCreating] = useState(false);
   const [mode, setMode] = useState<"agent" | "manual">("agent");
   const [error, setError] = useState<string | null>(null);
@@ -209,14 +212,14 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [msgDraft, setMsgDraft] = useState<Record<string, string>>({});
   const [ndaAccepts, setNdaAccepts] = useState<NdaAcceptance[]>([]);
 
-  const nda: Nda = project?.nda ?? { required: false, source: "template", text: "", link: "", version: 1, updated: 0 };
+  const nda: NdaConfig = project?.nda ?? { required: false, source: "template", text: "", link: "", version: 1, updated: 0 };
 
   /** Persist an NDA change. Editing the wording, link or source bumps the
    *  version so any prior supplier acceptances no longer satisfy the gate and
    *  suppliers are asked to re-accept the current terms. */
-  async function updateNda(patch: Partial<Nda>) {
+  async function updateNda(patch: Partial<NdaConfig>) {
     if (!project) return;
-    const next: Nda = { ...nda, ...patch };
+    const next: NdaConfig = { ...nda, ...patch };
     const termsChanged = patch.text !== undefined && patch.text !== nda.text
       || patch.link !== undefined && patch.link !== nda.link
       || patch.source !== undefined && patch.source !== nda.source;
@@ -416,7 +419,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // discoverable by someone who only knows the RFP id.
   const manageToken = useRef<string>("");
   const mtokKey = (id: string) => `netify_mtok_${id}`;
-  function applyProject(p: Project) {
+  function applyProject(p: ProjectDetails) {
     let tok = p.manage_token || manageToken.current;
     if (!tok && typeof window !== "undefined") tok = localStorage.getItem(mtokKey(p.id)) || "";
     if (tok) {
@@ -499,7 +502,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     }
     try {
       const res = await fetch(`/sase/api/rfp/${id}`, { headers: authHeaders() });
-      if (res.ok) applyProject((await res.json()) as Project);
+      if (res.ok) applyProject((await res.json()) as ProjectDetails);
       else if (res.status === 401) setNotOwner(true);
       else setError("This RFP could not be loaded.");
     } catch { setError("This RFP could not be loaded."); }
@@ -529,7 +532,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     try {
       const res = await fetch("/sase/api/rfp", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(buyer ? { buyer } : {}) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not start an RFP."); }
-      const p = (await res.json()) as Project;
+      const p = (await res.json()) as ProjectDetails;
       applyProject(p); // create returns the full token; persist it client-side
       window.history.replaceState(null, "", `/sase/rfp-builder/${p.id}`);
       setMessages([{ role: "assistant", content: openingMessage(buyer) }]);
@@ -661,13 +664,13 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     /* eslint-disable-next-line */
   }, []);
 
-  async function persist(updated: Project, regenerate = false) {
+  async function persist(updated: ProjectDetails, regenerate = false) {
     setProject(updated);
     try {
       // updated carries the manage_token from client state, which the gated PUT
       // requires; the response keeps the token (access proven), so re-apply it.
       const res = await fetch(`/sase/api/rfp/${updated.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...updated, manage_token: manageToken.current || updated.manage_token, regenerate }) });
-      if (res.ok && regenerate) applyProject((await res.json()) as Project);
+      if (res.ok && regenerate) applyProject((await res.json()) as ProjectDetails);
       // A refused save must be loud, not silent: without this, a viewer who is
       // not the owner sees edits "work" locally and then vanish on reload.
       if (res.status === 401) {
@@ -685,7 +688,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     } catch { /* optimistic */ }
   }
 
-  async function setScope(scope: string) {
+  async function setScope(scope: ProductScope) {
     if (!project) return;
     // ask the API to regenerate by sending updated buyer; server keeps sections in sync on agent path,
     // here we PUT buyer and re-fetch a regenerated structure via the create-style synthesis on the server.
@@ -712,7 +715,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     try {
       const res = await fetch(`/sase/api/rfp/${project.id}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: next, manage_token: manageToken.current || project.manage_token }), signal: ctrl.signal });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error ?? `The advisor could not respond (${res.status}).`); }
-      const data = (await res.json()) as { narrative?: string; project?: Project };
+      const data = (await res.json()) as { narrative?: string; project?: ProjectDetails };
       if (data.project) applyProject(data.project); // agent response is token-stripped; re-attach
       if (data.narrative) setMessages([...next, { role: "assistant", content: data.narrative }]);
       else setMessages([...next, { role: "assistant", content: "Done. Review the sections below, or tell me what to change." }]);
@@ -960,7 +963,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       try {
         const r = await fetch(`/sase/api/rfp/${project.id}`, { headers: authHeaders() });
         if (r.ok) {
-          const fresh = (await r.json()) as Project;
+          const fresh = (await r.json()) as ProjectDetails;
           if (fresh.status === "published") {
             applyProject(fresh);
             try {
@@ -1388,7 +1391,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             <p className="eyebrow mb-1">Vendor approach</p>
             <select
               value={project.buyer.product_scope}
-              onChange={(e) => setScope(e.target.value)}
+              onChange={(e) => setScope(e.target.value as ProductScope)}
               className="border border-[var(--ink-300,#ccc)] rounded-sm p-1.5 text-sm bg-white"
             >
               {SASE_APPROACHES.map((a) => <option key={a.key} value={a.key}>{a.label}</option>)}
