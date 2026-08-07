@@ -198,6 +198,32 @@ export function assertEngineArtefactsIntact(
   next: ProjectDetails,
   opts: { engineWrite?: boolean } = {},
 ): void {
+  // Project Foundation Piece 2 (7 Aug 2026), closing the writer audit's
+  // Finding 6: this guard used to return immediately below for any record
+  // that was not already engine === "security_sourcing", which meant a
+  // legacy Project (or any record without the security engine) could
+  // acquire OR have its engine_data changed for the very first time
+  // through an ordinary save (the generic PUT route) with no server-side
+  // gating at all. Robert's ruling: "first-time introduction or mutation
+  // of engine_data must require an explicitly authorised engine writer."
+  // This check runs first and applies regardless of existing.engine; it
+  // only ever fires when engine_data is genuinely changing - an ordinary
+  // edit to a Project whose engine_data stays untouched (including one
+  // that has none at all and stays that way) is completely unaffected,
+  // matching "absence is valid, ordinary edits proceed."
+  if (existing.engine !== "security_sourcing" && !opts.engineWrite) {
+    const before = existing.engine_data;
+    const after = next.engine_data;
+    const introducedOrChanged = before
+      ? JSON.stringify(after ?? null) !== JSON.stringify(before)
+      : Boolean(after);
+    if (introducedOrChanged) {
+      throw new ProtectedContentError(
+        "engine_data may only be attached or changed by an authorised Security Sourcing engine writer (creation, re-scope, regeneration), not by an ordinary Project update.",
+      );
+    }
+  }
+
   if (existing.engine !== "security_sourcing") return;
 
   // The Record is append-only (Article 9): verdicts and artefact

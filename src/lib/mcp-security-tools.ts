@@ -11,11 +11,11 @@ import { assessSecurityRequirement, RULEBOOK_VERSION } from "@/lib/security/rule
 import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/security/rulebook";
 import { createSecurityProject } from "@/lib/security/persist-project";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
-import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { buildRescopedProject, rescopeConsentText } from "@/lib/security/rescope-project";
+import { buildRegeneratedProject } from "@/lib/security/regenerate-project";
 import { getProject, saveProject } from "@/lib/rfp-store";
-import { projectPhase, advanceProject, recordProjectEvent, openSecurityGaps } from "@/lib/project-machine";
-import type { ProjectDetails, ProjectHistoryEvent } from "@/lib/rfp-types";
+import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
+import type { ProjectDetails } from "@/lib/rfp-types";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const MCP_SECURITY_TOOL_DEFINITIONS = [
@@ -318,59 +318,30 @@ export async function callSecurityTool(
       if (!project || project.manage_token !== token) {
         return { error: "Unknown project or wrong credential." };
       }
-      const latest = project.engine_data?.verdicts?.slice(-1)[0];
-      if (project.engine !== "security_sourcing" || !latest) {
-        return { error: "Not a Security Sourcing project: no verdict on record to generate from." };
-      }
-      const verdict = latest.verdict as SecurityScopeVerdict;
-      const arts = project.engine_data?.artefacts ?? [];
-      const lastSnap = arts.length ? arts[arts.length - 1].sections_snapshot : null;
-      const edited = lastSnap ? JSON.stringify(project.rfp_sections) !== JSON.stringify(lastSnap) : false;
-      if (edited && args?.force !== true) {
-        return {
-          error:
-            "The document has been edited since the last generation; regenerating would replace those edits (earlier versions stay recoverable in the project record). Pass force: true only with the buyer's explicit agreement in this conversation.",
-        };
-      }
-      const sections = generateRfpSections(verdict);
-      const version = (arts.length ? arts[arts.length - 1].version : 0) + 1;
-      const now = Date.now();
-      let updated: ProjectDetails = {
-        ...project,
-        rfp_sections: sections,
-        engine_data: {
-          verdicts: project.engine_data!.verdicts,
-          requirement: project.engine_data!.requirement,
-          artefacts: [
-            ...arts,
-            { version, kind: "rfp_sections", input_digest: verdict.inputDigest, created_at: now, via: "mcp", sections_snapshot: sections },
-          ],
-        },
-      };
-      const event: ProjectHistoryEvent = {
-        at: now,
-        actor: "assistant",
-        actor_ref: "generate_security_rfp",
-        via: "mcp",
-        event: "rfp.generated",
-        detail: {
-          artefact_version: version,
-          regenerated: arts.length > 0,
-          forced: args?.force === true,
-          verdict_digest: verdict.inputDigest,
-          open_gaps: verdict.gaps.length,
-        },
-      };
+      // Business logic (verdict/version selection, edited-document refusal,
+      // event recording) now lives in the shared regenerate-project domain
+      // capability, not in this MCP tool - the tool is a thin transport
+      // wrapper over it, matching how create_security_project and
+      // rescope_security_project already call their own shared cores.
+      let built;
       try {
-        // At drafted, regeneration is a recorded event (v n+1, no phase
-        // change); a pre-generation record advances scoped → drafted. After
-        // publication the machine refuses: published documents do not
-        // silently change under suppliers (one truth, Article 17).
-        updated = projectPhase(updated) === "drafted" ? recordProjectEvent(updated, event) : advanceProject(updated, event);
-        updated = await saveProject(updated, { engineWrite: true });
+        built = buildRegeneratedProject({
+          project,
+          via: "mcp",
+          actorRef: "generate_security_rfp",
+          force: args?.force === true,
+        });
       } catch (e) {
         return { error: (e as Error).message };
       }
+      let updated: ProjectDetails;
+      try {
+        updated = await saveProject(built.project, { engineWrite: true });
+      } catch (e) {
+        return { error: (e as Error).message };
+      }
+      const { verdict, version } = built;
+      const sections = updated.rfp_sections;
       const askCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
       const infoCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority === "optional").length, 0);
       return {
