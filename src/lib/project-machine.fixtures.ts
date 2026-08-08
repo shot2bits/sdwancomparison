@@ -21,6 +21,27 @@ import {
 } from "./project-machine";
 import { PROJECT_PHASE } from "./rfp-types";
 import type { ProjectDetails, ProjectHistoryEvent, ProjectPhase } from "./rfp-types";
+import type { SecurityScopeVerdict } from "./security/rulebook";
+
+/** Project Foundation Piece 2 (7 Aug 2026): engine_data.verdicts[].verdict is
+ *  now schema-validated (was z.unknown()), so this fixture's placeholder
+ *  verdict must be a real, minimal, valid SecurityScopeVerdict - this suite
+ *  only exercises verdict PRESENCE for phase transitions, never verdict
+ *  content, so an empty-but-valid shape is the faithful minimal fixture. */
+const MINIMAL_VERDICT: SecurityScopeVerdict = {
+  rulebookVersion: "SEC-RULES-2026.1",
+  generatedAt: new Date(0).toISOString(),
+  inputDigest: "d".repeat(64),
+  capabilities: [],
+  serviceModel: null,
+  pathRecommendation: null,
+  againstInterest: [],
+  assumptions: [],
+  gaps: [],
+  summary: { recommended: [], conditional: [], not_recommended: [] },
+  confidence: "low",
+  nextSteps: [],
+};
 
 /* ------------------------------------------------------------------ */
 /* Builders                                                            */
@@ -64,7 +85,7 @@ function baseProject(overrides: Partial<ProjectDetails> = {}): ProjectDetails {
 const withVerdict = (p: ProjectDetails): ProjectDetails => ({
   ...p,
   engine_data: {
-    verdicts: [{ version: 1, verdict: { ok: true }, input_digest: "d".repeat(64), created_at: clock, via: "web" }],
+    verdicts: [{ version: 1, verdict: MINIMAL_VERDICT, input_digest: "d".repeat(64), created_at: clock, via: "web" }],
     requirement: {},
     artefacts: [],
   },

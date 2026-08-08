@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { SecurityRequirementInputSchema, SecurityScopeVerdictSchema } from "@/lib/security/rulebook";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -94,7 +95,10 @@ export type ProjectPhase = (typeof PROJECT_PHASE)[number];
  *  Re-scoping appends the next version (Articles 3 and 9). */
 export const ProjectVerdictSchema = z.object({
   version: z.number().int().min(1),
-  verdict: z.unknown(),          // e.g. SecurityScopeVerdict, verbatim
+  verdict: SecurityScopeVerdictSchema, // Project Foundation Piece 2 (7 Aug 2026):
+  // was z.unknown(); the two remaining untyped engine_data leaves are now the
+  // real runtime schema (rulebook.ts). engine_data itself stays optional on
+  // ProjectDetailsSchema below - this only validates it WHEN present.
   input_digest: z.string(),      // provable identity of the input (Article 3)
   created_at: z.number(),
   via: z.enum(["web", "mcp", "handoff"]),
@@ -117,7 +121,7 @@ export type ProjectArtefact = z.infer<typeof ProjectArtefactSchema>;
 
 export const ProjectEngineDataSchema = z.object({
   verdicts: z.array(ProjectVerdictSchema).default([]),
-  requirement: z.unknown().optional(), // engine input as last submitted
+  requirement: SecurityRequirementInputSchema.optional(), // engine input as last submitted; was z.unknown().optional()
   artefacts: z.array(ProjectArtefactSchema).default([]),
 }).strict();
 export type ProjectEngineData = z.infer<typeof ProjectEngineDataSchema>;

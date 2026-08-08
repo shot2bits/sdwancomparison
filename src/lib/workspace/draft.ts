@@ -223,9 +223,24 @@ export const SOC_LABELS: Record<string, string> = {
   twenty_four_seven: "24/7 in-house security operations",
 };
 
-export function factLabel(f: WorkspaceFact): string {
-  const v = String(f.value);
-  switch (f.path) {
+/**
+ * Authoritative path+value -> buyer-facing text formatter (Milestone 1,
+ * Commit 9B prerequisite): the same switch that used to live directly
+ * inside factLabel(), extracted unchanged so a caller that has a path and
+ * a value — but not a full WorkspaceFact (id/struck/source/cycle) — can
+ * still reach the one true formatting rule instead of either fabricating
+ * those missing fact fields or standing up a second, independently
+ * maintained copy of this dispatch (see the Commit 9B-prep stop report).
+ *
+ * Behaviour-preserving extraction only: every branch, every table
+ * reference and the default `String(value)` fallback are identical to
+ * factLabel()'s pre-Commit-9B-prerequisite body. Nothing here is new
+ * formatting, and no label table was copied, altered or added — every
+ * case still reads from the same exported tables above.
+ */
+export function humaniseWorkspaceValue(path: AllowedPath, value: unknown): string {
+  const v = String(value);
+  switch (path) {
     case "estate.cloud": return CLOUD_LABELS[v] ?? v;
     case "estate.existingNetwork": return NETWORK_LABELS[v] ?? v;
     case "organisation.regions": return REGION_LABELS[v] ?? v;
@@ -236,6 +251,15 @@ export function factLabel(f: WorkspaceFact): string {
     case "procurement.operatingModel": return OPERATING_MODEL_LABELS[v as OperatingModelId] ?? v;
     default: return v;
   }
+}
+
+/** The single buyer-facing value voice (ProjectDesk.tsx's own description
+ *  of this function, unchanged): delegates every path/value decision to
+ *  humaniseWorkspaceValue() above, reading only fact.path and fact.value —
+ *  no other WorkspaceFact field (id/struck/source/cycle/provenance/quote/
+ *  reason) has ever been part of this function's output. */
+export function factLabel(f: WorkspaceFact): string {
+  return humaniseWorkspaceValue(f.path, f.value);
 }
 
 /* ------------------------------------------------------------------ */
@@ -544,6 +568,36 @@ export function briefModel(opts: {
     if (paras.length) blocks.push({ key: "estate", heading: "Estate and current position", paras });
   }
 
+  /* ---- Providers and vendors (PKM extension) ---- */
+  {
+    const paras: Seg[][] = [];
+    const tech = at("estate.namedTechnologies");
+    if (tech.length) paras.push([t("Named technologies already in place: "), ...joinSegs(tech.map((f) => fs(f))), t(".")]);
+    const providers = at("estate.existingProviders");
+    if (providers.length) paras.push([t("Existing providers: "), ...joinSegs(providers.map((f) => fs(f))), t(".")]);
+    const considering = at("procurement.vendorsUnderConsideration");
+    // "Under consideration, not yet selected" is hard-coded into the
+    // projection's own prose, not derived from the buyer's words: the
+    // document itself carries the same guarantee the path name carries,
+    // so a mention here can never read as a selection.
+    if (considering.length) paras.push([t("Under consideration, not yet selected: "), ...joinSegs(considering.map((f) => fs(f))), t(".")]);
+    if (paras.length) blocks.push({ key: "vendors", heading: "Providers and vendors", paras });
+  }
+
+  /* ---- Locations and site resilience (PKM extension) ---- */
+  {
+    const paras: Seg[][] = [];
+    const locations = at("estate.namedLocations");
+    if (locations.length) paras.push([t("Named locations: "), ...joinSegs(locations.map((f) => fs(f))), t(".")]);
+    // Each criticality clause and each resilience clause renders as its own
+    // paragraph, in the order captured: nothing here joins a criticality
+    // clause to a resilience clause, or infers that a resilience clause
+    // applies to a location named in a different clause.
+    for (const f of at("estate.locationCriticality")) paras.push([fs(f), t(".")]);
+    for (const f of at("estate.siteResilience")) paras.push([fs(f), t(".")]);
+    if (paras.length) blocks.push({ key: "locations", heading: "Locations and site resilience", paras });
+  }
+
   /* ---- Why now ---- */
   {
     const paras: Seg[][] = [];
@@ -614,6 +668,18 @@ export function briefModel(opts: {
       t("Publishing issues the Netify question set for this scope under methodology v2026.1, matched to the sector and compliance stated above, and invites the best-fit evaluated vendors alongside any you pin below."),
     ]);
     blocks.push({ key: "scope", heading: "Scope of supply", paras });
+  }
+
+  /* ---- Additional requirements (PKM extension bespoke catch-all) ---- */
+  {
+    const bespoke = at("requirements.bespoke");
+    if (bespoke.length) {
+      blocks.push({
+        key: "bespoke",
+        heading: "Additional requirements",
+        paras: bespoke.map((f) => [fs(f), t(".")]),
+      });
+    }
   }
 
   const openGaps = [...gapByField.entries()].filter(([f]) => !consumedGaps.has(f)).map(([, g]) => g);

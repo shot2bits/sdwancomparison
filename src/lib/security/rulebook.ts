@@ -25,7 +25,15 @@
  * both call assessSecurityRequirement below. No client/server forks. Pure
  * module: no server-only import, no I/O; inputDigest uses WebCrypto, which
  * exists in both runtimes.
+ *
+ * Project Foundation Piece 2 (runtime schemas, 7 Aug 2026): the input and
+ * verdict shapes below are now Zod schemas first, with the TypeScript types
+ * derived via z.infer, so the schema and the type cannot silently diverge
+ * (Robert's instruction). This file stays a pure module: zod is the only
+ * import, still no server-only dependency, still no I/O.
  */
+
+import { z } from "zod";
 
 export const RULEBOOK_VERSION = "SEC-RULES-2026.1";
 
@@ -34,101 +42,150 @@ export const RULEBOOK_VERSION = "SEC-RULES-2026.1";
  *  transformation"; the number may move between rulebook versions). */
 const TRANSFORMATION_MIN_SITES = 3;
 
-export type SecurityDriver =
-  | "incident"
-  | "audit"
-  | "compliance"
-  | "renewal"
-  | "growth"
-  | "consolidation"
-  | "ransomware_concern";
+export const SECURITY_DRIVERS = [
+  "incident",
+  "audit",
+  "compliance",
+  "renewal",
+  "growth",
+  "consolidation",
+  "ransomware_concern",
+] as const;
+const SecurityDriverSchema = z.enum(SECURITY_DRIVERS);
+export type SecurityDriver = z.infer<typeof SecurityDriverSchema>;
 
-export type SocCapacity = "none" | "business_hours" | "twenty_four_seven";
+export const SOC_CAPACITIES = ["none", "business_hours", "twenty_four_seven"] as const;
+const SocCapacitySchema = z.enum(SOC_CAPACITIES);
+export type SocCapacity = z.infer<typeof SocCapacitySchema>;
 
-export type CapabilityId =
-  | "endpoint"
-  | "mdr_soc"
-  | "sse"
-  | "siem_logging"
-  | "managed_firewall"
-  | "awareness"
-  | "email_security"
-  | "backup_resilience";
+export const CAPABILITY_IDS = [
+  "endpoint",
+  "mdr_soc",
+  "sse",
+  "siem_logging",
+  "managed_firewall",
+  "awareness",
+  "email_security",
+  "backup_resilience",
+] as const;
+const CapabilityIdSchema = z.enum(CAPABILITY_IDS);
+export type CapabilityId = z.infer<typeof CapabilityIdSchema>;
 
-export type Needed = "required" | "recommended" | "not_indicated" | "cannot_assess";
+const NeededSchema = z.enum(["required", "recommended", "not_indicated", "cannot_assess"]);
+export type Needed = z.infer<typeof NeededSchema>;
 
-export type Route =
-  | "bt_product"
-  | "marketplace_service"
-  | "other_bt"
-  | "either"
-  | "out_of_scope"
-  | "escalate_sase"
-  | null;
+const RouteSchema = z
+  .enum(["bt_product", "marketplace_service", "other_bt", "either", "out_of_scope", "escalate_sase"])
+  .nullable();
+export type Route = z.infer<typeof RouteSchema>;
 
-export interface SecurityRequirementInput {
-  organisation?: {
-    sector?: string;
-    sizeBand?: "small" | "medium" | "large";
-    regions?: string[];
-  };
-  estate?: {
-    users?: number;
-    sites?: number;
-    devices?: { computers?: number; mobiles?: number; servers?: number };
-    specialDevices?: Array<"chromebook" | "epos">;
-    cloud?: string[];
-    existingSecurity?: string[];
-    existingNetwork?: string[];
-  };
-  drivers?: SecurityDriver[];
-  constraints?: {
-    complianceRequirements?: string[];
-    inHouseSocCapacity?: SocCapacity;
-    budgetBand?: string;
-    timeline?: string;
-  };
-}
+export const SecurityRequirementInputSchema = z
+  .object({
+    organisation: z
+      .object({
+        sector: z.string().optional(),
+        sizeBand: z.enum(["small", "medium", "large"]).optional(),
+        regions: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    estate: z
+      .object({
+        users: z.number().optional(),
+        sites: z.number().optional(),
+        devices: z
+          .object({
+            computers: z.number().optional(),
+            mobiles: z.number().optional(),
+            servers: z.number().optional(),
+          })
+          .strict()
+          .optional(),
+        specialDevices: z.array(z.enum(["chromebook", "epos"])).optional(),
+        cloud: z.array(z.string()).optional(),
+        existingSecurity: z.array(z.string()).optional(),
+        existingNetwork: z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    drivers: z.array(SecurityDriverSchema).optional(),
+    constraints: z
+      .object({
+        complianceRequirements: z.array(z.string()).optional(),
+        inHouseSocCapacity: SocCapacitySchema.optional(),
+        budgetBand: z.string().optional(),
+        timeline: z.string().optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
+export type SecurityRequirementInput = z.infer<typeof SecurityRequirementInputSchema>;
 
-export interface CapabilityVerdict {
-  id: CapabilityId;
-  needed: Needed;
-  reasoning: string;
-  evidence: Array<{ source: string; claim: string }>;
-  route: Route;
-  routeDetail?: string;
-  firedRules: string[];
-}
+export const CapabilityVerdictSchema = z
+  .object({
+    id: CapabilityIdSchema,
+    needed: NeededSchema,
+    reasoning: z.string(),
+    evidence: z.array(z.object({ source: z.string(), claim: z.string() }).strict()),
+    route: RouteSchema,
+    routeDetail: z.string().optional(),
+    firedRules: z.array(z.string()),
+  })
+  .strict();
+export type CapabilityVerdict = z.infer<typeof CapabilityVerdictSchema>;
 
-export interface AgainstInterestEntry {
-  capabilityId: CapabilityId;
-  routeDenied: "bt_product" | "marketplace_service";
-  statement: string;
-  evidence?: string;
-}
+export const AgainstInterestEntrySchema = z
+  .object({
+    capabilityId: CapabilityIdSchema,
+    routeDenied: z.enum(["bt_product", "marketplace_service"]),
+    statement: z.string(),
+    evidence: z.string().optional(),
+  })
+  .strict();
+export type AgainstInterestEntry = z.infer<typeof AgainstInterestEntrySchema>;
 
-export interface SecurityScopeVerdict {
-  rulebookVersion: typeof RULEBOOK_VERSION;
-  questionBankVersion?: string;
-  generatedAt: string;
-  inputDigest: string;
-  capabilities: CapabilityVerdict[];
-  serviceModel: "fully_managed" | "co_managed" | "product_only" | null;
-  pathRecommendation: "product_path" | "service_path" | "hybrid" | "escalate_sase" | null;
-  againstInterest: AgainstInterestEntry[];
-  assumptions: string[];
-  gaps: Array<{ field: string; whyItMatters?: string; question: string }>;
-  /** The doctor's explanation (approved amendment): what we recommended,
-   *  what is conditional, and why we did NOT recommend things. Every
-   *  rendering must show all three. */
-  summary: {
-    recommended: CapabilityId[];
-    conditional: CapabilityId[];
-    not_recommended: Array<{ capabilityId: CapabilityId; reason: string; alternative?: string }>;
-  };
-  confidence: "high" | "medium" | "low";
-  nextSteps: Array<{ action: string; tool?: string; page?: string }>;
-}
+export const SecurityScopeVerdictSchema = z
+  .object({
+    // Deliberately z.string(), NOT z.literal(RULEBOOK_VERSION): the original
+    // TS type (`typeof RULEBOOK_VERSION`) is a literal type pinned to today's
+    // rulebook string. Verdicts are immutable, stored-verbatim, append-only
+    // artefacts (see ProjectVerdictSchema in rfp-types.ts) that get
+    // re-validated on every future save of the whole Project, not just the
+    // save that created them. A literal here would mean the day this
+    // constant is next bumped (SEC-RULES-2026.2, etc.), every existing
+    // Project holding an older verdict would fail to save on its very next
+    // unrelated edit. This is a deliberate, reasoned deviation from a pure
+    // field-for-field literal match, flagged to Robert rather than applied
+    // silently; a future piece introducing multi-version rulebooks should
+    // revisit this as a real union of known historical versions instead.
+    rulebookVersion: z.string(),
+    questionBankVersion: z.string().optional(),
+    generatedAt: z.string(),
+    inputDigest: z.string(),
+    capabilities: z.array(CapabilityVerdictSchema),
+    serviceModel: z.enum(["fully_managed", "co_managed", "product_only"]).nullable(),
+    pathRecommendation: z.enum(["product_path", "service_path", "hybrid", "escalate_sase"]).nullable(),
+    againstInterest: z.array(AgainstInterestEntrySchema),
+    assumptions: z.array(z.string()),
+    gaps: z.array(z.object({ field: z.string(), whyItMatters: z.string().optional(), question: z.string() }).strict()),
+    /** The doctor's explanation (approved amendment): what we recommended,
+     *  what is conditional, and why we did NOT recommend things. Every
+     *  rendering must show all three. */
+    summary: z
+      .object({
+        recommended: z.array(CapabilityIdSchema),
+        conditional: z.array(CapabilityIdSchema),
+        not_recommended: z.array(
+          z.object({ capabilityId: CapabilityIdSchema, reason: z.string(), alternative: z.string().optional() }).strict(),
+        ),
+      })
+      .strict(),
+    confidence: z.enum(["high", "medium", "low"]),
+    nextSteps: z.array(z.object({ action: z.string(), tool: z.string().optional(), page: z.string().optional() }).strict()),
+  })
+  .strict();
+export type SecurityScopeVerdict = z.infer<typeof SecurityScopeVerdictSchema>;
 
 /* ------------------------------------------------------------------ */
 /* Evidence sources, named once                                        */
