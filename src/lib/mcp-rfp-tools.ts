@@ -17,6 +17,7 @@ import { getSampleNotice } from "@/lib/sample-notices";
 import { normaliseNoticeDraft } from "@/lib/notice-validate";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { SITE_URL } from "@/lib/structured-data";
+import { resolveSupplierResponseAccess, RESPONSE_DENIAL_MESSAGES } from "@/lib/rfp-response-access";
 
 export const MCP_RFP_TOOL_DEFINITIONS = [
   {
@@ -44,7 +45,7 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
   },
   {
     name: "respond_to_rfp",
-    description: "Submit or update a supplier's answers to an RFP. Provide the share token, your organisation name, and an answers map of question id to response text. Set submit true to finalise.",
+    description: "Submit or update a supplier's answers to an RFP. Provide the share token, your organisation name, and an answers map of question id to response text. Set submit true to finalise. Requires the same verified supplier identity, approved claim, and NDA acceptance (where required) as the web response form — the share token alone is not sufficient. Today's MCP transport cannot yet establish that identity, so this tool currently returns a structured supplier_identity_required refusal for every call; use the web response link in the meantime.",
     inputSchema: {
       type: "object",
       properties: {
@@ -361,22 +362,43 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
   if (name === "respond_to_rfp") {
     const p = await getProjectByToken(token);
     if (!p) return { error: "RFP not found for that token." };
-    if (p.status !== "published" && p.status !== "qa") return { error: "This RFP is not open for responses." };
     const vendor = String(args.vendor ?? "");
     if (!vendor) return { error: "vendor is required." };
+
+    // Project Foundation Piece 3A: the same transport-neutral policy the web
+    // response route calls decides phase, deadline, identity, claim-approval
+    // and NDA here — the share token alone no longer grants a write. The
+    // current MCP transport has no mechanism to produce a session (confirmed
+    // in api/mcp/route.ts: tool handlers receive only the JSON-RPC
+    // `arguments`, never request cookies), so `session` is always null here
+    // today and this deterministically denies with supplier_identity_required
+    // rather than trusting the caller-supplied `vendor` text as identity.
+    // This is the intended, safe outcome, not a bug: Piece 3B is expected to
+    // supply a real principal into `session` without this tool's business
+    // logic changing again.
+    const decision = await resolveSupplierResponseAccess({ project: p, vendor, session: null });
+    if (!decision.allowed) {
+      return {
+        error: decision.reason,
+        allowed: false,
+        actor: decision.actor,
+        message: RESPONSE_DENIAL_MESSAGES[decision.reason],
+      };
+    }
+
     const answers = (args.answers ?? {}) as Record<string, string>;
     const existing = (await listResponses(p.id)).find((r) => r.vendor === vendor);
     const response = RfpResponseSchema.parse({
       id: existing?.id ?? newId("resp"),
       rfp_id: p.id,
       vendor,
-      vendor_slug: existing?.vendor_slug ?? matchVendorSlug(vendor),
+      vendor_slug: existing?.vendor_slug ?? decision.vendor_slug ?? matchVendorSlug(vendor),
       answers: { ...(existing?.answers ?? {}), ...answers },
       submitted: args.submit ? Date.now() : existing?.submitted ?? null,
       created: existing?.created ?? Date.now(),
     });
     await saveResponse(response);
-    return { ok: true, recorded: Object.keys(answers).length, submitted: Boolean(args.submit) };
+    return { ok: true, actor: decision.actor, recorded: Object.keys(answers).length, submitted: Boolean(args.submit) };
   }
   return { error: `Unknown RFP tool ${name}` };
 }

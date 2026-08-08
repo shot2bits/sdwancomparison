@@ -1,12 +1,13 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getProject, listResponses, saveResponse, hasAcceptedNda, newId, kvConfigured } from "@/lib/rfp-store";
+import { getProject, listResponses, saveResponse, newId, kvConfigured } from "@/lib/rfp-store";
 import { RfpResponseSchema } from "@/lib/rfp-types";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { recordCompletenessSample } from "@/lib/rfp-store";
-import { sessionFromRequest, requireClaimedSupplierFor } from "@/lib/auth";
+import { sessionFromRequest } from "@/lib/auth";
 import { getGoal } from "@/lib/agent-store";
 import { reviewBid } from "@/lib/bid-review";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
+import { resolveSupplierResponseAccess, RESPONSE_DENIAL_MESSAGES } from "@/lib/rfp-response-access";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -41,7 +42,12 @@ export async function POST(req: Request, ctx: Ctx) {
     return Response.json({ error: "This RFP is not open for responses." }, { status: 409, headers: cors });
   }
   // Response window: submissions close at the deadline set when the buyer
-  // submitted to the marketplace (deal room slice 1, 15 July 2026).
+  // submitted to the marketplace (deal room slice 1, 15 July 2026). Kept as
+  // an early pre-check (before body parsing) for the same reason it always
+  // was — a closed RFP should 409 even on a malformed body. The shared
+  // policy below re-checks phase/deadline too (harmless no-op once these
+  // have already passed); it exists so MCP, which has no equivalent
+  // pre-check, gets the same rule.
   if (project.response_deadline && Date.now() > project.response_deadline) {
     return Response.json({ error: "The response window for this RFP has closed." }, { status: 409, headers: cors });
   }
@@ -52,17 +58,43 @@ export async function POST(req: Request, ctx: Ctx) {
     return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors });
   }
   if (!body.vendor) return Response.json({ error: "vendor is required." }, { status: 422, headers: cors });
-  const slug = matchVendorSlug(body.vendor);
+
+  // Project Foundation Piece 3A: the same transport-neutral policy the MCP
+  // respond_to_rfp tool calls decides identity, claim-approval and NDA here
+  // too, so the two transports cannot diverge on this question again.
   const session = await sessionFromRequest(req);
-  const gate = await requireClaimedSupplierFor(session, slug ?? "__unmatched__", cors);
-  if (gate) return gate;
-  // NDA gate: if the buyer requires an NDA, the responding organisation must
-  // have a recorded acceptance of the current version before they can respond.
-  if (!(await hasAcceptedNda(project, body.vendor))) {
-    return Response.json(
-      { error: "This RFP requires you to accept the buyer's NDA before responding.", nda_required: true },
-      { status: 403, headers: cors },
-    );
+  const decision = await resolveSupplierResponseAccess({ project, vendor: body.vendor, session });
+  if (!decision.allowed) {
+    switch (decision.reason) {
+      case "supplier_identity_required":
+        return Response.json(
+          { error: "Sign in as this vendor to respond.", auth_required: true },
+          { status: 401, headers: cors },
+        );
+      case "vendor_mismatch":
+        return Response.json(
+          { error: RESPONSE_DENIAL_MESSAGES.vendor_mismatch, auth_required: true },
+          { status: 403, headers: cors },
+        );
+      case "claim_not_approved":
+        return Response.json(
+          {
+            error: RESPONSE_DENIAL_MESSAGES.claim_not_approved,
+            claim_required: true,
+            claim_status: decision.claim_status ?? "unclaimed",
+          },
+          { status: 403, headers: cors },
+        );
+      case "nda_required":
+        return Response.json(
+          { error: RESPONSE_DENIAL_MESSAGES.nda_required, nda_required: true },
+          { status: 403, headers: cors },
+        );
+      // rfp_not_open / deadline_passed: unreachable here, already handled by
+      // the pre-checks above; kept only so the switch is exhaustive.
+      default:
+        return Response.json({ error: RESPONSE_DENIAL_MESSAGES[decision.reason] }, { status: 409, headers: cors });
+    }
   }
   const existing = (await listResponses(id)).find((r) => r.vendor === body.vendor);
   const response = RfpResponseSchema.parse({
