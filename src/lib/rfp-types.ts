@@ -268,6 +268,11 @@ export const RfpThreadSchema = z.object({
   id: z.string(),
   rfp_id: z.string(),
   vendor: z.string().min(1),
+  // Piece 3B-2 (9 Aug 2026): matched at creation, same convention as
+  // RfpResponseSchema.vendor_slug and NdaAcceptanceSchema.vendor_slug —
+  // added so a thread's owning vendor can be checked deterministically at
+  // read time instead of re-running fuzzy matchVendorSlug() on every GET.
+  vendor_slug: z.string().nullable().default(null),
   category: z.enum(["technical", "commercial", "timeline", "scope", "other"]).default("other"),
   question: z.string().min(1),
   status: z.enum(["open", "answered"]).default("open"),

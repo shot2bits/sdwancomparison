@@ -18,6 +18,7 @@ import { normaliseNoticeDraft } from "@/lib/notice-validate";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { SITE_URL } from "@/lib/structured-data";
 import { resolveSupplierResponseAccess, RESPONSE_DENIAL_MESSAGES } from "@/lib/rfp-response-access";
+import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
 
 export const MCP_RFP_TOOL_DEFINITIONS = [
   {
@@ -33,14 +34,15 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
   {
     name: "get_rfp_evidence_draft",
     description:
-      "Netify's pre-drafted Evidence Response for an invited supplier: answers drafted from Netify's public-evidence capability grades for that vendor (grade and evaluation date stated in every line), gaps and all pricing questions left blank for the supplier. Provide the share token and the supplier organisation name. Review and edit before submitting via respond_to_rfp.",
+      "Netify's pre-drafted Evidence Response for an invited supplier: answers drafted from Netify's public-evidence capability grades for that vendor (grade and evaluation date stated in every line), gaps and all pricing questions left blank for the supplier. Provide the share token, the supplier organisation name, and the vendor_token from your invitation link (the per-supplier credential minted at publish time — without it this call is refused, since the share token alone does not prove which vendor you are). Review and edit before submitting via respond_to_rfp.",
     inputSchema: {
       type: "object",
       properties: {
         token: { type: "string", description: "The RFP share token issued to invited suppliers." },
         vendor: { type: "string", description: "The supplier organisation name or Netify vendor slug." },
+        vendor_token: { type: "string", description: "The per-supplier credential from your invitation link (the vt= parameter). Required to prove which vendor you are; the share token alone is not sufficient." },
       },
-      required: ["token", "vendor"],
+      required: ["token", "vendor", "vendor_token"],
     },
   },
   {
@@ -347,9 +349,28 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     if (!p) return { error: "RFP not found for that token." };
     const vendorRef = String(args.vendor ?? "").trim();
     if (!vendorRef) return { error: "vendor is required (organisation name or Netify vendor slug)." };
+
+    // Project Foundation Piece 3B-2 (hybrid model, Robert's ruling 9 Aug
+    // 2026): this evidence draft is vendor-specific, competitive content —
+    // a share token alone (proving only RFP-invitation possession) is not
+    // sufficient, matching the web route's fix. MCP has no session mechanism
+    // (see respond_to_rfp above and api/mcp/route.ts), so `session` is
+    // always null here — but unlike respond_to_rfp's high-stakes bar, this
+    // read only needs the CREDENTIAL tier, and a bearer credential is just a
+    // string argument: it travels over MCP exactly as it does over a URL
+    // query param, no session required. A caller who supplies the
+    // vendor_token from their invitation link succeeds; a caller who
+    // doesn't (or supplies one for a different RFP or vendor) is refused
+    // with a structured, honest reason rather than ever trusting the
+    // free-text `vendor` argument as identity.
+    const vendorTokenRaw = String(args.vendor_token ?? "").trim() || null;
+    const principal = await resolveSupplierPrincipal(null, p.id, vendorTokenRaw, vendorRef);
+    if (!principal.established) {
+      return { error: principal.reason, allowed: false, message: SUPPLIER_PRINCIPAL_DENIAL_MESSAGES[principal.reason] };
+    }
     const { buildEvidenceDraft } = await import("@/lib/evidence-response");
     return {
-      ...buildEvidenceDraft(p, vendorRef),
+      ...buildEvidenceDraft(p, principal.vendorSlug),
       next: "Review and edit every draft, add pricing, then submit via respond_to_rfp with the same token and an answers map keyed by question_id.",
     };
   }

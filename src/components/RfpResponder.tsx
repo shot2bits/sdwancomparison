@@ -44,6 +44,17 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
   // Every supplier-side call carries the share token from the response link:
   // the server refuses reads on the bare id (the id alone must grant nothing).
   const tokenQs = `token=${encodeURIComponent(token)}`;
+  // Piece 3B-2 credential exchange (Robert's ruling, 9 Aug 2026): the
+  // per-supplier bearer credential is established server-side, once, at
+  // /api/rfp/[id]/supplier-credential (see respond/page.tsx), as an HttpOnly
+  // cookie — never read or held here. The thread, NDA and evidence-draft
+  // calls below carry it automatically as an ordinary same-origin cookie;
+  // this component never sees the credential itself and has nothing to
+  // thread through a query string or a request body. A caller who never
+  // went through that exchange (an older link minted before this piece, or
+  // no credential at all) simply has no cookie — those calls then fall back
+  // to whatever the SignIn widget above establishes, exactly as intended,
+  // not a broken state.
 
   // Initial load: NDA config + a redacted (supplier-lens) project view.
   useEffect(() => {
@@ -114,6 +125,11 @@ export default function RfpResponder({ id, token }: { id: string; token: string 
     try {
       const res = await fetch(`/sase/api/rfp/${id}/nda`, {
         method: "POST", headers: { "content-type": "application/json" },
+        // NDA acceptance is held to the higher, claimed-session tier
+        // (Robert's ruling #4) — the bearer credential (now cookie-borne,
+        // sent automatically) will not satisfy it alone, so a supplier who
+        // has only that credential still needs to sign in via the widget
+        // above before this succeeds.
         body: JSON.stringify({ vendor, signatory_name: signatory, agree: true, token }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error ?? "Could not record acceptance."); }

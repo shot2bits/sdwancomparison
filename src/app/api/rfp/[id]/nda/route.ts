@@ -1,9 +1,11 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, getNdaAcceptance, saveNdaAcceptance, listNdaAcceptances, hasAcceptedNda, newId, kvConfigured } from "@/lib/rfp-store";
 import { NdaAcceptanceSchema } from "@/lib/rfp-types";
-import { matchVendorSlug } from "@/lib/rfp-evaluation";
-import { sessionFromRequest } from "@/lib/auth";
+import { sessionFromRequest, requireClaimedSupplierFor, supplierCredentialFromRequest } from "@/lib/auth";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
+import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
+import { matchVendorSlug } from "@/lib/rfp-evaluation";
+import { vendorName } from "@/lib/opportunity";
 
 /** Share-token check for supplier-side NDA reads/accepts. */
 function shareTokenOk(req: Request, shareToken: string, bodyToken?: string): boolean {
@@ -29,6 +31,22 @@ function ndaPublic(nda: { required: boolean; source: string; text: string; link:
 }
 
 /**
+ * getNdaAcceptance/hasAcceptedNda (rfp-store.ts) key their lookup by the
+ * free-text `vendor` string stored on the record, not by vendor_slug — that
+ * is shared, unmodified code Piece 3A's respond flow also depends on, so it
+ * is not changed here. Once a supplier principal is resolved (real
+ * identity), this derives the best text to feed that lookup: the caller's
+ * own text when it still resolves to the same vendor (continuity with any
+ * acceptance recorded before this piece, under whatever name was typed
+ * then), otherwise the canonical vendor name for that slug.
+ */
+function lookupTextFor(principalVendorSlug: string, callerText: string): string {
+  const t = callerText.trim();
+  if (t && matchVendorSlug(t) === principalVendorSlug) return t;
+  return vendorName(principalVendorSlug) ?? t;
+}
+
+/**
  * GET — NDA status for a supplier.
  *   ?vendor=<organisation>  → also reports whether that organisation has accepted.
  *   ?acceptances=1          → buyer/Netify only: the full acceptance audit list.
@@ -49,14 +67,47 @@ export async function GET(req: Request, ctx: Ctx) {
     return Response.json({ nda: ndaPublic(project.nda), acceptances: await listNdaAcceptances(id) }, { headers: cors });
   }
 
-  // Supplier status read: needs the share token from the response link (or the owner).
+  // Supplier status read: needs the share token from the response link (or
+  // the owner) as an unchanged baseline gate, PLUS — Piece 3B-2 (hybrid
+  // model, Robert's ruling 9 Aug 2026) — a resolved supplier principal, via
+  // the vendor-specific bearer credential (?vt=) or a session, when a
+  // specific ?vendor= is asked about. The record this returns (acceptance)
+  // carries the signatory's name, email, IP and user agent: real personal
+  // data, not a bare boolean, so this read gets the same fix as the write
+  // below, not just the accept action. Credential tier is sufficient here
+  // (Robert's ruling #3 names NDA-status reads explicitly) — the higher,
+  // claimed tier is reserved for the accept action below.
   if (!shareTokenOk(req, project.share_token)) {
     const access = await requireRfpOwner(req, project);
     if (!access.ok) return ownerRequired("Reading the NDA status", cors);
+    const vendor = (url.searchParams.get("vendor") ?? "").trim();
+    const accepted = await hasAcceptedNda(project, vendor);
+    const acceptance = vendor ? await getNdaAcceptance(id, vendor) : null;
+    return Response.json({ nda: ndaPublic(project.nda), accepted, acceptance }, { headers: cors });
   }
-  const vendor = (url.searchParams.get("vendor") ?? "").trim();
-  const accepted = await hasAcceptedNda(project, vendor);
-  const acceptance = vendor ? await getNdaAcceptance(id, vendor) : null;
+  const vendorParam = (url.searchParams.get("vendor") ?? "").trim();
+  if (!vendorParam) {
+    // No vendor named: just the public NDA text/requirement, nothing
+    // personal, and the share_token already proves invitation possession —
+    // unchanged from before this piece.
+    return Response.json({ nda: ndaPublic(project.nda), accepted: null, acceptance: null }, { headers: cors });
+  }
+  // The credential now normally arrives via the HttpOnly cookie the
+  // /supplier-credential exchange sets (Robert's ruling, 9 Aug 2026); an
+  // explicit ?vt= is still honoured for any caller not going through that
+  // exchange, but the web client no longer sends one.
+  const vendorToken = url.searchParams.get("vt") ?? supplierCredentialFromRequest(req, id);
+  const session = await sessionFromRequest(req);
+  const principal = await resolveSupplierPrincipal(session, id, vendorToken, vendorParam);
+  if (!principal.established) {
+    return Response.json(
+      { error: SUPPLIER_PRINCIPAL_DENIAL_MESSAGES[principal.reason], auth_required: principal.reason === "supplier_identity_required" },
+      { status: principal.reason === "supplier_identity_required" ? 401 : 403, headers: cors },
+    );
+  }
+  const lookupVendor = lookupTextFor(principal.vendorSlug, vendorParam);
+  const accepted = await hasAcceptedNda(project, lookupVendor);
+  const acceptance = await getNdaAcceptance(id, lookupVendor);
   return Response.json({ nda: ndaPublic(project.nda), accepted, acceptance }, { headers: cors });
 }
 
@@ -69,13 +120,14 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   if (!project.nda.required) return Response.json({ error: "This RFP has no NDA requirement." }, { status: 409, headers: cors });
 
-  let body: { vendor?: string; signatory_name?: string; agree?: boolean; token?: string };
+  let body: { vendor?: string; signatory_name?: string; agree?: boolean; token?: string; vt?: string };
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors });
   }
-  // Accepting is a supplier action performed from the response link.
+  // Accepting is a supplier action performed from the response link. The
+  // share token is still required (unchanged baseline gate).
   if (!shareTokenOk(req, project.share_token, body.token)) {
     return Response.json({ error: "Accepting the NDA needs the response link token. Open this RFP via your response link and try again." }, { status: 401, headers: cors });
   }
@@ -85,7 +137,29 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!signatory) return Response.json({ error: "Enter the full name of the person accepting." }, { status: 422, headers: cors });
   if (body.agree !== true) return Response.json({ error: "You must confirm you have read and agree to the NDA." }, { status: 422, headers: cors });
 
+  // Piece 3B-2 (hybrid model, Robert's ruling #4, 9 Aug 2026): accepting an
+  // NDA is a legally significant write, deliberately held to the SAME bar
+  // as respond_to_rfp — a claimed, admin-approved supplier session (or the
+  // Netify relay) — not merely the low-friction bearer credential that is
+  // sufficient for reads and for asking a clarification question. First
+  // resolve a principal at all (so a bearer-token-only caller gets a clear
+  // "sign in" message naming the credential, not a generic auth failure)...
   const session = await sessionFromRequest(req);
+  const principal = await resolveSupplierPrincipal(session, id, body.vt ?? supplierCredentialFromRequest(req, id), vendor);
+  if (!principal.established) {
+    return Response.json(
+      { error: SUPPLIER_PRINCIPAL_DENIAL_MESSAGES[principal.reason], auth_required: principal.reason === "supplier_identity_required" },
+      { status: principal.reason === "supplier_identity_required" ? 401 : 403, headers: cors },
+    );
+  }
+  // ...then require the claimed tier specifically, reusing Piece 3A's own,
+  // already-verified gate rather than duplicating tier logic here. A
+  // bearer-token-only principal (tier "credential") is established but
+  // still fails this: requireClaimedSupplierFor(null-ish session, ...)
+  // asks them to sign in, exactly as intended.
+  const claimGate = await requireClaimedSupplierFor(session, principal.vendorSlug, cors);
+  if (claimGate) return claimGate;
+
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
   const ua = (req.headers.get("user-agent") ?? "").slice(0, 300);
 
@@ -93,7 +167,7 @@ export async function POST(req: Request, ctx: Ctx) {
     id: newId("nda"),
     rfp_id: id,
     vendor,
-    vendor_slug: matchVendorSlug(vendor),
+    vendor_slug: principal.vendorSlug,
     signatory_name: signatory,
     email: session?.email ?? "",
     nda_version: project.nda.version,

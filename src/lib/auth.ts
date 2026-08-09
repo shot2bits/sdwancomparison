@@ -33,6 +33,33 @@ export async function sessionFromRequest(req: Request): Promise<AuthSession | nu
   return getSession(parseCookie(req, SESSION_COOKIE));
 }
 
+/**
+ * Piece 3B-2 credential exchange (Robert's ruling, 9 Aug 2026, replacing
+ * query-string `vt` delivery): the per-(RFP, vendor) bearer credential
+ * minted at publish time is redeemed exactly once, server-side, at
+ * /api/rfp/[id]/supplier-credential. From that point on it lives ONLY in
+ * this HttpOnly cookie — never again in the navigable URL, never readable
+ * by client JS (so it cannot ride into SignIn.tsx's return_to, a GA4 page
+ * location, a copied link, or a browser history entry). Named per-RFP
+ * (rather than one shared cookie) so a supplier with invitations open for
+ * two different RFPs in two tabs is not made to collide between them, and
+ * so a stale cookie from an old RFP is never mistaken for a new one. Same
+ * attributes and lifetime as the session cookie: this is the browser-held
+ * equivalent of it, for a caller who never signs in.
+ */
+export function supplierCredentialCookieName(rfpId: string): string {
+  return `netify_svt_${rfpId}`;
+}
+
+export function supplierCredentialCookieHeader(rfpId: string, vendorToken: string): string {
+  const maxAge = 30 * 24 * 60 * 60;
+  return `${supplierCredentialCookieName(rfpId)}=${encodeURIComponent(vendorToken)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=${maxAge}`;
+}
+
+export function supplierCredentialFromRequest(req: Request, rfpId: string): string | null {
+  return parseCookie(req, supplierCredentialCookieName(rfpId));
+}
+
 /** Send a magic sign-in link via Resend (best effort). Returns whether an email was sent. */
 export async function sendMagicLink(email: string, token: string, role: string, returnTo = "", code?: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;

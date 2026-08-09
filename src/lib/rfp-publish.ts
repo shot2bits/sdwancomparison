@@ -1,4 +1,4 @@
-import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities } from "@/lib/rfp-store";
+import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJson, indexRfpForBuyer, listSignoffs, listPublicOpportunities, getOrCreateSupplierVendorToken } from "@/lib/rfp-store";
 import { ensureDistinctNoticeTitle } from "@/lib/notice-title";
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED_ACTION, ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
@@ -444,7 +444,34 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       v.slug,
       `You are invited to respond to the RFP "${project.title}". Netify has pre-drafted evidence answers for your organisation from its public capability evaluation; open your response link, review the draft, correct anything and add your pricing. Most of the writing is already done.`,
     );
-    if (!("error" in r)) invited.push({ slug: v.slug, name: r.vendor_name, supplier_url: `${SITE_URL}/rfp-builder/${project.id}/respond?token=${project.share_token}` });
+    if (!("error" in r)) {
+      // Piece 3B-2 (hybrid model, Robert's ruling #2, 9 Aug 2026): mint this
+      // vendor's own bearer credential at publish time, distinct from
+      // project.share_token (which stays exactly what it always was — proof
+      // of RFP-invitation possession, shared by every invited vendor) and
+      // distinct from `r.token`/SupplierConnection.token (the separate
+      // connect/messaging feature's credential, not reused here to avoid
+      // coupling two unrelated features). This is what lets the
+      // clarification thread, NDA status and evidence draft work without a
+      // sign-in, while still telling suppliers apart. See
+      // supplier-capability-access.ts for how it is consumed.
+      //
+      // Credential-exchange delivery (Robert's ruling, 9 Aug 2026, replacing
+      // the first version's `&vt=` query-string embedding on the respond
+      // link itself): the invitation now points at the credential-exchange
+      // endpoint, /api/rfp/[id]/supplier-credential, which validates the
+      // token server-side, sets it as an HttpOnly cookie, and redirects to
+      // the plain respond URL. The bearer secret still appears once, in this
+      // first link, but never again in a navigable URL — see that route for
+      // the exchange, and auth.ts's supplierCredentialCookieHeader for the
+      // cookie it sets.
+      const vendorToken = await getOrCreateSupplierVendorToken(project.id, v.slug);
+      invited.push({
+        slug: v.slug,
+        name: r.vendor_name,
+        supplier_url: `${SITE_URL}/api/rfp/${project.id}/supplier-credential?token=${project.share_token}&vt=${vendorToken}`,
+      });
+    }
   }
 
   // Publish is the strongest identity-capture moment: adopt ownership onto

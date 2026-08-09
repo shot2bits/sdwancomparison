@@ -440,6 +440,34 @@ export async function getConnectionByToken(token: string): Promise<SupplierConne
   return getConnection(ref.rfp_id, ref.vendor_slug);
 }
 
+/**
+ * Piece 3B-2 (hybrid ruling, 9 Aug 2026) — a stable, per-(RFP, vendor) bearer
+ * credential for the supplier-private capabilities (clarification thread,
+ * NDA status, evidence draft). Possession alone establishes the supplier
+ * principal for those; it is deliberately NOT sufficient for NDA acceptance
+ * or respond_to_rfp, which stay gated behind a claimed, approved supplier
+ * session (see supplier-capability-access.ts). Mirrors
+ * getOrCreateOpportunityToken's shape exactly: minted once, reused, not
+ * regenerated. Deliberately a distinct token/namespace from
+ * SupplierConnection.token above -- that one belongs to the separate,
+ * buyer-initiated "connect" messaging feature (its own status machine:
+ * invited/engaged/declined/contact_shared/demo_requested) and must not be
+ * overloaded with this, unrelated capability's semantics.
+ */
+export async function getOrCreateSupplierVendorToken(rfpId: string, vendorSlug: string): Promise<string> {
+  const key = `rfp:svtok:${rfpId}:${vendorSlug}`;
+  const existing = (await kv(["GET", key])) as string | null;
+  if (existing) return existing;
+  const token = newId("svtok");
+  await kv(["SET", `rfp:svtok-ref:${token}`, JSON.stringify({ rfp_id: rfpId, vendor_slug: vendorSlug })]);
+  await kv(["SET", key, token]);
+  return token;
+}
+
+export async function resolveSupplierVendorToken(token: string): Promise<{ rfp_id: string; vendor_slug: string } | null> {
+  return getJson<{ rfp_id: string; vendor_slug: string }>(`rfp:svtok-ref:${token}`);
+}
+
 /* ------------------------------------------------------------------ */
 /* Opportunities (live tender rooms)                                   */
 /* ------------------------------------------------------------------ */
