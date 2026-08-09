@@ -77,6 +77,12 @@ export function buildRegeneratedProject(input: RegenerateInput): RegeneratedProj
         { version, kind: "rfp_sections" as const, input_digest: verdict.inputDigest, created_at: now, via: input.via, sections_snapshot: sections },
       ],
     },
+    // Milestone 3 (9 Aug 2026): Understanding now lives at the top level of
+    // ProjectDetails, not inside engine_data (see rfp-types.ts) — the
+    // `...project` spread above already carries it through unchanged.
+    // (An earlier version of this fix patched engine_data directly, from
+    // when Understanding was still nested there; no longer needed now that
+    // it sits alongside engine_data instead of inside it.)
   };
 
   const event: ProjectHistoryEvent = {

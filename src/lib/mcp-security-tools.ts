@@ -13,6 +13,7 @@ import { createSecurityProject } from "@/lib/security/persist-project";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { buildRescopedProject, rescopeConsentText } from "@/lib/security/rescope-project";
 import { buildRegeneratedProject } from "@/lib/security/regenerate-project";
+import { continueSecurityConversation, ConverseError } from "@/lib/security/converse-project";
 import { getProject, saveProject } from "@/lib/rfp-store";
 import { projectPhase, openSecurityGaps } from "@/lib/project-machine";
 import type { ProjectDetails } from "@/lib/rfp-types";
@@ -255,12 +256,74 @@ const RESCOPE_DEFINITION = {
   },
 } as const;
 
+/**
+ * Milestone 3 — FIRST CUT (9 Aug 2026): "Continue this procurement
+ * conversation" as one capability. The caller never sequences
+ * assess/create/rescope itself: give it the buyer's next sentence (and,
+ * after the first turn, the project_id and manage_token it returned) and
+ * it creates or evolves a real, persisted Security Sourcing Project.
+ */
+const CONTINUE_CONVERSATION_DEFINITION = {
+  name: "continue_security_conversation",
+  description:
+    `Netify Security Sourcing: the single capability for "continue this procurement conversation." Give it the buyer's next sentence; it composes extraction, assessment, and project creation/re-scope behind one call, so you never need to sequence assess_security_requirement/create_security_project/rescope_security_project yourself. FIRST TURN (omit project_id): the Project is created immediately, even when the buyer's Understanding is incomplete or the ${RULEBOOK_VERSION} verdict is low confidence — low confidence is Project state, not a reason for the Project not to exist. CONSENT REQUIRED on the first turn only: pass consent: true with the buyer's explicit agreement; the wording recorded is returned as consent_text (also returned on refusal, so you can show it before asking). SUBSEQUENT TURNS (pass the project_id and manage_token this tool returned): the new sentence is reconciled against the Project's standing Understanding, not treated as a fresh start — a correction (e.g. "actually 46 sites, not 40") supersedes the earlier value; the superseded value is not lost, it is named in the returned corrections array and stays in the project's audit history. Every fact in the returned understanding carries provenance (stated with the buyer's quote, or inferred with the inference named). STOPS SHORT OF THE RFP WORKFLOW BY DESIGN: this tool never generates an RFP document, never matches or invites suppliers, never publishes anything. The Project it builds sits at phase "scoped" (a verdict attached, no document yet) until you call generate_security_rfp explicitly, later, when the buyer is ready to move into drafting. Read understanding.completeness.missing_information and earned_questions to decide what to ask next; when nothing is missing or earned, ask nothing — the Project already exists and is already usable as it stands.`,
+  inputSchema: {
+    type: "object",
+    properties: {
+      text: { type: "string", description: "The buyer's words this turn: a first sentence, an answer, or a correction." },
+      project_id: { type: "string", description: "Omit on the first turn. Pass on every later turn to continue the same Project." },
+      manage_token: { type: "string", description: "Required alongside project_id: the creator credential this tool returned at creation." },
+      consent: { type: "boolean", description: "Required (must be true) on the first turn only: the buyer's explicit agreement to create the project." },
+      test: { type: "boolean", description: "First turn only. Integration testing: self-expires in two hours, no side effects." },
+    },
+    required: ["text"],
+  },
+  outputSchema: {
+    type: "object",
+    required: ["turn", "project_id", "phase", "verdict", "understanding"],
+    properties: {
+      turn: { type: "string", enum: ["created", "updated"] },
+      project_id: { type: "string" },
+      phase: { type: "string" },
+      manage_token: { type: "string", description: "Creator credential; give it to the buyer and pass it back on every later turn." },
+      builder_url: { type: "string" },
+      verdict: { type: "object", description: "The attached SecurityScopeVerdict, verbatim." },
+      understanding: {
+        type: "object",
+        description: "The persisted Understanding: standing facts with provenance, recognised objectives, and a deterministic completeness read — explicitly distinct from verdict.confidence.",
+        properties: {
+          facts: { type: "array" },
+          objectives: { type: "array" },
+          completeness: {
+            type: "object",
+            properties: {
+              score: { type: "number" },
+              sections_present: { type: "array", items: { type: "string" } },
+              sections_missing: { type: "array", items: { type: "string" } },
+              missing_information: { type: "array", items: { type: "string" } },
+            },
+          },
+          cycle: { type: "number" },
+        },
+      },
+      corrections: {
+        type: "array",
+        description: "Facts THIS turn superseded: {path, from, to}. The earlier value stays auditable in the project's history even though the live understanding shows only the current value.",
+      },
+      earned_questions: { type: "array", description: "Same earned-question engine as workspace_cycle; relay to the buyer." },
+      consent_text: { type: "string" },
+      note: { type: "string" },
+    },
+  },
+} as const;
+
 export const SECURITY_TOOL_DEFINITIONS_ALL = [
   ...MCP_SECURITY_TOOL_DEFINITIONS,
   CREATE_PROJECT_DEFINITION,
   GENERATE_RFP_DEFINITION,
   RESCOPE_DEFINITION,
   GET_STATUS_DEFINITION,
+  CONTINUE_CONVERSATION_DEFINITION,
 ] as const;
 
 export const SECURITY_TOOL_NAMES = new Set<string>(
@@ -397,6 +460,49 @@ export async function callSecurityTool(
         verdict: result.verdict,
         builder_url: `${SITE_URL}/rfp-builder/${id}`,
         note: "Earlier verdict and document versions stay in the project record; the story shows what changed.",
+      };
+    }
+    case "continue_security_conversation": {
+      let result;
+      try {
+        result = await continueSecurityConversation({
+          text: String(args?.text ?? ""),
+          projectId: args?.project_id ? String(args.project_id) : undefined,
+          manageToken: args?.manage_token ? String(args.manage_token) : undefined,
+          consent: args?.consent === true,
+          via: "mcp",
+          test: args?.test === true,
+        });
+      } catch (e) {
+        if (e instanceof ConverseError) {
+          return { error: e.message, ...(e.consentText ? { consent_text: e.consentText } : {}) };
+        }
+        return { error: (e as Error).message };
+      }
+      const { project, verdict, understanding, earnedQuestions, turn, corrections } = result;
+      return {
+        turn,
+        project_id: project.id,
+        phase: projectPhase(project),
+        manage_token: project.manage_token,
+        builder_url: `${SITE_URL}/rfp-builder/${project.id}`,
+        verdict,
+        understanding,
+        ...(corrections.length ? { corrections } : {}),
+        earned_questions: earnedQuestions.map((q) => ({
+          id: q.id,
+          question: q.question,
+          section: q.section,
+          options: q.options.map((o) => o.label),
+          evidence: q.evidence,
+        })),
+        ...(turn === "created" ? { consent_text: CREATE_CONSENT_TEXT } : {}),
+        note:
+          turn === "created"
+            ? project.test
+              ? "Test project: self-expires in two hours, no emails, no side effects."
+              : "Anonymous draft created from conversation; the buyer claims it by signing in from the builder link. No RFP has been generated and no vendor has been contacted."
+            : "Understanding updated on the existing project. No RFP has been generated and no vendor has been contacted.",
       };
     }
     case "get_security_project_status": {

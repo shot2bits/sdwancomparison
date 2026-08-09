@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 import { SecurityRequirementInputSchema, SecurityScopeVerdictSchema } from "@/lib/security/rulebook";
+import { UnderstandingSchema } from "@/lib/workspace/understanding";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -206,6 +207,33 @@ export const ProjectDetailsSchema = z.object({
   // pre-engine projects validate unchanged; absent means pre-engine.
   engine: z.enum(ENGINE_IDS).optional(),
   engine_data: ProjectEngineDataSchema.optional(),
+  /**
+   * Milestone 3 (9 Aug 2026), corrected the same day after an architecture
+   * check: the canonical, engine-INDEPENDENT expression of buyer intent —
+   * objective, drivers, estate, geography, timescale, existing suppliers,
+   * vendors under consideration, technologies, constraints and bespoke
+   * requirements, each with provenance, plus a deterministic completeness
+   * read. Explicitly NOT under `engine_data`: `engine_data` was scoped in
+   * Project Foundation Piece 2 as engine-OWNED data. Its WRITE path is
+   * strictly gated on `engine === "security_sourcing"`
+   * (assertEngineArtefactsIntact throws otherwise); a second, exhaustive
+   * pass over every read site (9 Aug 2026) found two call sites that read
+   * `engine_data` without that literal runtime check — project-story.ts and
+   * market-report.ts — but both consume it exclusively as security_sourcing-
+   * shaped content (a hard cast to SecurityScopeVerdict; a comment naming it
+   * "the security engine's stated estate"). No generic or engine-independent
+   * data has ever been stored under `engine_data` anywhere in the codebase,
+   * gated or not — which is why Understanding, a genuinely engine-
+   * independent concept, does not belong there even before this file's
+   * write gate is considered. See openSecurityGaps and project-health.ts for
+   * further engine === "security_sourcing" reads, and
+   * the Project/Understanding/projections architecture (docs/netify-
+   * project-and-projections-DRAFT-2026-08-03.md) treats Understanding as
+   * canonical Project-level state that engines and other artefacts (SoR,
+   * RFI, RFP) are PROJECTIONS derived from, not something any one engine
+   * owns. Sits here at the same level as `engine_data`, `phase` and
+   * `history` — every existing record without it validates unchanged. */
+  understanding: UnderstandingSchema.optional(),
   phase: z.enum(PROJECT_PHASE).optional(),
   history: z.array(ProjectHistoryEventSchema).default([]),
   consents: z.array(ProjectConsentSchema).default([]),

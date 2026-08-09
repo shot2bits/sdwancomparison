@@ -190,6 +190,13 @@ const NON_TRANSITION_EVENTS: Record<string, ProjectPhase[]> = {
   "project.created": ["scoping"],
   "requirement.updated": ["scoping", "scoped", "drafting", "drafted"],
   "verdict.attached": ["scoped", "drafting", "drafted"], // re-scope: new version, no bounce
+  // Milestone 3 (9 Aug 2026): the conversational capability's own event,
+  // recorded once per turn alongside project.created (turn 1) or
+  // requirement.updated/verdict.attached (later turns) — never replacing
+  // them. Same phase set as requirement.updated: Understanding can evolve
+  // any time before a document exists to protect (spec: correction and
+  // subsequent-turn behaviour).
+  "understanding.updated": ["scoping", "scoped", "drafting", "drafted"],
   "rfp.edited": ["drafting", "drafted"],
   "rfp.generated": ["drafted"], // regeneration to v(n+1)
   "publish.consented": ["drafted"],

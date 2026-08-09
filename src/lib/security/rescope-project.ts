@@ -24,6 +24,7 @@ import {
 import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { advanceProject, recordProjectEvent, projectPhase } from "@/lib/project-machine";
 import type { ProjectDetails } from "@/lib/rfp-types";
+import type { Understanding } from "@/lib/workspace/understanding";
 
 /** True when the live document differs from the latest generated snapshot:
  *  the same rule the generate_security_rfp tool applies. */
@@ -61,6 +62,20 @@ export interface RescopeInput {
   actorRef?: string;
   replaceEdits?: boolean;
   now?: number;
+  /** Milestone 3 (Gap B/D rulings, 9 Aug 2026): the same twin-gate bypasses
+   *  create-project.ts takes, for the conversational capability's
+   *  subsequent-turn updates only. Absent/false for every existing caller
+   *  (the existing rescope_security_project MCP tool), which is byte-for-
+   *  byte unchanged. See create-project.ts's CreateSecurityProjectInput for
+   *  the full rationale. */
+  skipConfidenceGate?: boolean;
+  skipRfpGeneration?: boolean;
+  /** Milestone 3 (Gap A/C): the updated Understanding this turn produced,
+   *  stored at the Project's top level (see rfp-types.ts), not inside
+   *  engine_data. Omitted (undefined) means "leave the Project's existing
+   *  Understanding exactly as it was" — so an existing rescope call that
+   *  knows nothing about Understanding can never wipe it. */
+  understanding?: Understanding;
 }
 
 export interface RescopedProject {
@@ -77,15 +92,20 @@ export async function buildRescopedProject(input: RescopeInput): Promise<Rescope
 
   const verdict = await assessSecurityRequirement(input.requirement);
   // One behaviour for every client (Article 17), same as creation: a
-  // re-scope is not recorded on guesswork.
-  if (verdict.confidence === "low") {
+  // re-scope is not recorded on guesswork. Milestone 3 (Gap B): the
+  // conversational capability's subsequent turns opt out with
+  // skipConfidenceGate; every existing caller leaves it unset.
+  if (verdict.confidence === "low" && !input.skipConfidenceGate) {
     throw new Error(
       "Confidence is low: answer the assessment's gap questions before re-scoping. " +
         verdict.gaps.map((g) => g.question).join(" "),
     );
   }
 
-  const edited = documentEdited(project);
+  // Milestone 3 (Gap D): when the conversational capability skips document
+  // generation, there is no document to protect from being overwritten, so
+  // the edited-document check (and its consent requirement) does not apply.
+  const edited = input.skipRfpGeneration ? false : documentEdited(project);
   if (edited && input.replaceEdits !== true) {
     throw new Error(
       "The document has been edited since the last generation; re-scoping regenerates it and would replace those edits. Confirm the replace-edits consent to proceed (earlier versions stay recoverable in the record).",
@@ -130,6 +150,15 @@ export async function buildRescopedProject(input: RescopeInput): Promise<Rescope
       requirement: input.requirement,
       artefacts: p.engine_data?.artefacts ?? [],
     },
+    // Milestone 3 (9 Aug 2026, corrected same-day after an architecture
+    // check): Understanding is canonical Project state, set at the SAME
+    // level as engine_data, never nested inside it. Explicit
+    // input.understanding wins (a conversational turn updating it);
+    // otherwise the `...p` spread above already carries the project's
+    // existing top-level Understanding through unchanged, so a caller
+    // that knows nothing about it (every existing rescope caller) can
+    // never wipe it.
+    ...(input.understanding ? { understanding: input.understanding } : {}),
   };
 
   p = recordProjectEvent(p, {
@@ -141,34 +170,42 @@ export async function buildRescopedProject(input: RescopeInput): Promise<Rescope
     detail: { version: versions.verdict, rulebookVersion: verdict.rulebookVersion, confidence: verdict.confidence },
   });
 
-  const sections = generateRfpSections(verdict);
-  p = {
-    ...p,
-    rfp_sections: sections,
-    engine_data: {
-      ...p.engine_data!,
-      artefacts: [
-        ...(p.engine_data!.artefacts ?? []),
-        { version: versions.artefact, kind: "rfp_sections" as const, input_digest: verdict.inputDigest, created_at: now + 1, via: input.via, sections_snapshot: sections },
-      ],
-    },
-  };
+  // Milestone 3 (Gap D): the conversational capability's subsequent turns
+  // skip document (re)generation entirely — the project's phase and
+  // rfp_sections are left exactly as they were (for a project this
+  // capability created, that means still "scoped", still no document).
+  // Every existing caller leaves skipRfpGeneration unset, so this block
+  // runs for them exactly as before.
+  if (!input.skipRfpGeneration) {
+    const sections = generateRfpSections(verdict);
+    p = {
+      ...p,
+      rfp_sections: sections,
+      engine_data: {
+        ...p.engine_data!,
+        artefacts: [
+          ...(p.engine_data!.artefacts ?? []),
+          { version: versions.artefact, kind: "rfp_sections" as const, input_digest: verdict.inputDigest, created_at: now + 1, via: input.via, sections_snapshot: sections },
+        ],
+      },
+    };
 
-  const genEvent = {
-    at: now + 2,
-    actor: "system" as const,
-    actor_ref: "rescope",
-    via: input.via,
-    event: "rfp.generated",
-    detail: {
-      artefact_version: versions.artefact,
-      rescope: true,
-      replaced_edits: edited,
-      verdict_digest: verdict.inputDigest,
-      open_gaps: verdict.gaps.length,
-    },
-  };
-  p = projectPhase(p) === "drafted" ? recordProjectEvent(p, genEvent) : advanceProject(p, genEvent);
+    const genEvent = {
+      at: now + 2,
+      actor: "system" as const,
+      actor_ref: "rescope",
+      via: input.via,
+      event: "rfp.generated",
+      detail: {
+        artefact_version: versions.artefact,
+        rescope: true,
+        replaced_edits: edited,
+        verdict_digest: verdict.inputDigest,
+        open_gaps: verdict.gaps.length,
+      },
+    };
+    p = projectPhase(p) === "drafted" ? recordProjectEvent(p, genEvent) : advanceProject(p, genEvent);
+  }
 
   return { project: p, verdict };
 }

@@ -22,6 +22,7 @@ import {
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
+import type { Understanding } from "@/lib/workspace/understanding";
 
 export const CREATE_CONSENT_TEXT =
   "Create my Security Sourcing project: Netify stores this requirement and scoping verdict so I can build and publish an RFP to matched vendors. No vendor is contacted until I publish.";
@@ -43,6 +44,30 @@ export interface CreateSecurityProjectInput {
   preferredVendors?: string[];
   ids: { id: string; shareToken: string; manageToken: string }; // injected so the core stays pure
   now?: number;
+  /**
+   * Milestone 3 (Gap B/D rulings, 9 Aug 2026): the two twin-gate bypasses,
+   * for the NEW conversational entry point only. Both default to false/
+   * absent, so every existing caller (the web wizard's create route, the
+   * existing create_security_project MCP tool) is byte-for-byte unchanged.
+   *
+   * skipConfidenceGate: create the Project even at low confidence — "low
+   * confidence is Project state, not a reason for the Project not to
+   * exist." The verdict is still computed and attached honestly, at
+   * whatever confidence it lands on; nothing here changes the verdict
+   * itself, only whether a low confidence stops creation.
+   *
+   * skipRfpGeneration: do not auto-generate the RFP document or advance
+   * the phase past "scoped". The conversational capability creates
+   * Project -> Understanding only (Gap D); the existing
+   * generate_security_rfp tool remains available, unmodified, for the
+   * buyer's later explicit step into drafting.
+   */
+  skipConfidenceGate?: boolean;
+  skipRfpGeneration?: boolean;
+  /** Milestone 3 (Gap A/C): the richer Understanding this creation was
+   *  built from, stored verbatim on the Project alongside the rulebook's
+   *  own `requirement`. Absent for every existing caller. */
+  understanding?: Understanding;
 }
 
 export interface BuiltSecurityProject {
@@ -126,7 +151,13 @@ export async function buildSecurityProject(
   // One behaviour for every client (Article 17): a project is not created
   // on guesswork. The page disables its button at low confidence; the API
   // and the MCP tool refuse here with the same reason.
-  if (verdict.confidence === "low") {
+  //
+  // Milestone 3 (Gap B ruling, 9 Aug 2026): the ONE exception is the new
+  // conversational entry point, which opts in with skipConfidenceGate.
+  // Every other caller (web wizard, existing create_security_project MCP
+  // tool) never sets this flag, so this throw fires for them exactly as
+  // before.
+  if (verdict.confidence === "low" && !input.skipConfidenceGate) {
     throw new Error(
       "Confidence is low: answer the assessment's gap questions before creating a project. " +
         verdict.gaps.map((g) => g.question).join(" "),
@@ -150,6 +181,12 @@ export async function buildSecurityProject(
     methodology_version: "2026.1",
     engine: "security_sourcing",
     engine_data: { verdicts: [], requirement: input.requirement },
+    // Milestone 3 (9 Aug 2026, corrected same-day after an architecture
+    // check): Understanding is canonical Project state, not engine_data —
+    // set here, at the SAME level as engine_data itself, never nested
+    // inside it. Absent for every caller that doesn't pass it, so the
+    // Project shape is otherwise identical to before this milestone.
+    ...(input.understanding ? { understanding: input.understanding } : {}),
     phase: "scoping",
     history: [],
     consents: [
@@ -202,47 +239,57 @@ export async function buildSecurityProject(
     detail: { version: 1, rulebookVersion: verdict.rulebookVersion, confidence: verdict.confidence },
   });
 
-  // Step 3: generation happens INSIDE creation (adapter, not a page). The
-  // buyer's next click lands in the EXISTING RFP Builder with the document
-  // already populated; there is no generation UI anywhere. Deterministic
-  // from the verdict (Article 3); the snapshot keeps v1 recoverable
-  // (Article 9; acceptance check 8).
-  const sections = generateRfpSections(verdict);
-  const askCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
-  const infoCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority === "optional").length, 0);
-  project = {
-    ...project,
-    rfp_sections: sections,
-    engine_data: {
-      ...project.engine_data!,
-      artefacts: [
-        {
-          version: 1,
-          kind: "rfp_sections" as const,
-          input_digest: verdict.inputDigest,
-          created_at: now,
-          via,
-          sections_snapshot: sections,
-        },
-      ],
-    },
-  };
+  // Milestone 3 (Gap D ruling, 9 Aug 2026): the conversational entry point
+  // opts out of automatic generation with skipRfpGeneration. The project
+  // stops here, at phase "scoped" (a verdict attached, no document) — the
+  // existing generate_security_rfp tool (regenerate-project.ts) already
+  // handles building the first document for a project that has never been
+  // drafted, unmodified, for whenever the buyer takes that explicit step.
+  // Every existing caller leaves this flag unset, so the block below runs
+  // for them exactly as before.
+  if (!input.skipRfpGeneration) {
+    // Step 3: generation happens INSIDE creation (adapter, not a page). The
+    // buyer's next click lands in the EXISTING RFP Builder with the document
+    // already populated; there is no generation UI anywhere. Deterministic
+    // from the verdict (Article 3); the snapshot keeps v1 recoverable
+    // (Article 9; acceptance check 8).
+    const sections = generateRfpSections(verdict);
+    const askCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+    const infoCount = sections.reduce((n, s) => n + s.questions.filter((q) => q.priority === "optional").length, 0);
+    project = {
+      ...project,
+      rfp_sections: sections,
+      engine_data: {
+        ...project.engine_data!,
+        artefacts: [
+          {
+            version: 1,
+            kind: "rfp_sections" as const,
+            input_digest: verdict.inputDigest,
+            created_at: now,
+            via,
+            sections_snapshot: sections,
+          },
+        ],
+      },
+    };
 
-  project = advanceProject(project, {
-    at: now + 2,
-    actor: "system", // the adapter generates; the buyer edits afterwards
-    actor_ref: "generate-rfp",
-    via: input.via,
-    event: "rfp.generated",
-    detail: {
-      artefact_version: 1,
-      sections: sections.length,
-      questions: askCount,
-      informational_items: infoCount,
-      verdict_digest: verdict.inputDigest,
-      open_gaps: verdict.gaps.length,
-    },
-  });
+    project = advanceProject(project, {
+      at: now + 2,
+      actor: "system", // the adapter generates; the buyer edits afterwards
+      actor_ref: "generate-rfp",
+      via: input.via,
+      event: "rfp.generated",
+      detail: {
+        artefact_version: 1,
+        sections: sections.length,
+        questions: askCount,
+        informational_items: infoCount,
+        verdict_digest: verdict.inputDigest,
+        open_gaps: verdict.gaps.length,
+      },
+    });
+  }
 
   return { project, verdict };
 }
