@@ -2688,7 +2688,27 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               </div>
             ) : (
               <div>
-                <div className="max-w-[36em] text-[16px] leading-[1.6]">
+                {/* Sell block (Robert's ask, 10 Aug 2026, tightened same day
+                    on his "more concise and harder hitting" feedback): the
+                    mechanics/trust copy below this earns confidence, but
+                    nothing on the panel made the case for WHY to publish.
+                    One headline stating exactly what this gets you + a row
+                    of plain benefit chips; the old separate closing line is
+                    folded into the headline so there's one less text block.
+                    No new colours, same tokens as the diagram and chips
+                    elsewhere in this panel. */}
+                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5] text-[#141414]">
+                  Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson required.
+                </p>
+                <div className="mt-2.5 flex max-w-[36em] flex-wrap gap-1.5">
+                  {["Get bids", "Get pricing", "Get vetted responses", "Send messages", "Request demos"].map((chip) => (
+                    <span key={chip} className="rounded-full border border-[#F5A21B]/40 bg-[#FFF7E8] px-2.5 py-1 text-[12.5px] font-medium text-[#8A4D08]">
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-4 max-w-[36em] text-[16px] leading-[1.6]">
                   Publishing lists your project anonymously on the Netify opportunity board and notifies matched vendors. Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted</a> vendors and service providers can view the opportunity in full or respond. Everyone else, including search engines, sees only the anonymous notice and can register to become vetted first.
                 </div>
 

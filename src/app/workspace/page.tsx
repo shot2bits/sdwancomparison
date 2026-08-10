@@ -25,10 +25,14 @@ import { getAllVendors } from "@/lib/vendors";
 const ENGINE_H1 = "The global SASE and SD-WAN sourcing engine";
 const ENGINE_PROMISE =
   "Describe your requirement in your own words. Netify structures it, identifies what’s missing, evaluates suitable vendors and service providers and prepares an anonymous opportunity for the market.";
-/** The trust paragraph (his exact copy, 29 Jul): plain centred text,
- *  never a card or border, never uppercase, no heading of its own. */
+/** The trust paragraph (his exact copy, 29 Jul, extended 10 Aug 2026 with
+ *  his sell-the-concept language, then tightened same day): plain centred
+ *  text, never a card or border, never uppercase, no heading of its own.
+ *  Kept verbatim-identical with the home twin; see that file's comment for
+ *  the full 10 Aug context (graphic explored and set aside, language-only
+ *  addition keeps ONE HIERARCHY intact). */
 const ENGINE_VALUE =
-  `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors.`;
+  `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors. Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson involved.`;
 /** Geography retired as a separate line (Robert, 29 Jul: one message);
  *  it lives in the value card's title. Twin of home. */
 const ENGINE_AGENT =

@@ -36,10 +36,18 @@ const ENGINE_H1 = "The global SASE and SD-WAN sourcing engine";
 /** The supporting paragraph (his exact copy, 29 Jul). */
 const ENGINE_PROMISE =
   "Describe your requirement in your own words. Netify structures it, identifies what’s missing, evaluates suitable vendors and service providers and prepares an anonymous opportunity for the market.";
-/** The trust paragraph (his exact copy, 29 Jul): plain centred text,
- *  never a card or border, never uppercase, no heading of its own. */
+/** The trust paragraph (his exact copy, 29 Jul, extended 10 Aug 2026 with
+ *  his sell-the-concept language, then tightened same day on his "more
+ *  concise and harder hitting" feedback): plain centred text, never a
+ *  card or border, never uppercase, no heading of its own. The added
+ *  sentence stays language-only (Robert's ruling, 10 Aug: "just language
+ *  agreed" — a graphic was explored and set aside as too landing-page-like;
+ *  the shortlist/messaging/contact idea behind it was earmarked for a
+ *  future About page instead, not built here) so the ONE HIERARCHY rule
+ *  below still holds: still exactly one H1, one supporting paragraph, one
+ *  trust paragraph, then the input. */
 const ENGINE_VALUE =
-  `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors.`;
+  `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors. Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson involved.`;
 /** The two-buyer line and the control line (ruled v2 door). Geography
  *  retired as a separate line (Robert, 29 Jul: one message); it lives in
  *  the value card's title. */
