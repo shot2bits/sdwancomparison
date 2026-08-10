@@ -2183,6 +2183,21 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
               </button>
             </div>
           </div>
+          {/* Robert, 10 Aug 2026 (screenshot of this exact empty state):
+              it isn't obvious the box above fills in the statement fields
+              below automatically. That instruction already existed
+              further down (THREAD_WELCOME, and the statement's own
+              intro paragraph) but both sit well below the fold here and
+              were being missed. This is the same sentence, moved to
+              where the eye actually is: directly under the box, only
+              before the first fact lands. Round-6 law (no example
+              answers in copy) still holds -- this describes the
+              mechanism, it does not demonstrate an answer. */}
+          {!started && (
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
+              Answers below fill in automatically as you describe your requirement above.
+            </p>
+          )}
           {wrongCompany && (
             <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
               Looking for website hosting? That is Netlify, a different company. This is Netify, the SASE and SD-WAN procurement marketplace; carry on if the network is what you came for.
