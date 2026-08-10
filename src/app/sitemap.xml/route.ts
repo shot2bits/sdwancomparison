@@ -75,6 +75,10 @@ export async function GET() {
       loc: `${SITE_URL}/alternatives/${slug}`,
       priority: "0.7",
     })),
+    // The /compare/ INDEX was missing while all 25 children were listed,
+    // the same gap /best/'s index had until 2 Jul 2026 (see the comment
+    // above) -- found again by Harry Yelland's 10 Aug 2026 platform test.
+    { loc: `${SITE_URL}/compare`, priority: "0.8" },
     ...COMPARE_PAIRS.map((p) => ({
       loc: `${SITE_URL}/compare/${p.slug}`,
       priority: "0.8",

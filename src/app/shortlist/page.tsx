@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
 import ProviderTables from "@/components/ProviderTables";
 import { BEST_PAGES } from "@/lib/best-pages";
@@ -98,7 +99,14 @@ export default function ShortlistPage() {
         </p>
       </div>
 
-      <ShortlistBuilder vendors={vendors} features={features} />
+      {/* useSearchParams() inside ShortlistBuilder (fix, 10 Aug 2026: the
+          builder now reacts to URL changes after mount, not just the first
+          one) requires a Suspense boundary here to keep this page
+          statically prerendered rather than opting the whole route into
+          per-request dynamic rendering. */}
+      <Suspense fallback={null}>
+        <ShortlistBuilder vendors={vendors} features={features} />
+      </Suspense>
 
       {/* Below the ranked list, per Robert 29 Jul: the builder answers the
           buyer's question, these tables are the reference behind it. */}

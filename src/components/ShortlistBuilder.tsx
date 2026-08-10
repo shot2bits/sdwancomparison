@@ -6,11 +6,14 @@
  * MCP tool and the Claude agent). This component only collects input,
  * calls buildShortlist, and renders the result.
  *
- * URL state: reads window.location.search on mount, pushes changes back
- * via history.replaceState (debounced) so every scenario is shareable.
+ * URL state: reads the URL via useSearchParams() -- reactive to Next.js
+ * client-side navigation, not just first mount (fixed 2026-08-10; see the
+ * read-effect below) -- and pushes local edits back via history.replaceState
+ * (debounced) so every scenario is shareable.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import CompareTable from "@/components/CompareTable";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import Continuation from "@/components/Continuation";
@@ -101,12 +104,22 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     [features],
   );
 
-  // Read URL state on mount
+  // Read URL state on mount, and again whenever it changes via Next.js
+  // client-side navigation while this component stays mounted -- e.g. the
+  // "Refine this shortlist interactively" link on a best/[slug] page
+  // navigating to /shortlist?<scenario> when the shortlist route was
+  // already visited earlier in the same tab. A window.location.search
+  // read in a mount-only effect only ever saw the first URL this instance
+  // was mounted with, since Next doesn't remount the page component on a
+  // same-route, query-only navigation; useSearchParams() is reactive to
+  // exactly that case. (Root-caused 2026-08-10 against Harry Yelland's
+  // testing: that handoff appeared to open an empty builder.)
+  const searchParams = useSearchParams();
   useEffect(() => {
-    setInput(decodeScenario(window.location.search, featureIds));
+    setInput(decodeScenario(searchParams.toString(), featureIds));
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams]);
 
   // Push state changes back into the URL (debounced)
   const urlTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
