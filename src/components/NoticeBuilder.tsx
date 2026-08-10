@@ -621,7 +621,18 @@ export default function NoticeBuilder() {
                 {improve.recommend_full_rfp && (
                   <p className="rounded-sm border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                     <strong>Consider a full RFP.</strong> {improve.recommend_reason}{" "}
-                    <a href="https://netify.co.uk/" className="underline">Continue on the desk</a>, where priorities and a commercial position raise it to a full RFP; paste this RFI straight in.
+                    {/* Fix, 10 Aug 2026: this linked to the bare production
+                        domain with no data -- "paste this RFI straight in"
+                        was a promise the link itself didn't keep, and an
+                        absolute https://netify.co.uk/ URL also yanked a
+                        buyer on a preview deployment off the preview
+                        entirely. Relative, matching the site logo's own
+                        home link (MegaNav.tsx), plus "q" -- the desk
+                        already reads it on load and runs it through the
+                        same intake as if typed there (ProjectDesk.tsx
+                        :846,858-862) -- so the RFI text now actually
+                        carries across instead of requiring a manual paste. */}
+                    <a href={`/?q=${encodeURIComponent(draft.summary || draft.title)}`} className="underline">Continue on the desk</a>, where priorities and a commercial position raise it to a full RFP.
                   </p>
                 )}
                 <div className="flex gap-3">
@@ -712,7 +723,10 @@ export default function NoticeBuilder() {
                 </>
               )}
               <p className="mt-4 text-xs text-[var(--ink-500)]">
-                Need a formal process instead? <a href="https://netify.co.uk/" className="underline">Turn this into a full RFP</a>.
+                {/* Fix, 10 Aug 2026: same root cause and same fix as the
+                    step-6 callout above -- see that comment. */}
+                Need a formal process instead?{" "}
+                <a href={`/?q=${encodeURIComponent(draft.summary || draft.title)}`} className="underline">Turn this into a full RFP</a>.
               </p>
             </div>
           </div>

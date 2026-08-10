@@ -124,7 +124,19 @@ export default function GuidedStart() {
     if (summary) p.set("summary", summary);
     if (s.budget) p.set("budget", s.budget);
     if (s.sector) p.set("sector", s.sector);
-    router.push(`/opportunities?${p.toString()}`);
+    // Fix, 10 Aug 2026: this pushed to /opportunities, the static two-card
+    // chooser page, which reads no query params -- every answer collected
+    // above was silently dropped and the buyer landed on a blank choice
+    // screen. /opportunities/new is the actual notice wizard that reads
+    // "prefill" (NoticeBuilder.tsx:140-149); it already reads it verbatim
+    // for the quick-pricing links on /opportunities/page.tsx itself, so
+    // this now matches the "Compare a shortlist" branch above and that
+    // established pattern. NoticeBuilder does not yet consume regions,
+    // sites, budget or sector from the URL (only scope, summary and
+    // engagement) -- unchanged here, flagged rather than widened, since
+    // wiring those in needs a region-key mapping first (this file's
+    // "apac" vs. notice-options.ts's "asia_pacific").
+    router.push(`/opportunities/new?${p.toString()}`);
   }
 
   const chip = (active: boolean) =>
