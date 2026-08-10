@@ -221,6 +221,7 @@ const GENERATE_RFP_DEFINITION = {
       open_gaps: { type: "number", description: "Gaps that must be answered or individually accepted before publication" },
       builder_url: { type: "string" },
       note: { type: "string" },
+      next_step: { type: "string", description: "Names the tool that publishes this Project (publish_rfp) and how its parameters map onto this one's." },
     },
   },
 } as const;
@@ -266,7 +267,7 @@ const RESCOPE_DEFINITION = {
 const CONTINUE_CONVERSATION_DEFINITION = {
   name: "continue_security_conversation",
   description:
-    `Netify Security Sourcing: the single capability for "continue this procurement conversation." Give it the buyer's next sentence; it composes extraction, assessment, and project creation/re-scope behind one call, so you never need to sequence assess_security_requirement/create_security_project/rescope_security_project yourself. FIRST TURN (omit project_id): the Project is created immediately, even when the buyer's Understanding is incomplete or the ${RULEBOOK_VERSION} verdict is low confidence — low confidence is Project state, not a reason for the Project not to exist. CONSENT REQUIRED on the first turn only: pass consent: true with the buyer's explicit agreement; the wording recorded is returned as consent_text (also returned on refusal, so you can show it before asking). SUBSEQUENT TURNS (pass the project_id and manage_token this tool returned): the new sentence is reconciled against the Project's standing Understanding, not treated as a fresh start — a correction (e.g. "actually 46 sites, not 40") supersedes the earlier value; the superseded value is not lost, it is named in the returned corrections array and stays in the project's audit history. Every fact in the returned understanding carries provenance (stated with the buyer's quote, or inferred with the inference named). STOPS SHORT OF THE RFP WORKFLOW BY DESIGN: this tool never generates an RFP document, never matches or invites suppliers, never publishes anything. The Project it builds sits at phase "scoped" (a verdict attached, no document yet) until you call generate_security_rfp explicitly, later, when the buyer is ready to move into drafting. Read understanding.completeness.missing_information and earned_questions to decide what to ask next; when nothing is missing or earned, ask nothing — the Project already exists and is already usable as it stands.`,
+    `Netify Security Sourcing: the single capability for "continue this procurement conversation." Give it the buyer's next sentence; it composes extraction, assessment, and project creation/re-scope behind one call, so you never need to sequence assess_security_requirement/create_security_project/rescope_security_project yourself. FIRST TURN (omit project_id): the Project is created immediately, even when the buyer's Understanding is incomplete or the ${RULEBOOK_VERSION} verdict is low confidence — low confidence is Project state, not a reason for the Project not to exist. CONSENT REQUIRED on the first turn only: pass consent: true with the buyer's explicit agreement; the wording recorded is returned as consent_text (also returned on refusal, so you can show it before asking). SUBSEQUENT TURNS (pass the project_id and manage_token this tool returned): the new sentence is reconciled against the Project's standing Understanding, not treated as a fresh start — a correction (e.g. "actually 46 sites, not 40") supersedes the earlier value; the superseded value is not lost, it is named in the returned corrections array and stays in the project's audit history. Every fact in the returned understanding carries provenance (stated with the buyer's quote, or inferred with the inference named). STOPS SHORT OF THE RFP WORKFLOW BY DESIGN: this tool never generates an RFP document, never matches or invites suppliers, never publishes anything. The Project it builds sits at phase "scoped" (a verdict attached, no document yet) until you call generate_security_rfp explicitly, later, when the buyer is ready to move into drafting. THE FULL PATH TO PUBLISH: generate_security_rfp turns this Project into a document, then the same Project publishes through publish_rfp, passing this tool's project_id as publish_rfp's rfp_id (same project, same manage_token, different parameter name between the two tools). publish_rfp still hands off to buyer sign-in, a human always signs before anything publishes, but that is the confirmed route from this conversation all the way to a published opportunity. Read understanding.completeness.missing_information and earned_questions to decide what to ask next; when nothing is missing or earned, ask nothing — the Project already exists and is already usable as it stands.`,
   inputSchema: {
     type: "object",
     properties: {
@@ -420,6 +421,13 @@ export async function callSecurityTool(
         note: verdict.gaps.length
           ? "Draft generated. Publication will require each open gap to be answered (re-scope) or individually accepted by the buyer."
           : "Draft generated from the latest verdict.",
+        // Names the next tool explicitly and states the parameter crosswalk
+        // (10 Aug 2026, closing the discoverability gap found while
+        // reviewing why the newest buyer entry point looked like it had no
+        // route to Publish: the route already existed, generate_security_rfp
+        // writes to the same project record publish_rfp reads, but nothing
+        // told the calling agent that, or that project_id becomes rfp_id).
+        next_step: `To publish, call publish_rfp with rfp_id: "${id}" (this Project's project_id) and the same manage_token. It hands the buyer to sign-in before anything sends; a human always signs before anything publishes.`,
       };
     }
     case "rescope_security_project": {

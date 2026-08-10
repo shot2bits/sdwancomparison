@@ -2488,6 +2488,16 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                     ? "The gaps left are ones vendors and service providers can quote around."
                     : "The gaps left are ones vendors and service providers can quote around. Nothing has left this page."}
                 </div>
+                {/* Mid-funnel sell reinforcement (10 Aug 2026, Robert's
+                    standing goal: "the goal is to get a publish so that last
+                    step must be clear what the user gets out of the
+                    publish"). The sell case previously only lived at the
+                    hero and the publish panel itself; this is the one
+                    natural point in between, readiness just crossing
+                    threshold, so the payoff stays in view on the way there. */}
+                <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#8A4D08]">
+                  Next: see who fits, then publish to get bids, pricing and vetted responses.
+                </div>
               </div>
               <button
                 type="button"
