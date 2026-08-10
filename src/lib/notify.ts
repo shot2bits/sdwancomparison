@@ -27,6 +27,53 @@ const ACTIVITY_LABELS: Partial<Record<FeedType, string>> = {
   question: "asked a clarification question on",
 };
 
+/**
+ * Internal lead alert for an Opportunity publish (Robert's principle, 10 Aug
+ * 2026: there is no draft or value in this record until it reaches the
+ * board). An Opportunity has no draft state at all — POST /api/opportunity
+ * only ever runs at the moment of publish (see that route's own gating
+ * comment), so this is the single, correct notification point for the
+ * whole intake path: nothing earlier would be alerting on real value, and
+ * nothing later would be missed. Mirrors rfp-publish.ts's sendPublishEmails
+ * internal alert for the Project/RFP engine, so the team gets one
+ * consistent "something just went live" signal regardless of which intake
+ * path a buyer used. Best effort: never blocks the publish response.
+ */
+export async function notifyOpportunityPublishedLead(opp: Opportunity): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false;
+  const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
+  const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
+  const domain = (opp.owner_email.split("@")[1] ?? "unknown").toLowerCase();
+  const roomUrl = `${SITE_URL}/opportunities/${opp.id}/room`;
+  const org = [
+    opp.buyer_sector && `Sector: ${opp.buyer_sector}`,
+    opp.buyer_size_band && `Size: ${opp.buyer_size_band}`,
+    opp.sites != null && `Sites: ${opp.sites}`,
+    opp.regions.length > 0 && `Regions: ${opp.regions.join(", ")}`,
+  ].filter(Boolean).join("<br/>");
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to,
+        reply_to: opp.owner_email || undefined,
+        subject: `Opportunity Published | ${domain} | ${opp.scope.join(", ") || "unscoped"}`,
+        html:
+          `<p><strong>${opp.title}</strong> (${opp.id}) was published by <strong>${opp.owner_email || "an unattributed session"}</strong> via the Opportunity wizard.</p>` +
+          (org ? `<p>${org}</p>` : "") +
+          `<p>Engagement: ${opp.engagement_type} &middot; Response mode: ${opp.response_mode} &middot; Eligibility: ${opp.eligibility} &middot; Visibility: ${opp.visibility}</p>` +
+          `<p><a href="${roomUrl}">Open the response room</a></p>`,
+      }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function notifyBuyerOfSupplierActivity(
   opp: Opportunity,
   supplierName: string,

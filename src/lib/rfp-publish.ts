@@ -277,12 +277,28 @@ function pinnedNoteFor(p: ProjectDetails): string {
   return pins.length ? `<p><em>Includes the vendor${pins.length === 1 ? "" : "s"} you named for evaluation: ${pins.join(", ")}.</em></p>` : "";
 }
 
+/** Friendly label for the internal alert: which engine, and which door the
+ *  buyer came through. Both fields pre-date Milestone 3 as schema (engine
+ *  Piece B, source Piece 2) but neither was ever surfaced to a human until
+ *  now — Robert's 10 Aug ask to make the emails reflect the current
+ *  deployment. */
+function engineChannelLabel(p: ProjectDetails): string {
+  const engine = p.engine === "security_sourcing" ? "Security Sourcing" : "Network/SD-WAN";
+  const channel = p.source === "mcp" ? "AI agent (MCP)" : p.source === "wizard" ? "web wizard" : "unknown/pre-stamp";
+  return `${engine} &middot; via ${channel}`;
+}
+
 async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited: { name: string }[], report?: MarketReport) {
   const key = process.env.RESEND_API_KEY;
   if (!key) return;
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const to = process.env.SIGNUP_NOTIFY_EMAIL ?? "support@netify.com";
-  const rfpUrl = `${SITE_URL}/rfp-builder/${p.id}/`;
+  // The canonical Project view (Robert's copy, 21 Jul: the RFP Builder is
+  // "a deliberate escape hatch, never the main road"). Both the internal
+  // alert and the buyer confirmation used to point at that escape hatch
+  // (/rfp-builder/{id}/, still a real, live page) rather than the front
+  // door — fixed 10 Aug 2026.
+  const rfpUrl = `${SITE_URL}/project/${p.id}/`;
   const supplierNames = invited.map((v) => v.name).join("\n");
   const org = [
     p.buyer.sector && `Sector: ${sectorLabel(p.buyer.sector)}`,
@@ -304,7 +320,7 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
     to,
     reply_to: ownerEmail,
     subject: `RFP Published Lead | ${emailDomain(ownerEmail) ?? "unknown"} | ${invited.length} vendors`,
-    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p>${org ? `<p>${org}</p>` : ""}<p><strong>Vendors auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}${pinnedNoteFor(p)}<p><a href="${rfpUrl}">Open the RFP</a></p>`,
+    html: `<p><strong>${p.title}</strong> (${p.id}) was published by <strong>${ownerEmail}</strong>.</p><p>${engineChannelLabel(p)}</p>${org ? `<p>${org}</p>` : ""}<p><strong>Vendors auto-selected:</strong></p><pre>${supplierNames}</pre>${report?.matched?.region_assumption ? `<p><em>${report.matched.region_assumption}</em></p>` : ""}${pinnedNoteFor(p)}<p><a href="${rfpUrl}">Open the Project</a></p>`,
   });
 
   // Confirmation to the buyer, carrying the Market Report (18 July 2026):
