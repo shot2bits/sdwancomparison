@@ -2689,8 +2689,44 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             ) : (
               <div>
                 <div className="max-w-[36em] text-[16px] leading-[1.6]">
-                  Publishing generates your document, sends the full requirement to the ones you keep, and lists it anonymously for the rest of the market. Nobody sees your name until you choose to reply, and vendors and service providers are <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted</a> before they can respond.
+                  Publishing lists your project anonymously on the Netify opportunity board and notifies matched vendors. Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted</a> vendors and service providers can view the opportunity in full or respond. Everyone else, including search engines, sees only the anonymous notice and can register to become vetted first.
                 </div>
+
+                {/* Publish-mechanics diagram (Robert's ask, 10 Aug 2026): the
+                    board/notify/vetted-view structure stated in prose above,
+                    shown as a shape so it reads in one glance. Same colour
+                    tokens as the rest of this panel; no new palette. */}
+                <div className="my-4 max-w-[38em] rounded-md border border-[#EAE7E1] bg-[#F5F3EE] p-4 text-[12px] leading-snug">
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 font-semibold text-[#33302C]">Your project</div>
+                    <div className="text-[#8C8A85]" style={mono}>publish ↓</div>
+                    <div className="rounded-md border border-[#F5A21B] bg-[#FFF7E8] px-3 py-1.5 text-center">
+                      <p className="m-0 font-semibold text-[#8A4D08]">Opportunity board</p>
+                      <p className="m-0 text-[11px] text-[#6E6C67]">Anonymous notice: sector, size band. No name, no contact details.</p>
+                    </div>
+                    <div className="grid w-full grid-cols-2 gap-3 pt-1">
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="text-[#8C8A85]" style={mono}>↓ notified</div>
+                        <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
+                          <p className="m-0 font-semibold text-[#33302C]">Matched, vetted vendors</p>
+                          <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">See the opportunity in full. Can respond directly.</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="text-[#8C8A85]" style={mono}>↓ can find it</div>
+                        <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
+                          <p className="m-0 font-semibold text-[#33302C]">Everyone else</p>
+                          <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">Public web, search engines, unvetted vendors. Sees the notice only. Can register to become vetted.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-[#8C8A85]" style={mono}>↓</div>
+                    <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 text-center font-semibold text-[#33302C]">
+                      You choose who gets your contact details, and when
+                    </div>
+                  </div>
+                </div>
+
                 <p className="m-0 mt-2 max-w-[38em] text-[12.5px] leading-relaxed text-[#5F5D59]">
                   <span className="font-semibold text-[#33302C]">Your project publishes anonymously.</span>{" "}
                   Nobody browsing Netify, and no search engine, sees your company name or your contact details
