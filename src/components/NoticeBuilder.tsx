@@ -253,6 +253,29 @@ export default function NoticeBuilder() {
     };
   }, [draft, previewTs]);
 
+  /* Fix, 10 Aug 2026 (Harry's Test 5.9 misattribution -- the actual gap it
+     surfaced): the "Continue on the desk" / "Turn this into a full RFP"
+     handoff carried only the free-text summary via ?q=, dropping the
+     sector the buyer already picked in this wizard -- the desk then asked
+     for it again from scratch. Sector is the one wizard field confirmed
+     safe to carry across: notice-options.ts's SECTORS labels match
+     extract.ts's WORKSPACE_SECTORS labels exactly (both checked by hand).
+     Compliance and region keys are NOT safe -- they diverge between the
+     two files (uk_gdpr/iso_27001/... vs iso27001/..., asia_pacific vs
+     apac) -- so only sector rides the link; the rest is deliberately left
+     for the buyer to restate on the desk rather than risk landing a
+     silently-wrong value. draft.buyer_sector holds the wizard's KEY
+     ("healthcare"); the desk's organisation.sector fact wants the LABEL
+     ("Healthcare & pharma"), so it's translated here via the same SECTORS
+     catalogue the sector <select> above already uses. */
+  const deskHandoffHref = useMemo(() => {
+    const params = new URLSearchParams();
+    params.set("q", draft.summary || draft.title);
+    const sectorLabel = SECTORS.find((s) => s.key === draft.buyer_sector)?.label;
+    if (sectorLabel) params.set("sector", sectorLabel);
+    return `/?${params.toString()}`;
+  }, [draft.summary, draft.title, draft.buyer_sector]);
+
   const canContinue =
     step === 0 ? draft.scope.length > 0
       : step === 2 ? draft.summary.trim().length > 20
@@ -632,7 +655,7 @@ export default function NoticeBuilder() {
                         same intake as if typed there (ProjectDesk.tsx
                         :846,858-862) -- so the RFI text now actually
                         carries across instead of requiring a manual paste. */}
-                    <a href={`/?q=${encodeURIComponent(draft.summary || draft.title)}`} className="underline">Continue on the desk</a>, where priorities and a commercial position raise it to a full RFP.
+                    <a href={deskHandoffHref} className="underline">Continue on the desk</a>, where priorities and a commercial position raise it to a full RFP.
                   </p>
                 )}
                 <div className="flex gap-3">
@@ -726,7 +749,7 @@ export default function NoticeBuilder() {
                 {/* Fix, 10 Aug 2026: same root cause and same fix as the
                     step-6 callout above -- see that comment. */}
                 Need a formal process instead?{" "}
-                <a href={`/?q=${encodeURIComponent(draft.summary || draft.title)}`} className="underline">Turn this into a full RFP</a>.
+                <a href={deskHandoffHref} className="underline">Turn this into a full RFP</a>.
               </p>
             </div>
           </div>

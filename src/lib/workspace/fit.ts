@@ -53,6 +53,13 @@ export type FitSupplier = {
   matched: FitEvidence[];
   /** Checks the dataset does not evidence for this supplier. */
   missed: FitEvidence[];
+  /** Fix, 10 Aug 2026 (Harry's E2E, Test 4.4): the desk's own fits panel
+   *  had no vendor-contact route at all -- "Read the full record" only
+   *  went to the vendor's Netify profile, one click short of the contact
+   *  button every other surface (vendor page, compare page, best/ranked
+   *  list) already carries. Same field the vendor page's own button reads
+   *  (marketplace_url), added here so the panel can offer it directly. */
+  marketplace_url: string | null;
 };
 
 export type WorkspaceFitResult =
@@ -193,6 +200,7 @@ function enrich(slugs: string[], regionKeys: string[], vendors: VendorRecord[], 
       coverage,
       matched,
       missed,
+      marketplace_url: v.marketplace_url ?? null,
     });
   }
   return out;

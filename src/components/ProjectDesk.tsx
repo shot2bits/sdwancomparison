@@ -11,7 +11,7 @@ import {
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { ACCEPT_GAP_PREFIX } from "@/components/GapActions";
-import { statedObjectivesIn, WORKSPACE_SECTORS, type AllowedPath, type BuyingId, type FieldUpdate } from "@/lib/workspace/extract";
+import { statedObjectivesIn, LIST_FACT_PATHS, WORKSPACE_SECTORS, type AllowedPath, type BuyingId, type FieldUpdate } from "@/lib/workspace/extract";
 import {
   briefModel,
   buyingOf,
@@ -150,6 +150,11 @@ export type FitSupplier = {
   slug: string; name: string; category: string; last_verified: string;
   evidence_coverage_pct: number; yes_count: number; coverage: Record<string, string>;
   matched: FitEvidence[]; missed: FitEvidence[];
+  /** Fix, 10 Aug 2026: mirrors the API's own new field, see fit.ts. Optional
+   *  here (unlike the server type) since this is parsed from a fetch response
+   *  and should degrade gracefully rather than throw on an older cached
+   *  response shape. */
+  marketplace_url?: string | null;
 };
 export type FitState = {
   mode: "graded" | "compiled"; count?: number; total?: number; note?: string;
@@ -843,6 +848,21 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         reason: "from the link you arrived on; drop it if wrong",
       });
     }
+    // Fix, 10 Aug 2026 (Harry's Test 5.9 misattribution -- the actual gap
+    // it surfaced): NoticeBuilder's handoff links now carry the wizard's
+    // sector choice as ?sector=<label>, matching a WORKSPACE_SECTORS entry
+    // exactly (checked by hand against notice-options.ts's SECTORS). Seed
+    // it the same way scope is seeded above -- inferred, so it reads as a
+    // starting point the buyer can strike, not a claim they stated it here.
+    const sectorParam = p.get("sector");
+    if (sectorParam && (WORKSPACE_SECTORS as readonly string[]).includes(sectorParam)) {
+      seedFacts.push({
+        path: "organisation.sector",
+        value: sectorParam,
+        provenance: "inferred",
+        reason: "from the link you arrived on; drop it if wrong",
+      });
+    }
     const q = p.get("q");
     const vendorsParam = (p.get("vendors") ?? "")
       .split(",")
@@ -1142,15 +1162,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     },
     [dropFact, say],
   );
-
-  /** Clears every note sharing a slot prefix (round 6): the row-level
-   *  control for a slot that only ever holds one note at a time (Term,
-   *  Resilience). */
-  const clearNotes = useCallback((prefix: string) => {
-    setNoted((ns) => ns.filter((n) => !n.id.startsWith(prefix)));
-    setChangedSlots([]);
-    setSaveDirty(true);
-  }, []);
 
   /** Clears exactly one held note by id (round 8, 2 Aug 2026 bug found in
    *  QA): the genuinely multi-select slots restored in round 7 (Support,
@@ -1890,7 +1901,19 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const meta = latest.provenance === "stated"
         ? (latest.source === "answer" ? "you chose this" : latest.quote ? `“${latest.quote}”` : "your words")
         : latest.reason ?? "netify guessed";
-      const single = fs.length === 1;
+      /* Fix, 10 Aug 2026 (Harry's E2E, Test 1.6): Cloud held one value with
+         no visible way to add a second, though estate.cloud (like the
+         twelve other LIST_FACT_PATHS -- regions, existing network,
+         compliance, and so on) genuinely accumulates multiple facts at the
+         data layer. The gap was purely this row's own control: at exactly
+         one held value it showed only "clear", never "edit" -- "edit" only
+         appeared once a second value already existed some other way, so
+         there was nothing telling a buyer that clicking the value text
+         itself (already wired to setEdit two lines up) reopens the same
+         picker to add another. A genuinely single-value path (Sector,
+         Sites) keeps "clear": there is no second value to add, so "edit"
+         would be a picker with nothing new to offer. */
+      const single = fs.length === 1 && !LIST_FACT_PATHS.has(s.path as string);
       return (
         <div key={s.id} className={rowCls} style={rowStyle}>
           <span className={labCls}>{s.label}</span>
@@ -1930,7 +1953,6 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const value = ns.length === 1
         ? labelFor(ns[0])
         : `${ns.slice(0, 3).map(labelFor).join(", ")}${ns.length > 3 ? ` and ${numWord(ns.length - 3)} more` : ""}`;
-      const single = ns.length === 1;
       return (
         <div key={s.id} className={rowCls} style={rowStyle}>
           <span className={labCls}>{s.label}</span>
@@ -1946,20 +1968,16 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
             <span className="text-[12px] italic text-[#A3A099]">you chose this</span>
           </div>
           <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
-          {single ? (
-            <button
-              type="button"
-              onClick={() => { clearNotes(s.notePrefix as string); say(`${s.label} cleared. It is an open line in the statement again.`); }}
-              className={`${ctlCls} hover:border-[#B4650B] hover:text-[#B4650B]`}
-              style={{ ...mono, letterSpacing: "0.07em" }}
-            >
-              clear
-            </button>
-          ) : (
-            <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#141414] hover:text-[#141414]`} style={{ ...mono, letterSpacing: "0.07em" }}>
-              edit
-            </button>
-          )}
+          {/* Fix, 10 Aug 2026 (Harry's E2E, Test 1.6 -- same root cause as
+              the fact-based row above): every note-based slot here is
+              multi-select by design (round-7 comment above `ns`: "a buyer
+              can pick both 24x7 support and Named engineer"), so showing
+              only "clear" at exactly one held note wrongly implied there
+              was nothing left to add. Always "edit"; clearing one note (or
+              the whole prefix) still happens from inside the edit sheet. */}
+          <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#141414] hover:text-[#141414]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+            edit
+          </button>
         </div>
       );
     }
@@ -2513,6 +2531,19 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                 {cap(numWord(keptFits.length))} of {numWord(rankedFits.length)} kept for direct invites. Untick anyone you do not want to hear from
                 {partnerDependent.length ? <>, or say <em>drop the ones that need a partner</em>.</> : "."}
               </p>
+              {/* Fix, 10 Aug 2026 (Harry's E2E, Test 1.8): "Your named
+                  checks" used to sit below the WHOLE list, so with 8+
+                  vendors the badge's meaning was scrolled past long before
+                  anyone read it -- same prominence problem as the empty-
+                  state hint fixed this morning, copy existed but wasn't
+                  where the eye was. Moved above the list, before the first
+                  badge appears, and each badge now also carries the same
+                  line as a hover title. */}
+              {checksCount > 0 && fit?.checks && (
+                <p className="m-0 mb-3 max-w-[38em] text-[13px] leading-relaxed text-[#8C8A85]">
+                  Your named checks: {fit.checks.map((c) => c.label).join(", ")}. Each badge below counts the checks met with graded evidence out of {checksCount}.
+                </p>
+              )}
               <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8]">
                 {rankedFits.map((s, i) => {
                   const on = !removed.includes(s.slug);
@@ -2550,6 +2581,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                         <div className="flex flex-none flex-col items-end gap-[5px]">
                           {checksCount > 0 && (
                             <span
+                              title={`Meets ${s.matched.length} of your ${checksCount} named checks, with graded evidence`}
                               className={`rounded-[6px] px-2 py-1 text-[12px] font-semibold ${full ? "bg-[#EAF6EE] text-[#256B3E]" : "bg-[#F2F0EB] text-[#5F5F5F]"}`}
                               style={mono}
                             >
@@ -2579,18 +2611,29 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                           <p className="m-0 mb-1.5 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
                             Across the whole dataset this record fully meets {s.yes_count} of 40 capabilities. Graded {fmtDate(s.last_verified)}.
                           </p>
-                          <a href={`/sase/vendors/${s.slug}/`} className="text-[13.5px]">Read the full record, with every source behind these grades</a>
+                          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                            <a href={`/sase/vendors/${s.slug}/`} className="text-[13.5px]">Read the full record, with every source behind these grades</a>
+                            {/* Fix, 10 Aug 2026 (Harry's E2E, Test 4.4): this
+                                panel had no vendor-contact route at all --
+                                the vendor's own page (one click further)
+                                already carries this button, everywhere else
+                                it's expected does too (compare, best/ranked
+                                list); this was the one surface without it. */}
+                            <a
+                              href={s.marketplace_url ?? "https://netify.co.uk/marketplace/"}
+                              target="_blank"
+                              rel="noopener"
+                              className="text-[13.5px]"
+                            >
+                              Contact {s.name} via Netify ↗
+                            </a>
+                          </div>
                         </div>
                       )}
                     </div>
                   );
                 })}
               </div>
-              {checksCount > 0 && fit?.checks && (
-                <p className="m-0 mt-3 text-[13px] leading-relaxed text-[#8C8A85]">
-                  Your named checks: {fit.checks.map((c) => c.label).join(", ")}. Each tag counts the checks met with graded evidence.
-                </p>
-              )}
             </>
           )}
 

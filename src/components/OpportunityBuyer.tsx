@@ -38,6 +38,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [comment, setComment] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
   /* The close the buyer was promised (Harry's Section 1 finding, 28 Jul
    * 2026): the account page and the publish signature both said "close it
    * from its room" and the room had no control. Two-step, never one tap. */
@@ -134,12 +135,40 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
     } catch { /* ignore */ }
   }
 
+  /* Fix, 10 Aug 2026 (Harry's E2E, Test 7.2): "copies correctly, but
+   * silently" -- the invite POST plainly succeeded (he had the real token
+   * URL), but nothing on screen told him so. Root cause: setCopied only
+   * ran after `await res.json()`, inside the same try/catch as everything
+   * else -- if that parse ever threw (malformed body, unexpected shape),
+   * the whole block aborted silently and the confirmation the buyer
+   * needed never fired, even though the server-side invite had already
+   * gone through. Confirmation now fires the moment res.ok is true,
+   * before any further parsing can fail it; a genuine failure (network
+   * error, or a non-OK response) now also says so instead of doing
+   * nothing, matching the create-opportunity form's own error line. */
   async function invite(slug: string) {
     if (!opp) return;
+    setInviteError(null);
+    let res: Response;
     try {
-      const res = await fetch(`/sase/api/opportunity/${opp.id}/invite`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, buyer_token: opp.buyer_token }) });
-      if (res.ok) { const d = await res.json(); setOpp(d.opportunity); navigator.clipboard.writeText(`${window.location.origin}${d.supplier_url}`); setCopied(slug); setTimeout(() => setCopied(null), 2500); }
-    } catch { /* ignore */ }
+      res = await fetch(`/sase/api/opportunity/${opp.id}/invite`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ vendor_slug: slug, buyer_token: opp.buyer_token }) });
+    } catch {
+      setInviteError("Could not reach Netify to send the invite. Check your connection and try again.");
+      return;
+    }
+    if (!res.ok) {
+      setInviteError("Could not invite that vendor. Try again in a moment.");
+      return;
+    }
+    setCopied(slug);
+    setTimeout(() => setCopied(null), 2500);
+    try {
+      const d = (await res.json()) as { opportunity: Opp; supplier_url: string };
+      setOpp(d.opportunity);
+      navigator.clipboard.writeText(`${window.location.origin}${d.supplier_url}`);
+    } catch {
+      setInviteError("Invited, but the response was unexpected -- reload to confirm before relying on the copied link.");
+    }
   }
 
   async function buyerAction(action: string, body: string, award_slug?: string, vendor_slug?: string) {
@@ -312,6 +341,7 @@ export default function OpportunityBuyer({ initialId }: { initialId?: string }) 
           );
         })()}
         <p className="text-xs text-[var(--ink-500)] mt-4">Inviting a vendor copies their private room link. They reply live with comments and pricing.</p>
+        {inviteError && <p className="text-xs text-red-700 mt-2">{inviteError}</p>}
         {opp.status === "open" && (
           <div className="mt-6 border-t border-[var(--ink-200,#e5e5e5)] pt-4">
             <p className="eyebrow mb-1">Close this notice</p>
