@@ -121,18 +121,25 @@ export async function notifyNewSignup(
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   const status = role === "supplier" ? "Vendor" : "Buyer";
   // Attribution block (16 July 2026): every sign-up alert states where the
-  // person came from and whether an RFP draft is attached, so a qualified
-  // buyer and a wandering sign-in are distinguishable at a glance. Name and
-  // company get their own lines when known (from stored buyer profiles;
-  // the LinkedIn lane that first carried names was removed 29 July 2026,
-  // business email only).
+  // person came from, so a qualified buyer and a wandering sign-in are
+  // distinguishable at a glance. Name and company get their own lines when
+  // known (from stored buyer profiles; the LinkedIn lane that first carried
+  // names was removed 29 July 2026, business email only).
+  //
+  // Fix, 10 Aug 2026 (Robert): the "RFP draft attached" line used to show
+  // unconditionally, which meant it read "No, signed in without a draft" on
+  // almost every alert -- an RFP draft claimed at sign-in is rare, so the
+  // common case was noise stating a negative rather than a useful signal.
+  // Now it only appears when there actually is one to report; the positive
+  // case ("Yes, claimed at sign-in") is the only one worth an ops team's
+  // attention, same pattern as the name/company lines above it.
   const a = context?.attr;
   const lines = [
     `<strong>Email:</strong> ${email}`,
     `<strong>Status:</strong> ${status}`,
     context?.profile?.name ? `<strong>Name:</strong> ${context.profile.name}` : "",
     context?.profile?.company ? `<strong>Company:</strong> ${context.profile.company}` : "",
-    role === "buyer" ? `<strong>RFP draft attached:</strong> ${context?.rfp_attached ? "Yes (claimed at sign-in)" : "No, signed in without a draft"}` : "",
+    role === "buyer" && context?.rfp_attached ? `<strong>RFP draft attached:</strong> Yes (claimed at sign-in)` : "",
     a?.country ? `<strong>Country:</strong> ${a.country}` : "",
     a?.ref ? `<strong>Arrived from:</strong> ${a.ref}` : `<strong>Arrived from:</strong> no referrer (direct, bookmark or an AI assistant link)`,
     a?.landing ? `<strong>Landing page:</strong> ${a.landing}` : "",
