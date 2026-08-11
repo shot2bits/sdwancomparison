@@ -32,6 +32,7 @@ import {
   saveConnection,
 } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
+import { getBounces } from "@/lib/email-bounces";
 import { recoverUnlistedPublish } from "@/lib/rfp-publish";
 import { SECTORS, REGIONS } from "@/lib/notice-options";
 import {
@@ -89,6 +90,13 @@ export async function GET(req: Request) {
   const responsesByRfp = new Map<string, number>();
   publishedProjects.forEach((p, i) => responsesByRfp.set(p.id, Array.isArray(responseLists[i]) ? responseLists[i]!.length : 0));
 
+  // Confirmed delivery bounces (11 Aug 2026, fed by /api/webhooks/resend):
+  // one bulk lookup against every owner/contact address on the page, so
+  // "stuck at the email step" stops being one undifferentiated number and
+  // becomes "actually undeliverable" vs "just hasn't clicked yet".
+  const bounceAddrs = projects.flatMap((p, i) => [p.owner_email || "", contacts[i] ?? ""]).filter(Boolean);
+  const bouncesByAddr = await getBounces(bounceAddrs);
+
   const rfps = projects
     .map((p, i) => ({
       id: p.id,
@@ -109,6 +117,14 @@ export async function GET(req: Request) {
       // pending_submit true is a buyer lost at the email step.
       consented: Boolean(p.consent),
       pending_submit: Boolean(p.pending_submit),
+      // bounced = the owner or contact address has a confirmed delivery
+      // failure on file. True positive, not a guess: a pending_submit row
+      // with bounced false just hasn't clicked yet; with bounced true, the
+      // link never had a chance to arrive.
+      bounced: Boolean(
+        (p.owner_email && bouncesByAddr.has(p.owner_email.toLowerCase().trim())) ||
+        (contacts[i] && bouncesByAddr.has(contacts[i]!.toLowerCase().trim())),
+      ),
       created: p.created,
       updated: p.updated,
     }))

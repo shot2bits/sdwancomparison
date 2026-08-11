@@ -2,6 +2,7 @@ import { getProjectsBulk, kvConfigured, kvGetJson, kvMgetJson, kvSetJson, listAl
 import { getOptouts, signUnsubscribe } from "@/lib/email-optout";
 import { matchSuppliers } from "@/lib/supplier-match";
 import { SITE_URL } from "@/lib/structured-data";
+import { getBounces, recordResendSend } from "@/lib/email-bounces";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -94,10 +95,16 @@ export async function GET(req: Request) {
   const contacts = await kvMgetJson<string>(projects.map((p) => `rfp:${p.id}:contact_email`));
   const contactByIndex = new Map<number, string>();
   projects.forEach((_, i) => { const c = (contacts[i] ?? "").toLowerCase().trim(); if (c) contactByIndex.set(i, c); });
+  // Known-bad addresses (11 Aug 2026, fed by /api/webhooks/resend): this is
+  // an automated, unattended send, exactly the case a known bounce should
+  // hard-skip rather than merely warn on — nobody is present to read a
+  // failure message the way a live sign-in attempt has one. One bulk lookup
+  // against every candidate owner/contact address up front.
+  const bounces = await getBounces([...new Set([...projects.map((p) => (p.owner_email ?? "").toLowerCase().trim()), ...Array.from(contactByIndex.values())])].filter(Boolean));
 
   let considered = 0;
   let sent = 0;
-  const skipped = { published: 0, anonymous: 0, internal: 0, recent: 0, already_nudged: 0, opted_out: 0, send_failed: 0 };
+  const skipped = { published: 0, anonymous: 0, internal: 0, recent: 0, already_nudged: 0, opted_out: 0, send_failed: 0, known_bounced: 0 };
 
   for (const [idx, p] of projects.entries()) {
     if (sent >= MAX_SENDS_PER_RUN) break;
@@ -107,6 +114,7 @@ export async function GET(req: Request) {
     if (!owner) { skipped.anonymous += 1; continue; }
     if (owner.endsWith("@netify.com")) { skipped.internal += 1; continue; }
     if (optoutSet.has(owner)) { skipped.opted_out += 1; continue; }
+    if (bounces.has(owner)) { skipped.known_bounced += 1; continue; }
     const lastTouch = Math.max(p.updated ?? 0, p.created ?? 0);
     if (now - lastTouch < QUIET_MS) { skipped.recent += 1; continue; }
     const flagKey = `rfp:nudge:${p.id}`;
@@ -138,6 +146,8 @@ export async function GET(req: Request) {
         }),
       });
       if (!res.ok) { skipped.send_failed += 1; continue; }
+      const data = (await res.json().catch(() => null)) as { id?: string } | null;
+      await recordResendSend(data?.id, { to: owner, kind: "publish_nudge", ts: now, rfp_id: p.id });
       await kvSetJson(flagKey, now);
       sent += 1;
     } catch {

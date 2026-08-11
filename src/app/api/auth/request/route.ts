@@ -1,6 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { createMagicToken, kvConfigured, kvGetJson, kvSetJson, kvRaw, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
 import { sendMagicLink, resendConfigured } from "@/lib/auth";
+import { getBounce, recordResendSend } from "@/lib/email-bounces";
 import {
   isBlockedDomainLive,
   isAcademicDomain,
@@ -105,6 +106,27 @@ export async function POST(req: Request) {
   // sign-in email on the phone, where localStorage-based claiming cannot see
   // the draft.
   const rfpIdMatch = returnTo.match(/\/rfp-builder\/(rfp_[a-z0-9]+)/i);
+
+  // Known-bad address (11 Aug 2026): Resend accepts a send synchronously and
+  // only discovers a bounce later, via the webhook that feeds this flag —
+  // see src/lib/email-bounces.ts. A repeat attempt to an address that has
+  // already bounced would otherwise silently fail again the same way,
+  // wasting a send and telling the buyer nothing. Skip it outright and say
+  // so plainly instead; typing any other address in the same box still
+  // works normally, this only ever short-circuits the exact address that
+  // already failed.
+  const priorBounce = await getBounce(email).catch(() => null);
+  if (priorBounce) {
+    return Response.json(
+      {
+        ok: true,
+        emailed: false,
+        bounced_before: true,
+        message: `We could not deliver to ${email} last time (a ${priorBounce.type.toLowerCase()} delivery failure). Try a different work email, or email support@netify.com and we will get you in.`,
+      },
+      { headers: cors },
+    );
+  }
   // Sign-up attribution, carried through the magic link so the new-sign-up
   // alert can say where the person came from: client-captured first touch
   // (original referrer + landing path, sessionStorage), the page hosting the
@@ -143,6 +165,11 @@ export async function POST(req: Request) {
   } catch { code = undefined; /* code is an enhancement; the link still works */ }
 
   const sent = await sendMagicLink(email, token, resolvedRole, returnTo, code);
+  // Correlate this send against Resend's own email id so the bounce webhook
+  // (which only ever carries that id, never any of this app's own context)
+  // can trace a later bounce back to this exact attempt. Best effort: see
+  // email-bounces.ts, a failure here only means one send goes untraced.
+  await recordResendSend(sent.emailId, { to: email, kind: "magic_link", ts: Date.now(), rfp_id: rfpIdMatch ? rfpIdMatch[1] : null });
   // In preview without Resend configured, return the link so it is testable.
   // Fix, 11 Aug 2026: this used to key off `!sent`, which also fired on a
   // genuine production send failure now that sendMagicLink checks Resend's
@@ -151,5 +178,5 @@ export async function POST(req: Request) {
   // API response. Keyed on Resend actually being configured instead, the
   // only case this was ever meant to cover.
   const devLink = resendConfigured() ? undefined : `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
-  return Response.json({ ok: true, emailed: sent, dev_link: devLink, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
+  return Response.json({ ok: true, emailed: sent.ok, dev_link: devLink, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
 }

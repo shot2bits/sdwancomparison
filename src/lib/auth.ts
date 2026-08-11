@@ -81,15 +81,18 @@ export function resendConfigured(): boolean {
  * nothing was ever going out. This only catches synchronous rejections; an
  * address that Resend accepts but which bounces later at the recipient's
  * mail server (the async case, like the bounce spotted on the Resend
- * dashboard this morning) needs a webhook to catch, which this does not add.
+ * dashboard this morning) needs a webhook to catch — added 11 Aug 2026, see
+ * /api/webhooks/resend and src/lib/email-bounces.ts. Returns Resend's own
+ * email id alongside the outcome so the caller can record it for that
+ * webhook to correlate against later.
  */
-export async function sendMagicLink(email: string, token: string, role: string, returnTo = "", code?: string): Promise<boolean> {
+export async function sendMagicLink(email: string, token: string, role: string, returnTo = "", code?: string): Promise<{ ok: boolean; emailId?: string }> {
   const key = process.env.RESEND_API_KEY;
   // returnTo is validated by the caller (same-app absolute path only); it
   // rides the link so the verify page can send the person back where the
   // sign-in was requested instead of dead-ending.
   const link = `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
-  if (!key) return false;
+  if (!key) return { ok: false };
   const from = process.env.AUTH_FROM_EMAIL ?? "no-reply@mail.netify.co.uk";
   // Consent-at-generate flow: when the sign-in was requested from the
   // wizard's agreement step, the click IS the submission, so the email says
@@ -114,9 +117,11 @@ export async function sendMagicLink(email: string, token: string, role: string, 
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({ from, to: email, subject, html }),
     });
-    return res.ok;
+    if (!res.ok) return { ok: false };
+    const data = (await res.json().catch(() => null)) as { id?: string } | null;
+    return { ok: true, emailId: data?.id };
   } catch {
-    return false;
+    return { ok: false };
   }
 }
 

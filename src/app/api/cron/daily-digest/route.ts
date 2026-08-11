@@ -10,6 +10,7 @@ import {
   listPendingRequests,
   listOpportunities,
 } from "@/lib/rfp-store";
+import { getBounces } from "@/lib/email-bounces";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -99,6 +100,19 @@ export async function GET(req: Request) {
   const draftsNew = projects.filter((p) => (p.created ?? 0) >= since);
   const consentedNew = draftsNew.filter((p) => Boolean(p.consent) || (p.consents?.length ?? 0) > 0);
   const stuckSubmits = projects.filter((p) => Boolean(p.pending_submit) && (p.status === "draft" || p.status === "review"));
+  // Confirmed-bounce breakdown (11 Aug 2026, fed by /api/webhooks/resend):
+  // "stuck at the email step" used to be one undifferentiated number that
+  // could mean "hasn't clicked yet" or "the link never arrived" — the two
+  // need very different responses. Contact emails fetched only for this
+  // cohort, cheap even if the whole projects list is large.
+  const stuckContacts = await kvMgetJson<string>(stuckSubmits.map((p) => `rfp:${p.id}:contact_email`));
+  const stuckAddrs = stuckSubmits.flatMap((p, i) => [p.owner_email || "", stuckContacts[i] ?? ""]).filter(Boolean);
+  const stuckBounces = await getBounces(stuckAddrs);
+  const stuckBouncedCount = stuckSubmits.filter((p, i) => {
+    const owner = (p.owner_email ?? "").toLowerCase().trim();
+    const contact = (stuckContacts[i] ?? "").toLowerCase().trim();
+    return (owner && stuckBounces.has(owner)) || (contact && stuckBounces.has(contact));
+  }).length;
   const publishedAll = projects.filter((p) => p.status !== "draft" && p.status !== "review");
   const publishedNew = publishedAll.filter((p) => (p.updated ?? p.created ?? 0) >= since);
   const draftsBreakdown = engineChannelCounts(draftsNew);
@@ -148,7 +162,7 @@ export async function GET(req: Request) {
     `- Vendor sign-ins: ${supplierSessionsNew.length}`,
     "",
     "Watch items:",
-    `- Buyers stuck at the email step (pending submit, link never clicked): ${stuckSubmits.length}`,
+    `- Buyers stuck at the email step (pending submit, link never clicked): ${stuckSubmits.length}${stuckBouncedCount ? ` (${stuckBouncedCount} confirmed bounced, see admin console)` : ""}`,
     `- Vendor access requests waiting in the queue: ${pending.length}`,
     "",
     "Running totals:",
@@ -207,6 +221,7 @@ export async function GET(req: Request) {
       buyer_signins_24h: buyerSessionsNew.length,
       supplier_signins_24h: supplierSessionsNew.length,
       stuck_submits: stuckSubmits.length,
+      stuck_submits_confirmed_bounced: stuckBouncedCount,
       pending_requests: pending.length,
     },
   });

@@ -46,13 +46,17 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
         throw new Error(data.error ?? "Could not send a link.");
       }
       // Fix, 11 Aug 2026: emailed can now come back false on a 200 response
-      // (the request was accepted, but the actual send failed) — this used
-      // to be ignored entirely, so a rejected send still showed the same
-      // green "Sent" message as a real delivery, with no signal anything
-      // was wrong. dev_link (preview only, no Resend configured) still
-      // takes the ordinary sent path below, unaffected by this.
+      // (the request was accepted, but the actual send failed, including
+      // the known-bad-address short circuit that skips sending altogether —
+      // see email-bounces.ts) — this used to be ignored entirely, so a
+      // rejected send still showed the same green "Sent" message as a real
+      // delivery, with no signal anything was wrong. dev_link (preview
+      // only, no Resend configured) still takes the ordinary sent path
+      // below, unaffected by this. data.message carries the specific reason
+      // when the API has one (e.g. a known prior bounce); otherwise this
+      // falls back to a generic line.
       if (data.emailed === false && !data.dev_link) {
-        setError("We could not confirm delivery to that address. Double-check it, try a different work email, or email support@netify.com and we will get you in.");
+        setError(data.message ?? "We could not confirm delivery to that address. Double-check it, try a different work email, or email support@netify.com and we will get you in.");
       } else {
         setSent(data.message ?? `Sent. Click the link in the email, or type the 6-digit code from it below. Not there within a minute? Check spam.`);
         if (data.dev_link) setDevLink(data.dev_link);

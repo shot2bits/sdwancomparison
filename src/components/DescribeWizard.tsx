@@ -338,9 +338,20 @@ export default function DescribeWizard() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: `/sase/rfp-builder/${id}/?welcome=submitting`, marketing_opt_in: optIn, attribution: firstTouch() }),
         });
+        const ad = (await ar.json().catch(() => ({}))) as { error?: string; message?: string; emailed?: boolean; dev_link?: string };
         if (!ar.ok) {
-          const e = (await ar.json().catch(() => ({}))) as { error?: string; message?: string };
-          throw new Error(e.message ?? e.error ?? "That email address could not be used. Please use your work email.");
+          throw new Error(ad.message ?? ad.error ?? "That email address could not be used. Please use your work email.");
+        }
+        // Fix, 11 Aug 2026: a known-bad address or a rejected send comes
+        // back as a 200 with emailed:false (see auth/request/route.ts and
+        // SignIn.tsx, which already handled this) — this call used to only
+        // check ar.ok, so it sailed past that and landed on the "welcome
+        // =submitting" screen's "click the link we emailed you" copy for an
+        // email that was never actually sent. Stop here instead, with the
+        // same specific message the API gives, and let the person try a
+        // different address without losing the draft.
+        if (ad.emailed === false && !ad.dev_link) {
+          throw new Error(ad.message ?? "We could not confirm delivery to that address. Double-check it, try a different work email, or email support@netify.com and we will get you in.");
         }
         try { sessionStorage.setItem("netify_pending_email", email.trim()); } catch { /* ignore */ }
       }
