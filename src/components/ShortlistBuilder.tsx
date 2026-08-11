@@ -292,6 +292,14 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     e.preventDefault();
     if (leadState === "busy") return;
     setLeadState("busy");
+    // 11 Aug 2026: this form previously had no dedicated tracking at all —
+    // NetifyEvents.tsx's delegated form_start/form_submit listeners fire for
+    // every form on the site, so they couldn't tell this submission apart
+    // from a sign-in or RFP-builder form, and neither distinguishes a submit
+    // attempt from a confirmed send. These three events are specific to this
+    // exact flow and split attempt from outcome, so "no leads" questions
+    // have a real answer going forward instead of relying on the Resend log.
+    fireNetifyEvent("shortlist_lead_submit");
     try {
       const qs = encodeScenario(input);
       const res = await fetch("/sase/api/lead", {
@@ -308,8 +316,10 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       });
       if (!res.ok) throw new Error("lead failed");
       setLeadState("sent");
+      fireNetifyEvent("shortlist_lead_sent");
     } catch {
       setLeadState("error");
+      fireNetifyEvent("shortlist_lead_error");
     }
   }
 
@@ -704,6 +714,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             </a>
             <a
               href={workspaceUrl()}
+              onClick={() => fireNetifyEvent("shortlist_get_bids_click")}
               className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors"
             >
               Get competing bids →

@@ -18,6 +18,20 @@
 // DELEGATED listeners - no page component changes needed.
 // Events: rfp_start, shortlist_build, shortlist_download, provider_compare,
 //         costed_view, contact_click, go_cta, form_start / form_submit.
+//
+// EXPLICIT calls (fireNetifyEvent, exported below) - added where the
+// delegated listeners can't tell one form/CTA apart from another. 11 Aug
+// 2026: audited after Robert flagged the site had moved on since this was
+// set up - found the "Start a project" nav CTA (href="/") doesn't match the
+// rfp_start text patterns above (it only fires later, on RfpBuilder's own
+// "Start my RFP" button), the shortlist page's "Get competing bids" link was
+// never matched by any pattern, and ShortlistBuilder's lead-capture form had
+// a `fireNetifyEvent` import that was never actually called. The generic
+// form_start/form_submit pair still fires for that form (any <form> on the
+// site trips it), but can't distinguish it from every other form, or a
+// submit attempt from a confirmed send - these fill that gap:
+// shortlist_lead_submit / shortlist_lead_sent / shortlist_lead_error,
+// shortlist_get_bids_click.
 
 import { useEffect } from 'react';
 
