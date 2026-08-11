@@ -1,6 +1,6 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { createMagicToken, kvConfigured, kvGetJson, kvSetJson, kvRaw, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
-import { sendMagicLink } from "@/lib/auth";
+import { sendMagicLink, resendConfigured } from "@/lib/auth";
 import {
   isBlockedDomainLive,
   isAcademicDomain,
@@ -144,6 +144,12 @@ export async function POST(req: Request) {
 
   const sent = await sendMagicLink(email, token, resolvedRole, returnTo, code);
   // In preview without Resend configured, return the link so it is testable.
-  const devLink = sent ? undefined : `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
+  // Fix, 11 Aug 2026: this used to key off `!sent`, which also fired on a
+  // genuine production send failure now that sendMagicLink checks Resend's
+  // response status (see that file) — a real buyer whose email failed for a
+  // real reason would have had the raw sign-in token handed back in this
+  // API response. Keyed on Resend actually being configured instead, the
+  // only case this was ever meant to cover.
+  const devLink = resendConfigured() ? undefined : `${SITE_URL}/auth/verify?token=${token}${returnTo ? `&return=${encodeURIComponent(returnTo)}` : ""}`;
   return Response.json({ ok: true, emailed: sent, dev_link: devLink, role: resolvedRole, vendor_slug, code_available: Boolean(code) }, { headers: cors });
 }

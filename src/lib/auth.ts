@@ -60,7 +60,29 @@ export function supplierCredentialFromRequest(req: Request, rfpId: string): stri
   return parseCookie(req, supplierCredentialCookieName(rfpId));
 }
 
-/** Send a magic sign-in link via Resend (best effort). Returns whether an email was sent. */
+/** Whether Resend is configured at all (preview environments without the key
+ *  fall back to returning the raw sign-in link in the API response instead
+ *  of emailing it). Separate from send success, see sendMagicLink below. */
+export function resendConfigured(): boolean {
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
+/**
+ * Send a magic sign-in link via Resend. Returns whether the email was
+ * actually accepted for delivery.
+ *
+ * Fix, 11 Aug 2026 (traced from the "buyers stuck at the email step" digest
+ * figure, and confirmed live by sending to a nonexistent domain from the
+ * account sign-in page): this used to return true as soon as the fetch call
+ * itself didn't throw, never checking Resend's response status. A rejected
+ * send (bad recipient domain, Resend account issue, anything short of a
+ * network exception) was indistinguishable from a real delivery, so the
+ * caller always reported success and the buyer always saw "Sent" even when
+ * nothing was ever going out. This only catches synchronous rejections; an
+ * address that Resend accepts but which bounces later at the recipient's
+ * mail server (the async case, like the bounce spotted on the Resend
+ * dashboard this morning) needs a webhook to catch, which this does not add.
+ */
 export async function sendMagicLink(email: string, token: string, role: string, returnTo = "", code?: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   // returnTo is validated by the caller (same-app absolute path only); it
@@ -87,12 +109,12 @@ export async function sendMagicLink(email: string, token: string, role: string, 
     ? `<p>You asked Netify to generate your RFP and submit it to your matched vendors and managed service providers.</p><p><a href="${link}">Confirm and submit</a> (valid for 60 minutes). Clicking confirms your agreement: your RFP goes to your matched vendors, who review your requirements and make contact through the Netify app. Your contact details are never shown to them, and you can edit the RFP afterwards; they always see the latest version.</p>${codeBlock}<p>If you did not request this, ignore this email and nothing is sent to anyone.</p>`
     : `<p>Sign in to the Netify marketplace as a ${role}.</p><p><a href="${link}">Sign in</a>, then click <strong>Confirm sign-in</strong> on the page that opens (valid for 60 minutes).</p>${codeBlock}<p>If you did not request this, ignore this email.</p>`;
   try {
-    await fetch("https://api.resend.com/emails", {
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify({ from, to: email, subject, html }),
     });
-    return true;
+    return res.ok;
   } catch {
     return false;
   }
