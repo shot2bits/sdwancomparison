@@ -732,9 +732,16 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         <section className="border border-[var(--ink-900)] rounded-sm p-5 mb-6 bg-[var(--paper-base)]">
           <p className="eyebrow mb-1">Next step</p>
           <p className="text-sm text-[var(--ink-700)] mb-3">
-            A shortlist names the right providers. The workspace makes them respond: describe your
-            requirement once, publish it as an anonymous position, and vendors answer with their
-            bids. What you have built on this page travels with you.
+            You already have this for free: the right providers, named and ranked, no sign-in
+            required. Publishing is what gets them responding — structured written bids side by
+            side, indicative pricing private to you, and a single place to request demos. What you
+            have built on this page travels with you, and vendors never see your email or phone
+            number until you choose to share it.
+          </p>
+          <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
+            {["Structured written responses", "Indicative pricing, private to you", "Demo requests", "Message vendors in-app", "Contact details, when you choose"].map((c) => (
+              <span key={c} className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[var(--ink-700)]">{c}</span>
+            ))}
           </p>
           <a
             href={workspaceUrl()}
