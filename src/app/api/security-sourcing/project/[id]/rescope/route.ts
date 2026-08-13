@@ -11,6 +11,7 @@ import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { openSecurityGaps } from "@/lib/project-machine";
 import { buildRescopedProject, rescopeConsentText, documentEdited } from "@/lib/security/rescope-project";
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
+import { parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 
 export async function OPTIONS(req: Request) {
   return preflight(req);
@@ -21,7 +22,18 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   const { id } = await ctx.params;
 
-  let body: { requirement?: SecurityRequirementInput; manage_token?: string; consent?: boolean; replace_edits_consent?: boolean } = {};
+  let body: {
+    requirement?: SecurityRequirementInput;
+    manage_token?: string;
+    consent?: boolean;
+    replace_edits_consent?: boolean;
+    /** Fourth amendment (13 Aug 2026), gap 2 fix: this route is the ONLY
+     *  save path a Security Sourcing project takes after its first save
+     *  (subsequent Save and the pre-publish refresh both land here), so
+     *  this is the field that makes wording typed after the first save
+     *  actually persist. */
+    source_turns?: unknown;
+  } = {};
   try {
     body = await req.json();
   } catch {
@@ -52,6 +64,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       via: "web",
       actorRef: access.session?.email ?? "",
       replaceEdits: body.replace_edits_consent === true,
+      sourceTurns: parseIncomingSourceTurns(body.source_turns),
     });
   } catch (e) {
     return Response.json({ error: (e as Error).message }, { status: 400, headers: cors });

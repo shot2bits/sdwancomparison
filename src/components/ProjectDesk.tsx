@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { assessSecurityRequirement, type SecurityScopeVerdict } from "@/lib/security/rulebook";
+import { assessSecurityRequirement, type SecurityScopeVerdict, type SecurityRequirementInput } from "@/lib/security/rulebook";
 import {
   deriveInstrumentLadder,
   deriveRfiQuestionSet,
@@ -11,7 +11,18 @@ import {
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
 import { ACCEPT_GAP_PREFIX } from "@/components/GapActions";
-import { statedObjectivesIn, LIST_FACT_PATHS, WORKSPACE_SECTORS, type AllowedPath, type BuyingId, type FieldUpdate } from "@/lib/workspace/extract";
+import {
+  statedObjectivesIn,
+  LIST_FACT_PATHS,
+  WORKSPACE_SECTORS,
+  notesWithSourceTurns,
+  type AllowedPath,
+  type BuyingId,
+  type FieldUpdate,
+  type FieldRemoval,
+} from "@/lib/workspace/extract";
+import type { SourceLedgerEntry, SourceLedgerVia } from "@/lib/workspace/source-ledger";
+import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeStateFromProject } from "@/lib/workspace/source-ledger";
 import {
   briefModel,
   buyingOf,
@@ -20,6 +31,7 @@ import {
   factLabel,
   mergeUpdates,
   meterOf,
+  mergeRequirementBase,
   operatingModelOf,
   productScopeFor,
   requirementFrom,
@@ -29,6 +41,9 @@ import {
   wizardSectorKey,
   COMPLIANCE_LABELS,
   regionStandalone,
+  humaniseWorkspaceValue,
+  dropListFact,
+  resolveDropTarget,
   type WorkspaceFact,
 } from "@/lib/workspace/draft";
 import { TAXONOMY, sectionForGapKey, sectionForPath, type TaxonomyItem } from "@/lib/workspace/taxonomy";
@@ -165,6 +180,55 @@ export type FitState = {
 /** `own` marks an answer the buyer typed: kept verbatim, theirs (1f). */
 type NotedItem = { id: string; label: string; section: string; own?: boolean };
 type Receipt = { id: number; text: string };
+/** Reliability gate, third amendment (13 Aug 2026, Codex's third review,
+ *  item 1): "persist every non-command buyer entry verbatim as an
+ *  immutable source turn... preservation of buyer wording must not
+ *  depend on successful semantic segmentation." A `Receipt` above is
+ *  scoped, deliberately, to CLAUSES the extractor could not place --
+ *  buyer content that still needs a human's review. A `SourceTurn` is
+ *  broader and unconditional: the exact raw text of every non-command
+ *  message the buyer typed, pasted or dropped, recorded the moment it
+ *  arrives and never rewritten afterward, whether extraction later
+ *  places every clause perfectly or none at all. Nothing here is ever
+ *  edited or removed once added -- an immutable log, not a working
+ *  list.
+ *
+ *  FOURTH amendment (13 Aug 2026): `id` is now a stable STRING, generated
+ *  once at capture time (newSourceTurnId() below) and never regenerated --
+ *  the third amendment's numeric ref-counter id reset to 0 on every page
+ *  load, so it could never survive as a real merge key across separate
+ *  saves. This shape is exactly source-ledger.ts's SourceLedgerEntry
+ *  (that module is the canonical, persisted form; this is its client-side
+ *  working copy) plus `via`, which the third amendment's version dropped
+ *  on the floor even though every call site already knew it.
+ *
+ *  FIFTH amendment (13 Aug 2026): now a plain type alias, not a separate
+ *  shape -- the two were already field-for-field identical, and
+ *  hydrateSourceTurns() (the function that bridges them) has moved to
+ *  source-ledger.ts for testability, so keeping a distinct local type here
+ *  would just be a cast with extra steps. The `SourceTurn` name stays, for
+ *  readability at this file's own call sites. */
+type SourceTurn = SourceLedgerEntry;
+
+/** Matches rfp-store.ts's server-side newId() exactly (time-based prefix +
+ *  a few random base-36 characters) -- that helper lives in a Node-only
+ *  module this client component cannot import, so it is duplicated here
+ *  at the one call site that needs a client-generated stable id. */
+function newSourceTurnId(): string {
+  return `st_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/* hydrateSourceTurns() -- the client-side half of "rehydrate the ledger
+ * when an existing project is reopened" -- now lives in
+ * workspace/source-ledger.ts (imported above), for the same reason
+ * captureRawSourceEntry does: so a fixture can call the exact function this
+ * component's arrival effect calls, against real persisted data, rather
+ * than a hand-rolled stand-in that could silently drift from production.
+ * See that module's doc comment for the fourth/fifth amendment history and
+ * the "Minimal resume link" scope ruling (source_ledger only, not
+ * facts/receipts/requirement). The one real entry point into this resume
+ * path is the project dashboard's "Add more detail" link
+ * (project/[id]/page.tsx). */
 
 /** Field names for the requirement sheet: a bare "20" or "the UK" says
  *  nothing on its own (Robert's first live test, 31 Jul). Display side
@@ -185,6 +249,7 @@ const PATH_LABELS: Record<string, string> = {
   "constraints.budgetBand": "Budget",
   "procurement.buying": "Buying",
   "procurement.operatingModel": "Who runs it",
+  "requirements.bespoke": "Additional requirements",
 };
 
 /** The dataset's grade words, humanised (the same table the desk has
@@ -228,6 +293,10 @@ const ITEM_BY_ID: Record<string, { item: TaxonomyItem; section: string }> = (() 
  * named standard and a named product, and they are dead). */
 const PLACEHOLDER_EMPTY = "Describe what you are buying, in your own words…";
 const PLACEHOLDER_LIVE = "Say what changed, add a rule, or correct anything in the statement…";
+/** Sixth amendment (13 Aug 2026), Robert's item 3: shown while a resume
+ *  fetch is in flight, so the composer visibly explains why it is
+ *  temporarily disabled rather than just looking broken. */
+const PLACEHOLDER_RESUMING = "Loading your saved project…";
 
 /** The thread (round 6, Robert's ruling: the small persistent chat
  *  window stays). User messages echo verbatim; every Netify line is a
@@ -661,12 +730,66 @@ function parseCommand(raw: string): Command | null {
 
 /** afterPrompt: the page slots the journey strip and the capability
  *  block beneath the twin; they render on the door only. */
-export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }) {
+export default function ProjectDesk({
+  afterPrompt,
+  /** Fourth amendment, item 4: seeds the source-turn log from an existing
+   *  project's persisted `source_ledger` when a caller has one to offer.
+   *  Still unused by both real callers -- the fifth amendment's "Minimal
+   *  resume link" (see the arrival effect below, and
+   *  workspace/source-ledger.ts's hydrateSourceTurns doc comment) hydrates
+   *  via a URL-driven fetch and setSourceTurns() directly, not through this
+   *  prop, since neither real caller has the project loaded ahead of time
+   *  to pass one in. Kept as a lower-level seam for a future caller that
+   *  DOES already have the data (e.g. a server-rendered resume page). */
+  initialSourceLedger,
+}: { afterPrompt?: ReactNode; initialSourceLedger?: SourceLedgerEntry[] }) {
   const [phase, setPhase] = useState<"live" | "fits">("live");
   const [market, setMarket] = useState<Market | null>(null);
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
   const [noted, setNoted] = useState<NotedItem[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  /** The immutable source-turn log (see the SourceTurn type comment). */
+  const [sourceTurns, setSourceTurns] = useState<SourceTurn[]>(() => hydrateSourceTurns(initialSourceLedger));
+  /** Sixth amendment (13 Aug 2026), Robert's item 3: true from the instant
+   *  the arrival effect decides a resume attempt is worth making, false
+   *  once that attempt has either succeeded or visibly failed. Gates
+   *  typing, Save and Publish (see send()/saveNow()/signAndPublish()'s own
+   *  guards and signLocked below) so nothing can act on a half-loaded
+   *  project. Stays false for the overwhelmingly common non-resumed
+   *  session (nothing here ever runs). */
+  const [resuming, setResuming] = useState(false);
+  /** Sixth amendment, Robert's items 1/2: the resumed project's persisted
+   *  `engine_data.requirement`, set ONCE (immutably) when a resume
+   *  succeeds, never overwritten again. See draft.ts's
+   *  mergeRequirementBase() for why this is kept separate from `facts`
+   *  rather than converted into fabricated WorkspaceFacts, and how the two
+   *  combine into the `requirement` this component actually sends. State
+   *  (not a bare ref) so the requirement memo below re-derives the instant
+   *  resume finishes, even if `facts` itself hasn't changed yet. */
+  const [resumeRequirementBase, setResumeRequirementBase] = useState<SecurityRequirementInput | null>(null);
+  const resumeRequirementBaseRef = useRef<SecurityRequirementInput | null>(null);
+  useEffect(() => { resumeRequirementBaseRef.current = resumeRequirementBase; }, [resumeRequirementBase]);
+  /** Seventh amendment (13 Aug 2026), Robert's finding on the sixth
+   *  amendment above: unioning `resumeRequirementBase` against this
+   *  session's own facts means a buyer can add a new list value but can
+   *  never retract one the base already holds ("we no longer use MPLS"
+   *  correctly avoided ADDING mpls as a false positive, but nothing ever
+   *  told the merge to actually drop the base's own pre-existing mpls
+   *  either). This is the set of `factId(path, value)` tombstones this
+   *  session has explicitly retracted -- from a deterministic "no longer
+   *  use X" style correction (see applyRemovals below) or the existing
+   *  drop/remove command reaching a value that lives only in the resumed
+   *  base, never in `facts` -- so mergeRequirementBase() can strip them
+   *  out of the base before it unions in whatever this session adds. See
+   *  that function's own doc comment for why the tombstone is applied to
+   *  the BASE only, never to `addition`: a later restatement in the same
+   *  sitting must still be able to bring a value back, the same
+   *  resurrection rule a struck WorkspaceFact already follows. Empty for
+   *  the overwhelmingly common non-resumed session (mergeRequirementBase
+   *  ignores it entirely whenever there is no base to subtract from). */
+  const [resumeRemovals, setResumeRemovals] = useState<Set<string>>(() => new Set());
+  const resumeRemovalsRef = useRef<Set<string>>(new Set());
+  useEffect(() => { resumeRemovalsRef.current = resumeRemovals; }, [resumeRemovals]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
@@ -725,6 +848,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const receiptId = useRef(0);
   const factsRef = useRef<WorkspaceFact[]>([]);
   const receiptsRef = useRef<Receipt[]>([]);
+  const sourceTurnsRef = useRef<SourceTurn[]>([]);
   const assertedPacks = useRef<Set<string>>(new Set());
   const acceptedGaps = useRef<Set<string>>(new Set());
   /** Which scope class the saved record was created under: a class flip
@@ -738,6 +862,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const nrKey = (path: string, value: unknown) => `${path}::${String(value)}`;
 
   useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
+  useEffect(() => { sourceTurnsRef.current = sourceTurns; }, [sourceTurns]);
 
   /** Netify's voice is a thread line now (round 6): one template
    *  sentence per event, appended, never model prose, never a summary
@@ -806,8 +931,57 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     return m;
   }, []);
 
+  /** Seventh amendment (13 Aug 2026): the counterpart to applyMerge above,
+   *  for explicit retractions rather than additions. Two effects, always
+   *  both applied, because a retracted value can be live in either place
+   *  (or both): (1) if THIS session's own ledger already carries a
+   *  standing fact for the exact same path+value -- landed earlier this
+   *  same sitting, resumed or not -- it is struck, precisely the way
+   *  dropFact() already strikes a fact the buyer clicks "drop" on; (2) the
+   *  value's factId is tombstoned into `resumeRemovals` regardless, which
+   *  only ever has any effect when a resumed base is set (see
+   *  mergeRequirementBase()'s doc comment) -- harmless, not a no-op check
+   *  needed here, for the ordinary non-resumed session. Returns the
+   *  labels actually struck/tombstoned so callers can tell the buyer what
+   *  happened, the same honesty applyMerge's own caller already gives
+   *  landed facts. */
+  const applyRemovals = useCallback((removals: FieldRemoval[]): string[] => {
+    if (!removals.length) return [];
+    const labels: string[] = [];
+    let struckAny = false;
+    const ids = new Set(removals.map((r) => factId(r.path, r.value)));
+    factsRef.current = factsRef.current.map((f) => {
+      if (!f.struck && ids.has(f.id)) {
+        struckAny = true;
+        return { ...f, struck: true };
+      }
+      return f;
+    });
+    if (struckAny) setFacts(factsRef.current);
+    setResumeRemovals((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) next.add(id);
+      return next;
+    });
+    for (const r of removals) labels.push(humaniseWorkspaceValue(r.path, r.value).toLowerCase());
+    setSaveDirty(true);
+    return [...new Set(labels)];
+  }, []);
+
   /* ---- Derivations off the ledger ---- */
-  const requirement = useMemo(() => requirementFrom(facts), [facts]);
+  /** Sixth amendment: merges the resumed project's immutable requirement
+   *  base (null for every non-resumed session) with whatever THIS
+   *  session's own facts derive -- see mergeRequirementBase()'s doc
+   *  comment in draft.ts. This is the ONE `requirement` value the verdict
+   *  assessment, the brief, and every create/save/publish payload below
+   *  all read (all already close over this same variable) -- so fixing it
+   *  here, once, fixes every one of them together. Seventh amendment: now
+   *  also carries `resumeRemovals`, the tombstones applyRemovals above
+   *  maintains, so an explicit retraction actually leaves the base. */
+  const requirement = useMemo(
+    () => mergeRequirementBase(resumeRequirementBase, requirementFrom(facts), resumeRemovals),
+    [facts, resumeRequirementBase, resumeRemovals],
+  );
   const buying = buyingOf(facts);
   const opModel = operatingModelOf(facts);
   const securityScope = buying === "managed_security" || buying === null;
@@ -870,7 +1044,98 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       .filter((s) => /^[a-z0-9-]{2,60}$/.test(s))
       .slice(0, 5);
     /* R2: nothing is restored. The twin starts empty every time except
-       for what the link itself carries. */
+       for what the link itself carries.
+
+       Fifth amendment (13 Aug 2026), Robert's ruling on rehydration's
+       scope: a Security Sourcing project reopened with its id on the URL
+       restores its source ledger -- the SAME `?manage=` convention every
+       other owner-gated link in this app already uses when a manage token
+       is actually held (rfp-builder/{id}?manage=, and this component's
+       own post-creation redirect to /project/{id}?manage=).
+
+       Sixth amendment (13 Aug 2026), Robert's items 1, 2 and 4:
+         1/2. Facts are not restored (there is nothing to restore them
+              FROM, structurally -- see resumeStateFromProject()'s doc
+              comment), but the project's persisted `engine_data.requirement`
+              now is, as an immutable base every subsequent extraction,
+              Save and Publish merges over (mergeRequirementBase(), the
+              `requirement` memo above, and the extract-cycle POST body
+              below all read it) -- so a resumed session's own new facts
+              can never again silently replace the project's whole earlier
+              scope.
+         3. Resume is now GATED, not fire-and-forget: `resuming` is set
+            true before this fetch starts and stays true (blocking typing,
+            Save and Publish -- see signLocked, sendReady, send() and
+            saveNow()'s own guards above) until this attempt has either
+            succeeded or visibly failed (every exit path below either
+            calls `say()` to explain what happened or leaves the success
+            message from a completed resume) -- never silently, and never
+            left permanently locked either (the `finally` always clears
+            `resuming`, including on a thrown error).
+         4. A manage token is no longer required to attempt resume: a
+            signed-in owner's session travels automatically on this
+            same-origin fetch (the server's requireRfpOwner() already
+            accepts a session-authorised owner with no token at all, same
+            as every other RFP route) -- ?manage= is now optional, present
+            only for a token-carrying link (project/[id]/page.tsx's
+            "Add more detail", when the visitor actually holds one).
+         6. The source-ledger hydration below MERGES with whatever this
+            session may have already captured locally during this fetch's
+            own async gap (mergeSourceLedger, existing+incoming by stable
+            id) instead of replacing it outright -- so a turn the buyer
+            manages to type before this resolves is never discarded, even
+            though `resuming` should already have prevented that turn from
+            being typed at all. Belt and braces: two independent guards
+            against the same race, not one relied on alone. */
+    const resumeId = p.get("id");
+    const resumeManage = p.get("manage");
+    if (resumeId) {
+      setResuming(true);
+      void (async () => {
+        try {
+          const url = resumeManage
+            ? `/sase/api/rfp/${encodeURIComponent(resumeId)}?manage=${encodeURIComponent(resumeManage)}`
+            : `/sase/api/rfp/${encodeURIComponent(resumeId)}`;
+          const res = await fetch(url);
+          if (!res.ok) {
+            say("That project link didn't load, so this is starting fresh instead.");
+            return;
+          }
+          const proj = (await res.json()) as {
+            engine?: string;
+            test?: boolean;
+            source_ledger?: SourceLedgerEntry[];
+            engine_data?: { requirement?: unknown } | null;
+          };
+          const resumeState = resumeStateFromProject(proj);
+          if (!resumeState) {
+            // Scoped to Security Sourcing this round (see
+            // resumeStateFromProject()'s doc comment): a non-engine/wizard
+            // project's Save path is the wizard PUT route, which this
+            // resume flow does not yet drive, so resuming into one here
+            // would silently misroute the next save.
+            say("This project isn't a Security Sourcing engagement yet, so it can't be reopened here -- starting fresh instead.");
+            return;
+          }
+          // Merge, not replace (item 6): preserves anything this session
+          // already captured locally during the fetch's own async gap.
+          setSourceTurns((current) => mergeSourceLedger(resumeState.sourceLedger, current));
+          setResumeRequirementBase(resumeState.requirementBase);
+          // Marks this session as "already saved" under this id/manage, so
+          // saveNow()/signAndPublish() take the refreshRecord() (update)
+          // path, not createRecord() (which would mint a second project) --
+          // and records the scope this project was saved under, so an
+          // unrelated later scope change is still detected correctly.
+          setCreated({ id: resumeId, manage: resumeManage ?? "", test: Boolean(proj.test) });
+          savedSecurity.current = true;
+          say("Reopened your saved project. Everything you had is still here -- add more, or save or publish when ready.");
+        } catch {
+          say("That project link didn't load, so this is starting fresh instead.");
+        } finally {
+          setResuming(false);
+        }
+      })();
+    }
     if (seedFacts.length) {
       const m = applyMerge(seedFacts, "link");
       if (m.changed.length) markChanged(m.changed, m.facts);
@@ -1090,18 +1355,20 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
   /* ---- The publish gate (identical law to every round) ---- */
   const signLocked =
-    !started || facts.length === 0 || Boolean(published) || !coreFiveComplete || (securityScope && (!verdict || verdict.confidence === "low")) || (!securityScope && !buying);
-  const lockLine = !started
-    ? "Say one sentence about the organisation and the engine takes over."
-    : facts.length === 0
-      ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
-      : !coreFiveComplete
-        ? `A notice cannot publish without five details, and ${numWord(missingCore.length)} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it in the prompt, or answer the open lines in the statement.`
-        : securityScope && (!verdict || verdict.confidence === "low")
-          ? "Answer the open questions first: nothing is recorded on guesswork."
-          : !securityScope && !buying
-            ? "Say what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
-            : null;
+    resuming || !started || facts.length === 0 || Boolean(published) || !coreFiveComplete || (securityScope && (!verdict || verdict.confidence === "low")) || (!securityScope && !buying);
+  const lockLine = resuming
+    ? "Loading your saved project…"
+    : !started
+      ? "Say one sentence about the organisation and the engine takes over."
+      : facts.length === 0
+        ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
+        : !coreFiveComplete
+          ? `A notice cannot publish without five details, and ${numWord(missingCore.length)} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it in the prompt, or answer the open lines in the statement.`
+          : securityScope && (!verdict || verdict.confidence === "low")
+            ? "Answer the open questions first: nothing is recorded on guesswork."
+            : !securityScope && !buying
+              ? "Say what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
+              : null;
   const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGapsLenOk() || consentGaps) : consentCreate;
   function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
   const unansweredGaps = brief.openGaps;
@@ -1136,12 +1403,26 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   const publishTitle = brief.title;
 
   /* ---- Corrections: the drop that never returns ---- */
+  /** Round 9 (13 Aug 2026), Robert's third finding on the seventh
+   *  amendment: dropping a fact used to strike it (dropListFact below)
+   *  but never tombstone it, so a value that existed in BOTH this
+   *  session's own facts AND a resumed project's persisted base came
+   *  straight back on the next save -- the live copy stayed struck, but
+   *  mergeRequirementBase() never learned the base's own copy should be
+   *  stripped too. dropFact now runs the SAME pure strike-and-tombstone
+   *  primitive (draft.ts's dropListFact) every removal surface uses --
+   *  the row button (via dropRow below), the typed drop/remove command
+   *  (via resolveDropTarget's "fact" match, handleCommand below) and any
+   *  fixture proving either -- so all three are provably one code path,
+   *  not three copies that happen to agree today. */
   const dropFact = useCallback((id: string) => {
     const f = factsRef.current.find((x) => x.id === id);
     if (!f || f.struck) return;
     if (f.provenance === "inferred") neverReinfer.current.add(nrKey(f.path, f.value));
-    factsRef.current = factsRef.current.map((x) => (x.id === id ? { ...x, struck: true } : x));
+    const result = dropListFact(factsRef.current, resumeRemovalsRef.current, f);
+    factsRef.current = result.facts;
     setFacts(factsRef.current);
+    setResumeRemovals(result.removals);
     setChangedSlots([]);
     setSaveDirty(true);
     ev("workspace_fact_struck", { path: f.path, provenance: f.provenance, undo: "0" });
@@ -1177,6 +1458,21 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
 
   const keepReceipt = useCallback((text: string) => {
     setReceipts((rs) => [...rs, { id: ++receiptId.current, text }]);
+    setSaveDirty(true);
+  }, []);
+
+  /** Reliability gate, third amendment (13 Aug 2026), item 1: appends one
+   *  immutable source turn. Called for every non-command entry BEFORE
+   *  extraction runs, so preservation of the buyer's own wording never
+   *  depends on what the extractor later manages to place -- unlike
+   *  `keepReceipt`, this always fires, whether the message lands every
+   *  clause cleanly or none at all. Never edited or removed afterward.
+   *  FOURTH amendment: takes `via` now (typed/paste/drop), and the id is
+   *  generated once here with newSourceTurnId() -- stable across every
+   *  later save of this same turn, unlike the third amendment's numeric
+   *  ref counter (see the SourceTurn type comment). */
+  const keepSourceTurn = useCallback((text: string, via: SourceLedgerVia) => {
+    setSourceTurns((ts) => [...ts, { id: newSourceTurnId(), text, at: Date.now(), via }]);
     setSaveDirty(true);
   }, []);
 
@@ -1251,11 +1547,11 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
   /* ---- The extraction cycle (the same organ). Round 6: the cycle
      reports which slots it changed so the thread can say exactly that,
      a template line composed from the diff and nothing else. ---- */
-  type CycleResult = { landed: number; labels: string[]; rules: number; error: boolean };
+  type CycleResult = { landed: number; labels: string[]; rules: number; error: boolean; unplaced: string[]; removed: string[] };
   const runCycle = useCallback(
     async (text: string): Promise<CycleResult> => {
       const trimmed = text.trim();
-      if (trimmed.length < 3 || busy) return { landed: 0, labels: [], rules: 0, error: false };
+      if (trimmed.length < 3 || busy) return { landed: 0, labels: [], rules: 0, error: false, unplaced: [], removed: [] };
       if (looksLikeAnotherNetify(trimmed)) setWrongCompany(true);
       setBusy(true);
       setCycleError(null);
@@ -1263,11 +1559,32 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         const res = await fetch("/sase/api/workspace/extract", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ text: trimmed, requirement: requirementFrom(factsRef.current) }),
+          // Sixth amendment: the model's own extraction context must see
+          // the full picture too (item 1's "every subsequent extraction ...
+          // starts from the project's existing engine_data.requirement"),
+          // not just this resumed session's own facts so far -- same merge
+          // the `requirement` memo above applies, via the ref so this
+          // callback never closes over a stale value. Seventh amendment:
+          // also carries resumeRemovalsRef so the model's own context
+          // never sees a value this session has already retracted.
+          body: JSON.stringify({
+            text: trimmed,
+            requirement: mergeRequirementBase(resumeRequirementBaseRef.current, requirementFrom(factsRef.current), resumeRemovalsRef.current),
+          }),
         });
         if (!res.ok) throw new Error(`extract ${res.status}`);
-        const data = (await res.json()) as { updates: FieldUpdate[]; engine: string; notes: string[] };
+        const data = (await res.json()) as { updates: FieldUpdate[]; engine: string; notes: string[]; unplacedClauses?: string[]; removals?: FieldRemoval[] };
         const merged = applyMerge(data.updates ?? [], "extract");
+        /* Seventh amendment: applied AFTER the positive merge above, so a
+           value this SAME message both states and retracts (a genuine
+           contradiction, not the expected case) resolves as "retracted" --
+           the more consequential of the two actions wins. In the ordinary
+           case the two never overlap: the extractor's own negation window
+           already keeps a negated mention from producing a positive
+           update in the first place (see removalsIn()'s own comment in
+           extract.ts), so `data.updates` and `data.removals` never name
+           the same path+value together in practice. */
+        const removedLabels = applyRemovals(data.removals ?? []);
 
         /* Stated objectives note themselves (Harry, 24 Jul): the phrase is
            in this cycle's words, so the note is the buyer's own statement. */
@@ -1300,15 +1617,15 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
           const lbl = (sid ? SLOT_BY_ID[sid].label : PATH_LABELS[f.path] ?? f.path).toLowerCase();
           if (!labels.includes(lbl)) labels.push(lbl);
         }
-        return { landed: merged.changed.length, labels, rules, error: false };
+        return { landed: merged.changed.length, labels, rules, error: false, unplaced: data.unplacedClauses ?? [], removed: removedLabels };
       } catch {
         setCycleError("The engine did not answer; your words are unchanged, say it again in a moment.");
-        return { landed: 0, labels: [], rules: 0, error: true };
+        return { landed: 0, labels: [], rules: 0, error: true, unplaced: [], removed: [] };
       } finally {
         setBusy(false);
       }
     },
-    [busy, applyMerge, markChanged, say],
+    [busy, applyMerge, applyRemovals, markChanged, say],
   );
 
   /* ---- Ingest (The Threshold): a paste or a dropped text file runs
@@ -1322,15 +1639,43 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const receiptsBefore = receiptsRef.current.length;
       ev("workspace_ingest", { source, chunks: plan.chunks.length, chars: plan.readChars, truncated: plan.truncated ? 1 : 0 });
       if (!firstKeyAt.current) firstKeyAt.current = Date.now();
+      /* Fourth amendment (13 Aug 2026), gap 1: the third amendment kept
+         one source turn PER CHUNK -- so anything chunkForIngest's own
+         honest, disclosed extraction budget (maxChunks * chunkMax, ~10,500
+         characters) truncated for READING was, by construction, also
+         missing from the ledger, even though the ledger's entire purpose
+         is to survive independent of extraction. Fixed: the buyer's
+         COMPLETE original entry is kept as ONE turn here, before any
+         chunking, any extraction, and regardless of plan.truncated.
+
+         Fifth amendment (13 Aug 2026), gap 1 continued: that fix still
+         applied chunkForIngest's OWN normalisation (CRLF -> LF, outer
+         trim) to the ledger's copy too -- silently rewriting line endings
+         and dropping leading/trailing content the buyer actually typed.
+         captureRawSourceEntry() (workspace/source-ledger.ts) is now the
+         ONLY operation between the raw paste/drop string and what the
+         ledger keeps: identity on the content, no trim, no CRLF rewrite.
+         chunkForIngest(raw) below still receives the SAME untouched raw
+         string and normalises its own internal copy exactly as before --
+         the two copies are independent from here on. */
+      keepSourceTurn(captureRawSourceEntry(raw), source);
       for (const chunk of plan.chunks) {
         // Sequential on purpose: each cycle merges before the next reads.
-        await runCycle(chunk);
+        const r = await runCycle(chunk);
+        /* Reliability gate amendment (13 Aug 2026), blocker 2 (Codex's
+           review): send() already keeps every unplaced clause as a
+           receipt (see that function's own comment above); the paste/drop
+           path called runCycle() per chunk but threw its result away, so
+           a clause the extractor couldn't place in a PASTED chunk still
+           vanished silently, even though the identical clause typed by
+           hand would have survived. Same fix, same place in the flow: */
+        for (const clause of r.unplaced) keepReceipt(clause);
       }
       const landed = Math.max(0, factsRef.current.filter((f) => !f.struck).length - factsBefore);
       const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
       setPasteSummary(ingestSummary(landed, kept, plan));
     },
-    [runCycle],
+    [runCycle, keepReceipt, keepSourceTurn],
   );
 
   /** What is most useful next, computed off the fresh refs so the reply
@@ -1353,7 +1698,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
      with the notes and the thread says so once. ---- */
   async function send(raw: string) {
     const text = raw.trim();
-    if (!text || busy) return;
+    // Sixth amendment, item 3: blocks typing from acting while a resume
+    // fetch is still in flight (the composer is also disabled/hidden
+    // behind `resuming` in the JSX below; this is the same guard's
+    // non-UI half, since Enter-to-send calls send() directly and does not
+    // go through the button's `disabled` attribute at all).
+    if (!text || busy || resuming) return;
     setDraft("");
     if (!firstKeyAt.current) firstKeyAt.current = Date.now();
     sayYou(text);
@@ -1364,20 +1714,54 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       return;
     }
 
+    /* Reliability gate, third amendment (13 Aug 2026), item 1: a
+       recognised command is an instruction, not buyer content, so it is
+       never kept as a source turn (the early return above already skips
+       this line for one). Everything else -- kept the moment it's known
+       not to be a command, before extraction runs -- is preserved
+       verbatim regardless of what runCycle() below manages to place. */
+    keepSourceTurn(text, "typed");
+
     const r = await runCycle(text);
-    if (r.landed > 0) {
+    if (r.error) return; /* the caption carries the engine error; the words stay in the prompt's history */
+
+    /* Fact Ledger Reliability Gate (13 Aug 2026): keep EVERY clause the
+       extractor could not place, even when OTHER clauses in the same
+       message landed real facts. This is the actual bug: before this,
+       a receipt was only ever kept when the WHOLE message landed
+       nothing (see the old fallback this replaces, below) -- a message
+       that landed four facts and missed a fifth sentence returned early
+       right here and that fifth sentence's words were never kept
+       anywhere. Runs before the landed/not-landed branch so both paths
+       below share it, once. */
+    for (const clause of r.unplaced) keepReceipt(clause);
+
+    /* Seventh amendment: a retraction alone (e.g. "We no longer use
+       MPLS.", nothing else in the same message) must not fall through to
+       the "nothing landed" branch below and say THREAD_NO_CATCH -- that
+       would misreport a real change to the statement as no change at
+       all. Checked alongside r.landed so both a positive landing and a
+       retraction, together or separately, take this branch. */
+    if (r.landed > 0 || r.removed.length > 0) {
       const parts: string[] = [];
       if (r.labels.length) parts.push(`Written in: ${r.labels.join(", ")}.`);
       if (r.rules > 0) parts.push(`${cap(numWord(r.rules))} rule${r.rules === 1 ? "" : "s"} landed in the statement with your words as provenance.`);
+      if (r.removed.length) parts.push(`Removed from the statement: ${r.removed.join(", ")}.`);
+      if (r.unplaced.length) parts.push(`${cap(numWord(r.unplaced.length))} other line${r.unplaced.length === 1 ? "" : "s"} kept with your notes, unplaced.`);
       const miss = missingNow();
       parts.push(miss.length ? `Most useful next: ${miss.slice(0, 2).join(" and ")}.` : "Everything the statement tracks is in.");
       say(parts.join(" "));
       return;
     }
-    if (r.error) return; /* the caption carries the engine error; the words stay in the prompt's history */
 
-    /* Nothing landed: kept verbatim, said once in the thread. */
-    keepReceipt(text);
+    /* Nothing landed as a structured fact. If the extractor split the
+       message into clauses and kept some individually above, don't ALSO
+       keep the whole message as a second, overlapping receipt -- only
+       fall back to the old whole-message receipt when there was no
+       clause structure to keep in the first place (e.g. a short aside,
+       or a glossary question, which never reaches coverDeclarativeClauses
+       at all). Either way, said once in the thread. */
+    if (!r.unplaced.length) keepReceipt(text);
     say(THREAD_NO_CATCH);
   }
 
@@ -1470,30 +1854,47 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         /* Round 8 (2 Aug 2026, Robert: "if someone types... remove this...
            it should work"): "drop X"/"remove X" now reaches anything on
            the statement, not just a vendor or a guess — a stated fact, a
-           noted multi-select item (Support, Change model, and so on), or
-           a kept-verbatim note, matched the same way a vendor name is:
-           against the words the page itself shows, either direction. Each
-           removal fires the exact same function its own row's own button
-           calls, so the thread reads exactly as if the buyer had clicked
-           it, with the correct "dropped"/"cleared" wording for whether it
-           was netify's guess or the buyer's own stated word. */
+           noted multi-select item (Support, Change model, and so on), a
+           kept-verbatim note, or a value that lives only in a resumed
+           project's persisted base — matched the same way a vendor name
+           is: against the words the page itself shows, either direction.
+           Round 9 (13 Aug 2026), item 6: the matching itself now runs
+           through draft.ts's resolveDropTarget(), the SAME pure function
+           a fixture can call directly with synthetic data, so this
+           handler and any test of it are provably exercising identical
+           matching logic rather than two copies that merely look alike.
+           Each removal still fires the exact same function its own row's
+           own button calls (dropRow -> dropFact -> dropListFact, item 4/5
+           above), so the thread reads exactly as if the buyer had
+           clicked it, with the correct "dropped"/"cleared" wording for
+           whether it was netify's guess or the buyer's own stated word. */
         if (cmd.kind === "dropName") {
-          const liveFacts = factsRef.current.filter((x) => !x.struck);
-          const f = liveFacts.find((x) => {
-            const l = norm(factLabel(x));
-            return l.length > 0 && (l.includes(target) || target.includes(l));
+          const match = resolveDropTarget(cmd.name, {
+            liveFacts: factsRef.current.filter((x) => !x.struck),
+            noted,
+            receipts,
+            resumeRequirementBase,
+            resumeRemovals: resumeRemovalsRef.current,
           });
-          if (f) { dropRow(f); return; }
-          const n = noted.find((x) => {
-            const l = norm(x.label);
-            return l.length > 0 && (l.includes(target) || target.includes(l));
-          });
-          if (n) { clearNote(n.id); say(`Cleared: ${n.label}. It is an open line in the statement again.`); return; }
-          const rcpt = receipts.find((x) => {
-            const l = norm(x.text);
-            return l.length > 0 && (l.includes(target) || target.includes(l));
-          });
-          if (rcpt) { dropReceipt(rcpt.id); say(`Cleared: “${rcpt.text}”. It will not come back unless you say it yourself.`); return; }
+          if (match) {
+            switch (match.kind) {
+              case "fact":
+                dropRow(match.fact);
+                return;
+              case "note":
+                clearNote(match.id);
+                say(`Cleared: ${match.label}. It is an open line in the statement again.`);
+                return;
+              case "receipt":
+                dropReceipt(match.id);
+                say(`Cleared: “${match.text}”. It will not come back unless you say it yourself.`);
+                return;
+              case "resumeBase":
+                applyRemovals([{ path: match.path, value: match.value, quote: match.display }]);
+                say(`Cleared: ${match.display}. It will not come back unless you say it yourself.`);
+                return;
+            }
+          }
         }
         say(`I could not find “${cmd.name}” in the list or among the guesses. Say the name as the page shows it.`);
         return;
@@ -1517,6 +1918,18 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
     }
   }
 
+  /** Fourth amendment (13 Aug 2026), gaps 2 & 3: the ONE shape every
+   *  save/create/re-scope call sends the source ledger in, on the wire --
+   *  used by rfpPayload() below AND by createRecord/refreshRecord's
+   *  security-scope branches, which (unlike the wizard path) don't share
+   *  one payload builder. Sending the SAME entries (same stable ids) on
+   *  every call is exactly what makes the server's mergeSourceLedger()
+   *  idempotent: a repeated save changes nothing, a save with new turns
+   *  appends only the new ones. */
+  function sourceTurnsPayload(): Array<{ id: string; text: string; at: number; via: SourceLedgerVia }> {
+    return sourceTurns.map((t) => ({ id: t.id, text: t.text, at: t.at, via: t.via }));
+  }
+
   /* ---- The create step, shared by the early save and the publish
      chain (round 6): the same payloads, the same records, unpublished.
      The wizard-store payload only carries the submit-agreement consent
@@ -1530,6 +1943,14 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       requirement.estate?.existingNetwork?.length ? `Network estate: ${requirement.estate.existingNetwork.join(", ")}.` : "",
       noted.length ? `Buyer selections (structured fields pending): ${noted.map((n) => n.label).join(", ")}.` : "",
       receipts.length ? `Buyer notes, kept verbatim: ${receipts.map((r) => r.text).join(" | ")}.` : "",
+      /* Reliability gate, third amendment (13 Aug 2026), item 6: the full
+         immutable source-turn log (see the SourceTurn type comment)
+         flows into the persisted record here -- not merely the
+         transient chat thread -- so every original requirement stays
+         available in the saved/published output even for a turn the
+         extractor placed perfectly, not only the ones flagged above as
+         still needing review. */
+      notesWithSourceTurns("", sourceTurns.map((t) => t.text)),
       instrumentNotesLine({
         instrument,
         set: rfiSet,
@@ -1557,6 +1978,12 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
         covered_sections: coveredSections,
         sector: (requirement.organisation?.sector as string | undefined) ?? null,
       },
+      /* Fourth amendment, gaps 2 & 3: the structured ledger, alongside the
+         flattened `notes` projection above -- the server merges this into
+         `source_ledger` (rfp-types.ts), the canonical store, on every
+         create AND every refresh (this payload is shared by both, see
+         createRecord/refreshRecord below), not only the first save. */
+      source_turns: sourceTurnsPayload(),
     };
   }
 
@@ -1565,7 +1992,20 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
       const res = await fetch("/sase/api/security-sourcing/project", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ requirement, consent: true, preferred_vendors: pins, ...(testMode ? { test: true } : {}) }),
+        body: JSON.stringify({
+          requirement,
+          consent: true,
+          preferred_vendors: pins,
+          /* Reliability gate, third amendment (13 Aug 2026), item 6: this
+             was the one save/publish path with NO route for the buyer's
+             own wording to reach the persisted record at all -- the
+             wizard's rfpPayload() above already carried it, this branch
+             never did. FOURTH amendment: sends the structured ledger
+             (source_turns), not a flattened string array (source_notes,
+             now retired everywhere) -- see sourceTurnsPayload() above. */
+          ...(sourceTurns.length ? { source_turns: sourceTurnsPayload() } : {}),
+          ...(testMode ? { test: true } : {}),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.project?.id) throw new Error(data.error || "Could not create the project; try again.");
@@ -1585,10 +2025,19 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
    *  store through its own PUT, the engine through its own re-scope. */
   async function refreshRecord(proj: { id: string; manage: string; test: boolean }) {
     if (securityScope) {
+      // Gap 2 fix (round 5): this is the ONLY save path a Security Sourcing
+      // project ever takes after its first save — saveNow() calls this on
+      // every subsequent Save, and signAndPublish() calls this as the
+      // pre-publish refresh. Round 4 threaded source turns into
+      // createRecord()'s first-save POST but never into this route, so any
+      // wording typed after that first save was silently never persisted.
+      // Sending the full current ledger here and merging idempotently by id
+      // server-side (rescope-project.ts) is what makes "save twice" and
+      // "type more, then publish" both durable.
       const res = await fetch(`/sase/api/security-sourcing/project/${proj.id}/rescope`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ manage_token: proj.manage, requirement, consent: true }),
+        body: JSON.stringify({ manage_token: proj.manage, requirement, consent: true, source_turns: sourceTurnsPayload() }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
@@ -1608,7 +2057,8 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
      header stays honest either way; nothing is invited and nothing is
      listed until the signature chain runs. ---- */
   async function saveNow() {
-    if (!started || saveBusy) return;
+    // Sixth amendment, item 3: same non-UI guard as send() above.
+    if (!started || saveBusy || resuming) return;
     if (securityScope && !consentSave) return;
     setSaveBusy(true);
     setSaveError(null);
@@ -1873,7 +2323,7 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
      Every advertised sentence still works typed; the surface copy
      advertises them where they apply. */
 
-  const sendReady = draft.trim().length > 0 && !busy;
+  const sendReady = draft.trim().length > 0 && !busy && !resuming;
   const readyToFit = pct >= 62 && Boolean(fitBuying) && !published;
 
   if (!booted) return <div className="pd-root mt-10" />;
@@ -2150,9 +2600,10 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   void ingestText(text, "paste");
                 }
               }}
-              placeholder={started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
+              placeholder={resuming ? PLACEHOLDER_RESUMING : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
+              disabled={resuming}
               rows={1}
-              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099]"
+              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099] disabled:cursor-not-allowed disabled:opacity-60"
             />
             <div className="flex flex-none items-center gap-1.5">
               {voiceSupported && (
@@ -3091,13 +3542,14 @@ export default function ProjectDesk({ afterPrompt }: { afterPrompt?: ReactNode }
                   </label>
                 )}
                 {saveError && <p className="m-0 mb-2 text-[12.5px] text-red-600">{saveError}</p>}
+                {resuming && <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#8C8A85]">Loading your saved project…</p>}
                 <button
                   type="button"
                   onClick={() => void saveNow()}
-                  disabled={saveBusy || (securityScope && !consentSave)}
+                  disabled={saveBusy || resuming || (securityScope && !consentSave)}
                   className="cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[20px] py-[11px] text-[14.5px] font-semibold text-[#141414] hover:bg-[#E5940F] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {saveBusy ? "Saving…" : created ? "Save changes" : "Save"}
+                  {saveBusy ? "Saving…" : resuming ? "Loading…" : created ? "Save changes" : "Save"}
                 </button>
               </div>
             )}

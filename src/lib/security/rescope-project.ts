@@ -25,6 +25,7 @@ import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { advanceProject, recordProjectEvent, projectPhase } from "@/lib/project-machine";
 import type { ProjectDetails } from "@/lib/rfp-types";
 import type { Understanding } from "@/lib/workspace/understanding";
+import { mergeSourceLedger, type SourceLedgerEntry } from "@/lib/workspace/source-ledger";
 
 /** True when the live document differs from the latest generated snapshot:
  *  the same rule the generate_security_rfp tool applies. */
@@ -76,6 +77,17 @@ export interface RescopeInput {
    *  Understanding exactly as it was" — so an existing rescope call that
    *  knows nothing about Understanding can never wipe it. */
   understanding?: Understanding;
+  /** Fourth amendment (13 Aug 2026), gap 2: this is the ONLY route a
+   *  Security Sourcing project's Save (after the first) or pre-publish
+   *  refresh ever takes — round 4 threaded source turns into
+   *  create-project.ts's first save but never into re-scope, so wording
+   *  typed after that first save was silently never persisted. Merged
+   *  idempotently by stable turn id (mergeSourceLedger) into the project's
+   *  existing source_ledger below; omitted/empty is a no-op, so an existing
+   *  caller that knows nothing about turns (the rescope_security_project
+   *  MCP tool) leaves the ledger exactly as it was, same as `understanding`
+   *  above. */
+  sourceTurns?: SourceLedgerEntry[];
 }
 
 export interface RescopedProject {
@@ -118,6 +130,13 @@ export async function buildRescopedProject(input: RescopeInput): Promise<Rescope
 
   let p: ProjectDetails = {
     ...project,
+    // Fourth amendment, gap 2 fix: accretes exactly like every other part
+    // of this record already does — never reorders, edits or removes an
+    // existing entry, and a repeat of the same batch (a Save with nothing
+    // newly typed) is a no-op by construction (mergeSourceLedger's own
+    // idempotency), so calling this on every Save/refresh, not just once,
+    // cannot duplicate anything.
+    source_ledger: mergeSourceLedger(project.source_ledger ?? [], input.sourceTurns ?? []),
     consents: [
       ...(project.consents ?? []),
       {

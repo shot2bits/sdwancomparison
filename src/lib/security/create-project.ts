@@ -23,6 +23,8 @@ import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 import type { Understanding } from "@/lib/workspace/understanding";
+import { notesWithSourceTurns } from "@/lib/workspace/extract";
+import { mergeSourceLedger, type SourceLedgerEntry } from "@/lib/workspace/source-ledger";
 
 export const CREATE_CONSENT_TEXT =
   "Create my Security Sourcing project: Netify stores this requirement and scoping verdict so I can build and publish an RFP to matched vendors. No vendor is contacted until I publish.";
@@ -68,6 +70,17 @@ export interface CreateSecurityProjectInput {
    *  built from, stored verbatim on the Project alongside the rulebook's
    *  own `requirement`. Absent for every existing caller. */
   understanding?: Understanding;
+  /** Reliability gate, fourth amendment (13 Aug 2026): the buyer's own
+   *  verbatim source turns (see ProjectDesk.tsx's SourceTurn type and
+   *  workspace/source-ledger.ts), persisted two ways from the SAME input —
+   *  structured and complete into `project.source_ledger` (the canonical
+   *  store this amendment introduces), and, unchanged from the third
+   *  amendment, folded as a human-readable projection into `buyer.notes` via
+   *  notesWithSourceTurns. Absent for every existing caller (the web
+   *  wizard's create route has its own, separate notes path; the existing
+   *  create_security_project MCP tool has no chat thread to draw from at
+   *  all). */
+  sourceTurns?: SourceLedgerEntry[];
 }
 
 export interface BuiltSecurityProject {
@@ -165,13 +178,24 @@ export async function buildSecurityProject(
   }
 
   const pins = (input.preferredVendors ?? []).filter(Boolean).slice(0, 5);
+  const buyerProfile = buyerFrom(input.requirement);
+  // Fourth amendment: the ledger is built once, here, from this creation's
+  // input turns (there is no existing ledger yet — `mergeSourceLedger([], ...)`
+  // is just "validate and de-dup within this one batch"), and the SAME
+  // ledger's text values feed the human-readable projection below, so the
+  // two never drift apart at the moment of creation.
+  const sourceLedger = mergeSourceLedger([], input.sourceTurns ?? []);
   let project = ProjectDetailsSchema.parse({
     id: input.ids.id,
     created: now,
     updated: now,
     status: "draft",
     title: usableTitle(input.customTitle) ?? titleFor(input.requirement),
-    buyer: { ...buyerFrom(input.requirement), ...(pins.length ? { pinned_vendors: pins } : {}) },
+    buyer: {
+      ...buyerProfile,
+      notes: notesWithSourceTurns(String(buyerProfile.notes ?? ""), sourceLedger.map((t) => t.text)),
+      ...(pins.length ? { pinned_vendors: pins } : {}),
+    },
     rfp_sections: [],
     invited_vendors: [],
     share_token: input.ids.shareToken,
@@ -187,6 +211,10 @@ export async function buildSecurityProject(
     // inside it. Absent for every caller that doesn't pass it, so the
     // Project shape is otherwise identical to before this milestone.
     ...(input.understanding ? { understanding: input.understanding } : {}),
+    // Fourth amendment: the canonical structured ledger, top-level like
+    // `understanding` for the same reason — engine-independent, not gated
+    // by engine_data's authorised-writer invariants.
+    source_ledger: sourceLedger,
     phase: "scoping",
     history: [],
     consents: [

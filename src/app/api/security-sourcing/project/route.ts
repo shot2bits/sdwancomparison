@@ -13,6 +13,7 @@ import { createSecurityProject } from "@/lib/security/persist-project";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { publicProject } from "@/lib/rfp-store";
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
+import { parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 
 export async function OPTIONS(req: Request) {
   return preflight(req);
@@ -23,7 +24,19 @@ export async function POST(req: Request) {
   if (!kvConfigured()) {
     return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
   }
-  let body: { custom_title?: string; requirement?: SecurityRequirementInput; consent?: boolean; test?: boolean; preferred_vendors?: string[] } = {};
+  let body: {
+    custom_title?: string;
+    requirement?: SecurityRequirementInput;
+    consent?: boolean;
+    test?: boolean;
+    preferred_vendors?: string[];
+    /** Reliability gate, fourth amendment (13 Aug 2026): the buyer's own
+     *  verbatim source turns as structured ledger entries (see
+     *  workspace/source-ledger.ts), parsed defensively below — a malformed
+     *  or missing field is simply an empty ledger for this create, never a
+     *  400 for the whole request. */
+    source_turns?: unknown;
+  } = {};
   try {
     body = await req.json();
   } catch {
@@ -53,6 +66,7 @@ export async function POST(req: Request) {
       ...(Array.isArray(body.preferred_vendors)
         ? { preferredVendors: body.preferred_vendors.filter((s): s is string => typeof s === "string") }
         : {}),
+      sourceTurns: parseIncomingSourceTurns(body.source_turns),
     });
   } catch (e) {
     // Core refusals (low confidence with the gap questions) return as a

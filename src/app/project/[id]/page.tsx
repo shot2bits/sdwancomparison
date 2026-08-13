@@ -200,6 +200,36 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
                   <Link href={`/project/${id}/rescope${qs}`} className="underline">Re-scope</Link>
                 </>
               )}
+              {/* Fifth amendment (13 Aug 2026): the one real entry point
+                  into ProjectDesk's resume capability -- carries this
+                  project's id, and its manage token when the visitor
+                  actually holds one, so the workspace chat can rehydrate
+                  its source ledger and keep saving to THIS project instead
+                  of minting a new one.
+                  Sixth amendment (13 Aug 2026), Robert's gap 4: a
+                  signed-in owner reaching this page through their account
+                  (sessionOwner, no manage token in the URL at all) could
+                  see this whole page -- this page's own access gate two
+                  lines up is `!tokenOk && !sessionOwner`, so sessionOwner
+                  alone is already enough to be looking at this page -- but
+                  the link itself required `tokenOk` regardless, so that
+                  same owner had no way to reach resume. The server side
+                  never needed a token from a session-authorised owner
+                  (requireRfpOwner falls back to the session, same-origin
+                  cookies travel with ProjectDesk's own fetch calls
+                  automatically) -- only this link's gate was too narrow.
+                  Now gated on owner-ness generally (tokenOk OR
+                  sessionOwner), and the URL carries `manage=` only when a
+                  real token is actually held; a session-only owner's link
+                  omits it, and ProjectDesk's resume effect authenticates
+                  by cookie instead. Still only while the project is
+                  editable. */}
+              {(tokenOk || sessionOwner) && ["scoping", "scoped", "drafting", "drafted"].includes(phase) && (
+                <>
+                  <span className="mx-2 text-[var(--ink-300,#ccc)]">·</span>
+                  <Link href={`/workspace/?id=${id}${tokenOk && manage ? `&manage=${encodeURIComponent(manage)}` : ""}`} className="underline">Add more detail</Link>
+                </>
+              )}
             </p>
           </section>
         )}

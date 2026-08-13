@@ -4,6 +4,7 @@ import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark, recordDemandSample, indexRfpForBuyer } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
+import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -94,6 +95,17 @@ export async function PUT(req: Request, ctx: Ctx) {
   const regenerate = body.regenerate === true;
   delete body.regenerate;
 
+  // Fourth amendment (13 Aug 2026), gap 2/3 fix: this PUT is the wizard's
+  // pre-publish refresh path (and every subsequent non-security Save), so
+  // it needs the exact same treatment as the security-scope re-scope route.
+  // `source_turns` is a request-body convenience shape, not a
+  // ProjectDetailsSchema field (the schema's canonical field is
+  // `source_ledger`, an array of validated entries) — pulled out and
+  // deleted BEFORE the blind spread below, so it can never pass through raw
+  // (wrong field name/shape) or silently overwrite instead of merging.
+  const incomingSourceTurns = parseIncomingSourceTurns(body.source_turns);
+  delete body.source_turns;
+
   // Preserve immutable/credential/ownership fields: a PUT must never rotate the
   // manage_token, reassign identity-bearing tokens, or move the RFP to another
   // account.
@@ -105,6 +117,10 @@ export async function PUT(req: Request, ctx: Ctx) {
     created: existing.created,
     manage_token: existing.manage_token,
     owner_email: existing.owner_email,
+    // Merged explicitly (never overwritten by the spread above, and never
+    // left to whatever body.source_ledger happened to contain): accretes
+    // idempotently by stable turn id, exactly like the re-scope route.
+    source_ledger: mergeSourceLedger(existing.source_ledger ?? [], incomingSourceTurns),
   } as typeof existing;
 
   // Adopt ownership: a token-authorised save from a signed-in buyer binds the

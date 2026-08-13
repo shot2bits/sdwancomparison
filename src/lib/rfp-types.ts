@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { SecurityRequirementInputSchema, SecurityScopeVerdictSchema } from "@/lib/security/rulebook";
 import { UnderstandingSchema } from "@/lib/workspace/understanding";
+import { SourceLedgerEntrySchema } from "@/lib/workspace/source-ledger";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -234,6 +235,26 @@ export const ProjectDetailsSchema = z.object({
    * owns. Sits here at the same level as `engine_data`, `phase` and
    * `history` — every existing record without it validates unchanged. */
   understanding: UnderstandingSchema.optional(),
+  /**
+   * Fact Ledger Reliability Gate, FOURTH amendment (13 Aug 2026): the
+   * canonical, structured, immutable log of the buyer's own verbatim
+   * wording — every entry keeps its own stable id, timestamp, exact text
+   * and input channel (typed / paste / drop). See source-ledger.ts for
+   * the full rationale. Sits at this same top level, alongside
+   * `understanding`, for the identical reason that field does: it is
+   * engine-independent Project state, not something any one engine owns,
+   * so it is never nested under `engine_data` (whose write path is
+   * gated to authorised engine writers only — this field is not, since
+   * every save/create/re-scope path across every engine needs to append
+   * to it). `buyer.notes` may still carry a human-readable PROJECTION
+   * built from this ledger (extract.ts's notesWithSourceTurns), but this
+   * field — never notes — is the durable store a future Canvas compiler
+   * or any other reader should walk. Defaults to an empty array so every
+   * record from before this amendment validates unchanged. Entries are
+   * appended only (mergeSourceLedger): nothing here is ever edited or
+   * removed by any write path in this codebase.
+   */
+  source_ledger: z.array(SourceLedgerEntrySchema).default([]),
   phase: z.enum(PROJECT_PHASE).optional(),
   history: z.array(ProjectHistoryEventSchema).default([]),
   consents: z.array(ProjectConsentSchema).default([]),

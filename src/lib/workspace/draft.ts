@@ -118,6 +118,119 @@ export function requirementFrom(facts: WorkspaceFact[]): SecurityRequirementInpu
   return applyUpdates({}, updates);
 }
 
+/**
+ * Sixth amendment (13 Aug 2026), Robert's core finding on the fifth
+ * amendment's "Minimal resume link": `requirementFrom` derives the
+ * requirement PURELY from `facts` -- correct for a fresh session, where
+ * `facts` genuinely does accumulate everything said all sitting, but wrong
+ * the moment a project is resumed. Resuming rehydrates the source ledger
+ * (the buyer's verbatim words) but never repopulates `facts` -- the
+ * per-field quote/reason/provenance WorkspaceFact needs was never
+ * persisted structurally in the first place; the server only holds
+ * `engine_data.requirement`, the flattened SecurityRequirementInput the
+ * rulebook actually assessed. Without this function, a resumed session's
+ * very first Save (or Publish's own pre-publish refresh) sends
+ * `requirementFrom(facts)` built from nothing but whatever THIS session
+ * has typed so far -- and rescope-project.ts's `requirement:
+ * input.requirement` REPLACES the project's whole existing
+ * `engine_data.requirement` with it, wholesale. The buyer's original
+ * sector, estate, drivers, constraints and buying intent silently vanish
+ * the instant a sufficiently detailed new message happens to clear the
+ * confidence gate on its own.
+ *
+ * The fix is deliberately NOT to reconstruct fake WorkspaceFacts from the
+ * flattened base and feed them into `facts` -- there is no real
+ * quote/reason/provenance to give them (SecurityRequirementInput never
+ * carried those), and fabricating one would misrepresent what was
+ * genuinely said this session versus what the record already held.
+ * Instead: keep the fetched requirement as an IMMUTABLE resume base, and
+ * merge it with whatever `requirementFrom(facts)` derives from this
+ * session's own facts -- a scalar this session states wins (a genuine
+ * correction, same "the new value replaces the old" rule mergeUpdates
+ * already applies within one session); every list field accretes (unions,
+ * never drops what the base already had, same accretion law every other
+ * part of a Project record already follows). A resumed session that adds
+ * nothing new returns the base back, field for field; a resumed session
+ * that adds one new driver keeps every earlier field AND the new driver.
+ *
+ * `base` is null for every non-resumed session (the overwhelmingly common
+ * case), so `mergeRequirementBase(null, addition)` is exactly `addition`
+ * -- byte-identical to calling `requirementFrom(facts)` alone, same as
+ * before this amendment. Only a resumed session, with a real base set,
+ * behaves differently.
+ *
+ * Seventh amendment (13 Aug 2026), Robert's finding on the sixth
+ * amendment above: unconditional union means a resumed buyer can add a
+ * new list value but can never RETRACT one the base already holds -- "we
+ * no longer use MPLS; we now use SD-WAN" correctly keeps the negated
+ * "MPLS" from being ADDED (the extractor's negation window already
+ * guaranteed that), but the base's own pre-existing mpls value was never
+ * touched, so the immutable source ledger records the correction while
+ * the structured requirement kept insisting the opposite. `removals` is
+ * a set of the SAME `factId(path, value)` ids draft.ts already uses for
+ * fact identity (list values as `path:normalisedValue`) -- every id in it
+ * is stripped OUT OF THE BASE, specifically, before the union runs, never
+ * out of `addition`. That ordering is what makes resurrection work for
+ * free, with no separate "un-remove" bookkeeping: if this SAME session
+ * later states the value again, it arrives through `addition` and the
+ * union re-adds it untouched, exactly the way a struck WorkspaceFact
+ * already returns the instant the buyer restates it in words. Applying
+ * the tombstone to `addition` too would instead let one correction
+ * permanently suppress every later restatement in the same sitting,
+ * which is not what "explicit session removals" was ever meant to do.
+ * Formula, field by field: (base − removals) ∪ addition -- exactly
+ * "persisted base + positive session additions − explicit session
+ * removals" whenever addition does not itself reintroduce the removed
+ * value. `removals` defaults to empty, so every existing call site
+ * (2-arg) is untouched and behaves exactly as before this amendment.
+ */
+function unionField<T>(base: T[] | undefined, addition: T[] | undefined): T[] | undefined {
+  if (base === undefined && addition === undefined) return undefined;
+  return [...new Set([...(base ?? []), ...(addition ?? [])])];
+}
+
+/** Strips any base list entry whose factId is tombstoned -- see
+ *  mergeRequirementBase()'s own comment for why this only ever touches
+ *  `base`, never `addition`. */
+function withoutRemoved<T extends string>(path: AllowedPath, list: T[] | undefined, removals: ReadonlySet<string>): T[] | undefined {
+  if (list === undefined || removals.size === 0) return list;
+  return list.filter((v) => !removals.has(factId(path, v)));
+}
+
+export function mergeRequirementBase(
+  base: SecurityRequirementInput | null | undefined,
+  addition: SecurityRequirementInput,
+  removals: ReadonlySet<string> = new Set(),
+): SecurityRequirementInput {
+  if (!base) return addition;
+  return {
+    organisation: {
+      sector: addition.organisation?.sector ?? base.organisation?.sector,
+      sizeBand: addition.organisation?.sizeBand ?? base.organisation?.sizeBand,
+      regions: unionField(withoutRemoved("organisation.regions", base.organisation?.regions, removals), addition.organisation?.regions),
+    },
+    estate: {
+      users: addition.estate?.users ?? base.estate?.users,
+      sites: addition.estate?.sites ?? base.estate?.sites,
+      devices: addition.estate?.devices ?? base.estate?.devices,
+      specialDevices: unionField(base.estate?.specialDevices, addition.estate?.specialDevices),
+      cloud: unionField(withoutRemoved("estate.cloud", base.estate?.cloud, removals), addition.estate?.cloud),
+      existingSecurity: unionField(withoutRemoved("estate.existingSecurity", base.estate?.existingSecurity, removals), addition.estate?.existingSecurity),
+      existingNetwork: unionField(withoutRemoved("estate.existingNetwork", base.estate?.existingNetwork, removals), addition.estate?.existingNetwork),
+    },
+    drivers: unionField(withoutRemoved("drivers", base.drivers, removals), addition.drivers),
+    constraints: {
+      complianceRequirements: unionField(
+        withoutRemoved("constraints.complianceRequirements", base.constraints?.complianceRequirements, removals),
+        addition.constraints?.complianceRequirements,
+      ),
+      inHouseSocCapacity: addition.constraints?.inHouseSocCapacity ?? base.constraints?.inHouseSocCapacity,
+      budgetBand: addition.constraints?.budgetBand ?? base.constraints?.budgetBand,
+      timeline: addition.constraints?.timeline ?? base.constraints?.timeline,
+    },
+  };
+}
+
 const lastStanding = (facts: WorkspaceFact[], path: AllowedPath): WorkspaceFact | undefined => {
   const xs = standing(facts).filter((f) => f.path === path);
   return xs[xs.length - 1];
@@ -260,6 +373,115 @@ export function humaniseWorkspaceValue(path: AllowedPath, value: unknown): strin
  *  reason) has ever been part of this function's output. */
 export function factLabel(f: WorkspaceFact): string {
   return humaniseWorkspaceValue(f.path, f.value);
+}
+
+/* ------------------------------------------------------------------ */
+/* Round 9 (13 Aug 2026): one drop/remove primitive, shared by the row  */
+/* button, the typed command and any fixture that wants to prove either */
+/* actually works -- Robert's third finding on the seventh amendment.   */
+/* ------------------------------------------------------------------ */
+
+/** Strikes exactly one live fact AND tombstones its factId into the
+ *  removals set, in one call, so a value that lives in BOTH this
+ *  session's own facts and a resumed project's persisted base is removed
+ *  from both at once. Before this, ProjectDesk.tsx's dropRow() called
+ *  only dropFact() -- struck the live fact, never touched the tombstone
+ *  set -- so a value restated this session (landing a live fact) and
+ *  then dropped again came straight back on the very next save: the live
+ *  fact stayed struck, but mergeRequirementBase() never saw a tombstone
+ *  for it, and the base's own copy unioned straight back in. Pure: takes
+ *  the current facts/removals and returns the next values, exactly the
+ *  shape a fixture can call directly with synthetic data to prove the
+ *  row button and the typed command are the SAME code, not two
+ *  independently written copies that merely look alike. Tombstoning a
+ *  SCALAR fact's id is harmless and deliberately not special-cased away
+ *  -- mergeRequirementBase() only ever consults `removals` through
+ *  withoutRemoved() on the six list paths, so a scalar id sitting unused
+ *  in the set has no effect (see that function's own doc comment). */
+export function dropListFact(
+  facts: WorkspaceFact[],
+  removals: ReadonlySet<string>,
+  fact: WorkspaceFact,
+): { facts: WorkspaceFact[]; removals: Set<string> } {
+  const nextFacts = facts.map((f) => (f.id === fact.id ? { ...f, struck: true } : f));
+  const nextRemovals = new Set(removals);
+  nextRemovals.add(fact.id);
+  return { facts: nextFacts, removals: nextRemovals };
+}
+
+/** What resolveDropTarget() below decided a typed "drop X"/"remove X"
+ *  (or, identically, a row's own button) should act on. Never mutates
+ *  anything itself -- the caller applies the match through the ordinary
+ *  drop/clear functions (dropRow -> dropListFact above for "fact",
+ *  clearNote/dropReceipt for "note"/"receipt", applyRemovals for
+ *  "resumeBase"), so a fixture calling resolveDropTarget directly
+ *  observes exactly the same decision the real UI would make. */
+export type DropMatch =
+  | { kind: "fact"; fact: WorkspaceFact }
+  | { kind: "note"; id: string; label: string }
+  | { kind: "receipt"; id: number; text: string }
+  | { kind: "resumeBase"; path: AllowedPath; value: unknown; display: string };
+
+/** Round 9 (13 Aug 2026), item 6: the SAME target-resolution ProjectDesk
+ *  .tsx's typed drop/remove command uses, extracted as a pure function so
+ *  a fixture can drive the REAL matching logic directly instead of
+ *  hand-constructing a FieldRemoval and calling mergeRequirementBase()
+ *  alone -- exactly the gap Robert found in the round-8 Azure fixture,
+ *  which proved the merge arithmetic but never exercised the command
+ *  handler that is supposed to produce that removal in the first place.
+ *  Matches in the command's existing precedence order: this session's
+ *  own live facts first, then held notes, then kept receipts, and only
+ *  last a value that lives ONLY in the resumed base (never re-typed this
+ *  session at all) -- unchanged from the seventh amendment's own
+ *  ordering. Free-text estate.existingSecurity entries match on their
+ *  own raw text; every other list path matches on its display label,
+ *  same as factLabel()/humaniseWorkspaceValue() elsewhere. */
+export function resolveDropTarget(
+  targetRaw: string,
+  opts: {
+    liveFacts: WorkspaceFact[];
+    noted: Array<{ id: string; label: string }>;
+    receipts: Array<{ id: number; text: string }>;
+    resumeRequirementBase: SecurityRequirementInput | null | undefined;
+    resumeRemovals: ReadonlySet<string>;
+  },
+): DropMatch | null {
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const target = norm(targetRaw);
+  const matches = (label: string) => {
+    const l = norm(label);
+    return l.length > 0 && (l.includes(target) || target.includes(l));
+  };
+
+  const f = opts.liveFacts.find((x) => matches(factLabel(x)));
+  if (f) return { kind: "fact", fact: f };
+
+  const n = opts.noted.find((x) => matches(x.label));
+  if (n) return { kind: "note", id: n.id, label: n.label };
+
+  const r = opts.receipts.find((x) => matches(x.text));
+  if (r) return { kind: "receipt", id: r.id, text: r.text };
+
+  const base = opts.resumeRequirementBase;
+  if (base) {
+    const resumeListFields: Array<{ path: AllowedPath; values: string[] | undefined }> = [
+      { path: "organisation.regions", values: base.organisation?.regions },
+      { path: "estate.cloud", values: base.estate?.cloud },
+      { path: "estate.existingSecurity", values: base.estate?.existingSecurity },
+      { path: "estate.existingNetwork", values: base.estate?.existingNetwork },
+      { path: "drivers", values: base.drivers },
+      { path: "constraints.complianceRequirements", values: base.constraints?.complianceRequirements },
+    ];
+    for (const { path, values } of resumeListFields) {
+      for (const v of values ?? []) {
+        const id = factId(path, v);
+        if (opts.resumeRemovals.has(id)) continue; // already retracted this sitting
+        const display = path === "estate.existingSecurity" ? String(v) : humaniseWorkspaceValue(path, v);
+        if (matches(display)) return { kind: "resumeBase", path, value: v, display };
+      }
+    }
+  }
+  return null;
 }
 
 /* ------------------------------------------------------------------ */

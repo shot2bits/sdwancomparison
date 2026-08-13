@@ -28,6 +28,57 @@ export type FieldUpdate = {
   provenance: Provenance;
   quote?: string;
   reason?: string;
+  /** Fact Ledger Reliability Gate (13 Aug 2026): the literal buyer-text
+   *  span this update traces to, ONLY when that span is not already
+   *  carried by `quote` — i.e. an `infer()` call whose reason names a
+   *  trigger word that isn't itself the buyer's stated value (organisation
+   *  .sector's "health" indicates this sector" being the exact case that
+   *  exposed the gap). `quote` already IS a verified literal span for
+   *  every `say()` call and every model proposal vetModelProposals()
+   *  marks "stated" (line ~918: `lower.includes(quote.toLowerCase())`),
+   *  so clause-coverage checking (below) treats `quote` as the anchor
+   *  first and only falls back to `matchedText` when `quote` is absent.
+   *  Never used to change provenance -- purely an internal coverage
+   *  signal, optional and additive, so nothing outside this file needs it. */
+  matchedText?: string;
+  /** Occurrence-aware coverage (13 Aug 2026, amendment round -- Codex's
+   *  review): the character offset in the ORIGINAL buyer text where
+   *  `matchedText` (or, if absent, `quote`) actually sits. Without this,
+   *  clause coverage could only ask "does this anchor's TEXT appear
+   *  ANYWHERE in the message", which wrongly let one occurrence of a word
+   *  (e.g. "Azure" in "We use Azure today") cover a LATER, unrelated
+   *  sentence containing the same word ("We also require Azure
+   *  ExpressRoute..."). With a real position, coverage asks "does this
+   *  SPECIFIC occurrence fall inside THIS clause's own character range" --
+   *  the same discipline `hit()` already uses to find only the first
+   *  regex occurrence (see hit()'s own comment). Optional and additive,
+   *  same footing as matchedText: nothing outside coverage-checking reads
+   *  it, and its absence only ever degrades to the old, more permissive
+   *  behaviour (a redundant receipt at worst, never a silent drop). */
+  matchStart?: number;
+};
+
+/**
+ * Seventh amendment (13 Aug 2026), Robert's finding on the sixth
+ * amendment's `mergeRequirementBase()`: unioning a resumed session's list
+ * fields against the persisted base means a buyer can add a new value but
+ * can never RETRACT one the base already holds -- "we no longer use MPLS"
+ * correctly avoids ADDING mpls as a false positive (the negation window
+ * below already guaranteed that), but nothing ever told the merge to
+ * actually drop the base's own existing mpls value either, so the
+ * immutable source ledger records the correction while the structured
+ * requirement keeps insisting the opposite. A `FieldRemoval` is that
+ * missing signal: a specific path+value the buyer has explicitly retracted
+ * this turn, carrying the same quote/matchedText/matchStart anchors a
+ * `FieldUpdate` does so it can also count toward clause coverage. It is
+ * never itself written into `updates` -- see removalsIn()'s own comment
+ * for why a negated phrase must never become a positive fact either way. */
+export type FieldRemoval = {
+  path: AllowedPath;
+  value: unknown;
+  quote: string;
+  matchedText?: string;
+  matchStart?: number;
 };
 
 export type ExtractResult = {
@@ -36,6 +87,16 @@ export type ExtractResult = {
   engine: "model" | "deterministic_fallback";
   model?: string;
   notes: string[];
+  /** Fact Ledger Reliability Gate (13 Aug 2026): declarative clauses of the
+   *  buyer's message that landed in NEITHER a structured fact NOR
+   *  requirements.bespoke -- surfaced so the caller can keep them as a
+   *  visible, unplaced receipt instead of letting them silently vanish.
+   *  Empty in the ordinary case where every clause was accounted for. */
+  unplacedClauses: string[];
+  /** Seventh amendment (13 Aug 2026): explicit retractions of a known
+   *  list-vocabulary value this turn -- see FieldRemoval's own comment.
+   *  Empty in the overwhelming ordinary case where nothing was retracted. */
+  removals: FieldRemoval[];
 };
 
 /* ------------------------------------------------------------------ */
@@ -339,14 +400,33 @@ function validate(
     case "estate.locationCriticality":
     case "estate.siteResilience":
     case "requirements.bespoke": {
-      const v = asList(value)
-        .map((x) => {
-          let s = clean(x, 200);
-          if (!/\s/.test(s) && s.includes("_")) s = s.replace(/_+/g, " ").trim();
-          return s;
-        })
-        .filter((x) => /[a-zA-Z0-9]{2,}/.test(x))
-        .slice(0, 6);
+      /* Reliability gate, SECOND amendment (13 Aug 2026, Codex's second
+       * review): the first amendment raised the cap and added ONE extra
+       * chunk for the remainder -- which still silently lost anything
+       * past TWO chunks (a 5,021-character clause kept exactly 4,000 and
+       * called it "kept in full" in the note, the same class of quiet
+       * loss this gate exists to close, one layer down). Replaced with a
+       * loop that keeps chunking until every character of the ORIGINAL
+       * value is accounted for, however many chunks that takes, plus the
+       * list-length cap (previously `v.slice(0, 12)`, silently dropping
+       * item 13 onward) removed outright rather than merely raised --
+       * these three paths are exactly where an accumulating buyer
+       * message is SUPPOSED to keep growing a list, so an arbitrary cap
+       * here is just this same bug in a different shape. */
+      const FREE_TEXT_CLAUSE_MAX = 2000;
+      const v: string[] = [];
+      for (const x of asList(value)) {
+        let original = String(x ?? "").replace(/[\r\n\t]+/g, " ").trim();
+        if (!original) continue;
+        if (!/\s/.test(original) && original.includes("_")) original = original.replace(/_+/g, " ").trim();
+        if (!/[a-zA-Z0-9]{2,}/.test(original)) continue;
+        const chunks: string[] = [];
+        for (let i = 0; i < original.length; i += FREE_TEXT_CLAUSE_MAX) chunks.push(original.slice(i, i + FREE_TEXT_CLAUSE_MAX));
+        v.push(...chunks);
+        if (chunks.length > 1) {
+          notes.push(`A captured clause (${original.length} characters) was too long to keep as one piece and was split into ${chunks.length} parts -- every character was kept, none discarded.`);
+        }
+      }
       return v.length ? { path: p, value: v } : null;
     }
   }
@@ -418,6 +498,159 @@ function negatedAt(t: string, i: number, len: number): boolean {
 }
 
 /**
+ * Seventh amendment (13 Aug 2026): explicit retraction detection. This is
+ * DELIBERATELY separate from negatedAt() above, which only ever answers
+ * "should this mention be suppressed from becoming a new positive fact" --
+ * that stays exactly as strict and as broad as it already was (F-B is
+ * unchanged, and every existing scalar correction/omission fixture keeps
+ * passing on that same behaviour). Retracting something already on record
+ * is a stronger, more consequential action than merely not-adding it, so
+ * the trigger phrasing recognised here is a NARROWER subset: it requires
+ * wording that names a change of state ("no longer", "stopped using",
+ * "removed", "decommissioned", "don't use ... any more") rather than
+ * negatedAt()'s wider net of ordinary negators ("except", "rather than",
+ * "instead of") that suppress a false add but do not, on their own,
+ * assert that an existing value should be taken off the record.
+ */
+function removalIntentBefore(before: string): boolean {
+  return /\b(?:no longer|not\s+(?:using|use)|don'?t\s+use|doesn'?t\s+use|do not use|does not use|stopped using|no longer (?:have|run|need|require)|removed|dropp?ed|decommission(?:ed|ing)?|retir(?:ed|ing)|migrat(?:ed|ing)\s+(?:away from|off))\s+(?:\w+\s+){0,2}$/.test(before);
+}
+function removalIntentAfter(after: string): boolean {
+  return /^\s{0,3}(?:is |are |has been |have been |was |were )?(?:no longer (?:used|needed|required|in use)\b|not (?:used|needed|required)(?:\s+any\s*more|\s+anymore)?\b|removed\b|decommissioned\b|retired\b)/.test(after);
+}
+function removalIntentAt(t: string, i: number, len: number): boolean {
+  const before = t.slice(Math.max(0, i - 30), i);
+  const after = t.slice(i + len, i + len + 30);
+  return removalIntentBefore(before) || removalIntentAfter(after);
+}
+
+/** Round 9 (13 Aug 2026), Robert's second finding, item 2: a matched
+ *  vocabulary term used as a compound ADJECTIVE describing a different
+ *  noun -- "UK-BASED SOC coverage", "US-based support team" -- is not
+ *  itself the thing being retracted; the retraction's real object is the
+ *  noun phrase that follows (SOC coverage, a support team), a completely
+ *  different concept from the region/platform/network value whose own
+ *  name merely modifies it. "A region must not be removed merely because
+ *  its name modifies another concept" (Robert's own wording), applied
+ *  here to every vocabulary entry, not only regions, since the identical
+ *  ambiguity can occur with any short token ("MPLS-based failover",
+ *  "AWS-hosted workloads"). Conservative by design and structural, not a
+ *  guess at what the "real" object is: an adjectival mention simply never
+ *  becomes a removal candidate, the same way a negated mention never
+ *  becomes a positive one. */
+function isAdjectivalModifier(t: string, matchEnd: number): boolean {
+  return /^-\s?(?:based|only|hosted|specific|focused|native|first|centric)\b|^\s+based\b/.test(
+    t.slice(matchEnd, matchEnd + 24),
+  );
+}
+
+/** The known vocabulary terms retraction can recognise: one row per
+ *  enumerated list-field value, reusing the exact same trigger words the
+ *  positive rail above matches on (so "MPLS" is recognised as a
+ *  retraction target using precisely the same word the rail would have
+ *  used to ADD it), deliberately kept as its own small table rather than
+ *  refactored to share the rail's inline `hit()` calls -- item 8's "keep
+ *  all current scalar correction, source-ledger, ownership and race fixes
+ *  unchanged" argues against touching the already-verified positive-path
+ *  code to thread a table through it. estate.existingSecurity is
+ *  free-text (no enumerated vocabulary), so it is not covered here; the
+ *  drop/remove command (ProjectDesk.tsx) reaches it by matching the
+ *  buyer's own words against the resumed base's existing free-text
+ *  entries directly, the same way it already matches a stated fact.
+ *
+ *  Round 9 (13 Aug 2026), Robert's second finding, item 2: "microsoft"
+ *  alone is not an unambiguous reference to Microsoft 365 -- it is
+ *  equally the first word of Microsoft Defender, Microsoft Teams,
+ *  Microsoft Azure or plain "Microsoft" the company, so "We no longer use
+ *  Microsoft Defender" must never remove m365. Retraction requires an
+ *  unambiguous value reference, so the bare company name is dropped from
+ *  this table entirely -- only "Microsoft 365"/"M365"/"Office 365"/
+ *  "O365" remain, deliberately narrower than the POSITIVE rail's own
+ *  bare-"microsoft" rule (deterministicExtract's separate `hit(/microsoft
+ *  ... /)` two hundred lines below, item 8's "keep unchanged" -- retracting
+ *  is the stronger, more consequential action and stays held to the
+ *  stricter standard, exactly as removalIntentBefore/After already hold a
+ *  narrower window than negatedAt()). */
+const LIST_VALUE_PATTERNS: Array<{ path: AllowedPath; value: string; re: RegExp; quote: string }> = [
+  { path: "estate.existingNetwork", value: "mpls", re: /\bmpls\b/, quote: "MPLS" },
+  { path: "estate.existingNetwork", value: "sdwan", re: /sd-?wan/, quote: "SD-WAN" },
+  { path: "estate.existingNetwork", value: "btnet", re: /\bbtnet\b/, quote: "BTnet" },
+  { path: "estate.existingNetwork", value: "bt_broadband", re: /bt broadband/, quote: "BT Broadband" },
+  { path: "estate.existingNetwork", value: "vpn", re: /\bvpn\b/, quote: "VPN" },
+  { path: "estate.existingNetwork", value: "leased_line", re: /leased lines?/, quote: "leased lines" },
+  { path: "estate.existingNetwork", value: "broadband", re: /\bbroadband\b/, quote: "broadband" },
+  { path: "estate.cloud", value: "m365", re: /microsoft\s?365|\bm365\b|office\s?365|\bo365\b/, quote: "Microsoft 365" },
+  { path: "estate.cloud", value: "azure", re: /\bazure\b/, quote: "Azure" },
+  { path: "estate.cloud", value: "google", re: /google workspace|gsuite/, quote: "Google Workspace" },
+  { path: "estate.cloud", value: "aws", re: /\baws\b/, quote: "AWS" },
+  { path: "constraints.complianceRequirements", value: "iso27001", re: /iso ?27001/, quote: "ISO 27001" },
+  { path: "constraints.complianceRequirements", value: "pci_dss", re: /\bpci\b|pci ?dss/, quote: "PCI DSS" },
+  { path: "constraints.complianceRequirements", value: "cyber_essentials_plus", re: /cyber essentials/, quote: "Cyber Essentials Plus" },
+  { path: "constraints.complianceRequirements", value: "nhs_dspt", re: /nhs dspt|\bdspt\b/, quote: "NHS DSPT" },
+  { path: "constraints.complianceRequirements", value: "nis2", re: /\bnis\s?2\b/, quote: "NIS2" },
+  { path: "constraints.complianceRequirements", value: "uk_gdpr", re: /\bgdpr\b/, quote: "GDPR" },
+  { path: "constraints.complianceRequirements", value: "fca", re: /\bfca\b/, quote: "FCA" },
+  { path: "drivers", value: "incident", re: /\bincidents?\b/, quote: "incident" },
+  { path: "drivers", value: "ransomware_concern", re: /ransomware/, quote: "ransomware" },
+  { path: "drivers", value: "renewal", re: /renewal/, quote: "contract renewal" },
+  { path: "drivers", value: "audit", re: /\baudit\b/, quote: "audit" },
+  { path: "drivers", value: "growth", re: /growth/, quote: "growth" },
+  { path: "drivers", value: "consolidation", re: /consolidation/, quote: "consolidation" },
+  { path: "organisation.regions", value: "uk", re: /\buk\b|united kingdom/, quote: "UK" },
+  { path: "organisation.regions", value: "ie", re: /(?<!northern )ireland/, quote: "Ireland" },
+  { path: "organisation.regions", value: "us", re: /\bu\.?s\.?\b|\busa\b|united states/, quote: "US" },
+  { path: "organisation.regions", value: "eu", re: /\beurope\b/, quote: "Europe" },
+  { path: "organisation.regions", value: "apac", re: /\bapac\b|asia pacific/, quote: "Asia Pacific" },
+  { path: "organisation.regions", value: "me", re: /middle east/, quote: "Middle East" },
+];
+
+/**
+ * Seventh amendment (13 Aug 2026): the deterministic retraction pass.
+ * Scans for a known vocabulary term whose mention sits inside a retraction
+ * window (removalIntentAt above) and, when found, emits a FieldRemoval --
+ * never a FieldUpdate, so item 3 ("a negated phrase must never itself
+ * become a positive fact") holds structurally: this function's output
+ * never reaches `updates`, only the separate `removals` channel. Position
+ * bookkeeping mirrors deterministicExtract's own hitPos() exactly (`t` is
+ * `text` lowercased with one leading padding space, so the same span in
+ * the ORIGINAL text sits one character earlier). Deliberately independent
+ * of the model layer -- retraction is conservative and rail-only by
+ * design, the same way the negation window itself always has been.
+ *
+ * Round 9 (13 Aug 2026), Robert's second finding, item 1: the previous
+ * version called `re.exec(t)` once per term and inspected only that FIRST
+ * occurrence -- "We use MPLS today, but we no longer use MPLS." failed to
+ * remove MPLS because the first "MPLS" (the positive statement) sits
+ * outside the retraction window, and nothing ever looked at the SECOND
+ * "MPLS" (the actual retraction) at all. Every pattern now runs as a
+ * global regex and every occurrence is checked in turn, left to right,
+ * stopping at the first occurrence that (a) sits inside a retraction
+ * window AND (b) is not an adjectival modifier of a different noun (item
+ * 2, isAdjectivalModifier above) -- so a later, genuine retraction is
+ * found even when an earlier, unrelated or merely-adjectival mention of
+ * the same word exists elsewhere in the same message. */
+export function removalsIn(text: string): FieldRemoval[] {
+  const t = ` ${text.toLowerCase()} `;
+  const out: FieldRemoval[] = [];
+  const seen = new Set<string>();
+  for (const { path, value, re, quote } of LIST_VALUE_PATTERNS) {
+    const id = `${path}:${value}`;
+    if (seen.has(id)) continue;
+    const globalRe = new RegExp(re.source, re.flags.includes("g") ? re.flags : `${re.flags}g`);
+    let m: RegExpExecArray | null;
+    while ((m = globalRe.exec(t))) {
+      if (m[0].length === 0) { globalRe.lastIndex += 1; continue; } // never loop forever on a zero-width match
+      if (removalIntentAt(t, m.index, m[0].length) && !isAdjectivalModifier(t, m.index + m[0].length)) {
+        seen.add(id);
+        out.push({ path, value, quote, matchedText: m[0].trim(), matchStart: Math.max(0, m.index - 1) });
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+/**
  * `externalNotes` (correction pass 2, Priority 3): optional, backward
  * compatible — every existing caller (draft.fixtures.ts, verify-*.ts
  * scripts, the `text` regression battery above) calls this with one
@@ -439,7 +672,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
    *  reaches the same truth; the rail shouldn't be exempt"): every rail
    *  statement passes the SAME validate() a model proposal passes. What
    *  fails validation is omitted, and the receipt keeps the clause. */
-  const say = (path: AllowedPath, value: unknown, quote: string) => {
+  const say = (path: AllowedPath, value: unknown, quote: string, matchedText?: string, matchStart?: number) => {
     /* rawBuyerText = text (this function's own input) — defence in depth
      * only; the deterministic path already guards estate.users/sites
      * negative-or-decimal shapes upstream of this call (see
@@ -447,16 +680,51 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
      * consistent with the model path and covers any future deterministic
      * rule that doesn't add its own upstream guard. */
     const ok = validate(path, value, sink, quote, text);
-    if (ok) out.push({ path: ok.path, value: ok.value, provenance: "stated", quote });
+    /* Fact Ledger Reliability Gate (13 Aug 2026): most say() calls pass
+     * the actual matched span as `quote`, so it doubles as the coverage
+     * anchor with no extra work. A few (this file's "canonical label"
+     * calls -- "managed security" for an MDR/MSSP/SOC mention, "SD-WAN"/
+     * "UK"/"Microsoft" for a bare regex hit) pass a fixed display string
+     * instead, which is NOT guaranteed to appear in the buyer's own
+     * clause (an "MDR" mention never contains the word "managed"). An
+     * explicit `matchedText` lets those calls keep their buyer-facing
+     * display quote unchanged while still giving clause-coverage
+     * checking (below) a literal span to anchor on, exactly the same
+     * shape `infer()` already carries for the same reason. `matchStart`
+     * (amendment round, 13 Aug 2026) is the character offset in the
+     * ORIGINAL text where that literal span actually sits, threaded
+     * through from the regex match itself wherever one is available --
+     * see FieldUpdate's own comment for why this matters. */
+    if (ok) out.push({ path: ok.path, value: ok.value, provenance: "stated", quote, ...(matchedText ? { matchedText } : {}), ...(typeof matchStart === "number" ? { matchStart } : {}) });
   };
-  const infer = (path: AllowedPath, value: unknown, reason: string) => {
+  const infer = (path: AllowedPath, value: unknown, reason: string, matchedText?: string, matchStart?: number) => {
     const ok = validate(path, value, sink, reason, text);
-    if (ok) out.push({ path: ok.path, value: ok.value, provenance: "inferred", reason });
+    if (ok) out.push({ path: ok.path, value: ok.value, provenance: "inferred", reason, ...(matchedText ? { matchedText } : {}), ...(typeof matchStart === "number" ? { matchStart } : {}) });
   };
   /** A match that lands only outside the negation window. */
   const hit = (re: RegExp): RegExpExecArray | null => {
     const m = re.exec(t);
     return m && !negatedAt(t, m.index, m[0].length) ? m : null;
+  };
+  /* Fact Ledger Reliability Gate, amendment round (13 Aug 2026): `hit()`'s
+   * match position is against `t` (the lowercased text padded with ONE
+   * leading space -- see `t`'s own definition), so the corresponding
+   * position in the ORIGINAL `text` is one character earlier, exactly the
+   * same adjustment `originalSpan()` below already makes for the same
+   * reason. Clamped at 0 so a match right at the start never goes
+   * negative. */
+  const hitPos = (m: RegExpExecArray): number => Math.max(0, m.index - 1);
+  /* Fact Ledger Reliability Gate (13 Aug 2026): `hit()`'s match comes from
+   * `t`, the lowercased search text, so `m[0]` on its own is always
+   * lowercase -- fine for a hardcoded display label ("UK", "SD-WAN"), but
+   * WRONG as a "stated"/"your words" quote, which must show the buyer their
+   * own words back (a buyer who typed "Healthcare" should see "Healthcare"
+   * quoted, not "healthcare"). `t` is `text` lowercased with one leading
+   * padding space (see `t`'s own definition above), so the same span at
+   * `m.index - 1` in the ORIGINAL `text` is the buyer's actual casing. */
+  const originalSpan = (m: RegExpExecArray): string => {
+    const start = Math.max(0, m.index - 1);
+    return text.slice(start, start + m[0].length) || m[0];
   };
 
   // Numbers (F-A, semantic integrity: 2, 2,000 and 2 million users are
@@ -514,7 +782,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negUserMatch[0].trim(), 60)}" is negative or not a whole number, so no user count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
   } else {
     const users = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:${USER_NOUN})\\b`));
-    if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim());
+    if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim(), undefined, hitPos(users));
   }
 
   /* "clinics" joined the noun list 31 Jul 2026 (round 6 dry run: "60
@@ -526,7 +794,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negSiteMatch[0].trim(), 60)}" is negative or not a whole number, so no site count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
   } else {
     const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:${SITE_NOUN})\\b`));
-    if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim());
+    if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim(), undefined, hitPos(sites));
   }
 
   /* Timeline (round three, 31 Jul 2026; the P1 lane's finding made real:
@@ -576,7 +844,97 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
        * "within" (no word boundary sits between its "h" and "i"), so
        * this never double-fires on the "within" case immediately above. */
       hit(/\bin\s+(?:the\s+next\s+)?\d{1,2}\s+(?:weeks?|months?)\b/);
-    if (timeline) say("constraints.timeline", timeline[0].trim(), timeline[0].trim());
+    if (timeline) say("constraints.timeline", timeline[0].trim(), timeline[0].trim(), undefined, hitPos(timeline));
+  }
+
+  /* Fact Ledger Reliability Gate (13 Aug 2026), reliability item 1: a
+   * buyer who TYPES THE SECTOR'S OWN NAME -- "Healthcare", "Retail",
+   * "Manufacturing", "Financial services" and the like -- has stated
+   * their sector, not left it for Netify to guess. Before this, sector
+   * had no `say()` path at all: every deterministic sector fact, even off
+   * a completely literal, unambiguous mention, came out of the inference
+   * map below and rendered "netify guessed" (confirmed live, 13 Aug:
+   * Robert typed "Healthcare" and got "\"health\" indicates this
+   * sector"). This runs FIRST and stops at the first match so a literal
+   * mention always wins; it is deliberately narrow -- only the sector's
+   * own name or an unambiguous synonym of it, never the ESTATE words
+   * (hospital, GP, dental, care home...) that only imply a sector and
+   * must stay inferred. Robert's own ruling (28 Jul, see the comment
+   * below): "site(s)/branch(es)/trust/campus/practice/fleet/port(s)/
+   * outlet(s)/grid/mat NEVER mapped alone" applies here too, so bare
+   * ambiguous words (energy, leisure, education) require a sector-naming
+   * companion word rather than firing alone. */
+  const directSectorMap: Array<[RegExp, (typeof WORKSPACE_SECTORS)[number]]> = [
+    [/healthcare|health care|\bpharma(?:ceutical)?\b/, "Healthcare & pharma"],
+    [/retail\s*(?:and|&)\s*e-?commerce|\bretail\b|e-?commerce/, "Retail & e-commerce"],
+    [/financial services|finance sector|financial sector/, "Financial services"],
+    [/\bmanufacturing\b/, "Manufacturing"],
+    [/energy\s*(?:and|&)\s*utilit(?:y|ies)|energy sector|utilities sector/, "Energy & utilities"],
+    [/government|public sector/, "Government & public sector"],
+    [/\beducation(?:al)?\b/, "Education"],
+    [/transport\s*(?:and|&)\s*logistics|\blogistics\b/, "Transport & logistics"],
+    [/professional services/, "Professional services"],
+    [/hospitality/, "Hospitality & leisure"],
+  ];
+  /* Reliability gate amendment (13 Aug 2026), blocker 4 (Codex's review):
+   * "Government security classifications" must NOT set the sector, while
+   * "We are a Government organisation" must. Before this guard, the
+   * direct map above fired on the sector's own name ANYWHERE it appeared,
+   * with nothing checking what the mention was actually ABOUT -- exactly
+   * the same class of mistake the region/SOC-capacity guards elsewhere in
+   * this function already fixed for "24x7 UK-based support" (a
+   * requirement aimed at the vendor, not a fact about the buyer). A
+   * direct sector word only STATES the buyer's own sector when either (a)
+   * it is self-identifying language ("we are a Government organisation",
+   * "operating as a Retail business") or (b) it is immediately followed
+   * by an organisational noun (organisation, business, company, trust,
+   * council...) that itself makes it a description of the buyer, not of
+   * a requirement or a compliance regime the buyer must meet. Deliberately
+   * excluded either way when what follows names a REQUIREMENT the sector
+   * word is qualifying ("Government security classifications",
+   * "Healthcare compliance standards") -- up to two filler words allowed
+   * so "Government security classifications" (word, word) still excludes
+   * correctly. A mention that satisfies neither test falls through
+   * unclaimed, same as any other guard in this file: no field is written,
+   * and the clause keeps its receipt via the coverage gate below rather
+   * than being forced into the wrong home. */
+  /* Reliability gate amendment (13 Aug 2026), round 3, blocker 4 (Codex's
+   * second review): bare "is" in SECTOR_SELF_ID_BEFORE was sufficient to
+   * treat ANY "<noun> is <Sector>" sentence as self-identification, so
+   * "Our policy is Government approved" was wrongly stated. "is" is
+   * removed from that alternation entirely -- self-identification now
+   * requires an actual self-referring subject ("we are"/"we're"/"operating
+   * as"...) or explicit sector-labelling phrasing ("Sector:", "Sector -",
+   * "sector is", "our sector is"). Two false negatives are also closed: a
+   * message that IS, in its entirety, nothing but the bare recognised
+   * sector word ("Healthcare") now states rather than infers (handled by
+   * the whole-message fallback in sectorReadsAsBuyerIdentity below, since
+   * there is no self-identifying phrase to anchor on when the sector name
+   * is the entire buyer message); and the requirement-object exclusion
+   * list gains approved/accredited/compliant/endorsed/assured so
+   * "Government approved" is excluded from BOTH the direct map (belt and
+   * braces -- it was already excluded once "is" stopped matching) and the
+   * INFERRED map below, which shares this same constant and would
+   * otherwise still wrongly infer the sector from that exact sentence. */
+  const SECTOR_SELF_ID_BEFORE =
+    /(?:\b(?:we are|we're|we operate as|we run|we are operating as|operating as)\s+(?:an?\s+)?|\bour sector\s+(?:is\s+)?|\bsector\s*(?:is\s*|[:\-]\s*))$/i;
+  const SECTOR_ORG_NOUN_AFTER =
+    /^[\s,-]*(?:organisation|organization|business|company|firm|sector|practice|group|authority|provider|department|agency|body|trust|council|charity|institution|entity)\b/i;
+  const SECTOR_REQUIREMENT_OBJECT_AFTER =
+    /^[\s,-]*(?:\w+\s+){0,2}(?:classification|classifications|compliance|standard|standards|certification|certifications|accreditation|accreditations|accredited|approved|compliant|endorsed|assured|clearance|clearances|regulation|regulations|requirement|requirements|polic(?:y|ies)|laws?|legislation|frameworks?|grades?|ratings?|levels?|contracts?|security)\b/i;
+  const sectorReadsAsBuyerIdentity = (m: RegExpExecArray, src: string): boolean => {
+    const before = src.slice(Math.max(0, m.index - 30), m.index);
+    const after = src.slice(m.index + m[0].length, m.index + m[0].length + 40);
+    if (SECTOR_REQUIREMENT_OBJECT_AFTER.test(after)) return false;
+    if (SECTOR_SELF_ID_BEFORE.test(before) || SECTOR_ORG_NOUN_AFTER.test(after)) return true;
+    const wholeMessage = src.trim().replace(/[.!?]+$/, "");
+    if (wholeMessage.toLowerCase() === m[0].trim().toLowerCase()) return true;
+    return false;
+  };
+  let sectorStated = false;
+  for (const [re, sector] of directSectorMap) {
+    const m = hit(re);
+    if (m && sectorReadsAsBuyerIdentity(m, t)) { say("organisation.sector", sector, originalSpan(m).trim(), undefined, hitPos(m)); sectorStated = true; break; }
   }
 
   /* The sector inference map, widened under Robert's intake-truth ruling
@@ -609,9 +967,32 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     [/law firm|solicitor|accountanc|consultanc|professional services|\bchambers\b|law practice|accountancy practice|architects?\b|surveyors?\b|recruitment agenc/, "Professional services"],
     [/energy|utilit|substations?\b|power grid|national grid|water compan|renewables|wind farm|solar farm/, "Energy & utilities"],
   ];
-  for (const [re, sector] of sectorMap) {
-    const m = hit(re);
-    if (m) { infer("organisation.sector", sector, `"${m[0].trim()}" indicates this sector`); break; }
+  /* Skipped when the direct map above already stated the sector: a literal
+   * mention always wins, and running this too would propose a second,
+   * inferred update for the same scalar path in the same pass. */
+  if (!sectorStated) {
+    for (const [re, sector] of sectorMap) {
+      const m = hit(re);
+      /* Blocker 4 (amendment round): the inferred map shares some
+       * trigger words with the direct map above (e.g. "government"), so
+       * without the same requirement-object exclusion, a mention the
+       * direct map correctly refused ("Government security
+       * classifications") would still slip through HERE and infer the
+       * sector anyway -- the guard above would be defeated by its own
+       * fallback. Only the negative half of the direct map's guard
+       * applies here (a requirement-object noun right after still
+       * excludes); the positive half (self-identification / an
+       * organisational noun) is deliberately NOT required for inferred
+       * matches, since most of this map's own trigger words are
+       * estate/sector nouns ("hospital", "GP practice"...) that were
+       * never meant to require self-identifying phrasing -- only the
+       * "clause is actually about a REQUIREMENT, not the buyer" failure
+       * mode needs excluding here. */
+      if (m && !SECTOR_REQUIREMENT_OBJECT_AFTER.test(t.slice(m.index + m[0].length, m.index + m[0].length + 40))) {
+        infer("organisation.sector", sector, `"${m[0].trim()}" indicates this sector`, m[0].trim(), hitPos(m));
+        break;
+      }
+    }
   }
 
   /* Round 9 catch (2 Aug 2026, live QA finding): "24x7 UK-based support"
@@ -640,11 +1021,16 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   // stated with the country as its quote: operating there is their claim.
   {
     const uk = hit(/\buk\b|united kingdom|britain|northern ireland|\blondon\b/);
-    if (uk && regionIsBuyerLocation(uk, t)) say("organisation.regions", ["uk"], "UK");
+    /* Reliability gate amendment (13 Aug 2026), blocker 3 (canonical
+     * label audit): quote stays the buyer-facing "UK", but that fixed
+     * label doesn't literally appear when the trigger was "united
+     * kingdom"/"britain"/"london" -- matchedText carries the ACTUAL
+     * matched words so clause-coverage checking has a real anchor. */
+    if (uk && regionIsBuyerLocation(uk, t)) say("organisation.regions", ["uk"], "UK", uk[0].trim(), hitPos(uk));
   }
   {
     const ie = hit(/(?<!northern )ireland|\bdublin\b/);
-    if (ie && regionIsBuyerLocation(ie, t)) say("organisation.regions", ["ie"], ie[0].trim());
+    if (ie && regionIsBuyerLocation(ie, t)) say("organisation.regions", ["ie"], ie[0].trim(), undefined, hitPos(ie));
   }
   /* US and CHINA, the two Harry named and the rail could not see (30 Jul
    * 2026). China was absent from the map entirely, and a bare "US" is
@@ -656,7 +1042,12 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
    * country is not. */
   {
     const us = /\bUS\b|\bU\.S\.\b/.exec(text);
-    if (us && regionIsBuyerLocation(us, text)) say("organisation.regions", ["us"], "US");
+    /* Blocker 3: the fixed "US" quote can literally mismatch a "U.S."
+     * (periods) trigger -- matchedText carries the exact matched text,
+     * position taken directly from `text` (this match already runs
+     * against raw text, unlike hit()'s padded-lowercase `t`, so no
+     * hitPos() adjustment is needed here). */
+    if (us && regionIsBuyerLocation(us, text)) say("organisation.regions", ["us"], "US", us[0].trim(), us.index);
   }
   for (const [re, region] of [
     [/\bfrance\b|\bgermany\b|\bspain\b|\bitaly\b|netherlands|\bholland\b|\bbelgium\b|\bpoland\b|\bportugal\b|\bsweden\b|\bdenmark\b|\baustria\b|switzerland|\bnorway\b|\bfinland\b|luxembourg|\beurope\b|\bemea\b/, "eu"],
@@ -665,16 +1056,29 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     [/\buae\b|\bdubai\b|\bsaudi\b|\bqatar\b|\bbahrain\b|\bkuwait\b|\bisrael\b|south africa|\bnigeria\b|\bkenya\b|\begypt\b/, "me"],
   ] as Array<[RegExp, string]>) {
     const m = hit(re);
-    if (m && regionIsBuyerLocation(m, t)) say("organisation.regions", [region], m[0].trim());
+    if (m && regionIsBuyerLocation(m, t)) say("organisation.regions", [region], m[0].trim(), undefined, hitPos(m));
   }
 
   {
     const m = hit(/microsoft|m365|office ?365|\bo365\b/);
-    if (m) say("estate.cloud", ["m365"], "Microsoft");
+    /* Blocker 3: "Microsoft" is the display label; a bare "M365"/"O365"
+     * mention never contains that word, so matchedText carries the real
+     * trigger. */
+    if (m) say("estate.cloud", ["m365"], "Microsoft", m[0].trim(), hitPos(m));
   }
-  if (hit(/azure/)) say("estate.cloud", ["azure"], "Azure");
-  if (hit(/google workspace|gsuite/)) say("estate.cloud", ["google"], "Google Workspace");
-  if (hit(/\baws\b/)) say("estate.cloud", ["aws"], "AWS");
+  {
+    const m = hit(/azure/);
+    if (m) say("estate.cloud", ["azure"], "Azure", undefined, hitPos(m));
+  }
+  {
+    const m = hit(/google workspace|gsuite/);
+    // Blocker 3: "gsuite" never contains the words "Google Workspace".
+    if (m) say("estate.cloud", ["google"], "Google Workspace", m[0].trim(), hitPos(m));
+  }
+  {
+    const m = hit(/\baws\b/);
+    if (m) say("estate.cloud", ["aws"], "AWS", undefined, hitPos(m));
+  }
   /* 1 Aug 2026, Robert's live catch: a bare "SD-WAN" (his very first word in
    * a brand-new project) landed as estate.existingNetwork -- "you already
    * run this" -- when he meant the opposite, he wanted to buy it. The
@@ -685,24 +1089,81 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
    * still land here exactly as before; the buying-intent fallback below
    * covers the bare case, symmetrically with SASE/SSE/managed security. */
   const existingEstateSignal = /\b(?:already|currently|current|existing|today|right now|at the moment|in place|we (?:run|have|use|are on)|running on|our current|legacy)\b/;
-  if (hit(/sd-?wan/) && existingEstateSignal.test(t)) say("estate.existingNetwork", ["sdwan"], "SD-WAN");
-  if (hit(/\bmpls\b/)) say("estate.existingNetwork", ["mpls"], "MPLS");
+  {
+    const m = hit(/sd-?wan/);
+    // Blocker 3: "SD-WAN" (hyphenated) can mismatch a hyphen-free "sdwan" trigger.
+    if (m && existingEstateSignal.test(t)) say("estate.existingNetwork", ["sdwan"], "SD-WAN", m[0].trim(), hitPos(m));
+  }
+  {
+    const m = hit(/\bmpls\b/);
+    if (m) say("estate.existingNetwork", ["mpls"], "MPLS", undefined, hitPos(m));
+  }
 
-  if (hit(/incident|breach|phishing|attack|compromis|hacked/)) say("drivers", ["incident"], "incident");
-  if (hit(/ransomware/)) say("drivers", ["ransomware_concern"], "ransomware");
-  if (hit(/renewal|contract end|contract expir|contract is up|ends? in march|ends? in \w+ 20\d\d/)) say("drivers", ["renewal"], "contract renewal");
-  if (hit(/audit/)) say("drivers", ["audit"], "audit");
-  if (hit(/acquisition|merger|growing fast|expansion/)) say("drivers", ["growth"], "growth");
+  {
+    const m = hit(/incident|breach|phishing|attack|compromis|hacked/);
+    // Blocker 3: "incident" is the display label; "breach"/"phishing"/
+    // "attack"/"compromised"/"hacked" never contain that word.
+    if (m) say("drivers", ["incident"], "incident", m[0].trim(), hitPos(m));
+  }
+  {
+    const m = hit(/ransomware/);
+    if (m) say("drivers", ["ransomware_concern"], "ransomware", undefined, hitPos(m));
+  }
+  {
+    const m = hit(/renewal|contract end|contract expir|contract is up|ends? in march|ends? in \w+ 20\d\d/);
+    // Blocker 3: "contract renewal" is the display label; most of this
+    // regex's own alternatives never contain that exact phrase.
+    if (m) say("drivers", ["renewal"], "contract renewal", m[0].trim(), hitPos(m));
+  }
+  {
+    const m = hit(/audit/);
+    if (m) say("drivers", ["audit"], "audit", undefined, hitPos(m));
+  }
+  {
+    const m = hit(/acquisition|merger|growing fast|expansion/);
+    // Blocker 3: "growth" is the display label; none of the trigger words
+    // (acquisition/merger/growing fast/expansion) contain it.
+    if (m) say("drivers", ["growth"], "growth", m[0].trim(), hitPos(m));
+  }
 
-  if (hit(/iso ?27001/)) say("constraints.complianceRequirements", ["iso27001"], "ISO 27001");
-  if (hit(/\bpci\b/)) say("constraints.complianceRequirements", ["pci_dss"], "PCI");
-  else if (hit(/card payments|take cards|card-present/)) infer("constraints.complianceRequirements", ["pci_dss"], "card payments bring PCI DSS into scope");
-  if (hit(/cyber essentials/)) say("constraints.complianceRequirements", ["cyber_essentials_plus"], "Cyber Essentials");
-  if (hit(/nhs dspt|\bdspt\b/)) say("constraints.complianceRequirements", ["nhs_dspt"], "NHS DSPT");
+  {
+    const m = hit(/iso ?27001/);
+    // Blocker 3: quote has a fixed space ("ISO 27001"); a space-free
+    // "iso27001" trigger wouldn't literally contain it.
+    if (m) say("constraints.complianceRequirements", ["iso27001"], "ISO 27001", m[0].trim(), hitPos(m));
+  }
+  {
+    const m = hit(/\bpci\b/);
+    if (m) say("constraints.complianceRequirements", ["pci_dss"], "PCI", undefined, hitPos(m));
+    else {
+      const pciHit = hit(/card payments|take cards|card-present/);
+      if (pciHit) infer("constraints.complianceRequirements", ["pci_dss"], "card payments bring PCI DSS into scope", pciHit[0].trim(), hitPos(pciHit));
+    }
+  }
+  {
+    const m = hit(/cyber essentials/);
+    if (m) say("constraints.complianceRequirements", ["cyber_essentials_plus"], "Cyber Essentials", undefined, hitPos(m));
+  }
+  {
+    const m = hit(/nhs dspt|\bdspt\b/);
+    // Blocker 3: a bare "DSPT" mention doesn't literally contain "NHS DSPT".
+    if (m) say("constraints.complianceRequirements", ["nhs_dspt"], "NHS DSPT", m[0].trim(), hitPos(m));
+  }
   // Harry's 22 July finding: NIS2 named verbatim and silently dropped.
-  if (hit(/\bnis\s?2\b/)) say("constraints.complianceRequirements", ["nis2"], "NIS2");
-  if (hit(/\bgdpr\b/)) say("constraints.complianceRequirements", ["uk_gdpr"], "GDPR");
-  if (hit(/\bfca\b/)) say("constraints.complianceRequirements", ["fca"], "FCA");
+  {
+    const m = hit(/\bnis\s?2\b/);
+    // Blocker 3: "NIS 2" (with a space) wouldn't literally contain the
+    // fixed no-space quote "NIS2".
+    if (m) say("constraints.complianceRequirements", ["nis2"], "NIS2", m[0].trim(), hitPos(m));
+  }
+  {
+    const m = hit(/\bgdpr\b/);
+    if (m) say("constraints.complianceRequirements", ["uk_gdpr"], "GDPR", undefined, hitPos(m));
+  }
+  {
+    const m = hit(/\bfca\b/);
+    if (m) say("constraints.complianceRequirements", ["fca"], "FCA", undefined, hitPos(m));
+  }
 
   {
     const soc = hit(/24\/7|24x7|around.the.clock|twenty.four/);
@@ -725,8 +1186,20 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
       // allowed between the match and the noun that actually matters.
       const requirementNoun = /^[\s,-]*(?:[a-z]+-?based\s+)?(?:support|cover(?:age)?|engineers?|response|help\s*desk|helpdesk)\b/;
       const needSignal = /\b(?:need|want|require|looking for|must have)\s*$/;
-      if (!requirementNoun.test(after) && !needSignal.test(before)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7");
-    } else if (/nobody watching|no out.of.hours|no overnight|no soc\b|no security team/.test(t)) say("constraints.inHouseSocCapacity", "none", "no out-of-hours cover");
+      /* Blocker 3: quote "24/7" is fixed; the trigger regex also matches
+       * "24x7"/"around the clock"/"twenty four", none of which literally
+       * contain "24/7" -- matchedText carries the real matched text. */
+      if (!requirementNoun.test(after) && !needSignal.test(before)) say("constraints.inHouseSocCapacity", "twenty_four_seven", "24/7", soc[0].trim(), hitPos(soc));
+    } else {
+      /* Blocker 3: this branch used to be a bare `.test()` with a
+       * hardcoded quote ("no out-of-hours cover") that never matched any
+       * of its own trigger phrases ("nobody watching", "no soc"...) --
+       * restructured to `hit()` so the real matched words can be
+       * threaded through as matchedText/matchStart, same as every other
+       * branch in this function. */
+      const noSoc = hit(/nobody watching|no out.of.hours|no overnight|no soc\b|no security team/);
+      if (noSoc) say("constraints.inHouseSocCapacity", "none", "no out-of-hours cover", noSoc[0].trim(), hitPos(noSoc));
+    }
   }
 
   // What they are BUYING (distinct from what they have). Seeking verbs near
@@ -751,27 +1224,43 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   // clause boundary and swallow an unrelated "with" later in the sentence.
   const seek = "(?:need|want|looking for|buy|buying|procure|procuring|source|sourcing|tender|rfp|quotes? for|move to|moving to|migrat\\w+ to|replac(?:e|ing) (?:\\w+\\s+){0,3}\\w+ with|roll(?:ing)? out|deploy(?:ing)?)";
   const buyRe = (term: string) => new RegExp(`${seek}[^.!?]{0,60}\\b${term}|\\b${term}\\b[^.!?]{0,30}(?:rollout|roll-out|project|procurement|tender|rfp)`);
-  if (hit(/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/)) {
-    say("procurement.buying", "managed_security", "managed security");
-  } else if (hit(buyRe("sase"))) say("procurement.buying", "sase", "SASE");
-  else if (hit(buyRe("sse|security service edge|secure service edge"))) say("procurement.buying", "sse", "SSE");
-  else if (hit(buyRe("sd-?wan"))) {
-    say("procurement.buying", "sdwan", "SD-WAN");
-    // The SD-WAN mention was a purchase intent, so it is not evidence of
-    // the estate: withdraw the blanket existing-network claim above.
-    const i = out.findIndex((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
-    if (i >= 0) out.splice(i, 1);
-  } else if (!existingEstateSignal.test(t)) {
-    /* 1 Aug 2026, Robert's live catch: none of the seeking-verb patterns
-     * above require one, so a buyer who typed nothing but the bare term --
-     * "SASE" on its own reached the ledger not at all; "SD-WAN" on its own
-     * reached it as the wrong field (see above) -- got silence or a lie.
-     * A bare mention with no existing-estate language is buying intent:
-     * this is the parity fallback, same four terms, same priority order,
-     * landed with the bare word as its own quote. */
-    if (hit(/\bsase\b/)) say("procurement.buying", "sase", "SASE");
-    else if (hit(/\bsse\b|security service edge|secure service edge/)) say("procurement.buying", "sse", "SSE");
-    else if (hit(/sd-?wan/)) say("procurement.buying", "sdwan", "SD-WAN");
+  const managedSecurityHit = hit(/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/);
+  const sdwanBuyHit = hit(buyRe("sd-?wan"));
+  const sdwanBareHit = hit(/sd-?wan/);
+  if (managedSecurityHit) {
+    /* Fact Ledger Reliability Gate (13 Aug 2026): the buyer-facing quote
+     * stays the canonical "managed security" (unchanged -- that's the
+     * clearer label, and no one asked for it to change), but the actual
+     * trigger word ("MDR", "MSSP", "SOC service"...) is threaded through
+     * as matchedText so clause-coverage checking recognises this clause
+     * as represented even though "managed security" itself never
+     * literally appears in it. */
+    say("procurement.buying", "managed_security", "managed security", originalSpan(managedSecurityHit).trim(), hitPos(managedSecurityHit));
+  } else {
+    const saseBuyHit = hit(buyRe("sase"));
+    const sseBuyHit = hit(buyRe("sse|security service edge|secure service edge"));
+    if (saseBuyHit) say("procurement.buying", "sase", "SASE", saseBuyHit[0].trim(), hitPos(saseBuyHit));
+    else if (sseBuyHit) say("procurement.buying", "sse", "SSE", sseBuyHit[0].trim(), hitPos(sseBuyHit));
+    else if (sdwanBuyHit) {
+      say("procurement.buying", "sdwan", "SD-WAN", sdwanBuyHit[0].trim(), hitPos(sdwanBuyHit));
+      // The SD-WAN mention was a purchase intent, so it is not evidence of
+      // the estate: withdraw the blanket existing-network claim above.
+      const i = out.findIndex((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
+      if (i >= 0) out.splice(i, 1);
+    } else if (!existingEstateSignal.test(t)) {
+      /* 1 Aug 2026, Robert's live catch: none of the seeking-verb patterns
+       * above require one, so a buyer who typed nothing but the bare term --
+       * "SASE" on its own reached the ledger not at all; "SD-WAN" on its own
+       * reached it as the wrong field (see above) -- got silence or a lie.
+       * A bare mention with no existing-estate language is buying intent:
+       * this is the parity fallback, same four terms, same priority order,
+       * landed with the bare word as its own quote. */
+      const bareSase = hit(/\bsase\b/);
+      const bareSse = hit(/\bsse\b|security service edge|secure service edge/);
+      if (bareSase) say("procurement.buying", "sase", "SASE", undefined, hitPos(bareSase));
+      else if (bareSse) say("procurement.buying", "sse", "SSE", bareSse[0].trim(), hitPos(bareSse));
+      else if (sdwanBareHit) say("procurement.buying", "sdwan", "SD-WAN", sdwanBareHit[0].trim(), hitPos(sdwanBareHit));
+    }
   }
 
   // Operating model: the managed words must attach to the SERVICE BEING
@@ -786,9 +1275,15 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
     const m = hit(/fully managed|managed service|manage it for us|no in.house it|outsourced?/);
     const after = m ? t.slice(m.index + m[0].length, m.index + m[0].length + 44) : "";
     const foreignObject = /^\s*(?:\w+\s+)?(?:saas\b|software\b|apps?\b|applications?\b|desktops?\b|laptops?\b|endpoints?\b|devices?\b|printers?\b|payroll\b|crm\b|erp\b|m365\b|office ?365\b)/.test(after);
-    if (m && !foreignObject) say("procurement.operatingModel", "managed", m[0].trim());
-    else if (hit(/co-?managed/)) say("procurement.operatingModel", "co_managed", "co-managed");
-    else if (hit(/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/)) say("procurement.operatingModel", "diy", "self-managed");
+    const coManagedHit = hit(/co-?managed/);
+    const diyHit = hit(/\bdiy\b|self-?managed|manage (?:it )?ourselves|in-?house managed/);
+    if (m && !foreignObject) say("procurement.operatingModel", "managed", m[0].trim(), undefined, hitPos(m));
+    // Blocker 3: quote "co-managed" is hyphenated; a hyphen-free
+    // "comanaged" trigger wouldn't literally contain it.
+    else if (coManagedHit) say("procurement.operatingModel", "co_managed", "co-managed", coManagedHit[0].trim(), hitPos(coManagedHit));
+    // Blocker 3: quote "self-managed" is fixed; "diy"/"manage it
+    // ourselves"/"in-house managed" never contain that exact phrase.
+    else if (diyHit) say("procurement.operatingModel", "diy", "self-managed", diyHit[0].trim(), hitPos(diyHit));
   }
 
   /* PKM extension (vendors/products under consideration, named locations,
@@ -812,22 +1307,22 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
 
   const consideringRe = /\b(?:considering|evaluating|looking at|shortlisting|comparing)\s+([A-Z][\w&+-]*(?:\s+[A-Z][\w&+-]*){0,2})/;
   const consider = rawHit(consideringRe);
-  if (consider) say("procurement.vendorsUnderConsideration", [consider[1].trim()], consider[0].trim());
+  if (consider) say("procurement.vendorsUnderConsideration", [consider[1].trim()], consider[0].trim(), undefined, consider.index);
 
   const providerRe = /\b(?:provided by|our (?:current|existing) provider is|incumbent (?:provider|vendor) is|currently with)\s+([A-Z][\w&+-]*(?:\s+[A-Z][\w&+-]*){0,2})/;
   const provider = rawHit(providerRe);
-  if (provider) say("estate.existingProviders", [provider[1].trim()], provider[0].trim());
+  if (provider) say("estate.existingProviders", [provider[1].trim()], provider[0].trim(), undefined, provider.index);
 
   /* Named locations + criticality. Both need the case-insensitive flag:
    * a buyer writes the abbreviation "HQ" capitalised, and a bare lowercase
    * literal in the pattern would silently never match it. */
   const hqRe = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\s+(?:hq|headquarters|head office)\b/i;
   const hq = rawHit(hqRe);
-  if (hq) say("estate.namedLocations", [`${hq[1].trim()} HQ`], hq[0].trim());
+  if (hq) say("estate.namedLocations", [`${hq[1].trim()} HQ`], hq[0].trim(), undefined, hq.index);
 
   const criticalRe = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2}(?:\s+HQ)?)\s+is\s+(?:our\s+)?(business[- ]critical|critical|our main site|our primary site|flagship)\b/i;
   const critical = rawHit(criticalRe);
-  if (critical) say("estate.locationCriticality", [critical[0].trim()], critical[0].trim());
+  if (critical) say("estate.locationCriticality", [critical[0].trim()], critical[0].trim(), undefined, critical.index);
 
   /* Site resilience / backup connectivity: the whole clause containing a
    * mobile-connectivity term and "backup", captured verbatim so whatever
@@ -845,7 +1340,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
    * just the words. */
   const resilienceRe = /[^.,!?;]*\b(?:4g|5g)\b[^.,!?;]*\bbackup\b[^.,!?;]*/i;
   const resilience = rawHit(resilienceRe);
-  if (resilience) say("estate.siteResilience", [resilience[0].trim()], resilience[0].trim());
+  if (resilience) say("estate.siteResilience", [resilience[0].trim()], resilience[0].trim(), undefined, resilience.index);
 
   /* Bespoke requirements: one narrow, named deterministic exception, named
    * because the acceptance case names it directly. The general case (a
@@ -856,7 +1351,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
    * words. */
   const bespokeThreatRe = /[^.,!?;]*threat protection[^.,!?;]*/i;
   const bespokeThreat = rawHit(bespokeThreatRe);
-  if (bespokeThreat) say("requirements.bespoke", [bespokeThreat[0].trim()], bespokeThreat[0].trim());
+  if (bespokeThreat) say("requirements.bespoke", [bespokeThreat[0].trim()], bespokeThreat[0].trim(), undefined, bespokeThreat.index);
 
   return out;
 }
@@ -1234,6 +1729,261 @@ function dedupeSiteResilience(updates: FieldUpdate[]): FieldUpdate[] {
     .filter((u): u is FieldUpdate => u !== null);
 }
 
+/* ------------------------------------------------------------------ */
+/* Fact Ledger Reliability Gate (13 Aug 2026): clause-level coverage   */
+/*                                                                      */
+/* The invariant this section exists to hold: every declarative clause */
+/* in the buyer's message becomes a structured fact, a bespoke         */
+/* requirement, or a visible unplaced receipt. Nothing silently        */
+/* disappears -- the specific, live failure this closes was            */
+/* ProjectDesk.send() only ever keeping a verbatim receipt when ZERO   */
+/* facts landed for a whole message (see that file's send()): a        */
+/* five-sentence message where four sentences landed a fact and one    */
+/* did not returned early and the fifth sentence's own words were      */
+/* never kept anywhere. This module supplies the missing half: which   */
+/* of the message's clauses the accepted updates never actually        */
+/* touched, so the caller (ProjectDesk.send()) can keep them even when */
+/* other facts from the same message landed. Pure, deterministic, no   */
+/* model call -- the same "the validator/rail is the source of truth,  */
+/* not a caller's guess" law the rest of this file already holds.      */
+/* ------------------------------------------------------------------ */
+
+/** A declarative clause (sentence) together with its own character
+ *  range in the ORIGINAL, unmodified buyer text. Occurrence-aware
+ *  coverage (below) depends on this: an update's `matchStart` and a
+ *  clause's `[start, end)` must share one coordinate space, or position
+ *  comparisons are meaningless. */
+export type ClauseSpan = { text: string; start: number; end: number };
+
+/** Splits a buyer's message into its declarative clauses (sentences),
+ *  each carrying its own position in the ORIGINAL text. Pure and
+ *  deterministic, no NLP: split on a sentence terminator -- the same
+ *  boundary chunkForIngest() (ingest.ts) already uses to cut a paste
+ *  into cycle-sized pieces, one law for "where does one buyer statement
+ *  end and the next begin", not two competing ones. Punctuation-only
+ *  fragments are dropped (a floor of 3 characters, matching runCycle()'s
+ *  own `trimmed.length < 3` guard on the whole message).
+ *
+ *  Reliability gate, third amendment (13 Aug 2026, Codex's third review,
+ *  item 5): a newline is now ALSO a strong, deterministic boundary,
+ *  alongside a sentence terminator -- explicitly instructed as one of
+ *  the only two boundary kinds this gate may ever use for deterministic
+ *  separation. Every other candidate boundary this file has tried
+ *  (commas, colons, slashes, "with", coordinator words) is deliberately
+ *  excluded: none of them reliably marks "one buyer statement ends, the
+ *  next begins" the way a full stop or a line break does.
+ *
+ *  Deliberately does NOT normalise whitespace before splitting (the
+ *  first version of this gate did, via a `.replace(/\s+/g, " ")` pass) --
+ *  that would shift every clause's position relative to the original
+ *  text, which is exactly the coordinate space `matchStart` is computed
+ *  in. Leading/trailing whitespace around each clause is trimmed from
+ *  the returned `text`, with `start`/`end` adjusted to match, so the
+ *  returned span always points at the clause's own trimmed content. */
+export function splitDeclarativeClauseSpans(text: string): ClauseSpan[] {
+  const s = String(text ?? "");
+  const rough: Array<{ start: number; end: number }> = [];
+  const boundary = /[.!?]+(?=\s|$)|\n+/g;
+  let cursor = 0;
+  let m: RegExpExecArray | null;
+  while ((m = boundary.exec(s))) {
+    const end = m.index + m[0].length;
+    rough.push({ start: cursor, end });
+    cursor = end;
+  }
+  if (cursor < s.length) rough.push({ start: cursor, end: s.length });
+  return rough
+    .map(({ start, end }) => {
+      const chunk = s.slice(start, end);
+      const leading = chunk.length - chunk.trimStart().length;
+      const trimmed = chunk.trim();
+      return { text: trimmed, start: start + leading, end: start + leading + trimmed.length };
+    })
+    .filter((c) => c.text.length >= 3);
+}
+
+/** String-only convenience wrapper, kept for callers (and this file's
+ *  own regression script) that only need the clause text, not its
+ *  position. */
+export function splitDeclarativeClauses(text: string): string[] {
+  return splitDeclarativeClauseSpans(text).map((c) => c.text);
+}
+
+type AnchorSpan = { anchor: string; start: number; end: number };
+
+/** The literal buyer-text span an update traces to, WITH its position,
+ *  for occurrence-aware coverage. Reliability gate amendment (13 Aug
+ *  2026, Codex's review, blocker 1): the first version of this gate
+ *  checked only whether an anchor's TEXT appeared ANYWHERE in the
+ *  message -- so one occurrence of "Azure" (in "We use Azure today")
+ *  wrongly covered a LATER, unrelated sentence containing the same word
+ *  ("We also require Azure ExpressRoute..."). A real position closes
+ *  that gap: coverage now asks whether THIS SPECIFIC occurrence falls
+ *  inside THIS clause's own range, not merely whether the word exists
+ *  somewhere in the buyer's message.
+ *
+ *  `matchedText` wins over `quote` when both are present -- deliberately
+ *  NOT both, unlike the first version of this gate: a canonical-label
+ *  call (say()'s own comment: "managed security" for an MDR mention,
+ *  "SD-WAN"/"UK"/"Microsoft" for a bare regex hit) carries a `quote` that
+ *  is NOT guaranteed to be the buyer's own literal words at all, so
+ *  pairing it with matchedText's real position would misrepresent where
+ *  a non-literal display label supposedly "sits". `matchedText`, when
+ *  present, is always the true literal trigger and always shares its
+ *  match's own position; `quote` is used as the anchor only when
+ *  matchedText is absent, in which case (every ordinary say() call,
+ *  every "stated" model proposal) quote already IS the literal span.
+ *
+ *  When `matchStart` itself is absent (a call site that predates this
+ *  amendment, or a model proposal whose exact position was never
+ *  captured), this falls back to the FIRST occurrence of the anchor
+ *  text in the message -- the same "hit() only ever finds the first
+ *  occurrence" precedent this file already establishes elsewhere, and a
+ *  strictly better fallback than the old file-wide substring check,
+ *  since it still pins to ONE real position rather than every
+ *  occurrence. Anchors under 3 characters are dropped: checked as a
+ *  precise position now, not a file-wide substring, so the old
+ *  "us"/"uk" collision risk (colliding with "business"/"custom") this
+ *  file's previous version guarded against no longer applies with the
+ *  same force, but the floor is kept anyway as a second, cheap line of
+ *  defence against a stray short anchor landing on the wrong occurrence
+ *  entirely. */
+function updateAnchorSpan(u: FieldUpdate, fullText: string, fullTextLower: string): AnchorSpan | null {
+  const raw = (u.matchedText ?? u.quote)?.trim();
+  if (!raw || raw.length < 3) return null;
+  const anchor = raw.toLowerCase();
+  const start = typeof u.matchStart === "number" && u.matchStart >= 0 ? u.matchStart : fullTextLower.indexOf(anchor);
+  if (start < 0) return null;
+  return { anchor, start, end: start + anchor.length };
+}
+
+/** Reliability gate, THIRD amendment (13 Aug 2026, Codex's third review --
+ *  a source-ledger architecture correction, replacing the SECOND
+ *  amendment's conjunction/punctuation splitter entirely).
+ *
+ *  The second amendment split each clause into atomic sub-spans at an
+ *  ever-expanding list of coordinator words and punctuation (and/but/
+ *  plus/as well as/;), then checked coverage per atomic unit. Codex's
+ *  third review showed this is architecturally unsound in BOTH
+ *  directions at once, and cannot be patched by adding more words to the
+ *  list: (1) natural English coordinates a second requirement in more
+ *  shapes than any punctuation list can enumerate -- a comma, a colon, a
+ *  slash, the word "with" all silently lost the second requirement,
+ *  exactly like "and"/"but"/"plus" did before THIS list existed -- and
+ *  (2) splitting on those same words actively DAMAGES ordinary compound
+ *  phrases whose own coordinator sits INSIDE a single correct match
+ *  ("Energy and utilities", "research and development", "active-active
+ *  and active-passive"): the splitter cuts the clause into pieces
+ *  smaller than the phrase itself, so an anchor whose real match spans
+ *  the cut point reads as covering only the first half, and the second
+ *  half surfaces as a stray, nonsense fragment ("utilities business.").
+ *
+ *  Robert's explicit correction: stop expanding the splitter and replace
+ *  it with a source-ledger design. Concretely:
+ *   1. Clauses are split ONLY on strong, deterministic boundaries --
+ *      sentence terminators and newlines (splitDeclarativeClauseSpans,
+ *      above) -- and never subdivided further. No conjunction,
+ *      coordinator or punctuation mark is ever used as a cut point here.
+ *   2. This function no longer invents requirements.bespoke facts at
+ *      all. A bespoke fact is only ever proposed by deterministicExtract's
+ *      own named rules (the threat-protection case above is the one
+ *      example) or by a vetted model proposal -- i.e. only when "the
+ *      extractor/model explicitly returns that complete span" (Robert's
+ *      wording). This gate's own job shrinks to one binary judgement per
+ *      clause: is there real buyer content here that no accepted update
+ *      already accounts for?
+ *   3. When the answer is yes, the clause's FULL, ORIGINAL text -- never
+ *      a derived substring -- is kept as an unplaced "needs review"
+ *      receipt. A receipt sitting alongside a fact the SAME clause also
+ *      produced is expected and accepted: duplication is the safe
+ *      outcome instruction 4 asks for, strictly preferred over ever
+ *      guessing where a fragment begins or ends. */
+/* Round 4, live-testing addendum: the first cut of this stoplist only
+ * covered pronouns/articles/copula/auxiliaries/modals and a few generic
+ * organisational nouns. Running the rewritten reliability gate against
+ * ordinary, already-fully-captured buyer sentences ("We are a Healthcare
+ * business WITH 20 sites.", "We need SASE ACROSS 50 sites.", "We USE
+ * M365.", "We SUFFERED a breach.") surfaced false "not fully explained"
+ * verdicts: plain grammatical glue -- prepositions that carry no meaning
+ * independent of the noun phrase an anchor already covers, and a handful
+ * of generic framing verbs whose OBJECT is what a fact actually records
+ * -- was being counted as an unaddressed second requirement. Every
+ * addition below is deliberately still free of conjunctions/coordinators
+ * (and/but/plus/or/as well as) and of any content noun a fixture depends
+ * on ("Ethernet", "circuit", "protection", "ExpressRoute", "research",
+ * "development", "active-active", "sales", "marketing" and their kind
+ * are never touched) -- this remains a closed-class stoplist of words
+ * that never by themselves constitute a buyer requirement, not a second
+ * attempt at clause splitting. */
+const RESIDUAL_SCAFFOLDING_RE =
+  /\b(?:we're|we've|we|our|us|you're|your|you|i'm|my|i|it's|its|it|this|that|these|those|they're|their|they|a|an|the|is|are|am|was|were|be|been|being|have|has|had|do|does|did|will|would|can|could|should|shall|may|might|must|business|company|organisation|organization|firm|sector|with|for|of|across|within|throughout|estate|whole|use|uses|used|using|suffered|today|currently|now)\b/gi;
+
+/** Whether `clause` reads as fully accounted for by the updates that
+ *  already anchor somewhere inside it -- a BINARY judgement only. It
+ *  never decides WHERE an uncovered fragment begins or ends, and it
+ *  never returns one: the caller always keeps the clause's own complete
+ *  text when this returns false. Each covering anchor's own matched
+ *  SPAN (start through end, not merely its start point -- this is what
+ *  lets "Energy and utilities" register as fully covered even though
+ *  the match crosses the word "and") is removed from the clause; what
+ *  is left is stripped of the closed class of pronouns, articles, the
+ *  copula and a few generic organisational nouns above (deliberately
+ *  NOT conjunctions, coordinators, or any punctuation mark -- this never
+ *  makes a splitting decision, only a keep-the-whole-clause-or-not one)
+ *  and anything real left over -- a run of three or more letters/digits
+ *  -- means the buyer said something this pass has not accounted for. */
+function clauseIsFullyExplained(clause: ClauseSpan, covering: AnchorSpan[]): boolean {
+  if (covering.length === 0) return false;
+  const local = clause.text;
+  const covered = new Array(local.length).fill(false);
+  for (const a of covering) {
+    const s = Math.max(0, a.start - clause.start);
+    const e = Math.min(local.length, a.end - clause.start);
+    for (let i = s; i < e; i++) covered[i] = true;
+  }
+  let residual = "";
+  for (let i = 0; i < local.length; i++) residual += covered[i] ? " " : local[i];
+  const stripped = residual.replace(RESIDUAL_SCAFFOLDING_RE, " ").replace(/[^a-zA-Z0-9]+/g, " ").trim();
+  return !/[a-zA-Z]{3,}/.test(stripped);
+}
+
+/** The gate's core: split `text` into clauses (strong boundaries only --
+ *  sentence terminators and newlines) and, for every clause no accepted
+ *  update already fully accounts for, return its COMPLETE original text
+ *  for the caller to keep as an unplaced "needs review" receipt. Never
+ *  invents a requirements.bespoke fact and never returns a fragment --
+ *  see the design note above. Exported (amendment round, 13 Aug 2026,
+ *  blocker 6) so hermetic tests can drive it directly with synthetic
+ *  updates, the same way vetModelProposals() already lets tests drive
+ *  the model-vetting rail without a real model call. */
+export function coverDeclarativeClauses(text: string, updates: FieldUpdate[]): { unplacedClauses: string[] } {
+  const fullTextLower = text.toLowerCase();
+  const anchorSpans = updates
+    .map((u) => updateAnchorSpan(u, text, fullTextLower))
+    .filter((a): a is AnchorSpan => a !== null);
+  const unplacedClauses: string[] = [];
+  for (const clause of splitDeclarativeClauseSpans(text)) {
+    if (!/[a-zA-Z]{3,}/.test(clause.text)) continue; // punctuation/number-only fragment: nothing to place
+    const covering = anchorSpans.filter((a) => a.start >= clause.start && a.start < clause.end);
+    if (!clauseIsFullyExplained(clause, covering)) unplacedClauses.push(clause.text);
+  }
+  return { unplacedClauses };
+}
+
+/** Folds the buyer's own verbatim source turns into a legacy notes
+ *  string, in one place, so every caller that persists a buyer-notes
+ *  field (the RFP wizard's payload, the security-sourcing create route)
+ *  composes it identically (round 4, Codex's third review, item 6:
+ *  "ensure the retained source turn flows into saving, publishing...
+ *  not merely the transient chat display"). Pure and directly testable,
+ *  independent of any particular persistence route. */
+export function notesWithSourceTurns(baseNotes: string, sourceTurns: string[] | undefined): string {
+  const turns = (sourceTurns ?? []).map((s) => String(s ?? "").trim()).filter(Boolean);
+  if (!turns.length) return baseNotes;
+  const line = `Buyer's original wording, preserved verbatim: ${turns.join(" | ")}.`;
+  return [baseNotes, line].filter(Boolean).join(" ");
+}
+
 export async function extractRequirement(text: string, base: SecurityRequirementInput = {}): Promise<ExtractResult> {
   const notes: string[] = [];
   /* Fix (correction pass 2, Priority 1 — Tests 21, 22, 23, 24, 26, 31,
@@ -1270,19 +2020,35 @@ export async function extractRequirement(text: string, base: SecurityRequirement
    * for those proceeds completely unaffected below. */
   if (explanationForInput(text)) {
     notes.push("Recognised as a glossary question; no extraction was attempted so the answer can't be read as a new project fact.");
-    return { requirement: base, updates: [], engine: "deterministic_fallback", notes };
+    return { requirement: base, updates: [], engine: "deterministic_fallback", notes, unplacedClauses: [], removals: [] };
   }
   const det = deterministicExtract(text, notes);
   const modelUpdates = await modelExtract(text, notes);
   const modelSpoke = Boolean(modelUpdates && modelUpdates.length > 0);
-  const updates = modelSpoke ? unionUpdates(modelUpdates!, det) : det;
+  const unionedUpdates = modelSpoke ? unionUpdates(modelUpdates!, det) : det;
   const engine = modelSpoke ? "model" : "deterministic_fallback";
+  /* Fact Ledger Reliability Gate (13 Aug 2026, third amendment): run
+   * AFTER model+det are unioned, so a clause the model or the rail
+   * already covered (however it covered it) never ALSO surfaces as an
+   * unplaced receipt. Never invents a fact -- see coverDeclarativeClauses'
+   * own design note above; `updates` is exactly `unionedUpdates`, nothing
+   * appended. */
+  const { unplacedClauses } = coverDeclarativeClauses(text, unionedUpdates);
+  const updates = unionedUpdates;
+  /* Seventh amendment (13 Aug 2026): retraction detection is rail-only and
+   * independent of the model/det union above (see removalsIn()'s own
+   * comment) -- computed directly off the buyer's raw text, never off
+   * `updates`, so it can never be confused with, or suppressed by,
+   * whatever the model or the rail did or didn't propose this turn. */
+  const removals = removalsIn(text);
   return {
     requirement: applyUpdates(base, updates),
     updates,
     engine,
     ...(engine === "model" ? { model: MODEL } : {}),
     notes,
+    unplacedClauses,
+    removals,
   };
 }
 
