@@ -23,6 +23,7 @@ import {
 } from "@/lib/workspace/extract";
 import type { SourceLedgerEntry, SourceLedgerVia } from "@/lib/workspace/source-ledger";
 import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeStateFromProject } from "@/lib/workspace/source-ledger";
+import { parseCommand, type Command } from "@/lib/workspace/commands";
 import {
   briefModel,
   buyingOf,
@@ -688,41 +689,10 @@ const TOTAL_WEIGHT = TWIN_SLOTS.reduce((a, s) => a + s.w, 0) + 3;
 /* pattern is a sentence the surface itself advertises.                 */
 /* ================================================================== */
 
-type Command =
-  | { kind: "whoFits" }
-  | { kind: "publish" }
-  | { kind: "sheet"; open: boolean }
-  | { kind: "reset" }
-  | { kind: "back" }
-  | { kind: "closeEdit" }
-  | { kind: "missing" }
-  | { kind: "cost" }
-  | { kind: "dropPartner" }
-  | { kind: "dropName"; name: string }
-  | { kind: "keepName"; name: string }
-  | { kind: "why"; name: string };
-
-function parseCommand(raw: string): Command | null {
-  const t = raw.trim().toLowerCase().replace(/[?.!]+$/, "").replace(/\s+/g, " ");
-  if (!t) return null;
-  if (/^(show me )?who fits$/.test(t)) return { kind: "whoFits" };
-  if (/^(publish( it| this| to the board)?|generate and publish)$/.test(t)) return { kind: "publish" };
-  if (/^(see|show( me)?|open) the requirement( sheet)?$/.test(t) || t === "open the sheet") return { kind: "sheet", open: true };
-  if (/^close the (requirement( sheet)?|sheet)$/.test(t)) return { kind: "sheet", open: false };
-  if (/^(start (again|over|afresh)|reset)$/.test(t)) return { kind: "reset" };
-  if (/^back( to the (conversation|project))?$/.test(t)) return { kind: "back" };
-  if (/^(not sure( yet)?|skip( it| this( one)?)?)$/.test(t)) return { kind: "closeEdit" };
-  if (/^what( am i| are we)? ?(am i |are we )?(still )?(missing|left|outstanding)$/.test(t) || /^what are you still missing$/.test(t)) return { kind: "missing" };
-  if (/^what (will|would) (this|it) cost$/.test(t) || /^(price|cost)( it| this)?$/.test(t)) return { kind: "cost" };
-  if (/^drop (the ones|anyone|those) (that need|needing) a partner$/.test(t)) return { kind: "dropPartner" };
-  const drop = /^(?:drop|remove|untick) (.+)$/.exec(t);
-  if (drop && !/guess|inference/.test(drop[1])) return { kind: "dropName", name: drop[1] };
-  const keep = /^(?:keep|re-?add|tick) (.+)$/.exec(t);
-  if (keep) return { kind: "keepName", name: keep[1] };
-  const why = /^why is (.+?) (?:first|top|ranked (?:first|top|where it is)|there)$/.exec(t) ?? /^why (.+?) first$/.exec(t);
-  if (why) return { kind: "why", name: why[1] };
-  return null;
-}
+/* Command and parseCommand() moved to @/lib/workspace/commands.ts (Phase 1
+ * checkpoint correction, item 3, 13 Aug 2026) -- see that module's own
+ * header comment for why (fixture testability) and for the multi-clause-
+ * correction fix (isSingleCommandTarget()) it now carries. */
 
 /* ================================================================== */
 /* The component                                                       */
