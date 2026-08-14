@@ -26,6 +26,7 @@ import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import { humaniseSecurityCodes, securityCodeLabel } from "@/lib/security/labels";
 import FlowStageStrip, { type FlowStage } from "@/components/FlowStageStrip";
+import { hasPublished } from "@/lib/project-machine";
 
 /** The instant publish reward, mirrored from lib/market-report (server). */
 type MarketReportT = {
@@ -163,9 +164,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // Publish requires a verified sign-in on top of the manage token: when the
   // server answers 401 sign_in_required, render the inline sign-in panel.
   const [publishAuthNeeded, setPublishAuthNeeded] = useState(false);
-  // Live supplier match for the publish panel: the same public endpoint the
-  // Describe wizard uses, so both quote the same marketplace numbers.
-  const [matchInfo, setMatchInfo] = useState<{ count: number; total: number; names: string[] } | null>(null);
+  // Live evaluated-market SIZE for the publish panel: the same public,
+  // project-blind endpoint the Describe wizard uses. Living Procurement
+  // Canvas Phase 2 hotfix (14 Aug 2026), Robert's finding: this endpoint
+  // has no project id or status, so it must never carry this project's
+  // actual matched vendor names or narrowed count -- only the aggregate
+  // marketplace size. This project's REAL matched/invited vendors, once
+  // published, come from the publish response and the owner-gated report
+  // route -- never from here.
+  const [matchInfo, setMatchInfo] = useState<{ total: number } | null>(null);
   // The Market Report: the instant publish reward (price band, matched
   // suppliers, gaps, downloads). Set from the publish response, or fetched
   // when a published RFP loads.
@@ -281,7 +288,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     let gone = false;
     fetch(`/sase/api/rfp/match?${new URLSearchParams({ scope: matchScope, regions: matchRegions, model: matchModel })}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!gone && d && typeof d.count === "number") setMatchInfo({ count: d.count, total: d.total ?? 0, names: Array.isArray(d.names) ? d.names : [] }); })
+      .then((d) => { if (!gone && d && typeof d.total === "number") setMatchInfo({ total: d.total }); })
       .catch(() => { /* panel copy falls back to unnumbered */ });
     return () => { gone = true; };
     /* eslint-disable-next-line */
@@ -1165,7 +1172,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     : `You are reviewing your draft RFP: ${includedQuestionCount} questions across ${includedSections.length} sections. Add, remove or reword anything.`;
   const stripNext = published
     ? "Responses are scored against your questions under Evaluate vendor responses below. We also email you when activity arrives."
-    : `submit${matchInfo && matchInfo.count > 0 ? `, so your ${matchInfo.count} matched vendors can respond` : ", so matched vendors can respond"}. Nothing is shared until you press submit in the panel below.`;
+    : "submit, so matched vendors can respond. Nothing is shared until you press submit in the panel below.";
 
   return (
     <div className={!published && !stickyGone ? "pb-16" : undefined}>
@@ -1234,7 +1241,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 Price band from the TCO methodology with its assumptions
                 stated, gaps as facts about the document, and the document
                 downloads the buyer can circulate internally. */}
-            {marketReport && project.status !== "published" && (
+            {marketReport && !hasPublished(project.status) && (
               <div className="mt-3 rounded-sm border border-amber-300 bg-white p-4">
                 <p className="text-sm font-semibold mb-1">Your Market Report preview</p>
                 <p className="text-sm text-[var(--ink-800)] mb-1">
@@ -1258,7 +1265,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
                 </div>
               </div>
             )}
-            {marketReport && project.status === "published" && (
+            {marketReport && hasPublished(project.status) && (
               <div className="mt-3 rounded-sm border border-emerald-300 bg-white p-4">
                 <p className="text-sm font-semibold mb-2">Your Netify Market Report</p>
                 {marketReport.estimate && (
@@ -1328,14 +1335,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <div>
             <p className="eyebrow mb-1.5">Next step</p>
             <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
-              Submit this RFP{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched vendor${matchInfo.count === 1 ? "" : "s"}` : " to your matched vendors"}
+              Submit this RFP to your matched vendors
             </h2>
-            {matchInfo && matchInfo.names.length > 0 && (
-              <p className="text-base text-[var(--ink-800)] leading-snug mb-3">
-                <strong>{matchInfo.names.slice(0, 3).join(", ")}</strong>
-                {matchInfo.count > 3 ? ` and ${matchInfo.count - 3} more fit what you described.` : " fit what you described."}
-              </p>
-            )}
             <p className="text-sm text-[var(--ink-700)] mb-2">
               This is the fastest and simplest way to see whether your requirements match the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. They never see your email or phone number, and your data is only shared with a vetted account manager from each vendor or managed service provider. Every conversation starts in this app, on your terms, only when you choose.
             </p>
@@ -1358,7 +1359,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             )}
             <div className="flex flex-wrap items-center gap-3">
               <button onClick={() => publishToCurated("panel")} disabled={publishing} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
-                {publishing ? "Submitting..." : matchInfo && matchInfo.count > 0 ? `Submit to your ${matchInfo.count} matched vendors` : "Submit to your matched vendors"}
+                {publishing ? "Submitting..." : "Submit to your matched vendors"}
               </button>
               <span className="text-xs text-[var(--ink-600,#555)]">Free, no obligation to award, nothing shared until you press it. <a href="https://netify.co.uk/how-netify-makes-money/" className="underline">How Netify makes money</a>. Prefer control? <a href="#suppliers" className="underline">Invite vendors one at a time</a>.</span>
             </div>
@@ -2063,7 +2064,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {!published && !stickyGone && !submitFlow && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-300 bg-white/95 backdrop-blur px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
-            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> submit{matchInfo && matchInfo.count > 0 ? ` to your ${matchInfo.count} matched vendors` : " to your matched vendors"}. Competing bids, no sales calls.</span>
+            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> submit to your matched vendors. Competing bids, no sales calls.</span>
             <span className="flex items-center gap-2">
               <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : "Submit"}</button>
               <button onClick={() => { setStickyGone(true); try { sessionStorage.setItem(`rfp_publish_bar_${project.id}`, "1"); } catch { /* ignore */ } }} aria-label="Hide publish bar" className="text-sm text-[var(--ink-500)] underline">Hide</button>
