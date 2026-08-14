@@ -172,9 +172,17 @@ export type FitSupplier = {
    *  response shape. */
   marketplace_url?: string | null;
 };
+/** Living Procurement Canvas Phase 2 correction (14 Aug 2026): `GET
+ *  /api/workspace/fit` now strips `suppliers`/`directory`/`count` from
+ *  every response (see that route's own doc comment) -- vendor identity
+ *  AND this project's own match count never reach the browser pre-
+ *  publication. All three fields are therefore ALWAYS absent on this
+ *  client type now (never populated, not merely optional-and-sometimes-
+ *  present), so every reader must treat them as unavailable rather than
+ *  fall back to an old cached shape. `total` stays: it is the whole
+ *  evaluated market, never narrowed by this project's own scope. */
 export type FitState = {
-  mode: "graded" | "compiled"; count?: number; total?: number; note?: string;
-  suppliers: FitSupplier[]; directory: Array<{ slug: string; name: string }>;
+  mode: "graded" | "compiled"; total?: number; note?: string;
   checks?: Array<{ id: string; label: string }>;
 };
 
@@ -253,18 +261,6 @@ const PATH_LABELS: Record<string, string> = {
   "requirements.bespoke": "Additional requirements",
 };
 
-/** The dataset's grade words, humanised (the same table the desk has
- *  always used; the fit working states evidence in these words). */
-const GRADE_WORDS: Record<string, string> = {
-  yes: "evidenced yes",
-  partial: "partial evidence",
-  partner_integrated: "via partner or integrated",
-  managed_service_dependent: "as a managed service",
-  not_primary: "not primary",
-  unknown: "not evidenced",
-};
-const gradeWord = (g: string) => GRADE_WORDS[g] ?? g;
-
 /** Taxonomy items that carry a want id (a real home in the fit checks). */
 const WANT_BY_ITEM: Record<string, string> = (() => {
   const out: Record<string, string> = {};
@@ -340,13 +336,6 @@ const ev = (name: string, data: Record<string, string | number> = {}) => {
   const flat: Record<string, string> = { surface: "desk" };
   for (const [k, v] of Object.entries(data)) flat[k] = String(v);
   fireNetifyEvent(name, flat);
-};
-
-const fmtDate = (iso: string): string => {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
-  if (!m) return iso;
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${Number(m[3])} ${months[Number(m[2]) - 1]} ${m[1]}`;
 };
 
 /* ================================================================== */
@@ -766,7 +755,6 @@ export default function ProjectDesk({
   const [verdict, setVerdict] = useState<SecurityScopeVerdict | null>(null);
   const [fit, setFit] = useState<FitState | null>(null);
   const [added, setAdded] = useState<string[]>([]);
-  const [removed, setRemoved] = useState<string[]>([]);
   /** THE CHANGE MARKER (reference rule 9): the slots changed by the most
    *  recent action only. REPLACED whole on every transition, never
    *  appended, so nothing accumulates and no history builds up. */
@@ -777,7 +765,6 @@ export default function ProjectDesk({
   const [msgs, setMsgs] = useState<ThreadMsg[]>([{ who: "netify", text: THREAD_WELCOME }]);
   const [edit, setEdit] = useState<string | null>(null);
   const [reqOpen, setReqOpen] = useState(false);
-  const [expandedFit, setExpandedFit] = useState<string | null>(null);
   const [booted, setBooted] = useState(false);
   const [testMode, setTestMode] = useState(false);
   const [wrongCompany, setWrongCompany] = useState(false);
@@ -792,7 +779,18 @@ export default function ProjectDesk({
   const [signError, setSignError] = useState<string | null>(null);
   const [needAuth, setNeedAuth] = useState(false);
   const [created, setCreated] = useState<{ id: string; manage: string; test: boolean } | null>(null);
-  const [published, setPublished] = useState<{ invited: string[]; boardId?: string } | null>(null);
+  /** Living Procurement Canvas Phase 2 correction (14 Aug 2026): carries
+   *  exactly what the publish response itself returned -- real invited
+   *  suppliers (name + credential link) and the `market_report.matched`
+   *  figure that gets cached onto this project's frozen PublishedSnapshot
+   *  -- so post-publish rendering below reads the frozen result, never a
+   *  fresh `workspaceFit()` recompute (see the fits-panel replacement and
+   *  the "Your matches" block for where this is consumed). */
+  const [published, setPublished] = useState<{
+    invited: { slug: string; name: string; supplier_url: string }[];
+    boardId?: string;
+    matched: { count: number; names: string[]; total_evaluated_market: number };
+  } | null>(null);
   /** The early save (round 6, Robert's ruling: an option to save when a
    *  verified work email is given). Saving creates the real project
    *  record through the existing create machinery, unpublished; edits
@@ -1280,20 +1278,37 @@ export default function ProjectDesk({
         ? `Still needed: ${topMissing.join(", ")}.`
         : "Everything the statement tracks is in.";
 
-  /* ---- The market card: derived, never decorative. The count is the
-     live fit organ's, scored against the project; before a scope is
-     known it is the whole evaluated market. ---- */
-  const rankedFits = useMemo(() => (fit?.mode === "graded" ? fit.suppliers : []), [fit]);
-  const keptFits = useMemo(() => rankedFits.filter((s) => !removed.includes(s.slug)), [rankedFits, removed]);
-  const fitSlugs = keptFits.map((s) => s.slug);
-  const pins = [...new Set([...added, ...fitSlugs])].slice(0, 5);
-  const checksCount = fit?.checks?.length ?? 0;
-  const partnerDependent = useMemo(
-    () => keptFits.filter((s) => s.matched.some((m) => m.grade === "partner_integrated")),
-    [keptFits],
-  );
+  /* ---- The market card: derived, never decorative.
+     Living Procurement Canvas Phase 2 correction (14 Aug 2026): `fit` no
+     longer ever carries `suppliers`/`directory` (the API redacts them --
+     see the fit route's own doc comment), so nothing here derives a
+     per-vendor identity, ranking or evidence badge from it any more.
+     `marketTotal` is the whole evaluated market (`fit.total`, dataset-
+     wide, never narrowed by this project's own match) -- the one figure
+     the product rule says is safe to show pre-publish.
+     A second pass on this same round's fixtures (below) caught a sibling
+     leak the first pass missed: this file used to also derive
+     `fittingCount` from `fit.count` -- the server-computed COUNT of
+     vendors that match THIS project's scope -- and render it in the
+     "understanding band" ("{fittingCount} of {marketTotal} still fit"),
+     unconditionally, in every phase, not just the retired ranked panel.
+     A project-specific match COUNT is exactly what the product rule
+     prohibits pre-publish ("...rankings, match counts, positions...."),
+     independent of whether any vendor NAME is attached to it, so
+     `fittingCount` is retired outright, not merely hidden; the band below
+     now shows only `marketTotal`.
+     `pins` -- the vendors persisted onto the draft as buyer-selected
+     input -- comes ONLY from `added` (vendors the buyer arrived with via
+     a `?vendors=` link, e.g. from an earlier public shortlist selection,
+     genuinely the buyer's own prior intent) and NEVER folds in survivors
+     of Netify's own computed ranking, which is exactly the "invitation
+     selections" the product rule says must not be exposed or persisted
+     before publication. `keptFits`/`fitSlugs`/`partnerDependent` are
+     retired along with the ranked panel they existed to serve; see the
+     locked pre-publish outcome panel and the command handlers below for
+     the corresponding removal. */
   const marketTotal = fit?.total ?? market?.counts.vendors ?? null;
-  const fittingCount = buying && fit?.mode === "graded" ? rankedFits.length : marketTotal;
+  const pins = [...new Set(added)].slice(0, 5);
 
   /** Vendors the buyer has NAMED in their own retained words (quotes,
    *  receipts). A tag for the Constellation, never a rank change: naming
@@ -1745,7 +1760,6 @@ export default function ProjectDesk({
         }
         ev("workspace_command", { kind: "who_fits" });
         setPhase("fits");
-        setExpandedFit(null);
         scrollToWorkspace();
         return;
       }
@@ -1794,33 +1808,19 @@ export default function ProjectDesk({
         say("The price band computes at publish, under the Netify TCO methodology (v2026.1). Publishing generates it alongside your document and the anonymous notice; nothing here invents a number early.");
         return;
       case "dropPartner": {
-        if (phase !== "fits") { say("Say “who fits” first and I will show the list this works on."); return; }
-        if (!partnerDependent.length) {
-          say("Nobody in the list relies on a partner for what you asked: no row carries partner-or-integrated evidence against your checks.");
-          return;
-        }
-        const names = partnerDependent.map((s) => s.name);
-        setRemoved((r) => [...new Set([...r, ...partnerDependent.map((s) => s.slug)])]);
-        ev("workspace_command", { kind: "drop_partner" });
-        say(`Dropped ${names.join(", ")}: their evidence for one or more of your checks is graded via partner or integrated.`);
+        // Living Procurement Canvas Phase 2 correction (14 Aug 2026): this
+        // command used to drop ranked-list rows whose evidence graded as
+        // partner/integrated -- it operated entirely on the pre-publish
+        // ranked fit list, which no longer exists as identifying data in
+        // this component (see the fit route's own doc comment). There is
+        // no per-vendor detail to act on before publication, so this is
+        // now an honest refusal rather than a silent no-op that would
+        // otherwise misleadingly read as "nobody relies on a partner."
+        say("Which vendors and service providers are matched, and how each is evidenced, is part of what publishing unlocks. Publish first, then this becomes something to act on.");
         return;
       }
       case "dropName":
       case "keepName": {
-        const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const target = norm(cmd.name);
-        const inFits = rankedFits.find((s) => norm(s.name).includes(target) || target.includes(norm(s.name)));
-        if (inFits) {
-          if (cmd.kind === "dropName") {
-            setRemoved((r) => (r.includes(inFits.slug) ? r : [...r, inFits.slug]));
-            say(`${inFits.name} dropped. Direct invites leave them out; the anonymous public notice is unaffected.`);
-          } else {
-            setRemoved((r) => r.filter((s) => s !== inFits.slug));
-            say(`${inFits.name} kept back in.`);
-          }
-          ev("workspace_command", { kind: cmd.kind === "dropName" ? "drop_vendor" : "keep_vendor" });
-          return;
-        }
         /* Round 8 (2 Aug 2026, Robert: "if someone types... remove this...
            it should work"): "drop X"/"remove X" now reaches anything on
            the statement, not just a vendor or a guess — a stated fact, a
@@ -1870,19 +1870,14 @@ export default function ProjectDesk({
         return;
       }
       case "why": {
-        const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const target = norm(cmd.name);
-        const idx = rankedFits.findIndex((s) => norm(s.name).includes(target) || target.includes(norm(s.name)));
-        if (idx < 0) { say(`“${cap(cmd.name)}” is not in the scored list. Say “who fits” to see it.`); return; }
-        const s = rankedFits[idx];
+        // Living Procurement Canvas Phase 2 correction (14 Aug 2026): "why
+        // <vendor>" used to open a ranked-list row's evidence working --
+        // that per-vendor detail is exactly what the product rule reserves
+        // for after publication (see the fit route's own doc comment and
+        // the locked outcome panel below). No pre-publish path can answer
+        // this any more; an honest refusal replaces the old lookup.
         ev("workspace_command", { kind: "why_vendor" });
-        setPhase("fits");
-        setExpandedFit(s.slug);
-        setTimeout(() => {
-          const el = document.querySelector(`[data-fit="${s.slug}"]`);
-          if (el) el.scrollIntoView({ block: "center" });
-        }, 60);
-        say(`${s.name}'s working is open in the list: position, evidence and dates, never what anyone pays.`);
+        say(`Why a specific vendor or service provider matched, with evidence and dates, is part of what publishing unlocks — “${cap(cmd.name)}” included, if they are among the matches. Publish to see the working.`);
         return;
       }
     }
@@ -2108,20 +2103,35 @@ export default function ProjectDesk({
 
       ev("publish_click", {});
       setSignStage("Publishing to the board…");
+      // Living Procurement Canvas Phase 2 correction (14 Aug 2026):
+      // `excluded_vendors` used to carry the buyer's pre-publish "drop
+      // from direct invites" selections (the removed WHO FITS panel's
+      // checkboxes) -- that curation depended on displaying Netify's
+      // computed ranking before publication, which the product rule now
+      // forbids, so there is no longer a pre-publish signal to send. The
+      // publish route's own `excluded_vendors` option still exists
+      // server-side for a future consented mechanism; this call simply
+      // no longer has anything honest to populate it with.
       const res = await fetch(`/sase/api/rfp/${proj.id}/publish`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           manage_token: proj.manage,
           list_on_board: true,
-          ...(removed.length ? { excluded_vendors: removed.slice(0, 40) } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        const invited: string[] = Array.isArray(data.invited) ? data.invited.map((i: { slug: string }) => i.slug) : [];
+        // Living Procurement Canvas Phase 2 correction (14 Aug 2026): keep
+        // the FULL invited records (name, credential link) the route
+        // returned, and the report's own frozen `matched` figure, rather
+        // than discarding them down to bare slugs -- this is what lets
+        // the post-publish panel render the real, frozen result instead
+        // of recomputing anything client-side.
+        const invited: { slug: string; name: string; supplier_url: string }[] = Array.isArray(data.invited) ? data.invited : [];
+        const matched = data.market_report?.matched ?? { count: 0, names: [], total_evaluated_market: 0 };
         ev("board_listed", { board_id: data.board?.opportunity_id ?? "" });
-        setPublished({ invited, boardId: data.board?.opportunity_id });
+        setPublished({ invited, boardId: data.board?.opportunity_id, matched });
         setNeedAuth(false);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
       } else if (data.auth_required) {
@@ -2519,7 +2529,16 @@ export default function ProjectDesk({
           )}
 
           {/* The understanding band and the market count: always visible,
-              derived, never decorative. */}
+              derived, never decorative.
+              Living Procurement Canvas Phase 2 correction (14 Aug 2026):
+              this used to show "{fittingCount} of {marketTotal} still fit"
+              -- a project-specific matched-vendor COUNT, computed pre-
+              publish, unconditionally, in every phase (not just the
+              retired ranked panel). A match count is exactly what the
+              product rule prohibits before publication, vendor names
+              attached or not; see the doc comment on `marketTotal` above.
+              Now shows only the safe, non-project-specific evaluated-
+              market total. */}
           <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
             <div className="min-w-[220px] flex-1">
               <div className="flex items-baseline gap-2.5">
@@ -2535,8 +2554,8 @@ export default function ProjectDesk({
             </div>
             <div className="flex-none border-l border-[#E5E1D9] pl-[22px]">
               <div className="flex items-baseline gap-2">
-                <span className="text-[22px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>{fittingCount ?? "…"}</span>
-                <span className="text-[12.5px] text-[#8C8A85]">of {marketTotal ?? "…"} still fit</span>
+                <span className="text-[22px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>{marketTotal ?? "…"}</span>
+                <span className="text-[12.5px] text-[#8C8A85]">evaluated marketplace</span>
               </div>
               <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#A3A099]">{marketNote}</div>
             </div>
@@ -2917,7 +2936,7 @@ export default function ProjectDesk({
                     natural point in between, readiness just crossing
                     threshold, so the payoff stays in view on the way there. */}
                 <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#8A4D08]">
-                  Next: see who fits, then publish to get bids, pricing and vetted responses.
+                  Next: see what publishing unlocks, then publish to get bids, pricing and vetted responses.
                 </div>
               </div>
               <button
@@ -2925,7 +2944,7 @@ export default function ProjectDesk({
                 onClick={() => handleCommand({ kind: "whoFits" })}
                 className="flex-none cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[21px] py-3 text-[15px] font-semibold text-[#141414] hover:bg-[#E5940F]"
               >
-                Show the {fittingCount ?? ""} that fit
+                See what publishing unlocks
               </button>
             </div>
           )}
@@ -2933,10 +2952,20 @@ export default function ProjectDesk({
         </div>
       )}
 
-      {/* ── WHO FITS ── the count, scored against the project and never
-          against what anyone pays, then the ranked list with dated
-          evidence and one reason per row; the publish organ at the end
-          because publish is the only exit. */}
+      {/* ── LOCKED OUTCOME (was "WHO FITS") ── Living Procurement Canvas
+          Phase 2 correction (14 Aug 2026): the product rule is that
+          publication is the boundary that unlocks a project's matched
+          vendors and service providers, not a UI event -- before
+          publication this panel MUST NOT reveal a project-specific ranked
+          match result: no matched vendor names, rankings, match counts,
+          positions, evidence badges, invitation selections or supplier
+          links (see /api/workspace/fit/route.ts's own doc comment, which
+          now enforces the identical boundary server-side so this panel
+          cannot be bypassed by a differently-shaped client). What remains
+          honest to show pre-publish: the general evaluated-market size,
+          this project's own document readiness, and what remains open --
+          never a result computed against this specific requirement's
+          vendor match. */}
       {phase === "fits" && (
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-6">
           <button
@@ -2946,127 +2975,37 @@ export default function ProjectDesk({
           >
             Back to the statement
           </button>
-          {rankedFits.length === 0 ? (
-            <div className="max-w-[36em] text-[16px] leading-[1.6] text-[#6E6C67]">
-              The market has not scored yet: say what you are buying and where it runs, and the evaluated vendors and service providers rank against it here.
-            </div>
-          ) : (
-            <>
-              <h2 className="m-0 mb-2.5 max-w-[24em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
-                {rankedFits.length} of {fit?.total ?? rankedFits.length} fit the requirement as it stands.
-              </h2>
-              <p className="m-0 mb-2 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
-                Scored against the statement, never against what anyone pays. Change anything in it and this list changes with it.
-              </p>
-              <p className="m-0 mb-6 max-w-[38em] text-[14px] leading-[1.6] text-[#8C8A85]">
-                {cap(numWord(keptFits.length))} of {numWord(rankedFits.length)} kept for direct invites. Untick anyone you do not want to hear from
-                {partnerDependent.length ? <>, or say <em>drop the ones that need a partner</em>.</> : "."}
-              </p>
-              {/* Fix, 10 Aug 2026 (Harry's E2E, Test 1.8): "Your named
-                  checks" used to sit below the WHOLE list, so with 8+
-                  vendors the badge's meaning was scrolled past long before
-                  anyone read it -- same prominence problem as the empty-
-                  state hint fixed this morning, copy existed but wasn't
-                  where the eye was. Moved above the list, before the first
-                  badge appears, and each badge now also carries the same
-                  line as a hover title. */}
-              {checksCount > 0 && fit?.checks && (
-                <p className="m-0 mb-3 max-w-[38em] text-[13px] leading-relaxed text-[#8C8A85]">
-                  Your named checks: {fit.checks.map((c) => c.label).join(", ")}. Each badge below counts the checks met with graded evidence out of {checksCount}.
-                </p>
-              )}
-              <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8]">
-                {rankedFits.map((s, i) => {
-                  const on = !removed.includes(s.slug);
-                  const full = checksCount > 0 && s.matched.length === checksCount;
-                  const open = expandedFit === s.slug;
-                  return (
-                    <div key={s.slug} data-fit={s.slug} className="border-b border-[#EFECE5]">
-                      <div className="flex w-full items-start gap-3.5 px-5 py-4">
-                        <button
-                          type="button"
-                          onClick={() => setRemoved((r) => (on ? [...r, s.slug] : r.filter((x) => x !== s.slug)))}
-                          aria-label={on ? `Drop ${s.name} from direct invites` : `Keep ${s.name} in direct invites`}
-                          className={`mt-[3px] flex h-[19px] w-[19px] flex-none cursor-pointer items-center justify-center rounded-[5px] border-0 text-[11px] font-bold ${on ? "bg-[#141414] text-white" : "border border-solid border-[#DDD9D1] bg-transparent text-transparent"}`}
-                        >
-                          {on ? "✓" : ""}
-                        </button>
-                        <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
-                          <span className="flex flex-wrap items-baseline gap-2.5">
-                            <span className="text-[16.5px] font-semibold">{s.name}</span>
-                            <span className="text-[12.5px] text-[#A3A099]">{s.category}</span>
-                          </span>
-                          <span className="text-[14px] leading-[1.55] text-[#5F5D59]" style={{ textWrap: "pretty" }}>
-                            {s.matched.length
-                              ? `Evidenced for ${s.matched.slice(0, 3).map((m) => m.label).join(", ")}${s.matched.length > 3 ? ` and ${numWord(s.matched.length - 3)} more` : ""}.`
-                              : "On the curated market for this scope; no graded evidence against your named checks yet."}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setExpandedFit(open ? null : s.slug)}
-                            className="cursor-pointer self-start border-0 bg-transparent p-0 text-[12.5px] text-[#B4650B] underline hover:text-[#8A4D08]"
-                          >
-                            {open ? "Close the working" : `Why position ${i + 1}`}
-                          </button>
-                        </div>
-                        <div className="flex flex-none flex-col items-end gap-[5px]">
-                          {checksCount > 0 && (
-                            <span
-                              title={`Meets ${s.matched.length} of your ${checksCount} named checks, with graded evidence`}
-                              className={`rounded-[6px] px-2 py-1 text-[12px] font-semibold ${full ? "bg-[#EAF6EE] text-[#256B3E]" : "bg-[#F2F0EB] text-[#5F5F5F]"}`}
-                              style={mono}
-                            >
-                              {s.matched.length} of {checksCount}
-                            </span>
-                          )}
-                          <span className="text-[11px] text-[#A3A099]" style={mono}>
-                            evaluated {fmtDate(s.last_verified)}
-                          </span>
-                        </div>
-                      </div>
-                      {open && (
-                        <div className="border-t border-[#F0EEE9] bg-white px-5 py-4 pl-[52px]">
-                          <p className="m-0 mb-1 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
-                            Position {i + 1} of {rankedFits.length}, ordered by graded evidence against your named checks, never by what anyone pays.
-                          </p>
-                          {s.matched.length > 0 && (
-                            <p className="m-0 mb-1 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
-                              Evidenced for: {s.matched.map((m) => `${m.label} (${gradeWord(m.grade)})`).join(", ")}.
-                            </p>
-                          )}
-                          {s.missed.length > 0 && (
-                            <p className="m-0 mb-1 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
-                              Not evidenced for: {s.missed.map((m) => m.label).join(", ")}.
-                            </p>
-                          )}
-                          <p className="m-0 mb-1.5 max-w-[40em] text-[14px] leading-[1.55] text-[#5F5D59]">
-                            Across the whole dataset this record fully meets {s.yes_count} of 40 capabilities. Graded {fmtDate(s.last_verified)}.
-                          </p>
-                          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                            <a href={`/sase/vendors/${s.slug}/`} className="text-[13.5px]">Read the full record, with every source behind these grades</a>
-                            {/* Fix, 10 Aug 2026 (Harry's E2E, Test 4.4): this
-                                panel had no vendor-contact route at all --
-                                the vendor's own page (one click further)
-                                already carries this button, everywhere else
-                                it's expected does too (compare, best/ranked
-                                list); this was the one surface without it. */}
-                            <a
-                              href={s.marketplace_url ?? "https://netify.co.uk/marketplace/"}
-                              target="_blank"
-                              rel="noopener"
-                              className="text-[13.5px]"
-                            >
-                              Contact {s.name} via Netify ↗
-                            </a>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+          <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] p-6">
+            <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
+              Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
+            </h2>
+            <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
+              Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
+            </p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
+                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                  Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
+                </div>
               </div>
-            </>
-          )}
+              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
+                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                  Document readiness. {pctNote}
+                </div>
+              </div>
+              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                <div className="text-[22px] font-semibold" style={mono}>{unansweredGaps.length}</div>
+                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                  {unansweredGaps.length === 1 ? "Open decision" : "Open decisions"} remaining. Resolve or accept as a stated assumption before you publish.
+                </div>
+              </div>
+            </div>
+            <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#8C8A85]">
+              What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
+            </p>
+          </div>
 
           {/* ---- Generate and publish: the only exit (R5), the ruled
                   organs intact: what carries, what stays private, the
@@ -3080,28 +3019,39 @@ export default function ProjectDesk({
                   {published.boardId ? <>: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></> : "."}
                   {published.invited.length > 0 && <> {cap(numWord(published.invited.length))} {published.invited.length === 1 ? "was" : "were"} invited directly.</>}
                 </div>
-                {keptFits.length > 0 && (
+                {/* Living Procurement Canvas Phase 2 correction (14 Aug
+                    2026): this list now renders ONLY what the publish
+                    response itself returned -- `invited` (the real invited
+                    suppliers `executePublish()` selected) and `matched`
+                    (the same `market_report.matched` figure cached onto
+                    this project's frozen PublishedSnapshot) -- never a
+                    freshly recalculated `workspaceFit()` result, which is
+                    exactly what the product rule (and Robert's own
+                    instruction, 14 Aug 2026) requires post-publish: "the
+                    frozen matched and invited suppliers from the published
+                    snapshot, not a freshly recalculated workspace fit." */}
+                {(published.matched.count > 0 || published.invited.length > 0) && (
                   <div className="mt-3">
-                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: ".12em" }}>Your shortlist</p>
-                    <ol className="m-0 list-none p-0">
-                      {keptFits.map((r, i) => (
-                        <li key={r.slug} className="border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
-                          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                            <span className="text-[11px] text-[#8C8A85]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
-                            <a href={`/sase/vendors/${r.slug}/`} className="text-[14px] font-semibold text-[#141414] underline decoration-[#C9C5BC] underline-offset-2 hover:decoration-[#141414]">{r.name}</a>
-                            <span className="text-[12.5px] text-[#6E6C67]">{r.category} · graded {fmtDate(r.last_verified)}</span>
-                            {published.invited.includes(r.slug) && (
-                              <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
-                            )}
-                          </div>
-                          {r.matched.length > 0 && (
-                            <p className="m-0 mt-0.5 pl-6 text-[12.5px] leading-relaxed text-[#5F5D59]">
-                              Evidenced for {r.matched.map((m) => m.label).join(", ")}.
-                            </p>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
+                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: ".12em" }}>Your matches</p>
+                    <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#5F5D59]">
+                      {published.matched.count} matched out of {published.matched.total_evaluated_market} evaluated, from this publish&apos;s own frozen match. {cap(numWord(published.invited.length))} invited directly.
+                    </p>
+                    {published.matched.names.length > 0 && (
+                      <ol className="m-0 list-none p-0">
+                        {published.matched.names.map((name, i) => {
+                          const inv = published.invited.find((v) => v.name === name);
+                          return (
+                            <li key={`${name}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
+                              <span className="text-[11px] text-[#8C8A85]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
+                              <span className="text-[14px] font-semibold text-[#141414]">{name}</span>
+                              {inv && (
+                                <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    )}
                   </div>
                 )}
                 {created?.id && (
@@ -3261,11 +3211,6 @@ export default function ProjectDesk({
                     </p>
                   )
                 )}
-                {removed.length > 0 && (
-                  <p className="m-0 mt-1 text-[12.5px] leading-relaxed text-[#6E6C67]">
-                    Direct invites leave out {numWord(removed.length)} {removed.length === 1 ? "vendor or service provider" : "vendors and service providers"} at your word; the ranked fill tops back up from the next best evidenced. The anonymous public notice is unaffected.
-                  </p>
-                )}
                 {needAuth && (
                   <div className="mt-2 rounded-md bg-[#FBFAF8] p-3">
                     <p className="m-0 mb-1 text-[12.5px] text-[#5F5D59]">
@@ -3308,12 +3253,19 @@ export default function ProjectDesk({
       <ConstellationScene
         market={market}
         fit={fit}
-        published={published}
+        published={published ? { invited: published.invited.map((v) => v.slug) } : null}
         buying={buying}
         added={added}
         namedSlugs={namedSlugs}
         started={started}
-        fitSlugs={fitSlugs}
+        // Living Procurement Canvas Phase 2 correction (14 Aug 2026): the
+        // "kept/ranked" signal the Constellation positions vendors by is
+        // now the REAL, frozen invited-vendor slugs from the publish
+        // response -- the same "matched and invited from the published
+        // snapshot" data the rest of the post-publish panel reads --
+        // never a live, still-recomputing workspaceFit() result (which
+        // this used to be, via the now-retired keptFits/fitSlugs).
+        fitSlugs={published?.invited.map((v) => v.slug) ?? []}
       />
 
       {/* ── THE EDIT SHEET ── bottom-anchored, one focal question with
