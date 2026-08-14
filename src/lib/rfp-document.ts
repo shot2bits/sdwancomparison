@@ -10,6 +10,33 @@ import type { ProjectDetails, RfpSection } from "@/lib/rfp-types";
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import { SECTORS, REGIONS, COMPLIANCE_OPTIONS, labelFor, labelsFor } from "@/lib/notice-options";
 
+/**
+ * Phase 2 (14 Aug 2026): the publication record every gated export must
+ * carry -- project title (already the document's own H1), published
+ * version, publication date, methodology/compiler version, accepted
+ * assumptions and open decisions where applicable, and a content
+ * identifier/hash. Optional so every existing caller (the live preview
+ * page, which renders a draft that has no snapshot yet) is unaffected;
+ * only the gated download route (which requires a published snapshot to
+ * exist at all) supplies this.
+ */
+/** This document-assembly pipeline's own version -- the real "compiler
+ *  version" a published snapshot records (see published-snapshot.ts's
+ *  top-of-file scope note for why this, not a Canvas-compiler version, is
+ *  the honest field to version here). Bump when the section/cover/
+ *  appendix structure changes in a way that would matter to an auditor
+ *  comparing two published documents. */
+export const RFP_DOCUMENT_PIPELINE_VERSION = "1";
+
+export type PublishedDocMeta = {
+  version: number;
+  publishedAt: number;
+  methodologyVersion: string;
+  contentHash: string;
+  assumptions: string[];
+  openDecisions: string[];
+};
+
 /* Buyer-English casing, once at the source (Harry, 24 July 2026: the
    generated document read "Sector: retail ecommerce" and "Regions:
    europe, uk ireland", lowercase in a formal document a supplier
@@ -162,7 +189,7 @@ export function buyerProfileSentence(p: ProjectDetails): string {
 }
 
 /** The full RFP as markdown — used by the gated download. */
-export function buildRfpMarkdown(p: ProjectDetails): string {
+export function buildRfpMarkdown(p: ProjectDetails, opts?: { publishedMeta?: PublishedDocMeta }): string {
   const sections = documentSections(p);
   const stats = sectionStats(p);
   const evidence = evidenceChecklist(p);
@@ -180,7 +207,28 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
   if (p.buyer.regions.length) L.push(`| Regions | ${regionLabelList(p.buyer.regions)} |`);
   if (p.buyer.compliance.length) L.push(`| Compliance | ${complianceLabelList(p.buyer.compliance)} |`);
   L.push(`| Methodology | Netify SASE Methodology v${p.methodology_version} |`);
-  L.push(`| Question bank | Netify question bank v${BANK_VERSION} / ${SASE_EXTENDED_BANK.question_bank_version} |`, "");
+  L.push(`| Question bank | Netify question bank v${BANK_VERSION} / ${SASE_EXTENDED_BANK.question_bank_version} |`);
+  if (opts?.publishedMeta) {
+    const m = opts.publishedMeta;
+    L.push(`| Published version | v${m.version}, ${new Date(m.publishedAt).toISOString().slice(0, 10)} |`);
+    L.push(`| Document content hash | ${m.contentHash.slice(0, 16)} |`);
+  }
+  L.push("");
+  if (opts?.publishedMeta && (opts.publishedMeta.assumptions.length || opts.publishedMeta.openDecisions.length)) {
+    const m = opts.publishedMeta;
+    L.push(`## Publication record`, "");
+    L.push(`This document reflects the exact content published as version ${m.version} on ${new Date(m.publishedAt).toISOString().slice(0, 10)} (content hash ${m.contentHash.slice(0, 16)}). Later edits to the buyer's project do not change this document until the buyer explicitly republishes.`, "");
+    if (m.assumptions.length) {
+      L.push(`**Accepted assumptions:**`, "");
+      for (const a of m.assumptions) L.push(`- ${a}`);
+      L.push("");
+    }
+    if (m.openDecisions.length) {
+      L.push(`**Open decisions at publication:**`, "");
+      for (const d of m.openDecisions) L.push(`- ${d}`);
+      L.push("");
+    }
+  }
 
   // Background: always present — the synthesised buyer profile keeps the
   // sector/estate context in the document even without free-text notes.
@@ -251,7 +299,7 @@ export function buildRfpMarkdown(p: ProjectDetails): string {
  *    the browser-native "save as PDF" path.
  * Content mirrors buildRfpMarkdown exactly; only the container differs.
  */
-export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; autoPrint?: boolean }): string {
+export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; autoPrint?: boolean; publishedMeta?: PublishedDocMeta }): string {
   const sections = documentSections(p);
   const stats = sectionStats(p);
   const evidence = evidenceChecklist(p);
@@ -268,6 +316,10 @@ export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; aut
   if (p.buyer.compliance.length) coverRows.push(["Compliance", complianceLabelList(p.buyer.compliance)]);
   coverRows.push(["Methodology", `Netify SASE Methodology v${p.methodology_version}`]);
   coverRows.push(["Question bank", `Netify question bank v${BANK_VERSION} / ${SASE_EXTENDED_BANK.question_bank_version}`]);
+  if (opts?.publishedMeta) {
+    coverRows.push(["Published version", `v${opts.publishedMeta.version}, ${new Date(opts.publishedMeta.publishedAt).toISOString().slice(0, 10)}`]);
+    coverRows.push(["Document content hash", opts.publishedMeta.contentHash.slice(0, 16)]);
+  }
 
   const B: string[] = [];
   if (opts?.watermark) B.push(`<p class="watermark">${esc(opts.watermark)}</p>`);
@@ -319,6 +371,14 @@ export function buildRfpHtml(p: ProjectDetails, opts?: { watermark?: string; aut
   B.push(`<li>Canonical methodology: https://netify.co.uk/methodology/ · Question bank: https://netify.co.uk/sase/rfp-builder/questions/</li>`);
   B.push(`<li><strong>Human review required.</strong> This document was assembled with AI assistance. Review every question, weighting and mandatory flag against your actual requirement before issuing it.</li>`);
   B.push(`</ul>`);
+
+  if (opts?.publishedMeta) {
+    const m = opts.publishedMeta;
+    B.push(`<h2>Publication record</h2>`);
+    B.push(`<p>This document reflects the exact content published as version ${m.version} on ${esc(new Date(m.publishedAt).toISOString().slice(0, 10))} (content hash ${esc(m.contentHash.slice(0, 16))}). Later edits to the buyer's project do not change this document until the buyer explicitly republishes.</p>`);
+    if (m.assumptions.length) B.push(`<p><strong>Accepted assumptions:</strong></p><ul>${m.assumptions.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>`);
+    if (m.openDecisions.length) B.push(`<p><strong>Open decisions at publication:</strong></p><ul>${m.openDecisions.map((d) => `<li>${esc(d)}</li>`).join("")}</ul>`);
+  }
 
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>${esc(p.title)}</title><style>
   body{font-family:Calibri,Arial,sans-serif;color:#1a1a1a;max-width:800px;margin:2em auto;padding:0 1.5em;line-height:1.5}

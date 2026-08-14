@@ -2,7 +2,7 @@ import { saveProject, saveOpportunity, getOpportunity, newId, kvGetJson, kvSetJs
 import { ensureDistinctNoticeTitle } from "@/lib/notice-title";
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED_ACTION, ENGINE_PUBLISH_CONSENT_TEXT } from "@/lib/project-approvals";
-import { inviteSupplier } from "@/lib/rfp-connect";
+import { inviteSupplier, vendorBySlug } from "@/lib/rfp-connect";
 import { regionHintFromEmail } from "@/lib/region-hint";
 import { buildShortlist } from "@/lib/shortlist-core";
 import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
@@ -13,9 +13,11 @@ import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validat
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
 import { FOLLOW_UP_NOTE, PROMISES_PARAGRAPH } from "@/lib/publish-promises";
-import { sectorLabel } from "@/lib/rfp-document";
+import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
+import { rfpContentSnapshot, contentHash, getLatestPublishedSnapshot, savePublishedSnapshot, type PublishedSnapshot } from "@/lib/published-snapshot";
+import { loadGovernedRevisionState, applyGovernedEvent } from "@/lib/rfp-governed-revision";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
 /**
@@ -366,14 +368,118 @@ async function sendPublishEmails(p: ProjectDetails, ownerEmail: string, invited:
 }
 
 /**
+ * Living Procurement Canvas Phase 2 (14 Aug 2026): a stable, content-
+ * addressable identity for one publish REQUEST -- the same real-world click
+ * (or an exact retry of it: double-click, timeout retry) always produces the
+ * SAME id; a genuinely different request (the buyer edited the draft first,
+ * or asked for a different shortlist_size) always produces a DIFFERENT one.
+ * Built from `rfpContentSnapshot()` (the buyer's actual governed content)
+ * plus the publish OPTIONS that change what gets invited/listed -- never
+ * from volatile fields (timestamps, history) that would make every attempt
+ * look unique regardless of content.
+ */
+function publishEventId(projectId: string, contentSnapshot: Record<string, unknown>, opts: PublishOpts): string {
+  return `publish:${projectId}:${contentHash({
+    content: contentSnapshot,
+    shortlist_size: opts.shortlist_size ?? null,
+    list_on_board: opts.list_on_board ?? null,
+    excluded_vendors: [...(opts.excluded_vendors ?? [])].sort(),
+  })}`;
+}
+
+/** The security-sourcing engine's rulebook version, from the project's own
+ *  latest immutable verdict artefact -- null for non-engine projects, where
+ *  no rulebook applies (see PublishedSnapshot's own doc comment). */
+function rulebookVersionOf(p: ProjectDetails): string | null {
+  if (p.engine !== "security_sourcing") return null;
+  const verdicts = p.engine_data?.verdicts ?? [];
+  if (verdicts.length === 0) return null;
+  return verdicts.reduce((a, b) => (b.version > a.version ? b : a)).verdict.rulebookVersion ?? null;
+}
+
+/** The most recent publish-related consent recorded on the project, if any
+ *  -- for the snapshot's own audit trail. Non-engine publishes without a
+ *  declined-approval acknowledgement record no explicit "publish" consent
+ *  entry today (see executePublish's D5 gate below), so this is honestly
+ *  `null` in that case rather than a fabricated entry. */
+function latestPublishConsent(p: ProjectDetails): PublishedSnapshot["consent"] {
+  const relevant = (p.consents ?? []).filter((c) => c.action === "publish" || c.action === PUBLISH_DESPITE_DECLINED_ACTION);
+  if (relevant.length === 0) return null;
+  const last = relevant.reduce((a, b) => (b.at > a.at ? b : a));
+  return { action: last.action, at: last.at, granted_by: last.granted_by, text: last.text };
+}
+
+/**
+ * Idempotent-replay reconstruction (Robert's Phase 2 idempotency brief):
+ * double-clicking Publish, or retrying after a timeout, with EXACTLY the
+ * same content and options as the last successful publish must never
+ * re-invite, re-list, re-save or re-notify. This rebuilds the SAME
+ * `PublishResult` shape from the durable snapshot instead -- the only live
+ * work it does is re-mint each invited vendor's bearer token, which
+ * `getOrCreateSupplierVendorToken` already makes idempotent and silent (no
+ * email, no new connection).
+ */
+async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnapshot): Promise<PublishResult> {
+  const invited = await Promise.all(
+    snapshot.invited_vendor_ids.map(async (slug) => {
+      const vendor = vendorBySlug(slug);
+      const vendorToken = await getOrCreateSupplierVendorToken(project.id, slug);
+      return {
+        slug,
+        name: vendor?.name ?? slug,
+        supplier_url: `${SITE_URL}/api/rfp/${project.id}/supplier-credential?token=${project.share_token}&vt=${vendorToken}`,
+      };
+    }),
+  );
+  return {
+    published: project,
+    invited,
+    criteria: snapshot.match_criteria,
+    board: {
+      listed: Boolean(snapshot.public_projection.opportunity_id),
+      ...(snapshot.public_projection.opportunity_id ? { opportunity_id: snapshot.public_projection.opportunity_id } : {}),
+      ...(snapshot.public_projection.url ? { url: snapshot.public_projection.url } : {}),
+    },
+    market_report: snapshot.market_report,
+  };
+}
+
+/**
  * Execute a publish: invite the best-fit graded vendors, move the RFP to
  * published (adopting ownership onto sessionEmail when the draft has no
  * owner), set the response window, optionally list on the public board,
  * record marketing consent and send the notifications. Clears any
  * pending_submit intent so the action can never run twice from the same
  * stored instruction.
+ *
+ * Phase 2 (14 Aug 2026): also the publication boundary the product brief
+ * requires -- freezes one authoritative PublishedSnapshot after every
+ * genuinely new publish (see published-snapshot.ts), and short-circuits
+ * entirely, before any side effect, on an exact repeat of the last
+ * successful publish (see replayResultFrom() above and the idempotency
+ * check just inside this function).
  */
 export async function executePublish(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
+  // IDEMPOTENCY (Robert's Phase 2 brief): checked first, before any gate or
+  // side effect. If this exact request (same governed content, same
+  // options) already completed a successful publish, this is a double-
+  // click or a retry after a lost response -- return the durable record of
+  // what already happened, never re-run verification, invites, board
+  // listing, the save or the notification emails. A DIFFERENT request
+  // (the buyer edited the draft, or asked for different options) always
+  // produces a different eventId and falls through to a real publish.
+  const contentSnapshotForEvent = rfpContentSnapshot(project);
+  const publishEventIdForRequest = publishEventId(project.id, contentSnapshotForEvent, opts);
+  const priorGovernedState = await loadGovernedRevisionState(project.id);
+  if (priorGovernedState.lastAppliedEventId === publishEventIdForRequest) {
+    const priorSnapshot = await getLatestPublishedSnapshot(project.id);
+    if (priorSnapshot) return replayResultFrom(project, priorSnapshot);
+    // Governed state says this exact request already applied, but no
+    // snapshot exists (a pre-Phase-2 record, or a snapshot write that
+    // failed after the state commit) -- fall through to a real publish
+    // rather than returning nothing; the snapshot below will be created.
+  }
+
   // Minimum-content gate (Harry's QA, RFP Builder F2): submit was live at
   // zero questions, one click from dispatching an empty requirement to real
   // supplier contacts. The gate is server-side so every client (the page,
@@ -622,7 +728,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   } catch {
     market_report = {
       generated_at: Date.now(),
-      matched: { count: invited.length, names: invited.map((i) => i.name) },
+      matched: { count: invited.length, names: invited.map((i) => i.name), total_evaluated_market: invited.length },
       estimate: null,
       assumptions: [],
       gaps: [],
@@ -633,6 +739,61 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
 
   // Notifications are best effort and never block the publish.
   try { await sendPublishEmails(published, ownerEmail, invited, market_report); } catch { /* best effort */ }
+
+  // Freeze the published snapshot and COMMIT the governed-revision state
+  // (Robert's Phase 2 brief): only now, after every side effect above has
+  // genuinely succeeded, so a request that throws partway through never
+  // poisons the idempotency state -- a real failure stays retryable as a
+  // real new attempt, never silently swallowed as "already applied".
+  // `factsBefore` is the PRIOR snapshot's own frozen content (an honest
+  // diff against what was actually last published, not against whatever
+  // the live draft happened to contain); `factsAfter` is this publish's
+  // content -- both real Record<string,unknown> snapshots, so
+  // resolveGovernedRevision()'s changedFactIds computation is a genuine
+  // diff, never a caller assertion.
+  const priorSnapshotForDiff = await getLatestPublishedSnapshot(project.id);
+  const factsBeforeSnapshot = priorSnapshotForDiff
+    ? rfpContentSnapshot({ ...published, ...priorSnapshotForDiff.frozen_content })
+    : {};
+  const govResult = await applyGovernedEvent(
+    project.id,
+    "publish",
+    publishEventIdForRequest,
+    factsBeforeSnapshot,
+    contentSnapshotForEvent,
+  );
+  if (govResult.applied && govResult.revision) {
+    const snapshot: PublishedSnapshot = {
+      id: newId("snap"),
+      project_id: published.id,
+      document_version: govResult.revision.cycle,
+      compiler_version: RFP_DOCUMENT_PIPELINE_VERSION,
+      methodology_version: published.methodology_version,
+      rulebook_version: rulebookVersionOf(published),
+      published_at: Date.now(),
+      published_by: ownerEmail,
+      consent: latestPublishConsent(published),
+      content_hash: contentHash(contentSnapshotForEvent),
+      frozen_content: { title: published.title, buyer: published.buyer, rfp_sections: published.rfp_sections },
+      public_projection: { opportunity_id: board.opportunity_id ?? null, url: board.url ?? null },
+      private_requirement: { rfp_id: published.id },
+      match_criteria: result.criteria_summary,
+      matched_vendor_ids: result.shortlist.map((v) => v.slug),
+      invited_vendor_ids: invited.map((i) => i.slug),
+      accepted_assumptions: market_report.assumptions,
+      open_decisions: market_report.gaps,
+      market_report,
+    };
+    await savePublishedSnapshot(project.id, snapshot);
+  }
+  // A missing `govResult.applied` here would mean this exact eventId was
+  // somehow already the last-applied one despite failing the read at the
+  // top of this function (a race between two truly concurrent identical
+  // requests -- see rfp-governed-revision.ts's own documented limit). The
+  // publish itself has already genuinely succeeded above either way; only
+  // the SNAPSHOT write is skipped to avoid a duplicate version, matching
+  // this function's idempotency contract rather than throwing after the
+  // buyer's vendors have already been invited.
 
   return { published, invited, criteria: result.criteria_summary, board, market_report };
 }

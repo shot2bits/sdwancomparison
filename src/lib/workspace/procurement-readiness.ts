@@ -96,8 +96,15 @@ export function buildOpenDecisions(input: {
    *  did not guess, and this is where that becomes a visible decision
    *  instead of a silently-dropped signal. */
   operatingModelAmbiguousText?: string | null;
+  /** Phase 2 (14 Aug 2026): non-null means resolveSupportCoverage()
+   *  (procurement-templates.ts) found a genuine support-coverage
+   *  ambiguity -- an explicit "no preference" statement, or a clicked
+   *  24x7 selection conflicting with explicit textual wording -- and
+   *  deliberately did NOT guess. Mirrors operatingModelAmbiguousText
+   *  above exactly. */
+  supportCoverageAmbiguousText?: string | null;
 }): OpenDecision[] {
-  const { requirement, buying, opModel, receipts, clauses, operatingModelAmbiguousText } = input;
+  const { requirement, buying, opModel, receipts, clauses, operatingModelAmbiguousText, supportCoverageAmbiguousText } = input;
   const out: OpenDecision[] = [];
 
   // Section 16.4: a genuine contradiction becomes a visible decision, not
@@ -128,6 +135,25 @@ export function buildOpenDecisions(input: {
       impact: ["price", "delivery", "architecture"],
       conflict: true,
       conflictReason: operatingModelAmbiguousText,
+      affectedClauseIds: affected,
+    });
+  }
+
+  // Phase 2 (14 Aug 2026): a genuine support-coverage ambiguity --
+  // resolveSupportCoverage() (procurement-templates.ts) found either an
+  // explicit "no preference" statement or a clicked 24x7 selection
+  // conflicting with explicit textual wording, and deliberately did not
+  // guess. Robert's brief: "prevent the system from publishing an
+  // inverted support requirement" -- this is that prevention made
+  // visible, mirroring OD-operating-model-ambiguous-correction exactly.
+  if (supportCoverageAmbiguousText) {
+    const affected = clauses.filter((c) => c.templateId === "managed-service-boundary").map((c) => c.id);
+    out.push({
+      id: "OD-support-coverage-ambiguous",
+      question: "Support coverage hours are not clearly resolved. Is 24x7 support required, or business hours only?",
+      impact: ["price", "delivery"],
+      conflict: true,
+      conflictReason: supportCoverageAmbiguousText,
       affectedClauseIds: affected,
     });
   }

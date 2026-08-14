@@ -49,6 +49,7 @@ import {
   mergeReceiptsWithSourceLedger,
   chronologicalHistory,
   operatingModelFromHistory,
+  resolveSupportCoverage,
   type ReceiptLike,
   type ClauseDraft,
 } from "@/lib/workspace/procurement-templates";
@@ -1000,7 +1001,14 @@ export type GovernedEventKind =
   | "noted_add"
   | "noted_remove"
   | "fact_removal"
-  | "requirement_edit";
+  | "requirement_edit"
+  /** Phase 2 (14 Aug 2026): a real production caller -- rfp-publish.ts's
+   *  executePublish() -- now applies this reducer to the RFP/project
+   *  lifecycle, not only Living Canvas facts. `resolveGovernedRevision()`
+   *  itself never branches on `kind` (kind is documentation, not control
+   *  flow), so adding this variant is purely additive and changes no
+   *  existing behaviour for the five kinds above. */
+  | "publish";
 
 export type GovernedEvent = {
   /** Stable, content-addressable identity -- see this section's own
@@ -1109,6 +1117,14 @@ export function compileProcurementDocument(input: ProcurementCompilerInput): Liv
   const history = chronologicalHistory(sourceTurns, receipts);
   const historyModel = operatingModelFromHistory(history);
   const opModel = operatingModelOf(facts) ?? historyModel.model;
+  // Phase 2 (14 Aug 2026): the canonical support-coverage state (24x7 /
+  // business_hours / other_stated / unresolved), converging the buyer's
+  // retained wording AND any explicit noted 24x7 selection into ONE
+  // resolution -- see resolveSupportCoverage()'s own comment. Computed
+  // once here, at the same level `historyModel` is, and threaded down so
+  // managedServiceClause() consumes this single result rather than
+  // re-deriving it.
+  const historyHours = resolveSupportCoverage(history, input.noted ?? []);
 
   const pack = activePack(requirement);
   const flavours = pack ? activeFlavours(pack, corpus) : [];
@@ -1125,6 +1141,7 @@ export function compileProcurementDocument(input: ProcurementCompilerInput): Liv
     flavours,
     sourceTurns,
     noted: input.noted,
+    supportCoverage: historyHours,
   });
 
   const clauses = numberClauses(candidates);
@@ -1158,6 +1175,13 @@ export function compileProcurementDocument(input: ProcurementCompilerInput): Liv
     // contradiction (two model names, no correction signal to pick one)
     // becomes a visible decision, never a silent guess.
     operatingModelAmbiguousText: historyModel.ambiguousText,
+    // Phase 2 (14 Aug 2026): a genuine support-coverage ambiguity (an
+    // explicit "no preference" statement, or a clicked 24x7 selection
+    // conflicting with explicit textual wording) becomes a visible
+    // decision too, never silently resolved either way -- Robert:
+    // "prevent the system from publishing an inverted support
+    // requirement."
+    supportCoverageAmbiguousText: historyHours.ambiguous ? historyHours.ambiguousText : null,
   });
   const bankQuestionCount = responseGroups.reduce((n, g) => n + g.questions.filter((q) => q.source === "bank").length, 0);
   const readiness = buildReadiness({

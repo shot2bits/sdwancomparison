@@ -750,54 +750,120 @@ const MENTION_247_RE = /24\s*\/?\s*7|24x7|round.the.clock|twenty.four.seven/gi;
  *  own right, checked occurrence-wide (there is no mention position to
  *  scope it to). */
 const BUSINESS_HOURS_STANDALONE_RE = /business hours only|standard business hours|office hours only|\b9\s*-\s*5\b|\b9\s*to\s*5\b/i;
+/** A named, specific alternative coverage scheme that is NOT literally
+ *  "business hours" wording and NOT 24/7 -- e.g. "8am to 8pm support",
+ *  "extended hours support". Deliberately narrow (a closed set of
+ *  grammatical shapes, never a sentence list, matching this file's own
+ *  standing rule): anything this does NOT recognise falls through to
+ *  `unresolved` rather than being guessed at, per Robert's Phase 2 brief
+ *  ("never guess ... from a double-negative sentence" -- generalised here
+ *  to "never guess an unnamed coverage scheme"). */
+const OTHER_COVERAGE_STATED_RE = /extended (?:support )?hours|\b\d{1,2}\s*(?:am|:00)?\s*(?:to|-)\s*\d{1,2}\s*(?:pm|:00)?\b/i;
+/** An explicit statement that the buyer has NOT decided between coverage
+ *  options -- a genuine ambiguity, never resolved by guessing (mirrors
+ *  the operating-model resolver's own "no strong preference" handling). */
+const HOURS_NO_PREFERENCE_RE = /no (?:strong )?preference|either way|not (?:yet )?decided|undecided/i;
 /** Negation cues that flip a 24/7 MENTION's own polarity, wherever they
  *  fall in the mention's own clause -- before it ("not on a 24/7 basis"),
  *  after it ("24/7 support is not required"), or wrapping it ("We don't
  *  need 24/7 support"). This is deliberately a small closed set of
  *  grammatical negation words, not a sentence list: any clause containing
- *  BOTH a 24/7 mention and one of these words is read as negative. */
+ *  BOTH a 24/7 mention and one of these words is read as negative --
+ *  UNLESS `hoursMentionPolarity()` below finds a double negative around
+ *  it first (checked FIRST, always, never bypassed). */
 const HOURS_NEGATION_RE = /\b(not|isn'?t|is not|aren'?t|doesn'?t|don'?t|do not|does not|never|no longer|won'?t|will not|without|excluding|except)\b/i;
 const HOURS_REMOVAL_RE = /\b(remove|drop|cancel|stop requiring|no longer (?:want|need|require)s?)\b/i;
 
-export type SupportHoursState = { hours247: boolean; incidentSupport247: boolean; sourceTurnId: string | null };
-
-type HoursOccurrenceResult = { hasSignal: boolean; hours247: boolean; incidentSupport247: boolean };
+/**
+ * Phase 2 (14 Aug 2026), Robert's adversarial finding against 0e3e7ac:
+ * "24/7 support is not optional.", "We cannot operate without 24/7
+ * support.", "We do not accept suppliers without 24/7 support." all
+ * incorrectly resolved hours247=FALSE -- each is a DOUBLE negative
+ * (negating "optional", or negating a want/accept/operate verb in front
+ * of "without X"), which `HOURS_NEGATION_RE`'s single-negation-word test
+ * cannot tell apart from a genuine single negative ("We don't need 24/7
+ * support."). This mirrors the SAME structural fix Round 4 already
+ * applied to operating-model negation (`modelMentionPolarity()` above):
+ * check for an OUTER negation wrapping the inner one FIRST, before the
+ * bare single-negation test ever runs, so a double negative resolves to
+ * asserted rather than being counted twice into a false negative. Never a
+ * fixture-specific sentence match -- a small, closed set of grammatical
+ * shapes, exactly like every other resolver in this file.
+ */
+function hoursMentionPolarity(clauseText: string): "asserted" | "negated" {
+  // "not optional" / "isn't optional": negating "optional" IS the
+  // assertion ("24/7 support is not optional" = 24/7 is required).
+  if (/\bnot\s+optional\b/i.test(clauseText)) return "asserted";
+  // An outer negation of a want/accept/operate verb before "without X"
+  // nets to "X is required" -- the same "without" double-negative shape
+  // modelMentionPolarity() already established, widened here with
+  // "cannot"/"can't" (both real in this domain: "We cannot operate
+  // without 24/7 support.") alongside the existing negation set.
+  if (/\b(?:do not|don'?t|does not|doesn'?t|cannot|can'?t|never|won'?t|will not|shouldn'?t|should not)\b[\s\S]{0,40}\bwithout\b/i.test(clauseText)) {
+    return "asserted";
+  }
+  if (HOURS_REMOVAL_RE.test(clauseText) || HOURS_NEGATION_RE.test(clauseText)) return "negated";
+  return "asserted";
+}
 
 /**
- * THE BUG (Phase 1 checkpoint round 3, item 2, 14 Aug 2026, still present
- * after that round's own fix). Round 3 evaluated a whole-occurrence
- * BUSINESS_HOURS_ONLY_RE (a small, fixed list of negative SENTENCE forms)
- * before a whole-occurrence HOURS_247_RE -- an improvement on check
- * ORDER, but still only as good as its own list of negative sentences.
- * Robert's round-4 reproduction found four more phrasings the list simply
- * did not contain: "We don't need 24/7 support.", "24/7 support is not
- * required.", "Remove 24/7 support.", "We require support, but not on a
- * 24/7 basis." -- each contains the literal "24/7" token with NO listed
- * negative-sentence match, so the broad positive test still won.
- *
- * THE FIX. Mention-LOCAL polarity, not a sentence list. `resolveOccurrenceHours()`
- * finds every 24/7 MENTION's own character position (MENTION_247_RE, a
- * pure mention detector -- 24/7, 24x7, round-the-clock, twenty-four-
- * seven), takes the CLAUSE that mention sits in (`clauseBoundsAround()`,
- * shared with the operating-model resolver below), and asks only "does
- * THIS mention's own clause also contain a negation/removal cue" --
- * `HOURS_NEGATION_RE`/`HOURS_REMOVAL_RE`, a small closed set of
- * grammatical words, never a specific sentence. This reads correctly
- * whether the cue falls BEFORE the mention ("not on a 24/7 basis"),
- * AFTER it ("24/7 support is not required"), or wraps it ("We don't need
- * 24/7 support") -- comma/period/"but" clause boundaries keep an
- * unrelated negation elsewhere in a longer sentence from leaking in. The
- * LAST clause containing a mention decides the occurrence (mirroring
- * "latest signal wins" at the sentence level, same as the chronological
- * reducer does across occurrences). A bare "business hours only" with NO
- * 24/7 token at all is still its own occurrence-wide negative signal
- * (there is no mention to scope it to). Every round-1--3 required form
- * ("24/7 support" -> true, "24/7 incident support" -> incidentSupport247,
- * "not 24/7" -> false, "no longer need 24/7" -> false, "business hours
- * only" -> false) still resolves identically -- see the fixture script's
- * own comment for the full matrix this was checked against.
+ * THE CANONICAL STATE (Phase 2, Robert's brief: "Create a canonical
+ * support-coverage state suitable for publication ... The compiler should
+ * consume that canonical state when available. Typed prompts and clicked
+ * options must converge on the same canonical state."). Four values,
+ * never more inferred than the evidence supports:
+ *  - "24x7": an asserted 24/7-style mention, or an explicit noted 24x7
+ *    selection (see `resolveSupportCoverage()` below for how the two
+ *    converge).
+ *  - "business_hours": an explicit "business hours only"/"9-5"-style
+ *    statement, or a negated 24/7 mention paired with one in the same
+ *    clause.
+ *  - "other_stated": a named, specific alternative scheme that is neither
+ *    of the above (`OTHER_COVERAGE_STATED_RE`).
+ *  - "unresolved": nothing stated yet, OR a 24/7 mention was explicitly
+ *    negated with NO named alternative -- "We don't need 24/7 support."
+ *    tells us what is NOT wanted, not what IS. Guessing "business_hours"
+ *    here would be exactly the kind of invented requirement Robert's
+ *    brief prohibits, so this stays honestly unresolved instead.
  */
-function resolveOccurrenceHours(text: string): HoursOccurrenceResult {
+export type SupportCoverage = "24x7" | "business_hours" | "other_stated" | "unresolved";
+
+export type SupportCoverageResolution = {
+  coverage: SupportCoverage;
+  sourceTurnId: string | null;
+  incidentSupport247: boolean;
+  /** True only for a genuine, structurally-detected ambiguity (two
+   *  provenances in direct conflict, or an explicit "no preference"
+   *  statement) -- never for an ordinary negative or an ordinary
+   *  double-negative, both of which resolve deterministically above.
+   *  Callers MUST surface an OpenDecision when this is true and MUST NOT
+   *  treat `coverage` as a confident requirement (Robert: "prevent the
+   *  system from publishing an inverted support requirement"). */
+  ambiguous: boolean;
+  ambiguousText: string | null;
+};
+
+type OccurrenceCoverageResult = {
+  hasSignal: boolean;
+  coverage: SupportCoverage;
+  incidentSupport247: boolean;
+  ambiguous: boolean;
+  ambiguousText: string | null;
+};
+
+/**
+ * ONE resolver for one occurrence's own support-coverage signal -- the
+ * single source of truth both the legacy boolean (`resolveOccurrenceHours`,
+ * kept for `supportHoursFromHistory`'s existing callers) and the new
+ * canonical four-value state derive from, per Robert's brief: "Do not
+ * continue solving support coverage solely through an endlessly expanding
+ * occurrence-wide negation regex" -- consolidated into one mention-scoped
+ * resolver rather than two parallel implementations that could drift.
+ */
+function resolveOccurrenceCoverage(text: string): OccurrenceCoverageResult {
+  if (HOURS_NO_PREFERENCE_RE.test(text) && (MENTION_247_RE.test(text) || BUSINESS_HOURS_STANDALONE_RE.test(text))) {
+    return { hasSignal: true, coverage: "unresolved", incidentSupport247: false, ambiguous: true, ambiguousText: text };
+  }
   const mentionPositions: number[] = [];
   const g = new RegExp(MENTION_247_RE.source, MENTION_247_RE.flags);
   let m: RegExpExecArray | null;
@@ -806,29 +872,75 @@ function resolveOccurrenceHours(text: string): HoursOccurrenceResult {
     if (m[0].length === 0) g.lastIndex += 1; // never loop forever on a zero-width match
   }
 
-  let result: HoursOccurrenceResult | null = null;
+  let result: OccurrenceCoverageResult | null = null;
   for (const pos of mentionPositions) {
     const { start, end } = clauseBoundsAround(text, pos);
     const clauseText = text.slice(start, end);
-    if (HOURS_REMOVAL_RE.test(clauseText) || HOURS_NEGATION_RE.test(clauseText)) {
-      result = { hasSignal: true, hours247: false, incidentSupport247: false };
+    if (hoursMentionPolarity(clauseText) === "negated") {
+      result = { hasSignal: true, coverage: "unresolved", incidentSupport247: false, ambiguous: false, ambiguousText: null };
     } else {
-      result = { hasSignal: true, hours247: true, incidentSupport247: /incident/i.test(clauseText) };
+      result = { hasSignal: true, coverage: "24x7", incidentSupport247: /incident/i.test(clauseText), ambiguous: false, ambiguousText: null };
     }
   }
   if (result) return result;
-  if (BUSINESS_HOURS_STANDALONE_RE.test(text)) return { hasSignal: true, hours247: false, incidentSupport247: false };
-  return { hasSignal: false, hours247: false, incidentSupport247: false };
+  if (BUSINESS_HOURS_STANDALONE_RE.test(text)) return { hasSignal: true, coverage: "business_hours", incidentSupport247: false, ambiguous: false, ambiguousText: null };
+  if (OTHER_COVERAGE_STATED_RE.test(text)) return { hasSignal: true, coverage: "other_stated", incidentSupport247: false, ambiguous: false, ambiguousText: null };
+  return { hasSignal: false, coverage: "unresolved", incidentSupport247: false, ambiguous: false, ambiguousText: null };
 }
 
+export type SupportHoursState = { hours247: boolean; incidentSupport247: boolean; sourceTurnId: string | null };
+
+/** Legacy boolean projection, kept byte-for-byte call-compatible for every
+ *  existing caller (managedServiceClause's own text-only signal, the
+ *  fixture matrix) -- now DERIVED from the same canonical resolver above
+ *  rather than a second, independently-maintained implementation.
+ *  `hours247` is true only for `coverage === "24x7"`; an ambiguous
+ *  occurrence never resolves true here either (never guessed positive). */
 export function supportHoursFromHistory(history: ChronologicalOccurrence[]): SupportHoursState {
   let state: SupportHoursState = { hours247: false, incidentSupport247: false, sourceTurnId: null };
   for (const occ of history) {
-    const r = resolveOccurrenceHours(occ.text);
+    const r = resolveOccurrenceCoverage(occ.text);
     if (!r.hasSignal) continue;
-    state = { hours247: r.hours247, incidentSupport247: r.incidentSupport247, sourceTurnId: occ.sourceTurnId };
+    state = { hours247: r.coverage === "24x7" && !r.ambiguous, incidentSupport247: r.incidentSupport247, sourceTurnId: occ.sourceTurnId };
   }
   return state;
+}
+
+/**
+ * THE CANONICAL RESOLVER (Phase 2): chronologically reduces the buyer's
+ * retained wording into the four-value `SupportCoverage`, THEN converges
+ * an explicit noted 24x7 selection into the SAME state -- "typed prompts
+ * and clicked options must converge on the same canonical state" (Robert).
+ * A noted selection can only ASSERT 24x7 (mirroring `managedServiceClause`'s
+ * existing OR-style convergence, never retracting a positive the buyer
+ * typed); when it would contradict an EXPLICIT textual statement of
+ * something else (`business_hours`/`other_stated`), that is a genuine
+ * conflict between two distinct provenances and is surfaced as an
+ * ambiguity rather than silently resolved either way. `retained wording`
+ * (the source-turn text itself) remains the provenance callers cite; this
+ * function is the STATE, never a replacement for it.
+ */
+export function resolveSupportCoverage(history: ChronologicalOccurrence[], noted: NotedItem[]): SupportCoverageResolution {
+  let textState: SupportCoverageResolution = { coverage: "unresolved", sourceTurnId: null, incidentSupport247: false, ambiguous: false, ambiguousText: null };
+  for (const occ of history) {
+    const r = resolveOccurrenceCoverage(occ.text);
+    if (!r.hasSignal) continue;
+    textState = { coverage: r.coverage, sourceTurnId: occ.sourceTurnId, incidentSupport247: r.incidentSupport247, ambiguous: r.ambiguous, ambiguousText: r.ambiguousText };
+  }
+  if (textState.ambiguous) return textState;
+
+  const notedAsserts247 = notedTwentyFourSevenSupportIds(noted).length > 0;
+  if (!notedAsserts247) return textState;
+  if (textState.coverage === "business_hours" || textState.coverage === "other_stated") {
+    return {
+      coverage: "unresolved",
+      sourceTurnId: textState.sourceTurnId,
+      incidentSupport247: textState.incidentSupport247,
+      ambiguous: true,
+      ambiguousText: "A 24x7 support selection conflicts with support hours stated in the buyer's own wording.",
+    };
+  }
+  return { coverage: "24x7", sourceTurnId: textState.sourceTurnId, incidentSupport247: textState.incidentSupport247, ambiguous: false, ambiguousText: null };
 }
 
 /** Phase 1 checkpoint round 4, item 1 (14 Aug 2026), THE CRITICAL
@@ -880,6 +992,7 @@ function managedServiceClause(
   history: ChronologicalOccurrence[],
   conflict: { active: boolean; quote: string } | null,
   noted: NotedItem[],
+  coverage: SupportCoverageResolution,
 ): ClauseDraft[] {
   if (!opModel) return [];
   const f = standing(facts).filter((x) => x.path === "procurement.operatingModel").slice(-1)[0];
@@ -893,9 +1006,21 @@ function managedServiceClause(
   const fallbackQuote = opModelOccurrence ? operatingModelPhraseIn(opModel, opModelOccurrence.text) : null;
   const fallbackSourceTurnId = opModelOccurrence?.sourceTurnId ?? null;
   const label = OP_MODEL_LABEL[opModel];
-  const { hours247: hours247FromText, incidentSupport247, sourceTurnId: hoursSourceTurnId } = supportHoursFromHistory(history);
+  // Phase 2 (14 Aug 2026): the canonical support-coverage resolution,
+  // precomputed by the caller (see buildCandidateClauses's own doc
+  // comment) -- replaces the old `supportHoursFromHistory(history) ||
+  // notedHoursIds.length > 0` OR-only merge with the SAME converged
+  // state resolveSupportCoverage() already computed (which itself
+  // performs an equivalent-but-principled OR-merge, PLUS genuine-
+  // conflict detection the old inline logic never had). An ambiguous
+  // resolution never asserts hours247 -- never a guessed positive,
+  // matching Robert's "prevent the system from publishing an inverted
+  // support requirement".
+  const hours247FromText = coverage.coverage === "24x7" && !coverage.ambiguous;
+  const incidentSupport247 = coverage.incidentSupport247 && !coverage.ambiguous;
+  const hoursSourceTurnId = coverage.sourceTurnId;
   const notedHoursIds = notedTwentyFourSevenSupportIds(noted);
-  const hours247 = hours247FromText || notedHoursIds.length > 0;
+  const hours247 = hours247FromText;
   const supportPhrase = incidentSupport247
     ? "including 24/7 incident support"
     : hours247
@@ -1601,17 +1726,27 @@ export function buildCandidateClauses(input: {
    *  Optional and defaulted to `[]` so every existing caller is
    *  unaffected. */
   noted?: NotedItem[];
+  /** Phase 2 (14 Aug 2026): the PRECOMPUTED canonical support-coverage
+   *  resolution (see resolveSupportCoverage()'s own comment), computed
+   *  once by the caller (procurement-document.ts, at the same level
+   *  `opModel` itself is resolved) and consumed here rather than
+   *  re-derived -- one source of truth, never two independently-computed
+   *  copies. Optional: a caller that omits it (every existing fixture)
+   *  gets the SAME result computed locally from `sourceTurns`/`receipts`/
+   *  `noted` below, byte-for-byte -- full backward compatibility. */
+  supportCoverage?: SupportCoverageResolution;
 }): ClauseDraft[] {
   const { facts, requirement, buying, opModel, receipts, removalTargets, pack, flavours, sourceTurns, noted } = input;
   const corpus = [...standing(facts).map((f) => f.quote ?? String(f.value)), ...receipts.map((r) => r.text)].join(" ");
   const ctx: TextTemplateCtx = { corpus, corpusReceipts: receipts, requirement };
   const conflict = detectOperatingModelConflict(receipts);
   const history = chronologicalHistory(sourceTurns ?? [], receipts);
+  const supportCoverage = input.supportCoverage ?? resolveSupportCoverage(history, noted ?? []);
 
   const factDriven = [
     ...complianceClauses(facts),
     ...timelineClause(facts),
-    ...managedServiceClause(facts, opModel, history, conflict, noted ?? []),
+    ...managedServiceClause(facts, opModel, history, conflict, noted ?? [], supportCoverage),
     ...mplsCoexistenceClause(facts, buying),
     ...sectorClauses(pack, flavours),
   ];
