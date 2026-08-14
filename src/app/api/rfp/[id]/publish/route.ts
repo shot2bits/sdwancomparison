@@ -71,7 +71,13 @@ export async function POST(req: Request, ctx: Ctx) {
     }
     return Response.json({ error: (e as Error).message }, { status: 409, headers: cors });
   }
-  const { published, invited, criteria, board, market_report } = result;
+  const { published, invited, criteria, board, market_report, matched_vendors } = result;
 
-  return Response.json({ ok: true, status: published.status, invited, criteria, board, market_report }, { headers: cors });
+  // Round 4 correction (14 Aug 2026), Robert's finding 4: `matched_vendors`
+  // is the REAL buildShortlist() selection (same source as `invited`), not
+  // `market_report.matched.names` (a different, simpler matchSuppliers()
+  // ranking that can genuinely omit an invited vendor). Returning it here
+  // means the immediate post-publish view can render the correct matched
+  // set, not only a later resumed read.
+  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report }, { headers: cors });
 }

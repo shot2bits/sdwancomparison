@@ -140,6 +140,23 @@ export type PublishedSnapshot = {
    *  hidden until this snapshot exists. */
   matched_vendor_ids: string[];
   invited_vendor_ids: string[];
+  /** Round 4 correction (14 Aug 2026), Robert's findings 4 and 5:
+   *  `market_report.matched` below comes from `matchSuppliers()` -- a
+   *  DIFFERENT, simpler ranking than `buildShortlist()`, the one that
+   *  actually selected `matched_vendor_ids`/`invited_vendor_ids` above.
+   *  The two can genuinely diverge (a live-demo run showed an invited
+   *  vendor absent from `market_report.matched.names`'s capped top-8).
+   *  These carry the REAL vendor NAMES for those two id lists, frozen at
+   *  publish time from the SAME buildShortlist()/invite-selection call --
+   *  so "exactly as published" is literally true even if a vendor is
+   *  later renamed or removed from the live dataset, rather than resolved
+   *  against the current directory on every later read. Optional: a
+   *  snapshot frozen before this schema addition has neither; callers
+   *  fall back to `matched_vendor_ids`/`invited_vendor_ids` (always
+   *  present) resolved against the live directory, and label that
+   *  honestly rather than claiming it is frozen. */
+  matched_vendors?: { slug: string; name: string }[];
+  invited_vendors?: { slug: string; name: string; supplier_url: string }[];
   accepted_assumptions: string[];
   open_decisions: string[];
   /** Cached at publish time so every later read (the report route, a

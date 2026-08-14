@@ -105,6 +105,15 @@ export type PublishResult = {
   board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
   /** The instant publish reward: matched suppliers, price band, gaps. Never late because it is synchronous. */
   market_report: MarketReport;
+  /** Round 4 correction (14 Aug 2026), Robert's finding 4: the REAL
+   *  shortlist buildShortlist() selected -- the same one `invited` above
+   *  was drawn from -- not `market_report.matched.names` (a different,
+   *  simpler `matchSuppliers()` ranking that can genuinely omit an
+   *  invited vendor). This is what `matched_vendor_ids`/`matched_vendors`
+   *  freeze onto the published snapshot; returning it here too means the
+   *  publish route's own immediate response can render the correct
+   *  matched set, not only a later resumed read. */
+  matched_vendors: { slug: string; name: string }[];
 };
 
 /** Map the RFP's product scope + operating model onto board scope tags. */
@@ -431,6 +440,12 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
       };
     }),
   );
+  // Round 4 (14 Aug 2026): prefer the snapshot's own frozen names when
+  // this snapshot was written after that schema addition; an older
+  // snapshot resolves the same real matched_vendor_ids against the live
+  // dataset, same pattern `invited` above already used for names.
+  const matchedVendorsReplay =
+    snapshot.matched_vendors ?? snapshot.matched_vendor_ids.map((slug) => ({ slug, name: vendorBySlug(slug)?.name ?? slug }));
   return {
     published: project,
     invited,
@@ -441,6 +456,7 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
       ...(snapshot.public_projection.url ? { url: snapshot.public_projection.url } : {}),
     },
     market_report: snapshot.market_report,
+    matched_vendors: matchedVendorsReplay,
   };
 }
 
@@ -762,6 +778,12 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     factsBeforeSnapshot,
     contentSnapshotForEvent,
   );
+  // Round 4 (14 Aug 2026), Robert's findings 4 & 5: the REAL shortlist
+  // buildShortlist() selected, with vendor NAMES frozen at this exact
+  // moment -- computed once here so the snapshot, the return value below
+  // (which the publish route's immediate response carries), and every
+  // later resumed read all agree on the identical list.
+  const matchedVendorsFrozen = result.shortlist.map((v) => ({ slug: v.slug, name: v.name }));
   if (govResult.applied && govResult.revision) {
     const snapshot: PublishedSnapshot = {
       id: newId("snap"),
@@ -780,6 +802,8 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       match_criteria: result.criteria_summary,
       matched_vendor_ids: result.shortlist.map((v) => v.slug),
       invited_vendor_ids: invited.map((i) => i.slug),
+      matched_vendors: matchedVendorsFrozen,
+      invited_vendors: invited,
       accepted_assumptions: market_report.assumptions,
       open_decisions: market_report.gaps,
       market_report,
@@ -795,5 +819,5 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // this function's idempotency contract rather than throwing after the
   // buyer's vendors have already been invited.
 
-  return { published, invited, criteria: result.criteria_summary, board, market_report };
+  return { published, invited, criteria: result.criteria_summary, board, market_report, matched_vendors: matchedVendorsFrozen };
 }

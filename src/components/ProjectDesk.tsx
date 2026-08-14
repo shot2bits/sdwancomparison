@@ -22,6 +22,7 @@ import {
   type FieldRemoval,
 } from "@/lib/workspace/extract";
 import type { SourceLedgerEntry, SourceLedgerVia } from "@/lib/workspace/source-ledger";
+import type { RfpStatus } from "@/lib/rfp-types";
 import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeStateFromProject } from "@/lib/workspace/source-ledger";
 import { parseCommand, type Command } from "@/lib/workspace/commands";
 import {
@@ -56,6 +57,7 @@ import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options"
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import ConstellationScene from "@/components/ConstellationScene";
+import { hasPublished } from "@/lib/project-machine";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -781,15 +783,39 @@ export default function ProjectDesk({
   const [created, setCreated] = useState<{ id: string; manage: string; test: boolean } | null>(null);
   /** Living Procurement Canvas Phase 2 correction (14 Aug 2026): carries
    *  exactly what the publish response itself returned -- real invited
-   *  suppliers (name + credential link) and the `market_report.matched`
-   *  figure that gets cached onto this project's frozen PublishedSnapshot
-   *  -- so post-publish rendering below reads the frozen result, never a
-   *  fresh `workspaceFit()` recompute (see the fits-panel replacement and
-   *  the "Your matches" block for where this is consumed). */
+   *  suppliers (name + credential link) -- so post-publish rendering below
+   *  reads the frozen result, never a fresh `workspaceFit()` recompute
+   *  (see the fits-panel replacement and the "Your matches" block for
+   *  where this is consumed).
+   *
+   *  Round 4 correction (14 Aug 2026), Robert's findings 3-5: `matched`
+   *  used to be `market_report.matched` (count/names/total). That figure
+   *  comes from `matchSuppliers()`, a DIFFERENT, simpler ranking than the
+   *  `buildShortlist()` call that actually selected `invited` above --
+   *  they can genuinely diverge, so an invited vendor could silently be
+   *  absent from the rendered "matched" list (proven live: Fortinet was
+   *  invited but outside `matchSuppliers()`'s capped top-8 names).
+   *  `matchedVendors` now carries the REAL matched set (the publish
+   *  route's own `matched_vendors`, or on resume the report route's
+   *  `matched_vendor_ids`/`matched_vendors`) -- the same source `invited`
+   *  is drawn from. `totalEvaluatedMarket` is the aggregate figure alone
+   *  (still fine from `market_report.matched.total_evaluated_market`,
+   *  since that number names no vendor and isn't project-specific
+   *  ranking). `frozen`/`namesFrozen` distinguish three real provenance
+   *  states so the JSX below can word each honestly instead of always
+   *  claiming "exactly as published": a live publish is always both
+   *  (frozen=true, namesFrozen=true); a resumed already-published project
+   *  with a snapshot written after this round's schema addition is also
+   *  both true; an older snapshot has frozen=true but namesFrozen=false
+   *  (names resolved from the live directory); a legacy published record
+   *  with no snapshot at all has frozen=false (a fresh recompute). */
   const [published, setPublished] = useState<{
     invited: { slug: string; name: string; supplier_url: string }[];
     boardId?: string;
-    matched: { count: number; names: string[]; total_evaluated_market: number };
+    matchedVendors: { slug: string; name: string }[];
+    totalEvaluatedMarket: number;
+    frozen: boolean;
+    namesFrozen: boolean;
   } | null>(null);
   /** The early save (round 6, Robert's ruling: an option to save when a
    *  verified work email is given). Saving creates the real project
@@ -1114,23 +1140,39 @@ export default function ProjectDesk({
           /* Round 3 correction, item 6: rehydrate `published` durably for
            * an already-published project, from the SAME frozen sources the
            * report route and every export already read from -- never a
-           * fresh recompute. Both calls are owner-gated GET routes already
-           * proven correct at this exact publish boundary (report/route.ts's
-           * own doc comment: "After publication, every reader of this
-           * route sees the SAME frozen market report the snapshot cached
-           * at publish time"); this reuses that guarantee rather than
-           * inventing a new one. Vendor NAMES for the invited slugs come
-           * from the already-public, non-project-specific market directory
-           * (the same one ProjectDesk's own market-count band reads) --
-           * `invited_vendors` on the project is slugs only. Best-effort:
-           * if either fetch fails, resume still succeeds with `published`
-           * left null (today's behaviour), never blocked on this. */
+           * fresh recompute. The report route is an owner-gated GET route
+           * already proven correct at this exact publish boundary
+           * (report/route.ts's own doc comment). Best-effort throughout:
+           * any failure leaves `published` at null (today's behaviour),
+           * never blocking the resume itself.
+           *
+           * Round 4 correction (14 Aug 2026), Robert's findings 1, 2, 4, 5:
+           *   1. Gated on `hasPublished()`, not `status === "published"` --
+           *      that equality undercounted every project that has since
+           *      moved into QA or evaluation (STATUS_FOR_PHASE maps every
+           *      phase from "published" onward onto one of exactly those
+           *      three legacy statuses).
+           *   2/4/5. The report route now says, honestly, whether a real
+           *      snapshot backs this read (`frozen`) and whether the
+           *      vendor NAMES it returned are themselves frozen
+           *      (`matched_vendors`/`invited_vendors` present) or resolved
+           *      from the live directory as a fallback for an older
+           *      snapshot (`matched_vendor_ids`/`invited_vendor_ids`
+           *      only) -- three real provenance states, carried through to
+           *      `published.frozen`/`namesFrozen` so the JSX renders each
+           *      honestly instead of always claiming "exactly as
+           *      published". `matched_vendor_ids` (the REAL buildShortlist()
+           *      selection) replaces `market_report.matched.names` (a
+           *      different, simpler matchSuppliers() ranking that could
+           *      silently omit an invited vendor) as the source of the
+           *      matched vendor SET; `market_report.matched` is now read
+           *      only for its aggregate `total_evaluated_market` figure. */
           // Tracks whether `published` was ACTUALLY rehydrated below, not
-          // merely whether the project's own status says "published" --
+          // merely whether the project's own status crossed publication --
           // the message that follows must never claim matches are showing
           // when the best-effort fetches beneath it came back empty.
           let rehydratedPublished = false;
-          if (proj.status === "published") {
+          if (proj.status && hasPublished(proj.status as RfpStatus)) {
             try {
               const reportUrl = resumeManage
                 ? `/sase/api/rfp/${encodeURIComponent(resumeId)}/report?manage=${encodeURIComponent(resumeManage)}`
@@ -1139,35 +1181,55 @@ export default function ProjectDesk({
               const reportBody = reportRes.ok
                 ? ((await reportRes.json()) as {
                     ok?: boolean;
-                    market_report?: { matched?: { count: number; names: string[]; total_evaluated_market: number } };
+                    frozen?: boolean;
+                    market_report?: { matched?: { total_evaluated_market: number } };
+                    matched_vendor_ids?: string[] | null;
+                    invited_vendor_ids?: string[];
+                    matched_vendors?: { slug: string; name: string }[] | null;
+                    invited_vendors?: { slug: string; name: string; supplier_url: string }[] | null;
                   })
                 : null;
-              const matched = reportBody?.ok ? reportBody.market_report?.matched : undefined;
-              if (matched) {
-                const slugs = Array.isArray(proj.invited_vendors) ? proj.invited_vendors : [];
-                const namesBySlug = new Map<string, string>();
-                if (slugs.length) {
-                  try {
-                    const mRes = await fetch("/sase/api/workspace/market");
-                    const mBody = mRes.ok ? ((await mRes.json()) as { vendors?: Array<{ slug: string; name: string }> }) : null;
-                    for (const v of mBody?.vendors ?? []) namesBySlug.set(v.slug, v.name);
-                  } catch {
-                    /* names degrade to the slug itself below; never blocks resume */
+              if (reportBody?.ok) {
+                const frozen = reportBody.frozen === true;
+                const totalEvaluatedMarket = Number(reportBody.market_report?.matched?.total_evaluated_market ?? 0);
+                const namesFrozen = Boolean(reportBody.matched_vendors && reportBody.invited_vendors);
+                let matchedVendors: { slug: string; name: string }[] = reportBody.matched_vendors ?? [];
+                let invited: { slug: string; name: string; supplier_url: string }[] = reportBody.invited_vendors ?? [];
+                if (!namesFrozen) {
+                  const matchedIds = reportBody.matched_vendor_ids ?? [];
+                  const invitedIds = reportBody.invited_vendor_ids ?? [];
+                  if (matchedIds.length || invitedIds.length) {
+                    let namesBySlug = new Map<string, string>();
+                    try {
+                      const mRes = await fetch("/sase/api/workspace/market");
+                      const mBody = mRes.ok ? ((await mRes.json()) as { vendors?: Array<{ slug: string; name: string }> }) : null;
+                      namesBySlug = new Map((mBody?.vendors ?? []).map((v) => [v.slug, v.name]));
+                    } catch {
+                      /* names degrade to the slug itself below; never blocks resume */
+                    }
+                    matchedVendors = matchedIds.map((slug) => ({ slug, name: namesBySlug.get(slug) ?? slug }));
+                    invited = invitedIds.map((slug) => ({ slug, name: namesBySlug.get(slug) ?? slug, supplier_url: "" }));
                   }
                 }
-                setPublished({
-                  invited: slugs.map((slug) => ({ slug, name: namesBySlug.get(slug) ?? slug, supplier_url: "" })),
-                  matched,
-                });
-                // The post-publish matches section lives inside the same
-                // `phase === "fits"` block as the pre-publish locked panel
-                // (see that block's own doc comment); `phase` defaults to
-                // "live" and is otherwise only switched by the `whoFits`
-                // command, so without this a rehydrated `published` would
-                // sit correctly in state but never actually render until
-                // the buyer happened to trigger that command again.
-                setPhase("fits");
-                rehydratedPublished = true;
+                // Only actually hydrate when there is something real to
+                // show: a genuine snapshot (frozen), or at least a real
+                // matched/invited id set to resolve (a legacy no-snapshot
+                // record can still carry `project.invited_vendors`). A
+                // record with truly nothing leaves `published` at null,
+                // same as today.
+                if (frozen || matchedVendors.length > 0 || invited.length > 0) {
+                  setPublished({ invited, boardId: undefined, matchedVendors, totalEvaluatedMarket, frozen, namesFrozen });
+                  // The post-publish matches section lives inside the same
+                  // `phase === "fits"` block as the pre-publish locked
+                  // panel (see that block's own doc comment); `phase`
+                  // defaults to "live" and is otherwise only switched by
+                  // the `whoFits` command, so without this a rehydrated
+                  // `published` would sit correctly in state but never
+                  // actually render until the buyer happened to trigger
+                  // that command again.
+                  setPhase("fits");
+                  rehydratedPublished = true;
+                }
               }
             } catch {
               /* a durability nicety, never a reason to fail the resume itself */
@@ -1175,7 +1237,7 @@ export default function ProjectDesk({
           }
           say(
             rehydratedPublished
-              ? "Reopened your published project. Your matched and invited vendors and service providers are below, exactly as published."
+              ? "Reopened your published project. Your matched and invited vendors and service providers are below."
               : "Reopened your saved project. Everything you had is still here -- add more, or save or publish when ready.",
           );
         } catch {
@@ -2205,14 +2267,23 @@ export default function ProjectDesk({
       if (res.ok) {
         // Living Procurement Canvas Phase 2 correction (14 Aug 2026): keep
         // the FULL invited records (name, credential link) the route
-        // returned, and the report's own frozen `matched` figure, rather
-        // than discarding them down to bare slugs -- this is what lets
-        // the post-publish panel render the real, frozen result instead
-        // of recomputing anything client-side.
+        // returned rather than discarding them down to bare slugs -- this
+        // is what lets the post-publish panel render the real, frozen
+        // result instead of recomputing anything client-side.
+        //
+        // Round 4 correction (14 Aug 2026), Robert's findings 3-5:
+        // `matchedVendors` now reads `data.matched_vendors` -- the REAL
+        // buildShortlist() selection the publish route now also returns
+        // (same source `invited` is drawn from) -- never
+        // `data.market_report.matched.names` (a different, simpler
+        // matchSuppliers() ranking that can genuinely omit an invited
+        // vendor). A fresh, live publish is always fully frozen: this
+        // exact response IS what the snapshot just wrote.
         const invited: { slug: string; name: string; supplier_url: string }[] = Array.isArray(data.invited) ? data.invited : [];
-        const matched = data.market_report?.matched ?? { count: 0, names: [], total_evaluated_market: 0 };
+        const matchedVendors: { slug: string; name: string }[] = Array.isArray(data.matched_vendors) ? data.matched_vendors : [];
+        const totalEvaluatedMarket = Number(data.market_report?.matched?.total_evaluated_market ?? 0);
         ev("board_listed", { board_id: data.board?.opportunity_id ?? "" });
-        setPublished({ invited, boardId: data.board?.opportunity_id, matched });
+        setPublished({ invited, boardId: data.board?.opportunity_id, matchedVendors, totalEvaluatedMarket, frozen: true, namesFrozen: true });
         setNeedAuth(false);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
       } else if (data.auth_required) {
@@ -3103,28 +3174,52 @@ export default function ProjectDesk({
                 {/* Living Procurement Canvas Phase 2 correction (14 Aug
                     2026): this list now renders ONLY what the publish
                     response itself returned -- `invited` (the real invited
-                    suppliers `executePublish()` selected) and `matched`
-                    (the same `market_report.matched` figure cached onto
-                    this project's frozen PublishedSnapshot) -- never a
+                    suppliers `executePublish()` selected) -- never a
                     freshly recalculated `workspaceFit()` result, which is
                     exactly what the product rule (and Robert's own
                     instruction, 14 Aug 2026) requires post-publish: "the
                     frozen matched and invited suppliers from the published
-                    snapshot, not a freshly recalculated workspace fit." */}
-                {(published.matched.count > 0 || published.invited.length > 0) && (
+                    snapshot, not a freshly recalculated workspace fit."
+                    Round 4 correction (14 Aug 2026), Robert's findings
+                    3-5: `matchedVendors` is now sourced from
+                    `matched_vendor_ids`/`matched_vendors` -- the REAL
+                    `buildShortlist()` selection, the SAME one `invited` is
+                    drawn from -- never `market_report.matched.names` (a
+                    different, simpler `matchSuppliers()` ranking that
+                    could silently omit an invited vendor; proven live
+                    with Fortinet). The "invited" badge below now matches
+                    by SLUG, not name (name equality silently failed for
+                    any vendor whose display name differs even slightly).
+                    A buyer-pinned vendor can still be invited without
+                    being part of Netify's own ranked match (pins are the
+                    buyer's own selection, not a computed match) -- such
+                    entries are rendered in a second "also invited" list
+                    below rather than silently vanishing, matching
+                    Robert's suggestion of a stable union rather than one
+                    list that can quietly drop an invitee. Wording is
+                    conditional on `published.frozen`/`namesFrozen`
+                    (round 4, finding 2): "exactly as published" is only
+                    claimed when a real snapshot backs this read, and
+                    "frozen at the moment of publication" only when the
+                    NAMES themselves are frozen, not resolved from
+                    whatever the live marketplace directory says today. */}
+                {(published.matchedVendors.length > 0 || published.invited.length > 0) && (
                   <div className="mt-3">
                     <p className="m-0 mb-1 text-[10px] font-semibold uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: ".12em" }}>Your matches</p>
                     <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#5F5D59]">
-                      {published.matched.count} matched out of {published.matched.total_evaluated_market} evaluated, from this publish&apos;s own frozen match. {cap(numWord(published.invited.length))} invited directly.
+                      {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
+                      {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
+                      {cap(numWord(published.invited.length))} invited directly.
+                      {published.frozen && !published.namesFrozen && " Vendor names below are resolved from the current marketplace directory, not frozen at the moment of publication."}
                     </p>
-                    {published.matched.names.length > 0 && (
+                    {published.matchedVendors.length > 0 && (
                       <ol className="m-0 list-none p-0">
-                        {published.matched.names.map((name, i) => {
-                          const inv = published.invited.find((v) => v.name === name);
+                        {published.matchedVendors.map((v, i) => {
+                          const inv = published.invited.some((iv) => iv.slug === v.slug);
                           return (
-                            <li key={`${name}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
+                            <li key={`${v.slug}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
                               <span className="text-[11px] text-[#8C8A85]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
-                              <span className="text-[14px] font-semibold text-[#141414]">{name}</span>
+                              <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
                               {inv && (
                                 <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
                               )}
@@ -3133,6 +3228,26 @@ export default function ProjectDesk({
                         })}
                       </ol>
                     )}
+                    {(() => {
+                      const matchedSlugs = new Set(published.matchedVendors.map((v) => v.slug));
+                      const invitedOnly = published.invited.filter((v) => !matchedSlugs.has(v.slug));
+                      if (invitedOnly.length === 0) return null;
+                      return (
+                        <div className="mt-2">
+                          <p className="m-0 mb-1 text-[11px] text-[#8C8A85]">
+                            Also invited (your own pinned {invitedOnly.length === 1 ? "vendor" : "vendors"}, not part of the ranked match):
+                          </p>
+                          <ol className="m-0 list-none p-0">
+                            {invitedOnly.map((v, i) => (
+                              <li key={`${v.slug}-invited-only-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2 first:border-t-0 first:pt-0">
+                                <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
+                                <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
                 {created?.id && (

@@ -52,6 +52,28 @@ export function projectPhase(p: ProjectDetails): ProjectPhase {
   return p.phase ?? PHASE_FOR_LEGACY_STATUS[p.status];
 }
 
+/**
+ * Living Procurement Canvas Phase 2 round 4 (14 Aug 2026), Robert's
+ * finding 1: STATUS_FOR_PHASE above already maps every phase from
+ * "published" onward -- including the post-evaluation phases (awarded,
+ * transacting, complete, closed), which have no distinct legacy status of
+ * their own -- onto one of exactly three legacy statuses: "published",
+ * "qa", "evaluation". Several call sites (this fix's own two, and others
+ * pre-dating it) tested `status === "published"` alone, which is true
+ * only for the FIRST of those three -- so a project that has moved into
+ * QA or evaluation, despite having unquestionably crossed the publication
+ * boundary, was treated as if it never published at all. One shared
+ * predicate, so every future caller asks the same question the same way.
+ */
+export const POST_PUBLISH_STATUSES: readonly RfpStatus[] = ["published", "qa", "evaluation"];
+
+/** True once a project has genuinely crossed the publication boundary --
+ *  the single question every "is this published yet" call site should be
+ *  asking, in place of `status === "published"`. */
+export function hasPublished(status: RfpStatus): boolean {
+  return (POST_PUBLISH_STATUSES as readonly string[]).includes(status);
+}
+
 /* ------------------------------------------------------------------ */
 /* Errors                                                              */
 /* ------------------------------------------------------------------ */
