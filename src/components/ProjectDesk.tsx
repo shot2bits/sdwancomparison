@@ -1074,6 +1074,21 @@ export default function ProjectDesk({
             test?: boolean;
             source_ledger?: SourceLedgerEntry[];
             engine_data?: { requirement?: unknown } | null;
+            // Living Procurement Canvas Phase 2, round 3 correction (14 Aug
+            // 2026), Robert's item 6: `status`/`invited_vendors` were
+            // previously omitted from this type -- not because the route
+            // doesn't return them (GET /api/rfp/[id] returns the full
+            // owner-gated project), but because nothing here read them.
+            // Resuming an ALREADY-PUBLISHED project therefore left
+            // `published` at its initial `null` (it is only ever set by
+            // signAndPublish()'s own response handler), so a returning
+            // buyer saw the pre-publish locked outcome panel again instead
+            // of their frozen matches -- not an identity leak (the fit API
+            // redaction below is unconditional regardless of this gap),
+            // but a real durability gap in "display the frozen matched and
+            // invited suppliers from the published snapshot".
+            status?: string;
+            invited_vendors?: string[];
           };
           const resumeState = resumeStateFromProject(proj);
           if (!resumeState) {
@@ -1096,7 +1111,73 @@ export default function ProjectDesk({
           // unrelated later scope change is still detected correctly.
           setCreated({ id: resumeId, manage: resumeManage ?? "", test: Boolean(proj.test) });
           savedSecurity.current = true;
-          say("Reopened your saved project. Everything you had is still here -- add more, or save or publish when ready.");
+          /* Round 3 correction, item 6: rehydrate `published` durably for
+           * an already-published project, from the SAME frozen sources the
+           * report route and every export already read from -- never a
+           * fresh recompute. Both calls are owner-gated GET routes already
+           * proven correct at this exact publish boundary (report/route.ts's
+           * own doc comment: "After publication, every reader of this
+           * route sees the SAME frozen market report the snapshot cached
+           * at publish time"); this reuses that guarantee rather than
+           * inventing a new one. Vendor NAMES for the invited slugs come
+           * from the already-public, non-project-specific market directory
+           * (the same one ProjectDesk's own market-count band reads) --
+           * `invited_vendors` on the project is slugs only. Best-effort:
+           * if either fetch fails, resume still succeeds with `published`
+           * left null (today's behaviour), never blocked on this. */
+          // Tracks whether `published` was ACTUALLY rehydrated below, not
+          // merely whether the project's own status says "published" --
+          // the message that follows must never claim matches are showing
+          // when the best-effort fetches beneath it came back empty.
+          let rehydratedPublished = false;
+          if (proj.status === "published") {
+            try {
+              const reportUrl = resumeManage
+                ? `/sase/api/rfp/${encodeURIComponent(resumeId)}/report?manage=${encodeURIComponent(resumeManage)}`
+                : `/sase/api/rfp/${encodeURIComponent(resumeId)}/report`;
+              const reportRes = await fetch(reportUrl);
+              const reportBody = reportRes.ok
+                ? ((await reportRes.json()) as {
+                    ok?: boolean;
+                    market_report?: { matched?: { count: number; names: string[]; total_evaluated_market: number } };
+                  })
+                : null;
+              const matched = reportBody?.ok ? reportBody.market_report?.matched : undefined;
+              if (matched) {
+                const slugs = Array.isArray(proj.invited_vendors) ? proj.invited_vendors : [];
+                const namesBySlug = new Map<string, string>();
+                if (slugs.length) {
+                  try {
+                    const mRes = await fetch("/sase/api/workspace/market");
+                    const mBody = mRes.ok ? ((await mRes.json()) as { vendors?: Array<{ slug: string; name: string }> }) : null;
+                    for (const v of mBody?.vendors ?? []) namesBySlug.set(v.slug, v.name);
+                  } catch {
+                    /* names degrade to the slug itself below; never blocks resume */
+                  }
+                }
+                setPublished({
+                  invited: slugs.map((slug) => ({ slug, name: namesBySlug.get(slug) ?? slug, supplier_url: "" })),
+                  matched,
+                });
+                // The post-publish matches section lives inside the same
+                // `phase === "fits"` block as the pre-publish locked panel
+                // (see that block's own doc comment); `phase` defaults to
+                // "live" and is otherwise only switched by the `whoFits`
+                // command, so without this a rehydrated `published` would
+                // sit correctly in state but never actually render until
+                // the buyer happened to trigger that command again.
+                setPhase("fits");
+                rehydratedPublished = true;
+              }
+            } catch {
+              /* a durability nicety, never a reason to fail the resume itself */
+            }
+          }
+          say(
+            rehydratedPublished
+              ? "Reopened your published project. Your matched and invited vendors and service providers are below, exactly as published."
+              : "Reopened your saved project. Everything you had is still here -- add more, or save or publish when ready.",
+          );
         } catch {
           say("That project link didn't load, so this is starting fresh instead.");
         } finally {

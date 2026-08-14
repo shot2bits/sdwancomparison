@@ -209,19 +209,24 @@ function partB() {
     "[B5] `dropName`/`keepName` no longer has a vendor-ranking-matching branch",
   );
 
-  /* ---- B6: post-publish rendering is sourced from the publish route's  */
-  /* OWN response (`published.invited` / `published.matched`), never a    */
-  /* fresh client-side recompute -- `published` is set in exactly one     */
-  /* place, and that place reads `data.invited` / `data.market_report`    */
-  /* off the publish route's JSON, not off `fit`/`rankedFits`.            */
+  /* ---- B6: post-publish rendering is sourced from a publish route's OWN */
+  /* response (`published.invited` / `published.matched`), never a fresh  */
+  /* client-side recompute. `published` is legitimately set from exactly  */
+  /* TWO places -- the live `signAndPublish()` response handler, and the  */
+  /* round-3 durable resume-hydration path (Robert's independent audit,   */
+  /* item 6: a reopened already-published project used to leave           */
+  /* `published` at null, since it was only ever set by the live publish  */
+  /* click) -- and both read `data.market_report`/`report.market_report`, */
+  /* never `fit`/`rankedFits`. See validate-published-resume-hydration.ts */
+  /* for the resume path's own dedicated fixtures.                        */
   const setPublishedCalls = desk.match(/setPublished\(/g) ?? [];
-  expect(setPublishedCalls.length === 1, `[B6] \`setPublished(\` is called from exactly one place (found ${setPublishedCalls.length})`);
+  expect(setPublishedCalls.length === 2, `[B6] \`setPublished(\` is called from exactly two places -- signAndPublish and resume hydration (found ${setPublishedCalls.length})`);
   const signAndPublishMatch = desk.match(/const invited: [\s\S]*?setPublished\(\{[\s\S]*?\}\);/);
-  expect(signAndPublishMatch !== null, "[B6] the publish response handler that sets `published` is found");
+  expect(signAndPublishMatch !== null, "[B6] the live publish response handler that sets `published` is found");
   const signAndPublishSrc = signAndPublishMatch?.[0] ?? "";
   expect(/data\.invited/.test(signAndPublishSrc), "[B6] `invited` is read from the publish route's own `data.invited`");
   expect(/data\.market_report\?\.matched/.test(signAndPublishSrc), "[B6] `matched` is read from the publish route's own `data.market_report.matched`");
-  expect(!/rankedFits|keptFits|fitSlugs/.test(signAndPublishSrc), "[B6] the publish response handler does not fold in any locally-computed fit/rank data");
+  expect(!/rankedFits|keptFits|fitSlugs/.test(signAndPublishSrc), "[B6] the live publish response handler does not fold in any locally-computed fit/rank data");
 
   /* ---- B7: the locked outcome panel (`phase === "fits"`), including    */
   /* its post-publish "Your matches" section, contains none of the        */
