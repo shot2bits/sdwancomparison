@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ProjectDesk from "@/components/ProjectDesk";
 import JourneyStrip from "@/components/JourneyStrip";
 import CapabilityBlock from "@/components/CapabilityBlock";
+import CollapsibleHero from "@/components/CollapsibleHero";
 import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchema } from "@/lib/structured-data";
 import { getAllVendors } from "@/lib/vendors";
 
@@ -155,26 +156,7 @@ export default function Page() {
             supporting paragraph, trust paragraph, input: nothing else.
             Twin of home, same fluid clamps; gap before the input is
             trust mb 12px + ProjectDesk's mt-10 = 52px. */}
-        <h1
-          id="page-h1"
-          className="mx-auto max-w-[1150px] text-center"
-          style={{ fontSize: "clamp(38px, 2.5vw + 24px, 58px)", lineHeight: 1.1, fontWeight: 650, letterSpacing: "-0.015em", color: "#18181b", margin: "0 auto 32px" }}
-        >
-          {ENGINE_H1}
-        </h1>
-        <p
-          id="page-subhead"
-          className="mx-auto text-center"
-          style={{ fontSize: "clamp(20px, 1vw + 16px, 26px)", lineHeight: 1.55, color: "#52525b", margin: "0 auto 22px" }}
-        >
-          {ENGINE_PROMISE}
-        </p>
-        <p
-          className="mx-auto text-center"
-          style={{ fontSize: "clamp(16.5px, 0.5vw + 14px, 20px)", lineHeight: 1.6, color: "#71717a", margin: "0 auto 12px" }}
-        >
-          {ENGINE_VALUE}
-        </p>
+        <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} />
 
         <ProjectDesk afterPrompt={<><JourneyStrip /><CapabilityBlock /></>} />
       </main>

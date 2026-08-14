@@ -8,7 +8,9 @@
     "build": "npm run validate && next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "validate": "tsx scripts/apply-vendor-overrides.ts && tsx scripts/validate-vendors.ts && tsx scripts/validate-continuations.ts && tsx scripts/validate-instruments.ts && tsx scripts/validate-notice-titles.ts && tsx scripts/validate-labels.ts && tsx scripts/verify-fact-ledger-reliability-gate.ts && tsx scripts/validate-procurement-document.ts && tsx scripts/validate-procurement-canvas-corrections.ts && tsx scripts/validate-living-canvas-phase2-lifecycle.ts && tsx scripts/validate-pre-publish-vendor-disclosure.ts && tsx scripts/validate-published-resume-hydration.ts && tsx scripts/validate-rfp-builder-match-disclosure.ts"
+    "validate": "tsx scripts/apply-vendor-overrides.ts && tsx scripts/validate-vendors.ts && tsx scripts/validate-continuations.ts && tsx scripts/validate-instruments.ts && tsx scripts/validate-notice-titles.ts && tsx scripts/validate-labels.ts && tsx scripts/verify-fact-ledger-reliability-gate.ts && tsx scripts/validate-procurement-document.ts && tsx scripts/validate-procurement-canvas-corrections.ts && tsx scripts/validate-living-canvas-phase2-lifecycle.ts && tsx scripts/validate-pre-publish-vendor-disclosure.ts && tsx scripts/validate-published-resume-hydration.ts && tsx scripts/validate-rfp-builder-match-disclosure.ts && tsx scripts/validate-living-procurement-os-stage-a.ts",
+    "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
+    "validate:ui:setup": "playwright install chromium"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
@@ -24,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "playwright": "^1.56.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.3",
     "typescript": "^5",
