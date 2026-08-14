@@ -306,3 +306,39 @@ a:focus-visible {
   font-weight: 500;
   text-decoration: none;
 }
+
+/* Living Procurement OS · Phase 3 Stage A (14 Aug 2026): the aesthetic
+ * constitution's own change rule (brief Section 5.6) — "changes pulse
+ * briefly (250-400ms) then settle to a normal state; a reduced-motion
+ * preference gets a static border and textual change label instead of
+ * an animation." One shared class so every projection (clause list,
+ * supplier pack, evaluation) marks a changed row identically. The
+ * amber pulse fades to nothing (not to the highlight the existing
+ * changedSlots mechanism uses elsewhere in this file's sibling
+ * component — this is a NEW, separate surface, so it gets its own
+ * class rather than reusing that inline style). */
+@keyframes ldoc-pulse {
+  0% { background-color: rgba(245, 162, 27, 0.22); }
+  100% { background-color: transparent; }
+}
+.ldoc-changed {
+  animation: ldoc-pulse 350ms ease-out;
+  box-shadow: inset 2px 0 0 #f5a21b;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ldoc-changed {
+    animation: none;
+    border-left: 3px solid #f5a21b;
+    box-shadow: none;
+  }
+}
+
+/* Provenance dots (brief Section 5.6): green = buyer's own words, orange
+ * = Netify-derived, purple = sector/compliance rule. buyer_override
+ * (a buyer statement that knowingly overrides a sector default) reuses
+ * the buyer green — it is still the buyer's own words, just recorded as
+ * an override rather than a first assertion. */
+.ldoc-dot-buyer { background: #2d6a4f; }
+.ldoc-dot-buyer_override { background: #2d6a4f; }
+.ldoc-dot-netify { background: #b45309; }
+.ldoc-dot-sector { background: #6d28d9; }

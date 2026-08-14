@@ -58,6 +58,25 @@ import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
 import ConstellationScene from "@/components/ConstellationScene";
 import { hasPublished } from "@/lib/project-machine";
+/** Living Procurement OS · Phase 3 Stage A (14 Aug 2026): wires the
+ *  existing, pure `compileProcurementDocument()` compiler into this real
+ *  production interface -- see LivingProcurementCanvas's own doc comment
+ *  for the render-side half of this. Nothing here changes what the
+ *  compiler does; this file only supplies its inputs from the desk's own
+ *  already-standing state (facts/requirement/verdict/noted/rfiSet/
+ *  instrument/receipts/sourceTurns -- all pre-existing) and renders its
+ *  output. No second fact store: `compiledDocument` is derived, never
+ *  independently mutated. */
+import {
+  compileProcurementDocument,
+  factSnapshotOf,
+  resolveGovernedRevision,
+  INITIAL_GOVERNED_REVISION_STATE,
+  type LivingProcurementDocument,
+  type CompilerRevision,
+  type GovernedEvent,
+} from "@/lib/workspace/procurement-document";
+import LivingProcurementCanvas, { type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -304,8 +323,25 @@ const PLACEHOLDER_RESUMING = "Loading your saved project…";
 type ThreadMsg = { who: "you" | "netify"; text: string };
 const THREAD_WELCOME =
   "Describe what you are buying, in your own words. Every sentence you write fills in the statement below, or answer any open line in it directly.";
-const THREAD_NO_CATCH =
-  "I did not catch anything new in that; your words are kept with your notes. Try naming a number of sites, a deadline, what you run today, or who should operate it, or answer any open line in the statement.";
+/** Phase 3 Stage A correction round (Robert, 14 Aug 2026), defect #3
+ *  reproduction: send()'s final branch below keeps the message as a
+ *  receipt EVERY time it is reached (either per-unplaced-clause, or this
+ *  constant's own whole-message fallback) -- and the deterministic
+ *  compiler (buildCandidateClauses, procurement-templates.ts) reads
+ *  those same receipts and, in the ordinary case, DOES derive a real
+ *  testable requirement clause from them (a named template match, or the
+ *  generic Additional-Requirement fallback for anything left over). The
+ *  previous message here ("I did not catch anything new in that...")
+ *  was therefore false whenever that happened -- most visibly for
+ *  Prompt C's UK-residency sentence, which lands no structured FACT (no
+ *  site count, no deadline) but plainly IS caught as a new, named,
+ *  mandatory clause with its own gate and open decision. This message
+ *  only ever claims what is unconditionally true: the words were kept,
+ *  and where to look for the result -- never "nothing new," which
+ *  requires knowing the compiler's own downstream template match and
+ *  this callback cannot see that synchronously. */
+const THREAD_KEPT_UNPLACED =
+  "Kept in your own words -- see the statement below for how it landed. Try naming a number of sites, a deadline, what you run today, or who should operate it, or answer any open line in the statement.";
 
 /** Small counts in words, the estate's register. */
 const NUM_WORDS = [
@@ -843,6 +879,49 @@ export default function ProjectDesk({
   const factsRef = useRef<WorkspaceFact[]>([]);
   const receiptsRef = useRef<Receipt[]>([]);
   const sourceTurnsRef = useRef<SourceTurn[]>([]);
+  /** Phase 3 Stage A: the last compiled document, used ONLY so the next
+   *  compile can attribute a real added/updated/removed change set
+   *  against it (`compileProcurementDocument`'s own `previousDocument`
+   *  parameter) -- never read for anything else, and never itself the
+   *  source of truth (that's still `facts`/`requirement`/etc. below).
+   *  Updated in an effect AFTER the compile it came from has committed
+   *  (see `compiledDocument` below), not mutated inside the memo itself,
+   *  so a StrictMode double-invoke of the memo never sees a half-updated
+   *  ref. */
+  const previousProcurementDocumentRef = useRef<LivingProcurementDocument | null>(null);
+  /** Phase 3 Stage A correction round (Robert, 14 Aug 2026): explicit
+   *  governed-revision wiring, replacing the legacy fallback that bumped
+   *  `compiledDocument.version` once per genuine facts-or-receipts diff.
+   *  The bug that fix produced: ONE buyer submission (e.g. typing Prompt
+   *  A) triggers SEVERAL distinct `applyMerge()`/`applyRemovals()` calls
+   *  across a few React renders -- the main extraction's own merge, then
+   *  the sector-pack effect's own follow-up merge (reacting to the
+   *  just-changed facts), sometimes more -- each producing a genuinely
+   *  different facts snapshot, so legacy-fallback mode bumped the version
+   *  once per call instead of once per buyer action ("V4 after one
+   *  prompt").
+   *
+   *  THE FIX. A short settle-debounce window, opened by the FIRST
+   *  applyMerge()/applyRemovals() call since the last settle and extended
+   *  by every subsequent one, closes after 400ms of quiet (comfortably
+   *  longer than the synchronous sector-pack effect's own follow-up
+   *  render and the async verdict-assessment microtask, both of which
+   *  resolve far faster than that) and resolves EXACTLY ONE
+   *  `resolveGovernedRevision()` event for the whole burst -- regardless
+   *  of how many individual merge/removal calls happened inside it. Tab
+   *  switches, renders, hydration and identical recompilation never call
+   *  `beginOrExtendSubmission()` at all, so they can never open a window
+   *  or consume a revision. `governedRevisionRef`/`submissionSeqRef`
+   *  start at their module-level zero state on every fresh mount (a new
+   *  project, or "Start again", both fully reload the page -- see the
+   *  "Start again" button below), so a new project never inherits a
+   *  revision count from a previous one. */
+  const governedRevisionRef = useRef(INITIAL_GOVERNED_REVISION_STATE);
+  const [currentRevision, setCurrentRevision] = useState<CompilerRevision | null>(null);
+  const pendingSubmissionRef = useRef<{ eventId: string; factsBefore: Record<string, unknown> } | null>(null);
+  const submissionSeqRef = useRef(0);
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [procurementView, setProcurementView] = useState<ProcurementView>("document");
   const assertedPacks = useRef<Set<string>>(new Set());
   const acceptedGaps = useRef<Set<string>>(new Set());
   /** Which scope class the saved record was created under: a class flip
@@ -915,15 +994,57 @@ export default function ProjectDesk({
     setChangedSlots([...slots]);
   }, []);
 
+  /** Opens the settle window (capturing `factsBefore` from the CURRENT,
+   *  pre-mutation `factsRef`) only if none is already open -- a second,
+   *  third, ... call inside the same burst extends the window without
+   *  overwriting the original `factsBefore`, so the eventual settle diffs
+   *  the WHOLE burst against its true starting point, not just its last
+   *  leg. Must be called BEFORE the caller mutates `factsRef.current`. */
+  const beginOrExtendSubmission = useCallback(() => {
+    if (!pendingSubmissionRef.current) {
+      submissionSeqRef.current += 1;
+      pendingSubmissionRef.current = { eventId: `submission:${submissionSeqRef.current}`, factsBefore: factSnapshotOf(factsRef.current) };
+    }
+  }, []);
+
+  /** (Re)starts the 400ms quiet-period timer. When it finally fires with
+   *  no further activity, the whole burst resolves as EXACTLY ONE
+   *  governed event -- "one buyer submission equals one revision,
+   *  regardless of how many React state updates it causes." 400ms
+   *  comfortably covers the synchronous sector-pack follow-up effect and
+   *  the async (but non-blocking, no real I/O) verdict-assessment
+   *  microtask, both of which settle far faster in practice. */
+  const scheduleSettle = useCallback(() => {
+    if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+    settleTimerRef.current = setTimeout(() => {
+      const pending = pendingSubmissionRef.current;
+      pendingSubmissionRef.current = null;
+      settleTimerRef.current = null;
+      if (!pending) return;
+      const event: GovernedEvent = {
+        eventId: pending.eventId,
+        kind: "prompt_cycle",
+        seq: submissionSeqRef.current,
+        factsBefore: pending.factsBefore,
+        factsAfter: factSnapshotOf(factsRef.current),
+      };
+      const result = resolveGovernedRevision(governedRevisionRef.current, event);
+      governedRevisionRef.current = result.state;
+      if (result.applied) setCurrentRevision(result.revision);
+    }, 400);
+  }, []);
+
   const applyMerge = useCallback((updates: FieldUpdate[], source: "extract" | "answer" | "link") => {
     const allowed = updates.filter((u) => !(u.provenance === "inferred" && neverReinfer.current.has(nrKey(u.path, u.value))));
+    beginOrExtendSubmission();
     cycleRef.current += 1;
     const m = mergeUpdates(factsRef.current, allowed, cycleRef.current, source);
     factsRef.current = m.facts;
     setFacts(m.facts);
     if (m.changed.length) setSaveDirty(true);
+    scheduleSettle();
     return m;
-  }, []);
+  }, [beginOrExtendSubmission, scheduleSettle]);
 
   /** Seventh amendment (13 Aug 2026): the counterpart to applyMerge above,
    *  for explicit retractions rather than additions. Two effects, always
@@ -941,6 +1062,7 @@ export default function ProjectDesk({
    *  landed facts. */
   const applyRemovals = useCallback((removals: FieldRemoval[]): string[] => {
     if (!removals.length) return [];
+    beginOrExtendSubmission();
     const labels: string[] = [];
     let struckAny = false;
     const ids = new Set(removals.map((r) => factId(r.path, r.value)));
@@ -959,8 +1081,9 @@ export default function ProjectDesk({
     });
     for (const r of removals) labels.push(humaniseWorkspaceValue(r.path, r.value).toLowerCase());
     setSaveDirty(true);
+    scheduleSettle();
     return [...new Set(labels)];
-  }, []);
+  }, [beginOrExtendSubmission, scheduleSettle]);
 
   /* ---- Derivations off the ledger ---- */
   /** Sixth amendment: merges the resumed project's immutable requirement
@@ -981,6 +1104,18 @@ export default function ProjectDesk({
   const securityScope = buying === "managed_security" || buying === null;
   const live = standing(facts);
   const started = facts.length > 0 || noted.length > 0;
+  /** Phase 3 Stage A correction round (Robert, 14 Aug 2026), item 8: a
+   *  small, undirected signal for the marketing hero (a SIBLING
+   *  component under the same Server Component page, not a child of
+   *  this one -- see CollapsibleHero.tsx's own doc comment) to compact
+   *  itself once a project has genuinely started, without lifting
+   *  `started` into the Server Component page or threading a prop across
+   *  an unrelated boundary. Fires once, the first time `started` becomes
+   *  true (never on the reverse transition -- `started` never reverts
+   *  within a session; "Start again" fully reloads the page instead). */
+  useEffect(() => {
+    if (started) window.dispatchEvent(new Event("pd:project-started"));
+  }, [started]);
   const meter = meterOf(facts, verdict);
   const brief = useMemo(() => briefModel({ facts, verdict }), [facts, verdict]);
 
@@ -1530,6 +1665,70 @@ export default function ProjectDesk({
   const instrument = earnedInstrument(instrumentLadder);
   const publishTitle = brief.title;
 
+  /** Phase 3 Stage A correction round (Robert, 14 Aug 2026): the single
+   *  compiled object every projection below (Living document / Supplier
+   *  pack / Evaluation) reads -- REAL compiler output over this session's
+   *  own live state, never mockup content. `revision: currentRevision`
+   *  wires the EXPLICIT `resolveGovernedRevision()` event contract
+   *  (`beginOrExtendSubmission()`/`scheduleSettle()` above), replacing
+   *  Stage A's original legacy-fallback mode: `compileProcurementDocument`
+   *  now bumps `version` exactly once per settled `currentRevision.cycle`
+   *  change, not once per intermediate facts-or-receipts diff -- see
+   *  `resolveVersion()`'s own `revision !== undefined` branch
+   *  (procurement-document.ts). A render, a tab switch, hydration or an
+   *  identical recompile never changes `currentRevision` at all (nothing
+   *  here calls `setCurrentRevision` outside `scheduleSettle()`'s own
+   *  settle callback), so none of them can consume a revision. */
+  const compiledDocument = useMemo<LivingProcurementDocument>(
+    () =>
+      compileProcurementDocument({
+        facts,
+        requirement,
+        verdict,
+        noted,
+        rfiSet,
+        instrument,
+        receipts,
+        sourceTurns,
+        previousDocument: previousProcurementDocumentRef.current,
+        revision: currentRevision,
+      }),
+    [facts, requirement, verdict, noted, rfiSet, instrument, receipts, sourceTurns, currentRevision],
+  );
+  /** Freezes `previousProcurementDocumentRef` until a NAMED revision
+   *  actually lands (Robert: "the change ribbon compares complete
+   *  buyer-event snapshots, not intermediate renders"). Without this
+   *  guard, this effect would run after EVERY compile -- including the
+   *  intermediate, still-settling renders inside an open submission
+   *  window -- so the next real revision's own change-ribbon diff would
+   *  compare against the LAST INTERMEDIATE render rather than the last
+   *  NAMED version. Content still updates live during settling (the
+   *  document itself is always the freshest compile); only the
+   *  change-ribbon's own comparison baseline holds until a cycle change
+   *  actually lands. */
+  useEffect(() => {
+    const prevCycle = previousProcurementDocumentRef.current?.lastRevision?.cycle ?? null;
+    const thisCycle = compiledDocument.lastRevision?.cycle ?? null;
+    /* Correction (14 Aug 2026, found via the real-UI Playwright fixture
+       added for defect #1): the ref must stay null -- never freeze on the
+       phantom pre-event compile that runs on mount before any buyer
+       action (facts=[], revision=null, lastRevision=null). That compile
+       is legitimately version 1 (resolveVersion's `!previousDocument`
+       branch), but freezing it as a "previousDocument" baseline meant the
+       FIRST REAL governed event (Prompt A's own cycle 1) then saw a
+       non-null previousDocument whose own version was already 1, so
+       resolveVersion's `revision !== undefined` branch computed
+       version+1 = 2 for Prompt A -- violating "Prompt A -> V1, B -> V2,
+       C -> V3." Only freeze once a REAL cycle (thisCycle !== null) has
+       landed and differs from whatever was last frozen; before that, the
+       ref stays null, so every compile prior to the first real event
+       keeps taking the `!previousDocument` branch and correctly stays at
+       version 1 until an actual buyer submission consumes it. */
+    if (thisCycle !== null && thisCycle !== prevCycle) {
+      previousProcurementDocumentRef.current = compiledDocument;
+    }
+  }, [compiledDocument]);
+
   /* ---- Corrections: the drop that never returns ---- */
   /** Round 9 (13 Aug 2026), Robert's third finding on the seventh
    *  amendment: dropping a fact used to strike it (dropListFact below)
@@ -1866,10 +2065,11 @@ export default function ProjectDesk({
 
     /* Seventh amendment: a retraction alone (e.g. "We no longer use
        MPLS.", nothing else in the same message) must not fall through to
-       the "nothing landed" branch below and say THREAD_NO_CATCH -- that
-       would misreport a real change to the statement as no change at
-       all. Checked alongside r.landed so both a positive landing and a
-       retraction, together or separately, take this branch. */
+       the "nothing landed" branch below and say THREAD_KEPT_UNPLACED --
+       that would misreport a real change to the statement as merely
+       kept, unplaced. Checked alongside r.landed so both a positive
+       landing and a retraction, together or separately, take this
+       branch. */
     if (r.landed > 0 || r.removed.length > 0) {
       const parts: string[] = [];
       if (r.labels.length) parts.push(`Written in: ${r.labels.join(", ")}.`);
@@ -1890,7 +2090,7 @@ export default function ProjectDesk({
        or a glossary question, which never reaches coverDeclarativeClauses
        at all). Either way, said once in the thread. */
     if (!r.unplaced.length) keepReceipt(text);
-    say(THREAD_NO_CATCH);
+    say(THREAD_KEPT_UNPLACED);
   }
 
   /* ---- The commands, each one true ---- */
@@ -2888,6 +3088,36 @@ export default function ProjectDesk({
         </div>
       </div>
 
+      {/* ── LIVING PROCUREMENT CANVAS (Phase 3 Stage A, 14 Aug 2026) ──
+          The compiled projection of the SAME fact ledger the editable
+          statement below still owns: title/summary, readiness, the
+          fact-strip counts, the Living document / Supplier pack /
+          Evaluation view-switch, the architecture, the numbered
+          testable-clause list and open decisions -- all real
+          `compileProcurementDocument()` output, never mockup content.
+          Deliberately placed ABOVE the existing statement rather than
+          replacing it: this IS the primary visible surface the brief
+          calls for, while the slot-by-slot statement panel below remains
+          the exact, already-working correction/edit affordance for
+          individual facts (drop/clear/edit buttons, sector packs, notes)
+          -- nothing about that panel's own behaviour changes here. Only
+          shown once a project has started, same as the statement it
+          sits above; hidden once locked (`phase === "fits"`), the same
+          gate the statement uses, so this never renders anywhere near
+          the pre-publication vendor-redaction panel below. */}
+      {phase === "live" && started && (
+        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2 pt-[6px]">
+          <LivingProcurementCanvas
+            document={compiledDocument}
+            view={procurementView}
+            onViewChange={setProcurementView}
+            factsKept={live.length}
+            factsStruck={Math.max(0, facts.length - live.length)}
+            sourceTurnCount={sourceTurns.length}
+          />
+        </div>
+      )}
+
       {/* ── THE LIVING STATEMENT ── one document card, five ruled
           sections of labelled rows, from the very first paint (Robert's
           ruling: the empty project IS the door): every empty line
@@ -2908,8 +3138,22 @@ export default function ProjectDesk({
           shadow were drawing a line that color alone no longer needed
           to. Both are gone; the padding stays, so the document still
           reads as its own paragraph, just without a frame around it. */}
+      {/* Phase 3 Stage A correction round (Robert, 14 Aug 2026), item 8:
+          "do not render two complete procurement documents consecutively
+          ... There must remain one authoritative record." The Living
+          Procurement Canvas above is now the primary, always-visible
+          record; this slot-by-slot editable statement -- every control,
+          the fact ledger, drop/clear, sector packs -- is completely
+          UNCHANGED, just moved behind a native, clearly labelled
+          disclosure rather than rendering as its own second full
+          document immediately below the canvas. Collapsed by default
+          (native `<details>`, no JS needed to open/close, keyboard- and
+          screen-reader-accessible for free). */}
       {phase === "live" && (
-        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-6 pt-[22px]">
+        <details className="mx-auto w-full max-w-[1000px] px-[26px] pb-6 pt-[10px]">
+          <summary className="cursor-pointer select-none rounded-[9px] px-3 py-2.5 text-[13px] font-medium text-[#6E6C67] hover:bg-[#F4F2ED] hover:text-[#141414]" style={mono}>
+            Project details / edit source facts
+          </summary>
           <div className="px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]">
           <div className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
           <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
@@ -3101,7 +3345,7 @@ export default function ProjectDesk({
             </div>
           )}
           </div>
-        </div>
+        </details>
       )}
 
       {/* ── LOCKED OUTCOME (was "WHO FITS") ── Living Procurement Canvas

@@ -15,7 +15,7 @@ import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import type { SecurityScopeVerdict } from "@/lib/security/rulebook";
 import type { BuyingId, OperatingModelId } from "@/lib/workspace/extract";
 import type { ClauseOrigin, EvaluationGate, OpenDecision, ProcurementSectionKey } from "@/lib/workspace/procurement-document";
-import { detectOperatingModelConflict, type ReceiptLike } from "@/lib/workspace/procurement-templates";
+import { detectOperatingModelConflict, detectSupplierStrategyConflict, type ReceiptLike } from "@/lib/workspace/procurement-templates";
 
 export type EvaluationCategoryKey = "network_resilience" | "security_identity_data" | "managed_service_delivery" | "commercial";
 
@@ -119,6 +119,26 @@ export function buildOpenDecisions(input: {
       conflict: true,
       conflictReason: conflict.quote,
       affectedClauseIds: affected,
+    });
+  }
+
+  // Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt D: a
+  // second, distinct kind of contradiction -- single-supplier
+  // consolidation vs. a wish for independently-selected, best-of-breed
+  // security controls. Visible, non-mandatory, no invented gate (no
+  // `affectedClauseIds` -- buildCandidateClauses() deliberately never
+  // materialises a competing clause for either side of this tension), and
+  // the buyer's own sentence is retained verbatim in `conflictReason`.
+  const supplierStrategyConflict = detectSupplierStrategyConflict(receipts);
+  if (supplierStrategyConflict?.active) {
+    out.push({
+      id: "OD-supplier-strategy-conflict",
+      question:
+        "The buyer wants a single supplier but also requires independently-selected, best-of-breed security controls. These pull in opposite directions -- which takes priority, or should the single-supplier scope exclude security?",
+      impact: ["architecture", "delivery", "price"],
+      conflict: true,
+      conflictReason: supplierStrategyConflict.quote,
+      affectedClauseIds: [],
     });
   }
 

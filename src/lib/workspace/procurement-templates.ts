@@ -32,7 +32,7 @@
 
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import { deterministicExtract, coverDeclarativeClauses, type BuyingId, type OperatingModelId } from "@/lib/workspace/extract";
-import { CLOUD_LABELS, NETWORK_LABELS, standing, type WorkspaceFact } from "@/lib/workspace/draft";
+import { BUYING_SHORT, CLOUD_LABELS, NETWORK_LABELS, standing, type WorkspaceFact } from "@/lib/workspace/draft";
 import type { SectorPack } from "@/lib/sector/packs";
 import type { SourceLedgerEntry } from "@/lib/workspace/source-ledger";
 import type { ArchitectureEdge, ArchitectureNode, ClauseOrigin, NotedItem, ProcurementSectionKey } from "@/lib/workspace/procurement-document";
@@ -293,6 +293,41 @@ export function receiptIsExplainedByClauses(receipt: ReceiptLike, clauses: Claus
   return covered.length / words.length >= 0.5;
 }
 
+/** Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt A
+ *  reproduction: "We are a UK healthcare organisation with 20 sites and
+ *  200 remote users." already lands every substantive fact it states
+ *  (organisation.sector, organisation.regions, estate.sites,
+ *  estate.users -- confirmed via deterministicExtract()), yet extract.ts's
+ *  own conservative clauseIsFullyExplained() still leaves the SENTENCE
+ *  itself "unplaced" (a bare word like "organisation" anchors nothing),
+ *  so it reached this file's generic Additional-requirements fallback and
+ *  became a scored "confirm your ability to meet this requirement" ask --
+ *  asking a supplier to confirm the BUYER's own stated identity and
+ *  scale, not a real supplier obligation. Robert: "should populate
+ *  architecture/context... not ask a supplier to confirm it can meet the
+ *  buyer's own identity and scale."
+ *
+ *  Deliberately narrow: only checked against the FIVE organisation-
+ *  identity/scale fact paths below (never a general-purpose fact/receipt
+ *  overlap check), and only suppresses a receipt whose own significant
+ *  words are STILL >=60% covered by those specific facts' own quotes --
+ *  a sentence that mixes in a genuine, separate requirement alongside the
+ *  buyer's identity/scale keeps enough uncovered words to survive and
+ *  still reach the ordinary Additional-requirements path. */
+const ORG_IDENTITY_SCALE_PATHS = new Set(["organisation.sector", "organisation.regions", "organisation.name", "estate.sites", "estate.users"]);
+
+function receiptIsOrgIdentityAndScale(receipt: ReceiptLike, facts: WorkspaceFact[]): boolean {
+  const words = significantWords(receipt.text);
+  if (words.length === 0) return false;
+  const orgQuotes = standing(facts)
+    .filter((f) => ORG_IDENTITY_SCALE_PATHS.has(f.path))
+    .map((f) => f.quote ?? String(f.value));
+  if (!orgQuotes.length) return false;
+  const haystack = orgQuotes.join(" ").toLowerCase();
+  const covered = words.filter((w) => haystack.includes(w));
+  return covered.length / words.length >= 0.6;
+}
+
 /* ------------------------------------------------------------------ */
 /* Removal instructions ("Remove DLP.") -- Section 16.2                */
 /* ------------------------------------------------------------------ */
@@ -301,6 +336,36 @@ export type RemovalInstruction = { receiptId: number; targetNorm: string; target
 
 const REMOVAL_VERB_RE = /^(remove|drop|delete|cancel|no longer require|stop requiring)\s+(.+?)[.!]?$/i;
 const normTarget = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/** Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt B
+ *  reproduction: "Change the service to co-managed. Keep 24/7 incident
+ *  support, remove DLP, and keep the April 2027 deadline." never matched
+ *  REMOVAL_VERB_RE above, because that pattern is anchored ("^...$") to
+ *  the WHOLE receipt text -- it only ever recognised a removal expressed
+ *  as its OWN entire sentence ("Remove DLP."), never one clause of
+ *  several inside a single compound sentence. splitDeclarativeClauseSpans
+ *  (extract.ts) only splits buyer text on SENTENCE boundaries, never on
+ *  commas, so "Keep 24/7 incident support, remove DLP, and keep the April
+ *  2027 deadline." survives as ONE receipt with the removal embedded
+ *  inside it -- invisible to an anchored pattern, and (worse)
+ *  `identityAndDataClauses()`'s bare `DLP_RE.test(corpus)` still finds
+ *  the literal word "DLP" in that same receipt and manufactures a
+ *  positive dlp-coverage clause from the buyer's own removal sentence.
+ *
+ *  THE FIX. `EMBEDDED_REMOVAL_RE` finds the SAME removal-verb vocabulary
+ *  as a CLAUSE within a larger sentence -- bounded by the start of text,
+ *  a comma/semicolon, or a coordinating "and"/"but", and closed by the
+ *  next such boundary or the end of text. `resolveReceiptRemovals()`
+ *  below tries the existing whole-receipt anchor FIRST (unchanged
+ *  behaviour for every receipt that already matched it -- e.g. every
+ *  standalone "Remove DLP." fixture already green); only when that fails
+ *  does it fall back to scanning for an embedded clause. Guarded against
+ *  a preceding negator ("do not remove", "never cancel", "won't drop" --
+ *  the same double-negative shape `modelMentionPolarity()` already
+ *  guards for the separate operating-model reducer) so a genuine double
+ *  negative is never misread as a removal instruction. */
+const EMBEDDED_REMOVAL_RE = /(?:^|[,;]|\band\b|\bbut\b)\s*(remove|drop|delete|cancel|no longer require|stop requiring)\s+([a-z0-9][^,;.!]*?)(?=\s*(?:[,;.!]|\band\b|\bbut\b|$))/gi;
+const EMBEDDED_REMOVAL_NEGATOR_RE = /\b(?:do not|don'?t|never|won'?t|will not|shouldn'?t|should not)\s*$/i;
 
 /** A compiler-only clause (DLP, ZTNA, voice continuity...) never becomes
  *  a WorkspaceFact, so removalsIn()'s fact-vocabulary tombstoning (Round 7
@@ -317,8 +382,25 @@ const normTarget = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").tr
 export function resolveReceiptRemovals(receipts: ReceiptLike[]): RemovalInstruction[] {
   const out: RemovalInstruction[] = [];
   for (const r of receipts) {
-    const m = REMOVAL_VERB_RE.exec(r.text.trim());
-    if (m) out.push({ receiptId: r.id, targetNorm: normTarget(m[2]), targetRaw: m[2].trim() });
+    const text = r.text.trim();
+    const whole = REMOVAL_VERB_RE.exec(text);
+    if (whole) {
+      out.push({ receiptId: r.id, targetNorm: normTarget(whole[2]), targetRaw: whole[2].trim() });
+      continue; // unchanged behaviour: the whole receipt is already one removal instruction
+    }
+    // Embedded: a removal clause inside a larger, multi-clause sentence
+    // (e.g. "Keep 24/7 incident support, remove DLP, and keep the April
+    // 2027 deadline.") -- see EMBEDDED_REMOVAL_RE's own comment above.
+    const g = new RegExp(EMBEDDED_REMOVAL_RE.source, EMBEDDED_REMOVAL_RE.flags);
+    let m: RegExpExecArray | null;
+    while ((m = g.exec(text))) {
+      const before = text.slice(0, m.index);
+      if (!EMBEDDED_REMOVAL_NEGATOR_RE.test(before)) {
+        const target = m[2].trim();
+        if (target) out.push({ receiptId: r.id, targetNorm: normTarget(target), targetRaw: target });
+      }
+      if (m[0].length === 0) g.lastIndex += 1; // never loop forever on a zero-width match
+    }
   }
   return out;
 }
@@ -1154,7 +1236,13 @@ function sectorClauses(pack: SectorPack | null, flavours: string[]): ClauseDraft
 /* Text-pattern templates (over the buyer's retained verbatim wording)  */
 /* ------------------------------------------------------------------ */
 
-type TextTemplateCtx = { corpus: string; corpusReceipts: ReceiptLike[]; requirement: SecurityRequirementInput };
+/** Stage A closure pass (Robert, 14 Aug 2026), item 1: `removalTargets`
+ *  added so a text-pattern template can filter its OWN generated example
+ *  lists against an active removal -- see `networkScopeClauses()`'s own
+ *  use of it below. Optional so no other caller of this type breaks;
+ *  every existing template that doesn't need it (the other five in
+ *  `textPattern`) is unaffected. */
+type TextTemplateCtx = { corpus: string; corpusReceipts: ReceiptLike[]; requirement: SecurityRequirementInput; removalTargets?: RemovalInstruction[] };
 
 /** The receipts whose text contains at least one of `res` (case-
  *  insensitive), joined for a multi-sentence quote -- this is how a
@@ -1245,6 +1333,46 @@ function resilienceClauses(ctx: TextTemplateCtx): ClauseDraft[] {
   return out;
 }
 
+/** Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt A
+ *  reproduction: "support Teams Phone" (no continuity/failover language)
+ *  named a real, in-scope voice service with no clause of its own --
+ *  resilienceClauses() above only produces a voice-continuity clause when
+ *  the buyer ALSO uses "cannot go down"/"fail over" wording, so a bare
+ *  in-scope mention fell entirely into networkScopeClauses()'s broader
+ *  catch-all quote. This is the lighter counterpart: a bare mention still
+ *  becomes its own named, testable in-scope clause (never the stronger
+ *  automatic-failover acceptance test, which is reserved for when the
+ *  buyer actually states that continuity requirement). Deliberately
+ *  gated OUT when the stronger resilience wording is present, so this
+ *  never duplicates resilienceClauses()'s own voice-continuity clause for
+ *  the same buyer sentence. */
+function voiceScopeClauses(ctx: TextTemplateCtx): ClauseDraft[] {
+  const resilienceLanguage = CANNOT_GO_DOWN_RE.test(ctx.corpus) || FAILOVER_RE.test(ctx.corpus);
+  if (resilienceLanguage || !VOICE_SUBJECT_RE.test(ctx.corpus)) return [];
+  const { quote: q, sourceTurnIds } = quoteFor(ctx.corpusReceipts, [VOICE_SUBJECT_RE]);
+  return [
+    {
+      section: "application",
+      statement: "Voice service (Teams Phone) is in scope and must be supported across the delivered architecture.",
+      supplierResponse: [
+        "Confirm your support for the buyer's stated voice service (Teams Phone), including call quality (QoS) treatment.",
+        "Describe how voice traffic is prioritised across your proposed network.",
+      ],
+      evidence: ["QoS/traffic-prioritisation design", "Voice service support confirmation"],
+      acceptanceTest: "The proposed architecture names how the stated voice service is supported and prioritised.",
+      mandatory: textImpliesMandatory(q ?? ""),
+      sourceFactIds: [],
+      origin: "buyer",
+      reason: "The buyer stated a voice service (Teams Phone) as in scope.",
+      quote: q,
+      sourceTurnIds,
+      sourceNotedIds: [],
+      templateKey: "application:voice-scope",
+      templateId: "voice-scope",
+    },
+  ];
+}
+
 const ENTRA_RE = /\bentra(\s?id)?\b/i;
 const ZTNA_RE = /\bztna\b|zero trust network access/i;
 const DLP_RE = /\bdlp\b|data loss prevention/i;
@@ -1271,6 +1399,36 @@ function identityAndDataClauses(ctx: TextTemplateCtx): ClauseDraft[] {
       sourceNotedIds: [],
       templateKey: "identity:entra-ztna",
       templateId: "identity-aware-ztna",
+    });
+  } else if (ENTRA_RE.test(ctx.corpus)) {
+    // Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt A
+    // reproduction: "use Azure and Entra ID" (no ZTNA wording) named a
+    // real, structured identity-provider requirement that previously had
+    // NO clause of its own -- identity-aware-ztna above only fires when
+    // ZTNA is ALSO named, so a bare Entra ID mention fell entirely into
+    // networkScopeClauses()'s much broader catch-all quote instead of
+    // getting its own testable identity-provider clause. Deliberately a
+    // lighter, non-ZTNA-specific supplier ask (integration + SSO/SCIM),
+    // never inventing a ZTNA requirement the buyer did not state.
+    const { quote: q, sourceTurnIds } = quoteFor(ctx.corpusReceipts, [ENTRA_RE]);
+    out.push({
+      section: "identity",
+      statement: "Identity provider integration with the buyer's stated Entra ID tenant for authentication and access policy.",
+      supplierResponse: [
+        "Describe your integration with Entra ID (SSO/SAML/OIDC, and SCIM provisioning if supported).",
+        "State which access-policy decisions read from Entra ID (group membership, conditional access), if any.",
+      ],
+      evidence: ["Entra ID integration test evidence", "SSO/provisioning configuration summary"],
+      acceptanceTest: "A live or recorded test demonstrates authentication against the buyer's Entra ID tenant.",
+      mandatory: textImpliesMandatory(q ?? ""),
+      sourceFactIds: [],
+      origin: "buyer",
+      reason: "The buyer stated Entra ID as the identity provider.",
+      quote: q,
+      sourceTurnIds,
+      sourceNotedIds: [],
+      templateKey: "identity:entra-provider",
+      templateId: "identity-provider-entra",
     });
   }
   if (DLP_RE.test(ctx.corpus)) {
@@ -1315,18 +1473,48 @@ function identityAndDataClauses(ctx: TextTemplateCtx): ClauseDraft[] {
  *  classify, and this template correctly produces nothing. */
 const NETWORK_SCOPE_RE = /\b(sase|sd-?wan|sse)\b/i;
 
+/** Stage A closure pass (Robert, 14 Aug 2026), item 1: "a removed
+ *  capability must disappear from every generated projection," not just
+ *  from becoming its own standalone clause. This template's own example
+ *  component list is a generated projection like any other -- named
+ *  here as `{display, removalLabel}` pairs (removalLabel matching the
+ *  SAME vocabulary `isCurrentlyRemoved()`/`clauseRemovalLabel()` already
+ *  use elsewhere for the real dlp-coverage clause, so "remove DLP" now
+ *  suppresses BOTH: the standalone clause AND this list's own mention of
+ *  it) rather than a single hard-coded string. Filtered per-compile
+ *  against `ctx.removalTargets`/`ctx.corpusReceipts` so an active removal
+ *  strips the item from the example list, and a later restatement (the
+ *  same resurrection law `isCurrentlyRemoved()` already documents)
+ *  brings it back. Never touches the buyer's own retained verbatim
+ *  sentence (`quote` below) -- only this template's own generated
+ *  prose. */
+const NETWORK_SCOPE_COMPONENTS: Array<{ display: string; removalLabel: string }> = [
+  { display: "SD-WAN transport", removalLabel: "sd-wan transport" },
+  { display: "SWG", removalLabel: "swg" },
+  { display: "CASB", removalLabel: "casb" },
+  { display: "ZTNA", removalLabel: "ztna" },
+  { display: "FWaaS", removalLabel: "fwaas" },
+  { display: "DLP", removalLabel: "dlp-coverage" },
+];
+
 function networkScopeClauses(ctx: TextTemplateCtx): ClauseDraft[] {
   const { quote: q, sourceTurnIds } = quoteFor(ctx.corpusReceipts, [NETWORK_SCOPE_RE]);
   if (!q) return [];
   const sector = ctx.requirement.organisation?.sector;
   const sites = ctx.requirement.estate?.sites;
   const scopeBits = [sector, sites ? `${sites} sites` : null].filter(Boolean).join(", ");
+  const removals = ctx.removalTargets ?? [];
+  const liveComponents = NETWORK_SCOPE_COMPONENTS.filter((c) => !isCurrentlyRemoved(c.removalLabel, removals, ctx.corpusReceipts));
+  const componentsLine =
+    liveComponents.length > 0
+      ? `Confirm which components are included in scope (e.g. ${liveComponents.map((c) => c.display).join(", ")}) versus SD-WAN transport alone.`
+      : "Confirm which components are included in scope versus SD-WAN transport alone.";
   return [
     {
       section: "network",
       statement: `Network/security architecture scope stated by the buyer${scopeBits ? ` (${scopeBits})` : ""}: "${q}"`,
       supplierResponse: [
-        "Confirm which components are included in scope (e.g. SD-WAN transport, SWG, CASB, ZTNA, FWaaS, DLP) versus SD-WAN transport alone.",
+        componentsLine,
         "Describe your architecture for delivering the stated scope across the buyer's estate.",
       ],
       evidence: ["Architecture diagram", "Component coverage matrix"],
@@ -1351,8 +1539,20 @@ function networkScopeClauses(ctx: TextTemplateCtx): ClauseDraft[] {
  *  instead of leaving it only as a receipt under "Your notes" (Section
  *  14.3's whole point). Matches Section 6.2's row: "Private Ethernet +
  *  legacy application -> Coexistence, migration sequencing, rollback and
- *  retained-service architecture edge." */
-const LEGACY_APP_RE = /legacy (application|app|system)/i;
+ *  retained-service architecture edge."
+ *
+ *  Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt A
+ *  reproduction: "retain private Ethernet for a clinical application" is
+ *  the SAME coexistence requirement stated with a healthcare-specific
+ *  application noun, not the word "legacy" -- the original LEGACY_APP_RE
+ *  matched neither, so this whole sentence had no structured clause of
+ *  its own and was only reachable inside `networkScopeClauses()`'s much
+ *  broader (and much less specific) "architecture scope" catch-all.
+ *  Broadened to recognise "clinical application" and "patient[- ]facing
+ *  application" alongside "legacy application/app/system" -- the SAME
+ *  named-application-plus-retained-circuit dependency, just named with
+ *  the buyer's own vertical-specific vocabulary instead of "legacy". */
+const LEGACY_APP_RE = /legacy (application|app|system)|clinical application|patient[- ]facing application/i;
 const RETAINED_CIRCUIT_RE = /point[- ]?to[- ]?point|p2p\b|private (circuit|ethernet|line)/i;
 
 function legacyCircuitClauses(ctx: TextTemplateCtx): ClauseDraft[] {
@@ -1361,18 +1561,18 @@ function legacyCircuitClauses(ctx: TextTemplateCtx): ClauseDraft[] {
   return [
     {
       section: "network",
-      statement: "The legacy application's retained point-to-point Ethernet private circuit must coexist with the new architecture through migration.",
+      statement: "The named application's retained point-to-point Ethernet private circuit must coexist with the new architecture through migration.",
       supplierResponse: [
         "Describe how the retained circuit coexists with your proposed architecture, and for how long.",
-        "State the migration sequencing for the dependent legacy application.",
+        "State the migration sequencing for the dependent application.",
         "Name the service owner for the retained circuit during transition, and the rollback plan.",
       ],
       evidence: ["Coexistence/migration plan", "Rollback plan", "Named service ownership during transition"],
-      acceptanceTest: "The legacy application remains operational throughout migration; retained-circuit performance is evidenced before and after cutover.",
+      acceptanceTest: "The named application remains operational throughout migration; retained-circuit performance is evidenced before and after cutover.",
       mandatory: textImpliesMandatory(q ?? ""),
       sourceFactIds: [],
       origin: "buyer",
-      reason: "The buyer stated a legacy application depends on a retained point-to-point Ethernet private circuit.",
+      reason: "The buyer stated a named application depends on a retained point-to-point Ethernet private circuit.",
       quote: q,
       sourceTurnIds,
       sourceNotedIds: [],
@@ -1389,15 +1589,30 @@ function legacyCircuitClauses(ctx: TextTemplateCtx): ClauseDraft[] {
  *  (procurement-readiness.ts) adds the matching "confirm which legal
  *  framework applies" open decision whenever this template fires, so the
  *  legal interpretation stays a decision, never a buyer fact. */
-const RESIDENCY_RE = /\b(data residency|may not leave|must not leave|leave the uk|cannot leave)\b/i;
-const RESIDENCY_PROHIBITION_RE = /may not leave|must not leave|cannot leave|^\s*no\b[\s\S]*\bmay leave\b/i;
+/** Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt C
+ *  reproduction: the brief's own canonical Section 12.3 sentence, "All
+ *  customer data must remain in the UK.", matched NEITHER the original
+ *  RESIDENCY_RE ("data residency" / "may not leave" / "must not leave" /
+ *  "leave the uk" / "cannot leave" -- all phrased around LEAVING, never
+ *  REMAINING) nor the dataLeavingRe fallback (also leave-only) -- so no
+ *  uk-data-residency clause was produced for the single most common
+ *  everyday phrasing of a residency requirement. Broadened to also
+ *  recognise "remain"/"stay"/"reside"/"kept"/"stored" (positive
+ *  containment wording), alongside the original "leave" (negative,
+ *  departure wording) -- both are the SAME requirement stated two
+ *  grammatical ways, not two different requirements. */
+const RESIDENCY_RE =
+  /\bdata residency\b|\bmay not leave\b|\bmust not leave\b|\bleave the uk\b|\bcannot leave\b|\bnot leave the uk\b|\bremain(?:s|ing)?\s+(?:in|within)\s+the uk\b|\bstay(?:s|ing)?\s+(?:in|within)\s+the uk\b|\breside(?:s)?\s+(?:in|within)\s+the uk\b|\bkept\s+(?:in|within)\s+the uk\b|\bstored\s+(?:only\s+|solely\s+)?(?:in|within)\s+the uk\b/i;
+const RESIDENCY_PROHIBITION_RE = /may not leave|must not leave|cannot leave|^\s*no\b[\s\S]*\bmay leave\b|must remain|must stay/i;
 
 function dataResidencyClauses(ctx: TextTemplateCtx): ClauseDraft[] {
   if (!RESIDENCY_RE.test(ctx.corpus) && !PROHIBITION_RE.test(ctx.corpus)) return [];
-  // Scope to receipts that actually name data leaving/residency, not any
-  // bare prohibition sentence elsewhere (avoids a false match on an
-  // unrelated "No X may..." sentence).
-  const dataLeavingRe = /data[\s\S]{0,40}\bleave\b|\bleave[\s\S]{0,40}\bdata\b/i;
+  // Scope to receipts that actually name data leaving/staying/residency,
+  // not any bare prohibition sentence elsewhere (avoids a false match on
+  // an unrelated "No X may..." sentence). Both directions of the same
+  // requirement -- data LEAVING (negative) and data REMAINING (positive)
+  // -- are recognised, matching RESIDENCY_RE's own broadened vocabulary.
+  const dataLeavingRe = /\bdata\b[\s\S]{0,40}\b(leave|remain|stay|reside|kept|stored)\b|\b(leave|remain|stay|reside|kept|stored)\b[\s\S]{0,40}\bdata\b/i;
   if (!dataLeavingRe.test(ctx.corpus) && !RESIDENCY_RE.test(ctx.corpus)) return [];
   const { quote: q, sourceTurnIds } = quoteFor(ctx.corpusReceipts, [dataLeavingRe, RESIDENCY_RE]);
   if (!q) return [];
@@ -1444,6 +1659,41 @@ export function detectOperatingModelConflict(receipts: ReceiptLike[]): { active:
   return null;
 }
 
+/** Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt D
+ *  reproduction: "We want a single supplier but also require independent
+ *  best-of-breed security controls." is a SECOND, distinct kind of
+ *  sourcing-strategy contradiction -- single-supplier consolidation vs. a
+ *  wish for independently-selected, best-of-breed security controls --
+ *  not the operating-model-vs-sole-control conflict OPMODEL_CONFLICT_RE
+ *  above already covers (that pattern only ever matches "fully
+ *  managed"/"co-managed" language, neither of which this sentence
+ *  contains). Before this fix, the sentence matched no named template at
+ *  all, so it fell through to `additionalRequirementClauses()`'s generic
+ *  fallback, which read "require" as MANDATORY_LANGUAGE and invented a
+ *  pass/fail gate from an unresolved contradiction -- the exact opposite
+ *  of Section 12.4/16.4's "a genuine contradiction becomes a visible
+ *  decision, never a silent choice, never an invented gate."
+ *
+ *  Same discipline as `detectOperatingModelConflict()` above: scoped to a
+ *  SINGLE receipt's own text (never the whole corpus), so an unrelated
+ *  "single supplier" fact and an unrelated "best of breed" fact stated in
+ *  two different, unconnected sentences are never mistaken for a
+ *  conflict -- the tension is only real when both signals appear
+ *  together in the buyer's own sentence. */
+const SINGLE_SUPPLIER_RE =
+  /\b(?:a\s+)?(?:single|one)\s+(?:supplier|vendor|provider)\b|\bconsolidat(?:e|ed|ing)\s+(?:to|on|with)\s+(?:a\s+)?(?:single|one)\s+(?:supplier|vendor|provider)\b/i;
+const BEST_OF_BREED_SECURITY_RE =
+  /\bbest[\s-]of[\s-]breed\b|\bindependent(?:ly)?\s+(?:best[\s-]of[\s-]breed\s+)?security\b|\bmulti[\s-]vendor\s+security\b/i;
+
+export function detectSupplierStrategyConflict(receipts: ReceiptLike[]): { active: boolean; quote: string } | null {
+  for (const r of receipts) {
+    if (SINGLE_SUPPLIER_RE.test(r.text) && BEST_OF_BREED_SECURITY_RE.test(r.text)) {
+      return { active: true, quote: r.text };
+    }
+  }
+  return null;
+}
+
 /* ------------------------------------------------------------------ */
 /* Additional requirements: the dynamic-section fallback (Section 14.3) */
 /* ------------------------------------------------------------------ */
@@ -1462,7 +1712,7 @@ export function detectOperatingModelConflict(receipts: ReceiptLike[]): { active:
  *  per distinct templateKey, merging every occurrence's `sourceTurnId`
  *  into that one draft's `sourceTurnIds` -- provenance widens, identity
  *  never duplicates. */
-function additionalRequirementClauses(receipts: ReceiptLike[], removals: RemovalInstruction[], alreadyCovered: ClauseDraft[]): ClauseDraft[] {
+function additionalRequirementClauses(receipts: ReceiptLike[], removals: RemovalInstruction[], alreadyCovered: ClauseDraft[], orgIdentityFacts: WorkspaceFact[] = []): ClauseDraft[] {
   const removedIds = new Set(removals.map((r) => r.receiptId));
   const byKey = new Map<string, ClauseDraft>();
   const order: string[] = [];
@@ -1500,6 +1750,7 @@ function additionalRequirementClauses(receipts: ReceiptLike[], removals: Removal
       continue;
     }
     if (receiptIsExplainedByClauses(r, [...alreadyCovered, ...byKey.values()])) continue;
+    if (receiptIsOrgIdentityAndScale(r, orgIdentityFacts)) continue; // buyer's own identity/scale, already represented -- never a scored ask
     if (isCurrentlyRemoved(r.text, removals, receipts)) continue; // the requirement itself was later retracted (and not since restated)
     const draft: ClauseDraft = {
       section: "additional",
@@ -1738,7 +1989,7 @@ export function buildCandidateClauses(input: {
 }): ClauseDraft[] {
   const { facts, requirement, buying, opModel, receipts, removalTargets, pack, flavours, sourceTurns, noted } = input;
   const corpus = [...standing(facts).map((f) => f.quote ?? String(f.value)), ...receipts.map((r) => r.text)].join(" ");
-  const ctx: TextTemplateCtx = { corpus, corpusReceipts: receipts, requirement };
+  const ctx: TextTemplateCtx = { corpus, corpusReceipts: receipts, requirement, removalTargets };
   const conflict = detectOperatingModelConflict(receipts);
   const history = chronologicalHistory(sourceTurns ?? [], receipts);
   const supportCoverage = input.supportCoverage ?? resolveSupportCoverage(history, noted ?? []);
@@ -1752,6 +2003,7 @@ export function buildCandidateClauses(input: {
   ];
   const textPattern = [
     ...resilienceClauses(ctx),
+    ...voiceScopeClauses(ctx),
     ...identityAndDataClauses(ctx),
     ...legacyCircuitClauses(ctx),
     ...dataResidencyClauses(ctx),
@@ -1759,8 +2011,46 @@ export function buildCandidateClauses(input: {
   ];
 
   const named = [...factDriven, ...textPattern];
-  const notedDrafts = notedClauses(noted ?? [], named);
-  const additional = additionalRequirementClauses(receipts, removalTargets, [...named, ...notedDrafts]);
+  // Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt D: a
+  // receipt that itself IS the single-supplier/best-of-breed-security
+  // contradiction is represented as a visible OpenDecision
+  // (buildOpenDecisions(), procurement-readiness.ts), never as an
+  // additional-requirements catch-all clause -- the fallback path would
+  // otherwise read "require" in the buyer's own sentence as mandatory
+  // language and invent a pass/fail gate from an unresolved
+  // contradiction (Section 16.4's own prohibition). Computed BEFORE
+  // notedClauses() (moved up from its original position after that call)
+  // so the noted-objective path below can share the same exclusion --
+  // see that filter's own comment for why it is needed too.
+  const supplierConflict = detectSupplierStrategyConflict(receipts);
+  const conflictReceiptIds = new Set(
+    supplierConflict?.active
+      ? receipts.filter((r) => SINGLE_SUPPLIER_RE.test(r.text) && BEST_OF_BREED_SECURITY_RE.test(r.text)).map((r) => r.id)
+      : [],
+  );
+  // Correction round, Prompt D reproduction (found via the real-UI
+  // Playwright fixture added for defect #1): `statedObjectivesIn()`
+  // (extract.ts) independently recognises the bare phrase "best-of-breed"
+  // anywhere in the buyer's sentence and lands it in `noted` as its own
+  // stated objective ("obj-bob"), a code path entirely separate from
+  // `receipts`/`additionalRequirementClauses` above. Without this filter,
+  // that objective still reached `notedClauses()` below and became its
+  // OWN scored "Confirm your ability to meet this requirement" clause --
+  // silently treating one side of an active, unresolved conflict as an
+  // accepted requirement, right alongside the OpenDecision naming the
+  // SAME tension as unresolved. Suppressed ONLY while the supplier-
+  // strategy conflict is active (i.e. only when this exact receipt pairs
+  // "best-of-breed" with "single supplier"); a buyer stating "we want
+  // best-of-breed security" with no single-supplier language anywhere
+  // still gets its own noted-objective clause exactly as before.
+  const notedForClauses = supplierConflict?.active ? (noted ?? []).filter((n) => !BEST_OF_BREED_SECURITY_RE.test(n.label ?? "")) : (noted ?? []);
+  const notedDrafts = notedClauses(notedForClauses, named);
+  const additional = additionalRequirementClauses(
+    receipts.filter((r) => !conflictReceiptIds.has(r.id)),
+    removalTargets,
+    [...named, ...notedDrafts],
+    facts,
+  );
 
   const all = [...named, ...notedDrafts, ...additional];
   // Section 16.2's removal law: a clause whose label was explicitly
@@ -1800,6 +2090,15 @@ export function buildArchitecture(input: {
   requirement: SecurityRequirementInput;
   clauses: Array<{ id: string; templateId: string; sourceFactIds: string[] }>;
   receipts: ReceiptLike[];
+  /** Stage A closure pass (Robert, 14 Aug 2026), item 2: what the buyer
+   *  is BUYING (procurement.buying), not just what they already HAVE
+   *  (estate.existingNetwork) -- see the "network" node's own comment
+   *  just below for why this was missing before. Optional so a caller
+   *  that predates this round (none left, but kept for the same
+   *  backward-compatibility discipline every other optional field here
+   *  already follows) degrades to the old existing-network-only
+   *  behaviour, unchanged. */
+  buying?: BuyingId | null;
 }): { nodes: ArchitectureNode[]; edges: ArchitectureEdge[]; accessibleSummary: string } {
   const { requirement } = input;
   const nodes: ArchitectureNode[] = [];
@@ -1808,9 +2107,33 @@ export function buildArchitecture(input: {
   if (requirement.estate?.sites) nodes.push({ id: "sites", label: `${requirement.estate.sites} sites`, kind: "site", sourceFactIds: [], sourceClauseIds: [] });
   if (requirement.estate?.users) nodes.push({ id: "remote-users", label: `${requirement.estate.users} remote users`, kind: "user", sourceFactIds: [], sourceClauseIds: [] });
 
+  /** Stage A closure pass, item 2 reproduction: this node used to exist
+   *  ONLY when the buyer stated an EXISTING network (estate.
+   *  existingNetwork, e.g. "we currently run MPLS") -- so Prompt A's own
+   *  recognised clauses (SASE/SD-WAN, Azure, Entra ID, Teams Phone, the
+   *  retained circuit) rendered as disconnected chips: every `link()`
+   *  call below reaches through this SAME node id, and none of them
+   *  could fire with no node to connect through, even though the buyer
+   *  had already stated a real TARGET service ("We need managed SASE and
+   *  SD-WAN"). Fixed by also creating this node from the buyer's stated
+   *  BUYING intent (procurement.buying, resolved the identical way the
+   *  rest of the compiler already resolves it -- never invented) or, if
+   *  that scalar fact didn't land but the buyer's own sentence was still
+   *  recognised as a network/security architecture scope statement (the
+   *  `network-architecture-scope` clause, `networkScopeClauses()`
+   *  above), from that clause's own presence -- citing it in
+   *  `sourceClauseIds` exactly the way every other clause-derived node
+   *  below already does. An EXISTING network, when stated, still takes
+   *  priority for the label (unchanged behaviour for the already-tested
+   *  MPLS-coexistence scenario) -- this only fills in the gap for when
+   *  no existing network was ever stated at all. */
   const network = requirement.estate?.existingNetwork ?? [];
+  const targetServiceClauseId = input.clauses.find((c) => c.templateId === "network-architecture-scope")?.id;
   if (network.length) {
     nodes.push({ id: "network", label: `Network (${network.map((n) => NETWORK_LABELS[n] ?? n).join(", ")})`, kind: "network", sourceFactIds: [], sourceClauseIds: [] });
+  } else if (input.buying || targetServiceClauseId) {
+    const label = input.buying ? `Proposed ${BUYING_SHORT[input.buying]} service` : "Proposed network/security service";
+    nodes.push({ id: "network", label, kind: "network", sourceFactIds: [], sourceClauseIds: targetServiceClauseId ? [targetServiceClauseId] : [] });
   }
   for (const c of requirement.estate?.cloud ?? []) {
     nodes.push({ id: `cloud-${c}`, label: CLOUD_LABELS[c] ?? c, kind: "cloud", sourceFactIds: [], sourceClauseIds: [] });
@@ -1831,8 +2154,31 @@ export function buildArchitecture(input: {
     return c ? [c.id] : [];
   };
   const hasClause = (templateId: string) => input.clauses.some((c) => c.templateId === templateId);
-  if (hasClause("identity-aware-ztna")) nodes.push({ id: "identity", label: "Identity (Entra ID)", kind: "identity", sourceFactIds: [], sourceClauseIds: clauseIdFor("identity-aware-ztna") });
-  if (hasClause("voice-continuity")) nodes.push({ id: "voice", label: "Voice service (Teams Phone)", kind: "voice", sourceFactIds: [], sourceClauseIds: clauseIdFor("voice-continuity") });
+  // Stage A closure pass (Robert, 14 Aug 2026), item 2 reproduction:
+  // this checked ONLY the heavier "identity-aware-ztna"/"voice-continuity"
+  // templateIds -- the correction round's own lighter templates
+  // ("identity-provider-entra" for a bare Entra ID mention with no ZTNA
+  // language, "voice-scope" for a bare Teams Phone mention with no
+  // resilience language, both added to fix the correction round's
+  // catch-all-clause defect) were never taught to this function, so
+  // Prompt A's own exact wording -- which fires the LIGHTER templates,
+  // not the heavier ones -- produced no identity/voice node at all. Each
+  // pair is checked in the same priority order buildCandidateClauses
+  // itself resolves them (the heavier, more specific template first,
+  // since identityAndDataClauses()'s own `else if` means at most one of
+  // the pair can ever be present in one compile), and cites whichever
+  // one actually fired.
+  const anyClauseId = (templateIds: string[]): string[] => {
+    for (const t of templateIds) {
+      const id = clauseIdFor(t);
+      if (id.length) return id;
+    }
+    return [];
+  };
+  const IDENTITY_TEMPLATE_IDS = ["identity-aware-ztna", "identity-provider-entra"];
+  const VOICE_TEMPLATE_IDS = ["voice-continuity", "voice-scope"];
+  if (IDENTITY_TEMPLATE_IDS.some(hasClause)) nodes.push({ id: "identity", label: "Identity (Entra ID)", kind: "identity", sourceFactIds: [], sourceClauseIds: anyClauseId(IDENTITY_TEMPLATE_IDS) });
+  if (VOICE_TEMPLATE_IDS.some(hasClause)) nodes.push({ id: "voice", label: "Voice service (Teams Phone)", kind: "voice", sourceFactIds: [], sourceClauseIds: anyClauseId(VOICE_TEMPLATE_IDS) });
   if (hasClause("application-resilience")) nodes.push({ id: "application", label: "Patient-facing application", kind: "application", sourceFactIds: [], sourceClauseIds: clauseIdFor("application-resilience") });
   if (hasClause("legacy-circuit-coexistence")) {
     nodes.push({ id: "legacy-application", label: "Legacy application", kind: "application", sourceFactIds: [], sourceClauseIds: clauseIdFor("legacy-circuit-coexistence") });
