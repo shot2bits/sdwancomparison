@@ -5,6 +5,8 @@ import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark, recordDemandSample, indexRfpForBuyer } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
+import { rfpContentSnapshot, contentHash } from "@/lib/published-snapshot";
+import { applyGovernedEvent } from "@/lib/rfp-governed-revision";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -175,5 +177,25 @@ export async function PUT(req: Request, ctx: Ctx) {
     // real BuyerContext fields only. Never blocks the publish.
     try { await recordDemandSample(saved.buyer, mandatory); } catch { /* best effort */ }
   }
+
+  // Living Procurement Canvas Phase 2 (14 Aug 2026): record this save as a
+  // governed "requirement_edit" event -- a direct document edit, exactly
+  // the event kind Robert's brief names, now tracked through a REAL
+  // production route rather than only the Phase 1 fixtures. Best effort
+  // and strictly observational: it never gates or alters the save, which
+  // has already fully succeeded above. When `existing.status ===
+  // "published"`, this write is precisely "a later draft after
+  // publication" (Robert's brief) -- it is recorded here, but it never
+  // touches the published snapshot the export/report routes read from
+  // (published-snapshot.ts): the snapshot stays frozen until the buyer
+  // explicitly republishes, so this save can never silently change what
+  // was already published.
+  try {
+    const before = rfpContentSnapshot(existing);
+    const after = rfpContentSnapshot(saved);
+    const eventId = `save:${saved.id}:${contentHash({ before, after })}`;
+    await applyGovernedEvent(saved.id, "requirement_edit", eventId, before, after);
+  } catch { /* observational only, never blocks the save */ }
+
   return Response.json(saved, { headers: cors });
 }

@@ -21,8 +21,15 @@ import type { ProjectDetails } from "@/lib/rfp-types";
 
 export type MarketReport = {
   generated_at: number;
-  /** Matched supplier names/count from the dataset (same engine as the wizard panel). */
-  matched: { count: number; names: string[]; region_assumption?: string };
+  /** Matched supplier names/count from the dataset (same engine as the wizard panel).
+   *  Phase 2 (14 Aug 2026): `total_evaluated_market` is the size of the
+   *  WHOLE vendor dataset (matchSuppliers()'s own `total`, never
+   *  scope/region-filtered) -- the general marketplace figure the publish
+   *  lifecycle brief permits showing before publication, clearly labelled
+   *  as the general market, never as this project's matches. `count` and
+   *  `names` remain this project's actual ranked/filtered matches and MUST
+   *  stay hidden until publication (see /api/rfp/[id]/report/route.ts). */
+  matched: { count: number; names: string[]; total_evaluated_market: number; region_assumption?: string };
   /** Indicative price band, or null when the estate cannot be banded honestly. */
   estimate: {
     monthly_band_gbp: [number, number];
@@ -175,6 +182,7 @@ export function buildMarketReport(p: ProjectDetails): MarketReport {
     matched: {
       count: matched.count,
       names: matched.names,
+      total_evaluated_market: matched.total,
       ...(regionHint ? { region_assumption: regionHint.assumption } : {}),
     },
     estimate: result

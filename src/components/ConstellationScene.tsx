@@ -50,8 +50,18 @@ export type ConstellationSceneProps = {
   added: string[];
   namedSlugs: Set<string>;
   started: boolean;
-  /** Kept, graded, ranked slugs: the caller's own fit.suppliers minus
-   *  whatever the buyer dropped from direct invites (its keptFits). */
+  /** Invited slugs, post-publish. Living Procurement Canvas Phase 2
+   *  correction (14 Aug 2026): this used to be a LIVE, still-recomputing
+   *  slice of the caller's own fit.suppliers (kept minus whatever the
+   *  buyer dropped from direct invites). Since the component only ever
+   *  renders once `published` is set (see the `if (!published) return
+   *  null` gate below -- R1b, "distance IS fit, so a ranked view is the
+   *  half that generates at publish, not before"), reading a live `fit`
+   *  even in that gated state was itself a subtler version of the same
+   *  leak: "not a freshly recalculated workspace fit" is Robert's Phase 2
+   *  wording for it. The caller (ProjectDesk) now derives this prop from
+   *  `published.invited` -- the FROZEN list returned by the publish route
+   *  itself -- never from `fit`. */
   fitSlugs: string[];
 };
 
@@ -106,10 +116,21 @@ export default function ConstellationScene({
     return constellation(items, sceneRanked, SCENE.cx, SCENE.cy, 34, BAND);
   }, [marketRows, sceneRanked, fitSlugs]);
 
-  const fitBySlug = useMemo(
-    () => new Map((fit?.suppliers ?? []).map((s) => [s.slug, s])),
-    [fit],
-  );
+  // Living Procurement Canvas Phase 2 correction (14 Aug 2026): `fit`
+  // (FitState, ProjectDesk.tsx) no longer ever carries `suppliers` -- the
+  // /api/workspace/fit route now redacts vendor-identifying data
+  // unconditionally, and per the product rule this component (though
+  // already gated to post-publish only, see `if (!published) return
+  // null` below) must render the FROZEN matched/invited result from the
+  // publish response, never a freshly recalculated workspaceFit() --
+  // exactly the shape that used to feed this map. Evidence lines to the
+  // capability ring therefore no longer draw (there is no per-vendor,
+  // per-check grade to draw from any more); the vendor dots themselves
+  // still position and rank correctly, from `fitSlugs`/`published`, both
+  // of which ProjectDesk now derives from the frozen publish response.
+  // Nothing here is invented to fill the gap -- the honest degradation
+  // is fewer lines, never a guessed one.
+  const fitBySlug = useMemo(() => new Map<string, { matched: { id: string; grade: string }[] }>(), []);
 
   const capNodes = useMemo(
     () => capabilityRing(sceneRanked ? fit?.checks ?? [] : [], SCENE.cx, SCENE.cy, 92, 0.78),
