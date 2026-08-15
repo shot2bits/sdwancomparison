@@ -77,6 +77,14 @@ import {
   type GovernedEvent,
 } from "@/lib/workspace/procurement-document";
 import LivingProcurementCanvas, { type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
+/** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
+ *  the canonical NextQuestion projection and section-outline projection
+ *  -- both pure, both layered over data this file already computes
+ *  (earnedQuestions/visibleSuggestions/compiledDocument.openDecisions).
+ *  See each module's own header comment for why they are separate files
+ *  from the compiler rather than folded into it. */
+import { rankNextQuestions, materialDecisionCount, type NextQuestion } from "@/lib/workspace/procurement-next-questions";
+import { buildSectionOutline, type OutlineRow } from "@/lib/workspace/procurement-outline";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -687,6 +695,22 @@ const TWIN_SLOTS: TwinSlot[] = [
 const SLOT_BY_ID: Record<string, TwinSlot> = Object.fromEntries(TWIN_SLOTS.map((s) => [s.id, s]));
 const SLOT_BY_PATH: Record<string, string> = Object.fromEntries(TWIN_SLOTS.filter((s) => s.path).map((s) => [s.path as string, s.id]));
 
+/** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
+ *  a compiler open decision (procurement-readiness.ts's `buildOpenDecisions`)
+ *  that already has a real, existing click-answer path -- an existing
+ *  `TWIN_SLOTS` entry -- renders THAT slot's own options in its
+ *  NextQuestion card rather than a fabricated new answer control. Only
+ *  the two open decisions with an unambiguous 1:1 slot are mapped;
+ *  conflict/ambiguity/legal-basis decisions (which need explanation, not
+ *  a button) render with a link into the existing "Project details"
+ *  sheet instead -- see ProcurementNextQuestions.tsx. */
+const OPEN_DECISION_SLOT: Record<string, string> = {
+  "OD-operating-model-unstated": "model",
+  "OD-operating-model-conflict": "model",
+  "OD-operating-model-ambiguous-correction": "model",
+  "OD-timeline-unstated": "timeline",
+};
+
 /** The nine sector quick-start chips (round 6; the reference's ten,
  *  Regulated industries removed by Robert's ruling because it cannot
  *  write a value honestly). Shown until a sector stands. Every chip
@@ -744,6 +768,19 @@ export default function ProjectDesk({
   const [market, setMarket] = useState<Market | null>(null);
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
   const [noted, setNoted] = useState<NotedItem[]>([]);
+  /** Living Procurement UK Decision-Maker Blueprint: an earned question
+   *  the buyer explicitly dismissed from the primary flow ("Not needed"/
+   *  "Undecided") -- mirrors the pack law's "declining is permanent and
+   *  stays on the record" for sector suggestions, applied to earned
+   *  questions too, so a dismissed question does not reappear every
+   *  render. In-memory only for this Stage checkpoint (not yet persisted
+   *  to the saved project record) -- a deliberate, named scope decision,
+   *  not a silent gap; see the checkpoint report's assumptions section. */
+  const [dismissedQuestionIds, setDismissedQuestionIds] = useState<string[]>([]);
+  /** A sector suggestion the buyer explicitly declined -- permanent, per
+   *  the pack law (sector/packs.ts's own header comment): "a declined
+   *  suggestion never returns." */
+  const [declinedSuggestionIds, setDeclinedSuggestionIds] = useState<string[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   /** The immutable source-turn log (see the SourceTurn type comment). */
   const [sourceTurns, setSourceTurns] = useState<SourceTurn[]>(() => hydrateSourceTurns(initialSourceLedger));
@@ -1474,6 +1511,18 @@ export default function ProjectDesk({
   );
   const pack = useMemo(() => activePack(requirement), [requirement]);
   const packFlavours = useMemo(() => (pack ? activeFlavours(pack, corpus) : []), [pack, corpus]);
+  /** Living Procurement UK Decision-Maker Blueprint: the LIVE (render-
+   *  time) visible-suggestion list, distinct from the auto-assert
+   *  effect's own one-shot `sugs` snapshot below (which only ever fires
+   *  once per newly-active pack, to write compliance-only suggestions in
+   *  as inferred rules). This memo re-derives on every relevant state
+   *  change so the primary-flow suggestion cards (NextQuestion
+   *  projection) and the section outline always show the CURRENT visible
+   *  set, honouring an explicit decline the instant it happens. */
+  const visibleSectorSuggestions = useMemo(
+    () => (pack ? visibleSuggestions(pack, packFlavours, facts, noted.map((n) => n.id), declinedSuggestionIds) : []),
+    [pack, packFlavours, facts, noted, declinedSuggestionIds],
+  );
   useEffect(() => {
     if (!pack || assertedPacks.current.has(pack.id)) return;
     assertedPacks.current = new Set([...assertedPacks.current, pack.id]);
@@ -1821,15 +1870,29 @@ export default function ProjectDesk({
         ev("workspace_gap_answered", { field: opt.land.path });
       } else {
         const l = opt.land;
+        /** Stage checkpoint fix (Living Procurement UK Decision-Maker
+         *  Blueprint, 15 Aug 2026): a note-only landed option previously
+         *  never called `beginOrExtendSubmission()`/`scheduleSettle()`,
+         *  so `currentRevision` never changed and `document.version`
+         *  stayed frozen for a note-only buyer answer -- silently
+         *  violating "one buyer submission must produce one governed
+         *  document revision" for every note-kind TwinOption (Resilience,
+         *  Term, Support, ...), not just the new NextQuestion cards.
+         *  `factsBefore === factsAfter` here (no fact changed), which
+         *  `resolveGovernedRevision()`'s own contract already treats as a
+         *  legitimate, honestly-empty `changedFactIds` -- see that
+         *  function's doc comment (procurement-document.ts). */
+        beginOrExtendSubmission();
         setNoted((ns) => (ns.some((n) => n.id === l.id) ? ns : [...ns, { id: l.id, label: l.text, section: l.section, own: true }]));
         setChangedSlots([slot.id]);
         setSaveDirty(true);
+        scheduleSettle();
         ev("workspace_earned_answered", { q: l.id, kind: "note" });
       }
       say(`${slot.label} set to “${opt.label}”.`);
       setEdit(null);
     },
-    [applyMerge, markChanged, say],
+    [applyMerge, markChanged, say, beginOrExtendSubmission, scheduleSettle],
   );
 
   /** A sector chip lands real values through the same machinery a
@@ -1853,12 +1916,19 @@ export default function ProjectDesk({
         }
       }
       if (noteLands.length) {
+        // Stage checkpoint fix (see landOption's identical comment above):
+        // a note-only chip (no factLands) must still open/settle a
+        // governed-revision submission itself; a chip WITH factLands is
+        // already governed by the applyMerge() call above, so this only
+        // needs to fire for the pure-note case.
+        if (!factLands.length) beginOrExtendSubmission();
         for (const l of noteLands) {
           setNoted((ns) => (ns.some((n) => n.id === l.id) ? ns : [...ns, { id: l.id, label: l.text, section: l.section, own: true }]));
           ev("workspace_earned_answered", { q: l.id, kind: "note" });
         }
         if (!factLands.length) setChangedSlots(["people"]);
         setSaveDirty(true);
+        if (!factLands.length) scheduleSettle();
         if (!landedSlots.includes("People")) landedSlots.push("People");
       }
       const sectorLand = factLands.find((l) => l.path === "organisation.sector");
@@ -1868,7 +1938,76 @@ export default function ProjectDesk({
           : `${listJoin(landedSlots)} written from “${chip.label}”.`,
       );
     },
-    [applyMerge, markChanged, say],
+    [applyMerge, markChanged, say, beginOrExtendSubmission, scheduleSettle],
+  );
+
+  /** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug
+   *  2026): answers a `NextQuestion` (an earned question or a sector
+   *  suggestion; compiler open decisions with an existing TWIN_SLOTS
+   *  answer path render that slot's own options instead and land through
+   *  `landOption` unchanged -- see `OPEN_DECISION_SLOT` and the render
+   *  side in LivingProcurementCanvas/ProcurementNextQuestions).
+   *
+   *  Every branch below lands through the SAME `applyMerge`/`setNoted`
+   *  machinery `landOption`/`pickChip` already use, tagged `source:
+   *  "answer"` and quoted with the OPTION'S OWN LABEL -- never the
+   *  underlying question text -- and NEVER calls `keepSourceTurn()`.
+   *  That is what makes this compliant with the blueprint's two hardest
+   *  rules at once: "Do not insert Netify-authored question text into
+   *  the buyer's source ledger. Only the buyer's answer may become buyer
+   *  wording" and "Question selection is UI context, not a source turn."
+   *  A "dismiss" answer never writes anything; it only remembers the
+   *  dismissal so the question does not reappear (earned questions) or
+   *  is permanently declined (sector suggestions, per the pack law). */
+  const answerNextQuestion = useCallback(
+    (nq: NextQuestion, optionIndex: number) => {
+      const opt = nq.options?.[optionIndex];
+      if (!opt) return;
+      const answer = opt.answer;
+      if (answer.kind === "dismiss") {
+        if (nq.source === "sector_suggestion") {
+          const suggestionId = nq.id.replace(/^sector:/, "");
+          setDeclinedSuggestionIds((ids) => (ids.includes(suggestionId) ? ids : [...ids, suggestionId]));
+          ev("workspace_pack_suggestion", { id: suggestionId, verdict: "declined" });
+        } else {
+          setDismissedQuestionIds((ids) => (ids.includes(nq.id) ? ids : [...ids, nq.id]));
+          ev("workspace_earned_answered", { q: nq.id, kind: "dismiss" });
+        }
+        say(`Noted: "${nq.question}" set aside for now.`);
+        return;
+      }
+      if (answer.kind === "items") {
+        const updates: FieldUpdate[] = [];
+        for (const itemId of answer.itemIds) {
+          const e = ITEM_BY_ID[itemId];
+          if (!e) continue;
+          updates.push({ path: e.item.path as AllowedPath, value: e.item.value, provenance: "stated", quote: opt.label });
+        }
+        if (updates.length) {
+          const m = applyMerge(updates, "answer");
+          markChanged(m.changed.length ? m.changed : updates.map((u) => factId(u.path, u.value)), m.facts);
+        }
+        ev("workspace_earned_answered", { q: nq.id, kind: "items" });
+      } else if (answer.kind === "note") {
+        const noteId = nq.source === "sector_suggestion" ? `ps-${nq.id.replace(/^sector:/, "")}` : `${nq.id}:${optionIndex}`;
+        beginOrExtendSubmission();
+        setNoted((ns) => (ns.some((n) => n.id === noteId) ? ns : [...ns, { id: noteId, label: answer.text, section: nq.target, own: true }]));
+        setChangedSlots([noteId]);
+        setSaveDirty(true);
+        scheduleSettle();
+        ev("workspace_earned_answered", { q: nq.id, kind: "note" });
+      } else if (answer.kind === "path") {
+        // Free-text answers (root sector/scope, contract end) open the
+        // existing edit sheet for the matching slot rather than a new
+        // inline control -- reusing the established, already-fixtured
+        // typed-answer path instead of inventing a parallel one.
+        const sid = SLOT_BY_PATH[answer.path];
+        if (sid) setEdit(sid);
+        return;
+      }
+      say(`${nq.question} — "${opt.label}".`);
+    },
+    [applyMerge, markChanged, say, beginOrExtendSubmission, scheduleSettle],
   );
 
   /* ---- The extraction cycle (the same organ). Round 6: the cycle
@@ -2601,8 +2740,91 @@ export default function ProjectDesk({
   /* ---- The requirement sheet sections: every row with provenance ---- */
   const earnedAll = useMemo(() => {
     const notedIds = noted.map((n) => n.id);
-    return earnedQuestions(requirement, buying, opModel, notedIds, [], corpus);
-  }, [requirement, buying, opModel, noted, corpus]);
+    return earnedQuestions(requirement, buying, opModel, notedIds, dismissedQuestionIds, corpus);
+  }, [requirement, buying, opModel, noted, corpus, dismissedQuestionIds]);
+
+  /** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug
+   *  2026): the ONE canonical NextQuestion projection (implementation
+   *  step 5) -- open decisions, earned questions and visible sector
+   *  suggestions, ranked and deduplicated. `rankedNextQuestions` is the
+   *  FULL list (used for the section outline's resolved/unresolved
+   *  checks and the readiness "material decisions remain" count);
+   *  `topThreeQuestions` is the UI-capped slice the primary flow renders
+   *  ("no more than three prioritised next decisions"). */
+  const rankedNextQuestions = useMemo(
+    () => rankNextQuestions({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions }),
+    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions],
+  );
+  const topThreeQuestions = useMemo(() => rankedNextQuestions.slice(0, 3), [rankedNextQuestions]);
+  const materialDecisionsRemaining = useMemo(
+    () => materialDecisionCount({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions }),
+    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions],
+  );
+
+  /** The section outline (implementation step 10): a coarser, buyer-
+   *  facing read of the SAME state already computed above -- never a
+   *  second fact store. The sector row only appears while `pack` is
+   *  active (blueprint: "do not display irrelevant sections merely
+   *  because a static template contains them"). */
+  const sectionOutline: OutlineRow[] = useMemo(() => {
+    const hasFact = (path: string) => facts.some((f) => !f.struck && f.path === path);
+    const rankedIds = new Set(rankedNextQuestions.map((q) => q.id));
+    const declinedCount = pack ? declinedSuggestionIds.filter((id) => pack.suggestions.some((s) => s.id === id) || Object.values(pack.flavourSuggestions).flat().some((s) => s.id === id)).length : 0;
+    const acceptedNotedCount = noted.filter((n) => n.id.startsWith("ps-")).length;
+    return buildSectionOutline({
+      orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && hasFact("estate.users"),
+      orgScaleDetail: coreFive.sector && coreFive.sites ? `${cap(String(standingAt("organisation.sector")[0]?.value ?? ""))}, ${standingAt("estate.sites").slice(-1)[0]?.value ?? "?"} sites` : "Sector, sites and regions not yet all stated.",
+      scopeComplete: coreFive.scope,
+      scopeDetail: buying ? `Buying: ${buying === "sase" ? "SASE" : buying === "sdwan" ? "SD-WAN" : buying === "sse" ? "SSE" : "managed security"}.` : "What is being bought is not yet stated.",
+      estateSignal: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity"),
+      estateDetail: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity") ? "Existing estate stated." : "Network, cloud and security estate today not yet stated.",
+      resilienceResolved: !rankedIds.has("q-resilience") && !rankedIds.has("OD-operating-model-conflict"),
+      resilienceDetail: rankedIds.has("q-resilience") ? "Dual-circuit resilience per site not yet decided." : "Resilience requirement stated or not applicable.",
+      securityResolved: !rankedIds.has("q-sse-scope"),
+      securityDetail: rankedIds.has("q-sse-scope") ? "Which security controls are in scope is not yet decided." : "Security control scope stated.",
+      sector: pack
+        ? { title: pack.id === "manufacturing" ? "Manufacturing and OT" : pack.id === "healthcare" ? "Healthcare and clinical systems" : `${pack.label} intelligence`, pendingSuggestions: visibleSectorSuggestions.length, acceptedOrDismissed: acceptedNotedCount + declinedCount }
+        : null,
+      operatingModelResolved: Boolean(opModel) && !rankedIds.has("OD-support-coverage-ambiguous"),
+      operatingModelDetail: opModel ? `Operating model stated.` : "Who runs it day to day is not yet stated.",
+      migrationSignal: noted.some((n) => n.id.startsWith("twin-services")),
+      migrationDetail: noted.some((n) => n.id.startsWith("twin-services")) ? "Migration/delivery scope stated." : "Migration and implementation scope not yet stated.",
+      commercialSignal: noted.some((n) => n.id.startsWith("twin-term") || n.id.startsWith("twin-commercial")),
+      commercialDetail: noted.some((n) => n.id.startsWith("twin-term") || n.id.startsWith("twin-commercial")) ? "Commercial preference stated." : "Material once pricing starts; not needed to publish a comparable enquiry.",
+      successSignal: noted.some((n) => n.id.startsWith("twin-success")),
+      successDetail: noted.some((n) => n.id.startsWith("twin-success")) ? "Success criteria stated." : "Add once the core scope and decisions above are settled.",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt]);
+
+  /** Resolves each of the top-3 NextQuestion cards into concrete,
+   *  clickable buttons -- done here (not inside the presentational
+   *  LivingProcurementCanvas) because the answer path for a compiler
+   *  open decision reuses an EXISTING `TWIN_SLOTS` entry's own options
+   *  via `landOption`, which is local to this component. The canvas
+   *  receives only `{ nq, buttons, hint }`, never TWIN_SLOTS itself, so
+   *  it stays a pure presentational layer, per its own header comment. */
+  const nextQuestionCards = useMemo(
+    () =>
+      topThreeQuestions.map((nq) => {
+        if (nq.source === "compiler_open_decision") {
+          const slotId = OPEN_DECISION_SLOT[nq.id];
+          const slot = slotId ? SLOT_BY_ID[slotId] : null;
+          return {
+            nq,
+            buttons: slot ? slot.options.map((o) => ({ label: o.label, onClick: () => landOption(slot, o) })) : [],
+            hint: slot ? null : "See “Project details” below for the full context.",
+          };
+        }
+        return {
+          nq,
+          buttons: (nq.options ?? []).map((o, i) => ({ label: o.label, onClick: () => answerNextQuestion(nq, i) })),
+          hint: null,
+        };
+      }),
+    [topThreeQuestions, landOption, answerNextQuestion],
+  );
+
   const sheetSections = useMemo(() => {
     const out: Array<{ key: string; title: string; rows: Array<{ text: string; meta: string | null; open?: boolean }> }> = [];
     for (const sec of TAXONOMY) {
@@ -3114,6 +3336,9 @@ export default function ProjectDesk({
             factsKept={live.length}
             factsStruck={Math.max(0, facts.length - live.length)}
             sourceTurnCount={sourceTurns.length}
+            nextQuestionCards={nextQuestionCards}
+            outline={sectionOutline}
+            materialDecisionsRemaining={materialDecisionsRemaining}
           />
         </div>
       )}

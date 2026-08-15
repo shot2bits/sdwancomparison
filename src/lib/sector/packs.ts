@@ -203,7 +203,83 @@ export const HEALTHCARE_PACK: SectorPack = {
   },
 };
 
-export const SECTOR_PACKS: SectorPack[] = [HEALTHCARE_PACK];
+/** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
+ *  the second pack, added to fix the brief's own reproduction — "UK 20
+ *  site SD-WAN in the manufacturing sector, full SASE required, 50
+ *  remote users" produced zero sector intelligence ("Project memory:
+ *  0 from sector rules"). Manufacturing follows the SAME pack law as
+ *  healthcare: every suggestion here is `accept.kind === "note"`
+ *  (never `"items"` targeting `constraints.complianceRequirements`),
+ *  which deliberately keeps it OUT of the existing auto-assert effect
+ *  (ProjectDesk.tsx's compliance-only useEffect) — a manufacturing
+ *  suggestion only ever lands through the buyer's own explicit accept
+ *  click, never silently, matching the brief's "a sector suggestion
+ *  must never silently become a buyer fact" rule precisely. */
+export const MANUFACTURING_PACK: SectorPack = {
+  id: "manufacturing",
+  label: "Manufacturing",
+  version: PACKS_VERSION,
+  sectorMatch: /manufactur|industrial|factory/i,
+  flavours: [
+    { id: "ot_named", label: "OT/ICS named", match: /\bot\b|\bics\b|\bscada\b|\bplc\b/i },
+  ],
+  // Deliberately no `questions` (unlike HEALTHCARE_PACK): the blueprint's
+  // own implementation step 11 asks for "governed manufacturing
+  // suggestions with explicit provenance and drop/reject controls" --
+  // suggestions, not a second earned-question mechanism duplicating the
+  // same OT/segmentation content two ways. An earlier draft of this pack
+  // added `q-mfg-segmentation`/`q-mfg-shift-windows` as PackQuestions
+  // too; removed because they said the same thing as the `mf-segmentation`
+  // suggestion below and inflated the readiness "material decisions
+  // remain" count (procurement-next-questions.ts) well past the
+  // blueprint's own worked example for the exact manufacturing
+  // reproduction ("Four material decisions remain"). Governed suggestions
+  // intentionally do NOT count toward that figure at all (see
+  // `materialDecisionCount`'s own comment) -- they are optional,
+  // Netify-labelled propositions, not buyer decisions blocking a
+  // comparable price.
+  questions: [],
+  suggestions: [
+    {
+      id: "mf-ot-visibility",
+      section: "security",
+      label: "OT/ICS asset visibility and monitoring recommended",
+      reason: "manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security, not full IT/OT convergence by default",
+      accept: { kind: "note", text: "OT/ICS asset visibility and monitoring in scope, alongside IT security" },
+      evidence: [{ source: "console_sector_2407", query: "OT ICS asset visibility manufacturing" }],
+    },
+    {
+      id: "mf-segmentation",
+      section: "network",
+      label: "IT/OT network segmentation (IEC 62443 zones and conduits)",
+      reason: "manufacturing sites typically separate production networks from corporate IT to limit blast radius from a compromise",
+      accept: { kind: "note", text: "IT/OT network segmentation (IEC 62443 zones and conduits) in scope" },
+      evidence: [{ source: "console_sector_2407", query: "IEC 62443 zones conduits manufacturing" }],
+    },
+  ],
+  flavourSuggestions: {
+    ot_named: [
+      {
+        id: "mf-ot-mdr",
+        section: "security",
+        label: "OT-aware monitoring or MDR recommended",
+        reason: "the buyer's own words name OT/ICS systems directly, and generic IT monitoring commonly misses PLC/SCADA-specific threats",
+        accept: { kind: "note", text: "OT-aware monitoring or MDR in scope for named ICS/SCADA systems" },
+        evidence: [{ source: "console_sector_2407", query: "OT aware MDR SCADA PLC" }],
+      },
+    ],
+  },
+  riskNotes: [
+    { id: "mr-change-windows", text: "Production change windows commonly restrict cutovers to planned maintenance periods; align migration sequencing with shift patterns and safety sign-off." },
+  ],
+  flavourRiskNotes: {
+    ot_named: [
+      { id: "mr-ot-vendor-access", text: "OT/ICS vendors often require dedicated remote-access paths distinct from corporate IT; scope this separately in the architecture." },
+    ],
+  },
+};
+
+export const SECTOR_PACKS: SectorPack[] = [HEALTHCARE_PACK, MANUFACTURING_PACK];
 
 /** Every pack question across all packs, for the engine and the feeds. */
 export const PACK_QUESTIONS: PackQuestion[] = SECTOR_PACKS.flatMap((p) => p.questions);

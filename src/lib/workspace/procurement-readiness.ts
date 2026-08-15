@@ -298,6 +298,23 @@ export function buildReadiness(input: {
   );
 
   score = Math.max(0, Math.min(100, score));
-  const label = score >= 80 ? "Ready to issue" : score >= 50 ? "Substantially ready" : score >= 20 ? "Taking shape" : "Early";
+  // Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026),
+  // Section 5.7's readiness bands, replacing the old "Substantially
+  // ready"/"Ready to issue" wording -- the exact defect Robert reported
+  // live ("50, SUBSTANTIALLY READY" while three material decisions sat
+  // hidden). New cut points (39/59/79) are deliberately NOT the old ones
+  // (19/49/79): the old 50-79 band read "Substantially ready" for a
+  // document that, by this file's own scoring, still has an unstated
+  // operating model, timeline and several material open decisions --
+  // the blueprint's own target wording ("Core scope captured. Four
+  // material decisions remain before suppliers can price consistently.")
+  // only reads honestly once 50 lands in "Scope forming", not
+  // "Substantially ready". The message itself (how many material
+  // decisions remain) is composed by the UI layer from the NextQuestion
+  // projection (procurement-next-questions.ts's `materialDecisionCount`),
+  // not here -- this compiler has no knowledge of earned questions or
+  // sector suggestions, which are computed outside it (see that file's
+  // own header comment for why that boundary is deliberate).
+  const label = score >= 80 ? "Ready to publish" : score >= 60 ? "Comparable enquiry" : score >= 40 ? "Scope forming" : "Starting shape";
   return { score, label, reasons };
 }

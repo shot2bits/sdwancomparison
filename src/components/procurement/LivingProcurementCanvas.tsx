@@ -30,10 +30,19 @@
 
 import { useRef } from "react";
 import type { LivingProcurementDocument, ProcurementClause } from "@/lib/workspace/procurement-document";
+import type { NextQuestion } from "@/lib/workspace/procurement-next-questions";
+import type { OutlineRow } from "@/lib/workspace/procurement-outline";
+import { outlineStateLabel } from "@/lib/workspace/procurement-outline";
 import ProcurementArchitecture from "./ProcurementArchitecture";
 import ProcurementClauseList from "./ProcurementClauseList";
 import SupplierPackView from "./SupplierPackView";
 import EvaluationView from "./EvaluationView";
+
+export type NextQuestionCard = {
+  nq: NextQuestion;
+  buttons: Array<{ label: string; onClick: () => void }>;
+  hint: string | null;
+};
 
 export type ProcurementView = "document" | "supplier" | "evaluation";
 
@@ -50,6 +59,9 @@ export default function LivingProcurementCanvas({
   factsKept,
   factsStruck,
   sourceTurnCount,
+  nextQuestionCards,
+  outline,
+  materialDecisionsRemaining,
 }: {
   document: LivingProcurementDocument;
   view: ProcurementView;
@@ -57,6 +69,20 @@ export default function LivingProcurementCanvas({
   factsKept: number;
   factsStruck: number;
   sourceTurnCount: number;
+  /** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug
+   *  2026): the top-3 prioritised next decisions, already resolved into
+   *  clickable buttons by ProjectDesk.tsx (see that file's own comment
+   *  for why the resolution happens there, not here) -- this component
+   *  stays presentational, reading `nq`'s own id/question/impact/source
+   *  straight off the projection, never recomputing anything. */
+  nextQuestionCards?: NextQuestionCard[];
+  /** The section outline (implementation step 10) -- Confirmed/Needs
+   *  input/Needs decision/Netify suggested/Later, already computed. */
+  outline?: OutlineRow[];
+  /** The readiness reason line's own count -- rendered beside the
+   *  readiness ring so "N material decisions remain" is never a
+   *  disconnected claim from the ring's own score. */
+  materialDecisionsRemaining?: number;
 }) {
   const changedClauseIds = new Set<string>([...document.changeSet.clauses.added, ...document.changeSet.clauses.updated]);
   const gateChangedIds = new Set<string>(document.changeSet.gates.added);
@@ -133,12 +159,26 @@ export default function LivingProcurementCanvas({
         </div>
       </div>
 
+      {typeof materialDecisionsRemaining === "number" && (
+        <p className="m-0 mt-2 max-w-[48em] text-[13px] leading-[1.6] text-[#8C8A85]">
+          {materialDecisionsRemaining > 0
+            ? `Core scope captured. ${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain before suppliers can price consistently.`
+            : "Every material decision this document tracks is resolved or deliberately accepted open."}
+        </p>
+      )}
+
       {hasChange && (
         <div className="mt-4 flex flex-wrap items-center gap-2 rounded-full border border-[#F5D9A8] bg-[#FFFCF3] px-4 py-2 text-[12.5px] text-[#8A4D08]">
           <span className="inline-block h-[6px] w-[6px] flex-none rounded-full bg-[#F5A21B]" aria-hidden="true" />
           {changeSummaryLine(document)}
         </div>
       )}
+
+      {nextQuestionCards && nextQuestionCards.length > 0 && (
+        <NextQuestions cards={nextQuestionCards} />
+      )}
+
+      {outline && outline.length > 0 && <SectionOutline rows={outline} />}
 
       <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         <StatTile label="Requirements" value={document.counts.requirements} />
@@ -218,6 +258,123 @@ export default function LivingProcurementCanvas({
         </span>
       </div>
     </section>
+  );
+}
+
+const IMPACT_LABEL: Record<string, string> = {
+  eligibility: "Affects who can bid",
+  price: "Affects pricing",
+  architecture: "Affects architecture",
+  compliance: "Affects compliance",
+  delivery: "Affects delivery",
+  evaluation: "Affects evaluation",
+  risk: "Affects resilience/risk",
+};
+
+/** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
+ *  "Show no more than three prioritised next decisions in the primary
+ *  flow" -- the caller already caps this at three; this component just
+ *  renders whatever it is given, with each card's own stable id, impact
+ *  labels and answer buttons. A `governedSuggestion` card is labelled
+ *  distinctly ("Netify suggests") so an accept click can never read as a
+ *  buyer-stated fact -- see procurement-next-questions.ts's own header
+ *  comment for why that distinction is load-bearing, not decorative.
+ *  Mobile-safe: cards stack full-width under 390px (no fixed min-widths
+ *  wider than the viewport, buttons wrap). */
+function NextQuestions({ cards }: { cards: NextQuestionCard[] }) {
+  return (
+    <div className="mt-5 border-t border-[#EFECE5] pt-[18px]">
+      <div className="mb-2.5 flex items-baseline gap-[11px]">
+        <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+          Best next decisions
+        </span>
+        <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">answering moves this document closer to publish</span>
+      </div>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        {cards.map(({ nq, buttons, hint }) => (
+          <div key={nq.id} className="flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] p-3.5" style={{ background: nq.governedSuggestion ? "#FBF9FF" : "#fff" }}>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", background: nq.governedSuggestion ? "#EDE6FB" : "#F4F2ED", color: nq.governedSuggestion ? "#5B3E9C" : "#8C8A85" }}>
+                {nq.governedSuggestion ? "Netify suggests" : "Open decision"}
+              </span>
+              <span className="text-[9.5px] text-[#B8B5AD]" style={mono} title="Stable question id">
+                {nq.id}
+              </span>
+            </div>
+            <div className="text-[13.5px] leading-[1.5] text-[#141414]">{nq.question}</div>
+            {nq.conflictReason && <div className="text-[12px] leading-[1.5] text-[#8A2E1F]">{nq.conflictReason}</div>}
+            {nq.impact.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {nq.impact.map((i) => (
+                  <span key={i} className="rounded-[4px] bg-[#F4F2ED] px-[6px] py-[2px] text-[9.5px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.05em" }}>
+                    {IMPACT_LABEL[i] ?? i}
+                  </span>
+                ))}
+              </div>
+            )}
+            {buttons.length > 0 ? (
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {buttons.map((b) => (
+                  <button
+                    key={b.label}
+                    type="button"
+                    onClick={b.onClick}
+                    className="cursor-pointer rounded-[6px] border border-[#E8E4DC] bg-transparent px-2.5 py-1.5 text-[12px] text-[#141414] hover:border-[#D8D4CA]"
+                  >
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+            ) : hint ? (
+              <div className="text-[12px] text-[#A3A099]">{hint}</div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const OUTLINE_STATE_STYLE: Record<string, { bg: string; color: string }> = {
+  confirmed: { bg: "#EAF4EC", color: "#256B3E" },
+  needs_input: { bg: "#F4F2ED", color: "#8C8A85" },
+  needs_decision: { bg: "#FFF1DE", color: "#B4650B" },
+  netify_suggested: { bg: "#EDE6FB", color: "#5B3E9C" },
+  later: { bg: "#F4F2ED", color: "#A3A099" },
+};
+
+/** The document outline (implementation step 10): "which relevant
+ *  sections are confirmed/incomplete/unresolved/suggested/deliberately
+ *  deferred" -- one compact row per section, never the old bare
+ *  "Project details / edit source facts" wording alone. Deliberately a
+ *  plain list, not a second interactive surface: the buttons that
+ *  actually resolve a gap live in the NextQuestions cards above and in
+ *  the existing Project details sheet, so this never duplicates a click
+ *  target with a different, easier-to-miss behaviour. */
+function SectionOutline({ rows }: { rows: OutlineRow[] }) {
+  return (
+    <div className="mt-5 border-t border-[#EFECE5] pt-[18px] pb-1">
+      <div className="mb-2.5 text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+        Document outline
+      </div>
+      <div className="flex flex-col gap-[1px] overflow-hidden rounded-[10px] border border-[#EFECE5]">
+        {rows.map((r) => {
+          const st = OUTLINE_STATE_STYLE[r.state] ?? OUTLINE_STATE_STYLE.later;
+          return (
+            <div key={r.key} className="flex flex-wrap items-center gap-x-3 gap-y-1 bg-white px-3.5 py-2.5 sm:flex-nowrap">
+              <span className="w-full min-w-0 text-[13px] text-[#141414] sm:w-[190px] sm:flex-none">{r.title}</span>
+              <span className="min-w-0 flex-1 text-[12px] text-[#8C8A85]">{r.detail}</span>
+              <span
+                className="flex-none rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase"
+                style={{ ...mono, letterSpacing: "0.05em", background: st.bg, color: st.color }}
+              >
+                {outlineStateLabel(r.state)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
