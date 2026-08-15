@@ -44,6 +44,19 @@ export type NextQuestionCard = {
   hint: string | null;
 };
 
+/** Hotfix (Robert, 15 Aug 2026), post-f33f103 production verification: an
+ *  accepted sector suggestion, resolved into a card by ProjectDesk.tsx
+ *  the same way `nextQuestionCards` already is -- this component reads
+ *  `label`/`reason` straight off the projection and never recomputes
+ *  anything, per this file's own presentational-layer rule (see its
+ *  header comment). */
+export type AcceptedSuggestionCard = {
+  id: string;
+  label: string;
+  reason: string;
+  onUndo: () => void;
+};
+
 export type ProcurementView = "document" | "supplier" | "evaluation";
 
 const VIEW_ORDER: ProcurementView[] = ["document", "supplier", "evaluation"];
@@ -62,6 +75,8 @@ export default function LivingProcurementCanvas({
   nextQuestionCards,
   outline,
   materialDecisionsRemaining,
+  acceptedSuggestionCards,
+  acceptedSuggestionsTitle,
 }: {
   document: LivingProcurementDocument;
   view: ProcurementView;
@@ -83,6 +98,15 @@ export default function LivingProcurementCanvas({
    *  readiness ring so "N material decisions remain" is never a
    *  disconnected claim from the ring's own score. */
   materialDecisionsRemaining?: number;
+  /** Hotfix (Robert, 15 Aug 2026): accepted sector suggestions the buyer
+   *  can still see and reverse, instead of an acceptance silently
+   *  vanishing from the UI the instant it compiles. Rendered directly
+   *  beneath the section outline, under the SAME title as the outline's
+   *  own sector row (`acceptedSuggestionsTitle`, e.g. "Manufacturing and
+   *  OT") so it reads as part of that named section rather than a
+   *  disconnected new surface. */
+  acceptedSuggestionCards?: AcceptedSuggestionCard[];
+  acceptedSuggestionsTitle?: string | null;
 }) {
   const changedClauseIds = new Set<string>([...document.changeSet.clauses.added, ...document.changeSet.clauses.updated]);
   const gateChangedIds = new Set<string>(document.changeSet.gates.added);
@@ -176,6 +200,10 @@ export default function LivingProcurementCanvas({
 
       {nextQuestionCards && nextQuestionCards.length > 0 && (
         <NextQuestions cards={nextQuestionCards} />
+      )}
+
+      {acceptedSuggestionCards && acceptedSuggestionCards.length > 0 && (
+        <AcceptedSuggestions cards={acceptedSuggestionCards} title={acceptedSuggestionsTitle ?? "Netify suggestions"} />
       )}
 
       {outline && outline.length > 0 && <SectionOutline rows={outline} />}
@@ -333,6 +361,58 @@ function NextQuestions({ cards }: { cards: NextQuestionCard[] }) {
             ) : hint ? (
               <div className="text-[12px] text-[#A3A099]">{hint}</div>
             ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Hotfix (Robert, 15 Aug 2026), post-f33f103 production verification:
+ *  "This is a real buyer-facing gap ... show accepted suggestions there
+ *  with their source, status and reversal action instead of making them
+ *  disappear entirely." Deliberately its own block, styled to match
+ *  `NextQuestions` above (same card shell, badge and button treatment)
+ *  rather than folded into `SectionOutline`, which is explicitly a
+ *  plain, non-interactive list per its own header comment -- this one
+ *  needs a real click target, `NextQuestions` already has one, so this
+ *  is that pattern applied to a card that has already been answered
+ *  rather than one still open. The green "Accepted" badge reuses
+ *  `SectionOutline`'s own `confirmed` colour pair for visual continuity
+ *  with the rest of the outline. */
+function AcceptedSuggestions({ cards, title }: { cards: AcceptedSuggestionCard[]; title: string }) {
+  return (
+    <div className="mt-5 border-t border-[#EFECE5] pt-[18px]">
+      <div className="mb-2.5 flex items-baseline gap-[11px]">
+        <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+          {title} · accepted
+        </span>
+        <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">
+          Netify suggested these; you accepted them. Each compiles a governed clause until reversed.
+        </span>
+      </div>
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+        {cards.map((c) => (
+          <div key={c.id} className="flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] bg-white p-3.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", background: "#EAF4EC", color: "#256B3E" }}>
+                Accepted
+              </span>
+              <span className="text-[9.5px] text-[#B8B5AD]" style={mono} title="Stable suggestion id">
+                {c.id}
+              </span>
+            </div>
+            <div className="text-[13.5px] leading-[1.5] text-[#141414]">{c.label}</div>
+            <div className="text-[12px] leading-[1.5] text-[#8C8A85]">{c.reason}</div>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={c.onUndo}
+                className="cursor-pointer rounded-[6px] border border-[#E8E4DC] bg-transparent px-2.5 py-1.5 text-[12px] text-[#141414] hover:border-[#D8D4CA]"
+              >
+                Mark as not needed
+              </button>
+            </div>
           </div>
         ))}
       </div>

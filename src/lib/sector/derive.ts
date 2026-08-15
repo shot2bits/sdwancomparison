@@ -68,6 +68,27 @@ export function declinedOnRecord(pack: SectorPack, flavours: string[], declined:
   return all.filter((s) => declined.includes(s.id));
 }
 
+/** Accepted suggestions that should render on the record for the active
+ *  pack (id order follows the pack definition) -- the accepted mirror of
+ *  declinedOnRecord above.
+ *
+ *  Hotfix (Robert, 15 Aug 2026), post-f33f103 production verification: an
+ *  accepted suggestion compiles a real governed clause
+ *  (acceptedSectorSuggestionClauses(), procurement-templates.ts, reading
+ *  the SAME `ps-<id>` noted tag this function reads), but until now
+ *  nothing ever surfaced the accepted suggestion back to the buyer once
+ *  visibleSuggestions() dropped it from the open-offer list -- there was
+ *  no live way to see it was accepted, let alone reverse it, even though
+ *  replayDecisionLedger()'s decline branch (round 3) already replays a
+ *  reversal correctly once one exists on the ledger. This is the read
+ *  half of closing that gap; ProjectDesk.tsx's declineAcceptedSuggestion
+ *  is the write half. */
+export function acceptedOnRecord(pack: SectorPack, flavours: string[], notedIds: string[]): PackSuggestion[] {
+  const all = [...pack.suggestions, ...Object.values(pack.flavourSuggestions).flat()];
+  void flavours;
+  return all.filter((s) => notedIds.includes(`ps-${s.id}`));
+}
+
 /** The pack's advice for the active flavours: rendered quietly with the
  *  pack version as provenance, never published, never facts. */
 export function packRiskNotes(pack: SectorPack, flavours: string[]): PackRiskNote[] {
