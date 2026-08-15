@@ -7,6 +7,7 @@ import { z } from "zod";
 import { SecurityRequirementInputSchema, SecurityScopeVerdictSchema } from "@/lib/security/rulebook";
 import { UnderstandingSchema } from "@/lib/workspace/understanding";
 import { SourceLedgerEntrySchema } from "@/lib/workspace/source-ledger";
+import { DecisionLedgerEntrySchema } from "@/lib/workspace/decision-ledger";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -255,6 +256,23 @@ export const ProjectDetailsSchema = z.object({
    * removed by any write path in this codebase.
    */
   source_ledger: z.array(SourceLedgerEntrySchema).default([]),
+  /**
+   * Living Procurement UK Decision-Maker Blueprint, correction pass
+   * (Robert, 15 Aug 2026), defects 3 and 4: the canonical, structured,
+   * immutable log of every NextQuestion card the buyer has actually
+   * resolved -- answered (items/note), dismissed, or a sector suggestion
+   * declined/accepted. Sits at this same top level, alongside
+   * `source_ledger`, for the identical reason: engine-independent Project
+   * state that every save/re-scope path needs to append to, not gated by
+   * `engine_data`'s authorised-writer invariants. See
+   * workspace/decision-ledger.ts for the full rationale, the merge rule
+   * (mergeDecisionLedger, identical accretion-only semantics to
+   * mergeSourceLedger) and the replay/resume functions
+   * (replayDecisionLedger, resumeDecisionsFromProject). Defaults to an
+   * empty array so every record from before this correction pass validates
+   * unchanged.
+   */
+  decision_ledger: z.array(DecisionLedgerEntrySchema).default([]),
   phase: z.enum(PROJECT_PHASE).optional(),
   history: z.array(ProjectHistoryEventSchema).default([]),
   consents: z.array(ProjectConsentSchema).default([]),

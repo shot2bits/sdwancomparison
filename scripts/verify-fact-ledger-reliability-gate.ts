@@ -40,13 +40,20 @@ import { buildSecurityProject } from "../src/lib/security/create-project";
 import { buildRescopedProject } from "../src/lib/security/rescope-project";
 import { chunkForIngest } from "../src/lib/workspace/ingest";
 import { mergeSourceLedger, parseIncomingSourceTurns, captureRawSourceEntry, resumeStateFromProject, type SourceLedgerEntry } from "../src/lib/workspace/source-ledger";
+import {
+  mergeDecisionLedger,
+  parseIncomingDecisionTurns,
+  replayDecisionLedger,
+  resumeDecisionsFromProject,
+  type DecisionLedgerEntry,
+} from "../src/lib/workspace/decision-ledger";
 import type { SecurityRequirementInput } from "../src/lib/security/rulebook";
 import { withFakeKv, makeRequest } from "./fake-kv-harness";
 
 /** The minimal shape these route-level fixtures read back off a real
  *  Response body -- not the full ProjectDetails type, just enough to make
  *  the assertions below type-safe without `any`. */
-type RouteProjectLike = { id?: string; manage_token?: string; source_ledger?: SourceLedgerEntry[] };
+type RouteProjectLike = { id?: string; manage_token?: string; source_ledger?: SourceLedgerEntry[]; decision_ledger?: DecisionLedgerEntry[]; engine?: string };
 
 let failures = 0;
 const record = (pass: boolean, label: string, detail: string) => {
@@ -1696,6 +1703,276 @@ async function main() {
         `source_ledger=${JSON.stringify(reloaded4.source_ledger)}`,
       );
     });
+  }
+
+  console.log(
+    "\n=== Round 10 (Living Procurement UK Decision-Maker Blueprint, correction pass, Robert, 15 Aug 2026), defects 3 and 4: the decision ledger -- durable NextQuestion state and honest structured-action provenance ===\n",
+  );
+  {
+    // Defect 3: "answered NextQuestion state, temporarily dismissed
+    // questions, accepted/declined sector suggestions... were all
+    // browser-only useState, gone on reload." Defect 4: "a clicked answer
+    // is buyer intent, but it is not free-typed buyer wording... record
+    // the selection as a durable structured buyer action containing at
+    // least: question ID; option ID; user-facing selected label;
+    // timestamp/order; resulting governed field/note changes." Both
+    // proven together here, through the SAME real persistence core
+    // (buildSecurityProject/buildRescopedProject) Round 5 above already
+    // established as "the real production path", plus the pure
+    // replay/resume function ProjectDesk.tsx's own arrival effect calls
+    // (resumeDecisionsFromProject) -- not a hand-rolled reimplementation.
+    const REQ10: SecurityRequirementInput = { organisation: { sector: "Manufacturing" }, estate: { sites: 20, users: 50 } };
+    const ids10 = { id: "reliability-gate-round10-decision-ledger-test", shareToken: "share-test-token-r10", manageToken: "manage-test-token-r10" };
+
+    // -- Fixture 1: one of each action kind lands in decision_ledger with
+    // a full, honest structured-action receipt (defect 4's four required
+    // fields, plus the resulting governed change). --
+    const turnDismiss: DecisionLedgerEntry = {
+      id: "dt_r10_dismiss", at: 1000, questionId: "q-contract-end", optionId: "dismiss", optionLabel: "Undecided, ask the market",
+      action: "dismiss_question", resultingFactPaths: [], resultingNoted: [],
+    };
+    const turnDecline: DecisionLedgerEntry = {
+      id: "dt_r10_decline", at: 2000, questionId: "sector:mf-segmentation", optionId: "decline", optionLabel: "Not applicable",
+      action: "decline_suggestion", resultingFactPaths: [], resultingNoted: [],
+    };
+    const turnNote: DecisionLedgerEntry = {
+      id: "dt_r10_note", at: 3000, questionId: "q-resilience", optionId: "q-resilience:0", optionLabel: "Critical sites only",
+      action: "note", resultingFactPaths: [],
+      resultingNoted: [{ id: "q-resilience:0", label: "Dual-circuit resilience at critical sites only", section: "estate", own: true }],
+    };
+    const built10 = await buildSecurityProject({
+      requirement: REQ10, via: "web", test: true, ids: ids10, skipConfidenceGate: true, skipRfpGeneration: true,
+      decisionTurns: [turnDismiss, turnDecline, turnNote],
+    });
+    const ledger10 = built10.project.decision_ledger ?? [];
+    const allThreePersisted = ["dt_r10_dismiss", "dt_r10_decline", "dt_r10_note"].every((id) => ledger10.some((e) => e.id === id));
+    record(
+      allThreePersisted,
+      "buildSecurityProject(): a dismiss, a decline and a note-kind NextQuestion action all persist into decision_ledger, the durable structured store -- not just useState",
+      `decision_ledger=${JSON.stringify(ledger10)}`,
+    );
+    const receiptHonest = ledger10.every((e) => e.questionId && e.optionId && e.optionLabel && typeof e.at === "number" && Array.isArray(e.resultingFactPaths) && Array.isArray(e.resultingNoted));
+    record(
+      receiptHonest,
+      "Defect 4: every persisted entry carries the full honest structured-action receipt Robert specified -- question id, option id, user-facing selected LABEL (never the question text), a timestamp, and the resulting governed change -- never a bare typed-quote fake",
+      `entries=${JSON.stringify(ledger10)}`,
+    );
+    const neverTheQuestionText = ledger10.every((e) => !e.optionLabel.includes("At your site count") && !e.optionLabel.includes("When do you need this live"));
+    record(
+      neverTheQuestionText,
+      "Defect 4: optionLabel is always the buyer's OWN SELECTED LABEL ('Critical sites only', 'Not applicable', 'Undecided, ask the market') -- Netify's own question wording never lands in the ledger",
+      `labels=${JSON.stringify(ledger10.map((e) => e.optionLabel))}`,
+    );
+
+    // -- Fixture 2: replay reconstructs noted/dismissedQuestionIds/
+    // declinedSuggestionIds exactly -- the same function ProjectDesk.tsx's
+    // resume effect calls, against the real persisted project. --
+    const resumed10 = resumeDecisionsFromProject(built10.project);
+    record(
+      Boolean(resumed10) &&
+        resumed10!.dismissedQuestionIds.includes("q-contract-end") &&
+        resumed10!.declinedSuggestionIds.includes("mf-segmentation") &&
+        resumed10!.noted.some((n) => n.id === "q-resilience:0" && n.label === "Dual-circuit resilience at critical sites only"),
+      "Defect 3: resumeDecisionsFromProject() replays the persisted ledger back into exactly the three previously browser-only pieces of state -- dismissedQuestionIds, declinedSuggestionIds, noted -- with provenance (label, section) intact",
+      `resumed=${JSON.stringify(resumed10)}`,
+    );
+
+    // -- Fixture 3: a SECOND save (buildRescopedProject, the real route a
+    // later Save/pre-publish refresh takes) adds a later decision that
+    // REVERSES an earlier one -- the buyer accepts the sector suggestion
+    // they had earlier declined. Proves the replay honours recorded
+    // order (latest choice wins), not "first answer sticks forever". --
+    const turnAcceptReversal: DecisionLedgerEntry = {
+      id: "dt_r10_accept_reversal", at: 4000, questionId: "sector:mf-segmentation", optionId: "ps-mf-segmentation", optionLabel: "Yes, add this",
+      action: "note", resultingFactPaths: [],
+      resultingNoted: [{ id: "ps-mf-segmentation", label: "IEC 62443 segmentation", section: "sector", own: true }],
+    };
+    const rescoped10 = await buildRescopedProject({
+      project: built10.project, requirement: REQ10, via: "web", skipConfidenceGate: true, skipRfpGeneration: true,
+      decisionTurns: [turnAcceptReversal],
+    });
+    const ledgerAfterRescope = rescoped10.project.decision_ledger ?? [];
+    const allFourPresent = ["dt_r10_dismiss", "dt_r10_decline", "dt_r10_note", "dt_r10_accept_reversal"].every((id) => ledgerAfterRescope.some((e) => e.id === id));
+    record(
+      allFourPresent,
+      "Gap 2 parity: a decision recorded AFTER the first save (buildRescopedProject, the same route a later Save/pre-publish refresh takes) survives alongside every earlier one -- decision_ledger accretes, never replaces",
+      `decision_ledger=${JSON.stringify(ledgerAfterRescope)}`,
+    );
+    const resumedAfterReversal = resumeDecisionsFromProject(rescoped10.project);
+    record(
+      Boolean(resumedAfterReversal) &&
+        !resumedAfterReversal!.declinedSuggestionIds.includes("mf-segmentation") &&
+        resumedAfterReversal!.noted.some((n) => n.id === "ps-mf-segmentation"),
+      "Defect 3: replaying the FULL ledger in recorded order honours the buyer's later choice -- the earlier decline of mf-segmentation no longer appears declined once a later entry accepts it",
+      `resumed=${JSON.stringify(resumedAfterReversal)}`,
+    );
+    // The item dismissed and never revisited is still exactly as the
+    // buyer left it -- proving reversal only affects the one item that
+    // was actually reversed, not the whole ledger.
+    record(
+      resumedAfterReversal!.dismissedQuestionIds.includes("q-contract-end"),
+      "Defect 3: an item the buyer dismissed and never revisited stays dismissed after the later save -- it does not reappear merely because a DIFFERENT decision was reversed",
+      `dismissedQuestionIds=${JSON.stringify(resumedAfterReversal!.dismissedQuestionIds)}`,
+    );
+
+    // -- Fixture 4: idempotent resave -- the SAME batch sent twice (the
+    // buyer reopens, decides nothing new, and Save fires anyway, exactly
+    // like decisionTurnsPayload() always sending the full current list)
+    // never duplicates an entry. --
+    const countBeforeRepeat10 = ledgerAfterRescope.length;
+    const repeatSave10a = await buildRescopedProject({
+      project: rescoped10.project, requirement: REQ10, via: "web", skipConfidenceGate: true, skipRfpGeneration: true,
+      decisionTurns: [turnAcceptReversal],
+    });
+    const repeatSave10b = await buildRescopedProject({
+      project: repeatSave10a.project, requirement: REQ10, via: "web", skipConfidenceGate: true, skipRfpGeneration: true,
+      decisionTurns: [turnAcceptReversal],
+    });
+    const ledgerAfterRepeats = repeatSave10b.project.decision_ledger ?? [];
+    record(
+      ledgerAfterRepeats.length === countBeforeRepeat10 && ledgerAfterRepeats.filter((e) => e.id === "dt_r10_accept_reversal").length === 1,
+      "Idempotent merge: saving the SAME decision batch twice in a row never duplicates an entry -- decision_ledger's entry count is unchanged",
+      `countBefore=${countBeforeRepeat10} countAfter=${ledgerAfterRepeats.length} copies=${ledgerAfterRepeats.filter((e) => e.id === "dt_r10_accept_reversal").length}`,
+    );
+
+    // -- Fixture 5: an ACTUAL reload, through the real route handlers
+    // (fake-kv-harness, the same "real HTTP in, real HTTP out" proof
+    // Round 6 established for source_ledger) -- the exact "save ->
+    // reload/resume fixture" Robert asked for, and the strongest form of
+    // it in this file: nothing here is a direct call into the pure core,
+    // every step is the real exported route function. --
+    await withFakeKv(async () => {
+      const { POST: createSecurityProjectRoute } = await import("../src/app/api/security-sourcing/project/route");
+      const { POST: rescopeRoute } = await import("../src/app/api/security-sourcing/project/[id]/rescope/route");
+      const { GET: rfpGetRoute } = await import("../src/app/api/rfp/[id]/route");
+
+      const FULL_REQ10: SecurityRequirementInput = {
+        organisation: { sector: "Manufacturing" },
+        estate: { sites: 20, users: 50, existingSecurity: ["Defender P2"] },
+        drivers: ["renewal"],
+        constraints: { inHouseSocCapacity: "business_hours", complianceRequirements: ["iso27001"] },
+      };
+      const createRes10 = await createSecurityProjectRoute(
+        makeRequest("POST", "https://example.test/sase/api/security-sourcing/project", {
+          body: {
+            requirement: FULL_REQ10, consent: true, test: true,
+            decision_turns: [
+              { id: "dt_r10rt_dismiss", at: 1000, questionId: "q-contract-end", optionId: "dismiss", optionLabel: "Undecided, ask the market", action: "dismiss_question", resultingFactPaths: [], resultingNoted: [] },
+              { id: "dt_r10rt_decline", at: 2000, questionId: "sector:mf-segmentation", optionId: "decline", optionLabel: "Not applicable", action: "decline_suggestion", resultingFactPaths: [], resultingNoted: [] },
+            ],
+          },
+        }),
+      );
+      const created10 = (await createRes10.json()) as { project?: RouteProjectLike; error?: string };
+      record(
+        createRes10.status === 200 && Boolean(created10.project?.decision_ledger?.some((e) => e.id === "dt_r10rt_dismiss")) && Boolean(created10.project?.decision_ledger?.some((e) => e.id === "dt_r10rt_decline")),
+        "Route-level: POST /security-sourcing/project (initial create) persists both decisions into decision_ledger through the real route",
+        `status=${createRes10.status} error=${created10.error} decision_ledger=${JSON.stringify(created10.project?.decision_ledger)}`,
+      );
+      const id10 = created10.project?.id ?? "";
+      const manage10 = created10.project?.manage_token ?? "";
+
+      // A later Save (the real re-scope route) records a third decision.
+      const rescopeRes10 = await rescopeRoute(
+        makeRequest("POST", `https://example.test/sase/api/security-sourcing/project/${id10}/rescope`, {
+          body: {
+            manage_token: manage10, requirement: FULL_REQ10, consent: true,
+            decision_turns: [{ id: "dt_r10rt_note", at: 3000, questionId: "q-resilience", optionId: "q-resilience:0", optionLabel: "Critical sites only", action: "note", resultingFactPaths: [], resultingNoted: [{ id: "q-resilience:0", label: "Dual-circuit resilience at critical sites only", section: "estate", own: true }] }],
+          },
+        }),
+        { params: Promise.resolve({ id: id10 }) },
+      );
+      record(rescopeRes10.status === 200, "Route-level: POST .../rescope (a later Save) records the third decision", `status=${rescopeRes10.status}`);
+
+      // The actual reload: GET the project back exactly as an
+      // authenticated owner's arrival effect would.
+      const reload10 = await rfpGetRoute(makeRequest("GET", `https://example.test/sase/api/rfp/${id10}?manage=${manage10}`), { params: Promise.resolve({ id: id10 }) });
+      const reloaded10 = (await reload10.json()) as RouteProjectLike;
+      const hasAllThree = ["dt_r10rt_dismiss", "dt_r10rt_decline", "dt_r10rt_note"].every((tid) => (reloaded10.decision_ledger ?? []).some((e) => e.id === tid));
+      record(
+        reload10.status === 200 && hasAllThree,
+        "Route-level reload: GET /api/rfp/[id] returns all three decisions the real routes above persisted",
+        `status=${reload10.status} decision_ledger=${JSON.stringify(reloaded10.decision_ledger)}`,
+      );
+
+      // The exact function ProjectDesk.tsx's own arrival effect calls,
+      // against the exact object the real GET route returned -- proving
+      // "resolved or declined items do not reappear" survives a REAL
+      // save -> reload/resume round trip, not a same-process object
+      // reference.
+      const resumeAfterRealReload = resumeDecisionsFromProject(reloaded10);
+      record(
+        Boolean(resumeAfterRealReload) &&
+          resumeAfterRealReload!.dismissedQuestionIds.includes("q-contract-end") &&
+          resumeAfterRealReload!.declinedSuggestionIds.includes("mf-segmentation") &&
+          resumeAfterRealReload!.noted.some((n) => n.id === "q-resilience:0"),
+        "Defect 3, the actual save -> reload/resume fixture: after a REAL create, a REAL later Save, and a REAL reload through the exported route handlers, resumeDecisionsFromProject() reconstructs the dismissed question, the declined suggestion and the answered resilience note -- none of them reappear, and provenance (label, section) survives intact",
+        `resumed=${JSON.stringify(resumeAfterRealReload)}`,
+      );
+    });
+
+    // -- Fixture 6: a project on the wizard/non-security-sourcing path
+    // (no `engine` field) is correctly refused by resume, the exact same
+    // boundary resumeStateFromProject() already documents for
+    // source_ledger -- this is not a new gap, it is the SAME architecture
+    // reused, at the SAME scope. --
+    const nonEngineProject = { decision_ledger: [turnDismiss] };
+    record(
+      resumeDecisionsFromProject(nonEngineProject) === null,
+      "resumeDecisionsFromProject() is scoped identically to resumeStateFromProject() -- a non-security_sourcing project's decisions are never rehydrated by this resume path, the same documented boundary the existing source-ledger resume already has",
+      `result=${JSON.stringify(resumeDecisionsFromProject(nonEngineProject))}`,
+    );
+
+    // -- Fixture 7: request-body parsing is defensive, same "duplication
+    // is safer than disappearance" per-item best-effort as
+    // parseIncomingSourceTurns -- one malformed item drops only itself. --
+    const parsedMixed = parseIncomingDecisionTurns([
+      turnDismiss,
+      { id: "dt_bad_missing_fields" }, // malformed: fails schema
+      "not even an object",
+      turnDecline,
+    ]);
+    record(
+      parsedMixed.length === 2 && parsedMixed.some((e) => e.id === "dt_r10_dismiss") && parsedMixed.some((e) => e.id === "dt_r10_decline"),
+      "parseIncomingDecisionTurns(): one malformed item in a batch drops only itself -- the two valid entries either side survive",
+      `parsed=${JSON.stringify(parsedMixed.map((e) => e.id))}`,
+    );
+    const mergedDefensive = mergeDecisionLedger([], parsedMixed);
+    record(
+      mergedDefensive.length === 2,
+      "mergeDecisionLedger(): merges the defensively-parsed batch with the same accretion-only, id-deduplicated rule as mergeSourceLedger",
+      `merged=${JSON.stringify(mergedDefensive.map((e) => e.id))}`,
+    );
+
+    // -- Fixture 8: replayDecisionLedger() in isolation -- the pure
+    // reconstruction step, direct proof it is a function of RECORDED
+    // ORDER, not of some other implicit rule (e.g. action-kind priority).
+    // The identical two entries in the OPPOSITE order produce the
+    // opposite verdict for the same suggestion id.
+    const declineThenAccept = replayDecisionLedger([turnDecline, turnAcceptReversal]);
+    const acceptThenDecline = replayDecisionLedger([turnAcceptReversal, turnDecline]);
+    record(
+      !declineThenAccept.declinedSuggestionIds.includes("mf-segmentation") && declineThenAccept.noted.some((n) => n.id === "ps-mf-segmentation"),
+      "replayDecisionLedger(): decline followed by a later accept resolves ACCEPTED -- recorded order, not action-kind priority, decides the outcome",
+      `result=${JSON.stringify(declineThenAccept)}`,
+    );
+    // Living Procurement UK Decision-Maker Blueprint, correction pass
+    // round 3 (Robert, 15 Aug 2026), release blocker 1: this assertion
+    // used to check ONLY declinedSuggestionIds, while acceptThenDecline's
+    // OWN `noted` array (visible in the very `result=` detail string this
+    // fixture already logged) still carried the earlier "ps-mf-segmentation"
+    // accepted note -- a later decline reversing an earlier accept was
+    // never actually implemented in replayDecisionLedger(), only the
+    // opposite direction was. The fixture reported PASS while proving the
+    // bug's own symptom in its own output. Now asserts BOTH halves of
+    // "resolves DECLINED": declinedSuggestionIds gains the id, AND the
+    // earlier accepted noted item is genuinely gone -- a governed clause
+    // has nothing left to compile from once this is proven.
+    record(
+      acceptThenDecline.declinedSuggestionIds.includes("mf-segmentation") && !acceptThenDecline.noted.some((n) => n.id === "ps-mf-segmentation"),
+      "replayDecisionLedger(): the SAME two entries in the OPPOSITE recorded order resolve DECLINED instead -- confirms the replay is genuinely order-driven, not a hidden bias toward accept, AND that the earlier accepted noted item is actually removed (not just shadowed by declinedSuggestionIds while still present)",
+      `result=${JSON.stringify(acceptThenDecline)}`,
+    );
   }
 
   console.log("\n=== Blocker 6: hermetic model tests (success, timeout, unavailability) + the reliability suite in the build gate ===\n");

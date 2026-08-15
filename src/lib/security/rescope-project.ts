@@ -26,6 +26,7 @@ import { advanceProject, recordProjectEvent, projectPhase } from "@/lib/project-
 import type { ProjectDetails } from "@/lib/rfp-types";
 import type { Understanding } from "@/lib/workspace/understanding";
 import { mergeSourceLedger, type SourceLedgerEntry } from "@/lib/workspace/source-ledger";
+import { mergeDecisionLedger, type DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
 
 /** True when the live document differs from the latest generated snapshot:
  *  the same rule the generate_security_rfp tool applies. */
@@ -88,6 +89,14 @@ export interface RescopeInput {
    *  MCP tool) leaves the ledger exactly as it was, same as `understanding`
    *  above. */
   sourceTurns?: SourceLedgerEntry[];
+  /** Living Procurement UK Decision-Maker Blueprint, correction pass
+   *  (Robert, 15 Aug 2026), defects 3 and 4: this route is the ONLY save
+   *  path a Security Sourcing project takes after its first save, exactly
+   *  like sourceTurns above -- so this is what makes a NextQuestion answer
+   *  clicked after the first save durable too. Merged idempotently by
+   *  stable entry id (mergeDecisionLedger) into the project's existing
+   *  decision_ledger below; omitted/empty is a no-op. */
+  decisionTurns?: DecisionLedgerEntry[];
 }
 
 export interface RescopedProject {
@@ -137,6 +146,9 @@ export async function buildRescopedProject(input: RescopeInput): Promise<Rescope
     // idempotency), so calling this on every Save/refresh, not just once,
     // cannot duplicate anything.
     source_ledger: mergeSourceLedger(project.source_ledger ?? [], input.sourceTurns ?? []),
+    // Defects 3/4: the same accretion-only merge, for the same reason,
+    // into the decision ledger.
+    decision_ledger: mergeDecisionLedger(project.decision_ledger ?? [], input.decisionTurns ?? []),
     consents: [
       ...(project.consents ?? []),
       {

@@ -238,12 +238,46 @@ export function buildReadiness(input: {
   instrument: "sor" | "rfi" | "rfp";
   bankQuestionCount: number;
   rfiBankVersion: string | null;
+  /**
+   * Living Procurement UK Decision-Maker Blueprint, correction pass
+   * (Robert, 15 Aug 2026), defect 5: "Do not merely relabel the existing
+   * score bands. Readiness must be derived from: material section
+   * coverage; ...; remaining material open questions; accepted-but-
+   * unresolved sector rules where applicable." These four fields carry
+   * exactly that -- the SAME projections the NextQuestion cards and
+   * section outline already compute (procurement-next-questions.ts's
+   * materialDecisionCount(), procurement-outline.ts's buildSectionOutline(),
+   * sector/derive.ts's visibleSuggestions()) -- into the two buckets below
+   * that were previously blind to them (a flat "any clause at all" 30pts,
+   * and an open-decisions-only 15pts). All four are OPTIONAL: every
+   * existing caller (every fixture, the throwaway repro script) that has
+   * not been updated to compute and pass this outer NextQuestion-layer
+   * state keeps the EXACT prior fallback formula for both buckets, so
+   * this correction pass changes NO existing compiler-level fixture's
+   * expected score. The real caller (ProjectDesk.tsx) DOES pass them,
+   * computed in a useMemo downstream of both compiledDocument and
+   * rankedNextQuestions/sectionOutline -- readiness is deliberately still
+   * not woven INTO the compiler itself (compileProcurementDocument()'s own
+   * signature is untouched), because rankedNextQuestions/sectionOutline
+   * both read compiledDocument.openDecisions, so feeding them back INTO
+   * the same compile would be circular; this keeps readiness a downstream
+   * projection over the compiled document, exactly like sectionOutline
+   * already is, not a second data model.
+   */
+  materialDecisionsRemaining?: number;
+  pendingSectorSuggestions?: number;
+  sectionsConfirmed?: number;
+  sectionsTotal?: number;
 }): { score: number; label: string; reasons: string[] } {
-  const { requirement, opModel, clauses, openDecisions, instrument, bankQuestionCount, rfiBankVersion } = input;
+  const { requirement, opModel, clauses, openDecisions, instrument, bankQuestionCount, rfiBankVersion, materialDecisionsRemaining, pendingSectorSuggestions, sectionsConfirmed, sectionsTotal } = input;
   const reasons: string[] = [];
   let score = 0;
 
-  if (clauses.length > 0) {
+  if (typeof sectionsConfirmed === "number" && typeof sectionsTotal === "number" && sectionsTotal > 0) {
+    const sectionPoints = Math.round(30 * (sectionsConfirmed / sectionsTotal));
+    score += sectionPoints;
+    reasons.push(`${sectionsConfirmed} of ${sectionsTotal} procurement sections confirmed.`);
+  } else if (clauses.length > 0) {
     score += 30;
     reasons.push(`${clauses.length} testable requirement${clauses.length === 1 ? "" : "s"} compiled.`);
   } else {
@@ -280,9 +314,40 @@ export function buildReadiness(input: {
     reasons.push("A mandatory clause is unresolved and carries no acceptance test yet (see open decisions).");
   }
 
-  const decisionCredit = Math.max(0, 15 - Math.min(15, openDecisions.length * 5));
-  score += decisionCredit;
-  reasons.push(openDecisions.length ? `${openDecisions.length} high-impact open decision${openDecisions.length === 1 ? "" : "s"} remain.` : "No high-impact open decisions remain.");
+  if (typeof materialDecisionsRemaining === "number") {
+    // Living Procurement UK Decision-Maker Blueprint, correction pass
+    // round 3 (Robert, 15 Aug 2026), release blocker 2: `materialDecisionCount()`
+    // (procurement-next-questions.ts) DELIBERATELY excludes
+    // sector-suggestion-sourced candidates (`q.source !== "sector_suggestion"`)
+    // -- they are optional, buyer-may-accept-or-ignore Netify
+    // recommendations, never a decision that blocks consistent pricing.
+    // This function used to contradict that on both counts: it silently
+    // SUBTRACTED a `sectorPenalty` from the score for every pending
+    // suggestion (so declining an optional suggestion -- pure queue-
+    // clearing, no requirement improved -- raised the score), and its own
+    // reason text claimed the material-decision count "combined" and
+    // "included" the pending suggestions when materialDecisionsRemaining
+    // never counted them at all (mathematically false whenever
+    // pendingSectorSuggestions > 0). Fixed: no score contribution from
+    // pendingSectorSuggestions in either direction, and the two concepts
+    // are reported as two separate, honest sentences.
+    const decisionCredit = Math.max(0, 15 - materialDecisionsRemaining * 3);
+    score += decisionCredit;
+    reasons.push(
+      materialDecisionsRemaining
+        ? `${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain${materialDecisionsRemaining === 1 ? "s" : ""} (open decisions and unresolved earned questions).`
+        : "No material decisions remain.",
+    );
+    if (pendingSectorSuggestions) {
+      reasons.push(
+        `Separately, ${pendingSectorSuggestions} optional Netify suggestion${pendingSectorSuggestions === 1 ? "" : "s"} ${pendingSectorSuggestions === 1 ? "is" : "are"} available to review -- these do not block consistent pricing and do not affect this score.`,
+      );
+    }
+  } else {
+    const decisionCredit = Math.max(0, 15 - Math.min(15, openDecisions.length * 5));
+    score += decisionCredit;
+    reasons.push(openDecisions.length ? `${openDecisions.length} high-impact open decision${openDecisions.length === 1 ? "" : "s"} remain.` : "No high-impact open decisions remain.");
+  }
 
   // Informational only -- never added to `score` (readiness, here, is
   // about THIS document's own testable-requirements state, a different
@@ -298,6 +363,23 @@ export function buildReadiness(input: {
   );
 
   score = Math.max(0, Math.min(100, score));
-  const label = score >= 80 ? "Ready to issue" : score >= 50 ? "Substantially ready" : score >= 20 ? "Taking shape" : "Early";
+  // Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026),
+  // Section 5.7's readiness bands, replacing the old "Substantially
+  // ready"/"Ready to issue" wording -- the exact defect Robert reported
+  // live ("50, SUBSTANTIALLY READY" while three material decisions sat
+  // hidden). New cut points (39/59/79) are deliberately NOT the old ones
+  // (19/49/79): the old 50-79 band read "Substantially ready" for a
+  // document that, by this file's own scoring, still has an unstated
+  // operating model, timeline and several material open decisions --
+  // the blueprint's own target wording ("Core scope captured. Four
+  // material decisions remain before suppliers can price consistently.")
+  // only reads honestly once 50 lands in "Scope forming", not
+  // "Substantially ready". The message itself (how many material
+  // decisions remain) is composed by the UI layer from the NextQuestion
+  // projection (procurement-next-questions.ts's `materialDecisionCount`),
+  // not here -- this compiler has no knowledge of earned questions or
+  // sector suggestions, which are computed outside it (see that file's
+  // own header comment for why that boundary is deliberate).
+  const label = score >= 80 ? "Ready to publish" : score >= 60 ? "Comparable enquiry" : score >= 40 ? "Scope forming" : "Starting shape";
   return { score, label, reasons };
 }
