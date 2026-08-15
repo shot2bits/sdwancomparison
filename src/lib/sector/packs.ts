@@ -241,10 +241,20 @@ export const MANUFACTURING_PACK: SectorPack = {
   questions: [],
   suggestions: [
     {
+      // Correction pass (Robert, 15 Aug 2026), defect 6: "keep manufacturing
+      // rules explicitly labelled Netify suggested and optional... make
+      // clear that manufacturing alone does not prove an OT/ICS
+      // environment exists." Both suggestions below are inferred from the
+      // SECTOR alone (organisation.sector matches manufacturing), NOT from
+      // the buyer naming OT/ICS/SCADA/PLC systems directly -- that
+      // stronger, evidence-based signal is the separate `ot_named`
+      // flavour suggestion (`mf-ot-mdr`, below) which does not need this
+      // disclaimer since the buyer's own words already name the systems.
       id: "mf-ot-visibility",
       section: "security",
       label: "OT/ICS asset visibility and monitoring recommended",
-      reason: "manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security, not full IT/OT convergence by default",
+      reason:
+        "manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.",
       accept: { kind: "note", text: "OT/ICS asset visibility and monitoring in scope, alongside IT security" },
       evidence: [{ source: "console_sector_2407", query: "OT ICS asset visibility manufacturing" }],
     },
@@ -252,7 +262,8 @@ export const MANUFACTURING_PACK: SectorPack = {
       id: "mf-segmentation",
       section: "network",
       label: "IT/OT network segmentation (IEC 62443 zones and conduits)",
-      reason: "manufacturing sites typically separate production networks from corporate IT to limit blast radius from a compromise",
+      reason:
+        "manufacturing sites typically separate production networks from corporate IT (IEC 62443 zones and conduits) to limit blast radius from a compromise -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.",
       accept: { kind: "note", text: "IT/OT network segmentation (IEC 62443 zones and conduits) in scope" },
       evidence: [{ source: "console_sector_2407", query: "IEC 62443 zones conduits manufacturing" }],
     },

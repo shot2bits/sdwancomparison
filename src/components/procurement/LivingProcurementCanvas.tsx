@@ -295,13 +295,18 @@ function NextQuestions({ cards }: { cards: NextQuestionCard[] }) {
           <div key={nq.id} className="flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] p-3.5" style={{ background: nq.governedSuggestion ? "#FBF9FF" : "#fff" }}>
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", background: nq.governedSuggestion ? "#EDE6FB" : "#F4F2ED", color: nq.governedSuggestion ? "#5B3E9C" : "#8C8A85" }}>
-                {nq.governedSuggestion ? "Netify suggests" : "Open decision"}
+                {nq.governedSuggestion ? "Netify suggests · optional" : "Open decision"}
               </span>
               <span className="text-[9.5px] text-[#B8B5AD]" style={mono} title="Stable question id">
                 {nq.id}
               </span>
             </div>
             <div className="text-[13.5px] leading-[1.5] text-[#141414]">{nq.question}</div>
+            {/* defect 6 (correction pass, 15 Aug 2026): every governed
+                suggestion shows its own short "why Netify is raising this"
+                reason, straight from the sector pack -- never left as a
+                bare label the buyer has to take on faith. */}
+            {nq.reason && <div className="text-[12px] leading-[1.5] text-[#8C8A85]">{nq.reason}</div>}
             {nq.conflictReason && <div className="text-[12px] leading-[1.5] text-[#8A2E1F]">{nq.conflictReason}</div>}
             {nq.impact.length > 0 && (
               <div className="flex flex-wrap gap-1.5">

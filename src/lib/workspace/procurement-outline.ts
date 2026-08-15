@@ -30,6 +30,10 @@
  * PURE: no I/O, no React.
  */
 
+import type { SecurityRequirementInput } from "@/lib/security/rulebook";
+import type { BuyingId } from "@/lib/workspace/extract";
+import type { ProcurementClause } from "@/lib/workspace/procurement-document";
+
 export type OutlineState = "confirmed" | "needs_input" | "needs_decision" | "netify_suggested" | "later";
 
 export type OutlineRow = {
@@ -51,6 +55,46 @@ const STATE_LABEL: Record<OutlineState, string> = {
 
 export function outlineStateLabel(s: OutlineState): string {
   return STATE_LABEL[s];
+}
+
+/**
+ * Living Procurement UK Decision-Maker Blueprint, correction pass
+ * (Robert, 15 Aug 2026), defect 2: "The Resilience and availability
+ * outline row may say Confirmed only when the canonical document
+ * contains the corresponding governed resilience state or clause.
+ * Question disappearance alone is not sufficient proof." Pulled out of
+ * ProjectDesk.tsx into this pure module specifically so it is a real,
+ * directly testable unit -- exercised behaviourally (against an actual
+ * compiled document) rather than proven only by inspecting the
+ * component's source text.
+ *
+ * `q-resilience` (questions.ts) is earned purely from site count and
+ * buying type; it is never resolved by notedIds, so its disappearance
+ * from the ranked NextQuestion list means only "the buyer dismissed the
+ * card" or "site count/buying type changed" -- never "a resilience
+ * decision was actually compiled." The one thing that DOES prove a real
+ * decision is the presence of the `site-resilience-scope` clause
+ * (network:site-resilience, procurement-templates.ts), which compiles
+ * from the buyer's own stated per-site circuit language regardless of
+ * whether the NextQuestion card is still showing.
+ */
+export function deriveResilienceOutlineState(input: {
+  clauses: Pick<ProcurementClause, "templateId">[];
+  requirement: SecurityRequirementInput;
+  buying: BuyingId | null;
+  hasOperatingModelConflict: boolean;
+}): { resolved: boolean; detail: string } {
+  const hasSiteResilienceClause = input.clauses.some((c) => c.templateId === "site-resilience-scope");
+  const materiallyApplicable =
+    (input.requirement.estate?.sites ?? 0) >= 10 &&
+    (input.buying === "sase" || input.buying === "sdwan" || input.buying === "sse");
+  const resolved = (hasSiteResilienceClause || !materiallyApplicable) && !input.hasOperatingModelConflict;
+  const detail = hasSiteResilienceClause
+    ? "Per-site resilience requirement stated and compiled into the document."
+    : materiallyApplicable
+      ? "Dual-circuit resilience per site not yet decided."
+      : "Resilience requirement not yet applicable at this site count.";
+  return { resolved, detail };
 }
 
 export function buildSectionOutline(input: {

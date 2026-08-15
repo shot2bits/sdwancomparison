@@ -238,12 +238,46 @@ export function buildReadiness(input: {
   instrument: "sor" | "rfi" | "rfp";
   bankQuestionCount: number;
   rfiBankVersion: string | null;
+  /**
+   * Living Procurement UK Decision-Maker Blueprint, correction pass
+   * (Robert, 15 Aug 2026), defect 5: "Do not merely relabel the existing
+   * score bands. Readiness must be derived from: material section
+   * coverage; ...; remaining material open questions; accepted-but-
+   * unresolved sector rules where applicable." These four fields carry
+   * exactly that -- the SAME projections the NextQuestion cards and
+   * section outline already compute (procurement-next-questions.ts's
+   * materialDecisionCount(), procurement-outline.ts's buildSectionOutline(),
+   * sector/derive.ts's visibleSuggestions()) -- into the two buckets below
+   * that were previously blind to them (a flat "any clause at all" 30pts,
+   * and an open-decisions-only 15pts). All four are OPTIONAL: every
+   * existing caller (every fixture, the throwaway repro script) that has
+   * not been updated to compute and pass this outer NextQuestion-layer
+   * state keeps the EXACT prior fallback formula for both buckets, so
+   * this correction pass changes NO existing compiler-level fixture's
+   * expected score. The real caller (ProjectDesk.tsx) DOES pass them,
+   * computed in a useMemo downstream of both compiledDocument and
+   * rankedNextQuestions/sectionOutline -- readiness is deliberately still
+   * not woven INTO the compiler itself (compileProcurementDocument()'s own
+   * signature is untouched), because rankedNextQuestions/sectionOutline
+   * both read compiledDocument.openDecisions, so feeding them back INTO
+   * the same compile would be circular; this keeps readiness a downstream
+   * projection over the compiled document, exactly like sectionOutline
+   * already is, not a second data model.
+   */
+  materialDecisionsRemaining?: number;
+  pendingSectorSuggestions?: number;
+  sectionsConfirmed?: number;
+  sectionsTotal?: number;
 }): { score: number; label: string; reasons: string[] } {
-  const { requirement, opModel, clauses, openDecisions, instrument, bankQuestionCount, rfiBankVersion } = input;
+  const { requirement, opModel, clauses, openDecisions, instrument, bankQuestionCount, rfiBankVersion, materialDecisionsRemaining, pendingSectorSuggestions, sectionsConfirmed, sectionsTotal } = input;
   const reasons: string[] = [];
   let score = 0;
 
-  if (clauses.length > 0) {
+  if (typeof sectionsConfirmed === "number" && typeof sectionsTotal === "number" && sectionsTotal > 0) {
+    const sectionPoints = Math.round(30 * (sectionsConfirmed / sectionsTotal));
+    score += sectionPoints;
+    reasons.push(`${sectionsConfirmed} of ${sectionsTotal} procurement sections confirmed.`);
+  } else if (clauses.length > 0) {
     score += 30;
     reasons.push(`${clauses.length} testable requirement${clauses.length === 1 ? "" : "s"} compiled.`);
   } else {
@@ -280,9 +314,20 @@ export function buildReadiness(input: {
     reasons.push("A mandatory clause is unresolved and carries no acceptance test yet (see open decisions).");
   }
 
-  const decisionCredit = Math.max(0, 15 - Math.min(15, openDecisions.length * 5));
-  score += decisionCredit;
-  reasons.push(openDecisions.length ? `${openDecisions.length} high-impact open decision${openDecisions.length === 1 ? "" : "s"} remain.` : "No high-impact open decisions remain.");
+  if (typeof materialDecisionsRemaining === "number") {
+    const sectorPenalty = Math.min(3, pendingSectorSuggestions ?? 0);
+    const decisionCredit = Math.max(0, 15 - materialDecisionsRemaining * 3 - sectorPenalty);
+    score += decisionCredit;
+    reasons.push(
+      materialDecisionsRemaining
+        ? `${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain${materialDecisionsRemaining === 1 ? "s" : ""} (open decisions, unresolved earned questions and unaccepted sector suggestions combined)${sectorPenalty ? `, including ${sectorPenalty} pending sector suggestion${sectorPenalty === 1 ? "" : "s"}` : ""}.`
+        : "No material decisions remain.",
+    );
+  } else {
+    const decisionCredit = Math.max(0, 15 - Math.min(15, openDecisions.length * 5));
+    score += decisionCredit;
+    reasons.push(openDecisions.length ? `${openDecisions.length} high-impact open decision${openDecisions.length === 1 ? "" : "s"} remain.` : "No high-impact open decisions remain.");
+  }
 
   // Informational only -- never added to `score` (readiness, here, is
   // about THIS document's own testable-requirements state, a different

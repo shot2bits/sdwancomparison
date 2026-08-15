@@ -95,6 +95,16 @@ export type NextQuestion = {
   /** A conflict/ambiguity this decision resolves, when the underlying
    *  open decision carries one -- rendered as context, never invented. */
   conflictReason: string | null;
+  /** Living Procurement UK Decision-Maker Blueprint, correction pass
+   *  (Robert, 15 Aug 2026), defect 6: "keep manufacturing rules explicitly
+   *  labelled Netify suggested and optional... show a short reason
+   *  explaining why Netify is raising it." Populated ONLY for
+   *  `source === "sector_suggestion"`, straight from the pack's own
+   *  `PackSuggestion.reason` (packs.ts) -- never invented here, never
+   *  shown for an earned/open-decision candidate, since those already
+   *  carry their own `question` wording as the reason. `null` when the
+   *  candidate has none. */
+  reason: string | null;
   /** Internal ranking weight (earned question weight, or a 0 default for
    *  open decisions/suggestions, which rank by tier instead) -- exposed
    *  for fixtures/debugging, not meant as user-facing copy. */
@@ -203,6 +213,7 @@ export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
       options: null,
       governedSuggestion: false,
       conflictReason: d.conflictReason,
+      reason: null,
       weight: d.conflict ? 96 : 0,
     });
   }
@@ -217,6 +228,7 @@ export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
       options: q.options,
       governedSuggestion: false,
       conflictReason: null,
+      reason: null,
       weight: q.weight,
     });
   }
@@ -234,6 +246,9 @@ export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
       ],
       governedSuggestion: true,
       conflictReason: null,
+      // defect 6: the buyer-facing card must show WHY Netify is raising
+      // this, straight from the pack's own reason -- never invented here.
+      reason: s.reason,
       weight: 40,
     });
   }

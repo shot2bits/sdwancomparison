@@ -5,6 +5,7 @@ import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark, recordDemandSample, indexRfpForBuyer } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
+import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 import { rfpContentSnapshot, contentHash } from "@/lib/published-snapshot";
 import { applyGovernedEvent } from "@/lib/rfp-governed-revision";
 
@@ -107,6 +108,10 @@ export async function PUT(req: Request, ctx: Ctx) {
   // (wrong field name/shape) or silently overwrite instead of merging.
   const incomingSourceTurns = parseIncomingSourceTurns(body.source_turns);
   delete body.source_turns;
+  // Defects 3/4 (correction pass, 15 Aug 2026): same pulled-out-before-the-
+  // blind-spread treatment as source_turns immediately above.
+  const incomingDecisionTurns = parseIncomingDecisionTurns(body.decision_turns);
+  delete body.decision_turns;
 
   // Preserve immutable/credential/ownership fields: a PUT must never rotate the
   // manage_token, reassign identity-bearing tokens, or move the RFP to another
@@ -123,6 +128,7 @@ export async function PUT(req: Request, ctx: Ctx) {
     // left to whatever body.source_ledger happened to contain): accretes
     // idempotently by stable turn id, exactly like the re-scope route.
     source_ledger: mergeSourceLedger(existing.source_ledger ?? [], incomingSourceTurns),
+    decision_ledger: mergeDecisionLedger(existing.decision_ledger ?? [], incomingDecisionTurns),
   } as typeof existing;
 
   // Adopt ownership: a token-authorised save from a signed-in buyer binds the

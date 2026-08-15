@@ -25,6 +25,7 @@ import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 import type { Understanding } from "@/lib/workspace/understanding";
 import { notesWithSourceTurns } from "@/lib/workspace/extract";
 import { mergeSourceLedger, type SourceLedgerEntry } from "@/lib/workspace/source-ledger";
+import { mergeDecisionLedger, type DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
 
 export const CREATE_CONSENT_TEXT =
   "Create my Security Sourcing project: Netify stores this requirement and scoping verdict so I can build and publish an RFP to matched vendors. No vendor is contacted until I publish.";
@@ -81,6 +82,14 @@ export interface CreateSecurityProjectInput {
    *  create_security_project MCP tool has no chat thread to draw from at
    *  all). */
   sourceTurns?: SourceLedgerEntry[];
+  /** Living Procurement UK Decision-Maker Blueprint, correction pass
+   *  (Robert, 15 Aug 2026), defects 3 and 4: the buyer's own structured
+   *  NextQuestion actions (see ProjectDesk.tsx's answerNextQuestion and
+   *  workspace/decision-ledger.ts), persisted into `project.decision_ledger`
+   *  the same way sourceTurns above persists into `project.source_ledger` --
+   *  a durable, structured store, not a browser-only one. Absent for every
+   *  existing caller (the MCP tools have no NextQuestion cards to answer). */
+  decisionTurns?: DecisionLedgerEntry[];
 }
 
 export interface BuiltSecurityProject {
@@ -185,6 +194,7 @@ export async function buildSecurityProject(
   // ledger's text values feed the human-readable projection below, so the
   // two never drift apart at the moment of creation.
   const sourceLedger = mergeSourceLedger([], input.sourceTurns ?? []);
+  const decisionLedger = mergeDecisionLedger([], input.decisionTurns ?? []);
   let project = ProjectDetailsSchema.parse({
     id: input.ids.id,
     created: now,
@@ -215,6 +225,11 @@ export async function buildSecurityProject(
     // `understanding` for the same reason — engine-independent, not gated
     // by engine_data's authorised-writer invariants.
     source_ledger: sourceLedger,
+    // Defects 3/4: the same canonical, structured, top-level treatment as
+    // source_ledger immediately above, built once here from this creation's
+    // input decisions (mergeDecisionLedger([], ...) is again just "validate
+    // and de-dup within this one batch" -- there is no existing ledger yet).
+    decision_ledger: decisionLedger,
     phase: "scoping",
     history: [],
     consents: [

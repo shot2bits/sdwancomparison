@@ -1227,7 +1227,34 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   const managedSecurityHit = hit(/\bmdr\b|\bmssp\b|managed (?:security|detection|soc|siem)|security (?:partner|provider|service|operations centre)|\bsoc\b service|incident response service/);
   const sdwanBuyHit = hit(buyRe("sd-?wan"));
   const sdwanBareHit = hit(/sd-?wan/);
-  if (managedSecurityHit) {
+  /* Living Procurement UK Decision-Maker Blueprint, correction pass
+   * (Robert, 15 Aug 2026), defect 1: "UK 20 site SD-WAN in the
+   * manufacturing sector, full SASE required..." followed later by "...
+   * we will consider third-party SOC services" DESTRUCTIVELY overwrote
+   * the already-stated `procurement.buying: "sase"` with
+   * "managed_security" -- managedSecurityHit's own design (see the
+   * comment below) treats a bare MDR/MSSP/SOC mention as strong enough
+   * buying intent on its own, which is right for a firm statement ("we
+   * run SD-WAN and need a managed SOC" -- draft.fixtures.ts's own
+   * existing case) but wrong for HEDGED, tentative language ("will
+   * consider", "might explore", "possibly") that is real signal but not
+   * a firm purchase decision. `procurement.buying` is a single-value
+   * path (mergeUpdates' generic "a later stated value replaces the
+   * earlier one" scalar-correction rule), so ANY fired update here can
+   * silently replace an already-established scope -- guarding the
+   * TRIGGER itself (rather than reaching into the generic merge, which
+   * many other paths correctly depend on behaving the same way) is the
+   * smallest change that stops the destructive rescope at its root. A
+   * suppressed tentative mention is not lost: it stays in the turn's own
+   * text, which `coverDeclarativeClauses` leaves unplaced, and
+   * `thirdPartySecurityConsiderationClauses()` (procurement-templates.ts)
+   * gives it its own additive, non-mandatory clause -- "may add a
+   * separate operational/security-service consideration, but must never
+   * destructively rescope the project." */
+  const TENTATIVE_CONSIDERATION_RE = /\b(?:will|may|might|could|would)\s+consider\b|\bconsidering\b|\bpossibly\b|\bmight explore\b|\bmay explore\b|\bcould explore\b/;
+  const managedSecurityIsTentative =
+    Boolean(managedSecurityHit) && TENTATIVE_CONSIDERATION_RE.test(t.slice(Math.max(0, managedSecurityHit!.index - 40), managedSecurityHit!.index));
+  if (managedSecurityHit && !managedSecurityIsTentative) {
     /* Fact Ledger Reliability Gate (13 Aug 2026): the buyer-facing quote
      * stays the canonical "managed security" (unchanged -- that's the
      * clearer label, and no one asked for it to change), but the actual

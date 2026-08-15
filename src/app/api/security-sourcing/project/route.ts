@@ -14,6 +14,7 @@ import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
 import { publicProject } from "@/lib/rfp-store";
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import { parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
+import { parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 
 export async function OPTIONS(req: Request) {
   return preflight(req);
@@ -36,6 +37,11 @@ export async function POST(req: Request) {
      *  or missing field is simply an empty ledger for this create, never a
      *  400 for the whole request. */
     source_turns?: unknown;
+    /** Defects 3/4 (correction pass, 15 Aug 2026): the buyer's structured
+     *  NextQuestion actions, parsed defensively below like source_turns --
+     *  a malformed/missing field is simply an empty ledger for this
+     *  create. */
+    decision_turns?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -67,6 +73,7 @@ export async function POST(req: Request) {
         ? { preferredVendors: body.preferred_vendors.filter((s): s is string => typeof s === "string") }
         : {}),
       sourceTurns: parseIncomingSourceTurns(body.source_turns),
+      decisionTurns: parseIncomingDecisionTurns(body.decision_turns),
     });
   } catch (e) {
     // Core refusals (low confidence with the gap questions) return as a

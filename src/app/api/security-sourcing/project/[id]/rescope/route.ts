@@ -12,6 +12,7 @@ import { openSecurityGaps } from "@/lib/project-machine";
 import { buildRescopedProject, rescopeConsentText, documentEdited } from "@/lib/security/rescope-project";
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import { parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
+import { parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 
 export async function OPTIONS(req: Request) {
   return preflight(req);
@@ -33,6 +34,11 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
      *  this is the field that makes wording typed after the first save
      *  actually persist. */
     source_turns?: unknown;
+    /** Defects 3/4 (correction pass, 15 Aug 2026): this route is the ONLY
+     *  save path a Security Sourcing project takes after its first save,
+     *  so this is the field that makes a NextQuestion answer clicked after
+     *  the first save actually persist. */
+    decision_turns?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -65,6 +71,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       actorRef: access.session?.email ?? "",
       replaceEdits: body.replace_edits_consent === true,
       sourceTurns: parseIncomingSourceTurns(body.source_turns),
+      decisionTurns: parseIncomingDecisionTurns(body.decision_turns),
     });
   } catch (e) {
     return Response.json({ error: (e as Error).message }, { status: 400, headers: cors });

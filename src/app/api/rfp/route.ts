@@ -10,6 +10,7 @@ import { indexRfpForBuyer } from "@/lib/rfp-store";
 import { isBlockedDomainLive, emailDomain } from "@/lib/access-control";
 import { SITE_URL } from "@/lib/structured-data";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
+import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 
 /**
  * Early-capture contact email (the wizard's optional "get a link to this RFP
@@ -85,6 +86,14 @@ export async function POST(req: Request) {
      *  shared payload the security branches use — see
      *  workspace/source-ledger.ts. */
     source_turns?: unknown;
+    /** Defects 3/4 (correction pass, 15 Aug 2026): the same parity
+     *  treatment as source_turns immediately above -- decision_ledger is
+     *  engine-independent Project state too, so it is sent (and never
+     *  silently lost) on the wizard/non-security create path as well,
+     *  even though today's resume only rehydrates it for a
+     *  security_sourcing project (resumeDecisionsFromProject's own
+     *  documented scope, matching resumeStateFromProject's). */
+    decision_turns?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -160,6 +169,7 @@ export async function POST(req: Request) {
     // ...)` here is just "validate and de-dup within this one creation
     // batch", matching create-project.ts's own first-save construction.
     source_ledger: mergeSourceLedger([], parseIncomingSourceTurns(body.source_turns)),
+    decision_ledger: mergeDecisionLedger([], parseIncomingDecisionTurns(body.decision_turns)),
   });
   // The record starts at creation (Harry's Section 1 finding, 28 Jul 2026:
   // "Shows no recorded events despite it being created?". The 24 Jul fix

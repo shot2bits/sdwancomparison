@@ -1373,6 +1373,114 @@ function voiceScopeClauses(ctx: TextTemplateCtx): ClauseDraft[] {
   ];
 }
 
+/** Living Procurement UK Decision-Maker Blueprint, correction pass
+ *  (Robert, 15 Aug 2026), defect 2: the brief's own exact resilience
+ *  answer -- "Yes, dual circuits at our five production-critical sites.
+ *  Single circuits are acceptable elsewhere." -- matched none of
+ *  `resilienceClauses()`'s own trigger wording (CANNOT_GO_DOWN_RE/
+ *  FAILOVER_RE look for "cannot go down"/"fail over"/"zero downtime",
+ *  none of which this sentence uses), so it fell entirely into the
+ *  generic `unclassified` "Additional requirement" catch-all -- TWO
+ *  separate ones, one per sentence, with no per-site resilience state
+ *  the compiled document, the section outline or a supplier gate could
+ *  ever point to. This is the dedicated per-site resilience template
+ *  that was missing: it recognises dual/redundant-circuit language
+ *  (with or without a stated single-circuit fallback elsewhere) and
+ *  compiles ONE canonical, testable, MANDATORY clause -- a definitive
+ *  per-site resilience decision, not a hint -- carrying the buyer's own
+ *  wording for both halves of the statement as its `quote`. Once this
+ *  clause exists, `receiptIsExplainedByClauses()` (this file, above)
+ *  stops the same two sentences from ALSO spawning the generic
+ *  catch-all, because a majority of each sentence's own significant
+ *  words now appear in this clause's own statement/quote/reason. */
+const DUAL_CIRCUIT_RE = /\bdual[- ]circuits?\b|\bredundant circuits?\b|\btwo (?:diverse |separate )?circuits?\b/i;
+const SINGLE_CIRCUIT_FALLBACK_RE = /\bsingle[- ]circuits?\b[^.]{0,60}\b(acceptable|fine|sufficient|ok\b|okay)\b/i;
+
+function siteResilienceClauses(ctx: TextTemplateCtx): ClauseDraft[] {
+  if (!DUAL_CIRCUIT_RE.test(ctx.corpus)) return [];
+  const dualQuote = quoteFor(ctx.corpusReceipts, [DUAL_CIRCUIT_RE]);
+  const hasFallback = SINGLE_CIRCUIT_FALLBACK_RE.test(ctx.corpus);
+  const fallbackQuote = hasFallback ? quoteFor(ctx.corpusReceipts, [SINGLE_CIRCUIT_FALLBACK_RE]) : { quote: null, sourceTurnIds: [] as string[] };
+  const texts = [...new Set([dualQuote.quote, fallbackQuote.quote].filter((x): x is string => Boolean(x)))];
+  const quote = texts.length ? texts.join(" ") : null;
+  const sourceTurnIds = [...new Set([...dualQuote.sourceTurnIds, ...fallbackQuote.sourceTurnIds])];
+  return [
+    {
+      section: "network",
+      statement: hasFallback
+        ? "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites."
+        : "Per-site resilience: dual-circuit resilience required at the buyer's stated sites.",
+      supplierResponse: [
+        "Confirm which named sites receive dual-circuit (diverse-path/diverse-carrier) resilience and which run single-circuit.",
+        "Describe your dual-carrier or diverse-path design for the sites requiring resilience.",
+      ],
+      evidence: ["Per-site resilience design naming which sites carry dual circuits", "Circuit diversity evidence (diverse carriers/paths)"],
+      acceptanceTest: "A per-site resilience design is submitted naming which sites carry dual circuits, matching the buyer's own stated split.",
+      // A definitive resilience decision, once stated, is a testable
+      // gate the same way an operating-model or timeline answer is --
+      // not merely hinted language, so this is unconditionally
+      // mandatory once detected (matches uk-data-residency's own
+      // unconditional-once-detected mandatory rule below), rather than
+      // gated on textImpliesMandatory()'s "must/shall/require" keyword
+      // scan, which this sentence's own wording ("Yes, dual circuits at
+      // our five production-critical sites") would fail.
+      mandatory: true,
+      sourceFactIds: [],
+      origin: "buyer",
+      reason: "The buyer stated a definitive per-site resilience decision (dual circuits at named sites, single circuits acceptable elsewhere).",
+      quote,
+      sourceTurnIds,
+      sourceNotedIds: [],
+      templateKey: "network:site-resilience",
+      templateId: "site-resilience-scope",
+    },
+  ];
+}
+
+// Living Procurement UK Decision-Maker Blueprint, correction pass
+// (Robert, 15 Aug 2026), defect 1: a hedged mention of a third-party
+// SOC/MDR/MSSP service ("we will consider third-party SOC services")
+// must not be silently dropped once extract.ts's tentative-language
+// guard stops it from rescoping procurement.buying to
+// "managed_security" (see the TENTATIVE_CONSIDERATION_RE guard around
+// the managedSecurityHit trigger in extract.ts). This gives that
+// mention a real, additive clause of its own -- "It may add a separate
+// operational/security-service consideration, but it must never
+// destructively rescope the project" -- instead of just vanishing from
+// the compiled document. Suppressed only when the buyer's actual
+// buying scope IS managed_security, since in that case the standing
+// buying-scope clause (network-architecture-scope /
+// procurement.buying) already represents it and this would be a
+// duplicate.
+const THIRD_PARTY_SECURITY_SERVICE_RE =
+  /third[- ]party\s+(?:soc|mdr|mssp)\b|third[- ]party\s+security\s+operations|\bsoc\s+services?\b|\bmdr\b|\bmssp\b/i;
+
+function thirdPartySecurityConsiderationClauses(ctx: TextTemplateCtx, buying: BuyingId | null): ClauseDraft[] {
+  if (buying === "managed_security") return [];
+  if (!THIRD_PARTY_SECURITY_SERVICE_RE.test(ctx.corpus)) return [];
+  const { quote, sourceTurnIds } = quoteFor(ctx.corpusReceipts, [THIRD_PARTY_SECURITY_SERVICE_RE]);
+  return [
+    {
+      section: "security",
+      statement: "A third-party security operations/MDR-style service is under consideration alongside the core scope.",
+      supplierResponse: [
+        "State whether you offer, or can integrate with, a third-party SOC/MDR service, and describe the integration model.",
+      ],
+      evidence: ["SOC/MDR integration approach"],
+      acceptanceTest: null,
+      mandatory: false,
+      sourceFactIds: [],
+      origin: "buyer",
+      reason: "The buyer mentioned considering a third-party security-operations service alongside the core scope.",
+      quote,
+      sourceTurnIds,
+      sourceNotedIds: [],
+      templateKey: "security:third-party-soc-consideration",
+      templateId: "third-party-security-consideration",
+    },
+  ];
+}
+
 const ENTRA_RE = /\bentra(\s?id)?\b/i;
 const ZTNA_RE = /\bztna\b|zero trust network access/i;
 const DLP_RE = /\bdlp\b|data loss prevention/i;
@@ -2003,11 +2111,13 @@ export function buildCandidateClauses(input: {
   ];
   const textPattern = [
     ...resilienceClauses(ctx),
+    ...siteResilienceClauses(ctx),
     ...voiceScopeClauses(ctx),
     ...identityAndDataClauses(ctx),
     ...legacyCircuitClauses(ctx),
     ...dataResidencyClauses(ctx),
     ...networkScopeClauses(ctx),
+    ...thirdPartySecurityConsiderationClauses(ctx, buying),
   ];
 
   const named = [...factDriven, ...textPattern];

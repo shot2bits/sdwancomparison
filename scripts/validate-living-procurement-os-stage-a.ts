@@ -52,7 +52,7 @@
 // checkpoint report's own verification section, not re-encoded into this
 // committed script as a permanent self-sabotage step).
 
-import { deterministicExtract, coverDeclarativeClauses } from "../src/lib/workspace/extract";
+import { deterministicExtract, coverDeclarativeClauses, statedObjectivesIn } from "../src/lib/workspace/extract";
 import { mergeUpdates, requirementFrom, buyingOf, operatingModelOf, standing, type WorkspaceFact } from "../src/lib/workspace/draft";
 import {
   compileProcurementDocument,
@@ -64,7 +64,8 @@ import {
 import { earnedQuestions } from "../src/lib/workspace/questions";
 import { activePack, activeFlavours, visibleSuggestions } from "../src/lib/sector/derive";
 import { rankNextQuestions, materialDecisionCount } from "../src/lib/workspace/procurement-next-questions";
-import { buildSectionOutline } from "../src/lib/workspace/procurement-outline";
+import { buildSectionOutline, deriveResilienceOutlineState } from "../src/lib/workspace/procurement-outline";
+import { buildReadiness } from "../src/lib/workspace/procurement-readiness";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 
@@ -109,6 +110,87 @@ function turn(
 
 function clauseByTemplate(doc: LivingProcurementDocument, templateId: string) {
   return doc.clauses.find((c) => c.templateId === templateId);
+}
+
+/** Living Procurement UK Decision-Maker Blueprint, correction pass
+ *  (Robert, 15 Aug 2026), defect 5: reproduces EXACTLY the downstream
+ *  compile ProjectDesk.tsx's own `sectionAwareReadiness` useMemo performs
+ *  (procurement-outline.ts's buildSectionOutline/deriveResilienceOutlineState,
+ *  procurement-next-questions.ts's rankNextQuestions/materialDecisionCount,
+ *  sector/derive.ts's activePack/activeFlavours/visibleSuggestions, then
+ *  procurement-readiness.ts's buildReadiness() with the enriched inputs) --
+ *  the real production functions, called in the real order, not a
+ *  reimplementation, so this fixture exercises the actual behaviour a
+ *  buyer would see, per Robert's "behavioural fixtures, not source-string
+ *  inspection" instruction. */
+function sectionAwareReadinessFor(
+  facts: WorkspaceFact[],
+  doc: LivingProcurementDocument,
+  receipts: Receipt[],
+  opts: { notedIds?: string[]; dismissed?: string[]; declined?: string[]; opModelOverride?: string | null } = {},
+) {
+  const requirement = requirementFrom(facts);
+  const buying = buyingOf(facts);
+  const opModel = opts.opModelOverride !== undefined ? (opts.opModelOverride as ReturnType<typeof operatingModelOf>) : operatingModelOf(facts);
+  const notedIds = opts.notedIds ?? [];
+  const dismissed = opts.dismissed ?? [];
+  const declined = opts.declined ?? [];
+  // Corpus MUST match ProjectDesk.tsx's own `corpus` useMemo byte-for-byte
+  // (quotes + reasons + values of every unstruck fact, THEN receipts) --
+  // an earlier draft of this helper used receipts-only and, discovered by
+  // comparing this fixture's own pinned score against a real, rendered
+  // Prompt A-D run (mfg-02-desktop-after-fixturesBCD.png), scored one
+  // point lower than the live UI at Prompt D (24 vs the real 25) because
+  // the narrower corpus changed a pack-suggestion/earned-question signal.
+  // Fixed here rather than left as an approximation, per Robert's
+  // "behavioural fixtures, not source-string inspection" instruction.
+  const corpus = [
+    ...facts.filter((f) => !f.struck).flatMap((f) => [f.quote ?? "", f.reason ?? "", String(f.value ?? "")]),
+    ...receipts.map((r) => r.text),
+  ].join(" ");
+  const earnedAll = earnedQuestions(requirement, buying, opModel, notedIds, dismissed, corpus);
+  const pack = activePack(requirement);
+  const flav = pack ? activeFlavours(pack, corpus) : [];
+  const sugs = pack ? visibleSuggestions(pack, flav, facts, notedIds, declined) : [];
+  const ranked = rankNextQuestions({ openDecisions: doc.openDecisions, earned: earnedAll, suggestions: sugs });
+  const materialDecisionsRemaining = materialDecisionCount({ openDecisions: doc.openDecisions, earned: earnedAll, suggestions: sugs });
+  const rankedIds = new Set(ranked.map((q) => q.id));
+  const resilienceState = deriveResilienceOutlineState({ clauses: doc.clauses, requirement, buying, hasOperatingModelConflict: rankedIds.has("OD-operating-model-conflict") });
+  const outline = buildSectionOutline({
+    orgScaleComplete: Boolean(requirement.organisation?.sector && requirement.estate?.sites && requirement.organisation?.regions && requirement.estate?.users),
+    orgScaleDetail: "",
+    scopeComplete: Boolean(buying),
+    scopeDetail: "",
+    estateSignal: Boolean(requirement.estate?.existingNetwork?.length || requirement.estate?.cloud?.length || requirement.estate?.existingSecurity?.length),
+    estateDetail: "",
+    resilienceResolved: resilienceState.resolved,
+    resilienceDetail: resilienceState.detail,
+    securityResolved: !rankedIds.has("q-sse-scope"),
+    securityDetail: "",
+    sector: pack ? { title: "x", pendingSuggestions: sugs.length, acceptedOrDismissed: 0 } : null,
+    operatingModelResolved: Boolean(opModel) && !rankedIds.has("OD-support-coverage-ambiguous"),
+    operatingModelDetail: "",
+    migrationSignal: false,
+    migrationDetail: "",
+    commercialSignal: false,
+    commercialDetail: "",
+    successSignal: false,
+    successDetail: "",
+  });
+  const sectionsConfirmed = outline.filter((r) => r.state === "confirmed").length;
+  const sectionsTotal = outline.length;
+  const bankQuestionCount = doc.responseGroups.reduce((n, g) => n + g.questions.filter((q) => q.source === "bank").length, 0);
+  return {
+    readiness: buildReadiness({
+      requirement, buying, opModel, clauses: doc.clauses, openDecisions: doc.openDecisions, gates: doc.evaluation.gates,
+      instrument: "sor", bankQuestionCount, rfiBankVersion: null,
+      materialDecisionsRemaining, pendingSectorSuggestions: sugs.length, sectionsConfirmed, sectionsTotal,
+    }),
+    sectionsConfirmed,
+    sectionsTotal,
+    materialDecisionsRemaining,
+    outline,
+  };
 }
 
 function checkCoordinatedProjections(doc: LivingProcurementDocument, label: string) {
@@ -464,7 +546,73 @@ function main() {
     });
     const sectorRow = outlineA.find((r) => r.key === "sector_intelligence");
     record(sectorRow?.title === "Manufacturing and OT" && sectorRow?.state === "netify_suggested", "Fixture A: the section outline shows a 'Manufacturing and OT' row, state Netify suggested", `row=${JSON.stringify(sectorRow)}`);
+
+    // --- M: defect 6 regression -- manufacturing suggestions must be
+    // explicitly labelled Netify suggested/optional, and strong
+    // suggestions (IEC 62443 segmentation) must carry a short reason that
+    // is actually surfaced to the buyer through the SAME NextQuestion
+    // projection the top-3 cards render (not just present as inert data
+    // in packs.ts), and that reason must make clear sector alone does not
+    // prove an OT/ICS environment exists. Robert (15 Aug 2026): "keep
+    // manufacturing rules explicitly labelled Netify suggested and
+    // optional... show a short reason explaining why Netify is raising
+    // it and make clear that manufacturing alone does not prove an
+    // OT/ICS environment exists."
+    const segRankedM = rankedA.find((q) => q.id === "sector:mf-segmentation");
+    const otVisRankedM = rankedA.find((q) => q.id === "sector:mf-ot-visibility");
+    record(Boolean(segRankedM) && Boolean(otVisRankedM), "Fixture M/defect 6: both manufacturing suggestions (OT/ICS visibility, IEC 62443 segmentation) are present as real NextQuestion candidates at Prompt A", `seg=${Boolean(segRankedM)} otVis=${Boolean(otVisRankedM)}`);
+    record(segRankedM?.governedSuggestion === true && otVisRankedM?.governedSuggestion === true, "Fixture M/defect 6: both are marked governedSuggestion -- the renderer labels them distinctly, never as a buyer-stated open decision", `seg=${segRankedM?.governedSuggestion} otVis=${otVisRankedM?.governedSuggestion}`);
+    record(
+      typeof segRankedM?.reason === "string" && segRankedM.reason.length > 0,
+      "Fixture M/defect 6: the IEC 62443 segmentation suggestion carries a real, non-empty reason on the SAME NextQuestion object the UI card renders (not dropped between packs.ts and the projection)",
+      `reason=${segRankedM?.reason}`,
+    );
+    record(
+      /does not confirm an OT\/ICS environment exists/i.test(segRankedM?.reason ?? ""),
+      "Fixture M/defect 6: the segmentation suggestion's own reason explicitly states that the manufacturing sector alone does not confirm an OT/ICS environment exists",
+      `reason=${segRankedM?.reason}`,
+    );
+    record(
+      /does not confirm an OT\/ICS environment exists/i.test(otVisRankedM?.reason ?? ""),
+      "Fixture M/defect 6: the OT/ICS visibility suggestion's own reason carries the SAME disclaimer",
+      `reason=${otVisRankedM?.reason}`,
+    );
+    // Counter-example: the ot_named FLAVOUR suggestion (mf-ot-mdr) is
+    // triggered by the buyer's own words naming OT/ICS/SCADA/PLC directly
+    // -- an evidence-based signal, not a sector-only inference -- so it
+    // correctly carries a DIFFERENT reason, without the disclaimer,
+    // proving the disclaimer is deliberate (sector-inferred suggestions
+    // only), not a blanket string stamped on every manufacturing item.
+    const otNamedText = "UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users. We have SCADA and PLC systems on the shop floor.";
+    const otNamedState = turn(otNamedText, [], [], { n: 20000 }, 1, null);
+    const reqM2 = requirementFrom(otNamedState.facts);
+    const packM2 = activePack(reqM2);
+    const corpusM2 = [...standing(otNamedState.facts).map((f) => f.quote ?? String(f.value)), ...otNamedState.receipts.map((r) => r.text)].join(" ");
+    const flavM2 = packM2 ? activeFlavours(packM2, corpusM2) : [];
+    const sugM2 = packM2 ? visibleSuggestions(packM2, flavM2, otNamedState.facts, [], []) : [];
+    const rankedM2 = rankNextQuestions({ openDecisions: otNamedState.doc.openDecisions, earned: earnedQuestions(reqM2, buyingOf(otNamedState.facts), operatingModelOf(otNamedState.facts), [], [], corpusM2), suggestions: sugM2 });
+    const otMdrRankedM2 = rankedM2.find((q) => q.id === "sector:mf-ot-mdr");
+    record(Boolean(otMdrRankedM2), "Fixture M/defect 6: naming SCADA/PLC directly earns the ot_named flavour's own OT-aware monitoring/MDR suggestion", `found=${Boolean(otMdrRankedM2)}`);
+    record(
+      Boolean(otMdrRankedM2?.reason) && !/does not confirm an OT\/ICS environment exists/i.test(otMdrRankedM2?.reason ?? ""),
+      "Fixture M/defect 6: the evidence-based ot_named suggestion carries its OWN reason (the buyer's own words already named the systems), correctly WITHOUT the sector-alone disclaimer",
+      `reason=${otMdrRankedM2?.reason}`,
+    );
+
+    // Structural proof (same no-jsdom convention as Part B/Fixture H/J):
+    // the card component actually renders nq.reason and the "optional"
+    // badge wording, not just carries the data on the NextQuestion object
+    // with nothing reading it.
+    const canvasSrcM = readFileSync("src/components/procurement/LivingProcurementCanvas.tsx", "utf8");
+    record(/nq\.reason/.test(canvasSrcM), "Fixture M/defect 6: LivingProcurementCanvas.tsx actually reads nq.reason when rendering a NextQuestion card (the reason is not dropped between the projection and the render)", "");
+    record(/Netify suggests.*optional/.test(canvasSrcM), "Fixture M/defect 6: the governed-suggestion badge explicitly says 'optional', not just 'Netify suggests'", "");
     record(!outlineA.some((r) => r.key === "sector_intelligence" && !packA), "Fixture A: no irrelevant sector row is shown when no pack is active (this branch: pack IS active, so presence is correct here; absence is proven by Fixture A's own construction when packA is null)", "");
+
+    // Defect 5: section-aware readiness snapshot at Prompt A, captured here
+    // (before s is reassigned by Prompt B) using the REAL production
+    // sectionAwareReadinessFor() helper -- the same computation
+    // ProjectDesk.tsx's own sectionAwareReadiness useMemo performs.
+    const readinessA = sectionAwareReadinessFor(s.facts, s.doc, s.receipts);
 
     // --- B: resilience answer ---
     const promptFixtureB = "Yes, dual circuits at our five production-critical sites. Single circuits are acceptable elsewhere.";
@@ -473,18 +621,216 @@ function main() {
     record(s.doc.version === 2, "Fixture B: the resilience answer produces exactly one new governed version", `version=${s.doc.version}`);
     void sourceTurnsBeforeB;
 
+    // --- K1: defect 2 regression -- resilience compiles into the governed
+    // section, and the outline row is genuinely gated on that clause, not
+    // on question-disappearance. Robert (15 Aug 2026): "The Resilience and
+    // availability outline row may say Confirmed only when the canonical
+    // document contains the corresponding governed resilience state or
+    // clause. Question disappearance alone is not sufficient proof."
+    const siteResilienceClauseAfterB = clauseByTemplate(s.doc, "site-resilience-scope");
+    record(Boolean(siteResilienceClauseAfterB), "Fixture K1/defect 2: Prompt B's dual-circuit answer compiles into a canonical site-resilience-scope clause, not just a generic Additional requirement", `statement=${siteResilienceClauseAfterB?.statement}`);
+    record(siteResilienceClauseAfterB?.mandatory === true, "Fixture K1/defect 2: the site-resilience-scope clause is mandatory (a stated per-site resilience decision is a testable gate)", `mandatory=${siteResilienceClauseAfterB?.mandatory}`);
+    const outlineStateAfterB = deriveResilienceOutlineState({
+      clauses: s.doc.clauses,
+      requirement: requirementFrom(s.facts),
+      buying: buyingOf(s.facts),
+      hasOperatingModelConflict: false,
+    });
+    record(outlineStateAfterB.resolved === true, "Fixture K1/defect 2: the outline's Resilience and availability row reads Confirmed once the real governed clause exists (real clause, not card-disappearance, drives the row)", `detail=${outlineStateAfterB.detail}`);
+    // Counter-example: a project at the SAME material site count/buying
+    // type that has NEVER stated a resilience decision (no clause) must
+    // NOT read Confirmed merely because nothing asked about it yet, or
+    // because a caller claims the question was "dismissed" -- proving the
+    // row is gated on the clause, not on any question/dismissal state.
+    const outlineStateNoClause = deriveResilienceOutlineState({
+      clauses: [],
+      requirement: requirementFrom(s.facts),
+      buying: buyingOf(s.facts),
+      hasOperatingModelConflict: false,
+    });
+    record(outlineStateNoClause.resolved === false, "Fixture K1/defect 2: with the SAME materially-applicable requirement but no site-resilience-scope clause present, the row correctly reads Needs decision (proves the row cannot be satisfied by absence of a question alone)", `detail=${outlineStateNoClause.detail}`);
+
+    // Defect 5: section-aware readiness snapshot at Prompt B. factsB/docB/
+    // receiptsB are also kept so Fixture L2 below can re-run
+    // sectionAwareReadinessFor from this genuinely SASE-shape-unresolved
+    // state (Prompt C has not landed yet, so no stated objective has been
+    // folded in) -- see the Prompt C block below for why the Prompt-C
+    // state itself can no longer serve as an "unresolved" baseline.
+    const factsB = s.facts;
+    const docB = s.doc;
+    const receiptsB = s.receipts;
+    const readinessB = sectionAwareReadinessFor(factsB, docB, receiptsB);
+
     // --- C: SASE-shape answer ---
     const promptFixtureC = "We prefer a single platform, but identity must integrate with Entra ID and we will consider third-party SOC services.";
+    const buyingBeforeC = buyingOf(s.facts);
     s = turn(promptFixtureC, s.facts, s.receipts, nqIdRef, ++nqCycle, s.doc);
+    // Living Procurement UK Decision-Maker Blueprint, correction pass
+    // (Robert, 15 Aug 2026), verification finding (caught by comparing this
+    // fixture's own pinned readiness score against a REAL, rendered
+    // Prompt A-D run -- reports/screenshots/mfg-02-desktop-after-
+    // fixturesBCD.png read 25, this fixture originally pinned 24):
+    // extract.ts's `statedObjectivesIn()` (Harry, 24 Jul 2026, a
+    // pre-existing, narrow, strict-phrase mechanism, unrelated to this
+    // correction pass's own 6 defects) recognises "single platform" in the
+    // buyer's OWN words as a genuine stated objective and folds it into
+    // `noted` in the SAME cycle (ProjectDesk.tsx line ~2165), honestly
+    // attributed to the buyer's own wording -- never Netify's question
+    // text, consistent with defect 4. This means Prompt C's EXACT wording
+    // really does resolve q-sase-shape, live, not just via a clicked
+    // option -- it is not a case of "freeform text silently counting as
+    // an answer" (that general principle is still true and still proven,
+    // see the rewritten Fixture G below with genuinely neutral wording);
+    // it is a case of the buyer's phrasing literally matching a strict,
+    // named phrase Netify already treats as a stated choice. Every
+    // downstream fixture below now folds this the SAME way ProjectDesk.tsx
+    // does, so the readiness/next-question numbers below are checked
+    // against real production behaviour, not an incomplete simulation of
+    // it.
+    const objectivesFromC = statedObjectivesIn(promptFixtureC).map((o) => o.id);
     record(s.doc.version === 3, "Fixture C: the SASE-shape answer produces exactly one new governed version", `version=${s.doc.version}`);
     const entraAfterC = clauseByTemplate(s.doc, "identity-provider-entra");
     record(Boolean(entraAfterC), "Fixture C: Entra ID identity integration compiles into its own clause from the buyer's own words", `found=${Boolean(entraAfterC)}`);
+
+    // --- K2: defect 1 regression -- "we will consider third-party SOC
+    // services" must never destructively rescope procurement.buying away
+    // from SASE. Robert's exact reported bug: the buyer's own words in
+    // this sentence previously overwrote procurement.buying from "sase"
+    // to "managed_security" via mergeUpdates()'s generic "later stated
+    // value replaces the earlier one" scalar-correction rule -- driven by
+    // extract.ts's managedSecurityHit trigger firing on hedged/tentative
+    // language with no "seeking verb" required. Exercised through the
+    // REAL production extraction/compiler path (deterministicExtract ->
+    // mergeUpdates -> compileProcurementDocument), not a source-string
+    // inspection.
+    const buyingAfterC = buyingOf(s.facts);
+    record(buyingBeforeC === "sase", "Fixture K2/defect 1 setup: the canonical buying scope is SASE going into Prompt C (sanity check on the fixture sequence itself)", `buyingBeforeC=${buyingBeforeC}`);
+    record(buyingAfterC === "sase", "Fixture K2/defect 1: the canonical buying scope (procurement.buying) remains SASE after Prompt C -- 'SOC services' does not destructively rescope the project", `buyingAfterC=${buyingAfterC}`);
+    const outlineAfterC = buildSectionOutline({
+      orgScaleComplete: true, orgScaleDetail: "", scopeComplete: Boolean(buyingAfterC), scopeDetail: buyingAfterC === "sase" ? "Buying: SASE." : `Buying: ${buyingAfterC}.`,
+      estateSignal: true, estateDetail: "", resilienceResolved: true, resilienceDetail: "",
+      securityResolved: false, securityDetail: "", sector: null,
+      operatingModelResolved: false, operatingModelDetail: "", migrationSignal: false, migrationDetail: "",
+      commercialSignal: false, commercialDetail: "", successSignal: false, successDetail: "",
+    });
+    const scopeRowAfterC = outlineAfterC.find((r) => r.key === "solution_scope");
+    record(scopeRowAfterC?.detail === "Buying: SASE.", "Fixture K2/defect 1: the section outline's Solution scope row still reads 'Buying: SASE.' after Prompt C", `detail=${scopeRowAfterC?.detail}`);
+    const architectureScopeAfterC = clauseByTemplate(s.doc, "network-architecture-scope");
+    record(Boolean(architectureScopeAfterC), "Fixture K2/defect 1: the architecture/network-architecture-scope clause still represents the proposed SASE service after Prompt C", `found=${Boolean(architectureScopeAfterC)} statement=${architectureScopeAfterC?.statement}`);
+    const entraAfterC2 = clauseByTemplate(s.doc, "identity-provider-entra");
+    record(Boolean(entraAfterC2), "Fixture K2/defect 1: Entra ID remains a separate identity requirement (its own clause, not folded into or lost by the buying-scope handling)", `found=${Boolean(entraAfterC2)}`);
+    const thirdPartySocAfterC = clauseByTemplate(s.doc, "third-party-security-consideration");
+    record(Boolean(thirdPartySocAfterC), "Fixture K2/defect 1: third-party SOC services are retained as their own additive consideration clause, without corrupting the SASE buying scope", `found=${Boolean(thirdPartySocAfterC)} statement=${thirdPartySocAfterC?.statement}`);
+    record(thirdPartySocAfterC?.mandatory === false, "Fixture K2/defect 1: the third-party SOC consideration is advisory (not mandatory) -- a hedged 'will consider' never becomes a hard requirement", `mandatory=${thirdPartySocAfterC?.mandatory}`);
+
+    // Defect 5: section-aware readiness snapshot at Prompt C. factsC/docC/
+    // receiptsC are also kept (not just the derived readiness) so Fixture
+    // L2 below can re-run sectionAwareReadinessFor from the SAME Prompt-C
+    // state with a genuine structured answer applied, without s having
+    // already moved on to Prompt D.
+    const factsC = s.facts;
+    const docC = s.doc;
+    const receiptsC = s.receipts;
+    // notedIds: objectivesFromC -- the REAL fold (see the comment above),
+    // not an empty array. Without this, the readiness/next-question layer
+    // below would understate what the buyer has actually resolved by this
+    // point, same as the pre-fix discrepancy this comment documents.
+    const readinessC = sectionAwareReadinessFor(factsC, docC, receiptsC, { notedIds: objectivesFromC });
 
     // --- D: UK data constraint ---
     const promptFixtureD = "Customer data must remain in the UK, including backups and support access.";
     s = turn(promptFixtureD, s.facts, s.receipts, nqIdRef, ++nqCycle, s.doc);
     const residencyD = clauseByTemplate(s.doc, "uk-data-residency");
     record(Boolean(residencyD) && residencyD?.quote === promptFixtureD, "Fixture D: the UK data-residency constraint compiles into its own clause with the buyer's exact wording retained verbatim", `quote=${residencyD?.quote}`);
+
+    // Defect 5: section-aware readiness snapshot at Prompt D. The stated
+    // objective folded at Prompt C persists (noted state is cumulative in
+    // production; nothing in Prompt D retracts it), so objectivesFromC is
+    // threaded through here too.
+    const readinessD = sectionAwareReadinessFor(s.facts, s.doc, s.receipts, { notedIds: objectivesFromC });
+
+    // --- L: defect 5 regression -- readiness must be genuinely section-
+    // aware, not a relabelled score band. Robert: "Readiness must be
+    // derived from: material section coverage; unresolved pricing
+    // decisions; unresolved eligibility/gate decisions; remaining material
+    // open questions; accepted-but-unresolved sector rules where
+    // applicable. Resolving the operating model, SASE shape, resilience
+    // and security scope must produce an explainable score/state change."
+    console.log(
+      `  Fixture L/defect 5 readiness progression: A=${readinessA.readiness.score}(${readinessA.readiness.label}) sections=${readinessA.sectionsConfirmed}/${readinessA.sectionsTotal} decisions=${readinessA.materialDecisionsRemaining} ` +
+        `-> B=${readinessB.readiness.score}(${readinessB.readiness.label}) sections=${readinessB.sectionsConfirmed}/${readinessB.sectionsTotal} decisions=${readinessB.materialDecisionsRemaining} ` +
+        `-> C=${readinessC.readiness.score}(${readinessC.readiness.label}) sections=${readinessC.sectionsConfirmed}/${readinessC.sectionsTotal} decisions=${readinessC.materialDecisionsRemaining} ` +
+        `-> D=${readinessD.readiness.score}(${readinessD.readiness.label}) sections=${readinessD.sectionsConfirmed}/${readinessD.sectionsTotal} decisions=${readinessD.materialDecisionsRemaining}`,
+    );
+    record(readinessA.readiness.reasons.length > 0, "Fixture L/defect 5: the section-aware readiness at Prompt A carries explainable reasons, not a bare number", JSON.stringify(readinessA.readiness.reasons));
+    record(
+      readinessA.readiness.score === 22 && readinessB.readiness.score === 25 && readinessC.readiness.score === 28 && readinessD.readiness.score === 25,
+      "Fixture L/defect 5: the exact A->B->C->D score progression (22 -> 25 -> 28 -> 25) matches empirical reproduction against the real production functions AND the real, rendered live UI (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png reads 25 after B/C/D, confirmed by pixel crop) -- a pinned regression value, not just a directional check",
+      `A=${readinessA.readiness.score} B=${readinessB.readiness.score} C=${readinessC.readiness.score} D=${readinessD.readiness.score}`,
+    );
+    record(
+      readinessA.sectionsTotal > 0 && readinessA.sectionsConfirmed < readinessA.sectionsTotal,
+      "Fixture L/defect 5: at Prompt A, section coverage is genuinely partial (not every section already reads confirmed) -- the score has real headroom to move",
+      `confirmed=${readinessA.sectionsConfirmed}/${readinessA.sectionsTotal}`,
+    );
+    record(
+      readinessB.sectionsConfirmed > readinessA.sectionsConfirmed && readinessB.readiness.score > readinessA.readiness.score,
+      "Fixture L/defect 5: resolving Site resilience (Prompt B's dual-circuit answer, defect 2's own site-resilience-scope clause) increases BOTH section coverage and the readiness score -- an explainable, section-driven change, not a relabelled band",
+      `sectionsConfirmed A=${readinessA.sectionsConfirmed} B=${readinessB.sectionsConfirmed}; score A=${readinessA.readiness.score} B=${readinessB.readiness.score}`,
+    );
+    // Living Procurement UK Decision-Maker Blueprint, correction pass
+    // (Robert, 15 Aug 2026), verification finding: Prompt C's EXACT
+    // wording ("We prefer a single platform...") is not generic freeform
+    // prose -- it literally matches extract.ts's own strict "single
+    // platform" objective phrase (statedObjectivesIn(), Harry, 24 Jul
+    // 2026), so it genuinely, honestly resolves q-sase-shape the SAME way
+    // ProjectDesk.tsx's live UI does (see objectivesFromC above). The
+    // score correctly INCREASES here -- this is not a relabelled band and
+    // not "freeform text silently counting as an answer" (that general
+    // claim is proven separately, with genuinely neutral wording, by
+    // Fixture G below); it is the honest, buyer-quoted objective
+    // mechanism doing exactly what it is designed to do.
+    record(
+      readinessC.materialDecisionsRemaining < readinessB.materialDecisionsRemaining && readinessC.readiness.score > readinessB.readiness.score,
+      "Fixture L/defect 5: Prompt C's own wording resolves the SASE-shape decision (a real, strict-phrase objective match, not silent freeform inference) -- an explainable INCREASE in the score, honestly attributed to the buyer's own words",
+      `materialDecisionsRemaining B=${readinessB.materialDecisionsRemaining} C=${readinessC.materialDecisionsRemaining}; score B=${readinessB.readiness.score} C=${readinessC.readiness.score}`,
+    );
+    record(
+      readinessD.materialDecisionsRemaining > readinessC.materialDecisionsRemaining && readinessD.readiness.score < readinessC.readiness.score,
+      "Fixture L/defect 5: Prompt D's UK-residency constraint opens a NEW material decision (legal-basis-for-residency) -- an explainable DECREASE in the score, tied to a real, named open decision, not noise",
+      `materialDecisionsRemaining C=${readinessC.materialDecisionsRemaining} D=${readinessD.materialDecisionsRemaining}; score C=${readinessC.readiness.score} D=${readinessD.readiness.score}`,
+    );
+
+    // Fixture L2: the conditional claim itself -- resolving SASE shape via
+    // a genuine STRUCTURED answer must produce an explainable score
+    // increase. The baseline here is the Prompt-B state (factsB/docB/
+    // receiptsB), which is genuinely SASE-shape-unresolved (Prompt C, the
+    // turn that folds the "single platform" objective, has not landed
+    // yet) -- the Prompt-C state itself can no longer serve as an
+    // "unresolved" baseline now that its own real wording resolves the
+    // decision (see the Fixture L block above).
+    const readinessBResolvedShape = sectionAwareReadinessFor(factsB, docB, receiptsB, { notedIds: ["obj-unified"] });
+    record(
+      readinessBResolvedShape.readiness.score >= readinessB.readiness.score,
+      "Fixture L2/defect 5: resolving SASE shape via a genuine structured answer (notedIds includes obj-unified) at the Prompt-B state produces a score at least as high as the unresolved state -- an explainable, decision-driven change (the SAME resolution mechanism Fixture G proves below with a clicked option, and the SAME one Prompt C's own wording exercises live, above)",
+      `unresolved=${readinessB.readiness.score} resolved=${readinessBResolvedShape.readiness.score} materialDecisionsRemaining unresolved=${readinessB.materialDecisionsRemaining} resolved=${readinessBResolvedShape.materialDecisionsRemaining}`,
+    );
+    record(
+      readinessBResolvedShape.materialDecisionsRemaining < readinessB.materialDecisionsRemaining,
+      "Fixture L2/defect 5: resolving SASE shape strictly reduces material-decisions-remaining (the decision the buyer just answered is no longer counted as open)",
+      `unresolved=${readinessB.materialDecisionsRemaining} resolved=${readinessBResolvedShape.materialDecisionsRemaining}`,
+    );
+
+    // Fixture L3: resolving the operating model via a genuine override
+    // (opModelOverride) at the Prompt-C state independently produces an
+    // explainable score change too -- section-aware readiness responds to
+    // more than one governed section, not just resilience/SASE-shape.
+    const readinessCResolvedOpModel = sectionAwareReadinessFor(factsC, docC, receiptsC, { opModelOverride: "managed" });
+    record(
+      readinessCResolvedOpModel.readiness.score >= readinessC.readiness.score,
+      "Fixture L3/defect 5: resolving the operating model (opModelOverride: managed) at the Prompt-C state produces a score at least as high as the unresolved state",
+      `unresolved=${readinessC.readiness.score} resolved=${readinessCResolvedOpModel.readiness.score}`,
+    );
 
     // --- E: question selection does not create a buyer source turn ---
     // Structural proof (same convention Part B already uses for hook-heavy
@@ -514,18 +860,81 @@ function main() {
     record(docAfterF.version === docBeforeF.version + 1, "Fixture F: the compiler itself advances document.version by exactly one for that same note-only revision, end to end", `before=${docBeforeF.version} after=${docAfterF.version}`);
 
     // --- G: a resolved question disappears and the next is promoted ---
+    // Living Procurement UK Decision-Maker Blueprint, correction pass
+    // (Robert, 15 Aug 2026), defect 1 follow-through, corrected TWICE:
+    //  (1) originally this fixture asserted q-sase-shape vanished purely
+    //      because Prompt C's text ran through deterministicExtract() --
+    //      that was defect 1's own destructive-rescope bug (buying
+    //      flipped away from "sase"), not a genuine resolution. Fixed by
+    //      defect 1's own correction (buying stays SASE through C,
+    //      proven above).
+    //  (2) THEN this fixture over-corrected to claim Prompt C's own
+    //      exact wording never resolves q-sase-shape at all -- found
+    //      FALSE by comparing this file's own defect-5 pinned readiness
+    //      score against the real, rendered live UI (reports/screenshots/
+    //      mfg-02-desktop-after-fixturesBCD.png: readiness genuinely
+    //      lands at 25, confirmed by pixel crop, not the 24 this fixture
+    //      originally implied). Root cause: Prompt C's exact phrase "a
+    //      single platform" matches extract.ts's own strict, narrow
+    //      statedObjectivesIn() phrase list (Harry, 24 Jul 2026,
+    //      pre-existing and unrelated to this correction pass' six
+    //      defects), which folds it into `noted` in the SAME cycle, live
+    //      (ProjectDesk.tsx line ~2165) -- an honest, buyer-quoted
+    //      resolution, not silent inference, and not a violation of
+    //      defect 4 (the provenance is the buyer's own matched phrase,
+    //      never Netify's question text).
+    // This fixture now proves the CORRECT, narrower claim in three parts:
+    // genuinely unrelated freeform prose never resolves the decision (the
+    // general principle defect 1/4 cares about); a genuine structured
+    // answer (a click) resolves it; and Prompt C's OWN real wording,
+    // through the real extraction mechanism, resolves it the SAME way.
     const reqG = requirementFrom(s.facts);
     const buyingG = buyingOf(s.facts);
     const opModelG = operatingModelOf(s.facts);
     const corpusG = [...standing(s.facts).map((f) => f.quote ?? String(f.value)), ...s.receipts.map((r) => r.text)].join(" ");
-    const earnedG = earnedQuestions(reqG, buyingG, opModelG, [], [], corpusG);
     const packG = activePack(reqG);
     const flavG = packG ? activeFlavours(packG, corpusG) : [];
-    const sugG = packG ? visibleSuggestions(packG, flavG, s.facts, [], []) : [];
-    const rankedG = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedG, suggestions: sugG });
-    const idsG = rankedG.map((q) => q.id);
-    record(!idsG.includes("q-sase-shape"), "Fixture G: once Fixture C's SASE-shape answer lands, q-sase-shape no longer appears in the ranked list (the resolved question disappears)", `remaining=${JSON.stringify(idsG)}`);
-    record(rankedG.slice(0, 3).every((q) => q.id !== "q-sase-shape"), "Fixture G: a new question is promoted into the top-3 in its place (the list never shrinks to fewer than 3 while unresolved decisions remain)", `top3=${JSON.stringify(rankedG.slice(0, 3).map((q) => q.id))}`);
+
+    // G/neutral: genuinely unrelated freeform prose (no strict-phrase
+    // match at all) never resolves q-sase-shape -- the general principle.
+    const neutralTextG = "We are still weighing our supplier options internally.";
+    record(statedObjectivesIn(neutralTextG).length === 0, "Fixture G/neutral setup: the comparison text matches no strict stated-objective phrase at all (a fair test of the general principle, not a coincidence)", `matches=${JSON.stringify(statedObjectivesIn(neutralTextG))}`);
+    const earnedGUnanswered = earnedQuestions(reqG, buyingG, opModelG, [], [], corpusG);
+    const sugGUnanswered = packG ? visibleSuggestions(packG, flavG, s.facts, [], []) : [];
+    const rankedGUnanswered = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGUnanswered, suggestions: sugGUnanswered });
+    const idsGUnanswered = rankedGUnanswered.map((q) => q.id);
+    record(idsGUnanswered.includes("q-sase-shape"), "Fixture G/neutral: genuinely unrelated freeform prose, on its own, does NOT resolve q-sase-shape -- only a structured answer (a click, or the buyer's own strict-phrase wording) may", `remaining=${JSON.stringify(idsGUnanswered)}`);
+
+    // G/structured: a genuine STRUCTURED answer (the buyer clicking
+    // "Single-vendor platform" -- itemId pushed into notedIds, the same
+    // way ProjectDesk.tsx lands a note answer) resolves it, with a new
+    // question promoted into the top-3 in its place.
+    const notedIdsAfterStructuredAnswer = ["obj-unified"];
+    const earnedGAnswered = earnedQuestions(reqG, buyingG, opModelG, notedIdsAfterStructuredAnswer, [], corpusG);
+    const sugGAnswered = packG ? visibleSuggestions(packG, flavG, s.facts, [], []) : [];
+    const rankedGAnswered = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGAnswered, suggestions: sugGAnswered });
+    const idsGAnswered = rankedGAnswered.map((q) => q.id);
+    record(!idsGAnswered.includes("q-sase-shape"), "Fixture G/structured: once the buyer's SASE-shape choice lands as a genuine structured answer (notedIds includes obj-unified), q-sase-shape no longer appears in the ranked list", `remaining=${JSON.stringify(idsGAnswered)}`);
+    record(rankedGAnswered.slice(0, 3).every((q) => q.id !== "q-sase-shape"), "Fixture G/structured: a new question is promoted into the top-3 in its place (the list never shrinks to fewer than 3 while unresolved decisions remain)", `top3=${JSON.stringify(rankedGAnswered.slice(0, 3).map((q) => q.id))}`);
+
+    // G/real: Prompt C's OWN actual wording, run through the REAL
+    // production mechanism (statedObjectivesIn, not a manual injection),
+    // produces the SAME resolution as the structured-answer case above --
+    // proving the live behaviour (Fixture L's score increase at Prompt C)
+    // is this honest mechanism working as designed, not a bug.
+    record(
+      JSON.stringify(objectivesFromC) === JSON.stringify(["obj-unified"]),
+      "Fixture G/real: Prompt C's own exact wording, through the REAL statedObjectivesIn() extraction (not a manual notedIds injection), produces the SAME obj-unified id the structured-answer case above uses",
+      `objectivesFromC=${JSON.stringify(objectivesFromC)}`,
+    );
+    const earnedGReal = earnedQuestions(reqG, buyingG, opModelG, objectivesFromC, [], corpusG);
+    const sugGReal = packG ? visibleSuggestions(packG, flavG, s.facts, objectivesFromC, []) : [];
+    const rankedGReal = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGReal, suggestions: sugGReal });
+    record(
+      !rankedGReal.some((q) => q.id === "q-sase-shape"),
+      "Fixture G/real: with the REAL Prompt C fold applied, q-sase-shape no longer appears in the ranked list -- matching the live UI, whose 'Best next decisions' cards never show it after Prompt C (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png)",
+      `remaining=${JSON.stringify(rankedGReal.map((q) => q.id))}`,
+    );
 
     // --- H: no project-specific supplier identity before publication ---
     const nqSrc = readFileSync("src/lib/workspace/procurement-next-questions.ts", "utf8");
@@ -542,8 +951,8 @@ function main() {
     // actual React resume behaviour; this proves the underlying data has
     // no hidden, unreproducible state.
     const reloadedDoc = compileProcurementDocument({ facts: s.facts, requirement: requirementFrom(s.facts), verdict: null, noted: [], rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: null, revision: null });
-    const rankedReload = rankNextQuestions({ openDecisions: reloadedDoc.openDecisions, earned: earnedG, suggestions: sugG });
-    record(JSON.stringify(rankedReload.map((q) => q.id)) === JSON.stringify(idsG), "Fixture I: a reload (previousDocument=null) reproduces the identical ranked NextQuestion list and provenance for the identical facts", `before=${JSON.stringify(idsG)} after=${JSON.stringify(rankedReload.map((q) => q.id))}`);
+    const rankedReload = rankNextQuestions({ openDecisions: reloadedDoc.openDecisions, earned: earnedGUnanswered, suggestions: sugGUnanswered });
+    record(JSON.stringify(rankedReload.map((q) => q.id)) === JSON.stringify(idsGUnanswered), "Fixture I: a reload (previousDocument=null) reproduces the identical ranked NextQuestion list and provenance for the identical facts", `before=${JSON.stringify(idsGUnanswered)} after=${JSON.stringify(rankedReload.map((q) => q.id))}`);
 
     // --- J: desktop and 390px mobile layout hierarchy ---
     // Structural proof here (same convention as Part B); the real visual

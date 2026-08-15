@@ -24,6 +24,8 @@ import {
 import type { SourceLedgerEntry, SourceLedgerVia } from "@/lib/workspace/source-ledger";
 import type { RfpStatus } from "@/lib/rfp-types";
 import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeStateFromProject } from "@/lib/workspace/source-ledger";
+import type { DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
+import { mergeDecisionLedger, resumeDecisionsFromProject } from "@/lib/workspace/decision-ledger";
 import { parseCommand, type Command } from "@/lib/workspace/commands";
 import {
   briefModel,
@@ -84,7 +86,8 @@ import LivingProcurementCanvas, { type ProcurementView } from "@/components/proc
  *  See each module's own header comment for why they are separate files
  *  from the compiler rather than folded into it. */
 import { rankNextQuestions, materialDecisionCount, type NextQuestion } from "@/lib/workspace/procurement-next-questions";
-import { buildSectionOutline, type OutlineRow } from "@/lib/workspace/procurement-outline";
+import { buildReadiness } from "@/lib/workspace/procurement-readiness";
+import { buildSectionOutline, deriveResilienceOutlineState, type OutlineRow } from "@/lib/workspace/procurement-outline";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -254,6 +257,22 @@ type SourceTurn = SourceLedgerEntry;
  *  at the one call site that needs a client-generated stable id. */
 function newSourceTurnId(): string {
   return `st_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** Living Procurement UK Decision-Maker Blueprint, correction pass
+ *  (Robert, 15 Aug 2026), defects 3 and 4: the client-side working copy of
+ *  workspace/decision-ledger.ts's DecisionLedgerEntry -- a plain type
+ *  alias for the same reason SourceTurn is one (see that type's own doc
+ *  comment): the shapes are field-for-field identical, and the merge/
+ *  replay/resume functions this component calls all live in the shared
+ *  module for testability. */
+type DecisionTurn = DecisionLedgerEntry;
+
+/** Same client-generated stable-id convention as newSourceTurnId(),
+ *  distinct prefix so the two id spaces are never visually confusable in
+ *  logs/devtools. */
+function newDecisionTurnId(): string {
+  return `dt_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /* hydrateSourceTurns() -- the client-side half of "rehydrate the ledger
@@ -773,17 +792,34 @@ export default function ProjectDesk({
    *  "Undecided") -- mirrors the pack law's "declining is permanent and
    *  stays on the record" for sector suggestions, applied to earned
    *  questions too, so a dismissed question does not reappear every
-   *  render. In-memory only for this Stage checkpoint (not yet persisted
-   *  to the saved project record) -- a deliberate, named scope decision,
-   *  not a silent gap; see the checkpoint report's assumptions section. */
+   *  render.
+   *
+   *  Correction pass (Robert, 15 Aug 2026), defect 3: previously in-memory
+   *  only, a NAMED gap the prior checkpoint's own report disclosed. Now
+   *  durable: every dismissal/decline/answer that changes this, `noted` or
+   *  `declinedSuggestionIds` also appends a DecisionLedgerEntry to
+   *  `decisionTurns` below (see answerNextQuestion), which Save/Publish
+   *  persist into the project's `decision_ledger` (rfp-types.ts) exactly
+   *  like `sourceTurns` persists into `source_ledger` -- and the arrival
+   *  effect's resume replays that same ledger back into this state
+   *  (resumeDecisionsFromProject), so a resolved or declined item does not
+   *  reappear after a reload. */
   const [dismissedQuestionIds, setDismissedQuestionIds] = useState<string[]>([]);
   /** A sector suggestion the buyer explicitly declined -- permanent, per
    *  the pack law (sector/packs.ts's own header comment): "a declined
-   *  suggestion never returns." */
+   *  suggestion never returns." Durable as of the correction pass above. */
   const [declinedSuggestionIds, setDeclinedSuggestionIds] = useState<string[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   /** The immutable source-turn log (see the SourceTurn type comment). */
   const [sourceTurns, setSourceTurns] = useState<SourceTurn[]>(() => hydrateSourceTurns(initialSourceLedger));
+  /** Living Procurement UK Decision-Maker Blueprint, correction pass
+   *  (Robert, 15 Aug 2026), defects 3 and 4: the immutable log of every
+   *  structured NextQuestion action the buyer has taken (see the
+   *  DecisionTurn type comment and workspace/decision-ledger.ts) -- the
+   *  honest alternative to presenting a button click as ordinary typed
+   *  buyer wording, and the durable store `noted`/`dismissedQuestionIds`/
+   *  `declinedSuggestionIds` above are reconstructed from on resume. */
+  const [decisionTurns, setDecisionTurns] = useState<DecisionTurn[]>([]);
   /** Sixth amendment (13 Aug 2026), Robert's item 3: true from the instant
    *  the arrival effect decides a resume attempt is worth making, false
    *  once that attempt has either succeeded or visibly failed. Gates
@@ -916,6 +952,11 @@ export default function ProjectDesk({
   const factsRef = useRef<WorkspaceFact[]>([]);
   const receiptsRef = useRef<Receipt[]>([]);
   const sourceTurnsRef = useRef<SourceTurn[]>([]);
+  /** Correction pass (Robert, 15 Aug 2026), defects 3 and 4: same purpose
+   *  as sourceTurnsRef immediately above -- lets the resume effect read
+   *  this session's own locally-captured decisions without closing over a
+   *  stale value. */
+  const decisionTurnsRef = useRef<DecisionTurn[]>([]);
   /** Phase 3 Stage A: the last compiled document, used ONLY so the next
    *  compile can attribute a real added/updated/removed change set
    *  against it (`compileProcurementDocument`'s own `previousDocument`
@@ -973,6 +1014,7 @@ export default function ProjectDesk({
 
   useEffect(() => { receiptsRef.current = receipts; }, [receipts]);
   useEffect(() => { sourceTurnsRef.current = sourceTurns; }, [sourceTurns]);
+  useEffect(() => { decisionTurnsRef.current = decisionTurns; }, [decisionTurns]);
 
   /** Netify's voice is a thread line now (round 6): one template
    *  sentence per event, appended, never model prose, never a summary
@@ -1271,6 +1313,10 @@ export default function ProjectDesk({
             engine?: string;
             test?: boolean;
             source_ledger?: SourceLedgerEntry[];
+            // Correction pass (Robert, 15 Aug 2026), defects 3 and 4: the
+            // structured NextQuestion-action ledger, same top-level shape
+            // as source_ledger immediately above.
+            decision_ledger?: DecisionLedgerEntry[];
             engine_data?: { requirement?: unknown } | null;
             // Living Procurement Canvas Phase 2, round 3 correction (14 Aug
             // 2026), Robert's item 6: `status`/`invited_vendors` were
@@ -1302,6 +1348,31 @@ export default function ProjectDesk({
           // already captured locally during the fetch's own async gap.
           setSourceTurns((current) => mergeSourceLedger(resumeState.sourceLedger, current));
           setResumeRequirementBase(resumeState.requirementBase);
+          /* Correction pass (Robert, 15 Aug 2026), defect 3: the SAME
+           * merge-not-replace treatment for the decision ledger --
+           * `resumeState` above already proved `proj.engine ===
+           * "security_sourcing"` (resumeStateFromProject returns null
+           * otherwise, and this code is unreachable in that case), so
+           * resumeDecisionsFromProject(proj) is guaranteed non-null here
+           * too. Replaying the merged ledger back into `noted`/
+           * `dismissedQuestionIds`/`declinedSuggestionIds` is what makes
+           * "resolved or declined items do not reappear" true on a real
+           * reload, not just on the ledger's own storage. */
+          const decisionResume = resumeDecisionsFromProject(proj);
+          if (decisionResume) {
+            const mergedDecisionLedger = mergeDecisionLedger(decisionResume.decisionLedger, decisionTurnsRef.current);
+            setDecisionTurns(mergedDecisionLedger);
+            const replay = resumeDecisionsFromProject({ engine: proj.engine, decision_ledger: mergedDecisionLedger });
+            if (replay) {
+              setNoted((current) => {
+                const merged = current.slice();
+                for (const n of replay.noted) if (!merged.some((x) => x.id === n.id)) merged.push(n);
+                return merged;
+              });
+              setDismissedQuestionIds((current) => [...new Set([...replay.dismissedQuestionIds, ...current])]);
+              setDeclinedSuggestionIds((current) => [...new Set([...replay.declinedSuggestionIds, ...current])]);
+            }
+          }
           // Marks this session as "already saved" under this id/manage, so
           // saveNow()/signAndPublish() take the refreshRecord() (update)
           // path, not createRecord() (which would mint a second project) --
@@ -1958,7 +2029,37 @@ export default function ProjectDesk({
    *  wording" and "Question selection is UI context, not a source turn."
    *  A "dismiss" answer never writes anything; it only remembers the
    *  dismissal so the question does not reappear (earned questions) or
-   *  is permanently declined (sector suggestions, per the pack law). */
+   *  is permanently declined (sector suggestions, per the pack law).
+   *
+   *  Correction pass (Robert, 15 Aug 2026), defect 4: "A clicked answer
+   *  is buyer intent, but it is not free-typed buyer wording... Do not
+   *  silently present the option label as an ordinary typed buyer quote
+   *  with no ledger receipt." Every branch below (including dismiss)
+   *  therefore ALSO appends one DecisionLedgerEntry to `decisionTurns` --
+   *  the honest structured-action receipt, distinct from the fact's own
+   *  `quote: opt.label` (which stays, unchanged, for clause-text display;
+   *  see decision-ledger.ts's header comment for why one new field closes
+   *  both defect 3 and defect 4 at once). */
+  const recordDecision = useCallback(
+    (nq: NextQuestion, opt: NonNullable<NextQuestion["options"]>[number], entry: Pick<DecisionTurn, "action" | "optionId" | "resultingFactPaths" | "resultingNoted">) => {
+      setDecisionTurns((ds) => [
+        ...ds,
+        {
+          id: newDecisionTurnId(),
+          at: Date.now(),
+          questionId: nq.id,
+          optionLabel: opt.label,
+          resultingFactPaths: entry.resultingFactPaths ?? [],
+          resultingNoted: entry.resultingNoted ?? [],
+          optionId: entry.optionId,
+          action: entry.action,
+        },
+      ]);
+      setSaveDirty(true);
+    },
+    [],
+  );
+
   const answerNextQuestion = useCallback(
     (nq: NextQuestion, optionIndex: number) => {
       const opt = nq.options?.[optionIndex];
@@ -1968,9 +2069,11 @@ export default function ProjectDesk({
         if (nq.source === "sector_suggestion") {
           const suggestionId = nq.id.replace(/^sector:/, "");
           setDeclinedSuggestionIds((ids) => (ids.includes(suggestionId) ? ids : [...ids, suggestionId]));
+          recordDecision(nq, opt, { action: "decline_suggestion", optionId: "decline", resultingFactPaths: [], resultingNoted: [] });
           ev("workspace_pack_suggestion", { id: suggestionId, verdict: "declined" });
         } else {
           setDismissedQuestionIds((ids) => (ids.includes(nq.id) ? ids : [...ids, nq.id]));
+          recordDecision(nq, opt, { action: "dismiss_question", optionId: "dismiss", resultingFactPaths: [], resultingNoted: [] });
           ev("workspace_earned_answered", { q: nq.id, kind: "dismiss" });
         }
         say(`Noted: "${nq.question}" set aside for now.`);
@@ -1987,11 +2090,13 @@ export default function ProjectDesk({
           const m = applyMerge(updates, "answer");
           markChanged(m.changed.length ? m.changed : updates.map((u) => factId(u.path, u.value)), m.facts);
         }
+        recordDecision(nq, opt, { action: "items", optionId: answer.itemIds.join("+"), resultingFactPaths: updates.map((u) => u.path), resultingNoted: [] });
         ev("workspace_earned_answered", { q: nq.id, kind: "items" });
       } else if (answer.kind === "note") {
         const noteId = nq.source === "sector_suggestion" ? `ps-${nq.id.replace(/^sector:/, "")}` : `${nq.id}:${optionIndex}`;
         beginOrExtendSubmission();
         setNoted((ns) => (ns.some((n) => n.id === noteId) ? ns : [...ns, { id: noteId, label: answer.text, section: nq.target, own: true }]));
+        recordDecision(nq, opt, { action: "note", optionId: noteId, resultingFactPaths: [], resultingNoted: [{ id: noteId, label: answer.text, section: nq.target, own: true }] });
         setChangedSlots([noteId]);
         setSaveDirty(true);
         scheduleSettle();
@@ -2000,14 +2105,17 @@ export default function ProjectDesk({
         // Free-text answers (root sector/scope, contract end) open the
         // existing edit sheet for the matching slot rather than a new
         // inline control -- reusing the established, already-fixtured
-        // typed-answer path instead of inventing a parallel one.
+        // typed-answer path instead of inventing a parallel one. Not
+        // recorded here: this click only OPENS the sheet, it lands nothing
+        // itself -- the eventual typed submission through that sheet is a
+        // real buyer-typed answer, correctly outside this ledger.
         const sid = SLOT_BY_PATH[answer.path];
         if (sid) setEdit(sid);
         return;
       }
       say(`${nq.question} — "${opt.label}".`);
     },
-    [applyMerge, markChanged, say, beginOrExtendSubmission, scheduleSettle],
+    [applyMerge, markChanged, say, beginOrExtendSubmission, scheduleSettle, recordDecision],
   );
 
   /* ---- The extraction cycle (the same organ). Round 6: the cycle
@@ -2377,6 +2485,16 @@ export default function ProjectDesk({
     return sourceTurns.map((t) => ({ id: t.id, text: t.text, at: t.at, via: t.via }));
   }
 
+  /** Correction pass (Robert, 15 Aug 2026), defects 3 and 4: the same
+   *  on-the-wire convention as sourceTurnsPayload() immediately above, for
+   *  `decisionTurns` -- shared by rfpPayload() and by createRecord/
+   *  refreshRecord's security-scope branches. Sending the same entries
+   *  (same stable ids) on every call is what makes the server's
+   *  mergeDecisionLedger() idempotent, exactly like the source ledger. */
+  function decisionTurnsPayload(): DecisionLedgerEntry[] {
+    return decisionTurns;
+  }
+
   /* ---- The create step, shared by the early save and the publish
      chain (round 6): the same payloads, the same records, unpublished.
      The wizard-store payload only carries the submit-agreement consent
@@ -2431,6 +2549,9 @@ export default function ProjectDesk({
          create AND every refresh (this payload is shared by both, see
          createRecord/refreshRecord below), not only the first save. */
       source_turns: sourceTurnsPayload(),
+      /** Correction pass, defects 3 and 4: the same treatment, into
+       *  `decision_ledger`. */
+      decision_turns: decisionTurnsPayload(),
     };
   }
 
@@ -2451,6 +2572,9 @@ export default function ProjectDesk({
              (source_turns), not a flattened string array (source_notes,
              now retired everywhere) -- see sourceTurnsPayload() above. */
           ...(sourceTurns.length ? { source_turns: sourceTurnsPayload() } : {}),
+          /* Correction pass, defects 3 and 4: the same treatment as
+             source_turns immediately above -- see decisionTurnsPayload(). */
+          ...(decisionTurns.length ? { decision_turns: decisionTurnsPayload() } : {}),
           ...(testMode ? { test: true } : {}),
         }),
       });
@@ -2484,7 +2608,7 @@ export default function ProjectDesk({
       const res = await fetch(`/sase/api/security-sourcing/project/${proj.id}/rescope`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ manage_token: proj.manage, requirement, consent: true, source_turns: sourceTurnsPayload() }),
+        body: JSON.stringify({ manage_token: proj.manage, requirement, consent: true, source_turns: sourceTurnsPayload(), decision_turns: decisionTurnsPayload() }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
@@ -2771,6 +2895,27 @@ export default function ProjectDesk({
     const rankedIds = new Set(rankedNextQuestions.map((q) => q.id));
     const declinedCount = pack ? declinedSuggestionIds.filter((id) => pack.suggestions.some((s) => s.id === id) || Object.values(pack.flavourSuggestions).flat().some((s) => s.id === id)).length : 0;
     const acceptedNotedCount = noted.filter((n) => n.id.startsWith("ps-")).length;
+    /* Living Procurement UK Decision-Maker Blueprint, correction pass
+     * (Robert, 15 Aug 2026), defect 2: "The Resilience and availability
+     * outline row may say Confirmed only when the canonical document
+     * contains the corresponding governed resilience state or clause.
+     * Question disappearance alone is not sufficient proof." q-resilience
+     * disappearing from rankedIds only ever meant the buyer dismissed the
+     * card (dismissedQuestionIds) or the site count/buying type changed --
+     * NEVER that a real resilience decision was compiled, since
+     * q-resilience's own earnedBy() never inspects notedIds. Conversely, a
+     * buyer who states dual-circuit resilience in free text (the exact
+     * Prompt B scenario) compiles a real `site-resilience-scope` clause
+     * (network:site-resilience, procurement-templates.ts) while the card
+     * stays visible -- that clause's presence, not the card's absence, is
+     * the actual proof this row needs.
+     */
+    const resilienceState = deriveResilienceOutlineState({
+      clauses: compiledDocument.clauses,
+      requirement,
+      buying,
+      hasOperatingModelConflict: rankedIds.has("OD-operating-model-conflict"),
+    });
     return buildSectionOutline({
       orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && hasFact("estate.users"),
       orgScaleDetail: coreFive.sector && coreFive.sites ? `${cap(String(standingAt("organisation.sector")[0]?.value ?? ""))}, ${standingAt("estate.sites").slice(-1)[0]?.value ?? "?"} sites` : "Sector, sites and regions not yet all stated.",
@@ -2778,8 +2923,8 @@ export default function ProjectDesk({
       scopeDetail: buying ? `Buying: ${buying === "sase" ? "SASE" : buying === "sdwan" ? "SD-WAN" : buying === "sse" ? "SSE" : "managed security"}.` : "What is being bought is not yet stated.",
       estateSignal: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity"),
       estateDetail: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity") ? "Existing estate stated." : "Network, cloud and security estate today not yet stated.",
-      resilienceResolved: !rankedIds.has("q-resilience") && !rankedIds.has("OD-operating-model-conflict"),
-      resilienceDetail: rankedIds.has("q-resilience") ? "Dual-circuit resilience per site not yet decided." : "Resilience requirement stated or not applicable.",
+      resilienceResolved: resilienceState.resolved,
+      resilienceDetail: resilienceState.detail,
       securityResolved: !rankedIds.has("q-sse-scope"),
       securityDetail: rankedIds.has("q-sse-scope") ? "Which security controls are in scope is not yet decided." : "Security control scope stated.",
       sector: pack
@@ -2796,6 +2941,59 @@ export default function ProjectDesk({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt]);
+
+  /** Living Procurement UK Decision-Maker Blueprint, correction pass
+   *  (Robert, 15 Aug 2026), defect 5: "Do not merely relabel the existing
+   *  score bands. Readiness must be derived from: material section
+   *  coverage; ...; remaining material open questions; accepted-but-
+   *  unresolved sector rules where applicable." A SECOND, downstream
+   *  readiness compile -- not a second data model, the SAME buildReadiness()
+   *  the compiler itself already calls internally, given the SAME base
+   *  inputs read straight off `compiledDocument` (clauses/openDecisions/
+   *  gates/instrument) PLUS the outer NextQuestion-layer signals that only
+   *  exist AFTER compiledDocument, sectionOutline and
+   *  materialDecisionsRemaining are all computed (`compileProcurementDocument`
+   *  itself cannot take these as inputs without a circular dependency --
+   *  rankedNextQuestions reads compiledDocument.openDecisions, so feeding
+   *  its own output back into that same compile is not possible; see
+   *  buildReadiness()'s own doc comment in procurement-readiness.ts for
+   *  the full rationale). `compiledDocument.readiness` (the compiler's own
+   *  fallback-formula score) is intentionally left untouched everywhere
+   *  else this file reads it internally (e.g. the started/consent gates);
+   *  ONLY the object handed to the canvas for DISPLAY substitutes this
+   *  richer score, so "resolving the operating model, SASE shape,
+   *  resilience and security scope must produce an explainable score/state
+   *  change" is true of what the buyer actually sees. */
+  const sectionAwareReadiness = useMemo(() => {
+    const sectionsConfirmed = sectionOutline.filter((r) => r.state === "confirmed").length;
+    const sectionsTotal = sectionOutline.length;
+    const bankQuestionCount = compiledDocument.responseGroups.reduce((n, g) => n + g.questions.filter((q) => q.source === "bank").length, 0);
+    return buildReadiness({
+      requirement,
+      buying,
+      opModel,
+      clauses: compiledDocument.clauses,
+      openDecisions: compiledDocument.openDecisions,
+      gates: compiledDocument.evaluation.gates,
+      instrument,
+      bankQuestionCount,
+      rfiBankVersion: rfiSet?.version ?? null,
+      materialDecisionsRemaining,
+      pendingSectorSuggestions: visibleSectorSuggestions.length,
+      sectionsConfirmed,
+      sectionsTotal,
+    });
+  }, [sectionOutline, compiledDocument, requirement, buying, opModel, instrument, rfiSet, materialDecisionsRemaining, visibleSectorSuggestions]);
+
+  /** The document handed to the canvas for display: identical to
+   *  `compiledDocument` in every field except `readiness`, which is the
+   *  section-aware compile above. Never a second compile of the document
+   *  itself -- one object, one field substituted, immediately before
+   *  render. */
+  const canvasDocument = useMemo(
+    () => ({ ...compiledDocument, readiness: sectionAwareReadiness }),
+    [compiledDocument, sectionAwareReadiness],
+  );
 
   /** Resolves each of the top-3 NextQuestion cards into concrete,
    *  clickable buttons -- done here (not inside the presentational
@@ -3330,7 +3528,7 @@ export default function ProjectDesk({
       {phase === "live" && started && (
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2 pt-[6px]">
           <LivingProcurementCanvas
-            document={compiledDocument}
+            document={canvasDocument}
             view={procurementView}
             onViewChange={setProcurementView}
             factsKept={live.length}
