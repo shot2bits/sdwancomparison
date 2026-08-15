@@ -64,7 +64,7 @@ import {
 import { earnedQuestions } from "../src/lib/workspace/questions";
 import { activePack, activeFlavours, visibleSuggestions } from "../src/lib/sector/derive";
 import { rankNextQuestions, materialDecisionCount } from "../src/lib/workspace/procurement-next-questions";
-import { buildSectionOutline, deriveResilienceOutlineState } from "../src/lib/workspace/procurement-outline";
+import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists } from "../src/lib/workspace/procurement-outline";
 import { buildReadiness } from "../src/lib/workspace/procurement-readiness";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -152,8 +152,13 @@ function sectionAwareReadinessFor(
   const pack = activePack(requirement);
   const flav = pack ? activeFlavours(pack, corpus) : [];
   const sugs = pack ? visibleSuggestions(pack, flav, facts, notedIds, declined) : [];
-  const ranked = rankNextQuestions({ openDecisions: doc.openDecisions, earned: earnedAll, suggestions: sugs });
-  const materialDecisionsRemaining = materialDecisionCount({ openDecisions: doc.openDecisions, earned: earnedAll, suggestions: sugs });
+  // Correction pass round 2 (Robert, 15 Aug 2026), defect 1: the SAME
+  // clause-existence signal ProjectDesk.tsx now computes, so this
+  // behavioural fixture helper exercises the real fix, not a stale
+  // pre-fix approximation.
+  const resilienceClauseResolved = siteResilienceClauseExists(doc.clauses);
+  const ranked = rankNextQuestions({ openDecisions: doc.openDecisions, earned: earnedAll, suggestions: sugs, resilienceClauseResolved });
+  const materialDecisionsRemaining = materialDecisionCount({ openDecisions: doc.openDecisions, earned: earnedAll, suggestions: sugs, resilienceClauseResolved });
   const rankedIds = new Set(ranked.map((q) => q.id));
   const resilienceState = deriveResilienceOutlineState({ clauses: doc.clauses, requirement, buying, hasOperatingModelConflict: rankedIds.has("OD-operating-model-conflict") });
   const outline = buildSectionOutline({
@@ -527,7 +532,16 @@ function main() {
     const packA = activePack(reqA);
     const flavA = packA ? activeFlavours(packA, corpusA) : [];
     const sugA = packA ? visibleSuggestions(packA, flavA, s.facts, [], []) : [];
-    const rankedA = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedA, suggestions: sugA });
+    // Correction pass round 2 (Robert, 15 Aug 2026), defect 1: wire the
+    // SAME clause-existence signal ProjectDesk.tsx now computes into
+    // every ranked-list/material-decision-count call this file makes, so
+    // every fixture below exercises the real fix rather than a stale
+    // pre-fix approximation. At Prompt A no resilience answer has been
+    // given yet, so this is false here (q-resilience still earns its
+    // place in the top-3, checked below) -- it only starts mattering from
+    // Fixture K1/K3 (after Prompt B) onward.
+    const resilienceClauseResolvedA = siteResilienceClauseExists(s.doc.clauses);
+    const rankedA = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedA, suggestions: sugA, resilienceClauseResolved: resilienceClauseResolvedA });
     const top3A = rankedA.slice(0, 3).map((q) => q.id);
     record(packA?.id === "manufacturing", "Fixture A: the manufacturing sector pack activates from the buyer's own words", `pack=${packA?.id}`);
     record(
@@ -535,7 +549,8 @@ function main() {
       "Fixture A: the top-3 next decisions are exactly Operating model / SASE shape / Site resilience, per the blueprint's own required set",
       `top3=${JSON.stringify(top3A)}`,
     );
-    record(materialDecisionCount({ openDecisions: s.doc.openDecisions, earned: earnedA, suggestions: sugA }) === 4, "Fixture A: material-decision count matches the blueprint's own target message ('Four material decisions remain')", `count=${materialDecisionCount({ openDecisions: s.doc.openDecisions, earned: earnedA, suggestions: sugA })}`);
+    const materialDecisionCountA = materialDecisionCount({ openDecisions: s.doc.openDecisions, earned: earnedA, suggestions: sugA, resilienceClauseResolved: resilienceClauseResolvedA });
+    record(materialDecisionCountA === 4, "Fixture A: material-decision count matches the blueprint's own target message ('Four material decisions remain')", `count=${materialDecisionCountA}`);
     record(s.doc.readiness.label === "Scope forming", "Fixture A: readiness reads 'Scope forming', not the old overstated 'Substantially ready'", `label=${s.doc.readiness.label} score=${s.doc.readiness.score}`);
     const outlineA = buildSectionOutline({
       orgScaleComplete: true, orgScaleDetail: "", scopeComplete: Boolean(buyingA), scopeDetail: "",
@@ -590,7 +605,12 @@ function main() {
     const corpusM2 = [...standing(otNamedState.facts).map((f) => f.quote ?? String(f.value)), ...otNamedState.receipts.map((r) => r.text)].join(" ");
     const flavM2 = packM2 ? activeFlavours(packM2, corpusM2) : [];
     const sugM2 = packM2 ? visibleSuggestions(packM2, flavM2, otNamedState.facts, [], []) : [];
-    const rankedM2 = rankNextQuestions({ openDecisions: otNamedState.doc.openDecisions, earned: earnedQuestions(reqM2, buyingOf(otNamedState.facts), operatingModelOf(otNamedState.facts), [], [], corpusM2), suggestions: sugM2 });
+    const rankedM2 = rankNextQuestions({
+      openDecisions: otNamedState.doc.openDecisions,
+      earned: earnedQuestions(reqM2, buyingOf(otNamedState.facts), operatingModelOf(otNamedState.facts), [], [], corpusM2),
+      suggestions: sugM2,
+      resilienceClauseResolved: siteResilienceClauseExists(otNamedState.doc.clauses),
+    });
     const otMdrRankedM2 = rankedM2.find((q) => q.id === "sector:mf-ot-mdr");
     record(Boolean(otMdrRankedM2), "Fixture M/defect 6: naming SCADA/PLC directly earns the ot_named flavour's own OT-aware monitoring/MDR suggestion", `found=${Boolean(otMdrRankedM2)}`);
     record(
@@ -607,6 +627,142 @@ function main() {
     record(/nq\.reason/.test(canvasSrcM), "Fixture M/defect 6: LivingProcurementCanvas.tsx actually reads nq.reason when rendering a NextQuestion card (the reason is not dropped between the projection and the render)", "");
     record(/Netify suggests.*optional/.test(canvasSrcM), "Fixture M/defect 6: the governed-suggestion badge explicitly says 'optional', not just 'Netify suggests'", "");
     record(!outlineA.some((r) => r.key === "sector_intelligence" && !packA), "Fixture A: no irrelevant sector row is shown when no pack is active (this branch: pack IS active, so presence is correct here; absence is proven by Fixture A's own construction when packA is null)", "");
+
+    // --- N: correction pass round 2 (Robert, 15 Aug 2026), defect 2 --
+    // "Never compile an unaccepted sector suggestion." Robert's exact
+    // reproduction: "After Prompt A alone, the current evidence already
+    // contains: templateId: sector-pack-suggestion, statement: OT/ICS
+    // asset visibility and monitoring recommended." Exercises the REAL
+    // compileProcurementDocument() -> buildCandidateClauses() ->
+    // acceptedSectorSuggestionClauses() path (procurement-templates.ts),
+    // not a reimplementation, across all four required states: pending,
+    // accepted, declined, resumed.
+    {
+      const suggestionTemplateId = "sector-pack-suggestion";
+      const acceptedNoteId = "ps-mf-ot-visibility";
+      const acceptedNoteLabel = "OT/ICS asset visibility and monitoring in scope, alongside IT security";
+
+      // N/pending: Prompt A alone, no accept/decline yet -- s.doc is the
+      // real, unmodified compile Robert's own reproduction used.
+      const pendingSuggestionClause = s.doc.clauses.find((c) => c.templateId === suggestionTemplateId);
+      record(
+        !pendingSuggestionClause,
+        "Fixture N/defect 2 (pending): after Prompt A alone, the compiled document contains NO sector-pack-suggestion clause -- Robert's exact reproduced defect no longer reproduces",
+        `clauses=${JSON.stringify(s.doc.clauses.map((c) => c.templateId))}`,
+      );
+      const pendingRequirementsCount = s.doc.counts.requirements;
+      record(
+        pendingRequirementsCount === s.doc.clauses.length,
+        "Fixture N/defect 2 (pending): the Requirements count is not inflated by the pending suggestion -- it already equals the real compiled clause count (general coordinated-projection invariant, reconfirmed here for this specific state)",
+        `counts.requirements=${pendingRequirementsCount} clauses.length=${s.doc.clauses.length}`,
+      );
+      const responseGroupTextPending = s.doc.responseGroups.flatMap((g) => g.questions.map((q) => q.text ?? "")).join(" | ");
+      const gateClauseIdsPending = new Set(s.doc.evaluation.gates.flatMap((g) => g.clauseIds));
+      record(
+        !responseGroupTextPending.includes("OT/ICS asset visibility"),
+        "Fixture N/defect 2 (pending): the unaccepted suggestion produces no supplier response-group question",
+        `responseGroupText=${responseGroupTextPending}`,
+      );
+      record(
+        gateClauseIdsPending.size === 0 || !s.doc.clauses.some((c) => c.templateId === suggestionTemplateId && gateClauseIdsPending.has(c.id)),
+        "Fixture N/defect 2 (pending): the unaccepted suggestion is referenced by no evaluation gate",
+        `gates=${JSON.stringify(s.doc.evaluation.gates)}`,
+      );
+      const categoryWeightPending = s.doc.evaluation.categories.reduce((n, c) => n + c.weight, 0);
+      record(categoryWeightPending === 100, "Fixture N/defect 2 (pending): Evaluation category weights still sum to exactly 100 -- the unaccepted suggestion contributes no scoring weight of its own", `total=${categoryWeightPending}`);
+      // Still visible, but only as a pending, governed, optional suggestion
+      // (reusing Fixture M's own governedSuggestion/reason/badge proof --
+      // this asserts presence in THIS state specifically).
+      const pendingCard = rankedA.find((q) => q.id === "sector:mf-ot-visibility");
+      record(
+        Boolean(pendingCard) && pendingCard?.governedSuggestion === true && typeof pendingCard?.reason === "string",
+        "Fixture N/defect 2 (pending): the suggestion appears ONLY as a governed, labelled 'Netify suggests / optional' NextQuestion card with a reason and Accept/Not needed options, never as governed document content",
+        `card=${JSON.stringify(pendingCard)}`,
+      );
+
+      // N/accepted: the buyer clicks Accept -- the SAME noted-item shape
+      // answerNextQuestion (ProjectDesk.tsx line ~2096-2099) lands for a
+      // sector_suggestion "note" answer, fed into the REAL compiler. A
+      // note-only answer touches no WorkspaceFact (same as Fixture F's
+      // note-only case above), so the version-increment signal must be
+      // the SAME explicit `revision` event ProjectDesk.tsx's own
+      // beginOrExtendSubmission/scheduleSettle path supplies -- not the
+      // legacy facts/receipts diff (which would never fire for a
+      // noted-only acceptance, exactly the gap Fixture F itself exists to
+      // close).
+      const notedAccepted = [{ id: acceptedNoteId, label: acceptedNoteLabel, section: "security", own: true }];
+      const snapAccept = factSnapshotOf(s.facts);
+      const rAccept = resolveGovernedRevision(INITIAL_GOVERNED_REVISION_STATE, {
+        eventId: "submission:accept-suggestion:1", kind: "noted_add", seq: 1, factsBefore: snapAccept, factsAfter: snapAccept,
+      });
+      const docAccepted = compileProcurementDocument({
+        facts: s.facts, requirement: reqA, verdict: null, noted: notedAccepted, rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: s.doc, revision: rAccept.revision,
+      });
+      const acceptedClauses = docAccepted.clauses.filter((c) => c.templateId === suggestionTemplateId);
+      record(acceptedClauses.length === 1, "Fixture N/defect 2 (accepted): accepting creates EXACTLY ONE governed clause", `count=${acceptedClauses.length}`);
+      record(acceptedClauses[0]?.origin === "sector", "Fixture N/defect 2 (accepted): the clause's origin is preserved as Netify/sector-derived ('sector'), never 'buyer' -- accepted is not the same as buyer-authored", `origin=${acceptedClauses[0]?.origin}`);
+      record(
+        /Netify suggested this; the buyer accepted it\./.test(acceptedClauses[0]?.reason ?? ""),
+        "Fixture N/defect 2 (accepted): the clause's own reason honestly states both halves -- Netify suggested it, the buyer accepted it",
+        `reason=${acceptedClauses[0]?.reason}`,
+      );
+      record(docAccepted.version === s.doc.version + 1, "Fixture N/defect 2 (accepted): the document version increments exactly once for the acceptance", `before=${s.doc.version} after=${docAccepted.version}`);
+      const sugAfterAccept = packA ? visibleSuggestions(packA, flavA, s.facts, [acceptedNoteId], []) : [];
+      record(
+        !sugAfterAccept.some((sg) => sg.id === "mf-ot-visibility"),
+        "Fixture N/defect 2 (accepted): the accepted suggestion is removed from the pending-suggestion projection (visibleSuggestions), not left duplicated in both places",
+        `pending=${JSON.stringify(sugAfterAccept.map((sg) => sg.id))}`,
+      );
+      const rankedAfterAccept = rankNextQuestions({ openDecisions: docAccepted.openDecisions, earned: earnedA, suggestions: sugAfterAccept, resilienceClauseResolved: siteResilienceClauseExists(docAccepted.clauses) });
+      record(!rankedAfterAccept.some((q) => q.id === "sector:mf-ot-visibility"), "Fixture N/defect 2 (accepted): the accepted suggestion no longer appears as a pending NextQuestion card either", `rankedIds=${JSON.stringify(rankedAfterAccept.map((q) => q.id))}`);
+      // Persist and rehydrate: a reload recompiles from the SAME facts +
+      // the SAME noted state (the durable signal decision_ledger/resume
+      // restores, per resumeDecisionsFromProject) and reproduces the
+      // identical governed clause -- not an artefact of in-memory state.
+      const docAcceptedReloaded = compileProcurementDocument({
+        facts: s.facts, requirement: reqA, verdict: null, noted: notedAccepted, rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: null,
+      });
+      const acceptedClausesReloaded = docAcceptedReloaded.clauses.filter((c) => c.templateId === suggestionTemplateId);
+      record(
+        acceptedClausesReloaded.length === 1 && acceptedClausesReloaded[0]?.origin === "sector" && acceptedClausesReloaded[0]?.id === acceptedClauses[0]?.id,
+        "Fixture N/defect 2 (resumed, accepted): a reload (previousDocument: null) from the same facts/noted state reproduces the SAME one governed clause, with the SAME stable id -- persists and rehydrates correctly",
+        `before=${acceptedClauses[0]?.id} after=${acceptedClausesReloaded[0]?.id}`,
+      );
+
+      // N/declined: the buyer clicks "Not needed" instead -- no noted
+      // item is ever created for a decline (recordDecision's own
+      // resultingNoted: [] for action "decline_suggestion"), so the
+      // compiler input is identical to the pending case; the decline is
+      // durable via declinedSuggestionIds/decision_ledger, not a clause.
+      const docDeclined = compileProcurementDocument({
+        facts: s.facts, requirement: reqA, verdict: null, noted: [], rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: s.doc,
+      });
+      record(
+        !docDeclined.clauses.some((c) => c.templateId === suggestionTemplateId),
+        "Fixture N/defect 2 (declined): declining creates NO clause",
+        `clauses=${JSON.stringify(docDeclined.clauses.map((c) => c.templateId))}`,
+      );
+      const sugAfterDecline = packA ? visibleSuggestions(packA, flavA, s.facts, [], ["mf-ot-visibility"]) : [];
+      record(
+        !sugAfterDecline.some((sg) => sg.id === "mf-ot-visibility"),
+        "Fixture N/defect 2 (declined): the decline is persisted in the pending-suggestion projection -- visibleSuggestions (fed by declinedSuggestionIds, durable via decision_ledger's decline_suggestion action) drops it",
+        `pending=${JSON.stringify(sugAfterDecline.map((sg) => sg.id))}`,
+      );
+
+      // N/resumed, declined: a reload from the same facts, with the same
+      // durable declinedSuggestionIds state, must not show it again.
+      const sugAfterDeclineReloaded = packA ? visibleSuggestions(packA, flavA, s.facts, [], ["mf-ot-visibility"]) : [];
+      record(
+        !sugAfterDeclineReloaded.some((sg) => sg.id === "mf-ot-visibility"),
+        "Fixture N/defect 2 (resumed, declined): after a reload, the declined suggestion does not reappear in the pending-suggestion projection",
+        `pending=${JSON.stringify(sugAfterDeclineReloaded.map((sg) => sg.id))}`,
+      );
+      record(
+        !docDeclined.clauses.some((c) => c.templateId === suggestionTemplateId),
+        "Fixture N/defect 2 (resumed, declined): a reload still produces no governed clause for the declined suggestion",
+        "",
+      );
+    }
 
     // Defect 5: section-aware readiness snapshot at Prompt A, captured here
     // (before s is reassigned by Prompt B) using the REAL production
@@ -650,6 +806,63 @@ function main() {
     });
     record(outlineStateNoClause.resolved === false, "Fixture K1/defect 2: with the SAME materially-applicable requirement but no site-resilience-scope clause present, the row correctly reads Needs decision (proves the row cannot be satisfied by absence of a question alone)", `detail=${outlineStateNoClause.detail}`);
 
+    // --- K3: correction pass round 2 (Robert, 15 Aug 2026), defect 1 --
+    // "q-resilience must disappear from the full ranked NextQuestion
+    // list; it must disappear from the visible top three; it must no
+    // longer contribute to materialDecisionsRemaining... Do not resolve
+    // this merely because a card was clicked or disappeared. Use the
+    // canonical governed resilience clause/state as the resolution
+    // signal." K1 above already proves the clause exists and the outline
+    // row reads Confirmed; this fixture proves the THIRD, previously
+    // missing leg -- the NextQuestion projection itself -- using the
+    // real production wiring (siteResilienceClauseExists ->
+    // resilienceClauseResolved -> rankNextQuestions/materialDecisionCount),
+    // the same signal ProjectDesk.tsx now computes, not a manual filter.
+    const reqAfterB = requirementFrom(s.facts);
+    const buyingAfterB = buyingOf(s.facts);
+    const opModelAfterB = operatingModelOf(s.facts);
+    const corpusAfterB = [...standing(s.facts).map((f) => f.quote ?? String(f.value)), ...s.receipts.map((r) => r.text)].join(" ");
+    const earnedAfterB = earnedQuestions(reqAfterB, buyingAfterB, opModelAfterB, [], [], corpusAfterB);
+    const packAfterB = activePack(reqAfterB);
+    const flavAfterB = packAfterB ? activeFlavours(packAfterB, corpusAfterB) : [];
+    const sugAfterB = packAfterB ? visibleSuggestions(packAfterB, flavAfterB, s.facts, [], []) : [];
+    record(
+      earnedAfterB.some((q) => q.id === "q-resilience"),
+      "Fixture K3/defect 1 setup: q-resilience is still materially earned (site count/buying still qualify) after Prompt B -- proves the fixture below is a genuine clause-driven filter, not an artefact of the question no longer being earned at all",
+      `earnedIds=${JSON.stringify(earnedAfterB.map((q) => q.id))}`,
+    );
+    const resilienceClauseResolvedAfterB = siteResilienceClauseExists(s.doc.clauses);
+    record(resilienceClauseResolvedAfterB === true, "Fixture K3/defect 1 setup: siteResilienceClauseExists reads true against the real compiled document after Prompt B", "");
+    const rankedAfterB = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedAfterB, suggestions: sugAfterB, resilienceClauseResolved: resilienceClauseResolvedAfterB });
+    record(
+      !rankedAfterB.some((q) => q.id === "q-resilience"),
+      "Fixture K3/defect 1: q-resilience is absent from the FULL ranked NextQuestion list once the canonical site-resilience-scope clause exists",
+      `rankedIds=${JSON.stringify(rankedAfterB.map((q) => q.id))}`,
+    );
+    record(
+      !rankedAfterB.slice(0, 3).some((q) => q.id === "q-resilience"),
+      "Fixture K3/defect 1: q-resilience is absent from the visible top three",
+      `top3=${JSON.stringify(rankedAfterB.slice(0, 3).map((q) => q.id))}`,
+    );
+    const materialDecisionCountAfterB = materialDecisionCount({ openDecisions: s.doc.openDecisions, earned: earnedAfterB, suggestions: sugAfterB, resilienceClauseResolved: resilienceClauseResolvedAfterB });
+    const materialDecisionCountAfterBUnfiltered = materialDecisionCount({ openDecisions: s.doc.openDecisions, earned: earnedAfterB, suggestions: sugAfterB, resilienceClauseResolved: false });
+    record(
+      materialDecisionCountAfterB === materialDecisionCountAfterBUnfiltered - 1,
+      "Fixture K3/defect 1: materialDecisionsRemaining decreases by exactly one once resilience is correctly excluded (an apples-to-apples comparison against the SAME state with the flag forced off)",
+      `resolved=${materialDecisionCountAfterB} unresolved=${materialDecisionCountAfterBUnfiltered}`,
+    );
+    // Counter-example: the SAME earned/open-decision/suggestion state,
+    // but with no site-resilience-scope clause present (resilienceClauseResolved
+    // left false/omitted, today's pre-fix default) -- q-resilience must
+    // remain open, proving the filter is genuinely clause-gated and not
+    // vacuously always-off.
+    const rankedNoClauseSignal = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedAfterB, suggestions: sugAfterB });
+    record(
+      rankedNoClauseSignal.some((q) => q.id === "q-resilience"),
+      "Fixture K3/defect 1 counter-example: with the identical earned/open-decision state but resilienceClauseResolved not supplied (the safe default), q-resilience correctly remains open in the ranked list",
+      `rankedIds=${JSON.stringify(rankedNoClauseSignal.map((q) => q.id))}`,
+    );
+
     // Defect 5: section-aware readiness snapshot at Prompt B. factsB/docB/
     // receiptsB are also kept so Fixture L2 below can re-run
     // sectionAwareReadinessFor from this genuinely SASE-shape-unresolved
@@ -660,6 +873,22 @@ function main() {
     const docB = s.doc;
     const receiptsB = s.receipts;
     const readinessB = sectionAwareReadinessFor(factsB, docB, receiptsB);
+    // Fixture K3/defect 1, continued: the production readiness helper
+    // (which now internally computes the same resilienceClauseResolved
+    // signal) reconciles exactly with the standalone check above -- the
+    // readiness reasons/score are not a second, independently-drifting
+    // copy of "is resilience resolved".
+    record(
+      readinessB.materialDecisionsRemaining === materialDecisionCountAfterB,
+      "Fixture K3/defect 1: the section-aware readiness snapshot's own materialDecisionsRemaining exactly matches the standalone, clause-gated materialDecisionCount computed above -- one reconciled number, not two",
+      `readinessB.materialDecisionsRemaining=${readinessB.materialDecisionsRemaining} standalone=${materialDecisionCountAfterB}`,
+    );
+    const materialDecisionsReasonB = readinessB.readiness.reasons.find((r) => /material decision/.test(r));
+    record(
+      Boolean(materialDecisionsReasonB) && materialDecisionsReasonB!.startsWith(`${materialDecisionCountAfterB} material decision`),
+      "Fixture K3/defect 1: the readiness reason naming material decisions remaining literally cites the SAME corrected count (resilience excluded), not the stale unfiltered one",
+      `reason=${materialDecisionsReasonB} expectedCount=${materialDecisionCountAfterB}`,
+    );
 
     // --- C: SASE-shape answer ---
     const promptFixtureC = "We prefer a single platform, but identity must integrate with Entra ID and we will consider third-party SOC services.";
@@ -763,9 +992,26 @@ function main() {
         `-> D=${readinessD.readiness.score}(${readinessD.readiness.label}) sections=${readinessD.sectionsConfirmed}/${readinessD.sectionsTotal} decisions=${readinessD.materialDecisionsRemaining}`,
     );
     record(readinessA.readiness.reasons.length > 0, "Fixture L/defect 5: the section-aware readiness at Prompt A carries explainable reasons, not a bare number", JSON.stringify(readinessA.readiness.reasons));
+    // Correction pass round 2 (Robert, 15 Aug 2026): "Recalculate
+    // readiness only after correcting both state defects... Do not pin
+    // new scores until the semantic state is correct." The old pinned
+    // progression (22 -> 25 -> 28 -> 25) was computed against the SAME
+    // two bugs this round fixes (q-resilience never excluded once
+    // resolved; an unaccepted sector suggestion silently compiled into a
+    // governed clause and counted towards Requirements/material
+    // decisions) -- it was an accurate measurement of the BUGGY
+    // behaviour, not a correct target. The new progression below
+    // (22 -> 28 -> 31 -> 28) was recomputed AFTER both fixes landed, then
+    // independently confirmed against a real, freshly rendered Playwright
+    // run of the exact same A/B/C/D prompt sequence, this round
+    // (reports/screenshots/mfg-01-desktop-after-fixtureA-round2.png reads
+    // 22; mfg-02-desktop-after-fixturesBCD-round2.png / the -fullpage
+    // variant reads 28 after B and D, 31 after C, read live from the
+    // aria-label during capture) -- not re-derived from the old
+    // screenshot, which was itself a render of the pre-fix bug.
     record(
-      readinessA.readiness.score === 22 && readinessB.readiness.score === 25 && readinessC.readiness.score === 28 && readinessD.readiness.score === 25,
-      "Fixture L/defect 5: the exact A->B->C->D score progression (22 -> 25 -> 28 -> 25) matches empirical reproduction against the real production functions AND the real, rendered live UI (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png reads 25 after B/C/D, confirmed by pixel crop) -- a pinned regression value, not just a directional check",
+      readinessA.readiness.score === 22 && readinessB.readiness.score === 28 && readinessC.readiness.score === 31 && readinessD.readiness.score === 28,
+      "Fixture L/defect 5, correction pass round 2: the RECALCULATED A->B->C->D score progression (22 -> 28 -> 31 -> 28) matches empirical reproduction against the real production functions AND a freshly rendered live UI run captured this round -- a pinned regression value, not just a directional check, and not the stale pre-fix progression",
       `A=${readinessA.readiness.score} B=${readinessB.readiness.score} C=${readinessC.readiness.score} D=${readinessD.readiness.score}`,
     );
     record(
@@ -894,6 +1140,12 @@ function main() {
     const corpusG = [...standing(s.facts).map((f) => f.quote ?? String(f.value)), ...s.receipts.map((r) => r.text)].join(" ");
     const packG = activePack(reqG);
     const flavG = packG ? activeFlavours(packG, corpusG) : [];
+    // s.doc here is the post-Prompt-D state; the resilience clause
+    // compiled at Prompt B is still present (cumulative facts), so the
+    // SAME resilienceClauseResolved signal must be threaded through every
+    // ranked-list call below for it to reflect real production state.
+    const resilienceClauseResolvedG = siteResilienceClauseExists(s.doc.clauses);
+    record(resilienceClauseResolvedG === true, "Fixture G setup: the resilience clause compiled at Prompt B is still present at this later state (facts are cumulative)", "");
 
     // G/neutral: genuinely unrelated freeform prose (no strict-phrase
     // match at all) never resolves q-sase-shape -- the general principle.
@@ -901,9 +1153,10 @@ function main() {
     record(statedObjectivesIn(neutralTextG).length === 0, "Fixture G/neutral setup: the comparison text matches no strict stated-objective phrase at all (a fair test of the general principle, not a coincidence)", `matches=${JSON.stringify(statedObjectivesIn(neutralTextG))}`);
     const earnedGUnanswered = earnedQuestions(reqG, buyingG, opModelG, [], [], corpusG);
     const sugGUnanswered = packG ? visibleSuggestions(packG, flavG, s.facts, [], []) : [];
-    const rankedGUnanswered = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGUnanswered, suggestions: sugGUnanswered });
+    const rankedGUnanswered = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGUnanswered, suggestions: sugGUnanswered, resilienceClauseResolved: resilienceClauseResolvedG });
     const idsGUnanswered = rankedGUnanswered.map((q) => q.id);
     record(idsGUnanswered.includes("q-sase-shape"), "Fixture G/neutral: genuinely unrelated freeform prose, on its own, does NOT resolve q-sase-shape -- only a structured answer (a click, or the buyer's own strict-phrase wording) may", `remaining=${JSON.stringify(idsGUnanswered)}`);
+    record(!idsGUnanswered.includes("q-resilience"), "Fixture G/neutral: q-resilience correctly stays excluded at this later state too (the clause-gated filter holds beyond Prompt B, not just at the moment the clause first compiles)", `remaining=${JSON.stringify(idsGUnanswered)}`);
 
     // G/structured: a genuine STRUCTURED answer (the buyer clicking
     // "Single-vendor platform" -- itemId pushed into notedIds, the same
@@ -912,7 +1165,7 @@ function main() {
     const notedIdsAfterStructuredAnswer = ["obj-unified"];
     const earnedGAnswered = earnedQuestions(reqG, buyingG, opModelG, notedIdsAfterStructuredAnswer, [], corpusG);
     const sugGAnswered = packG ? visibleSuggestions(packG, flavG, s.facts, [], []) : [];
-    const rankedGAnswered = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGAnswered, suggestions: sugGAnswered });
+    const rankedGAnswered = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGAnswered, suggestions: sugGAnswered, resilienceClauseResolved: resilienceClauseResolvedG });
     const idsGAnswered = rankedGAnswered.map((q) => q.id);
     record(!idsGAnswered.includes("q-sase-shape"), "Fixture G/structured: once the buyer's SASE-shape choice lands as a genuine structured answer (notedIds includes obj-unified), q-sase-shape no longer appears in the ranked list", `remaining=${JSON.stringify(idsGAnswered)}`);
     record(rankedGAnswered.slice(0, 3).every((q) => q.id !== "q-sase-shape"), "Fixture G/structured: a new question is promoted into the top-3 in its place (the list never shrinks to fewer than 3 while unresolved decisions remain)", `top3=${JSON.stringify(rankedGAnswered.slice(0, 3).map((q) => q.id))}`);
@@ -929,7 +1182,7 @@ function main() {
     );
     const earnedGReal = earnedQuestions(reqG, buyingG, opModelG, objectivesFromC, [], corpusG);
     const sugGReal = packG ? visibleSuggestions(packG, flavG, s.facts, objectivesFromC, []) : [];
-    const rankedGReal = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGReal, suggestions: sugGReal });
+    const rankedGReal = rankNextQuestions({ openDecisions: s.doc.openDecisions, earned: earnedGReal, suggestions: sugGReal, resilienceClauseResolved: resilienceClauseResolvedG });
     record(
       !rankedGReal.some((q) => q.id === "q-sase-shape"),
       "Fixture G/real: with the REAL Prompt C fold applied, q-sase-shape no longer appears in the ranked list -- matching the live UI, whose 'Best next decisions' cards never show it after Prompt C (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png)",
@@ -951,7 +1204,14 @@ function main() {
     // actual React resume behaviour; this proves the underlying data has
     // no hidden, unreproducible state.
     const reloadedDoc = compileProcurementDocument({ facts: s.facts, requirement: requirementFrom(s.facts), verdict: null, noted: [], rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: null, revision: null });
-    const rankedReload = rankNextQuestions({ openDecisions: reloadedDoc.openDecisions, earned: earnedGUnanswered, suggestions: sugGUnanswered });
+    // Fixture K3/defect 1, continued: "it must stay resolved after save
+    // and reload" -- the reload recompiles clauses fresh from facts
+    // (previousDocument: null), so the site-resilience-scope clause, and
+    // therefore siteResilienceClauseExists(), must reproduce identically.
+    const resilienceClauseResolvedReload = siteResilienceClauseExists(reloadedDoc.clauses);
+    record(resilienceClauseResolvedReload === true, "Fixture K3/defect 1: the site-resilience-scope clause survives a reload (recompiled fresh from the same facts, previousDocument: null) -- resolution is not an artefact of in-memory document state", "");
+    const rankedReload = rankNextQuestions({ openDecisions: reloadedDoc.openDecisions, earned: earnedGUnanswered, suggestions: sugGUnanswered, resilienceClauseResolved: resilienceClauseResolvedReload });
+    record(!rankedReload.some((q) => q.id === "q-resilience"), "Fixture K3/defect 1: q-resilience stays absent from the ranked list after a reload", `rankedIds=${JSON.stringify(rankedReload.map((q) => q.id))}`);
     record(JSON.stringify(rankedReload.map((q) => q.id)) === JSON.stringify(idsGUnanswered), "Fixture I: a reload (previousDocument=null) reproduces the identical ranked NextQuestion list and provenance for the identical facts", `before=${JSON.stringify(idsGUnanswered)} after=${JSON.stringify(rankedReload.map((q) => q.id))}`);
 
     // --- J: desktop and 390px mobile layout hierarchy ---

@@ -87,7 +87,7 @@ import LivingProcurementCanvas, { type ProcurementView } from "@/components/proc
  *  from the compiler rather than folded into it. */
 import { rankNextQuestions, materialDecisionCount, type NextQuestion } from "@/lib/workspace/procurement-next-questions";
 import { buildReadiness } from "@/lib/workspace/procurement-readiness";
-import { buildSectionOutline, deriveResilienceOutlineState, type OutlineRow } from "@/lib/workspace/procurement-outline";
+import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists, type OutlineRow } from "@/lib/workspace/procurement-outline";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -2875,14 +2875,25 @@ export default function ProjectDesk({
    *  checks and the readiness "material decisions remain" count);
    *  `topThreeQuestions` is the UI-capped slice the primary flow renders
    *  ("no more than three prioritised next decisions"). */
+  /** Living Procurement UK Decision-Maker Blueprint, correction pass round 2
+   *  (Robert, 15 Aug 2026), defect 1: "Use the canonical governed
+   *  resilience clause/state as the resolution signal" -- not card
+   *  click/dismissal. Computed directly from the compiled document's own
+   *  clauses (the same check `deriveResilienceOutlineState` uses
+   *  internally, via the shared `siteResilienceClauseExists` helper) so
+   *  this and the section outline row can never drift apart. */
+  const resilienceClauseResolved = useMemo(
+    () => siteResilienceClauseExists(compiledDocument.clauses),
+    [compiledDocument.clauses],
+  );
   const rankedNextQuestions = useMemo(
-    () => rankNextQuestions({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions }),
-    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions],
+    () => rankNextQuestions({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions, resilienceClauseResolved }),
+    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions, resilienceClauseResolved],
   );
   const topThreeQuestions = useMemo(() => rankedNextQuestions.slice(0, 3), [rankedNextQuestions]);
   const materialDecisionsRemaining = useMemo(
-    () => materialDecisionCount({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions }),
-    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions],
+    () => materialDecisionCount({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions, resilienceClauseResolved }),
+    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions, resilienceClauseResolved],
   );
 
   /** The section outline (implementation step 10): a coarser, buyer-

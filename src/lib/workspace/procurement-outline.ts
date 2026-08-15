@@ -78,13 +78,36 @@ export function outlineStateLabel(s: OutlineState): string {
  * from the buyer's own stated per-site circuit language regardless of
  * whether the NextQuestion card is still showing.
  */
+/**
+ * Living Procurement UK Decision-Maker Blueprint, correction pass round 2
+ * (Robert, 15 Aug 2026), defect 1: the single, shared clause-existence
+ * check for the canonical resilience decision. Extracted out of
+ * `deriveResilienceOutlineState()` so the SAME boolean also gates whether
+ * `q-resilience` is still an earned candidate in the ranked NextQuestion
+ * list / materialDecisionsRemaining (procurement-next-questions.ts) --
+ * previously those two surfaces each answered "is resilience resolved?"
+ * differently (this one from the compiled clause, that one from
+ * dismissedIds/notedIds), which is exactly the drift this correction
+ * closes. Deliberately just the clause check -- NOT `resolved` as a
+ * whole -- because `resolved` here is additionally ANDed with
+ * `!hasOperatingModelConflict`, and `hasOperatingModelConflict` is itself
+ * derived FROM `rankedNextQuestions`, which is downstream of the earned
+ * list this same boolean also filters. Reusing `resolved` directly at
+ * that layer would be circular; the clause check alone is not, because
+ * `q-resilience`'s own `earnedBy` already re-derives materiality
+ * (site count + buying) independently every time.
+ */
+export function siteResilienceClauseExists(clauses: Pick<ProcurementClause, "templateId">[]): boolean {
+  return clauses.some((c) => c.templateId === "site-resilience-scope");
+}
+
 export function deriveResilienceOutlineState(input: {
   clauses: Pick<ProcurementClause, "templateId">[];
   requirement: SecurityRequirementInput;
   buying: BuyingId | null;
   hasOperatingModelConflict: boolean;
 }): { resolved: boolean; detail: string } {
-  const hasSiteResilienceClause = input.clauses.some((c) => c.templateId === "site-resilience-scope");
+  const hasSiteResilienceClause = siteResilienceClauseExists(input.clauses);
   const materiallyApplicable =
     (input.requirement.estate?.sites ?? 0) >= 10 &&
     (input.buying === "sase" || input.buying === "sdwan" || input.buying === "sse");

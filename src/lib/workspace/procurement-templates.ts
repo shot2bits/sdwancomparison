@@ -1179,19 +1179,39 @@ function mplsCoexistenceClause(facts: WorkspaceFact[], buying: BuyingId | null):
   ];
 }
 
-/** A recommended (never mandatory) clause drawn from the active sector
- *  pack, Section 5.2's "If Netify recommends rather than requires a
- *  capability, label it recommended/scored and show the reason" applied
- *  to the sector layer (Section 8.1: "sector rules remain visibly
- *  inferred and droppable"). The pack's own suggestion/reason/evidence
- *  text is reused verbatim -- this module invents nothing, it only
- *  projects the SAME pack Section 7.1 names ("activePack/activeFlavours/
- *  sector rulebook") into a clause shape. */
-function sectorClauses(pack: SectorPack | null, flavours: string[]): ClauseDraft[] {
+/** Living Procurement UK Decision-Maker Blueprint, correction pass round 2
+ *  (Robert, 15 Aug 2026), defect 2: this function USED to unconditionally
+ *  compile `pack.suggestions[0]` into a real governed clause the instant
+ *  a sector pack activated -- "Netify suggests" content silently leaking
+ *  into the governed document, counted in Requirements, gated, scored,
+ *  BEFORE the buyer had ever seen or accepted it (Robert's exact
+ *  reproduction: Prompt A alone already produced a `sector-pack-
+ *  suggestion` clause for "OT/ICS asset visibility and monitoring
+ *  recommended"). It also only ever looked at index 0, so a second
+ *  suggestion (e.g. manufacturing's own `mf-segmentation`) could never
+ *  reach this path even once genuinely accepted.
+ *
+ *  Fixed by splitting this in two: `acceptedSectorSuggestionClauses()`
+ *  below now compiles a suggestion ONLY once the buyer has genuinely
+ *  accepted it -- the SAME `ps-<suggestion.id>` noted tag
+ *  ProjectDesk.tsx's `answerNextQuestion` writes when the buyer clicks
+ *  Accept on a NextQuestion sector-suggestion card, and the SAME tag
+ *  `sector/derive.ts`'s `visibleSuggestions()` already reads to drop an
+ *  accepted suggestion out of the pending list -- one signal, not two
+ *  independently-tracked copies. Declining, or simply never answering,
+ *  produces no clause at all, ever: the pack law ("no pack ever writes a
+ *  fact; only the buyer's own touch does", packs.ts's own header
+ *  comment) now actually holds for every suggestion, not just the ones
+ *  past index 0. `sectorClauses()` (below, renamed in spirit but kept as
+ *  the flavour-risk-note compiler, which Robert's report did not name and
+ *  which is unaffected by this fix) is otherwise unchanged. */
+function acceptedSectorSuggestionClauses(pack: SectorPack | null, flavours: string[], noted: NotedItem[]): ClauseDraft[] {
   if (!pack) return [];
+  const all = [...pack.suggestions, ...flavours.flatMap((f) => pack.flavourSuggestions[f] ?? [])];
   const out: ClauseDraft[] = [];
-  const suggestion = pack.suggestions[0];
-  if (suggestion) {
+  for (const suggestion of all) {
+    const acceptedNoted = noted.find((n) => n.id === `ps-${suggestion.id}`);
+    if (!acceptedNoted) continue;
     out.push({
       section: "security",
       statement: suggestion.label,
@@ -1200,15 +1220,32 @@ function sectorClauses(pack: SectorPack | null, flavours: string[]): ClauseDraft
       acceptanceTest: null,
       mandatory: false,
       sourceFactIds: [],
+      // Robert: "preserve its origin as Netify/sector-derived and
+      // buyer-accepted, not buyer-authored" -- origin stays "sector"
+      // (never "buyer"), and the reason spells out both halves honestly
+      // rather than reading like an ordinary typed/clicked buyer note.
       origin: "sector",
-      reason: `${suggestion.reason} (${pack.label} pack, ${pack.version}).`,
+      reason: `${suggestion.reason} (${pack.label} pack, ${pack.version}). Netify suggested this; the buyer accepted it.`,
       quote: null,
       sourceTurnIds: [],
-      sourceNotedIds: [],
+      sourceNotedIds: [acceptedNoted.id],
       templateKey: `sector:${pack.id}:${suggestion.id}`,
       templateId: "sector-pack-suggestion",
     });
   }
+  return out;
+}
+
+/** The active sector pack's flavour risk notes -- Section 8.1's "sector
+ *  rules remain visibly inferred and droppable" applied to the risk-note
+ *  layer. Unaffected by the defect-2 fix above: Robert's report named the
+ *  SUGGESTION auto-compile specifically, and a risk note earned by the
+ *  buyer's own words (a named flavour match, not a bare sector guess) is
+ *  a materially different, already-evidence-gated case this correction
+ *  pass leaves untouched. */
+function sectorClauses(pack: SectorPack | null, flavours: string[]): ClauseDraft[] {
+  if (!pack) return [];
+  const out: ClauseDraft[] = [];
   for (const flavourId of flavours) {
     for (const rn of pack.flavourRiskNotes[flavourId] ?? []) {
       out.push({
@@ -2107,6 +2144,7 @@ export function buildCandidateClauses(input: {
     ...timelineClause(facts),
     ...managedServiceClause(facts, opModel, history, conflict, noted ?? [], supportCoverage),
     ...mplsCoexistenceClause(facts, buying),
+    ...acceptedSectorSuggestionClauses(pack, flavours, noted ?? []),
     ...sectorClauses(pack, flavours),
   ];
   const textPattern = [

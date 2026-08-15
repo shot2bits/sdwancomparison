@@ -115,6 +115,20 @@ type Ctx = {
   openDecisions: OpenDecision[];
   earned: EarnedQuestion[];
   suggestions: PackSuggestion[];
+  /** Living Procurement UK Decision-Maker Blueprint, correction pass round 2
+   *  (Robert, 15 Aug 2026), defect 1: whether the canonical governed
+   *  `site-resilience-scope` clause already exists in the compiled
+   *  document (`siteResilienceClauseExists()`, procurement-outline.ts).
+   *  `q-resilience` (questions.ts) is earned purely from site count and
+   *  buying type and has NO notion of the compiled clause, so without
+   *  this flag it would keep re-appearing here (and in
+   *  `materialDecisionCount`) after the buyer has already answered the
+   *  resilience question and the clause has been compiled -- "a card was
+   *  clicked or disappeared" is not proof of resolution; only the
+   *  governed clause is. `undefined`/`false` is the safe default (treat
+   *  as unresolved, i.e. today's pre-fix behaviour) so every existing
+   *  caller that does not yet pass this field keeps working unchanged. */
+  resilienceClauseResolved?: boolean;
 };
 
 /** Impact overrides for specific earned-question ids where the generic
@@ -219,6 +233,13 @@ export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
   }
 
   for (const q of ctx.earned) {
+    // Defect 1 fix (correction pass round 2): q-resilience is earned
+    // purely from site count/buying and never reflects whether the
+    // buyer's answer already compiled into the canonical
+    // site-resilience-scope clause. Once it has, the clause itself -- not
+    // card dismissal/notedIds -- is the resolution signal, so the
+    // candidate is dropped here rather than left to reappear.
+    if (q.id === "q-resilience" && ctx.resilienceClauseResolved) continue;
     candidates.push({
       id: q.id,
       question: q.question,
