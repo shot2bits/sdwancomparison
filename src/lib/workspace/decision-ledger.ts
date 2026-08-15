@@ -142,6 +142,22 @@ export function replayDecisionLedger(ledger: DecisionLedgerEntry[]): {
     } else if (entry.action === "decline_suggestion") {
       const suggestionId = entry.questionId.replace(/^sector:/, "");
       declined.add(suggestionId);
+      // Living Procurement UK Decision-Maker Blueprint, correction pass
+      // round 3 (Robert, 15 Aug 2026), release blocker 1: this header
+      // comment already promised "a later decline reverses an earlier
+      // accept, exactly like the reverse direction below" -- the code
+      // only ever implemented the accept-reverses-decline half. A later
+      // decline for a suggestion the buyer had ALREADY accepted (a real,
+      // reproduced case: accept -> decline in the same session) left the
+      // earlier `ps-<suggestionId>` noted item in `noted` forever, so
+      // compileProcurementDocument (which only checks for that noted tag,
+      // never declinedSuggestionIds) kept compiling the governed clause
+      // for a suggestion the buyer had explicitly declined. Fixed by
+      // removing the matching noted item here too -- the buyer's most
+      // recent choice wins in BOTH directions, not just one.
+      const psId = `ps-${suggestionId}`;
+      const acceptedIndex = noted.findIndex((n) => n.id === psId);
+      if (acceptedIndex !== -1) noted.splice(acceptedIndex, 1);
     } else {
       // "items" | "note": accepting a sector suggestion later than a
       // decline reverses the decline -- the buyer changed their mind, and

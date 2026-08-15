@@ -1956,9 +1956,21 @@ async function main() {
       "replayDecisionLedger(): decline followed by a later accept resolves ACCEPTED -- recorded order, not action-kind priority, decides the outcome",
       `result=${JSON.stringify(declineThenAccept)}`,
     );
+    // Living Procurement UK Decision-Maker Blueprint, correction pass
+    // round 3 (Robert, 15 Aug 2026), release blocker 1: this assertion
+    // used to check ONLY declinedSuggestionIds, while acceptThenDecline's
+    // OWN `noted` array (visible in the very `result=` detail string this
+    // fixture already logged) still carried the earlier "ps-mf-segmentation"
+    // accepted note -- a later decline reversing an earlier accept was
+    // never actually implemented in replayDecisionLedger(), only the
+    // opposite direction was. The fixture reported PASS while proving the
+    // bug's own symptom in its own output. Now asserts BOTH halves of
+    // "resolves DECLINED": declinedSuggestionIds gains the id, AND the
+    // earlier accepted noted item is genuinely gone -- a governed clause
+    // has nothing left to compile from once this is proven.
     record(
-      acceptThenDecline.declinedSuggestionIds.includes("mf-segmentation"),
-      "replayDecisionLedger(): the SAME two entries in the OPPOSITE recorded order resolve DECLINED instead -- confirms the replay is genuinely order-driven, not a hidden bias toward accept",
+      acceptThenDecline.declinedSuggestionIds.includes("mf-segmentation") && !acceptThenDecline.noted.some((n) => n.id === "ps-mf-segmentation"),
+      "replayDecisionLedger(): the SAME two entries in the OPPOSITE recorded order resolve DECLINED instead -- confirms the replay is genuinely order-driven, not a hidden bias toward accept, AND that the earlier accepted noted item is actually removed (not just shadowed by declinedSuggestionIds while still present)",
       `result=${JSON.stringify(acceptThenDecline)}`,
     );
   }

@@ -315,14 +315,34 @@ export function buildReadiness(input: {
   }
 
   if (typeof materialDecisionsRemaining === "number") {
-    const sectorPenalty = Math.min(3, pendingSectorSuggestions ?? 0);
-    const decisionCredit = Math.max(0, 15 - materialDecisionsRemaining * 3 - sectorPenalty);
+    // Living Procurement UK Decision-Maker Blueprint, correction pass
+    // round 3 (Robert, 15 Aug 2026), release blocker 2: `materialDecisionCount()`
+    // (procurement-next-questions.ts) DELIBERATELY excludes
+    // sector-suggestion-sourced candidates (`q.source !== "sector_suggestion"`)
+    // -- they are optional, buyer-may-accept-or-ignore Netify
+    // recommendations, never a decision that blocks consistent pricing.
+    // This function used to contradict that on both counts: it silently
+    // SUBTRACTED a `sectorPenalty` from the score for every pending
+    // suggestion (so declining an optional suggestion -- pure queue-
+    // clearing, no requirement improved -- raised the score), and its own
+    // reason text claimed the material-decision count "combined" and
+    // "included" the pending suggestions when materialDecisionsRemaining
+    // never counted them at all (mathematically false whenever
+    // pendingSectorSuggestions > 0). Fixed: no score contribution from
+    // pendingSectorSuggestions in either direction, and the two concepts
+    // are reported as two separate, honest sentences.
+    const decisionCredit = Math.max(0, 15 - materialDecisionsRemaining * 3);
     score += decisionCredit;
     reasons.push(
       materialDecisionsRemaining
-        ? `${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain${materialDecisionsRemaining === 1 ? "s" : ""} (open decisions, unresolved earned questions and unaccepted sector suggestions combined)${sectorPenalty ? `, including ${sectorPenalty} pending sector suggestion${sectorPenalty === 1 ? "" : "s"}` : ""}.`
+        ? `${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain${materialDecisionsRemaining === 1 ? "s" : ""} (open decisions and unresolved earned questions).`
         : "No material decisions remain.",
     );
+    if (pendingSectorSuggestions) {
+      reasons.push(
+        `Separately, ${pendingSectorSuggestions} optional Netify suggestion${pendingSectorSuggestions === 1 ? "" : "s"} ${pendingSectorSuggestions === 1 ? "is" : "are"} available to review -- these do not block consistent pricing and do not affect this score.`,
+      );
+    }
   } else {
     const decisionCredit = Math.max(0, 15 - Math.min(15, openDecisions.length * 5));
     score += decisionCredit;

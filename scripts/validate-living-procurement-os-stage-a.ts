@@ -62,6 +62,7 @@ import {
   type LivingProcurementDocument,
 } from "../src/lib/workspace/procurement-document";
 import { earnedQuestions } from "../src/lib/workspace/questions";
+import { mergeDecisionLedger, replayDecisionLedger, resumeDecisionsFromProject, type DecisionLedgerEntry } from "../src/lib/workspace/decision-ledger";
 import { activePack, activeFlavours, visibleSuggestions } from "../src/lib/sector/derive";
 import { rankNextQuestions, materialDecisionCount } from "../src/lib/workspace/procurement-next-questions";
 import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists } from "../src/lib/workspace/procurement-outline";
@@ -762,6 +763,128 @@ function main() {
         "Fixture N/defect 2 (resumed, declined): a reload still produces no governed clause for the declined suggestion",
         "",
       );
+
+      // --- N2: correction pass round 3 (Robert, 15 Aug 2026), release
+      // blocker 1 -- "accepted -> declined still leaves the requirement
+      // active." Every N/accepted and N/declined case above constructed
+      // its `noted`/declined state BY HAND (a direct array literal), so
+      // none of them actually exercised replayDecisionLedger() -- the
+      // real function ProjectDesk.tsx's resume effect calls. That is
+      // exactly why the bug was invisible to this file: replayDecisionLedger()
+      // only ever reversed ONE direction (an accept later than a decline
+      // deleted the earlier decline), never the other (a decline later
+      // than an accept never deleted the earlier accepted `ps-<id>` noted
+      // item), so a buyer who accepted a suggestion and then changed
+      // their mind still had it compile into the governed document after
+      // save/reload. This fixture drives the REAL ledger this time:
+      // mergeDecisionLedger -> replayDecisionLedger -> compile, and the
+      // full save (fake project + decision_ledger) -> resumeDecisionsFromProject
+      // -> reload -> compile round trip.
+      const acceptEntryN2: DecisionLedgerEntry = {
+        id: "dt_n2_accept", at: 1000, questionId: "sector:mf-ot-visibility", optionId: acceptedNoteId, optionLabel: "Accept",
+        action: "note", resultingFactPaths: [], resultingNoted: [{ id: acceptedNoteId, label: acceptedNoteLabel, section: "security", own: true }],
+      };
+      const declineEntryN2: DecisionLedgerEntry = {
+        id: "dt_n2_decline", at: 2000, questionId: "sector:mf-ot-visibility", optionId: "decline", optionLabel: "Not needed",
+        action: "decline_suggestion", resultingFactPaths: [], resultingNoted: [],
+      };
+      const ledgerAcceptThenDecline = mergeDecisionLedger([], [acceptEntryN2, declineEntryN2]);
+      const replayedAcceptThenDecline = replayDecisionLedger(ledgerAcceptThenDecline);
+      record(
+        replayedAcceptThenDecline.declinedSuggestionIds.includes("mf-ot-visibility") && !replayedAcceptThenDecline.noted.some((n) => n.id === acceptedNoteId),
+        "Fixture N2/release blocker 1: replaying accept-then-decline (recorded order) resolves DECLINED -- declinedSuggestionIds gains the id AND the earlier accepted noted item is genuinely removed, not merely shadowed",
+        `replayed=${JSON.stringify(replayedAcceptThenDecline)}`,
+      );
+      const docAcceptThenDecline = compileProcurementDocument({
+        facts: s.facts, requirement: reqA, verdict: null, noted: replayedAcceptThenDecline.noted, rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: s.doc,
+      });
+      record(
+        !docAcceptThenDecline.clauses.some((c) => c.templateId === suggestionTemplateId),
+        "Fixture N2/release blocker 1: after accept -> decline (real ledger replay, not a hand-built noted array), the compiled document contains NO governed clause for the suggestion -- Robert's exact reproduced defect no longer reproduces",
+        `clauses=${JSON.stringify(docAcceptThenDecline.clauses.map((c) => c.templateId))}`,
+      );
+      // Full save -> reload round trip: a fake persisted project carrying
+      // the real ledger, resumed through resumeDecisionsFromProject() (the
+      // SAME function ProjectDesk.tsx's own arrival effect calls), then a
+      // genuine reload compile (previousDocument: null).
+      const projectAfterAcceptThenDeclineSave = { engine: "security_sourcing", decision_ledger: ledgerAcceptThenDecline };
+      const resumedAcceptThenDecline = resumeDecisionsFromProject(projectAfterAcceptThenDeclineSave);
+      record(Boolean(resumedAcceptThenDecline), "Fixture N2/release blocker 1 setup: resumeDecisionsFromProject() accepts the persisted security_sourcing project", "");
+      const docAcceptThenDeclineReloaded = compileProcurementDocument({
+        facts: s.facts, requirement: reqA, verdict: null, noted: resumedAcceptThenDecline?.noted ?? [], rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: null,
+      });
+      record(
+        !docAcceptThenDeclineReloaded.clauses.some((c) => c.templateId === suggestionTemplateId),
+        "Fixture N2/release blocker 1 (save -> reload -> compile): after a REAL save (decision_ledger persisted) and a REAL reload (resumeDecisionsFromProject, then a fresh compile from previousDocument: null), no governed clause remains for the declined-after-accepted suggestion",
+        `clauses=${JSON.stringify(docAcceptThenDeclineReloaded.clauses.map((c) => c.templateId))}`,
+      );
+
+      // Counter-example, preserved per Robert's own instruction ("preserve
+      // decline -> acceptance as the opposite, valid last-write-wins
+      // case"): the SAME two entries in the OPPOSITE recorded order
+      // resolve ACCEPTED, and DO compile the governed clause.
+      const ledgerDeclineThenAccept = mergeDecisionLedger([], [declineEntryN2, acceptEntryN2]);
+      const replayedDeclineThenAccept = replayDecisionLedger(ledgerDeclineThenAccept);
+      record(
+        !replayedDeclineThenAccept.declinedSuggestionIds.includes("mf-ot-visibility") && replayedDeclineThenAccept.noted.some((n) => n.id === acceptedNoteId),
+        "Fixture N2/counter-example: the SAME two entries in the OPPOSITE recorded order (decline THEN accept) resolve ACCEPTED instead -- confirms last-write-wins is genuinely order-driven in both directions",
+        `replayed=${JSON.stringify(replayedDeclineThenAccept)}`,
+      );
+      const docDeclineThenAccept = compileProcurementDocument({
+        facts: s.facts, requirement: reqA, verdict: null, noted: replayedDeclineThenAccept.noted, rfiSet: null, instrument: "sor", receipts: s.receipts, previousDocument: s.doc,
+      });
+      record(
+        docDeclineThenAccept.clauses.some((c) => c.templateId === suggestionTemplateId),
+        "Fixture N2/counter-example: decline THEN a later accept DOES compile the governed clause -- the buyer's most recent choice is honoured either way, not a one-directional patch",
+        `clauses=${JSON.stringify(docDeclineThenAccept.clauses.map((c) => c.templateId))}`,
+      );
+    }
+
+    // --- O: correction pass round 3 (Robert, 15 Aug 2026), release
+    // blocker 2 -- "readiness contradicts its own definition." materialDecisionCount()
+    // (procurement-next-questions.ts) deliberately excludes
+    // sector-suggestion-sourced candidates -- they are optional, buyer-
+    // may-accept-or-ignore Netify recommendations, never a decision that
+    // blocks consistent pricing. buildReadiness() used to contradict that
+    // by subtracting a `sectorPenalty` for every pending suggestion, so
+    // declining an optional suggestion (pure queue-clearing, no
+    // requirement improved) raised the score. Isolated, non-confounded
+    // proof: buildReadiness() called directly (not through
+    // sectionAwareReadinessFor, whose own outline recomputes the sector
+    // row's OWN state -- "suggested" vs "confirmed" -- a genuinely
+    // separate outline-coverage concept this fixture deliberately holds
+    // constant) with IDENTICAL inputs except pendingSectorSuggestions.
+    {
+      const baseReadinessInput = {
+        requirement: reqA, buying: buyingA, opModel: opModelA, clauses: s.doc.clauses, openDecisions: s.doc.openDecisions, gates: s.doc.evaluation.gates,
+        instrument: "sor" as const, bankQuestionCount: 0, rfiBankVersion: null,
+        materialDecisionsRemaining: 4, sectionsConfirmed: 2, sectionsTotal: 10,
+      };
+      const readinessZeroPending = buildReadiness({ ...baseReadinessInput, pendingSectorSuggestions: 0 });
+      const readinessTwoPending = buildReadiness({ ...baseReadinessInput, pendingSectorSuggestions: 2 });
+      record(
+        readinessZeroPending.score === readinessTwoPending.score,
+        "Fixture O/release blocker 2: buildReadiness() with IDENTICAL material-decision/section state but a different pendingSectorSuggestions count (0 vs 2) produces the IDENTICAL score -- optional sector suggestions no longer move the score in either direction",
+        `zeroPending=${readinessZeroPending.score} twoPending=${readinessTwoPending.score}`,
+      );
+      const materialReason = readinessTwoPending.reasons.find((r) => /material decision/.test(r));
+      record(
+        Boolean(materialReason) && !/including/.test(materialReason ?? "") && !/sector suggestion/.test(materialReason ?? ""),
+        "Fixture O/release blocker 2: the material-decisions reason no longer falsely claims to 'include' pending sector suggestions in the material-decision count",
+        `reason=${materialReason}`,
+      );
+      const suggestionReason = readinessTwoPending.reasons.find((r) => /optional Netify suggestion/.test(r));
+      record(
+        Boolean(suggestionReason) && /^Separately,/.test(suggestionReason ?? "") && suggestionReason!.includes("2 optional Netify suggestions"),
+        "Fixture O/release blocker 2: pending sector suggestions are now reported as their OWN separate, honest sentence ('Separately, 2 optional Netify suggestions are available to review...'), not folded into the material-decision count",
+        `reason=${suggestionReason}`,
+      );
+      const readinessNoSuggestionsReason = readinessZeroPending.reasons.find((r) => /optional Netify suggestion/.test(r));
+      record(
+        readinessNoSuggestionsReason === undefined,
+        "Fixture O/release blocker 2: with zero pending suggestions, no 'optional Netify suggestions' sentence is emitted at all (no phantom reason for a queue that is already empty)",
+        `reasons=${JSON.stringify(readinessZeroPending.reasons)}`,
+      );
     }
 
     // Defect 5: section-aware readiness snapshot at Prompt A, captured here
@@ -992,26 +1115,27 @@ function main() {
         `-> D=${readinessD.readiness.score}(${readinessD.readiness.label}) sections=${readinessD.sectionsConfirmed}/${readinessD.sectionsTotal} decisions=${readinessD.materialDecisionsRemaining}`,
     );
     record(readinessA.readiness.reasons.length > 0, "Fixture L/defect 5: the section-aware readiness at Prompt A carries explainable reasons, not a bare number", JSON.stringify(readinessA.readiness.reasons));
-    // Correction pass round 2 (Robert, 15 Aug 2026): "Recalculate
-    // readiness only after correcting both state defects... Do not pin
-    // new scores until the semantic state is correct." The old pinned
-    // progression (22 -> 25 -> 28 -> 25) was computed against the SAME
-    // two bugs this round fixes (q-resilience never excluded once
-    // resolved; an unaccepted sector suggestion silently compiled into a
-    // governed clause and counted towards Requirements/material
-    // decisions) -- it was an accurate measurement of the BUGGY
-    // behaviour, not a correct target. The new progression below
-    // (22 -> 28 -> 31 -> 28) was recomputed AFTER both fixes landed, then
-    // independently confirmed against a real, freshly rendered Playwright
-    // run of the exact same A/B/C/D prompt sequence, this round
-    // (reports/screenshots/mfg-01-desktop-after-fixtureA-round2.png reads
-    // 22; mfg-02-desktop-after-fixturesBCD-round2.png / the -fullpage
-    // variant reads 28 after B and D, 31 after C, read live from the
-    // aria-label during capture) -- not re-derived from the old
-    // screenshot, which was itself a render of the pre-fix bug.
+    // Correction pass round 3 (Robert, 15 Aug 2026), release blocker 2:
+    // buildReadiness() no longer subtracts a `sectorPenalty` for pending
+    // sector suggestions (Fixture O proves that formula fix in isolation
+    // above) -- removing that penalty raises every one of round 2's own
+    // pinned scores by exactly 2 (the min(3, pendingSectorSuggestions)
+    // term at Prompts A/B/D, where 2 suggestions are pending; Prompt C
+    // has the same 2 pending, so it moves by 2 too). Round 2's own
+    // progression (22 -> 28 -> 31 -> 28) was itself computed AFTER
+    // correctly fixing defects 1 and 2, per "do not pin new scores until
+    // the semantic state is correct" -- but it still measured against
+    // the readiness FORMULA'S own separate, pre-existing bug (release
+    // blocker 2), not a defect-1/2 regression. The corrected progression
+    // below (24 -> 30 -> 33 -> 30) was independently confirmed against a
+    // real, freshly rendered Playwright run of the identical A/B/C/D
+    // prompt sequence this round (reports/screenshots/mfg-01-desktop-
+    // after-fixtureA-round3.png reads 24; mfg-02-desktop-after-
+    // fixturesBCD-round3.png reads 30 after B and D, 33 after C, read
+    // live from the aria-label during capture).
     record(
-      readinessA.readiness.score === 22 && readinessB.readiness.score === 28 && readinessC.readiness.score === 31 && readinessD.readiness.score === 28,
-      "Fixture L/defect 5, correction pass round 2: the RECALCULATED A->B->C->D score progression (22 -> 28 -> 31 -> 28) matches empirical reproduction against the real production functions AND a freshly rendered live UI run captured this round -- a pinned regression value, not just a directional check, and not the stale pre-fix progression",
+      readinessA.readiness.score === 24 && readinessB.readiness.score === 30 && readinessC.readiness.score === 33 && readinessD.readiness.score === 30,
+      "Fixture L/defect 5, correction pass round 3: the RECALCULATED A->B->C->D score progression (24 -> 30 -> 33 -> 30) matches empirical reproduction against the real production functions AND a freshly rendered live UI run captured this round -- a pinned regression value, not just a directional check, and not a stale pre-fix progression",
       `A=${readinessA.readiness.score} B=${readinessB.readiness.score} C=${readinessC.readiness.score} D=${readinessD.readiness.score}`,
     );
     record(
