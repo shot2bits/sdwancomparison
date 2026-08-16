@@ -191,13 +191,16 @@ function partB() {
     expect(!src.includes(retired), `[B5] RfpBuilder.tsx no longer contains the retired pre-publish leak fragment "${retired}"`);
   }
 
-  /* ---- B6: the pre-publish "Submit" heading, CTA button and sticky bar   */
+  /* ---- B6: the pre-publish "Publish" heading, CTA button and sticky bar  */
   /* all quote generic, vendor-count-free copy -- proven structurally by    */
   /* the absence of any `matchInfo` reference inside their literal button   */
-  /* text, not merely by eyeballing the diff.                               */
-  expect(src.includes('Submit this RFP to your matched vendors'), "[B6] the pre-publish heading reads generic \"Submit this RFP to your matched vendors\", no count");
-  expect(src.includes('{publishing ? "Submitting..." : "Submit to your matched vendors"}'), "[B6] the pre-publish CTA button reads generic \"Submit to your matched vendors\", no count");
-  expect(src.includes("submit to your matched vendors. Competing bids, no sales calls."), "[B6] the sticky publish bar reads generic copy, no count");
+  /* text, not merely by eyeballing the diff. Market-unlock correction      */
+  /* round 2 (16 Aug 2026), requirement 5: the pre-publish CTA is now a     */
+  /* board-first action ("Publish opportunity"), not "Submit to your        */
+  /* matched vendors" -- matching unlocks only after publication succeeds. */
+  expect(src.includes('Publish this opportunity'), "[B6] the pre-publish heading reads generic \"Publish this opportunity\", no count");
+  expect(src.includes('{publishing ? "Publishing..." : "Publish opportunity"}'), "[B6] the pre-publish CTA button reads generic \"Publish opportunity\", no count");
+  expect(src.includes("publish this opportunity. Competing bids, no sales calls."), "[B6] the sticky publish bar reads generic copy, no count");
 
   /* ---- B7: post-publication vendor results (the "Market Report" panel's */
   /* pre/post gate) use the shared `hasPublished()` predicate, not the     */
@@ -276,11 +279,38 @@ function partB9() {
   }
 
   const publishLibSrc = readFileSync(new URL("../src/lib/rfp-publish.ts", import.meta.url), "utf8");
-  expect(/const publishedRevisionId = newId\("snap"\);/.test(publishLibSrc), "[B9] executePublish() freezes a canonical revision id BEFORE the board/invite sequence");
-  expect(/await commitMarketUnlock\(\{/.test(publishLibSrc), "[B9] executePublish() commits the MarketUnlock record only after the board opportunity is created");
-  expect(/if \(!board\.opportunity_id\) \{[\s\S]{0,600}return \{ published, invited: \[\], criteria: "", board, market_report: lockedReport, matched_vendors: \[\] \};/.test(publishLibSrc), "[B9] a board-listing failure returns a genuinely locked result -- no invited vendors, no matched vendors");
-  expect(/const gate = publishDecisionGate\(signoffs, working\.consents\);\s*\n\s*if \(gate\.blocked\) throw new DeclinedApprovalError\(gate\.confirmationText\);\s*\n\s*\n\s*\/\/ FREEZE THE CANONICAL REVISION/.test(publishLibSrc), "[B9] the D5 declined-approval gate runs BEFORE any board/invite side effect (moved up from after the invite loop)");
-  expect(/for \(const v of inviteSlugs\.map\(\(slug\) => \(\{ slug \}\)\)\) \{\s*\n\s*const r = await inviteSupplier\(/.test(publishLibSrc.slice(publishLibSrc.indexOf("ONLY NOW: calculate matching"))), "[B9] the invite loop runs strictly after the market-unlock commit (positionally, in the ONLY-NOW block)");
+
+  // Round 2 correction (16 Aug 2026): the saga's own lettered steps (A-G,
+  // Robert's exact scheme), proven both to exist and to appear in the
+  // correct RELATIVE ORDER in the source -- the same structural-proof
+  // technique this file already used for round 1, extended to the new
+  // saga shape (PublicationAttempt resume-or-fresh, status transition
+  // moved to strictly after the unlock commit, list_on_board:false never
+  // touching listRfpOnBoard at all).
+  const stepIndex = (label: string) => publishLibSrc.indexOf(label);
+  const idxGate = stepIndex("if (gate.blocked) throw new DeclinedApprovalError(gate.confirmationText);");
+  const idxStepB = stepIndex("// STEP B (Robert's lettering): compile and persist an immutable frozen");
+  const idxStepC = stepIndex("// STEP C: create the PUBLIC Opportunities Board listing bound to that");
+  const idxListOnBoardFalse = stepIndex("if (opts.list_on_board === false) {");
+  const idxStepD = stepIndex("// STEP D: persist the matching basis and invitation plan for");
+  const idxStepE = stepIndex("// STEP E: atomically/finally commit MarketUnlock -- the ONLY step that");
+  const idxCommitCall = stepIndex("await commitMarketUnlock({");
+  const idxStepF = stepIndex("// STEP F: transition the project to published -- ONLY NOW, strictly");
+  const idxStepG = stepIndex("// STEP G: create invitations idempotently from the frozen invitation");
+  const idxInviteSupplierCall = stepIndex("const r = await inviteSupplier(");
+
+  expect([idxGate, idxStepB, idxStepC, idxStepD, idxStepE, idxStepF, idxStepG].every((i) => i >= 0), "[B9] every lettered saga step (B-G) is present in executePublish()'s source, in addition to the unchanged D5 gate");
+  expect(idxGate < idxStepB, "[B9] the D5 declined-approval gate runs BEFORE step B (freezing the revision) -- moved up, still ahead of every market-facing effect");
+  expect(idxStepB < idxStepC, "[B9] step B (freeze the FrozenRevision) runs BEFORE step C (create the board Opportunity)");
+  expect(idxStepC < idxListOnBoardFalse && idxListOnBoardFalse < idxStepD, "[B9] the list_on_board:false branch is decided AS PART OF step C, before step D ever runs -- no Opportunity, no matching basis computed for a request that never asked to list");
+  expect(idxStepD < idxStepE, "[B9] step D (persist the invitation plan) runs BEFORE step E (commit MarketUnlock)");
+  expect(idxStepE < idxCommitCall && idxCommitCall < idxStepF, "[B9] the ACTUAL commitMarketUnlock() call sits inside step E, strictly BEFORE step F (the project's status transition) -- round 2's literal fix for finding 4: status never moves before the unlock verifies");
+  expect(idxStepF < idxStepG && idxStepG < idxInviteSupplierCall, "[B9] step F (status transition) runs BEFORE step G's real inviteSupplier() calls -- invitations are the LAST supplier-facing effect, never earlier");
+  expect(!/listRfpOnBoard\(working, sessionEmail, \{ publishedRevisionId \}\);\s*\n\s*board = \{ listed: true/.test(publishLibSrc.slice(0, idxListOnBoardFalse)), "[B9] listRfpOnBoard() is never called before the list_on_board:false decision -- the skip is unconditional, not a post-hoc discard of a real listing");
+
+  expect(/board = \{\s*\n\s*listed: false,\s*\n\s*reason:\s*\n\s*"This requirement was not submitted for publication on the Opportunities Board\./.test(publishLibSrc), "[B9] list_on_board:false produces an explicit locked board result -- never an unlisted Opportunity, never a MarketUnlock");
+  expect(/if \(!board\.opportunity_id\) \{\s*\n\s*return \{ published: working, invited: \[\], criteria: "", board, market_report: lockedMarketReportFor\(working\), matched_vendors: \[\] \};/.test(publishLibSrc), "[B9] a board-listing failure (or list_on_board:false) returns a genuinely locked result bound to `working` -- the UN-transitioned project, never `published`, since no such object exists yet at this point");
+  expect(/catch \(e\) \{[\s\S]{0,700}const reason = e instanceof MarketUnlockBindingError/.test(publishLibSrc), "[B9] a MarketUnlockBindingError from the commit itself (step E) is caught and ALSO returns a locked result, never allowed to propagate into step F's status transition");
 
   console.log(`Part B: ${pass}/${pass + fail} passed cumulative.\n`);
 }
@@ -455,21 +485,36 @@ async function partC() {
     // see partD()'s own header comment for why a second fake-kv instance
     // would be silently ignored by the already-imported route handlers.
     await partD(kvServer);
+    // Part E runs INSIDE the same try block too, reusing the SAME kvServer
+    // session for the same reason partD does -- see partD()'s own header
+    // comment.
+    await partE();
   } finally {
     await kvServer.stop();
   }
 }
 
 /**
- * Part D (market-unlock correction round, 16 Aug 2026): the positive
+ * Part D (market-unlock correction round, 16 Aug 2026; REVISED in round 2,
+ * 16 Aug 2026, for Robert's non-negotiable product rule): the positive
  * counterpart to Part C's reproduction -- proves that a REAL board listing
- * (the real `listRfpOnBoard()`) plus a REAL `commitMarketUnlock()` commit
- * (the two steps Part C's project deliberately never got) correctly and
- * consistently unlock every governed route, that `list_on_board: false`
- * still unlocks via an unlisted-but-real Opportunity (never a second,
- * ungated path), and that the failure modes Robert's item 7 names --
- * board quality-gate failure, board storage failure -- leave the market
+ * (the real `listRfpOnBoard()`) plus a REAL, INTEGRITY-VERIFIED
+ * `commitMarketUnlock()` commit correctly and consistently unlock every
+ * governed route, and that the failure modes Robert names -- board
+ * quality-gate failure, board storage failure -- leave the market
  * genuinely locked with no partial side effects, safely retryable.
+ *
+ * ROUND 2 CORRECTION: this part's own D2 scenario used to assert that
+ * `list_on_board: false` still unlocked the market via a real, unlisted
+ * Opportunity -- Robert's review rejected that reading outright ("Do not
+ * reinterpret 'not listed on the board' as 'listed privately'"). D2 below
+ * now proves the OPPOSITE, correct claim: an unlisted Opportunity never
+ * satisfies the board prerequisite, whatever created it. Every
+ * `commitMarketUnlock()` call in this part is also updated to the round 2
+ * signature (no more caller-supplied `board_visibility`/
+ * `matching_basis_hash`/`invitation_snapshot_id` -- those are now derived
+ * internally from the real, persisted FrozenRevision and Opportunity, and
+ * the commit refuses unless both independently verify).
  *
  * A REAL end-to-end publish through `executePublish()`/`POST /api/rfp/
  * [id]/publish` is deliberately NOT attempted here, for the same reason
@@ -477,13 +522,20 @@ async function partC() {
  * `executePublish()` always calls `verifyBusinessEmail()`, which does real
  * DNS and HTTPS against the publishing email's domain -- not something a
  * wired `npm run validate` script can depend on. This proves the market-
- * unlock LAYER itself (`listRfpOnBoard()` + `market-unlock.ts`, called
- * exactly as `executePublish()` calls them) against real route handlers
- * and a real fake-kv backend, which is the boundary this correction round
- * actually introduces; `executePublish()`'s own internal ORDERING
- * (freeze-then-gate-then-board-then-unlock-then-invite) is proven
- * structurally in Part B9 against the real source, since it cannot run
- * here for the same DNS reason.
+ * unlock LAYER itself (`listRfpOnBoard()`, `published-snapshot.ts`'s
+ * FrozenRevision, and `market-unlock.ts`, called exactly as
+ * `executePublish()` calls them) against real route handlers and a real
+ * fake-kv backend, which is the boundary this correction round actually
+ * introduces; `executePublish()`'s own internal saga ORDERING (A through
+ * G) is proven structurally in Part B9 against the real source, and
+ * end-to-end against the real publish route (real business-email
+ * verification, real DNS/HTTPS to netify.co.uk) in
+ * scripts/verify-publish-route-live-demo.ts, whose Scenario 1 proves a
+ * real successful public publish, Scenario 2 proves `list_on_board: false`
+ * stays locked through the real route, and Scenario 3 proves a real board
+ * quality-gate failure leaves the project non-published and market-locked
+ * -- deliberately NOT wired into `npm run validate`, for the same DNS
+ * reason.
  *
  * Reuses the SAME fake-kv server / KV_REST_API_URL Part C started: the
  * app's KV client caches those env vars at module-import time (the first
@@ -503,9 +555,10 @@ async function partD(kvServer: { outage: () => Promise<void>; restore: () => Pro
   const { GET: downloadRoute } = await import("../src/app/rfp-builder/[id]/preview/download/route");
   const { GET: ndaRoute } = await import("../src/app/api/rfp/[id]/nda/route");
   const { listRfpOnBoard, BoardQualityGateError } = await import("../src/lib/rfp-publish");
-  const { commitMarketUnlock, getMarketUnlock, isMarketUnlocked } = await import("../src/lib/market-unlock");
-  const { getProject, saveProject, getOpportunity, listPublicOpportunities, kvGetJson, newId, createSession } = await import("../src/lib/rfp-store");
-  const { rfpContentSnapshot, contentHash } = await import("../src/lib/published-snapshot");
+  const { commitMarketUnlock, getMarketUnlock, isMarketUnlocked, MarketUnlockBindingError } = await import("../src/lib/market-unlock");
+  const { getProject, saveProject, saveOpportunity, getOpportunity, listPublicOpportunities, kvGetJson, kvSetJson, newId, createSession } = await import("../src/lib/rfp-store");
+  const { rfpContentSnapshot, contentHash, saveFrozenRevision, getFrozenRevision } = await import("../src/lib/published-snapshot");
+  const { OpportunitySchema } = await import("../src/lib/opportunity-types");
 
   const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
   const OWNER_EMAIL = "buyer-fixture@example-corp.test";
@@ -521,33 +574,43 @@ async function partD(kvServer: { outage: () => Promise<void>; restore: () => Pro
     return (await res.json()) as { id: string; share_token: string; manage_token: string };
   }
 
-  /** Bind a real, just-created Opportunity into a real MarketUnlock, the
-   *  exact two calls executePublish() itself makes once the board step
-   *  succeeds -- never a hand-rolled substitute record. */
-  async function unlock(projectId: string, opportunityId: string, visibility: "public" | "unlisted") {
+  /** Round 2 correction: persist a real, immutable FrozenRevision for a
+   *  project -- the exact call executePublish()'s saga step B makes --
+   *  never a hand-rolled substitute. Returns its id. */
+  async function freezeRevision(projectId: string): Promise<string> {
     const p = await getProject(projectId);
     if (!p) throw new Error(`fixture project ${projectId} vanished`);
-    const snapshot = rfpContentSnapshot(p);
     const revisionId = newId("snap");
-    return commitMarketUnlock({
+    await saveFrozenRevision({
+      id: revisionId,
       project_id: projectId,
-      published_revision_id: revisionId,
-      board_opportunity_id: opportunityId,
-      board_visibility: visibility,
-      matching_basis_hash: contentHash(snapshot),
-      invitation_snapshot_id: revisionId,
+      content_hash: contentHash(rfpContentSnapshot(p)),
+      frozen_content: { title: p.title, buyer: p.buyer, rfp_sections: p.rfp_sections },
+      created_at: Date.now(),
     });
+    return revisionId;
   }
 
-  // ---- D1: successful, default (public) board publication unlocks every
-  // governed route, and only every governed route -- the owner/share-token
-  // bar itself is untouched by unlocking.
+  /** Bind a real, just-created public Opportunity (already bound to
+   *  `revisionId` via listRfpOnBoard's `publishedRevisionId` option) into a
+   *  real, integrity-verified MarketUnlock -- the exact saga step E call. */
+  async function unlock(projectId: string, revisionId: string, opportunityId: string) {
+    return commitMarketUnlock({ project_id: projectId, published_revision_id: revisionId, board_opportunity_id: opportunityId });
+  }
+
+  // ---- D1: successful, default (public) board publication -- bound to a
+  // real, already-persisted FrozenRevision (saga steps B then C then E, in
+  // that exact order) -- unlocks every governed route, and only every
+  // governed route: the owner/share-token bar itself is untouched by
+  // unlocking.
   const p1 = await createDraft("Part D board publication fixture RFP");
-  const listed1 = await listRfpOnBoard((await getProject(p1.id))!, OWNER_EMAIL);
-  expect(typeof listed1.opportunity_id === "string" && listed1.opportunity_id.length > 0, "[D1] listRfpOnBoard() (the real function) creates a real Opportunity and returns its id");
+  const revisionId1 = await freezeRevision(p1.id);
+  const listed1 = await listRfpOnBoard((await getProject(p1.id))!, OWNER_EMAIL, { publishedRevisionId: revisionId1 });
+  expect(typeof listed1.opportunity_id === "string" && listed1.opportunity_id.length > 0, "[D1] listRfpOnBoard() (the real function) creates a real, PUBLIC Opportunity and returns its id");
   expect(!(await isMarketUnlocked(p1.id)), "[D1] a board listing ALONE, with no MarketUnlock commit yet, does not itself unlock the market -- board creation and unlock commit are two distinct steps");
-  const unlock1 = await unlock(p1.id, listed1.opportunity_id, "public");
+  const unlock1 = await unlock(p1.id, revisionId1, listed1.opportunity_id);
   expect(unlock1.board_opportunity_id === listed1.opportunity_id, "[D1] the committed MarketUnlock binds the exact Opportunity just created");
+  expect(unlock1.published_revision_id === revisionId1, "[D1] and the exact FrozenRevision persisted just before it");
   expect(await isMarketUnlocked(p1.id), "[D1] isMarketUnlocked() now reads true");
 
   const ownerRead1 = await projectReadRoute(new Request(`https://example.test/api/rfp/${p1.id}`, { headers: { "x-manage-token": p1.manage_token } }), ctx(p1.id));
@@ -586,19 +649,56 @@ async function partD(kvServer: { outage: () => Promise<void>; restore: () => Pro
   const publicOpps1 = await listPublicOpportunities();
   expect(publicOpps1.some((o) => o.id === listed1.opportunity_id), "[D1] the public visibility Opportunity genuinely appears on the public board feed");
 
-  // ---- D2: explicit list_on_board:false still creates a real (unlisted)
-  // Opportunity and still unlocks -- board publication is a prerequisite
-  // in EITHER case, per Robert's ruling; only public crawlability differs.
-  const p2 = await createDraft("Part D unlisted board fixture RFP");
-  const listed2 = await listRfpOnBoard((await getProject(p2.id))!, OWNER_EMAIL, { visibility: "unlisted" });
-  await unlock(p2.id, listed2.opportunity_id, "unlisted");
-  expect(await isMarketUnlocked(p2.id), "[D2] an unlisted board publication unlocks the market exactly like a public one");
-  const opp2 = await getOpportunity(listed2.opportunity_id);
-  expect(opp2?.visibility === "unlisted", "[D2] the created Opportunity's own visibility field is genuinely \"unlisted\"");
-  const shareRead2 = await projectReadRoute(new Request(`https://example.test/api/rfp/${p2.id}?token=${p2.share_token}`), ctx(p2.id));
-  expect(shareRead2.status === 200, "[D2/share-token] the supplier-facing reveal still happens for an unlisted listing -- \"matched suppliers only\" is a public-board-visibility choice, not a lesser unlock");
-  const publicOpps2 = await listPublicOpportunities();
-  expect(!publicOpps2.some((o) => o.id === listed2.opportunity_id), "[D2] the unlisted Opportunity does NOT appear on the public board feed, matching the buyer's \"matched suppliers only\" choice");
+  // ---- D2 (ROUND 2 CORRECTION, replacing round 1's now-rejected reading):
+  // `listRfpOnBoard()` no longer has any "unlisted" path at all -- it
+  // always creates a PUBLIC Opportunity. This proves the two things that
+  // together make Robert's non-negotiable rule hold even against an
+  // Opportunity that ends up unlisted some OTHER way (e.g. a future
+  // private-market feature, or a hand-edited record): (a) the real
+  // production function this project's publish path actually calls cannot
+  // itself produce an unlisted listing any more, and (b)
+  // `commitMarketUnlock()` independently REFUSES to commit against an
+  // unlisted Opportunity even if one is directly constructed and handed to
+  // it -- so the non-negotiable rule is enforced at the verification layer
+  // itself, not merely by "nothing currently calls it that way".
+  const p2 = await createDraft("Part D board-prerequisite fixture RFP (round 2)");
+  const revisionId2 = await freezeRevision(p2.id);
+  const listed2 = await listRfpOnBoard((await getProject(p2.id))!, OWNER_EMAIL, { publishedRevisionId: revisionId2 });
+  const opp2Real = await getOpportunity(listed2.opportunity_id);
+  expect(opp2Real?.visibility === "public", "[D2a] listRfpOnBoard() -- the real function every publish path calls -- always creates a PUBLIC Opportunity now; there is no more \"unlisted\" option to request");
+
+  // Directly construct an UNLISTED Opportunity bound to a real, valid
+  // FrozenRevision (never a dangling reference -- this scenario isolates
+  // the visibility check specifically) and try to commit a MarketUnlock
+  // against it, exactly as a forged/legacy/future-private-listing caller
+  // might attempt.
+  const p2b = await createDraft("Part D unlisted-Opportunity refusal fixture RFP");
+  const revisionId2b = await freezeRevision(p2b.id);
+  const unlistedOppId = newId("opp");
+  await saveOpportunity(
+    OpportunitySchema.parse({
+      id: unlistedOppId,
+      created: Date.now(),
+      updated: Date.now(),
+      title: "Unlisted fixture opportunity",
+      scope: ["sase"],
+      status: "open",
+      buyer_token: `btok_${unlistedOppId}`,
+      visibility: "unlisted",
+      source_rfp_id: p2b.id,
+      source_published_revision_id: revisionId2b,
+    }),
+  );
+  let unlistedRefused = false;
+  try {
+    await commitMarketUnlock({ project_id: p2b.id, published_revision_id: revisionId2b, board_opportunity_id: unlistedOppId });
+  } catch (e) {
+    unlistedRefused = e instanceof MarketUnlockBindingError;
+  }
+  expect(unlistedRefused, "[D2b] commitMarketUnlock() REFUSES an unlisted Opportunity even when it is otherwise perfectly bound to a real, valid FrozenRevision -- \"not listed on the board\" is never reinterpreted as \"listed privately\"");
+  expect(!(await isMarketUnlocked(p2b.id)), "[D2b] and the market stays locked for this project -- no MarketUnlock record was ever committed");
+  const shareRead2b = await projectReadRoute(new Request(`https://example.test/api/rfp/${p2b.id}?token=${p2b.share_token}`), ctx(p2b.id));
+  expect(shareRead2b.status === 404, "[D2b/share-token] a supplier-facing read for this project is correctly refused -- an unlock referencing an unlisted Opportunity is treated as locked, exactly like no unlock at all");
 
   // ---- D3: board quality-gate failure -- no Opportunity, no MarketUnlock,
   // no partial side effects, and the failure is the SAME real quality gate
@@ -620,37 +720,46 @@ async function partD(kvServer: { outage: () => Promise<void>; restore: () => Pro
 
   // ---- D4: board storage failure (a real, transport-level outage of the
   // fake-kv backend the app talks to, via the outage()/restore() harness
-  // added for this round) -- and a subsequent retry against the CURRENT
-  // project content succeeds cleanly once storage recovers.
+  // added for this round) -- freezing the revision succeeds (storage is up
+  // at that point), but the board write itself fails; a subsequent retry
+  // against the CURRENT project content succeeds cleanly once storage
+  // recovers.
   const p4 = await createDraft("Part D storage-outage fixture RFP");
+  const revisionId4 = await freezeRevision(p4.id);
   await kvServer.outage();
   let storageThrew = false;
   try {
-    await listRfpOnBoard((await getProject(p4.id))!, OWNER_EMAIL);
+    await listRfpOnBoard((await getProject(p4.id))!, OWNER_EMAIL, { publishedRevisionId: revisionId4 });
   } catch {
     storageThrew = true;
   }
   expect(storageThrew, "[D4] listRfpOnBoard() genuinely fails while the KV backend is down (a real transport error, not a quality-gate refusal)");
   await kvServer.restore();
   expect(!(await isMarketUnlocked(p4.id)), "[D4] the market is still locked immediately after the outage -- no partial commit survived it");
-  const listed4 = await listRfpOnBoard((await getProject(p4.id))!, OWNER_EMAIL);
-  expect(typeof listed4.opportunity_id === "string" && listed4.opportunity_id.length > 0, "[D4] once storage is restored, a retry against the SAME project succeeds and creates a real Opportunity");
-  const unlock4 = await unlock(p4.id, listed4.opportunity_id, "public");
+  const listed4 = await listRfpOnBoard((await getProject(p4.id))!, OWNER_EMAIL, { publishedRevisionId: revisionId4 });
+  expect(typeof listed4.opportunity_id === "string" && listed4.opportunity_id.length > 0, "[D4] once storage is restored, a retry against the SAME project (and the SAME already-frozen revision) succeeds and creates a real Opportunity");
+  const unlock4 = await unlock(p4.id, revisionId4, listed4.opportunity_id);
   expect(await isMarketUnlocked(p4.id), "[D4] and the market unlocks on this successful retry");
 
   // ---- D5: idempotent publication replay -- committing the exact same
   // (project, revision, opportunity) triple again never mints a second
-  // record or moves the unlock timestamp.
+  // record or moves the unlock timestamp; requirement 6's explicit "repeated
+  // publication/retry does not change the frozen revision ... or unlocked_at
+  // timestamp" fixture.
   const replay5 = await commitMarketUnlock({
     project_id: p4.id,
     published_revision_id: unlock4.published_revision_id,
     board_opportunity_id: unlock4.board_opportunity_id,
-    board_visibility: "public",
-    matching_basis_hash: unlock4.matching_basis_hash,
-    invitation_snapshot_id: unlock4.invitation_snapshot_id,
   });
   expect(replay5.id === unlock4.id, "[D5] an idempotent replay of the same publish returns the SAME MarketUnlock record id, not a freshly minted one");
   expect(replay5.unlocked_at === unlock4.unlocked_at, "[D5] and the original unlocked_at timestamp is preserved, never moved by the replay");
+  expect(replay5.published_revision_id === revisionId4, "[D5] and the frozen revision it references never changes across the replay");
+  const p4Live = await getProject(p4.id);
+  const frozenAfterReplay = await getFrozenRevision(revisionId4);
+  expect(
+    !!p4Live && frozenAfterReplay?.content_hash === contentHash(rfpContentSnapshot(p4Live)),
+    "[D5] the FrozenRevision's content_hash still matches an independent recomputation from the live project's content -- nothing about it drifted across the replay",
+  );
 
   // ---- D6: qa/evaluation after a valid board publication -- the market
   // stays unlocked purely because MarketUnlock exists, independent of
@@ -682,12 +791,172 @@ async function partD(kvServer: { outage: () => Promise<void>; restore: () => Pro
   const ndaPre = await ndaRoute(new Request(`https://example.test/api/rfp/${p5.id}/nda?token=${p5.share_token}`), ctx(p5.id));
   expect(ndaPre.status === 404, `[D7/nda] the NDA route refuses (404) before market unlock, got ${ndaPre.status}`);
 
-  const listed5 = await listRfpOnBoard((await getProject(p5.id))!, OWNER_EMAIL);
-  await unlock(p5.id, listed5.opportunity_id, "public");
+  const revisionId5 = await freezeRevision(p5.id);
+  const listed5 = await listRfpOnBoard((await getProject(p5.id))!, OWNER_EMAIL, { publishedRevisionId: revisionId5 });
+  await unlock(p5.id, revisionId5, listed5.opportunity_id);
   const ndaPost = await ndaRoute(new Request(`https://example.test/api/rfp/${p5.id}/nda?token=${p5.share_token}`), ctx(p5.id));
   expect(ndaPost.status === 200, `[D7/nda] and the SAME route opens (200) once the market genuinely unlocks -- proving the gate, not something else, was what blocked it, got ${ndaPost.status}`);
 
   console.log(`Part D: ${pass}/${pass + fail} passed cumulative.\n`);
+}
+
+/**
+ * Part E (market-unlock correction round 2, 16 Aug 2026): requirement 6's
+ * additional non-vacuous failure fixtures -- the integrity-verification
+ * invariants `market-unlock.ts`'s round 2 rewrite introduces, which Part D
+ * (a mostly-positive-path proof plus the two board-failure modes Robert's
+ * FIRST round already named) does not otherwise cover: a forged/dangling
+ * MarketUnlock, a mismatched revision/hash, and the "no snapshot -> no
+ * unlock" invariant restated directly against the persistence layer (not
+ * only the market-facing symptom Part D3 already proves).
+ *
+ * Same DNS-dependence rationale as Part D's own header comment: these run
+ * against the real `market-unlock.ts`/`published-snapshot.ts` functions
+ * and a real fake-kv backend, never `executePublish()` itself.
+ */
+async function partE() {
+  console.log("=== Part E (round 2): forged/dangling MarketUnlock rows and mismatched bindings are treated as locked ===\n");
+
+  const { GET: projectReadRoute } = await import("../src/app/api/rfp/[id]/route");
+  const { POST: createRoute } = await import("../src/app/api/rfp/route");
+  const { getMarketUnlock, isMarketUnlocked, commitMarketUnlock, MarketUnlockBindingError } = await import("../src/lib/market-unlock");
+  const { getProject, saveOpportunity, kvSetJson, newId } = await import("../src/lib/rfp-store");
+  const { rfpContentSnapshot, contentHash, saveFrozenRevision } = await import("../src/lib/published-snapshot");
+  const { OpportunitySchema } = await import("../src/lib/opportunity-types");
+
+  const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
+
+  async function createDraft(title: string): Promise<{ id: string; share_token: string; manage_token: string }> {
+    const res = await createRoute(
+      new Request("https://example.test/api/rfp", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ title, buyer: { sector: "manufacturing", organisation_size: "201-1000", operating_model: "hybrid", regions: ["uk"] } }),
+      }),
+    );
+    return (await res.json()) as { id: string; share_token: string; manage_token: string };
+  }
+
+  async function freezeRevision(projectId: string): Promise<string> {
+    const p = await getProject(projectId);
+    if (!p) throw new Error(`fixture project ${projectId} vanished`);
+    const revisionId = newId("snap");
+    await saveFrozenRevision({
+      id: revisionId,
+      project_id: projectId,
+      content_hash: contentHash(rfpContentSnapshot(p)),
+      frozen_content: { title: p.title, buyer: p.buyer, rfp_sections: p.rfp_sections },
+      created_at: Date.now(),
+    });
+    return revisionId;
+  }
+
+  async function publicOpportunityFor(projectId: string, revisionId: string): Promise<string> {
+    const oppId = newId("opp");
+    await saveOpportunity(
+      OpportunitySchema.parse({
+        id: oppId,
+        created: Date.now(),
+        updated: Date.now(),
+        title: `Fixture opportunity for ${projectId}`,
+        scope: ["sase"],
+        status: "open",
+        buyer_token: `btok_${oppId}`,
+        visibility: "public",
+        source_rfp_id: projectId,
+        source_published_revision_id: revisionId,
+      }),
+    );
+    return oppId;
+  }
+
+  // ---- E1: a forged/dangling MarketUnlock KV row (written directly,
+  // bypassing commitMarketUnlock() entirely) referencing a
+  // published_revision_id for which NO FrozenRevision was ever persisted --
+  // isMarketUnlocked()/getMarketUnlock() must treat it as locked, not trust
+  // its mere existence as a KV row.
+  const pE1 = await createDraft("Part E dangling-revision fixture RFP");
+  const revisionE1 = await freezeRevision(pE1.id);
+  const oppE1 = await publicOpportunityFor(pE1.id, revisionE1);
+  await kvSetJson(`rfp:${pE1.id}:market_unlock`, {
+    id: newId("mktu"),
+    project_id: pE1.id,
+    published_revision_id: "snap_never_persisted_e1",
+    board_opportunity_id: oppE1,
+    board_visibility: "public",
+    matching_basis_hash: "forged-hash",
+    invitation_snapshot_id: "snap_never_persisted_e1",
+    unlocked_at: Date.now(),
+  });
+  expect((await getMarketUnlock(pE1.id)) === null, "[E1] a MarketUnlock KV row referencing a FrozenRevision that was never persisted is NOT returned by getMarketUnlock() -- integrity-checked on every read, not trusted on existence");
+  expect(!(await isMarketUnlocked(pE1.id)), "[E1] and isMarketUnlocked() correctly reads false");
+  const shareReadE1 = await projectReadRoute(new Request(`https://example.test/api/rfp/${pE1.id}?token=${pE1.share_token}`), ctx(pE1.id));
+  expect(shareReadE1.status === 404, "[E1/share-token] a supplier-facing read for this project is refused exactly as if no unlock existed");
+  // Sanity: the SAME project's genuinely-frozen revisionE1/oppE1 pair,
+  // committed properly, does unlock -- proving E1's refusal above is about
+  // the FORGED row specifically, not some unrelated project-level block.
+  const properE1 = await commitMarketUnlock({ project_id: pE1.id, published_revision_id: revisionE1, board_opportunity_id: oppE1 });
+  expect(await isMarketUnlocked(pE1.id), "[E1/sanity] the SAME project, once a real commitMarketUnlock() call replaces the forged row with a genuine one, does unlock");
+  expect(properE1.published_revision_id === revisionE1, "[E1/sanity] bound to the real, previously-frozen revision, not the forged one");
+
+  // ---- E2: a MarketUnlock whose matching_basis_hash does not agree with
+  // the referenced FrozenRevision's own content_hash (a mismatched/forged
+  // hash) -- treated as locked.
+  const pE2 = await createDraft("Part E mismatched-hash fixture RFP");
+  const revisionE2 = await freezeRevision(pE2.id);
+  const oppE2 = await publicOpportunityFor(pE2.id, revisionE2);
+  await kvSetJson(`rfp:${pE2.id}:market_unlock`, {
+    id: newId("mktu"),
+    project_id: pE2.id,
+    published_revision_id: revisionE2,
+    board_opportunity_id: oppE2,
+    board_visibility: "public",
+    matching_basis_hash: "deliberately-wrong-hash",
+    invitation_snapshot_id: revisionE2,
+    unlocked_at: Date.now(),
+  });
+  expect((await getMarketUnlock(pE2.id)) === null, "[E2] a MarketUnlock whose matching_basis_hash disagrees with the referenced FrozenRevision's real content_hash is refused on read");
+  expect(!(await isMarketUnlocked(pE2.id)), "[E2] isMarketUnlocked() correctly reads false");
+
+  // ---- E3: a MarketUnlock referencing a real, public Opportunity that is
+  // bound to a DIFFERENT revision than the one this unlock claims (an
+  // Opportunity refreshed for a later republish, with a stale unlock row
+  // left pointing at the earlier revision) -- treated as locked.
+  const pE3 = await createDraft("Part E mismatched-revision-binding fixture RFP");
+  const revisionE3a = await freezeRevision(pE3.id);
+  const revisionE3b = await freezeRevision(pE3.id);
+  const oppE3 = await publicOpportunityFor(pE3.id, revisionE3b); // bound to b, not a
+  await kvSetJson(`rfp:${pE3.id}:market_unlock`, {
+    id: newId("mktu"),
+    project_id: pE3.id,
+    published_revision_id: revisionE3a, // claims a
+    board_opportunity_id: oppE3,
+    board_visibility: "public",
+    matching_basis_hash: contentHash(rfpContentSnapshot((await getProject(pE3.id))!)),
+    invitation_snapshot_id: revisionE3a,
+    unlocked_at: Date.now(),
+  });
+  expect((await getMarketUnlock(pE3.id)) === null, "[E3] a MarketUnlock claiming a revision the bound Opportunity does NOT actually reference is refused on read");
+  expect(!(await isMarketUnlocked(pE3.id)), "[E3] isMarketUnlocked() correctly reads false");
+
+  // ---- E4: commitMarketUnlock() itself refuses (not just the read side)
+  // when the referenced Opportunity belongs to a DIFFERENT project entirely
+  // (source_rfp_id mismatch) -- proving the write-side gate, not only the
+  // read-side re-verification, catches a cross-project binding attempt.
+  const pE4a = await createDraft("Part E cross-project fixture RFP (A)");
+  const pE4b = await createDraft("Part E cross-project fixture RFP (B)");
+  const revisionE4a = await freezeRevision(pE4a.id);
+  const oppE4b = await publicOpportunityFor(pE4b.id, revisionE4a); // Opportunity says it belongs to B, not A
+  let crossProjectRefused = false;
+  try {
+    await commitMarketUnlock({ project_id: pE4a.id, published_revision_id: revisionE4a, board_opportunity_id: oppE4b });
+  } catch (e) {
+    crossProjectRefused = e instanceof MarketUnlockBindingError;
+  }
+  expect(crossProjectRefused, "[E4] commitMarketUnlock() refuses to bind project A's revision to project B's Opportunity, even though both records are individually real and valid");
+  expect(!(await isMarketUnlocked(pE4a.id)), "[E4] and project A's market never unlocked from the refused attempt");
+
+  console.log(`Part E: ${pass}/${pass + fail} passed cumulative.\n`);
 }
 
 async function main() {

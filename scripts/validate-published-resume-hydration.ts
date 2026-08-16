@@ -108,7 +108,7 @@
  */
 
 import { readFileSync } from "node:fs";
-import { withFakeKv, makeRequest } from "./fake-kv-harness";
+import { withFakeKv, makeRequest, seedVerifiedMarketUnlock } from "./fake-kv-harness";
 import type { SecurityRequirementInput } from "../src/lib/security/rulebook";
 import type { PublishedSnapshot } from "../src/lib/published-snapshot";
 
@@ -203,8 +203,13 @@ async function partA2() {
     // below now also commits a real MarketUnlock record immediately after
     // seeding the status, so this fixture keeps proving what it always
     // proved (a post-publish status sees the full report, not the draft
-    // preview) against the boundary that actually governs it today.
-    const { commitMarketUnlock } = await import("../src/lib/market-unlock");
+    // preview) against the boundary that actually governs it today. Round 2
+    // correction: each seeded unlock must reference a REAL, persisted
+    // FrozenRevision and a REAL, public board Opportunity for
+    // commitMarketUnlock() to accept it (see market-unlock.ts's integrity
+    // check) -- seedVerifiedMarketUnlock() (fake-kv-harness.ts) creates both
+    // before committing, so this fixture's seeded unlock is genuine, not a
+    // bare KV row.
 
     const createRes = await createSecurityProjectRoute(
       makeRequest("POST", "https://example.test/sase/api/security-sourcing/project", {
@@ -231,13 +236,11 @@ async function partA2() {
     /* (findings 1 + 2 together: a post-publish status the round-3 gate    */
     /* missed, AND a legacy record with nothing frozen to serve.)          */
     store.command(["SET", `rfp:${id}`, JSON.stringify({ ...original, status: "qa" })]);
-    await commitMarketUnlock({
+    await seedVerifiedMarketUnlock({
       project_id: id,
       published_revision_id: "snap_a2_test_qa",
       board_opportunity_id: "opp_a2_test_qa",
-      board_visibility: "public",
-      matching_basis_hash: "test-hash-qa",
-      invitation_snapshot_id: "snap_a2_test_qa",
+      content_hash: "test-hash-qa",
     });
     const qaRes = await reportRoute(makeRequest("GET", `https://example.test/api/rfp/${id}/report?manage=${manage}`), { params: Promise.resolve({ id }) });
     const qaBody = (await qaRes.json()) as Record<string, unknown>;
@@ -258,13 +261,11 @@ async function partA2() {
     // here is a harmless no-op that also documents this scenario's own
     // requirement explicitly rather than depending silently on execution
     // order between scenarios.
-    await commitMarketUnlock({
+    await seedVerifiedMarketUnlock({
       project_id: id,
       published_revision_id: "snap_a2_test_qa",
       board_opportunity_id: "opp_a2_test_qa",
-      board_visibility: "public",
-      matching_basis_hash: "test-hash-qa",
-      invitation_snapshot_id: "snap_a2_test_qa",
+      content_hash: "test-hash-qa",
     });
     const evalRes = await reportRoute(makeRequest("GET", `https://example.test/api/rfp/${id}/report?manage=${manage}`), { params: Promise.resolve({ id }) });
     const evalBody = (await evalRes.json()) as Record<string, unknown>;
@@ -318,13 +319,12 @@ async function partA2() {
     // PublishedSnapshot id) rather than relying on the qa/evaluation
     // scenarios' earlier, differently-keyed commit above still being
     // present.
-    await commitMarketUnlock({
+    await seedVerifiedMarketUnlock({
       project_id: id,
       published_revision_id: snapshot.id,
       board_opportunity_id: "opp_a2_test_published",
-      board_visibility: "public",
-      matching_basis_hash: snapshot.content_hash,
-      invitation_snapshot_id: snapshot.id,
+      content_hash: snapshot.content_hash,
+      frozen_content: snapshot.frozen_content,
     });
 
     const pubRes = await reportRoute(makeRequest("GET", `https://example.test/api/rfp/${id}/report?manage=${manage}`), { params: Promise.resolve({ id }) });

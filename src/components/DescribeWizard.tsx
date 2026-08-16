@@ -102,14 +102,20 @@ export default function DescribeWizard() {
   // generating and submitting to the marketplace are one agreed action.
   const [email, setEmail] = useState("");
   const [optIn, setOptIn] = useState(false);
-  // Optional anonymous listing on the public opportunity board: sector and
-  // size band only, never the company name (buyer_visibility is anonymous by
-  // construction in the publish core). Off by default; explicit consent.
-  // Board listing defaults ON (Robert's gate ruling, 23 Jul 2026: 41 published
-  // RFPs, only 9 ever supplier-visible). The checkbox stays visible and
-  // untickable, so listing remains a per-publish consent (Article 13); the
-  // notice itself is anonymised either way.
-  const [listBoard, setListBoard] = useState(true);
+  // Public Opportunities Board listing (sector and size band only, never the
+  // company name -- buyer_visibility is anonymous by construction in the
+  // publish core) is no longer an optional, untickable choice here.
+  // Market-unlock correction round 2 (16 Aug 2026), Robert's non-negotiable
+  // product rule: vendor identities, matching, invitations, supplier-room
+  // access and everything else supplier-facing unlock ONLY after this RFP
+  // has been successfully published as a PUBLIC opportunity on the board --
+  // an unlisted/private listing never satisfies that rule, so unticking this
+  // used to silently promise "your matched vendors only" while, under the
+  // corrected saga, it now means nothing ever unlocks at all. There is no
+  // real "matched vendors only" path any more, so this is no longer a
+  // consent toggle; it is always true, and the copy below says so plainly
+  // instead of offering a choice that would leave the buyer's RFP stuck
+  // market-locked with no explanation.
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -277,7 +283,7 @@ export default function DescribeWizard() {
         // "Confirm and submit" magic link completes the submission whichever
         // device it is opened on. The localStorage copy below remains the
         // same-browser fast path.
-        const pending_submit = submit ? { shortlist_size: 5, list_on_board: listBoard, marketing_opt_in: optIn } : undefined;
+        const pending_submit = submit ? { shortlist_size: 5, list_on_board: true, marketing_opt_in: optIn } : undefined;
         // On the submit path the agreement email doubles as the contact
         // address on the draft, so the reminder cron can still reach a buyer
         // whose magic-link click never happens. No email is ever sent about
@@ -328,7 +334,7 @@ export default function DescribeWizard() {
       // completes the publish the moment the session exists.
       try {
         localStorage.setItem(`rfp_pending_publish_${id}`, "1");
-        localStorage.setItem(`rfp_publish_opts_${id}`, JSON.stringify({ shortlist_size: 5, list_on_board: listBoard, marketing_opt_in: optIn }));
+        localStorage.setItem(`rfp_publish_opts_${id}`, JSON.stringify({ shortlist_size: 5, list_on_board: true, marketing_opt_in: optIn }));
       } catch { /* private mode: the builder panel still offers publish */ }
       fireNetifyEvent("submit_agreed", { matched: String(Math.min(5, match?.count ?? 0)), opt_in: optIn ? "1" : "0" });
 
@@ -517,11 +523,11 @@ export default function DescribeWizard() {
 
         {step === 5 && (
           <div>
-            {heading("Generate and submit to the marketplace", "Built for UK and North American businesses with national or global network requirements.")}
+            {heading("Generate and publish your opportunity", "Built for UK and North American businesses with national or global network requirements.")}
             {match && match.count > 0 && (
               <p className="mb-3 text-sm text-[var(--ink-700)]">
                 Going to: <strong>{match.names.slice(0, Math.min(5, match.count)).join(", ")}</strong>.
-                {match.count > 5 ? ` ${match.count - 5} more match; you can add them after submitting.` : " You can add more after submitting."}
+                {match.count > 5 ? ` ${match.count - 5} more match; you can add them after publishing.` : " You can add more after publishing."}
               </p>
             )}
             <div className="mb-3">
@@ -546,18 +552,18 @@ export default function DescribeWizard() {
                   placeholder="you@yourcompany.com"
                   className="w-full max-w-md border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-base"
                 />
-                <p className="mt-1 text-xs text-[var(--ink-500)]">Business addresses only. We email a confirm link and a 6-digit code; either completes your submission (the code works on this screen, no link-hunting).</p>
+                <p className="mt-1 text-xs text-[var(--ink-500)]">Business addresses only. We email a confirm link and a 6-digit code; either completes publication (the code works on this screen, no link-hunting).</p>
               </div>
             )}
             {/* The quote-reveal moment, compare-the-market style (Robert,
                 17 July 2026): what submitting buys you, in four scannable
                 lines, before the legal detail. */}
             <div className="mb-4 rounded-sm border border-emerald-200 bg-emerald-50/60 p-4">
-              <p className="text-sm font-semibold mb-2">What you get the moment you submit</p>
+              <p className="text-sm font-semibold mb-2">What you get the moment you publish</p>
               <ul className="space-y-1.5 text-sm text-[var(--ink-700)]">
                 <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> <span>Your <strong>Netify Market Report</strong>, instantly: an indicative market price band for your estate (Netify TCO Methodology), plus a gap check on your requirement</span></li>
                 <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> <span>Your RFP as a <strong>Word and PDF document</strong> to circulate internally</span></li>
-                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Your RFP goes to your {Math.min(5, match?.count ?? 5) || 5} matched vendors, each with a private response link; structured responses come back side by side</li>
+                <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Your RFP is published as a public opportunity and goes to your {Math.min(5, match?.count ?? 5) || 5} matched vendors, each with a private response link; structured responses come back side by side</li>
                 <li className="flex gap-2"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> Pricing stays private to you; you stay anonymous until you reply, and your contact details are never shown to them</li>
               </ul>
               <p className="mt-2 text-xs text-[var(--ink-600,#555)]">Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted vendors and service providers</a> can respond, and you choose who receives your contact details.</p>
@@ -569,10 +575,10 @@ export default function DescribeWizard() {
               your RFPs, opportunities and RFP Builder and Marketplace features. No third-party marketing.{" "}
               <a href="https://netify.co.uk/privacy-policy/" className="underline" target="_blank" rel="noreferrer">Privacy policy</a>.
             </p>
-            <label className="mb-2 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
-              <input type="checkbox" checked={listBoard} onChange={(e) => setListBoard(e.target.checked)} className="mt-0.5" />
-              <span>Also list this RFP <strong>anonymously</strong> on the opportunity board so additional verified vendors can register interest. The board shows your sector, estate size and requirement only, never your company name or contact details, and pricing stays private to you. Untick to go to your matched vendors only.</span>
-            </label>
+            <p className="mb-2 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
+              <span aria-hidden="true" className="text-emerald-600 font-bold">✓</span>
+              <span>Publishing lists this RFP <strong>anonymously</strong> as a public opportunity on the Opportunities Board so your matched vendors, and additional verified vendors who register interest, can respond. The board shows your sector, estate size and requirement only, never your company name or contact details, and pricing stays private to you. This is what unlocks matching and invitations, so it is not optional.</span>
+            </p>
             <label className="mb-4 flex items-start gap-2 text-xs text-[var(--ink-600,#555)]">
               <input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5" />
               <span>Email me about new Netify features and research (optional).</span>
@@ -584,7 +590,7 @@ export default function DescribeWizard() {
                 disabled={creating || (authed !== true && !email.includes("@"))}
                 className={nextBtn}
               >
-                {creating ? "Submitting..." : `Generate and submit to your ${Math.min(5, match?.count ?? 5) || 5} matched vendors`}
+                {creating ? "Publishing..." : `Generate and publish opportunity`}
               </button>
               <button onClick={() => setStep(4)} className={backBtn}>Back</button>
             </div>

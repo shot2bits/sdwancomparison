@@ -19,8 +19,8 @@
  *      the generic, aggregate-only locked notice -- and no real vendor
  *      name string appears anywhere in the panel's rendered text.
  *   2. A REAL sign-in (magic-link exchange, same as the app's own
- *      SignIn/CodeEntry components) followed by a REAL click on "Submit to
- *      your matched vendors" (the panel's own publish trigger) succeeds.
+ *      SignIn/CodeEntry components) followed by a REAL click on "Publish
+ *      opportunity" (the panel's own publish trigger) succeeds.
  *   3. Immediately after that real publish click, WITHOUT a reload, the
  *      same panel now shows the "Suggest best-fit vendors" control and
  *      (once clicked) a real, named, invited vendor -- the frozen identity
@@ -123,8 +123,8 @@ async function main() {
     // Real sign-in BEFORE the page ever mounts (same rationale as the
     // sector-suggestion reversal fixture): the buyer is authenticated from
     // the very first render, exactly like someone returning to a draft
-    // they started on a previous visit, so the real "Submit to your
-    // matched vendors" click below needs no auth-resume detour.
+    // they started on a previous visit, so the real "Publish opportunity"
+    // click below needs no auth-resume detour.
     await signIn(ctx, TEST_EMAIL);
     const page = await ctx.newPage();
 
@@ -163,9 +163,9 @@ async function main() {
     // ---- Real click: publish from this exact panel ----------------------
     const [publishResponse] = await Promise.all([
       page.waitForResponse((r) => /\/api\/rfp\/[^/]+\/publish$/.test(r.url()) && r.request().method() === "POST"),
-      suppliers.getByRole("button", { name: "Submit to your matched vendors" }).click(),
+      suppliers.getByRole("button", { name: "Publish opportunity" }).click(),
     ]);
-    record(publishResponse.status() === 200, "Real click on \"Submit to your matched vendors\" (this exact panel's own publish trigger) succeeds", `status=${publishResponse.status()}`);
+    record(publishResponse.status() === 200, "Real click on \"Publish opportunity\" (this exact panel's own publish trigger) succeeds", `status=${publishResponse.status()}`);
     await page.waitForTimeout(800);
 
     // ---- Post-publish, no reload: the intended reveal ------------------

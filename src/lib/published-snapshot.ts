@@ -165,6 +165,46 @@ export type PublishedSnapshot = {
   market_report: MarketReport;
 };
 
+/**
+ * Market-unlock correction round 2 (16 Aug 2026), requirement 3: the frozen
+ * revision `commitMarketUnlock()` must be able to verify BEFORE it commits.
+ *
+ * This is deliberately smaller than `PublishedSnapshot` above and persisted
+ * MUCH earlier in the publish saga (rfp-publish.ts step B, before the board
+ * Opportunity is even created, let alone matching/invitations computed) --
+ * it freezes only the document content and its hash, the two things that
+ * are genuinely fixed the instant the buyer's content is captured. The
+ * richer `PublishedSnapshot` (matched/invited vendor lists, market_report)
+ * is still written once, at the END of the saga (step G), once those are
+ * actually known -- but it reuses THIS SAME id, so "the frozen revision
+ * MarketUnlock references" and "the row the full snapshot is saved under"
+ * are always one identity, never two independently-minted ones that could
+ * drift apart.
+ *
+ * Immutable once created, like PublishedSnapshot: `saveFrozenRevision()`
+ * is a plain create, never called twice for the same id with different
+ * content (a genuinely new publish attempt always mints a new id).
+ */
+export type FrozenRevision = {
+  id: string;
+  project_id: string;
+  content_hash: string;
+  frozen_content: { title: string; buyer: BuyerContext; rfp_sections: RfpSection[] };
+  created_at: number;
+};
+
+function frozenRevisionKey(id: string): string {
+  return `rfp:frozen_revision:${id}`;
+}
+
+export async function saveFrozenRevision(revision: FrozenRevision): Promise<void> {
+  await kvSetJson(frozenRevisionKey(revision.id), revision);
+}
+
+export async function getFrozenRevision(id: string): Promise<FrozenRevision | null> {
+  return kvGetJson<FrozenRevision>(frozenRevisionKey(id));
+}
+
 function latestKey(rfpId: string): string {
   return `rfp:${rfpId}:published_snapshot`;
 }

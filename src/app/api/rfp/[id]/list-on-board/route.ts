@@ -3,6 +3,7 @@ import { getProject, getOpportunity, kvGetJson, kvConfigured } from "@/lib/rfp-s
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { retryBoardPublication } from "@/lib/rfp-publish";
 import { isMarketUnlocked } from "@/lib/market-unlock";
+import { getPublicationAttempt } from "@/lib/publication-attempt";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const runtime = "nodejs";
@@ -50,11 +51,29 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   const access = await requireRfpOwner(req, project);
   if (!access.ok) return ownerRequired("Reading this RFP's board listing", cors);
+  // Market-unlock correction round 2 (16 Aug 2026): `project.status` no
+  // longer flips to "published" until the saga's own step F succeeds
+  // (strictly after the market has genuinely unlocked), so a project stuck
+  // on a failed or never-attempted publication no longer satisfies
+  // `hasPublished(project.status)` -- the UI's own polling gate (see
+  // RfpBuilder.tsx) can no longer key off that. `publication_attempted`
+  // (a PublicationAttempt record exists at all) is the correct, honest
+  // signal instead: "has this buyer ever tried to publish", independent of
+  // whether that attempt succeeded, failed, or is still locked. Only the
+  // attempt's EXISTENCE is surfaced here, never its internal contents
+  // (invitation_plan, invited_slugs) -- see publication-attempt.ts's own
+  // header comment on why those stay internal bookkeeping.
+  const attempt = await getPublicationAttempt(project.id);
+  const unlocked = await isMarketUnlocked(project.id);
   return Response.json({
     ok: true,
     status: project.status,
     board: await boardState(project.id),
-    market_unlocked: await isMarketUnlocked(project.id),
+    market_unlocked: unlocked,
+    publication_attempted: attempt !== null || project.status !== "draft",
+    publication_locked_reason: !unlocked && attempt && !attempt.board_opportunity_id
+      ? "Publication has not yet completed on the Opportunities Board."
+      : null,
   }, { headers: cors });
 }
 
