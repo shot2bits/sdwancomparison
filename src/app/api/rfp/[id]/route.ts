@@ -4,6 +4,7 @@ import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark, recordDemandSample, indexRfpForBuyer } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
+import { hasPublished } from "@/lib/project-machine";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 import { rfpContentSnapshot, contentHash } from "@/lib/published-snapshot";
@@ -67,6 +68,20 @@ export async function GET(req: Request, ctx: Ctx) {
   // Supplier read: requires the share token from the response link.
   const shareToken = (url.searchParams.get("token") ?? "").trim();
   if (shareToken && shareToken === project.share_token) {
+    // Row-8 hotfix (16 Aug 2026): this branch previously returned the full
+    // supplierView (rfp_sections, buyer details, project-specific content)
+    // to anyone holding the share token, with no check on publish state.
+    // The token is minted at project creation and the "Response link"
+    // control in the UI copies it unconditionally, so before this fix a
+    // draft-stage link handed out (or guessed, given rfp-store.ts's
+    // non-cryptographic newId()) granted the same disclosure this hotfix
+    // closes for the owner-driven invite/vendor-panel paths. Respond
+    // identically to "not found" — not a distinct "not published yet"
+    // message — so this path cannot be used to distinguish a draft project
+    // from one that doesn't exist.
+    if (!hasPublished(project.status)) {
+      return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+    }
     const vendor = (url.searchParams.get("vendor") ?? "").trim();
     const accepted = project.nda.required ? await hasAcceptedNda(project, vendor) : true;
     return Response.json(supplierView(project, accepted), { headers: cors });

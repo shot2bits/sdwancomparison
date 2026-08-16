@@ -414,7 +414,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }, [marketReport, project?.status]);
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
   useEffect(() => { fetch("/sase/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
-  useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
+  // Row-8 hotfix (16 Aug 2026): only poll for supplier connections once the
+  // project has actually published. Pre-publish there is nothing legitimate
+  // to fetch (the connect route below now refuses to persist a connection
+  // before publish), so this also stops an unauthenticated pre-publish read
+  // of this endpoint on every draft page load. The explicit post-publish
+  // refreshConnections() calls elsewhere (after invite/message/publish) are
+  // unaffected — they read the fresh publish result directly, not this
+  // status-gated mount effect.
+  useEffect(() => { if (project && hasPublished(project.status)) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
   useEffect(() => { if (project?.nda?.required) refreshNdaAccepts(); /* eslint-disable-next-line */ }, [project?.id, project?.nda?.required, project?.nda?.version]);
   useEffect(() => { fetch("/sase/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
@@ -925,7 +933,13 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }
 
   async function suggestSuppliers() {
-    if (!project) return;
+    // Row-8 hotfix (16 Aug 2026): this call reveals project-specific vendor
+    // matching (names + scores) for THIS project. It must never fire before
+    // the project has crossed the publication boundary — the button that
+    // triggers it is now hidden pre-publish (see the "Vendors and service
+    // providers" section below), and this guard is the defence-in-depth
+    // backstop against any stale ref/race calling it anyway.
+    if (!project || !hasPublished(project.status)) return;
     try {
       const res = await fetch("/sase/api/openapi/build_sase_shortlist", {
         method: "POST", headers: { "content-type": "application/json" },
@@ -1165,7 +1179,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // Walkthrough strip: where the buyer is and what happens next, from real
   // state. Draft or review = reviewing the document with publish ahead;
   // published and beyond = responses arriving.
-  const published = project.status !== "draft" && project.status !== "review";
+  // Row-8 hotfix (16 Aug 2026): this used to re-derive the same boolean
+  // locally (`status !== "draft" && status !== "review"`), a parallel
+  // reimplementation of the canonical predicate in project-machine.ts that
+  // happened to agree with it only because RfpStatus currently has exactly
+  // five values. Delegating to hasPublished() removes that duplicate
+  // definition — this is now the single "has this project crossed the
+  // publication boundary" question the whole file (and the vendor panel
+  // gating below) asks the same way.
+  const published = hasPublished(project.status);
   const stripStage: FlowStage = published ? "responses" : "review";
   const stripNow = published
     ? `Your RFP is live. ${connections.length > 0 ? `${connections.length} invited vendor${connections.length === 1 ? "" : "s"} hold` : "Invited vendors hold"} private response links, and replies land on this page.`
@@ -1781,11 +1803,28 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
           <h2 className="text-lg">Vendors and service providers</h2>
           <div className="flex gap-2">
-            <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit vendors</button>
+            {/* Row-8 hotfix (16 Aug 2026): this button is the only trigger for
+                suggestSuppliers(), which reveals project-specific vendor
+                matches. Hiding it pre-publish (on top of the function-level
+                guard) means there is no control on the page that can start
+                that disclosure before publication. */}
+            {published && (
+              <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit vendors</button>
+            )}
             <button onClick={() => publishToCurated("suppliers")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : project.status === "published" ? "Re-send to your matched vendors" : "Submit to your matched vendors"}</button>
           </div>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> These are the graded vendors and service providers from the Netify marketplace. <strong>Suggest best-fit vendors</strong> finds the closest matches to what you described. <strong>Submit to your matched vendors</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each one gets a private link to read your RFP and reply.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3">
+          {published ? (
+            <><strong>Step 3.</strong> These are the graded vendors and service providers from the Netify marketplace. <strong>Suggest best-fit vendors</strong> finds the closest matches to what you described. <strong>Submit to your matched vendors</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each one gets a private link to read your RFP and reply.</>
+          ) : (
+            // Row-8 hotfix (16 Aug 2026): pre-publish this section may name the
+            // marketplace as an aggregate ("Netify's graded marketplace") but
+            // must not reveal which vendors match THIS project, or any
+            // supplier identity, before publication.
+            <><strong>Step 3.</strong> Netify's graded marketplace vendors and service providers are matched to your requirement and invited once you publish. Nothing about your specific match, or any vendor's identity, is shown here until then.</>
+          )}
+        </p>
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed: this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track replies. Don&apos;t share it: vendors get their own links.</span>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
@@ -1825,7 +1864,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           )
         )}
 
-        {suggestions && suggestions.length > 0 && (
+        {/* Row-8 hotfix (16 Aug 2026): everything below this line names real
+            vendors matched to THIS project, or real supplier connections/
+            actions — exactly the "supplier identity or project-specific
+            matching signal" the brief says must never leak before
+            publication. All of it is now gated on `published`; pre-publish
+            we show only the generic locked notice, matching the pattern
+            already used below for "Evaluate vendor responses". */}
+        {!published && (
+          <div className="mb-3 rounded-sm border border-dashed border-[var(--ink-300,#ccc)] bg-[var(--paper-base)] p-3 text-sm text-[var(--ink-500)]">
+            Vendor matches, invitations, messages and replies are locked until you publish — publishing is what invites your matched vendors and starts the conversation.{" "}
+            <a href="#publish" className="underline">Publish to unlock</a>.
+          </div>
+        )}
+        {published && suggestions && suggestions.length > 0 && (
           <div className="mb-4">
             <p className="eyebrow mb-2">Suggested (best-fit for your context)</p>
             <div className="flex flex-wrap gap-2">
@@ -1838,15 +1890,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         )}
 
-        {connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No vendors invited yet.</p>}
-        {connections.length > 0 && (
+        {published && connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No vendors invited yet.</p>}
+        {published && connections.length > 0 && (
           <p className="mb-2 text-sm text-[var(--ink-700)]">
             <strong>{connections.filter((c) => c.viewed_at).length} of {connections.length}</strong> vendors have viewed your RFP
             {connections.filter((c) => c.status === "declined").length > 0 ? ` · ${connections.filter((c) => c.status === "declined").length} declined` : ""}
             {project.response_deadline ? ` · responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left)` : ""}.
           </p>
         )}
-        {(() => {
+        {published && (() => {
           const HINTS: Record<string, string> = {
             out_of_region: "Consider widening the vendor set or checking your region selections match where you need delivery.",
             sector_not_served: "Your sector filter may be narrowing the match; sector context in the background section helps vendors self-qualify.",
@@ -1875,36 +1927,38 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </div>
           );
         })()}
-        <div className="space-y-3">
-          {connections.map((c) => (
-            <details key={c.vendor_slug} className="border border-[var(--ink-300,#ccc)] rounded-sm">
-              <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer flex justify-between">
-                <span>{c.vendor_name}</span>
-                <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">
-                  {c.viewed_at ? "viewed · " : ""}{c.status}
-                </span>
-              </summary>
-              <div className="px-4 pb-3">
-                <div className="space-y-2 my-2">
-                  {c.messages.map((m) => (
-                    <div key={m.id} className={`text-sm rounded-sm p-2 ${m.from === "buyer" ? "bg-amber-50" : "border border-[var(--ink-200,#e5e5e5)]"}`}>
-                      <span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-2">{m.from === "buyer" ? "You" : c.vendor_name} · {m.type}</span>
-                      {m.body}
-                      {Object.keys(m.payload).length > 0 && <span className="block text-[var(--ink-700)] mt-0.5">{Object.entries(m.payload).map(([k, v]) => `${k}: ${v}`).join(" · ")}</span>}
-                    </div>
-                  ))}
+        {published && (
+          <div className="space-y-3">
+            {connections.map((c) => (
+              <details key={c.vendor_slug} className="border border-[var(--ink-300,#ccc)] rounded-sm">
+                <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer flex justify-between">
+                  <span>{c.vendor_name}</span>
+                  <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">
+                    {c.viewed_at ? "viewed · " : ""}{c.status}
+                  </span>
+                </summary>
+                <div className="px-4 pb-3">
+                  <div className="space-y-2 my-2">
+                    {c.messages.map((m) => (
+                      <div key={m.id} className={`text-sm rounded-sm p-2 ${m.from === "buyer" ? "bg-amber-50" : "border border-[var(--ink-200,#e5e5e5)]"}`}>
+                        <span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-2">{m.from === "buyer" ? "You" : c.vendor_name} · {m.type}</span>
+                        {m.body}
+                        {Object.keys(m.payload).length > 0 && <span className="block text-[var(--ink-700)] mt-0.5">{Object.entries(m.payload).map(([k, v]) => `${k}: ${v}`).join(" · ")}</span>}
+                      </div>
+                    ))}
+                  </div>
+                  <textarea value={msgDraft[c.vendor_slug] ?? ""} onChange={(e) => setMsgDraft({ ...msgDraft, [c.vendor_slug]: e.target.value })} rows={2} placeholder="Message to the vendor" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
+                  <div className="mt-2 flex gap-2 flex-wrap">
+                    <button onClick={() => connectAction(c.vendor_slug, "message", msgDraft[c.vendor_slug] ?? "")} disabled={!msgDraft[c.vendor_slug]} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
+                    <button onClick={() => connectAction(c.vendor_slug, "demo_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request demo</button>
+                    <button onClick={() => connectAction(c.vendor_slug, "contact_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request contact</button>
+                    <button onClick={() => copySupplierLink(c.token)} className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Copy response link</button>
+                  </div>
                 </div>
-                <textarea value={msgDraft[c.vendor_slug] ?? ""} onChange={(e) => setMsgDraft({ ...msgDraft, [c.vendor_slug]: e.target.value })} rows={2} placeholder="Message to the vendor" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  <button onClick={() => connectAction(c.vendor_slug, "message", msgDraft[c.vendor_slug] ?? "")} disabled={!msgDraft[c.vendor_slug]} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
-                  <button onClick={() => connectAction(c.vendor_slug, "demo_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request demo</button>
-                  <button onClick={() => connectAction(c.vendor_slug, "contact_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request contact</button>
-                  <button onClick={() => copySupplierLink(c.token)} className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Copy response link</button>
-                </div>
-              </div>
-            </details>
-          ))}
-        </div>
+              </details>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Evaluation: independent cross-check of supplier responses */}

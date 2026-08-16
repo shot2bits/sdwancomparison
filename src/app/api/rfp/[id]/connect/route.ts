@@ -2,6 +2,7 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, listConnections, getConnection, kvConfigured } from "@/lib/rfp-store";
 import { inviteSupplier, addMessage } from "@/lib/rfp-connect";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
+import { hasPublished } from "@/lib/project-machine";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -33,6 +34,23 @@ export async function POST(req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const project = await getProject(id);
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+
+  // Row-8 hotfix (16 Aug 2026): a supplier connection is a real, addressable,
+  // persisted invitation — the brief's own Procurement Room description says
+  // publish "creates invitations idempotently", i.e. invitations are a
+  // consequence of publication, not something that can exist before it. This
+  // route previously had no status check at all, so any owner (or anyone who
+  // could satisfy requireRfpOwner) could invite, message or otherwise contact
+  // a named supplier while the project was still a private draft — the exact
+  // pre-publication supplier-identity/contact leak this hotfix closes. This
+  // must be checked before requireRfpOwner, not after: it is a publication-
+  // state rule, not an ownership rule, and applies equally to the owner.
+  if (!hasPublished(project.status)) {
+    return Response.json(
+      { error: "Publish the RFP before inviting or contacting vendors.", code: "not_published" },
+      { status: 409, headers: cors },
+    );
+  }
 
   let body: { vendor_slug?: string; intro?: string; action?: string; body?: string; manage_token?: string };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
