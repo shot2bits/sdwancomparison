@@ -16,8 +16,18 @@ import { FOLLOW_UP_NOTE, PROMISES_PARAGRAPH } from "@/lib/publish-promises";
 import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
-import { rfpContentSnapshot, contentHash, getLatestPublishedSnapshot, savePublishedSnapshot, type PublishedSnapshot } from "@/lib/published-snapshot";
+import {
+  rfpContentSnapshot,
+  contentHash,
+  getLatestPublishedSnapshot,
+  savePublishedSnapshot,
+  saveFrozenRevision,
+  type PublishedSnapshot,
+} from "@/lib/published-snapshot";
 import { loadGovernedRevisionState, applyGovernedEvent } from "@/lib/rfp-governed-revision";
+import { hasPublished } from "@/lib/project-machine";
+import { commitMarketUnlock, isMarketUnlocked, MarketUnlockBindingError } from "@/lib/market-unlock";
+import { getPublicationAttempt, savePublicationAttempt, loadResumableAttempt, type PublicationAttempt } from "@/lib/publication-attempt";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
 /**
@@ -102,7 +112,7 @@ export type PublishResult = {
   published: ProjectDetails;
   invited: { slug: string; name: string; supplier_url: string }[];
   criteria: string;
-  board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
+  board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string; visibility?: "public" };
   /** The instant publish reward: matched suppliers, price band, gaps. Never late because it is synchronous. */
   market_report: MarketReport;
   /** Round 4 correction (14 Aug 2026), Robert's finding 4: the REAL
@@ -126,10 +136,36 @@ function boardScope(p: ProjectDetails): OppScope[] {
   return scope;
 }
 
-/** Create or refresh the public board notice for a published RFP. Exported
- *  for the standing list-on-board action (published RFPs that skipped the
- *  board at publish time can list later without re-running invites). */
-export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Promise<{ opportunity_id: string; url: string }> {
+/**
+ * Create or refresh the board notice for a published RFP. Exported for the
+ * standing list-on-board action (a published RFP whose original publish
+ * failed to list can list later without redoing the whole publish).
+ *
+ * Market-unlock correction round 2 (16 Aug 2026), Robert's non-negotiable
+ * product rule: this ALWAYS creates a PUBLIC listing now -- there is no
+ * more "unlisted" path through this function. Round 1 of this correction
+ * accepted a `visibility` option so `list_on_board: false` could still
+ * produce a real, unlisted Opportunity that unlocked the market privately;
+ * Robert's review rejected that reading outright ("Do not reinterpret 'not
+ * listed on the board' as 'listed privately'"). `executePublish()` no
+ * longer calls this function at all when the buyer chose `list_on_board:
+ * false` -- see its saga step C -- so by the time this function runs, a
+ * public listing is exactly what is being asked for, full stop.
+ *
+ * `publishedRevisionId`, when supplied, binds the created/refreshed
+ * Opportunity to that exact FrozenRevision (published-snapshot.ts) via
+ * `source_published_revision_id` -- the field `commitMarketUnlock()`'s
+ * integrity check (market-unlock.ts) verifies against. Every call from the
+ * publish saga supplies it; the admin recovery path
+ * (`recoverUnlistedPublish`) does not run the full saga and therefore does
+ * not unlock the market on its own -- see that function's own doc comment.
+ */
+export async function listRfpOnBoard(
+  p: ProjectDetails,
+  ownerEmail: string,
+  opts: { publishedRevisionId?: string } = {},
+): Promise<{ opportunity_id: string; url: string }> {
+  const visibility = "public" as const;
   const mapKey = `rfp:${p.id}:board_opp`;
   const existingId = await kvGetJson<string>(mapKey);
   const existing = existingId ? await getOpportunity(existingId) : null;
@@ -182,7 +218,7 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     auction_format: "open",
     deadline: null,
     eligibility: "open",
-    visibility: "public",
+    visibility,
     awarded_vendor_slug: existing?.awarded_vendor_slug ?? null,
     buyer_token: existing?.buyer_token ?? newId("btok"),
     invited: existing?.invited ?? [],
@@ -207,6 +243,11 @@ export async function listRfpOnBoard(p: ProjectDetails, ownerEmail: string): Pro
     },
     owner_email: ownerEmail,
     source_rfp_id: p.id,
+    // Round 2 correction, requirement 3: bind this listing to the exact
+    // frozen revision it was published against. Falls back to whatever was
+    // previously bound (a refresh call that did not supply a fresh
+    // revision id, e.g. a cosmetic re-list) rather than clearing it.
+    source_published_revision_id: opts.publishedRevisionId ?? existing?.source_published_revision_id ?? "",
   });
 
   // The public quality gate (Robert's ruling, 28 Jul 2026): no test data,
@@ -246,7 +287,19 @@ export class BoardQualityGateError extends Error {
  * pipeline as any publish; fail (or no email, or the quality gate refuses
  * the content) and the record lands on the internal list as
  * saved-unpublished with the reason. Never throws; the outcome is the
- * answer. Invites are NOT re-run: listing is listRfpOnBoard's whole job.
+ * answer.
+ *
+ * Market-unlock correction round 2 (16 Aug 2026): this used to call
+ * `listRfpOnBoard()` directly, creating an Opportunity WITHOUT running the
+ * rest of the publish saga -- under Robert's non-negotiable rule, that
+ * would list the notice publicly while leaving the market genuinely LOCKED
+ * (no FrozenRevision to bind a MarketUnlock to, so `commitMarketUnlock()`
+ * would refuse even if called). That is a real, silent defect for this
+ * admin tool's actual purpose ("46 published, 14 ever seen by a supplier"
+ * -- suppliers must actually be able to see and respond). Delegates to
+ * `retryBoardPublication()` instead, which runs the full saga (freeze,
+ * list, unlock, invite) idempotently -- "listing" and "the market
+ * genuinely unlocking" are now the same recovered outcome, not two.
  */
 export async function recoverUnlistedPublish(
   p: ProjectDetails,
@@ -268,9 +321,14 @@ export async function recoverUnlistedPublish(
     return { state: "saved_unpublished", reason };
   }
   try {
-    const listed = await listRfpOnBoard(p, email);
-    await recordPublishLead({ state: "published", rfp_id: p.id, email, verification, requirement_depth: depth, board_opportunity_id: listed.opportunity_id });
-    return { state: "published", reason: null, opportunity_id: listed.opportunity_id };
+    const result = await retryBoardPublication(p, email);
+    if (!result.board.opportunity_id) {
+      const reason = result.board.reason ?? "board listing failed";
+      await recordPublishLead({ state: "saved_unpublished", rfp_id: p.id, email, verification, requirement_depth: depth, reason });
+      return { state: "saved_unpublished", reason };
+    }
+    await recordPublishLead({ state: "published", rfp_id: p.id, email, verification, requirement_depth: depth, board_opportunity_id: result.board.opportunity_id });
+    return { state: "published", reason: null, opportunity_id: result.board.opportunity_id };
   } catch (e) {
     const reason = e instanceof BoardQualityGateError ? e.message : "board listing failed";
     await recordPublishLead({ state: "saved_unpublished", rfp_id: p.id, email, verification, requirement_depth: depth, reason });
@@ -461,12 +519,88 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
 }
 
 /**
- * Execute a publish: invite the best-fit graded vendors, move the RFP to
- * published (adopting ownership onto sessionEmail when the draft has no
- * owner), set the response window, optionally list on the public board,
- * record marketing consent and send the notifications. Clears any
- * pending_submit intent so the action can never run twice from the same
- * stored instruction.
+ * Market-unlock correction round (16 Aug 2026), Robert's ruling on the
+ * row-8 checkpoint evidence: the CURRENT executePublish() (before this
+ * round) computed the matched shortlist and called inviteSupplier() for
+ * every selected vendor BEFORE the D5 declined-approval gate check, BEFORE
+ * the project's status ever moved to "published", and BEFORE the board
+ * listing was even attempted. Three consequences, all real defects:
+ *
+ *   1. A publish blocked by the D5 gate (a declined approval with no
+ *      explicit confirmation) still resulted in real, persisted
+ *      SupplierConnection invitations to real named vendors, even though
+ *      the function then threw DeclinedApprovalError and the project
+ *      NEVER left "draft" status -- an invitation sent from behind a
+ *      thrown exception, on a project the buyer never actually published.
+ *   2. `hasPublished(project.status)` (the row-8 hotfix's own gate) could
+ *      read true, and RfpBuilder's vendor panel could show real invited-
+ *      vendor names, while the SAME publish's own board listing had failed
+ *      -- the project's internal status and its public market presence are
+ *      two different facts, and only one of them was ever checked.
+ *   3. Because "reveal identities" and "create invitations" happened
+ *      before "list on the board", a board-listing failure could never
+ *      undo either -- there was no sequencing left to make the invitations
+ *      contingent on the board outcome even in principle.
+ *
+ * MARKET-UNLOCK CORRECTION ROUND 2 (16 Aug 2026): round 1's sequence above
+ * was still wrong in two further ways Robert's review found, with real
+ * reproduced evidence (see reports/row8-repro/round2-before-evidence.json):
+ *
+ *   4. Round 1 moved the project's status to "published" BEFORE the board
+ *      listing was attempted (only the invite/unlock steps were moved
+ *      after it) -- so a board-listing failure still left the project
+ *      internally "published" with no board presence and no unlock: a
+ *      published-but-never-actually-published project, bookkeeping-only in
+ *      name only.
+ *   5. Round 1's MarketUnlock was committed with a `published_revision_id`
+ *      that was only ever a minted STRING at that point -- the
+ *      corresponding PublishedSnapshot was not persisted until the very
+ *      end of the function, well after the unlock. An unlock could exist
+ *      referencing a "frozen revision" that had never actually been frozen
+ *      anywhere.
+ *   6. Round 1 also let `list_on_board: false` produce a real, unlisted
+ *      Opportunity that still satisfied the board prerequisite and
+ *      unlocked the market privately. Robert's review rejected this
+ *      reading outright: an unlisted/private Opportunity does NOT satisfy
+ *      the non-negotiable rule, and reinterpreting "not listed" as "listed
+ *      privately" is not this change's call to make.
+ *
+ * THE RECOVERABLE PUBLICATION SAGA (round 2's fix, Robert's exact
+ * lettering -- see publication-attempt.ts for the record this saga's
+ * in-progress state lives in, entirely separate from `project.status`):
+ *
+ *   A. Validate eligibility, ownership, consent and D5 (unchanged, still
+ *      first: the idempotency short-circuit, the min-content gate, the
+ *      business-verification chain, then the D5 declined-approval gate).
+ *   B. Compile and persist an immutable FrozenRevision (published-
+ *      snapshot.ts), not yet externally exposed -- resuming an in-flight
+ *      PublicationAttempt for this EXACT request if one exists, minting a
+ *      fresh one otherwise.
+ *   C. Create the PUBLIC Opportunities Board listing bound to that exact
+ *      revision. `list_on_board: false` no longer creates any Opportunity
+ *      at all -- the market simply never unlocks for that attempt, exactly
+ *      as it does not for a genuine board failure.
+ *   D. Persist the matching basis and invitation plan (buildShortlist()
+ *      against the frozen content) into the PublicationAttempt, for
+ *      deterministic replay -- reused verbatim on resume, never
+ *      recomputed.
+ *   E. Commit MarketUnlock (market-unlock.ts) -- idempotent by
+ *      (project_id, published_revision_id, board_opportunity_id); refuses
+ *      unless the FrozenRevision and the public board Opportunity both
+ *      verify. This is the ONLY step that may expose anything supplier-
+ *      facing; everything before it ran with zero project-specific vendor
+ *      computation and zero supplier-facing writes.
+ *   F. Transition the project to published -- ONLY NOW, strictly after E
+ *      has verified and committed. This is round 2's literal fix for
+ *      finding 4 above.
+ *   G. Create invitations idempotently from the frozen invitation plan --
+ *      an idempotent outbox: already-invited slugs are never re-invited on
+ *      a resume.
+ *
+ * Failures before E leave the project market-locked and non-published,
+ * retryable. Failures after E resume idempotently without changing the
+ * frozen revision, shortlist or original `unlocked_at` (see
+ * commitMarketUnlock()'s and the invite loop's own idempotency).
  *
  * Phase 2 (14 Aug 2026): also the publication boundary the product brief
  * requires -- freezes one authoritative PublishedSnapshot after every
@@ -543,10 +677,183 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     throw new SavedUnpublishedError(verification, `${SITE_URL}/rfp-builder/${project.id}/`);
   }
 
+  // Publish is the strongest identity-capture moment: adopt ownership onto
+  // the verified account when the RFP has no owner yet, so the RFP appears
+  // under the buyer's account.
+  const ownerEmail = project.owner_email || sessionEmail;
+  // Response window: 14 days by default from the moment of submission,
+  // preserved on re-sends so the clock never quietly restarts.
+  const responseDeadline = project.response_deadline ?? Date.now() + 14 * 86400000;
+
+  // D5 decision gate (Robert's amendment): a declined approval never
+  // vetoes, but publishing against it must be an intentional, recorded
+  // decision. The confirmation wording is recorded verbatim as consent.
+  // MOVED UP (market-unlock correction round): this must run BEFORE any
+  // market-facing effect, and strictly before the board/invite sequence
+  // below -- previously it ran AFTER the shortlist was computed and every
+  // vendor already invited, so a blocked publish (declined approval, no
+  // confirmation) still left real invitations sent to real named vendors
+  // for a project that never actually left "draft" (see this function's
+  // own header comment, finding 1).
+  const signoffs = await listSignoffs(project.id);
+  let working: ProjectDetails = project;
+  if (
+    opts.acknowledge_declined_approval === true &&
+    signoffs.some((a) => a.decision === "declined") &&
+    !(working.consents ?? []).some((c) => c.action === PUBLISH_DESPITE_DECLINED_ACTION)
+  ) {
+    working = {
+      ...working,
+      consents: [
+        ...(working.consents ?? []),
+        { at: Date.now(), action: PUBLISH_DESPITE_DECLINED_ACTION, granted_by: ownerEmail, via: "web" as const, text: declinedConfirmationText(signoffs) },
+      ],
+    };
+  }
+  const gate = publishDecisionGate(signoffs, working.consents);
+  if (gate.blocked) throw new DeclinedApprovalError(gate.confirmationText);
+
+  // Locked-result builder shared by every "the market did not unlock this
+  // attempt" exit below (list_on_board:false, a board failure, or a
+  // MarketUnlock binding refusal) -- always the SAME shape: nothing
+  // supplier-specific computed, project left exactly as it was.
+  const lockedMarketReportFor = (p: ProjectDetails): MarketReport => {
+    try {
+      const full = buildMarketReport(p);
+      return { ...full, matched: { count: 0, names: [], total_evaluated_market: full.matched.total_evaluated_market } };
+    } catch {
+      return {
+        generated_at: Date.now(),
+        matched: { count: 0, names: [], total_evaluated_market: 0 },
+        estimate: null,
+        assumptions: [],
+        gaps: [],
+        document: { sections: 0, questions: 0 },
+        analyst_note: FOLLOW_UP_NOTE,
+      };
+    }
+  };
+
+  // STEP B (Robert's lettering): compile and persist an immutable frozen
+  // revision, not yet externally exposed. Resume an in-flight
+  // PublicationAttempt for this EXACT request (same content + options) if
+  // one exists -- reusing its id/board_opportunity_id/invitation_plan
+  // verbatim, never re-minting or recomputing anything already durable;
+  // mint a fresh attempt otherwise (a genuinely new request always gets a
+  // new revision, never colliding with a prior, never-unlocked attempt).
+  // See publication-attempt.ts's header for the full resume contract.
+  let attempt: PublicationAttempt | null = await loadResumableAttempt(project.id, publishEventIdForRequest);
+  if (!attempt) {
+    const freshRevisionId = newId("snap");
+    await saveFrozenRevision({
+      id: freshRevisionId,
+      project_id: project.id,
+      content_hash: contentHash(contentSnapshotForEvent),
+      frozen_content: { title: working.title, buyer: working.buyer, rfp_sections: working.rfp_sections },
+      created_at: Date.now(),
+    });
+    attempt = await savePublicationAttempt({
+      id: freshRevisionId,
+      project_id: project.id,
+      request_event_id: publishEventIdForRequest,
+      frozen_content_hash: contentHash(contentSnapshotForEvent),
+      board_opportunity_id: null,
+      invitation_plan: null,
+      invited_slugs: [],
+      unlocked: false,
+      published: false,
+      created_at: Date.now(),
+      updated_at: Date.now(),
+    });
+  }
+  const publishedRevisionId = attempt.id;
+
+  // STEP C: create the PUBLIC Opportunities Board listing bound to that
+  // exact revision -- the ONLY path onto the board this saga ever takes.
+  // `list_on_board: false` no longer creates ANY Opportunity (public or
+  // otherwise): per Robert's non-negotiable rule, "not listed on the
+  // board" is never reinterpreted as "listed privately" -- the market
+  // simply never unlocks for this attempt, exactly as if the board write
+  // had failed outright. A private-market workflow may be a legitimate
+  // FUTURE product, but it is a separately named lifecycle requiring its
+  // own explicit approval, not a side effect of this flag.
+  let board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string; visibility?: "public" };
+  if (opts.list_on_board === false) {
+    board = {
+      listed: false,
+      reason:
+        "This requirement was not submitted for publication on the Opportunities Board. Vendor matching, invitations and supplier access only unlock once a requirement is successfully published as a public opportunity on the board.",
+    };
+  } else {
+    try {
+      const listed = await listRfpOnBoard(working, sessionEmail, { publishedRevisionId });
+      board = { listed: true, ...listed, visibility: "public" as const };
+      if (attempt.board_opportunity_id !== listed.opportunity_id) {
+        attempt = await savePublicationAttempt({ ...attempt, board_opportunity_id: listed.opportunity_id });
+      }
+    } catch (e) {
+      // The quality gate says exactly why a notice stayed off the board
+      // (Robert's ruling, 28 Jul 2026); other failures (a storage/write
+      // failure, for instance) keep the generic line. Either way, this is
+      // now also the reason the market never unlocks for this attempt --
+      // see the locked return just below.
+      board = e instanceof BoardQualityGateError
+        ? { listed: false, reason: e.message }
+        : { listed: false, reason: "Board listing failed; try re-publishing." };
+    }
+  }
+
+  // The internal list hears every outcome (Ruling One): this publish
+  // attempt, with its evidence, derived company and requirement depth,
+  // and honestly which state it actually reached. Best effort.
+  await recordPublishLead({
+    state: board.opportunity_id ? "published" : "saved_unpublished",
+    rfp_id: project.id,
+    email: publishEmail,
+    verification,
+    requirement_depth: requirementDepth,
+    ...(board.opportunity_id ? { board_opportunity_id: board.opportunity_id } : {}),
+    ...(board.reason ? { reason: board.reason } : {}),
+  });
+
+  // Optional marketing consent captured at the agreement step is recorded
+  // against the verified identity the publish runs as, regardless of
+  // whether this attempt goes on to unlock -- the buyer's consent to be
+  // contacted is a fact about the click, not about the outcome.
+  if (opts.marketing_opt_in === true) {
+    try {
+      const key = "email:marketing_optin";
+      const list = (await kvGetJson<string[]>(key)) ?? [];
+      const addr = sessionEmail.toLowerCase();
+      if (!list.includes(addr)) { list.push(addr); await kvSetJson(key, list); }
+    } catch { /* best effort */ }
+  }
+
+  // NO PUBLIC BOARD OPPORTUNITY WAS CREATED (list_on_board:false, or a
+  // board failure): stop here. Per Robert's non-negotiable rule, this
+  // means the market never unlocked for this attempt, and -- round 2's
+  // literal fix -- the project's status is NEVER touched: `working` here
+  // is exactly `project` (plus, at most, a D5 acknowledgement consent
+  // entry), never transitioned toward "published". No matching is
+  // computed, no supplier is invited, no MarketUnlock record is
+  // committed, and no governed-revision idempotency state is committed
+  // either, so a retry (this same request again, or the standing
+  // /list-on-board recovery action -- see retryBoardPublication() below)
+  // is a genuine, safe re-attempt, not a silent no-op.
+  if (!board.opportunity_id) {
+    return { published: working, invited: [], criteria: "", board, market_report: lockedMarketReportFor(working), matched_vendors: [] };
+  }
+
+  // STEP D: persist the matching basis and invitation plan for
+  // deterministic replay -- computed once and reused verbatim on any
+  // resume, never recomputed against a vendor dataset that may have moved
+  // on since. Deliberately runs against `working` (the frozen content),
+  // never a later-edited live project, since a resume only ever happens
+  // for the SAME content+options request.
   const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
   // Buyer-named vendors are always invited (explicit intent beats inference),
   // capped upstream at five; the ranked shortlist fills the remainder.
-  const pinSlugs = (project.buyer.pinned_vendors ?? []).filter(Boolean);
+  const pinSlugs = (working.buyer.pinned_vendors ?? []).filter(Boolean);
   // Buyer exclusions (F3): sanitised, capped, and never allowed to beat a
   // pin. They govern the ranked fill only; the board listing, the grading
   // and the record are untouched.
@@ -562,12 +869,12 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // Region hint (20 July 2026, the ministry lesson): when the buyer stated no
   // regions, weight the ranking by the email's country TLD. Never filters;
   // declared to the buyer as an assumption in the confirmation email.
-  const statedRegions = (project.buyer.regions ?? []).filter(Boolean);
-  const regionHint = statedRegions.length === 0 ? regionHintFromEmail(project.owner_email || sessionEmail) : null;
+  const statedRegions = (working.buyer.regions ?? []).filter(Boolean);
+  const regionHint = statedRegions.length === 0 ? regionHintFromEmail(ownerEmail) : null;
   const result = buildShortlist(getShortlistDataset(), {
-    sector: project.buyer.sector ?? null,
-    organisation_size: project.buyer.organisation_size ?? "any",
-    service_model: project.buyer.operating_model ?? "any",
+    sector: working.buyer.sector ?? null,
+    organisation_size: working.buyer.organisation_size ?? "any",
+    service_model: working.buyer.operating_model ?? "any",
     required_regions: statedRegions,
     ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
     shortlist_size: requestSize,
@@ -575,12 +882,130 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
 
   const rankedFill = result.shortlist.map((v) => v.slug).filter((s) => !excluded.has(s));
   const inviteSlugs = [...new Set([...pinSlugs, ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
+  if (!attempt.invitation_plan) {
+    attempt = await savePublicationAttempt({
+      ...attempt,
+      invitation_plan: inviteSlugs.map((slug) => ({ slug, name: vendorBySlug(slug)?.name ?? slug })),
+    });
+  }
+
+  // STEP E: atomically/finally commit MarketUnlock -- the ONLY step that
+  // may expose anything supplier-facing. Idempotent by
+  // (project_id, published_revision_id, board_opportunity_id) --
+  // market-unlock.ts's own commit path; refuses unless the FrozenRevision
+  // and the public board Opportunity both independently verify.
+  try {
+    await commitMarketUnlock({
+      project_id: working.id,
+      published_revision_id: publishedRevisionId,
+      board_opportunity_id: attempt.board_opportunity_id!,
+    });
+  } catch (e) {
+    // A binding refusal here (MarketUnlockBindingError) means the frozen
+    // revision or board Opportunity this attempt just produced somehow
+    // does not verify -- treated exactly like a board failure: stay
+    // locked, non-published, retryable. This should not happen on the
+    // normal path (both were just persisted above in this same call), but
+    // the saga must never silently "unlock" past a verification failure.
+    const reason = e instanceof MarketUnlockBindingError ? e.message : "Market-unlock verification failed; try re-publishing.";
+    return { published: working, invited: [], criteria: "", board: { listed: false, reason }, market_report: lockedMarketReportFor(working), matched_vendors: [] };
+  }
+  if (!attempt.unlocked) {
+    attempt = await savePublicationAttempt({ ...attempt, unlocked: true });
+  }
+
+  // STEP F: transition the project to published -- ONLY NOW, strictly
+  // after E has verified and committed (round 2's literal fix: this used
+  // to run before the board attempt was even made). Skipped entirely when
+  // this project already crossed the publication boundary on an EARLIER
+  // successful cycle (a genuine republish, or a resumed attempt whose F
+  // already ran before an earlier crash): advanceProject() only permits
+  // the drafted -> published transition once, so re-running it on an
+  // already-published record would throw a spurious illegal-transition
+  // error even though nothing here is actually wrong.
+  let published: ProjectDetails;
+  if (hasPublished(working.status)) {
+    published = working;
+  } else if (working.engine) {
+    // Engine records publish THROUGH THE MACHINE (the legacy direct
+    // status write is refused by the write gate for engine records, by
+    // design): publish consent recorded verbatim, then the drafted to
+    // published transition with its guards (consent + the gap gate).
+    const now = Date.now();
+    let p: ProjectDetails = {
+      ...working,
+      owner_email: ownerEmail,
+      response_deadline: responseDeadline,
+      pending_submit: undefined,
+      business_verification: { ...verification },
+    };
+    if (!(p.consents ?? []).some((c) => c.action === "publish")) {
+      p = {
+        ...p,
+        consents: [...(p.consents ?? []), { at: now, action: "publish", granted_by: ownerEmail, via: "web" as const, text: ENGINE_PUBLISH_CONSENT_TEXT }],
+      };
+      p = recordProjectEvent(p, { at: now, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.consented", detail: {}, consent: true });
+    }
+    // `detail.invited` no longer belongs on this transition event -- the
+    // invite count is not known yet at this point in the sequence. A
+    // separate `invite.sent` event (already a legal NON_TRANSITION_EVENT
+    // for the published/qa/evaluation phases) is appended once invites
+    // genuinely happen, below (step G).
+    p = advanceProject(p, { at: now + 1, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.live", detail: {} });
+    published = await saveProject(p);
+  } else {
+    // The record-keeping gap Harry proved (24 July 2026): builder-lane
+    // projects published with EMPTY history, so the Timeline read "No
+    // recorded events yet" on a project created and published the same
+    // morning. The same append-only events the engine lane records are
+    // recorded here; nothing is invented, both facts ARE this call. The
+    // record must never block the publish, so failures fall through to
+    // the plain write.
+    let p: ProjectDetails = {
+      ...working,
+      status: "published",
+      owner_email: ownerEmail,
+      response_deadline: responseDeadline,
+      pending_submit: undefined,
+      business_verification: { ...verification },
+    };
+    try {
+      const now = Date.now();
+      p = recordProjectEvent(p, { at: now, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.consented", detail: {}, consent: true });
+      p = recordProjectEvent(p, { at: now + 1, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.live", detail: {} });
+    } catch { /* the history is a record, never a gate */ }
+    published = await saveProject(p);
+  }
+  if (!project.owner_email) {
+    try { await indexRfpForBuyer(sessionEmail, published.id); } catch { /* best effort */ }
+  }
+  if (!attempt.published) {
+    attempt = await savePublicationAttempt({ ...attempt, published: true });
+  }
+
+  // STEP G: create invitations idempotently from the frozen invitation
+  // plan -- an idempotent outbox: `invited_slugs` is persisted after each
+  // successful invite, so a crash mid-loop resumes without re-inviting an
+  // already-invited slug. Already-invited slugs (from a resumed attempt)
+  // still get their supplier_url reconstructed for THIS response, even
+  // though inviteSupplier() itself is not called again for them.
+  const invitationPlan = attempt.invitation_plan ?? [];
+  const alreadyInvited = new Set(attempt.invited_slugs);
   const invited: { slug: string; name: string; supplier_url: string }[] = [];
-  for (const v of inviteSlugs.map((slug) => ({ slug }))) {
+  for (const entry of invitationPlan) {
+    if (alreadyInvited.has(entry.slug)) {
+      const vendorToken = await getOrCreateSupplierVendorToken(published.id, entry.slug);
+      invited.push({
+        slug: entry.slug,
+        name: entry.name,
+        supplier_url: `${SITE_URL}/api/rfp/${published.id}/supplier-credential?token=${published.share_token}&vt=${vendorToken}`,
+      });
+      continue;
+    }
     const r = await inviteSupplier(
-      project.id,
-      v.slug,
-      `You are invited to respond to the RFP "${project.title}". Netify has pre-drafted evidence answers for your organisation from its public capability evaluation; open your response link, review the draft, correct anything and add your pricing. Most of the writing is already done.`,
+      published.id,
+      entry.slug,
+      `You are invited to respond to the RFP "${published.title}". Netify has pre-drafted evidence answers for your organisation from its public capability evaluation; open your response link, review the draft, correct anything and add your pricing. Most of the writing is already done.`,
     );
     if (!("error" in r)) {
       // Piece 3B-2 (hybrid model, Robert's ruling #2, 9 Aug 2026): mint this
@@ -603,136 +1028,35 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       // first link, but never again in a navigable URL — see that route for
       // the exchange, and auth.ts's supplierCredentialCookieHeader for the
       // cookie it sets.
-      const vendorToken = await getOrCreateSupplierVendorToken(project.id, v.slug);
+      const vendorToken = await getOrCreateSupplierVendorToken(published.id, entry.slug);
       invited.push({
-        slug: v.slug,
+        slug: entry.slug,
         name: r.vendor_name,
-        supplier_url: `${SITE_URL}/api/rfp/${project.id}/supplier-credential?token=${project.share_token}&vt=${vendorToken}`,
+        supplier_url: `${SITE_URL}/api/rfp/${published.id}/supplier-credential?token=${published.share_token}&vt=${vendorToken}`,
       });
+      attempt = await savePublicationAttempt({ ...attempt, invited_slugs: [...attempt.invited_slugs, entry.slug] });
     }
   }
 
-  // Publish is the strongest identity-capture moment: adopt ownership onto
-  // the verified account when the RFP has no owner yet, so the RFP appears
-  // under the buyer's account.
-  const ownerEmail = project.owner_email || sessionEmail;
-  // Response window: 14 days by default from the moment of submission,
-  // preserved on re-sends so the clock never quietly restarts.
-  const responseDeadline = project.response_deadline ?? Date.now() + 14 * 86400000;
-
-  // D5 decision gate (Robert's amendment): a declined approval never
-  // vetoes, but publishing against it must be an intentional, recorded
-  // decision. The confirmation wording is recorded verbatim as consent.
-  const signoffs = await listSignoffs(project.id);
-  let working: ProjectDetails = project;
-  if (
-    opts.acknowledge_declined_approval === true &&
-    signoffs.some((a) => a.decision === "declined") &&
-    !(working.consents ?? []).some((c) => c.action === PUBLISH_DESPITE_DECLINED_ACTION)
-  ) {
-    working = {
-      ...working,
-      consents: [
-        ...(working.consents ?? []),
-        { at: Date.now(), action: PUBLISH_DESPITE_DECLINED_ACTION, granted_by: ownerEmail, via: "web" as const, text: declinedConfirmationText(signoffs) },
-      ],
-    };
-  }
-  const gate = publishDecisionGate(signoffs, working.consents);
-  if (gate.blocked) throw new DeclinedApprovalError(gate.confirmationText);
-
-  const mergedInvited = Array.from(new Set([...project.invited_vendors, ...invited.map((i) => i.slug)]));
-  let published: ProjectDetails;
-  if (project.engine) {
-    // Engine records publish THROUGH THE MACHINE (the legacy direct
-    // status write is refused by the write gate for engine records, by
-    // design): publish consent recorded verbatim, then the drafted to
-    // published transition with its guards (consent + the gap gate).
-    const now = Date.now();
-    let p: ProjectDetails = {
-      ...working,
-      owner_email: ownerEmail,
-      response_deadline: responseDeadline,
-      invited_vendors: mergedInvited,
-      pending_submit: undefined,
-      business_verification: { ...verification },
-    };
-    if (!(p.consents ?? []).some((c) => c.action === "publish")) {
-      p = {
-        ...p,
-        consents: [...(p.consents ?? []), { at: now, action: "publish", granted_by: ownerEmail, via: "web" as const, text: ENGINE_PUBLISH_CONSENT_TEXT }],
-      };
-      p = recordProjectEvent(p, { at: now, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.consented", detail: {}, consent: true });
+  // Merge the real invite list onto the project record and append the
+  // `invite.sent` history event now that invites genuinely exist -- best
+  // effort throughout: the invitations themselves are already real,
+  // irreversible SupplierConnection writes by this point, so a bookkeeping
+  // hiccup here must never be reported as a failed publish.
+  if (invited.length > 0) {
+    try {
+      const mergedInvited = Array.from(new Set([...published.invited_vendors, ...invited.map((i) => i.slug)]));
+      let p: ProjectDetails = { ...published, invited_vendors: mergedInvited };
+      try {
+        p = recordProjectEvent(p, { at: Date.now(), actor: "buyer", actor_ref: ownerEmail, via: "web", event: "invite.sent", detail: { invited: invited.length, slugs: invited.map((i) => i.slug) } });
+      } catch { /* the history is a record, never a gate */ }
+      published = await saveProject(p);
+    } catch {
+      // Persistence failed; fall back to reflecting the real invites in the
+      // in-memory object this function returns, so the immediate response
+      // is still honest even if the next read has to catch up.
+      published = { ...published, invited_vendors: Array.from(new Set([...published.invited_vendors, ...invited.map((i) => i.slug)])) };
     }
-    p = advanceProject(p, { at: now + 1, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.live", detail: { invited: invited.length } });
-    published = await saveProject(p);
-  } else {
-    // The record-keeping gap Harry proved (24 July 2026): builder-lane
-    // projects published with EMPTY history, so the Timeline read "No
-    // recorded events yet" on a project created and published the same
-    // morning. The same append-only events the engine lane records are
-    // recorded here; nothing is invented, both facts ARE this call. The
-    // record must never block the publish, so failures fall through to
-    // the plain write.
-    let p: ProjectDetails = {
-      ...working,
-      status: "published",
-      owner_email: ownerEmail,
-      response_deadline: responseDeadline,
-      invited_vendors: mergedInvited,
-      pending_submit: undefined,
-      business_verification: { ...verification },
-    };
-    try {
-      const now = Date.now();
-      p = recordProjectEvent(p, { at: now, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.consented", detail: {}, consent: true });
-      p = recordProjectEvent(p, { at: now + 1, actor: "buyer", actor_ref: ownerEmail, via: "web", event: "publish.live", detail: { invited: invited.length } });
-    } catch { /* the history is a record, never a gate */ }
-    published = await saveProject(p);
-  }
-  if (!project.owner_email) {
-    try { await indexRfpForBuyer(sessionEmail, published.id); } catch { /* best effort */ }
-  }
-
-  // A publish also lists the RFP on the public opportunity board unless the
-  // caller opted for matched suppliers only (the wizard-submit default,
-  // 15 July 2026).
-  let board: { listed: boolean; opportunity_id?: string; url?: string; reason?: string };
-  if (opts.list_on_board === false) {
-    board = { listed: false, reason: "Matched vendors only; not listed on the public board." };
-  } else {
-    try {
-      const listed = await listRfpOnBoard(published, sessionEmail);
-      board = { listed: true, ...listed };
-    } catch (e) {
-      // The quality gate says exactly why a notice stayed off the board
-      // (Robert's ruling, 28 Jul 2026); other failures keep the generic line.
-      board = e instanceof BoardQualityGateError
-        ? { listed: false, reason: e.message }
-        : { listed: false, reason: "Board listing failed; try re-publishing." };
-    }
-  }
-
-  // The internal list hears every outcome (Ruling One): this publish, with
-  // its evidence, derived company and requirement depth. Best effort.
-  await recordPublishLead({
-    state: "published",
-    rfp_id: published.id,
-    email: publishEmail,
-    verification,
-    requirement_depth: requirementDepth,
-    ...(board.listed && board.opportunity_id ? { board_opportunity_id: board.opportunity_id } : {}),
-  });
-
-  // Optional marketing consent captured at the agreement step is recorded
-  // against the verified identity the publish runs as.
-  if (opts.marketing_opt_in === true) {
-    try {
-      const key = "email:marketing_optin";
-      const list = (await kvGetJson<string[]>(key)) ?? [];
-      const addr = sessionEmail.toLowerCase();
-      if (!list.includes(addr)) { list.push(addr); await kvSetJson(key, list); }
-    } catch { /* best effort */ }
   }
 
   // The Market Report: synchronous, deterministic, the buyer's instant
@@ -786,7 +1110,13 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   const matchedVendorsFrozen = result.shortlist.map((v) => ({ slug: v.slug, name: v.name }));
   if (govResult.applied && govResult.revision) {
     const snapshot: PublishedSnapshot = {
-      id: newId("snap"),
+      // Market-unlock correction round: the SAME id minted and bound into
+      // the MarketUnlock record above (published_revision_id /
+      // invitation_snapshot_id) -- and the SAME id the earlier FrozenRevision
+      // (step B) was persisted under -- never a second, independently-minted
+      // id. "The frozen revision" and "the row this snapshot ends up saved
+      // under" must always be the same identity.
+      id: publishedRevisionId,
       project_id: published.id,
       document_version: govResult.revision.cycle,
       compiler_version: RFP_DOCUMENT_PIPELINE_VERSION,
@@ -820,4 +1150,50 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // buyer's vendors have already been invited.
 
   return { published, invited, criteria: result.criteria_summary, board, market_report, matched_vendors: matchedVendorsFrozen };
+}
+
+/**
+ * The standing recovery path (market-unlock correction round, 16 Aug
+ * 2026, updated in round 2): when a publish's board step failed, was
+ * refused (`list_on_board: false`), or was never attempted (a pre-round
+ * published record with no MarketUnlock yet), this re-attempts the FULL
+ * saga against the project's CURRENT content -- resuming or freezing a
+ * revision as needed, listing publicly, and, if that succeeds, committing
+ * the unlock and running the invite tail. Called by the standing
+ * /list-on-board POST route so that route's own recovery action
+ * (documented there since 23 Jul 2026: "a published-but-unlisted RFP
+ * could only reach the board by re-running the whole publish") now ALSO
+ * completes the deferred market-unlock and invitation step.
+ *
+ * Round 2 correction: the guard used to be `hasPublished(project.status)`
+ * -- wrong now that `project.status` never moves until the saga's own
+ * step F succeeds, so a project stuck on a failed/never-attempted
+ * publication attempt would never satisfy it. The guard is now "does a
+ * PublicationAttempt exist for this project" (has a publish ever been
+ * genuinely tried), which is exactly the retryable state this route
+ * exists to recover.
+ *
+ * A no-op, returning the existing state, when the market is already
+ * unlocked (idempotent: calling this twice after a genuine success never
+ * re-invites or re-lists).
+ */
+export async function retryBoardPublication(project: ProjectDetails, sessionEmail: string): Promise<PublishResult> {
+  const existingAttempt = await getPublicationAttempt(project.id);
+  if (!hasPublished(project.status) && !existingAttempt) {
+    throw new Error("Only a project with a publish attempt already in progress can be listed on the board. Publish first; listing is part of the publish step.");
+  }
+  if (await isMarketUnlocked(project.id)) {
+    // Already unlocked: nothing to retry. Return a result shaped like a
+    // fresh publish's, sourced from the latest frozen snapshot so callers
+    // get the same honest, already-unlocked state either way.
+    const snapshot = await getLatestPublishedSnapshot(project.id);
+    if (snapshot) return replayResultFrom(project, snapshot);
+  }
+  // Re-run the SAME publish core, with list_on_board defaulting to true
+  // (this route's own purpose is an explicit ask to become publicly
+  // listed) -- executePublish() itself resumes the existing
+  // PublicationAttempt when the content/options are unchanged, and skips
+  // re-running the status transition when the project is already
+  // published, going straight to a fresh board attempt.
+  return executePublish(project, sessionEmail, { list_on_board: true });
 }

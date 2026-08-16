@@ -3,6 +3,7 @@ import { buildRfpMarkdown, buildRfpHtml, type PublishedDocMeta } from "@/lib/rfp
 import { sessionFromRequest } from "@/lib/auth";
 import { requireRfpOwner } from "@/lib/rfp-access";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
 export const runtime = "nodejs";
@@ -43,10 +44,18 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     );
   }
 
-  if (project.status !== "published") {
+  // Market-unlock correction round (16 Aug 2026): this used raw
+  // `status !== "published"` equality, undercounting a project that has
+  // since moved into QA or evaluation AND, more importantly for this round,
+  // treating a project whose board listing failed as equally "unlocked" as
+  // one that genuinely completed the sequence -- the export is one of the
+  // capabilities market-unlock.ts's canonical predicate now governs
+  // directly, since it is built from the same frozen snapshot the board
+  // notice and supplier room read from.
+  if (!(await isMarketUnlocked(id))) {
     return Response.json(
       {
-        error: "This document unlocks once you publish. Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.",
+        error: "This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.",
         publish_required: true,
       },
       { status: 403 },

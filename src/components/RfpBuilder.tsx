@@ -136,6 +136,18 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [notOwner, setNotOwner] = useState(false);
   // Board-listing outcome from the last publish (listed, or why not).
   const [boardNote, setBoardNote] = useState<{ listed: boolean; url?: string; reason?: string } | null>(null);
+  // Market-unlock correction round (16 Aug 2026): the canonical,
+  // server-derived boolean (market-unlock.ts) that gates every vendor-
+  // identity-revealing part of this panel -- replacing the row-8 hotfix's
+  // `hasPublished(project.status)` client-side recomputation, which could
+  // read true while the project's board listing (and therefore its market
+  // unlock) had failed. Deliberately NOT a field on `project` itself: that
+  // object round-trips through PUT (see applyProject below and the save
+  // handler), and ProjectDetailsSchema is `.strict()` -- an extra key
+  // surviving a save's blind spread would fail every PUT with "Invalid RFP
+  // shape". Kept as separate state, defaulting LOCKED (false) until a real
+  // server response says otherwise.
+  const [marketUnlocked, setMarketUnlocked] = useState(false);
   // Feedback for every question-add outcome (added / merged / duplicate) —
   // silent no-ops read as "the button is broken" (Harry's Testing 1).
   const [addMsg, setAddMsg] = useState<string | null>(null);
@@ -414,7 +426,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }, [marketReport, project?.status]);
   useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
   useEffect(() => { fetch("/sase/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
-  useEffect(() => { if (project) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
+  // Row-8 hotfix (16 Aug 2026): only poll for supplier connections once the
+  // project has actually published. Pre-publish there is nothing legitimate
+  // to fetch (the connect route below now refuses to persist a connection
+  // before publish), so this also stops an unauthenticated pre-publish read
+  // of this endpoint on every draft page load. The explicit post-publish
+  // refreshConnections() calls elsewhere (after invite/message/publish) are
+  // unaffected — they read the fresh publish result directly, not this
+  // status-gated mount effect.
+  useEffect(() => { if (project && marketUnlocked) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id, marketUnlocked]);
   useEffect(() => { if (project?.nda?.required) refreshNdaAccepts(); /* eslint-disable-next-line */ }, [project?.id, project?.nda?.required, project?.nda?.version]);
   useEffect(() => { fetch("/sase/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
@@ -426,7 +446,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // discoverable by someone who only knows the RFP id.
   const manageToken = useRef<string>("");
   const mtokKey = (id: string) => `netify_mtok_${id}`;
-  function applyProject(p: ProjectDetails) {
+  function applyProject(p: ProjectDetails & { market_unlocked?: boolean; market_unlock?: unknown }) {
     let tok = p.manage_token || manageToken.current;
     if (!tok && typeof window !== "undefined") tok = localStorage.getItem(mtokKey(p.id)) || "";
     if (tok) {
@@ -434,7 +454,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       try { localStorage.setItem(mtokKey(p.id), tok); } catch { /* private mode, keep in ref */ }
     }
     setNotOwner(false);
-    setProject({ ...p, manage_token: tok });
+    // Market-unlock correction round: every owner read of a project now
+    // carries this canonical, server-derived field (see the GET/PUT routes
+    // in api/rfp/[id]/route.ts) as a SIBLING key, never merged into the
+    // stored `project` state itself -- see the marketUnlocked useState
+    // comment above for why. A response from a code path that doesn't
+    // attach it (there should be none left after this round; anything
+    // missed defaults safely LOCKED rather than silently unlocked).
+    if (typeof p.market_unlocked === "boolean") setMarketUnlocked(p.market_unlocked);
+    const { market_unlocked: _marketUnlocked, market_unlock: _marketUnlock, ...projectFields } = p;
+    void _marketUnlocked; void _marketUnlock;
+    setProject({ ...projectFields, manage_token: tok });
   }
 
   /** The owner credential, attached to every workspace API call. */
@@ -446,24 +476,51 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // 41 published RFPs, 9 ever supplier-visible). boardNote used to exist only
   // in the moments after a publish; a returning owner of a published-but-
   // unlisted RFP saw nothing and stayed invisible to board suppliers.
+  //
+  // Market-unlock correction round 2 (16 Aug 2026): this used to gate on
+  // `hasPublished(project.status)` -- now the WRONG signal, since
+  // `project.status` no longer flips to "published" until the publish
+  // saga's own step F succeeds (strictly after the market has genuinely
+  // unlocked, see rfp-publish.ts's executePublish()). A project stuck on a
+  // failed or never-completed publication attempt would never satisfy that
+  // gate, so this effect would never fire and a returning owner would see
+  // no locked-state messaging at all -- a newly-introduced bug this round's
+  // own saga restructure would otherwise have caused. Now runs on every
+  // visit that has a project at all; the server's own `publication_attempted`
+  // flag (list-on-board/route.ts's GET) decides whether there is anything
+  // to show, so a brand-new, never-submitted draft still shows nothing.
   const [listingBusy, setListingBusy] = useState(false);
   const [listAuthNeeded, setListAuthNeeded] = useState(false);
+  const [publicationLockedReason, setPublicationLockedReason] = useState<string | null>(null);
   useEffect(() => {
-    if (!project || project.status !== "published") return;
+    if (!project) return;
     fetch(`/sase/api/rfp/${project.id}/list-on-board`, { headers: authHeaders() })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { ok?: boolean; board?: { listed: boolean; url?: string } } | null) => {
-        if (!d?.ok || !d.board) return;
-        const next = d.board.listed
-          ? { listed: true, url: d.board.url }
-          : { listed: false, reason: "Verified vendors browsing the board cannot see this RFP." };
-        setBoardNote((prev) => prev ?? next);
+      .then((d: { ok?: boolean; board?: { listed: boolean; url?: string }; market_unlocked?: boolean; publication_attempted?: boolean; publication_locked_reason?: string | null } | null) => {
+        if (!d?.ok || !d.publication_attempted) return;
+        if (d.board) {
+          const next = d.board.listed
+            ? { listed: true, url: d.board.url }
+            : { listed: false, reason: "Verified vendors browsing the board cannot see this RFP." };
+          setBoardNote((prev) => prev ?? next);
+        }
+        // Market-unlock correction round: this GET already queries the
+        // canonical record (list-on-board/route.ts) -- pick it up here too,
+        // so a returning owner whose original publish's board step failed
+        // (internal status published, market still locked) sees the true
+        // locked state on load, not a stale unlocked assumption from
+        // `hasPublished()` alone.
+        if (typeof d.market_unlocked === "boolean") setMarketUnlocked(d.market_unlocked);
+        setPublicationLockedReason(d.publication_locked_reason ?? null);
       })
       .catch(() => {});
     // eslint-disable-next-line
   }, [project?.id, project?.status]);
 
-  /** List an already published RFP on the board without re-running invites. */
+  /** List an already published RFP on the board -- and, per the
+   *  market-unlock correction round, complete the deferred unlock/invite
+   *  sequence too, if this is the first time listing succeeds for this
+   *  publish (see retryBoardPublication() in rfp-publish.ts). */
   async function listOnBoardNow() {
     if (!project || listingBusy) return;
     setListingBusy(true);
@@ -475,7 +532,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         headers: { "content-type": "application/json", ...authHeaders() },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({})) as { board?: { listed?: boolean; url?: string }; auth_required?: boolean; error?: string };
+      const data = await res.json().catch(() => ({})) as { board?: { listed?: boolean; url?: string }; auth_required?: boolean; error?: string; market_unlocked?: boolean };
       if (res.ok && data.board?.listed) {
         setBoardNote({ listed: true, url: data.board.url });
         fireNetifyEvent("board_listed", { source: "standing_action" });
@@ -484,6 +541,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       } else {
         setBoardNote({ listed: false, reason: data.error || "Board listing failed; try again." });
       }
+      if (typeof data.market_unlocked === "boolean") setMarketUnlocked(data.market_unlocked);
+      if (data.market_unlocked) refreshConnections();
     } catch {
       setBoardNote({ listed: false, reason: "Network error; nothing was listed. Try again." });
     } finally {
@@ -925,7 +984,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }
 
   async function suggestSuppliers() {
-    if (!project) return;
+    // Row-8 hotfix (16 Aug 2026), amended in the market-unlock correction
+    // round (16 Aug 2026): this call reveals project-specific vendor
+    // matching (names + scores) for THIS project. It must never fire before
+    // this project's MARKET HAS UNLOCKED (market-unlock.ts's canonical,
+    // server-derived boolean) — not merely once its status has crossed the
+    // publication boundary, since a board-listing failure can leave a
+    // "published" project's market still locked. The button that triggers
+    // this is hidden until then (see the "Vendors and service providers"
+    // section below), and this guard is the defence-in-depth backstop
+    // against any stale ref/race calling it anyway.
+    if (!project || !marketUnlocked) return;
     try {
       const res = await fetch("/sase/api/openapi/build_sase_shortlist", {
         method: "POST", headers: { "content-type": "application/json" },
@@ -1020,6 +1089,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       }
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
+      // Market-unlock correction round: the publish response now carries
+      // the canonical boolean directly (publish/route.ts) -- a board
+      // failure means this stays false even though `data.status` above is
+      // already "published", which is exactly the internal-published-but-
+      // locked state this round exists to represent honestly in the UI.
+      setMarketUnlocked(Boolean((data as { market_unlocked?: boolean }).market_unlocked));
       if (data.market_report) setMarketReport(data.market_report as MarketReportT);
       fireNetifyEvent("rfp_published", { invited: String(data.invited?.length ?? 0) });
       try {
@@ -1165,14 +1240,45 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // Walkthrough strip: where the buyer is and what happens next, from real
   // state. Draft or review = reviewing the document with publish ahead;
   // published and beyond = responses arriving.
-  const published = project.status !== "draft" && project.status !== "review";
+  // Row-8 hotfix (16 Aug 2026): this used to re-derive the same boolean
+  // locally (`status !== "draft" && status !== "review"`), a parallel
+  // reimplementation of the canonical predicate in project-machine.ts that
+  // happened to agree with it only because RfpStatus currently has exactly
+  // five values.
+  //
+  // Market-unlock correction round (16 Aug 2026): `hasPublished()` was
+  // itself then found to be the WRONG boundary for this variable's actual
+  // job — everything below keyed off `published` (the vendor panel, the
+  // "your RFP is live" messaging, invite/message actions, the market
+  // report reveal) describes what a buyer's MARKET has actually done, not
+  // merely what this project's internal status field says. A project can
+  // satisfy `hasPublished(project.status)` while its board listing failed
+  // and no supplier was ever invited — the exact state the checkpoint
+  // evidence (`reports/row8-repro/after-fix-vendor-panel-post-publish.png`)
+  // showed: "Not on the public board yet" alongside a real named invited
+  // vendor, because this variable used to read `hasPublished()` alone. It
+  // now reads the canonical, server-derived `marketUnlocked` state instead
+  // (market-unlock.ts, threaded through applyProject() above and every
+  // publish/list-on-board response) — the single "has this project's
+  // market actually unlocked" question the whole panel now asks the same
+  // way, matching every server-side route governed by the same rule.
+  const published = marketUnlocked;
+  // Market-unlock correction round 2 (16 Aug 2026), requirement 5: the
+  // third lifecycle state the panel must distinguish honestly -- a
+  // publication was genuinely attempted (boardNote exists, from the
+  // effect above) but the market has not unlocked. Never the same as "not
+  // yet attempted" (boardNote stays null/undefined until the server
+  // confirms `publication_attempted`), and never the same as `published`.
+  const publicationLocked = !published && boardNote != null;
   const stripStage: FlowStage = published ? "responses" : "review";
   const stripNow = published
     ? `Your RFP is live. ${connections.length > 0 ? `${connections.length} invited vendor${connections.length === 1 ? "" : "s"} hold` : "Invited vendors hold"} private response links, and replies land on this page.`
     : `You are reviewing your draft RFP: ${includedQuestionCount} questions across ${includedSections.length} sections. Add, remove or reword anything.`;
   const stripNext = published
     ? "Responses are scored against your questions under Evaluate vendor responses below. We also email you when activity arrives."
-    : "submit, so matched vendors can respond. Nothing is shared until you press submit in the panel below.";
+    : publicationLocked
+      ? "finish publishing this opportunity, so matched vendors can respond. Nothing is shared until publication completes."
+      : "publish this opportunity, so matched vendors can respond. Nothing is shared until you press publish in the panel below.";
 
   return (
     <div className={!published && !stickyGone ? "pb-16" : undefined}>
@@ -1200,9 +1306,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           {signinNote > 0
             ? (signinNote === 1 ? "Your draft RFP is saved to your account." : `${signinNote} draft RFPs are saved to your account.`)
             : "Your work here saves to your account."}{" "}
-          {project.status === "published"
+          {published
             ? "This RFP is published; vendor responses appear below as they arrive."
-            : "When you are ready, submit below to invite your matched vendors."}
+            : publicationLocked
+              ? "Publication has not completed yet; finish it below to invite your matched vendors."
+              : "When you are ready, publish below to invite your matched vendors."}
           <button onClick={() => setSigninNote(null)} className="ml-2 underline">Dismiss</button>
         </div>
       )}
@@ -1215,10 +1323,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <p className="text-sm text-[var(--ink-700)] mb-3">
             {includedQuestionCount} questions across {includedSections.length} sections, assembled from the Netify
             question bank (Methodology v{project.methodology_version}) around what you described. Review and trim
-            anything below, then choose who sees it. Nothing reaches a vendor until you submit or invite them.
+            anything below, then choose who sees it. Nothing reaches a vendor until you publish or invite them.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <a href="#publish" onClick={() => setGeneratedWelcome(false)} className="inline-flex items-center px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors">Submit to vendors</a>
+            <a href="#publish" onClick={() => setGeneratedWelcome(false)} className="inline-flex items-center px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors">Publish opportunity</a>
             <button onClick={() => setGeneratedWelcome(false)} className="text-sm underline text-[var(--ink-600,#555)]">Review first</button>
           </div>
         </div>
@@ -1231,7 +1339,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       <section id="publish" ref={publishPanelRef} className={`mb-6 rounded-sm border p-4 ${published ? "border-emerald-300 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
         {published ? (
           <div>
-            <p className="text-base font-semibold mb-1">Submitted. Your RFP is with your vendors now.</p>
+            <p className="text-base font-semibold mb-1">Published. Your RFP is with your vendors now.</p>
             <p className="text-sm text-[var(--ink-700)]">
               {connections.length > 0 ? `${connections.filter((c) => c.viewed_at).length} of ${connections.length} vendors have viewed your RFP.` : "Invited vendors hold private response links."}{" "}
               {project.response_deadline ? `Responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left). ` : ""}
@@ -1299,17 +1407,46 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               </div>
             )}
           </div>
+        ) : publicationLocked ? (
+          // Market-unlock correction round 2 (16 Aug 2026), requirement 5:
+          // the third lifecycle state -- a publication was attempted but
+          // has not completed. Distinct from BOTH `published` (above) and
+          // the never-attempted default panel (below): must not say
+          // "submitted" or "your RFP is with your vendors", must explain
+          // plainly that nothing has unlocked, and must offer the retry
+          // action, not a fresh "Publish opportunity" invitation (this
+          // project already has a real, in-progress attempt to resume).
+          <div>
+            <p className="eyebrow mb-1.5">Publication incomplete</p>
+            <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
+              Your requirement has not gone out yet
+            </h2>
+            <p className="text-sm text-[var(--ink-700)] mb-3">
+              {publicationLockedReason ?? boardNote?.reason ?? "Publishing this requirement as a public opportunity on the Opportunities Board hasn't completed yet."} No vendor has been invited, no vendor identity or matching has unlocked, and nothing has been shared. Your draft is exactly as you left it; try publication again below.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button onClick={listOnBoardNow} disabled={listingBusy} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
+                {listingBusy ? "Publishing…" : "Try publication again"}
+              </button>
+            </div>
+            {listAuthNeeded && (
+              <div className="mt-3 rounded-sm border border-amber-400 bg-white p-3 text-sm text-[var(--ink-800)]">
+                <p className="mb-2">Publishing reaches verified vendors, so it needs your signed-in work email first.</p>
+                <SignIn role="buyer" prompt="Sign in with your work email, then try publication again." />
+              </div>
+            )}
+          </div>
         ) : submitFlow && publishAuthNeeded ? (
           <div>
             <p className="eyebrow mb-1.5">Final step</p>
             <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
-              Almost done: confirm your submission
+              Almost done: confirm publication
             </h2>
             <p className="text-sm text-[var(--ink-700)] mb-3">
-              Click the link we emailed{pendingEmail ? ` to ${pendingEmail}` : " you"} and your RFP goes to your matched
-              vendors automatically, exactly as you agreed. Wrong address, or no email after a minute? Use the form below.
+              Click the link we emailed{pendingEmail ? ` to ${pendingEmail}` : " you"} and your RFP is published as a public
+              opportunity and goes to your matched vendors automatically, exactly as you agreed. Wrong address, or no email after a minute? Use the form below.
             </p>
-            <SignIn role="buyer" prompt="Sign in with your work email to complete the submission." />
+            <SignIn role="buyer" prompt="Sign in with your work email to complete publication." />
             <CodeEntry defaultEmail={pendingEmail} onVerified={() => publishToCurated("signin_resume")} />
             {publishMsg && <p className="mt-2 text-sm text-emerald-700">{publishMsg}</p>}
           </div>
@@ -1335,10 +1472,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           <div>
             <p className="eyebrow mb-1.5">Next step</p>
             <h2 className="text-xl sm:text-2xl font-semibold leading-snug mb-2">
-              Submit this RFP to your matched vendors
+              Publish this opportunity
             </h2>
             <p className="text-sm text-[var(--ink-700)] mb-2">
-              This is the fastest and simplest way to see whether your requirements match the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. They never see your email or phone number, and your data is only shared with a vetted account manager from each vendor or managed service provider. Every conversation starts in this app, on your terms, only when you choose.
+              Publishing lists this requirement as a public opportunity on the Opportunities Board, which is what
+              unlocks the market: competing bids and structured responses from {matchInfo && matchInfo.total > 0 ? `the marketplace's ${matchInfo.total} ` : ""}verified vendors and managed service providers, without speaking to a single salesperson. Nothing about your company, your matches, or any vendor identity is shared until publication completes. They never see your email or phone number, and your data is only shared with a vetted account manager from each vendor or managed service provider. Every conversation starts in this app, on your terms, only when you choose.
             </p>
             <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
               {["Indicative pricing, private to you", "Demo requests", "Proof-of-concept scoping", "Message vendors and managed providers in-app", "Evidence, documents and PDF collateral", "Sales and account contact, when you choose", "Independent response scoring"].map((c) => (
@@ -1346,20 +1484,20 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               ))}
             </p>
             <ol className="text-sm text-[var(--ink-700)] mb-3 space-y-1 list-decimal list-inside">
-              <li><strong>Submit.</strong> Each matched vendor gets a private link to your {includedQuestionCount} questions. Until then, your RFP is invisible to the market and nothing has been shared.</li>
+              <li><strong>Publish.</strong> Your RFP is listed as a public opportunity on the Opportunities Board and each matched vendor gets a private link to your {includedQuestionCount} questions. Until then, your RFP is invisible to the market and nothing has been shared.</li>
               <li><strong>Responses arrive here.</strong> Structured, comparable answers with pricing kept private to you.</li>
               <li><strong>Compare and choose.</strong> Replies are scored against your questions; message vendors, request demos, collateral or a proof of concept from this page.</li>
             </ol>
             {publishAuthNeeded && (
               <div className="mb-3 rounded-sm border border-amber-400 bg-white p-3 text-sm text-[var(--ink-800)]">
-                <p className="mb-2"><strong>One step before your RFP goes out.</strong> Submitting sends this RFP to vendors and service providers, so it needs a verified work email. Sign in and the submission continues automatically. Your draft is exactly as you left it.</p>
-                <SignIn role="buyer" prompt="Sign in with your work email to submit to your matched vendors." />
+                <p className="mb-2"><strong>One step before your RFP goes out.</strong> Publishing sends this RFP to vendors and service providers, so it needs a verified work email. Sign in and publication continues automatically. Your draft is exactly as you left it.</p>
+                <SignIn role="buyer" prompt="Sign in with your work email to publish this opportunity." />
                 <CodeEntry defaultEmail={pendingEmail} onVerified={() => publishToCurated("signin_resume")} />
               </div>
             )}
             <div className="flex flex-wrap items-center gap-3">
               <button onClick={() => publishToCurated("panel")} disabled={publishing} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
-                {publishing ? "Submitting..." : "Submit to your matched vendors"}
+                {publishing ? "Publishing..." : "Publish opportunity"}
               </button>
               <span className="text-xs text-[var(--ink-600,#555)]">Free, no obligation to award, nothing shared until you press it. <a href="https://netify.co.uk/how-netify-makes-money/" className="underline">How Netify makes money</a>. Prefer control? <a href="#suppliers" className="underline">Invite vendors one at a time</a>.</span>
             </div>
@@ -1371,7 +1509,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {/* The FlowStageStrip above carries orientation (where you are, what
           happens next) from live state, replacing the old static "How this
           works" box. One line of reassurance stays. */}
-      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a vendor until you submit or invite them.</p>
+      <p className="mb-4 text-xs text-[var(--ink-500)]">Everything saves automatically as you go. Nothing reaches a vendor until you publish or invite them.</p>
 
       <p className="eyebrow mb-2">Step 1: the basics</p>
       <p className="-mt-1 mb-3 text-xs text-[var(--ink-500)]">All optional. Set what you know; the AI agent fills in the rest as you chat, and you can change any of it later.</p>
@@ -1781,11 +1919,39 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
           <h2 className="text-lg">Vendors and service providers</h2>
           <div className="flex gap-2">
-            <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit vendors</button>
-            <button onClick={() => publishToCurated("suppliers")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : project.status === "published" ? "Re-send to your matched vendors" : "Submit to your matched vendors"}</button>
+            {/* Row-8 hotfix (16 Aug 2026): this button is the only trigger for
+                suggestSuppliers(), which reveals project-specific vendor
+                matches. Hiding it pre-publish (on top of the function-level
+                guard) means there is no control on the page that can start
+                that disclosure before publication. */}
+            {published && (
+              <button onClick={suggestSuppliers} className="px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Suggest best-fit vendors</button>
+            )}
+            <button onClick={() => publishToCurated("suppliers")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">
+              {publishing ? "Publishing..." : published ? "Re-send to your matched vendors" : publicationLocked ? "Try publication again" : "Publish opportunity"}
+            </button>
           </div>
         </div>
-        <p className="text-sm text-[var(--ink-500)] mb-3"><strong>Step 3.</strong> These are the graded vendors and service providers from the Netify marketplace. <strong>Suggest best-fit vendors</strong> finds the closest matches to what you described. <strong>Submit to your matched vendors</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each one gets a private link to read your RFP and reply.</p>
+        <p className="text-sm text-[var(--ink-500)] mb-3">
+          {published ? (
+            <><strong>Step 3.</strong> These are the graded vendors and service providers from the Netify marketplace. <strong>Suggest best-fit vendors</strong> finds the closest matches to what you described. <strong>Re-send to your matched vendors</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each one gets a private link to read your RFP and reply.</>
+          ) : publicationLocked ? (
+            // Market-unlock correction round 2 (16 Aug 2026), requirement 5:
+            // this used to say "Your submission is in" -- untrue while the
+            // market has not unlocked. `published`/`hasPublished()` are the
+            // wrong signal here: the market genuinely has NOT unlocked, and
+            // this copy must say so plainly, name that nothing has been
+            // invited, and point at the retry action (the boardNote banner
+            // just below, or the button above).
+            <><strong>Step 3.</strong> Publication incomplete. {publicationLockedReason ?? "Your requirement has not yet been published as a public opportunity on the Opportunities Board."} No vendor has been invited and nothing about your specific match, or any vendor&apos;s identity, has unlocked. See the notice below to complete publication.</>
+          ) : (
+            // Row-8 hotfix (16 Aug 2026): pre-publish this section may name the
+            // marketplace as an aggregate ("Netify's graded marketplace") but
+            // must not reveal which vendors match THIS project, or any
+            // supplier identity, before publication.
+            <><strong>Step 3.</strong> Netify&apos;s graded marketplace vendors and service providers are matched to your requirement and invited once you publish. Nothing about your specific match, or any vendor&apos;s identity, is shown here until then.</>
+          )}
+        </p>
         <div className="mb-3 rounded-sm border border-[var(--ink-200,#e5e5e5)] bg-[var(--paper-base)] p-3 text-sm flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="text-[var(--ink-700)]"><strong>Your private link to this RFP.</strong> No account needed: this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track replies. Don&apos;t share it: vendors get their own links.</span>
           <button onClick={copyManageLink} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">{manageCopied ? "Copied" : "Copy my link"}</button>
@@ -1797,7 +1963,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         </div>
         {publishMsg && <p className="text-sm text-emerald-700 mb-3">{publishMsg}</p>}
         {publishAuthNeeded && (
-          <p className="mb-3 text-sm text-[var(--ink-700)]"><strong>Sign-in needed to submit:</strong> use the <a href="#publish" className="underline">panel at the top of this page</a>; the submission continues automatically once you are signed in.</p>
+          <p className="mb-3 text-sm text-[var(--ink-700)]"><strong>Sign-in needed to publish:</strong> use the <a href="#publish" className="underline">panel at the top of this page</a>; publication continues automatically once you are signed in.</p>
         )}
         {boardNote && (
           boardNote.listed ? (
@@ -1806,26 +1972,46 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
               {boardNote.url ? <>: <a href={boardNote.url} className="underline">view the public RFI page</a></> : null}. The notice shows scope and sector only; your questions, pricing and contact details stay private.
             </p>
           ) : (
+            // Market-unlock correction round 2 (16 Aug 2026), requirement 5:
+            // "Publication incomplete" (not "Not on the public board yet",
+            // which read as a minor visibility toggle rather than the
+            // reason nothing has unlocked) and "Complete Opportunities
+            // Board publication" (not "List on the board", which
+            // undersold what this action actually completes: the market
+            // unlock itself, not merely a board listing).
             <div className="mb-3 rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-[var(--ink-800)]">
-              <p className="mb-2"><strong>Not on the public board yet.</strong> {boardNote.reason ?? "Verified vendors browsing the board cannot see this RFP."} Listing is anonymous: the notice shows sector, estate and requirement only, never your company name or contact details, and pricing stays private to you.</p>
+              <p className="mb-2"><strong>Publication incomplete.</strong> {boardNote.reason ?? publicationLockedReason ?? "Verified vendors browsing the board cannot see this RFP."} No vendor has been invited and nothing supplier-facing has unlocked: publication only completes once this requirement is successfully published as a public opportunity on the Opportunities Board. Listing is anonymous: the notice shows sector, estate and requirement only, never your company name or contact details, and pricing stays private to you.</p>
               <button
                 onClick={listOnBoardNow}
                 disabled={listingBusy}
                 className="px-3.5 py-1.5 text-sm rounded-full border border-amber-500 bg-amber-100 hover:bg-amber-200 transition-colors disabled:opacity-60"
               >
-                {listingBusy ? "Listing…" : "List on the board"}
+                {listingBusy ? "Publishing…" : "Complete Opportunities Board publication"}
               </button>
               {listAuthNeeded && (
                 <div className="mt-2">
                   <p className="mb-1 text-xs text-[var(--ink-700)]">Listing reaches verified vendors, so it needs your signed-in work email first.</p>
-                  <SignIn role="buyer" prompt="Sign in with your work email, then press List on the board again." />
+                  <SignIn role="buyer" prompt="Sign in with your work email, then complete Opportunities Board publication again." />
                 </div>
               )}
             </div>
           )
         )}
 
-        {suggestions && suggestions.length > 0 && (
+        {/* Row-8 hotfix (16 Aug 2026): everything below this line names real
+            vendors matched to THIS project, or real supplier connections/
+            actions — exactly the "supplier identity or project-specific
+            matching signal" the brief says must never leak before
+            publication. All of it is now gated on `published`; pre-publish
+            we show only the generic locked notice, matching the pattern
+            already used below for "Evaluate vendor responses". */}
+        {!published && (
+          <div className="mb-3 rounded-sm border border-dashed border-[var(--ink-300,#ccc)] bg-[var(--paper-base)] p-3 text-sm text-[var(--ink-500)]">
+            Vendor matches, invitations, messages and replies are locked until you publish — publishing is what invites your matched vendors and starts the conversation.{" "}
+            <a href="#publish" className="underline">Publish to unlock</a>.
+          </div>
+        )}
+        {published && suggestions && suggestions.length > 0 && (
           <div className="mb-4">
             <p className="eyebrow mb-2">Suggested (best-fit for your context)</p>
             <div className="flex flex-wrap gap-2">
@@ -1838,15 +2024,15 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           </div>
         )}
 
-        {connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No vendors invited yet.</p>}
-        {connections.length > 0 && (
+        {published && connections.length === 0 && <p className="text-sm text-[var(--ink-500)]">No vendors invited yet.</p>}
+        {published && connections.length > 0 && (
           <p className="mb-2 text-sm text-[var(--ink-700)]">
             <strong>{connections.filter((c) => c.viewed_at).length} of {connections.length}</strong> vendors have viewed your RFP
             {connections.filter((c) => c.status === "declined").length > 0 ? ` · ${connections.filter((c) => c.status === "declined").length} declined` : ""}
             {project.response_deadline ? ` · responses close ${new Date(project.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(0, Math.ceil((project.response_deadline - Date.now()) / 86400000))} days left)` : ""}.
           </p>
         )}
-        {(() => {
+        {published && (() => {
           const HINTS: Record<string, string> = {
             out_of_region: "Consider widening the vendor set or checking your region selections match where you need delivery.",
             sector_not_served: "Your sector filter may be narrowing the match; sector context in the background section helps vendors self-qualify.",
@@ -1875,36 +2061,38 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
             </div>
           );
         })()}
-        <div className="space-y-3">
-          {connections.map((c) => (
-            <details key={c.vendor_slug} className="border border-[var(--ink-300,#ccc)] rounded-sm">
-              <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer flex justify-between">
-                <span>{c.vendor_name}</span>
-                <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">
-                  {c.viewed_at ? "viewed · " : ""}{c.status}
-                </span>
-              </summary>
-              <div className="px-4 pb-3">
-                <div className="space-y-2 my-2">
-                  {c.messages.map((m) => (
-                    <div key={m.id} className={`text-sm rounded-sm p-2 ${m.from === "buyer" ? "bg-amber-50" : "border border-[var(--ink-200,#e5e5e5)]"}`}>
-                      <span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-2">{m.from === "buyer" ? "You" : c.vendor_name} · {m.type}</span>
-                      {m.body}
-                      {Object.keys(m.payload).length > 0 && <span className="block text-[var(--ink-700)] mt-0.5">{Object.entries(m.payload).map(([k, v]) => `${k}: ${v}`).join(" · ")}</span>}
-                    </div>
-                  ))}
+        {published && (
+          <div className="space-y-3">
+            {connections.map((c) => (
+              <details key={c.vendor_slug} className="border border-[var(--ink-300,#ccc)] rounded-sm">
+                <summary className="px-4 py-2.5 text-sm font-medium cursor-pointer flex justify-between">
+                  <span>{c.vendor_name}</span>
+                  <span className="text-xs uppercase tracking-wide text-[var(--ink-500)]">
+                    {c.viewed_at ? "viewed · " : ""}{c.status}
+                  </span>
+                </summary>
+                <div className="px-4 pb-3">
+                  <div className="space-y-2 my-2">
+                    {c.messages.map((m) => (
+                      <div key={m.id} className={`text-sm rounded-sm p-2 ${m.from === "buyer" ? "bg-amber-50" : "border border-[var(--ink-200,#e5e5e5)]"}`}>
+                        <span className="text-xs uppercase text-[var(--ink-400,#9ca3af)] mr-2">{m.from === "buyer" ? "You" : c.vendor_name} · {m.type}</span>
+                        {m.body}
+                        {Object.keys(m.payload).length > 0 && <span className="block text-[var(--ink-700)] mt-0.5">{Object.entries(m.payload).map(([k, v]) => `${k}: ${v}`).join(" · ")}</span>}
+                      </div>
+                    ))}
+                  </div>
+                  <textarea value={msgDraft[c.vendor_slug] ?? ""} onChange={(e) => setMsgDraft({ ...msgDraft, [c.vendor_slug]: e.target.value })} rows={2} placeholder="Message to the vendor" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
+                  <div className="mt-2 flex gap-2 flex-wrap">
+                    <button onClick={() => connectAction(c.vendor_slug, "message", msgDraft[c.vendor_slug] ?? "")} disabled={!msgDraft[c.vendor_slug]} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
+                    <button onClick={() => connectAction(c.vendor_slug, "demo_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request demo</button>
+                    <button onClick={() => connectAction(c.vendor_slug, "contact_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request contact</button>
+                    <button onClick={() => copySupplierLink(c.token)} className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Copy response link</button>
+                  </div>
                 </div>
-                <textarea value={msgDraft[c.vendor_slug] ?? ""} onChange={(e) => setMsgDraft({ ...msgDraft, [c.vendor_slug]: e.target.value })} rows={2} placeholder="Message to the vendor" className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-2 text-sm" />
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  <button onClick={() => connectAction(c.vendor_slug, "message", msgDraft[c.vendor_slug] ?? "")} disabled={!msgDraft[c.vendor_slug]} className="px-3 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">Send</button>
-                  <button onClick={() => connectAction(c.vendor_slug, "demo_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request demo</button>
-                  <button onClick={() => connectAction(c.vendor_slug, "contact_request", "")} className="px-3 py-1.5 text-sm border border-[var(--ink-900)] rounded-full hover:bg-[var(--ink-900)] hover:text-white transition-colors">Request contact</button>
-                  <button onClick={() => copySupplierLink(c.token)} className="px-3 py-1.5 text-sm border border-[var(--ink-300,#ccc)] rounded-full hover:border-[var(--ink-900)]">Copy response link</button>
-                </div>
-              </div>
-            </details>
-          ))}
-        </div>
+              </details>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Evaluation: independent cross-check of supplier responses */}
@@ -2064,9 +2252,9 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       {!published && !stickyGone && !submitFlow && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-300 bg-white/95 backdrop-blur px-4 py-2">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
-            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> submit to your matched vendors. Competing bids, no sales calls.</span>
+            <span className="text-sm text-[var(--ink-800)]"><strong>Next step:</strong> {publicationLocked ? "finish publishing this opportunity." : "publish this opportunity. Competing bids, no sales calls."}</span>
             <span className="flex items-center gap-2">
-              <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Submitting..." : "Submit"}</button>
+              <button onClick={() => publishToCurated("bar")} disabled={publishing} className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{publishing ? "Publishing..." : publicationLocked ? "Try again" : "Publish"}</button>
               <button onClick={() => { setStickyGone(true); try { sessionStorage.setItem(`rfp_publish_bar_${project.id}`, "1"); } catch { /* ignore */ } }} aria-label="Hide publish bar" className="text-sm text-[var(--ink-500)] underline">Hide</button>
             </span>
           </div>

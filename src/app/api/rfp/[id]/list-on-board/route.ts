@@ -1,7 +1,9 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, getOpportunity, kvGetJson, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
-import { listRfpOnBoard } from "@/lib/rfp-publish";
+import { retryBoardPublication } from "@/lib/rfp-publish";
+import { isMarketUnlocked } from "@/lib/market-unlock";
+import { getPublicationAttempt } from "@/lib/publication-attempt";
 import { SITE_URL } from "@/lib/structured-data";
 
 export const runtime = "nodejs";
@@ -12,14 +14,25 @@ export async function OPTIONS(req: Request) { return preflight(req); }
  * The standing board-listing action (Robert's gate ruling, 23 Jul 2026:
  * 41 published RFPs, 9 ever supplier-visible — a published-but-unlisted
  * RFP could only reach the board by re-running the whole publish, invites
- * and emails included). This route lists WITHOUT re-inviting.
+ * and emails included). This route now completes the FULL market-unlock
+ * sequence when the listing succeeds (market-unlock correction round, 16
+ * Aug 2026): a project published earlier whose board step failed (or was
+ * skipped) never had a MarketUnlock committed and never had invitations
+ * sent, so this recovery action must run the same board -> unlock ->
+ * matching -> invite tail executePublish() itself runs, via
+ * retryBoardPublication() (rfp-publish.ts) — not just create the
+ * Opportunity in isolation, which would list the notice while still
+ * leaving supplier identities locked with no path to ever unlock them.
  *
- *   GET  → the owner's listing state ({listed, url}), so the builder can
- *          show the true board state on load, not only after a publish.
- *   POST → create or refresh the anonymised board notice for an already
- *          published RFP. Same identity bar as publish itself: manage_token
- *          proves ownership, a verified session proves identity, because
- *          listing reaches the supplier community.
+ *   GET  → the owner's listing state PLUS the canonical market_unlocked
+ *          boolean, so the builder can show the true, server-derived state
+ *          on load, not only after a publish.
+ *   POST → create or refresh the board notice for an already published
+ *          RFP, and — if this is the first time it succeeds — unlock the
+ *          market and send invitations. Same identity bar as publish
+ *          itself: manage_token proves ownership, a verified session
+ *          proves identity, because listing (and now, potentially,
+ *          inviting) reaches the supplier community.
  */
 
 async function boardState(rfpId: string): Promise<{ listed: boolean; opportunity_id?: string; url?: string; notice_status?: string }> {
@@ -27,7 +40,7 @@ async function boardState(rfpId: string): Promise<{ listed: boolean; opportunity
   if (!oppId) return { listed: false };
   const opp = await getOpportunity(oppId);
   if (!opp) return { listed: false };
-  return { listed: true, opportunity_id: opp.id, url: `${SITE_URL}/opportunities/${opp.id}/`, notice_status: opp.status };
+  return { listed: opp.visibility === "public", opportunity_id: opp.id, url: `${SITE_URL}/opportunities/${opp.id}/`, notice_status: opp.status };
 }
 
 export async function GET(req: Request, ctx: Ctx) {
@@ -38,7 +51,30 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   const access = await requireRfpOwner(req, project);
   if (!access.ok) return ownerRequired("Reading this RFP's board listing", cors);
-  return Response.json({ ok: true, status: project.status, board: await boardState(project.id) }, { headers: cors });
+  // Market-unlock correction round 2 (16 Aug 2026): `project.status` no
+  // longer flips to "published" until the saga's own step F succeeds
+  // (strictly after the market has genuinely unlocked), so a project stuck
+  // on a failed or never-attempted publication no longer satisfies
+  // `hasPublished(project.status)` -- the UI's own polling gate (see
+  // RfpBuilder.tsx) can no longer key off that. `publication_attempted`
+  // (a PublicationAttempt record exists at all) is the correct, honest
+  // signal instead: "has this buyer ever tried to publish", independent of
+  // whether that attempt succeeded, failed, or is still locked. Only the
+  // attempt's EXISTENCE is surfaced here, never its internal contents
+  // (invitation_plan, invited_slugs) -- see publication-attempt.ts's own
+  // header comment on why those stay internal bookkeeping.
+  const attempt = await getPublicationAttempt(project.id);
+  const unlocked = await isMarketUnlocked(project.id);
+  return Response.json({
+    ok: true,
+    status: project.status,
+    board: await boardState(project.id),
+    market_unlocked: unlocked,
+    publication_attempted: attempt !== null || project.status !== "draft",
+    publication_locked_reason: !unlocked && attempt && !attempt.board_opportunity_id
+      ? "Publication has not yet completed on the Opportunities Board."
+      : null,
+  }, { headers: cors });
 }
 
 export async function POST(req: Request, ctx: Ctx) {
@@ -68,17 +104,19 @@ export async function POST(req: Request, ctx: Ctx) {
     );
   }
 
-  if (project.status !== "published") {
-    return Response.json(
-      { error: "Only a published RFP can be listed on the board. Publish first; listing is part of the publish step." },
-      { status: 409, headers: cors },
-    );
-  }
-
   try {
-    const listed = await listRfpOnBoard(project, project.owner_email || sessionEmail);
-    return Response.json({ ok: true, board: { listed: true, ...listed } }, { headers: cors });
+    const result = await retryBoardPublication(project, project.owner_email || sessionEmail);
+    return Response.json(
+      {
+        ok: true,
+        board: result.board,
+        market_unlocked: await isMarketUnlocked(project.id),
+        invited: result.invited,
+        matched_vendors: result.matched_vendors,
+      },
+      { headers: cors },
+    );
   } catch (e) {
-    return Response.json({ error: (e as Error).message || "Board listing failed; try again." }, { status: 500, headers: cors });
+    return Response.json({ error: (e as Error).message || "Board listing failed; try again." }, { status: 409, headers: cors });
   }
 }

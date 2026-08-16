@@ -199,6 +199,65 @@ export async function withFakeKv<T>(
   }
 }
 
+/**
+ * Market-unlock correction round 2 (16 Aug 2026): `commitMarketUnlock()`
+ * now refuses to commit unless a real, persisted `FrozenRevision` and a
+ * real, PUBLIC board `Opportunity` both exist and are bound to each other
+ * (market-unlock.ts's integrity check -- see `verifyMarketUnlockBinding`).
+ * Fixtures that want a genuine MarketUnlock in place to exercise
+ * DOWNSTREAM behaviour (a report route, a supplier-facing read -- not
+ * testing the unlock mechanism itself, which has its own dedicated
+ * fixtures) need both of those real records to exist first. This helper
+ * creates them using the real persistence functions (never a hand-rolled
+ * substitute) and then calls the real `commitMarketUnlock()`, so a
+ * fixture's seeded unlock is exactly as genuine -- and exactly as
+ * refusable if malformed -- as the one a real publish produces.
+ *
+ * Dynamic imports only (this harness's own top-of-file ordering
+ * constraint): every import here touches rfp-store.ts transitively, so it
+ * must happen after withFakeKv() has set the KV env vars, which callers
+ * satisfy by invoking this from inside a withFakeKv() callback.
+ */
+export async function seedVerifiedMarketUnlock(input: {
+  project_id: string;
+  published_revision_id: string;
+  board_opportunity_id: string;
+  content_hash?: string;
+  frozen_content?: { title: string; buyer: unknown; rfp_sections: unknown[] };
+}): Promise<void> {
+  const { saveFrozenRevision } = await import("../src/lib/published-snapshot");
+  const { saveOpportunity } = await import("../src/lib/rfp-store");
+  const { OpportunitySchema } = await import("../src/lib/opportunity-types");
+  const { commitMarketUnlock } = await import("../src/lib/market-unlock");
+
+  await saveFrozenRevision({
+    id: input.published_revision_id,
+    project_id: input.project_id,
+    content_hash: input.content_hash ?? `test-hash:${input.published_revision_id}`,
+    frozen_content: (input.frozen_content as { title: string; buyer: never; rfp_sections: never[] }) ?? { title: "Test fixture", buyer: {} as never, rfp_sections: [] },
+    created_at: Date.now(),
+  });
+  await saveOpportunity(
+    OpportunitySchema.parse({
+      id: input.board_opportunity_id,
+      created: Date.now(),
+      updated: Date.now(),
+      title: "Test fixture opportunity",
+      scope: ["sase"],
+      status: "open",
+      buyer_token: `btok_${input.board_opportunity_id}`,
+      visibility: "public",
+      source_rfp_id: input.project_id,
+      source_published_revision_id: input.published_revision_id,
+    }),
+  );
+  await commitMarketUnlock({
+    project_id: input.project_id,
+    published_revision_id: input.published_revision_id,
+    board_opportunity_id: input.board_opportunity_id,
+  });
+}
+
 /** Build a plain Web-standard Request the same shape a real browser POST/
  *  PUT/GET carries -- no Next.js-specific request wrapper needed, since
  *  every route handler in this app is typed against the Fetch API's

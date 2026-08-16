@@ -79,5 +79,13 @@ export async function POST(req: Request, ctx: Ctx) {
   // ranking that can genuinely omit an invited vendor). Returning it here
   // means the immediate post-publish view can render the correct matched
   // set, not only a later resumed read.
-  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report }, { headers: cors });
+  // Market-unlock correction round (16 Aug 2026): `board.opportunity_id`
+  // is only ever set once the Opportunities Board record was created
+  // successfully, which is the same moment executePublish() commits the
+  // MarketUnlock record (rfp-publish.ts) -- so its presence here is a
+  // reliable, cheap proxy for the canonical market_unlocked boolean
+  // without a second KV read. Callers should still treat market-unlock.ts
+  // as the single source of truth on any LATER read (the GET routes all
+  // query it directly); this is only for this one immediate response.
+  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report, market_unlocked: Boolean(board.opportunity_id) }, { headers: cors });
 }

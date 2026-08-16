@@ -6,6 +6,7 @@ import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
 import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { vendorName } from "@/lib/opportunity";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 
 /** Share-token check for supplier-side NDA reads/accepts. */
 function shareTokenOk(req: Request, shareToken: string, bodyToken?: string): boolean {
@@ -85,6 +86,26 @@ export async function GET(req: Request, ctx: Ctx) {
     const acceptance = vendor ? await getNdaAcceptance(id, vendor) : null;
     return Response.json({ nda: ndaPublic(project.nda), accepted, acceptance }, { headers: cors });
   }
+
+  // Market-unlock correction round (16 Aug 2026): a supplier's own bearer
+  // credential (?vt=) can only ever be minted by an invite created AFTER
+  // the market unlocks (rfp-publish.ts's corrected sequencing), so this
+  // check never fires in the ordinary post-unlock case. It closes the
+  // OTHER path into this route: resolveSupplierPrincipal()'s "claimed
+  // session" lazy-issuance branch (supplier-capability-access.ts) mints a
+  // fresh per-vendor credential for ANY vendor with an approved profile
+  // claim and a session, for ANY rfp id, regardless of whether that vendor
+  // was ever invited or whether this project's market has unlocked at all
+  // -- so a claimed supplier account that merely obtained this project's
+  // share_token (the same non-cryptographic, copyable-before-unlock token
+  // the row-8 hotfix addressed on the main project route) could otherwise
+  // read this project's NDA status/acceptance record before the buyer's
+  // market ever unlocked. Responds identically to "not found", matching
+  // the row-8 precedent on the main project route, so this cannot be used
+  // to distinguish a locked project from one that doesn't exist.
+  if (!(await isMarketUnlocked(id))) {
+    return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+  }
   const vendorParam = (url.searchParams.get("vendor") ?? "").trim();
   if (!vendorParam) {
     // No vendor named: just the public NDA text/requirement, nothing
@@ -130,6 +151,12 @@ export async function POST(req: Request, ctx: Ctx) {
   // share token is still required (unchanged baseline gate).
   if (!shareTokenOk(req, project.share_token, body.token)) {
     return Response.json({ error: "Accepting the NDA needs the response link token. Open this RFP via your response link and try again." }, { status: 401, headers: cors });
+  }
+  // Market-unlock correction round (16 Aug 2026): see the matching comment
+  // on GET above -- the canonical gate every supplier-capability route now
+  // applies before resolving any supplier principal or accepting any write.
+  if (!(await isMarketUnlocked(id))) {
+    return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   }
   const vendor = (body.vendor ?? "").trim();
   const signatory = (body.signatory_name ?? "").trim();

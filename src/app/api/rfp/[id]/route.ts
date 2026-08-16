@@ -4,6 +4,7 @@ import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { recordRfpBenchmark, recordDemandSample, indexRfpForBuyer } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
+import { isMarketUnlocked, getMarketUnlock } from "@/lib/market-unlock";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
 import { rfpContentSnapshot, contentHash } from "@/lib/published-snapshot";
@@ -58,15 +59,39 @@ export async function GET(req: Request, ctx: Ctx) {
   const url = new URL(req.url);
 
   // Owner read: full project. Kept exactly schema-shaped (no marker keys),
-  // because the builder PUTs this object straight back and the schema is strict.
+  // because the builder PUTs this object straight back and the schema is
+  // strict — the market-unlock fields below are therefore attached as
+  // SIBLING keys on the JSON response, never merged into the project object
+  // itself (a stray `market_unlocked` surviving a later PUT's blind spread
+  // would fail ProjectDetailsSchema's strict parse and break every save).
   const access = await requireRfpOwner(req, project);
   if (access.ok) {
-    return Response.json(publicProject(project), { headers: cors });
+    const unlock = await getMarketUnlock(id);
+    return Response.json({ ...publicProject(project), market_unlocked: unlock !== null, market_unlock: unlock }, { headers: cors });
   }
 
   // Supplier read: requires the share token from the response link.
   const shareToken = (url.searchParams.get("token") ?? "").trim();
   if (shareToken && shareToken === project.share_token) {
+    // Row-8 hotfix (16 Aug 2026), amended in the market-unlock correction
+    // round (16 Aug 2026): this branch previously returned the full
+    // supplierView (rfp_sections, buyer details, project-specific content)
+    // to anyone holding the share token, with no check on publish state.
+    // The token is minted at project creation and the "Response link"
+    // control in the UI copies it unconditionally, so before the row-8 fix
+    // a draft-stage link handed out (or guessed, given rfp-store.ts's
+    // non-cryptographic newId()) granted the same disclosure that fix
+    // closed for the owner-driven invite/vendor-panel paths. The row-8 fix
+    // gated this on `hasPublished(project.status)`; that is now replaced
+    // with the canonical `isMarketUnlocked()` check, since a project can
+    // satisfy hasPublished() while its board listing (and therefore its
+    // market unlock) has failed. Responds identically to "not found" — not
+    // a distinct "not published yet" or "not unlocked yet" message — so
+    // this path cannot be used to distinguish a draft/locked project from
+    // one that doesn't exist.
+    if (!(await isMarketUnlocked(id))) {
+      return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+    }
     const vendor = (url.searchParams.get("vendor") ?? "").trim();
     const accepted = project.nda.required ? await hasAcceptedNda(project, vendor) : true;
     return Response.json(supplierView(project, accepted), { headers: cors });
@@ -203,5 +228,6 @@ export async function PUT(req: Request, ctx: Ctx) {
     await applyGovernedEvent(saved.id, "requirement_edit", eventId, before, after);
   } catch { /* observational only, never blocks the save */ }
 
-  return Response.json(saved, { headers: cors });
+  const unlock = await getMarketUnlock(saved.id);
+  return Response.json({ ...saved, market_unlocked: unlock !== null, market_unlock: unlock }, { headers: cors });
 }

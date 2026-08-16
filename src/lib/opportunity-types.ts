@@ -202,6 +202,15 @@ export const OpportunitySchema = z.object({
   // id. Public flag only ("this buyer issued a full RFP"); the RFP's private
   // respond link is never exposed here.
   source_rfp_id: z.string().default(""),
+  // Market-unlock correction round 2 (16 Aug 2026), requirement 3: the exact
+  // FrozenRevision (published-snapshot.ts) this listing is bound to. Set the
+  // moment the Opportunity is created/refreshed FROM a publish attempt (see
+  // rfp-publish.ts's saga, step C), never editable afterwards by any other
+  // path. This is what commitMarketUnlock()'s integrity check
+  // (market-unlock.ts) verifies against -- "the Opportunity is bound to that
+  // exact revision" -- rather than trusting a caller-supplied claim. Private:
+  // never exposed on PublicOpportunity/toPublicOpportunity below.
+  source_published_revision_id: z.string().default(""),
 }).strict();
 export type Opportunity = z.infer<typeof OpportunitySchema>;
 
