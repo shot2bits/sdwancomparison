@@ -3,6 +3,7 @@ import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { buildEvidenceDraft } from "@/lib/evidence-response";
 import { sessionFromRequest, supplierCredentialFromRequest } from "@/lib/auth";
 import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -37,6 +38,15 @@ export async function GET(req: Request, ctx: Ctx) {
   }
   const vendor = (url.searchParams.get("vendor") ?? "").trim();
   if (!vendor) return Response.json({ error: "vendor is required (your organisation name)." }, { status: 422, headers: cors });
+
+  // Market-unlock correction round (16 Aug 2026): the canonical gate every
+  // supplier-capability route now applies before resolving any supplier
+  // principal — see the matching comment in nda/route.ts for why this
+  // closes a real gap resolveSupplierPrincipal()'s claimed-session lazy
+  // issuance leaves open on its own. Responds identically to "not found".
+  if (!(await isMarketUnlocked(id))) {
+    return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
+  }
 
   // The credential now normally arrives via the HttpOnly cookie the
   // /supplier-credential exchange sets (Robert's ruling, 9 Aug 2026); an

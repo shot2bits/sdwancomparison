@@ -8,6 +8,7 @@ import { getGoal } from "@/lib/agent-store";
 import { reviewBid } from "@/lib/bid-review";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { resolveSupplierResponseAccess, RESPONSE_DENIAL_MESSAGES } from "@/lib/rfp-response-access";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -40,6 +41,17 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   if (project.status !== "published" && project.status !== "qa") {
     return Response.json({ error: "This RFP is not open for responses." }, { status: 409, headers: cors });
+  }
+  // Market-unlock correction round (16 Aug 2026): the status check above
+  // encodes a DIFFERENT rule (responses close once evaluation starts) and
+  // is kept as-is; this is the ADDITIONAL canonical gate, closing the same
+  // gap named on the other supplier-capability routes -- a project can
+  // satisfy `status === "published"` while its board listing (and
+  // therefore its market unlock) never completed, and no supplier
+  // response should be acceptable in that state either. Responds
+  // identically to "not found", matching the row-8 precedent.
+  if (!(await isMarketUnlocked(id))) {
+    return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   }
   // Response window: submissions close at the deadline set when the buyer
   // submitted to the marketplace (deal room slice 1, 15 July 2026). Kept as

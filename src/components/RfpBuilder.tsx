@@ -136,6 +136,18 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [notOwner, setNotOwner] = useState(false);
   // Board-listing outcome from the last publish (listed, or why not).
   const [boardNote, setBoardNote] = useState<{ listed: boolean; url?: string; reason?: string } | null>(null);
+  // Market-unlock correction round (16 Aug 2026): the canonical,
+  // server-derived boolean (market-unlock.ts) that gates every vendor-
+  // identity-revealing part of this panel -- replacing the row-8 hotfix's
+  // `hasPublished(project.status)` client-side recomputation, which could
+  // read true while the project's board listing (and therefore its market
+  // unlock) had failed. Deliberately NOT a field on `project` itself: that
+  // object round-trips through PUT (see applyProject below and the save
+  // handler), and ProjectDetailsSchema is `.strict()` -- an extra key
+  // surviving a save's blind spread would fail every PUT with "Invalid RFP
+  // shape". Kept as separate state, defaulting LOCKED (false) until a real
+  // server response says otherwise.
+  const [marketUnlocked, setMarketUnlocked] = useState(false);
   // Feedback for every question-add outcome (added / merged / duplicate) —
   // silent no-ops read as "the button is broken" (Harry's Testing 1).
   const [addMsg, setAddMsg] = useState<string | null>(null);
@@ -422,7 +434,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // refreshConnections() calls elsewhere (after invite/message/publish) are
   // unaffected — they read the fresh publish result directly, not this
   // status-gated mount effect.
-  useEffect(() => { if (project && hasPublished(project.status)) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id]);
+  useEffect(() => { if (project && marketUnlocked) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id, marketUnlocked]);
   useEffect(() => { if (project?.nda?.required) refreshNdaAccepts(); /* eslint-disable-next-line */ }, [project?.id, project?.nda?.required, project?.nda?.version]);
   useEffect(() => { fetch("/sase/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
@@ -434,7 +446,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // discoverable by someone who only knows the RFP id.
   const manageToken = useRef<string>("");
   const mtokKey = (id: string) => `netify_mtok_${id}`;
-  function applyProject(p: ProjectDetails) {
+  function applyProject(p: ProjectDetails & { market_unlocked?: boolean; market_unlock?: unknown }) {
     let tok = p.manage_token || manageToken.current;
     if (!tok && typeof window !== "undefined") tok = localStorage.getItem(mtokKey(p.id)) || "";
     if (tok) {
@@ -442,7 +454,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       try { localStorage.setItem(mtokKey(p.id), tok); } catch { /* private mode, keep in ref */ }
     }
     setNotOwner(false);
-    setProject({ ...p, manage_token: tok });
+    // Market-unlock correction round: every owner read of a project now
+    // carries this canonical, server-derived field (see the GET/PUT routes
+    // in api/rfp/[id]/route.ts) as a SIBLING key, never merged into the
+    // stored `project` state itself -- see the marketUnlocked useState
+    // comment above for why. A response from a code path that doesn't
+    // attach it (there should be none left after this round; anything
+    // missed defaults safely LOCKED rather than silently unlocked).
+    if (typeof p.market_unlocked === "boolean") setMarketUnlocked(p.market_unlocked);
+    const { market_unlocked: _marketUnlocked, market_unlock: _marketUnlock, ...projectFields } = p;
+    void _marketUnlocked; void _marketUnlock;
+    setProject({ ...projectFields, manage_token: tok });
   }
 
   /** The owner credential, attached to every workspace API call. */
@@ -457,21 +479,31 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   const [listingBusy, setListingBusy] = useState(false);
   const [listAuthNeeded, setListAuthNeeded] = useState(false);
   useEffect(() => {
-    if (!project || project.status !== "published") return;
+    if (!project || !hasPublished(project.status)) return;
     fetch(`/sase/api/rfp/${project.id}/list-on-board`, { headers: authHeaders() })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { ok?: boolean; board?: { listed: boolean; url?: string } } | null) => {
+      .then((d: { ok?: boolean; board?: { listed: boolean; url?: string }; market_unlocked?: boolean } | null) => {
         if (!d?.ok || !d.board) return;
         const next = d.board.listed
           ? { listed: true, url: d.board.url }
           : { listed: false, reason: "Verified vendors browsing the board cannot see this RFP." };
         setBoardNote((prev) => prev ?? next);
+        // Market-unlock correction round: this GET already queries the
+        // canonical record (list-on-board/route.ts) -- pick it up here too,
+        // so a returning owner whose original publish's board step failed
+        // (internal status published, market still locked) sees the true
+        // locked state on load, not a stale unlocked assumption from
+        // `hasPublished()` alone.
+        if (typeof d.market_unlocked === "boolean") setMarketUnlocked(d.market_unlocked);
       })
       .catch(() => {});
     // eslint-disable-next-line
   }, [project?.id, project?.status]);
 
-  /** List an already published RFP on the board without re-running invites. */
+  /** List an already published RFP on the board -- and, per the
+   *  market-unlock correction round, complete the deferred unlock/invite
+   *  sequence too, if this is the first time listing succeeds for this
+   *  publish (see retryBoardPublication() in rfp-publish.ts). */
   async function listOnBoardNow() {
     if (!project || listingBusy) return;
     setListingBusy(true);
@@ -483,7 +515,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         headers: { "content-type": "application/json", ...authHeaders() },
         body: JSON.stringify({}),
       });
-      const data = await res.json().catch(() => ({})) as { board?: { listed?: boolean; url?: string }; auth_required?: boolean; error?: string };
+      const data = await res.json().catch(() => ({})) as { board?: { listed?: boolean; url?: string }; auth_required?: boolean; error?: string; market_unlocked?: boolean };
       if (res.ok && data.board?.listed) {
         setBoardNote({ listed: true, url: data.board.url });
         fireNetifyEvent("board_listed", { source: "standing_action" });
@@ -492,6 +524,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       } else {
         setBoardNote({ listed: false, reason: data.error || "Board listing failed; try again." });
       }
+      if (typeof data.market_unlocked === "boolean") setMarketUnlocked(data.market_unlocked);
+      if (data.market_unlocked) refreshConnections();
     } catch {
       setBoardNote({ listed: false, reason: "Network error; nothing was listed. Try again." });
     } finally {
@@ -933,13 +967,17 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   }
 
   async function suggestSuppliers() {
-    // Row-8 hotfix (16 Aug 2026): this call reveals project-specific vendor
+    // Row-8 hotfix (16 Aug 2026), amended in the market-unlock correction
+    // round (16 Aug 2026): this call reveals project-specific vendor
     // matching (names + scores) for THIS project. It must never fire before
-    // the project has crossed the publication boundary — the button that
-    // triggers it is now hidden pre-publish (see the "Vendors and service
-    // providers" section below), and this guard is the defence-in-depth
-    // backstop against any stale ref/race calling it anyway.
-    if (!project || !hasPublished(project.status)) return;
+    // this project's MARKET HAS UNLOCKED (market-unlock.ts's canonical,
+    // server-derived boolean) — not merely once its status has crossed the
+    // publication boundary, since a board-listing failure can leave a
+    // "published" project's market still locked. The button that triggers
+    // this is hidden until then (see the "Vendors and service providers"
+    // section below), and this guard is the defence-in-depth backstop
+    // against any stale ref/race calling it anyway.
+    if (!project || !marketUnlocked) return;
     try {
       const res = await fetch("/sase/api/openapi/build_sase_shortlist", {
         method: "POST", headers: { "content-type": "application/json" },
@@ -1034,6 +1072,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       }
       if (!res.ok) throw new Error(data.error ?? "Could not publish.");
       setProject({ ...project, status: data.status ?? "published" });
+      // Market-unlock correction round: the publish response now carries
+      // the canonical boolean directly (publish/route.ts) -- a board
+      // failure means this stays false even though `data.status` above is
+      // already "published", which is exactly the internal-published-but-
+      // locked state this round exists to represent honestly in the UI.
+      setMarketUnlocked(Boolean((data as { market_unlocked?: boolean }).market_unlocked));
       if (data.market_report) setMarketReport(data.market_report as MarketReportT);
       fireNetifyEvent("rfp_published", { invited: String(data.invited?.length ?? 0) });
       try {
@@ -1183,11 +1227,25 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // locally (`status !== "draft" && status !== "review"`), a parallel
   // reimplementation of the canonical predicate in project-machine.ts that
   // happened to agree with it only because RfpStatus currently has exactly
-  // five values. Delegating to hasPublished() removes that duplicate
-  // definition — this is now the single "has this project crossed the
-  // publication boundary" question the whole file (and the vendor panel
-  // gating below) asks the same way.
-  const published = hasPublished(project.status);
+  // five values.
+  //
+  // Market-unlock correction round (16 Aug 2026): `hasPublished()` was
+  // itself then found to be the WRONG boundary for this variable's actual
+  // job — everything below keyed off `published` (the vendor panel, the
+  // "your RFP is live" messaging, invite/message actions, the market
+  // report reveal) describes what a buyer's MARKET has actually done, not
+  // merely what this project's internal status field says. A project can
+  // satisfy `hasPublished(project.status)` while its board listing failed
+  // and no supplier was ever invited — the exact state the checkpoint
+  // evidence (`reports/row8-repro/after-fix-vendor-panel-post-publish.png`)
+  // showed: "Not on the public board yet" alongside a real named invited
+  // vendor, because this variable used to read `hasPublished()` alone. It
+  // now reads the canonical, server-derived `marketUnlocked` state instead
+  // (market-unlock.ts, threaded through applyProject() above and every
+  // publish/list-on-board response) — the single "has this project's
+  // market actually unlocked" question the whole panel now asks the same
+  // way, matching every server-side route governed by the same rule.
+  const published = marketUnlocked;
   const stripStage: FlowStage = published ? "responses" : "review";
   const stripNow = published
     ? `Your RFP is live. ${connections.length > 0 ? `${connections.length} invited vendor${connections.length === 1 ? "" : "s"} hold` : "Invited vendors hold"} private response links, and replies land on this page.`
@@ -1817,6 +1875,13 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         <p className="text-sm text-[var(--ink-500)] mb-3">
           {published ? (
             <><strong>Step 3.</strong> These are the graded vendors and service providers from the Netify marketplace. <strong>Suggest best-fit vendors</strong> finds the closest matches to what you described. <strong>Submit to your matched vendors</strong> invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, then message them, request a demo, or ask for contact details. Each one gets a private link to read your RFP and reply.</>
+          ) : hasPublished(project.status) ? (
+            // Market-unlock correction round (16 Aug 2026): submitted, but
+            // the board step hasn't completed yet -- the boardNote banner
+            // just below names why and offers the retry action. This copy
+            // must not claim matches are showing (they are not, until the
+            // board succeeds and the market genuinely unlocks).
+            <><strong>Step 3.</strong> Your submission is in. Your matched vendors and service providers are invited the moment your board listing completes — see the notice below.</>
           ) : (
             // Row-8 hotfix (16 Aug 2026): pre-publish this section may name the
             // marketplace as an aggregate ("Netify's graded marketplace") but

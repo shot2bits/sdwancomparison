@@ -3,7 +3,7 @@ import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { buildMarketReport } from "@/lib/market-report";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
-import { hasPublished } from "@/lib/project-machine";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -65,7 +65,14 @@ export async function GET(req: Request, ctx: Ctx) {
   if (!project) return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   const access = await requireRfpOwner(req, project);
   if (!access.ok) return ownerRequired("Reading this RFP's market report", cors);
-  if (!hasPublished(project.status)) {
+  // Market-unlock correction round (16 Aug 2026): this project-specific
+  // matching output is governed by the same canonical market-unlock
+  // predicate as every other post-publication surface, not
+  // `hasPublished(project.status)` alone — a project can satisfy
+  // hasPublished() while its board listing (and therefore its market
+  // unlock) has failed, and this route must still show the locked,
+  // aggregate-only preview in that state, exactly as it does pre-publish.
+  if (!(await isMarketUnlocked(id))) {
     // Draft readiness (Phase 2 replaces the old value-preview panel, which
     // leaked project-specific matches, with an honest locked-outcome
     // reading): document completeness, gaps, the indicative price band

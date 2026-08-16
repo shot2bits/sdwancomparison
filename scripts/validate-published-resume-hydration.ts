@@ -192,6 +192,19 @@ async function partA2() {
     const { getProject } = await import("../src/lib/rfp-store");
     const { savePublishedSnapshot } = await import("../src/lib/published-snapshot");
     const { POST: createSecurityProjectRoute } = await import("../src/app/api/security-sourcing/project/route");
+    // Market-unlock correction round (16 Aug 2026): the report route this
+    // part exercises now gates `market_report` on the canonical
+    // `isMarketUnlocked()` predicate (market-unlock.ts), not on
+    // `hasPublished(project.status)` alone -- a qa/evaluation/published
+    // status reached by this fixture's own direct `store.command(["SET",
+    // ...])` seeding (deliberately bypassing saveProject(), see this
+    // function's own header comment) no longer carries a market unlock on
+    // its own, since no real board listing ever ran for it. Each scenario
+    // below now also commits a real MarketUnlock record immediately after
+    // seeding the status, so this fixture keeps proving what it always
+    // proved (a post-publish status sees the full report, not the draft
+    // preview) against the boundary that actually governs it today.
+    const { commitMarketUnlock } = await import("../src/lib/market-unlock");
 
     const createRes = await createSecurityProjectRoute(
       makeRequest("POST", "https://example.test/sase/api/security-sourcing/project", {
@@ -218,6 +231,14 @@ async function partA2() {
     /* (findings 1 + 2 together: a post-publish status the round-3 gate    */
     /* missed, AND a legacy record with nothing frozen to serve.)          */
     store.command(["SET", `rfp:${id}`, JSON.stringify({ ...original, status: "qa" })]);
+    await commitMarketUnlock({
+      project_id: id,
+      published_revision_id: "snap_a2_test_qa",
+      board_opportunity_id: "opp_a2_test_qa",
+      board_visibility: "public",
+      matching_basis_hash: "test-hash-qa",
+      invitation_snapshot_id: "snap_a2_test_qa",
+    });
     const qaRes = await reportRoute(makeRequest("GET", `https://example.test/api/rfp/${id}/report?manage=${manage}`), { params: Promise.resolve({ id }) });
     const qaBody = (await qaRes.json()) as Record<string, unknown>;
     expect(qaRes.status === 200, "[A2] report route succeeds for a qa-status project");
@@ -232,6 +253,19 @@ async function partA2() {
     /* awarded/transacting/complete/closed onto "evaluation", so this one  */
     /* scenario stands in for all four post-evaluation phases too.)        */
     store.command(["SET", `rfp:${id}`, JSON.stringify({ ...original, status: "evaluation" })]);
+    // Already unlocked by the qa scenario's commit above (same project id);
+    // commitMarketUnlock() is idempotent, so re-asserting the SAME triple
+    // here is a harmless no-op that also documents this scenario's own
+    // requirement explicitly rather than depending silently on execution
+    // order between scenarios.
+    await commitMarketUnlock({
+      project_id: id,
+      published_revision_id: "snap_a2_test_qa",
+      board_opportunity_id: "opp_a2_test_qa",
+      board_visibility: "public",
+      matching_basis_hash: "test-hash-qa",
+      invitation_snapshot_id: "snap_a2_test_qa",
+    });
     const evalRes = await reportRoute(makeRequest("GET", `https://example.test/api/rfp/${id}/report?manage=${manage}`), { params: Promise.resolve({ id }) });
     const evalBody = (await evalRes.json()) as Record<string, unknown>;
     expect(evalRes.status === 200, "[A2] report route succeeds for an evaluation-status project");
@@ -279,6 +313,19 @@ async function partA2() {
       market_report: marketReport as never,
     };
     await savePublishedSnapshot(id, snapshot);
+    // Bind the MarketUnlock to the REAL snapshot id this scenario just
+    // saved, matching the actual invariant (published_revision_id is the
+    // PublishedSnapshot id) rather than relying on the qa/evaluation
+    // scenarios' earlier, differently-keyed commit above still being
+    // present.
+    await commitMarketUnlock({
+      project_id: id,
+      published_revision_id: snapshot.id,
+      board_opportunity_id: "opp_a2_test_published",
+      board_visibility: "public",
+      matching_basis_hash: snapshot.content_hash,
+      invitation_snapshot_id: snapshot.id,
+    });
 
     const pubRes = await reportRoute(makeRequest("GET", `https://example.test/api/rfp/${id}/report?manage=${manage}`), { params: Promise.resolve({ id }) });
     const pubBody = (await pubRes.json()) as {

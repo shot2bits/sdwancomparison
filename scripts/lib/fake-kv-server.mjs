@@ -173,9 +173,53 @@ export async function startFakeKv() {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address();
   const url = `http://127.0.0.1:${port}`;
+  let live = server;
   return {
     url,
     token: "fixture-token",
-    stop: async () => { await new Promise((resolve) => server.close(resolve)); },
+    stop: async () => { await new Promise((resolve) => live.close(resolve)); },
+    /**
+     * Market-unlock correction round (16 Aug 2026): simulate a genuine
+     * backend-storage outage for a "board storage failure" fixture, distinct
+     * from the deliberate BoardQualityGateError business-rule refusal --
+     * closes the TCP listener (every in-flight and subsequent request gets a
+     * real connection-refused, exactly like Upstash being unreachable), then
+     * reopens a fresh listener on the EXACT SAME port once `restore()` is
+     * called. The in-memory `store`/`expiries` Maps above are untouched by
+     * either call (they are outer-scope closures, not owned by the listener),
+     * so this is a real outage-and-recovery of the transport only -- data
+     * already committed before the outage survives it, matching what a real
+     * managed KV outage looks like to this app (the module-level cached
+     * KV_REST_API_URL never changes, so the app keeps talking to the same
+     * port throughout).
+     */
+    outage: async () => { await new Promise((resolve) => live.close(resolve)); },
+    restore: async () => {
+      // Rebuild a listener with the identical request handler as the
+      // original (createServer's callback isn't introspectable after the
+      // fact in a portable way, so this recreates it via the same closure
+      // used above rather than trying to clone `server`).
+      const relistened = createServer((req, res) => {
+        if (req.method !== "POST") { res.writeHead(405).end(); return; }
+        let body = "";
+        req.on("data", (c) => { body += c; });
+        req.on("end", () => {
+          try {
+            const command = JSON.parse(body || "[]");
+            const result = exec(command);
+            res.writeHead(200, { "content-type": "application/json" });
+            res.end(JSON.stringify({ result }));
+          } catch (e) {
+            res.writeHead(500, { "content-type": "application/json" });
+            res.end(JSON.stringify({ error: String(e && e.message ? e.message : e) }));
+          }
+        });
+      });
+      await new Promise((resolve, reject) => {
+        relistened.on("error", reject);
+        relistened.listen(port, "127.0.0.1", resolve);
+      });
+      live = relistened;
+    },
   };
 }

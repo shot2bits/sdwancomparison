@@ -4,6 +4,7 @@ import { RfpThreadSchema } from "@/lib/rfp-types";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { sessionFromRequest, supplierCredentialFromRequest } from "@/lib/auth";
 import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -49,6 +50,15 @@ export async function GET(req: Request, ctx: Ctx) {
     const access = await requireRfpOwner(req, project);
     if (!access.ok) return ownerRequired("Reading clarification threads", cors);
     return Response.json({ threads: await listThreads(id) }, { headers: cors });
+  }
+
+  // Market-unlock correction round (16 Aug 2026): the canonical gate every
+  // supplier-capability route now applies before resolving any supplier
+  // principal — see the matching comment in nda/route.ts for why this
+  // closes a real gap resolveSupplierPrincipal()'s claimed-session lazy
+  // issuance leaves open on its own. Responds identically to "not found".
+  if (!(await isMarketUnlocked(id))) {
+    return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   }
 
   // Share token present but not the owner: this request must now prove a
@@ -121,6 +131,9 @@ export async function POST(req: Request, ctx: Ctx) {
   // (Robert's ruling #3 names clarification reads/writes explicitly).
   if (!shareTokenOk(req, project.share_token, body)) {
     return Response.json({ error: "Asking a question needs the response link token. Open this RFP via your response link and try again." }, { status: 401, headers: cors });
+  }
+  if (!(await isMarketUnlocked(id))) {
+    return Response.json({ error: "RFP not found." }, { status: 404, headers: cors });
   }
   if (!body.vendor || !body.question) {
     return Response.json({ error: "vendor and question are required." }, { status: 422, headers: cors });
