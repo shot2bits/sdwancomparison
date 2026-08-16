@@ -52,7 +52,7 @@ import {
 } from "@/lib/workspace/draft";
 import { TAXONOMY, sectionForGapKey, sectionForPath, type TaxonomyItem } from "@/lib/workspace/taxonomy";
 import { earnedQuestions } from "@/lib/workspace/questions";
-import { activePack, activeFlavours, visibleSuggestions } from "@/lib/sector/derive";
+import { activePack, activeFlavours, visibleSuggestions, acceptedOnRecord } from "@/lib/sector/derive";
 import { type PackSuggestion } from "@/lib/sector/packs";
 import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
@@ -1582,6 +1582,20 @@ export default function ProjectDesk({
   );
   const pack = useMemo(() => activePack(requirement), [requirement]);
   const packFlavours = useMemo(() => (pack ? activeFlavours(pack, corpus) : []), [pack, corpus]);
+  /** The active pack's display title -- unchanged wording, only moved:
+   *  previously computed inline, once, inside the `sectionOutline` memo
+   *  below. Hotfix (Robert, 15 Aug 2026) needs the identical string for
+   *  the new accepted-suggestions block's own heading (so it reads as
+   *  part of the SAME named section the outline row already names, e.g.
+   *  "Manufacturing and OT"), so it is hoisted here once rather than
+   *  duplicated. */
+  const sectorSectionTitle = pack
+    ? pack.id === "manufacturing"
+      ? "Manufacturing and OT"
+      : pack.id === "healthcare"
+        ? "Healthcare and clinical systems"
+        : `${pack.label} intelligence`
+    : null;
   /** Living Procurement UK Decision-Maker Blueprint: the LIVE (render-
    *  time) visible-suggestion list, distinct from the auto-assert
    *  effect's own one-shot `sugs` snapshot below (which only ever fires
@@ -1593,6 +1607,17 @@ export default function ProjectDesk({
   const visibleSectorSuggestions = useMemo(
     () => (pack ? visibleSuggestions(pack, packFlavours, facts, noted.map((n) => n.id), declinedSuggestionIds) : []),
     [pack, packFlavours, facts, noted, declinedSuggestionIds],
+  );
+  /** Hotfix (Robert, 15 Aug 2026): the accepted mirror of
+   *  `visibleSectorSuggestions` above -- the suggestions this memo drops
+   *  out of the OPEN-offer list the instant they're accepted are exactly
+   *  the ones this one picks up, so the buyer always sees where an
+   *  accepted suggestion went instead of it silently vanishing. Read via
+   *  `acceptedOnRecord` (sector/derive.ts), the accepted-side twin of the
+   *  already-existing `declinedOnRecord`. */
+  const acceptedSectorSuggestions = useMemo(
+    () => (pack ? acceptedOnRecord(pack, packFlavours, noted.map((n) => n.id)) : []),
+    [pack, packFlavours, noted],
   );
   useEffect(() => {
     if (!pack || assertedPacks.current.has(pack.id)) return;
@@ -2040,15 +2065,26 @@ export default function ProjectDesk({
    *  `quote: opt.label` (which stays, unchanged, for clause-text display;
    *  see decision-ledger.ts's header comment for why one new field closes
    *  both defect 3 and defect 4 at once). */
+  /** Hotfix (Robert, 15 Aug 2026): signature changed from
+   *  `(nq, opt, entry)` to `(questionId, optionLabel, entry)` --
+   *  `answerNextQuestion`'s four call sites only ever read `nq.id` and
+   *  `opt.label` off those two params, never anything else, so this is a
+   *  pure narrowing, not a behaviour change. It lets
+   *  `declineAcceptedSuggestion` (below) record the SAME
+   *  "decline_suggestion" ledger entry `answerNextQuestion`'s own decline
+   *  branch does, without needing a live NextQuestion card to read `nq`/
+   *  `opt` off of -- there is no such card once a suggestion has already
+   *  been accepted (visibleSuggestions() has already dropped it), which
+   *  is exactly the gap this hotfix closes. */
   const recordDecision = useCallback(
-    (nq: NextQuestion, opt: NonNullable<NextQuestion["options"]>[number], entry: Pick<DecisionTurn, "action" | "optionId" | "resultingFactPaths" | "resultingNoted">) => {
+    (questionId: string, optionLabel: string, entry: Pick<DecisionTurn, "action" | "optionId" | "resultingFactPaths" | "resultingNoted">) => {
       setDecisionTurns((ds) => [
         ...ds,
         {
           id: newDecisionTurnId(),
           at: Date.now(),
-          questionId: nq.id,
-          optionLabel: opt.label,
+          questionId,
+          optionLabel,
           resultingFactPaths: entry.resultingFactPaths ?? [],
           resultingNoted: entry.resultingNoted ?? [],
           optionId: entry.optionId,
@@ -2069,11 +2105,11 @@ export default function ProjectDesk({
         if (nq.source === "sector_suggestion") {
           const suggestionId = nq.id.replace(/^sector:/, "");
           setDeclinedSuggestionIds((ids) => (ids.includes(suggestionId) ? ids : [...ids, suggestionId]));
-          recordDecision(nq, opt, { action: "decline_suggestion", optionId: "decline", resultingFactPaths: [], resultingNoted: [] });
+          recordDecision(nq.id, opt.label, { action: "decline_suggestion", optionId: "decline", resultingFactPaths: [], resultingNoted: [] });
           ev("workspace_pack_suggestion", { id: suggestionId, verdict: "declined" });
         } else {
           setDismissedQuestionIds((ids) => (ids.includes(nq.id) ? ids : [...ids, nq.id]));
-          recordDecision(nq, opt, { action: "dismiss_question", optionId: "dismiss", resultingFactPaths: [], resultingNoted: [] });
+          recordDecision(nq.id, opt.label, { action: "dismiss_question", optionId: "dismiss", resultingFactPaths: [], resultingNoted: [] });
           ev("workspace_earned_answered", { q: nq.id, kind: "dismiss" });
         }
         say(`Noted: "${nq.question}" set aside for now.`);
@@ -2090,13 +2126,13 @@ export default function ProjectDesk({
           const m = applyMerge(updates, "answer");
           markChanged(m.changed.length ? m.changed : updates.map((u) => factId(u.path, u.value)), m.facts);
         }
-        recordDecision(nq, opt, { action: "items", optionId: answer.itemIds.join("+"), resultingFactPaths: updates.map((u) => u.path), resultingNoted: [] });
+        recordDecision(nq.id, opt.label, { action: "items", optionId: answer.itemIds.join("+"), resultingFactPaths: updates.map((u) => u.path), resultingNoted: [] });
         ev("workspace_earned_answered", { q: nq.id, kind: "items" });
       } else if (answer.kind === "note") {
         const noteId = nq.source === "sector_suggestion" ? `ps-${nq.id.replace(/^sector:/, "")}` : `${nq.id}:${optionIndex}`;
         beginOrExtendSubmission();
         setNoted((ns) => (ns.some((n) => n.id === noteId) ? ns : [...ns, { id: noteId, label: answer.text, section: nq.target, own: true }]));
-        recordDecision(nq, opt, { action: "note", optionId: noteId, resultingFactPaths: [], resultingNoted: [{ id: noteId, label: answer.text, section: nq.target, own: true }] });
+        recordDecision(nq.id, opt.label, { action: "note", optionId: noteId, resultingFactPaths: [], resultingNoted: [{ id: noteId, label: answer.text, section: nq.target, own: true }] });
         setChangedSlots([noteId]);
         setSaveDirty(true);
         scheduleSettle();
@@ -2116,6 +2152,39 @@ export default function ProjectDesk({
       say(`${nq.question} — "${opt.label}".`);
     },
     [applyMerge, markChanged, say, beginOrExtendSubmission, scheduleSettle, recordDecision],
+  );
+
+  /** Hotfix (Robert, 15 Aug 2026), post-f33f103 production verification:
+   *  the reversal half of an accepted sector suggestion. Once accepted,
+   *  `visibleSuggestions()` permanently drops the suggestion from the
+   *  pending-question list (by design -- see that function's own header
+   *  comment), so there is no NextQuestion card left for
+   *  `answerNextQuestion`'s decline branch to ever fire against -- the
+   *  live UI had no way to generate a `decline_suggestion` entry for an
+   *  ALREADY-accepted suggestion at all, even though
+   *  `replayDecisionLedger()`'s decline branch (round 3) already replays
+   *  that reversal correctly once one exists on the ledger.
+   *
+   *  This is that missing write path, and it is the SAME decline: it
+   *  removes the exact `ps-<id>` noted item
+   *  `acceptedSectorSuggestionClauses()` (procurement-templates.ts) reads
+   *  to compile the governed clause -- so the clause is gone from the
+   *  very next compile, live, no save/reload required -- adds the
+   *  suggestion id to `declinedSuggestionIds` (permanent, per the pack
+   *  law), and records the identical `"decline_suggestion"` ledger entry
+   *  the button-driven decline path records, so `replayDecisionLedger()`
+   *  reconstructs the SAME reversed state on save/reload. */
+  const declineAcceptedSuggestion = useCallback(
+    (suggestionId: string, label: string) => {
+      const psId = `ps-${suggestionId}`;
+      setNoted((ns) => ns.filter((n) => n.id !== psId));
+      setDeclinedSuggestionIds((ids) => (ids.includes(suggestionId) ? ids : [...ids, suggestionId]));
+      recordDecision(`sector:${suggestionId}`, label, { action: "decline_suggestion", optionId: "decline", resultingFactPaths: [], resultingNoted: [] });
+      setChangedSlots([psId]);
+      ev("workspace_pack_suggestion", { id: suggestionId, verdict: "declined" });
+      say(`Marked as not needed: ${label}. The compiled clause is removed.`);
+    },
+    [recordDecision, say],
   );
 
   /* ---- The extraction cycle (the same organ). Round 6: the cycle
@@ -2938,8 +3007,8 @@ export default function ProjectDesk({
       resilienceDetail: resilienceState.detail,
       securityResolved: !rankedIds.has("q-sse-scope"),
       securityDetail: rankedIds.has("q-sse-scope") ? "Which security controls are in scope is not yet decided." : "Security control scope stated.",
-      sector: pack
-        ? { title: pack.id === "manufacturing" ? "Manufacturing and OT" : pack.id === "healthcare" ? "Healthcare and clinical systems" : `${pack.label} intelligence`, pendingSuggestions: visibleSectorSuggestions.length, acceptedOrDismissed: acceptedNotedCount + declinedCount }
+      sector: pack && sectorSectionTitle
+        ? { title: sectorSectionTitle, pendingSuggestions: visibleSectorSuggestions.length, acceptedOrDismissed: acceptedNotedCount + declinedCount }
         : null,
       operatingModelResolved: Boolean(opModel) && !rankedIds.has("OD-support-coverage-ambiguous"),
       operatingModelDetail: opModel ? `Operating model stated.` : "Who runs it day to day is not yet stated.",
@@ -3032,6 +3101,24 @@ export default function ProjectDesk({
         };
       }),
     [topThreeQuestions, landOption, answerNextQuestion],
+  );
+
+  /** Hotfix (Robert, 15 Aug 2026): resolves `acceptedSectorSuggestions`
+   *  (the accepted mirror of `visibleSectorSuggestions`, defined above)
+   *  into concrete, clickable cards for the canvas -- same resolve-here-
+   *  not-in-the-presentational-layer pattern `nextQuestionCards` already
+   *  uses just above, for the same reason: the canvas stays a pure
+   *  presentational layer that never touches `declineAcceptedSuggestion`
+   *  or any other local callback directly. */
+  const acceptedSuggestionCards = useMemo(
+    () =>
+      acceptedSectorSuggestions.map((s) => ({
+        id: s.id,
+        label: s.label,
+        reason: s.reason,
+        onUndo: () => declineAcceptedSuggestion(s.id, "Mark as not needed"),
+      })),
+    [acceptedSectorSuggestions, declineAcceptedSuggestion],
   );
 
   const sheetSections = useMemo(() => {
@@ -3548,6 +3635,8 @@ export default function ProjectDesk({
             nextQuestionCards={nextQuestionCards}
             outline={sectionOutline}
             materialDecisionsRemaining={materialDecisionsRemaining}
+            acceptedSuggestionCards={acceptedSuggestionCards}
+            acceptedSuggestionsTitle={sectorSectionTitle}
           />
         </div>
       )}
