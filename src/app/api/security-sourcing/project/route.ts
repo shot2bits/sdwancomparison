@@ -42,6 +42,16 @@ export async function POST(req: Request) {
      *  a malformed/missing field is simply an empty ledger for this
      *  create. */
     decision_turns?: unknown;
+    /** Full-unification CLOSURE pass (17 Aug 2026): the canonical
+     *  envelope's own fields -- see envelope.ts's `buildEnvelopeUpdate`.
+     *  Absent `facts` (every caller that hasn't adopted this yet) means
+     *  this create is completely unaffected, exactly as before this pass. */
+    facts?: unknown;
+    receipts?: unknown;
+    instrument?: unknown;
+    compiled_document?: unknown;
+    base_revision?: unknown;
+    position?: { covered_sections?: unknown; sector?: unknown };
   } = {};
   try {
     body = await req.json();
@@ -63,22 +73,33 @@ export async function POST(req: Request) {
 
   let created;
   try {
-    created = await createSecurityProject({
-      requirement: body.requirement,
-      ...(typeof body.custom_title === "string" ? { customTitle: body.custom_title } : {}),
-      ownerEmail,
-      via: "web",
-      test: body.test === true,
-      ...(Array.isArray(body.preferred_vendors)
-        ? { preferredVendors: body.preferred_vendors.filter((s): s is string => typeof s === "string") }
-        : {}),
-      sourceTurns: parseIncomingSourceTurns(body.source_turns),
-      decisionTurns: parseIncomingDecisionTurns(body.decision_turns),
-    });
+    created = await createSecurityProject(
+      {
+        requirement: body.requirement,
+        ...(typeof body.custom_title === "string" ? { customTitle: body.custom_title } : {}),
+        ownerEmail,
+        via: "web",
+        test: body.test === true,
+        ...(Array.isArray(body.preferred_vendors)
+          ? { preferredVendors: body.preferred_vendors.filter((s): s is string => typeof s === "string") }
+          : {}),
+        sourceTurns: parseIncomingSourceTurns(body.source_turns),
+        decisionTurns: parseIncomingDecisionTurns(body.decision_turns),
+      },
+      // Full-unification CLOSURE pass (17 Aug 2026): the raw envelope
+      // fields, verified inside createSecurityProject() itself (see that
+      // function's own comment) -- absent `facts` leaves this create
+      // exactly as it was before this pass.
+      { facts: body.facts, receipts: body.receipts, instrument: body.instrument, compiled_document: body.compiled_document, base_revision: body.base_revision },
+      Array.isArray(body.position?.covered_sections) ? body.position.covered_sections.map(String) : [],
+    );
   } catch (e) {
     // Core refusals (low confidence with the gap questions) return as a
     // clear 400, identical in substance to the tool's structured error.
     return Response.json({ error: (e as Error).message }, { status: 400, headers: cors });
+  }
+  if ("rejected" in created) {
+    return Response.json({ error: created.rejected.error }, { status: created.rejected.status, headers: cors });
   }
   const { project, verdict, builderPath } = created;
 

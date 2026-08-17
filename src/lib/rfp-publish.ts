@@ -13,7 +13,7 @@ import { publicNoticeQualityGate, SECTOR_NOT_STATED } from "@/lib/notice-validat
 import { pingIndexNow, noticePingPaths } from "@/lib/indexnow";
 import { verifyBusinessEmail, type BusinessVerification } from "@/lib/verify-business";
 import { FOLLOW_UP_NOTE, PROMISES_PARAGRAPH } from "@/lib/publish-promises";
-import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION } from "@/lib/rfp-document";
+import { sectorLabel, RFP_DOCUMENT_PIPELINE_VERSION, livingDocumentToRfpSections } from "@/lib/rfp-document";
 import { RFP_ORG_SIZES, labelFor } from "@/lib/notice-options";
 import { buildMarketReport, formatBandGBP, type MarketReport } from "@/lib/market-report";
 import {
@@ -609,6 +609,41 @@ async function replayResultFrom(project: ProjectDetails, snapshot: PublishedSnap
  * successful publish (see replayResultFrom() above and the idempotency
  * check just inside this function).
  */
+
+/**
+ * Full-unification CLOSURE pass (17 Aug 2026), requirement 4: how many
+ * "would a supplier see this" questions this project's minimum-content gate
+ * (below) counts -- extracted as its own pure, exported function so the
+ * fixture suite can exercise the REAL gate logic directly (never a
+ * hand-duplicated copy that could silently drift from it), and so the exact
+ * same count can be asserted consistent with the notice/export pipelines
+ * that also read from `procurement_document`.
+ *
+ * `rfp_sections` is no longer a second authority for a project that has a
+ * canonical envelope (`project.envelope` is set only once
+ * `buildEnvelopeUpdate()` has durably persisted a server-recomputed
+ * `procurement_document` -- see envelope.ts's own `EnvelopeSaveOutcome`,
+ * where `envelope` and `procurement_document` are always set together). For
+ * such a project, this counts through the SAME faithful rendering adapter
+ * every export already uses (`livingDocumentToRfpSections()`,
+ * rfp-document.ts) -- never a second, hand-rolled count of
+ * `procurement_document.clauses` -- so "how many questions would a supplier
+ * see" can only ever mean one thing across the gate and the exports. A
+ * record with no `envelope` (every record saved before this pass, or a
+ * project whose engine never reached the canonical-envelope save path)
+ * falls back to the exact pre-existing `rfp_sections`-based count,
+ * unaffected -- the explicitly identified compatibility projection for
+ * historic records the requirement calls for, not a silently degraded
+ * resume experience.
+ */
+export function minimumContentQuestionCount(project: ProjectDetails): number {
+  return project.envelope && project.procurement_document
+    ? livingDocumentToRfpSections(project.procurement_document).reduce((n, s) => n + s.questions.length, 0)
+    : project.rfp_sections
+        .filter((s) => s.included)
+        .reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+}
+
 export async function executePublish(project: ProjectDetails, sessionEmail: string, opts: PublishOpts): Promise<PublishResult> {
   // IDEMPOTENCY (Robert's Phase 2 brief): checked first, before any gate or
   // side effect. If this exact request (same governed content, same
@@ -634,10 +669,10 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // zero questions, one click from dispatching an empty requirement to real
   // supplier contacts. The gate is server-side so every client (the page,
   // the MCP publish tools, and the verify path's pending_submit) refuses
-  // identically (Article 17).
-  const activeQuestionCount = project.rfp_sections
-    .filter((s) => s.included)
-    .reduce((n, s) => n + s.questions.filter((q) => q.priority !== "optional").length, 0);
+  // identically (Article 17). Extracted into `minimumContentQuestionCount()`
+  // (below) so the fixture suite can exercise the REAL gate logic directly,
+  // never a hand-duplicated copy that could silently drift from it.
+  const activeQuestionCount = minimumContentQuestionCount(project);
   if (activeQuestionCount === 0) {
     throw new Error(
       "This RFP has no questions yet, so there is nothing for vendors to respond to. Describe your project and generate the question set first; nothing has been sent.",

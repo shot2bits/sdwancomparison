@@ -1,0 +1,973 @@
+
+> netifymarketplace@0.1.0 validate
+> tsx scripts/apply-vendor-overrides.ts && tsx scripts/validate-vendors.ts && tsx scripts/validate-continuations.ts && tsx scripts/validate-instruments.ts && tsx scripts/validate-notice-titles.ts && tsx scripts/validate-labels.ts && tsx scripts/verify-fact-ledger-reliability-gate.ts && tsx scripts/validate-procurement-document.ts && tsx scripts/validate-procurement-canvas-corrections.ts && tsx scripts/validate-living-canvas-phase2-lifecycle.ts && tsx scripts/validate-pre-publish-vendor-disclosure.ts && tsx scripts/validate-published-resume-hydration.ts && tsx scripts/validate-rfp-builder-match-disclosure.ts && tsx scripts/validate-living-procurement-os-stage-a.ts && tsx scripts/validate-envelope-schema-version.ts && tsx scripts/validate-procurement-room.ts && tsx scripts/validate-export-parity.ts && tsx scripts/validate-history-provenance.ts && tsx scripts/validate-procurement-document-persistence.ts
+
+apply-vendor-overrides: nothing approved to apply.
+✓ 30 vendor records validated
+continuations: 22 fixtures pass (0 fail)
+instruments: 18 fixtures pass (0 fail)
+notice-titles: 33 fixtures pass (0 fail)
+labels: 96 checks pass (0 fail)
+
+=== Regression 1: the original five-fact buyer message (Doc 1, 13 Aug) ===
+
+PASS  Doc 1 message: sector stated 'Healthcare' (not guessed), the Ethernet-circuit clause and the SD-WAN/SASE clause both survive COMPLETE and VERBATIM as unplaced receipts (no invented bespoke fragment, nothing silently lost)  ->  sector={"path":"organisation.sector","value":"Healthcare & pharma","provenance":"stated","quote":"Healthcare","matchStart":11} unplaced=["UK 20 site Healthcare business requires SD-WAN and full SASE.","We also have a legacy app that requires a point to point Ethernet private circuit."]
+
+=== Regression 2: literal sector vs inferred sector ===
+
+PASS  Sector: "We are a Healthcare business with 40 sites."  ->  -> {"path":"organisation.sector","value":"Healthcare & pharma","provenance":"stated","quote":"Healthcare","matchStart":9} (expected value=Healthcare & pharma provenance=stated quote="Healthcare")
+PASS  Sector: "We are a Retail business with 40 stores."  ->  -> {"path":"organisation.sector","value":"Retail & e-commerce","provenance":"stated","quote":"Retail","matchStart":9} (expected value=Retail & e-commerce provenance=stated quote="Retail")
+PASS  Sector: "We are a Manufacturing company with 40 sites."  ->  -> {"path":"organisation.sector","value":"Manufacturing","provenance":"stated","quote":"Manufacturing","matchStart":9} (expected value=Manufacturing provenance=stated quote="Manufacturing")
+PASS  Sector: "We are a Financial services firm with 40 sites."  ->  -> {"path":"organisation.sector","value":"Financial services","provenance":"stated","quote":"Financial services","matchStart":9} (expected value=Financial services provenance=stated quote="Financial services")
+PASS  Sector: "We run a hospital group with 40 sites."  ->  -> {"path":"organisation.sector","value":"Healthcare & pharma","provenance":"inferred","reason":"\"hospital\" indicates this sector","matchedText":"hospital","matchStart":9} (expected value=Healthcare & pharma provenance=inferred)
+PASS  Sector: "We operate 12 GP practices."  ->  -> {"path":"organisation.sector","value":"Healthcare & pharma","provenance":"inferred","reason":"\"gp\" indicates this sector","matchedText":"gp","matchStart":14} (expected value=Healthcare & pharma provenance=inferred)
+PASS  Sector: "We run a chain of dental clinics."  ->  -> {"path":"organisation.sector","value":"Healthcare & pharma","provenance":"inferred","reason":"\"dental\" indicates this sector","matchedText":"dental","matchStart":18} (expected value=Healthcare & pharma provenance=inferred)
+
+=== Regression 3: partial extraction -- four clauses land, one does not ===
+
+PASS  Four clauses land facts, the fifth (small talk) is kept as an unplaced receipt, not dropped  ->  clauses=5 landedPaths=["estate.users","estate.sites","constraints.timeline","organisation.sector","drivers","procurement.buying"] unplaced=["We had a great chat with our account manager last week."]
+
+=== Regression 4: no duplication between structured facts and bespoke requirements ===
+
+PASS  A clause already covered by estate.sites/procurement.buying is not also filed as bespoke  ->  bespokeUpdates=0 unplaced=[]
+PASS  The rail's own threat-protection bespoke match is not duplicated by the clause-coverage supplement  ->  bespokeUpdates=[{"path":"requirements.bespoke","value":["We need next-generation threat protection across our estate"],"provenance":"stated","quote":"We need next-generation threat protection across our estate","matchStart":0}] unplaced=[]
+PASS  A canonical-label fact (managed security, off an 'MDR' mention) is not duplicated as a bespoke requirement  ->  updates=[{"path":"procurement.buying","value":"managed_security","provenance":"stated","quote":"managed security","matchedText":"MDR","matchStart":14}] unplaced=["We require an MDR service."]
+
+=== Regression 5: model timeout / unavailability ===
+
+PASS  extractRequirement falls back to the deterministic rail when the model is unavailable, and the gate still runs on top of it  ->  engine=deterministic_fallback notes=["Model extraction unavailable: no API key configured."]
+
+=== Regression 6a: corrections across turns still work with the gate layered on ===
+
+PASS  A correction ('actually 25 sites') still upgrades the ledger to 25, not 20  ->  estate.sites=25
+
+=== Regression 6b: a negated requirement is never invented as a bespoke fact ===
+
+PASS  A negated requirement clause is not filed as a bespoke requirement -- it surfaces as an unplaced receipt instead  ->  bespoke=undefined unplaced=["We don't need a point to point Ethernet circuit for the legacy app."]
+
+=== Regression 6c: removal-command matching still reaches a long clause receipt ===
+
+PASS  A short CONTIGUOUS phrase from a long unplaced-clause receipt matches ProjectDesk's drop/remove command predicate  ->  receipt="We also have a legacy app that requires a point to point Ethernet private circuit." target="point to point Ethernet" matches=true
+NOTE  Known limitation, not fixed by this gate: a non-adjacent phrase ("Ethernet circuit", with "private" sitting between the two words in the receipt) does NOT match the drop/remove command's concatenated-normalisation predicate (matches=false). Buyers will need to quote a contiguous phrase from a long receipt to clear it by typing "drop ...".
+
+=== Blocker 1a: occurrence-aware coverage -- a second requirement coordinated in the SAME sentence ===
+
+PASS  "We need SASE and a point-to-point Ethernet circuit.": SASE lands AND the Ethernet circuit survives, as the complete original sentence (not silently covered by the SASE fact, not a fragment)  ->  buying={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} unplaced=["We need SASE and a point-to-point Ethernet circuit."]
+
+=== Blocker 1b: occurrence-aware coverage -- the SAME word in an EARLIER sentence must not cover a LATER one ===
+
+PASS  "We use Azure today. We also require Azure ExpressRoute...": the Azure cloud fact from sentence 1 does not silently cover sentence 2's ExpressRoute requirement, which survives as a complete unplaced receipt  ->  cloud={"path":"estate.cloud","value":["azure"],"provenance":"stated","quote":"Azure","matchStart":7} unplaced=["We also require Azure ExpressRoute for connectivity."]
+
+=== Blocker 1 regression guard: a coordinated but SAME-intent pairing (SD-WAN/SASE) must not spawn a spurious duplicate ===
+
+PASS  "...requires SD-WAN and full SASE...": one unified buying intent does not spawn a spurious extra bespoke entry OR a duplicate/fragmented unplaced entry -- exactly the two whole clauses, once each  ->  bespoke=[] unplaced=["UK 20 site Healthcare business requires SD-WAN and full SASE.","We also have a legacy app that requires a point to point Ethernet private circuit."]
+
+=== Blocker 1, direct unit test: coverDeclarativeClauses() itself, with synthetic updates (no model, no rail) ===
+
+PASS  coverDeclarativeClauses(): a single Azure anchor positioned in sentence 1 does not cover sentence 2's ExpressRoute clause -- it survives whole  ->  unplaced=["We also require Azure ExpressRoute for connectivity."]
+
+=== Round 3 blockers 1 & 2 -- SUPERSEDED by the third amendment's architectural correction ===
+
+NOTE  Round 3's atomic-splitting fixtures are retained below as regression cases proving the buyer intent still holds, not as proof the old mechanism survives -- it has been replaced outright.
+PASS  "SASE plus Ethernet private circuit": SASE still lands, no invented bespoke fragment, and the complete original sentence (Ethernet circuit included) survives verbatim as an unplaced receipt  ->  sase={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE plus Ethernet private circuit."]
+PASS  "SASE and require an Ethernet circuit": SASE still lands, no invented bespoke fragment, and the complete original sentence (Ethernet circuit included) survives verbatim as an unplaced receipt  ->  sase={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE and require an Ethernet circuit."]
+PASS  "SASE but also require an Ethernet circuit": SASE still lands, no invented bespoke fragment, and the complete original sentence (Ethernet circuit included) survives verbatim as an unplaced receipt  ->  sase={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE but also require an Ethernet circuit."]
+PASS  "SASE; we also require an Ethernet circuit (semicolon is NOT a strong boundary per instruction 5 -- one clause, not two)": SASE still lands, no invented bespoke fragment, and the complete original sentence (Ethernet circuit included) survives verbatim as an unplaced receipt  ->  sase={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE; we also require an Ethernet circuit."]
+
+=== Round 4, direct unit test: coverDeclarativeClauses() never splits on 'and'/';' -- a covered clause with residual text stays whole ===
+
+PASS  coverDeclarativeClauses(): a semicolon-joined repeated predicate is not split -- the whole clause, verbatim, survives as one unplaced receipt  ->  unplaced=["We need SASE; we also require an Ethernet circuit."]
+
+=== Blocker 2: paste/drop ingestion (ProjectDesk.tsx's ingestText) ===
+
+NOTE  Not independently unit-testable (ingestText is an inline React callback, not an exported pure function) -- verified by source review: the paste/drop chunk loop in ProjectDesk.tsx now calls keepReceipt() for every runCycle().unplaced clause, mirroring send()'s own fix line for line.
+
+=== Blocker 3: canonical display labels must not be used as coverage evidence unless literally present ===
+
+PASS  "We need SDWAN.": the canonical display label is not used as coverage evidence -- no duplicate bespoke/receipt  ->  fact={"path":"procurement.buying","value":"sdwan","provenance":"stated","quote":"SD-WAN","matchedText":"need sdwan","matchStart":3} bespoke=[] unplaced=[]
+PASS  "We use M365.": the canonical display label is not used as coverage evidence -- no duplicate bespoke/receipt  ->  fact={"path":"estate.cloud","value":["m365"],"provenance":"stated","quote":"Microsoft","matchedText":"m365","matchStart":7} bespoke=[] unplaced=[]
+PASS  "We suffered a breach.": the canonical display label is not used as coverage evidence -- no duplicate bespoke/receipt  ->  fact={"path":"drivers","value":["incident"],"provenance":"stated","quote":"incident","matchedText":"breach","matchStart":14} bespoke=[] unplaced=[]
+
+=== Blocker 4: direct sector matching requires organisational self-identification, not a bare requirement mention ===
+
+PASS  "We are a Government organisation.": self-identification still states the sector  ->  sector={"path":"organisation.sector","value":"Government & public sector","provenance":"stated","quote":"Government","matchStart":9}
+PASS  "We require Government security classifications.": a requirement mentioning the word does not set the buyer's sector  ->  sector=undefined unplaced=["We require Government security classifications."] bespoke=[]
+
+=== Round 3, blocker 4: sector provenance -- bare 'is' removed, explicit labelling and standalone exact input tightened ===
+
+PASS  "Healthcare" (exact standalone input, nothing else): the sector is STATED, not inferred -- it's the buyer's own literal word for it  ->  sector={"path":"organisation.sector","value":"Healthcare & pharma","provenance":"stated","quote":"Healthcare","matchStart":0}
+PASS  "Sector: Healthcare": explicit sector-labelling phrasing states the sector  ->  sector={"path":"organisation.sector","value":"Healthcare & pharma","provenance":"stated","quote":"Healthcare","matchStart":8}
+PASS  "We are a Healthcare business.": explicit self-identification still states the sector (unchanged by the 'is' removal)  ->  sector={"path":"organisation.sector","value":"Healthcare & pharma","provenance":"stated","quote":"Healthcare","matchStart":9}
+PASS  "Our policy is Government approved.": bare 'is' is no longer sufficient self-identification -- the sector is set NEITHER stated NOR inferred  ->  sector=undefined unplaced=["Our policy is Government approved."] bespoke=[]
+
+=== Blocker 5 & Round 3 blocker 3, consolidated: a captured bespoke clause is never silently truncated, at any length ===
+
+PASS  A 'threat protection' bespoke clause longer than the old 200-character cap is kept in full, not silently sliced  ->  clauseLength=432 reconstructedLength=432 exactMatch=true bespoke={"path":"requirements.bespoke","value":["We also require next-generation threat protection additional named requirement detail padded with no punctuation so it all stays one clause additional named requirement detail padded with no punctuation so it all stays one clause additional named requirement detail padded with no punctuation so it all stays one clause additional named requirement detail padded with no punctuation so it all stays one clause additional named requi"],"provenance":"stated","quote":"We also require next-generation threat protection additional named requirement detail padded with no punctuation so it all stays one clause additional named requirement detail padded with no punctuation so it all stays one clause additional named requirement detail padded with no punctuation so it all stays one clause additional named requirement detail padded with no punctuation so it all stays one clause additional named requi","matchStart":0}
+PASS  A 5,021-character 'threat protection' clause (Codex's exact reported length) is reconstructed character-for-character, not truncated to 4,000  ->  clauseLength=5021 chunkCount=3 reconstructedLength=5021 exactMatch=true
+PASS  A clause needing 16 chunks is not capped at 12 (the old .slice(0,12) list cap) -- every chunk is kept and reconstructs exactly  ->  clauseLength=30500 chunkCount=16 reconstructedLength=30500 exactMatch=true
+
+=== Round 4, fixture set A: comma/colon/slash/with -- the silent-loss examples Codex reported ===
+
+PASS  "We need SASE, require an Ethernet private circuit.": SASE lands AND the Ethernet requirement remains available as the complete, verbatim source receipt (never silently lost, never a fragment)  ->  buying={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE, require an Ethernet private circuit."]
+PASS  "We need SASE: we also require an Ethernet private circuit.": SASE lands AND the Ethernet requirement remains available as the complete, verbatim source receipt (never silently lost, never a fragment)  ->  buying={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE: we also require an Ethernet private circuit."]
+PASS  "We need SASE / we also require an Ethernet private circuit.": SASE lands AND the Ethernet requirement remains available as the complete, verbatim source receipt (never silently lost, never a fragment)  ->  buying={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE / we also require an Ethernet private circuit."]
+PASS  "We need SASE with an Ethernet private circuit.": SASE lands AND the Ethernet requirement remains available as the complete, verbatim source receipt (never silently lost, never a fragment)  ->  buying={"path":"procurement.buying","value":"sase","provenance":"stated","quote":"SASE","matchedText":"need sase","matchStart":3} bespoke=[] unplaced=["We need SASE with an Ethernet private circuit."]
+
+=== Round 4, fixture set B: compound phrases whose own coordinator must NOT be split ===
+
+PASS  "We are an Energy and utilities business.": the compound sector phrase lands CLEAN (its own "and" is not split) -- zero spurious unplaced receipts  ->  sector={"path":"organisation.sector","value":"Energy & utilities","provenance":"stated","quote":"Energy and utilities","matchStart":10} unplaced=[]
+PASS  "Sector: Retail and e-commerce.": the compound sector phrase lands CLEAN (its own "and" is not split) -- zero spurious unplaced receipts  ->  sector={"path":"organisation.sector","value":"Retail & e-commerce","provenance":"stated","quote":"Retail and e-commerce","matchStart":8} unplaced=[]
+PASS  "We need research and development network segmentation.": no fact captures this compound phrase, so the COMPLETE, UNSPLIT sentence is kept as a receipt -- never "We need research" plus a stray fragment  ->  updates=[] unplaced=["We need research and development network segmentation."]
+PASS  "We need sales and marketing network segmentation.": no fact captures this compound phrase, so the COMPLETE, UNSPLIT sentence is kept as a receipt -- never "We need research" plus a stray fragment  ->  updates=[] unplaced=["We need sales and marketing network segmentation."]
+PASS  "We need active-active and active-passive failover.": no fact captures this compound phrase, so the COMPLETE, UNSPLIT sentence is kept as a receipt -- never "We need research" plus a stray fragment  ->  updates=[] unplaced=["We need active-active and active-passive failover."]
+
+=== Round 4, fixture set C: the original five-fact message, re-verified under the new architecture ===
+
+PASS  The original five-fact message: every requirement remains available -- as a structured fact, or as a complete retained source receipt -- under the new architecture  ->  updates=[{"path":"estate.users","value":200},{"path":"estate.sites","value":20},{"path":"organisation.sector","value":"Healthcare & pharma"},{"path":"organisation.regions","value":["uk"]},{"path":"estate.existingNetwork","value":["sdwan"]}] unplaced=["UK 20 site Healthcare business requires SD-WAN and full SASE.","We also have a legacy app that requires a point to point Ethernet private circuit."]
+
+=== Round 4, item 6: persisted buyer.notes carries the buyer's verbatim source wording (save/publish, not just the transient chat display) ===
+
+PASS  notesWithSourceTurns(): folds the buyer's verbatim source turn into the notes string alongside any existing content  ->  out="Staff: 200. Buyer's original wording, preserved verbatim: We need SASE, require an Ethernet private circuit.."
+PASS  buildSecurityProject(): the persisted project's buyer.notes contains the buyer's original source wording verbatim  ->  notes="Staff: 200. Buyer's original wording, preserved verbatim: We need SASE, require an Ethernet private circuit.."
+PASS  buildSecurityProject(): the persisted project's source_ledger contains the buyer's structured turn (id, text, via) -- the new canonical store, not just its notes projection  ->  source_ledger=[{"id":"st_round4fixture1","text":"We need SASE, require an Ethernet private circuit.","at":1786974551959,"via":"typed"}]
+
+=== Round 5 (fourth amendment, 13 Aug 2026): the source ledger is canonical, structured, persisted data, threaded through every save path ===
+
+PASS  chunkForIngest(): a paste past the read budget is still honestly truncated for EXTRACTION -- this round changes what the LEDGER keeps, not this disclosed budget  ->  totalChars=15239 readChars=10284 truncated=true
+PASS  source_ledger: a paste exceeding maxChunks survives COMPLETELY and EXACTLY in the ledger, even though the same text is truncated for extraction  ->  entryLength=15239 normalisedLength=15239 extractionReadChars=10284
+PASS  First save: turn A lands in source_ledger  ->  source_ledger=[{"id":"st_r5_turnA","text":"We need SASE for 20 sites.","at":1000,"via":"typed"}]
+PASS  Gap 2 fix: wording typed AFTER the first save (turn B) survives a second save (buildRescopedProject, the re-scope route's core) -- and turn A is not lost  ->  source_ledger=[{"id":"st_r5_turnA","text":"We need SASE for 20 sites.","at":1000,"via":"typed"},{"id":"st_r5_turnB","text":"Also: we suffered a breach last quarter.","at":2000,"via":"typed"}]
+PASS  Gap 2 fix: wording added just before publish (turn C, via the same refresh call signAndPublish() makes) is present in the project publish would receive -- all three turns intact  ->  source_ledger=[{"id":"st_r5_turnA","text":"We need SASE for 20 sites.","at":1000,"via":"typed"},{"id":"st_r5_turnB","text":"Also: we suffered a breach last quarter.","at":2000,"via":"typed"},{"id":"st_r5_turnC_prepublish","text":"One more thing: we also need PCI DSS scope.","at":3000,"via":"typed"}]
+PASS  parseIncomingSourceTurns(): a turn containing newlines, a pipe character, and leading/trailing whitespace round-trips EXACTLY as one entry -- the ledger never splits or joins on those characters  ->  in="  Line one.\nLine two has a | pipe in it.\n\nBlank-line-separated line three.  " out="  Line one.\nLine two has a | pipe in it.\n\nBlank-line-separated line three.  "
+PASS  mergeSourceLedger(): the same messy entry survives the merge step unchanged -- boundaries are never inferred from the text's own content, only from array position  ->  merged=[{"id":"st_r5_messy","text":"  Line one.\nLine two has a | pipe in it.\n\nBlank-line-separated line three.  ","at":4000,"via":"paste"}]
+PASS  Idempotent merge: saving the SAME batch twice in a row (nothing newly typed) never duplicates a turn -- entry count is unchanged and turn A still appears exactly once  ->  countBefore=3 countAfter=3 turnACopies=1
+
+=== Round 6 (fifth amendment, 13 Aug 2026): route-level integration -- the REAL Next.js route handlers, not the persistence core called directly ===
+
+PASS  Route-level: POST /security-sourcing/project (initial create) persists turn A into source_ledger  ->  status=200 error=undefined source_ledger=[{"id":"st_r6_A","text":"Turn A: initial create.","at":1000,"via":"typed"}]
+PASS  Route-level: POST .../rescope (a later Save, after the first) succeeds  ->  status=200
+PASS  Route-level: POST .../rescope (the pre-publish refresh call) succeeds  ->  status=200
+PASS  Route-level: GET /api/rfp/[id] (reopen) returns all three turns the real routes above persisted -- A (create), B (a later Save), C (the pre-publish refresh)  ->  status=200 source_ledger=[{"id":"st_r6_A","text":"Turn A: initial create.","at":1000,"via":"typed"},{"id":"st_r6_B","text":"Turn B: a later Save.","at":2000,"via":"typed"},{"id":"st_r6_C","text":"Turn C: added just before publish.","at":3000,"via":"typed"}]
+PASS  Route-level: reload/reopen FOLLOWED BY another real save persists turn D alongside every earlier turn  ->  source_ledger=[{"id":"st_r6_A","text":"Turn A: initial create.","at":1000,"via":"typed"},{"id":"st_r6_B","text":"Turn B: a later Save.","at":2000,"via":"typed"},{"id":"st_r6_C","text":"Turn C: added just before publish.","at":3000,"via":"typed"},{"id":"st_r6_D","text":"Turn D: typed after reopening.","at":4000,"via":"typed"}]
+PASS  Route-level: reopening and saving again with an already-persisted turn id never duplicates it -- entry count unchanged, turn A appears exactly once  ->  countBefore=4 countAfter=4 turnACopies=1
+PASS  Route-level, gap-1 fix: a raw paste with CRLF, leading/trailing spaces, blank lines and a pipe survives captureRawSourceEntry() -> the real create route -> saveProject -> a real reload, byte-for-byte identical to the original raw input  ->  helperMatches=true persistedMatches=true reloadedMatches=true raw="\r\n  Line one.\r\nLine two has a | pipe in it.\r\n\r\nBlank-line-separated line three.  \r\n"
+
+=== Round 7 (sixth amendment, 13 Aug 2026): resume must never silently discard the project's existing scope ===
+
+PASS  Round 7: create with requirement A succeeds through the real route  ->  status=200 error=undefined
+PASS  Round 7, item 5: resumeStateFromProject() -- the real helper ProjectDesk.tsx calls -- recovers requirement A, verbatim, from a real reload  ->  requirementBase={"organisation":{"sector":"Financial services","sizeBand":"large","regions":["uk","eu"]},"estate":{"users":850,"sites":14,"cloud":["azure","m365"],"existingSecurity":["Defender P2","CrowdStrike"],"existingNetwork":["mpls","sdwan"]},"drivers":["renewal","compliance"],"constraints":{"complianceRequirements":["iso27001","fca"],"inHouseSocCapacity":"twenty_four_seven","budgetBand":"£1.2m","timeline":"H2 2027"}}
+PASS  Round 7: the resumed save (real merged requirement, not FULL_REQ) succeeds through the real re-scope route  ->  status=200
+PASS  Round 7, items 1/2/5: after resume + one new detail + save, EVERY field from requirement A survives, B (pci_dss) is added, and every source id remains unique -- this is exactly the scenario that silently lost data before this amendment  ->  finalRequirement={"organisation":{"sector":"Financial services","sizeBand":"large","regions":["uk","eu"]},"estate":{"users":850,"sites":14,"cloud":["azure","m365"],"existingSecurity":["Defender P2","CrowdStrike"],"existingNetwork":["mpls","sdwan"]},"drivers":["renewal","compliance"],"constraints":{"complianceRequirements":["iso27001","fca","pci_dss"],"inHouseSocCapacity":"twenty_four_seven","budgetBand":"£1.2m","timeline":"H2 2027"}} sourceIds=["st_r7_A","st_r7_B"]
+PASS  Round 7, item 6: a turn typed locally during the resume fetch's async gap survives the resume merge -- mergeSourceLedger(fetched, local) never discards the locally-captured turn  ->  merged=[{"id":"st_race_A","text":"Turn A, already on the server before this resume.","at":1000,"via":"typed"},{"id":"st_race_B","text":"Turn B, already on the server before this resume.","at":2000,"via":"typed"},{"id":"st_race_local","text":"Typed in the gap between the fetch starting and resolving.","at":1500,"via":"typed"}]
+PASS  Round 7: mergeRequirementBase(null, addition) is byte-identical to addition -- a non-resumed session behaves exactly as it did before this amendment  ->  merged={"organisation":{"sector":"Retail & e-commerce"},"estate":{"sites":5}}
+
+=== Round 8 (seventh amendment, 13 Aug 2026): resumed corrections must actually retract a persisted list value, not just fail to add it back ===
+
+PASS  Round 8: create with requirement C succeeds through the real route  ->  status=200 error=undefined
+PASS  Round 8: resume recovers requirement C via the real resumeStateFromProject()  ->  resumeState={"sourceLedger":[{"id":"st_r8_C","text":"Turn C: the original scoping conversation.","at":1000,"via":"typed"}],"requirementBase":{"organisation":{"sector":"Retail & e-commerce","sizeBand":"medium","regions":["uk"]},"estate":{"users":300,"sites":8,"cloud":["azure","aws"],"existingNetwork":["mpls","vpn"]},"drivers":["renewal"],"constraints":{"complianceRequirements":["iso27001"],"budgetBand":"£400k"}}}
+PASS  Round 8, items 2/3: removalsIn() flags exactly MPLS as retracted from 'no longer use MPLS', and never SD-WAN; deterministicExtract() on the same text never proposes mpls as a positive update either  ->  removals=[{"path":"estate.existingNetwork","value":"mpls","quote":"MPLS","matchedText":"mpls","matchStart":17}] updates=[{"path":"procurement.buying","value":"sdwan","provenance":"stated","quote":"SD-WAN","matchedText":"sd-wan","matchStart":34}]
+PASS  Round 8: the corrected save succeeds through the real re-scope route  ->  status=200
+PASS  Round 8, items 1/2/4/6: reload after the corrected save shows MPLS removed while VPN/Azure/ISO 27001 (untouched values, merely omitted from the correction text) are preserved and PCI DSS (the new addition) is present  ->  finalRequirement={"organisation":{"sector":"Retail & e-commerce","sizeBand":"medium","regions":["uk"]},"estate":{"users":300,"sites":8,"cloud":["azure","aws"],"existingNetwork":["vpn"]},"drivers":["renewal"],"constraints":{"complianceRequirements":["iso27001","pci_dss"],"budgetBand":"£400k"}}
+PASS  Round 8, item 6 (source_ledger unchanged): the buyer's exact correction wording survives verbatim in source_ledger after the corrected save  ->  source_ledger=[{"id":"st_r8_C","text":"Turn C: the original scoping conversation.","at":1000,"via":"typed"},{"id":"st_r8_D","text":"We no longer use MPLS; we now use SD-WAN.","at":2000,"via":"typed"}]
+PASS  Round 8, item 3: dropping Azure (the command path's own FieldRemoval shape) removes exactly Azure and leaves every other cloud platform (AWS) untouched  ->  cloud=["aws"]
+PASS  Round 8, item 4: omitting an existing list item (no removal signal at all) preserves it exactly -- the base is untouched when nothing was explicitly retracted  ->  merged=["mpls","vpn"] base=["mpls","vpn"]
+PASS  Round 8: a value removed this sitting still returns the instant the SAME session restates it in words -- resurrection, mirroring the struck-WorkspaceFact rule  ->  existingNetwork=["vpn","mpls"]
+
+=== Round 9 (eighth amendment, 13 Aug 2026): occurrence-aware retraction, unambiguous removal aliases, and one strike-and-tombstone primitive for the row button and the drop/remove command ===
+
+PASS  Round 9, item 1: 'We use MPLS today, but we no longer use MPLS.' removes MPLS -- the earlier, unrelated positive mention no longer blocks the later, genuine retraction  ->  removals=[{"path":"estate.existingNetwork","value":"mpls","quote":"MPLS","matchedText":"mpls","matchStart":40}]
+PASS  Round 9, item 2: 'We no longer use Microsoft Defender.' does NOT remove m365 -- bare 'Microsoft' is no longer an alias for Microsoft 365  ->  removals=[]
+PASS  Round 9, item 2: 'We no longer use Microsoft 365.' DOES remove m365 -- the unambiguous full name still works  ->  removals=[{"path":"estate.cloud","value":"m365","quote":"Microsoft 365","matchedText":"microsoft 365","matchStart":17}]
+PASS  Round 9, item 2: 'We no longer use UK-based SOC coverage.' does NOT remove the UK region -- 'UK' here modifies 'SOC coverage', a different concept, not itself the retraction target  ->  removals=[]
+PASS  Round 9, item 3: the ambiguous 'Microsoft Defender' wording produces no tombstone AND survives as a visible unplaced clause, never silently discarded  ->  unplacedClauses=["We no longer use Microsoft Defender."]
+PASS  Round 9, item 3: the ambiguous 'UK-based SOC coverage' wording produces no tombstone AND survives as a visible unplaced clause  ->  unplacedClauses=["We no longer use UK-based SOC coverage."]
+PASS  Round 9: create with requirement E succeeds through the real route  ->  status=200 error=undefined
+PASS  Round 9: resume recovers requirement E via the real resumeStateFromProject()  ->  resumeState={"sourceLedger":[{"id":"st_r9_E","text":"Turn E: the original scoping conversation.","at":1000,"via":"typed"}],"requirementBase":{"organisation":{"sector":"Manufacturing","sizeBand":"medium","regions":["uk"]},"estate":{"users":400,"sites":12,"cloud":["azure","aws","m365"],"existingNetwork":["mpls","vpn"]},"drivers":["renewal"],"constraints":{"complianceRequirements":["iso27001"]}}}
+PASS  Round 9, item 5/6: resolveDropTarget('Azure') finds the RESTATED session fact first (the command's own live-fact precedence), not the resumed-base fallback the round-8 fixture only ever reached  ->  dropMatch={"kind":"fact","fact":{"id":"estate.cloud:azure","path":"estate.cloud","value":"azure","provenance":"stated","quote":"Azure","struck":false,"source":"extract","cycle":1}}
+PASS  Round 9, item 4: the typed drop/remove command strikes the live fact AND tombstones the matching resumed-base value in the SAME operation  ->  result={"facts":[{"id":"estate.cloud:azure","path":"estate.cloud","value":"azure","provenance":"stated","quote":"Azure","struck":true,"source":"extract","cycle":1}],"removals":{}}
+PASS  Round 9, item 5: clicking the same fact's row removal (dropListFact on the identical input) produces exactly the same result as the typed drop/remove command  ->  row={"facts":[{"id":"estate.cloud:azure","path":"estate.cloud","value":"azure","provenance":"stated","quote":"Azure","struck":true,"source":"extract","cycle":1}],"removals":{}} command={"facts":[{"id":"estate.cloud:azure","path":"estate.cloud","value":"azure","provenance":"stated","quote":"Azure","struck":true,"source":"extract","cycle":1}],"removals":{}}
+PASS  Round 9: the save after dropping the restated Azure fact succeeds through the real re-scope route  ->  status=200
+PASS  Round 9, item 7: reload after save shows Azure removed (from both the restated session fact and the persisted base) while AWS (untouched) is preserved  ->  cloud=["aws","m365"]
+PASS  Round 9: everything not touched by this correction -- MPLS, the UK region -- is still exactly as requirement E stated it, unaffected by dropping Azure  ->  existingNetwork=["mpls","vpn"] regions=["uk"]
+PASS  Round 9: a second resume, after the Azure save, recovers the project's current state via the real resumeStateFromProject()  ->  resumeState2={"sourceLedger":[{"id":"st_r9_E","text":"Turn E: the original scoping conversation.","at":1000,"via":"typed"},{"id":"st_r9_F","text":"Azure retired this quarter; dropped from the workspace.","at":2000,"via":"typed"}],"requirementBase":{"organisation":{"sector":"Manufacturing","sizeBand":"medium","regions":["uk"]},"estate":{"users":400,"sites":12,"cloud":["aws","m365"],"existingNetwork":["mpls","vpn"]},"drivers":["renewal"],"constraints":{"complianceRequirements":["iso27001"]}}}
+PASS  Round 9: the combined correction text produces exactly ONE removal (MPLS) -- the Defender and UK-based-SOC mentions correctly produce none  ->  removals=[{"path":"estate.existingNetwork","value":"mpls","quote":"MPLS","matchedText":"mpls","matchStart":40}]
+PASS  Round 9: the combined-correction save succeeds through the real re-scope route  ->  status=200
+PASS  Round 9, item 7: reload after the combined-correction save shows MPLS gone, while VPN, Microsoft 365 and the UK region -- none of them genuinely retracted -- all survive  ->  existingNetwork=["vpn"] cloud=["aws","m365"] regions=["uk"]
+PASS  Round 9, item 7: the combined correction's exact wording survives verbatim in source_ledger, including the two ambiguous mentions that produced no tombstone  ->  source_ledger=[{"id":"st_r9_E","text":"Turn E: the original scoping conversation.","at":1000,"via":"typed"},{"id":"st_r9_F","text":"Azure retired this quarter; dropped from the workspace.","at":2000,"via":"typed"},{"id":"st_r9_G","text":"We use MPLS today, but we no longer use MPLS. We no longer use Microsoft Defender. We no longer use UK-based SOC coverage.","at":3000,"via":"typed"}]
+
+=== Round 10 (Living Procurement UK Decision-Maker Blueprint, correction pass, Robert, 15 Aug 2026), defects 3 and 4: the decision ledger -- durable NextQuestion state and honest structured-action provenance ===
+
+PASS  buildSecurityProject(): a dismiss, a decline and a note-kind NextQuestion action all persist into decision_ledger, the durable structured store -- not just useState  ->  decision_ledger=[{"id":"dt_r10_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_note","at":3000,"questionId":"q-resilience","optionId":"q-resilience:0","optionLabel":"Critical sites only","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}]}]
+PASS  Defect 4: every persisted entry carries the full honest structured-action receipt Robert specified -- question id, option id, user-facing selected LABEL (never the question text), a timestamp, and the resulting governed change -- never a bare typed-quote fake  ->  entries=[{"id":"dt_r10_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_note","at":3000,"questionId":"q-resilience","optionId":"q-resilience:0","optionLabel":"Critical sites only","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}]}]
+PASS  Defect 4: optionLabel is always the buyer's OWN SELECTED LABEL ('Critical sites only', 'Not applicable', 'Undecided, ask the market') -- Netify's own question wording never lands in the ledger  ->  labels=["Undecided, ask the market","Not applicable","Critical sites only"]
+PASS  Defect 3: resumeDecisionsFromProject() replays the persisted ledger back into exactly the three previously browser-only pieces of state -- dismissedQuestionIds, declinedSuggestionIds, noted -- with provenance (label, section) intact  ->  resumed={"decisionLedger":[{"id":"dt_r10_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_note","at":3000,"questionId":"q-resilience","optionId":"q-resilience:0","optionLabel":"Critical sites only","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}]}],"noted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}],"dismissedQuestionIds":["q-contract-end"],"declinedSuggestionIds":["mf-segmentation"]}
+PASS  Gap 2 parity: a decision recorded AFTER the first save (buildRescopedProject, the same route a later Save/pre-publish refresh takes) survives alongside every earlier one -- decision_ledger accretes, never replaces  ->  decision_ledger=[{"id":"dt_r10_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_note","at":3000,"questionId":"q-resilience","optionId":"q-resilience:0","optionLabel":"Critical sites only","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}]},{"id":"dt_r10_accept_reversal","at":4000,"questionId":"sector:mf-segmentation","optionId":"ps-mf-segmentation","optionLabel":"Yes, add this","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"ps-mf-segmentation","label":"IEC 62443 segmentation","section":"sector","own":true}]}]
+PASS  Defect 3: replaying the FULL ledger in recorded order honours the buyer's later choice -- the earlier decline of mf-segmentation no longer appears declined once a later entry accepts it  ->  resumed={"decisionLedger":[{"id":"dt_r10_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10_note","at":3000,"questionId":"q-resilience","optionId":"q-resilience:0","optionLabel":"Critical sites only","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}]},{"id":"dt_r10_accept_reversal","at":4000,"questionId":"sector:mf-segmentation","optionId":"ps-mf-segmentation","optionLabel":"Yes, add this","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"ps-mf-segmentation","label":"IEC 62443 segmentation","section":"sector","own":true}]}],"noted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true},{"id":"ps-mf-segmentation","label":"IEC 62443 segmentation","section":"sector","own":true}],"dismissedQuestionIds":["q-contract-end"],"declinedSuggestionIds":[]}
+PASS  Defect 3: an item the buyer dismissed and never revisited stays dismissed after the later save -- it does not reappear merely because a DIFFERENT decision was reversed  ->  dismissedQuestionIds=["q-contract-end"]
+PASS  Idempotent merge: saving the SAME decision batch twice in a row never duplicates an entry -- decision_ledger's entry count is unchanged  ->  countBefore=4 countAfter=4 copies=1
+PASS  Route-level: POST /security-sourcing/project (initial create) persists both decisions into decision_ledger through the real route  ->  status=200 error=undefined decision_ledger=[{"id":"dt_r10rt_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10rt_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]}]
+PASS  Route-level: POST .../rescope (a later Save) records the third decision  ->  status=200
+PASS  Route-level reload: GET /api/rfp/[id] returns all three decisions the real routes above persisted  ->  status=200 decision_ledger=[{"id":"dt_r10rt_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10rt_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10rt_note","at":3000,"questionId":"q-resilience","optionId":"q-resilience:0","optionLabel":"Critical sites only","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}]}]
+PASS  Defect 3, the actual save -> reload/resume fixture: after a REAL create, a REAL later Save, and a REAL reload through the exported route handlers, resumeDecisionsFromProject() reconstructs the dismissed question, the declined suggestion and the answered resilience note -- none of them reappear, and provenance (label, section) survives intact  ->  resumed={"decisionLedger":[{"id":"dt_r10rt_dismiss","at":1000,"questionId":"q-contract-end","optionId":"dismiss","optionLabel":"Undecided, ask the market","action":"dismiss_question","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10rt_decline","at":2000,"questionId":"sector:mf-segmentation","optionId":"decline","optionLabel":"Not applicable","action":"decline_suggestion","resultingFactPaths":[],"resultingNoted":[]},{"id":"dt_r10rt_note","at":3000,"questionId":"q-resilience","optionId":"q-resilience:0","optionLabel":"Critical sites only","action":"note","resultingFactPaths":[],"resultingNoted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}]}],"noted":[{"id":"q-resilience:0","label":"Dual-circuit resilience at critical sites only","section":"estate","own":true}],"dismissedQuestionIds":["q-contract-end"],"declinedSuggestionIds":["mf-segmentation"]}
+PASS  resumeDecisionsFromProject() is scoped identically to resumeStateFromProject() -- a non-security_sourcing project's decisions are never rehydrated by this resume path, the same documented boundary the existing source-ledger resume already has  ->  result=null
+PASS  parseIncomingDecisionTurns(): one malformed item in a batch drops only itself -- the two valid entries either side survive  ->  parsed=["dt_r10_dismiss","dt_r10_decline"]
+PASS  mergeDecisionLedger(): merges the defensively-parsed batch with the same accretion-only, id-deduplicated rule as mergeSourceLedger  ->  merged=["dt_r10_dismiss","dt_r10_decline"]
+PASS  replayDecisionLedger(): decline followed by a later accept resolves ACCEPTED -- recorded order, not action-kind priority, decides the outcome  ->  result={"noted":[{"id":"ps-mf-segmentation","label":"IEC 62443 segmentation","section":"sector","own":true}],"dismissedQuestionIds":[],"declinedSuggestionIds":[]}
+PASS  replayDecisionLedger(): the SAME two entries in the OPPOSITE recorded order resolve DECLINED instead -- confirms the replay is genuinely order-driven, not a hidden bias toward accept, AND that the earlier accepted noted item is actually removed (not just shadowed by declinedSuggestionIds while still present)  ->  result={"noted":[],"dismissedQuestionIds":[],"declinedSuggestionIds":["mf-segmentation"]}
+
+=== Blocker 6: hermetic model tests (success, timeout, unavailability) + the reliability suite in the build gate ===
+
+PASS  Hermetic model SUCCESS: a mocked model reply is vetted through vetModelProposals() and lands via extractRequirement()  ->  engine=model budget={"path":"constraints.budgetBand","value":"£250k","provenance":"stated","quote":"£250k"}
+PASS  Hermetic model TIMEOUT: an aborted call falls back to the deterministic rail with a visible note, and the gate still runs on top of it  ->  engine=deterministic_fallback notes=["Model extraction timed out; deterministic parsing used."]
+PASS  Hermetic model FAILURE (non-timeout): a rejected fetch falls back to the deterministic rail with a visible note  ->  engine=deterministic_fallback notes=["Model extraction failed; deterministic parsing used."]
+PASS  Hermetic model UNAVAILABLE (503): a non-OK response falls back to the deterministic rail with a visible note  ->  engine=deterministic_fallback notes=["Model extraction unavailable (503); deterministic parsing used."]
+NOTE  This script is now wired into package.json's "validate" (and therefore "build"), so a regression here fails the build gate, not just this standalone run.
+
+ALL PASS
+PASS  Hermetic wrap: a pre-existing ANTHROPIC_API_KEY (simulating a real Vercel build key) is restored after the run, not left deleted or overwritten  ->  restored=true
+
+ALL PASS (including hermetic-wrap proof)
+PASS  14.4: Healthcare is a stated sector, never a guess  ->  value=Healthcare & pharma provenance=stated
+PASS  14.4: Healthcare sector fact is provenance=stated  ->  provenance=stated
+PASS  14.4: UK remains a structured fact  ->  ["uk"]
+PASS  14.4: 20 sites remains a structured fact  ->  sites=20
+PASS  14.4: 200 remote users remains a structured fact  ->  users=200
+PASS  14.4: SD-WAN remains a structured fact  ->  ["sdwan"]
+PASS  14.4: the SASE/SD-WAN scope sentence becomes a real network clause, not just a receipt  ->  found=true
+PASS  14.4: the scope clause quotes the buyer's SASE wording verbatim  ->  quote=UK 20 site Healthcare business requires SD-WAN and full SASE.
+PASS  14.4: the legacy app + retained Ethernet circuit becomes a testable clause  ->  found=true
+PASS  14.4: the legacy-circuit clause is classified, not dumped unclassified  ->  section=network
+PASS  14.4: the exact buyer sentence is attached as provenance verbatim  ->  quote=We also have a legacy app that requires a point to point Ethernet private circuit.
+PASS  14.4: the legacy-circuit clause is mandatory (buyer said "requires")  ->  mandatory=true
+PASS  14.4: supplier response asks for coexistence, migration sequencing and rollback, without prescribing a supplier architecture  ->  ["Describe how the retained circuit coexists with your proposed architecture, and for how long.","State the migration sequencing for the dependent application.","Name the service owner for the retained circuit during transition, and the rollback plan."]
+PASS  14.4: no unplaced clause remains ONLY under 'Your notes'  ->  stillUnclassified=[]
+PASS  14.4 Healthcare/Ethernet: evaluation categories total exactly 100  ->  total=100
+PASS  14.4 Healthcare/Ethernet: every clause traces to a fact, a quote or a named sector template  ->  untraceable=[]
+PASS  14.4 Healthcare/Ethernet: every mandatory clause carries an acceptance test  ->  bad=[]
+PASS  16.1: architecture includes an Azure node  ->  ["cloud-azure","identity","voice","application"]
+PASS  16.1: architecture includes an identity (Entra ID) node  ->  ["cloud-azure","identity","voice","application"]
+PASS  16.1: architecture includes a voice (Teams Phone) node  ->  ["cloud-azure","identity","voice","application"]
+PASS  16.1: architecture has a traceable edge touching the identity node  ->  [{"from":"identity","to":"application","label":"gated access"}]
+PASS  16.1: summary names the voice/Teams Phone requirement  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 testable requirements compiled from the buyer's own words.
+PASS  16.1: summary names the patient-facing application  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 testable requirements compiled from the buyer's own words.
+PASS  16.1: summary names Azure  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 testable requirements compiled from the buyer's own words.
+PASS  16.1: voice continuity clause generated  ->  
+PASS  16.1: application resilience clause generated  ->  
+PASS  16.1: Entra-aware ZTNA clause generated  ->  
+PASS  16.1: DLP clause generated  ->  
+PASS  16.1: fully managed / 24/7 service clause generated  ->  
+PASS  16.1: April 2027 dated transition clause generated  ->  
+PASS  16.1: voice-continuity clause specifies required evidence  ->  ["Failover time (seconds)","Call-survival test evidence"]
+PASS  16.1: voice-continuity clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: application-resilience clause specifies required evidence  ->  ["Application availability target","Failover test evidence"]
+PASS  16.1: application-resilience clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: identity-aware-ztna clause specifies required evidence  ->  ["Device-posture evidence","Entra ID integration test results"]
+PASS  16.1: identity-aware-ztna clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: dlp-coverage clause specifies required evidence  ->  ["Supported data types/classification labels","Policy enforcement test evidence"]
+PASS  16.1: dlp-coverage clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: managed-service-boundary clause specifies required evidence  ->  ["Service definition/RACI document","Support SLA"]
+PASS  16.1: managed-service-boundary clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: dated-transition-plan clause specifies required evidence  ->  ["Dated project plan","Rollback/contingency plan"]
+PASS  16.1: dated-transition-plan clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: supplier question count is non-zero  ->  questions=14
+PASS  16.1: mandatory gate count is non-zero  ->  gates=6
+PASS  16.1: security/identity weight is non-zero  ->  {"network_resilience":0,"security_identity_data":33,"managed_service_delivery":67,"commercial":0}
+PASS  16.1: service/delivery weight is non-zero  ->  {"network_resilience":0,"security_identity_data":33,"managed_service_delivery":67,"commercial":0}
+PASS  16.1 Prompt A: evaluation categories total exactly 100  ->  total=100
+PASS  16.1: the change ribbon's added-clause count matches the actual compiled clauses (first compile, no previousDocument)  ->  added=6 clauses=6
+PASS  16.1 Prompt A: every clause traces to a fact, a quote or a named sector template  ->  untraceable=[]
+PASS  16.1 Prompt A: every mandatory clause carries an acceptance test  ->  bad=[]
+PASS  16.2: the DLP clause is removed or superseded  ->  stillPresent=false
+PASS  16.2: the change set explicitly names the DLP clause as removed  ->  ["SEC-693021ca"]
+PASS  16.2: the operating model changes to co-managed  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  16.2: 24/7 incident support is kept  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  16.2: the change set records the managed-service clause as updated (not silently replaced)  ->  ["OPS-a2e5cbe3"]
+PASS  16.2: unrelated voice-continuity clause survives the correction  ->  
+PASS  16.2: unrelated application-resilience clause survives the correction  ->  
+PASS  16.2: unrelated identity-aware-ztna clause survives the correction  ->  
+PASS  16.2: the document version increments exactly once  ->  before=1 after=2
+PASS  16.2: the change ribbon distinguishes removals from updates in the same compile  ->  removed=["SEC-693021ca"] updated=["OPS-a2e5cbe3"]
+PASS  16.2 Prompt B: evaluation categories total exactly 100  ->  total=100
+PASS  16.3: a data-residency clause is generated  ->  
+PASS  16.3: the exact buyer wording is retained verbatim  ->  quote=No patient-identifiable data may leave the UK.
+PASS  16.3: the clause is attributed to buyer provenance  ->  origin=buyer
+PASS  16.3: supplier evidence is requested  ->  ["Data-flow diagram","Sub-processor list and locations"]
+PASS  16.3: the compiler does not invent a statute or certification  ->  Data residency constraint stated verbatim by the buyer: "No patient-identifiable data may leave the UK."
+PASS  16.3: the legal interpretation is recorded as an open decision, not asserted as fact  ->  ["OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  16.4: no mandatory gate is invented while the operating model conflicts  ->  gates=[]
+PASS  16.4: a visible conflict/open decision is generated  ->  
+PASS  16.4: the conflict decision names its reason  ->  The service must be fully managed, but our team must retain sole operational control over all policy changes.
+PASS  16.4: the conflicted managed-service clause is not silently made mandatory  ->  mandatory=false
+PASS  16.4 Prompt D: evaluation categories total exactly 100  ->  total=100
+PASS  14.5: Deterministic -- the same normalized inputs produce byte-identical documents  ->  compared two independent compiles of the same input
+PASS  14.5/Reversible: DLP clause present after it is stated  ->  
+PASS  14.5/Reversible: DLP clause removed after "Remove DLP."  ->  
+PASS  14.5/Reversible: DLP clause resurrects once the buyer restates it in their own words  ->  
+PASS  14.5/Conservative: a bare, non-obligatory mention is never marked mandatory  ->  {"section":"identity","statement":"Identity-aware ZTNA using the buyer's stated identity provider (Entra ID) for access decisions.","supplierResponse":["Describe your ZTNA integration with Entra ID, including device-posture enforcement.","State how a policy change in Entra ID propagates to network access decisions."],"evidence":["Device-posture evidence","Entra ID integration test results"],"acceptanceTest":"Access is denied when device posture fails an Entra-defined compliance policy, evidenced by a live or recorded test.","mandatory":false,"sourceFactIds":[],"origin":"buyer","reason":"The buyer stated Entra ID as the identity provider and required ZTNA.","quote":"We use Entra ID and Azure. ZTNA is available as an option.","sourceTurnIds":[],"sourceNotedIds":[],"templateKey":"identity:entra-ztna","templateId":"identity-aware-ztna","id":"ID-3331f8dc","weight":3}
+PASS  14.5/Balanced: an empty document: evaluation categories total exactly 100  ->  total=100
+PASS  14.5: an empty document compiles with zero clauses, not an error  ->  clauses=0
+PASS  14.3: no section renders when nothing has been said  ->  sections=[]
+PASS  14.3: no supplier response group renders when nothing has been said  ->  groups=0
+
+ALL PASS
+PASS  Item 1/insertion-before: DLP alone compiles with a well-formed immutable id (SECTION-<8 hex chars>, a hash of templateKey, no ordinal)  ->  id=SEC-693021ca
+PASS  Item 1/history-free: a totally independent compile (no shared history whatsoever) of the SAME templateKey produces the IDENTICAL id  ->  chained=SEC-693021ca independent=SEC-693021ca
+PASS  Item 1/insertion-before: adding an alphabetically-earlier clause does NOT change the surviving DLP clause's id  ->  dlp id before=SEC-693021ca after=SEC-693021ca
+PASS  Item 1/insertion-before: the new residency clause gets its own well-formed, distinct id, independent of insertion order  ->  id=SEC-e83fb756
+PASS  Item 1/removal-before: DLP is gone after "Remove DLP."  ->  
+PASS  Item 1/removal-before: the surviving residency clause retains EXACTLY the same id after an unrelated removal  ->  before=SEC-e83fb756 after=SEC-e83fb756
+PASS  Item 1/THE ROBERT REPRODUCTION: recompiling the identical post-removal state with previousDocument=null (a genuine reload) does NOT renumber the surviving residency clause -- it keeps the exact same id an in-session recompile would  ->  mid-session id=SEC-e83fb756 previousDocument=null id=SEC-e83fb756
+PASS  Item 1/THE ROBERT REPRODUCTION: DLP also stays correctly removed after the previousDocument=null recompile (not resurrected by the reload itself)  ->  
+PASS  Item 1/removed-id-not-reassigned: the ISO 27001 compliance clause compiles  ->  
+PASS  Item 1/removed-id-not-reassigned: the new ISO 27001 clause does NOT inherit DLP's old id (or residency's id)  ->  iso id=SEC-138dd579 dlp(retired)=SEC-693021ca residency=SEC-e83fb756
+PASS  Item 1/resurrection: DLP resurrects with EXACTLY its original id, not a new one and not a collision  ->  original=SEC-693021ca resurrected=SEC-693021ca residency=SEC-e83fb756 iso=SEC-138dd579
+PASS  Item 1: all three surviving security-section clauses carry three DISTINCT ids -- no collision anywhere in this scenario  ->  ids=["SEC-693021ca","SEC-e83fb756","SEC-138dd579"]
+PASS  Item 1/correction: a content correction (fully managed -> co-managed) preserves the EXACT same public clause id  ->  before=OPS-a2e5cbe3 after=OPS-a2e5cbe3
+PASS  Item 1: the mandatory gate referencing this clause carries the SAME id across the correction, because it derives from the now-stable clause id  ->  before=GATE-OPS-a2e5cbe3 after=GATE-OPS-a2e5cbe3
+PASS  Item 1: the architecture's voice node cites the SAME stable clause id as the voice-continuity clause itself  ->  clauseId=APP-50d06527 node.sourceClauseIds=["APP-50d06527"]
+PASS  Item 2/THE ROBERT REPRODUCTION: "co-managed" then, LATER, "fully managed" reduces to fully managed (managed), not co-managed  ->  model=managed
+PASS  Item 2/THE ROBERT REPRODUCTION: the resolved state traces to the LATER turn's own id  ->  sourceTurnId=om_t2
+PASS  Item 2/reverse direction: "fully managed" then, LATER, "co-managed instead" reduces to co-managed, not fully managed  ->  model=co_managed
+PASS  Item 2/support-hours: 24/7 then, LATER, business-hours-only reduces to hours247=false  ->  {"hours247":false,"incidentSupport247":false,"sourceTurnId":"sh_t2"}
+PASS  Item 2/support-hours (reverse): business-hours-only then, LATER, 24/7 incident support reduces to hours247=true, incidentSupport247=true  ->  {"hours247":true,"incidentSupport247":true,"sourceTurnId":"sh_t2"}
+PASS  Item 2/unrelated intervening turn: an unrelated turn between the two operating-model statements does not disrupt the chronology -- fully managed still wins  ->  model=managed
+PASS  Item 2/(at, position) ordering: array order is REVERSED from `at` order -- the reducer still resolves by `at`, not by array position, so fully managed (the later `at`) wins  ->  model=managed sourceTurnId=ap_t2
+PASS  Item 2/(at, position) tie-break: two turns with the IDENTICAL `at` resolve by array position -- the later array entry wins  ->  model=managed sourceTurnId=tb_b
+PASS  Item 2/same-turn contradiction: two model names in ONE occurrence with no correction signal is left unresolved (model stays null) and surfaced as ambiguousText, never guessed  ->  {"model":null,"sourceTurnId":null,"ambiguousText":"We could go with a co-managed service or a managed service, no strong preference either way."}
+PASS  Item 2/same-turn contradiction: the full compile surfaces OD-operating-model-ambiguous-correction as a real OpenDecision, not a silently dropped signal  ->  ["OD-operating-model-ambiguous-correction","OD-timeline-unstated"]
+PASS  Item 2/end-to-end: the compiled managed-service clause states fully managed (not co-managed) after the correction, with facts=[] so only the chronological reducer could have produced this  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
+PASS  Item 2/save-reopen: create with the co-managed turn succeeds through the real route  ->  status=200 error=undefined
+PASS  Item 2/save-reopen: the fully-managed correction saves through the real rescope route  ->  {"rescoped":true,"verdict_version":2,"artefact_version":2,"replaced_edits":false,"open_gaps":1,"verdict":{"rulebookVersion":"SEC-RULES-2026.1","generatedAt":"2026-08-17T13:49:13.476Z","inputDigest":"56ee85883d6310774c5b198a4d082d9a36322ae86d1f925b77e44ed540a43925","capabilities":[{"id":"endpoint","needed":"not_indicated","reasoning":"You already run Defender P2, a graded endpoint control. Replacing it without a consolidation driver buys nothing.","evidence":[{"source":"Existing-control precedence: never replace a graded control without a consolidation driver","claim":"Existing graded controls take precedence over new purchases."}],"route":null,"firedRules":["END-2"]},{"id":"mdr_soc","needed":"recommended","reasoning":"Business-hours cover leaves the out-of-hours gap that most incidents use.","evidence":[{"source":"Netify threat coverage matrix (the Threat Protect advisor rulebook)","claim":"SOC and MDR marked beyond the SMB product; marketplace route."}],"route":"marketplace_service","firedRules":["MDR-2"]},{"id":"sse","needed":"not_indicated","reasoning":"No declared cloud estate; SSE has nothing to protect here yet.","evidence":[],"route":null,"firedRules":[]},{"id":"siem_logging","needed":"required","reasoning":"Declared compliance (iso27001) carries log retention and audit-evidence obligations.","evidence":[{"source":"Netify question bank v2026.1, security and monitoring sections","claim":"Monitoring and reporting obligations in the security sections."},{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"SIEM vendor shortlists are compiled per project; grading depth is honest."}],"route":"marketplace_service","routeDetail":"Managed SIEM shortlist compiled with you; Netify's grading is deepest in network security, so confidence is capped (SIEM-2)","firedRules":["SIEM-1","SIEM-2"]},{"id":"managed_firewall","needed":"recommended","reasoning":"On-premises estate without cloud-delivered perimeter controls; managed firewall covers the office edge.","evidence":[{"source":"Published BT Fortinet and Meraki managed options; BTnet Security attach prices (£100/£200 per month)","claim":"BT Fortinet and Meraki managed options; BTnet Security attach at published prices."}],"route":"either","routeDetail":"Both the BT managed options and marketplace vendors genuinely satisfy this; the service path puts matched vendors in competition for it, with the BT option assessed alongside (COMPETE-1)","firedRules":["FW-1","FW-3"]},{"id":"awareness","needed":"required","reasoning":"Incident or compliance context makes staff training a required control, not a nice-to-have.","evidence":[{"source":"Netify threat coverage matrix (the Threat Protect advisor rulebook)","claim":"Staff phishing partly mitigated by tooling; Security Awareness Training is the BT route."}],"route":"bt_product","routeDetail":"BT Security Awareness Training, or an equivalent; this never blocks a path","firedRules":["AWA-1","AWA-2"]},{"id":"email_security","needed":"not_indicated","reasoning":"No indicator in the declared drivers. Baseline native controls plus awareness cover the ordinary case.","evidence":[{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"We recommend only what we can evaluate."}],"route":"out_of_scope","routeDetail":"Native platform controls plus awareness; dedicated gateways via your MSP or direct (EML-2)","firedRules":["EML-2"]},{"id":"backup_resilience","needed":"recommended","reasoning":"Tested recovery is baseline hygiene; outside Netify's categories, flagged for completeness.","evidence":[{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"Outside Netify's graded categories; flagged honestly, never sold."}],"route":"out_of_scope","routeDetail":"Buyer-side requirement; carried into generated RFP documents as a stated line (BCK-2)","firedRules":["BCK-2","BCK-2"]}],"serviceModel":"co_managed","pathRecommendation":"service_path","againstInterest":[{"capabilityId":"endpoint","routeDenied":"bt_product","statement":"You already run Defender P2; endpoint replacement is not indicated. Spend nothing here.","evidence":"Existing-control precedence: never replace a graded control without a consolidation driver"}],"assumptions":[],"gaps":[{"field":"estate.users","whyItMatters":"Scale decides the product-versus-managed-service boundary.","question":"How many staff, and roughly how many computers, mobiles and servers?"}],"summary":{"recommended":["siem_logging","awareness"],"conditional":["mdr_soc","managed_firewall","backup_resilience"],"not_recommended":[{"capabilityId":"endpoint","reason":"You already run Defender P2, a graded endpoint control. Replacing it without a consolidation driver buys nothing.","alternative":"Keep the incumbent EDR; revisit only with a consolidation driver."},{"capabilityId":"sse","reason":"No declared cloud estate; SSE has nothing to protect here yet."},{"capabilityId":"email_security","reason":"No indicator in the declared drivers. Baseline native controls plus awareness cover the ordinary case.","alternative":"Native platform controls plus awareness training."}]},"confidence":"medium","nextSteps":[{"action":"Product path: BT Endpoint Threat Protect can be quoted and ordered, with a signed contract, on the page.","page":"https://netify.co.uk/bt-endpoint-threat-protect/"},{"action":"Service path: build the security requirement into an RFP and publish it to matched vendors.","page":"https://netify.co.uk/sase/rfp-builder/new/"}]},"project_path":"/project/rfp_msxaie0il4qavf","envelope_revision":0}
+PASS  Item 2/save-reopen: both turns are durable in source_ledger after the real save  ->  ["We require a co-managed service, with 24/7 support, UK 20 site Healthcare business.","We now require a fully managed service instead."]
+PASS  Item 2/save-reopen: after a REAL save+reopen+recompile with previousDocument=null, the managed-service clause reads fully managed (the correction survived and reduced chronologically, not co-managed)  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, including 24/7 support.
+PASS  Item 2/byte-equivalent recompilation: re-deriving the operating-model correction from the SAME source_ledger twice is byte-identical  ->  compared two independent derivations
+PASS  Item 3/pure: a real single-target command ("remove Azure") still classifies as dropName  ->  {"kind":"dropName","name":"azure"}
+PASS  Item 3/pure: "drop MPLS" still classifies as dropName  ->  {"kind":"dropName","name":"mpls"}
+PASS  Item 3/pure: a longer but SINGLE-sentence target ("untick the DLP requirement") still classifies as dropName  ->  {"kind":"dropName","name":"the dlp requirement"}
+PASS  Item 3/pure: "keep Azure" still classifies as keepName  ->  {"kind":"keepName","name":"azure"}
+PASS  Item 3/THE FIX: the exact Section 16.2 correction prompt is NOT classified as a drop command (falls through to ordinary procurement content)  ->  parsed=null
+PASS  Item 3/pure: "Remove DLP" ALONE (no trailing correction) still classifies as dropName  ->  {"kind":"dropName","name":"dlp"}
+PASS  Items 2+3: create with the Healthcare/Ethernet/residency turn succeeds through the real route  ->  status=200 error=undefined
+PASS  Items 2+3/before-save baseline: network-architecture-scope compiles from the live session  ->  
+PASS  Items 2+3/before-save baseline: legacy-circuit-coexistence compiles from the live session  ->  
+PASS  Items 2+3/before-save baseline: uk-data-residency compiles from the live session  ->  
+PASS  Items 2+3: resume recovers source_ledger and requirementBase via the real resumeStateFromProject()  ->  resumeState={"sourceLedger":[{"id":"canvas_t1","text":"UK 20 site Healthcare business requires SD-WAN and full SASE. We have 200 remote users. We also have a legacy app that requires a point to point Ethernet private circuit. No patient-identifiable data may leave the UK.","at":1000,"via":"typed"}],"requirementBase":{"organisation":{"sector":"Healthcare & pharma","regions":["uk"]},"estate":{"users":200,"sites":20,"existingSecurity":["Defender P2"],"existingNetwork":["sdwan"]},"drivers":["renewal"],"constraints":{"complianceRequirements":["iso27001"],"inHouseSocCapacity":"business_hours"}}}
+PASS  Item 2: the reloaded source_ledger carries the buyer's exact original turn verbatim  ->  [{"id":"canvas_t1","text":"UK 20 site Healthcare business requires SD-WAN and full SASE. We have 200 remote users. We also have a legacy app that requires a point to point Ethernet private circuit. No patient-identifiable data may leave the UK.","at":1000,"via":"typed"}]
+PASS  Item 2/durability: network-architecture-scope survives reopen -- BYTE-EQUIVALENT statement, quote and mandatory classification, with receipts=[] (only source_ledger drove this)  ->  before={"statement":"Network/security architecture scope stated by the buyer (Healthcare & pharma, 20 sites): \"UK 20 site Healthcare business requires SD-WAN and full SASE.\"","quote":"UK 20 site Healthcare business requires SD-WAN and full SASE."} after={"statement":"Network/security architecture scope stated by the buyer (Healthcare & pharma, 20 sites): \"UK 20 site Healthcare business requires SD-WAN and full SASE.\"","quote":"UK 20 site Healthcare business requires SD-WAN and full SASE."}
+PASS  Item 2/durability: legacy-circuit-coexistence survives reopen -- BYTE-EQUIVALENT statement, quote and mandatory classification, with receipts=[] (only source_ledger drove this)  ->  before={"statement":"The named application's retained point-to-point Ethernet private circuit must coexist with the new architecture through migration.","quote":"We also have a legacy app that requires a point to point Ethernet private circuit."} after={"statement":"The named application's retained point-to-point Ethernet private circuit must coexist with the new architecture through migration.","quote":"We also have a legacy app that requires a point to point Ethernet private circuit."}
+PASS  Item 2/durability: uk-data-residency survives reopen -- BYTE-EQUIVALENT statement, quote and mandatory classification, with receipts=[] (only source_ledger drove this)  ->  before={"statement":"Data residency constraint stated verbatim by the buyer: \"No patient-identifiable data may leave the UK.\"","quote":"No patient-identifiable data may leave the UK."} after={"statement":"Data residency constraint stated verbatim by the buyer: \"No patient-identifiable data may leave the UK.\"","quote":"No patient-identifiable data may leave the UK."}
+PASS  Item 2: exact source wording remains linked as clause provenance after a real reopen  ->  quote=We also have a legacy app that requires a point to point Ethernet private circuit.
+PASS  Item 1+2/stable ids across reopen: network-architecture-scope keeps the SAME public id after reopen, WITH a previousDocument supplied (in-session recompile) -- now merely a confirmation, no longer a requirement, since identity is history-free  ->  before=NET-4f3aa85d after=NET-4f3aa85d
+PASS  Item 1/THE ROBERT REPRODUCTION, applied to network-architecture-scope: previousDocument=null (a genuine reload) and previousDocument=beforeDoc (an in-session recompile) produce the IDENTICAL id -- previousDocument is now OPTIONAL for stability, not required  ->  previousDocument=null id=NET-4f3aa85d previousDocument=beforeDoc id=NET-4f3aa85d
+PASS  Item 1+2/stable ids across reopen: legacy-circuit-coexistence keeps the SAME public id after reopen, WITH a previousDocument supplied (in-session recompile) -- now merely a confirmation, no longer a requirement, since identity is history-free  ->  before=NET-80af8f52 after=NET-80af8f52
+PASS  Item 1/THE ROBERT REPRODUCTION, applied to legacy-circuit-coexistence: previousDocument=null (a genuine reload) and previousDocument=beforeDoc (an in-session recompile) produce the IDENTICAL id -- previousDocument is now OPTIONAL for stability, not required  ->  previousDocument=null id=NET-80af8f52 previousDocument=beforeDoc id=NET-80af8f52
+PASS  Item 1+2/stable ids across reopen: uk-data-residency keeps the SAME public id after reopen, WITH a previousDocument supplied (in-session recompile) -- now merely a confirmation, no longer a requirement, since identity is history-free  ->  before=SEC-e83fb756 after=SEC-e83fb756
+PASS  Item 1/THE ROBERT REPRODUCTION, applied to uk-data-residency: previousDocument=null (a genuine reload) and previousDocument=beforeDoc (an in-session recompile) produce the IDENTICAL id -- previousDocument is now OPTIONAL for stability, not required  ->  previousDocument=null id=SEC-e83fb756 previousDocument=beforeDoc id=SEC-e83fb756
+PASS  Item 2: network-architecture-scope (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->  
+PASS  Item 2: legacy-circuit-coexistence (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->  
+PASS  Item 2: uk-data-residency (from BEFORE reopen) survives a NEW turn typed AFTER reopen  ->  
+PASS  Item 2: the NEW turn's own clause (identity-aware-ztna) also compiles  ->  
+PASS  Item 2: the NEW turn's own clause (dlp-coverage) also compiles  ->  
+PASS  Item 2: re-deriving from the SAME source_ledger twice is byte-identical -- no second store, no hidden state, nothing to fall out of sync  ->  compared two independent derivations of the same ledger
+PASS  Item 3/route: baseline managed-service clause states fully managed  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
+PASS  Item 3/route: the exact correction, re-checked at THIS call site, is not a drop command  ->  
+PASS  Item 3/route: DLP is removed by the correction, reached through the real command-boundary + extraction pipeline  ->  
+PASS  Item 3/route: fully managed becomes co-managed  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Item 3/route: 24/7 incident support is kept  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Item 3/route: the correction saves through the REAL rescope route  ->  rescoped={"rescoped":true,"verdict_version":2,"artefact_version":2,"replaced_edits":false,"open_gaps":3,"verdict":{"rulebookVersion":"SEC-RULES-2026.1","generatedAt":"2026-08-17T13:49:13.513Z","inputDigest":"9212ac9c2ab9e7196e5fdde987ce33eef94c285bcee24b49965752e0b727037f","capabilities":[{"id":"endpoint","needed":"required","reasoning":"Devices exist in every operating business; scale is needed before a route can be recommended (G-1).","evidence":[{"source":"Netify BT Endpoint Threat Protect claim set (public claims, reviewed 20 July 2026)","claim":"NGAV endpoint protection is the baseline control."}],"route":"either","firedRules":["END-1","G-1"]},{"id":"mdr_soc","needed":"not_indicated","reasoning":"You already run a 24/7 SOC; buying another one is waste. SIEM tooling to support it is the better question.","evidence":[{"source":"Existing-control precedence: never replace a graded control without a consolidation driver","claim":"Existing capability precedence."}],"route":null,"firedRules":["MDR-4"]},{"id":"sse","needed":"not_indicated","reasoning":"No declared cloud estate; SSE has nothing to protect here yet.","evidence":[],"route":null,"firedRules":[]},{"id":"siem_logging","needed":"recommended","reasoning":"In-house security operations need the tooling to see with.","evidence":[{"source":"Netify question bank v2026.1, security and monitoring sections","claim":"Monitoring and reporting obligations in the security sections."},{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"SIEM vendor shortlists are compiled per project; grading depth is honest."}],"route":"marketplace_service","routeDetail":"Managed SIEM shortlist compiled with you; Netify's grading is deepest in network security, so confidence is capped (SIEM-2)","firedRules":["SIEM-1","SIEM-2"]},{"id":"managed_firewall","needed":"not_indicated","reasoning":"No premises: there is no perimeter to manage, and buying one would obsolete immediately. The spend belongs in SSE.","evidence":[{"source":"Netify marketplace vendor evidence grades (SSE, SASE, MDR depth)","claim":"Cloud-delivered security replaces the premises perimeter in cloud-first estates."}],"route":null,"firedRules":["FW-4"]},{"id":"awareness","needed":"required","reasoning":"Incident or compliance context makes staff training a required control, not a nice-to-have.","evidence":[{"source":"Netify threat coverage matrix (the Threat Protect advisor rulebook)","claim":"Staff phishing partly mitigated by tooling; Security Awareness Training is the BT route."}],"route":"bt_product","routeDetail":"BT Security Awareness Training, or an equivalent; this never blocks a path","firedRules":["AWA-1","AWA-2"]},{"id":"email_security","needed":"recommended","reasoning":"Incident context makes email controls relevant. Baseline: native Microsoft 365 or Google controls plus awareness training. For a dedicated gateway, Netify does not maintain graded supplier evidence and declines to recommend blind.","evidence":[{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"We recommend only what we can evaluate."}],"route":"out_of_scope","routeDetail":"Native platform controls plus awareness; dedicated gateways via your MSP or direct (EML-2)","firedRules":["EML-1","EML-2"]},{"id":"backup_resilience","needed":"required","reasoning":"Recovery capability decides ransomware outcomes; this is a prerequisite, stated plainly. Netify sells nothing here; it is carried into any RFP as a buyer-side requirement.","evidence":[{"source":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project","claim":"Outside Netify's graded categories; flagged honestly, never sold."}],"route":"out_of_scope","routeDetail":"Buyer-side requirement; carried into generated RFP documents as a stated line (BCK-2)","firedRules":["BCK-1","BCK-2"]}],"serviceModel":"co_managed","pathRecommendation":null,"againstInterest":[{"capabilityId":"mdr_soc","routeDenied":"marketplace_service","statement":"You have a 24/7 SOC; a managed detection service would duplicate it. Not recommended.","evidence":"Existing-control precedence: never replace a graded control without a consolidation driver"},{"capabilityId":"managed_firewall","routeDenied":"bt_product","statement":"No premises and a cloud-first estate: do not buy firewall management you would immediately obsolete; put the budget into SSE.","evidence":"Netify marketplace vendor evidence grades (SSE, SASE, MDR depth)"},{"capabilityId":"email_security","routeDenied":"marketplace_service","statement":"Netify does not maintain graded evidence for dedicated email security vendors, so we decline the category rather than recommend blind. Source via your MSP or direct.","evidence":"Netify dataset boundary: vendor grading is deepest in network security; managed SIEM shortlists are compiled per project"}],"assumptions":["No existing controls declared: keep-what-you-have rules are suspended (G-4)."],"gaps":[{"field":"estate.existingSecurity","whyItMatters":"Existing graded controls change verdicts from buy to keep.","question":"What security tooling do you already run (for example Defender P2, CrowdStrike, an MSP service)?"},{"field":"estate.users","whyItMatters":"Scale decides the product-versus-managed-service boundary.","question":"How many staff, and roughly how many computers, mobiles and servers?"},{"field":"constraints.complianceRequirements","whyItMatters":"Compliance regimes decide logging and evidence obligations (G-3 caps SIEM without it).","question":"Which compliance regimes apply (ISO 27001, PCI DSS, Cyber Essentials Plus, FCA, NHS DSPT, none)?"}],"summary":{"recommended":["endpoint","awareness","backup_resilience"],"conditional":["siem_logging","email_security"],"not_recommended":[{"capabilityId":"mdr_soc","reason":"You already run a 24/7 SOC; buying another one is waste. SIEM tooling to support it is the better question.","alternative":"Support the existing SOC with SIEM tooling instead."},{"capabilityId":"sse","reason":"No declared cloud estate; SSE has nothing to protect here yet."},{"capabilityId":"managed_firewall","reason":"No premises: there is no perimeter to manage, and buying one would obsolete immediately. The spend belongs in SSE.","alternative":"Allocate the spend to SSE instead."}]},"confidence":"medium","nextSteps":[{"action":"Product path: BT Endpoint Threat Protect can be quoted and ordered, with a signed contract, on the page.","page":"https://netify.co.uk/bt-endpoint-threat-protect/"}]},"project_path":"/project/rfp_msxaie1wyrjma0","envelope_revision":0}
+PASS  Item 3/route: both turns (original + correction) are durable in source_ledger after the real save  ->  ["Fully managed with 24/7 support, live by April 2027.","Remove DLP. Make the service co-managed instead of fully managed, but keep 24/7 incident support."]
+PASS  Item 3/route: after a REAL save+reopen+recompile, DLP is STILL removed (the correction survived)  ->  
+PASS  Item 3/route: after reopen, the managed-service clause still reads co-managed with 24/7 incident support  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Round 1-9 preservation: resolveDropTarget('Azure') (the real drop-command matcher, unmodified by this correction) still resolves a live fact  ->  {"kind":"fact","fact":{"id":"estate.cloud:azure","path":"estate.cloud","value":"azure","provenance":"stated","quote":"Azure","struck":false,"source":"extract","cycle":1}}
+PASS  Item 3/THE ROBERT REPRODUCTION: "We require DLP." / "Remove DLP." / "We require DLP." -- the final, byte-identical restatement resurrects DLP (it is a genuinely distinct source-turn occurrence, not a duplicate to be discarded)  ->  
+PASS  Item 3: the resurrected DLP clause's provenance names the actual restating source-turn id (dlp_t3), not just copied quote text  ->  ["dlp_t1","dlp_t2","dlp_t3"]
+PASS  Item 3: replaying the identical three-turn ledger twice is byte-identical and idempotent  ->  
+PASS  Item 3/identical repeat, no removal: the SAME requirement stated by two distinct source turns produces exactly ONE clause, not two duplicates  ->  count=1
+PASS  Item 3/identical repeat, no removal: the ONE emitted clause's provenance carries BOTH occurrences' source-turn ids  ->  ["rep_t1","rep_t2"]
+PASS  Item 3/duplicate delivery: the SAME source-turn id delivered twice collapses to ONE occurrence and ONE clause, with sourceTurnIds carrying the id only once  ->  count=1 sourceTurnIds=["dup_t1"]
+PASS  Item 3/save-reopen: the removal saves through the real rescope route  ->  
+PASS  Item 3/save-reopen: the byte-identical restatement saves through the real rescope route as its own distinct turn  ->  
+PASS  Item 3/save-reopen: all three turns (state, remove, byte-identical restate) are durable in source_ledger  ->  ["We require DLP, UK 20 site Healthcare business.","Remove DLP.","We require DLP, UK 20 site Healthcare business."]
+PASS  Item 3/save-reopen: after a REAL save+reopen+recompile through three separate rescope calls, DLP is resurrected (the byte-identical restatement survived as its own occurrence, not discarded)  ->  
+PASS  Item 4: a real RfiQuestionSet earns from deriveRfiQuestionSet() for this scenario  ->  canonicalCount=24
+PASS  Item 4/instrument gate: at instrument=sor, every supplier question is generated, none reused from the bank yet  ->  ["generated"]
+PASS  Item 4/instrument gate: readiness names the instrument state (SoR)  ->  ["7 testable requirements compiled.","Operating model stated: fully managed.","Delivery timeline stated.","Budget position not yet stated.","Every mandatory clause carries an acceptance test.","1 high-impact open decision remain.","Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."]
+PASS  Item 4/reuse: once the RFI is earned, at least one supplier question is reused from the bank  ->  bank=16 total=19
+PASS  Item 4/reuse: identity-aware-ztna reuses the correct bank category's own question id(s)  ->  ["Q-IZ-01","Q-IZ-02","Q-IZ-03"]
+PASS  Item 4/reuse: dlp-coverage reuses the correct bank category's own question id(s)  ->  ["Q-SC-01","Q-SC-02","Q-SC-03","Q-SC-04"]
+PASS  Item 4/reuse: uk-data-residency reuses the correct bank category's own question id(s)  ->  ["Q-DR-01","Q-DR-02"]
+PASS  Item 4/reuse: managed-service-boundary reuses the correct bank category's own question id(s)  ->  ["Q-SM-01","Q-SM-02"]
+PASS  Item 4/reuse: dated-transition-plan reuses the correct bank category's own question id(s)  ->  ["Q-DP-01","Q-DP-02"]
+PASS  Item 4/reuse: network-architecture-scope reuses the correct bank category's own question id(s)  ->  ["Q-SD-01","Q-SD-02","Q-SD-03"]
+PASS  Item 4/no duplication: no supplier question text appears twice anywhere in the compiled document  ->  []
+NOTE  mpls-coexistence did not fire for this probe sentence (no standing MPLS fact) -- the exclusivity rule for unmapped templates is still proven structurally by CLAUSE_BANK_CATEGORY's own construction (no entry exists for that templateId, so questionsForClause() always falls to its generated branch for it).
+PASS  Item 4/documented incompatibility: the separate no-timeline scenario genuinely leaves the timeline unstated  ->  {}
+PASS  Item 4/documented incompatibility: OD-timeline-unstated is shaped as an OpenDecision (no clauseId/answerFormat) -- structurally NOT a SupplierQuestion, confirming it is a different taxonomy from earnedQuestions()'s q-contract-end, not a silent duplicate of it  ->  {"id":"OD-timeline-unstated","question":"When must this be live, or when does the current contract end?","impact":["delivery","evaluation"],"conflict":false,"conflictReason":null,"affectedClauseIds":[]}
+PASS  Item 4 (instrument=rfi): evaluation categories still total exactly 100  ->  total=100
+PASS  Item 4 (instrument=sor): evaluation categories still total exactly 100  ->  total=100
+PASS  Item 4/version: a document with no previousDocument always starts at version 1  ->  version=1
+PASS  Item 4/fact addition: changeSet.facts.added names the newly-added fact id  ->  {"added":["constraints.timeline"],"updated":[],"removed":[]}
+PASS  Item 4/fact addition: nothing else is reported as updated or removed  ->  {"added":["constraints.timeline"],"updated":[],"removed":[]}
+PASS  Item 4/one prompt, one increment: the fact addition bumps the version by EXACTLY one  ->  before=1 after=2
+PASS  Item 4/scalar correction: changeSet.facts.updated names the corrected fact id (same path, new value)  ->  {"added":[],"updated":["constraints.timeline"],"removed":[]}
+PASS  Item 4/scalar correction: nothing is reported as added or removed  ->  {"added":[],"updated":["constraints.timeline"],"removed":[]}
+PASS  Item 4/one prompt, one increment: the scalar correction bumps the version by EXACTLY one  ->  before=2 after=3
+PASS  Item 4/list-value addition, setup: the real merge produced the expected list-value fact id  ->  ["constraints.timeline","constraints.complianceRequirements:iso27001"]
+PASS  Item 4/list-value addition: changeSet.facts.added names the new list-value fact id  ->  {"added":["constraints.complianceRequirements:iso27001"],"updated":[],"removed":[]}
+PASS  Item 4/list-value removal: changeSet.facts.removed names the struck list-value fact id, via the REAL dropListFact() function  ->  {"added":[],"updated":[],"removed":["constraints.complianceRequirements:iso27001"]}
+PASS  Item 4/list-value removal: nothing else is reported as added or updated  ->  {"added":[],"updated":[],"removed":["constraints.complianceRequirements:iso27001"]}
+PASS  Item 4/compiler-only clause addition: changeSet.clauses.added names the new DLP clause id, on a receipts-only change with facts held constant  ->  {"added":["SEC-693021ca"],"updated":[],"removed":[]}
+PASS  Item 4/compiler-only clause addition: changeSet.facts stays completely flat -- a clause-only change is never misreported as a fact change  ->  {"added":[],"updated":[],"removed":[]}
+PASS  Item 4/one prompt, one increment: the compiler-only clause addition (a receipts-only change) still bumps the version by EXACTLY one  ->  before=5 after=6
+PASS  Item 4/compiler-only clause removal, setup: DLP is now removed  ->  
+PASS  Item 4/compiler-only clause removal: changeSet.clauses.removed names the retracted DLP clause's own stable id  ->  {"added":[],"updated":[],"removed":["SEC-693021ca"]}
+PASS  Item 4/compiler-only clause removal: changeSet.facts stays completely flat again  ->  {"added":[],"updated":[],"removed":[]}
+PASS  Item 4/one prompt, one increment: the compiler-only clause removal also bumps the version by EXACTLY one  ->  before=6 after=7
+PASS  Item 4/identical recompilation: recompiling the IDENTICAL facts and receipts does NOT increment the version  ->  before=7 after=7
+PASS  Item 4/identical recompilation: the change set itself is entirely empty on an identical recompile, not merely the version  ->  {"facts":{"added":[],"updated":[],"removed":[]},"clauses":{"added":[],"updated":[],"removed":[]}}
+PASS  Item 4/save-reopen: the first reopen (previousDocument=null, a genuine reload) starts a fresh chain at version 1  ->  version=1
+PASS  Item 4/save-reopen, no artificial increment: reopening the SAME saved project a second time and recompiling its identical state, WITH previousDocument supplied, does NOT bump the version -- previousDocument's mere presence is no longer sufficient to increment (THE bug Robert named)  ->  version=1
+PASS  Item 4/save-reopen, no artificial increment: a THIRD reopen lands on the SAME version as the first and second -- version is a function of real change, not of reopen count or previousDocument availability  ->  version=1
+PASS  Item 1/THE ROBERT REPRODUCTION: "fully managed instead of co-managed" resolves to managed, not co_managed  ->  model=managed
+PASS  Item 1/THE ROBERT REPRODUCTION: "change from co-managed to fully managed" resolves to managed  ->  model=managed
+PASS  Item 1: "co-managed instead of fully managed" -> co_managed  ->  
+PASS  Item 1: "fully managed instead of co-managed" -> managed  ->  
+PASS  Item 1: "change from co-managed to fully managed" -> managed  ->  
+PASS  Item 1: "change from fully managed to co-managed" -> co_managed  ->  
+PASS  Item 1: "fully managed rather than co-managed" -> managed  ->  
+PASS  Item 1: "co-managed rather than fully managed" -> co_managed  ->  
+PASS  Item 1: separate chronological turns, co-managed then fully managed -> managed  ->  
+PASS  Item 1: separate chronological turns, fully managed then co-managed -> co_managed  ->  
+PASS  Item 1: an unrelated intervening turn between two directional corrections does not disrupt the LATER one winning  ->  
+PASS  Item 1: identical timestamps resolve by array position -- the LATER array entry wins  ->  
+PASS  Item 1: two models with no directional correction language stays unresolved (model=null), surfaced as ambiguousText  ->  {"model":null,"sourceTurnId":null,"ambiguousText":"We might want fully managed or co-managed, no strong preference either way."}
+PASS  Item 1: the full compile surfaces the ambiguous-correction OpenDecision for two models with no directional language  ->  
+PASS  Item 1: "remove co-managed" does not positively assert co_managed  ->  model=null
+PASS  Item 1: "no longer want co-managed" does not positively assert co_managed  ->  model=null
+PASS  Item 1: assert co-managed, then "Remove co-managed." with no replacement, unsets the model (result.model=null)  ->  {"model":null,"sourceTurnId":null,"ambiguousText":null}
+PASS  Item 1/removal without replacement, end to end: no managed-service clause is compiled once the model is unset (no stale assertion)  ->  
+PASS  Item 1/removal without replacement, end to end: the honest OD-operating-model-unstated decision fires -- the existing document contract, not a new mechanism  ->  ["OD-operating-model-unstated","OD-timeline-unstated"]
+PASS  Item 2: "24/7 support" -> true  ->  
+PASS  Item 2: "24/7 incident support" -> hours247=true and incidentSupport247=true  ->  {"hours247":true,"incidentSupport247":true,"sourceTurnId":"t1"}
+PASS  Item 2/THE ROBERT REPRODUCTION: "Support is not 24/7." -> false  ->  hours247=false
+PASS  Item 2/THE ROBERT REPRODUCTION: "We no longer need 24/7 support; business hours only." -> false  ->  hours247=false
+PASS  Item 2: "business hours only" -> false  ->  
+PASS  Item 2: "not 24/7; business hours only" -> false  ->  
+PASS  Item 2: 24/7 followed LATER by business-hours-only -> false  ->  
+PASS  Item 2: business-hours-only followed LATER by 24/7 -> true  ->  
+PASS  Item 2/save-reopen: the negation turn saves through the real rescope route  ->  
+PASS  Item 2/save-reopen: after a REAL save+reopen+recompile with previousDocument=null, the managed-service clause reads "with an agreed support model" (the negation survived), not 24/7  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
+PASS  Item 3/baseline: compiling with noted=[] produces no noted-selection clause -- THE BUG, confirmed present before the fix's own positive case  ->  
+PASS  Item 3/THE FIX: adding one noted item changes the compiled document -- a real clause is now emitted for it (was byte-identical before)  ->  
+PASS  Item 3: the noted clause's section is honoured and buyer provenance remains explicit  ->  {"section":"operations","origin":"buyer"}
+PASS  Item 3: the clause's templateKey is keyed by the noted item's own STABLE id, not array position or copied label text alone  ->  templateKey=noted:s-247
+PASS  Item 3: the change set reports the noted clause's addition  ->  {"added":["OPS-9ee3a489"],"updated":[],"removed":[]}
+PASS  Item 3: removing the noted item reverses the output -- the clause is gone  ->  
+PASS  Item 3: the change set reports the noted clause's removal  ->  {"added":[],"updated":[],"removed":["OPS-9ee3a489"]}
+PASS  Item 3: an unchanged noted set is idempotent -- two independent compiles produce byte-identical output  ->  
+PASS  Item 3: array reordering of the noted set does not change semantic identities -- the SAME two ids regardless of order  ->  {"idsAB":["OPS-11d58fca","OPS-9ee3a489"],"idsBA":["OPS-11d58fca","OPS-9ee3a489"]}
+PASS  Item 3/no-duplication, setup: the DLP clause compiles from the buyer's own words via the deterministic template  ->  
+PASS  Item 3/no-duplication: a noted item substantively covered by the DLP template's own clause does NOT emit a second, redundant clause  ->  
+PASS  Item 3/no-duplication: the original DLP template clause is still present, untouched by the suppressed duplicate  ->  
+PASS  Item 4/THE ROBERT REPRODUCTION baseline: compiling an empty requirement gives title "Sourcing procurement", version 1  ->  title=Sourcing procurement version=1
+PASS  Item 4/THE ROBERT REPRODUCTION: the title genuinely changes with the sector  ->  before=Sourcing procurement after=Healthcare & pharma procurement
+PASS  Item 4/THE ROBERT REPRODUCTION, fixed: under the explicit revision contract, the version now advances even though facts/receipts alone were unchanged  ->  before=1 after=2
+PASS  Item 4/documented boundary: the SAME reproduction through the LEGACY no-revision path (omitted entirely) still preserves round-2 behaviour for backward compatibility -- callers must adopt `revision` to get event-truthful versioning  ->  version=1
+PASS  Item 4: an identical rerender with the SAME revision (cycle 1 again) does not increment  ->  version=2
+PASS  Item 4: one successful prompt revision (a new cycle) increments exactly once  ->  before=2 after=3
+PASS  Item 4: one direct noted-item edit (its own authorised revision) increments exactly once  ->  before=3 after=4
+PASS  Item 4: one direct requirement/document edit increments exactly once  ->  before=4 after=5
+PASS  Item 4/fact-only correction: exactly one increment  ->  before=1 after=2
+PASS  Item 4/fact-only correction: truthful fact ids -- changeSet.facts.updated (the REAL diff) names the corrected fact  ->  {"added":[],"updated":["constraints.timeline"],"removed":[]}
+PASS  Item 4/fact-only correction: the document's own lastRevision carries the caller-asserted changed fact ids for truthful audit  ->  {"cycle":2,"changedFactIds":["constraints.timeline"]}
+PASS  Item 4/receipt-only change: a compiler-only clause addition (receipts changed, facts did not) still increments exactly once under an authorised revision  ->  before=1 after=2
+PASS  Item 4/no-op recompile: revision=null (no authorised event) never increments, even with inputs identical to the previous compile  ->  version=2
+PASS  Item 4/invariant: sector requirement edit -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=false before=2 after=3
+PASS  Item 4/invariant: noted-item edit -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=true before=3 after=4
+PASS  Item 4/invariant: requirement/timeline edit -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=false before=4 after=5
+PASS  Item 4/invariant: fact-only correction -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=true before=1 after=2
+PASS  Item 4/invariant: receipt-only change -- a non-empty change set during an authorised revision coexists with the version advancing by EXACTLY one, never an unchanged version  ->  nonEmpty=true before=1 after=2
+PASS  Item 4/invariant: at least one authorised revision above produced a genuinely non-empty change set -- the invariant fixture is not vacuous  ->  
+PASS  Item 4/save-reopen: a genuine reload (previousDocument=null) starts a fresh in-memory chain at version 1  ->  version=1
+PASS  Item 4/save-reopen: a SECOND independent reload also lands on version 1 -- no second persisted document was needed to preserve any counter across reloads  ->  version=1
+PASS  Item 1 (round 4): real noted id "twin-res-all" (real section "estate") does NOT fall into Additional requirements  ->  section=network
+PASS  Item 1 (round 4): real noted id "twin-res-all" lands in the correct target section per Robert's own mapping  ->  expected=network got=network
+PASS  Item 1 (round 4): real noted id "twin-change-cab" (real section "change") does NOT fall into Additional requirements  ->  section=operations
+PASS  Item 1 (round 4): real noted id "twin-change-cab" lands in the correct target section per Robert's own mapping  ->  expected=operations got=operations
+PASS  Item 1 (round 4): real noted id "twin-support-uk" (real section "support") does NOT fall into Additional requirements  ->  section=operations
+PASS  Item 1 (round 4): real noted id "twin-support-uk" lands in the correct target section per Robert's own mapping  ->  expected=operations got=operations
+PASS  Item 1 (round 4): real noted id "twin-services-mig" (real section "services") does NOT fall into Additional requirements  ->  section=project
+PASS  Item 1 (round 4): real noted id "twin-services-mig" lands in the correct target section per Robert's own mapping  ->  expected=project got=project
+PASS  Item 1 (round 4): real noted id "sc-availability" (real section "success") does NOT fall into Additional requirements  ->  section=network
+PASS  Item 1 (round 4): real noted id "sc-availability" lands in the correct target section per Robert's own mapping  ->  expected=network got=network
+PASS  Item 1 (round 4): real noted id "twin-suppliers-ref" (real section "suppliers") does NOT fall into Additional requirements  ->  section=supplier
+PASS  Item 1 (round 4): real noted id "twin-suppliers-ref" lands in the correct target section per Robert's own mapping  ->  expected=supplier got=supplier
+PASS  Item 1 (round 4): a clicked selection (own=true) is honestly described as "selected", never as typed wording  ->  The buyer selected this from noted options; a structured field has not yet landed for it.
+PASS  Item 1 (round 4): a typed/extracted noted item (own unset) is worded distinctly as the buyer's own words, never claimed to be a click  ->  The buyer's own words state this; a structured field has not yet landed for it.
+PASS  Item 1 (round 4): neither provenance fabricates a verbatim buyer quote for a noted item -- quote stays null either way  ->  
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: the buyer's real 24x7-support UI selection visibly changes the compiled document (was byte-identical on 98bfa75)  ->  
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION baseline: without the selection, the clause reads the generic "agreed support model"  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION fixed: with the selection, the managed-service clause reads "including 24/7 support"  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, including 24/7 support.
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: the managed-service clause carries a machine-readable sourceNotedIds citation, not just an internal templateKey  ->  ["twin-support-247"]
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: no redundant second "noted-selection" clause is created once the managed-service clause already represents the 24/7 selection (explicit template coverage, not generic word overlap)  ->  
+PASS  Item 1 (round 4)/THE CRITICAL REPRODUCTION: with no operating model at all, the 24/7 selection still creates its own Operations requirement  ->  section=operations
+PASS  Item 2 (round 4)/THE REPRODUCTION: "We don't need 24/7 support." -> false  ->  got=false
+PASS  Item 2 (round 4)/THE REPRODUCTION: "24/7 support is not required." -> false  ->  got=false
+PASS  Item 2 (round 4)/THE REPRODUCTION: "Remove 24/7 support." -> false  ->  got=false
+PASS  Item 2 (round 4)/THE REPRODUCTION: negation AFTER the mention, separated by a comma/but -> false  ->  got=false
+PASS  Item 2 (round 4)/positive: "24/7 support required." stays true  ->  
+PASS  Item 2 (round 4)/positive: "24/7 support is required." stays true  ->  
+PASS  Item 2 (round 4)/positive: "24/7 incident support" (round 1-3 required fixture) stays true  ->  
+PASS  Item 2 (round 4)/negation after: "not available 24/7"  ->  
+PASS  Item 2 (round 4)/negation after: "never required"  ->  
+PASS  Item 2 (round 4)/negation before: "won't require 24/7"  ->  
+PASS  Item 2 (round 4)/removal before: "cancel the 24/7 support requirement"  ->  
+PASS  Item 2 (round 4)/clause scoping: an unrelated earlier clause with no negation cue does not suppress a later positive mention  ->  
+PASS  Item 2 (round 4)/clause scoping: a "not" in an EARLIER, unrelated clause does not falsely negate a later, plainly positive mention  ->  
+PASS  Item 2 (round 4)/correction order: 24/7 asserted, then LATER negated -> false  ->  
+PASS  Item 2 (round 4)/correction order: negated, then LATER asserted -> true  ->  
+PASS  Item 2 (round 4)/save-reopen: create with the mention-local negation turn succeeds through the real route  ->  status=200 error=undefined
+PASS  Item 2 (round 4)/save-reopen: after a REAL save+reopen+recompile with previousDocument=null, the mention-local negation survives ("with an agreed support model", not 24/7)  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
+PASS  Item 3 (round 4)/THE REPRODUCTION: "Do not remove the fully managed service." resolves to managed, never a removal  ->  got=managed
+PASS  Item 3 (round 4)/THE REPRODUCTION: a double negative via "without" resolves to managed, never null  ->  got=managed
+PASS  Item 3 (round 4)/THE REPRODUCTION: a negated old model followed by an asserted new model resolves to the new model, not ambiguous and not stale co_managed  ->  got=managed
+PASS  Item 3 (round 4): the SAME structure in the OPPOSITE order (asserted new model first, negated old model second) also resolves to the new model  ->  got=managed
+PASS  Item 3 (round 4)/regression: "co-managed instead of fully managed" still resolves to co_managed  ->  
+PASS  Item 3 (round 4)/regression: "fully managed instead of co-managed" still resolves to managed  ->  
+PASS  Item 3 (round 4)/regression: "change from co-managed to fully managed" still resolves to managed  ->  
+PASS  Item 3 (round 4)/regression: a genuine two-model contradiction with no structural marker stays an unresolved OpenDecision (never guessed by the new polarity check)  ->  
+PASS  Item 3 (round 4)/double negative: "will not drop" also retains the model  ->  got=co_managed
+PASS  Item 3 (round 4)/double negative: "never cancel" also retains the model  ->  got=managed
+PASS  Item 3 (round 4)/regression: a genuine, unnegated removal still unsets the model  ->  
+PASS  Item 3 (round 4)/regression: "no longer want" (no outer negation) still unsets the model  ->  
+PASS  Item 3 (round 4): a double-negated removal of one model, alongside an asserted second model, is a genuine contradiction -- correctly left unresolved, never silently guessed  ->  got=null
+PASS  Item 3 (round 4)/end-to-end: the compiled managed-service clause states fully managed, not co-managed, from the single negated-then-asserted occurrence  ->  Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.
+PASS  Item 4 (round 4): GovernedEvent's own type carries NO caller-asserted changedFactIds field at all -- the adapter always COMPUTES it from real factsBefore/factsAfter snapshots, so a caller cannot supply an untruthful claim even by accident  ->  
+PASS  Item 4 (round 4)/baseline: before any governed event, a fresh compile is version 1  ->  version=1
+PASS  Item 4 (round 4)/prompt cycle: a successful extraction event is accepted  ->  reason=applied
+PASS  Item 4 (round 4)/prompt cycle: one accepted governed event increments exactly once  ->  before=1 after=2
+PASS  Item 4 (round 4)/prompt cycle: changedFactIds is a REAL, non-empty diff, computed from the actual before/after fact snapshots  ->  ["estate.sites","organisation.sector","constraints.complianceRequirements:iso27001"]
+PASS  Item 4 (round 4)/prompt cycle: the compiled document's own changeSet.facts genuinely reflects the addition  ->  {"added":["estate.sites","organisation.sector","constraints.complianceRequirements:iso27001"],"updated":[],"removed":[]}
+PASS  Item 4 (round 4)/click-selected fact: accepted  ->  reason=applied
+PASS  Item 4 (round 4)/click-selected fact: exactly one increment  ->  before=2 after=3
+PASS  Item 4 (round 4)/noted-item add: accepted even though NO WorkspaceFact changed -- a direct noted edit does not rely on a counter that only advances inside applyMerge()  ->  reason=applied
+PASS  Item 4 (round 4)/noted-item add: exactly one increment  ->  before=3 after=4
+PASS  Item 4 (round 4)/noted-item add: changedFactIds is honestly EMPTY (a real diff of two identical fact snapshots), never fabricated to look like a fact changed  ->  []
+PASS  Item 4 (round 4)/noted-item remove: accepted  ->  reason=applied
+PASS  Item 4 (round 4)/noted-item remove: exactly one increment  ->  before=4 after=5
+PASS  Item 4 (round 4)/fact removal: accepted  ->  reason=applied
+PASS  Item 4 (round 4)/fact removal: exactly one increment  ->  before=5 after=6
+PASS  Item 4 (round 4)/fact removal: changedFactIds truthfully names the removed fact id  ->  ["constraints.complianceRequirements:iso27001"]
+PASS  Item 4 (round 4)/fact removal: the compiled document's own changeSet.facts.removed genuinely reflects the removal  ->  {"added":[],"updated":[],"removed":["constraints.complianceRequirements:iso27001"]}
+PASS  Item 4 (round 4)/direct requirement edit: accepted even though NO WorkspaceFact changed -- direct requirement edits cannot rely on a counter that only advances inside applyMerge()  ->  reason=applied
+PASS  Item 4 (round 4)/direct requirement edit: exactly one increment  ->  before=6 after=7
+PASS  Item 4 (round 4)/direct requirement edit: the document genuinely changed (title reflects the new sector)  ->  before=Healthcare & pharma procurement (20 sites) after=Financial services procurement (20 sites)
+PASS  Item 4 (round 4)/no-op render/reopen: NOT applied, never increments  ->  reason=reopen
+PASS  Item 4 (round 4)/no-op render/reopen: version unchanged  ->  before=7 after=7
+PASS  Item 4 (round 4)/replay: the SAME event (identical eventId) replayed is NOT applied a second time  ->  reason=replay
+PASS  Item 4 (round 4)/replay: version does not increment on replay  ->  before=7 after=7
+PASS  Item 4 (round 4)/stale event: an older/out-of-order event (a lower seq than already applied) is REJECTED even though its eventId is distinct and would otherwise look like a new event  ->  reason=stale
+PASS  Item 4 (round 4)/stale event: version does not increment for a stale event  ->  before=7 after=7
+PASS  Item 4 (round 4)/stale event: the reducer's own monotonic cycle counter is untouched by a stale event -- cycle is derived internally from ACCEPTED events only, never taken from the event's own claim, so a stale event has no cycle to assert in the first place  ->  cycle=6
+
+ALL PASS
+PASS  Item 15/support-hours: "24/7 support is not optional." resolves hours247=true  ->  double negative ("not optional") must assert, not negate
+PASS  Item 15/support-hours: "We cannot operate without 24/7 support." resolves hours247=true  ->  negation + "without" is a double negative, must assert
+PASS  Item 15/support-hours: "We do not accept suppliers without 24/7 support." resolves hours247=true  ->  negation + "without" is a double negative, must assert
+PASS  Item 15/support-hours: a genuine single negation ("is not required") still resolves hours247=false  ->  guards against an over-broad fix that asserts on every negation word
+PASS  Item 15/support-hours: a plain positive statement still resolves hours247=true  ->  guards against a fix that only fires on negation-shaped text
+PASS  Draft create (security-sourcing path) succeeds  ->  status=200 error=undefined
+PASS  Draft create (plain network/wizard path) succeeds  ->  status=200
+PASS  Item 1 (security-sourcing): a draft is not listed on the board (no rfp:{id}:board_opp mapping exists)  ->  mapping=null
+PASS  Item 2 (security-sourcing): a draft invites nobody (invited_vendors is empty)  ->  invited_vendors=[]
+PASS  Item 2 (security-sourcing) sanity: project genuinely not yet published  ->  status=review
+PASS  Item 3 (security-sourcing): an authenticated OWNER of a DRAFT cannot download format=markdown (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 3 (security-sourcing): an authenticated OWNER of a DRAFT cannot download format=doc (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 3 (security-sourcing): an authenticated OWNER of a DRAFT cannot download format=print (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 3 (security-sourcing): an authenticated OWNER of a DRAFT cannot download format=json (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 4 (security-sourcing): a draft's report route returns readiness only -- no matched vendor names, no matched count, no market_report at all  ->  status=200 keys=["ok","preview","readiness","unlocked_at_publish"] readiness={"document":{"sections":7,"questions":17},"gaps":["No regions stated. Coverage answers cannot be checked without them.","No timeline stated. A target go-live focuses vendor responses.","No questions are flagged as hard requirements yet. Marking your deal-breakers improves the scoring matrix."],"estimate":{"monthly_band_gbp":[3200,12300],"three_year_tco_band_gbp":[115000,442000],"methodology_version":"2026.1","disclaimer":"Indicative bands from the Netify SASE Methodology v2026.1 calibration, not vendor quotes."},"assumptions":["User count taken from your security assessment (200 users).","No regions provided; the band assumes UK & Europe.","No delivery model preference; the band assumes co-managed.","Banded at a 3 year term."],"evaluated_market_total":30}
+PASS  Item 4 (security-sourcing) detail: readiness carries the general evaluated-market total (safe, non-project-specific) but never names/count  ->  readiness_keys=["document","gaps","estimate","assumptions","evaluated_market_total"]
+PASS  Item 14 (security-sourcing): a token-only (signed-out) caller cannot publish -- manage_token possession alone is refused  ->  status=401 body={"error":"sign_in_required","auth_required":true,"message":"Publishing sends this RFP to vendors and service providers, so it needs a verified work email. Open the builder, sign in and publish again; your draft is untouched.","sign_in_url":"https://netify.co.uk/sase/rfp-builder/rfp_msxaiepjlpeo3v/"}
+PASS  Item 14 (security-sourcing): a token-only (signed-out) caller cannot download -- manage_token possession alone is refused  ->  status=401 body={"error":"Create an account to download the final RFP, save versions and invite vendors. You can keep editing the preview before signing in.","auth_required":true}
+PASS  Item 1 (network/wizard): a draft is not listed on the board (no rfp:{id}:board_opp mapping exists)  ->  mapping=null
+PASS  Item 2 (network/wizard): a draft invites nobody (invited_vendors is empty)  ->  invited_vendors=[]
+PASS  Item 2 (network/wizard) sanity: project genuinely not yet published  ->  status=draft
+PASS  Item 3 (network/wizard): an authenticated OWNER of a DRAFT cannot download format=markdown (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 3 (network/wizard): an authenticated OWNER of a DRAFT cannot download format=doc (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 3 (network/wizard): an authenticated OWNER of a DRAFT cannot download format=print (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 3 (network/wizard): an authenticated OWNER of a DRAFT cannot download format=json (route itself refuses, not just the UI)  ->  status=403 body={"error":"This document unlocks once your market has unlocked -- publish, and make sure the board listing has completed (retry it from your workspace if it failed). Publishing matches this project against Netify's evaluated vendors and service providers, invites the strongest fits, and unlocks the Word and PDF documents together. Publishing is free.","publish_required":true}
+PASS  Item 4 (network/wizard): a draft's report route returns readiness only -- no matched vendor names, no matched count, no market_report at all  ->  status=200 keys=["ok","preview","readiness","unlocked_at_publish"] readiness={"document":{"sections":0,"questions":0},"gaps":["No site count stated. Vendors will price more accurately with an estate size.","No regions stated. Coverage answers cannot be checked without them.","No compliance requirements listed. If any apply (PCI DSS, ISO 27001, Cyber Essentials), vendors should evidence them.","No timeline stated. A target go-live focuses vendor responses.","No questions are flagged as hard requirements yet. Marking your deal-breakers improves the scoring matrix."],"estimate":{"monthly_band_gbp":[2650,10200],"three_year_tco_band_gbp":[96000,367000],"methodology_version":"2026.1","disclaimer":"Indicative bands from the Netify SASE Methodology v2026.1 calibration, not vendor quotes."},"assumptions":["Baseline band: no estate size was provided, so these figures are the Netify market baseline for a typical mid-market estate (250 users, 5 sites), not an estimate of your project. Add your users and sites for a band of your own.","User count not provided; the band assumes 250 users. Rerun with your own numbers in the cost estimator.","Site count not provided; the band assumes 5 sites.","No regions provided; the band assumes UK & Europe.","No delivery model preference; the band assumes co-managed.","Banded at a 3 year term."],"evaluated_market_total":30}
+PASS  Item 4 (network/wizard) detail: readiness carries the general evaluated-market total (safe, non-project-specific) but never names/count  ->  readiness_keys=["document","gaps","estimate","assumptions","evaluated_market_total"]
+PASS  Item 14 (network/wizard): a token-only (signed-out) caller cannot publish -- manage_token possession alone is refused  ->  status=401 body={"error":"sign_in_required","auth_required":true,"message":"Publishing sends this RFP to vendors and service providers, so it needs a verified work email. Open the builder, sign in and publish again; your draft is untouched.","sign_in_url":"https://netify.co.uk/sase/rfp-builder/rfp_msxaieq1867u16/"}
+PASS  Item 14 (network/wizard): a token-only (signed-out) caller cannot download -- manage_token possession alone is refused  ->  status=401 body={"error":"Create an account to download the final RFP, save versions and invite vendors. You can keep editing the preview before signing in.","auth_required":true}
+PASS  Item 5: buyer-pinned vendors survive as buyer input on a draft (distinct field from any Netify match list)  ->  pinned_vendors=["cato-networks","palo-alto-networks"]
+PASS  Item 5: even with buyer pins present, the pre-publish report never presents them as (or alongside) Netify's project matches -- no matched field at all  ->  keys=["ok","preview","readiness","unlocked_at_publish"]
+
+ALL PASS
+=== Part A: GET /api/workspace/fit never returns supplier-identifying data ===
+
+Part A: 38/38 passed so far.
+
+=== Part B: ProjectDesk.tsx / ConstellationScene.tsx structural source proof ===
+
+Part B: 82/82 passed cumulative.
+
+
+ALL PASS  (82/82)
+=== Part A: route-level data contracts this fix's client hydration depends on ===
+
+Part A: 9/9 passed so far.
+
+=== Part A2 (round 4): qa/evaluation hydration, legacy no-snapshot honesty, and matched-vs-invited divergence ===
+
+Part A2: 31/31 passed cumulative.
+
+=== Part B: ProjectDesk.tsx resume-hydration + render structural proof ===
+
+Part B: 66/66 passed cumulative.
+
+
+ALL PASS  (66/66)
+=== Part A: GET /api/rfp/match never returns project-specific vendor data ===
+
+Part A: 44/44 passed so far.
+
+=== Part B: RfpBuilder.tsx structural source proof (Project Overview -> Review and edit route) ===
+
+Part B: 69/69 passed cumulative.
+
+=== Part B9 (market-unlock correction round): the canonical market-unlock predicate replaces hasPublished() at every disclosure gate ===
+
+Part B: 96/96 passed cumulative.
+
+=== Part C: production-path proof, connect + share-token reads, owner/anonymous/share-token, pre/post publish ===
+
+Part C: 116/116 passed cumulative.
+
+=== Part D: real board listing + MarketUnlock commit correctly unlock every governed route; failure modes leave it genuinely locked ===
+
+Part D: 156/156 passed cumulative.
+
+=== Part E (round 2): forged/dangling MarketUnlock rows and mismatched bindings are treated as locked ===
+
+Part E: 167/167 passed cumulative.
+
+
+ALL PASS  (167/167)
+PASS  Prompt A: first compile is version 1  ->  version=1
+PASS  Prompt A: the document compiles immediately (a real document, not an empty shell)  ->  clauses=5
+PASS  Prompt A: the architecture is non-empty from the first compile  ->  nodes=8
+PASS  Prompt A: readiness score is a valid percentage  ->  score=70
+PASS  Prompt A: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=5 clauses.length=5
+PASS  Prompt A: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=1 evaluation.gates.length=1
+PASS  Prompt A: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=11 responseGroups total=11
+PASS  Prompt A: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Prompt A: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt A: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt A: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+  Prompt A fixture: title="Healthcare & pharma procurement (20 sites)" summary="Healthcare & pharma, UK, 20 sites, 200 remote users, azure, retained private Ethernet circuit. 5 testable requirements compiled from the buyer's own words." clauses=["network-architecture-scope","legacy-circuit-coexistence","identity-provider-entra","voice-scope","dated-transition-plan"] counts={"requirements":5,"questions":11,"gates":1,"decisions":1}
+PASS  Prompt B: the document version increments exactly once  ->  before=1 after=2
+PASS  Prompt B: evaluation total stays exactly 100 after a removal  ->  total=100
+PASS  Prompt B: the April 2027 deadline is kept, not dropped by the correction  ->  value=by april 2027
+PASS  Prompt B/THE CORRECTION: 'remove DLP' with no prior DLP requirement is an idempotent no-op -- DLP does not exist afterwards  ->  dlp present=false
+PASS  Prompt B/THE CORRECTION: no gate or supplier question was ever created from the negated DLP phrase  ->  gates=[] questions=[]
+PASS  Prompt B/THE CORRECTION: the removal sentence does not ALSO survive as a duplicate 'Additional requirement' catch-all clause  ->  []
+PASS  Prompt B/THE CORRECTION: co-managed replaces the operating-model concept in place -- one managed-service-boundary clause, not a competing second one  ->  statement=Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Prompt B/THE CORRECTION: 24/7 incident support is kept on the SAME managed-service clause, not dropped by the correction  ->  statement=Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Prompt B/THE CORRECTION: exactly one managed-service-boundary clause exists -- no competing second clause left behind  ->  count=1
+PASS  Prompt B/THE CORRECTION: the change ribbon describes the real semantic change to the managed-service clause (added, since Prompt A stated no prior operating model) -- never fabricated, never a phantom removal  ->  {"added":["OPS-a2e5cbe3"],"updated":["NET-4f3aa85d"],"removed":[]}
+PASS  Prompt B: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=6 clauses.length=6
+PASS  Prompt B: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=2 evaluation.gates.length=2
+PASS  Prompt B: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=14 responseGroups total=14
+PASS  Prompt B: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=0 openDecisions.length=0
+PASS  Prompt B: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt B: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt B: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+  Prompt B changeSet: {"added":["OPS-a2e5cbe3"],"updated":["NET-4f3aa85d"],"removed":[]}
+PASS  Prompt C/THE CORRECTION: the brief's own exact Section 12.3 sentence ('All customer data must remain in the UK.') is recognised as the named UK data-residency template  ->  found=true
+PASS  Prompt C: the exact buyer sentence is retained verbatim as the clause's own quote (provenance)  ->  quote=All customer data must remain in the UK.
+PASS  Prompt C: a testable residency clause carries a real, correct evidence request  ->  ["Data-flow diagram","Sub-processor list and locations"]
+PASS  Prompt C: the residency clause is attributed to the buyer, not fabricated as a netify/sector default  ->  origin=buyer
+PASS  Prompt C: 'must remain in the UK' is recognised as mandatory language  ->  mandatory=true
+PASS  Prompt C: no generic 'confirm your ability' Additional-requirement fallback was created for this sentence (it has its own named clause)  ->  []
+PASS  Prompt C: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=7 clauses.length=7
+PASS  Prompt C: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=3 evaluation.gates.length=3
+PASS  Prompt C: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=16 responseGroups total=16
+PASS  Prompt C: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Prompt C: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt C: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt C: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Part A2 (rich wording): voice-continuity clause is generated  ->  
+PASS  Part A2 (rich wording): application-resilience clause is generated  ->  
+PASS  Part A2 (rich wording): identity-aware-ztna clause is generated  ->  
+PASS  Part A2 (rich wording): dlp-coverage clause is generated  ->  
+PASS  Part A2 (rich wording): managed-service-boundary clause is generated  ->  
+PASS  Part A2 (rich wording): dated-transition-plan clause is generated  ->  
+PASS  Part A2 (rich wording): uk-data-residency clause is generated  ->  
+PASS  Part A2 (rich wording): legacy-circuit-coexistence clause is generated  ->  
+PASS  Part A2: at least one clause carries buyer (green-dot) provenance  ->  ["buyer"]
+PASS  Part A2: clauses span at least 3 different sections (exercises the clause list's section grouping)  ->  ["network","security","identity","application","operations","project"]
+PASS  Part A2 (rich wording): counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=8 clauses.length=8
+PASS  Part A2 (rich wording): counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=8 evaluation.gates.length=8
+PASS  Part A2 (rich wording): counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=19 responseGroups total=19
+PASS  Part A2 (rich wording): counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Part A2 (rich wording): Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Part A2 (rich wording): every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Part A2 (rich wording): every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Prompt D/THE CORRECTION: a visible conflict/open decision describing the single-supplier-vs-best-of-breed-security tension is created  ->  found=true
+PASS  Prompt D: the decision is flagged as a genuine conflict  ->  conflict=true
+PASS  Prompt D: the original buyer wording is retained visibly and verbatim in the decision's own conflictReason  ->  conflictReason=We want a single supplier but also require independent best-of-breed security controls.
+PASS  Prompt D: the decision is included in the document's own conflict-flagged decisions  ->  
+PASS  Prompt D/THE CORRECTION: no invented mandatory 'unclassified' clause -- neither side of the conflict is made mandatory before the buyer decides  ->  []
+PASS  Prompt D/THE CORRECTION: no pass/fail gate is invented from the unresolved contradiction  ->  []
+PASS  Prompt D/THE CORRECTION: an unrelated deadline open decision (legitimately also present, since Prompt D alone states no deadline) never SUBSTITUTES for the conflict decision -- both can coexist, but the conflict decision itself is always present  ->  supplierStrategyDecision=true deadlineDecisionAlsoPresent=true
+PASS  Prompt D: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=0 clauses.length=0
+PASS  Prompt D: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=0 evaluation.gates.length=0
+PASS  Prompt D: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=0 responseGroups total=0
+PASS  Prompt D: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=2 openDecisions.length=2
+PASS  Prompt D: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt D: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt D: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Prompt D/THE CORRECTION: Prompt D in a separate new project produces V1 (a fresh project never inherits a prior project's revision count)  ->  version=1
+PASS  Part C/known-vector: templateKey "network:legacy-circuit-coexistence" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=NET-80af8f52 expectedSuffix=80af8f52
+PASS  Part C/known-vector: templateKey "security:dlp" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=SEC-693021ca expectedSuffix=693021ca
+PASS  Part C/known-vector: templateKey "identity:entra-ztna" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=ID-3331f8dc expectedSuffix=3331f8dc
+PASS  Part C/known-vector: templateKey "identity:entra-provider" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=ID-69d3a001 expectedSuffix=69d3a001
+PASS  Part C/known-vector: templateKey "security:data-residency" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=SEC-e83fb756 expectedSuffix=e83fb756
+PASS  Part C/known-vector: templateKey "operating-model:boundary" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=OPS-a2e5cbe3 expectedSuffix=a2e5cbe3
+PASS  Part C/known-vector: templateKey "timeline:plan" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=PRJ-5477afed expectedSuffix=5477afed
+PASS  Part C/known-vector: templateKey "resilience:voice-continuity" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-50d06527 expectedSuffix=50d06527
+PASS  Part C/known-vector: templateKey "resilience:application" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-755c9e7f expectedSuffix=755c9e7f
+PASS  Part C/known-vector: templateKey "application:voice-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-9b7bec5f expectedSuffix=9b7bec5f
+PASS  Part C/known-vector: templateKey "network:architecture-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=NET-4f3aa85d expectedSuffix=4f3aa85d
+PASS  Part C/known-vector: a genuine reload (previousDocument=null) reproduces the IDENTICAL clause id for the identical templateKey  ->  before=SEC-693021ca after=SEC-693021ca
+PASS  Part B: ProjectDesk.tsx imports the real compiler module  ->  
+PASS  Part B: ProjectDesk.tsx calls the real compileProcurementDocument()  ->  
+PASS  Part B: the compiler call is fed the desk's own live state variables (facts/requirement/verdict/noted/rfiSet/instrument/receipts/sourceTurns), not fabricated inputs  ->  
+PASS  Part B/THE CORRECTION: the compiler call is fed the explicit governed-revision contract (revision: currentRevision), not left undefined in legacy fallback mode  ->  
+PASS  Part B/THE CORRECTION: ProjectDesk.tsx imports and uses the real resolveGovernedRevision() reducer, not a hand-rolled version counter  ->  
+PASS  Part B/THE CORRECTION: a settle-debounce window batches every applyMerge()/applyRemovals() call inside one buyer submission into exactly one governed event  ->  
+PASS  Part B/THE CORRECTION: applyMerge() opens/extends the submission window before mutating facts  ->  
+PASS  Part B/THE CORRECTION: applyRemovals() also opens/extends the SAME submission window (a removal is a buyer submission too)  ->  
+PASS  Part B/THE CORRECTION: previousProcurementDocumentRef is frozen until a NAMED revision cycle actually lands -- the change ribbon compares complete buyer-event snapshots, not intermediate settling renders  ->  
+PASS  Part B: ProjectDesk.tsx actually renders <LivingProcurementCanvas  ->  
+PASS  Part B: the new canvas is gated on phase==="live" && started, the same gate the existing editable statement panel uses  ->  
+PASS  Part B: the Phase 2 locked-outcome panel's own header comment is still present, byte-identical marker  ->  
+PASS  Part B: the new canvas's own JSX appears strictly before the phase==="fits" locked panel in source order (not nested inside it, not after it)  ->  canvasIdx=218927 fitsIdx=236099
+PASS  Part B: the new component files never reference 'rankedFits' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference '.suppliers' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Part B: no hard-coded mockup/example content ('Aryaka') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('BT Business') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Verizon') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('20 sites, 200 remote users') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Cato Networks') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Palo Alto') in the new components  ->  
+PASS  Part B: LivingProcurementCanvas is its own focused component  ->  
+PASS  Part B: ProcurementArchitecture is its own focused component  ->  
+PASS  Part B: ProcurementClauseList is its own focused component  ->  
+PASS  Part B: SupplierPackView is its own focused component  ->  
+PASS  Part B: EvaluationView is its own focused component  ->  
+PASS  Part B: ProcurementClauseList keys clause rows on the compiler's own stable clause.id  ->  
+PASS  Part B: response groups / evaluation categories key on the compiler's own stable group/category key  ->  
+PASS  Part B: supplier questions key on the compiler's own stable question id  ->  
+PASS  Part B: gates key on the compiler's own stable gate id  ->  
+PASS  Part B: architecture nodes key on the compiler's own stable node id  ->  
+PASS  Part B: open decisions key on the compiler's own stable decision id  ->  
+PASS  Part B: LivingProcurementCanvas.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: ProcurementArchitecture.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: ProcurementClauseList.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: SupplierPackView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: EvaluationView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: the Living document / Supplier pack / Evaluation switch uses real tab semantics (role, aria-selected)  ->  
+PASS  Part B: the architecture's accessible text summary is always rendered (not display:none / JS-conditional)  ->  
+PASS  Part B: the shared change-pulse class has a prefers-reduced-motion static fallback (Section 5.6)  ->  
+PASS  Part B: the change pulse is a real, short (350ms, within the 250-400ms band) CSS animation  ->  350ms confirmed
+PASS  Part B: the existing slot-by-slot Living Statement panel's own header comment is untouched  ->  
+PASS  Part B: the existing TWIN_GROUPS slot-editing render loop is untouched  ->  
+PASS  Part B: the existing drop/clear fact controls are untouched  ->  
+PASS  Part B: the new canvas mounts inside the SAME responsive max-width wrapper the rest of the page uses (no new fixed-width container)  ->  
+PASS  Part B: the canvas cover/tabs layout wraps on narrow viewports  ->  
+PASS  Part B: the view-switch tabs scroll horizontally rather than overflow on narrow viewports  ->  
+PASS  Fixture A: the manufacturing sector pack activates from the buyer's own words  ->  pack=manufacturing
+PASS  Fixture A: the top-3 next decisions are exactly Operating model / SASE shape / Site resilience, per the blueprint's own required set  ->  top3=["OD-operating-model-unstated","q-sase-shape","q-resilience"]
+PASS  Fixture A: material-decision count matches the blueprint's own target message ('Four material decisions remain')  ->  count=4
+PASS  Fixture A: readiness reads 'Scope forming', not the old overstated 'Substantially ready'  ->  label=Scope forming score=50
+PASS  Fixture A: the section outline shows a 'Manufacturing and OT' row, state Netify suggested  ->  row={"key":"sector_intelligence","title":"Manufacturing and OT","state":"netify_suggested","detail":"2 sector suggestions to review"}
+PASS  Fixture M/defect 6: both manufacturing suggestions (OT/ICS visibility, IEC 62443 segmentation) are present as real NextQuestion candidates at Prompt A  ->  seg=true otVis=true
+PASS  Fixture M/defect 6: both are marked governedSuggestion -- the renderer labels them distinctly, never as a buyer-stated open decision  ->  seg=true otVis=true
+PASS  Fixture M/defect 6: the IEC 62443 segmentation suggestion carries a real, non-empty reason on the SAME NextQuestion object the UI card renders (not dropped between packs.ts and the projection)  ->  reason=manufacturing sites typically separate production networks from corporate IT (IEC 62443 zones and conduits) to limit blast radius from a compromise -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.
+PASS  Fixture M/defect 6: the segmentation suggestion's own reason explicitly states that the manufacturing sector alone does not confirm an OT/ICS environment exists  ->  reason=manufacturing sites typically separate production networks from corporate IT (IEC 62443 zones and conduits) to limit blast radius from a compromise -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.
+PASS  Fixture M/defect 6: the OT/ICS visibility suggestion's own reason carries the SAME disclaimer  ->  reason=manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.
+PASS  Fixture M/defect 6: naming SCADA/PLC directly earns the ot_named flavour's own OT-aware monitoring/MDR suggestion  ->  found=true
+PASS  Fixture M/defect 6: the evidence-based ot_named suggestion carries its OWN reason (the buyer's own words already named the systems), correctly WITHOUT the sector-alone disclaimer  ->  reason=the buyer's own words name OT/ICS systems directly, and generic IT monitoring commonly misses PLC/SCADA-specific threats
+PASS  Fixture M/defect 6: LivingProcurementCanvas.tsx actually reads nq.reason when rendering a NextQuestion card (the reason is not dropped between the projection and the render)  ->  
+PASS  Fixture M/defect 6: the governed-suggestion badge explicitly says 'optional', not just 'Netify suggests'  ->  
+PASS  Fixture A: no irrelevant sector row is shown when no pack is active (this branch: pack IS active, so presence is correct here; absence is proven by Fixture A's own construction when packA is null)  ->  
+PASS  Fixture N/defect 2 (pending): after Prompt A alone, the compiled document contains NO sector-pack-suggestion clause -- Robert's exact reproduced defect no longer reproduces  ->  clauses=["network-architecture-scope"]
+PASS  Fixture N/defect 2 (pending): the Requirements count is not inflated by the pending suggestion -- it already equals the real compiled clause count (general coordinated-projection invariant, reconfirmed here for this specific state)  ->  counts.requirements=1 clauses.length=1
+PASS  Fixture N/defect 2 (pending): the unaccepted suggestion produces no supplier response-group question  ->  responseGroupText=Confirm which components are included in scope (e.g. SD-WAN transport, SWG, CASB, ZTNA, FWaaS, DLP) versus SD-WAN transport alone. | Describe your architecture for delivering the stated scope across the buyer's estate.
+PASS  Fixture N/defect 2 (pending): the unaccepted suggestion is referenced by no evaluation gate  ->  gates=[{"id":"GATE-NET-4f3aa85d","label":"Network/security architecture scope stated by the buyer (Manufacturing, 20 si...","clauseIds":["NET-4f3aa85d"],"description":"Pass/fail: the supplier's response to NET-4f3aa85d must satisfy \"The proposed architecture names every in-scope component from the buyer's stated scope and how each is delivered.\"."}]
+PASS  Fixture N/defect 2 (pending): Evaluation category weights still sum to exactly 100 -- the unaccepted suggestion contributes no scoring weight of its own  ->  total=100
+PASS  Fixture N/defect 2 (pending): the suggestion appears ONLY as a governed, labelled 'Netify suggests / optional' NextQuestion card with a reason and Accept/Not needed options, never as governed document content  ->  card={"id":"sector:mf-ot-visibility","question":"OT/ICS asset visibility and monitoring recommended","source":"sector_suggestion","target":"security","impact":["compliance","architecture"],"options":[{"label":"Accept","answer":{"kind":"note","text":"OT/ICS asset visibility and monitoring in scope, alongside IT security"}},{"label":"Not needed","answer":{"kind":"dismiss"}}],"governedSuggestion":true,"conflictReason":null,"reason":"manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.","weight":40}
+PASS  Fixture N/defect 2 (accepted): accepting creates EXACTLY ONE governed clause  ->  count=1
+PASS  Fixture N/defect 2 (accepted): the clause's origin is preserved as Netify/sector-derived ('sector'), never 'buyer' -- accepted is not the same as buyer-authored  ->  origin=sector
+PASS  Fixture N/defect 2 (accepted): the clause's own reason honestly states both halves -- Netify suggested it, the buyer accepted it  ->  reason=manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate. (Manufacturing pack, sector-packs v2026-07-24). Netify suggested this; the buyer accepted it.
+PASS  Fixture N/defect 2 (accepted): the document version increments exactly once for the acceptance  ->  before=1 after=2
+PASS  Fixture N/defect 2 (accepted): the accepted suggestion is removed from the pending-suggestion projection (visibleSuggestions), not left duplicated in both places  ->  pending=["mf-segmentation"]
+PASS  Fixture N/defect 2 (accepted): the accepted suggestion no longer appears as a pending NextQuestion card either  ->  rankedIds=["OD-operating-model-unstated","q-sase-shape","q-resilience","q-sse-scope","sector:mf-segmentation","OD-timeline-unstated"]
+PASS  Fixture N/defect 2 (resumed, accepted): a reload (previousDocument: null) from the same facts/noted state reproduces the SAME one governed clause, with the SAME stable id -- persists and rehydrates correctly  ->  before=SEC-243b70ab after=SEC-243b70ab
+PASS  Fixture N/defect 2 (declined): declining creates NO clause  ->  clauses=["network-architecture-scope"]
+PASS  Fixture N/defect 2 (declined): the decline is persisted in the pending-suggestion projection -- visibleSuggestions (fed by declinedSuggestionIds, durable via decision_ledger's decline_suggestion action) drops it  ->  pending=["mf-segmentation"]
+PASS  Fixture N/defect 2 (resumed, declined): after a reload, the declined suggestion does not reappear in the pending-suggestion projection  ->  pending=["mf-segmentation"]
+PASS  Fixture N/defect 2 (resumed, declined): a reload still produces no governed clause for the declined suggestion  ->  
+PASS  Fixture N2/release blocker 1: replaying accept-then-decline (recorded order) resolves DECLINED -- declinedSuggestionIds gains the id AND the earlier accepted noted item is genuinely removed, not merely shadowed  ->  replayed={"noted":[],"dismissedQuestionIds":[],"declinedSuggestionIds":["mf-ot-visibility"]}
+PASS  Fixture N2/release blocker 1: after accept -> decline (real ledger replay, not a hand-built noted array), the compiled document contains NO governed clause for the suggestion -- Robert's exact reproduced defect no longer reproduces  ->  clauses=["network-architecture-scope"]
+PASS  Fixture N2/release blocker 1 setup: resumeDecisionsFromProject() accepts the persisted security_sourcing project  ->  
+PASS  Fixture N2/release blocker 1 (save -> reload -> compile): after a REAL save (decision_ledger persisted) and a REAL reload (resumeDecisionsFromProject, then a fresh compile from previousDocument: null), no governed clause remains for the declined-after-accepted suggestion  ->  clauses=["network-architecture-scope"]
+PASS  Fixture N2/counter-example: the SAME two entries in the OPPOSITE recorded order (decline THEN accept) resolve ACCEPTED instead -- confirms last-write-wins is genuinely order-driven in both directions  ->  replayed={"noted":[{"id":"ps-mf-ot-visibility","label":"OT/ICS asset visibility and monitoring in scope, alongside IT security","section":"security","own":true}],"dismissedQuestionIds":[],"declinedSuggestionIds":[]}
+PASS  Fixture N2/counter-example: decline THEN a later accept DOES compile the governed clause -- the buyer's most recent choice is honoured either way, not a one-directional patch  ->  clauses=["network-architecture-scope","sector-pack-suggestion"]
+PASS  Fixture O/release blocker 2: buildReadiness() with IDENTICAL material-decision/section state but a different pendingSectorSuggestions count (0 vs 2) produces the IDENTICAL score -- optional sector suggestions no longer move the score in either direction  ->  zeroPending=24 twoPending=24
+PASS  Fixture O/release blocker 2: the material-decisions reason no longer falsely claims to 'include' pending sector suggestions in the material-decision count  ->  reason=4 material decisions remain (open decisions and unresolved earned questions).
+PASS  Fixture O/release blocker 2: pending sector suggestions are now reported as their OWN separate, honest sentence ('Separately, 2 optional Netify suggestions are available to review...'), not folded into the material-decision count  ->  reason=Separately, 2 optional Netify suggestions are available to review -- these do not block consistent pricing and do not affect this score.
+PASS  Fixture O/release blocker 2: with zero pending suggestions, no 'optional Netify suggestions' sentence is emitted at all (no phantom reason for a queue that is already empty)  ->  reasons=["2 of 10 procurement sections confirmed.","Operating model not yet stated.","Delivery timeline not yet stated.","Budget position not yet stated.","Every mandatory clause carries an acceptance test.","4 material decisions remain (open decisions and unresolved earned questions).","Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."]
+PASS  Fixture B: the resilience answer produces exactly one new governed version  ->  version=2
+PASS  Fixture K1/defect 2: Prompt B's dual-circuit answer compiles into a canonical site-resilience-scope clause, not just a generic Additional requirement  ->  statement=Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.
+PASS  Fixture K1/defect 2: the site-resilience-scope clause is mandatory (a stated per-site resilience decision is a testable gate)  ->  mandatory=true
+PASS  Fixture K1/defect 2: the outline's Resilience and availability row reads Confirmed once the real governed clause exists (real clause, not card-disappearance, drives the row)  ->  detail=Per-site resilience requirement stated and compiled into the document.
+PASS  Fixture K1/defect 2: with the SAME materially-applicable requirement but no site-resilience-scope clause present, the row correctly reads Needs decision (proves the row cannot be satisfied by absence of a question alone)  ->  detail=Dual-circuit resilience per site not yet decided.
+PASS  Fixture K3/defect 1 setup: q-resilience is still materially earned (site count/buying still qualify) after Prompt B -- proves the fixture below is a genuine clause-driven filter, not an artefact of the question no longer being earned at all  ->  earnedIds=["q-contract-end","q-sase-shape","q-sse-scope","q-resilience"]
+PASS  Fixture K3/defect 1 setup: siteResilienceClauseExists reads true against the real compiled document after Prompt B  ->  
+PASS  Fixture K3/defect 1: q-resilience is absent from the FULL ranked NextQuestion list once the canonical site-resilience-scope clause exists  ->  rankedIds=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-timeline-unstated"]
+PASS  Fixture K3/defect 1: q-resilience is absent from the visible top three  ->  top3=["OD-operating-model-unstated","q-sase-shape","q-sse-scope"]
+PASS  Fixture K3/defect 1: materialDecisionsRemaining decreases by exactly one once resilience is correctly excluded (an apples-to-apples comparison against the SAME state with the flag forced off)  ->  resolved=3 unresolved=4
+PASS  Fixture K3/defect 1 counter-example: with the identical earned/open-decision state but resilienceClauseResolved not supplied (the safe default), q-resilience correctly remains open in the ranked list  ->  rankedIds=["OD-operating-model-unstated","q-sase-shape","q-resilience","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-timeline-unstated"]
+PASS  Fixture K3/defect 1: the section-aware readiness snapshot's own materialDecisionsRemaining exactly matches the standalone, clause-gated materialDecisionCount computed above -- one reconciled number, not two  ->  readinessB.materialDecisionsRemaining=3 standalone=3
+PASS  Fixture K3/defect 1: the readiness reason naming material decisions remaining literally cites the SAME corrected count (resilience excluded), not the stale unfiltered one  ->  reason=3 material decisions remain (open decisions and unresolved earned questions). expectedCount=3
+PASS  Fixture C: the SASE-shape answer produces exactly one new governed version  ->  version=3
+PASS  Fixture C: Entra ID identity integration compiles into its own clause from the buyer's own words  ->  found=true
+PASS  Fixture K2/defect 1 setup: the canonical buying scope is SASE going into Prompt C (sanity check on the fixture sequence itself)  ->  buyingBeforeC=sase
+PASS  Fixture K2/defect 1: the canonical buying scope (procurement.buying) remains SASE after Prompt C -- 'SOC services' does not destructively rescope the project  ->  buyingAfterC=sase
+PASS  Fixture K2/defect 1: the section outline's Solution scope row still reads 'Buying: SASE.' after Prompt C  ->  detail=Buying: SASE.
+PASS  Fixture K2/defect 1: the architecture/network-architecture-scope clause still represents the proposed SASE service after Prompt C  ->  found=true statement=Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): "UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users."
+PASS  Fixture K2/defect 1: Entra ID remains a separate identity requirement (its own clause, not folded into or lost by the buying-scope handling)  ->  found=true
+PASS  Fixture K2/defect 1: third-party SOC services are retained as their own additive consideration clause, without corrupting the SASE buying scope  ->  found=true statement=A third-party security operations/MDR-style service is under consideration alongside the core scope.
+PASS  Fixture K2/defect 1: the third-party SOC consideration is advisory (not mandatory) -- a hedged 'will consider' never becomes a hard requirement  ->  mandatory=false
+PASS  Fixture D: the UK data-residency constraint compiles into its own clause with the buyer's exact wording retained verbatim  ->  quote=Customer data must remain in the UK, including backups and support access.
+  Fixture L/defect 5 readiness progression: A=24(Starting shape) sections=2/10 decisions=4 -> B=30(Starting shape) sections=3/10 decisions=3 -> C=33(Starting shape) sections=3/10 decisions=2 -> D=30(Starting shape) sections=3/10 decisions=3
+PASS  Fixture L/defect 5: the section-aware readiness at Prompt A carries explainable reasons, not a bare number  ->  ["2 of 10 procurement sections confirmed.","Operating model not yet stated.","Delivery timeline not yet stated.","Budget position not yet stated.","Every mandatory clause carries an acceptance test.","4 material decisions remain (open decisions and unresolved earned questions).","Separately, 2 optional Netify suggestions are available to review -- these do not block consistent pricing and do not affect this score.","Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."]
+PASS  Fixture L/defect 5, correction pass round 3: the RECALCULATED A->B->C->D score progression (24 -> 30 -> 33 -> 30) matches empirical reproduction against the real production functions AND a freshly rendered live UI run captured this round -- a pinned regression value, not just a directional check, and not a stale pre-fix progression  ->  A=24 B=30 C=33 D=30
+PASS  Fixture L/defect 5: at Prompt A, section coverage is genuinely partial (not every section already reads confirmed) -- the score has real headroom to move  ->  confirmed=2/10
+PASS  Fixture L/defect 5: resolving Site resilience (Prompt B's dual-circuit answer, defect 2's own site-resilience-scope clause) increases BOTH section coverage and the readiness score -- an explainable, section-driven change, not a relabelled band  ->  sectionsConfirmed A=2 B=3; score A=24 B=30
+PASS  Fixture L/defect 5: Prompt C's own wording resolves the SASE-shape decision (a real, strict-phrase objective match, not silent freeform inference) -- an explainable INCREASE in the score, honestly attributed to the buyer's own words  ->  materialDecisionsRemaining B=3 C=2; score B=30 C=33
+PASS  Fixture L/defect 5: Prompt D's UK-residency constraint opens a NEW material decision (legal-basis-for-residency) -- an explainable DECREASE in the score, tied to a real, named open decision, not noise  ->  materialDecisionsRemaining C=2 D=3; score C=33 D=30
+PASS  Fixture L2/defect 5: resolving SASE shape via a genuine structured answer (notedIds includes obj-unified) at the Prompt-B state produces a score at least as high as the unresolved state -- an explainable, decision-driven change (the SAME resolution mechanism Fixture G proves below with a clicked option, and the SAME one Prompt C's own wording exercises live, above)  ->  unresolved=30 resolved=33 materialDecisionsRemaining unresolved=3 resolved=2
+PASS  Fixture L2/defect 5: resolving SASE shape strictly reduces material-decisions-remaining (the decision the buyer just answered is no longer counted as open)  ->  unresolved=3 resolved=2
+PASS  Fixture L3/defect 5: resolving the operating model (opModelOverride: managed) at the Prompt-C state produces a score at least as high as the unresolved state  ->  unresolved=33 resolved=45
+PASS  Fixture E setup: answerNextQuestion's own function body was found in ProjectDesk.tsx (regex still matches the current source)  ->  found=true
+PASS  Fixture E: answering a NextQuestion (any branch: items/note/dismiss/path) never calls keepSourceTurn() -- question selection is UI context, not a source turn  ->  bodyLength=3155
+PASS  Fixture E: answerNextQuestion does land through the desk's own governed state machinery (not a no-op stub)  ->  
+PASS  Fixture F: a note-only answer (no WorkspaceFact touched) still resolves to exactly one applied governed revision, with an honestly empty changedFactIds  ->  applied=true cycle=1 changedFactIds=[]
+PASS  Fixture F: the compiler itself advances document.version by exactly one for that same note-only revision, end to end  ->  before=1 after=2
+PASS  Fixture G setup: the resilience clause compiled at Prompt B is still present at this later state (facts are cumulative)  ->  
+PASS  Fixture G/neutral setup: the comparison text matches no strict stated-objective phrase at all (a fair test of the general principle, not a coincidence)  ->  matches=[]
+PASS  Fixture G/neutral: genuinely unrelated freeform prose, on its own, does NOT resolve q-sase-shape -- only a structured answer (a click, or the buyer's own strict-phrase wording) may  ->  remaining=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture G/neutral: q-resilience correctly stays excluded at this later state too (the clause-gated filter holds beyond Prompt B, not just at the moment the clause first compiles)  ->  remaining=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture G/structured: once the buyer's SASE-shape choice lands as a genuine structured answer (notedIds includes obj-unified), q-sase-shape no longer appears in the ranked list  ->  remaining=["OD-operating-model-unstated","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture G/structured: a new question is promoted into the top-3 in its place (the list never shrinks to fewer than 3 while unresolved decisions remain)  ->  top3=["OD-operating-model-unstated","q-sse-scope","sector:mf-ot-visibility"]
+PASS  Fixture G/real: Prompt C's own exact wording, through the REAL statedObjectivesIn() extraction (not a manual notedIds injection), produces the SAME obj-unified id the structured-answer case above uses  ->  objectivesFromC=["obj-unified"]
+PASS  Fixture G/real: with the REAL Prompt C fold applied, q-sase-shape no longer appears in the ranked list -- matching the live UI, whose 'Best next decisions' cards never show it after Prompt C (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png)  ->  remaining=["OD-operating-model-unstated","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'rankedFits' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference '.suppliers' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Fixture K3/defect 1: the site-resilience-scope clause survives a reload (recompiled fresh from the same facts, previousDocument: null) -- resolution is not an artefact of in-memory document state  ->  
+PASS  Fixture K3/defect 1: q-resilience stays absent from the ranked list after a reload  ->  rankedIds=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture I: a reload (previousDocument=null) reproduces the identical ranked NextQuestion list and provenance for the identical facts  ->  before=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"] after=["OD-operating-model-unstated","q-sase-shape","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture J: the NextQuestion cards stack to one column under the sm breakpoint (390px-safe) and only become 3 columns at sm and above  ->  
+PASS  Fixture J: the section outline's title column is full-width on mobile (no fixed 190px column below the sm breakpoint)  ->  
+PASS  Fixture J: no new UNCONDITIONAL (non-responsive) fixed pixel width at or above 100px that would overflow a 390px viewport  ->  matches=[]
+
+ALL PASS
+PASS  1: a pre-Checkpoint-B record has no envelope_schema_version field (not synthesized on parse)  ->  value=undefined
+PASS  1: migrateProjectDetails() treats an absent version as 1 and upgrades it to CURRENT  ->  after=1 current=1
+PASS  1: migration changes ONLY the version field -- every other field survives byte-identical  ->  title="Manufacturing procurement (20 sites)" ledgerLen=1
+PASS  2: migrateProjectDetails() returns the SAME object reference (not even a copy) when already current -- a true no-op  ->  sameRef=true
+PASS  3: a record from a NEWER deploy (version above current) is left completely untouched, never downgraded  ->  version=2
+PASS  4: a full ProjectDetails record round-trips through JSON.stringify/JSON.parse + re-validation byte-identical (exact save/reopen fidelity)  ->  equal=true
+PASS  4: the buyer's own verbatim wording in source_ledger survives the round trip unchanged  ->  text="Manufacturing company, 20 sites."
+PASS  4: the decision ledger's structured entries survive the round trip unchanged  ->  questionId=q-sase-shape
+PASS  5: an unknown top-level field is rejected by the strict envelope schema (no parallel/undocumented representation)  ->  success=false
+
+ALL PASS
+PASS  1: phase="scoping" with no snapshot reads as not_published  ->  got=not_published
+PASS  1: phase="scoped" with no snapshot reads as not_published  ->  got=not_published
+PASS  1: phase="drafting" with no snapshot reads as not_published  ->  got=not_published
+PASS  1: phase="drafted" with no snapshot reads as not_published  ->  got=not_published
+PASS  2: phase="published" with no snapshot reads as published_no_snapshot (not "not_published", not "frozen")  ->  got=published_no_snapshot
+PASS  2: phase="qa" with no snapshot reads as published_no_snapshot (not "not_published", not "frozen")  ->  got=published_no_snapshot
+PASS  2: phase="evaluation" with no snapshot reads as published_no_snapshot (not "not_published", not "frozen")  ->  got=published_no_snapshot
+PASS  2: phase="awarded" with no snapshot reads as published_no_snapshot (not "not_published", not "frozen")  ->  got=published_no_snapshot
+PASS  2: phase="transacting" with no snapshot reads as published_no_snapshot (not "not_published", not "frozen")  ->  got=published_no_snapshot
+PASS  2: phase="complete" with no snapshot reads as published_no_snapshot (not "not_published", not "frozen")  ->  got=published_no_snapshot
+PASS  2: phase="closed" with no snapshot reads as published_no_snapshot (not "not_published", not "frozen")  ->  got=published_no_snapshot
+PASS  2: the pre-publish and published-or-later lists together cover every real ProjectPhase, none omitted  ->  covered=11 total=11
+PASS  3: any phase="scoping" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="scoped" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="drafting" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="drafted" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="published" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="qa" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="evaluation" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="awarded" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="transacting" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="complete" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  3: any phase="closed" with a real snapshot present reads as frozen  ->  got=frozen
+PASS  4: document_version survives the snapshot's own JSON round trip  ->  v=3
+PASS  4: frozen matched vendor NAMES survive the round trip (the room's own primary read)  ->  name=Acme SASE
+PASS  4: accepted_assumptions text survives the round trip verbatim  ->  text=Single region: UK
+
+ALL PASS
+PASS  1: the real buildRfpMarkdown() output produces at least one paragraph block  ->  paragraphs=25
+PASS  1: both real tables in the canonical document (cover fields, scoring) become docx Table blocks  ->  tables=2
+PASS  1: the canonical document is non-empty and produces a non-empty block list  ->  inputLines=37 blocks=27
+PASS  2: the first block is a Paragraph (the document title)  ->  found=true
+PASS  3: the realistic project's mandatory question produces a **[MANDATORY]** line in the real canonical markdown  ->  line="1. **[MANDATORY]** What is your total site count?"
+PASS  4: renderRfpDocx() produces a non-trivial real .docx binary from the real canonical document  ->  bytes=10278
+PASS  4: the output is a genuine ZIP/OOXML container (starts with the PK signature)  ->  bytes=50,4b
+PASS  5: the export's source text is genuinely buildRfpMarkdown()'s real output, not a stand-in (contains the real project title)  ->  titleFound=true
+
+ALL PASS
+PASS  1: via=mcp reads as an MCP receipt  ->  isMcp=true
+PASS  1: the receipt's detail field count reflects the real recorded detail, not a guess  ->  count=2
+PASS  2: actor=assistant + via=web does NOT read as an MCP receipt (via is the signal, not actor)  ->  isMcp=false
+PASS  3: via="web" does not read as an MCP receipt  ->  isMcp=false
+PASS  3: via="admin" does not read as an MCP receipt  ->  isMcp=false
+PASS  3: via="cron" does not read as an MCP receipt  ->  isMcp=false
+PASS  3: via="system" does not read as an MCP receipt  ->  isMcp=false
+PASS  4: consent=true reads as recorded  ->  
+PASS  4: consent=false does not read as recorded  ->  
+PASS  4: an absent consent field does not read as recorded  ->  
+
+ALL PASS
+PASS  1: a real compiled document validates against LivingProcurementDocumentSchema  ->  ok
+PASS  1: parseIncomingProcurementDocument accepts the same real document  ->  
+PASS  2: null input drops cleanly (undefined)  ->  
+PASS  2: an empty object drops cleanly (undefined)  ->  
+PASS  2: a type-mismatched real-shaped document drops cleanly (undefined)  ->  
+PASS  2: an extra unexpected field drops cleanly (.strict() rejects it)  ->  
+PASS  3: a ProjectDetails record with no procurement_document still validates (backward compatible)  ->  ok
+PASS  3: a ProjectDetails record carrying a real procurement_document validates  ->  ok
+PASS  4 setup: the second compile is genuinely a different document (version advanced)  ->  v1=1 v2=2
+PASS  4: rfpContentSnapshot() output is IDENTICAL across two records differing only in procurement_document  ->  identical, as required
+PASS  5: every clause becomes exactly one question (no loss, no duplication)  ->  clauses=2 questions=2
+PASS  5: no empty section is emitted  ->  sections=["Network"]
+PASS  5: every projected question's weight is clamped into RfpQuestion's 1-5 range  ->  
+PASS  5: a mandatory clause maps to, and only to, a required-priority question  ->  mandatory=2 required=2
+PASS  6: reopening with no new revision this session keeps the SAME persisted version (never resets to 1)  ->  persisted=1 reopened=1
+PASS  6: a genuinely new revision after reopen advances the version by exactly one  ->  persisted=1 afterEdit=2
+
+ALL PASS

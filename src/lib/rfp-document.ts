@@ -125,13 +125,17 @@ export function livingDocumentToRfpSections(doc: LivingProcurementDocument): Rfp
       evidence_requested: clause.evidence.join("; "),
       rationale: clause.reason,
       priority: clause.mandatory ? "required" : "recommended",
-      // `RfpQuestion.source` has no clause-origin-shaped value ("buyer" /
-      // "netify" / "sector" / "buyer_override"); "methodology" is this
-      // pipeline's own catch-all for "not a buyer-typed custom question",
-      // which every compiled clause is -- provenance is not lost, it is
-      // still carried on the clause itself (`origin`, `quote`,
-      // `sourceTurnIds`), just not projectable into this narrower field.
-      source: "methodology",
+      // Full-unification CLOSURE pass (17 Aug 2026): `RfpQuestion.source`
+      // now carries the clause's REAL `ClauseOrigin` directly -- the prior
+      // pass collapsed every compiled clause into a generic
+      // `"methodology"` catch-all because the enum had no clause-origin-
+      // shaped value yet; it does now (rfp-types.ts's own comment on this
+      // field). No provenance is lossy here any more: a buyer-stated
+      // clause reads as `"buyer"`, a Netify default as `"netify"`, a
+      // sector-pack addition as `"sector"`, and an explicit buyer override
+      // as `"buyer_override"` -- exactly `clause.origin`, never remapped
+      // or approximated.
+      source: clause.origin,
       buyer_lens: clause.quote ?? "",
       supplier_lens: clause.supplierResponse.join("; "),
       mandatory: clause.mandatory,

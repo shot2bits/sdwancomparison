@@ -7,6 +7,7 @@ import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { isMarketUnlocked, getMarketUnlock } from "@/lib/market-unlock";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
+import { buildEnvelopeUpdate } from "@/lib/workspace/envelope";
 import { rfpContentSnapshot, contentHash } from "@/lib/published-snapshot";
 import { applyGovernedEvent } from "@/lib/rfp-governed-revision";
 
@@ -137,6 +138,57 @@ export async function PUT(req: Request, ctx: Ctx) {
   // blind-spread treatment as source_turns immediately above.
   const incomingDecisionTurns = parseIncomingDecisionTurns(body.decision_turns);
   delete body.decision_turns;
+  // Full-unification CLOSURE pass (17 Aug 2026), bug found while wiring the
+  // canonical envelope in: `position` is NOT a ProjectDetailsSchema field
+  // (it never was -- POST /api/rfp only ever reads it transiently, to pick
+  // the earned bank set at creation, never persists it) but rfpPayload()
+  // (ProjectDesk.tsx) has always sent it on EVERY save, including this PUT.
+  // Left in the blind spread below, it made `ProjectDetailsSchema.safeParse`
+  // reject the WHOLE save with "Unrecognized key: position" -- meaning every
+  // non-security-scope ProjectDesk save AFTER the first (every refreshRecord
+  // call) has been silently failing with a 422 pre-dating this pass. Pulled
+  // out and deleted, same convention as source_turns/decision_turns
+  // immediately above; its `covered_sections` is read below for the
+  // canonical envelope's own RFI-set derivation, matching what POST already
+  // does at creation.
+  const rawPosition = body.position as { covered_sections?: unknown; sector?: unknown } | undefined;
+  const coveredSections = rawPosition && Array.isArray(rawPosition.covered_sections) ? rawPosition.covered_sections.map(String) : [];
+  delete body.position;
+  // Full-unification CLOSURE pass: same "pull out before the blind spread,
+  // verify, merge explicitly" treatment for the canonical envelope's own
+  // fields -- `facts`/`receipts`/`envelope_revision`/`envelope` must never
+  // pass through the blind spread raw (unvalidated, unverified, bypassing
+  // envelope.ts entirely); `compiled_document`/`base_revision`/`instrument`
+  // are request-body-only convenience fields, not ProjectDetailsSchema
+  // fields at all (mirroring source_turns/decision_turns), so they are
+  // deleted unconditionally regardless of outcome.
+  const mergedSourceLedger = mergeSourceLedger(existing.source_ledger ?? [], incomingSourceTurns);
+  const mergedDecisionLedger = mergeDecisionLedger(existing.decision_ledger ?? [], incomingDecisionTurns);
+  const envelopeOutcome = await buildEnvelopeUpdate({
+    existing: { procurement_document: existing.procurement_document ?? null, envelope_revision: existing.envelope_revision ?? 0 },
+    body,
+    mergedSourceLedger,
+    mergedDecisionLedger,
+    coveredSections,
+    savedBy: access.session?.email ?? existing.owner_email ?? "unauthenticated",
+  });
+  delete body.facts;
+  delete body.receipts;
+  delete body.envelope_revision;
+  delete body.envelope;
+  delete body.compiled_document;
+  delete body.base_revision;
+  delete body.instrument;
+  // A raw client-submitted `procurement_document` must never pass through
+  // the blind spread untouched -- it is ONLY ever set from
+  // `envelopeOutcome` below (the server's own verified recompute). This is
+  // the exact gap the prior pass left open (a client's compiled-document
+  // bytes were trusted outright); closing it here, not just in the new
+  // `facts`-bearing path, so an old field name can never resurrect it.
+  delete body.procurement_document;
+  if (envelopeOutcome.participates && !envelopeOutcome.ok) {
+    return Response.json({ error: envelopeOutcome.error }, { status: envelopeOutcome.status, headers: cors });
+  }
 
   // Preserve immutable/credential/ownership fields: a PUT must never rotate the
   // manage_token, reassign identity-bearing tokens, or move the RFP to another
@@ -152,8 +204,17 @@ export async function PUT(req: Request, ctx: Ctx) {
     // Merged explicitly (never overwritten by the spread above, and never
     // left to whatever body.source_ledger happened to contain): accretes
     // idempotently by stable turn id, exactly like the re-scope route.
-    source_ledger: mergeSourceLedger(existing.source_ledger ?? [], incomingSourceTurns),
-    decision_ledger: mergeDecisionLedger(existing.decision_ledger ?? [], incomingDecisionTurns),
+    source_ledger: mergedSourceLedger,
+    decision_ledger: mergedDecisionLedger,
+    ...(envelopeOutcome.participates && envelopeOutcome.ok
+      ? {
+          facts: envelopeOutcome.facts,
+          receipts: envelopeOutcome.receipts,
+          procurement_document: envelopeOutcome.procurement_document,
+          envelope_revision: envelopeOutcome.envelope_revision,
+          envelope: envelopeOutcome.envelope,
+        }
+      : {}),
   } as typeof existing;
 
   // Adopt ownership: a token-authorised save from a signed-in buyer binds the

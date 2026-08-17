@@ -1,0 +1,1281 @@
+
+/tmp/sdwan_reliability_gate/scripts/validate-rfp-builder-match-disclosure.ts
+  559:105  warning  'kvSetJson' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/scripts/validate-workspace-value-formatting.ts
+  31:3  warning  'REGION_LABELS' is defined but never used      @typescript-eslint/no-unused-vars
+  32:3  warning  'COMPLIANCE_LABELS' is defined but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/app/account/page.tsx
+  46:11  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+/tmp/sdwan_reliability_gate/src/app/api/opportunity/[id]/route.ts
+  34:24  warning  '_bt' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  34:42  warning  '_oe' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/app/api/opportunity/supplier/[token]/route.ts
+  41:24  warning  '_bt' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  41:42  warning  '_oe' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  41:59  warning  '_in' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  41:73  warning  '_inv' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  89:24  warning  '_bt2' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  89:43  warning  '_oe2' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  89:61  warning  '_in2' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  89:76  warning  '_inv2' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/app/api/rfp/[id]/signoff/route.ts
+  42:41  warning  '_token' is defined but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/app/auth/verify/VerifyClient.tsx
+  60:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/app/auth/verify/VerifyClient.tsx:60:7
+  58 |     const t = new URLSearchParams(window.location.search).get("token");
+  59 |     if (t) {
+> 60 |       setToken(t);
+     |       ^^^^^^^^ Avoid calling setState() directly within an effect
+  61 |       // A valid token AND an existing session (Harry, 24 July 2026: signed
+  62 |       // in with the 6-digit code, then clicked the same email's link and
+  63 |       // was asked to confirm sign-in a third time). Recognise the session  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/app/best/[slug]/page.tsx
+  91:9  warning  'sectorLabel' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/app/project/[id]/rescope/page.tsx
+  2:8  warning  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/app/vendors/[slug]/page.tsx
+  73:9  warning  'yesPct' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/app/vendors/page.tsx
+  117:23  warning  'yesPct' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/components/AdminClient.tsx
+  101:66  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/AdminClient.tsx:101:66
+   99 |   }, []);
+  100 |
+> 101 |   useEffect(() => { if (session?.authenticated && session.admin) load(); }, [session, load]);
+      |                                                                  ^^^^ Avoid calling setState() directly within an effect
+  102 |
+  103 |   async function act(payload: Record<string, unknown>) {
+  104 |     setBusy(true); setError(null); setNotice(null);  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/AgentReviewPanel.tsx
+   90:21   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/AgentReviewPanel.tsx:90:21
+  88 |   }, [rfpId]);
+  89 |
+> 90 |   useEffect(() => { load(); }, [load]);
+     |                     ^^^^ Avoid calling setState() directly within an effect
+  91 |
+  92 |   // Saved confirmation (Harry's QA F12: pressing "Set goal" gave no visible
+  93 |   // acknowledgement, so the buyer could not tell the goal was active)  react-hooks/set-state-in-effect
+  239:129  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react/no-unescaped-entities
+
+/tmp/sdwan_reliability_gate/src/components/CodeEntry.tsx
+  18:48   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/CodeEntry.tsx:18:48
+  16 |   const [busy, setBusy] = useState(false);
+  17 |   const [err, setErr] = useState<string | null>(null);
+> 18 |   useEffect(() => { if (defaultEmail && !addr) setAddr(defaultEmail); /* eslint-disable-next-line */ }, [defaultEmail]);
+     |                                                ^^^^^^^ Avoid calling setState() directly within an effect
+  19 |   async function submit() {
+  20 |     const c = code.trim();
+  21 |     const e = addr.trim();  react-hooks/set-state-in-effect
+  18:71   warning  Unused eslint-disable directive (no problems were reported)
+  18:105  warning  React Hook useEffect has a missing dependency: 'addr'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+
+/tmp/sdwan_reliability_gate/src/components/ContinueDraftBanner.tsx
+  38:65  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/ContinueDraftBanner.tsx:38:65
+  36 |       const d = JSON.parse(raw) as LastDraft;
+  37 |       // Only surface drafts the builder can actually reopen (its token key).
+> 38 |       if (d?.id && localStorage.getItem(`netify_mtok_${d.id}`)) setDraft(d);
+     |                                                                 ^^^^^^^^ Avoid calling setState() directly within an effect
+  39 |     } catch {
+  40 |       /* private mode or malformed pointer: no banner */
+  41 |     }  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/CostEstimator.tsx
+  57:10  warning  'base64url' is defined but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/components/DescribeWizard.tsx
+  152:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/DescribeWizard.tsx:152:7
+  150 |     const s = p.get("scope");
+  151 |     if (s && SCOPES.some((x) => x.key === s)) {
+> 152 |       setScope(s);
+      |       ^^^^^^^^ Avoid calling setState() directly within an effect
+  153 |       if (s === "managed") setModel("managed");
+  154 |       setStep(1);
+  155 |       started.current = true;                                                                                                                                                                                                      react-hooks/set-state-in-effect
+  205:41  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/DescribeWizard.tsx:205:41
+  203 |   // buttons changed nothing and the count looked stuck).
+  204 |   useEffect(() => {
+> 205 |     if (!scope || scope === "unsure") { setMatch(null); return; }
+      |                                         ^^^^^^^^ Avoid calling setState() directly within an effect
+  206 |     const q = new URLSearchParams({ scope: scope === "managed" ? "sase" : scope, regions: regions.join("."), model });
+  207 |     const t = window.setTimeout(() => {
+  208 |       fetch(`/sase/api/rfp/match?${q.toString()}`)  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx
+   83:95  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:83:95
+  81 |   // Remember the form across navigation, so opening an outcome and coming back
+  82 |   // never loses what the user entered.
+> 83 |   useEffect(() => { try { const raw = sessionStorage.getItem("netify_guided_start"); if (raw) setS({ ...INITIAL, ...JSON.parse(raw) }); } catch { /* ignore */ } }, []);
+     |                                                                                               ^^^^ Avoid calling setState() directly within an effect
+  84 |   useEffect(() => { try { sessionStorage.setItem("netify_guided_start", JSON.stringify(s)); } catch { /* ignore */ } }, [s]);
+  85 |
+  86 |   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);                                                                                                                                                                                                                                                                                                                                                                               react-hooks/set-state-in-effect
+  174:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:174:10
+  172 |
+  173 |       <div className="space-y-5">
+> 174 |         <Group title="What do you need?">
+      |          ^^^^^ This component is created during render
+  175 |           {NEEDS.map((n) => <button key={n.key} onClick={() => setS({ ...s, needs: toggle(s.needs, n.key) })} className={chip(s.needs.includes(n.key))}>{n.label}</button>)}
+  176 |         </Group>
+  177 |
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                                                                                                                                                                                                 react-hooks/static-components
+  179:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:179:12
+  177 |
+  178 |         <div className="grid md:grid-cols-2 gap-5">
+> 179 |           <Group title="Sector">
+      |            ^^^^^ This component is created during render
+  180 |             {SECTORS.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sector: s.sector === k ? null : k })} className={chip(s.sector === k)}>{l}</button>)}
+  181 |           </Group>
+  182 |           <Group title="Region">
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                                                                                                                                                         react-hooks/static-components
+  182:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:182:12
+  180 |             {SECTORS.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sector: s.sector === k ? null : k })} className={chip(s.sector === k)}>{l}</button>)}
+  181 |           </Group>
+> 182 |           <Group title="Region">
+      |            ^^^^^ This component is created during render
+  183 |             {REGIONS.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, regions: toggle(s.regions, k) })} className={chip(s.regions.includes(k))}>{l}</button>)}
+  184 |           </Group>
+  185 |         </div>
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                                  react-hooks/static-components
+  188:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:188:12
+  186 |
+  187 |         <div className="grid md:grid-cols-3 gap-5">
+> 188 |           <Group title="Project type">
+      |            ^^^^^ This component is created during render
+  189 |             {(["new", "migration"] as const).map((k) => <button key={k} onClick={() => setS({ ...s, project: s.project === k ? null : k })} className={chip(s.project === k)}>{k === "new" ? "New project" : "Migration"}</button>)}
+  190 |           </Group>
+  191 |           <Group title="Organisation">
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                                                                               react-hooks/static-components
+  191:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:191:12
+  189 |             {(["new", "migration"] as const).map((k) => <button key={k} onClick={() => setS({ ...s, project: s.project === k ? null : k })} className={chip(s.project === k)}>{k === "new" ? "New project" : "Migration"}</button>)}
+  190 |           </Group>
+> 191 |           <Group title="Organisation">
+      |            ^^^^^ This component is created during render
+  192 |             {ORG_SIZES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, orgSize: s.orgSize === k ? null : k })} className={chip(s.orgSize === k)}>{l}</button>)}
+  193 |           </Group>
+  194 |           <Group title="Delivery model">
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">  react-hooks/static-components
+  194:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:194:12
+  192 |             {ORG_SIZES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, orgSize: s.orgSize === k ? null : k })} className={chip(s.orgSize === k)}>{l}</button>)}
+  193 |           </Group>
+> 194 |           <Group title="Delivery model">
+      |            ^^^^^ This component is created during render
+  195 |             {DELIVERY.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, delivery: k })} className={chip(s.delivery === k)}>{l}</button>)}
+  196 |           </Group>
+  197 |         </div>
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                                           react-hooks/static-components
+  200:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:200:12
+  198 |
+  199 |         <div className="grid md:grid-cols-2 gap-5">
+> 200 |           <Group title="SD-WAN features">
+      |            ^^^^^ This component is created during render
+  201 |             {SDWAN_FEATURES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sdwan: toggle(s.sdwan, k) })} className={chip(s.sdwan.includes(k))}>{l}</button>)}
+  202 |           </Group>
+  203 |           <Group title="SASE features">
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                                                                                                                                     react-hooks/static-components
+  203:12  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:203:12
+  201 |             {SDWAN_FEATURES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sdwan: toggle(s.sdwan, k) })} className={chip(s.sdwan.includes(k))}>{l}</button>)}
+  202 |           </Group>
+> 203 |           <Group title="SASE features">
+      |            ^^^^^ This component is created during render
+  204 |             {SASE_FEATURES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sase: toggle(s.sase, k) })} className={chip(s.sase.includes(k))}>{l}</button>)}
+  205 |           </Group>
+  206 |         </div>
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                          react-hooks/static-components
+  208:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:208:10
+  206 |         </div>
+  207 |
+> 208 |         <Group title="Compliance (optional)">
+      |          ^^^^^ This component is created during render
+  209 |           {COMPLIANCE.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, compliance: toggle(s.compliance, k) })} className={chip(s.compliance.includes(k))}>{l}</button>)}
+  210 |         </Group>
+  211 |
+
+/tmp/sdwan_reliability_gate/src/components/GuidedStart.tsx:144:17
+  142 |   const chip = (active: boolean) =>
+  143 |     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
+> 144 |   const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 145 |     <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 146 |   );
+      | ^^^^ The component is created during render here
+  147 |
+  148 |   return (
+  149 |     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">                                                                                                                                                                                                                                                                         react-hooks/static-components
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx
+   26:15  warning  'AllowedPath' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  276:10  warning  'cycle' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  332:32  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx:332:32
+  330 |   useEffect(() => {
+  331 |     const p = new URLSearchParams(window.location.search);
+> 332 |     if (p.get("test") === "1") setTestMode(true);
+      |                                ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  333 |     const scope = p.get("scope");
+  334 |     const seedFacts: FieldUpdate[] = [];
+  335 |     if (scope && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scope)) {                                                                                                                                                                         react-hooks/set-state-in-effect
+  367:12  error    Error: Cannot access variable before it is declared
+
+`runCycle` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx:367:12
+  365 |       setInput(q);
+  366 |       firstKeyAt.current = Date.now();
+> 367 |       void runCycle(q, { fromLink: true });
+      |            ^^^^^^^^ `runCycle` accessed before it is declared
+  368 |     }
+  369 |     // eslint-disable-next-line react-hooks/exhaustive-deps
+  370 |   }, []);
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx:399:3
+  397 |
+  398 |   /* ---- The extraction cycle ---- */
+> 399 |   const runCycle = useCallback(
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 400 |     async (text: string, opts: { fromEnter?: boolean; fromLink?: boolean } = {}) => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 401 |       const trimmed = text.trim();
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 431 |     [busy, applyMerge],
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 432 |   );
+      | ^^^^^ `runCycle` is declared here
+  433 |
+  434 |   /* ---- Debounce: a cycle per pause, not per keystroke ---- */
+  435 |   useEffect(() => {  react-hooks/immutability
+  393:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx:393:7
+  391 |     const useful = Boolean(verdict) || standing(facts).length >= 3;
+  392 |     if (started && useful) {
+> 393 |       setSaveLite("shown");
+      |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  394 |       ev("workspace_save_lite_shown", { facts: standing(facts).length });
+  395 |     }
+  396 |   }, [saveLite, signedIn, published, created, verdict, facts, started]);                                                                                                                                                                                                                      react-hooks/set-state-in-effect
+  400:5   error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx:400:5
+  398 |   /* ---- The extraction cycle ---- */
+  399 |   const runCycle = useCallback(
+> 400 |     async (text: string, opts: { fromEnter?: boolean; fromLink?: boolean } = {}) => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 401 |       const trimmed = text.trim();
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 402 |       if (trimmed.length < 3 || busy) return;
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 429 |       }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 430 |     },
+      | ^^^^^^ Could not preserve existing memoization
+  431 |     [busy, applyMerge],
+  432 |   );
+  433 |                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/preserve-manual-memoization
+  448:7   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx:448:7
+  446 |   useEffect(() => {
+  447 |     if (!securityScope || live.length === 0) {
+> 448 |       setVerdict(null);
+      |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  449 |       return;
+  450 |     }
+  451 |     let cancelled = false;                                                                                                                                                                                                                                                                                                                                                                   react-hooks/set-state-in-effect
+  594:83  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/tmp/sdwan_reliability_gate/src/components/LiveWorkspace.tsx:594:83
+  592 |                 notes: notesLine,
+  593 |               },
+> 594 |               consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" },
+      |                                                                                   ^^^^^^^^^^ Cannot call impure function
+  595 |             }),
+  596 |           });
+  597 |           const data = await res.json().catch(() => ({}));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            react-hooks/purity
+
+/tmp/sdwan_reliability_gate/src/components/MegaNav.tsx
+  111:19  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/MegaNav.tsx:111:19
+  109 |   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  110 |   const hoverOpenedAt = useRef(0);
+> 111 |   useEffect(() => setMounted(true), []);
+      |                   ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  112 |
+  113 |   const [session, setSession] = useState<Session | null>(null);
+  114 |   useEffect(() => {                                                                    react-hooks/set-state-in-effect
+  127:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/MegaNav.tsx:127:21
+  125 |   const accountHref = session?.authenticated ? ACCOUNT.href : SIGN_IN.href;
+  126 |
+> 127 |   useEffect(() => { setMobileOpen(false); setOpenGroup(null); }, [pathname]);
+      |                     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  128 |   useEffect(() => {
+  129 |     document.body.style.overflow = mobileOpen ? "hidden" : "";
+  130 |     return () => { document.body.style.overflow = ""; };  react-hooks/set-state-in-effect
+  146:31  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/tmp/sdwan_reliability_gate/src/components/MegaNav.tsx:146:31
+  144 |       closeTimer.current = setTimeout(() => setOpenGroup(null), 140);
+  145 |     } else {
+> 146 |       hoverOpenedAt.current = Date.now();
+      |                               ^^^^^^^^^^ Cannot call impure function
+  147 |       setOpenGroup(label);
+  148 |     }
+  149 |   };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/purity
+  154:9   error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @next/next/no-html-link-for-pages
+  237:15  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @next/next/no-html-link-for-pages
+
+/tmp/sdwan_reliability_gate/src/components/NoticeBuilder.tsx
+  137:16  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/NoticeBuilder.tsx:137:16
+  135 |     try {
+  136 |       const raw = localStorage.getItem(DRAFT_KEY);
+> 137 |       if (raw) setDraft({ ...EMPTY, ...(JSON.parse(raw) as Partial<Draft>) });
+      |                ^^^^^^^^ Avoid calling setState() directly within an effect
+  138 |     } catch { /* fresh draft */ }
+  139 |     const p = new URLSearchParams(window.location.search);
+  140 |     if (p.get("prefill") === "1") {  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/OpportunityBuyer.tsx
+   49:36  error    Error: Cannot access variable before it is declared
+
+`load` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/tmp/sdwan_reliability_gate/src/components/OpportunityBuyer.tsx:49:36
+  47 |   const lastTs = useRef(0);
+  48 |
+> 49 |   useEffect(() => { if (initialId) load(initialId); /* eslint-disable-next-line */ }, [initialId]);
+     |                                    ^^^^ `load` accessed before it is declared
+  50 |   // Prefill the post form from the guided start (query carry-through).
+  51 |   useEffect(() => {
+  52 |     if (initialId) return;
+
+/tmp/sdwan_reliability_gate/src/components/OpportunityBuyer.tsx:87:3
+   85 |   }, [opp?.id]);
+   86 |
+>  87 |   async function load(id: string) {
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  88 |     // Prove ownership with the locally stored buyer token (set at publish
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  89 |     // time); the API no longer returns buyer_token to arbitrary viewers.
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 111 |     catch { setError("Could not load."); }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 112 |   }
+      | ^^^^ `load` is declared here
+  113 |
+  114 |   async function postOpportunity() {
+  115 |     setError(null);  react-hooks/immutability
+   49:53  warning  Unused eslint-disable directive (no problems were reported)
+   61:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/OpportunityBuyer.tsx:61:5
+  59 |     const summary = p.get("summary") ?? "";
+  60 |     const scopeLabel = scope.map((k) => SCOPES.find((x) => x.key === k)?.label ?? k).join(", ");
+> 61 |     setForm((f) => ({
+     |     ^^^^^^^ Avoid calling setState() directly within an effect
+  62 |       ...f,
+  63 |       scope: scope.length ? scope : f.scope,
+  64 |       regions: regions.length ? regions : f.regions,                                                                                                                                                                                                                                                                                  react-hooks/set-state-in-effect
+   85:6   warning  React Hook useEffect has a missing dependency: 'opp'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/exhaustive-deps
+  331:51  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+/tmp/sdwan_reliability_gate/src/components/OpportunityBuyer.tsx:331:51
+  329 |                     <button
+  330 |                       key={slug}
+> 331 |                       onClick={() => { if (!done) buyerAction("accept_introduction", "", undefined, slug); }}
+      |                                                   ^^^^^^^^^^^ Passing a ref to a function may read its value during render
+  332 |                       disabled={done}
+  333 |                       className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${done ? "border-emerald-500 text-emerald-700" : "border-[var(--ink-900)] hover:bg-[var(--ink-900)] hover:text-white"}`}
+  334 |                     >                                                                                                                                                                                                                                                                                                                                                                                                react-hooks/refs
+
+/tmp/sdwan_reliability_gate/src/components/OpportunityOwnerBanner.tsx
+  21:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/OpportunityOwnerBanner.tsx:21:7
+  19 |   useEffect(() => {
+  20 |     try {
+> 21 |       setIsOwner(Boolean(localStorage.getItem(`opp_btok_${id}`)));
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  22 |     } catch {
+  23 |       /* private mode: no banner */
+  24 |     }  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/OpportunitySupplier.tsx
+  70:6  warning  React Hook useEffect has a missing dependency: 'opp'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/tmp/sdwan_reliability_gate/src/components/PartnerWorkspace.tsx
+  38:21  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/PartnerWorkspace.tsx:38:21
+  36 |     setLoading(false);
+  37 |   }, []);
+> 38 |   useEffect(() => { load().catch(() => setLoading(false)); }, [load]);
+     |                     ^^^^ Avoid calling setState() directly within an effect
+  39 |
+  40 |   if (loading) return <p className="text-sm text-[var(--ink-500)]">Loading your workspace…</p>;
+  41 |   if (needsAuth) return (  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx
+   223:32  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:223:32
+  221 |
+  222 |     const p = new URLSearchParams(window.location.search);
+> 223 |     if (p.get("test") === "1") setTestMode(true);
+      |                                ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  224 |     const scopeParam = p.get("scope");
+  225 |     const seedFacts: FieldUpdate[] = [];
+  226 |     if (scopeParam && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scopeParam)) {                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/set-state-in-effect
+   258:12  error  Error: Cannot access variable before it is declared
+
+`runCycle` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:258:12
+  256 |       setInput(q);
+  257 |       firstKeyAt.current = Date.now();
+> 258 |       void runCycle(q, { fromLink: true });
+      |            ^^^^^^^^ `runCycle` accessed before it is declared
+  259 |     }
+  260 |     // eslint-disable-next-line react-hooks/exhaustive-deps
+  261 |   }, []);
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:272:3
+  270 |
+  271 |   /* ---- The extraction cycle (the same organ) ---- */
+> 272 |   const runCycle = useCallback(
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 273 |     async (text: string, opts: { fromEnter?: boolean; fromLink?: boolean } = {}) => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 274 |       const trimmed = text.trim();
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 320 |     [busy, applyMerge, crewLog],
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 321 |   );
+      | ^^^^^ `runCycle` is declared here
+  322 |
+  323 |   /* ---- Debounce per pause ---- */
+  324 |   useEffect(() => {                                                                                                                                                                                                                   react-hooks/immutability
+   273:5   error  Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:273:5
+  271 |   /* ---- The extraction cycle (the same organ) ---- */
+  272 |   const runCycle = useCallback(
+> 273 |     async (text: string, opts: { fromEnter?: boolean; fromLink?: boolean } = {}) => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 274 |       const trimmed = text.trim();
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 275 |       if (trimmed.length < 3 || busy) return;
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 318 |       }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 319 |     },
+      | ^^^^^^ Could not preserve existing memoization
+  320 |     [busy, applyMerge, crewLog],
+  321 |   );
+  322 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-hooks/preserve-manual-memoization
+   337:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:337:7
+  335 |   useEffect(() => {
+  336 |     if (!securityScope || live.length === 0) {
+> 337 |       setVerdict(null);
+      |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  338 |       return;
+  339 |     }
+  340 |     let cancelled = false;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/set-state-in-effect
+   392:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:392:7
+  390 |     if (saveLite !== "hidden" || signedIn || published || created) return;
+  391 |     if (started && (Boolean(verdict) || live.length >= 3)) {
+> 392 |       setSaveLite("shown");
+      |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  393 |       ev("workspace_save_lite_shown", { facts: live.length });
+  394 |     }
+  395 |   }, [saveLite, signedIn, published, created, verdict, live.length, started]);                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/set-state-in-effect
+   564:28  error  Error: Expected the dependency list to be an array of simple expressions (e.g. `x`, `x.y.z`, `x?.y?.z`)
+
+Expected the dependency list to be an array of simple expressions (e.g. `x`, `x.y.z`, `x?.y?.z`).
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:564:28
+  562 |     });
+  563 |     // eslint-disable-next-line react-hooks/exhaustive-deps
+> 564 |   }, [vendors, latestEval, Array.from(shownFit).join(","), scopeForFit]);
+      |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected the dependency list to be an array of simple expressions (e.g. `x`, `x.y.z`, `x?.y?.z`)
+  565 |
+  566 |   const noticeLayout = useMemo(
+  567 |     () =>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/use-memo
+  1006:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:1006:10
+  1004 |       <div className="relative">
+  1005 |         {close}
+> 1006 |         <K>Evaluated vendor · live: dataset</K>
+       |          ^ This component is created during render
+  1007 |         <p className="m-0 text-[13.5px] font-semibold text-zinc-900">{v.name}</p>
+  1008 |         <p className="m-0 mt-0.5 text-[10.5px] text-zinc-500">{v.category}</p>
+  1009 |         <p className="m-0 mt-1.5 text-[11px] leading-relaxed text-zinc-600">
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:993:13
+  991 |   const { selection } = props;
+  992 |   const [gapVal, setGapVal] = useState("");
+> 993 |   const K = ({ children }: { children: React.ReactNode }) => (
+      |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 994 |     <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">{children}</p>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 995 |   );
+      | ^^^^ The component is created during render here
+  996 |   const close = (
+  997 |     <button type="button" onClick={props.onClose} className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-900">✕</button>
+  998 |   );                                                                                                         react-hooks/static-components
+  1031:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:1031:10
+  1029 |       <div className="relative">
+  1030 |         {close}
+> 1031 |         <K>Open on the board · live</K>
+       |          ^ This component is created during render
+  1032 |         <p className="m-0 text-[13px] font-semibold text-zinc-900">{n.title}</p>
+  1033 |         <p className="m-0 mt-1 text-[10.5px] text-zinc-500">
+  1034 |           {n.scope.join(", ")}
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:993:13
+  991 |   const { selection } = props;
+  992 |   const [gapVal, setGapVal] = useState("");
+> 993 |   const K = ({ children }: { children: React.ReactNode }) => (
+      |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 994 |     <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">{children}</p>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 995 |   );
+      | ^^^^ The component is created during render here
+  996 |   const close = (
+  997 |     <button type="button" onClick={props.onClose} className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-900">✕</button>
+  998 |   );                                                                                                                                                                                  react-hooks/static-components
+  1046:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:1046:10
+  1044 |       <div className="relative">
+  1045 |         {close}
+> 1046 |         <K>Only you can answer this</K>
+       |          ^ This component is created during render
+  1047 |         <p className="pw-serif m-0 mb-2 text-[13px] italic leading-relaxed text-zinc-900">{g.question}</p>
+  1048 |         {g.path && g.control === "chips" && g.options ? (
+  1049 |           <div className="flex flex-wrap gap-1.5">
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:993:13
+  991 |   const { selection } = props;
+  992 |   const [gapVal, setGapVal] = useState("");
+> 993 |   const K = ({ children }: { children: React.ReactNode }) => (
+      |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 994 |     <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">{children}</p>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 995 |   );
+      | ^^^^ The component is created during render here
+  996 |   const close = (
+  997 |     <button type="button" onClick={props.onClose} className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-900">✕</button>
+  998 |   );                                                                                                                                       react-hooks/static-components
+  1081:10  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:1081:10
+  1079 |       <div className="relative">
+  1080 |         {close}
+> 1081 |         <K>The artefact · a printout of your position</K>
+       |          ^ This component is created during render
+  1082 |         <pre className="m-0 max-h-64 overflow-auto whitespace-pre-wrap text-[10px] leading-relaxed text-zinc-700">{props.briefTextValue()}</pre>
+  1083 |         <p className="m-0 mt-1.5 text-[9.5px] text-zinc-400">The published document is generated by the engine at your signature; this is the position as it stands now.</p>
+  1084 |       </div>
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:993:13
+  991 |   const { selection } = props;
+  992 |   const [gapVal, setGapVal] = useState("");
+> 993 |   const K = ({ children }: { children: React.ReactNode }) => (
+      |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 994 |     <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">{children}</p>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 995 |   );
+      | ^^^^ The component is created during render here
+  996 |   const close = (
+  997 |     <button type="button" onClick={props.onClose} className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-900">✕</button>
+  998 |   );  react-hooks/static-components
+  1091:8   error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:1091:8
+  1089 |     <div className="relative">
+  1090 |       {close}
+> 1091 |       <K>Your position · {props.meter.percent}% in your own words</K>
+       |        ^ This component is created during render
+  1092 |       <div className="max-h-56 space-y-1 overflow-auto">
+  1093 |         {props.facts.map((f) => (
+  1094 |           <div key={f.id} className="flex items-baseline justify-between gap-2 border-t border-zinc-100 pt-1 text-[11px]">
+
+/tmp/sdwan_reliability_gate/src/components/PositionWorkspace.tsx:993:13
+  991 |   const { selection } = props;
+  992 |   const [gapVal, setGapVal] = useState("");
+> 993 |   const K = ({ children }: { children: React.ReactNode }) => (
+      |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 994 |     <p className="m-0 mb-1.5 text-[9px] font-semibold uppercase tracking-[.14em] text-zinc-400">{children}</p>
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 995 |   );
+      | ^^^^ The component is created during render here
+  996 |   const close = (
+  997 |     <button type="button" onClick={props.onClose} className="absolute right-2.5 top-2 text-zinc-400 hover:text-zinc-900">✕</button>
+  998 |   );                                                                                                                  react-hooks/static-components
+
+/tmp/sdwan_reliability_gate/src/components/ProjectDesk.tsx
+  1222:32  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/ProjectDesk.tsx:1222:32
+  1220 |
+  1221 |     const p = new URLSearchParams(window.location.search);
+> 1222 |     if (p.get("test") === "1") setTestMode(true);
+       |                                ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  1223 |     const scopeParam = p.get("scope");
+  1224 |     const seedFacts: FieldUpdate[] = [];
+  1225 |     if (scopeParam && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scopeParam)) {                                                                                                                                                                                    react-hooks/set-state-in-effect
+  1543:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/ProjectDesk.tsx:1543:7
+  1541 |   useEffect(() => {
+  1542 |     if (!securityScope || live.length === 0) {
+> 1543 |       setVerdict(null);
+       |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  1544 |       return;
+  1545 |     }
+  1546 |     let cancelled = false;                                                                                                                                                                                                                                                                                                                                                                         react-hooks/set-state-in-effect
+  1668:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/ProjectDesk.tsx:1668:5
+  1666 |     /* The change carries the marker AND one thread line (round 6): the
+  1667 |        rules are already written in when the line appears. */
+> 1668 |     setChangedSlots((prev) => [...new Set([...prev, ...merged.changed.map((id) => `rule:${id}`)])]);
+       |     ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  1669 |     const n = merged.changed.length;
+  1670 |     say(`Your sector writes ${numWord(n)} rule${n === 1 ? "" : "s"} into the statement; they are in already, each with its reason, and any one can be dropped.`);
+  1671 |     // eslint-disable-next-line react-hooks/exhaustive-deps  react-hooks/set-state-in-effect
+  2868:59  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/ProjectDesk.tsx:2868:59
+  2866 |   useEffect(() => {
+  2867 |     const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+> 2868 |     if (w.SpeechRecognition || w.webkitSpeechRecognition) setVoiceSupported(true);
+       |                                                           ^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  2869 |     return () => { try { voiceRec.current?.stop(); } catch { /* gone */ } };
+  2870 |   }, []);
+  2871 |   const startVoice = () => {                                                                                                                     react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx
+    17:8    warning  'BuyerContext' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    18:8    warning  'RfpSection' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   259:60   warning  Unused eslint-disable directive (no problems were reported)
+   259:94   warning  React Hook useEffect has a missing dependency: 'loadProject'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+   271:74   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:271:74
+  269 |     let flagged = false;
+  270 |     try { flagged = localStorage.getItem(`rfp_pending_publish_${project.id}`) === "1"; } catch { /* ignore */ }
+> 271 |     if (flagged && project.status !== "published" && !publishAuthNeeded) setPublishAuthNeeded(true);
+      |                                                                          ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  272 |     /* eslint-disable-next-line */
+  273 |   }, [project?.id]);
+  274 |   useEffect(() => {  react-hooks/set-state-in-effect
+   312:11   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:312:11
+  310 |   useEffect(() => {
+  311 |     if (!project) return;
+> 312 |     try { setStickyGone(sessionStorage.getItem(`rfp_publish_bar_${project.id}`) === "1"); } catch { /* ignore */ }
+      |           ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  313 |     /* eslint-disable-next-line */
+  314 |   }, [project?.id]);
+  315 |                                                                                                                                                                         react-hooks/set-state-in-effect
+   347:28   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:347:28
+  345 |     const w = p.get("welcome");
+  346 |     if (w !== "generated" && w !== "submitting") return;
+> 347 |     if (w === "generated") setGeneratedWelcome(true);
+      |                            ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  348 |     if (w === "submitting") {
+  349 |       setSubmitFlow(true);
+  350 |       try { setPendingEmail(sessionStorage.getItem("netify_pending_email") ?? ""); } catch { /* ignore */ }                                                       react-hooks/set-state-in-effect
+   369:7    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:369:7
+  367 |       sessionStorage.removeItem("netify_signin_note");
+  368 |       const d = JSON.parse(raw) as { claimed?: number };
+> 369 |       setSigninNote(typeof d.claimed === "number" ? d.claimed : 0);
+      |       ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  370 |     } catch { /* ignore */ }
+  371 |   }, []);
+  372 |                                                                                                                                                                            react-hooks/set-state-in-effect
+   418:6    warning  React Hook useEffect has missing dependencies: 'project.status' and 'project.title'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+   427:57   warning  Unused eslint-disable directive (no problems were reported)
+   427:91   warning  React Hook useEffect has missing dependencies: 'project' and 'refreshCoverage'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+   427:105  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-hooks/exhaustive-deps
+   437:108  warning  React Hook useEffect has missing dependencies: 'project' and 'refreshConnections'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+   438:70   warning  Unused eslint-disable directive (no problems were reported)
+   709:9    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:709:9
+  707 |         };
+  708 |         prefilled.current = true;
+> 709 |         setMode("manual");
+      |         ^^^^^^^ Avoid calling setState() directly within an effect
+  710 |         startRfp(buyer);
+  711 |       } catch {
+  712 |         /* malformed prefill payloads are ignored; the builder starts clean */                                                                                                                                                                                                           react-hooks/set-state-in-effect
+  2279:48   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:2279:48
+  2277 |   const [busy, setBusy] = useState(false);
+  2278 |   const [err, setErr] = useState<string | null>(null);
+> 2279 |   useEffect(() => { if (defaultEmail && !addr) setAddr(defaultEmail); /* eslint-disable-next-line */ }, [defaultEmail]);
+       |                                                ^^^^^^^ Avoid calling setState() directly within an effect
+  2280 |   async function submit() {
+  2281 |     const c = code.trim();
+  2282 |     const e = addr.trim();                                              react-hooks/set-state-in-effect
+  2279:71   warning  Unused eslint-disable directive (no problems were reported)
+  2279:105  warning  React Hook useEffect has a missing dependency: 'addr'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilderPathCards.tsx
+  23:63  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilderPathCards.tsx:23:63
+  21 |     window.addEventListener("netify:rfp-active", onActive);
+  22 |     // Covers the reload case: the builder rewrites the URL to /rfp-builder/{rfp id}.
+> 23 |     if (/\/rfp-builder\/rfp_/.test(window.location.pathname)) setCollapsed(true);
+     |                                                               ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |     return () => window.removeEventListener("netify:rfp-active", onActive);
+  25 |   }, []);
+  26 |  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/ShortlistBuilder.tsx
+  119:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/ShortlistBuilder.tsx:119:5
+  117 |   const searchParams = useSearchParams();
+  118 |   useEffect(() => {
+> 119 |     setInput(decodeScenario(searchParams.toString(), featureIds));
+      |     ^^^^^^^^ Avoid calling setState() directly within an effect
+  120 |     setHydrated(true);
+  121 |     // eslint-disable-next-line react-hooks/exhaustive-deps
+  122 |   }, [searchParams]);  react-hooks/set-state-in-effect
+
+/tmp/sdwan_reliability_gate/src/components/SupplierDashboard.tsx
+   33:7    error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/SupplierDashboard.tsx:33:7
+  31 |   useEffect(() => {
+  32 |     if (session?.authenticated && session.role !== "buyer") {
+> 33 |       load();
+     |       ^^^^ Avoid calling setState() directly within an effect
+  34 |       fetch("/sase/api/supplier/claim").then((r) => r.json()).then((d) => setClaim({ status: d.status, vendor_slug: d.vendor_slug })).catch(() => {});
+  35 |     }
+  36 |   }, [session, load]);  react-hooks/set-state-in-effect
+  105:161  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react/no-unescaped-entities
+
+/tmp/sdwan_reliability_gate/src/components/SupplierPortal.tsx
+  26:21   error    Error: Cannot access variable before it is declared
+
+`load` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/tmp/sdwan_reliability_gate/src/components/SupplierPortal.tsx:26:21
+  24 |   const [notice, setNotice] = useState<string | null>(null);
+  25 |
+> 26 |   useEffect(() => { load(); /* eslint-disable-next-line */ }, [token]);
+     |                     ^^^^ `load` accessed before it is declared
+  27 |
+  28 |   async function load() {
+  29 |     try {
+
+/tmp/sdwan_reliability_gate/src/components/SupplierPortal.tsx:28:3
+  26 |   useEffect(() => { load(); /* eslint-disable-next-line */ }, [token]);
+  27 |
+> 28 |   async function load() {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^
+> 29 |     try {
+     | ^^^^^^^^^
+> 30 |       const res = await fetch(`/sase/api/supplier/${token}`);
+     | ^^^^^^^^^
+> 31 |       if (!res.ok) { setError("This connection could not be found."); return; }
+     | ^^^^^^^^^
+> 32 |       const data = (await res.json()) as { connection: Conn; rfp: Rfp | null };
+     | ^^^^^^^^^
+> 33 |       setConn(data.connection); setRfp(data.rfp);
+     | ^^^^^^^^^
+> 34 |     } catch { setError("This connection could not be loaded."); }
+     | ^^^^^^^^^
+> 35 |   }
+     | ^^^^ `load` is declared here
+  36 |
+  37 |   async function post(action: string, body: string, payload: Record<string, string> = {}) {
+  38 |     setError(null); setNotice(null);  react-hooks/immutability
+  26:29   warning  Unused eslint-disable directive (no problems were reported)
+  26:63   warning  React Hook useEffect has a missing dependency: 'load'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/exhaustive-deps
+  58:65   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/tmp/sdwan_reliability_gate/src/components/SupplierPortal.tsx:58:65
+  56 |         <p className="text-sm text-[var(--ink-500)] mt-1">Connection status: {conn.status}</p>
+  57 |         {rfp?.response_deadline && (
+> 58 |           <p className={`mt-1 text-sm ${rfp.response_deadline < Date.now() ? "text-red-700" : "text-[var(--ink-700)]"}`}>
+     |                                                                 ^^^^^^^^^^ Cannot call impure function
+  59 |             {rfp.response_deadline < Date.now()
+  60 |               ? `The response window closed on ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`
+  61 |               : `Responses close ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(1, Math.ceil((rfp.response_deadline - Date.now()) / 86400000))} day${Math.ceil((rfp.response_deadline - Date.now()) / 86400000) === 1 ? "" : "s"} left).`}                                                                                                                                                         react-hooks/purity
+  59:38   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/tmp/sdwan_reliability_gate/src/components/SupplierPortal.tsx:59:38
+  57 |         {rfp?.response_deadline && (
+  58 |           <p className={`mt-1 text-sm ${rfp.response_deadline < Date.now() ? "text-red-700" : "text-[var(--ink-700)]"}`}>
+> 59 |             {rfp.response_deadline < Date.now()
+     |                                      ^^^^^^^^^^ Cannot call impure function
+  60 |               ? `The response window closed on ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`
+  61 |               : `Responses close ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(1, Math.ceil((rfp.response_deadline - Date.now()) / 86400000))} day${Math.ceil((rfp.response_deadline - Date.now()) / 86400000) === 1 ? "" : "s"} left).`}
+  62 |           </p>                                                                                                                                                                                                                                                                    react-hooks/purity
+  61:182  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/tmp/sdwan_reliability_gate/src/components/SupplierPortal.tsx:61:182
+  59 |             {rfp.response_deadline < Date.now()
+  60 |               ? `The response window closed on ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`
+> 61 |               : `Responses close ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(1, Math.ceil((rfp.response_deadline - Date.now()) / 86400000))} day${Math.ceil((rfp.response_deadline - Date.now()) / 86400000) === 1 ? "" : "s"} left).`}
+     |                                                                                                                                                                                      ^^^^^^^^^^ Cannot call impure function
+  62 |           </p>
+  63 |         )}
+  64 |       </div>                                                                                                                                                                                                                                                          react-hooks/purity
+  61:248  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/tmp/sdwan_reliability_gate/src/components/SupplierPortal.tsx:61:248
+  59 |             {rfp.response_deadline < Date.now()
+  60 |               ? `The response window closed on ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`
+> 61 |               : `Responses close ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(1, Math.ceil((rfp.response_deadline - Date.now()) / 86400000))} day${Math.ceil((rfp.response_deadline - Date.now()) / 86400000) === 1 ? "" : "s"} left).`}
+     |                                                                                                                                                                                                                                                        ^^^^^^^^^^ Cannot call impure function
+  62 |           </p>
+  63 |         )}
+  64 |       </div>                                                                                                                                                                                        react-hooks/purity
+
+/tmp/sdwan_reliability_gate/src/lib/agent-run.ts
+  23:69  warning  'ApprovalItem' is defined but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/lib/estimator/engine.ts
+  49:20  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/tmp/sdwan_reliability_gate/src/lib/security/rescope-project.fixtures.ts
+  11:10  warning  'SECURITY_FIXTURES' is defined but never used  @typescript-eslint/no-unused-vars
+  16:15  warning  'ProjectDetails' is defined but never used     @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/lib/workspace/areas.ts
+  24:15  warning  'BriefGap' is defined but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/lib/workspace/draft.fixtures.ts
+   17:3  warning  'standing' is defined but never used               @typescript-eslint/no-unused-vars
+  629:9  error    'facts2' is never reassigned. Use 'const' instead  prefer-const
+
+/tmp/sdwan_reliability_gate/src/lib/workspace/draft.ts
+  716:9  warning  'opModel' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/tmp/sdwan_reliability_gate/src/lib/workspace/questions.ts
+  306:22  warning  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+  306:41  warning  '_p' is defined but never used  @typescript-eslint/no-unused-vars
+  308:95  warning  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+  316:48  warning  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+  317:41  warning  '_e' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 119 problems (68 errors, 51 warnings)
+  1 error and 7 warnings potentially fixable with the `--fix` option.
+

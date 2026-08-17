@@ -967,6 +967,18 @@ export default function ProjectDesk({
    *  so a StrictMode double-invoke of the memo never sees a half-updated
    *  ref. */
   const previousProcurementDocumentRef = useRef<LivingProcurementDocument | null>(null);
+  /** Full-unification CLOSURE pass (17 Aug 2026): this session's own
+   *  concurrency token for the canonical envelope (envelope.ts's
+   *  `base_revision` compare-before-write) -- 0 until a save/resume proves
+   *  otherwise. Seeded from `proj.envelope_revision` on resume (below) and
+   *  advanced from every save response's own `envelope_revision` (saveNow's
+   *  create/refresh branches), never guessed or incremented locally: the
+   *  server is always the one source of truth for what the current
+   *  revision actually is, exactly like `previousProcurementDocumentRef`
+   *  immediately above is for document content. A ref, not state: sending
+   *  it is a fire-and-forget side channel on the next save, not something
+   *  that should re-render the canvas. */
+  const envelopeRevisionRef = useRef<number>(0);
   /** Phase 3 Stage A correction round (Robert, 14 Aug 2026): explicit
    *  governed-revision wiring, replacing the legacy fallback that bumped
    *  `compiledDocument.version` once per genuine facts-or-receipts diff.
@@ -1344,6 +1356,21 @@ export default function ProjectDesk({
             // survives a reload, which is the genuinely new guarantee this
             // phase adds).
             procurement_document?: LivingProcurementDocument;
+            // Full-unification CLOSURE pass (17 Aug 2026): the durably
+            // persisted canonical-envelope inputs from this project's own
+            // last save -- absent on a record saved before this pass (an
+            // older deploy, or a project that has never had `facts` sent to
+            // it), in which case the existing `resumeStateFromProject`
+            // heuristic-base path below remains this session's ONLY source
+            // of resumed facts, exactly as before this pass (fixture K:
+            // legacy records stay readable without this becoming the sole
+            // authority). When present, seeded ALONGSIDE (never instead of)
+            // that heuristic base -- mergeRequirementBase unions rather than
+            // overwrites, so having both a real facts array and the legacy
+            // heuristic populated is a safe, non-destructive union.
+            facts?: WorkspaceFact[];
+            receipts?: Receipt[];
+            envelope_revision?: number;
           };
           const resumeState = resumeStateFromProject(proj);
           if (!resumeState) {
@@ -1400,6 +1427,23 @@ export default function ProjectDesk({
           if (proj.procurement_document) {
             previousProcurementDocumentRef.current = proj.procurement_document;
           }
+          // Full-unification CLOSURE pass (17 Aug 2026): seeds the
+          // canonical envelope's own durable inputs -- see this effect's
+          // `facts`/`receipts`/`envelope_revision` field comments above.
+          // Deliberately does NOT touch `resumeRequirementBase` (set from
+          // `resumeState` above, unconditionally): that heuristic path
+          // keeps working exactly as before this pass for a record that
+          // predates `facts` being sent at all, and `mergeRequirementBase`
+          // unions the two rather than picking one, so seeding both here is
+          // safe even for a record that has both.
+          if (proj.facts && proj.facts.length) {
+            factsRef.current = proj.facts;
+            setFacts(proj.facts);
+          }
+          if (proj.receipts && proj.receipts.length) {
+            setReceipts(proj.receipts);
+          }
+          envelopeRevisionRef.current = proj.envelope_revision ?? 0;
           /* Round 3 correction, item 6: rehydrate `published` durably for
            * an already-published project, from the SAME frozen sources the
            * report route and every export already read from -- never a
@@ -2641,16 +2685,32 @@ export default function ProjectDesk({
       /** Correction pass, defects 3 and 4: the same treatment, into
        *  `decision_ledger`. */
       decision_turns: decisionTurnsPayload(),
-      /* 2030 blueprint, full-unification phase (17 Aug 2026): the ALREADY-
-         COMPILED document (this same `compiledDocument` the Living
-         Procurement Canvas itself renders from, not a second recompute) --
-         see rfp-types.ts's own `procurement_document` field comment and
-         procurement-document.ts's "Persistence" section for why the server
-         records this rather than recomputing it. `canvasDocument`, not
-         `compiledDocument`, so the persisted record carries the same
-         section-aware readiness the canvas itself shows -- the two are
-         identical in every other field (see canvasDocument's own comment). */
-      procurement_document: canvasDocument,
+      /* Full-unification CLOSURE pass (17 Aug 2026): `procurement_document`
+         renamed to `compiled_document` on the wire -- the server no longer
+         durably records the client's own compiled bytes as-is (that was
+         the exact trust gap this pass closes); it independently RECOMPUTES
+         from the canonical inputs below and either persists its own
+         recompute or rejects the save if this belief disagrees (see
+         envelope.ts's own doc comment). `canvasDocument`, not
+         `compiledDocument`, so the cross-check strips `readiness` before
+         comparing (the section-aware readiness is a client-side display
+         substitution, never part of the compiler's own output) -- see
+         envelope.ts's `withoutReadiness`. The canonical inputs themselves:
+         `facts`/`receipts` are this session's own live state (the server
+         validates but does not yet re-derive them -- see envelope.ts's own
+         documented boundary); `instrument` is session-local (started/live
+         claims/open questions), not facts-derivable, so it stays
+         client-trusted-but-schema-validated too. `base_revision` is this
+         session's own last-known concurrency token (0 for a brand-new
+         project, or whatever the last save/resume returned) -- absent
+         `facts` in this payload (never true here; `rfpPayload` always
+         sends it) would leave the whole envelope inert, exactly like every
+         other writer route. */
+      compiled_document: canvasDocument,
+      facts,
+      receipts,
+      instrument,
+      base_revision: envelopeRevisionRef.current,
     };
   }
 
@@ -2675,10 +2735,28 @@ export default function ProjectDesk({
              source_turns immediately above -- see decisionTurnsPayload(). */
           ...(decisionTurns.length ? { decision_turns: decisionTurnsPayload() } : {}),
           ...(testMode ? { test: true } : {}),
+          /* Full-unification CLOSURE pass (17 Aug 2026): this branch never
+             sent ANY canonical-envelope field before this pass, so the
+             prior session's whole "durably persist the compiled document"
+             work was inert for Security Sourcing in real usage (the
+             wizard's rfpPayload() was the only payload that carried it).
+             Same fields, same names, as rfpPayload() above -- one wire
+             shape for every writer route (envelope.ts is the single
+             verifier). Sent unconditionally (not gated on facts.length):
+             a brand-new Security Sourcing project's first save should
+             already carry its own canonical envelope from facts=[] onward,
+             not wait for a later re-scope to originate one. */
+          facts,
+          receipts,
+          instrument,
+          compiled_document: canvasDocument,
+          position: { covered_sections: coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
+          base_revision: envelopeRevisionRef.current,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.project?.id) throw new Error(data.error || "Could not create the project; try again.");
+      envelopeRevisionRef.current = typeof data.project?.envelope_revision === "number" ? data.project.envelope_revision : 0;
       return { id: data.project.id, manage: data.project.manage_token || "", test: testMode || Boolean(data.project.test) };
     }
     const res = await fetch("/sase/api/rfp", {
@@ -2688,6 +2766,7 @@ export default function ProjectDesk({
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.id) throw new Error(data.error || "Could not create the requirement; try again.");
+    envelopeRevisionRef.current = typeof data.envelope_revision === "number" ? data.envelope_revision : 0;
     return { id: data.id, manage: data.manage_token ?? "", test: false };
   }
 
@@ -2707,10 +2786,31 @@ export default function ProjectDesk({
       const res = await fetch(`/sase/api/security-sourcing/project/${proj.id}/rescope`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ manage_token: proj.manage, requirement, consent: true, source_turns: sourceTurnsPayload(), decision_turns: decisionTurnsPayload() }),
+        body: JSON.stringify({
+          manage_token: proj.manage,
+          requirement,
+          consent: true,
+          source_turns: sourceTurnsPayload(),
+          decision_turns: decisionTurnsPayload(),
+          /* Full-unification CLOSURE pass (17 Aug 2026): this is the ONLY
+             save path a Security Sourcing project takes after its first
+             save (saveNow() calls this on every subsequent Save, and
+             signAndPublish() calls this as the pre-publish refresh) -- so
+             it is the field that makes facts CORRECTED or REMOVED after
+             the first save, and the concurrency check protecting them,
+             actually reach the server. Same shape as createRecord()'s
+             security-scope branch and rfpPayload() above. */
+          facts,
+          receipts,
+          instrument,
+          compiled_document: canvasDocument,
+          position: { covered_sections: coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
+          base_revision: envelopeRevisionRef.current,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
+      envelopeRevisionRef.current = typeof data.envelope_revision === "number" ? data.envelope_revision : envelopeRevisionRef.current;
       return;
     }
     const res = await fetch(`/sase/api/rfp/${proj.id}`, {
@@ -2720,6 +2820,7 @@ export default function ProjectDesk({
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
+    envelopeRevisionRef.current = typeof data.envelope_revision === "number" ? data.envelope_revision : envelopeRevisionRef.current;
   }
 
   /* ---- The early save (round 6, Robert's ruling): a verified work

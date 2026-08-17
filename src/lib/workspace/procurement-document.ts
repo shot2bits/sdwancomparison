@@ -63,6 +63,18 @@ import {
   type EvaluationCategoryKey,
 } from "@/lib/workspace/procurement-readiness";
 
+/**
+ * 2030 blueprint, full-unification closure pass (17 Aug 2026): this
+ * compiler's own version -- recorded on every persisted canonical envelope
+ * (`ProjectDetails.envelope`, envelope.ts) so a future reader can tell
+ * exactly which `compileProcurementDocument()` produced a given persisted
+ * document. Bump only when this file's OUTPUT SHAPE changes in a way that
+ * would matter to an envelope reader (a field added/removed/renamed on
+ * `LivingProcurementDocument`, or a change to how `version`/clause ids are
+ * derived) -- not on every unrelated edit to this file.
+ */
+export const PROCUREMENT_COMPILER_VERSION = "1";
+
 /* ------------------------------------------------------------------ */
 /* Public types (Section 6, extended where Section 14 requires it --   */
 /* every extension is additive and documented at its own declaration)  */
