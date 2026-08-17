@@ -195,9 +195,12 @@ export function migrateProjectDetails(p: ProjectDetails): ProjectDetails {
   // CURRENT): never downgrade or rewrite it, leave it exactly alone.
   if (version > CURRENT_ENVELOPE_SCHEMA_VERSION) return p;
   // No structural migrations exist yet (CURRENT_ENVELOPE_SCHEMA_VERSION
-  // has never moved past 1) -- this loop is a no-op today and exists so
-  // the next real bump has a place to add one, rather than inventing the
-  // pattern under time pressure.
+  // has never moved past 1) -- this loop is a no-op today (`migrated`
+  // is declared `let`, not `const`, on purpose: the day a real step is
+  // added below it WILL be reassigned) and exists so the next real bump
+  // has a place to add one, rather than inventing the pattern under time
+  // pressure.
+  // eslint-disable-next-line prefer-const -- reassigned once a real migration step (e.g. `if (v === 2) migrated = migrateV1ToV2(migrated)`) is added below.
   let migrated = p;
   let v = version;
   while (v < CURRENT_ENVELOPE_SCHEMA_VERSION) {
