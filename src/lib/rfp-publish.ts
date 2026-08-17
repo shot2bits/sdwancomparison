@@ -749,7 +749,12 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       id: freshRevisionId,
       project_id: project.id,
       content_hash: contentHash(contentSnapshotForEvent),
-      frozen_content: { title: working.title, buyer: working.buyer, rfp_sections: working.rfp_sections },
+      // 2030 blueprint, full-unification phase (17 Aug 2026): freeze the
+      // living document alongside the legacy fields -- `?? null`, not a
+      // hard failure, when this project's most recent save predates the
+      // field or came from a client build that had not yet started
+      // sending it (published-snapshot.ts's own frozen_content comment).
+      frozen_content: { title: working.title, buyer: working.buyer, rfp_sections: working.rfp_sections, living_document: working.procurement_document ?? null },
       created_at: Date.now(),
     });
     attempt = await savePublicationAttempt({
@@ -1126,7 +1131,8 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       published_by: ownerEmail,
       consent: latestPublishConsent(published),
       content_hash: contentHash(contentSnapshotForEvent),
-      frozen_content: { title: published.title, buyer: published.buyer, rfp_sections: published.rfp_sections },
+      // Same treatment as the earlier FrozenRevision (step B) above.
+      frozen_content: { title: published.title, buyer: published.buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null },
       public_projection: { opportunity_id: board.opportunity_id ?? null, url: board.url ?? null },
       private_requirement: { rfp_id: published.id },
       match_criteria: result.criteria_summary,

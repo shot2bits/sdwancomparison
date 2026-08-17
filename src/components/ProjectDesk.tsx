@@ -1333,6 +1333,17 @@ export default function ProjectDesk({
             // invited suppliers from the published snapshot".
             status?: string;
             invited_vendors?: string[];
+            // 2030 blueprint, full-unification phase (17 Aug 2026): the
+            // durably persisted document from this project's own last
+            // save, when one exists -- seeded into
+            // `previousProcurementDocumentRef` below so a reopened session
+            // continues this project's OWN version/change-set history
+            // instead of silently restarting at version 1 (facts are still
+            // never rehydrated -- see source-ledger.ts's own comment --
+            // but the compiled OUTPUT of the prior session now durably
+            // survives a reload, which is the genuinely new guarantee this
+            // phase adds).
+            procurement_document?: LivingProcurementDocument;
           };
           const resumeState = resumeStateFromProject(proj);
           if (!resumeState) {
@@ -1380,6 +1391,15 @@ export default function ProjectDesk({
           // unrelated later scope change is still detected correctly.
           setCreated({ id: resumeId, manage: resumeManage ?? "", test: Boolean(proj.test) });
           savedSecurity.current = true;
+          // Seed the version/change-set chain from this project's own last
+          // persisted document (see this effect's own `procurement_document`
+          // field comment above) -- the FIRST compile after a reload still
+          // diffs against something real instead of `null`, so `version`
+          // keeps counting up from where the prior session left it rather
+          // than resetting to 1 on every reopen.
+          if (proj.procurement_document) {
+            previousProcurementDocumentRef.current = proj.procurement_document;
+          }
           /* Round 3 correction, item 6: rehydrate `published` durably for
            * an already-published project, from the SAME frozen sources the
            * report route and every export already read from -- never a
@@ -2621,6 +2641,16 @@ export default function ProjectDesk({
       /** Correction pass, defects 3 and 4: the same treatment, into
        *  `decision_ledger`. */
       decision_turns: decisionTurnsPayload(),
+      /* 2030 blueprint, full-unification phase (17 Aug 2026): the ALREADY-
+         COMPILED document (this same `compiledDocument` the Living
+         Procurement Canvas itself renders from, not a second recompute) --
+         see rfp-types.ts's own `procurement_document` field comment and
+         procurement-document.ts's "Persistence" section for why the server
+         records this rather than recomputing it. `canvasDocument`, not
+         `compiledDocument`, so the persisted record carries the same
+         section-aware readiness the canvas itself shows -- the two are
+         identical in every other field (see canvasDocument's own comment). */
+      procurement_document: canvasDocument,
     };
   }
 

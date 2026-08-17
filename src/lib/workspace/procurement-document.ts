@@ -35,6 +35,7 @@
  * impossible to pass. Every other field matches Section 6.1 exactly.
  */
 
+import { z } from "zod";
 import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/security/rulebook";
 import { buyingOf, operatingModelOf, standing, type WorkspaceFact } from "@/lib/workspace/draft";
 import type { RfiQuestionSet, EarnedInstrument } from "@/lib/workspace/instrument";
@@ -1312,4 +1313,210 @@ export function compileProcurementDocument(input: ProcurementCompilerInput): Liv
     lastRevision,
     instrument,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Persistence (2030 blueprint, full-unification phase, 17 Aug 2026)    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * WHY THIS EXISTS. The user's own code-review of the prior checkpoint work
+ * (17 Aug 2026) found, correctly, that the platform still has THREE related
+ * but non-identical canonical objects: the durable ProjectDetails+ledgers,
+ * the regenerated (never persisted) LivingProcurementDocument, and the
+ * immutable published snapshot (still frozen from the legacy `rfp_sections`
+ * pipeline, per published-snapshot.ts's own scope note). Directed to unify
+ * them, the obstacle is real and worth stating plainly: `compileProcurement
+ * Document()`'s `facts: WorkspaceFact[]` input is NOT reconstructable
+ * server-side from anything currently persisted (see source-ledger.ts's own
+ * "there is nothing to restore them FROM" comment) -- a server-side
+ * recompile-on-read would silently produce a wrong, facts-empty document.
+ *
+ * THE DESIGN THIS SIDESTEPS THAT OBSTACLE, RATHER THAN SOLVING THE
+ * UNSOLVABLE VERSION OF IT: this compiler is pure and 100% deterministic
+ * given its inputs (Section 8.5's own "never performs I/O" rule); the
+ * client (ProjectDesk.tsx) already holds the live `facts` and already
+ * compiles the document on every relevant state change via its
+ * `compiledDocument` useMemo. So the server never recomputes -- it durably
+ * RECORDS the already-computed result the client submits with every save,
+ * exactly the same "client acts, server durably records" shape this
+ * codebase already uses for `source_ledger`/`decision_ledger` (a buyer's
+ * chat turn or decision is also never re-derived server-side; it is
+ * received and stored). No parallel source of truth is created: the
+ * document's own content is still 100% a function of the SAME ledgers this
+ * compiler always read: it is simply the settled OUTPUT of that reduction
+ * that now also gets a durable home, rather than being recomputed from
+ * scratch (and silently wrong) on every reopen, room view or export.
+ *
+ * VALIDATION DEPTH: full and strict on every field this persistence layer's
+ * actual downstream readers use (clauses, evaluation, openDecisions,
+ * readiness, counts, architecture) -- an untrusted request body must not be
+ * able to smuggle an unvalidated shape into a "canonical" record any more
+ * than source_ledger/decision_ledger already allow. `factSnapshot` is the
+ * one field kept as a permissive `Record<string, unknown>`, matching its
+ * own doc comment above (LivingProcurementDocument.factSnapshot): its
+ * entire purpose is holding this compile's OWN arbitrary fact values for
+ * the NEXT in-memory compile to diff against, never a value any reader
+ * outside the compiler itself interprets.
+ */
+const ProcurementSectionKeySchema = z.enum([
+  "network", "security", "identity", "application", "operations", "project", "commercial", "supplier", "additional",
+]);
+
+const ClauseOriginSchema = z.enum(["buyer", "netify", "sector", "buyer_override"]);
+
+const ProcurementClauseSchema = z.object({
+  id: z.string().min(1),
+  section: ProcurementSectionKeySchema,
+  statement: z.string(),
+  supplierResponse: z.array(z.string()),
+  evidence: z.array(z.string()),
+  acceptanceTest: z.string().nullable(),
+  mandatory: z.boolean(),
+  weight: z.number(),
+  sourceFactIds: z.array(z.string()),
+  origin: ClauseOriginSchema,
+  reason: z.string(),
+  quote: z.string().nullable(),
+  sourceTurnIds: z.array(z.string()),
+  sourceNotedIds: z.array(z.string()),
+  templateKey: z.string(),
+  templateId: z.string(),
+}).strict();
+
+const AnswerFormatSchema = z.enum([
+  "narrative", "metric", "diagram", "compliance_matrix", "dated_plan", "live_demonstration", "documentary_evidence",
+]);
+
+const SupplierQuestionSchema = z.object({
+  id: z.string(),
+  clauseId: z.string(),
+  text: z.string(),
+  answerFormat: AnswerFormatSchema,
+  evidenceRequested: z.array(z.string()),
+  source: z.enum(["bank", "generated"]),
+  bankQuestionId: z.string().nullable(),
+}).strict();
+
+const EvaluationCategoryKeySchema = z.enum([
+  "network_resilience", "security_identity_data", "managed_service_delivery", "commercial",
+]);
+
+const SupplierResponseGroupSchema = z.object({
+  key: EvaluationCategoryKeySchema,
+  title: z.string(),
+  questions: z.array(SupplierQuestionSchema),
+}).strict();
+
+const EvaluationGateSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  clauseIds: z.array(z.string()),
+  description: z.string(),
+}).strict();
+
+const WeightSourceSchema = z.enum(["default", "sector", "buyer_priority", "buyer_override"]);
+
+const EvaluationCategorySchema = z.object({
+  key: EvaluationCategoryKeySchema,
+  label: z.string(),
+  weight: z.number(),
+  source: WeightSourceSchema,
+}).strict();
+
+const OpenDecisionImpactSchema = z.enum(["eligibility", "price", "architecture", "compliance", "delivery", "evaluation"]);
+
+const OpenDecisionSchema = z.object({
+  id: z.string(),
+  question: z.string(),
+  impact: z.array(OpenDecisionImpactSchema),
+  conflict: z.boolean(),
+  conflictReason: z.string().nullable(),
+  affectedClauseIds: z.array(z.string()),
+}).strict();
+
+const ArchitectureNodeSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  kind: z.enum(["site", "user", "network", "cloud", "identity", "voice", "application", "circuit", "datacentre"]),
+  sourceFactIds: z.array(z.string()),
+  sourceClauseIds: z.array(z.string()),
+}).strict();
+
+const ArchitectureEdgeSchema = z.object({ from: z.string(), to: z.string(), label: z.string() }).strict();
+
+const ProvenanceSummarySchema = z.object({
+  buyer: z.number(),
+  netify: z.number(),
+  sector: z.number(),
+  buyer_override: z.number(),
+}).strict();
+
+const ChangeListSchema = z.object({
+  added: z.array(z.string()),
+  updated: z.array(z.string()),
+  removed: z.array(z.string()),
+}).strict();
+
+const ProcurementChangeSetSchema = z.object({
+  facts: ChangeListSchema,
+  clauses: ChangeListSchema,
+  questions: ChangeListSchema,
+  gates: ChangeListSchema,
+  weights: z.object({
+    before: z.record(z.string(), z.number()),
+    after: z.record(z.string(), z.number()),
+  }).strict(),
+  sections: z.object({ added: z.array(z.string()), removed: z.array(z.string()) }).strict(),
+}).strict();
+
+const CompilerRevisionSchema = z.object({ cycle: z.number(), changedFactIds: z.array(z.string()) }).strict();
+
+/** The full persisted shape. `.strict()` at every level (matching
+ *  SourceLedgerEntrySchema/DecisionLedgerEntrySchema's own rigor): an
+ *  incoming save cannot smuggle extra fields into what becomes the
+ *  canonical persisted/frozen envelope. */
+export const LivingProcurementDocumentSchema = z.object({
+  version: z.number(),
+  title: z.string(),
+  summary: z.string(),
+  readiness: z.object({ score: z.number(), label: z.string(), reasons: z.array(z.string()) }).strict(),
+  counts: z.object({
+    requirements: z.number(),
+    questions: z.number(),
+    gates: z.number(),
+    decisions: z.number(),
+  }).strict(),
+  architecture: z.object({
+    nodes: z.array(ArchitectureNodeSchema),
+    edges: z.array(ArchitectureEdgeSchema),
+    accessibleSummary: z.string(),
+  }).strict(),
+  clauses: z.array(ProcurementClauseSchema),
+  responseGroups: z.array(SupplierResponseGroupSchema),
+  evaluation: z.object({ gates: z.array(EvaluationGateSchema), categories: z.array(EvaluationCategorySchema) }).strict(),
+  openDecisions: z.array(OpenDecisionSchema),
+  provenance: ProvenanceSummarySchema,
+  changeSet: ProcurementChangeSetSchema,
+  /** Permissive by design -- see this section's own top-of-block comment. */
+  factSnapshot: z.record(z.string(), z.unknown()),
+  receiptsSnapshot: z.array(z.string()),
+  lastRevision: CompilerRevisionSchema.nullable(),
+  instrument: z.enum(["sor", "rfi", "rfp"]),
+}).strict();
+
+/**
+ * Untrusted request-body JSON -> a validated LivingProcurementDocument, or
+ * `undefined` on any validation failure -- mirroring
+ * parseIncomingSourceTurns()'s own "duplication is safer than
+ * disappearance" ethos inverted for a replace-semantics field: a save whose
+ * submitted document fails validation must never destroy a project's
+ * EXISTING valid persisted document (the caller keeps the prior value on
+ * `undefined`), and must never fail the save outright either -- this field
+ * is additive, exactly like `envelope_schema_version` before it, so every
+ * existing caller/fixture that has never heard of it is unaffected.
+ */
+export function parseIncomingProcurementDocument(raw: unknown): LivingProcurementDocument | undefined {
+  const parsed = LivingProcurementDocumentSchema.safeParse(raw);
+  return parsed.success ? (parsed.data as LivingProcurementDocument) : undefined;
 }

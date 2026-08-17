@@ -123,9 +123,23 @@ export default async function ProcurementRoomPage({ params, searchParams }: Prop
 
           <section className="mb-6 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
             <p className="eyebrow mb-2">What was published</p>
-            <p className="m-0 text-sm text-[var(--ink-800)]">
-              <span className="font-medium">{snapshot.frozen_content.title}</span> -- {snapshot.frozen_content.rfp_sections.length} section{snapshot.frozen_content.rfp_sections.length === 1 ? "" : "s"} of requirements, exactly as they stood at the moment of publication.
-            </p>
+            {snapshot.frozen_content.living_document ? (
+              // 2030 blueprint, full-unification phase (17 Aug 2026): the
+              // real persisted/frozen Living Procurement Document, when
+              // this snapshot has one -- clause and readiness figures
+              // read straight from it, never recomputed.
+              <p className="m-0 text-sm text-[var(--ink-800)]">
+                <span className="font-medium">{snapshot.frozen_content.living_document.title}</span> -- {snapshot.frozen_content.living_document.clauses.length} requirement{snapshot.frozen_content.living_document.clauses.length === 1 ? "" : "s"} across {new Set(snapshot.frozen_content.living_document.clauses.map((c) => c.section)).size} section{new Set(snapshot.frozen_content.living_document.clauses.map((c) => c.section)).size === 1 ? "" : "s"}, exactly as they stood at the moment of publication.
+              </p>
+            ) : (
+              // Legacy fallback: a snapshot frozen before this phase, or
+              // from a save whose client had not yet started sending a
+              // living document -- honest about which content this is
+              // rather than fabricating a living-document reading.
+              <p className="m-0 text-sm text-[var(--ink-800)]">
+                <span className="font-medium">{snapshot.frozen_content.title}</span> -- {snapshot.frozen_content.rfp_sections.length} section{snapshot.frozen_content.rfp_sections.length === 1 ? "" : "s"} of requirements, exactly as they stood at the moment of publication.
+              </p>
+            )}
             {snapshot.accepted_assumptions.length > 0 && (
               <p className="m-0 mt-2 text-xs text-[var(--ink-600)]">
                 Accepted assumptions: {snapshot.accepted_assumptions.join("; ")}

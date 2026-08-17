@@ -8,6 +8,7 @@ import { SecurityRequirementInputSchema, SecurityScopeVerdictSchema } from "@/li
 import { UnderstandingSchema } from "@/lib/workspace/understanding";
 import { SourceLedgerEntrySchema } from "@/lib/workspace/source-ledger";
 import { DecisionLedgerEntrySchema } from "@/lib/workspace/decision-ledger";
+import { LivingProcurementDocumentSchema } from "@/lib/workspace/procurement-document";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -309,6 +310,28 @@ export const ProjectDetailsSchema = z.object({
    * version on next save via `saveProject()`.
    */
   envelope_schema_version: z.number().int().min(1).optional(),
+  /**
+   * 2030 blueprint, full-unification phase (17 Aug 2026): the durably
+   * PERSISTED LivingProcurementDocument -- the buyer's own code review
+   * found that, until now, this compiled document existed only as an
+   * in-memory recompute (ProjectDesk.tsx's `compiledDocument` useMemo),
+   * never a genuine part of the saved record, making it a THIRD,
+   * non-identical canonical object alongside ProjectDetails+ledgers and
+   * the published snapshot's legacy `rfp_sections` freeze. This field
+   * closes that gap: the client submits its own already-compiled document
+   * (see rfpPayload() in ProjectDesk.tsx) with every save, and the server
+   * durably records it -- never recomputes it server-side, because
+   * `facts: WorkspaceFact[]` (a required compiler input) cannot be
+   * reconstructed from any persisted state (source-ledger.ts's own "there
+   * is nothing to restore them FROM"). See procurement-document.ts's own
+   * "Persistence" section for the full design rationale. Optional so
+   * every record saved before this phase, and every save from an older
+   * client build that has not yet started sending it, validates
+   * unchanged -- readers (the Procurement Room, every export) must treat
+   * its absence as an honest "no living document on this record yet",
+   * never fabricate one.
+   */
+  procurement_document: LivingProcurementDocumentSchema.optional(),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
 
