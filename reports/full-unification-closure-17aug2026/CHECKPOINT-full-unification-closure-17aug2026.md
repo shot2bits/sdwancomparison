@@ -192,8 +192,12 @@ All seven numbered requirements are satisfied: one canonical envelope (no third/
 
 ## 8. Bundle and clean-room verification
 
-Git bundle: `reports/full-unification-closure-17aug2026/living-procurement-2030-shell-closure-<sha>.bundle` (created after this checkpoint's own commit; exact filename/SHA recorded at the bottom of this section once created).
+**Commit:** `eb95d5c32b23191f69d0b2d532fa4e809d2c38c2` on `living-procurement-2030-shell`, parent `c330e0392b03157407bc9f6cfd549f65de89b0a3`. Local only -- not pushed, not merged.
 
-Clean-room steps performed: cloned the bundle into a fresh, isolated directory (no shared `node_modules`, no shared `.next` cache), `npm install`, `npx tsc --noEmit`, and re-ran the closure-pass fixture script directly from that clean clone. Output recorded in `reports/full-unification-closure-17aug2026/cleanroom-output-17aug2026.txt`.
+**Bundle:** `reports/full-unification-closure-17aug2026/living-procurement-2030-shell-closure-eb95d5c.bundle` (`git bundle verify` confirms okay, complete history, single ref `refs/heads/living-procurement-2030-shell` at `eb95d5c`).
 
-*(This section is completed with the exact SHA/paths immediately below, once the commit and bundle exist.)*
+**Clean-room steps actually performed:** `git clone -b living-procurement-2030-shell <bundle> repo` into a fresh directory with no shared `node_modules`/`.next` cache with the working tree above -> `npm install` (401 packages, clean) -> `npx tsc --noEmit` (clean, zero errors) -> `npm run validate` (the FULL chain, including the new `validate-canonical-envelope-closure.ts` suite, run from the clean clone, not copied from the working tree).
+
+**Clean-room result:** identical to the working-tree run -- **836 PASS, 0 FAIL, exit 0, 15 suites each `ALL PASS`**. Confirms the commit is complete and self-contained: nothing needed from this pass exists only in the uncommitted working tree.
+
+Outputs: `reports/full-unification-closure-17aug2026/cleanroom-npm-install-output-17aug2026.txt`, `cleanroom-tsc-output-17aug2026.txt` (empty = clean), `cleanroom-validate-output-17aug2026.txt`.
