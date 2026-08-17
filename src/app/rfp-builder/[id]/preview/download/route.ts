@@ -1,5 +1,6 @@
 import { getProject, kvConfigured } from "@/lib/rfp-store";
-import { buildRfpMarkdown, buildRfpHtml, type PublishedDocMeta } from "@/lib/rfp-document";
+import { buildRfpMarkdown, buildRfpHtml, livingDocumentToRfpSections, type PublishedDocMeta } from "@/lib/rfp-document";
+import { renderRfpDocx } from "@/lib/rfp-export-docx";
 import { sessionFromRequest } from "@/lib/auth";
 import { requireRfpOwner } from "@/lib/rfp-access";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
@@ -71,11 +72,22 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
 
   // Render EXACTLY what was published, never whatever the live project
   // currently contains (see this route's own doc comment).
+  //
+  // 2030 blueprint, full-unification phase (17 Aug 2026): when this
+  // snapshot froze a real living document, EVERY export below renders from
+  // it (via livingDocumentToRfpSections()'s faithful projection into this
+  // pipeline's own section/question shape) instead of the legacy
+  // `rfp_sections` -- one change here repoints markdown, styled HTML/.doc,
+  // print and the native .docx all at once, since they all share this same
+  // `frozenProject`. A pre-unification snapshot (no living document) falls
+  // back to the legacy fields unchanged -- no regression for any
+  // previously-published project.
+  const livingDocument = snapshot.frozen_content.living_document ?? null;
   const frozenProject: ProjectDetails = {
     ...project,
     title: snapshot.frozen_content.title,
     buyer: snapshot.frozen_content.buyer,
-    rfp_sections: snapshot.frozen_content.rfp_sections,
+    rfp_sections: livingDocument ? livingDocumentToRfpSections(livingDocument) : snapshot.frozen_content.rfp_sections,
   };
   const publishedMeta: PublishedDocMeta = {
     version: snapshot.document_version,
@@ -102,6 +114,26 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       },
     });
   }
+  if (format === "docx") {
+    // 2030 blueprint, Checkpoint E (17 Aug 2026): a REAL native Word
+    // binary (application/vnd.openxmlformats-officedocument.wordprocessingml.document),
+    // not styled HTML Word happens to open (that is `format=doc`,
+    // unchanged, kept for existing links). Built from the exact same
+    // canonical markdown `buildRfpMarkdown()` already produces for every
+    // other export -- see rfp-export-docx.ts's own doc comment for why
+    // that, and not a second section-by-section renderer, is the honest
+    // "one canonical document" implementation. Gated identically to
+    // every other format above: owner-only, market-unlocked, frozen
+    // snapshot content only.
+    const buffer = await renderRfpDocx(buildRfpMarkdown(frozenProject, { publishedMeta }), frozenProject.title);
+    return new Response(new Uint8Array(buffer), {
+      headers: {
+        "content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "content-disposition": `attachment; filename="netify-rfp-${id}.docx"`,
+        "cache-control": "no-store",
+      },
+    });
+  }
   if (format === "print") {
     return new Response(buildRfpHtml(frozenProject, { autoPrint: true, publishedMeta }), {
       headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
@@ -121,7 +153,12 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
         rulebook_version: snapshot.rulebook_version,
         content_hash: snapshot.content_hash,
         buyer: snapshot.frozen_content.buyer,
-        rfp_sections: snapshot.frozen_content.rfp_sections,
+        rfp_sections: frozenProject.rfp_sections,
+        // The raw frozen living document, when this snapshot has one --
+        // additive, so an existing machine reader of this export that has
+        // never heard of it is unaffected; `null` on a pre-unification
+        // snapshot, never fabricated.
+        living_document: livingDocument,
         accepted_assumptions: snapshot.accepted_assumptions,
         open_decisions: snapshot.open_decisions,
       },

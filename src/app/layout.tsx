@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import MegaNav from "@/components/MegaNav";
 import NetifyEvents from "@/components/NetifyEvents";
+import SiteFooter from "@/components/SiteFooter";
 import "./globals.css";
 
 // Inter matches the main netify.co.uk site (SF Pro approximation),
@@ -158,6 +159,7 @@ export default function RootLayout({
         <div className="min-h-screen flex flex-col">
           <main id="main-content" className="flex-1">{children}</main>
 
+          <SiteFooter>
           <footer className="border-t border-[var(--ink-200)] mt-24">
             <div className="max-w-6xl mx-auto px-6 py-16">
               {/* Link columns - mirrors the netify.co.uk footer */}
@@ -218,6 +220,7 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+          </SiteFooter>
         </div>
       </body>
     </html>

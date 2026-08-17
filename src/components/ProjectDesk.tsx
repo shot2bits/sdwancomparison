@@ -78,7 +78,7 @@ import {
   type CompilerRevision,
   type GovernedEvent,
 } from "@/lib/workspace/procurement-document";
-import LivingProcurementCanvas, { type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
+import LivingProcurementCanvas, { NextQuestions, type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
 /** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
  *  the canonical NextQuestion projection and section-outline projection
  *  -- both pure, both layered over data this file already computes
@@ -967,6 +967,18 @@ export default function ProjectDesk({
    *  so a StrictMode double-invoke of the memo never sees a half-updated
    *  ref. */
   const previousProcurementDocumentRef = useRef<LivingProcurementDocument | null>(null);
+  /** Full-unification CLOSURE pass (17 Aug 2026): this session's own
+   *  concurrency token for the canonical envelope (envelope.ts's
+   *  `base_revision` compare-before-write) -- 0 until a save/resume proves
+   *  otherwise. Seeded from `proj.envelope_revision` on resume (below) and
+   *  advanced from every save response's own `envelope_revision` (saveNow's
+   *  create/refresh branches), never guessed or incremented locally: the
+   *  server is always the one source of truth for what the current
+   *  revision actually is, exactly like `previousProcurementDocumentRef`
+   *  immediately above is for document content. A ref, not state: sending
+   *  it is a fire-and-forget side channel on the next save, not something
+   *  that should re-render the canvas. */
+  const envelopeRevisionRef = useRef<number>(0);
   /** Phase 3 Stage A correction round (Robert, 14 Aug 2026): explicit
    *  governed-revision wiring, replacing the legacy fallback that bumped
    *  `compiledDocument.version` once per genuine facts-or-receipts diff.
@@ -1333,6 +1345,32 @@ export default function ProjectDesk({
             // invited suppliers from the published snapshot".
             status?: string;
             invited_vendors?: string[];
+            // 2030 blueprint, full-unification phase (17 Aug 2026): the
+            // durably persisted document from this project's own last
+            // save, when one exists -- seeded into
+            // `previousProcurementDocumentRef` below so a reopened session
+            // continues this project's OWN version/change-set history
+            // instead of silently restarting at version 1 (facts are still
+            // never rehydrated -- see source-ledger.ts's own comment --
+            // but the compiled OUTPUT of the prior session now durably
+            // survives a reload, which is the genuinely new guarantee this
+            // phase adds).
+            procurement_document?: LivingProcurementDocument;
+            // Full-unification CLOSURE pass (17 Aug 2026): the durably
+            // persisted canonical-envelope inputs from this project's own
+            // last save -- absent on a record saved before this pass (an
+            // older deploy, or a project that has never had `facts` sent to
+            // it), in which case the existing `resumeStateFromProject`
+            // heuristic-base path below remains this session's ONLY source
+            // of resumed facts, exactly as before this pass (fixture K:
+            // legacy records stay readable without this becoming the sole
+            // authority). When present, seeded ALONGSIDE (never instead of)
+            // that heuristic base -- mergeRequirementBase unions rather than
+            // overwrites, so having both a real facts array and the legacy
+            // heuristic populated is a safe, non-destructive union.
+            facts?: WorkspaceFact[];
+            receipts?: Receipt[];
+            envelope_revision?: number;
           };
           const resumeState = resumeStateFromProject(proj);
           if (!resumeState) {
@@ -1380,6 +1418,32 @@ export default function ProjectDesk({
           // unrelated later scope change is still detected correctly.
           setCreated({ id: resumeId, manage: resumeManage ?? "", test: Boolean(proj.test) });
           savedSecurity.current = true;
+          // Seed the version/change-set chain from this project's own last
+          // persisted document (see this effect's own `procurement_document`
+          // field comment above) -- the FIRST compile after a reload still
+          // diffs against something real instead of `null`, so `version`
+          // keeps counting up from where the prior session left it rather
+          // than resetting to 1 on every reopen.
+          if (proj.procurement_document) {
+            previousProcurementDocumentRef.current = proj.procurement_document;
+          }
+          // Full-unification CLOSURE pass (17 Aug 2026): seeds the
+          // canonical envelope's own durable inputs -- see this effect's
+          // `facts`/`receipts`/`envelope_revision` field comments above.
+          // Deliberately does NOT touch `resumeRequirementBase` (set from
+          // `resumeState` above, unconditionally): that heuristic path
+          // keeps working exactly as before this pass for a record that
+          // predates `facts` being sent at all, and `mergeRequirementBase`
+          // unions the two rather than picking one, so seeding both here is
+          // safe even for a record that has both.
+          if (proj.facts && proj.facts.length) {
+            factsRef.current = proj.facts;
+            setFacts(proj.facts);
+          }
+          if (proj.receipts && proj.receipts.length) {
+            setReceipts(proj.receipts);
+          }
+          envelopeRevisionRef.current = proj.envelope_revision ?? 0;
           /* Round 3 correction, item 6: rehydrate `published` durably for
            * an already-published project, from the SAME frozen sources the
            * report route and every export already read from -- never a
@@ -2621,6 +2685,32 @@ export default function ProjectDesk({
       /** Correction pass, defects 3 and 4: the same treatment, into
        *  `decision_ledger`. */
       decision_turns: decisionTurnsPayload(),
+      /* Full-unification CLOSURE pass (17 Aug 2026): `procurement_document`
+         renamed to `compiled_document` on the wire -- the server no longer
+         durably records the client's own compiled bytes as-is (that was
+         the exact trust gap this pass closes); it independently RECOMPUTES
+         from the canonical inputs below and either persists its own
+         recompute or rejects the save if this belief disagrees (see
+         envelope.ts's own doc comment). `canvasDocument`, not
+         `compiledDocument`, so the cross-check strips `readiness` before
+         comparing (the section-aware readiness is a client-side display
+         substitution, never part of the compiler's own output) -- see
+         envelope.ts's `withoutReadiness`. The canonical inputs themselves:
+         `facts`/`receipts` are this session's own live state (the server
+         validates but does not yet re-derive them -- see envelope.ts's own
+         documented boundary); `instrument` is session-local (started/live
+         claims/open questions), not facts-derivable, so it stays
+         client-trusted-but-schema-validated too. `base_revision` is this
+         session's own last-known concurrency token (0 for a brand-new
+         project, or whatever the last save/resume returned) -- absent
+         `facts` in this payload (never true here; `rfpPayload` always
+         sends it) would leave the whole envelope inert, exactly like every
+         other writer route. */
+      compiled_document: canvasDocument,
+      facts,
+      receipts,
+      instrument,
+      base_revision: envelopeRevisionRef.current,
     };
   }
 
@@ -2645,10 +2735,28 @@ export default function ProjectDesk({
              source_turns immediately above -- see decisionTurnsPayload(). */
           ...(decisionTurns.length ? { decision_turns: decisionTurnsPayload() } : {}),
           ...(testMode ? { test: true } : {}),
+          /* Full-unification CLOSURE pass (17 Aug 2026): this branch never
+             sent ANY canonical-envelope field before this pass, so the
+             prior session's whole "durably persist the compiled document"
+             work was inert for Security Sourcing in real usage (the
+             wizard's rfpPayload() was the only payload that carried it).
+             Same fields, same names, as rfpPayload() above -- one wire
+             shape for every writer route (envelope.ts is the single
+             verifier). Sent unconditionally (not gated on facts.length):
+             a brand-new Security Sourcing project's first save should
+             already carry its own canonical envelope from facts=[] onward,
+             not wait for a later re-scope to originate one. */
+          facts,
+          receipts,
+          instrument,
+          compiled_document: canvasDocument,
+          position: { covered_sections: coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
+          base_revision: envelopeRevisionRef.current,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.project?.id) throw new Error(data.error || "Could not create the project; try again.");
+      envelopeRevisionRef.current = typeof data.project?.envelope_revision === "number" ? data.project.envelope_revision : 0;
       return { id: data.project.id, manage: data.project.manage_token || "", test: testMode || Boolean(data.project.test) };
     }
     const res = await fetch("/sase/api/rfp", {
@@ -2658,6 +2766,7 @@ export default function ProjectDesk({
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.id) throw new Error(data.error || "Could not create the requirement; try again.");
+    envelopeRevisionRef.current = typeof data.envelope_revision === "number" ? data.envelope_revision : 0;
     return { id: data.id, manage: data.manage_token ?? "", test: false };
   }
 
@@ -2677,10 +2786,31 @@ export default function ProjectDesk({
       const res = await fetch(`/sase/api/security-sourcing/project/${proj.id}/rescope`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ manage_token: proj.manage, requirement, consent: true, source_turns: sourceTurnsPayload(), decision_turns: decisionTurnsPayload() }),
+        body: JSON.stringify({
+          manage_token: proj.manage,
+          requirement,
+          consent: true,
+          source_turns: sourceTurnsPayload(),
+          decision_turns: decisionTurnsPayload(),
+          /* Full-unification CLOSURE pass (17 Aug 2026): this is the ONLY
+             save path a Security Sourcing project takes after its first
+             save (saveNow() calls this on every subsequent Save, and
+             signAndPublish() calls this as the pre-publish refresh) -- so
+             it is the field that makes facts CORRECTED or REMOVED after
+             the first save, and the concurrency check protecting them,
+             actually reach the server. Same shape as createRecord()'s
+             security-scope branch and rfpPayload() above. */
+          facts,
+          receipts,
+          instrument,
+          compiled_document: canvasDocument,
+          position: { covered_sections: coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
+          base_revision: envelopeRevisionRef.current,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
+      envelopeRevisionRef.current = typeof data.envelope_revision === "number" ? data.envelope_revision : envelopeRevisionRef.current;
       return;
     }
     const res = await fetch(`/sase/api/rfp/${proj.id}`, {
@@ -2690,6 +2820,7 @@ export default function ProjectDesk({
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Could not refresh the saved record; try again.");
+    envelopeRevisionRef.current = typeof data.envelope_revision === "number" ? data.envelope_revision : envelopeRevisionRef.current;
   }
 
   /* ---- The early save (round 6, Robert's ruling): a verified work
@@ -3431,6 +3562,24 @@ export default function ProjectDesk({
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* ── PERSISTENT COMMAND DOCK (2030 shell reset, 16 Aug 2026) ──
+          Blueprint §3: "Command dock: Persistent bottom surface —
+          natural-language change, attachment/evidence and one primary
+          action." Extracted from the old sticky-top identity block so the
+          composer is reachable from any scroll position without pinning
+          the whole identity/readiness row to the viewport too. Same
+          textarea, same voice/attach/send handlers, same state — only the
+          position changed, from sticky-top to fixed-bottom. `pb-[26px]`
+          plus the page's own bottom padding (see the grid wrapper below)
+          keep it clear of the last document row. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#DED8CE]"
+        style={{ background: "#fbfaf8" }}
+      >
+        <div className="mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]">
           {/* The prompt (the input method, never the subject). Styled as a
               real chat composer (round 9, 2 Aug 2026, Robert: "style it
               exactly the same as a ChatGPT input or gemini"), not a form
@@ -3534,28 +3683,84 @@ export default function ProjectDesk({
           {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{pasteSummary}</p>}
           {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">{cycleError}</p>}
           {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{voiceError}</p>}
-
-          {/* The nine sector quick-start chips: shown until a sector
-              stands; one scrollable row on small screens. */}
-          {!coreFive.sector && (
-            <div className="flex items-center gap-[7px] overflow-x-auto pt-2.5 sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
-              <span className="flex-none text-[12.5px] text-[#A3A099]">Or start from your sector:</span>
-              {SECTOR_CHIPS.map((c) => (
-                <button
-                  key={c.label}
-                  type="button"
-                  onClick={() => pickChip(c)}
-                  className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E0DCD3] bg-[#FBFAF8] px-3.5 py-[7px] text-[13px] text-[#33302C] hover:border-[#141414] hover:bg-white"
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          )}
-
         </div>
       </div>
 
+      {/* Sector quick-start chips, shown only before a sector stands:
+          kept in normal page flow (not the fixed dock) so the dock stays
+          exactly what the blueprint specifies -- text, attachment, send --
+          nothing else. */}
+      {!coreFive.sector && (
+        <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
+          <div className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
+            <span className="flex-none text-[12.5px] text-[#A3A099]">Or start from your sector:</span>
+            {SECTOR_CHIPS.map((c) => (
+              <button
+                key={c.label}
+                type="button"
+                onClick={() => pickChip(c)}
+                className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E0DCD3] bg-[#FBFAF8] px-3.5 py-[7px] text-[13px] text-[#33302C] hover:border-[#141414] hover:bg-white"
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── 2030 SHELL RESET: DOCUMENT / MISSION-RAIL GRID (16 Aug 2026) ──
+          Blueprint §3, binding desktop composition: living document
+          canvas ~70% of the working width, mission rail ~30%, sticky
+          within the viewport, maximum three decision cards visible. The
+          rail renders the SAME `nextQuestionCards` (and the same
+          `landOption`/`pickChip`-driven onClick handlers) the canvas used
+          to render inline via `LivingProcurementCanvas`'s own
+          `NextQuestions` — that inline render is now suppressed (see the
+          `nextQuestionCards={undefined}` a few lines below) so the same
+          three cards appear exactly once, in the rail, never duplicated.
+          Below `lg`, the grid collapses to a single column and the rail
+          renders first (see the `order` classes), so the single highest-
+          priority decision is the first thing a 390px viewport shows
+          under the delta receipt — the blueprint's mobile rule ("one
+          decision card is fully readable above the fold"). `pb-[220px]`
+          keeps the last canvas row clear of the fixed bottom dock. */}
+      <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-[220px] pt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-[42px]">
+      {/* `pb-[150px]` (mobile only, correction 17 Aug 2026): the fixed
+          bottom command dock measures ~121px tall on a 390px viewport
+          plus its own border/shadow -- with no reserve here, the last
+          ~120px of ANY content that happens to scroll to the bottom of
+          the viewport sits physically underneath the dock (confirmed via
+          Playwright boundingBox: aside bottom 1467px vs dock top 723px
+          at scroll 0, i.e. overlapping). The grid container's own
+          `pb-[220px]` only guards the very end of the whole stack
+          (after `<main>`), not the aside/main seam on mobile where the
+          aside — now capped to one visible card, see NextQuestions'
+          `bare` mode above — still needs its own clearance. */}
+      <aside className="order-1 mb-6 pb-[150px] lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start">
+        <div className="rounded-[14px] border border-[#EFECE5] bg-white p-4">
+          <div className="text-[10.5px] uppercase text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.1em" }}>
+            Mission control
+          </div>
+          <h3 className="mb-0 mt-1.5 text-[17px] font-semibold leading-[1.3]">
+            {materialDecisionsRemaining
+              ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
+              : "Nothing material outstanding"}
+          </h3>
+          <p className="m-0 mt-1 text-[12px] leading-[1.5] text-[#8C8A85]">
+            The agent ranks only choices that change price, risk, compliance or delivery.
+          </p>
+          {nextQuestionCards && nextQuestionCards.length > 0 ? (
+            <div className="mt-4">
+              <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare />
+            </div>
+          ) : (
+            <p className="m-0 mt-4 text-[12.5px] leading-[1.5] text-[#A3A099]">
+              No material decision is open right now — the document reflects everything stated so far.
+            </p>
+          )}
+        </div>
+      </aside>
+      <main className="order-2 min-w-0 lg:order-1">
       {/* ── THE THREAD (round 7, 1 Aug 2026: Robert — "the idea was
           this section had a memory and users could keep typing to
           generate the living statement, so there would be a scrolling
@@ -3632,7 +3837,7 @@ export default function ProjectDesk({
             factsKept={live.length}
             factsStruck={Math.max(0, facts.length - live.length)}
             sourceTurnCount={sourceTurns.length}
-            nextQuestionCards={nextQuestionCards}
+            nextQuestionCards={undefined}
             outline={sectionOutline}
             materialDecisionsRemaining={materialDecisionsRemaining}
             acceptedSuggestionCards={acceptedSuggestionCards}
@@ -4230,6 +4435,11 @@ export default function ProjectDesk({
         // this used to be, via the now-retired keptFits/fitSlugs).
         fitSlugs={published?.invited.map((v) => v.slug) ?? []}
       />
+      </main>
+      </div>
+      {/* ↑ closes the 2030 shell reset's document/mission-rail grid opened
+          above THE THREAD. Everything below is a full-screen overlay
+          (fixed inset-0), so it deliberately sits outside the grid. */}
 
       {/* ── THE EDIT SHEET ── bottom-anchored, one focal question with
           its rationale and full option set; closing returns to the

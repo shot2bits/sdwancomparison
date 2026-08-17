@@ -8,6 +8,8 @@ import { SecurityRequirementInputSchema, SecurityScopeVerdictSchema } from "@/li
 import { UnderstandingSchema } from "@/lib/workspace/understanding";
 import { SourceLedgerEntrySchema } from "@/lib/workspace/source-ledger";
 import { DecisionLedgerEntrySchema } from "@/lib/workspace/decision-ledger";
+import { LivingProcurementDocumentSchema } from "@/lib/workspace/procurement-document";
+import { WorkspaceFactSchema, ReceiptLikeSchema } from "@/lib/workspace/envelope-schemas";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -29,7 +31,22 @@ export const RfpQuestionSchema = z.object({
   evidence_requested: z.string().default(""),
   rationale: z.string().default(""), // why this question is here (the citation)
   priority: z.enum(["required", "recommended", "optional"]).default("recommended"),
-  source: z.enum(["methodology", "custom", "bank"]).default("methodology"),
+  /**
+   * 2030 blueprint, full-unification closure pass (17 Aug 2026): widened
+   * from `"methodology" | "custom" | "bank"` to also carry a compiled
+   * clause's REAL origin (`ClauseOrigin`, procurement-document.ts) --
+   * `"buyer" | "netify" | "sector" | "buyer_override"` -- so
+   * `livingDocumentToRfpSections()` (rfp-document.ts) no longer collapses
+   * every compiled clause into the generic `"methodology"` catch-all it
+   * used before this pass. The original three values are UNCHANGED in
+   * meaning and every existing reader (`isInformationItem()`'s `===
+   * "custom"` check, RfpBuilder.tsx's `"custom"` badge, etc.) keeps working
+   * exactly as before: none of them assumed the union was exhaustive, so a
+   * new value simply falls through their existing "not custom"/"not bank"
+   * branches correctly, never mis-firing custom/bank-specific behaviour for
+   * a compiled clause.
+   */
+  source: z.enum(["methodology", "custom", "bank", "buyer", "netify", "sector", "buyer_override"]).default("methodology"),
   buyer_lens: z.string().default(""),
   supplier_lens: z.string().default(""),
   mandatory: z.boolean().default(false), // buyer flags a hard requirement
@@ -286,8 +303,129 @@ export const ProjectDetailsSchema = z.object({
    *  emails, joins no buyer index or moderation queue, and is excluded
    *  from telemetry funnels. */
   test: z.boolean().optional(),
+  /**
+   * 2030 blueprint, Checkpoint B (17 Aug 2026): the canonical envelope's
+   * OWN schema version -- distinct from `methodology_version` (the
+   * question-methodology matrix's version) and from `PublishedSnapshot`'s
+   * `compiler_version` (an alias of `methodology_version`, see that
+   * file's scope note). This one field versions the SHAPE of
+   * `ProjectDetails` itself, so a future breaking change to this record
+   * (a field renamed, restructured, or made mandatory) has a formal,
+   * checkable migration boundary instead of ad hoc self-repair scattered
+   * across read paths (the pre-existing pattern: `healSectionCategories`
+   * in rfp-store.ts silently fixes one known corruption on every read,
+   * with no version check at all -- undiscoverable and unbounded, since
+   * nothing marks which records still need it once fixed).
+   * `migrateProjectDetails()` (rfp-store.ts) is the single place that
+   * reads this field and brings an older record up to
+   * `CURRENT_ENVELOPE_SCHEMA_VERSION`. Optional so every record written
+   * before this field existed still validates unchanged; `getProject()`
+   * treats a missing value as version 1 (the version every record before
+   * this change is retroactively defined to be, since none of them have
+   * ever needed a real structural migration yet) and stamps the current
+   * version on next save via `saveProject()`.
+   */
+  envelope_schema_version: z.number().int().min(1).optional(),
+  /**
+   * 2030 blueprint, full-unification phase (17 Aug 2026): the durably
+   * PERSISTED LivingProcurementDocument -- the buyer's own code review
+   * found that, until now, this compiled document existed only as an
+   * in-memory recompute (ProjectDesk.tsx's `compiledDocument` useMemo),
+   * never a genuine part of the saved record, making it a THIRD,
+   * non-identical canonical object alongside ProjectDetails+ledgers and
+   * the published snapshot's legacy `rfp_sections` freeze. This field
+   * closes that gap: the client submits its own already-compiled document
+   * (see rfpPayload() in ProjectDesk.tsx) with every save, and the server
+   * durably records it. Updated in the full-unification CLOSURE pass (17
+   * Aug 2026, envelope.ts): the server no longer trusts the client's bytes
+   * outright -- it independently RECOMPUTES this document from validated,
+   * mostly server-derived inputs (see envelope.ts's own top-of-file design
+   * note) and persists its OWN recompute, rejecting the save outright if
+   * the client's own belief disagrees. Optional so every record saved
+   * before either phase, and every save from an older client build that
+   * has not yet started sending an envelope, validates unchanged --
+   * readers (the Procurement Room, every export) must treat its absence as
+   * an honest "no living document on this record yet", never fabricate
+   * one.
+   */
+  procurement_document: LivingProcurementDocumentSchema.optional(),
+  /**
+   * Full-unification CLOSURE pass (17 Aug 2026): the durable fact ledger
+   * itself -- the piece the prior pass's own report named as still
+   * missing ("facts are still never durably persisted... only the
+   * compiled OUTPUT of a session's facts now survives a reload"). REPLACE
+   * semantics on save (the client's local `facts` state is always the
+   * FULL current array, tombstones and all -- `struck: true`, never
+   * deleted, exactly the existing in-memory convention -- draft.ts's own
+   * `dropListFact`), protected against a stale overwrite by
+   * `envelope_revision` below. Optional/defaulted so every pre-phase
+   * record validates unchanged; absence reads as "this project has never
+   * had a canonical envelope saved", never as "this project has zero
+   * facts".
+   */
+  facts: z.array(WorkspaceFactSchema).default([]),
+  /**
+   * Full-unification CLOSURE pass (17 Aug 2026): the buyer's own retained,
+   * unplaced wording (procurement-document.ts's own `receipts` -- text
+   * that never became a WorkspaceFact but still matters to the compiler,
+   * e.g. the point-to-point Ethernet example that file's own top comment
+   * names) -- previously pure client-session state, lost on every reload.
+   * Same REPLACE-on-save treatment as `facts` above, for the same reason.
+   */
+  receipts: z.array(ReceiptLikeSchema).default([]),
+  /**
+   * Full-unification CLOSURE pass (17 Aug 2026): the canonical envelope's
+   * own optimistic-concurrency token -- incremented by exactly 1 on every
+   * successful envelope-touching save (envelope.ts's `buildEnvelopeUpdate`).
+   * A save that claims a stale `base_revision` against this value is
+   * rejected before anything is written (see envelope.ts's own concurrency
+   * design note, including its honestly-stated limits). Defaults to 0 for
+   * every record that predates this pass or has never had an
+   * envelope-touching save -- 0 always means "no canonical envelope has
+   * been saved for this record yet", never "revision zero of a real one".
+   */
+  envelope_revision: z.number().int().min(0).default(0),
+  /**
+   * Full-unification CLOSURE pass (17 Aug 2026): the envelope's own
+   * self-describing metadata -- schema/compiler versions, the base
+   * revision this save was written as, and content hashes over the source
+   * ledger, decision ledger, facts and compiled document as they stood at
+   * THIS save (envelope.ts's `EnvelopeMeta`). Optional so every pre-phase
+   * record validates unchanged; a reader wanting to verify a record's
+   * envelope independently (recompute the same hashes over the same
+   * fields and compare) can, without trusting this block's own claims --
+   * see `scripts/validate-canonical-envelope.ts`'s own fixture G for
+   * exactly that reproduction.
+   */
+  envelope: z
+    .object({
+      schema_version: z.number().int().min(1),
+      compiler_version: z.string(),
+      base_revision: z.number().int().min(0),
+      source_ledger_hash: z.string(),
+      decision_ledger_hash: z.string(),
+      facts_hash: z.string(),
+      compiled_document_hash: z.string(),
+      saved_at: z.number(),
+      saved_by: z.string(),
+    })
+    .strict()
+    .optional(),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
+
+/**
+ * The canonical envelope's current schema version. Bump this, and add a
+ * step to `migrateProjectDetails()` (rfp-store.ts), the day a change to
+ * `ProjectDetailsSchema` is genuinely structural (a field renamed, a shape
+ * changed, a previously-optional field now required in practice) rather
+ * than the routine, backward-compatible additive change every field in
+ * this schema has been so far (each new field arrives `.optional()` or
+ * `.default(...)`, which is why this constant has never needed to move
+ * past 1 yet -- this file's own history is the proof: every dated comment
+ * above added a field without breaking an existing record).
+ */
+export const CURRENT_ENVELOPE_SCHEMA_VERSION = 1;
 
 /**
  * A supplier's click-to-accept of the buyer's NDA. This is the audit record:

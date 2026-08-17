@@ -6,9 +6,10 @@
  * server-rendered preview page and the gated markdown download.
  */
 
-import type { ProjectDetails, RfpSection } from "@/lib/rfp-types";
+import type { ProjectDetails, RfpSection, RfpQuestion } from "@/lib/rfp-types";
 import { BANK_VERSION, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
 import { SECTORS, REGIONS, COMPLIANCE_OPTIONS, labelFor, labelsFor } from "@/lib/notice-options";
+import { SECTION_TITLES, type LivingProcurementDocument, type ProcurementSectionKey } from "@/lib/workspace/procurement-document";
 
 /**
  * Phase 2 (14 Aug 2026): the publication record every gated export must
@@ -92,6 +93,66 @@ export function includedSections(p: ProjectDetails): RfpSection[] {
   return p.rfp_sections
     .map((s) => ({ ...s, questions: s.questions.filter((q) => q.priority !== "optional") }))
     .filter((s) => s.included && s.questions.length > 0);
+}
+
+/**
+ * 2030 blueprint, full-unification phase (17 Aug 2026): projects a
+ * persisted/frozen `LivingProcurementDocument`'s clauses into this
+ * pipeline's own `RfpSection[]` shape, so every export (markdown, styled
+ * HTML/.doc, print, the native .docx) renders from the SAME canonical
+ * envelope without a second, parallel rendering pipeline having to be
+ * built from scratch. This is a faithful RENDERING adapter, not a new
+ * canonical representation: every field it produces is a direct, documented
+ * mapping from the clause that already carries the buyer's actual
+ * requirement, evidence and provenance -- nothing here is invented or
+ * recomputed. Sections are ordered by `SECTION_TITLES`' own declaration
+ * order (the same order `sectionsPresent()` in procurement-document.ts
+ * already uses) and a section is included only when it has at least one
+ * clause, mirroring `includedSections()`'s own "render a section only when
+ * it contains content" rule above.
+ */
+export function livingDocumentToRfpSections(doc: LivingProcurementDocument): RfpSection[] {
+  const bySection = new Map<ProcurementSectionKey, RfpQuestion[]>();
+  for (const clause of doc.clauses) {
+    const question: RfpQuestion = {
+      id: clause.id,
+      // The named deterministic template this clause traces to (Section
+      // 14.5's "traceable" invariant) -- the closest honest analogue to
+      // RfpQuestion's `feature_id`, which this pipeline's own methodology
+      // questions use for the same purpose.
+      feature_id: clause.templateId,
+      text: clause.statement,
+      evidence_requested: clause.evidence.join("; "),
+      rationale: clause.reason,
+      priority: clause.mandatory ? "required" : "recommended",
+      // Full-unification CLOSURE pass (17 Aug 2026): `RfpQuestion.source`
+      // now carries the clause's REAL `ClauseOrigin` directly -- the prior
+      // pass collapsed every compiled clause into a generic
+      // `"methodology"` catch-all because the enum had no clause-origin-
+      // shaped value yet; it does now (rfp-types.ts's own comment on this
+      // field). No provenance is lossy here any more: a buyer-stated
+      // clause reads as `"buyer"`, a Netify default as `"netify"`, a
+      // sector-pack addition as `"sector"`, and an explicit buyer override
+      // as `"buyer_override"` -- exactly `clause.origin`, never remapped
+      // or approximated.
+      source: clause.origin,
+      buyer_lens: clause.quote ?? "",
+      supplier_lens: clause.supplierResponse.join("; "),
+      mandatory: clause.mandatory,
+      // clauseWeight() (procurement-readiness.ts) produces 3-6; RfpQuestion
+      // caps at 5 -- clamp, never silently overflow the schema.
+      weight: Math.max(1, Math.min(5, Math.round(clause.weight))),
+    };
+    const list = bySection.get(clause.section) ?? [];
+    list.push(question);
+    bySection.set(clause.section, list);
+  }
+  const sections: RfpSection[] = [];
+  for (const key of Object.keys(SECTION_TITLES) as ProcurementSectionKey[]) {
+    const questions = bySection.get(key);
+    if (questions && questions.length > 0) sections.push({ category: SECTION_TITLES[key], included: true, questions });
+  }
+  return sections;
 }
 
 /**

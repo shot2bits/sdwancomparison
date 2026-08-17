@@ -309,18 +309,47 @@ const IMPACT_LABEL: Record<string, string> = {
  *  comment for why that distinction is load-bearing, not decorative.
  *  Mobile-safe: cards stack full-width under 390px (no fixed min-widths
  *  wider than the viewport, buttons wrap). */
-function NextQuestions({ cards }: { cards: NextQuestionCard[] }) {
+/**
+ * 2030 shell reset (16 Aug 2026): exported so ProjectDesk.tsx can render
+ * these cards inside the binding blueprint's sticky Mission Rail (right,
+ * ~30%) instead of inline underneath the document header. `bare`, when
+ * true, drops this component's own "Best next decisions" heading and
+ * top border — the rail supplies its own "Mission control" heading — so
+ * the same card markup (and the exact same `onClick` handlers ProjectDesk
+ * already wires up) renders correctly in both places without forking the
+ * card JSX. LivingProcurementCanvas itself no longer renders these cards
+ * inline once a caller has moved them to the rail (see that component's
+ * own doc comment on `nextQuestionCards`).
+ */
+export function NextQuestions({ cards, bare = false }: { cards: NextQuestionCard[]; bare?: boolean }) {
   return (
-    <div className="mt-5 border-t border-[#EFECE5] pt-[18px]">
-      <div className="mb-2.5 flex items-baseline gap-[11px]">
-        <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
-          Best next decisions
-        </span>
-        <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">answering moves this document closer to publish</span>
-      </div>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-        {cards.map(({ nq, buttons, hint }) => (
-          <div key={nq.id} className="flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] p-3.5" style={{ background: nq.governedSuggestion ? "#FBF9FF" : "#fff" }}>
+    <div className={bare ? "" : "mt-5 border-t border-[#EFECE5] pt-[18px]"}>
+      {!bare && (
+        <div className="mb-2.5 flex items-baseline gap-[11px]">
+          <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+            Best next decisions
+          </span>
+          <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">answering moves this document closer to publish</span>
+        </div>
+      )}
+      <div className={bare ? "flex flex-col gap-3" : "grid grid-cols-1 gap-2.5 sm:grid-cols-3"}>
+        {cards.map(({ nq, buttons, hint }, i) => (
+          <div
+            key={nq.id}
+            // 2030 shell reset, mobile correction (17 Aug 2026): the
+            // blueprint's binding mobile rule is ONE decision card
+            // readable above the fold, not three -- three full cards
+            // stacked in `bare` mode ran to 1000px+ tall on a 390px
+            // viewport, burying the living document below a wall of
+            // Mission Control before a buyer ever saw it (measured via
+            // Playwright: aside height 1025px on a 844px-tall viewport).
+            // Cards after the first stay in the DOM (so "load more"/
+            // desktop parity needs no extra fetch) but are hidden below
+            // `lg`, where the rail is no longer sticky-sidebar-sized and
+            // instead sits inline above the document.
+            className={`flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] p-3.5 ${bare && i > 0 ? "hidden lg:flex" : ""}`}
+            style={{ background: nq.governedSuggestion ? "#FBF9FF" : "#fff" }}
+          >
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", background: nq.governedSuggestion ? "#EDE6FB" : "#F4F2ED", color: nq.governedSuggestion ? "#5B3E9C" : "#8C8A85" }}>
                 {nq.governedSuggestion ? "Netify suggests · optional" : "Open decision"}

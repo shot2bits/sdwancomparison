@@ -13,6 +13,7 @@ import { buildRescopedProject, rescopeConsentText, documentEdited } from "@/lib/
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 import { parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 import { parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
+import { buildEnvelopeUpdate } from "@/lib/workspace/envelope";
 
 export async function OPTIONS(req: Request) {
   return preflight(req);
@@ -39,6 +40,19 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
      *  so this is the field that makes a NextQuestion answer clicked after
      *  the first save actually persist. */
     decision_turns?: unknown;
+    /** Full-unification CLOSURE pass (17 Aug 2026): this route is ALSO the
+     *  ONLY save path a Security Sourcing project takes after its first
+     *  save, so it is the field that makes facts CORRECTED/REMOVED after
+     *  the first save actually persist, and where the base-revision
+     *  concurrency check protects a Security Sourcing project exactly as
+     *  it already does the wizard's PUT route. Absent `facts` leaves this
+     *  re-scope completely unaffected, as before this pass. */
+    facts?: unknown;
+    receipts?: unknown;
+    instrument?: unknown;
+    compiled_document?: unknown;
+    base_revision?: unknown;
+    position?: { covered_sections?: unknown; sector?: unknown };
   } = {};
   try {
     body = await req.json();
@@ -77,9 +91,40 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return Response.json({ error: (e as Error).message }, { status: 400, headers: cors });
   }
 
+  // Full-unification CLOSURE pass (17 Aug 2026): the SAME shared verifier
+  // (envelope.ts) every writer route calls -- `existing` is the project
+  // BEFORE this re-scope (its own `envelope_revision`/`procurement_document`
+  // are the base concurrency compares against); `result.project` already
+  // carries the merged source/decision ledgers `buildRescopedProject()`
+  // produced. Absent `facts` in the body leaves this re-scope completely
+  // unaffected.
+  const coveredSections = Array.isArray(body.position?.covered_sections) ? body.position.covered_sections.map(String) : [];
+  const envelopeOutcome = await buildEnvelopeUpdate({
+    existing: { procurement_document: project.procurement_document ?? null, envelope_revision: project.envelope_revision ?? 0 },
+    body: body as Record<string, unknown>,
+    mergedSourceLedger: result.project.source_ledger,
+    mergedDecisionLedger: result.project.decision_ledger,
+    coveredSections,
+    savedBy: access.session?.email || project.owner_email || "unauthenticated",
+  });
+  if (envelopeOutcome.participates && !envelopeOutcome.ok) {
+    return Response.json({ error: envelopeOutcome.error }, { status: envelopeOutcome.status, headers: cors });
+  }
+  const projectToSave =
+    envelopeOutcome.participates && envelopeOutcome.ok
+      ? {
+          ...result.project,
+          facts: envelopeOutcome.facts,
+          receipts: envelopeOutcome.receipts,
+          procurement_document: envelopeOutcome.procurement_document,
+          envelope_revision: envelopeOutcome.envelope_revision,
+          envelope: envelopeOutcome.envelope,
+        }
+      : result.project;
+
   let saved;
   try {
-    saved = await saveProject(result.project, { engineWrite: true });
+    saved = await saveProject(projectToSave, { engineWrite: true });
   } catch (e) {
     return Response.json({ error: (e as Error).message }, { status: 409, headers: cors });
   }
@@ -95,6 +140,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       open_gaps: openSecurityGaps(saved).length,
       verdict: result.verdict,
       project_path: `/project/${saved.id}`,
+      // Full-unification CLOSURE pass (17 Aug 2026): so the client can
+      // track its own next `base_revision` without a second round-trip --
+      // 0 when this re-scope did not touch the canonical envelope at all.
+      envelope_revision: saved.envelope_revision ?? 0,
     },
     { headers: cors },
   );

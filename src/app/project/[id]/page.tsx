@@ -16,6 +16,7 @@ import ProjectNav from "@/components/ProjectNav";
 import EngineFlowGuide from "@/components/EngineFlowGuide";
 import GapActions from "@/components/GapActions";
 import SignIn from "@/components/SignIn";
+import { historyProvenance } from "@/lib/history-provenance";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -396,15 +397,37 @@ export default async function ProjectHomePage({ params, searchParams }: Props) {
         ) : (
           <>
             <ul className="m-0 list-none space-y-1.5 p-0">
-              {recent.map((h, i) => (
-                <li key={`${h.at}-${i}`} className="flex flex-wrap items-baseline gap-x-3 text-sm">
-                  <span className="tabular-nums text-xs text-[var(--ink-500)]">
-                    {new Date(h.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                  <span className="text-[var(--ink-800)]">{humaniseEvent(h.event, h.detail as Record<string, unknown> | undefined)}</span>
-                  <span className="text-xs text-[var(--ink-400,#9ca3af)]">{h.actor}{h.via ? ` · ${h.via}` : ""}</span>
-                </li>
-              ))}
+              {recent.map((h, i) => {
+                // 2030 blueprint, Checkpoint C: visible provenance for
+                // agent/MCP-originated actions (the blueprint's own
+                // violet agent/MCP token), derived from the SAME
+                // pre-existing history event this list already
+                // rendered -- no new data, just a distinguishing read.
+                const prov = historyProvenance(h);
+                return (
+                  <li key={`${h.at}-${i}`} className="flex flex-wrap items-baseline gap-x-3 text-sm">
+                    <span className="tabular-nums text-xs text-[var(--ink-500)]">
+                      {new Date(h.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                    <span className="text-[var(--ink-800)]">{humaniseEvent(h.event, h.detail as Record<string, unknown> | undefined)}</span>
+                    {prov.isMcp && (
+                      <span
+                        className="rounded-[4px] px-[6px] py-[1px] text-[10px] font-medium uppercase tracking-wide"
+                        style={{ background: "#EDE6FB", color: "#5B3E9C" }}
+                        title={prov.detailFieldCount > 0 ? `Agent/MCP receipt: ${prov.detailFieldCount} recorded field${prov.detailFieldCount === 1 ? "" : "s"}` : "Agent/MCP action"}
+                      >
+                        MCP receipt
+                      </span>
+                    )}
+                    {prov.hasConsent && (
+                      <span className="rounded-[4px] bg-emerald-50 px-[6px] py-[1px] text-[10px] font-medium uppercase tracking-wide text-emerald-800">
+                        Consent recorded
+                      </span>
+                    )}
+                    <span className="text-xs text-[var(--ink-400,#9ca3af)]">{h.actor}{h.via ? ` · ${h.via}` : ""}</span>
+                  </li>
+                );
+              })}
             </ul>
             <p className="mt-3 text-sm">
               <Link href={`/project/${id}/story${qs}`} className="underline">Full story</Link>

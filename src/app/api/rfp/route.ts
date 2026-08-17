@@ -11,6 +11,7 @@ import { isBlockedDomainLive, emailDomain } from "@/lib/access-control";
 import { SITE_URL } from "@/lib/structured-data";
 import { mergeSourceLedger, parseIncomingSourceTurns } from "@/lib/workspace/source-ledger";
 import { mergeDecisionLedger, parseIncomingDecisionTurns } from "@/lib/workspace/decision-ledger";
+import { buildEnvelopeUpdate } from "@/lib/workspace/envelope";
 
 /**
  * Early-capture contact email (the wizard's optional "get a link to this RFP
@@ -148,6 +149,25 @@ export async function POST(req: Request) {
   const id = newId("rfp");
   const session = await sessionFromRequest(req);
   const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
+  const createSourceLedger = mergeSourceLedger([], parseIncomingSourceTurns(body.source_turns));
+  const createDecisionLedger = mergeDecisionLedger([], parseIncomingDecisionTurns(body.decision_turns));
+  // Full-unification CLOSURE pass (17 Aug 2026): a first save can already
+  // carry a canonical envelope (Living Procurement Canvas's own first
+  // Save, via ProjectDesk.tsx) -- ONE shared verifier for every writer
+  // route (envelope.ts), never a fourth divergent copy. `existing: null`
+  // since this is a create; `participates: false` (no `facts` sent) means
+  // an ordinary wizard create, completely unaffected.
+  const envelopeOutcome = await buildEnvelopeUpdate({
+    existing: null,
+    body,
+    mergedSourceLedger: createSourceLedger,
+    mergedDecisionLedger: createDecisionLedger,
+    coveredSections: position?.covered_sections ?? [],
+    savedBy: ownerEmail || "unauthenticated",
+  });
+  if (envelopeOutcome.participates && !envelopeOutcome.ok) {
+    return Response.json({ error: envelopeOutcome.error }, { status: envelopeOutcome.status, headers: cors });
+  }
   let project = ProjectDetailsSchema.parse({
     id,
     created: Date.now(),
@@ -168,8 +188,17 @@ export async function POST(req: Request) {
     // path writes to (rfp-types.ts's source_ledger); `mergeSourceLedger([],
     // ...)` here is just "validate and de-dup within this one creation
     // batch", matching create-project.ts's own first-save construction.
-    source_ledger: mergeSourceLedger([], parseIncomingSourceTurns(body.source_turns)),
-    decision_ledger: mergeDecisionLedger([], parseIncomingDecisionTurns(body.decision_turns)),
+    source_ledger: createSourceLedger,
+    decision_ledger: createDecisionLedger,
+    ...(envelopeOutcome.participates && envelopeOutcome.ok
+      ? {
+          facts: envelopeOutcome.facts,
+          receipts: envelopeOutcome.receipts,
+          procurement_document: envelopeOutcome.procurement_document,
+          envelope_revision: envelopeOutcome.envelope_revision,
+          envelope: envelopeOutcome.envelope,
+        }
+      : {}),
   });
   // The record starts at creation (Harry's Section 1 finding, 28 Jul 2026:
   // "Shows no recorded events despite it being created?". The 24 Jul fix

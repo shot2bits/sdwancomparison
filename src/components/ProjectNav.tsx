@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 
-export type ProjectTab = "overview" | "assessment" | "rfp" | "preview" | "review" | "story" | "timeline" | "rescope";
+export type ProjectTab = "overview" | "assessment" | "rfp" | "preview" | "review" | "story" | "timeline" | "rescope" | "room";
 
 export default function ProjectNav({
   id,
@@ -38,6 +38,14 @@ export default function ProjectNav({
         { key: "story", label: "Story", href: `/project/${id}/story${qs}` },
         { key: "timeline", label: "Timeline", href: `/project/${id}/timeline${qs}` },
         { key: "review", label: "Review & responses", href: `/rfp-builder/${id}/review${qs}` },
+        // 2030 blueprint, Checkpoint D (17 Aug 2026): the frozen,
+        // read-only record of exactly what publication produced -- the
+        // one place a buyer (or, later, an invited vendor with the
+        // right room-scoped access) sees the SAME content the board
+        // notice, the invitations and every export all read from,
+        // never a live/possibly-drifted recompute. Placed last, after
+        // Review, since it only has real content once published.
+        { key: "room", label: "Procurement Room", href: `/project/${id}/room${qs}` },
       ]
     : [
         // One door per activity, completed for the non-engine lane too
@@ -50,6 +58,7 @@ export default function ProjectNav({
         { key: "story", label: "Story", href: `/project/${id}/story${qs}` },
         { key: "timeline", label: "Timeline", href: `/project/${id}/timeline${qs}` },
         { key: "review", label: "Review & responses", href: `/rfp-builder/${id}/review${qs}` },
+        { key: "room", label: "Procurement Room", href: `/project/${id}/room${qs}` },
       ];
   return (
     <nav aria-label="Project" className="mb-6 border-b border-[var(--ink-200,#e5e5e5)]">

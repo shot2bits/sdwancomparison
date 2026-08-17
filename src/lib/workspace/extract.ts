@@ -135,7 +135,12 @@ export type BuyingId = (typeof BUYING_IDS)[number];
 export const OPERATING_MODEL_IDS = ["managed", "co_managed", "diy"] as const;
 export type OperatingModelId = (typeof OPERATING_MODEL_IDS)[number];
 
-const ALLOWED_PATHS = [
+/* Exported (2030 blueprint, full-unification closure pass, 17 Aug 2026):
+ * the canonical-envelope's own WorkspaceFactSchema (procurement-document.ts)
+ * needs the REAL whitelist to validate an incoming fact's `path`, never a
+ * second, hand-copied list that could silently drift from this one. Purely
+ * additive -- nothing about ALLOWED_PATHS's own behaviour changes. */
+export const ALLOWED_PATHS = [
   "organisation.sector",
   "organisation.sizeBand",
   "organisation.regions",
