@@ -78,7 +78,7 @@ import {
   type CompilerRevision,
   type GovernedEvent,
 } from "@/lib/workspace/procurement-document";
-import LivingProcurementCanvas, { type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
+import LivingProcurementCanvas, { NextQuestions, type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
 /** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
  *  the canonical NextQuestion projection and section-outline projection
  *  -- both pure, both layered over data this file already computes
@@ -3431,6 +3431,24 @@ export default function ProjectDesk({
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* ── PERSISTENT COMMAND DOCK (2030 shell reset, 16 Aug 2026) ──
+          Blueprint §3: "Command dock: Persistent bottom surface —
+          natural-language change, attachment/evidence and one primary
+          action." Extracted from the old sticky-top identity block so the
+          composer is reachable from any scroll position without pinning
+          the whole identity/readiness row to the viewport too. Same
+          textarea, same voice/attach/send handlers, same state — only the
+          position changed, from sticky-top to fixed-bottom. `pb-[26px]`
+          plus the page's own bottom padding (see the grid wrapper below)
+          keep it clear of the last document row. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#DED8CE]"
+        style={{ background: "#fbfaf8" }}
+      >
+        <div className="mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]">
           {/* The prompt (the input method, never the subject). Styled as a
               real chat composer (round 9, 2 Aug 2026, Robert: "style it
               exactly the same as a ChatGPT input or gemini"), not a form
@@ -3534,28 +3552,73 @@ export default function ProjectDesk({
           {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{pasteSummary}</p>}
           {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">{cycleError}</p>}
           {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{voiceError}</p>}
-
-          {/* The nine sector quick-start chips: shown until a sector
-              stands; one scrollable row on small screens. */}
-          {!coreFive.sector && (
-            <div className="flex items-center gap-[7px] overflow-x-auto pt-2.5 sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
-              <span className="flex-none text-[12.5px] text-[#A3A099]">Or start from your sector:</span>
-              {SECTOR_CHIPS.map((c) => (
-                <button
-                  key={c.label}
-                  type="button"
-                  onClick={() => pickChip(c)}
-                  className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E0DCD3] bg-[#FBFAF8] px-3.5 py-[7px] text-[13px] text-[#33302C] hover:border-[#141414] hover:bg-white"
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          )}
-
         </div>
       </div>
 
+      {/* Sector quick-start chips, shown only before a sector stands:
+          kept in normal page flow (not the fixed dock) so the dock stays
+          exactly what the blueprint specifies -- text, attachment, send --
+          nothing else. */}
+      {!coreFive.sector && (
+        <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
+          <div className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
+            <span className="flex-none text-[12.5px] text-[#A3A099]">Or start from your sector:</span>
+            {SECTOR_CHIPS.map((c) => (
+              <button
+                key={c.label}
+                type="button"
+                onClick={() => pickChip(c)}
+                className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E0DCD3] bg-[#FBFAF8] px-3.5 py-[7px] text-[13px] text-[#33302C] hover:border-[#141414] hover:bg-white"
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── 2030 SHELL RESET: DOCUMENT / MISSION-RAIL GRID (16 Aug 2026) ──
+          Blueprint §3, binding desktop composition: living document
+          canvas ~70% of the working width, mission rail ~30%, sticky
+          within the viewport, maximum three decision cards visible. The
+          rail renders the SAME `nextQuestionCards` (and the same
+          `landOption`/`pickChip`-driven onClick handlers) the canvas used
+          to render inline via `LivingProcurementCanvas`'s own
+          `NextQuestions` — that inline render is now suppressed (see the
+          `nextQuestionCards={undefined}` a few lines below) so the same
+          three cards appear exactly once, in the rail, never duplicated.
+          Below `lg`, the grid collapses to a single column and the rail
+          renders first (see the `order` classes), so the single highest-
+          priority decision is the first thing a 390px viewport shows
+          under the delta receipt — the blueprint's mobile rule ("one
+          decision card is fully readable above the fold"). `pb-[220px]`
+          keeps the last canvas row clear of the fixed bottom dock. */}
+      <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-[220px] pt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-[42px]">
+      <aside className="order-1 mb-6 lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:self-start">
+        <div className="rounded-[14px] border border-[#EFECE5] bg-white p-4">
+          <div className="text-[10.5px] uppercase text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.1em" }}>
+            Mission control
+          </div>
+          <h3 className="mb-0 mt-1.5 text-[17px] font-semibold leading-[1.3]">
+            {materialDecisionsRemaining
+              ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
+              : "Nothing material outstanding"}
+          </h3>
+          <p className="m-0 mt-1 text-[12px] leading-[1.5] text-[#8C8A85]">
+            The agent ranks only choices that change price, risk, compliance or delivery.
+          </p>
+          {nextQuestionCards && nextQuestionCards.length > 0 ? (
+            <div className="mt-4">
+              <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare />
+            </div>
+          ) : (
+            <p className="m-0 mt-4 text-[12.5px] leading-[1.5] text-[#A3A099]">
+              No material decision is open right now — the document reflects everything stated so far.
+            </p>
+          )}
+        </div>
+      </aside>
+      <main className="order-2 min-w-0 lg:order-1">
       {/* ── THE THREAD (round 7, 1 Aug 2026: Robert — "the idea was
           this section had a memory and users could keep typing to
           generate the living statement, so there would be a scrolling
@@ -3632,7 +3695,7 @@ export default function ProjectDesk({
             factsKept={live.length}
             factsStruck={Math.max(0, facts.length - live.length)}
             sourceTurnCount={sourceTurns.length}
-            nextQuestionCards={nextQuestionCards}
+            nextQuestionCards={undefined}
             outline={sectionOutline}
             materialDecisionsRemaining={materialDecisionsRemaining}
             acceptedSuggestionCards={acceptedSuggestionCards}
@@ -4230,6 +4293,11 @@ export default function ProjectDesk({
         // this used to be, via the now-retired keptFits/fitSlugs).
         fitSlugs={published?.invited.map((v) => v.slug) ?? []}
       />
+      </main>
+      </div>
+      {/* ↑ closes the 2030 shell reset's document/mission-rail grid opened
+          above THE THREAD. Everything below is a full-screen overlay
+          (fixed inset-0), so it deliberately sits outside the grid. */}
 
       {/* ── THE EDIT SHEET ── bottom-anchored, one focal question with
           its rationale and full option set; closing returns to the

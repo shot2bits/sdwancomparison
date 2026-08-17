@@ -309,16 +309,30 @@ const IMPACT_LABEL: Record<string, string> = {
  *  comment for why that distinction is load-bearing, not decorative.
  *  Mobile-safe: cards stack full-width under 390px (no fixed min-widths
  *  wider than the viewport, buttons wrap). */
-function NextQuestions({ cards }: { cards: NextQuestionCard[] }) {
+/**
+ * 2030 shell reset (16 Aug 2026): exported so ProjectDesk.tsx can render
+ * these cards inside the binding blueprint's sticky Mission Rail (right,
+ * ~30%) instead of inline underneath the document header. `bare`, when
+ * true, drops this component's own "Best next decisions" heading and
+ * top border — the rail supplies its own "Mission control" heading — so
+ * the same card markup (and the exact same `onClick` handlers ProjectDesk
+ * already wires up) renders correctly in both places without forking the
+ * card JSX. LivingProcurementCanvas itself no longer renders these cards
+ * inline once a caller has moved them to the rail (see that component's
+ * own doc comment on `nextQuestionCards`).
+ */
+export function NextQuestions({ cards, bare = false }: { cards: NextQuestionCard[]; bare?: boolean }) {
   return (
-    <div className="mt-5 border-t border-[#EFECE5] pt-[18px]">
-      <div className="mb-2.5 flex items-baseline gap-[11px]">
-        <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
-          Best next decisions
-        </span>
-        <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">answering moves this document closer to publish</span>
-      </div>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+    <div className={bare ? "" : "mt-5 border-t border-[#EFECE5] pt-[18px]"}>
+      {!bare && (
+        <div className="mb-2.5 flex items-baseline gap-[11px]">
+          <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+            Best next decisions
+          </span>
+          <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">answering moves this document closer to publish</span>
+        </div>
+      )}
+      <div className={bare ? "flex flex-col gap-3" : "grid grid-cols-1 gap-2.5 sm:grid-cols-3"}>
         {cards.map(({ nq, buttons, hint }) => (
           <div key={nq.id} className="flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] p-3.5" style={{ background: nq.governedSuggestion ? "#FBF9FF" : "#fff" }}>
             <div className="flex flex-wrap items-center gap-1.5">
