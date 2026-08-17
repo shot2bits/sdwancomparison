@@ -1,5 +1,6 @@
 import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { buildRfpMarkdown, buildRfpHtml, type PublishedDocMeta } from "@/lib/rfp-document";
+import { renderRfpDocx } from "@/lib/rfp-export-docx";
 import { sessionFromRequest } from "@/lib/auth";
 import { requireRfpOwner } from "@/lib/rfp-access";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
@@ -98,6 +99,26 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       headers: {
         "content-type": "application/msword",
         "content-disposition": `attachment; filename="netify-rfp-${id}.doc"`,
+        "cache-control": "no-store",
+      },
+    });
+  }
+  if (format === "docx") {
+    // 2030 blueprint, Checkpoint E (17 Aug 2026): a REAL native Word
+    // binary (application/vnd.openxmlformats-officedocument.wordprocessingml.document),
+    // not styled HTML Word happens to open (that is `format=doc`,
+    // unchanged, kept for existing links). Built from the exact same
+    // canonical markdown `buildRfpMarkdown()` already produces for every
+    // other export -- see rfp-export-docx.ts's own doc comment for why
+    // that, and not a second section-by-section renderer, is the honest
+    // "one canonical document" implementation. Gated identically to
+    // every other format above: owner-only, market-unlocked, frozen
+    // snapshot content only.
+    const buffer = await renderRfpDocx(buildRfpMarkdown(frozenProject, { publishedMeta }), frozenProject.title);
+    return new Response(new Uint8Array(buffer), {
+      headers: {
+        "content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "content-disposition": `attachment; filename="netify-rfp-${id}.docx"`,
         "cache-control": "no-store",
       },
     });

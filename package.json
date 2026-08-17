@@ -8,7 +8,7 @@
     "build": "npm run validate && next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "validate": "tsx scripts/apply-vendor-overrides.ts && tsx scripts/validate-vendors.ts && tsx scripts/validate-continuations.ts && tsx scripts/validate-instruments.ts && tsx scripts/validate-notice-titles.ts && tsx scripts/validate-labels.ts && tsx scripts/verify-fact-ledger-reliability-gate.ts && tsx scripts/validate-procurement-document.ts && tsx scripts/validate-procurement-canvas-corrections.ts && tsx scripts/validate-living-canvas-phase2-lifecycle.ts && tsx scripts/validate-pre-publish-vendor-disclosure.ts && tsx scripts/validate-published-resume-hydration.ts && tsx scripts/validate-rfp-builder-match-disclosure.ts && tsx scripts/validate-living-procurement-os-stage-a.ts && tsx scripts/validate-envelope-schema-version.ts && tsx scripts/validate-procurement-room.ts",
+    "validate": "tsx scripts/apply-vendor-overrides.ts && tsx scripts/validate-vendors.ts && tsx scripts/validate-continuations.ts && tsx scripts/validate-instruments.ts && tsx scripts/validate-notice-titles.ts && tsx scripts/validate-labels.ts && tsx scripts/verify-fact-ledger-reliability-gate.ts && tsx scripts/validate-procurement-document.ts && tsx scripts/validate-procurement-canvas-corrections.ts && tsx scripts/validate-living-canvas-phase2-lifecycle.ts && tsx scripts/validate-pre-publish-vendor-disclosure.ts && tsx scripts/validate-published-resume-hydration.ts && tsx scripts/validate-rfp-builder-match-disclosure.ts && tsx scripts/validate-living-procurement-os-stage-a.ts && tsx scripts/validate-envelope-schema-version.ts && tsx scripts/validate-procurement-room.ts && tsx scripts/validate-export-parity.ts",
     "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
     "validate:ui:reversal": "node scripts/validate-sector-suggestion-reversal-ui.mjs",
     "validate:ui:row8": "node scripts/validate-row8-vendor-disclosure-ui.mjs",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
+    "docx": "^9.7.1",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
