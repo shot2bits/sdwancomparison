@@ -84,7 +84,6 @@
 
 import { z } from "zod";
 import crypto from "node:crypto";
-import { ALLOWED_PATHS } from "@/lib/workspace/extract";
 import { requirementFrom, buyingOf, type WorkspaceFact } from "@/lib/workspace/draft";
 import { assessSecurityRequirement } from "@/lib/security/rulebook";
 import { deriveRfiQuestionSet } from "@/lib/workspace/instrument";
@@ -103,39 +102,18 @@ import {
 /* ------------------------------------------------------------------ */
 
 /**
- * Validates against the REAL `ALLOWED_PATHS` whitelist (extract.ts),
- * exported for exactly this purpose -- never a second, hand-copied list
- * that could silently drift from the real one.
- *
- * `value` is deliberately `z.unknown()`: `AllowedPath` covers a genuinely
- * heterogeneous set of value shapes (numbers, strings, string arrays) by
- * design (the same reason `LivingProcurementDocumentSchema.factSnapshot`
- * is permissive) -- every OTHER field on a fact is fully, strictly
- * validated.
+ * Re-exported, not defined here (build fix, 17 Aug 2026): these two schemas
+ * moved to envelope-schemas.ts, a file with zero Node-only imports, because
+ * rfp-types.ts imports them and rfp-types.ts is reachable from
+ * RfpBuilder.tsx ("use client"). Defining them in THIS file -- which also
+ * does `import crypto from "node:crypto"` below for `envelopeContentHash`
+ * -- pulled that Node-only import into the client bundle and broke the
+ * Vercel build outright (`UnhandledSchemeError: Reading from "node:crypto"
+ * is not handled by plugins`). Every server-side caller below is unaffected
+ * -- same symbols, same behaviour, just re-exported instead of declared.
  */
-export const WorkspaceFactSchema = z
-  .object({
-    id: z.string().min(1),
-    path: z.enum(ALLOWED_PATHS),
-    value: z.unknown(),
-    provenance: z.enum(["stated", "inferred"]),
-    quote: z.string().optional(),
-    reason: z.string().optional(),
-    matchedText: z.string().optional(),
-    matchStart: z.number().optional(),
-    struck: z.boolean(),
-    source: z.enum(["extract", "answer", "link"]),
-    cycle: z.number(),
-  })
-  .strict();
-
-export const ReceiptLikeSchema = z
-  .object({
-    id: z.number(),
-    text: z.string(),
-    sourceTurnId: z.string().nullable().optional(),
-  })
-  .strict();
+export { WorkspaceFactSchema, ReceiptLikeSchema } from "@/lib/workspace/envelope-schemas";
+import { WorkspaceFactSchema, ReceiptLikeSchema } from "@/lib/workspace/envelope-schemas";
 
 const EARNED_INSTRUMENT_VALUES = ["sor", "rfi", "rfp"] as const;
 

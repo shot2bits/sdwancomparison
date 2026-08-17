@@ -9,7 +9,7 @@ import { UnderstandingSchema } from "@/lib/workspace/understanding";
 import { SourceLedgerEntrySchema } from "@/lib/workspace/source-ledger";
 import { DecisionLedgerEntrySchema } from "@/lib/workspace/decision-ledger";
 import { LivingProcurementDocumentSchema } from "@/lib/workspace/procurement-document";
-import { WorkspaceFactSchema, ReceiptLikeSchema } from "@/lib/workspace/envelope";
+import { WorkspaceFactSchema, ReceiptLikeSchema } from "@/lib/workspace/envelope-schemas";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
