@@ -3594,7 +3594,18 @@ export default function ProjectDesk({
           decision card is fully readable above the fold"). `pb-[220px]`
           keeps the last canvas row clear of the fixed bottom dock. */}
       <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-[220px] pt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-[42px]">
-      <aside className="order-1 mb-6 lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:self-start">
+      {/* `pb-[150px]` (mobile only, correction 17 Aug 2026): the fixed
+          bottom command dock measures ~121px tall on a 390px viewport
+          plus its own border/shadow -- with no reserve here, the last
+          ~120px of ANY content that happens to scroll to the bottom of
+          the viewport sits physically underneath the dock (confirmed via
+          Playwright boundingBox: aside bottom 1467px vs dock top 723px
+          at scroll 0, i.e. overlapping). The grid container's own
+          `pb-[220px]` only guards the very end of the whole stack
+          (after `<main>`), not the aside/main seam on mobile where the
+          aside — now capped to one visible card, see NextQuestions'
+          `bare` mode above — still needs its own clearance. */}
+      <aside className="order-1 mb-6 pb-[150px] lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start">
         <div className="rounded-[14px] border border-[#EFECE5] bg-white p-4">
           <div className="text-[10.5px] uppercase text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.1em" }}>
             Mission control

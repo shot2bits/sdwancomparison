@@ -333,8 +333,23 @@ export function NextQuestions({ cards, bare = false }: { cards: NextQuestionCard
         </div>
       )}
       <div className={bare ? "flex flex-col gap-3" : "grid grid-cols-1 gap-2.5 sm:grid-cols-3"}>
-        {cards.map(({ nq, buttons, hint }) => (
-          <div key={nq.id} className="flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] p-3.5" style={{ background: nq.governedSuggestion ? "#FBF9FF" : "#fff" }}>
+        {cards.map(({ nq, buttons, hint }, i) => (
+          <div
+            key={nq.id}
+            // 2030 shell reset, mobile correction (17 Aug 2026): the
+            // blueprint's binding mobile rule is ONE decision card
+            // readable above the fold, not three -- three full cards
+            // stacked in `bare` mode ran to 1000px+ tall on a 390px
+            // viewport, burying the living document below a wall of
+            // Mission Control before a buyer ever saw it (measured via
+            // Playwright: aside height 1025px on a 844px-tall viewport).
+            // Cards after the first stay in the DOM (so "load more"/
+            // desktop parity needs no extra fetch) but are hidden below
+            // `lg`, where the rail is no longer sticky-sidebar-sized and
+            // instead sits inline above the document.
+            className={`flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] p-3.5 ${bare && i > 0 ? "hidden lg:flex" : ""}`}
+            style={{ background: nq.governedSuggestion ? "#FBF9FF" : "#fff" }}
+          >
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", background: nq.governedSuggestion ? "#EDE6FB" : "#F4F2ED", color: nq.governedSuggestion ? "#5B3E9C" : "#8C8A85" }}>
                 {nq.governedSuggestion ? "Netify suggests · optional" : "Open decision"}
