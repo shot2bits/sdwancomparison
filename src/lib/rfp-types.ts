@@ -286,8 +286,44 @@ export const ProjectDetailsSchema = z.object({
    *  emails, joins no buyer index or moderation queue, and is excluded
    *  from telemetry funnels. */
   test: z.boolean().optional(),
+  /**
+   * 2030 blueprint, Checkpoint B (17 Aug 2026): the canonical envelope's
+   * OWN schema version -- distinct from `methodology_version` (the
+   * question-methodology matrix's version) and from `PublishedSnapshot`'s
+   * `compiler_version` (an alias of `methodology_version`, see that
+   * file's scope note). This one field versions the SHAPE of
+   * `ProjectDetails` itself, so a future breaking change to this record
+   * (a field renamed, restructured, or made mandatory) has a formal,
+   * checkable migration boundary instead of ad hoc self-repair scattered
+   * across read paths (the pre-existing pattern: `healSectionCategories`
+   * in rfp-store.ts silently fixes one known corruption on every read,
+   * with no version check at all -- undiscoverable and unbounded, since
+   * nothing marks which records still need it once fixed).
+   * `migrateProjectDetails()` (rfp-store.ts) is the single place that
+   * reads this field and brings an older record up to
+   * `CURRENT_ENVELOPE_SCHEMA_VERSION`. Optional so every record written
+   * before this field existed still validates unchanged; `getProject()`
+   * treats a missing value as version 1 (the version every record before
+   * this change is retroactively defined to be, since none of them have
+   * ever needed a real structural migration yet) and stamps the current
+   * version on next save via `saveProject()`.
+   */
+  envelope_schema_version: z.number().int().min(1).optional(),
 }).strict();
 export type ProjectDetails = z.infer<typeof ProjectDetailsSchema>;
+
+/**
+ * The canonical envelope's current schema version. Bump this, and add a
+ * step to `migrateProjectDetails()` (rfp-store.ts), the day a change to
+ * `ProjectDetailsSchema` is genuinely structural (a field renamed, a shape
+ * changed, a previously-optional field now required in practice) rather
+ * than the routine, backward-compatible additive change every field in
+ * this schema has been so far (each new field arrives `.optional()` or
+ * `.default(...)`, which is why this constant has never needed to move
+ * past 1 yet -- this file's own history is the proof: every dated comment
+ * above added a field without breaking an existing record).
+ */
+export const CURRENT_ENVELOPE_SCHEMA_VERSION = 1;
 
 /**
  * A supplier's click-to-accept of the buyer's NDA. This is the audit record:

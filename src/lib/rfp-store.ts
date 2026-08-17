@@ -22,6 +22,7 @@ import {
   type BuyerContext,
   ProjectSignoffSchema,
   type ProjectSignoff,
+  CURRENT_ENVELOPE_SCHEMA_VERSION,
 } from "@/lib/rfp-types";
 import { assertEngineArtefactsIntact } from "@/lib/security/generate-rfp";
 import { assertHistoryExtends, assertPhaseStatusConsistent } from "@/lib/project-machine";
@@ -89,7 +90,13 @@ export async function saveProject(
   p: ProjectDetails,
   opts: { engineWrite?: boolean } = {},
 ): Promise<ProjectDetails> {
-  const parsed = ProjectDetailsSchema.parse({ ...p, updated: Date.now() });
+  // 2030 blueprint, Checkpoint B: every write stamps the CURRENT envelope
+  // schema version, regardless of what version the caller's in-memory copy
+  // carried -- the single place this field is ever set. A record loaded
+  // and migrated by `getProject()` below therefore round-trips to the
+  // current version on its very next save, the same way `healSectionCategories`
+  // already makes its own repair durable on next save.
+  const parsed = ProjectDetailsSchema.parse({ ...p, updated: Date.now(), envelope_schema_version: CURRENT_ENVELOPE_SCHEMA_VERSION });
   // Append-only tamper guard (Phase B step 1, 21 July 2026; Constitution
   // Article 9, spec 1.4): a write may never shrink or rewrite the recorded
   // history. One stored read per save; pre-engine records (empty histories
@@ -153,11 +160,58 @@ function healSectionCategories(p: ProjectDetails): ProjectDetails {
   return { ...p, rfp_sections: sections };
 }
 
+/**
+ * 2030 blueprint, Checkpoint B (17 Aug 2026): the migration boundary for
+ * `ProjectDetails.envelope_schema_version` (see rfp-types.ts's doc comment
+ * on that field for the full rationale). Runs on EVERY read, exactly like
+ * `healSectionCategories` -- so a record written by an older deploy loads
+ * correctly today, and (per `saveProject()`'s unconditional stamp) is
+ * durably upgraded the next time anything saves it, without a bulk
+ * migration script or downtime.
+ *
+ * A record with no `envelope_schema_version` is version 1 by definition
+ * (every record ever written before this field existed is retroactively
+ * defined as version 1 -- see rfp-types.ts). There is, as of this change,
+ * no version above 1 yet, so this function's real migration branch is
+ * currently unreachable in production; it exists so the CONTRACT is real
+ * and testable (see scripts/validate-envelope-schema-version.ts, which
+ * exercises it against a synthetic future version) rather than merely
+ * documented intent. When `CURRENT_ENVELOPE_SCHEMA_VERSION` is next
+ * bumped for a genuine structural change, the upgrade step for that
+ * specific version lands here, one `if` block per version, each one
+ * idempotent and safe to run on an already-current record (a record at
+ * version 2 skips the "1 -> 2" branch entirely).
+ */
+export function migrateProjectDetails(p: ProjectDetails): ProjectDetails {
+  // A true no-op ONLY when the field is already EXPLICITLY stamped at the
+  // current version -- checked against the raw field, not the `?? 1`
+  // default below, so an absent-version legacy record (which defaults to
+  // 1 and may happen to equal CURRENT today) still gets the field
+  // physically stamped onto the returned object rather than silently
+  // staying absent forever.
+  if (p.envelope_schema_version === CURRENT_ENVELOPE_SCHEMA_VERSION) return p;
+  const version = p.envelope_schema_version ?? 1;
+  // A record from a NEWER deploy than this one (version already ahead of
+  // CURRENT): never downgrade or rewrite it, leave it exactly alone.
+  if (version > CURRENT_ENVELOPE_SCHEMA_VERSION) return p;
+  // No structural migrations exist yet (CURRENT_ENVELOPE_SCHEMA_VERSION
+  // has never moved past 1) -- this loop is a no-op today and exists so
+  // the next real bump has a place to add one, rather than inventing the
+  // pattern under time pressure.
+  let migrated = p;
+  let v = version;
+  while (v < CURRENT_ENVELOPE_SCHEMA_VERSION) {
+    v += 1;
+    // if (v === 2) migrated = migrateV1ToV2(migrated);
+  }
+  return { ...migrated, envelope_schema_version: CURRENT_ENVELOPE_SCHEMA_VERSION };
+}
+
 export async function getProject(id: string): Promise<ProjectDetails | null> {
   const data = await getJson<ProjectDetails>(`rfp:${id}`);
   if (!data) return null;
   const parsed = ProjectDetailsSchema.safeParse(data);
-  return parsed.success ? healSectionCategories(parsed.data) : null;
+  return parsed.success ? migrateProjectDetails(healSectionCategories(parsed.data)) : null;
 }
 
 export async function getProjectByToken(token: string): Promise<ProjectDetails | null> {
@@ -924,7 +978,7 @@ export async function getProjectsBulk(ids: string[]): Promise<ProjectDetails[]> 
   for (const item of raw) {
     if (!item) continue;
     const parsed = ProjectDetailsSchema.safeParse(item);
-    if (parsed.success) out.push(healSectionCategories(parsed.data));
+    if (parsed.success) out.push(migrateProjectDetails(healSectionCategories(parsed.data)));
   }
   return out;
 }
