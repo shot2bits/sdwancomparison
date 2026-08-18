@@ -1,0 +1,15 @@
+{
+  "item1_t1a_expected_managed": "co_managed",
+  "item1_t1b_expected_managed": null,
+  "item2_t2a_expected_false": true,
+  "item2_t2b_expected_false": true,
+  "item3_withoutNoted_hasNotedClause": false,
+  "item3_withNoted_hasNotedClause": false,
+  "item3_byteIdentical_ignoringNoted": true,
+  "item4_doc0_title": "Sourcing procurement",
+  "item4_doc0_version": 1,
+  "item4_doc1_title": "Healthcare & pharma procurement",
+  "item4_doc1_version": 1,
+  "item4_titleChanged": true,
+  "item4_versionIncremented": false
+}

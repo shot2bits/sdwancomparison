@@ -1,0 +1,57 @@
+{
+  "mode": "graded",
+  "count": 22,
+  "total": 30,
+  "suppliers": [
+    {
+      "slug": "aryaka",
+      "name": "Aryaka",
+      "category": "Managed SD-WAN / SASE provider",
+      "last_verified": "2026-07-29",
+      "evidence_coverage_pct": 0.95,
+      "yes_count": 32,
+      "coverage": {},
+      "matched": [
+        {
+          "id": "buying:sase",
+          "label": "Full SASE platform",
+          "grade": "yes"
+        }
+      ],
+      "missed": [],
+      "marketplace_url": "https://netify.co.uk/marketplace/aryaka/"
+    },
+    {
+      "slug": "att-business",
+      "name": "AT&T Business",
+      "category": "Global carrier managed SD-WAN / SASE provider",
+      "last_verified": "2026-07-29",
+      "evidence_coverage_pct": 0.975,
+      "yes_count": 30,
+      "coverage": {},
+      "matched": [
+        {
+          "id": "buying:sase",
+          "label": "Full SASE platform",
+          "grade": "yes"
+        }
+      ],
+      "missed": [],
+      "marketplace_url": "https://netify.co.uk/marketplace/att/"
+    }
+  ],
+  "directory": [
+    {
+      "slug": "arista-velocloud",
+      "name": "Arista / VeloCloud"
+    },
+    {
+      "slug": "aryaka",
+      "name": "Aryaka"
+    },
+    {
+      "slug": "att-business",
+      "name": "AT&T Business"
+    }
+  ]
+}

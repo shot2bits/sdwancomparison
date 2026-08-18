@@ -141,7 +141,7 @@ function partB() {
   /* ---- B0: the Project Overview page's "Review and edit" link genuinely */
   /* routes to this component's page -- the fixture is proving the route   */
   /* Robert named, not an unrelated one.                                   */
-  const overviewRaw = readFileSync(new URL("../src/app/project/[id]/page.tsx", import.meta.url), "utf8");
+  const overviewRaw = readFileSync(new URL("../src/app/(marketing)/project/[id]/page.tsx", import.meta.url), "utf8");
   expect(
     /Review and edit<\/Link>/.test(overviewRaw) && /href=\{`\/rfp-builder\/\$\{id\}/.test(overviewRaw),
     "[B0] Project Overview's \"Review and edit\" link routes to /rfp-builder/[id] (RfpBuilder.tsx)",
@@ -270,7 +270,7 @@ function partB9() {
   const reportSrc = readFileSync(new URL("../src/app/api/rfp/[id]/report/route.ts", import.meta.url), "utf8");
   expect(/if \(!\(await isMarketUnlocked\(id\)\)\) \{/.test(reportSrc), "[B9] the market-report (project-specific matching output) route is gated on the canonical market-unlock predicate");
 
-  const downloadSrc = readFileSync(new URL("../src/app/rfp-builder/[id]/preview/download/route.ts", import.meta.url), "utf8");
+  const downloadSrc = readFileSync(new URL("../src/app/(marketing)/rfp-builder/[id]/preview/download/route.ts", import.meta.url), "utf8");
   expect(/if \(!\(await isMarketUnlocked\(id\)\)\) \{/.test(downloadSrc), "[B9] the Word/PDF/JSON export route is gated on the canonical market-unlock predicate");
 
   for (const file of ["nda", "thread", "evidence-draft", "respond"]) {
@@ -552,7 +552,7 @@ async function partD(kvServer: { outage: () => Promise<void>; restore: () => Pro
   const { POST: connectRoute, GET: listConnectionsRoute } = await import("../src/app/api/rfp/[id]/connect/route");
   const { GET: projectReadRoute } = await import("../src/app/api/rfp/[id]/route");
   const { GET: reportRoute } = await import("../src/app/api/rfp/[id]/report/route");
-  const { GET: downloadRoute } = await import("../src/app/rfp-builder/[id]/preview/download/route");
+  const { GET: downloadRoute } = await import("../src/app/(marketing)/rfp-builder/[id]/preview/download/route");
   const { GET: ndaRoute } = await import("../src/app/api/rfp/[id]/nda/route");
   const { listRfpOnBoard, BoardQualityGateError } = await import("../src/lib/rfp-publish");
   const { commitMarketUnlock, getMarketUnlock, isMarketUnlocked, MarketUnlockBindingError } = await import("../src/lib/market-unlock");

@@ -79,6 +79,11 @@ import {
   type GovernedEvent,
 } from "@/lib/workspace/procurement-document";
 import LivingProcurementCanvas, { NextQuestions, type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
+import { ProvenanceTag } from "@/components/procurement/ProvenanceTag";
+import McpEvidencePanel from "@/components/procurement/McpEvidencePanel";
+import { historyProvenance } from "@/lib/history-provenance";
+import { humaniseEvent } from "@/lib/project-story";
+import type { ProjectHistoryEvent } from "@/lib/rfp-types";
 /** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
  *  the canonical NextQuestion projection and section-outline projection
  *  -- both pure, both layered over data this file already computes
@@ -890,6 +895,70 @@ export default function ProjectDesk({
   const [signError, setSignError] = useState<string | null>(null);
   const [needAuth, setNeedAuth] = useState(false);
   const [created, setCreated] = useState<{ id: string; manage: string; test: boolean } | null>(null);
+  /** State 3 (governed MCP/evidence, 18 Aug 2026): this project's own
+   *  real, persisted, append-only history -- the SAME array
+   *  project/[id]/page.tsx's Activity section already reads. Seeded
+   *  only from a real resume fetch (below); never populated any other
+   *  way, so McpEvidencePanel can never render anything that wasn't
+   *  actually stored. */
+  const [projectHistory, setProjectHistory] = useState<ProjectHistoryEvent[]>([]);
+  /** Mission Control's own "MCP RECEIPT" line (Constitution correction,
+   *  18 Aug 2026): the mockups (image3) show a violet "MCP RECEIPT" label
+   *  plus a short receipt line ("Board listing verified · 09:42") at the
+   *  foot of the Mission Control card -- distinct from the existing
+   *  cobalt "MCP evidence" tag (an OBSERVED fact) and from the orange
+   *  "Agent proposed" tag (an open decision): this one is specifically an
+   *  MCP-originated action that carried real, recorded buyer consent --
+   *  i.e. `historyProvenance(h).isMcp && hasConsent`, the exact same real
+   *  condition McpEvidencePanel.tsx's own `approvedEvents` already uses,
+   *  reused here rather than re-derived. Genuinely null (renders nothing)
+   *  until a real such event exists in this project's own history --
+   *  never fabricated, matching every other MCP-labelled surface this
+   *  pass. */
+  const latestMcpReceipt = useMemo(() => {
+    const approved = projectHistory
+      .filter((h) => {
+        const prov = historyProvenance(h);
+        return prov.isMcp && prov.hasConsent;
+      })
+      .sort((a, b) => b.at - a.at);
+    if (approved.length === 0) return null;
+    const h = approved[0];
+    return {
+      label: humaniseEvent(h.event, h.detail),
+      time: new Date(h.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+    };
+  }, [projectHistory]);
+  /** Mobile acceptance correction (18 Aug 2026): "Mission Control must
+   *  support the document, not consume most of the mobile viewport... show
+   *  a compact next-action summary first and allow the full decision stack
+   *  to expand." Desktop (`lg:`) is completely unaffected -- the full card
+   *  always renders there via the `lg:block` override below, regardless of
+   *  this flag; only the mobile default collapses. */
+  const [mcExpanded, setMcExpanded] = useState(false);
+  /** Composer-overlap correction (18 Aug 2026, real bug measured via
+   *  Playwright at 1440x900): a static `lg:max-h-[min(60vh,...)]` clamp on
+   *  the Mission Control card cannot actually guarantee it clears the
+   *  fixed-bottom composer, because the card's TOP position differs
+   *  between its natural (pre-scroll, in-flow) placement and its later
+   *  `lg:sticky lg:top-[132px]` stuck placement -- the natural placement
+   *  sits LOWER (measured 304.6px at this viewport vs. the 132px stuck
+   *  offset), leaving strictly less clearance above the dock than any
+   *  fixed vh-based number can account for across different hero/content
+   *  heights. A CSS-only max-height cannot reference "how far this
+   *  element's own natural top already is," so this measures it directly:
+   *  once on mount (while still unscrolled, i.e. in its natural,
+   *  worst-case position) and again on resize, using the two refs below.
+   *  The stuck (scrolled) position always has MORE clearance than the
+   *  natural one (132px offset < 304.6px natural position, dock stays put
+   *  either way), so sizing for the natural, worst-case position is
+   *  always safe for the stuck position too. Mobile is unaffected -- the
+   *  card only ever measures/applies this at `lg` widths (see the
+   *  matchMedia guard in the effect below); mobile's own height is
+   *  already bounded by the `mcExpanded` collapse, not this. */
+  const [mcMaxHeightPx, setMcMaxHeightPx] = useState<number | null>(null);
+  const mcCardRef = useRef<HTMLDivElement | null>(null);
+  const composerDockRef = useRef<HTMLDivElement | null>(null);
   /** Living Procurement Canvas Phase 2 correction (14 Aug 2026): carries
    *  exactly what the publish response itself returned -- real invited
    *  suppliers (name + credential link) -- so post-publish rendering below
@@ -1207,6 +1276,56 @@ export default function ProjectDesk({
   useEffect(() => {
     if (started) window.dispatchEvent(new Event("pd:project-started"));
   }, [started]);
+  /** Measures the real gap above the fixed composer for the Mission
+   *  Control card's own natural (worst-case) top position -- see the
+   *  `mcMaxHeightPx` doc comment above for why a static CSS clamp can't
+   *  do this. Runs once `started` (the card doesn't render before then)
+   *  and on resize; a small settle delay lets the just-mounted layout
+   *  (hero collapse, card content) finish before measuring. Desktop-only
+   *  (`lg`, >=1024px, matching Tailwind's default `lg` breakpoint used
+   *  throughout this file) -- below that, the card isn't sticky/capped at
+   *  all, so no measurement applies. */
+  useEffect(() => {
+    if (!started) return;
+    const measure = () => {
+      if (!window.matchMedia("(min-width: 1024px)").matches) {
+        setMcMaxHeightPx(null);
+        return;
+      }
+      // Only trust this measurement near the unscrolled (natural,
+      // worst-case) position -- see the doc comment above. If the card
+      // is already `lg:sticky`-stuck (user has scrolled), its rect.top
+      // reads a smaller, more generous number that would let this grow
+      // past the value that's actually safe once scrolled back to the
+      // top, so skip rather than overwrite a known-safe value.
+      if (window.scrollY > 4) return;
+      const card = mcCardRef.current;
+      const dock = composerDockRef.current;
+      if (!card || !dock) return;
+      const cardTop = card.getBoundingClientRect().top;
+      const dockTop = dock.getBoundingClientRect().top;
+      const MARGIN = 16;
+      const available = dockTop - cardTop - MARGIN;
+      // Sane bounds: never collapse below a usable minimum, never grow
+      // past a sensible cap even when the viewport is very tall.
+      setMcMaxHeightPx(Math.max(220, Math.min(available, 640)));
+    };
+    const t1 = window.setTimeout(measure, 60);
+    const t2 = window.setTimeout(measure, 400);
+    window.addEventListener("resize", measure);
+    // Re-measure whenever the page's overall layout height changes (hero
+    // collapse animation settling, async content -- market/verdict/next-
+    // question data -- landing above the card) -- any of these can move
+    // the card's natural top even though nothing the user did changed.
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(document.body);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.removeEventListener("resize", measure);
+      ro.disconnect();
+    };
+  }, [started]);
   const meter = meterOf(facts, verdict);
   const brief = useMemo(() => briefModel({ facts, verdict }), [facts, verdict]);
 
@@ -1371,7 +1490,14 @@ export default function ProjectDesk({
             facts?: WorkspaceFact[];
             receipts?: Receipt[];
             envelope_revision?: number;
+            // State 3 (governed MCP/evidence, 18 Aug 2026): GET /api/rfp/[id]
+            // has always returned the full owner-gated project (publicProject()
+            // spreads everything except manage_token/owner_email), so `history`
+            // was already arriving in this exact response -- simply never read
+            // out of it until now. See McpEvidencePanel.tsx.
+            history?: ProjectHistoryEvent[];
           };
+          setProjectHistory(proj.history ?? []);
           const resumeState = resumeStateFromProject(proj);
           if (!resumeState) {
             // Scoped to Security Sourcing this round (see
@@ -3576,8 +3702,9 @@ export default function ProjectDesk({
           plus the page's own bottom padding (see the grid wrapper below)
           keep it clear of the last document row. */}
       <div
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#DED8CE]"
-        style={{ background: "#fbfaf8" }}
+        ref={composerDockRef}
+        className="fixed inset-x-0 bottom-0 z-40 border-t"
+        style={{ background: "var(--nf-ivory-raised, #fbfaf8)", borderColor: "var(--nf-rule, #DED8CE)" }}
       >
         <div className="mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]">
           {/* The prompt (the input method, never the subject). Styled as a
@@ -3736,31 +3863,148 @@ export default function ProjectDesk({
           (after `<main>`), not the aside/main seam on mobile where the
           aside — now capped to one visible card, see NextQuestions'
           `bare` mode above — still needs its own clearance. */}
-      <aside className="order-1 mb-6 pb-[150px] lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start">
-        <div className="rounded-[14px] border border-[#EFECE5] bg-white p-4">
-          <div className="text-[10.5px] uppercase text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.1em" }}>
+      {/* Mission Control (2030 visual pass, 18 Aug 2026): restyled to the
+          approved prototype's dark `.card.dark` treatment (index.html) --
+          the one panel across states 0/1 the closure package specifically
+          names ("Mission Control... governed MCP approval flow"). Only
+          colour/typography change here; the sticky/order/mobile-height
+          logic above (lg:sticky, lg:top-[132px], the mobile dock
+          clearance) is untouched -- that's spacing/hierarchy the prototype
+          itself doesn't govern (it has no fixed dock to clear).
+
+          Dead-zone correction (18 Aug 2026, real bug found via mobile
+          screenshot): the 150px bottom clearance below was written when
+          the mobile card was ALWAYS fully expanded (guarding its last
+          decision card from the fixed dock) -- now that it defaults to
+          the collapsed one-line summary (`mcExpanded`, added this same
+          pass), that same 150px reservation sits empty below a two-line
+          card, reading as exactly the "giant dead zone" the mobile
+          acceptance criteria rule out. Only reserve it while genuinely
+          expanded; collapsed keeps a plain, small gap instead. */}
+      <aside className={`order-1 mb-6 ${mcExpanded ? "pb-[150px]" : "pb-6"} lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start`}>
+        {/* No .procurement-2030 class needed here: this div is already
+            inside ProcurementEntry's own .procurement-2030 wrapper (the
+            --nf-* custom properties inherit down the DOM tree), unlike
+            WorkspaceHeader.tsx, which is a layout-level sibling and does
+            need its own application. */}
+        {/* Mandatory visual correction (18 Aug 2026): "the fixed composer
+            must never obscure content." Confirmed by real screenshot at
+            1440x900, unscrolled: this card's own natural height, added to
+            its sticky top-132px offset, ran into the fixed-bottom
+            composer's ~90px footprint before the card ever got to scroll
+            out from under it. `lg:max-h-*` reserves exactly the space
+            between the sticky offset and the composer (with margin) and
+            `overflow-y-auto` lets the card's own content scroll internally
+            instead of spilling under the dock -- the standard fix for a
+            sticky sidebar sharing the viewport with a fixed footer. Mobile
+            is unaffected (not sticky there, and now collapsed by default
+            via `mcExpanded`, so it's short regardless). */}
+        <div
+          ref={mcCardRef}
+          // The max-height itself stays `lg:`-scoped via the Tailwind
+          // class (never applied on mobile, exactly as before) -- only
+          // the VALUE now comes from the `--mc-max-h` custom property so
+          // the JS measurement below can feed it. Setting a CSS variable
+          // via inline style is harmless below `lg` since nothing reads
+          // it there; the `min(60vh,...)` fallback covers first paint
+          // (before the effect runs) and any case the effect can't
+          // measure (e.g. no ResizeObserver support).
+          className="rounded-[18px] border p-4 lg:max-h-[var(--mc-max-h,min(60vh,calc(100vh-170px)))] lg:overflow-y-auto"
+          style={{
+            background: "var(--nf-ink-950)",
+            borderColor: "#2B2519",
+            color: "#EFEAE0",
+            ...(mcMaxHeightPx != null ? ({ "--mc-max-h": `${mcMaxHeightPx}px` } as React.CSSProperties) : {}),
+          }}
+        >
+          <div style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "#C9C2B2" }}>
             Mission control
           </div>
-          <h3 className="mb-0 mt-1.5 text-[17px] font-semibold leading-[1.3]">
+          {/* Real bug found via screenshot verification (18 Aug 2026): this
+              heading rendered near-invisible on the dark card -- `text-white`
+              LOSES to globals.css's sitewide `h1, h2, h3 { color:
+              var(--ink-900) }` rule, because that rule sits outside any
+              Tailwind `@layer` block and CSS cascade layers always rank
+              unlayered author CSS above layered CSS regardless of selector
+              specificity (confirmed via getComputedStyle: color resolved
+              to rgb(24,24,27), not white). Inline `style.color` beats any
+              class or unlayered selector, so the colour moved here rather
+              than relying on the class.
+
+              Accessibility correction (18 Aug 2026, real bug found via an
+              axe-core scan): this was an `<h3>`, but Mission Control is a
+              sibling SECTION alongside the living document (not nested
+              inside it), and it sits earlier in DOM order than the
+              document's own `<h2>` title (LivingProcurementCanvas.tsx /
+              ProjectDesk.tsx's docTitle) -- the CSS `order-*` classes that
+              visually reorder it for desktop don't change DOM/accessibility
+              tree order. That produced a real h1 -> h3 -> h2 sequence
+              (skipping a level, then stepping back down), which axe's
+              heading-order rule correctly flags: it breaks screen-reader
+              heading-list navigation. `<h2>` is the correct level -- a
+              sibling section heading, same rank as the document title,
+              not a subsection three levels below the page's own h1. */}
+          <h2 className="mb-0 mt-1.5 text-[19px] font-semibold leading-[1.3]" style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "#fff" }}>
             {materialDecisionsRemaining
               ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
               : "Nothing material outstanding"}
-          </h3>
-          <p className="m-0 mt-1 text-[12px] leading-[1.5] text-[#8C8A85]">
-            The agent ranks only choices that change price, risk, compliance or delivery.
-          </p>
-          {nextQuestionCards && nextQuestionCards.length > 0 ? (
-            <div className="mt-4">
-              <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare />
-            </div>
-          ) : (
-            <p className="m-0 mt-4 text-[12.5px] leading-[1.5] text-[#A3A099]">
-              No material decision is open right now — the document reflects everything stated so far.
+          </h2>
+          {/* Mobile-only compact toggle -- `lg:hidden` so desktop never
+              sees it (the full card is always expanded there). Only shown
+              when there's actually something to expand into. */}
+          {materialDecisionsRemaining > 0 && (
+            <button
+              type="button"
+              onClick={() => setMcExpanded((v) => !v)}
+              className="mt-2 cursor-pointer rounded-full border-0 px-3 py-1.5 text-[11px] font-semibold uppercase lg:hidden"
+              style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.06em", background: "var(--nf-orange, #E8590C)", color: "#fff" }}
+              aria-expanded={mcExpanded}
+            >
+              {mcExpanded ? "Hide decisions" : "View decisions"}
+            </button>
+          )}
+          <div className={`${mcExpanded ? "" : "hidden"} lg:block`}>
+            <p className="m-0 mt-3 text-[12px] leading-[1.5] lg:mt-1" style={{ color: "#B9B2A2" }}>
+              The agent ranks only choices that change price, risk, compliance or delivery.
             </p>
+            {nextQuestionCards && nextQuestionCards.length > 0 ? (
+              <div className="mt-4">
+                <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare dark />
+              </div>
+            ) : (
+              <p className="m-0 mt-4 text-[12.5px] leading-[1.5]" style={{ color: "#948C79" }}>
+                No material decision is open right now — the document reflects everything stated so far.
+              </p>
+            )}
+          </div>
+          {/* Real, honestly-empty-until-earned "MCP RECEIPT" line -- see
+              the `latestMcpReceipt` doc comment above. Sits outside the
+              `mcExpanded` collapse (mobile always sees a genuine receipt
+              if one exists, matching the mockup treating it as
+              foot-of-card chrome, not a decision card). */}
+          {latestMcpReceipt && (
+            <div className="mt-3 border-t pt-2.5" style={{ borderColor: "#2B2519" }}>
+              <span style={{ fontFamily: "var(--nf-font-mono)", fontSize: "9px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--nf-lilac, #8D77CF)", fontWeight: 700 }}>
+                MCP receipt
+              </span>
+              <p className="m-0 mt-1 text-[12px] leading-[1.4]" style={{ color: "#D8D0BE" }}>
+                {latestMcpReceipt.label} · {latestMcpReceipt.time}
+              </p>
+            </div>
           )}
         </div>
       </aside>
-      <main className="order-2 min-w-0 lg:order-1">
+      {/* Accessibility correction (18 Aug 2026, real bug found via an
+          axe-core scan): this was a second/third `<main>` on the page
+          (alongside (workspace)/layout.tsx's real page-level
+          `<main id="main-content">` and, until the same pass, Procurement
+          Entry's own) -- this is the document CANVAS COLUMN of a two-
+          column grid, a sub-region, not the page's primary-content
+          landmark. The `order-*`/`lg:order-*` classes here reorder it
+          visually only (CSS `order` never changes DOM/accessibility tree
+          order), so demoting this to a plain `<div>` changes no layout,
+          only removes the duplicate landmark. */}
+      <div className="order-2 min-w-0 lg:order-1">
       {/* ── THE THREAD (round 7, 1 Aug 2026: Robert — "the idea was
           this section had a memory and users could keep typing to
           generate the living statement, so there would be a scrolling
@@ -3794,7 +4038,21 @@ export default function ProjectDesk({
             Feedback only, kept for this sitting — the statement below is the record.
           </p>
         )}
-        <div ref={threadRef} className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto px-1 sm:max-h-[620px]">
+        {/* Accessibility correction (18 Aug 2026, real bug found via an
+            axe-core scan): this scrolls its own content (max-h +
+            overflow-y-auto) but carried no way for a keyboard user to
+            focus it and scroll with arrow keys (axe's
+            scrollable-region-focusable rule) -- mouse/touch/trackpad
+            scrolling worked, keyboard-only did not. `tabIndex={0}` plus a
+            real `aria-label` (this genuinely IS the feedback transcript,
+            not a decorative box) fixes both the focusability and gives
+            it a name a screen reader announces. */}
+        <div
+          ref={threadRef}
+          tabIndex={0}
+          aria-label="Feedback transcript"
+          className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto px-1 sm:max-h-[620px]"
+        >
           {msgs.map((m, i) => (
             <div key={i} className="flex items-start gap-2.5">
               <span
@@ -3843,6 +4101,19 @@ export default function ProjectDesk({
             acceptedSuggestionCards={acceptedSuggestionCards}
             acceptedSuggestionsTitle={sectorSectionTitle}
           />
+        </div>
+      )}
+
+      {/* ── STATE 3: GOVERNED MCP / EVIDENCE (18 Aug 2026) ── real
+          project history, never fabricated connections/evidence/receipts
+          -- see McpEvidencePanel.tsx's own doc comment for exactly what
+          each of the seven states is grounded in. Only rendered once a
+          project has actually been saved (an id exists), since history
+          only exists on a persisted record -- an unsaved draft honestly
+          has no history to read, not an empty one worth rendering. */}
+      {phase === "live" && started && created?.id && (
+        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2">
+          <McpEvidencePanel history={projectHistory} />
         </div>
       )}
 
@@ -4135,7 +4406,7 @@ export default function ProjectDesk({
                   organs intact: what carries, what stays private, the
                   consents verbatim, the identity read-back, the vetting
                   standard linked so the claim is checkable. ---- */}
-          <div data-publish="1" className="mt-9 border-l-2 border-[#F5A21B] pl-4" style={{ scrollMarginTop: "90px" }}>
+          <div data-publish="1" className="mt-9 border-l-2 pl-4" style={{ scrollMarginTop: "90px", borderColor: "var(--nf-orange, #F5A21B)" }}>
             {published ? (
               <div>
                 <div className="mb-2 max-w-[36em] text-[16px] leading-[1.6]">
@@ -4177,7 +4448,10 @@ export default function ProjectDesk({
                     whatever the live marketplace directory says today. */}
                 {(published.matchedVendors.length > 0 || published.invited.length > 0) && (
                   <div className="mt-3">
-                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: ".12em" }}>Your matches</p>
+                    <div className="mb-1 flex items-center justify-between gap-3">
+                      <p className="m-0 text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".12em", color: "var(--nf-orange-strong, #B4650B)" }}>Your matches</p>
+                      <ProvenanceTag kind="intel" />
+                    </div>
                     <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#5F5D59]">
                       {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
                       {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
@@ -4193,7 +4467,7 @@ export default function ProjectDesk({
                               <span className="text-[11px] text-[#8C8A85]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
                               <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
                               {inv && (
-                                <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
+                                <span className="rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}>invited</span>
                               )}
                             </li>
                           );
@@ -4213,7 +4487,7 @@ export default function ProjectDesk({
                             {invitedOnly.map((v, i) => (
                               <li key={`${v.slug}-invited-only-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2 first:border-t-0 first:pt-0">
                                 <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
-                                <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
+                                <span className="rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}>invited</span>
                               </li>
                             ))}
                           </ol>
@@ -4246,12 +4520,16 @@ export default function ProjectDesk({
                     folded into the headline so there's one less text block.
                     No new colours, same tokens as the diagram and chips
                     elsewhere in this panel. */}
-                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5] text-[#141414]">
+                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5]" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #141414)" }}>
                   Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson required.
                 </p>
                 <div className="mt-2.5 flex max-w-[36em] flex-wrap gap-1.5">
                   {["Get bids", "Get pricing", "Get vetted responses", "Send messages", "Request demos"].map((chip) => (
-                    <span key={chip} className="rounded-full border border-[#F5A21B]/40 bg-[#FFF7E8] px-2.5 py-1 text-[12.5px] font-medium text-[#8A4D08]">
+                    <span
+                      key={chip}
+                      className="rounded-full border px-2.5 py-1 text-[12.5px] font-medium"
+                      style={{ borderColor: "var(--nf-orange-soft-border, #F5A21B66)", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}
+                    >
                       {chip}
                     </span>
                   ))}
@@ -4265,12 +4543,15 @@ export default function ProjectDesk({
                     board/notify/vetted-view structure stated in prose above,
                     shown as a shape so it reads in one glance. Same colour
                     tokens as the rest of this panel; no new palette. */}
-                <div className="my-4 max-w-[38em] rounded-md border border-[#EAE7E1] bg-[#F5F3EE] p-4 text-[12px] leading-snug">
+                <div className="my-4 max-w-[38em] rounded-md border p-4 text-[12px] leading-snug" style={{ borderColor: "var(--nf-rule, #EAE7E1)", background: "var(--nf-ivory-raised, #F5F3EE)" }}>
+                  <div className="mb-2 flex justify-end">
+                    <ProvenanceTag kind="intel" />
+                  </div>
                   <div className="flex flex-col items-center gap-1.5">
                     <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 font-semibold text-[#33302C]">Your project</div>
                     <div className="text-[#8C8A85]" style={mono}>publish ↓</div>
-                    <div className="rounded-md border border-[#F5A21B] bg-[#FFF7E8] px-3 py-1.5 text-center">
-                      <p className="m-0 font-semibold text-[#8A4D08]">Opportunity board</p>
+                    <div className="rounded-md border px-3 py-1.5 text-center" style={{ borderColor: "var(--nf-orange, #F5A21B)", background: "var(--nf-orange-soft, #FFF7E8)" }}>
+                      <p className="m-0 font-semibold" style={{ color: "var(--nf-orange-strong, #8A4D08)" }}>Opportunity board</p>
                       <p className="m-0 text-[11px] text-[#6E6C67]">Anonymous notice: sector, size band. No name, no contact details.</p>
                     </div>
                     <div className="grid w-full grid-cols-2 gap-3 pt-1">
@@ -4332,7 +4613,7 @@ export default function ProjectDesk({
                   {" "}and anything you have dropped from the record.
                 </p>
                 {signLocked && lockLine && (
-                  <p className="m-0 mb-2 text-[13px] leading-relaxed text-[#B4650B]">{lockLine}</p>
+                  <p className="m-0 mb-2 text-[13px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>{lockLine}</p>
                 )}
                 <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5F5D59]">
                   <input type="checkbox" checked={consentCreate} onChange={(e) => setConsentCreate(e.target.checked)} className="mt-0.5" />
@@ -4357,24 +4638,30 @@ export default function ProjectDesk({
                   type="button"
                   onClick={() => void signAndPublish()}
                   disabled={signLocked || !consentsOk || Boolean(signStage) || (testMode && !securityScope)}
-                  className="mt-1 cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[22px] py-[13px] text-[15.5px] font-semibold text-[#141414] hover:bg-[#E5940F] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="mt-1 cursor-pointer rounded-full border-0 px-[22px] py-[13px] text-[15.5px] font-semibold text-[#141414] disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "var(--nf-orange, #F5A21B)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nf-orange-strong, #E5940F)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--nf-orange, #F5A21B)"; }}
                 >
                   {signStage ?? (testMode ? "Sign · create the test position" : "Generate and publish")}
                 </button>
                 {testMode && !securityScope && (
-                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">
+                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>
                     Test mode covers the security engine today, and this is a network requirement. Drop <span style={mono}>?test=1</span> from the address to publish it for real.
                   </p>
                 )}
                 {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
                 {signedIn && sessId && (
                   sessId.work ? (
-                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#6E6C67]">
-                      Publishing as <span className="font-medium text-[#33302C]">{sessId.email}</span>
-                      {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
+                    <p className="m-0 mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] leading-relaxed text-[#6E6C67]">
+                      <span>
+                        Publishing as <span className="font-medium text-[#33302C]">{sessId.email}</span>
+                        {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
+                      </span>
+                      <ProvenanceTag kind="approved" />
                     </p>
                   ) : (
-                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">
+                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>
                       Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays as it is while you switch.
                     </p>
                   )
@@ -4435,7 +4722,7 @@ export default function ProjectDesk({
         // this used to be, via the now-retired keptFits/fitSlugs).
         fitSlugs={published?.invited.map((v) => v.slug) ?? []}
       />
-      </main>
+      </div>
       </div>
       {/* ↑ closes the 2030 shell reset's document/mission-rail grid opened
           above THE THREAD. Everything below is a full-screen overlay

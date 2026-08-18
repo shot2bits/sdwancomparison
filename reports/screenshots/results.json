@@ -1,0 +1,11 @@
+{
+  "promptA_hasV1": true,
+  "promptB_hasV2": true,
+  "promptB_dlpMentioned": true,
+  "promptB_comanaged": true,
+  "promptC_hasV3": true,
+  "promptC_ukResidency": true,
+  "disclosurePresent": true,
+  "promptD_hasV1": true,
+  "promptD_conflict": true
+}

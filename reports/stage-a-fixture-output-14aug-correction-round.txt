@@ -1,0 +1,139 @@
+PASS  Prompt A: first compile is version 1  ->  version=1
+PASS  Prompt A: the document compiles immediately (a real document, not an empty shell)  ->  clauses=6
+PASS  Prompt A: the architecture is non-empty from the first compile  ->  nodes=5
+PASS  Prompt A: readiness score is a valid percentage  ->  score=70
+PASS  Prompt A: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=6 clauses.length=6
+PASS  Prompt A: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=1 evaluation.gates.length=1
+PASS  Prompt A: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=12 responseGroups total=12
+PASS  Prompt A: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Prompt A: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt A: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt A: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+  Prompt A fixture: title="Healthcare & pharma procurement (20 sites)" summary="Healthcare & pharma, UK, 20 sites, 200 remote users, azure, retained private Ethernet circuit. 6 testable requirements compiled from the buyer's own words." clauses=["network-architecture-scope","legacy-circuit-coexistence","sector-pack-suggestion","identity-provider-entra","voice-scope","dated-transition-plan"] counts={"requirements":6,"questions":12,"gates":1,"decisions":1}
+PASS  Prompt B: the document version increments exactly once  ->  before=1 after=2
+PASS  Prompt B: evaluation total stays exactly 100 after a removal  ->  total=100
+PASS  Prompt B: the April 2027 deadline is kept, not dropped by the correction  ->  value=by april 2027
+PASS  Prompt B/THE CORRECTION: 'remove DLP' with no prior DLP requirement is an idempotent no-op -- DLP does not exist afterwards  ->  dlp present=false
+PASS  Prompt B/THE CORRECTION: no gate or supplier question was ever created from the negated DLP phrase  ->  gates=[] questions=[]
+PASS  Prompt B/THE CORRECTION: the removal sentence does not ALSO survive as a duplicate 'Additional requirement' catch-all clause  ->  []
+PASS  Prompt B/THE CORRECTION: co-managed replaces the operating-model concept in place -- one managed-service-boundary clause, not a competing second one  ->  statement=Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Prompt B/THE CORRECTION: 24/7 incident support is kept on the SAME managed-service clause, not dropped by the correction  ->  statement=Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Prompt B/THE CORRECTION: exactly one managed-service-boundary clause exists -- no competing second clause left behind  ->  count=1
+PASS  Prompt B/THE CORRECTION: the change ribbon describes the real semantic change to the managed-service clause (added, since Prompt A stated no prior operating model) -- never fabricated, never a phantom removal  ->  {"added":["OPS-a2e5cbe3"],"updated":[],"removed":[]}
+PASS  Prompt B: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=7 clauses.length=7
+PASS  Prompt B: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=2 evaluation.gates.length=2
+PASS  Prompt B: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=15 responseGroups total=15
+PASS  Prompt B: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=0 openDecisions.length=0
+PASS  Prompt B: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt B: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt B: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+  Prompt B changeSet: {"added":["OPS-a2e5cbe3"],"updated":[],"removed":[]}
+PASS  Prompt C/THE CORRECTION: the brief's own exact Section 12.3 sentence ('All customer data must remain in the UK.') is recognised as the named UK data-residency template  ->  found=true
+PASS  Prompt C: the exact buyer sentence is retained verbatim as the clause's own quote (provenance)  ->  quote=All customer data must remain in the UK.
+PASS  Prompt C: a testable residency clause carries a real, correct evidence request  ->  ["Data-flow diagram","Sub-processor list and locations"]
+PASS  Prompt C: the residency clause is attributed to the buyer, not fabricated as a netify/sector default  ->  origin=buyer
+PASS  Prompt C: 'must remain in the UK' is recognised as mandatory language  ->  mandatory=true
+PASS  Prompt C: no generic 'confirm your ability' Additional-requirement fallback was created for this sentence (it has its own named clause)  ->  []
+PASS  Prompt C: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=8 clauses.length=8
+PASS  Prompt C: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=3 evaluation.gates.length=3
+PASS  Prompt C: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=17 responseGroups total=17
+PASS  Prompt C: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Prompt C: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt C: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt C: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Part A2 (rich wording): voice-continuity clause is generated  ->  
+PASS  Part A2 (rich wording): application-resilience clause is generated  ->  
+PASS  Part A2 (rich wording): identity-aware-ztna clause is generated  ->  
+PASS  Part A2 (rich wording): dlp-coverage clause is generated  ->  
+PASS  Part A2 (rich wording): managed-service-boundary clause is generated  ->  
+PASS  Part A2 (rich wording): dated-transition-plan clause is generated  ->  
+PASS  Part A2 (rich wording): uk-data-residency clause is generated  ->  
+PASS  Part A2 (rich wording): legacy-circuit-coexistence clause is generated  ->  
+PASS  Part A2: at least one clause carries buyer (green-dot) provenance  ->  ["buyer"]
+PASS  Part A2: clauses span at least 3 different sections (exercises the clause list's section grouping)  ->  ["network","security","identity","application","operations","project"]
+PASS  Part A2 (rich wording): counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=8 clauses.length=8
+PASS  Part A2 (rich wording): counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=8 evaluation.gates.length=8
+PASS  Part A2 (rich wording): counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=19 responseGroups total=19
+PASS  Part A2 (rich wording): counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Part A2 (rich wording): Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Part A2 (rich wording): every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Part A2 (rich wording): every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Prompt D/THE CORRECTION: a visible conflict/open decision describing the single-supplier-vs-best-of-breed-security tension is created  ->  found=true
+PASS  Prompt D: the decision is flagged as a genuine conflict  ->  conflict=true
+PASS  Prompt D: the original buyer wording is retained visibly and verbatim in the decision's own conflictReason  ->  conflictReason=We want a single supplier but also require independent best-of-breed security controls.
+PASS  Prompt D: the decision is included in the document's own conflict-flagged decisions  ->  
+PASS  Prompt D/THE CORRECTION: no invented mandatory 'unclassified' clause -- neither side of the conflict is made mandatory before the buyer decides  ->  []
+PASS  Prompt D/THE CORRECTION: no pass/fail gate is invented from the unresolved contradiction  ->  []
+PASS  Prompt D/THE CORRECTION: an unrelated deadline open decision (legitimately also present, since Prompt D alone states no deadline) never SUBSTITUTES for the conflict decision -- both can coexist, but the conflict decision itself is always present  ->  supplierStrategyDecision=true deadlineDecisionAlsoPresent=true
+PASS  Prompt D: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=0 clauses.length=0
+PASS  Prompt D: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=0 evaluation.gates.length=0
+PASS  Prompt D: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=0 responseGroups total=0
+PASS  Prompt D: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=2 openDecisions.length=2
+PASS  Prompt D: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt D: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt D: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Prompt D/THE CORRECTION: Prompt D in a separate new project produces V1 (a fresh project never inherits a prior project's revision count)  ->  version=1
+PASS  Part C/known-vector: templateKey "network:legacy-circuit-coexistence" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=NET-80af8f52 expectedSuffix=80af8f52
+PASS  Part C/known-vector: templateKey "security:dlp" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=SEC-693021ca expectedSuffix=693021ca
+PASS  Part C/known-vector: templateKey "identity:entra-ztna" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=ID-3331f8dc expectedSuffix=3331f8dc
+PASS  Part C/known-vector: templateKey "identity:entra-provider" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=ID-69d3a001 expectedSuffix=69d3a001
+PASS  Part C/known-vector: templateKey "security:data-residency" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=SEC-e83fb756 expectedSuffix=e83fb756
+PASS  Part C/known-vector: templateKey "operating-model:boundary" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=OPS-a2e5cbe3 expectedSuffix=a2e5cbe3
+PASS  Part C/known-vector: templateKey "timeline:plan" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=PRJ-5477afed expectedSuffix=5477afed
+PASS  Part C/known-vector: templateKey "resilience:voice-continuity" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-50d06527 expectedSuffix=50d06527
+PASS  Part C/known-vector: templateKey "resilience:application" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-755c9e7f expectedSuffix=755c9e7f
+PASS  Part C/known-vector: templateKey "application:voice-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-9b7bec5f expectedSuffix=9b7bec5f
+PASS  Part C/known-vector: templateKey "network:architecture-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=NET-4f3aa85d expectedSuffix=4f3aa85d
+PASS  Part C/known-vector: a genuine reload (previousDocument=null) reproduces the IDENTICAL clause id for the identical templateKey  ->  before=SEC-693021ca after=SEC-693021ca
+PASS  Part B: ProjectDesk.tsx imports the real compiler module  ->  
+PASS  Part B: ProjectDesk.tsx calls the real compileProcurementDocument()  ->  
+PASS  Part B: the compiler call is fed the desk's own live state variables (facts/requirement/verdict/noted/rfiSet/instrument/receipts/sourceTurns), not fabricated inputs  ->  
+PASS  Part B/THE CORRECTION: the compiler call is fed the explicit governed-revision contract (revision: currentRevision), not left undefined in legacy fallback mode  ->  
+PASS  Part B/THE CORRECTION: ProjectDesk.tsx imports and uses the real resolveGovernedRevision() reducer, not a hand-rolled version counter  ->  
+PASS  Part B/THE CORRECTION: a settle-debounce window batches every applyMerge()/applyRemovals() call inside one buyer submission into exactly one governed event  ->  
+PASS  Part B/THE CORRECTION: applyMerge() opens/extends the submission window before mutating facts  ->  
+PASS  Part B/THE CORRECTION: applyRemovals() also opens/extends the SAME submission window (a removal is a buyer submission too)  ->  
+PASS  Part B/THE CORRECTION: previousProcurementDocumentRef is frozen until a NAMED revision cycle actually lands -- the change ribbon compares complete buyer-event snapshots, not intermediate settling renders  ->  
+PASS  Part B: ProjectDesk.tsx actually renders <LivingProcurementCanvas  ->  
+PASS  Part B: the new canvas is gated on phase==="live" && started, the same gate the existing editable statement panel uses  ->  
+PASS  Part B: the Phase 2 locked-outcome panel's own header comment is still present, byte-identical marker  ->  
+PASS  Part B: the new canvas's own JSX appears strictly before the phase==="fits" locked panel in source order (not nested inside it, not after it)  ->  canvasIdx=174543 fitsIdx=191450
+PASS  Part B: the new component files never reference 'rankedFits' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference '.suppliers' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Part B: no hard-coded mockup/example content ('Aryaka') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('BT Business') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Verizon') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('20 sites, 200 remote users') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Cato Networks') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Palo Alto') in the new components  ->  
+PASS  Part B: LivingProcurementCanvas is its own focused component  ->  
+PASS  Part B: ProcurementArchitecture is its own focused component  ->  
+PASS  Part B: ProcurementClauseList is its own focused component  ->  
+PASS  Part B: SupplierPackView is its own focused component  ->  
+PASS  Part B: EvaluationView is its own focused component  ->  
+PASS  Part B: ProcurementClauseList keys clause rows on the compiler's own stable clause.id  ->  
+PASS  Part B: response groups / evaluation categories key on the compiler's own stable group/category key  ->  
+PASS  Part B: supplier questions key on the compiler's own stable question id  ->  
+PASS  Part B: gates key on the compiler's own stable gate id  ->  
+PASS  Part B: architecture nodes key on the compiler's own stable node id  ->  
+PASS  Part B: open decisions key on the compiler's own stable decision id  ->  
+PASS  Part B: LivingProcurementCanvas.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: ProcurementArchitecture.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: ProcurementClauseList.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: SupplierPackView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: EvaluationView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: the Living document / Supplier pack / Evaluation switch uses real tab semantics (role, aria-selected)  ->  
+PASS  Part B: the architecture's accessible text summary is always rendered (not display:none / JS-conditional)  ->  
+PASS  Part B: the shared change-pulse class has a prefers-reduced-motion static fallback (Section 5.6)  ->  
+PASS  Part B: the change pulse is a real, short (350ms, within the 250-400ms band) CSS animation  ->  350ms confirmed
+PASS  Part B: the existing slot-by-slot Living Statement panel's own header comment is untouched  ->  
+PASS  Part B: the existing TWIN_GROUPS slot-editing render loop is untouched  ->  
+PASS  Part B: the existing drop/clear fact controls are untouched  ->  
+PASS  Part B: the new canvas mounts inside the SAME responsive max-width wrapper the rest of the page uses (no new fixed-width container)  ->  
+PASS  Part B: the canvas cover/tabs layout wraps on narrow viewports  ->  
+PASS  Part B: the view-switch tabs scroll horizontally rather than overflow on narrow viewports  ->  
+
+ALL PASS

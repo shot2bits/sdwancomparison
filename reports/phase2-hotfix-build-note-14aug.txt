@@ -1,0 +1,4 @@
+Build already verified successful in this session (npx next build --webpack,
+sandbox-only next/font/google workaround applied and immediately reverted
+with confirmed zero git diff on layout.tsx). Full route list rendered
+without errors, including /rfp-builder/[id] and /api/rfp/match.

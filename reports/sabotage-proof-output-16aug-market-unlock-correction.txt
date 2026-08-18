@@ -1,0 +1,37 @@
+=== Part A: GET /api/rfp/match never returns project-specific vendor data ===
+
+Part A: 44/44 passed so far.
+
+=== Part B: RfpBuilder.tsx structural source proof (Project Overview -> Review and edit route) ===
+
+Part B: 69/69 passed cumulative.
+
+=== Part B9 (market-unlock correction round): the canonical market-unlock predicate replaces hasPublished() at every disclosure gate ===
+
+Part B: 87/90 passed cumulative.
+
+=== Part C: production-path proof, connect + share-token reads, owner/anonymous/share-token, pre/post publish ===
+
+Part C: 101/110 passed cumulative.
+
+=== Part D: real board listing + MarketUnlock commit correctly unlock every governed route; failure modes leave it genuinely locked ===
+
+Part D: 132/147 passed cumulative.
+
+
+15 FAILURE(S)  (132/147)
+FAIL  [B9] the connect route's POST handler refuses to persist a connection unless the canonical market-unlock predicate is true
+FAIL  [B9] ownership is authenticated BEFORE the market-unlock check (Robert's ordering ruling: an unauthorised caller must not distinguish lifecycle state via 404/409)
+FAIL  [B9] the share-token project read refuses to serve supplierView() unless the canonical market-unlock predicate is true
+FAIL  [C2/share-token] the exact mismatch Robert flagged: hasPublished() true, market never unlocked -- share-token read is now correctly refused (404), got 200
+FAIL  [C2/share-token] refused with the SAME "not found" wording a nonexistent id gets -- no distinguishable "not unlocked yet" oracle
+FAIL  [C2/owner] inviting a named vendor is STILL refused (409) despite hasPublished() reading true -- got 200
+FAIL  [C2/owner] the refusal names the canonical reason ("market_locked") -- the SAME code [C1/owner] got from a plain draft, since both states share the one thing that actually matters: no MarketUnlock record exists
+FAIL  [C2/owner] the refusal carries no SupplierConnection shape -- nothing was constructed to return
+FAIL  [C2/owner] independently listing connections after the refused invite shows zero persisted -- the status flip alone invited nobody, found 1
+FAIL  [D1/share-token] the intended reveal genuinely happens once the market is unlocked, got 404
+FAIL  [D1/share-token] carries the real supplier projection with real rfp_sections
+FAIL  [D1/owner] inviting a named vendor now succeeds once the market has genuinely unlocked, got 409
+FAIL  [D1/owner] returns a real, named SupplierConnection
+FAIL  [D1/owner] the invitation is genuinely persisted and independently readable back
+FAIL  [D2/share-token] the supplier-facing reveal still happens for an unlisted listing -- "matched suppliers only" is a public-board-visibility choice, not a lesser unlock

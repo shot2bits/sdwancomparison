@@ -1,0 +1,199 @@
+PASS  Prompt A: first compile is version 1  ->  version=1
+PASS  Prompt A: the document compiles immediately (a real document, not an empty shell)  ->  clauses=6
+PASS  Prompt A: the architecture is non-empty from the first compile  ->  nodes=8
+PASS  Prompt A: readiness score is a valid percentage  ->  score=70
+PASS  Prompt A: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=6 clauses.length=6
+PASS  Prompt A: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=1 evaluation.gates.length=1
+PASS  Prompt A: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=12 responseGroups total=12
+PASS  Prompt A: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Prompt A: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt A: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt A: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+  Prompt A fixture: title="Healthcare & pharma procurement (20 sites)" summary="Healthcare & pharma, UK, 20 sites, 200 remote users, azure, retained private Ethernet circuit. 6 testable requirements compiled from the buyer's own words." clauses=["network-architecture-scope","legacy-circuit-coexistence","sector-pack-suggestion","identity-provider-entra","voice-scope","dated-transition-plan"] counts={"requirements":6,"questions":12,"gates":1,"decisions":1}
+PASS  Prompt B: the document version increments exactly once  ->  before=1 after=2
+PASS  Prompt B: evaluation total stays exactly 100 after a removal  ->  total=100
+PASS  Prompt B: the April 2027 deadline is kept, not dropped by the correction  ->  value=by april 2027
+PASS  Prompt B/THE CORRECTION: 'remove DLP' with no prior DLP requirement is an idempotent no-op -- DLP does not exist afterwards  ->  dlp present=false
+PASS  Prompt B/THE CORRECTION: no gate or supplier question was ever created from the negated DLP phrase  ->  gates=[] questions=[]
+PASS  Prompt B/THE CORRECTION: the removal sentence does not ALSO survive as a duplicate 'Additional requirement' catch-all clause  ->  []
+PASS  Prompt B/THE CORRECTION: co-managed replaces the operating-model concept in place -- one managed-service-boundary clause, not a competing second one  ->  statement=Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Prompt B/THE CORRECTION: 24/7 incident support is kept on the SAME managed-service clause, not dropped by the correction  ->  statement=Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  Prompt B/THE CORRECTION: exactly one managed-service-boundary clause exists -- no competing second clause left behind  ->  count=1
+PASS  Prompt B/THE CORRECTION: the change ribbon describes the real semantic change to the managed-service clause (added, since Prompt A stated no prior operating model) -- never fabricated, never a phantom removal  ->  {"added":["OPS-a2e5cbe3"],"updated":["NET-4f3aa85d"],"removed":[]}
+PASS  Prompt B: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=7 clauses.length=7
+PASS  Prompt B: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=2 evaluation.gates.length=2
+PASS  Prompt B: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=15 responseGroups total=15
+PASS  Prompt B: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=0 openDecisions.length=0
+PASS  Prompt B: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt B: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt B: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+  Prompt B changeSet: {"added":["OPS-a2e5cbe3"],"updated":["NET-4f3aa85d"],"removed":[]}
+PASS  Prompt C/THE CORRECTION: the brief's own exact Section 12.3 sentence ('All customer data must remain in the UK.') is recognised as the named UK data-residency template  ->  found=true
+PASS  Prompt C: the exact buyer sentence is retained verbatim as the clause's own quote (provenance)  ->  quote=All customer data must remain in the UK.
+PASS  Prompt C: a testable residency clause carries a real, correct evidence request  ->  ["Data-flow diagram","Sub-processor list and locations"]
+PASS  Prompt C: the residency clause is attributed to the buyer, not fabricated as a netify/sector default  ->  origin=buyer
+PASS  Prompt C: 'must remain in the UK' is recognised as mandatory language  ->  mandatory=true
+PASS  Prompt C: no generic 'confirm your ability' Additional-requirement fallback was created for this sentence (it has its own named clause)  ->  []
+PASS  Prompt C: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=8 clauses.length=8
+PASS  Prompt C: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=3 evaluation.gates.length=3
+PASS  Prompt C: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=17 responseGroups total=17
+PASS  Prompt C: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Prompt C: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt C: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt C: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Part A2 (rich wording): voice-continuity clause is generated  ->  
+PASS  Part A2 (rich wording): application-resilience clause is generated  ->  
+PASS  Part A2 (rich wording): identity-aware-ztna clause is generated  ->  
+PASS  Part A2 (rich wording): dlp-coverage clause is generated  ->  
+PASS  Part A2 (rich wording): managed-service-boundary clause is generated  ->  
+PASS  Part A2 (rich wording): dated-transition-plan clause is generated  ->  
+PASS  Part A2 (rich wording): uk-data-residency clause is generated  ->  
+PASS  Part A2 (rich wording): legacy-circuit-coexistence clause is generated  ->  
+PASS  Part A2: at least one clause carries buyer (green-dot) provenance  ->  ["buyer"]
+PASS  Part A2: clauses span at least 3 different sections (exercises the clause list's section grouping)  ->  ["network","security","identity","application","operations","project"]
+PASS  Part A2 (rich wording): counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=8 clauses.length=8
+PASS  Part A2 (rich wording): counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=8 evaluation.gates.length=8
+PASS  Part A2 (rich wording): counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=19 responseGroups total=19
+PASS  Part A2 (rich wording): counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=1 openDecisions.length=1
+PASS  Part A2 (rich wording): Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Part A2 (rich wording): every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Part A2 (rich wording): every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Prompt D/THE CORRECTION: a visible conflict/open decision describing the single-supplier-vs-best-of-breed-security tension is created  ->  found=true
+PASS  Prompt D: the decision is flagged as a genuine conflict  ->  conflict=true
+PASS  Prompt D: the original buyer wording is retained visibly and verbatim in the decision's own conflictReason  ->  conflictReason=We want a single supplier but also require independent best-of-breed security controls.
+PASS  Prompt D: the decision is included in the document's own conflict-flagged decisions  ->  
+PASS  Prompt D/THE CORRECTION: no invented mandatory 'unclassified' clause -- neither side of the conflict is made mandatory before the buyer decides  ->  []
+PASS  Prompt D/THE CORRECTION: no pass/fail gate is invented from the unresolved contradiction  ->  []
+PASS  Prompt D/THE CORRECTION: an unrelated deadline open decision (legitimately also present, since Prompt D alone states no deadline) never SUBSTITUTES for the conflict decision -- both can coexist, but the conflict decision itself is always present  ->  supplierStrategyDecision=true deadlineDecisionAlsoPresent=true
+PASS  Prompt D: counts.requirements agrees with the Living document's own clause count  ->  counts.requirements=0 clauses.length=0
+PASS  Prompt D: counts.gates agrees with the Evaluation view's own gate count  ->  counts.gates=0 evaluation.gates.length=0
+PASS  Prompt D: counts.questions agrees with the Supplier pack's own question total  ->  counts.questions=0 responseGroups total=0
+PASS  Prompt D: counts.decisions agrees with the Living document's own open-decisions count  ->  counts.decisions=2 openDecisions.length=2
+PASS  Prompt D: Evaluation category weights sum to exactly 100  ->  total=100
+PASS  Prompt D: every mandatory clause has a matching pass/fail gate (Living document and Evaluation stay in lock-step)  ->  missing=[]
+PASS  Prompt D: every gate references a clause id that genuinely exists in this compile  ->  orphaned=[]
+PASS  Prompt D/THE CORRECTION: Prompt D in a separate new project produces V1 (a fresh project never inherits a prior project's revision count)  ->  version=1
+PASS  Part C/known-vector: templateKey "network:legacy-circuit-coexistence" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=NET-80af8f52 expectedSuffix=80af8f52
+PASS  Part C/known-vector: templateKey "security:dlp" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=SEC-693021ca expectedSuffix=693021ca
+PASS  Part C/known-vector: templateKey "identity:entra-ztna" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=ID-3331f8dc expectedSuffix=3331f8dc
+PASS  Part C/known-vector: templateKey "identity:entra-provider" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=ID-69d3a001 expectedSuffix=69d3a001
+PASS  Part C/known-vector: templateKey "security:data-residency" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=SEC-e83fb756 expectedSuffix=e83fb756
+PASS  Part C/known-vector: templateKey "operating-model:boundary" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=OPS-a2e5cbe3 expectedSuffix=a2e5cbe3
+PASS  Part C/known-vector: templateKey "timeline:plan" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=PRJ-5477afed expectedSuffix=5477afed
+PASS  Part C/known-vector: templateKey "resilience:voice-continuity" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-50d06527 expectedSuffix=50d06527
+PASS  Part C/known-vector: templateKey "resilience:application" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-755c9e7f expectedSuffix=755c9e7f
+PASS  Part C/known-vector: templateKey "application:voice-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=APP-9b7bec5f expectedSuffix=9b7bec5f
+PASS  Part C/known-vector: templateKey "network:architecture-scope" hashes to the EXACT pre-Stage-A SHA-256-derived id (independently computed via node:crypto)  ->  id=NET-4f3aa85d expectedSuffix=4f3aa85d
+PASS  Part C/known-vector: a genuine reload (previousDocument=null) reproduces the IDENTICAL clause id for the identical templateKey  ->  before=SEC-693021ca after=SEC-693021ca
+PASS  Part B: ProjectDesk.tsx imports the real compiler module  ->  
+PASS  Part B: ProjectDesk.tsx calls the real compileProcurementDocument()  ->  
+PASS  Part B: the compiler call is fed the desk's own live state variables (facts/requirement/verdict/noted/rfiSet/instrument/receipts/sourceTurns), not fabricated inputs  ->  
+PASS  Part B/THE CORRECTION: the compiler call is fed the explicit governed-revision contract (revision: currentRevision), not left undefined in legacy fallback mode  ->  
+PASS  Part B/THE CORRECTION: ProjectDesk.tsx imports and uses the real resolveGovernedRevision() reducer, not a hand-rolled version counter  ->  
+PASS  Part B/THE CORRECTION: a settle-debounce window batches every applyMerge()/applyRemovals() call inside one buyer submission into exactly one governed event  ->  
+PASS  Part B/THE CORRECTION: applyMerge() opens/extends the submission window before mutating facts  ->  
+PASS  Part B/THE CORRECTION: applyRemovals() also opens/extends the SAME submission window (a removal is a buyer submission too)  ->  
+PASS  Part B/THE CORRECTION: previousProcurementDocumentRef is frozen until a NAMED revision cycle actually lands -- the change ribbon compares complete buyer-event snapshots, not intermediate settling renders  ->  
+PASS  Part B: ProjectDesk.tsx actually renders <LivingProcurementCanvas  ->  
+PASS  Part B: the new canvas is gated on phase==="live" && started, the same gate the existing editable statement panel uses  ->  
+PASS  Part B: the Phase 2 locked-outcome panel's own header comment is still present, byte-identical marker  ->  
+PASS  Part B: the new canvas's own JSX appears strictly before the phase==="fits" locked panel in source order (not nested inside it, not after it)  ->  canvasIdx=200617 fitsIdx=217677
+PASS  Part B: the new component files never reference 'rankedFits' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference '.suppliers' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Part B: the new component files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Part B: no hard-coded mockup/example content ('Aryaka') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('BT Business') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Verizon') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('20 sites, 200 remote users') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Cato Networks') in the new components  ->  
+PASS  Part B: no hard-coded mockup/example content ('Palo Alto') in the new components  ->  
+PASS  Part B: LivingProcurementCanvas is its own focused component  ->  
+PASS  Part B: ProcurementArchitecture is its own focused component  ->  
+PASS  Part B: ProcurementClauseList is its own focused component  ->  
+PASS  Part B: SupplierPackView is its own focused component  ->  
+PASS  Part B: EvaluationView is its own focused component  ->  
+PASS  Part B: ProcurementClauseList keys clause rows on the compiler's own stable clause.id  ->  
+PASS  Part B: response groups / evaluation categories key on the compiler's own stable group/category key  ->  
+PASS  Part B: supplier questions key on the compiler's own stable question id  ->  
+PASS  Part B: gates key on the compiler's own stable gate id  ->  
+PASS  Part B: architecture nodes key on the compiler's own stable node id  ->  
+PASS  Part B: open decisions key on the compiler's own stable decision id  ->  
+PASS  Part B: LivingProcurementCanvas.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: ProcurementArchitecture.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: ProcurementClauseList.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: SupplierPackView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: EvaluationView.tsx holds no local state of its own (pure presentational read of the compiled document)  ->  
+PASS  Part B: the Living document / Supplier pack / Evaluation switch uses real tab semantics (role, aria-selected)  ->  
+PASS  Part B: the architecture's accessible text summary is always rendered (not display:none / JS-conditional)  ->  
+PASS  Part B: the shared change-pulse class has a prefers-reduced-motion static fallback (Section 5.6)  ->  
+PASS  Part B: the change pulse is a real, short (350ms, within the 250-400ms band) CSS animation  ->  350ms confirmed
+PASS  Part B: the existing slot-by-slot Living Statement panel's own header comment is untouched  ->  
+PASS  Part B: the existing TWIN_GROUPS slot-editing render loop is untouched  ->  
+PASS  Part B: the existing drop/clear fact controls are untouched  ->  
+PASS  Part B: the new canvas mounts inside the SAME responsive max-width wrapper the rest of the page uses (no new fixed-width container)  ->  
+PASS  Part B: the canvas cover/tabs layout wraps on narrow viewports  ->  
+PASS  Part B: the view-switch tabs scroll horizontally rather than overflow on narrow viewports  ->  
+PASS  Fixture A: the manufacturing sector pack activates from the buyer's own words  ->  pack=manufacturing
+PASS  Fixture A: the top-3 next decisions are exactly Operating model / SASE shape / Site resilience, per the blueprint's own required set  ->  top3=["OD-operating-model-unstated","q-sase-shape","q-resilience"]
+PASS  Fixture A: material-decision count matches the blueprint's own target message ('Four material decisions remain')  ->  count=4
+PASS  Fixture A: readiness reads 'Scope forming', not the old overstated 'Substantially ready'  ->  label=Scope forming score=50
+PASS  Fixture A: the section outline shows a 'Manufacturing and OT' row, state Netify suggested  ->  row={"key":"sector_intelligence","title":"Manufacturing and OT","state":"netify_suggested","detail":"2 sector suggestions to review"}
+PASS  Fixture M/defect 6: both manufacturing suggestions (OT/ICS visibility, IEC 62443 segmentation) are present as real NextQuestion candidates at Prompt A  ->  seg=true otVis=true
+PASS  Fixture M/defect 6: both are marked governedSuggestion -- the renderer labels them distinctly, never as a buyer-stated open decision  ->  seg=true otVis=true
+PASS  Fixture M/defect 6: the IEC 62443 segmentation suggestion carries a real, non-empty reason on the SAME NextQuestion object the UI card renders (not dropped between packs.ts and the projection)  ->  reason=manufacturing sites typically separate production networks from corporate IT (IEC 62443 zones and conduits) to limit blast radius from a compromise -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.
+PASS  Fixture M/defect 6: the segmentation suggestion's own reason explicitly states that the manufacturing sector alone does not confirm an OT/ICS environment exists  ->  reason=manufacturing sites typically separate production networks from corporate IT (IEC 62443 zones and conduits) to limit blast radius from a compromise -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.
+PASS  Fixture M/defect 6: the OT/ICS visibility suggestion's own reason carries the SAME disclaimer  ->  reason=manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate.
+PASS  Fixture M/defect 6: naming SCADA/PLC directly earns the ot_named flavour's own OT-aware monitoring/MDR suggestion  ->  found=true
+PASS  Fixture M/defect 6: the evidence-based ot_named suggestion carries its OWN reason (the buyer's own words already named the systems), correctly WITHOUT the sector-alone disclaimer  ->  reason=the buyer's own words name OT/ICS systems directly, and generic IT monitoring commonly misses PLC/SCADA-specific threats
+PASS  Fixture M/defect 6: LivingProcurementCanvas.tsx actually reads nq.reason when rendering a NextQuestion card (the reason is not dropped between the projection and the render)  ->  
+PASS  Fixture M/defect 6: the governed-suggestion badge explicitly says 'optional', not just 'Netify suggests'  ->  
+PASS  Fixture A: no irrelevant sector row is shown when no pack is active (this branch: pack IS active, so presence is correct here; absence is proven by Fixture A's own construction when packA is null)  ->  
+PASS  Fixture B: the resilience answer produces exactly one new governed version  ->  version=2
+PASS  Fixture K1/defect 2: Prompt B's dual-circuit answer compiles into a canonical site-resilience-scope clause, not just a generic Additional requirement  ->  statement=Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.
+PASS  Fixture K1/defect 2: the site-resilience-scope clause is mandatory (a stated per-site resilience decision is a testable gate)  ->  mandatory=true
+PASS  Fixture K1/defect 2: the outline's Resilience and availability row reads Confirmed once the real governed clause exists (real clause, not card-disappearance, drives the row)  ->  detail=Per-site resilience requirement stated and compiled into the document.
+PASS  Fixture K1/defect 2: with the SAME materially-applicable requirement but no site-resilience-scope clause present, the row correctly reads Needs decision (proves the row cannot be satisfied by absence of a question alone)  ->  detail=Dual-circuit resilience per site not yet decided.
+PASS  Fixture C: the SASE-shape answer produces exactly one new governed version  ->  version=3
+PASS  Fixture C: Entra ID identity integration compiles into its own clause from the buyer's own words  ->  found=true
+PASS  Fixture K2/defect 1 setup: the canonical buying scope is SASE going into Prompt C (sanity check on the fixture sequence itself)  ->  buyingBeforeC=sase
+PASS  Fixture K2/defect 1: the canonical buying scope (procurement.buying) remains SASE after Prompt C -- 'SOC services' does not destructively rescope the project  ->  buyingAfterC=sase
+PASS  Fixture K2/defect 1: the section outline's Solution scope row still reads 'Buying: SASE.' after Prompt C  ->  detail=Buying: SASE.
+PASS  Fixture K2/defect 1: the architecture/network-architecture-scope clause still represents the proposed SASE service after Prompt C  ->  found=true statement=Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): "UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users."
+PASS  Fixture K2/defect 1: Entra ID remains a separate identity requirement (its own clause, not folded into or lost by the buying-scope handling)  ->  found=true
+PASS  Fixture K2/defect 1: third-party SOC services are retained as their own additive consideration clause, without corrupting the SASE buying scope  ->  found=true statement=A third-party security operations/MDR-style service is under consideration alongside the core scope.
+PASS  Fixture K2/defect 1: the third-party SOC consideration is advisory (not mandatory) -- a hedged 'will consider' never becomes a hard requirement  ->  mandatory=false
+PASS  Fixture D: the UK data-residency constraint compiles into its own clause with the buyer's exact wording retained verbatim  ->  quote=Customer data must remain in the UK, including backups and support access.
+  Fixture L/defect 5 readiness progression: A=22(Starting shape) sections=2/10 decisions=4 -> B=25(Starting shape) sections=3/10 decisions=4 -> C=28(Starting shape) sections=3/10 decisions=3 -> D=25(Starting shape) sections=3/10 decisions=4
+PASS  Fixture L/defect 5: the section-aware readiness at Prompt A carries explainable reasons, not a bare number  ->  ["2 of 10 procurement sections confirmed.","Operating model not yet stated.","Delivery timeline not yet stated.","Budget position not yet stated.","Every mandatory clause carries an acceptance test.","4 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.","Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."]
+PASS  Fixture L/defect 5: the exact A->B->C->D score progression (22 -> 25 -> 28 -> 25) matches empirical reproduction against the real production functions AND the real, rendered live UI (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png reads 25 after B/C/D, confirmed by pixel crop) -- a pinned regression value, not just a directional check  ->  A=22 B=25 C=28 D=25
+PASS  Fixture L/defect 5: at Prompt A, section coverage is genuinely partial (not every section already reads confirmed) -- the score has real headroom to move  ->  confirmed=2/10
+PASS  Fixture L/defect 5: resolving Site resilience (Prompt B's dual-circuit answer, defect 2's own site-resilience-scope clause) increases BOTH section coverage and the readiness score -- an explainable, section-driven change, not a relabelled band  ->  sectionsConfirmed A=2 B=3; score A=22 B=25
+PASS  Fixture L/defect 5: Prompt C's own wording resolves the SASE-shape decision (a real, strict-phrase objective match, not silent freeform inference) -- an explainable INCREASE in the score, honestly attributed to the buyer's own words  ->  materialDecisionsRemaining B=4 C=3; score B=25 C=28
+PASS  Fixture L/defect 5: Prompt D's UK-residency constraint opens a NEW material decision (legal-basis-for-residency) -- an explainable DECREASE in the score, tied to a real, named open decision, not noise  ->  materialDecisionsRemaining C=3 D=4; score C=28 D=25
+PASS  Fixture L2/defect 5: resolving SASE shape via a genuine structured answer (notedIds includes obj-unified) at the Prompt-B state produces a score at least as high as the unresolved state -- an explainable, decision-driven change (the SAME resolution mechanism Fixture G proves below with a clicked option, and the SAME one Prompt C's own wording exercises live, above)  ->  unresolved=25 resolved=28 materialDecisionsRemaining unresolved=4 resolved=3
+PASS  Fixture L2/defect 5: resolving SASE shape strictly reduces material-decisions-remaining (the decision the buyer just answered is no longer counted as open)  ->  unresolved=4 resolved=3
+PASS  Fixture L3/defect 5: resolving the operating model (opModelOverride: managed) at the Prompt-C state produces a score at least as high as the unresolved state  ->  unresolved=28 resolved=42
+PASS  Fixture E setup: answerNextQuestion's own function body was found in ProjectDesk.tsx (regex still matches the current source)  ->  found=true
+PASS  Fixture E: answering a NextQuestion (any branch: items/note/dismiss/path) never calls keepSourceTurn() -- question selection is UI context, not a source turn  ->  bodyLength=3119
+PASS  Fixture E: answerNextQuestion does land through the desk's own governed state machinery (not a no-op stub)  ->  
+PASS  Fixture F: a note-only answer (no WorkspaceFact touched) still resolves to exactly one applied governed revision, with an honestly empty changedFactIds  ->  applied=true cycle=1 changedFactIds=[]
+PASS  Fixture F: the compiler itself advances document.version by exactly one for that same note-only revision, end to end  ->  before=1 after=2
+PASS  Fixture G/neutral setup: the comparison text matches no strict stated-objective phrase at all (a fair test of the general principle, not a coincidence)  ->  matches=[]
+PASS  Fixture G/neutral: genuinely unrelated freeform prose, on its own, does NOT resolve q-sase-shape -- only a structured answer (a click, or the buyer's own strict-phrase wording) may  ->  remaining=["OD-operating-model-unstated","q-sase-shape","q-resilience","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture G/structured: once the buyer's SASE-shape choice lands as a genuine structured answer (notedIds includes obj-unified), q-sase-shape no longer appears in the ranked list  ->  remaining=["OD-operating-model-unstated","q-resilience","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture G/structured: a new question is promoted into the top-3 in its place (the list never shrinks to fewer than 3 while unresolved decisions remain)  ->  top3=["OD-operating-model-unstated","q-resilience","q-sse-scope"]
+PASS  Fixture G/real: Prompt C's own exact wording, through the REAL statedObjectivesIn() extraction (not a manual notedIds injection), produces the SAME obj-unified id the structured-answer case above uses  ->  objectivesFromC=["obj-unified"]
+PASS  Fixture G/real: with the REAL Prompt C fold applied, q-sase-shape no longer appears in the ranked list -- matching the live UI, whose 'Best next decisions' cards never show it after Prompt C (reports/screenshots/mfg-02-desktop-after-fixturesBCD.png)  ->  remaining=["OD-operating-model-unstated","q-resilience","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'rankedFits' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matchInfo.count' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference '.suppliers' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'invited_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Fixture H: the new NextQuestion/outline projection files never reference 'matched_vendors' (no vendor-identity leakage surface)  ->  
+PASS  Fixture I: a reload (previousDocument=null) reproduces the identical ranked NextQuestion list and provenance for the identical facts  ->  before=["OD-operating-model-unstated","q-sase-shape","q-resilience","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"] after=["OD-operating-model-unstated","q-sase-shape","q-resilience","q-sse-scope","sector:mf-ot-visibility","sector:mf-segmentation","OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  Fixture J: the NextQuestion cards stack to one column under the sm breakpoint (390px-safe) and only become 3 columns at sm and above  ->  
+PASS  Fixture J: the section outline's title column is full-width on mobile (no fixed 190px column below the sm breakpoint)  ->  
+PASS  Fixture J: no new UNCONDITIONAL (non-responsive) fixed pixel width at or above 100px that would overflow a 390px viewport  ->  matches=[]
+
+ALL PASS

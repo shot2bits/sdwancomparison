@@ -1,0 +1,20 @@
+{
+  "item1_twin-res-all_section": "additional",
+  "item1_twin-change-cab_section": "additional",
+  "item1_twin-support-uk_section": "additional",
+  "item1_twin-services-mig_section": "additional",
+  "item1_sc-availability_section": "additional",
+  "item1_twin-suppliers-ref_section": "additional",
+  "item1_critical_byteIdentical": true,
+  "item1_critical_statementWithout": "Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.",
+  "item1_critical_statementWith": "Managed-service boundary, SLA, escalation and RACI for a fully managed service, with an agreed support model.",
+  "item1_noModel_notedClausePresent": true,
+  "item1_noModel_notedSection": "additional",
+  "item2_dont_need": true,
+  "item2_not_required": true,
+  "item2_remove": true,
+  "item2_but_not": true,
+  "item3_do_not_remove": null,
+  "item3_without": null,
+  "item3_no_longer_then_required": null
+}

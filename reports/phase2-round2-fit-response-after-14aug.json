@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "mode": "graded",
+  "total": 30,
+  "methodology": "Netify vendor dataset, live",
+  "checks": [
+    {
+      "id": "buying:sase",
+      "label": "Full SASE platform"
+    }
+  ]
+}

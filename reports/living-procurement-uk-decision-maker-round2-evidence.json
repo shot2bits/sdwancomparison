@@ -1,0 +1,811 @@
+{
+  "A": {
+    "label": "A",
+    "documentVersion": 1,
+    "resilienceClauseResolved": false,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+        "reason": "The buyer stated the network/security architecture scope."
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "rankedNextQuestions": [
+      {
+        "id": "OD-operating-model-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "operating-model"
+      },
+      {
+        "id": "q-sase-shape",
+        "source": "earned_question",
+        "governedSuggestion": false,
+        "target": "objectives"
+      },
+      {
+        "id": "q-resilience",
+        "source": "earned_question",
+        "governedSuggestion": false,
+        "target": "estate"
+      },
+      {
+        "id": "q-sse-scope",
+        "source": "earned_question",
+        "governedSuggestion": false,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-ot-visibility",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-segmentation",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "network"
+      },
+      {
+        "id": "OD-timeline-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "timeline"
+      }
+    ],
+    "topThree": [
+      "OD-operating-model-unstated",
+      "q-sase-shape",
+      "q-resilience"
+    ],
+    "materialDecisionsRemaining": 4,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "needs_decision",
+        "detail": "Dual-circuit resilience per site not yet decided."
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested",
+        "detail": "2 sector suggestions to review"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later",
+        "detail": ""
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later",
+        "detail": ""
+      }
+    ],
+    "readiness": {
+      "score": 22,
+      "label": "Starting shape",
+      "reasons": [
+        "2 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "4 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    },
+    "counts": {
+      "requirements": 1,
+      "questions": 2,
+      "gates": 1,
+      "decisions": 2
+    }
+  },
+  "B": {
+    "label": "B",
+    "documentVersion": 2,
+    "resilienceClauseResolved": true,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+        "reason": "The buyer stated the network/security architecture scope."
+      },
+      {
+        "id": "NET-75a868fa",
+        "templateId": "site-resilience-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.",
+        "reason": "The buyer stated a definitive per-site resilience decision (dual circuits at named sites, single circuits acceptable elsewhere)."
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "rankedNextQuestions": [
+      {
+        "id": "OD-operating-model-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "operating-model"
+      },
+      {
+        "id": "q-sase-shape",
+        "source": "earned_question",
+        "governedSuggestion": false,
+        "target": "objectives"
+      },
+      {
+        "id": "q-sse-scope",
+        "source": "earned_question",
+        "governedSuggestion": false,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-ot-visibility",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-segmentation",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "network"
+      },
+      {
+        "id": "OD-timeline-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "timeline"
+      }
+    ],
+    "topThree": [
+      "OD-operating-model-unstated",
+      "q-sase-shape",
+      "q-sse-scope"
+    ],
+    "materialDecisionsRemaining": 3,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "confirmed",
+        "detail": "Per-site resilience requirement stated and compiled into the document."
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested",
+        "detail": "2 sector suggestions to review"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later",
+        "detail": ""
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later",
+        "detail": ""
+      }
+    ],
+    "readiness": {
+      "score": 28,
+      "label": "Starting shape",
+      "reasons": [
+        "3 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "3 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    },
+    "counts": {
+      "requirements": 2,
+      "questions": 4,
+      "gates": 2,
+      "decisions": 2
+    }
+  },
+  "C": {
+    "label": "C",
+    "documentVersion": 3,
+    "resilienceClauseResolved": true,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+        "reason": "The buyer stated the network/security architecture scope."
+      },
+      {
+        "id": "NET-75a868fa",
+        "templateId": "site-resilience-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.",
+        "reason": "The buyer stated a definitive per-site resilience decision (dual circuits at named sites, single circuits acceptable elsewhere)."
+      },
+      {
+        "id": "SEC-c5733f5c",
+        "templateId": "third-party-security-consideration",
+        "origin": "buyer",
+        "mandatory": false,
+        "statement": "A third-party security operations/MDR-style service is under consideration alongside the core scope.",
+        "reason": "The buyer mentioned considering a third-party security-operations service alongside the core scope."
+      },
+      {
+        "id": "ID-69d3a001",
+        "templateId": "identity-provider-entra",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Identity provider integration with the buyer's stated Entra ID tenant for authentication and access policy.",
+        "reason": "The buyer stated Entra ID as the identity provider."
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "rankedNextQuestions": [
+      {
+        "id": "OD-operating-model-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "operating-model"
+      },
+      {
+        "id": "q-sse-scope",
+        "source": "earned_question",
+        "governedSuggestion": false,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-ot-visibility",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-segmentation",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "network"
+      },
+      {
+        "id": "OD-timeline-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "timeline"
+      }
+    ],
+    "topThree": [
+      "OD-operating-model-unstated",
+      "q-sse-scope",
+      "sector:mf-ot-visibility"
+    ],
+    "materialDecisionsRemaining": 2,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "confirmed",
+        "detail": "Per-site resilience requirement stated and compiled into the document."
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested",
+        "detail": "2 sector suggestions to review"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later",
+        "detail": ""
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later",
+        "detail": ""
+      }
+    ],
+    "readiness": {
+      "score": 31,
+      "label": "Starting shape",
+      "reasons": [
+        "3 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "2 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    },
+    "counts": {
+      "requirements": 4,
+      "questions": 7,
+      "gates": 3,
+      "decisions": 2
+    }
+  },
+  "D": {
+    "label": "D",
+    "documentVersion": 4,
+    "resilienceClauseResolved": true,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+        "reason": "The buyer stated the network/security architecture scope."
+      },
+      {
+        "id": "NET-75a868fa",
+        "templateId": "site-resilience-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.",
+        "reason": "The buyer stated a definitive per-site resilience decision (dual circuits at named sites, single circuits acceptable elsewhere)."
+      },
+      {
+        "id": "SEC-e83fb756",
+        "templateId": "uk-data-residency",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Data residency constraint stated verbatim by the buyer: \"Customer data must remain in the UK, including backups and support access.\"",
+        "reason": "The buyer stated a data-residency constraint verbatim."
+      },
+      {
+        "id": "SEC-c5733f5c",
+        "templateId": "third-party-security-consideration",
+        "origin": "buyer",
+        "mandatory": false,
+        "statement": "A third-party security operations/MDR-style service is under consideration alongside the core scope.",
+        "reason": "The buyer mentioned considering a third-party security-operations service alongside the core scope."
+      },
+      {
+        "id": "ID-69d3a001",
+        "templateId": "identity-provider-entra",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Identity provider integration with the buyer's stated Entra ID tenant for authentication and access policy.",
+        "reason": "The buyer stated Entra ID as the identity provider."
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "rankedNextQuestions": [
+      {
+        "id": "OD-operating-model-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "operating-model"
+      },
+      {
+        "id": "q-sse-scope",
+        "source": "earned_question",
+        "governedSuggestion": false,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-ot-visibility",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "security"
+      },
+      {
+        "id": "sector:mf-segmentation",
+        "source": "sector_suggestion",
+        "governedSuggestion": true,
+        "target": "network"
+      },
+      {
+        "id": "OD-data-residency-legal-basis",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "objectives"
+      },
+      {
+        "id": "OD-timeline-unstated",
+        "source": "compiler_open_decision",
+        "governedSuggestion": false,
+        "target": "timeline"
+      }
+    ],
+    "topThree": [
+      "OD-operating-model-unstated",
+      "q-sse-scope",
+      "sector:mf-ot-visibility"
+    ],
+    "materialDecisionsRemaining": 3,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed",
+        "detail": ""
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "confirmed",
+        "detail": "Per-site resilience requirement stated and compiled into the document."
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested",
+        "detail": "2 sector suggestions to review"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision",
+        "detail": ""
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input",
+        "detail": ""
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later",
+        "detail": ""
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later",
+        "detail": ""
+      }
+    ],
+    "readiness": {
+      "score": 28,
+      "label": "Starting shape",
+      "reasons": [
+        "3 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "3 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    },
+    "counts": {
+      "requirements": 5,
+      "questions": 9,
+      "gates": 4,
+      "decisions": 3
+    }
+  },
+  "sectorSuggestionLifecycle": {
+    "pending": {
+      "clauses": [
+        "network-architecture-scope"
+      ],
+      "hasSuggestionClause": false,
+      "requirementsCount": 1,
+      "pendingSuggestions": [
+        "mf-ot-visibility",
+        "mf-segmentation"
+      ]
+    },
+    "accepted": {
+      "decisionLedger": [
+        {
+          "id": "dt_round2_accept_1",
+          "at": 1000,
+          "questionId": "sector:mf-ot-visibility",
+          "optionId": "ps-mf-ot-visibility",
+          "optionLabel": "Accept",
+          "action": "note",
+          "resultingFactPaths": [],
+          "resultingNoted": [
+            {
+              "id": "ps-mf-ot-visibility",
+              "label": "OT/ICS asset visibility and monitoring in scope, alongside IT security",
+              "section": "security",
+              "own": true
+            }
+          ]
+        }
+      ],
+      "replayedNoted": [
+        {
+          "id": "ps-mf-ot-visibility",
+          "label": "OT/ICS asset visibility and monitoring in scope, alongside IT security",
+          "section": "security",
+          "own": true
+        }
+      ],
+      "versionBefore": 1,
+      "versionAfter": 2,
+      "governedClauses": [
+        {
+          "section": "security",
+          "statement": "OT/ICS asset visibility and monitoring recommended",
+          "supplierResponse": [
+            "State how you meet this sector expectation and provide evidence."
+          ],
+          "evidence": [
+            "Evidence of the stated sector expectation"
+          ],
+          "acceptanceTest": null,
+          "mandatory": false,
+          "sourceFactIds": [],
+          "origin": "sector",
+          "reason": "manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate. (Manufacturing pack, sector-packs v2026-07-24). Netify suggested this; the buyer accepted it.",
+          "quote": null,
+          "sourceTurnIds": [],
+          "sourceNotedIds": [
+            "ps-mf-ot-visibility"
+          ],
+          "templateKey": "sector:manufacturing:mf-ot-visibility",
+          "templateId": "sector-pack-suggestion",
+          "id": "SEC-243b70ab",
+          "weight": 4
+        }
+      ],
+      "requirementsCount": 2
+    },
+    "acceptedThenSavedAndReloaded": {
+      "resumedNoted": [
+        {
+          "id": "ps-mf-ot-visibility",
+          "label": "OT/ICS asset visibility and monitoring in scope, alongside IT security",
+          "section": "security",
+          "own": true
+        }
+      ],
+      "reloadedGovernedClauses": [
+        {
+          "section": "security",
+          "statement": "OT/ICS asset visibility and monitoring recommended",
+          "supplierResponse": [
+            "State how you meet this sector expectation and provide evidence."
+          ],
+          "evidence": [
+            "Evidence of the stated sector expectation"
+          ],
+          "acceptanceTest": null,
+          "mandatory": false,
+          "sourceFactIds": [],
+          "origin": "sector",
+          "reason": "manufacturing buyers commonly need visibility into PLC/SCADA assets alongside IT security -- but the sector alone does not confirm an OT/ICS environment exists here; accept only if it applies to your estate. (Manufacturing pack, sector-packs v2026-07-24). Netify suggested this; the buyer accepted it.",
+          "quote": null,
+          "sourceTurnIds": [],
+          "sourceNotedIds": [
+            "ps-mf-ot-visibility"
+          ],
+          "templateKey": "sector:manufacturing:mf-ot-visibility",
+          "templateId": "sector-pack-suggestion",
+          "id": "SEC-243b70ab",
+          "weight": 4
+        }
+      ],
+      "requirementsCount": 2
+    },
+    "declined": {
+      "decisionLedger": [
+        {
+          "id": "dt_round2_decline_1",
+          "at": 2000,
+          "questionId": "sector:mf-ot-visibility",
+          "optionId": "decline",
+          "optionLabel": "Not needed",
+          "action": "decline_suggestion",
+          "resultingFactPaths": [],
+          "resultingNoted": []
+        }
+      ],
+      "replayedDeclined": [
+        "mf-ot-visibility"
+      ],
+      "governedClauses": [],
+      "pendingSuggestionsAfterDecline": [
+        "mf-segmentation"
+      ]
+    },
+    "declinedThenSavedAndReloaded": {
+      "resumedDeclinedSuggestionIds": [
+        "mf-ot-visibility"
+      ],
+      "pendingSuggestionsAfterReload": [
+        "mf-segmentation"
+      ]
+    }
+  }
+}

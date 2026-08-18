@@ -1,0 +1,199 @@
+▲ Next.js 16.2.6 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 17.5s
+  Running TypeScript ...
+  Finished TypeScript in 18.0s ...
+  Collecting page data using 1 worker ...
+⚠ Using edge runtime on a page currently disables static generation for that page
+  Generating static pages using 1 worker (0/260) ...
+  Generating static pages using 1 worker (65/260) 
+  Generating static pages using 1 worker (130/260) 
+  Generating static pages using 1 worker (195/260) 
+✓ Generating static pages using 1 worker (260/260) in 13.1s
+  Finalizing page optimization ...
+
+Route (app)                                                       Revalidate  Expire
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /.well-known/ai-plugin.json
+├ ƒ /.well-known/mcp-server-metadata.json
+├ ○ /account
+├ ○ /admin
+├ ƒ /admin/record-queue
+├ ƒ /admin/records
+├ ● /alternatives/[slug]
+│ ├ /alternatives/arista-velocloud
+│ ├ /alternatives/aryaka
+│ ├ /alternatives/att-business
+│ └ [+27 more paths]
+├ ● /alternatives/[slug]/data.json
+│ ├ /alternatives/arista-velocloud/data.json
+│ ├ /alternatives/aryaka/data.json
+│ ├ /alternatives/att-business/data.json
+│ └ [+27 more paths]
+├ ƒ /api/admin
+├ ƒ /api/agent
+├ ƒ /api/agent/run
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/request
+├ ƒ /api/auth/session
+├ ƒ /api/auth/verify
+├ ƒ /api/buyer/digests
+├ ƒ /api/buyer/memory
+├ ƒ /api/buyer/profile
+├ ƒ /api/cost/data.json
+├ ƒ /api/cost/demand-stats
+├ ƒ /api/cost/estimate
+├ ƒ /api/cost/provider-categories
+├ ƒ /api/cron/account-activation
+├ ƒ /api/cron/daily-digest
+├ ƒ /api/cron/deadlines
+├ ƒ /api/cron/publish-nudge
+├ ƒ /api/email/unsubscribe
+├ ƒ /api/guided/parse
+├ ƒ /api/lead
+├ ƒ /api/mcp
+├ ƒ /api/openapi/[tool]
+├ ƒ /api/opportunity
+├ ƒ /api/opportunity/[id]
+├ ƒ /api/opportunity/[id]/buyer
+├ ƒ /api/opportunity/[id]/feed
+├ ƒ /api/opportunity/[id]/invite
+├ ƒ /api/opportunity/improve
+├ ƒ /api/opportunity/mine
+├ ƒ /api/opportunity/supplier/[token]
+├ ƒ /api/partner
+├ ƒ /api/partner/agent
+├ ƒ /api/partner/approvals
+├ ƒ /api/partner/digest
+├ ƒ /api/partner/goal
+├ ƒ /api/partner/memory
+├ ƒ /api/rfp
+├ ƒ /api/rfp/[id]
+├ ƒ /api/rfp/[id]/agent
+├ ƒ /api/rfp/[id]/approvals
+├ ƒ /api/rfp/[id]/compliance
+├ ƒ /api/rfp/[id]/connect
+├ ƒ /api/rfp/[id]/draft-question
+├ ƒ /api/rfp/[id]/email-link
+├ ƒ /api/rfp/[id]/evaluation
+├ ƒ /api/rfp/[id]/evidence-draft
+├ ƒ /api/rfp/[id]/goal
+├ ƒ /api/rfp/[id]/list-on-board
+├ ƒ /api/rfp/[id]/nda
+├ ƒ /api/rfp/[id]/publish
+├ ƒ /api/rfp/[id]/report
+├ ƒ /api/rfp/[id]/research
+├ ƒ /api/rfp/[id]/respond
+├ ƒ /api/rfp/[id]/signoff
+├ ƒ /api/rfp/[id]/signoff/decide
+├ ƒ /api/rfp/[id]/supplier-credential
+├ ƒ /api/rfp/[id]/thread
+├ ƒ /api/rfp/benchmark
+├ ƒ /api/rfp/claim
+├ ƒ /api/rfp/match
+├ ƒ /api/rfp/mine
+├ ƒ /api/security-sourcing/project
+├ ƒ /api/security-sourcing/project/[id]/accept-gap
+├ ƒ /api/security-sourcing/project/[id]/rescope
+├ ƒ /api/security-sourcing/project/[id]/scope
+├ ƒ /api/supplier/[token]
+├ ƒ /api/supplier/claim
+├ ƒ /api/supplier/opportunities
+├ ƒ /api/vendor-edit
+├ ƒ /api/webhooks/resend
+├ ƒ /api/workspace/extract
+├ ƒ /api/workspace/fit
+├ ƒ /api/workspace/health
+├ ƒ /api/workspace/market
+├ ƒ /api/workspace/save-lite
+├ ○ /auth/verify
+├ ○ /best
+├ ● /best/[slug]
+│ ├ /best/sd-wan-sase-providers-for-healthcare
+│ ├ /best/sd-wan-sase-providers-for-financial-services
+│ ├ /best/sd-wan-sase-providers-for-retail
+│ └ [+17 more paths]
+├ ● /best/[slug]/data.json
+│ ├ /best/sd-wan-sase-providers-for-healthcare/data.json
+│ ├ /best/sd-wan-sase-providers-for-financial-services/data.json
+│ ├ /best/sd-wan-sase-providers-for-retail/data.json
+│ └ [+17 more paths]
+├ ƒ /capabilities.json
+├ ○ /compare
+├ ● /compare/[pair]
+│ ├ /compare/cato-networks-vs-zscaler
+│ ├ /compare/cato-networks-vs-fortinet
+│ ├ /compare/cato-networks-vs-versa-networks
+│ └ [+20 more paths]
+├ ● /compare/[pair]/data.json
+│ ├ /compare/cato-networks-vs-zscaler/data.json
+│ ├ /compare/cato-networks-vs-fortinet/data.json
+│ ├ /compare/cato-networks-vs-versa-networks/data.json
+│ └ [+20 more paths]
+├ ○ /connector
+├ ○ /cost-estimator
+├ ○ /demand                                                              30m      1y
+├ ○ /demand/data.json                                                    30m      1y
+├ ƒ /for-suppliers
+├ ○ /home
+├ ○ /how-it-works
+├ ƒ /indexnow.txt
+├ ƒ /llms-full.txt
+├ ƒ /llms.txt
+├ ○ /methodology.json
+├ ○ /opportunities
+├ ƒ /opportunities/[id]
+├ ƒ /opportunities/[id]/data.json
+├ ƒ /opportunities/[id]/room
+├ ƒ /opportunities/board
+├ ƒ /opportunities/board/data.json
+├ ○ /opportunities/new
+├ ƒ /opportunities/supplier/[token]
+├ ○ /partner
+├ ○ /preview/quick-sor
+├ ƒ /project/[id]
+├ ƒ /project/[id]/approve
+├ ƒ /project/[id]/assessment
+├ ƒ /project/[id]/rescope
+├ ƒ /project/[id]/story
+├ ƒ /project/[id]/story/download
+├ ƒ /project/[id]/timeline
+├ ○ /question-bank.json
+├ ○ /rfp-builder
+├ ƒ /rfp-builder/[id]
+├ ƒ /rfp-builder/[id]/preview
+├ ƒ /rfp-builder/[id]/preview/download
+├ ƒ /rfp-builder/[id]/respond
+├ ƒ /rfp-builder/[id]/review
+├ ○ /rfp-builder/new
+├ ○ /rfp-builder/questions
+├ ○ /rfp-builder/sample-rfp
+├ ƒ /rfp-builder/sample-rfp/template.doc
+├ ○ /rfp-builder/start
+├ ○ /rfp-builder/supplier
+├ ƒ /rfp-builder/supplier/[token]
+├ ○ /robots.txt
+├ ○ /security-sourcing
+├ ○ /shortlist
+├ ƒ /shortlist/data.json
+├ ƒ /shortlist/print
+├ ○ /sitemap.xml
+├ ○ /supplier
+├ ○ /supplier-vetting-standard
+├ ○ /vendors
+├ ● /vendors/[slug]
+│ ├ /vendors/arista-velocloud
+│ ├ /vendors/aryaka
+│ ├ /vendors/att-business
+│ └ [+27 more paths]
+├ ƒ /vendors/[slug]/edit
+├ ○ /workspace
+└ ○ /workspace/questions.json
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

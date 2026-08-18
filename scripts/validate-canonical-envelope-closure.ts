@@ -609,13 +609,13 @@ async function main() {
   /* J. Procurement Room and every export use the same frozen revision. */
   /* ================================================================ */
   {
-    const roomSource = readFileSync(new URL("../src/app/project/[id]/room/page.tsx", import.meta.url), "utf8");
+    const roomSource = readFileSync(new URL("../src/app/(workspace)/project/[id]/room/page.tsx", import.meta.url), "utf8");
     record(
       /frozen_content\.living_document/.test(roomSource) && /getLatestPublishedSnapshot/.test(roomSource),
       "J: Procurement Room's own source reads exclusively from getLatestPublishedSnapshot()'s frozen_content.living_document, never a live project field",
       "",
     );
-    const downloadSource = readFileSync(new URL("../src/app/rfp-builder/[id]/preview/download/route.ts", import.meta.url), "utf8");
+    const downloadSource = readFileSync(new URL("../src/app/(marketing)/rfp-builder/[id]/preview/download/route.ts", import.meta.url), "utf8");
     const usesSnapshot = /const\s+livingDocument\s*=\s*snapshot\.frozen_content\.living_document/.test(downloadSource);
     const buildsFrozenProjectOnce = /const\s+frozenProject:\s*ProjectDetails\s*=\s*\{/.test(downloadSource);
     // Every format branch (doc/docx/print/json/markdown) must render from

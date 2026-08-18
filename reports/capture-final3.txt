@@ -1,0 +1,2 @@
+Starting dev server on port 3411
+Screenshots saved to /tmp/sdwan_reliability_gate/reports/screenshots/2030-shell-checkpoint-a
