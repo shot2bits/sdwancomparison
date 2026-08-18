@@ -248,11 +248,26 @@ export default function LivingProcurementCanvas({
 
       {outline && outline.length > 0 && <SectionOutline rows={outline} />}
 
+      {/* Lifecycle-consistency closure pass (18 Aug 2026), correction C:
+          this was labelled "Open decisions" -- the SAME word Mission
+          Control uses for `materialDecisionsRemaining` (compiler
+          openDecisions + earned questions + sector suggestions, ranked
+          and filtered to blocking-only), while this tile shows the raw,
+          unfiltered `document.counts.decisions` (every open decision the
+          compiler sees, sector suggestions included, no material-impact
+          filter). The two numbers can legitimately differ -- this one is
+          strictly a superset -- so sharing a label invited exactly the
+          "which number is real" confusion this pass exists to remove.
+          "Document gaps" names what this genuinely is (every unresolved
+          field in the compiled document) without claiming to be the
+          blocking-decision count Mission Control and the publish panel
+          both now share. Same real `document.counts.decisions` value,
+          only the label changed. */}
       <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         <StatTile label="Requirements" value={document.counts.requirements} />
         <StatTile label="Supplier questions" value={document.counts.questions} />
         <StatTile label="Pass/fail gates" value={document.counts.gates} />
-        <StatTile label="Open decisions" value={document.counts.decisions} warn={document.counts.decisions > 0} />
+        <StatTile label="Document gaps" value={document.counts.decisions} warn={document.counts.decisions > 0} />
       </div>
 
       <div role="tablist" aria-label="Document projection" className="mt-7 flex gap-1 overflow-x-auto border-b border-[#EFECE5]" style={{ scrollbarWidth: "none" }}>
@@ -660,8 +675,14 @@ function OpenDecisions({ decisions }: { decisions: LivingProcurementDocument["op
   return (
     <div className="border-t border-[#EFECE5] pb-4 pt-[18px]">
       <div className="mb-2 flex items-baseline gap-[11px]">
+        {/* Lifecycle-consistency closure pass, correction C: same
+            relabel as the StatTile above (same `document.openDecisions`
+            source) -- "Document gaps" so this never reads as the same
+            "blocking decisions" figure Mission Control and the publish
+            panel share; the sub-copy already made clear these don't gate
+            anything, this just stops the label implying otherwise. */}
         <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
-          Open decisions
+          Document gaps
         </span>
         <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">nothing here becomes a gate or requirement until you decide</span>
         <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{decisions.length}</span>

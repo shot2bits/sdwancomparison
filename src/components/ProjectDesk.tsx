@@ -995,6 +995,21 @@ export default function ProjectDesk({
     frozen: boolean;
     namesFrozen: boolean;
   } | null>(null);
+  /** Lifecycle-consistency closure pass (18 Aug 2026), correction D: the
+   *  post-publish view used to prove publication and invitation but never
+   *  checked whether any supplier had actually responded, so it could not
+   *  honestly distinguish "just published, nothing back yet" from "N
+   *  vendors have replied" -- and the codebase has no field anywhere that
+   *  would let it. `null` here means "not yet checked" (the safe default:
+   *  render as though nothing has arrived, never claim receipt without
+   *  proof); a real number comes only from `/api/rfp/[id]/evaluation`,
+   *  the SAME real, owner-gated, stored-response-backed endpoint
+   *  RfpBuilder.tsx's own genuine "Evaluate vendor responses" comparison
+   *  already uses -- this never fabricates or duplicates that comparison,
+   *  it only reads the same real count so this view can honestly say
+   *  whether one exists yet, and link to the real comparison page when it
+   *  does. See `loadResponseStatus` below. */
+  const [responseCount, setResponseCount] = useState<number | null>(null);
   /** The early save (round 6, Robert's ruling: an option to save when a
    *  verified work email is given). Saving creates the real project
    *  record through the existing create machinery, unpublished; edits
@@ -1662,6 +1677,11 @@ export default function ProjectDesk({
                   // that command again.
                   setPhase("fits");
                   rehydratedPublished = true;
+                  // Lifecycle-consistency closure pass, correction D: a
+                  // reopened already-published project must show real
+                  // response status too, not just at the moment of a live
+                  // publish -- same real endpoint, same honest default.
+                  void loadResponseStatus(resumeId, resumeManage ?? "");
                 }
               }
             } catch {
@@ -2986,6 +3006,27 @@ export default function ProjectDesk({
     }
   }
 
+  /** Lifecycle-consistency closure pass, correction D: reads the SAME
+   *  real, owner-gated, stored-response-backed endpoint RfpBuilder.tsx's
+   *  own "Evaluate vendor responses" section already uses
+   *  (`/api/rfp/[id]/evaluation`, which calls `listResponses()` against
+   *  real KV records -- never a guess or a placeholder). Fire-and-forget:
+   *  a failed or slow fetch just leaves `responseCount` at its safe
+   *  default (`null` -> rendered as "awaiting responses", never as
+   *  "responses received" without proof). */
+  async function loadResponseStatus(id: string, manage: string) {
+    try {
+      const url = `/sase/api/rfp/${encodeURIComponent(id)}/evaluation${manage ? `?manage=${encodeURIComponent(manage)}` : ""}`;
+      const r = await fetch(url);
+      if (!r.ok) return;
+      const body = (await r.json().catch(() => null)) as { evaluations?: unknown[] } | null;
+      if (body && Array.isArray(body.evaluations)) setResponseCount(body.evaluations.length);
+    } catch {
+      /* honest default: responseCount stays whatever it already was
+         (usually null), never fabricated from a failed fetch */
+    }
+  }
+
   /* ---- The signature chain (the same organs as every round; the twin
      changed its face, never its law: consents verbatim, humans sign,
      agents never, publish is the only exit). ---- */
@@ -3075,6 +3116,13 @@ export default function ProjectDesk({
         setPublished({ invited, boardId: data.board?.opportunity_id, matchedVendors, totalEvaluatedMarket, frozen: true, namesFrozen: true });
         setNeedAuth(false);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
+        // Lifecycle-consistency closure pass, correction D: a fresh
+        // publish has zero responses by construction (no vendor has had
+        // time to reply), but this still checks the real endpoint rather
+        // than assuming -- the same honest, no-shortcut rule as every
+        // other value on this page.
+        setResponseCount(null);
+        void loadResponseStatus(proj.id, proj.manage);
         // Visual closure pass (18 Aug 2026): a buyer who scrolled down to
         // review the pre-publish decisions/consents before pressing
         // "Generate and publish" keeps that same scroll position once the
@@ -3835,7 +3883,25 @@ export default function ProjectDesk({
           nothing else. */}
       {!coreFive.sector && (
         <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
-          <div className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
+          {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
+              E: at 390px this row is narrower than "Or start from your
+              sector:" plus even one chip, so with `overflow-x-auto`
+              genuinely scrollable but `scrollbarWidth: "none"` hiding the
+              ONLY affordance that could tell a buyer so, the visible chip
+              was hard-clipped mid-word ("Multinational / glo…") with
+              nothing suggesting more existed -- confirmed via a live
+              390px screenshot. Content itself is untouched (still scrolls,
+              still every chip's full label exists) -- a right-edge fade
+              mask now makes the cut a visibly intentional "more this way"
+              hint instead of a hard, silent clip, exactly the "scroll
+              intentionally with a clear affordance" option this
+              correction allows. `sm:[mask-image:none]` turns it off once
+              the row switches to `flex-wrap` (nothing to hint at once
+              everything's visible). */}
+          <div
+            className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]"
+            style={{ scrollbarWidth: "none" }}
+          >
             <span className="flex-none text-[12.5px] text-[#655F52]">Or start from your sector:</span>
             {SECTOR_CHIPS.map((c) => (
               <button
@@ -3975,11 +4041,26 @@ export default function ProjectDesk({
               is genuinely 0, never a phrase that could be misread as "there
               is nothing here at all." Whatever optional cards remain below
               get their own "Optional refinements" label (just below) so the
-              two never disagree. */}
+              two never disagree.
+
+              Lifecycle-consistency closure pass (18 Aug 2026), correction
+              A: "before publish" is only ever true before publish -- once
+              `published` is set, publication has already happened, so a
+              remaining `materialDecisionsRemaining` count no longer blocks
+              anything; it can only shape the NEXT revision. Saying "N
+              decisions before publish" (or even "No blocking decisions",
+              which still frames the card around a not-yet-completed
+              publish) after a real publish would misstate a completed
+              action as still pending -- exactly the contradiction this
+              pass exists to remove. */}
           <h2 className="mb-0 mt-1.5 text-[19px] font-semibold leading-[1.3]" style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "#fff" }}>
-            {materialDecisionsRemaining
-              ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
-              : "No blocking decisions"}
+            {published
+              ? materialDecisionsRemaining
+                ? `Project published · ${materialDecisionsRemaining} optional refinement${materialDecisionsRemaining === 1 ? "" : "s"} for the next revision`
+                : "Project published"
+              : materialDecisionsRemaining
+                ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
+                : "No blocking decisions"}
           </h2>
           {/* Mobile-only compact toggle -- `lg:hidden` so desktop never
               sees it (the full card is always expanded there). Only shown
@@ -4003,9 +4084,11 @@ export default function ProjectDesk({
           )}
           <div className={`${mcExpanded ? "" : "hidden"} lg:block`}>
             <p className="m-0 mt-3 text-[12px] leading-[1.5] lg:mt-1" style={{ color: "#B9B2A2" }}>
-              {materialDecisionsRemaining
-                ? "The agent ranks only choices that change price, risk, compliance or delivery."
-                : "Nothing below blocks publishing — every card here is optional."}
+              {published
+                ? "Publication is already complete — nothing below reopens it. These only shape your next revision."
+                : materialDecisionsRemaining
+                  ? "The agent ranks only choices that change price, risk, compliance or delivery."
+                  : "Nothing below blocks publishing — every card here is optional."}
             </p>
             {nextQuestionCards && nextQuestionCards.length > 0 ? (
               <div className="mt-4">
@@ -4015,8 +4098,16 @@ export default function ProjectDesk({
                     named group instead of sitting under a bare "no blocking
                     decisions" heading with no label of their own — never
                     presented as though they were the blocking decisions the
-                    heading just said there were none of. */}
-                {!materialDecisionsRemaining && (
+                    heading just said there were none of.
+
+                    Lifecycle-consistency closure pass, correction A: once
+                    `published` is true, EVERY remaining card gets this
+                    label, even ones `materialDecisionsRemaining` still
+                    counts as material -- material only ever meant "would
+                    have blocked publication," and publication has already
+                    happened, so nothing here is a blocker of anything
+                    anymore, regardless of its pre-publish classification. */}
+                {(published || !materialDecisionsRemaining) && (
                   <div className="mb-2 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.1em", color: "#948C79" }}>
                     Optional refinements
                   </div>
@@ -4444,37 +4535,72 @@ export default function ProjectDesk({
           >
             Back to the statement
           </button>
-          <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] p-6">
-            <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
-              Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
-            </h2>
-            <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
-              Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
-            </p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
-                <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
-                  Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
+          {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
+              B: this explainer card is a pre-publish sales pitch --
+              "Publish to match this project…", "What publishing
+              unlocks…", and an "Open decisions remaining… before you
+              publish" stat. `phase` stays "fits" forever once a buyer
+              opens this panel (see `setPhase` call sites; nothing reverts
+              it to "live" after a real publish), so gating this on
+              `phase === "fits"` alone left it rendering verbatim ABOVE the
+              "Published. Signed-in vendors…" confirmation below it --
+              two contradictory cards stacked in the same view, as if the
+              already-completed publish were still pending. `!published`
+              is the real "hasn't happened yet" check (see its own
+              declaration); the confirmation card below already carries
+              everything a published state honestly needs (board status,
+              frozen matches/invitations, response status, next action),
+              so this one simply stops rendering once that's true, rather
+              than being replaced by a duplicate. */}
+          {!published && (
+            <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] p-6">
+              <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
+                Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
+              </h2>
+              <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
+                Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                  <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                    Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
+                  </div>
+                </div>
+                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                  <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                    Document readiness. {pctNote}
+                  </div>
+                </div>
+                {/* Lifecycle-consistency closure pass, correction C: this
+                    used to read `unansweredGaps.length` -- `brief.openGaps`,
+                    a security-verdict-only gap list that is hard-coded to
+                    `[]` for any non-security (SASE/SD-WAN/SSE network)
+                    engagement, so it read "0" here unconditionally while
+                    Mission Control's `materialDecisionsRemaining` (compiler
+                    openDecisions + earned questions + sector suggestions,
+                    ranked and material-impact-filtered) could genuinely be
+                    7 at the same time -- two different arrays answering
+                    "how many decisions are open," never reconciled. Both
+                    projections now read the SAME `materialDecisionsRemaining`
+                    value Mission Control uses, so the two views can never
+                    disagree again; `unansweredGaps` itself is untouched
+                    (still the real, correct input to the accept-gap
+                    submission loop above in `signAndPublish`, an unrelated
+                    concern from what this stat displays). */}
+                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                  <div className="text-[22px] font-semibold" style={mono}>{materialDecisionsRemaining}</div>
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                    {materialDecisionsRemaining === 1 ? "Blocking decision" : "Blocking decisions"} remaining. Resolve or accept as a stated assumption before you publish.
+                  </div>
                 </div>
               </div>
-              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
-                <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
-                  Document readiness. {pctNote}
-                </div>
-              </div>
-              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
-                <div className="text-[22px] font-semibold" style={mono}>{unansweredGaps.length}</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
-                  {unansweredGaps.length === 1 ? "Open decision" : "Open decisions"} remaining. Resolve or accept as a stated assumption before you publish.
-                </div>
-              </div>
+              <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#655F52]">
+                What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
+              </p>
             </div>
-            <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#655F52]">
-              What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
-            </p>
-          </div>
+          )}
 
           {/* ---- Generate and publish: the only exit (R5), the ruled
                   organs intact: what carries, what stays private, the
@@ -4487,6 +4613,37 @@ export default function ProjectDesk({
                   Published. Signed-in vendors and service providers can now see your anonymous notice
                   {published.boardId ? <>: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></> : "."}
                   {published.invited.length > 0 && <> {cap(numWord(published.invited.length))} {published.invited.length === 1 ? "was" : "were"} invited directly.</>}
+                </div>
+                {/* Lifecycle-consistency closure pass (18 Aug 2026),
+                    correction D: this used to prove publication and
+                    invitation but never said anything about whether a
+                    supplier had actually responded -- a buyer reading
+                    only this card had no way to tell "just published,
+                    nothing back yet" from "vendors have replied." Never
+                    claims "responses received" or offers "Compare
+                    responses" without `responseCount` being a real,
+                    fetched, non-null, positive number (see
+                    `loadResponseStatus`); `responseCount === null` (not
+                    yet checked, or the check failed) renders identically
+                    to a real, confirmed zero -- the safe default never
+                    overclaims. The comparison link goes to RfpBuilder.tsx's
+                    own "Evaluate vendor responses" section, the genuine,
+                    already-correct response-comparison experience built
+                    from real stored records -- this never re-implements
+                    or duplicates that view. */}
+                <div className="mb-3 max-w-[36em] rounded-[10px] border p-3" style={{ borderColor: "#E5E1D9", background: responseCount ? "#F3F8F4" : "#FBFAF8" }}>
+                  <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#141414" }}>
+                    {responseCount
+                      ? `${responseCount} of ${published.invited.length || responseCount} invited vendor${responseCount === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
+                      : `Published — awaiting supplier responses.${published.invited.length > 0 ? ` ${cap(numWord(published.invited.length))} invited so far.` : ""}`}
+                  </p>
+                  {Boolean(responseCount) && created?.id && (
+                    <p className="m-0 mt-1.5 text-[13px]">
+                      <a className="underline hover:text-[#8A4D08]" href={`/sase/rfp-builder/${created.id}/review${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
+                        Compare responses
+                      </a>
+                    </p>
+                  )}
                 </div>
                 {/* Living Procurement Canvas Phase 2 correction (14 Aug
                     2026): this list now renders ONLY what the publish
