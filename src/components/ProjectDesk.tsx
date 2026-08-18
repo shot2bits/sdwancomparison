@@ -3075,6 +3075,22 @@ export default function ProjectDesk({
         setPublished({ invited, boardId: data.board?.opportunity_id, matchedVendors, totalEvaluatedMarket, frozen: true, namesFrozen: true });
         setNeedAuth(false);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
+        // Visual closure pass (18 Aug 2026): a buyer who scrolled down to
+        // review the pre-publish decisions/consents before pressing
+        // "Generate and publish" keeps that same scroll position once the
+        // response swaps in the (shorter, differently-laid-out) State 4
+        // content -- the browser never re-clamps scroll after a reflow.
+        // Confirmed via a live Playwright run: with scrollY left where the
+        // publish button had been, the sticky status dock (`[data-dock]`,
+        // `top: 52px`) ends up stacked over genuinely new State 4 content
+        // ("how to read this", and on mobile the invited-vendor list),
+        // covering real interactive controls. Scrolling to the top on a
+        // successful publish is the same "you finished an action, see the
+        // new view from its start" pattern already used elsewhere in this
+        // flow (state transitions never leave the buyer stranded mid-page)
+        // -- it does not change the canonical envelope, MarketUnlock
+        // boundary or anything about what publish itself does.
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (data.auth_required) {
         setNeedAuth(true);
         ev("workspace_auth_required", { scope: buying ?? "security" });

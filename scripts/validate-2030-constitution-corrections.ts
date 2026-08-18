@@ -228,6 +228,23 @@ function main() {
     record(existsSync(path.join(ROOT, "src/fonts/inter-variable-latin.woff2")), "8: the self-hosted Inter variable woff2 (latin subset) is checked into the repo at src/fonts/inter-variable-latin.woff2", "");
   }
 
+  /* ================================================================ */
+  /* 9. Post-publish dock obstruction: a buyer who has scrolled down    */
+  /*    to review pre-publish decisions/consents keeps that scroll      */
+  /*    position once State 4's (shorter, differently-laid-out)         */
+  /*    content swaps in -- confirmed via a live Playwright run this    */
+  /*    left the sticky status dock stacked over real State 4 controls  */
+  /*    ("how to read this", and on mobile the whole invited-vendor     */
+  /*    list). Scrolling to the top on a successful publish is the      */
+  /*    fix; re-running the same live repro afterwards showed zero      */
+  /*    obstruction at every sampled interval.                          */
+  /* ================================================================ */
+  {
+    const desk = src("src/components/ProjectDesk.tsx");
+    record(/window\.scrollTo\(\{ top: 0, behavior: "smooth" \}\)/.test(desk), "9: ProjectDesk.tsx scrolls to the top on a successful publish, so State 4 never renders under a scroll position left over from reviewing pre-publish decisions", "");
+    record(/if \(res\.ok\) \{[\s\S]{0,4000}window\.scrollTo/.test(desk), "9: the scroll-to-top runs specifically inside the publish success branch (res.ok), not on every render or on failure", "");
+  }
+
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);
   if (failures > 0) process.exit(1);
 }
