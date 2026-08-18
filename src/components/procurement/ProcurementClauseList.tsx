@@ -43,7 +43,7 @@ export default function ProcurementClauseList({
         <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
           Testable requirements
         </span>
-        <p className="mt-2 text-[13.5px] leading-[1.55] text-[#8C8A85]">
+        <p className="mt-2 text-[13.5px] leading-[1.55] text-[#655F52]">
           Nothing compiled yet — say what you need above and it lands here as a testable, numbered clause.
         </p>
       </div>
@@ -64,8 +64,8 @@ export default function ProcurementClauseList({
         <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
           Testable requirements
         </span>
-        <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">every clause carries a stable id and traces to your own words or a named rule</span>
-        <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{clauses.length}</span>
+        <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">every clause carries a stable id and traces to your own words or a named rule</span>
+        <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{clauses.length}</span>
       </div>
       {sections.map((section) => (
         <div key={section} className="pt-3">
@@ -91,7 +91,7 @@ function ClauseRow({ clause, changed }: { clause: ProcurementClause; changed: bo
       />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-          <span className="text-[10px] text-[#A3A099]" style={mono}>{clause.id}</span>
+          <span className="text-[10px] text-[#655F52]" style={mono}>{clause.id}</span>
           <span className="text-[14.5px] font-medium leading-[1.45] text-[#141414]" style={{ textWrap: "pretty" }}>
             {clause.statement}
           </span>
@@ -106,9 +106,9 @@ function ClauseRow({ clause, changed }: { clause: ProcurementClause; changed: bo
             {clause.mandatory ? "mandatory" : `scored · weight ${clause.weight}`}
           </span>
         </div>
-        {clause.quote && <p className="m-0 mt-1 text-[12px] italic leading-[1.5] text-[#A3A099]">&ldquo;{clause.quote}&rdquo;</p>}
+        {clause.quote && <p className="m-0 mt-1 text-[12px] italic leading-[1.5] text-[#655F52]">&ldquo;{clause.quote}&rdquo;</p>}
         {clause.supplierResponse.length > 0 && (
-          <ul className="m-0 mt-1.5 flex list-none flex-col gap-0.5 p-0 text-[12px] leading-[1.5] text-[#8C8A85]">
+          <ul className="m-0 mt-1.5 flex list-none flex-col gap-0.5 p-0 text-[12px] leading-[1.5] text-[#655F52]">
             {clause.supplierResponse.map((r, i) => (
               <li key={i}>· {r}</li>
             ))}

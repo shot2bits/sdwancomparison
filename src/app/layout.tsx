@@ -1,14 +1,28 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import NetifyEvents from "@/components/NetifyEvents";
 import "./globals.css";
 
 // Inter matches the main netify.co.uk site (SF Pro approximation),
 // self-hosted via next/font so no layout shift and no runtime request.
-const inter = Inter({
-  subsets: ["latin"],
+//
+// CORRECTED (visual closure pass, 18 Aug 2026): this was `next/font/google`,
+// which fetches the actual font bytes from fonts.googleapis.com at BUILD
+// time (every `next build`, even in CI/CD, needs live network access to
+// Google's font CDN at that moment). That's a real, if usually-invisible,
+// build-time fragility -- confirmed here when a network-restricted build
+// environment couldn't reach fonts.googleapis.com and `next build` failed
+// outright ("Failed to fetch font `Inter`"). The rendered font, weights
+// (variable 100-900), subset (latin) and `--font-inter` CSS variable
+// contract are byte-for-byte the same Inter typeface (sourced from the
+// `@fontsource-variable/inter` package's own latin variable-weight woff2,
+// checked into this repo at src/fonts/inter-variable-latin.woff2) -- this
+// is a build-hermeticity fix, not a font, weight or visual change.
+const inter = localFont({
+  src: "../fonts/inter-variable-latin.woff2",
   display: "swap",
   variable: "--font-inter",
+  weight: "100 900",
 });
 
 export const metadata: Metadata = {

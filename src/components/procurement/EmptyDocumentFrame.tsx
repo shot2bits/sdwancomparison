@@ -37,12 +37,12 @@ export default function EmptyDocumentFrame() {
       aria-label="Your living procurement document, not yet started"
     >
       <div className="flex items-center justify-between gap-3">
-        <div style={{ ...mono, fontSize: "10.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--nf-ink-400, #7A7263)" }}>
+        <div style={{ ...mono, fontSize: "10.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#655F52" }}>
           Your living procurement document
         </div>
         <span
           className="rounded-full px-2 py-[3px] text-[9.5px] font-semibold uppercase"
-          style={{ ...mono, letterSpacing: "0.07em", background: "var(--nf-ink-100, #EDE7D9)", color: "var(--nf-ink-400, #7A7263)" }}
+          style={{ ...mono, letterSpacing: "0.07em", background: "var(--nf-ink-100, #EDE7D9)", color: "#655F52" }}
         >
           Not started
         </span>
@@ -51,15 +51,27 @@ export default function EmptyDocumentFrame() {
         Say what you need in the prompt above. Every sentence lands here as a stated fact, and this frame fills in
         section by section — nothing is added until you say it.
       </p>
+      {/* Contrast fix (verification pass, 18 Aug 2026): the ghosting effect
+          ("ghosted future sections, a restrained preview" -- this file's
+          own header comment, an explicit approved-prototype aesthetic) used
+          to apply `opacity` to the WHOLE row, diluting the row's TEXT along
+          with its border -- axe-core caught the real result: rows 4-6
+          measured 1.88:1-3.32:1 against their own #FFFDF8 background, well
+          under WCAG AA's 4.5:1. The fade now applies only to the row's own
+          border colour (computed per-row as a real rgba alpha, not a fixed
+          swatch) -- the "later sections feel further away" ghosting is
+          still visible in the border, but every row's TEXT stays at the
+          same flat, always-accessible colour regardless of position, so
+          "section 6" is exactly as legible as "section 1". */}
       <div className="mt-5 flex flex-col gap-2.5">
         {GHOST_SECTIONS.map((title, i) => (
           <div
             key={title}
             className="flex items-center justify-between gap-3 rounded-[10px] border border-dashed px-3.5 py-3"
-            style={{ borderColor: "var(--nf-ink-200, #DCD3C0)", opacity: 1 - i * 0.06 }}
+            style={{ borderColor: `rgba(220, 211, 192, ${1 - i * 0.12})` }}
           >
-            <span className="text-[13px] font-medium" style={{ color: "var(--nf-ink-400, #7A7263)" }}>{title}</span>
-            <span className="text-[10.5px]" style={{ ...mono, color: "var(--nf-ink-300, #A79E8C)" }}>not yet stated</span>
+            <span className="text-[13px] font-medium" style={{ color: "#655F52" }}>{title}</span>
+            <span className="text-[10.5px]" style={{ ...mono, color: "#655F52" }}>not yet stated</span>
           </div>
         ))}
       </div>

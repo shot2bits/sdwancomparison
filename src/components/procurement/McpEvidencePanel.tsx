@@ -119,7 +119,14 @@ export default function McpEvidencePanel({ history }: { history: ProjectHistoryE
             <div key={`${e.h.at}-${i}`} className="rounded-[10px] border p-3" style={{ background: "#1E1912", borderColor: "#322A1D" }}>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] font-medium" style={{ color: "#fff" }}>{humaniseEvent(e.h.event, e.h.detail)}</span>
-                <span className="text-[10.5px]" style={{ ...mono, color: "#6E6656" }}>
+                {/* Contrast fix (verification pass, 18 Aug 2026): #6E6656 on
+                    this card's #1E1912 background measured 3.07:1, below
+                    WCAG AA's 4.5:1 for normal text (computed via the
+                    standard relative-luminance contrast formula) --
+                    #888274 is the same colour lightened just enough to
+                    clear 4.5:1 here (4.57:1) without standing out from the
+                    surrounding muted metadata tone. */}
+                <span className="text-[10.5px]" style={{ ...mono, color: "#888274" }}>
                   {new Date(e.h.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>

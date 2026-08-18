@@ -46,7 +46,7 @@ import { deriveRfiQuestionSet } from "../src/lib/workspace/instrument";
 import { replayDecisionLedger, mergeDecisionLedger, type DecisionLedgerEntry } from "../src/lib/workspace/decision-ledger";
 import type { SourceLedgerEntry } from "../src/lib/workspace/source-ledger";
 import { buildEnvelopeUpdate, envelopeContentHash } from "../src/lib/workspace/envelope";
-import { compileProcurementDocument, type LivingProcurementDocument } from "../src/lib/workspace/procurement-document";
+import { compileProcurementDocument, type LivingProcurementDocument, type CompilerRevision } from "../src/lib/workspace/procurement-document";
 import { livingDocumentToRfpSections } from "../src/lib/rfp-document";
 import { minimumContentQuestionCount } from "../src/lib/rfp-publish";
 import { ProjectDetailsSchema, type ProjectDetails } from "../src/lib/rfp-types";
@@ -61,13 +61,30 @@ type Receipt = { id: number; text: string };
 
 /**
  * Mirrors envelope.ts's own internal recompute EXACTLY (same functions,
- * same order, same `revision: undefined` legacy-fallback branch) -- what an
- * HONEST client (ProjectDesk.tsx's own `compiledDocument`/`canvasDocument`)
- * would submit as `compiled_document`. Not a duplicate of the SECURITY
- * logic (there is none here to duplicate) -- purely the plumbing a fixture
- * needs to hand buildEnvelopeUpdate() a document its own cross-check will
- * accept, so the fixtures below exercise the REAL accept path, not just the
- * reject paths.
+ * same order) -- what an HONEST client (ProjectDesk.tsx's own
+ * `compiledDocument`/`canvasDocument`) would submit as `compiled_document`.
+ * Not a duplicate of the SECURITY logic (there is none here to duplicate)
+ * -- purely the plumbing a fixture needs to hand buildEnvelopeUpdate() a
+ * document its own cross-check will accept, so the fixtures below exercise
+ * the REAL accept path, not just the reject paths.
+ *
+ * CORRECTED (Robert's follow-up visual-closure directive, 18 Aug 2026):
+ * this used to hardcode `revision: undefined`, taking `resolveVersion()`'s
+ * LEGACY fallback branch (bump on any real facts/receipts diff). envelope.ts
+ * itself no longer takes that branch in production -- a real first-save/
+ * update-path bug (found via a live local-KV Playwright run) meant it always
+ * passed `revision: undefined` too, so the fix there was widening it to
+ * `revision: clientDocParsed.data.lastRevision`, i.e. it now TRUSTS
+ * whichever revision the client's own submitted document carries. This
+ * fixture's "expected/submitted" document must mirror THAT contract, not the
+ * legacy one, or a genuine edit's fixture-submitted `compiled_document`
+ * disagrees with the server's own now-event-driven recompute and 409s --
+ * exactly the false failure this correction removes. `revision` is
+ * REQUIRED (no default) so every call site states its own intent: `null`
+ * for "no new event this call" (a reopen, an idempotent resave -- never
+ * increments), or an explicit `{cycle, changedFactIds}` distinct from
+ * `previousDocument`'s own `lastRevision.cycle` for a genuinely new buyer
+ * action (increments exactly once).
  */
 async function deriveExpectedServerDoc(params: {
   facts: WorkspaceFact[];
@@ -77,6 +94,7 @@ async function deriveExpectedServerDoc(params: {
   decisionLedger: DecisionLedgerEntry[];
   coveredSections: string[];
   previousDocument: LivingProcurementDocument | null;
+  revision: CompilerRevision | null;
 }): Promise<LivingProcurementDocument> {
   const requirement = requirementFrom(params.facts);
   const buying = buyingOf(params.facts);
@@ -94,7 +112,7 @@ async function deriveExpectedServerDoc(params: {
     receipts: params.receipts,
     sourceTurns: params.sourceLedger,
     previousDocument: params.previousDocument,
-    revision: undefined,
+    revision: params.revision,
   });
 }
 
@@ -139,6 +157,11 @@ async function main() {
     decisionLedger: [],
     coveredSections: [],
     previousDocument: null,
+    // First-ever compile: resolveVersion()'s `!previousDocument` branch
+    // fires unconditionally, so the exact revision value only sets the
+    // baseline `lastRevision` the NEXT call's isNewEvent check compares
+    // against -- cycle 1, matching a real client's first governed event.
+    revision: { cycle: 1, changedFactIds: facts1.map((f) => f.id) },
   });
   const outcomeCreate = await buildEnvelopeUpdate({
     existing: null,
@@ -205,6 +228,8 @@ async function main() {
     decisionLedger: [],
     coveredSections: [],
     previousDocument: persistedAfterCreate.procurement_document,
+    // Reopened, changed nothing: no new governed event this call.
+    revision: null,
   });
   const outcomeNoOp = await buildEnvelopeUpdate({
     existing: { procurement_document: persistedAfterCreate.procurement_document, envelope_revision: persistedAfterCreate.envelope_revision },
@@ -243,6 +268,9 @@ async function main() {
     decisionLedger: [],
     coveredSections: [],
     previousDocument: persistedAfterCreate.procurement_document,
+    // A genuinely new buyer action (site-count correction); previousDocument's
+    // own lastRevision.cycle is 1 (from create), so cycle:2 is a new event.
+    revision: { cycle: 2, changedFactIds: ["estate.sites"] },
   });
   const outcomeCorrect = await buildEnvelopeUpdate({
     existing: { procurement_document: persistedAfterCreate.procurement_document, envelope_revision: persistedAfterCreate.envelope_revision },
@@ -276,6 +304,9 @@ async function main() {
     decisionLedger: [],
     coveredSections: [],
     previousDocument: outcomeCorrect.procurement_document,
+    // A new buyer action (removal); previousDocument's own lastRevision.cycle
+    // is 2 (from the correction in B), so cycle:3 is a new event.
+    revision: { cycle: 3, changedFactIds: ["estate.users"] },
   });
   const outcomeDrop = await buildEnvelopeUpdate({
     existing: { procurement_document: outcomeCorrect.procurement_document, envelope_revision: outcomeCorrect.envelope_revision },
@@ -301,6 +332,9 @@ async function main() {
     decisionLedger: [],
     coveredSections: [],
     previousDocument: outcomeDrop.procurement_document,
+    // Explicitly a no-op per this fixture's own comment above: nothing new
+    // typed, so no new governed event this call.
+    revision: null,
   });
   const outcomeReopenAgain = await buildEnvelopeUpdate({
     existing: { procurement_document: outcomeDrop.procurement_document, envelope_revision: outcomeDrop.envelope_revision },
@@ -356,6 +390,9 @@ async function main() {
     decisionLedger: decisionLedgerAccept,
     coveredSections: [],
     previousDocument: null,
+    // First-ever compile of this separate (D) chain: the `!previousDocument`
+    // branch fires unconditionally, so this only sets the baseline cycle.
+    revision: { cycle: 1, changedFactIds: [] },
   });
   const outcomeAccept = await buildEnvelopeUpdate({
     existing: null,
@@ -382,6 +419,9 @@ async function main() {
     decisionLedger: decisionLedgerAcceptThenDecline,
     coveredSections: [],
     previousDocument: outcomeAccept.procurement_document,
+    // A new governed event (the decline) on the D chain; previousDocument's
+    // own lastRevision.cycle is 1 (from the accept), so cycle:2 is new.
+    revision: { cycle: 2, changedFactIds: [] },
   });
   const outcomeDecline = await buildEnvelopeUpdate({
     existing: { procurement_document: outcomeAccept.procurement_document, envelope_revision: outcomeAccept.envelope_revision },
@@ -430,6 +470,10 @@ async function main() {
     decisionLedger: [],
     coveredSections: [],
     previousDocument: outcomeCorrect.procurement_document,
+    // Doesn't affect this fixture's pass/fail (base_revision staleness is
+    // checked before the hash-consistency check), but kept realistic:
+    // previousDocument's own lastRevision.cycle is 2, so cycle:3 is new.
+    revision: { cycle: 3, changedFactIds: ["estate.sites"] },
   });
   const outcomeStale = await buildEnvelopeUpdate({
     existing: { procurement_document: outcomeCorrect.procurement_document, envelope_revision: outcomeCorrect.envelope_revision },

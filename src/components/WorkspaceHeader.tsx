@@ -82,17 +82,27 @@ export default function WorkspaceHeader() {
           </span>
           <span className="hidden sm:inline">Netify / Living Procurement OS</span>
         </a>
+        {/* Touch-target correction (verification pass, 18 Aug 2026): these
+            two links carried no vertical padding of their own, so their
+            actual hit area was just their 17px text-line height, even
+            though `items-center` visually centred them inside the header's
+            52px (h-13) row -- a real sub-target tap area on mobile
+            (measured via Playwright at 390px: 50x17px), not just a guess.
+            `py-3` (12px top+bottom) grows ONLY the invisible hit box to
+            ~41px, well inside the row's own 52px height, so the header's
+            visible size and the approved prototype's topbar aesthetic are
+            unchanged -- no new chrome, no layout shift. */}
         <nav aria-label="Workspace" className="flex shrink-0 items-center gap-4">
           <a
             href={BOARD_LINK.href}
-            className="hidden no-underline transition-colors hover:text-white sm:inline-flex"
+            className="hidden items-center py-3 no-underline transition-colors hover:text-white sm:inline-flex"
             style={{ fontFamily: "var(--nf-font-mono)", fontSize: "10.5px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#D8D0BE" }}
           >
             {BOARD_LINK.label}
           </a>
           <a
             href={accountHref}
-            className="no-underline transition-colors hover:text-white"
+            className="inline-flex items-center py-3 no-underline transition-colors hover:text-white"
             style={{ fontFamily: "var(--nf-font-mono)", fontSize: "10.5px", letterSpacing: "0.08em", textTransform: "uppercase", color: "#D8D0BE" }}
           >
             {accountLabel}

@@ -6,7 +6,6 @@
 const ALLOWED_ORIGINS = new Set([
   "https://netify.co.uk",
   "https://www.netify.co.uk",
-  "https://sase.netify.co.uk",
 ]);
 
 export function corsHeaders(req: Request): Record<string, string> {

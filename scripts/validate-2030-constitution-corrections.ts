@@ -13,7 +13,7 @@
 // report, not repeated here since that tooling isn't part of `npm run
 // validate`'s deterministic, no-browser fixture set.
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -126,6 +126,106 @@ function main() {
       record(!/evidence requests? added/i.test(fnBody), "6: the mockup's fabricated \"evidence requests added\" count is deliberately NOT reproduced in the actual rendered caption (this codebase has no real per-change count for it)", "");
     }
     record(/deltaCaption=\{hasChange \? architectureDeltaCaption\(document\) : null\}/.test(canvas), "6: the delta caption is only passed when hasChange is real and true, null otherwise", "");
+  }
+
+  /* ================================================================ */
+  /* 7. Full visual-closure pass corrections (Robert's follow-up        */
+  /*    directive, 18 Aug 2026, same day): a real end-to-end first-save */
+  /*    bug found and fixed via a live local-KV Playwright run, the     */
+  /*    contradictory blank-state wording replaced, and a scoped        */
+  /*    contrast/touch-target pass across the six-state workspace.      */
+  /* ================================================================ */
+  {
+    const envelope = src("src/lib/workspace/envelope.ts");
+    record(
+      /revision: clientDocParsed\.data\.lastRevision,/.test(envelope),
+      "7: envelope.ts's canonical-envelope recompute (both create AND update) now trusts the client's own validated lastRevision instead of guessing server-side (fixes a real false-positive 409 on every project's first save AND its next edit-then-save/publish, both confirmed via live Playwright runs against a local KV store)",
+      "",
+    );
+
+    const desk = src("src/components/ProjectDesk.tsx");
+    record(/: "No blocking decisions"/.test(desk), "7: Mission Control's zero-material-decisions heading reads \"No blocking decisions\", never \"Nothing material outstanding\" (which could render directly above a visible card grid)", "");
+    record(!/"Nothing material outstanding"/.test(desk), "7: the old contradictory \"Nothing material outstanding\" string is fully removed from ProjectDesk.tsx", "");
+    record(/Optional refinements/.test(desk), "7: non-blocking question cards shown when nothing is material get their own \"Optional refinements\" label, never left unlabelled under a \"no blocking decisions\" heading", "");
+    // #655F52 replaced an intermediate var(--nf-ink-400) attempt: a real
+    // axe-core scan (State 0, the "Not started" badge on its #EDE7D9 fill)
+    // found even the design system's own muted token measures anywhere
+    // from 4.12:1 to 4.79:1 depending on which of this workspace's several
+    // near-white/ivory backgrounds it sits on -- inconsistent and
+    // sometimes below 4.5:1. #655F52 clears 4.5:1 with real margin (5.1:1
+    // to 6.3:1) against every background this pass actually measured.
+    record(/text-\[#655F52\]|"#655F52"/.test(desk), "7: ProjectDesk's light-background muted/caption text uses #655F52 (axe-core-verified 5.1:1+ across every background this pass measured) instead of the inaccessible #A3A099/#8C8A85 hex literals (2.5:1-3.5:1) or the marginal --nf-ink-400 token (4.12:1-4.79:1 depending on background)", "");
+    record(!/text-\[#A3A099\]|text-\[#8C8A85\]/.test(desk), "7: no light-background Tailwind text-color class in ProjectDesk.tsx still uses the old sub-4.5:1 #A3A099/#8C8A85 hex literals", "");
+
+    const header = src("src/components/WorkspaceHeader.tsx");
+    record(/inline-flex items-center py-3/.test(header), "7: the workspace header's account/board nav links carry real vertical padding, growing their touch target from a measured 50x17px to ~41px tall without changing the header's visible height", "");
+
+    // A third, distinct false-positive 409, found the SAME way (a live
+    // local-KV Playwright run through save -> edit -> publish): diffIds()
+    // in procurement-document.ts compared clause/question/gate objects
+    // with raw JSON.stringify, which is key-INSERTION-ORDER-sensitive.
+    // `previousDocument` on a real save is read back from storage after a
+    // zod .parse() round-trip (LivingProcurementDocumentSchema, envelope.ts)
+    // that reorders every clause's keys into schema-declared order, while a
+    // fresh compile builds clauses as `{ ...d, id, weight }` (id/weight
+    // appended last) -- so every byte-for-byte-UNCHANGED clause surviving a
+    // second save was spuriously reported as "updated", and since
+    // changeSet is part of the server/client consistency check, this alone
+    // 409'd every edit-then-save/publish even after the second bug's fix.
+    // Confirmed by diffing a live server recompute against the actual
+    // persisted KV record: identical clause content, different key order.
+    const procDoc = src("src/lib/workspace/procurement-document.ts");
+    record(/function canonicalJson\(/.test(procDoc), "7: procurement-document.ts has a canonicalJson() helper that sorts object keys recursively before stringifying, making equality checks independent of property-insertion order", "");
+    record(/canonicalJson\(prevByKey\.get\(x\.templateKey\)\) !== canonicalJson\(x\)/.test(procDoc), "7: diffIds() (drives changeSet.clauses/questions/gates) now compares clauses via canonicalJson, not raw JSON.stringify -- fixes a real false-positive \"updated\" on every unchanged clause surviving a second save, confirmed via a live Playwright run diffing the server's fresh recompute against the actual persisted KV record (identical content, different key order after the schema round-trip)", "");
+    record(!/JSON\.stringify\(prevByKey\.get\(x\.templateKey\)\) !== JSON\.stringify\(x\)/.test(procDoc), "7: the old key-order-sensitive raw JSON.stringify comparison in diffIds() is fully removed", "");
+
+    // Requirement 7 of the SAME directive ("visibly preserve the value-
+    // building story" through states 3-5) was found unmet by a live
+    // Playwright walkthrough: LivingProcurementCanvas and McpEvidencePanel
+    // both hid completely once `phase === "fits"` (the publish/post-
+    // publish phase), leaving states 3-5 showing only the publish panel
+    // and, post-publish, the matched-vendor list -- no living document, no
+    // supplier pack, no evaluation view, no provenance. Neither component
+    // names a vendor; the MarketUnlock boundary lives entirely in the
+    // "fits" panel and its server route, untouched by rendering these
+    // through "fits" too.
+    record(/\(phase === "live" \|\| phase === "fits"\) && started && \(/.test(desk), "7: LivingProcurementCanvas now also renders through phase===\"fits\" (states 3-5), not just \"live\" (state 2) -- the living document/supplier pack/evaluation views stay visible right where a buyer is about to publish and right after they have, instead of vanishing the moment publishing starts", "");
+    record(/\(phase === "live" \|\| phase === "fits"\) && started && created\?\.id && \(/.test(desk), "7: McpEvidencePanel (real project history/provenance) now also renders through phase===\"fits\", for the same reason and with the same non-leak guarantee (it names no vendor)", "");
+
+    // Requirement 9 ("Use only the canonical production host... Do not
+    // reference app.netify.co.uk or sase.netify.co.uk"): a full-repo grep
+    // found two LIVE references to the retired sase.netify.co.uk
+    // subdomain (next.config.ts's own 301 redirects catch and forward
+    // traffic FROM that host, which is the correct, opposite thing, and
+    // are deliberately left alone). Both live references are fixed here;
+    // no live reference to app.netify.co.uk was found anywhere outside
+    // that same retirement-redirect and historical /reports/*.md records,
+    // neither of which this fixture touches.
+    const cors = src("src/lib/cors.ts");
+    record(!/sase\.netify\.co\.uk/.test(cors), "7: cors.ts's CORS allowlist no longer grants the retired sase.netify.co.uk subdomain cross-origin access to the agentic APIs", "");
+    const agentRoute = src("src/app/api/agent/route.ts");
+    record(!/sase\.netify\.co\.uk/.test(agentRoute), "7: the shortlist advisor's own system prompt no longer describes itself as embedded at sase.netify.co.uk -- it names the canonical netify.co.uk host", "");
+  }
+
+  /* ================================================================ */
+  /* 8. Production build hermeticity: `npm run build` (required        */
+  /*    evidence for this pass) failed outright in a network-          */
+  /*    restricted build environment because `next/font/google`        */
+  /*    fetches the actual Inter font bytes from fonts.googleapis.com  */
+  /*    at BUILD time, not just at first `next dev`. This is a build-  */
+  /*    tooling fix, not a visual or product change: same Inter        */
+  /*    typeface, same variable weight range (100-900), same latin     */
+  /*    subset, same `--font-inter` CSS variable contract -- just      */
+  /*    sourced from a font file checked into the repo instead of a    */
+  /*    live network fetch during the build.                           */
+  /* ================================================================ */
+  {
+    const layout = src("src/app/layout.tsx");
+    record(!/from "next\/font\/google"/.test(layout), "8: src/app/layout.tsx no longer imports from next/font/google (which fetches Inter from fonts.googleapis.com at build time)", "");
+    record(/next\/font\/local/.test(layout), "8: src/app/layout.tsx now sources Inter via next/font/local", "");
+    record(/variable:\s*"--font-inter"/.test(layout), "8: the --font-inter CSS variable contract (referenced by globals.css's --font-display/--font-sans) is unchanged", "");
+    record(/weight:\s*"100 900"/.test(layout), "8: the same variable weight range (100-900) that next/font/google previously fetched is preserved", "");
+    record(existsSync(path.join(ROOT, "src/fonts/inter-variable-latin.woff2")), "8: the self-hosted Inter variable woff2 (latin subset) is checked into the repo at src/fonts/inter-variable-latin.woff2", "");
   }
 
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);

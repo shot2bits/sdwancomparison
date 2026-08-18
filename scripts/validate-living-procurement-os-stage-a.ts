@@ -443,7 +443,18 @@ function main() {
     "",
   );
   record(desk.includes("<LivingProcurementCanvas"), "Part B: ProjectDesk.tsx actually renders <LivingProcurementCanvas", "");
-  record(desk.includes('phase === "live" && started &&'), "Part B: the new canvas is gated on phase===\"live\" && started, the same gate the existing editable statement panel uses", "");
+  // CORRECTED (Robert's follow-up visual-closure directive, 18 Aug 2026,
+  // item 7 -- "visibly preserve the value-building story" through states
+  // 3-5): this fixture originally required the canvas to be gated on
+  // phase==="live" alone, matching the pre-publish statement panel. A
+  // live Playwright walkthrough of publish found that gate hid the whole
+  // living document/supplier pack/evaluation surface the instant a buyer
+  // entered the publish flow (phase==="fits") -- exactly the states the
+  // directive requires it stay visible through. The canvas now also
+  // renders through "fits"; it still names no vendor (enforced by the
+  // leakage-surface fixtures below, unchanged), so this widening carries
+  // no MarketUnlock risk.
+  record(desk.includes('(phase === "live" || phase === "fits") && started &&'), "Part B: the new canvas is gated on (phase===\"live\" || phase===\"fits\") && started -- visible through states 2-5, not just state 2, while still never rendering pre-project-start", "");
 
   // The locked pre-publication panel must remain completely untouched and
   // must never be reachable while the new canvas is also shown.

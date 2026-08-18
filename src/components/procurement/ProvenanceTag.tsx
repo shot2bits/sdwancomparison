@@ -57,7 +57,7 @@ export const PROVENANCE_LABEL: Record<ProvenanceKind, string> = {
  *  closure-pass fix that gave agent/intel visually distinct dots (they
  *  both used to be lilac, a real collision the closure pass corrected). */
 const DOT_COLOR: Record<ProvenanceKind, string> = {
-  words: "var(--nf-ink-400)",
+  words: "#655F52",
   intel: "var(--nf-lilac)",
   evidence: "var(--nf-cobalt)",
   agent: "var(--nf-orange)",
@@ -84,7 +84,7 @@ export function ProvenanceTag({ kind, inline, dark }: { kind: ProvenanceKind; in
         fontSize: "9px",
         letterSpacing: "0.08em",
         textTransform: "uppercase",
-        color: dark ? "#948C79" : "var(--nf-ink-400)",
+        color: dark ? "#948C79" : "#655F52",
       }}
     >
       <span className="inline-block h-[6px] w-[6px] flex-none rounded-full" style={{ background: DOT_COLOR[kind] }} aria-hidden="true" />

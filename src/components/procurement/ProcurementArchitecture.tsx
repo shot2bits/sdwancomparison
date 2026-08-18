@@ -93,7 +93,7 @@ export default function ProcurementArchitecture({
       </span>
       <div className="mt-3 rounded-[14px] border p-4" style={{ borderColor: "var(--nf-rule, #E4D9C2)", background: "var(--nf-ivory-raised, #FBF7EE)" }}>
         {nodes.length === 0 ? (
-          <p className="m-0 text-[13.5px] leading-[1.55] text-[#8C8A85]">
+          <p className="m-0 text-[13.5px] leading-[1.55] text-[var(--nf-ink-400)]">
             Nothing derived yet — it fills in as you describe sites, users, network and cloud.
           </p>
         ) : edges.length === 0 ? (

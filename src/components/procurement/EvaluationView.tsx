@@ -30,8 +30,8 @@ export default function EvaluationView({
           <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
             Scoring weight
           </span>
-          <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">always balances to 100</span>
-          <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{weightTotal}</span>
+          <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">always balances to 100</span>
+          <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{weightTotal}</span>
         </div>
         {evaluation.categories.length > 0 && (
           <>
@@ -54,7 +54,7 @@ export default function EvaluationView({
                     aria-hidden="true"
                   />
                   {c.label} · {c.weight}%
-                  {c.source !== "default" && <span className="text-[10.5px] text-[#A3A099]">({c.source.replace(/_/g, " ")})</span>}
+                  {c.source !== "default" && <span className="text-[10.5px] text-[#655F52]">({c.source.replace(/_/g, " ")})</span>}
                 </div>
               ))}
             </div>
@@ -67,8 +67,8 @@ export default function EvaluationView({
           <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
             Pass/fail gates
           </span>
-          <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">every mandatory requirement, unweighted</span>
-          <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{evaluation.gates.length}</span>
+          <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">every mandatory requirement, unweighted</span>
+          <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{evaluation.gates.length}</span>
         </div>
         {evaluation.gates.length > 0 ? (
           <div className="flex flex-col">
@@ -80,13 +80,13 @@ export default function EvaluationView({
                 <span className="mt-[5px] inline-block h-[7px] w-[7px] flex-none rounded-full bg-[#B4650B]" aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[13.5px] leading-[1.5] text-[#141414]">{g.label}</div>
-                  <div className="mt-0.5 text-[12px] leading-[1.5] text-[#8C8A85]">{g.description}</div>
+                  <div className="mt-0.5 text-[12px] leading-[1.5] text-[#655F52]">{g.description}</div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="py-[9px] text-[13.5px] leading-[1.55] text-[#8C8A85]">No mandatory gates yet.</p>
+          <p className="py-[9px] text-[13.5px] leading-[1.55] text-[#655F52]">No mandatory gates yet.</p>
         )}
       </div>
     </div>

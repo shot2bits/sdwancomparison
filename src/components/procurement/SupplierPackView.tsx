@@ -26,14 +26,14 @@ export default function SupplierPackView({ groups }: { groups: SupplierResponseG
   if (totalQuestions === 0) {
     return (
       <div className="pb-4">
-        <p className="m-0 text-[13.5px] leading-[1.55] text-[#8C8A85]">No supplier questions yet — they compile alongside the requirements above.</p>
+        <p className="m-0 text-[13.5px] leading-[1.55] text-[#655F52]">No supplier questions yet — they compile alongside the requirements above.</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="m-0 max-w-[48em] pb-2 text-[13px] leading-[1.6] text-[#8C8A85]">
+      <p className="m-0 max-w-[48em] pb-2 text-[13px] leading-[1.6] text-[#655F52]">
         What suppliers and vendors will be asked to answer against — {totalQuestions} question{totalQuestions === 1 ? "" : "s"} across {groups.length}{" "}
         area{groups.length === 1 ? "" : "s"}, each tied to a numbered requirement above.
       </p>
@@ -43,16 +43,23 @@ export default function SupplierPackView({ groups }: { groups: SupplierResponseG
             <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
               {g.title}
             </span>
-            <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{g.questions.length}</span>
+            <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{g.questions.length}</span>
           </div>
           <div className="flex flex-col">
             {g.questions.map((q) => (
               <div key={q.id} className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]">
-                <span className="w-[64px] flex-none pt-[2px] text-[10px] text-[#A3A099]" style={mono}>{q.clauseId}</span>
+                <span className="w-[64px] flex-none pt-[2px] text-[10px] text-[#655F52]" style={mono}>{q.clauseId}</span>
                 <div className="min-w-0 flex-1">
                   <div className="text-[13.5px] leading-[1.5] text-[#141414]">{q.text}</div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#8C8A85]">
-                    <span className="rounded-[4px] bg-[#F4F2ED] px-[6px] py-[2px] uppercase" style={{ ...mono, letterSpacing: "0.06em" }}>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#655F52]">
+                    {/* Contrast fix (verification pass, 18 Aug 2026): this
+                        badge would otherwise inherit its parent's
+                        --nf-ink-400 (4.25:1 on white/ivory), which falls
+                        just short of 4.5:1 on this badge's own slightly
+                        warmer #F4F2ED fill (measured 4.25:1 there too) --
+                        #655F52 is the same neutral hue, darkened just
+                        enough to clear 4.5:1 specifically against #F4F2ED. */}
+                    <span className="rounded-[4px] bg-[#F4F2ED] px-[6px] py-[2px] uppercase" style={{ ...mono, letterSpacing: "0.06em", color: "#655F52" }}>
                       {q.answerFormat.replace(/_/g, " ")}
                     </span>
                     {q.evidenceRequested.map((e) => (

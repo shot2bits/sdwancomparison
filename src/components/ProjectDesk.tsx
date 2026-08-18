@@ -3444,9 +3444,9 @@ export default function ProjectDesk({
     const isNew = changedSlots.includes(s.id);
     const rowCls = "flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]";
     const rowStyle: React.CSSProperties = isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {};
-    const labCls = "w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]";
+    const labCls = "w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]";
     const tagBase: React.CSSProperties = { ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none" };
-    const ctlCls = "flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099]";
+    const ctlCls = "flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52]";
 
     const fs = s.path ? standingAt(s.path) : [];
     if (s.path && fs.length) {
@@ -3484,13 +3484,13 @@ export default function ProjectDesk({
             >
               {value}
             </button>
-            <span className="text-[12px] italic text-[#A3A099]">{meta}</span>
+            <span className="text-[12px] italic text-[#655F52]">{meta}</span>
           </div>
           <span style={{ ...tagBase, ...(anyInferred ? { background: "#F1EFE9", color: "#7A7770" } : { background: "#EAF6EE", color: "#256B3E" }) }}>
             {anyInferred ? "netify guessed" : "your words"}
           </span>
           {single ? (
-            <button type="button" onClick={() => dropRow(latest)} className={`${ctlCls} hover:border-[#B4650B] hover:text-[#B4650B]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+            <button type="button" onClick={() => dropRow(latest)} className={`${ctlCls} hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]`} style={{ ...mono, letterSpacing: "0.07em" }}>
               {latest.provenance === "inferred" ? "drop" : "clear"}
             </button>
           ) : (
@@ -3522,7 +3522,7 @@ export default function ProjectDesk({
             >
               {value}
             </button>
-            <span className="text-[12px] italic text-[#A3A099]">you chose this</span>
+            <span className="text-[12px] italic text-[#655F52]">you chose this</span>
           </div>
           <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
           {/* Fix, 10 Aug 2026 (Harry's E2E, Test 1.6 -- same root cause as
@@ -3547,7 +3547,7 @@ export default function ProjectDesk({
         <button
           type="button"
           onClick={() => setEdit(s.id)}
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
         >
           <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
           {s.cta}
@@ -3625,7 +3625,7 @@ export default function ProjectDesk({
                   {saveDirty ? "saved, edits since" : "saved"} · open your project record
                 </a>
               ) : (
-                <span className="text-[11.5px] text-[#A3A099]" style={mono}>nothing leaves this page</span>
+                <span className="text-[11.5px] text-[#655F52]" style={mono}>nothing leaves this page</span>
               )}
               <span className="flex-1" />
               <button
@@ -3648,7 +3648,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => window.location.assign(window.location.pathname)}
-                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#A3A099] hover:text-[#141414]"
+                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#655F52] hover:text-[#141414]"
               >
                 Start again
               </button>
@@ -3669,9 +3669,9 @@ export default function ProjectDesk({
           <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
             <div className="min-w-[220px] flex-1">
               <div className="flex items-baseline gap-2.5">
-                <span className="text-[10.5px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
+                <span className="text-[10.5px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
                 <span className="text-[15px] font-semibold" style={mono}>{pct}%</span>
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#A3A099]">{pctNote}</span>
+                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#655F52]">{pctNote}</span>
               </div>
               <div className="mt-2 flex gap-[3px]">
                 {Array.from({ length: 12 }, (_, i) => (
@@ -3682,9 +3682,9 @@ export default function ProjectDesk({
             <div className="flex-none border-l border-[#E5E1D9] pl-[22px]">
               <div className="flex items-baseline gap-2">
                 <span className="text-[22px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>{marketTotal ?? "…"}</span>
-                <span className="text-[12.5px] text-[#8C8A85]">evaluated marketplace</span>
+                <span className="text-[12.5px] text-[#655F52]">evaluated marketplace</span>
               </div>
-              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#A3A099]">{marketNote}</div>
+              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#655F52]">{marketNote}</div>
             </div>
           </div>
 
@@ -3738,7 +3738,7 @@ export default function ProjectDesk({
               placeholder={resuming ? PLACEHOLDER_RESUMING : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
               disabled={resuming}
               rows={1}
-              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099] disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#655F52] disabled:cursor-not-allowed disabled:opacity-60"
             />
             <div className="flex flex-none items-center gap-1.5">
               {voiceSupported && (
@@ -3746,7 +3746,7 @@ export default function ProjectDesk({
                   type="button"
                   onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}
                   title={voiceState === "idle" ? "Say it out loud" : "Stop listening"}
-                  className={`flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[#B4650B]" : "border-transparent text-[#8C8A85] hover:border-[#E3E0DA] hover:text-[#141414]"}`}
+                  className={`flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[var(--nf-orange-strong)]" : "border-transparent text-[#655F52] hover:border-[#E3E0DA] hover:text-[#141414]"}`}
                 >
                   {voiceState === "listening" ? (
                     <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#B4650B]" aria-hidden="true" />
@@ -3762,7 +3762,7 @@ export default function ProjectDesk({
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 title="Drop or choose a plain-text document and it will be read into the statement"
-                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#8C8A85] hover:border-[#E3E0DA] hover:text-[#141414]"
+                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#655F52] hover:border-[#E3E0DA] hover:text-[#141414]"
               >
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M11.5 5.5 6 11a2.5 2.5 0 1 0 3.54 3.54L15 9.08a4 4 0 1 0-5.66-5.66L4 8.76" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -3798,18 +3798,18 @@ export default function ProjectDesk({
               answers in copy) still holds -- this describes the
               mechanism, it does not demonstrate an answer. */}
           {!started && (
-            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">
               Answers below fill in automatically as you describe your requirement above.
             </p>
           )}
           {wrongCompany && (
-            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">
               Looking for website hosting? That is Netlify, a different company. This is Netify, the SASE and SD-WAN procurement marketplace; carry on if the network is what you came for.
             </p>
           )}
-          {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{pasteSummary}</p>}
-          {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">{cycleError}</p>}
-          {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{voiceError}</p>}
+          {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">{pasteSummary}</p>}
+          {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[var(--nf-orange-strong)]">{cycleError}</p>}
+          {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">{voiceError}</p>}
         </div>
       </div>
 
@@ -3820,7 +3820,7 @@ export default function ProjectDesk({
       {!coreFive.sector && (
         <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
           <div className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
-            <span className="flex-none text-[12.5px] text-[#A3A099]">Or start from your sector:</span>
+            <span className="flex-none text-[12.5px] text-[#655F52]">Or start from your sector:</span>
             {SECTOR_CHIPS.map((c) => (
               <button
                 key={c.label}
@@ -3944,10 +3944,26 @@ export default function ProjectDesk({
               heading-list navigation. `<h2>` is the correct level -- a
               sibling section heading, same rank as the document title,
               not a subsection three levels below the page's own h1. */}
+          {/* Honesty fix (verification pass, 18 Aug 2026): "Nothing material
+              outstanding" used to render directly above a live grid of
+              question cards (nextQuestionCards is the FULL ranked list,
+              never filtered to material-only -- see topThreeQuestions above)
+              whenever any non-material/optional question existed -- reading
+              as a direct contradiction ("nothing outstanding", right above
+              something visibly presented). The cards themselves already say
+              which they are (LivingProcurementCanvas.tsx's own isMaterial
+              fix, same MATERIAL_IMPACTS classification, "Open decision" vs
+              "Optional - not required to publish"); this heading now uses
+              the same true/false split the cards use, in the buyer's own
+              words: "No blocking decisions" when materialDecisionsRemaining
+              is genuinely 0, never a phrase that could be misread as "there
+              is nothing here at all." Whatever optional cards remain below
+              get their own "Optional refinements" label (just below) so the
+              two never disagree. */}
           <h2 className="mb-0 mt-1.5 text-[19px] font-semibold leading-[1.3]" style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "#fff" }}>
             {materialDecisionsRemaining
               ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
-              : "Nothing material outstanding"}
+              : "No blocking decisions"}
           </h2>
           {/* Mobile-only compact toggle -- `lg:hidden` so desktop never
               sees it (the full card is always expanded there). Only shown
@@ -3957,7 +3973,13 @@ export default function ProjectDesk({
               type="button"
               onClick={() => setMcExpanded((v) => !v)}
               className="mt-2 cursor-pointer rounded-full border-0 px-3 py-1.5 text-[11px] font-semibold uppercase lg:hidden"
-              style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.06em", background: "var(--nf-orange, #E8590C)", color: "#fff" }}
+              /* Contrast fix (verification pass, 18 Aug 2026): white text on
+                 --nf-orange (#E8590C) measured 3.58:1, below WCAG AA's
+                 4.5:1 for this button's normal-weight small text.
+                 --nf-orange-strong (#AA3E06, already the design system's
+                 own darker/contrast-fixed orange -- see globals.css) gives
+                 white text 6.17:1 here, comfortably safe, same accent hue. */
+              style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.06em", background: "var(--nf-orange-strong, #AA3E06)", color: "#fff" }}
               aria-expanded={mcExpanded}
             >
               {mcExpanded ? "Hide decisions" : "View decisions"}
@@ -3965,10 +3987,24 @@ export default function ProjectDesk({
           )}
           <div className={`${mcExpanded ? "" : "hidden"} lg:block`}>
             <p className="m-0 mt-3 text-[12px] leading-[1.5] lg:mt-1" style={{ color: "#B9B2A2" }}>
-              The agent ranks only choices that change price, risk, compliance or delivery.
+              {materialDecisionsRemaining
+                ? "The agent ranks only choices that change price, risk, compliance or delivery."
+                : "Nothing below blocks publishing — every card here is optional."}
             </p>
             {nextQuestionCards && nextQuestionCards.length > 0 ? (
               <div className="mt-4">
+                {/* Bullet 2 of the same honesty fix: when nothing is
+                    material, the cards still shown (governed suggestions,
+                    delivery/evaluation-only earned questions) get their own
+                    named group instead of sitting under a bare "no blocking
+                    decisions" heading with no label of their own — never
+                    presented as though they were the blocking decisions the
+                    heading just said there were none of. */}
+                {!materialDecisionsRemaining && (
+                  <div className="mb-2 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.1em", color: "#948C79" }}>
+                    Optional refinements
+                  </div>
+                )}
                 <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare dark />
               </div>
             ) : (
@@ -4034,7 +4070,7 @@ export default function ProjectDesk({
           data, the memory, or the scroll behaviour changes. */}
       <div className="mx-auto w-full max-w-[1000px] px-[26px] pt-3">
         {msgs.length > 0 && (
-          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#A3A099]">
+          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#655F52]">
             Feedback only, kept for this sitting — the statement below is the record.
           </p>
         )}
@@ -4057,7 +4093,7 @@ export default function ProjectDesk({
             <div key={i} className="flex items-start gap-2.5">
               <span
                 className="w-[52px] flex-none pt-[3px] text-[10px] font-semibold uppercase"
-                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#A3A099" : "#B4650B" }}
+                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#655F52" : "var(--nf-orange-strong)" }}
               >
                 {m.who === "you" ? "You" : "Netify"}
               </span>
@@ -4082,11 +4118,27 @@ export default function ProjectDesk({
           the exact, already-working correction/edit affordance for
           individual facts (drop/clear/edit buttons, sector packs, notes)
           -- nothing about that panel's own behaviour changes here. Only
-          shown once a project has started, same as the statement it
-          sits above; hidden once locked (`phase === "fits"`), the same
-          gate the statement uses, so this never renders anywhere near
-          the pre-publication vendor-redaction panel below. */}
-      {phase === "live" && started && (
+          shown once a project has started.
+
+          CORRECTION (Robert's follow-up visual-closure directive, 18 Aug
+          2026, item 7): this used to also hide once locked (`phase ===
+          "fits"`), on the reasoning that it must never render "anywhere
+          near" the pre-publication vendor-redaction panel below. That
+          reasoning doesn't hold up: this canvas (title/summary, readiness,
+          the fact-strip counts, the Living document / Supplier pack /
+          Evaluation switch, the architecture twin, the clause list, open
+          decisions) never names a single vendor or service provider --
+          the MarketUnlock boundary is enforced entirely inside the "fits"
+          panel and its own server route (fit/route.ts), untouched by this
+          change. Hiding the canvas instead broke the buyer-facing "value-
+          building story" the SAME directive requires end to end: buyer
+          wording -> structured facts -> living document -> supplier pack
+          -> frozen published revision -> vendor responses -> evidence-
+          backed comparison. Rendering through "fits" too (states 3-5, not
+          just state 2) keeps that story visible exactly where it matters
+          most -- right where the buyer is about to publish, and right
+          after they have. */}
+      {(phase === "live" || phase === "fits") && started && (
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2 pt-[6px]">
           <LivingProcurementCanvas
             document={canvasDocument}
@@ -4110,8 +4162,14 @@ export default function ProjectDesk({
           each of the seven states is grounded in. Only rendered once a
           project has actually been saved (an id exists), since history
           only exists on a persisted record -- an unsaved draft honestly
-          has no history to read, not an empty one worth rendering. */}
-      {phase === "live" && started && created?.id && (
+          has no history to read, not an empty one worth rendering.
+          Rendered through `phase === "fits"` too, the same correction and
+          for the same reason as the canvas above: this is provenance
+          (who did what, when), never a vendor name, so keeping it visible
+          through states 3-5 preserves the value-building story instead of
+          breaking it at the exact moment (about to publish, just
+          published) it matters most. */}
+      {(phase === "live" || phase === "fits") && started && created?.id && (
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2">
           <McpEvidencePanel history={projectHistory} />
         </div>
@@ -4154,9 +4212,9 @@ export default function ProjectDesk({
             Project details / edit source facts
           </summary>
           <div className="px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]">
-          <div className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
+          <div className="text-[10.5px] uppercase text-[var(--nf-orange-strong)]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
           <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
-          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#8C8A85]">
+          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#655F52]">
             This document is the project. It fills in as you talk, every line shows where it came from, and vendors and service providers bid against exactly what is on this page.
           </p>
 
@@ -4168,8 +4226,8 @@ export default function ProjectDesk({
                 <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
                   <div className="mb-2 flex items-baseline gap-[11px]">
                     <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                    <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">{g.note}</span>
-                    <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{state}</span>
+                    <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">{g.note}</span>
+                    <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{state}</span>
                   </div>
                   <div className="flex flex-col">
                     {rows.length > 0 ? (
@@ -4181,12 +4239,12 @@ export default function ProjectDesk({
                             className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]"
                             style={isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {}}
                           >
-                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]">Applied</span>
+                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]">Applied</span>
                             <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
                               <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>
                                 {COMPLIANCE_LABELS[String(f.value)] ?? String(f.value)}
                               </span>
-                              <span className="text-[12px] italic text-[#A3A099]">
+                              <span className="text-[12px] italic text-[#655F52]">
                                 {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
                               </span>
                             </div>
@@ -4199,7 +4257,7 @@ export default function ProjectDesk({
                             <button
                               type="button"
                               onClick={() => dropRow(f)}
-                              className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                              className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
                               style={{ ...mono, letterSpacing: "0.07em" }}
                             >
                               {f.provenance === "inferred" ? "drop" : "clear"}
@@ -4208,16 +4266,16 @@ export default function ProjectDesk({
                         );
                       })
                     ) : coreFive.sector ? (
-                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#8C8A85]">
+                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#655F52]">
                         No asserted rule pack for this sector yet. Any rule you state lands here with your words as its provenance.
                       </div>
                     ) : (
                       <div className="flex items-start gap-3.5 py-[9px]">
-                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Sector rules</span>
+                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Sector rules</span>
                         <button
                           type="button"
                           onClick={() => setEdit("sector")}
-                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
                         >
                           <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
                           Set your sector to load these
@@ -4232,11 +4290,11 @@ export default function ProjectDesk({
                         options (NHS DSPT, FCA) only appear once the
                         standing sector matches. */}
                     <div className="flex items-start gap-3.5 py-[9px]">
-                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Compliance</span>
+                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Compliance</span>
                       <button
                         type="button"
                         onClick={() => setEdit("compliance")}
-                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
                       >
                         <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
                         Add a compliance requirement
@@ -4252,8 +4310,8 @@ export default function ProjectDesk({
               <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
                 <div className="mb-2 flex items-baseline gap-[11px]">
                   <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                  <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">{g.note}</span>
-                  <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{filled} of {slots.length}</span>
+                  <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">{g.note}</span>
+                  <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{filled} of {slots.length}</span>
                 </div>
                 <div className="flex flex-col">{slots.map(slotCell)}</div>
               </div>
@@ -4276,17 +4334,17 @@ export default function ProjectDesk({
           <div className="border-t border-[#EFECE5] pb-4 pt-[18px]">
             <div className="mb-2 flex items-baseline gap-[11px]">
               <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>Other requirements</span>
-              <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">anything the statement above has no line for</span>
-              <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
+              <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">anything the statement above has no line for</span>
+              <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
             </div>
             <div className="flex flex-col">
               {receipts.length > 0 ? (
                 receipts.map((r) => (
                   <div key={r.id} className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]">
-                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]">Noted</span>
+                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]">Noted</span>
                     <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
                       <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>{r.text}</span>
-                      <span className="text-[12px] italic text-[#A3A099]">kept verbatim</span>
+                      <span className="text-[12px] italic text-[#655F52]">kept verbatim</span>
                     </div>
                     <span style={{ ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none", background: "#EAF6EE", color: "#256B3E" }}>
                       your words
@@ -4294,7 +4352,7 @@ export default function ProjectDesk({
                     <button
                       type="button"
                       onClick={() => { dropReceipt(r.id); say(`Cleared: “${r.text}”. It will not come back unless you say it yourself.`); }}
-                      className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                      className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
                       style={{ ...mono, letterSpacing: "0.07em" }}
                     >
                       clear
@@ -4303,8 +4361,8 @@ export default function ProjectDesk({
                 ))
               ) : (
                 <div className="flex items-start gap-3.5 py-[9px]">
-                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Anything else</span>
-                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85]">
+                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Anything else</span>
+                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52]">
                     Say it in the prompt above. Anything that doesn&apos;t fit a line elsewhere is kept here, word for word.
                   </div>
                 </div>
@@ -4366,7 +4424,7 @@ export default function ProjectDesk({
           <button
             type="button"
             onClick={() => { setPhase("live"); scrollToWorkspace(); }}
-            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#8C8A85] hover:text-[#141414]"
+            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#655F52] hover:text-[#141414]"
           >
             Back to the statement
           </button>
@@ -4380,24 +4438,24 @@ export default function ProjectDesk({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
                 <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
                   Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
                 </div>
               </div>
               <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
                 <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
                   Document readiness. {pctNote}
                 </div>
               </div>
               <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
                 <div className="text-[22px] font-semibold" style={mono}>{unansweredGaps.length}</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
+                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
                   {unansweredGaps.length === 1 ? "Open decision" : "Open decisions"} remaining. Resolve or accept as a stated assumption before you publish.
                 </div>
               </div>
             </div>
-            <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#8C8A85]">
+            <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#655F52]">
               What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
             </p>
           </div>
@@ -4464,7 +4522,7 @@ export default function ProjectDesk({
                           const inv = published.invited.some((iv) => iv.slug === v.slug);
                           return (
                             <li key={`${v.slug}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
-                              <span className="text-[11px] text-[#8C8A85]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
+                              <span className="text-[11px] text-[#655F52]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
                               <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
                               {inv && (
                                 <span className="rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}>invited</span>
@@ -4480,7 +4538,7 @@ export default function ProjectDesk({
                       if (invitedOnly.length === 0) return null;
                       return (
                         <div className="mt-2">
-                          <p className="m-0 mb-1 text-[11px] text-[#8C8A85]">
+                          <p className="m-0 mb-1 text-[11px] text-[#655F52]">
                             Also invited (your own pinned {invitedOnly.length === 1 ? "vendor" : "vendors"}, not part of the ranked match):
                           </p>
                           <ol className="m-0 list-none p-0">
@@ -4549,28 +4607,28 @@ export default function ProjectDesk({
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
                     <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 font-semibold text-[#33302C]">Your project</div>
-                    <div className="text-[#8C8A85]" style={mono}>publish ↓</div>
+                    <div className="text-[#655F52]" style={mono}>publish ↓</div>
                     <div className="rounded-md border px-3 py-1.5 text-center" style={{ borderColor: "var(--nf-orange, #F5A21B)", background: "var(--nf-orange-soft, #FFF7E8)" }}>
                       <p className="m-0 font-semibold" style={{ color: "var(--nf-orange-strong, #8A4D08)" }}>Opportunity board</p>
                       <p className="m-0 text-[11px] text-[#6E6C67]">Anonymous notice: sector, size band. No name, no contact details.</p>
                     </div>
                     <div className="grid w-full grid-cols-2 gap-3 pt-1">
                       <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#8C8A85]" style={mono}>↓ notified</div>
+                        <div className="text-[#655F52]" style={mono}>↓ notified</div>
                         <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
                           <p className="m-0 font-semibold text-[#33302C]">Matched, vetted vendors</p>
                           <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">See the opportunity in full. Can respond directly.</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#8C8A85]" style={mono}>↓ can find it</div>
+                        <div className="text-[#655F52]" style={mono}>↓ can find it</div>
                         <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
                           <p className="m-0 font-semibold text-[#33302C]">Everyone else</p>
                           <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">Public web, search engines, unvetted vendors. Sees the notice only. Can register to become vetted.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="text-[#8C8A85]" style={mono}>↓</div>
+                    <div className="text-[#655F52]" style={mono}>↓</div>
                     <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 text-center font-semibold text-[#33302C]">
                       You choose who gets your contact details, and when
                     </div>
@@ -4585,7 +4643,7 @@ export default function ProjectDesk({
                     : ""}
                   . You choose which of them receive your contact details, and when. Assumptions publish labelled as assumptions; example content never publishes at all.
                 </p>
-                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
+                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#655F52]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
                 <p className="m-0 mb-1.5 text-[12.5px] leading-loose">
                   {[
                     typeof requirement.estate?.sites === "number"
@@ -4601,13 +4659,13 @@ export default function ProjectDesk({
                   ].filter(Boolean).map((chip) => (
                     <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-[#EAE7E1] bg-white px-2 py-[1px] text-[12.5px] text-[#33302C]">{chip}</span>
                   ))}
-                  <span className="text-[12.5px] text-[#8C8A85]">
+                  <span className="text-[12.5px] text-[#655F52]">
                     {typeof requirement.estate?.sites === "number" && siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
                       ? "as written, except the site count: sector plus one region could identify you, so the notice shows the range, and the exact count is seen only after the gate"
                       : "exactly as written, nothing retyped"}
                   </span>
                 </p>
-                <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#8C8A85]">
+                <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#655F52]">
                   <span className="font-semibold text-[#6E6C67]">Stays private:</span> your identity and contacts, your notes,
                   {unansweredGaps.length > 0 ? ` ${numWord(unansweredGaps.length)} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
                   {" "}and anything you have dropped from the record.
@@ -4748,7 +4806,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => setEdit(null)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#A3A099] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#655F52] hover:text-[#141414]"
               >
                 Close
               </button>
@@ -4780,15 +4838,15 @@ export default function ProjectDesk({
               if (!held.length) return null;
               return (
                 <div className="mb-4">
-                  <div className="mb-1 text-[10px] font-semibold uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: ".11em" }}>Held now</div>
+                  <div className="mb-1 text-[10px] font-semibold uppercase text-[#655F52]" style={{ ...mono, letterSpacing: ".11em" }}>Held now</div>
                   {held.map((h) => (
                     <div key={h.key} className="flex items-baseline gap-2.5 border-t border-[#F0EEE9] py-2">
                       <span className="min-w-0 flex-1 text-[14.5px]">{h.label}</span>
-                      <span className="min-w-0 flex-[1.1] text-[12px] italic text-[#A3A099]">{h.meta}</span>
+                      <span className="min-w-0 flex-[1.1] text-[12px] italic text-[#655F52]">{h.meta}</span>
                       <button
                         type="button"
                         onClick={h.act}
-                        className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                        className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
                         style={{ ...mono, letterSpacing: "0.07em" }}
                       >
                         {h.kind}
@@ -4849,11 +4907,11 @@ export default function ProjectDesk({
                   className="flex w-full cursor-pointer items-center gap-3.5 rounded-[11px] border border-[#E3E0DA] bg-white px-[15px] py-[13px] hover:border-[#141414] hover:bg-[#FDFCFA]"
                 >
                   <span className="flex-1 text-left text-[15.5px] leading-[1.45]">{o.label}</span>
-                  {o.effect && <span className="max-w-[15em] flex-none text-right text-[12.5px] leading-[1.4] text-[#8C8A85]">{o.effect}</span>}
+                  {o.effect && <span className="max-w-[15em] flex-none text-right text-[12.5px] leading-[1.4] text-[#655F52]">{o.effect}</span>}
                 </button>
               ))}
             </div>
-            <div className="mt-3.5 text-[13px] leading-[1.5] text-[#A3A099]">
+            <div className="mt-3.5 text-[13px] leading-[1.5] text-[#655F52]">
               Or close this and say it in your own words in the prompt above. These are only the answers heard most.
             </div>
           </div>
@@ -4880,7 +4938,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => setSaveOpen(false)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#A3A099] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#655F52] hover:text-[#141414]"
               >
                 Close
               </button>
@@ -4892,7 +4950,7 @@ export default function ProjectDesk({
                   providers respond to verified work emails, so saving uses one too. Nothing is published and nobody is invited by saving.
                 </p>
                 {signedIn && sessId && !sessId.work && (
-                  <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#B4650B]">
+                  <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[var(--nf-orange-strong)]">
                     Signed in as {sessId.email}, a personal address. Saving needs a work email; everything here stays as it is while you switch.
                   </p>
                 )}
@@ -4924,7 +4982,7 @@ export default function ProjectDesk({
                   </label>
                 )}
                 {saveError && <p className="m-0 mb-2 text-[12.5px] text-red-600">{saveError}</p>}
-                {resuming && <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#8C8A85]">Loading your saved project…</p>}
+                {resuming && <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#655F52]">Loading your saved project…</p>}
                 <button
                   type="button"
                   onClick={() => void saveNow()}
@@ -4951,31 +5009,31 @@ export default function ProjectDesk({
             <div className="flex flex-none items-start gap-3.5 border-b border-[#EAE7E1] px-7 pb-4 pt-[22px]">
               <div className="min-w-0 flex-1">
                 <div className="text-[20px] font-semibold" style={{ letterSpacing: "-0.015em" }}>{publishTitle}</div>
-                <div className="mt-[5px] text-[13.5px] leading-normal text-[#8C8A85]">
+                <div className="mt-[5px] text-[13.5px] leading-normal text-[#655F52]">
                   This is what vendors and service providers would be answering. Say anything you want changed and it changes here.
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setReqOpen(false)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[15px] text-[#8C8A85] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[15px] text-[#655F52] hover:text-[#141414]"
               >
                 Close
               </button>
             </div>
             <div className="flex-1 overflow-auto px-7 pb-10 pt-[22px]">
               {sheetSections.length === 0 && (
-                <p className="m-0 text-[14.5px] leading-relaxed text-[#8C8A85]">Nothing yet. Say one sentence about the organisation and the requirement starts here.</p>
+                <p className="m-0 text-[14.5px] leading-relaxed text-[#655F52]">Nothing yet. Say one sentence about the organisation and the requirement starts here.</p>
               )}
               {sheetSections.map((sec) => (
                 <div key={sec.key} className="pb-6">
-                  <div className="border-b border-[#141414] pb-2 text-[11px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.11em" }}>
+                  <div className="border-b border-[#141414] pb-2 text-[11px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.11em" }}>
                     {sec.title}
                   </div>
                   {sec.rows.map((r, j) => (
                     <div key={j} className="border-b border-[#F5F3EE] py-2.5">
-                      <div className={`text-[15px] leading-normal ${r.open ? "text-[#8C8A85]" : ""}`} style={{ textWrap: "pretty" }}>{r.text}</div>
-                      {r.meta && <div className="mt-1 text-[13px] italic leading-[1.45] text-[#A3A099]">{r.meta}</div>}
+                      <div className={`text-[15px] leading-normal ${r.open ? "text-[#655F52]" : ""}`} style={{ textWrap: "pretty" }}>{r.text}</div>
+                      {r.meta && <div className="mt-1 text-[13px] italic leading-[1.45] text-[#655F52]">{r.meta}</div>}
                     </div>
                   ))}
                 </div>
