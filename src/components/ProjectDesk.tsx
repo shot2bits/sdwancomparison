@@ -4097,7 +4097,19 @@ export default function ProjectDesk({
             <div className="mx-auto w-full max-w-[1400px] px-[26px] py-2.5 lg:px-[42px]">{identityBar}</div>
           </div>
           <div className="sticky top-[97px] z-20">
-            <WizardRail current={activeStep} completed={completed} reachable={reachable} onSelect={goToStep} />
+            <WizardRail
+              current={activeStep}
+              completed={completed}
+              reachable={reachable}
+              /* The SAME `materialDecisionsRemaining` the Decisions station's
+                 own heading, the publish panel's stat and the rail's
+                 completion tick all read -- so the badge, the count and the
+                 tick can never tell three different stories. No badge at
+                 zero: the green tick already says that, and a "0" pill
+                 beside a completed station is noise. */
+              badges={{ decisions: materialDecisionsRemaining }}
+              onSelect={goToStep}
+            />
           </div>
 
           {/* `flex flex-col` below lg, not a plain block: the `order-*`
@@ -4138,7 +4150,44 @@ export default function ProjectDesk({
             {/* RIGHT PANE -- the active station. */}
             <div className="order-1 min-w-0 lg:order-2">
               <div className="pt-6 lg:px-8">
-                {activeStep === "describe" && canvasBlock}
+                {activeStep === "describe" && (
+                  <>
+                    {canvasBlock}
+                    {/* The explicit forward step. Robert, on the first build:
+                        "How does the user know when 2 Decisions is reached?"
+                        -- and the honest answer was that they didn't, unless
+                        they read the summary sentence or spotted the
+                        left-pane chips. The rail now carries a count badge,
+                        and this closes the same gap from the other end: the
+                        Describe station ends with the real number and a way
+                        to act on it, instead of running out of page. Both
+                        read `materialDecisionsRemaining`; neither invents a
+                        recommendation about what to answer. */}
+                    {materialDecisionsRemaining > 0 && (
+                      <div
+                        className="mt-8 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 rounded-[4px] border p-5"
+                        style={{ borderColor: "var(--nf-orange-soft-border, #db9f76)", background: "var(--nf-orange-soft, #ffe3cc)" }}
+                      >
+                        <div className="min-w-0">
+                          <div className="text-[14.5px] font-semibold leading-[1.35]" style={{ color: "var(--nf-ink-950, #110f0d)" }}>
+                            {materialDecisionsRemaining} decision{materialDecisionsRemaining === 1 ? "" : "s"} {materialDecisionsRemaining === 1 ? "changes" : "change"} price, risk, compliance or delivery
+                          </div>
+                          <p className="m-0 mt-1 text-[12.5px] leading-[1.5]" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
+                            Suppliers cannot price consistently until {materialDecisionsRemaining === 1 ? "it is" : "they are"} resolved or accepted as a stated assumption.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => goToStep("decisions")}
+                          className="flex-none cursor-pointer rounded-[3px] border-0 px-4 py-2.5 text-[13px] font-bold"
+                          style={{ background: "var(--nf-orange-strong, #832f00)", color: "#fff" }}
+                        >
+                          Review decisions &rarr;
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
 
 
                 {activeStep === "decisions" && (

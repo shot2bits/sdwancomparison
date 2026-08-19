@@ -38,6 +38,7 @@ export default function WizardRail({
   current,
   completed,
   reachable,
+  badges,
   onSelect,
 }: {
   current: WizardStep;
@@ -45,6 +46,16 @@ export default function WizardRail({
   completed: ReadonlySet<WizardStep>;
   /** Stations the buyer may open right now. */
   reachable: ReadonlySet<WizardStep>;
+  /** Outstanding-item counts per station, e.g. how many MATERIAL decisions
+   *  are still open. Added 19 Aug 2026 after Robert asked the obvious
+   *  question of the first build — "how does the user know when Decisions
+   *  is reached?" — to which the honest answer was: they didn't, unless
+   *  they read the summary sentence or noticed the left-pane chips. The
+   *  rail said only "2 Decisions" in inert grey whether six decisions were
+   *  waiting or none were. Every value here is a real count the compiler
+   *  already owns (see ProjectDesk's call site); a station with nothing
+   *  outstanding renders no badge rather than a zero. */
+  badges?: Partial<Record<WizardStep, number>>;
   onSelect: (step: WizardStep) => void;
 }) {
   return (
@@ -58,6 +69,8 @@ export default function WizardRail({
           const isCurrent = s.step === current;
           const isDone = completed.has(s.step) && !isCurrent;
           const canOpen = reachable.has(s.step);
+          const badge = badges?.[s.step];
+          const showBadge = typeof badge === "number" && badge > 0 && !isDone;
           return (
             <li key={s.step} className="flex flex-none items-center">
               <button
@@ -65,6 +78,10 @@ export default function WizardRail({
                 disabled={!canOpen}
                 onClick={() => canOpen && onSelect(s.step)}
                 aria-current={isCurrent ? "step" : undefined}
+                /* The badge is a bare numeral, which a screen reader would
+                   otherwise announce as "Decisions 6" — ambiguous between a
+                   count and a step number. Name the whole control instead. */
+                aria-label={showBadge ? `${s.label}, ${badge} outstanding` : undefined}
                 className={`flex items-center gap-2.5 rounded-[3px] px-1.5 py-1 ${canOpen ? "cursor-pointer" : "cursor-default"}`}
                 style={{ background: "transparent", border: 0 }}
               >
@@ -96,6 +113,21 @@ export default function WizardRail({
                 >
                   {s.label}
                 </span>
+                {showBadge && (
+                  <span
+                    aria-hidden="true"
+                    className="grid h-[18px] min-w-[18px] flex-none place-items-center rounded-[3px] px-[5px] text-[10.5px]"
+                    style={{
+                      fontFamily: "var(--nf-font-mono)",
+                      fontWeight: 700,
+                      background: "var(--nf-orange-soft, #ffe3cc)",
+                      color: "var(--nf-orange-strong, #832f00)",
+                      border: "1px solid var(--nf-orange-soft-border, #db9f76)",
+                    }}
+                  >
+                    {badge}
+                  </span>
+                )}
               </button>
               {i < WIZARD_STEPS.length - 1 && (
                 <span
