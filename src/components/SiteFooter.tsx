@@ -1,39 +1,22 @@
-"use client";
-
-import { usePathname } from "next/navigation";
-
 /**
- * 2030 shell reset, Checkpoint F (17 Aug 2026): the blueprint's binding
- * visual-standard no-go list is explicit -- "marketing footer absent from
- * active workspace." `layout.tsx` is the one root layout every route shares
- * (marketing pages AND the Living Procurement workspace), so the footer
- * previously rendered unconditionally on every page, including `/home/` and
- * `/workspace/` (confirmed via Playwright: `footer` element count 1 on
- * `/home/`). Pulled out of the server-rendered root layout into this small
- * client component -- the ONLY part of the footer that needs to change is
- * "render or don't" based on the CURRENT route, which needs `usePathname()`
- * (client-only); the footer's own content/markup is unchanged, still owned
- * by the caller (`RootLayout`), which passes it as `children` so this file
- * carries no duplicated column data to drift out of sync with `layout.tsx`.
+ * 2030 living-procurement workspace separation (18 Aug 2026), replacing the
+ * prior "Checkpoint F" (17 Aug 2026) fix: that version hid the footer on
+ * workspace routes with a client-side `usePathname()` prefix check — the
+ * same class of fragile, runtime string-matching fix that MegaNav.tsx's own
+ * doc comment describes trying and reverting (netify.co.uk/ and this app's
+ * own /sase/ root both normalize to "/" once basePath is stripped, so
+ * pathname-prefix matching can't reliably tell workspace and marketing
+ * apex apart). It also required manually keeping a route-prefix list in
+ * sync with actual routing by hand.
  *
- * Workspace routes (`usePathname()` returns the path WITHOUT this app's
- * `/sase` basePath, e.g. `/home`, not `/sase/home` -- see next.config.ts):
- *   /home        -- the door of the sourcing engine (home/page.tsx)
- *   /workspace   -- the twin/redirect route (workspace/page.tsx)
- *   /rfp/*       -- an open buyer project (including any future
- *                   Procurement Room view under it)
- * Every other route (marketing pages, /vendors/, /insights/, /marketplace/,
- * etc.) keeps the full commercial footer, unchanged.
+ * The real fix is structural: SiteFooter is now only ever imported by
+ * (marketing)/layout.tsx. The living-document workspace has its own
+ * sibling layout, (workspace)/layout.tsx, which never imports this
+ * component at all — so "does this route get the footer" is answered by
+ * the filesystem router itself, not by a runtime pathname check. This file
+ * goes back to being a plain pass-through; the footer's own markup/content
+ * is still owned by the caller and passed as `children`, unchanged.
  */
-const WORKSPACE_PREFIXES = ["/home", "/workspace", "/rfp"];
-
-function isWorkspaceRoute(pathname: string | null): boolean {
-  if (!pathname) return false;
-  return WORKSPACE_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-}
-
 export default function SiteFooter({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  if (isWorkspaceRoute(pathname)) return null;
   return <>{children}</>;
 }

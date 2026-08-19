@@ -72,7 +72,7 @@ async function main() {
       const { POST: publishRoute } = await import("../src/app/api/rfp/[id]/publish/route");
       const { GET: rfpGetRoute, PUT: rfpPutRoute } = await import("../src/app/api/rfp/[id]/route");
       const { GET: reportRoute } = await import("../src/app/api/rfp/[id]/report/route");
-      const { GET: downloadRoute } = await import("../src/app/rfp-builder/[id]/preview/download/route");
+      const { GET: downloadRoute } = await import("../src/app/(marketing)/rfp-builder/[id]/preview/download/route");
       const { createSession } = await import("../src/lib/rfp-store");
       const { sessionCookieHeader } = await import("../src/lib/auth");
       const { getLatestPublishedSnapshot, getPublishedSnapshotHistory } = await import("../src/lib/published-snapshot");

@@ -1,0 +1,40 @@
+
+> netifymarketplace@0.1.0 validate:ui
+> node scripts/validate-living-procurement-os-stage-a-ui.mjs
+
+No server reachable at http://localhost:3000/sase -- starting one on port 3211 for this run.
+Self-started dev server ready at http://localhost:3211/sase.
+PASS  UI: Prompt A alone renders the REAL component at v1 (not v2 -- the mount-freeze regression)  ->  v=1
+PASS  UI/closure item 2: Prompt A alone (no follow-up MPLS prompt) renders the real relationship SVG, not the disconnected-chip fallback  ->  svgCount=1
+PASS  UI/closure item 2: the network hub node is labelled as the PROPOSED target service (procurement.buying), not left empty  ->  
+PASS  UI/closure item 2: sites/remote users connect through the proposed service  ->  
+PASS  UI/closure item 2: the proposed service reaches Azure  ->  
+PASS  UI/closure item 2: Entra ID supplies identity/policy integration  ->  
+PASS  UI/closure item 2: Teams Phone (voice) is connected to the delivered network  ->  
+PASS  UI/closure item 2: the clinical application coexists with the retained Ethernet circuit  ->  
+PASS  UI/closure item 2: the retained circuit's own migration path onto the new network is represented  ->  
+PASS  UI/closure item 2: the accessible text equivalent of the architecture is present alongside the SVG  ->  
+PASS  UI: Prompt B renders v2  ->  v=2
+PASS  UI: no DLP-specific clause/gate exists after Prompt B's negation  ->  found=false
+PASS  UI: co-managed operating model is shown after Prompt B  ->  
+PASS  UI: 24/7 incident support survives Prompt B's edit  ->  
+PASS  UI/closure item 1: every DOM text node mentioning DLP reduces to a substring of the buyer's own retained verbatim sentence -- no leak into any other projection (requirements, supplier questions, evidence, gates, scoring, architecture, summaries, change text)  ->  hits=["Change the service to co-managed. Keep 24/7 incident support, remove DLP, and keep the April 2027 deadline.","Keep 24/7 incident support, remove DLP, and keep the April 2027 deadline."] leaks=[]
+PASS  UI/closure item 1: the buyer's own wording is NOT erased -- the verbatim sentence is still findable in the DOM  ->  hits.length=2
+PASS  UI: Prompt C renders v3  ->  v=3
+PASS  UI: Prompt C's UK residency sentence is recognised as its own named clause  ->  
+PASS  UI: the chat narration never claims 'I did not catch anything new' when a real clause/gate/decision was just derived (defect #3)  ->  
+PASS  UI: the chat narration instead gives the honest 'kept in your own words' line  ->  
+PASS  UI: Prompt D in a fresh project renders v1 (a new project never inherits another project's revision count)  ->  v=1
+PASS  UI: the single-supplier/best-of-breed conflict is a visible open decision  ->  
+PASS  UI: no duplicate 'best-of-breed' Additional-Requirement clause is created alongside the conflict decision (0 requirements total)  ->  requirements=0
+PASS  UI: Prompt D's narration also never claims 'I did not catch anything new'  ->  
+PASS  UI/closure item 3: the retained buyer turn is counted (1 recorded turn) even though it compiles zero clauses  ->  memoryText="Project memory0 standing facts1 recorded turn0 requirement clauses from your words · 0 from netify · 0 from sector rules"
+PASS  UI/closure item 3: the buyer-provenance metric is precisely labelled ('N requirement clauses from your words'), not a bare 'your words' claim  ->  
+PASS  UI/closure item 3: the displayed memory description never claims zero buyer wording while the verbatim conflict sentence is present  ->  bareZeroClaim=false
+PASS  UI/closure item 4: the compact heading is followed immediately by the command surface (gap < 150px, not a large dead zone), measured at the top of the page once compact mode is on  ->  gap=32px h1.bottom=118.59375 dock.top=150.59375
+PASS  UI/closure item 4: the command composer is visible within the initial mobile working viewport  ->  textarea={"x":65,"y":305.90625,"width":146,"height":78,"top":305.90625,"right":211,"bottom":383.90625,"left":65} innerHeight=844
+PASS  UI/closure item 4: the sticky composer dock does not obscure the content immediately below it (a probe point just past the dock's own bottom edge resolves to real content, not the dock itself)  ->  {"checked":true,"isDockOrChild":false,"probeX":195,"probeY":507.5,"tag":"DIV","text":"Feedback only, kept for this sitting — the statement below i"}
+
+30 passed, 0 failed.
+
+ALL PASS

@@ -81,7 +81,7 @@ function codeOnly(src: string): string {
 
 const workspaceSrc = readFileSync(new URL("../src/components/preview/QuickSorWorkspace.tsx", import.meta.url), "utf8");
 const workspaceCode = codeOnly(workspaceSrc);
-const pageSrc = readFileSync(new URL("../src/app/preview/quick-sor/page.tsx", import.meta.url), "utf8");
+const pageSrc = readFileSync(new URL("../src/app/(marketing)/preview/quick-sor/page.tsx", import.meta.url), "utf8");
 
 /** Shared fixture state built in test 6, reused by tests 7/17/18/19/25 —
  *  a real turn 1 -> turn 2 sequence through the actual mergeUpdates()/

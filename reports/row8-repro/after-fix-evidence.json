@@ -1,0 +1,65 @@
+{
+  "label": "after-fix",
+  "at_repro_time": null,
+  "checks": [
+    {
+      "name": "create_draft",
+      "status": 200,
+      "id": "rfp_msvser4yd3zpw8",
+      "project_status": "draft",
+      "has_share_token": true,
+      "has_manage_token": true
+    },
+    {
+      "name": "anonymous_read_pre_publish",
+      "status": 401
+    },
+    {
+      "name": "share_token_read_pre_publish",
+      "status": 404,
+      "leaked_rfp_sections": null,
+      "leaked_buyer_sector": null,
+      "response_error": "RFP not found."
+    },
+    {
+      "name": "connect_invite_pre_publish",
+      "status": 409,
+      "persisted_connection": false,
+      "response": {
+        "error": "Publish the RFP before inviting or contacting vendors.",
+        "code": "not_published"
+      }
+    },
+    {
+      "name": "connect_list_after_pre_publish_attempt",
+      "status": 200,
+      "connection_count": 0
+    },
+    {
+      "name": "ui_vendor_panel_pre_publish",
+      "screenshot": "/tmp/sdwan_reliability_gate/reports/row8-repro/after-fix-vendor-panel-pre-publish.png",
+      "suggest_button_visible": false,
+      "panel_text_snippet": "Vendors and service providers\nSubmit to your matched vendors\n\nStep 3. Netify's graded marketplace vendors and service providers are matched to your requirement and invited once you publish. Nothing about your specific match, or any vendor's identity, is shown here until then.\n\nYour private link to this RFP. No account needed: this page is your dashboard. Copy this link (it carries your private key"
+    },
+    {
+      "name": "anonymous_read_post_publish",
+      "status": 401
+    },
+    {
+      "name": "share_token_read_post_publish",
+      "status": 200,
+      "rfp_sections_visible": 5
+    },
+    {
+      "name": "connect_invite_post_publish",
+      "status": 200,
+      "persisted_connection": true
+    },
+    {
+      "name": "ui_vendor_panel_post_publish",
+      "screenshot": "/tmp/sdwan_reliability_gate/reports/row8-repro/after-fix-vendor-panel-post-publish.png",
+      "suggest_button_visible": true,
+      "panel_text_snippet": "Vendors and service providers\nSuggest best-fit vendors\nRe-send to your matched vendors\n\nStep 3. These are the graded vendors and service providers from the Netify marketplace. Suggest best-fit vendors finds the closest matches to what you described. Submit to your matched vendors invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, t"
+    }
+  ]
+}

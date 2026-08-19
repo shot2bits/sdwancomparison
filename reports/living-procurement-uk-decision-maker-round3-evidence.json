@@ -1,0 +1,550 @@
+{
+  "A": {
+    "label": "A",
+    "documentVersion": 1,
+    "resilienceClauseResolved": false,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\""
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "materialDecisionsRemaining": 4,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed"
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed"
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input"
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "needs_decision"
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision"
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision"
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input"
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later"
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later"
+      }
+    ],
+    "readiness": {
+      "score": 24,
+      "label": "Starting shape",
+      "reasons": [
+        "2 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "4 material decisions remain (open decisions and unresolved earned questions).",
+        "Separately, 2 optional Netify suggestions are available to review -- these do not block consistent pricing and do not affect this score.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    }
+  },
+  "B": {
+    "label": "B",
+    "documentVersion": 2,
+    "resilienceClauseResolved": true,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\""
+      },
+      {
+        "id": "NET-75a868fa",
+        "templateId": "site-resilience-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites."
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "materialDecisionsRemaining": 3,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed"
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed"
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input"
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "confirmed"
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision"
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision"
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input"
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later"
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later"
+      }
+    ],
+    "readiness": {
+      "score": 30,
+      "label": "Starting shape",
+      "reasons": [
+        "3 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "3 material decisions remain (open decisions and unresolved earned questions).",
+        "Separately, 2 optional Netify suggestions are available to review -- these do not block consistent pricing and do not affect this score.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    }
+  },
+  "C": {
+    "label": "C",
+    "documentVersion": 3,
+    "resilienceClauseResolved": true,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\""
+      },
+      {
+        "id": "NET-75a868fa",
+        "templateId": "site-resilience-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites."
+      },
+      {
+        "id": "SEC-c5733f5c",
+        "templateId": "third-party-security-consideration",
+        "origin": "buyer",
+        "mandatory": false,
+        "statement": "A third-party security operations/MDR-style service is under consideration alongside the core scope."
+      },
+      {
+        "id": "ID-69d3a001",
+        "templateId": "identity-provider-entra",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Identity provider integration with the buyer's stated Entra ID tenant for authentication and access policy."
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "materialDecisionsRemaining": 2,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed"
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed"
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input"
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "confirmed"
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision"
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision"
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input"
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later"
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later"
+      }
+    ],
+    "readiness": {
+      "score": 33,
+      "label": "Starting shape",
+      "reasons": [
+        "3 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "2 material decisions remain (open decisions and unresolved earned questions).",
+        "Separately, 2 optional Netify suggestions are available to review -- these do not block consistent pricing and do not affect this score.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    }
+  },
+  "D": {
+    "label": "D",
+    "documentVersion": 4,
+    "resilienceClauseResolved": true,
+    "compiledClauses": [
+      {
+        "id": "NET-4f3aa85d",
+        "templateId": "network-architecture-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\""
+      },
+      {
+        "id": "NET-75a868fa",
+        "templateId": "site-resilience-scope",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites."
+      },
+      {
+        "id": "SEC-e83fb756",
+        "templateId": "uk-data-residency",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Data residency constraint stated verbatim by the buyer: \"Customer data must remain in the UK, including backups and support access.\""
+      },
+      {
+        "id": "SEC-c5733f5c",
+        "templateId": "third-party-security-consideration",
+        "origin": "buyer",
+        "mandatory": false,
+        "statement": "A third-party security operations/MDR-style service is under consideration alongside the core scope."
+      },
+      {
+        "id": "ID-69d3a001",
+        "templateId": "identity-provider-entra",
+        "origin": "buyer",
+        "mandatory": true,
+        "statement": "Identity provider integration with the buyer's stated Entra ID tenant for authentication and access policy."
+      }
+    ],
+    "pendingSectorSuggestions": [
+      {
+        "id": "mf-ot-visibility",
+        "label": "OT/ICS asset visibility and monitoring recommended",
+        "section": "security"
+      },
+      {
+        "id": "mf-segmentation",
+        "label": "IT/OT network segmentation (IEC 62443 zones and conduits)",
+        "section": "network"
+      }
+    ],
+    "materialDecisionsRemaining": 3,
+    "sectionOutline": [
+      {
+        "key": "organisation_scale",
+        "title": "Organisation and scale",
+        "state": "confirmed"
+      },
+      {
+        "key": "solution_scope",
+        "title": "Solution scope",
+        "state": "confirmed"
+      },
+      {
+        "key": "current_estate",
+        "title": "Current estate",
+        "state": "needs_input"
+      },
+      {
+        "key": "resilience_availability",
+        "title": "Resilience and availability",
+        "state": "confirmed"
+      },
+      {
+        "key": "security_identity_data",
+        "title": "Security, identity and data",
+        "state": "needs_decision"
+      },
+      {
+        "key": "sector_intelligence",
+        "title": "Manufacturing and OT",
+        "state": "netify_suggested"
+      },
+      {
+        "key": "operating_model_support",
+        "title": "Operating model and support",
+        "state": "needs_decision"
+      },
+      {
+        "key": "migration_implementation",
+        "title": "Migration and implementation",
+        "state": "needs_input"
+      },
+      {
+        "key": "commercial_contractual",
+        "title": "Commercial and contractual",
+        "state": "later"
+      },
+      {
+        "key": "success_evaluation",
+        "title": "Success and evaluation",
+        "state": "later"
+      }
+    ],
+    "readiness": {
+      "score": 30,
+      "label": "Starting shape",
+      "reasons": [
+        "3 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "3 material decisions remain (open decisions and unresolved earned questions).",
+        "Separately, 2 optional Netify suggestions are available to review -- these do not block consistent pricing and do not affect this score.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    }
+  },
+  "sectorSuggestionReversalLifecycle": {
+    "acceptedThenDeclined": {
+      "decisionLedger": [
+        {
+          "id": "dt_r3_accept",
+          "at": 1000,
+          "questionId": "sector:mf-ot-visibility",
+          "optionId": "ps-mf-ot-visibility",
+          "optionLabel": "Accept",
+          "action": "note",
+          "resultingFactPaths": [],
+          "resultingNoted": [
+            {
+              "id": "ps-mf-ot-visibility",
+              "label": "OT/ICS asset visibility and monitoring in scope, alongside IT security",
+              "section": "security",
+              "own": true
+            }
+          ]
+        },
+        {
+          "id": "dt_r3_decline",
+          "at": 2000,
+          "questionId": "sector:mf-ot-visibility",
+          "optionId": "decline",
+          "optionLabel": "Not needed",
+          "action": "decline_suggestion",
+          "resultingFactPaths": [],
+          "resultingNoted": []
+        }
+      ],
+      "replayed": {
+        "noted": [],
+        "dismissedQuestionIds": [],
+        "declinedSuggestionIds": [
+          "mf-ot-visibility"
+        ]
+      },
+      "compiledHasGovernedClause": false,
+      "afterSaveAndReload": {
+        "resumedNoted": [],
+        "compiledHasGovernedClause": false
+      }
+    },
+    "counterExample_declinedThenAccepted": {
+      "decisionLedger": [
+        {
+          "id": "dt_r3_decline",
+          "at": 2000,
+          "questionId": "sector:mf-ot-visibility",
+          "optionId": "decline",
+          "optionLabel": "Not needed",
+          "action": "decline_suggestion",
+          "resultingFactPaths": [],
+          "resultingNoted": []
+        },
+        {
+          "id": "dt_r3_accept",
+          "at": 1000,
+          "questionId": "sector:mf-ot-visibility",
+          "optionId": "ps-mf-ot-visibility",
+          "optionLabel": "Accept",
+          "action": "note",
+          "resultingFactPaths": [],
+          "resultingNoted": [
+            {
+              "id": "ps-mf-ot-visibility",
+              "label": "OT/ICS asset visibility and monitoring in scope, alongside IT security",
+              "section": "security",
+              "own": true
+            }
+          ]
+        }
+      ],
+      "replayed": {
+        "noted": [
+          {
+            "id": "ps-mf-ot-visibility",
+            "label": "OT/ICS asset visibility and monitoring in scope, alongside IT security",
+            "section": "security",
+            "own": true
+          }
+        ],
+        "dismissedQuestionIds": [],
+        "declinedSuggestionIds": []
+      },
+      "compiledHasGovernedClause": true
+    }
+  },
+  "readinessFormulaIsolation": {
+    "note": "Identical inputs except pendingSectorSuggestions -- proves optional sector suggestions no longer move the readiness score in either direction.",
+    "zeroPending": {
+      "score": 24,
+      "label": "Starting shape",
+      "reasons": [
+        "2 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "4 material decisions remain (open decisions and unresolved earned questions).",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    },
+    "twoPending": {
+      "score": 24,
+      "label": "Starting shape",
+      "reasons": [
+        "2 of 10 procurement sections confirmed.",
+        "Operating model not yet stated.",
+        "Delivery timeline not yet stated.",
+        "Budget position not yet stated.",
+        "Every mandatory clause carries an acceptance test.",
+        "4 material decisions remain (open decisions and unresolved earned questions).",
+        "Separately, 2 optional Netify suggestions are available to review -- these do not block consistent pricing and do not affect this score.",
+        "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+      ]
+    },
+    "scoresEqual": true
+  }
+}

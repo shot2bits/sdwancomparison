@@ -872,6 +872,38 @@ function buildTitleAndSummary(requirement: SecurityRequirementInput, clauses: Pr
 /* Change set (Section 14.6: real diff against previousDocument)       */
 /* ------------------------------------------------------------------ */
 
+/** `JSON.stringify` is key-INSERTION-ORDER-sensitive, not just value-
+ *  sensitive -- two objects with identical field values but different
+ *  property insertion order serialise to different strings. This bit a
+ *  real save/publish (found via a live local-KV Playwright run, 18 Aug
+ *  2026): `previousDocument` here is read back from storage, which
+ *  round-trips every clause through `LivingProcurementDocumentSchema`'s
+ *  zod parse (envelope.ts) -- zod's `.parse()` returns a NEW object
+ *  built in the SCHEMA's own declared field order, not the order the
+ *  compiler originally produced. `numberClauses()` above builds a fresh
+ *  clause as `{ ...d, id, weight }` (`id`/`weight` appended LAST); the
+ *  schema-parsed copy of that same, semantically UNCHANGED clause has
+ *  `id` wherever the schema declares it (first, in practice) instead.
+ *  Naive `JSON.stringify` equality then saw every surviving, byte-for-
+ *  byte-identical clause as "updated" on the SECOND save of any
+ *  project -- and because `changeSet` is part of what the server/client
+ *  consistency check (envelope.ts) compares, this alone produced a
+ *  false-positive 409 on every edit-then-save/publish, confirmed via a
+ *  live Playwright run whose client-side compile (never round-tripped
+ *  through the schema) correctly saw no change for the same clauses.
+ *  `canonicalJson()` sorts object keys recursively before stringifying,
+ *  so the comparison is a genuine deep-value diff, independent of which
+ *  code path (fresh compile vs. schema-parsed reload) produced either
+ *  side. */
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map((v) => canonicalJson(v)).join(",")}]`;
+  if (value !== null && typeof value === "object") {
+    const keys = Object.keys(value as Record<string, unknown>).sort();
+    return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalJson((value as Record<string, unknown>)[k])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
 function diffIds<T extends { templateKey: string; id: string }>(prev: T[] | undefined, next: T[]): ChangeList {
   const prevByKey = new Map((prev ?? []).map((x) => [x.templateKey, x]));
   const nextByKey = new Map(next.map((x) => [x.templateKey, x]));
@@ -879,7 +911,7 @@ function diffIds<T extends { templateKey: string; id: string }>(prev: T[] | unde
   const removed = (prev ?? []).filter((x) => !nextByKey.has(x.templateKey)).map((x) => x.id);
   const updated = next
     .filter((x) => prevByKey.has(x.templateKey))
-    .filter((x) => JSON.stringify(prevByKey.get(x.templateKey)) !== JSON.stringify(x))
+    .filter((x) => canonicalJson(prevByKey.get(x.templateKey)) !== canonicalJson(x))
     .map((x) => x.id);
   return { added, updated, removed };
 }
@@ -912,7 +944,10 @@ export function diffFacts(prevSnapshot: Record<string, unknown> | undefined, nex
   const nextIds = new Set(Object.keys(nextSnapshot));
   const added = [...nextIds].filter((id) => !prevIds.has(id));
   const removed = [...prevIds].filter((id) => !nextIds.has(id));
-  const updated = [...nextIds].filter((id) => prevIds.has(id) && JSON.stringify((prevSnapshot as Record<string, unknown>)[id]) !== JSON.stringify(nextSnapshot[id]));
+  // canonicalJson (not raw JSON.stringify): see diffIds' own comment
+  // above -- the same schema-round-trip key-reordering hazard applies
+  // here whenever a fact's own value is itself an object.
+  const updated = [...nextIds].filter((id) => prevIds.has(id) && canonicalJson((prevSnapshot as Record<string, unknown>)[id]) !== canonicalJson(nextSnapshot[id]));
   return { added, updated, removed };
 }
 

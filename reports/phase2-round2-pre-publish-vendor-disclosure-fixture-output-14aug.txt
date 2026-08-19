@@ -1,0 +1,10 @@
+=== Part A: GET /api/workspace/fit never returns supplier-identifying data ===
+
+Part A: 38/38 passed so far.
+
+=== Part B: ProjectDesk.tsx / ConstellationScene.tsx structural source proof ===
+
+Part B: 82/82 passed cumulative.
+
+
+ALL PASS  (82/82)

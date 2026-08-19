@@ -1,0 +1,34 @@
+{
+  "at": "after this round's edits (working tree on fix/row8-pre-publish-supplier-disclosure, on top of 7608a09)",
+  "defects": {
+    "defect1_unlisted_unlock": {
+      "project_id": "rfp_msvzwgykq9rpl9",
+      "opportunity_id": "opp_msvzwgzlt8xiwp",
+      "board_visibility_attempted": "unlisted",
+      "commit_market_unlock_refused": true,
+      "refusal_reason": "The Opportunity is not public; an unlisted listing never satisfies the Opportunities Board prerequisite.",
+      "is_market_unlocked": false,
+      "share_token_read_status": 404,
+      "VIOLATION": false
+    },
+    "defect3_dangling_revision": {
+      "project_id": "rfp_msvzwh08viv6wg",
+      "published_revision_id_attempted": "snap_repro_defect3_never_persisted_after",
+      "frozen_revision_actually_persisted": false,
+      "commit_market_unlock_refused": true,
+      "refusal_reason": "No persisted FrozenRevision found for this project/revision; cannot commit a MarketUnlock.",
+      "is_market_unlocked": false,
+      "VIOLATION": false
+    },
+    "defect2_status_published_before_board_success": {
+      "project_id": "rfp_msvzwh1xsn9xf4",
+      "board_listing_failed": true,
+      "board_fail_reason": "Not listed on the public board: buyer_sector: \"Healthcare & pharma\" is not a catalogue sector. Pick one, or state not_stated explicitly.",
+      "project_status_immediately_after_publish_call": "review",
+      "project_status_after_reload": "review",
+      "market_unlocked": false,
+      "publication_attempt_exists_and_retryable": true,
+      "VIOLATION": false
+    }
+  }
+}

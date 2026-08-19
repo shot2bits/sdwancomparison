@@ -1,0 +1,820 @@
+{
+  "generatedBy": "scripts internal to this correction pass (not a committed script) -- reproduces the real deterministicExtract -> mergeUpdates -> compileProcurementDocument -> readiness/next-question pipeline, same functions scripts/validate-living-procurement-os-stage-a.ts's Part D fixtures exercise",
+  "scenario": "Living Procurement UK Decision-Maker Blueprint manufacturing sequence (Robert, 15 Aug 2026 correction pass)",
+  "prompts": [
+    {
+      "label": "Prompt A",
+      "prompt": "UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.",
+      "documentVersion": 1,
+      "procurement": {
+        "buying": "sase",
+        "opModel": null
+      },
+      "notedObjectiveIds": [],
+      "clauses": [
+        {
+          "id": "NET-4f3aa85d",
+          "templateId": "network-architecture-scope",
+          "section": "network",
+          "mandatory": true,
+          "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+          "origin": "buyer"
+        },
+        {
+          "id": "SEC-243b70ab",
+          "templateId": "sector-pack-suggestion",
+          "section": "security",
+          "mandatory": false,
+          "statement": "OT/ICS asset visibility and monitoring recommended",
+          "origin": "sector"
+        }
+      ],
+      "counts": {
+        "requirements": 2,
+        "questions": 3,
+        "gates": 1,
+        "decisions": 2
+      },
+      "evaluationGates": [
+        "GATE-NET-4f3aa85d"
+      ],
+      "openDecisions": [
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "conflict": false,
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ]
+        },
+        {
+          "id": "OD-timeline-unstated",
+          "question": "When must this be live, or when does the current contract end?",
+          "conflict": false,
+          "impact": [
+            "delivery",
+            "evaluation"
+          ]
+        }
+      ],
+      "sectionOutline": [
+        {
+          "key": "organisation_scale",
+          "title": "Organisation and scale",
+          "state": "confirmed",
+          "detail": ""
+        },
+        {
+          "key": "solution_scope",
+          "title": "Solution scope",
+          "state": "confirmed",
+          "detail": "Buying: SASE."
+        },
+        {
+          "key": "current_estate",
+          "title": "Current estate",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "resilience_availability",
+          "title": "Resilience and availability",
+          "state": "needs_decision",
+          "detail": "Dual-circuit resilience per site not yet decided."
+        },
+        {
+          "key": "security_identity_data",
+          "title": "Security, identity and data",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "sector_intelligence",
+          "title": "Manufacturing and OT",
+          "state": "netify_suggested",
+          "detail": "2 sector suggestions to review"
+        },
+        {
+          "key": "operating_model_support",
+          "title": "Operating model and support",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "migration_implementation",
+          "title": "Migration and implementation",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "commercial_contractual",
+          "title": "Commercial and contractual",
+          "state": "later",
+          "detail": ""
+        },
+        {
+          "key": "success_evaluation",
+          "title": "Success and evaluation",
+          "state": "later",
+          "detail": ""
+        }
+      ],
+      "bestNextDecisions": [
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "source": "compiler_open_decision",
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-sase-shape",
+          "question": "One platform or best-of-breed: which shape of SASE are you buying?",
+          "source": "earned_question",
+          "impact": [
+            "price",
+            "architecture"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-resilience",
+          "question": "At your site count, is dual-circuit resilience per site required?",
+          "source": "earned_question",
+          "impact": [
+            "price",
+            "architecture",
+            "risk"
+          ],
+          "reason": null
+        }
+      ],
+      "fullNextQuestionCount": 7,
+      "materialDecisionsRemaining": 4,
+      "pendingSectorSuggestions": 2,
+      "compilerOwnReadiness": {
+        "score": 50,
+        "label": "Scope forming",
+        "reasons": [
+          "2 testable requirements compiled.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "2 high-impact open decisions remain.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      },
+      "sectionAwareReadiness": {
+        "score": 22,
+        "label": "Starting shape",
+        "reasons": [
+          "2 of 10 procurement sections confirmed.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "4 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      }
+    },
+    {
+      "label": "Prompt B",
+      "prompt": "Yes, dual circuits at our five production-critical sites. Single circuits are acceptable elsewhere.",
+      "documentVersion": 2,
+      "procurement": {
+        "buying": "sase",
+        "opModel": null
+      },
+      "notedObjectiveIds": [],
+      "clauses": [
+        {
+          "id": "NET-4f3aa85d",
+          "templateId": "network-architecture-scope",
+          "section": "network",
+          "mandatory": true,
+          "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+          "origin": "buyer"
+        },
+        {
+          "id": "NET-75a868fa",
+          "templateId": "site-resilience-scope",
+          "section": "network",
+          "mandatory": true,
+          "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.",
+          "origin": "buyer"
+        },
+        {
+          "id": "SEC-243b70ab",
+          "templateId": "sector-pack-suggestion",
+          "section": "security",
+          "mandatory": false,
+          "statement": "OT/ICS asset visibility and monitoring recommended",
+          "origin": "sector"
+        }
+      ],
+      "counts": {
+        "requirements": 3,
+        "questions": 5,
+        "gates": 2,
+        "decisions": 2
+      },
+      "evaluationGates": [
+        "GATE-NET-4f3aa85d",
+        "GATE-NET-75a868fa"
+      ],
+      "openDecisions": [
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "conflict": false,
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ]
+        },
+        {
+          "id": "OD-timeline-unstated",
+          "question": "When must this be live, or when does the current contract end?",
+          "conflict": false,
+          "impact": [
+            "delivery",
+            "evaluation"
+          ]
+        }
+      ],
+      "sectionOutline": [
+        {
+          "key": "organisation_scale",
+          "title": "Organisation and scale",
+          "state": "confirmed",
+          "detail": ""
+        },
+        {
+          "key": "solution_scope",
+          "title": "Solution scope",
+          "state": "confirmed",
+          "detail": "Buying: SASE."
+        },
+        {
+          "key": "current_estate",
+          "title": "Current estate",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "resilience_availability",
+          "title": "Resilience and availability",
+          "state": "confirmed",
+          "detail": "Per-site resilience requirement stated and compiled into the document."
+        },
+        {
+          "key": "security_identity_data",
+          "title": "Security, identity and data",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "sector_intelligence",
+          "title": "Manufacturing and OT",
+          "state": "netify_suggested",
+          "detail": "2 sector suggestions to review"
+        },
+        {
+          "key": "operating_model_support",
+          "title": "Operating model and support",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "migration_implementation",
+          "title": "Migration and implementation",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "commercial_contractual",
+          "title": "Commercial and contractual",
+          "state": "later",
+          "detail": ""
+        },
+        {
+          "key": "success_evaluation",
+          "title": "Success and evaluation",
+          "state": "later",
+          "detail": ""
+        }
+      ],
+      "bestNextDecisions": [
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "source": "compiler_open_decision",
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-sase-shape",
+          "question": "One platform or best-of-breed: which shape of SASE are you buying?",
+          "source": "earned_question",
+          "impact": [
+            "price",
+            "architecture"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-resilience",
+          "question": "At your site count, is dual-circuit resilience per site required?",
+          "source": "earned_question",
+          "impact": [
+            "price",
+            "architecture",
+            "risk"
+          ],
+          "reason": null
+        }
+      ],
+      "fullNextQuestionCount": 7,
+      "materialDecisionsRemaining": 4,
+      "pendingSectorSuggestions": 2,
+      "compilerOwnReadiness": {
+        "score": 50,
+        "label": "Scope forming",
+        "reasons": [
+          "3 testable requirements compiled.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "2 high-impact open decisions remain.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      },
+      "sectionAwareReadiness": {
+        "score": 25,
+        "label": "Starting shape",
+        "reasons": [
+          "3 of 10 procurement sections confirmed.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "4 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      }
+    },
+    {
+      "label": "Prompt C",
+      "prompt": "We prefer a single platform, but identity must integrate with Entra ID and we will consider third-party SOC services.",
+      "documentVersion": 3,
+      "procurement": {
+        "buying": "sase",
+        "opModel": null
+      },
+      "notedObjectiveIds": [
+        "obj-unified"
+      ],
+      "clauses": [
+        {
+          "id": "NET-4f3aa85d",
+          "templateId": "network-architecture-scope",
+          "section": "network",
+          "mandatory": true,
+          "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+          "origin": "buyer"
+        },
+        {
+          "id": "NET-75a868fa",
+          "templateId": "site-resilience-scope",
+          "section": "network",
+          "mandatory": true,
+          "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.",
+          "origin": "buyer"
+        },
+        {
+          "id": "SEC-243b70ab",
+          "templateId": "sector-pack-suggestion",
+          "section": "security",
+          "mandatory": false,
+          "statement": "OT/ICS asset visibility and monitoring recommended",
+          "origin": "sector"
+        },
+        {
+          "id": "SEC-c5733f5c",
+          "templateId": "third-party-security-consideration",
+          "section": "security",
+          "mandatory": false,
+          "statement": "A third-party security operations/MDR-style service is under consideration alongside the core scope.",
+          "origin": "buyer"
+        },
+        {
+          "id": "ID-69d3a001",
+          "templateId": "identity-provider-entra",
+          "section": "identity",
+          "mandatory": true,
+          "statement": "Identity provider integration with the buyer's stated Entra ID tenant for authentication and access policy.",
+          "origin": "buyer"
+        }
+      ],
+      "counts": {
+        "requirements": 5,
+        "questions": 8,
+        "gates": 3,
+        "decisions": 2
+      },
+      "evaluationGates": [
+        "GATE-NET-4f3aa85d",
+        "GATE-NET-75a868fa",
+        "GATE-ID-69d3a001"
+      ],
+      "openDecisions": [
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "conflict": false,
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ]
+        },
+        {
+          "id": "OD-timeline-unstated",
+          "question": "When must this be live, or when does the current contract end?",
+          "conflict": false,
+          "impact": [
+            "delivery",
+            "evaluation"
+          ]
+        }
+      ],
+      "sectionOutline": [
+        {
+          "key": "organisation_scale",
+          "title": "Organisation and scale",
+          "state": "confirmed",
+          "detail": ""
+        },
+        {
+          "key": "solution_scope",
+          "title": "Solution scope",
+          "state": "confirmed",
+          "detail": "Buying: SASE."
+        },
+        {
+          "key": "current_estate",
+          "title": "Current estate",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "resilience_availability",
+          "title": "Resilience and availability",
+          "state": "confirmed",
+          "detail": "Per-site resilience requirement stated and compiled into the document."
+        },
+        {
+          "key": "security_identity_data",
+          "title": "Security, identity and data",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "sector_intelligence",
+          "title": "Manufacturing and OT",
+          "state": "netify_suggested",
+          "detail": "2 sector suggestions to review"
+        },
+        {
+          "key": "operating_model_support",
+          "title": "Operating model and support",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "migration_implementation",
+          "title": "Migration and implementation",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "commercial_contractual",
+          "title": "Commercial and contractual",
+          "state": "later",
+          "detail": ""
+        },
+        {
+          "key": "success_evaluation",
+          "title": "Success and evaluation",
+          "state": "later",
+          "detail": ""
+        }
+      ],
+      "bestNextDecisions": [
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "source": "compiler_open_decision",
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-resilience",
+          "question": "At your site count, is dual-circuit resilience per site required?",
+          "source": "earned_question",
+          "impact": [
+            "price",
+            "architecture",
+            "risk"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-sse-scope",
+          "question": "Full SASE covers several security controls. Which are in scope for you?",
+          "source": "earned_question",
+          "impact": [
+            "architecture",
+            "compliance"
+          ],
+          "reason": null
+        }
+      ],
+      "fullNextQuestionCount": 6,
+      "materialDecisionsRemaining": 3,
+      "pendingSectorSuggestions": 2,
+      "compilerOwnReadiness": {
+        "score": 50,
+        "label": "Scope forming",
+        "reasons": [
+          "5 testable requirements compiled.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "2 high-impact open decisions remain.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      },
+      "sectionAwareReadiness": {
+        "score": 28,
+        "label": "Starting shape",
+        "reasons": [
+          "3 of 10 procurement sections confirmed.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "3 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      }
+    },
+    {
+      "label": "Prompt D",
+      "prompt": "Customer data must remain in the UK, including backups and support access.",
+      "documentVersion": 4,
+      "procurement": {
+        "buying": "sase",
+        "opModel": null
+      },
+      "notedObjectiveIds": [
+        "obj-unified"
+      ],
+      "clauses": [
+        {
+          "id": "NET-4f3aa85d",
+          "templateId": "network-architecture-scope",
+          "section": "network",
+          "mandatory": true,
+          "statement": "Network/security architecture scope stated by the buyer (Manufacturing, 20 sites): \"UK 20 site SD-WAN in the manufacturing sector, full SASE required, 50 remote users.\"",
+          "origin": "buyer"
+        },
+        {
+          "id": "NET-75a868fa",
+          "templateId": "site-resilience-scope",
+          "section": "network",
+          "mandatory": true,
+          "statement": "Per-site resilience: dual circuits required at the buyer's stated production-critical sites; single circuits acceptable at all other sites.",
+          "origin": "buyer"
+        },
+        {
+          "id": "SEC-243b70ab",
+          "templateId": "sector-pack-suggestion",
+          "section": "security",
+          "mandatory": false,
+          "statement": "OT/ICS asset visibility and monitoring recommended",
+          "origin": "sector"
+        },
+        {
+          "id": "SEC-e83fb756",
+          "templateId": "uk-data-residency",
+          "section": "security",
+          "mandatory": true,
+          "statement": "Data residency constraint stated verbatim by the buyer: \"Customer data must remain in the UK, including backups and support access.\"",
+          "origin": "buyer"
+        },
+        {
+          "id": "SEC-c5733f5c",
+          "templateId": "third-party-security-consideration",
+          "section": "security",
+          "mandatory": false,
+          "statement": "A third-party security operations/MDR-style service is under consideration alongside the core scope.",
+          "origin": "buyer"
+        },
+        {
+          "id": "ID-69d3a001",
+          "templateId": "identity-provider-entra",
+          "section": "identity",
+          "mandatory": true,
+          "statement": "Identity provider integration with the buyer's stated Entra ID tenant for authentication and access policy.",
+          "origin": "buyer"
+        }
+      ],
+      "counts": {
+        "requirements": 6,
+        "questions": 10,
+        "gates": 4,
+        "decisions": 3
+      },
+      "evaluationGates": [
+        "GATE-NET-4f3aa85d",
+        "GATE-NET-75a868fa",
+        "GATE-SEC-e83fb756",
+        "GATE-ID-69d3a001"
+      ],
+      "openDecisions": [
+        {
+          "id": "OD-data-residency-legal-basis",
+          "question": "Confirm which UK data-protection framework(s) govern the stated data-residency constraint. This is a legal interpretation, not a fact this document asserts.",
+          "conflict": false,
+          "impact": [
+            "compliance"
+          ]
+        },
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "conflict": false,
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ]
+        },
+        {
+          "id": "OD-timeline-unstated",
+          "question": "When must this be live, or when does the current contract end?",
+          "conflict": false,
+          "impact": [
+            "delivery",
+            "evaluation"
+          ]
+        }
+      ],
+      "sectionOutline": [
+        {
+          "key": "organisation_scale",
+          "title": "Organisation and scale",
+          "state": "confirmed",
+          "detail": ""
+        },
+        {
+          "key": "solution_scope",
+          "title": "Solution scope",
+          "state": "confirmed",
+          "detail": "Buying: SASE."
+        },
+        {
+          "key": "current_estate",
+          "title": "Current estate",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "resilience_availability",
+          "title": "Resilience and availability",
+          "state": "confirmed",
+          "detail": "Per-site resilience requirement stated and compiled into the document."
+        },
+        {
+          "key": "security_identity_data",
+          "title": "Security, identity and data",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "sector_intelligence",
+          "title": "Manufacturing and OT",
+          "state": "netify_suggested",
+          "detail": "2 sector suggestions to review"
+        },
+        {
+          "key": "operating_model_support",
+          "title": "Operating model and support",
+          "state": "needs_decision",
+          "detail": ""
+        },
+        {
+          "key": "migration_implementation",
+          "title": "Migration and implementation",
+          "state": "needs_input",
+          "detail": ""
+        },
+        {
+          "key": "commercial_contractual",
+          "title": "Commercial and contractual",
+          "state": "later",
+          "detail": ""
+        },
+        {
+          "key": "success_evaluation",
+          "title": "Success and evaluation",
+          "state": "later",
+          "detail": ""
+        }
+      ],
+      "bestNextDecisions": [
+        {
+          "id": "OD-operating-model-unstated",
+          "question": "Which operating model is required: fully managed, co-managed or self-managed?",
+          "source": "compiler_open_decision",
+          "impact": [
+            "price",
+            "delivery",
+            "architecture"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-resilience",
+          "question": "At your site count, is dual-circuit resilience per site required?",
+          "source": "earned_question",
+          "impact": [
+            "price",
+            "architecture",
+            "risk"
+          ],
+          "reason": null
+        },
+        {
+          "id": "q-sse-scope",
+          "question": "Full SASE covers several security controls. Which are in scope for you?",
+          "source": "earned_question",
+          "impact": [
+            "architecture",
+            "compliance"
+          ],
+          "reason": null
+        }
+      ],
+      "fullNextQuestionCount": 7,
+      "materialDecisionsRemaining": 4,
+      "pendingSectorSuggestions": 2,
+      "compilerOwnReadiness": {
+        "score": 45,
+        "label": "Scope forming",
+        "reasons": [
+          "6 testable requirements compiled.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "3 high-impact open decisions remain.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      },
+      "sectionAwareReadiness": {
+        "score": 25,
+        "label": "Starting shape",
+        "reasons": [
+          "3 of 10 procurement sections confirmed.",
+          "Operating model not yet stated.",
+          "Delivery timeline not yet stated.",
+          "Budget position not yet stated.",
+          "Every mandatory clause carries an acceptance test.",
+          "4 material decisions remain (open decisions, unresolved earned questions and unaccepted sector suggestions combined), including 2 pending sector suggestions.",
+          "Instrument: SoR. Supplier questions are drawn from generated clause templates; the earned RFI question bank joins once the RFI instrument is earned."
+        ]
+      }
+    }
+  ]
+}

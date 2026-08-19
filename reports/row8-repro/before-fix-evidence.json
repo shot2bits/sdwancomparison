@@ -1,0 +1,58 @@
+{
+  "label": "before-fix",
+  "at_repro_time": "1970-01-01T00:00:00.000Z",
+  "checks": [
+    {
+      "name": "create_draft",
+      "status": 200,
+      "id": "rfp_msvsbzgdpa2nrv",
+      "project_status": "draft",
+      "has_share_token": true,
+      "has_manage_token": true
+    },
+    {
+      "name": "share_token_read_pre_publish",
+      "status": 200,
+      "leaked_rfp_sections": 5,
+      "leaked_buyer_sector": "manufacturing",
+      "response_error": null
+    },
+    {
+      "name": "connect_invite_pre_publish",
+      "status": 200,
+      "persisted_connection": true,
+      "response": {
+        "id": "conn_msvsc106pthi9c",
+        "rfp_id": "rfp_msvsbzgdpa2nrv",
+        "vendor_slug": "cato-networks",
+        "vendor_name": "Cato Networks",
+        "token": "stok_msvsc106pc27ta",
+        "status": "invited",
+        "messages": [
+          {
+            "id": "msg_msvsc106jmf8az",
+            "from": "buyer",
+            "type": "intro",
+            "body": "Row-8 repro invite",
+            "payload": {},
+            "created": 1786883557398,
+            "read": false
+          }
+        ],
+        "created": 1786883557398,
+        "updated": 1786883557398
+      }
+    },
+    {
+      "name": "connect_list_after_pre_publish_attempt",
+      "status": 200,
+      "connection_count": 1
+    },
+    {
+      "name": "ui_vendor_panel_pre_publish",
+      "screenshot": "/tmp/sdwan_reliability_gate/reports/row8-repro/before-fix-vendor-panel-pre-publish.png",
+      "suggest_button_visible": true,
+      "panel_text_snippet": "Vendors and service providers\nSuggest best-fit vendors\nSubmit to your matched vendors\n\nStep 3. These are the graded vendors and service providers from the Netify marketplace. Suggest best-fit vendors finds the closest matches to what you described. Submit to your matched vendors invites that whole set in one go, the same action as the panel at the top of this page. Or invite them one at a time, th"
+    }
+  ]
+}

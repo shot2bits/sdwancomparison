@@ -1,0 +1,65 @@
+{
+  "label": "market-unlock-correction",
+  "at_repro_time": null,
+  "checks": [
+    {
+      "name": "create_draft",
+      "status": 200,
+      "id": "rfp_msvv8bkbvw157t",
+      "project_status": "draft",
+      "has_share_token": true,
+      "has_manage_token": true
+    },
+    {
+      "name": "anonymous_read_pre_publish",
+      "status": 401
+    },
+    {
+      "name": "share_token_read_pre_publish",
+      "status": 404,
+      "leaked_rfp_sections": null,
+      "leaked_buyer_sector": null,
+      "response_error": "RFP not found."
+    },
+    {
+      "name": "connect_invite_pre_publish",
+      "status": 409,
+      "persisted_connection": false,
+      "response": {
+        "error": "This RFP's market has not unlocked yet — publish (and, if the board listing hasn't completed, list on the board) before inviting or contacting vendors.",
+        "code": "market_locked"
+      }
+    },
+    {
+      "name": "connect_list_after_pre_publish_attempt",
+      "status": 200,
+      "connection_count": 0
+    },
+    {
+      "name": "ui_vendor_panel_pre_publish",
+      "screenshot": "/tmp/sdwan_reliability_gate/reports/row8-repro/market-unlock-correction-vendor-panel-pre-publish.png",
+      "suggest_button_visible": false,
+      "panel_text_snippet": "Vendors and service providers\nSubmit to your matched vendors\n\nStep 3. Netify's graded marketplace vendors and service providers are matched to your requirement and invited once you publish. Nothing about your specific match, or any vendor's identity, is shown here until then.\n\nYour private link to this RFP. No account needed: this page is your dashboard. Copy this link (it carries your private key"
+    },
+    {
+      "name": "anonymous_read_post_publish",
+      "status": 401
+    },
+    {
+      "name": "share_token_read_post_publish",
+      "status": 404,
+      "rfp_sections_visible": null
+    },
+    {
+      "name": "connect_invite_post_publish",
+      "status": 409,
+      "persisted_connection": false
+    },
+    {
+      "name": "ui_vendor_panel_post_publish",
+      "screenshot": "/tmp/sdwan_reliability_gate/reports/row8-repro/market-unlock-correction-vendor-panel-post-publish.png",
+      "suggest_button_visible": false,
+      "panel_text_snippet": "Vendors and service providers\nRe-send to your matched vendors\n\nStep 3. Your submission is in. Your matched vendors and service providers are invited the moment your board listing completes — see the notice below.\n\nYour private link to this RFP. No account needed: this page is your dashboard. Copy this link (it carries your private key) to come back from any device and track replies. Don't share it"
+    }
+  ]
+}

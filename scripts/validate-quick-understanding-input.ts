@@ -53,7 +53,7 @@ const inputSrc = readFileSync(new URL("../src/components/preview/PersistentAssis
 const inputCode = codeOnly(inputSrc);
 const workspaceSrc = readFileSync(new URL("../src/components/preview/QuickSorWorkspace.tsx", import.meta.url), "utf8");
 const workspaceCode = codeOnly(workspaceSrc);
-const pageSrc = readFileSync(new URL("../src/app/preview/quick-sor/page.tsx", import.meta.url), "utf8");
+const pageSrc = readFileSync(new URL("../src/app/(marketing)/preview/quick-sor/page.tsx", import.meta.url), "utf8");
 const pageCode = codeOnly(pageSrc);
 
 const FORBIDDEN_TERMS = [

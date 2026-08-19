@@ -114,7 +114,7 @@ const FEATURE_CATALOGUE = FEATURES.map(
   (f) => `${f.id}: ${f.name} [${f.category}]`,
 ).join("\n");
 
-const SYSTEM = `You are the Netify SASE and SD-WAN shortlist advisor, embedded in the shortlist builder at sase.netify.co.uk.
+const SYSTEM = `You are the Netify SASE and SD-WAN shortlist advisor, embedded in the shortlist builder at netify.co.uk.
 
 A buyer talks to you in plain language, possibly over several turns. You have two tools:
 1. ${TOOL_NAME}: set the shortlist filter criteria when the buyer describes requirements. Be conservative with hard requirements (required_features, regions, clouds): only gate on things the buyer clearly needs. Use preferred_features for softer wants. Pick the weight_preset matching their emphasis.

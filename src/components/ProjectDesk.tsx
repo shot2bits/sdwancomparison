@@ -79,6 +79,11 @@ import {
   type GovernedEvent,
 } from "@/lib/workspace/procurement-document";
 import LivingProcurementCanvas, { NextQuestions, type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
+import { ProvenanceTag } from "@/components/procurement/ProvenanceTag";
+import McpEvidencePanel from "@/components/procurement/McpEvidencePanel";
+import { historyProvenance } from "@/lib/history-provenance";
+import { humaniseEvent } from "@/lib/project-story";
+import type { ProjectHistoryEvent } from "@/lib/rfp-types";
 /** Living Procurement UK Decision-Maker Blueprint (Robert, 15 Aug 2026):
  *  the canonical NextQuestion projection and section-outline projection
  *  -- both pure, both layered over data this file already computes
@@ -890,6 +895,70 @@ export default function ProjectDesk({
   const [signError, setSignError] = useState<string | null>(null);
   const [needAuth, setNeedAuth] = useState(false);
   const [created, setCreated] = useState<{ id: string; manage: string; test: boolean } | null>(null);
+  /** State 3 (governed MCP/evidence, 18 Aug 2026): this project's own
+   *  real, persisted, append-only history -- the SAME array
+   *  project/[id]/page.tsx's Activity section already reads. Seeded
+   *  only from a real resume fetch (below); never populated any other
+   *  way, so McpEvidencePanel can never render anything that wasn't
+   *  actually stored. */
+  const [projectHistory, setProjectHistory] = useState<ProjectHistoryEvent[]>([]);
+  /** Mission Control's own "MCP RECEIPT" line (Constitution correction,
+   *  18 Aug 2026): the mockups (image3) show a violet "MCP RECEIPT" label
+   *  plus a short receipt line ("Board listing verified · 09:42") at the
+   *  foot of the Mission Control card -- distinct from the existing
+   *  cobalt "MCP evidence" tag (an OBSERVED fact) and from the orange
+   *  "Agent proposed" tag (an open decision): this one is specifically an
+   *  MCP-originated action that carried real, recorded buyer consent --
+   *  i.e. `historyProvenance(h).isMcp && hasConsent`, the exact same real
+   *  condition McpEvidencePanel.tsx's own `approvedEvents` already uses,
+   *  reused here rather than re-derived. Genuinely null (renders nothing)
+   *  until a real such event exists in this project's own history --
+   *  never fabricated, matching every other MCP-labelled surface this
+   *  pass. */
+  const latestMcpReceipt = useMemo(() => {
+    const approved = projectHistory
+      .filter((h) => {
+        const prov = historyProvenance(h);
+        return prov.isMcp && prov.hasConsent;
+      })
+      .sort((a, b) => b.at - a.at);
+    if (approved.length === 0) return null;
+    const h = approved[0];
+    return {
+      label: humaniseEvent(h.event, h.detail),
+      time: new Date(h.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+    };
+  }, [projectHistory]);
+  /** Mobile acceptance correction (18 Aug 2026): "Mission Control must
+   *  support the document, not consume most of the mobile viewport... show
+   *  a compact next-action summary first and allow the full decision stack
+   *  to expand." Desktop (`lg:`) is completely unaffected -- the full card
+   *  always renders there via the `lg:block` override below, regardless of
+   *  this flag; only the mobile default collapses. */
+  const [mcExpanded, setMcExpanded] = useState(false);
+  /** Composer-overlap correction (18 Aug 2026, real bug measured via
+   *  Playwright at 1440x900): a static `lg:max-h-[min(60vh,...)]` clamp on
+   *  the Mission Control card cannot actually guarantee it clears the
+   *  fixed-bottom composer, because the card's TOP position differs
+   *  between its natural (pre-scroll, in-flow) placement and its later
+   *  `lg:sticky lg:top-[132px]` stuck placement -- the natural placement
+   *  sits LOWER (measured 304.6px at this viewport vs. the 132px stuck
+   *  offset), leaving strictly less clearance above the dock than any
+   *  fixed vh-based number can account for across different hero/content
+   *  heights. A CSS-only max-height cannot reference "how far this
+   *  element's own natural top already is," so this measures it directly:
+   *  once on mount (while still unscrolled, i.e. in its natural,
+   *  worst-case position) and again on resize, using the two refs below.
+   *  The stuck (scrolled) position always has MORE clearance than the
+   *  natural one (132px offset < 304.6px natural position, dock stays put
+   *  either way), so sizing for the natural, worst-case position is
+   *  always safe for the stuck position too. Mobile is unaffected -- the
+   *  card only ever measures/applies this at `lg` widths (see the
+   *  matchMedia guard in the effect below); mobile's own height is
+   *  already bounded by the `mcExpanded` collapse, not this. */
+  const [mcMaxHeightPx, setMcMaxHeightPx] = useState<number | null>(null);
+  const mcCardRef = useRef<HTMLDivElement | null>(null);
+  const composerDockRef = useRef<HTMLDivElement | null>(null);
   /** Living Procurement Canvas Phase 2 correction (14 Aug 2026): carries
    *  exactly what the publish response itself returned -- real invited
    *  suppliers (name + credential link) -- so post-publish rendering below
@@ -926,6 +995,21 @@ export default function ProjectDesk({
     frozen: boolean;
     namesFrozen: boolean;
   } | null>(null);
+  /** Lifecycle-consistency closure pass (18 Aug 2026), correction D: the
+   *  post-publish view used to prove publication and invitation but never
+   *  checked whether any supplier had actually responded, so it could not
+   *  honestly distinguish "just published, nothing back yet" from "N
+   *  vendors have replied" -- and the codebase has no field anywhere that
+   *  would let it. `null` here means "not yet checked" (the safe default:
+   *  render as though nothing has arrived, never claim receipt without
+   *  proof); a real number comes only from `/api/rfp/[id]/evaluation`,
+   *  the SAME real, owner-gated, stored-response-backed endpoint
+   *  RfpBuilder.tsx's own genuine "Evaluate vendor responses" comparison
+   *  already uses -- this never fabricates or duplicates that comparison,
+   *  it only reads the same real count so this view can honestly say
+   *  whether one exists yet, and link to the real comparison page when it
+   *  does. See `loadResponseStatus` below. */
+  const [responseCount, setResponseCount] = useState<number | null>(null);
   /** The early save (round 6, Robert's ruling: an option to save when a
    *  verified work email is given). Saving creates the real project
    *  record through the existing create machinery, unpublished; edits
@@ -1207,6 +1291,56 @@ export default function ProjectDesk({
   useEffect(() => {
     if (started) window.dispatchEvent(new Event("pd:project-started"));
   }, [started]);
+  /** Measures the real gap above the fixed composer for the Mission
+   *  Control card's own natural (worst-case) top position -- see the
+   *  `mcMaxHeightPx` doc comment above for why a static CSS clamp can't
+   *  do this. Runs once `started` (the card doesn't render before then)
+   *  and on resize; a small settle delay lets the just-mounted layout
+   *  (hero collapse, card content) finish before measuring. Desktop-only
+   *  (`lg`, >=1024px, matching Tailwind's default `lg` breakpoint used
+   *  throughout this file) -- below that, the card isn't sticky/capped at
+   *  all, so no measurement applies. */
+  useEffect(() => {
+    if (!started) return;
+    const measure = () => {
+      if (!window.matchMedia("(min-width: 1024px)").matches) {
+        setMcMaxHeightPx(null);
+        return;
+      }
+      // Only trust this measurement near the unscrolled (natural,
+      // worst-case) position -- see the doc comment above. If the card
+      // is already `lg:sticky`-stuck (user has scrolled), its rect.top
+      // reads a smaller, more generous number that would let this grow
+      // past the value that's actually safe once scrolled back to the
+      // top, so skip rather than overwrite a known-safe value.
+      if (window.scrollY > 4) return;
+      const card = mcCardRef.current;
+      const dock = composerDockRef.current;
+      if (!card || !dock) return;
+      const cardTop = card.getBoundingClientRect().top;
+      const dockTop = dock.getBoundingClientRect().top;
+      const MARGIN = 16;
+      const available = dockTop - cardTop - MARGIN;
+      // Sane bounds: never collapse below a usable minimum, never grow
+      // past a sensible cap even when the viewport is very tall.
+      setMcMaxHeightPx(Math.max(220, Math.min(available, 640)));
+    };
+    const t1 = window.setTimeout(measure, 60);
+    const t2 = window.setTimeout(measure, 400);
+    window.addEventListener("resize", measure);
+    // Re-measure whenever the page's overall layout height changes (hero
+    // collapse animation settling, async content -- market/verdict/next-
+    // question data -- landing above the card) -- any of these can move
+    // the card's natural top even though nothing the user did changed.
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(document.body);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.removeEventListener("resize", measure);
+      ro.disconnect();
+    };
+  }, [started]);
   const meter = meterOf(facts, verdict);
   const brief = useMemo(() => briefModel({ facts, verdict }), [facts, verdict]);
 
@@ -1371,7 +1505,14 @@ export default function ProjectDesk({
             facts?: WorkspaceFact[];
             receipts?: Receipt[];
             envelope_revision?: number;
+            // State 3 (governed MCP/evidence, 18 Aug 2026): GET /api/rfp/[id]
+            // has always returned the full owner-gated project (publicProject()
+            // spreads everything except manage_token/owner_email), so `history`
+            // was already arriving in this exact response -- simply never read
+            // out of it until now. See McpEvidencePanel.tsx.
+            history?: ProjectHistoryEvent[];
           };
+          setProjectHistory(proj.history ?? []);
           const resumeState = resumeStateFromProject(proj);
           if (!resumeState) {
             // Scoped to Security Sourcing this round (see
@@ -1536,6 +1677,11 @@ export default function ProjectDesk({
                   // that command again.
                   setPhase("fits");
                   rehydratedPublished = true;
+                  // Lifecycle-consistency closure pass, correction D: a
+                  // reopened already-published project must show real
+                  // response status too, not just at the moment of a live
+                  // publish -- same real endpoint, same honest default.
+                  void loadResponseStatus(resumeId, resumeManage ?? "");
                 }
               }
             } catch {
@@ -2860,6 +3006,27 @@ export default function ProjectDesk({
     }
   }
 
+  /** Lifecycle-consistency closure pass, correction D: reads the SAME
+   *  real, owner-gated, stored-response-backed endpoint RfpBuilder.tsx's
+   *  own "Evaluate vendor responses" section already uses
+   *  (`/api/rfp/[id]/evaluation`, which calls `listResponses()` against
+   *  real KV records -- never a guess or a placeholder). Fire-and-forget:
+   *  a failed or slow fetch just leaves `responseCount` at its safe
+   *  default (`null` -> rendered as "awaiting responses", never as
+   *  "responses received" without proof). */
+  async function loadResponseStatus(id: string, manage: string) {
+    try {
+      const url = `/sase/api/rfp/${encodeURIComponent(id)}/evaluation${manage ? `?manage=${encodeURIComponent(manage)}` : ""}`;
+      const r = await fetch(url);
+      if (!r.ok) return;
+      const body = (await r.json().catch(() => null)) as { evaluations?: unknown[] } | null;
+      if (body && Array.isArray(body.evaluations)) setResponseCount(body.evaluations.length);
+    } catch {
+      /* honest default: responseCount stays whatever it already was
+         (usually null), never fabricated from a failed fetch */
+    }
+  }
+
   /* ---- The signature chain (the same organs as every round; the twin
      changed its face, never its law: consents verbatim, humans sign,
      agents never, publish is the only exit). ---- */
@@ -2949,6 +3116,29 @@ export default function ProjectDesk({
         setPublished({ invited, boardId: data.board?.opportunity_id, matchedVendors, totalEvaluatedMarket, frozen: true, namesFrozen: true });
         setNeedAuth(false);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
+        // Lifecycle-consistency closure pass, correction D: a fresh
+        // publish has zero responses by construction (no vendor has had
+        // time to reply), but this still checks the real endpoint rather
+        // than assuming -- the same honest, no-shortcut rule as every
+        // other value on this page.
+        setResponseCount(null);
+        void loadResponseStatus(proj.id, proj.manage);
+        // Visual closure pass (18 Aug 2026): a buyer who scrolled down to
+        // review the pre-publish decisions/consents before pressing
+        // "Generate and publish" keeps that same scroll position once the
+        // response swaps in the (shorter, differently-laid-out) State 4
+        // content -- the browser never re-clamps scroll after a reflow.
+        // Confirmed via a live Playwright run: with scrollY left where the
+        // publish button had been, the sticky status dock (`[data-dock]`,
+        // `top: 52px`) ends up stacked over genuinely new State 4 content
+        // ("how to read this", and on mobile the invited-vendor list),
+        // covering real interactive controls. Scrolling to the top on a
+        // successful publish is the same "you finished an action, see the
+        // new view from its start" pattern already used elsewhere in this
+        // flow (state transitions never leave the buyer stranded mid-page)
+        // -- it does not change the canonical envelope, MarketUnlock
+        // boundary or anything about what publish itself does.
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (data.auth_required) {
         setNeedAuth(true);
         ev("workspace_auth_required", { scope: buying ?? "security" });
@@ -3318,9 +3508,9 @@ export default function ProjectDesk({
     const isNew = changedSlots.includes(s.id);
     const rowCls = "flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]";
     const rowStyle: React.CSSProperties = isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {};
-    const labCls = "w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]";
+    const labCls = "w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]";
     const tagBase: React.CSSProperties = { ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none" };
-    const ctlCls = "flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099]";
+    const ctlCls = "flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52]";
 
     const fs = s.path ? standingAt(s.path) : [];
     if (s.path && fs.length) {
@@ -3358,13 +3548,13 @@ export default function ProjectDesk({
             >
               {value}
             </button>
-            <span className="text-[12px] italic text-[#A3A099]">{meta}</span>
+            <span className="text-[12px] italic text-[#655F52]">{meta}</span>
           </div>
           <span style={{ ...tagBase, ...(anyInferred ? { background: "#F1EFE9", color: "#7A7770" } : { background: "#EAF6EE", color: "#256B3E" }) }}>
             {anyInferred ? "netify guessed" : "your words"}
           </span>
           {single ? (
-            <button type="button" onClick={() => dropRow(latest)} className={`${ctlCls} hover:border-[#B4650B] hover:text-[#B4650B]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+            <button type="button" onClick={() => dropRow(latest)} className={`${ctlCls} hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]`} style={{ ...mono, letterSpacing: "0.07em" }}>
               {latest.provenance === "inferred" ? "drop" : "clear"}
             </button>
           ) : (
@@ -3396,7 +3586,7 @@ export default function ProjectDesk({
             >
               {value}
             </button>
-            <span className="text-[12px] italic text-[#A3A099]">you chose this</span>
+            <span className="text-[12px] italic text-[#655F52]">you chose this</span>
           </div>
           <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
           {/* Fix, 10 Aug 2026 (Harry's E2E, Test 1.6 -- same root cause as
@@ -3421,7 +3611,7 @@ export default function ProjectDesk({
         <button
           type="button"
           onClick={() => setEdit(s.id)}
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
         >
           <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
           {s.cta}
@@ -3499,7 +3689,7 @@ export default function ProjectDesk({
                   {saveDirty ? "saved, edits since" : "saved"} · open your project record
                 </a>
               ) : (
-                <span className="text-[11.5px] text-[#A3A099]" style={mono}>nothing leaves this page</span>
+                <span className="text-[11.5px] text-[#655F52]" style={mono}>nothing leaves this page</span>
               )}
               <span className="flex-1" />
               <button
@@ -3522,7 +3712,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => window.location.assign(window.location.pathname)}
-                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#A3A099] hover:text-[#141414]"
+                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#655F52] hover:text-[#141414]"
               >
                 Start again
               </button>
@@ -3543,9 +3733,9 @@ export default function ProjectDesk({
           <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
             <div className="min-w-[220px] flex-1">
               <div className="flex items-baseline gap-2.5">
-                <span className="text-[10.5px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
+                <span className="text-[10.5px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
                 <span className="text-[15px] font-semibold" style={mono}>{pct}%</span>
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#A3A099]">{pctNote}</span>
+                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#655F52]">{pctNote}</span>
               </div>
               <div className="mt-2 flex gap-[3px]">
                 {Array.from({ length: 12 }, (_, i) => (
@@ -3556,9 +3746,9 @@ export default function ProjectDesk({
             <div className="flex-none border-l border-[#E5E1D9] pl-[22px]">
               <div className="flex items-baseline gap-2">
                 <span className="text-[22px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>{marketTotal ?? "…"}</span>
-                <span className="text-[12.5px] text-[#8C8A85]">evaluated marketplace</span>
+                <span className="text-[12.5px] text-[#655F52]">evaluated marketplace</span>
               </div>
-              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#A3A099]">{marketNote}</div>
+              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#655F52]">{marketNote}</div>
             </div>
           </div>
 
@@ -3576,8 +3766,9 @@ export default function ProjectDesk({
           plus the page's own bottom padding (see the grid wrapper below)
           keep it clear of the last document row. */}
       <div
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#DED8CE]"
-        style={{ background: "#fbfaf8" }}
+        ref={composerDockRef}
+        className="fixed inset-x-0 bottom-0 z-40 border-t"
+        style={{ background: "var(--nf-ivory-raised, #fbfaf8)", borderColor: "var(--nf-rule, #DED8CE)" }}
       >
         <div className="mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]">
           {/* The prompt (the input method, never the subject). Styled as a
@@ -3611,7 +3802,7 @@ export default function ProjectDesk({
               placeholder={resuming ? PLACEHOLDER_RESUMING : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
               disabled={resuming}
               rows={1}
-              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#A3A099] disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#655F52] disabled:cursor-not-allowed disabled:opacity-60"
             />
             <div className="flex flex-none items-center gap-1.5">
               {voiceSupported && (
@@ -3619,7 +3810,7 @@ export default function ProjectDesk({
                   type="button"
                   onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}
                   title={voiceState === "idle" ? "Say it out loud" : "Stop listening"}
-                  className={`flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[#B4650B]" : "border-transparent text-[#8C8A85] hover:border-[#E3E0DA] hover:text-[#141414]"}`}
+                  className={`flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[var(--nf-orange-strong)]" : "border-transparent text-[#655F52] hover:border-[#E3E0DA] hover:text-[#141414]"}`}
                 >
                   {voiceState === "listening" ? (
                     <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#B4650B]" aria-hidden="true" />
@@ -3635,7 +3826,7 @@ export default function ProjectDesk({
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 title="Drop or choose a plain-text document and it will be read into the statement"
-                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#8C8A85] hover:border-[#E3E0DA] hover:text-[#141414]"
+                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#655F52] hover:border-[#E3E0DA] hover:text-[#141414]"
               >
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M11.5 5.5 6 11a2.5 2.5 0 1 0 3.54 3.54L15 9.08a4 4 0 1 0-5.66-5.66L4 8.76" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -3671,18 +3862,18 @@ export default function ProjectDesk({
               answers in copy) still holds -- this describes the
               mechanism, it does not demonstrate an answer. */}
           {!started && (
-            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">
               Answers below fill in automatically as you describe your requirement above.
             </p>
           )}
           {wrongCompany && (
-            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">
               Looking for website hosting? That is Netlify, a different company. This is Netify, the SASE and SD-WAN procurement marketplace; carry on if the network is what you came for.
             </p>
           )}
-          {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{pasteSummary}</p>}
-          {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">{cycleError}</p>}
-          {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#8C8A85]">{voiceError}</p>}
+          {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">{pasteSummary}</p>}
+          {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[var(--nf-orange-strong)]">{cycleError}</p>}
+          {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">{voiceError}</p>}
         </div>
       </div>
 
@@ -3692,8 +3883,26 @@ export default function ProjectDesk({
           nothing else. */}
       {!coreFive.sector && (
         <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
-          <div className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible" style={{ scrollbarWidth: "none" }}>
-            <span className="flex-none text-[12.5px] text-[#A3A099]">Or start from your sector:</span>
+          {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
+              E: at 390px this row is narrower than "Or start from your
+              sector:" plus even one chip, so with `overflow-x-auto`
+              genuinely scrollable but `scrollbarWidth: "none"` hiding the
+              ONLY affordance that could tell a buyer so, the visible chip
+              was hard-clipped mid-word ("Multinational / glo…") with
+              nothing suggesting more existed -- confirmed via a live
+              390px screenshot. Content itself is untouched (still scrolls,
+              still every chip's full label exists) -- a right-edge fade
+              mask now makes the cut a visibly intentional "more this way"
+              hint instead of a hard, silent clip, exactly the "scroll
+              intentionally with a clear affordance" option this
+              correction allows. `sm:[mask-image:none]` turns it off once
+              the row switches to `flex-wrap` (nothing to hint at once
+              everything's visible). */}
+          <div
+            className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]"
+            style={{ scrollbarWidth: "none" }}
+          >
+            <span className="flex-none text-[12.5px] text-[#655F52]">Or start from your sector:</span>
             {SECTOR_CHIPS.map((c) => (
               <button
                 key={c.label}
@@ -3736,31 +3945,209 @@ export default function ProjectDesk({
           (after `<main>`), not the aside/main seam on mobile where the
           aside — now capped to one visible card, see NextQuestions'
           `bare` mode above — still needs its own clearance. */}
-      <aside className="order-1 mb-6 pb-[150px] lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start">
-        <div className="rounded-[14px] border border-[#EFECE5] bg-white p-4">
-          <div className="text-[10.5px] uppercase text-[#8C8A85]" style={{ fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace', letterSpacing: "0.1em" }}>
+      {/* Mission Control (2030 visual pass, 18 Aug 2026): restyled to the
+          approved prototype's dark `.card.dark` treatment (index.html) --
+          the one panel across states 0/1 the closure package specifically
+          names ("Mission Control... governed MCP approval flow"). Only
+          colour/typography change here; the sticky/order/mobile-height
+          logic above (lg:sticky, lg:top-[132px], the mobile dock
+          clearance) is untouched -- that's spacing/hierarchy the prototype
+          itself doesn't govern (it has no fixed dock to clear).
+
+          Dead-zone correction (18 Aug 2026, real bug found via mobile
+          screenshot): the 150px bottom clearance below was written when
+          the mobile card was ALWAYS fully expanded (guarding its last
+          decision card from the fixed dock) -- now that it defaults to
+          the collapsed one-line summary (`mcExpanded`, added this same
+          pass), that same 150px reservation sits empty below a two-line
+          card, reading as exactly the "giant dead zone" the mobile
+          acceptance criteria rule out. Only reserve it while genuinely
+          expanded; collapsed keeps a plain, small gap instead. */}
+      <aside className={`order-1 mb-6 ${mcExpanded ? "pb-[150px]" : "pb-6"} lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start`}>
+        {/* No .procurement-2030 class needed here: this div is already
+            inside ProcurementEntry's own .procurement-2030 wrapper (the
+            --nf-* custom properties inherit down the DOM tree), unlike
+            WorkspaceHeader.tsx, which is a layout-level sibling and does
+            need its own application. */}
+        {/* Mandatory visual correction (18 Aug 2026): "the fixed composer
+            must never obscure content." Confirmed by real screenshot at
+            1440x900, unscrolled: this card's own natural height, added to
+            its sticky top-132px offset, ran into the fixed-bottom
+            composer's ~90px footprint before the card ever got to scroll
+            out from under it. `lg:max-h-*` reserves exactly the space
+            between the sticky offset and the composer (with margin) and
+            `overflow-y-auto` lets the card's own content scroll internally
+            instead of spilling under the dock -- the standard fix for a
+            sticky sidebar sharing the viewport with a fixed footer. Mobile
+            is unaffected (not sticky there, and now collapsed by default
+            via `mcExpanded`, so it's short regardless). */}
+        <div
+          ref={mcCardRef}
+          // The max-height itself stays `lg:`-scoped via the Tailwind
+          // class (never applied on mobile, exactly as before) -- only
+          // the VALUE now comes from the `--mc-max-h` custom property so
+          // the JS measurement below can feed it. Setting a CSS variable
+          // via inline style is harmless below `lg` since nothing reads
+          // it there; the `min(60vh,...)` fallback covers first paint
+          // (before the effect runs) and any case the effect can't
+          // measure (e.g. no ResizeObserver support).
+          className="rounded-[18px] border p-4 lg:max-h-[var(--mc-max-h,min(60vh,calc(100vh-170px)))] lg:overflow-y-auto"
+          style={{
+            background: "var(--nf-ink-950)",
+            borderColor: "#2B2519",
+            color: "#EFEAE0",
+            ...(mcMaxHeightPx != null ? ({ "--mc-max-h": `${mcMaxHeightPx}px` } as React.CSSProperties) : {}),
+          }}
+        >
+          <div style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "#C9C2B2" }}>
             Mission control
           </div>
-          <h3 className="mb-0 mt-1.5 text-[17px] font-semibold leading-[1.3]">
-            {materialDecisionsRemaining
-              ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
-              : "Nothing material outstanding"}
-          </h3>
-          <p className="m-0 mt-1 text-[12px] leading-[1.5] text-[#8C8A85]">
-            The agent ranks only choices that change price, risk, compliance or delivery.
-          </p>
-          {nextQuestionCards && nextQuestionCards.length > 0 ? (
-            <div className="mt-4">
-              <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare />
-            </div>
-          ) : (
-            <p className="m-0 mt-4 text-[12.5px] leading-[1.5] text-[#A3A099]">
-              No material decision is open right now — the document reflects everything stated so far.
+          {/* Real bug found via screenshot verification (18 Aug 2026): this
+              heading rendered near-invisible on the dark card -- `text-white`
+              LOSES to globals.css's sitewide `h1, h2, h3 { color:
+              var(--ink-900) }` rule, because that rule sits outside any
+              Tailwind `@layer` block and CSS cascade layers always rank
+              unlayered author CSS above layered CSS regardless of selector
+              specificity (confirmed via getComputedStyle: color resolved
+              to rgb(24,24,27), not white). Inline `style.color` beats any
+              class or unlayered selector, so the colour moved here rather
+              than relying on the class.
+
+              Accessibility correction (18 Aug 2026, real bug found via an
+              axe-core scan): this was an `<h3>`, but Mission Control is a
+              sibling SECTION alongside the living document (not nested
+              inside it), and it sits earlier in DOM order than the
+              document's own `<h2>` title (LivingProcurementCanvas.tsx /
+              ProjectDesk.tsx's docTitle) -- the CSS `order-*` classes that
+              visually reorder it for desktop don't change DOM/accessibility
+              tree order. That produced a real h1 -> h3 -> h2 sequence
+              (skipping a level, then stepping back down), which axe's
+              heading-order rule correctly flags: it breaks screen-reader
+              heading-list navigation. `<h2>` is the correct level -- a
+              sibling section heading, same rank as the document title,
+              not a subsection three levels below the page's own h1. */}
+          {/* Honesty fix (verification pass, 18 Aug 2026): "Nothing material
+              outstanding" used to render directly above a live grid of
+              question cards (nextQuestionCards is the FULL ranked list,
+              never filtered to material-only -- see topThreeQuestions above)
+              whenever any non-material/optional question existed -- reading
+              as a direct contradiction ("nothing outstanding", right above
+              something visibly presented). The cards themselves already say
+              which they are (LivingProcurementCanvas.tsx's own isMaterial
+              fix, same MATERIAL_IMPACTS classification, "Open decision" vs
+              "Optional - not required to publish"); this heading now uses
+              the same true/false split the cards use, in the buyer's own
+              words: "No blocking decisions" when materialDecisionsRemaining
+              is genuinely 0, never a phrase that could be misread as "there
+              is nothing here at all." Whatever optional cards remain below
+              get their own "Optional refinements" label (just below) so the
+              two never disagree.
+
+              Lifecycle-consistency closure pass (18 Aug 2026), correction
+              A: "before publish" is only ever true before publish -- once
+              `published` is set, publication has already happened, so a
+              remaining `materialDecisionsRemaining` count no longer blocks
+              anything; it can only shape the NEXT revision. Saying "N
+              decisions before publish" (or even "No blocking decisions",
+              which still frames the card around a not-yet-completed
+              publish) after a real publish would misstate a completed
+              action as still pending -- exactly the contradiction this
+              pass exists to remove. */}
+          <h2 className="mb-0 mt-1.5 text-[19px] font-semibold leading-[1.3]" style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "#fff" }}>
+            {published
+              ? materialDecisionsRemaining
+                ? `Project published · ${materialDecisionsRemaining} optional refinement${materialDecisionsRemaining === 1 ? "" : "s"} for the next revision`
+                : "Project published"
+              : materialDecisionsRemaining
+                ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
+                : "No blocking decisions"}
+          </h2>
+          {/* Mobile-only compact toggle -- `lg:hidden` so desktop never
+              sees it (the full card is always expanded there). Only shown
+              when there's actually something to expand into. */}
+          {materialDecisionsRemaining > 0 && (
+            <button
+              type="button"
+              onClick={() => setMcExpanded((v) => !v)}
+              className="mt-2 cursor-pointer rounded-full border-0 px-3 py-1.5 text-[11px] font-semibold uppercase lg:hidden"
+              /* Contrast fix (verification pass, 18 Aug 2026): white text on
+                 --nf-orange (#E8590C) measured 3.58:1, below WCAG AA's
+                 4.5:1 for this button's normal-weight small text.
+                 --nf-orange-strong (#AA3E06, already the design system's
+                 own darker/contrast-fixed orange -- see globals.css) gives
+                 white text 6.17:1 here, comfortably safe, same accent hue. */
+              style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.06em", background: "var(--nf-orange-strong, #AA3E06)", color: "#fff" }}
+              aria-expanded={mcExpanded}
+            >
+              {mcExpanded ? "Hide decisions" : "View decisions"}
+            </button>
+          )}
+          <div className={`${mcExpanded ? "" : "hidden"} lg:block`}>
+            <p className="m-0 mt-3 text-[12px] leading-[1.5] lg:mt-1" style={{ color: "#B9B2A2" }}>
+              {published
+                ? "Publication is already complete — nothing below reopens it. These only shape your next revision."
+                : materialDecisionsRemaining
+                  ? "The agent ranks only choices that change price, risk, compliance or delivery."
+                  : "Nothing below blocks publishing — every card here is optional."}
             </p>
+            {nextQuestionCards && nextQuestionCards.length > 0 ? (
+              <div className="mt-4">
+                {/* Bullet 2 of the same honesty fix: when nothing is
+                    material, the cards still shown (governed suggestions,
+                    delivery/evaluation-only earned questions) get their own
+                    named group instead of sitting under a bare "no blocking
+                    decisions" heading with no label of their own — never
+                    presented as though they were the blocking decisions the
+                    heading just said there were none of.
+
+                    Lifecycle-consistency closure pass, correction A: once
+                    `published` is true, EVERY remaining card gets this
+                    label, even ones `materialDecisionsRemaining` still
+                    counts as material -- material only ever meant "would
+                    have blocked publication," and publication has already
+                    happened, so nothing here is a blocker of anything
+                    anymore, regardless of its pre-publish classification. */}
+                {(published || !materialDecisionsRemaining) && (
+                  <div className="mb-2 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.1em", color: "#948C79" }}>
+                    Optional refinements
+                  </div>
+                )}
+                <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare dark />
+              </div>
+            ) : (
+              <p className="m-0 mt-4 text-[12.5px] leading-[1.5]" style={{ color: "#948C79" }}>
+                No material decision is open right now — the document reflects everything stated so far.
+              </p>
+            )}
+          </div>
+          {/* Real, honestly-empty-until-earned "MCP RECEIPT" line -- see
+              the `latestMcpReceipt` doc comment above. Sits outside the
+              `mcExpanded` collapse (mobile always sees a genuine receipt
+              if one exists, matching the mockup treating it as
+              foot-of-card chrome, not a decision card). */}
+          {latestMcpReceipt && (
+            <div className="mt-3 border-t pt-2.5" style={{ borderColor: "#2B2519" }}>
+              <span style={{ fontFamily: "var(--nf-font-mono)", fontSize: "9px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--nf-lilac, #8D77CF)", fontWeight: 700 }}>
+                MCP receipt
+              </span>
+              <p className="m-0 mt-1 text-[12px] leading-[1.4]" style={{ color: "#D8D0BE" }}>
+                {latestMcpReceipt.label} · {latestMcpReceipt.time}
+              </p>
+            </div>
           )}
         </div>
       </aside>
-      <main className="order-2 min-w-0 lg:order-1">
+      {/* Accessibility correction (18 Aug 2026, real bug found via an
+          axe-core scan): this was a second/third `<main>` on the page
+          (alongside (workspace)/layout.tsx's real page-level
+          `<main id="main-content">` and, until the same pass, Procurement
+          Entry's own) -- this is the document CANVAS COLUMN of a two-
+          column grid, a sub-region, not the page's primary-content
+          landmark. The `order-*`/`lg:order-*` classes here reorder it
+          visually only (CSS `order` never changes DOM/accessibility tree
+          order), so demoting this to a plain `<div>` changes no layout,
+          only removes the duplicate landmark. */}
+      <div className="order-2 min-w-0 lg:order-1">
       {/* ── THE THREAD (round 7, 1 Aug 2026: Robert — "the idea was
           this section had a memory and users could keep typing to
           generate the living statement, so there would be a scrolling
@@ -3790,16 +4177,30 @@ export default function ProjectDesk({
           data, the memory, or the scroll behaviour changes. */}
       <div className="mx-auto w-full max-w-[1000px] px-[26px] pt-3">
         {msgs.length > 0 && (
-          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#A3A099]">
+          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#655F52]">
             Feedback only, kept for this sitting — the statement below is the record.
           </p>
         )}
-        <div ref={threadRef} className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto px-1 sm:max-h-[620px]">
+        {/* Accessibility correction (18 Aug 2026, real bug found via an
+            axe-core scan): this scrolls its own content (max-h +
+            overflow-y-auto) but carried no way for a keyboard user to
+            focus it and scroll with arrow keys (axe's
+            scrollable-region-focusable rule) -- mouse/touch/trackpad
+            scrolling worked, keyboard-only did not. `tabIndex={0}` plus a
+            real `aria-label` (this genuinely IS the feedback transcript,
+            not a decorative box) fixes both the focusability and gives
+            it a name a screen reader announces. */}
+        <div
+          ref={threadRef}
+          tabIndex={0}
+          aria-label="Feedback transcript"
+          className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto px-1 sm:max-h-[620px]"
+        >
           {msgs.map((m, i) => (
             <div key={i} className="flex items-start gap-2.5">
               <span
                 className="w-[52px] flex-none pt-[3px] text-[10px] font-semibold uppercase"
-                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#A3A099" : "#B4650B" }}
+                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#655F52" : "var(--nf-orange-strong)" }}
               >
                 {m.who === "you" ? "You" : "Netify"}
               </span>
@@ -3824,11 +4225,27 @@ export default function ProjectDesk({
           the exact, already-working correction/edit affordance for
           individual facts (drop/clear/edit buttons, sector packs, notes)
           -- nothing about that panel's own behaviour changes here. Only
-          shown once a project has started, same as the statement it
-          sits above; hidden once locked (`phase === "fits"`), the same
-          gate the statement uses, so this never renders anywhere near
-          the pre-publication vendor-redaction panel below. */}
-      {phase === "live" && started && (
+          shown once a project has started.
+
+          CORRECTION (Robert's follow-up visual-closure directive, 18 Aug
+          2026, item 7): this used to also hide once locked (`phase ===
+          "fits"`), on the reasoning that it must never render "anywhere
+          near" the pre-publication vendor-redaction panel below. That
+          reasoning doesn't hold up: this canvas (title/summary, readiness,
+          the fact-strip counts, the Living document / Supplier pack /
+          Evaluation switch, the architecture twin, the clause list, open
+          decisions) never names a single vendor or service provider --
+          the MarketUnlock boundary is enforced entirely inside the "fits"
+          panel and its own server route (fit/route.ts), untouched by this
+          change. Hiding the canvas instead broke the buyer-facing "value-
+          building story" the SAME directive requires end to end: buyer
+          wording -> structured facts -> living document -> supplier pack
+          -> frozen published revision -> vendor responses -> evidence-
+          backed comparison. Rendering through "fits" too (states 3-5, not
+          just state 2) keeps that story visible exactly where it matters
+          most -- right where the buyer is about to publish, and right
+          after they have. */}
+      {(phase === "live" || phase === "fits") && started && (
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2 pt-[6px]">
           <LivingProcurementCanvas
             document={canvasDocument}
@@ -3843,6 +4260,25 @@ export default function ProjectDesk({
             acceptedSuggestionCards={acceptedSuggestionCards}
             acceptedSuggestionsTitle={sectorSectionTitle}
           />
+        </div>
+      )}
+
+      {/* ── STATE 3: GOVERNED MCP / EVIDENCE (18 Aug 2026) ── real
+          project history, never fabricated connections/evidence/receipts
+          -- see McpEvidencePanel.tsx's own doc comment for exactly what
+          each of the seven states is grounded in. Only rendered once a
+          project has actually been saved (an id exists), since history
+          only exists on a persisted record -- an unsaved draft honestly
+          has no history to read, not an empty one worth rendering.
+          Rendered through `phase === "fits"` too, the same correction and
+          for the same reason as the canvas above: this is provenance
+          (who did what, when), never a vendor name, so keeping it visible
+          through states 3-5 preserves the value-building story instead of
+          breaking it at the exact moment (about to publish, just
+          published) it matters most. */}
+      {(phase === "live" || phase === "fits") && started && created?.id && (
+        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2">
+          <McpEvidencePanel history={projectHistory} />
         </div>
       )}
 
@@ -3883,9 +4319,9 @@ export default function ProjectDesk({
             Project details / edit source facts
           </summary>
           <div className="px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]">
-          <div className="text-[10.5px] uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
+          <div className="text-[10.5px] uppercase text-[var(--nf-orange-strong)]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
           <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
-          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#8C8A85]">
+          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#655F52]">
             This document is the project. It fills in as you talk, every line shows where it came from, and vendors and service providers bid against exactly what is on this page.
           </p>
 
@@ -3897,8 +4333,8 @@ export default function ProjectDesk({
                 <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
                   <div className="mb-2 flex items-baseline gap-[11px]">
                     <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                    <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">{g.note}</span>
-                    <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{state}</span>
+                    <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">{g.note}</span>
+                    <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{state}</span>
                   </div>
                   <div className="flex flex-col">
                     {rows.length > 0 ? (
@@ -3910,12 +4346,12 @@ export default function ProjectDesk({
                             className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]"
                             style={isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {}}
                           >
-                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]">Applied</span>
+                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]">Applied</span>
                             <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
                               <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>
                                 {COMPLIANCE_LABELS[String(f.value)] ?? String(f.value)}
                               </span>
-                              <span className="text-[12px] italic text-[#A3A099]">
+                              <span className="text-[12px] italic text-[#655F52]">
                                 {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
                               </span>
                             </div>
@@ -3928,7 +4364,7 @@ export default function ProjectDesk({
                             <button
                               type="button"
                               onClick={() => dropRow(f)}
-                              className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                              className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
                               style={{ ...mono, letterSpacing: "0.07em" }}
                             >
                               {f.provenance === "inferred" ? "drop" : "clear"}
@@ -3937,16 +4373,16 @@ export default function ProjectDesk({
                         );
                       })
                     ) : coreFive.sector ? (
-                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#8C8A85]">
+                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#655F52]">
                         No asserted rule pack for this sector yet. Any rule you state lands here with your words as its provenance.
                       </div>
                     ) : (
                       <div className="flex items-start gap-3.5 py-[9px]">
-                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Sector rules</span>
+                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Sector rules</span>
                         <button
                           type="button"
                           onClick={() => setEdit("sector")}
-                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
                         >
                           <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
                           Set your sector to load these
@@ -3961,11 +4397,11 @@ export default function ProjectDesk({
                         options (NHS DSPT, FCA) only appear once the
                         standing sector matches. */}
                     <div className="flex items-start gap-3.5 py-[9px]">
-                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Compliance</span>
+                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Compliance</span>
                       <button
                         type="button"
                         onClick={() => setEdit("compliance")}
-                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
                       >
                         <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
                         Add a compliance requirement
@@ -3981,8 +4417,8 @@ export default function ProjectDesk({
               <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
                 <div className="mb-2 flex items-baseline gap-[11px]">
                   <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                  <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">{g.note}</span>
-                  <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{filled} of {slots.length}</span>
+                  <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">{g.note}</span>
+                  <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{filled} of {slots.length}</span>
                 </div>
                 <div className="flex flex-col">{slots.map(slotCell)}</div>
               </div>
@@ -4005,17 +4441,17 @@ export default function ProjectDesk({
           <div className="border-t border-[#EFECE5] pb-4 pt-[18px]">
             <div className="mb-2 flex items-baseline gap-[11px]">
               <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>Other requirements</span>
-              <span className="min-w-0 flex-1 text-[12.5px] text-[#A3A099]">anything the statement above has no line for</span>
-              <span className="flex-none text-[11px] text-[#A3A099]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
+              <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">anything the statement above has no line for</span>
+              <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
             </div>
             <div className="flex flex-col">
               {receipts.length > 0 ? (
                 receipts.map((r) => (
                   <div key={r.id} className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]">
-                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#8C8A85] sm:w-[150px]">Noted</span>
+                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]">Noted</span>
                     <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
                       <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>{r.text}</span>
-                      <span className="text-[12px] italic text-[#A3A099]">kept verbatim</span>
+                      <span className="text-[12px] italic text-[#655F52]">kept verbatim</span>
                     </div>
                     <span style={{ ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none", background: "#EAF6EE", color: "#256B3E" }}>
                       your words
@@ -4023,7 +4459,7 @@ export default function ProjectDesk({
                     <button
                       type="button"
                       onClick={() => { dropReceipt(r.id); say(`Cleared: “${r.text}”. It will not come back unless you say it yourself.`); }}
-                      className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                      className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
                       style={{ ...mono, letterSpacing: "0.07em" }}
                     >
                       clear
@@ -4032,8 +4468,8 @@ export default function ProjectDesk({
                 ))
               ) : (
                 <div className="flex items-start gap-3.5 py-[9px]">
-                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#8C8A85] sm:w-[150px]">Anything else</span>
-                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#8C8A85]">
+                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Anything else</span>
+                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52]">
                     Say it in the prompt above. Anything that doesn&apos;t fit a line elsewhere is kept here, word for word.
                   </div>
                 </div>
@@ -4095,53 +4531,119 @@ export default function ProjectDesk({
           <button
             type="button"
             onClick={() => { setPhase("live"); scrollToWorkspace(); }}
-            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#8C8A85] hover:text-[#141414]"
+            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#655F52] hover:text-[#141414]"
           >
             Back to the statement
           </button>
-          <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] p-6">
-            <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
-              Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
-            </h2>
-            <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
-              Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
-            </p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
-                <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
-                  Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
+          {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
+              B: this explainer card is a pre-publish sales pitch --
+              "Publish to match this project…", "What publishing
+              unlocks…", and an "Open decisions remaining… before you
+              publish" stat. `phase` stays "fits" forever once a buyer
+              opens this panel (see `setPhase` call sites; nothing reverts
+              it to "live" after a real publish), so gating this on
+              `phase === "fits"` alone left it rendering verbatim ABOVE the
+              "Published. Signed-in vendors…" confirmation below it --
+              two contradictory cards stacked in the same view, as if the
+              already-completed publish were still pending. `!published`
+              is the real "hasn't happened yet" check (see its own
+              declaration); the confirmation card below already carries
+              everything a published state honestly needs (board status,
+              frozen matches/invitations, response status, next action),
+              so this one simply stops rendering once that's true, rather
+              than being replaced by a duplicate. */}
+          {!published && (
+            <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] p-6">
+              <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
+                Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
+              </h2>
+              <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
+                Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                  <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                    Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
+                  </div>
+                </div>
+                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                  <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                    Document readiness. {pctNote}
+                  </div>
+                </div>
+                {/* Lifecycle-consistency closure pass, correction C: this
+                    used to read `unansweredGaps.length` -- `brief.openGaps`,
+                    a security-verdict-only gap list that is hard-coded to
+                    `[]` for any non-security (SASE/SD-WAN/SSE network)
+                    engagement, so it read "0" here unconditionally while
+                    Mission Control's `materialDecisionsRemaining` (compiler
+                    openDecisions + earned questions + sector suggestions,
+                    ranked and material-impact-filtered) could genuinely be
+                    7 at the same time -- two different arrays answering
+                    "how many decisions are open," never reconciled. Both
+                    projections now read the SAME `materialDecisionsRemaining`
+                    value Mission Control uses, so the two views can never
+                    disagree again; `unansweredGaps` itself is untouched
+                    (still the real, correct input to the accept-gap
+                    submission loop above in `signAndPublish`, an unrelated
+                    concern from what this stat displays). */}
+                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                  <div className="text-[22px] font-semibold" style={mono}>{materialDecisionsRemaining}</div>
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                    {materialDecisionsRemaining === 1 ? "Blocking decision" : "Blocking decisions"} remaining. Resolve or accept as a stated assumption before you publish.
+                  </div>
                 </div>
               </div>
-              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
-                <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
-                  Document readiness. {pctNote}
-                </div>
-              </div>
-              <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
-                <div className="text-[22px] font-semibold" style={mono}>{unansweredGaps.length}</div>
-                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#8C8A85]">
-                  {unansweredGaps.length === 1 ? "Open decision" : "Open decisions"} remaining. Resolve or accept as a stated assumption before you publish.
-                </div>
-              </div>
+              <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#655F52]">
+                What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
+              </p>
             </div>
-            <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#8C8A85]">
-              What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
-            </p>
-          </div>
+          )}
 
           {/* ---- Generate and publish: the only exit (R5), the ruled
                   organs intact: what carries, what stays private, the
                   consents verbatim, the identity read-back, the vetting
                   standard linked so the claim is checkable. ---- */}
-          <div data-publish="1" className="mt-9 border-l-2 border-[#F5A21B] pl-4" style={{ scrollMarginTop: "90px" }}>
+          <div data-publish="1" className="mt-9 border-l-2 pl-4" style={{ scrollMarginTop: "90px", borderColor: "var(--nf-orange, #F5A21B)" }}>
             {published ? (
               <div>
                 <div className="mb-2 max-w-[36em] text-[16px] leading-[1.6]">
                   Published. Signed-in vendors and service providers can now see your anonymous notice
                   {published.boardId ? <>: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></> : "."}
                   {published.invited.length > 0 && <> {cap(numWord(published.invited.length))} {published.invited.length === 1 ? "was" : "were"} invited directly.</>}
+                </div>
+                {/* Lifecycle-consistency closure pass (18 Aug 2026),
+                    correction D: this used to prove publication and
+                    invitation but never said anything about whether a
+                    supplier had actually responded -- a buyer reading
+                    only this card had no way to tell "just published,
+                    nothing back yet" from "vendors have replied." Never
+                    claims "responses received" or offers "Compare
+                    responses" without `responseCount` being a real,
+                    fetched, non-null, positive number (see
+                    `loadResponseStatus`); `responseCount === null` (not
+                    yet checked, or the check failed) renders identically
+                    to a real, confirmed zero -- the safe default never
+                    overclaims. The comparison link goes to RfpBuilder.tsx's
+                    own "Evaluate vendor responses" section, the genuine,
+                    already-correct response-comparison experience built
+                    from real stored records -- this never re-implements
+                    or duplicates that view. */}
+                <div className="mb-3 max-w-[36em] rounded-[10px] border p-3" style={{ borderColor: "#E5E1D9", background: responseCount ? "#F3F8F4" : "#FBFAF8" }}>
+                  <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#141414" }}>
+                    {responseCount
+                      ? `${responseCount} of ${published.invited.length || responseCount} invited vendor${responseCount === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
+                      : `Published — awaiting supplier responses.${published.invited.length > 0 ? ` ${cap(numWord(published.invited.length))} invited so far.` : ""}`}
+                  </p>
+                  {Boolean(responseCount) && created?.id && (
+                    <p className="m-0 mt-1.5 text-[13px]">
+                      <a className="underline hover:text-[#8A4D08]" href={`/sase/rfp-builder/${created.id}/review${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
+                        Compare responses
+                      </a>
+                    </p>
+                  )}
                 </div>
                 {/* Living Procurement Canvas Phase 2 correction (14 Aug
                     2026): this list now renders ONLY what the publish
@@ -4177,7 +4679,10 @@ export default function ProjectDesk({
                     whatever the live marketplace directory says today. */}
                 {(published.matchedVendors.length > 0 || published.invited.length > 0) && (
                   <div className="mt-3">
-                    <p className="m-0 mb-1 text-[10px] font-semibold uppercase text-[#B4650B]" style={{ ...mono, letterSpacing: ".12em" }}>Your matches</p>
+                    <div className="mb-1 flex items-center justify-between gap-3">
+                      <p className="m-0 text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".12em", color: "var(--nf-orange-strong, #B4650B)" }}>Your matches</p>
+                      <ProvenanceTag kind="intel" />
+                    </div>
                     <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#5F5D59]">
                       {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
                       {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
@@ -4190,10 +4695,10 @@ export default function ProjectDesk({
                           const inv = published.invited.some((iv) => iv.slug === v.slug);
                           return (
                             <li key={`${v.slug}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
-                              <span className="text-[11px] text-[#8C8A85]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
+                              <span className="text-[11px] text-[#655F52]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
                               <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
                               {inv && (
-                                <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
+                                <span className="rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}>invited</span>
                               )}
                             </li>
                           );
@@ -4206,14 +4711,14 @@ export default function ProjectDesk({
                       if (invitedOnly.length === 0) return null;
                       return (
                         <div className="mt-2">
-                          <p className="m-0 mb-1 text-[11px] text-[#8C8A85]">
+                          <p className="m-0 mb-1 text-[11px] text-[#655F52]">
                             Also invited (your own pinned {invitedOnly.length === 1 ? "vendor" : "vendors"}, not part of the ranked match):
                           </p>
                           <ol className="m-0 list-none p-0">
                             {invitedOnly.map((v, i) => (
                               <li key={`${v.slug}-invited-only-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2 first:border-t-0 first:pt-0">
                                 <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
-                                <span className="rounded-full bg-[#FFF7E8] px-1.5 py-[1px] text-[10px] font-semibold uppercase text-[#8A4D08]" style={{ ...mono, letterSpacing: ".08em" }}>invited</span>
+                                <span className="rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}>invited</span>
                               </li>
                             ))}
                           </ol>
@@ -4246,12 +4751,16 @@ export default function ProjectDesk({
                     folded into the headline so there's one less text block.
                     No new colours, same tokens as the diagram and chips
                     elsewhere in this panel. */}
-                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5] text-[#141414]">
+                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5]" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #141414)" }}>
                   Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson required.
                 </p>
                 <div className="mt-2.5 flex max-w-[36em] flex-wrap gap-1.5">
                   {["Get bids", "Get pricing", "Get vetted responses", "Send messages", "Request demos"].map((chip) => (
-                    <span key={chip} className="rounded-full border border-[#F5A21B]/40 bg-[#FFF7E8] px-2.5 py-1 text-[12.5px] font-medium text-[#8A4D08]">
+                    <span
+                      key={chip}
+                      className="rounded-full border px-2.5 py-1 text-[12.5px] font-medium"
+                      style={{ borderColor: "var(--nf-orange-soft-border, #F5A21B66)", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}
+                    >
                       {chip}
                     </span>
                   ))}
@@ -4265,31 +4774,34 @@ export default function ProjectDesk({
                     board/notify/vetted-view structure stated in prose above,
                     shown as a shape so it reads in one glance. Same colour
                     tokens as the rest of this panel; no new palette. */}
-                <div className="my-4 max-w-[38em] rounded-md border border-[#EAE7E1] bg-[#F5F3EE] p-4 text-[12px] leading-snug">
+                <div className="my-4 max-w-[38em] rounded-md border p-4 text-[12px] leading-snug" style={{ borderColor: "var(--nf-rule, #EAE7E1)", background: "var(--nf-ivory-raised, #F5F3EE)" }}>
+                  <div className="mb-2 flex justify-end">
+                    <ProvenanceTag kind="intel" />
+                  </div>
                   <div className="flex flex-col items-center gap-1.5">
                     <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 font-semibold text-[#33302C]">Your project</div>
-                    <div className="text-[#8C8A85]" style={mono}>publish ↓</div>
-                    <div className="rounded-md border border-[#F5A21B] bg-[#FFF7E8] px-3 py-1.5 text-center">
-                      <p className="m-0 font-semibold text-[#8A4D08]">Opportunity board</p>
+                    <div className="text-[#655F52]" style={mono}>publish ↓</div>
+                    <div className="rounded-md border px-3 py-1.5 text-center" style={{ borderColor: "var(--nf-orange, #F5A21B)", background: "var(--nf-orange-soft, #FFF7E8)" }}>
+                      <p className="m-0 font-semibold" style={{ color: "var(--nf-orange-strong, #8A4D08)" }}>Opportunity board</p>
                       <p className="m-0 text-[11px] text-[#6E6C67]">Anonymous notice: sector, size band. No name, no contact details.</p>
                     </div>
                     <div className="grid w-full grid-cols-2 gap-3 pt-1">
                       <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#8C8A85]" style={mono}>↓ notified</div>
+                        <div className="text-[#655F52]" style={mono}>↓ notified</div>
                         <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
                           <p className="m-0 font-semibold text-[#33302C]">Matched, vetted vendors</p>
                           <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">See the opportunity in full. Can respond directly.</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#8C8A85]" style={mono}>↓ can find it</div>
+                        <div className="text-[#655F52]" style={mono}>↓ can find it</div>
                         <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
                           <p className="m-0 font-semibold text-[#33302C]">Everyone else</p>
                           <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">Public web, search engines, unvetted vendors. Sees the notice only. Can register to become vetted.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="text-[#8C8A85]" style={mono}>↓</div>
+                    <div className="text-[#655F52]" style={mono}>↓</div>
                     <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 text-center font-semibold text-[#33302C]">
                       You choose who gets your contact details, and when
                     </div>
@@ -4304,7 +4816,7 @@ export default function ProjectDesk({
                     : ""}
                   . You choose which of them receive your contact details, and when. Assumptions publish labelled as assumptions; example content never publishes at all.
                 </p>
-                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
+                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#655F52]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
                 <p className="m-0 mb-1.5 text-[12.5px] leading-loose">
                   {[
                     typeof requirement.estate?.sites === "number"
@@ -4320,19 +4832,19 @@ export default function ProjectDesk({
                   ].filter(Boolean).map((chip) => (
                     <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-[#EAE7E1] bg-white px-2 py-[1px] text-[12.5px] text-[#33302C]">{chip}</span>
                   ))}
-                  <span className="text-[12.5px] text-[#8C8A85]">
+                  <span className="text-[12.5px] text-[#655F52]">
                     {typeof requirement.estate?.sites === "number" && siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
                       ? "as written, except the site count: sector plus one region could identify you, so the notice shows the range, and the exact count is seen only after the gate"
                       : "exactly as written, nothing retyped"}
                   </span>
                 </p>
-                <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#8C8A85]">
+                <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#655F52]">
                   <span className="font-semibold text-[#6E6C67]">Stays private:</span> your identity and contacts, your notes,
                   {unansweredGaps.length > 0 ? ` ${numWord(unansweredGaps.length)} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
                   {" "}and anything you have dropped from the record.
                 </p>
                 {signLocked && lockLine && (
-                  <p className="m-0 mb-2 text-[13px] leading-relaxed text-[#B4650B]">{lockLine}</p>
+                  <p className="m-0 mb-2 text-[13px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>{lockLine}</p>
                 )}
                 <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5F5D59]">
                   <input type="checkbox" checked={consentCreate} onChange={(e) => setConsentCreate(e.target.checked)} className="mt-0.5" />
@@ -4357,24 +4869,30 @@ export default function ProjectDesk({
                   type="button"
                   onClick={() => void signAndPublish()}
                   disabled={signLocked || !consentsOk || Boolean(signStage) || (testMode && !securityScope)}
-                  className="mt-1 cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[22px] py-[13px] text-[15.5px] font-semibold text-[#141414] hover:bg-[#E5940F] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="mt-1 cursor-pointer rounded-full border-0 px-[22px] py-[13px] text-[15.5px] font-semibold text-[#141414] disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "var(--nf-orange, #F5A21B)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nf-orange-strong, #E5940F)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--nf-orange, #F5A21B)"; }}
                 >
                   {signStage ?? (testMode ? "Sign · create the test position" : "Generate and publish")}
                 </button>
                 {testMode && !securityScope && (
-                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">
+                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>
                     Test mode covers the security engine today, and this is a network requirement. Drop <span style={mono}>?test=1</span> from the address to publish it for real.
                   </p>
                 )}
                 {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
                 {signedIn && sessId && (
                   sessId.work ? (
-                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#6E6C67]">
-                      Publishing as <span className="font-medium text-[#33302C]">{sessId.email}</span>
-                      {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
+                    <p className="m-0 mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] leading-relaxed text-[#6E6C67]">
+                      <span>
+                        Publishing as <span className="font-medium text-[#33302C]">{sessId.email}</span>
+                        {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
+                      </span>
+                      <ProvenanceTag kind="approved" />
                     </p>
                   ) : (
-                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-[#B4650B]">
+                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>
                       Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays as it is while you switch.
                     </p>
                   )
@@ -4435,7 +4953,7 @@ export default function ProjectDesk({
         // this used to be, via the now-retired keptFits/fitSlugs).
         fitSlugs={published?.invited.map((v) => v.slug) ?? []}
       />
-      </main>
+      </div>
       </div>
       {/* ↑ closes the 2030 shell reset's document/mission-rail grid opened
           above THE THREAD. Everything below is a full-screen overlay
@@ -4461,7 +4979,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => setEdit(null)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#A3A099] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#655F52] hover:text-[#141414]"
               >
                 Close
               </button>
@@ -4493,15 +5011,15 @@ export default function ProjectDesk({
               if (!held.length) return null;
               return (
                 <div className="mb-4">
-                  <div className="mb-1 text-[10px] font-semibold uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: ".11em" }}>Held now</div>
+                  <div className="mb-1 text-[10px] font-semibold uppercase text-[#655F52]" style={{ ...mono, letterSpacing: ".11em" }}>Held now</div>
                   {held.map((h) => (
                     <div key={h.key} className="flex items-baseline gap-2.5 border-t border-[#F0EEE9] py-2">
                       <span className="min-w-0 flex-1 text-[14.5px]">{h.label}</span>
-                      <span className="min-w-0 flex-[1.1] text-[12px] italic text-[#A3A099]">{h.meta}</span>
+                      <span className="min-w-0 flex-[1.1] text-[12px] italic text-[#655F52]">{h.meta}</span>
                       <button
                         type="button"
                         onClick={h.act}
-                        className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#A3A099] hover:border-[#B4650B] hover:text-[#B4650B]"
+                        className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
                         style={{ ...mono, letterSpacing: "0.07em" }}
                       >
                         {h.kind}
@@ -4562,11 +5080,11 @@ export default function ProjectDesk({
                   className="flex w-full cursor-pointer items-center gap-3.5 rounded-[11px] border border-[#E3E0DA] bg-white px-[15px] py-[13px] hover:border-[#141414] hover:bg-[#FDFCFA]"
                 >
                   <span className="flex-1 text-left text-[15.5px] leading-[1.45]">{o.label}</span>
-                  {o.effect && <span className="max-w-[15em] flex-none text-right text-[12.5px] leading-[1.4] text-[#8C8A85]">{o.effect}</span>}
+                  {o.effect && <span className="max-w-[15em] flex-none text-right text-[12.5px] leading-[1.4] text-[#655F52]">{o.effect}</span>}
                 </button>
               ))}
             </div>
-            <div className="mt-3.5 text-[13px] leading-[1.5] text-[#A3A099]">
+            <div className="mt-3.5 text-[13px] leading-[1.5] text-[#655F52]">
               Or close this and say it in your own words in the prompt above. These are only the answers heard most.
             </div>
           </div>
@@ -4593,7 +5111,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => setSaveOpen(false)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#A3A099] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#655F52] hover:text-[#141414]"
               >
                 Close
               </button>
@@ -4605,7 +5123,7 @@ export default function ProjectDesk({
                   providers respond to verified work emails, so saving uses one too. Nothing is published and nobody is invited by saving.
                 </p>
                 {signedIn && sessId && !sessId.work && (
-                  <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#B4650B]">
+                  <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[var(--nf-orange-strong)]">
                     Signed in as {sessId.email}, a personal address. Saving needs a work email; everything here stays as it is while you switch.
                   </p>
                 )}
@@ -4637,7 +5155,7 @@ export default function ProjectDesk({
                   </label>
                 )}
                 {saveError && <p className="m-0 mb-2 text-[12.5px] text-red-600">{saveError}</p>}
-                {resuming && <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#8C8A85]">Loading your saved project…</p>}
+                {resuming && <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#655F52]">Loading your saved project…</p>}
                 <button
                   type="button"
                   onClick={() => void saveNow()}
@@ -4664,31 +5182,31 @@ export default function ProjectDesk({
             <div className="flex flex-none items-start gap-3.5 border-b border-[#EAE7E1] px-7 pb-4 pt-[22px]">
               <div className="min-w-0 flex-1">
                 <div className="text-[20px] font-semibold" style={{ letterSpacing: "-0.015em" }}>{publishTitle}</div>
-                <div className="mt-[5px] text-[13.5px] leading-normal text-[#8C8A85]">
+                <div className="mt-[5px] text-[13.5px] leading-normal text-[#655F52]">
                   This is what vendors and service providers would be answering. Say anything you want changed and it changes here.
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setReqOpen(false)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[15px] text-[#8C8A85] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[15px] text-[#655F52] hover:text-[#141414]"
               >
                 Close
               </button>
             </div>
             <div className="flex-1 overflow-auto px-7 pb-10 pt-[22px]">
               {sheetSections.length === 0 && (
-                <p className="m-0 text-[14.5px] leading-relaxed text-[#8C8A85]">Nothing yet. Say one sentence about the organisation and the requirement starts here.</p>
+                <p className="m-0 text-[14.5px] leading-relaxed text-[#655F52]">Nothing yet. Say one sentence about the organisation and the requirement starts here.</p>
               )}
               {sheetSections.map((sec) => (
                 <div key={sec.key} className="pb-6">
-                  <div className="border-b border-[#141414] pb-2 text-[11px] uppercase text-[#8C8A85]" style={{ ...mono, letterSpacing: "0.11em" }}>
+                  <div className="border-b border-[#141414] pb-2 text-[11px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.11em" }}>
                     {sec.title}
                   </div>
                   {sec.rows.map((r, j) => (
                     <div key={j} className="border-b border-[#F5F3EE] py-2.5">
-                      <div className={`text-[15px] leading-normal ${r.open ? "text-[#8C8A85]" : ""}`} style={{ textWrap: "pretty" }}>{r.text}</div>
-                      {r.meta && <div className="mt-1 text-[13px] italic leading-[1.45] text-[#A3A099]">{r.meta}</div>}
+                      <div className={`text-[15px] leading-normal ${r.open ? "text-[#655F52]" : ""}`} style={{ textWrap: "pretty" }}>{r.text}</div>
+                      {r.meta && <div className="mt-1 text-[13px] italic leading-[1.45] text-[#655F52]">{r.meta}</div>}
                     </div>
                   ))}
                 </div>

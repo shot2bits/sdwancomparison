@@ -1,0 +1,38 @@
+{
+  "at": "before this round's edits, commit 7608a09",
+  "defects": {
+    "defect1_unlisted_unlock": {
+      "project_id": "rfp_msvyeitod2ffln",
+      "opportunity_id": "opp_msvyeiv2uim9hr",
+      "board_visibility_committed": "unlisted",
+      "is_market_unlocked": true,
+      "share_token_read_status": 200,
+      "VIOLATION": true
+    },
+    "defect2_status_published_before_board_success": {
+      "project_id": "rfp_msvyeivr1ukmtp",
+      "board_listing_failed": true,
+      "board_fail_reason": "Not listed on the public board: title: reads as test or placeholder content. A public notice needs a real project title.",
+      "project_status_after_failed_board_attempt": "published",
+      "market_unlocked": false,
+      "VIOLATION": true
+    },
+    "defect3_dangling_revision": {
+      "project_id": "rfp_msvyeiwewij8du",
+      "published_revision_id_committed": "snap_repro_defect3_never_persisted",
+      "published_snapshot_actually_persisted": false,
+      "market_unlock_record": {
+        "id": "mktu_msvyeixabdmcow",
+        "project_id": "rfp_msvyeiwewij8du",
+        "published_revision_id": "snap_repro_defect3_never_persisted",
+        "board_opportunity_id": "opp_msvyeiwxyt08sl",
+        "board_visibility": "public",
+        "matching_basis_hash": "ab7047ecb1fc108371f60d0e335e3aaa3bd82b33639a03cf8fa4446a8e963e09",
+        "invitation_snapshot_id": "snap_repro_defect3_never_persisted",
+        "unlocked_at": 1786893751630
+      },
+      "is_market_unlocked": true,
+      "VIOLATION": true
+    }
+  }
+}

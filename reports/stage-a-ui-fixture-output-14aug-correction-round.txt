@@ -1,0 +1,21 @@
+
+> netifymarketplace@0.1.0 validate:ui
+> node scripts/validate-living-procurement-os-stage-a-ui.mjs
+
+PASS  UI: Prompt A alone renders the REAL component at v1 (not v2 -- the mount-freeze regression)  ->  v=1
+PASS  UI: Prompt B renders v2  ->  v=2
+PASS  UI: no DLP-specific clause/gate exists after Prompt B's negation  ->  found=false
+PASS  UI: co-managed operating model is shown after Prompt B  ->  
+PASS  UI: 24/7 incident support survives Prompt B's edit  ->  
+PASS  UI: Prompt C renders v3  ->  v=3
+PASS  UI: Prompt C's UK residency sentence is recognised as its own named clause  ->  
+PASS  UI: the chat narration never claims 'I did not catch anything new' when a real clause/gate/decision was just derived (defect #3)  ->  
+PASS  UI: the chat narration instead gives the honest 'kept in your own words' line  ->  
+PASS  UI: Prompt D in a fresh project renders v1 (a new project never inherits another project's revision count)  ->  v=1
+PASS  UI: the single-supplier/best-of-breed conflict is a visible open decision  ->  
+PASS  UI: no duplicate 'best-of-breed' Additional-Requirement clause is created alongside the conflict decision (0 requirements total)  ->  requirements=0
+PASS  UI: Prompt D's narration also never claims 'I did not catch anything new'  ->  
+
+13 passed, 0 failed.
+
+ALL PASS

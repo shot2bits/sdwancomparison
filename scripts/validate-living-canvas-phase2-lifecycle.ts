@@ -81,7 +81,7 @@ async function main() {
     const { POST: createNetworkRoute } = await import("../src/app/api/rfp/route");
     const { POST: publishRoute } = await import("../src/app/api/rfp/[id]/publish/route");
     const { GET: reportRoute } = await import("../src/app/api/rfp/[id]/report/route");
-    const { GET: downloadRoute } = await import("../src/app/rfp-builder/[id]/preview/download/route");
+    const { GET: downloadRoute } = await import("../src/app/(marketing)/rfp-builder/[id]/preview/download/route");
     const { GET: rfpGetRoute } = await import("../src/app/api/rfp/[id]/route");
     const { createSession } = await import("../src/lib/rfp-store");
     const { sessionCookieHeader } = await import("../src/lib/auth");

@@ -51,9 +51,15 @@ export default function JourneyStrip({
               idx === current ? "bg-amber-50/50 shadow-[inset_0_2px_0_#f59e0b]" : ""
             }`}
           >
-            <span className="block font-mono text-[9.5px] text-zinc-400">{s.n}</span>
+            {/* Contrast fix (verification pass, 18 Aug 2026): text-zinc-400
+                measured 2.56:1 on white -- axe-core confirmed, well under
+                WCAG AA's 4.5:1 -- and text-zinc-500 (the detail line) fell
+                to 4.42:1 specifically on the current station's amber-tinted
+                background. zinc-600 clears 4.5:1 with real margin (7+:1) on
+                both the plain white cards and the amber-tinted current one. */}
+            <span className="block font-mono text-[9.5px] text-zinc-600">{s.n}</span>
             <span className="mt-0.5 block text-[12px] font-semibold leading-tight text-zinc-900">{s.title}</span>
-            <span className="mt-0.5 block text-[10.5px] leading-snug text-zinc-500">{s.detail}</span>
+            <span className="mt-0.5 block text-[10.5px] leading-snug text-zinc-600">{s.detail}</span>
             {note ? <span className="mt-1 block text-[10.5px] leading-snug text-amber-700">{note}</span> : null}
           </li>
         );

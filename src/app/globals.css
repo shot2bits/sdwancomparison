@@ -42,6 +42,88 @@
   --text-micro: 0.75rem;
 }
 
+/* ====================================================================
+   2030 LIVING PROCUREMENT OS — scoped design tokens (18 Aug 2026)
+   ====================================================================
+   The approved Netify-2030-Closure-Checklist prototype's own palette
+   and typography-role system (warm ivory canvas, deep-ink structure,
+   orange = change/action, emerald = verified, cobalt = evidence, lilac
+   = intelligence; editorial system-serif for the living procurement
+   object, system-sans for controls, system-mono for provenance/receipts/
+   micro-labels), reproduced exactly from the prototype's own :root block.
+
+   Deliberately namespaced --nf-* rather than reusing --ink-900 etc:
+   the sitewide tokens above (zinc-based, matched to netify.co.uk's own
+   marketing palette) stay completely untouched — a global redefinition
+   would silently reskin every marketing/research/board page these
+   tokens already serve. --nf-* is scoped to the .procurement-2030
+   selector below, which only the workspace's own ProcurementEntry
+   component applies (see src/components/procurement/ProcurementEntry.tsx),
+   so this palette activates only inside the living-document workspace
+   surface itself. Values are the prototype's exact hex/font stacks —
+   "implement... preserving its palette, typography roles", not a
+   reinterpretation of them. */
+.procurement-2030 {
+  --nf-ivory: #F7F1E6;
+  --nf-ivory-raised: #FBF7EF;
+  --nf-ivory-card: #FFFDF8;
+  --nf-ink-950: #100E0A;
+  --nf-ink-900: #17140F;
+  --nf-ink-800: #252019;
+  --nf-ink-600: #4A4438;
+  --nf-ink-400: #7A7263;
+  --nf-ink-300: #A79E8C;
+  --nf-ink-200: #DCD3C0;
+  --nf-ink-100: #EDE7D9;
+  --nf-rule: #E4D9C2;
+
+  --nf-orange: #E8590C;
+  /* Accessibility correction (18 Aug 2026, real bug found via an
+   * axe-core scan on this pass's own new eyebrow labels -- e.g.
+   * ProcurementArchitecture.tsx's "Live procurement twin" text directly
+   * on the ivory canvas): the original #C94A08 measured 4.18:1 against
+   * the ivory family (F7F1E6/FBF7EE), below WCAG AA's 4.5:1 for text
+   * this small (11px, not bold). Darkened just enough to clear 4.5:1
+   * everywhere this token is already used as TEXT on the ivory family
+   * (measured 5.49:1) -- every other usage is either a dot/line
+   * (WCAG 1.4.11's more lenient 3:1 non-text threshold, already met) or
+   * gets MORE contrast from a darker value, never less, so this is a
+   * pure fix with no other-usage tradeoff. */
+  --nf-orange-strong: #AA3E06;
+  --nf-orange-soft: #FCE7D6;
+  --nf-orange-soft-border: #F3B685;
+
+  /* Accessibility correction (18 Aug 2026, same audit): the original
+   * #0E7A52 measured 4.43:1 as TEXT against --nf-emerald-soft
+   * (LivingProcurementCanvas.tsx's "What changed" eyebrow renders
+   * directly on that background) -- just under 4.5:1. Darkened to
+   * 5.72:1 against emerald-soft; every other real usage (the
+   * architecture edges/arrowheads, the delta caption on ivory-raised,
+   * ProvenanceTag's "approved" dot) is a non-text 3:1 case already
+   * passing or gets MORE contrast from the darker value. */
+  --nf-emerald: #0B6745;
+  --nf-emerald-soft: #DCEEE3;
+  --nf-emerald-soft-border: #9FCEB4;
+
+  --nf-cobalt: #2757C6;
+  --nf-cobalt-soft: #E1E9FB;
+  --nf-cobalt-soft-border: #AEC2F0;
+
+  /* Accessibility correction (18 Aug 2026, same audit): the original
+   * #7A5FC7 measured 3.94:1 as TEXT against the Mission Control dark
+   * card's --nf-ink-950 background (ProjectDesk.tsx's new "MCP receipt"
+   * label -- the only real TEXT usage of this token; ProvenanceTag's
+   * "intel" dot is a non-text 3:1 case, unaffected either way).
+   * Lightened to 5.21:1 against ink-950. */
+  --nf-lilac: #8D77CF;
+  --nf-lilac-soft: #EDE7FA;
+  --nf-lilac-soft-border: #C9B9EE;
+
+  --nf-font-serif: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+  --nf-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --nf-font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
 @theme inline {
   --color-paper: var(--paper-base);
   --color-paper-raised: var(--paper-raised);
@@ -330,6 +412,28 @@ a:focus-visible {
     animation: none;
     border-left: 3px solid #f5a21b;
     box-shadow: none;
+  }
+}
+
+/* Accessibility correction (18 Aug 2026, real bug found via Playwright's
+ * reducedMotion: 'reduce' emulation): the `.ldoc-changed` rule above only
+ * ever covered that one class -- CollapsibleHero.tsx's own inline
+ * `transition: "font-size 220ms ease, margin 220ms ease"` (and any other
+ * inline/Tailwind transition or animation elsewhere on this site) kept
+ * running at full speed regardless, since a scoped class rule can't touch
+ * unrelated elements and an unqualified CSS rule can't beat an inline
+ * style unless it carries `!important`. This is the standard, broad
+ * reduced-motion fallback (near-zero duration rather than `none`, so a
+ * transitionend/animationend listener relying on the event firing still
+ * gets one) -- it applies everywhere, not just to this pass's own new
+ * hero-collapse transition, which is exactly what "honour reduced motion"
+ * needs to mean sitewide, not per-component. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

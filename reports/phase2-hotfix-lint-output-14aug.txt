@@ -1,0 +1,117 @@
+
+/tmp/sdwan_reliability_gate/package.json
+  0:0  warning  File ignored because no matching configuration was supplied
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx
+    17:8    warning  'BuyerContext' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+    18:8    warning  'RfpSection' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   247:60   warning  Unused eslint-disable directive (no problems were reported)
+   247:94   warning  React Hook useEffect has a missing dependency: 'loadProject'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          react-hooks/exhaustive-deps
+   259:74   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:259:74
+  257 |     let flagged = false;
+  258 |     try { flagged = localStorage.getItem(`rfp_pending_publish_${project.id}`) === "1"; } catch { /* ignore */ }
+> 259 |     if (flagged && project.status !== "published" && !publishAuthNeeded) setPublishAuthNeeded(true);
+      |                                                                          ^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  260 |     /* eslint-disable-next-line */
+  261 |   }, [project?.id]);
+  262 |   useEffect(() => {  react-hooks/set-state-in-effect
+   300:11   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:300:11
+  298 |   useEffect(() => {
+  299 |     if (!project) return;
+> 300 |     try { setStickyGone(sessionStorage.getItem(`rfp_publish_bar_${project.id}`) === "1"); } catch { /* ignore */ }
+      |           ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  301 |     /* eslint-disable-next-line */
+  302 |   }, [project?.id]);
+  303 |                                                                                                                                                                         react-hooks/set-state-in-effect
+   335:28   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:335:28
+  333 |     const w = p.get("welcome");
+  334 |     if (w !== "generated" && w !== "submitting") return;
+> 335 |     if (w === "generated") setGeneratedWelcome(true);
+      |                            ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  336 |     if (w === "submitting") {
+  337 |       setSubmitFlow(true);
+  338 |       try { setPendingEmail(sessionStorage.getItem("netify_pending_email") ?? ""); } catch { /* ignore */ }                                                       react-hooks/set-state-in-effect
+   357:7    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:357:7
+  355 |       sessionStorage.removeItem("netify_signin_note");
+  356 |       const d = JSON.parse(raw) as { claimed?: number };
+> 357 |       setSigninNote(typeof d.claimed === "number" ? d.claimed : 0);
+      |       ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  358 |     } catch { /* ignore */ }
+  359 |   }, []);
+  360 |                                                                                                                                                                            react-hooks/set-state-in-effect
+   406:6    warning  React Hook useEffect has missing dependencies: 'project.status' and 'project.title'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+   415:57   warning  Unused eslint-disable directive (no problems were reported)
+   415:91   warning  React Hook useEffect has missing dependencies: 'project' and 'refreshCoverage'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+   415:105  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                react-hooks/exhaustive-deps
+   417:90   warning  React Hook useEffect has missing dependencies: 'project' and 'refreshConnections'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/exhaustive-deps
+   418:70   warning  Unused eslint-disable directive (no problems were reported)
+   650:9    error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:650:9
+  648 |         };
+  649 |         prefilled.current = true;
+> 650 |         setMode("manual");
+      |         ^^^^^^^ Avoid calling setState() directly within an effect
+  651 |         startRfp(buyer);
+  652 |       } catch {
+  653 |         /* malformed prefill payloads are ignored; the builder starts clean */                                                                                                                                                                                                           react-hooks/set-state-in-effect
+  2091:48   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/tmp/sdwan_reliability_gate/src/components/RfpBuilder.tsx:2091:48
+  2089 |   const [busy, setBusy] = useState(false);
+  2090 |   const [err, setErr] = useState<string | null>(null);
+> 2091 |   useEffect(() => { if (defaultEmail && !addr) setAddr(defaultEmail); /* eslint-disable-next-line */ }, [defaultEmail]);
+       |                                                ^^^^^^^ Avoid calling setState() directly within an effect
+  2092 |   async function submit() {
+  2093 |     const c = code.trim();
+  2094 |     const e = addr.trim();                                              react-hooks/set-state-in-effect
+  2091:71   warning  Unused eslint-disable directive (no problems were reported)
+  2091:105  warning  React Hook useEffect has a missing dependency: 'addr'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+
+✖ 19 problems (6 errors, 13 warnings)
+  0 errors and 4 warnings potentially fixable with the `--fix` option.
+

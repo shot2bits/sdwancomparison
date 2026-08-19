@@ -283,6 +283,48 @@ export async function buildEnvelopeUpdate(params: {
   const rfiSet = deriveRfiQuestionSet({ coveredSections, sector: requirement.organisation?.sector ?? null });
 
   const previousDocument = existing?.procurement_document ?? null;
+  /* Bug fix (verification pass, 18 Aug 2026, widened after a second live
+   *  failure): this call originally always passed `revision: undefined`,
+   *  intending resolveVersion()'s "legacy fallback" (a real server-derived
+   *  facts/receipts diff) to govern every save. Two separate end-to-end
+   *  Playwright runs against a real local KV store (this sandbox had never
+   *  had KV credentials before, so NEITHER path had ever actually been
+   *  exercised until this pass) proved that intent wrong on both branches:
+   *
+   *  1. FIRST save (no previousDocument): resolveVersion's own
+   *     `!previousDocument` branch is unconditionally
+   *     `{ version: 1, lastRevision: revision ?? null }` -- it never
+   *     reaches the legacy-fallback code at all. `revision: undefined`
+   *     there just meant `lastRevision: null`, while the client's first
+   *     compile already carried a real, non-null `lastRevision`
+   *     (`currentRevision`, ProjectDesk.tsx -- the buyer's first submitted
+   *     prompt is a genuine governed event, "V1" per that file's own
+   *     "Prompt A -> V1, B -> V2, C -> V3" contract) -- a guaranteed
+   *     mismatch on every project's very first save.
+   *
+   *  2. UPDATE (previousDocument exists): the legacy-fallback branch
+   *     carries `previousDocument.lastRevision` forward UNCHANGED
+   *     regardless of new edits, while the client always recomputes its
+   *     own `lastRevision` from its live `currentRevision` -- so the very
+   *     next edit-then-save/publish after the first one failed exactly the
+   *     same way (confirmed live: publish's own refreshRecord() call hit
+   *     this branch and got the identical 409).
+   *
+   *  Both branches share one root cause: the server was deriving its own,
+   *  DIFFERENT belief about "was this a new governed event" instead of
+   *  trusting the one truthful source ProjectDesk.tsx's own docs already
+   *  name for exactly this class of input -- `currentRevision` is
+   *  session-local and not purely fact-derivable, the SAME validated-but-
+   *  trusted tier `instrument` already has here (see this file's own
+   *  "HONESTY NOTE ON `instrument`" above). The fix: always pass the
+   *  client's own `lastRevision` -- already schema-validated as part of
+   *  `clientDocParsed` (`LivingProcurementDocumentSchema`,
+   *  procurement-document.ts) -- on every save, first or subsequent. This
+   *  does not weaken the envelope's own core guarantee: the server still
+   *  independently recomputes `requirement`/`verdict`/`noted`/`rfiSet` and
+   *  still rejects the save outright if the recompute disagrees with the
+   *  client's claimed document on anything else (the consistency check
+   *  immediately below, unchanged). */
   const serverDoc = compileProcurementDocument({
     facts,
     requirement,
@@ -293,7 +335,7 @@ export async function buildEnvelopeUpdate(params: {
     receipts,
     sourceTurns: mergedSourceLedger,
     previousDocument,
-    revision: undefined, // legacy-fallback resolveVersion() branch: one save = one candidate revision event, gated on a real facts/receipts diff -- see resolveVersion()'s own comment.
+    revision: clientDocParsed.data.lastRevision,
   });
 
   /* ---- Consistency check: the client's own belief must correspond ---- */

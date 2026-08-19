@@ -172,7 +172,7 @@ export async function runCredentialExchangeTests(): Promise<CredentialExchangeTe
     assert(!hit, `RfpResponder.tsx must not reference vt anymore (found: ${hit?.[0]} in context) — the credential is cookie-borne now, never client-visible`);
   });
   await ok("[7] variant. respond/page.tsx never renders RfpResponder with a vt prop", () => {
-    const src = readFileSync(new URL("../app/rfp-builder/[id]/respond/page.tsx", import.meta.url), "utf8");
+    const src = readFileSync(new URL("../app/(marketing)/rfp-builder/[id]/respond/page.tsx", import.meta.url), "utf8");
     assert(!/<RfpResponder[^>]*\bvt=/.test(src), "respond/page.tsx must not pass a vt prop to RfpResponder");
   });
 

@@ -1,0 +1,17 @@
+Starting dev server on port 3411
+FAILED: Error: Dev server did not become reachable at http://localhost:3411/sase/ within 90000ms
+    at waitForServer (file:///tmp/sdwan_reliability_gate/scripts/capture-2030-shell-screenshots.mjs:45:9)
+    at async main (file:///tmp/sdwan_reliability_gate/scripts/capture-2030-shell-screenshots.mjs:60:5)
+---- dev server output (tail) ----
+⨯ Failed to start server
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3411
+    at <unknown> (Error: listen EADDRINUSE: address already in use 0.0.0.0:3411)
+    at new Promise (<anonymous>) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3411
+}
+[?25h
+

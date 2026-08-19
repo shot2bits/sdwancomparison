@@ -1,0 +1,177 @@
+/**
+ * Market-unlock correction round 2 (16 Aug 2026) -- BEFORE reproduction.
+ *
+ * Run against the code as it stood at commit 7608a09 (before this round's
+ * edits), to reproduce, with real evidence, the three defects Robert named:
+ *
+ *   1. an unlisted Opportunity's MarketUnlock unlocks the market just like a
+ *      public one -- violating the non-negotiable rule that only a
+ *      successfully published PUBLIC opportunity may unlock anything;
+ *   2. a board-listing failure can occur AFTER the project's status has
+ *      already been written as "published" -- the project ends up
+ *      "published" with no board listing and no unlock, when the correct
+ *      behaviour is that publication itself did not succeed;
+ *   3. commitMarketUnlock() will happily commit a MarketUnlock record whose
+ *      published_revision_id references a PublishedSnapshot that was NEVER
+ *      actually persisted -- i.e. the unlock can exist before, and
+ *      independently of, the frozen revision it claims to be bound to.
+ *
+ * Uses real library functions (listRfpOnBoard, commitMarketUnlock,
+ * isMarketUnlocked, getLatestPublishedSnapshot, saveProject) against a real
+ * fake-kv backend -- not mocks, not a description of the code, but the
+ * actual functions doing the actual thing.
+ */
+import { writeFileSync, mkdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const OUT_DIR = join(__dirname, "..", "reports", "row8-repro");
+mkdirSync(OUT_DIR, { recursive: true });
+
+async function main() {
+  const { startFakeKv } = await import("./lib/fake-kv-server.mjs");
+  const kv = await startFakeKv();
+  process.env.KV_REST_API_URL = kv.url;
+  process.env.KV_REST_API_TOKEN = kv.token;
+
+  const evidence: Record<string, unknown> = { at: "before this round's edits, commit 7608a09", defects: {} };
+
+  try {
+    const { POST: createRoute } = await import("../src/app/api/rfp/route");
+    const { getProject, saveProject } = await import("../src/lib/rfp-store");
+    const { listRfpOnBoard } = await import("../src/lib/rfp-publish");
+    const { commitMarketUnlock, isMarketUnlocked, getMarketUnlock } = await import("../src/lib/market-unlock");
+    const { getLatestPublishedSnapshot } = await import("../src/lib/published-snapshot");
+    const { advanceProject } = await import("../src/lib/project-machine");
+    const { GET: projectReadRoute } = await import("../src/app/api/rfp/[id]/route");
+    const { rfpContentSnapshot, contentHash } = await import("../src/lib/published-snapshot");
+
+    const ctx = (id: string) => ({ params: Promise.resolve({ id }) });
+    const OWNER_EMAIL = "buyer-fixture@example-corp.test";
+
+    async function createDraft(title: string) {
+      const res = await createRoute(
+        new Request("https://example.test/api/rfp", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ title, buyer: { sector: "manufacturing", organisation_size: "201-1000", operating_model: "hybrid", regions: ["uk"] } }),
+        }),
+      );
+      return (await res.json()) as { id: string; share_token: string; manage_token: string };
+    }
+
+    // --- Defect 1: an UNLISTED opportunity's MarketUnlock unlocks the market ---
+    console.log("\n=== Defect 1: unlisted Opportunity unlocking the market ===");
+    const p1 = await createDraft("Round-2 repro: defect 1 (unlisted unlock)");
+    const listed1 = await listRfpOnBoard((await getProject(p1.id))!, OWNER_EMAIL, { visibility: "unlisted" });
+    const snap1 = rfpContentSnapshot((await getProject(p1.id))!);
+    const revId1 = "snap_repro_defect1";
+    await commitMarketUnlock({
+      project_id: p1.id,
+      published_revision_id: revId1,
+      board_opportunity_id: listed1.opportunity_id,
+      board_visibility: "unlisted",
+      matching_basis_hash: contentHash(snap1),
+      invitation_snapshot_id: revId1,
+    });
+    const unlocked1 = await isMarketUnlocked(p1.id);
+    const shareRead1 = await projectReadRoute(new Request(`https://example.test/api/rfp/${p1.id}?token=${p1.share_token}`), ctx(p1.id));
+    const opp1 = listed1;
+    evidence.defects = {
+      ...(evidence.defects as object),
+      defect1_unlisted_unlock: {
+        project_id: p1.id,
+        opportunity_id: opp1.opportunity_id,
+        board_visibility_committed: "unlisted",
+        is_market_unlocked: unlocked1,
+        share_token_read_status: shareRead1.status,
+        VIOLATION: unlocked1 === true && shareRead1.status === 200,
+      },
+    };
+    console.log(`isMarketUnlocked (unlisted opportunity) = ${unlocked1}`);
+    console.log(`share-token read status = ${shareRead1.status} (expected 200 under current, incorrect, code)`);
+
+    // --- Defect 2: board failure occurring AFTER status already "published" ---
+    console.log("\n=== Defect 2: board failure leaving project status published ===");
+    const p2 = await createDraft("Test placeholder RFP for defect 2 (quality gate trips)");
+    let stored2 = (await getProject(p2.id))!;
+    // Reproduce the CURRENT executePublish() sequence exactly: freeze a
+    // revision id, then transition status to "published" (as the current
+    // code's non-engine branch does, via a direct saveProject write), THEN
+    // attempt the board listing -- which fails, because this title trips
+    // the real public quality gate (TITLE_MARKERS matches "Test").
+    const publishedRecord = await saveProject({
+      ...stored2,
+      status: "published",
+      owner_email: OWNER_EMAIL,
+      response_deadline: Date.now() + 14 * 86400000,
+    });
+    let boardFailed = false;
+    let boardFailReason = "";
+    try {
+      await listRfpOnBoard(publishedRecord, OWNER_EMAIL);
+    } catch (e) {
+      boardFailed = true;
+      boardFailReason = (e as Error).message;
+    }
+    const afterFail = (await getProject(p2.id))!;
+    evidence.defects = {
+      ...(evidence.defects as object),
+      defect2_status_published_before_board_success: {
+        project_id: p2.id,
+        board_listing_failed: boardFailed,
+        board_fail_reason: boardFailReason,
+        project_status_after_failed_board_attempt: afterFail.status,
+        market_unlocked: await isMarketUnlocked(p2.id),
+        VIOLATION: boardFailed === true && afterFail.status === "published",
+      },
+    };
+    console.log(`board listing failed = ${boardFailed} (${boardFailReason})`);
+    console.log(`project.status AFTER the failed board attempt = "${afterFail.status}" (expected still "published" under current, incorrect, code -- a published-but-never-actually-published project)`);
+
+    // --- Defect 3: MarketUnlock existing before its frozen snapshot ---
+    console.log("\n=== Defect 3: MarketUnlock committed with no corresponding PublishedSnapshot ever persisted ===");
+    const p3 = await createDraft("Round-2 repro: defect 3 (dangling revision reference)");
+    const listed3 = await listRfpOnBoard((await getProject(p3.id))!, OWNER_EMAIL);
+    const revId3 = "snap_repro_defect3_never_persisted";
+    const snap3 = rfpContentSnapshot((await getProject(p3.id))!);
+    await commitMarketUnlock({
+      project_id: p3.id,
+      published_revision_id: revId3,
+      board_opportunity_id: listed3.opportunity_id,
+      board_visibility: "public",
+      matching_basis_hash: contentHash(snap3),
+      invitation_snapshot_id: revId3,
+    });
+    const snapshotExists = await getLatestPublishedSnapshot(p3.id);
+    const unlocked3 = await isMarketUnlocked(p3.id);
+    const unlockRecord3 = await getMarketUnlock(p3.id);
+    evidence.defects = {
+      ...(evidence.defects as object),
+      defect3_dangling_revision: {
+        project_id: p3.id,
+        published_revision_id_committed: revId3,
+        published_snapshot_actually_persisted: snapshotExists !== null,
+        market_unlock_record: unlockRecord3,
+        is_market_unlocked: unlocked3,
+        VIOLATION: unlocked3 === true && snapshotExists === null,
+      },
+    };
+    console.log(`PublishedSnapshot for revision "${revId3}" actually persisted = ${snapshotExists !== null}`);
+    console.log(`isMarketUnlocked() = ${unlocked3} (expected true under current, incorrect, code -- unlocked against a revision that was never frozen)`);
+
+    void advanceProject; // referenced above only for context/comment accuracy, not directly invoked
+
+    const outFile = join(OUT_DIR, "round2-before-evidence.json");
+    writeFileSync(outFile, JSON.stringify(evidence, null, 2));
+    console.log(`\nEvidence written to ${outFile}`);
+  } finally {
+    await kv.stop();
+  }
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exitCode = 1;
+});

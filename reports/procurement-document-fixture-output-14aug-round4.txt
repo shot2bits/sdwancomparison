@@ -1,0 +1,83 @@
+PASS  14.4: Healthcare is a stated sector, never a guess  ->  value=Healthcare & pharma provenance=stated
+PASS  14.4: Healthcare sector fact is provenance=stated  ->  provenance=stated
+PASS  14.4: UK remains a structured fact  ->  ["uk"]
+PASS  14.4: 20 sites remains a structured fact  ->  sites=20
+PASS  14.4: 200 remote users remains a structured fact  ->  users=200
+PASS  14.4: SD-WAN remains a structured fact  ->  ["sdwan"]
+PASS  14.4: the SASE/SD-WAN scope sentence becomes a real network clause, not just a receipt  ->  found=true
+PASS  14.4: the scope clause quotes the buyer's SASE wording verbatim  ->  quote=UK 20 site Healthcare business requires SD-WAN and full SASE.
+PASS  14.4: the legacy app + retained Ethernet circuit becomes a testable clause  ->  found=true
+PASS  14.4: the legacy-circuit clause is classified, not dumped unclassified  ->  section=network
+PASS  14.4: the exact buyer sentence is attached as provenance verbatim  ->  quote=We also have a legacy app that requires a point to point Ethernet private circuit.
+PASS  14.4: the legacy-circuit clause is mandatory (buyer said "requires")  ->  mandatory=true
+PASS  14.4: supplier response asks for coexistence, migration sequencing and rollback, without prescribing a supplier architecture  ->  ["Describe how the retained circuit coexists with your proposed architecture, and for how long.","State the migration sequencing for the dependent legacy application.","Name the service owner for the retained circuit during transition, and the rollback plan."]
+PASS  14.4: no unplaced clause remains ONLY under 'Your notes'  ->  stillUnclassified=[]
+PASS  14.4 Healthcare/Ethernet: evaluation categories total exactly 100  ->  total=100
+PASS  14.4 Healthcare/Ethernet: every clause traces to a fact, a quote or a named sector template  ->  untraceable=[]
+PASS  14.4 Healthcare/Ethernet: every mandatory clause carries an acceptance test  ->  bad=[]
+PASS  16.1: architecture includes an Azure node  ->  ["cloud-azure","identity","voice","application"]
+PASS  16.1: architecture includes an identity (Entra ID) node  ->  ["cloud-azure","identity","voice","application"]
+PASS  16.1: architecture includes a voice (Teams Phone) node  ->  ["cloud-azure","identity","voice","application"]
+PASS  16.1: architecture has a traceable edge touching the identity node  ->  [{"from":"identity","to":"application","label":"gated access"}]
+PASS  16.1: summary names the voice/Teams Phone requirement  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 testable requirements compiled from the buyer's own words.
+PASS  16.1: summary names the patient-facing application  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 testable requirements compiled from the buyer's own words.
+PASS  16.1: summary names Azure  ->  azure, Teams Phone, patient-facing application, Entra ID. 6 testable requirements compiled from the buyer's own words.
+PASS  16.1: voice continuity clause generated  ->  
+PASS  16.1: application resilience clause generated  ->  
+PASS  16.1: Entra-aware ZTNA clause generated  ->  
+PASS  16.1: DLP clause generated  ->  
+PASS  16.1: fully managed / 24/7 service clause generated  ->  
+PASS  16.1: April 2027 dated transition clause generated  ->  
+PASS  16.1: voice-continuity clause specifies required evidence  ->  ["Failover time (seconds)","Call-survival test evidence"]
+PASS  16.1: voice-continuity clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: application-resilience clause specifies required evidence  ->  ["Application availability target","Failover test evidence"]
+PASS  16.1: application-resilience clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: identity-aware-ztna clause specifies required evidence  ->  ["Device-posture evidence","Entra ID integration test results"]
+PASS  16.1: identity-aware-ztna clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: dlp-coverage clause specifies required evidence  ->  ["Supported data types/classification labels","Policy enforcement test evidence"]
+PASS  16.1: dlp-coverage clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: managed-service-boundary clause specifies required evidence  ->  ["Service definition/RACI document","Support SLA"]
+PASS  16.1: managed-service-boundary clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: dated-transition-plan clause specifies required evidence  ->  ["Dated project plan","Rollback/contingency plan"]
+PASS  16.1: dated-transition-plan clause has an explicit mandatory/scored classification  ->  mandatory=true
+PASS  16.1: supplier question count is non-zero  ->  questions=14
+PASS  16.1: mandatory gate count is non-zero  ->  gates=6
+PASS  16.1: security/identity weight is non-zero  ->  {"network_resilience":0,"security_identity_data":33,"managed_service_delivery":67,"commercial":0}
+PASS  16.1: service/delivery weight is non-zero  ->  {"network_resilience":0,"security_identity_data":33,"managed_service_delivery":67,"commercial":0}
+PASS  16.1 Prompt A: evaluation categories total exactly 100  ->  total=100
+PASS  16.1: the change ribbon's added-clause count matches the actual compiled clauses (first compile, no previousDocument)  ->  added=6 clauses=6
+PASS  16.1 Prompt A: every clause traces to a fact, a quote or a named sector template  ->  untraceable=[]
+PASS  16.1 Prompt A: every mandatory clause carries an acceptance test  ->  bad=[]
+PASS  16.2: the DLP clause is removed or superseded  ->  stillPresent=false
+PASS  16.2: the change set explicitly names the DLP clause as removed  ->  ["SEC-693021ca"]
+PASS  16.2: the operating model changes to co-managed  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  16.2: 24/7 incident support is kept  ->  Managed-service boundary, SLA, escalation and RACI for a co-managed service, including 24/7 incident support.
+PASS  16.2: the change set records the managed-service clause as updated (not silently replaced)  ->  ["OPS-a2e5cbe3"]
+PASS  16.2: unrelated voice-continuity clause survives the correction  ->  
+PASS  16.2: unrelated application-resilience clause survives the correction  ->  
+PASS  16.2: unrelated identity-aware-ztna clause survives the correction  ->  
+PASS  16.2: the document version increments exactly once  ->  before=1 after=2
+PASS  16.2: the change ribbon distinguishes removals from updates in the same compile  ->  removed=["SEC-693021ca"] updated=["OPS-a2e5cbe3"]
+PASS  16.2 Prompt B: evaluation categories total exactly 100  ->  total=100
+PASS  16.3: a data-residency clause is generated  ->  
+PASS  16.3: the exact buyer wording is retained verbatim  ->  quote=No patient-identifiable data may leave the UK.
+PASS  16.3: the clause is attributed to buyer provenance  ->  origin=buyer
+PASS  16.3: supplier evidence is requested  ->  ["Data-flow diagram","Sub-processor list and locations"]
+PASS  16.3: the compiler does not invent a statute or certification  ->  Data residency constraint stated verbatim by the buyer: "No patient-identifiable data may leave the UK."
+PASS  16.3: the legal interpretation is recorded as an open decision, not asserted as fact  ->  ["OD-data-residency-legal-basis","OD-timeline-unstated"]
+PASS  16.4: no mandatory gate is invented while the operating model conflicts  ->  gates=[]
+PASS  16.4: a visible conflict/open decision is generated  ->  
+PASS  16.4: the conflict decision names its reason  ->  The service must be fully managed, but our team must retain sole operational control over all policy changes.
+PASS  16.4: the conflicted managed-service clause is not silently made mandatory  ->  mandatory=false
+PASS  16.4 Prompt D: evaluation categories total exactly 100  ->  total=100
+PASS  14.5: Deterministic -- the same normalized inputs produce byte-identical documents  ->  compared two independent compiles of the same input
+PASS  14.5/Reversible: DLP clause present after it is stated  ->  
+PASS  14.5/Reversible: DLP clause removed after "Remove DLP."  ->  
+PASS  14.5/Reversible: DLP clause resurrects once the buyer restates it in their own words  ->  
+PASS  14.5/Conservative: a bare, non-obligatory mention is never marked mandatory  ->  {"section":"identity","statement":"Identity-aware ZTNA using the buyer's stated identity provider (Entra ID) for access decisions.","supplierResponse":["Describe your ZTNA integration with Entra ID, including device-posture enforcement.","State how a policy change in Entra ID propagates to network access decisions."],"evidence":["Device-posture evidence","Entra ID integration test results"],"acceptanceTest":"Access is denied when device posture fails an Entra-defined compliance policy, evidenced by a live or recorded test.","mandatory":false,"sourceFactIds":[],"origin":"buyer","reason":"The buyer stated Entra ID as the identity provider and required ZTNA.","quote":"We use Entra ID and Azure. ZTNA is available as an option.","sourceTurnIds":[],"sourceNotedIds":[],"templateKey":"identity:entra-ztna","templateId":"identity-aware-ztna","id":"ID-3331f8dc","weight":3}
+PASS  14.5/Balanced: an empty document: evaluation categories total exactly 100  ->  total=100
+PASS  14.5: an empty document compiles with zero clauses, not an error  ->  clauses=0
+PASS  14.3: no section renders when nothing has been said  ->  sections=[]
+PASS  14.3: no supplier response group renders when nothing has been said  ->  groups=0
+
+ALL PASS
