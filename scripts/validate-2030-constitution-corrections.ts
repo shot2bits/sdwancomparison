@@ -55,8 +55,22 @@ function main() {
     record(!/const \[mcMaxHeightPx, setMcMaxHeightPx\]/.test(desk), "2: the mcMaxHeightPx measurement state is removed (the fixed composer it existed to clear no longer exists)", "");
     record(!/composerDockRef/.test(desk), "2: composerDockRef is removed along with the measurement it fed", "");
     record(!/mcCardRef/.test(desk), "2: mcCardRef is removed along with the measurement it fed", "");
-    record(/lg:max-h-\[min\(60vh,calc\(100vh-170px\)\)\]/.test(desk), "2: the Mission Control card keeps a static lg: max-height cap now that no JS measurement feeds it", "");
-    record(/className="relative border-b"/.test(desk), "2: the composer's outer wrapper is relatively positioned (no longer fixed/inset-x-0/bottom-0), matching Robert's 19 Aug 2026 request to move it inline near the top", "");
+    // Superseded 19 Aug 2026 (structural pass): the Mission Control card
+    // this max-height capped no longer exists at all -- decisions are their
+    // own full-pane station now. Asserting the cap survives would be a
+    // vacuous check against a doc comment (the string does still appear in
+    // one, which is exactly how this fixture would have kept "passing"
+    // while the thing it guards was deleted). The real guarantee is that
+    // the dark rail is gone and nothing reintroduced it.
+    record(!/<aside/.test(desk), "2: the dark 340px Mission Control rail is retired outright -- no <aside> remains in ProjectDesk.tsx", "");
+    record(!/const \[mcExpanded, setMcExpanded\]/.test(desk), "2: the rail's mobile expand/collapse state is retired with it (a full pane has no 390px overflow to work around)", "");
+    // The composer is still in normal flow, never fixed/bottom-docked. It
+    // now renders in two places -- full-bleed on the pre-start door, inside
+    // the 368px chat pane once the workspace shell takes over -- so the
+    // class is chosen by `composerWide` rather than hardcoded; what matters
+    // is that neither branch is `fixed`.
+    record(/composerWide \? "relative border-b" : "relative"/.test(desk), "2: the composer's outer wrapper is relatively positioned in BOTH of its render contexts (no longer fixed/inset-x-0/bottom-0), matching Robert's 19 Aug 2026 request to move it inline near the top", "");
+    record(!/fixed inset-x-0 bottom-0/.test(desk), "2: no fixed bottom dock remains anywhere in ProjectDesk.tsx", "");
   }
 
   /* ================================================================ */
@@ -69,8 +83,15 @@ function main() {
   /* ================================================================ */
   {
     const desk = src("src/components/ProjectDesk.tsx");
-    record(!/mcExpanded \? "pb-\[150px\]" : "pb-6"/.test(desk), "3: the mobile aside no longer branches its bottom padding on mcExpanded (no fixed dock left to conditionally clear)", "");
-    record(/order-1 mb-6 pb-6 lg:sticky lg:top-\[132px\]/.test(desk), "3: the mobile aside carries a plain, unconditional pb-6 instead", "");
+    record(!/mcExpanded \? "pb-\[150px\]" : "pb-6"/.test(desk), "3: no mobile aside branches its bottom padding on mcExpanded (no fixed dock left to conditionally clear)", "");
+    // Superseded 19 Aug 2026 (structural pass): there is no mobile aside to
+    // pad. The two-pane shell replaces it, and the ordering guarantee that
+    // actually matters on mobile is that the ACTIVE STATION renders above
+    // the chat pane -- without `flex flex-col` below `lg` the `order-*`
+    // classes are inert and tapping a station appears to do nothing (a real
+    // regression, caught on a live 390px run during this pass).
+    record(/mx-auto flex w-full max-w-\[1400px\] flex-col px-\[26px\] pb-16 lg:grid/.test(desk), "3: the two-pane container is a flex column below lg, so the order-* classes that put the active station above the chat pane on mobile actually take effect", "");
+    record(/className="order-1 min-w-0 lg:order-2"/.test(desk), "3: the station pane is order-1 on mobile (first) and order-2 on desktop (right of the chat)", "");
   }
 
   /* ================================================================ */
@@ -110,7 +131,19 @@ function main() {
     // --nf-lilac-on-dark token (oklch(0.72 0.1 300), 7.45:1 on that card)
     // was added for this single usage; --nf-lilac itself is untouched and
     // still used as-is by every light-background badge/dot elsewhere.
-    record(/nf-lilac-on-dark,\s*#[0-9A-Fa-f]{6}/.test(desk), "5: the MCP RECEIPT label uses the violet (lilac-on-dark) token, distinct from the orange \"Agent proposed\" and cobalt \"MCP evidence\" tags, and accessibility-corrected for its dark-card background", "");
+    // Superseded 19 Aug 2026 (structural pass): the receipt moved off the
+    // retired dark Mission Control card onto the light document canvas, so
+    // it correctly reverts from --nf-lilac-on-dark (the lightened variant
+    // added on 19 Aug purely to clear 4.5:1 on ink-950) to --nf-lilac, the
+    // reference's own text-on-LIGHT violet. Same accessibility rule, other
+    // direction. The receipt itself is unchanged and still gated on the
+    // same real isMcp && hasConsent condition asserted just above.
+    record(/nf-lilac,\s*#[0-9A-Fa-f]{6}/.test(desk), "5: the MCP RECEIPT label uses the violet (lilac) token, distinct from the orange \"Agent proposed\" and cobalt \"MCP evidence\" tags, in the light-background variant its new surface requires", "");
+    // Deliberately matches the CSS-var USAGE form, not the bare token name:
+    // the doc comment beside the receipt legitimately explains why the
+    // colour reverted, and a fixture that trips over its own explanation is
+    // testing prose, not behaviour.
+    record(!/var\(--nf-lilac-on-dark/.test(desk), "5: the dark-surface lilac variant is no longer USED in ProjectDesk.tsx -- there is no dark card left to need it", "");
   }
 
   /* ================================================================ */
@@ -123,7 +156,21 @@ function main() {
     const arch = src("src/components/procurement/ProcurementArchitecture.tsx");
     record(/Live procurement twin/.test(arch), "6: the architecture eyebrow reads \"Live procurement twin\", matching the Constitution mockups", "");
     record(!/#C4C0B8/.test(arch), "6: the earlier neutral-grey edge/arrow colour is fully replaced", "");
-    record(/stroke="var\(--nf-emerald/.test(arch) && /fill="var\(--nf-emerald/.test(arch), "6: edges and their arrowheads use the emerald token, matching the mockups' green connecting lines", "");
+    // Superseded 19 Aug 2026 (structural pass): the twin is no longer an
+    // absolutely-positioned SVG. The handoff bundle draws it as a
+    // left-to-right pipeline of titled boxes joined by arrows, and the old
+    // SVG collapsed into an unreadable vertical smear under ~600px, so the
+    // same nodes/edges/columns now render as flex boxes. There is no
+    // `stroke=`/`fill=` to assert; the emerald connector survives as the
+    // arrow glyph's own colour, and the confirmed-node treatment uses the
+    // emerald-soft pair.
+    record(/color: "var\(--nf-emerald/.test(arch), "6: the pipeline's connecting arrows use the emerald token, matching the mockups' green connecting lines", "");
+    record(/nf-emerald-soft-border/.test(arch) && /nf-emerald-soft,/.test(arch), "6: a node backed by a governed compiled clause carries the emerald-soft border/background pair (the reference's \"Confirmed\" state)", "");
+    // The confirmed/in-scope split must stay DERIVED from a real compiler
+    // signal. ArchitectureNode carries no status field, so anything richer
+    // would have meant inventing a judgement about the buyer's estate.
+    record(/sourceClauseIds && n\.sourceClauseIds\.length > 0/.test(arch), "6: node state is derived from the real sourceClauseIds the compiler already records, never from an invented per-node status field", "");
+    record(/anyConfirmed &&/.test(arch) && /anyInScope &&/.test(arch), "6: the legend renders only the states actually present, so it can never advertise a category nothing on screen is in", "");
     record(/deltaCaption\?: string \| null/.test(arch), "6: the delta caption is an optional, nullable prop -- never a required/always-shown value", "");
 
     const canvas = src("src/components/procurement/LivingProcurementCanvas.tsx");
@@ -151,6 +198,7 @@ function main() {
   /* ================================================================ */
   {
     const envelope = src("src/lib/workspace/envelope.ts");
+    const decisionsStep = src("src/components/procurement/DecisionsStep.tsx");
     record(
       /revision: clientDocParsed\.data\.lastRevision,/.test(envelope),
       "7: envelope.ts's canonical-envelope recompute (both create AND update) now trusts the client's own validated lastRevision instead of guessing server-side (fixes a real false-positive 409 on every project's first save AND its next edit-then-save/publish, both confirmed via live Playwright runs against a local KV store)",
@@ -158,9 +206,21 @@ function main() {
     );
 
     const desk = src("src/components/ProjectDesk.tsx");
-    record(/: "No blocking decisions"/.test(desk), "7: Mission Control's zero-material-decisions heading reads \"No blocking decisions\", never \"Nothing material outstanding\" (which could render directly above a visible card grid)", "");
+    // Superseded 19 Aug 2026 (structural pass): this heading moved out of
+    // the retired Mission Control rail and into the Decisions station, which
+    // owns it now. Same honesty rule, same wording, new home -- so the
+    // assertion follows it to DecisionsStep.tsx rather than being dropped.
+    record(/: "No blocking decisions"/.test(decisionsStep), "7: the Decisions station's zero-material heading reads \"No blocking decisions\", never \"Nothing material outstanding\" (which could render directly above a visible card grid)", "");
     record(!/"Nothing material outstanding"/.test(desk), "7: the old contradictory \"Nothing material outstanding\" string is fully removed from ProjectDesk.tsx", "");
-    record(/Optional refinements/.test(desk), "7: non-blocking question cards shown when nothing is material get their own \"Optional refinements\" label, never left unlabelled under a \"no blocking decisions\" heading", "");
+    // Same supersession: the rail's group-level "Optional refinements"
+    // label is replaced by a per-card "Not required to publish" chip in the
+    // Decisions station, which is strictly more honest -- the old label
+    // grouped cards, so a material and a non-material card sitting together
+    // shared one heading; the chip is computed per card from the SAME
+    // MATERIAL_IMPACTS classification materialDecisionsRemaining counts.
+    record(/Not required to publish/.test(decisionsStep), "7: a non-material decision card carries its own \"Not required to publish\" chip, so it can never be read as a blocker under a heading that says there are none", "");
+    record(/MATERIAL_IMPACTS as readonly string\[\]/.test(decisionsStep), "7: that chip is computed from the SAME MATERIAL_IMPACTS classification the blocking-decision count uses, so badge and count can never disagree", "");
+    record(/Publication is already complete/.test(decisionsStep), "7: post-publish, the station says publication is complete and frames everything remaining as shaping the next revision, never as outstanding work", "");
     // #655F52 replaced an intermediate var(--nf-ink-400) attempt: a real
     // axe-core scan (State 0, the "Not started" badge on its #EDE7D9 fill)
     // found even the design system's own muted token measures anywhere

@@ -227,3 +227,61 @@ export function buildSectionOutline(input: {
 
   return rows;
 }
+
+/**
+ * Which outline row a still-open decision answers into — the reference
+ * design's "Resolves &ldquo;X&rdquo; in the outline once answered."
+ * footnote (Robert's "UI mockups request" handoff bundle, screenshot
+ * 02-decisions.png; structural pass 19 Aug 2026).
+ *
+ * HONESTY RULE, same as every other projection here: this returns a row
+ * title ONLY where the relationship is already real and 1:1 in the
+ * existing vocabularies, and `null` everywhere else. A decision whose
+ * target has no unambiguous outline home simply renders no footnote —
+ * never a guessed section name, which would promise the buyer that
+ * answering moves a row it may not move.
+ *
+ * The three input vocabularies, all pre-existing:
+ *  · `EarnedQuestion.section` (questions.ts): organisation | objectives |
+ *    estate | security | compliance | support | commercial
+ *  · open-decision ids (procurement-document.ts), whose `OD-` prefixes
+ *    already name their own subject
+ *  · governed sector suggestions, which by construction answer into the
+ *    sector row — its title is passed in because it is pack-derived
+ *    (`Manufacturing and OT`, `Healthcare and clinical systems`, …) and
+ *    only the caller knows which pack is active.
+ *
+ * `compliance` is deliberately absent from the section map: a compliance
+ * question can land in either the security row or the active sector row
+ * depending on the pack, so there is no 1:1 answer and it correctly
+ * returns null rather than picking one.
+ */
+const SECTION_TO_OUTLINE_TITLE: Record<string, string> = {
+  organisation: "Organisation and scale",
+  objectives: "Solution scope",
+  estate: "Current estate",
+  security: "Security, identity and data",
+  support: "Operating model and support",
+  commercial: "Commercial and contractual",
+};
+
+const OPEN_DECISION_TO_OUTLINE_TITLE: Record<string, string> = {
+  "OD-operating-model-unstated": "Operating model and support",
+  "OD-operating-model-conflict": "Operating model and support",
+  "OD-operating-model-ambiguous-correction": "Operating model and support",
+  "OD-support-coverage-ambiguous": "Operating model and support",
+  "OD-timeline-unstated": "Success and evaluation",
+};
+
+export function outlineRowForDecision(input: {
+  id: string;
+  target: string;
+  governedSuggestion: boolean;
+  /** The active sector pack's own row title, when a pack is active. */
+  sectorSectionTitle: string | null;
+}): string | null {
+  if (input.governedSuggestion) return input.sectorSectionTitle;
+  if (OPEN_DECISION_TO_OUTLINE_TITLE[input.id]) return OPEN_DECISION_TO_OUTLINE_TITLE[input.id];
+  const section = input.target.split(".")[0];
+  return SECTION_TO_OUTLINE_TITLE[section] ?? null;
+}

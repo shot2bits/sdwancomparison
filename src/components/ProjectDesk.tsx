@@ -78,7 +78,7 @@ import {
   type CompilerRevision,
   type GovernedEvent,
 } from "@/lib/workspace/procurement-document";
-import LivingProcurementCanvas, { NextQuestions, type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
+import LivingProcurementCanvas, { type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
 import { ProvenanceTag } from "@/components/procurement/ProvenanceTag";
 import McpEvidencePanel from "@/components/procurement/McpEvidencePanel";
 import { historyProvenance } from "@/lib/history-provenance";
@@ -90,9 +90,18 @@ import type { ProjectHistoryEvent } from "@/lib/rfp-types";
  *  (earnedQuestions/visibleSuggestions/compiledDocument.openDecisions).
  *  See each module's own header comment for why they are separate files
  *  from the compiler rather than folded into it. */
+import { BOARD_LINK } from "@/lib/nav";
 import { rankNextQuestions, materialDecisionCount, type NextQuestion } from "@/lib/workspace/procurement-next-questions";
 import { buildReadiness } from "@/lib/workspace/procurement-readiness";
 import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists, type OutlineRow } from "@/lib/workspace/procurement-outline";
+/** The five-station shell (Robert's "UI mockups request" handoff bundle,
+ *  structural pass 19 Aug 2026). `wizard-steps.ts` is the shared, pure
+ *  vocabulary: WizardRail renders it, this file routes on it, and both
+ *  derive completion from the SAME real document state rather than from
+ *  navigation history -- see that module's own header comment. */
+import WizardRail from "@/components/procurement/WizardRail";
+import DecisionsStep from "@/components/procurement/DecisionsStep";
+import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -929,13 +938,11 @@ export default function ProjectDesk({
       time: new Date(h.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
     };
   }, [projectHistory]);
-  /** Mobile acceptance correction (18 Aug 2026): "Mission Control must
-   *  support the document, not consume most of the mobile viewport... show
-   *  a compact next-action summary first and allow the full decision stack
-   *  to expand." Desktop (`lg:`) is completely unaffected -- the full card
-   *  always renders there via the `lg:block` override below, regardless of
-   *  this flag; only the mobile default collapses. */
-  const [mcExpanded, setMcExpanded] = useState(false);
+  /* The `mcExpanded` mobile collapse retired 19 Aug 2026 with the Mission
+     Control card itself (structural pass). It existed only because three
+     dark decision cards stacked in a 340px rail overran a 390px viewport;
+     decisions are now their own full-pane station, where the constraint
+     it worked around does not exist. */
   /** 19 Aug 2026: the JS-measured `mcMaxHeightPx` clamp this comment used
    *  to document existed solely to keep the Mission Control card clear of
    *  the composer's old FIXED-BOTTOM position (measuring the live gap
@@ -1086,6 +1093,35 @@ export default function ProjectDesk({
   const submissionSeqRef = useRef(0);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [procurementView, setProcurementView] = useState<ProcurementView>("document");
+  /** Which of the five stations the buyer is looking at (Robert's "UI
+   *  mockups request" handoff bundle, structural pass 19 Aug 2026). This
+   *  is NAVIGATION STATE ONLY -- it says where the buyer is, never what
+   *  is true about the document. Every completion tick, every reachable/
+   *  unreachable station and every readiness figure on screen is derived
+   *  from the compiler's own state (see wizard-steps.ts), so clicking
+   *  through the rail can never make the product claim progress that
+   *  hasn't happened. `describe` is the honest default: it is the only
+   *  station reachable before a single fact exists. */
+  const [step, setStep] = useState<WizardStep>("describe");
+  /** `phase` predates the rail by three weeks and still gates a lot of
+   *  existing JSX ("live" = working on the statement, "fits" = the
+   *  publish panel and everything downstream of it). Rather than rewrite
+   *  every one of those gates, the rail drives it: stations 1-3 are the
+   *  statement, stations 4-5 are the publish surface.
+   *
+   *  Deliberately a plain event handler, NOT a `useEffect` syncing
+   *  `phase` off `step`. The effect version worked but tripped
+   *  react-hooks/set-state-in-effect (a real cascading-render smell, and
+   *  a NEW lint error this file did not previously carry) -- navigation
+   *  is a user event, so the two pieces of state that describe "where
+   *  the buyer is" should move together in the handler that moves them,
+   *  not one render later. Every call site that changes stations goes
+   *  through here, including handleCommand's own publish/whoFits/back
+   *  cases, so `phase` and the rail can never disagree. */
+  const goToStep = (next: WizardStep) => {
+    setStep(next);
+    setPhase(next === "publish" || next === "compare" ? "fits" : "live");
+  };
   const assertedPacks = useRef<Set<string>>(new Set());
   const acceptedGaps = useRef<Set<string>>(new Set());
   /** Which scope class the saved record was created under: a class flip
@@ -2568,7 +2604,10 @@ export default function ProjectDesk({
           return;
         }
         ev("workspace_command", { kind: "who_fits" });
-        setPhase("fits");
+        /* Structural pass (19 Aug 2026): the command path moves the rail
+           too, so the station indicator can never disagree with what is
+           actually on screen. */
+        goToStep("publish");
         scrollToWorkspace();
         return;
       }
@@ -2578,7 +2617,7 @@ export default function ProjectDesk({
           say(lockLine ?? "Publishing is not open yet.");
           return;
         }
-        setPhase("fits");
+        goToStep("publish");
         setTimeout(() => {
           const el = document.querySelector("[data-publish]");
           if (el) el.scrollIntoView({ block: "start" });
@@ -2594,7 +2633,7 @@ export default function ProjectDesk({
         window.location.assign(window.location.pathname);
         return;
       case "back":
-        setPhase("live");
+        goToStep("describe");
         scrollToWorkspace();
         return;
       case "closeEdit":
@@ -3565,59 +3604,45 @@ export default function ProjectDesk({
   /* estate nav with the band and the bounded thread; the statement    */
   /* is one document card scrolling beneath it.                        */
   /* ================================================================ */
-  return (
-    <div
-      className="pd-root mt-8"
-      style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', color: "#110f0d" }}
-      onDragOver={(e) => { e.preventDefault(); }}
-      onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
-    >
-      {/* ── THE TOP BLOCK (round 6, thread moved out round 7) ── sticky
-          under the estate MegaNav: the identity row, the always-visible
-          understanding band with the live market count, the prompt, and
-          the sector chips until a sector stands. The thread now scrolls
-          in its own panel below (round 7: a Claude/ChatGPT-sized panel
-          cannot live in a permanently pinned dock). The prompt never
-          leaves the screen.
 
-          Round 11 catch (2 Aug 2026, Robert, second screenshot: "still
-          not 1 section as requested"). Round 10 removed the conversation
-          panel's own border/card/shadow, but this dock was still painted
-          its own solid colour (#e3e1de, a warm beige) -- a real seam,
-          but the first attempt at the fix (this comment, initially)
-          mis-cited the page's colour: globals.css's --paper-base is
-          #ffffff, but that is not what actually paints this page. Both
-          src/app/home/page.tsx and src/app/workspace/page.tsx wrap their
-          entire route in `<div className="relative bg-[#fefdfc]">` --
-          an explicit override, so the true page background under the
-          dock, the conversation thread and the statement of requirements
-          is #fefdfc, a warm off-white, never pure white. Setting the
-          dock to #fff (the first attempt) actually painted a NEW seam,
-          a white island on a cream page, in the opposite direction.
-          Caught live on production, not assumed: the dock now matches
-          #fefdfc, the colour every other inch of this route already
-          uses. It stays opaque (scrolled content still needs to
-          disappear cleanly behind it, being sticky).
+  /* ================================================================== */
+  /* THE FIVE-STATION SHELL (structural pass, 19 Aug 2026).              */
+  /*                                                                     */
+  /* Robert's "UI mockups request" handoff bundle, rejected first pass:  */
+  /* "Looks nothing like the ZIP file... Mission Control is lame." The   */
+  /* 19 Aug aesthetic-only pass repainted this surface in the bundle's   */
+  /* palette while leaving its structure untouched, because the bundle's */
+  /* own README says "visual style ONLY / do not restructure". That      */
+  /* README was written by a design tool describing a repaint of ITS OWN */
+  /* mockup, so it assumed the target already had this layout; ours did  */
+  /* not, and the literal reading produced a page sharing the reference's*/
+  /* colours and none of its shape. All five reference screenshots show  */
+  /* the same shell, so the shell is the design.                         */
+  /*                                                                     */
+  /* WHAT MOVED: composition only. The blocks below are the SAME JSX,    */
+  /* hoisted into named consts so the same markup can render in the      */
+  /* landing layout (pre-start) and in the two-pane workspace layout     */
+  /* (post-start) without being duplicated. Every handler, every piece   */
+  /* of state and every derived figure is untouched.                     */
+  /*                                                                     */
+  /* WHAT WAS RETIRED: the 340px dark "Mission Control" rail. Its cards  */
+  /* were never sidebar chrome -- they are the decisions that gate       */
+  /* publication -- so they are now station 2 (DecisionsStep), full      */
+  /* pane, full ranked list rather than slice(0,3), light cards big      */
+  /* enough to read. Same cards, same onClick handlers, same material/   */
+  /* optional classification.                                           */
+  /* ================================================================== */
+  const publishedFlag = Boolean(published);
+  const reachable = reachableSteps({ started, published: publishedFlag });
+  const completed = completedSteps({ started, materialDecisionsRemaining, published: publishedFlag });
+  /* Navigation can never strand the buyer on a station that stopped
+     being reachable (e.g. "Start again" wipes the facts while they are
+     standing on Review): fall back to the one station that is always
+     open rather than rendering an empty pane. */
+  const activeStep: WizardStep = reachable.has(step) ? step : "describe";
 
-          Round 14 catch (2 Aug 2026, Robert, re-testing this exact
-          screenshot after round 13 shipped: "no different"). Rounds
-          11-13 closed every colour and border seam on this route, but
-          the dock's own soft drop shadow -- kept deliberately through
-          all three of those rounds as a depth cue for a sticky element
-          -- was itself still reading as a boxed card: box-shadow with
-          blur exceeding its negative spread doesn't stay confined to
-          the bottom edge, it feathers out a few px on every side, which
-          is exactly the rounded-corner-card impression a zoomed
-          screenshot of the live page showed. The dock's background and
-          border were already proven identical to the page (verified
-          via computed style, not assumed) -- the shadow was the one
-          remaining thing drawing a boundary around it. It's gone. The
-          dock is still sticky and still opaque, so scrolled content
-          still disappears behind it cleanly; it just no longer looks
-          like a card floating over the page it's part of. */}
-      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#fefdfc" }}>
-        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">
-          {started && (
+  const identityBar = (
+          started && (
             <div className="flex w-full flex-wrap items-baseline gap-x-4 gap-y-1 pb-2">
               <span className="text-[14.5px] font-medium text-[#1c1a18]">{projectName}</span>
               {created ? (
@@ -3657,19 +3682,10 @@ export default function ProjectDesk({
                 Start again
               </button>
             </div>
-          )}
+          )
+  );
 
-          {/* The understanding band and the market count: always visible,
-              derived, never decorative.
-              Living Procurement Canvas Phase 2 correction (14 Aug 2026):
-              this used to show "{fittingCount} of {marketTotal} still fit"
-              -- a project-specific matched-vendor COUNT, computed pre-
-              publish, unconditionally, in every phase (not just the
-              retired ranked panel). A match count is exactly what the
-              product rule prohibits before publication, vendor names
-              attached or not; see the doc comment on `marketTotal` above.
-              Now shows only the safe, non-project-specific evaluated-
-              market total. */}
+  const understandingBand = (
           <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
             <div className="min-w-[220px] flex-1">
               <div className="flex items-baseline gap-2.5">
@@ -3691,37 +3707,21 @@ export default function ProjectDesk({
               <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#66635e]">{marketNote}</div>
             </div>
           </div>
+  );
 
-        </div>
-      </div>
-
-      {/* ── COMMAND COMPOSER (moved inline, 19 Aug 2026) ── Originally the
-          "PERSISTENT COMMAND DOCK" of the 16 Aug 2026 2030 shell reset,
-          following Blueprint §3 ("Command dock: Persistent bottom surface
-          — natural-language change, attachment/evidence and one primary
-          action") by pinning this to `fixed inset-x-0 bottom-0`.
-
-          Robert's explicit 19 Aug 2026 feedback, from an annotated
-          screenshot, asked for this moved out of that fixed bottom
-          position and placed inline near the top of the page instead,
-          around where the sector chips / initial prompt sit -- a
-          deliberate, knowing departure from Blueprint §3's "persistent
-          bottom surface" language, made at his direction. The composer
-          already sat right here in source/DOM order (immediately after
-          the sticky identity band above, immediately before the sector
-          chips below); the only thing that was ever pinning it to the
-          viewport bottom was the `fixed inset-x-0 bottom-0 z-40` class
-          itself, so removing just that positioning (now `relative`, and
-          `border-b` in place of `border-t` since content now flows below
-          it rather than above it) is enough to render it exactly here,
-          in normal page flow, near the top. Same textarea, same
-          voice/attach/send handlers, same state -- only the position
-          changed. */}
+  /** Structural pass (19 Aug 2026): `composerWide` distinguishes the two
+   *  places this same markup now renders — full-bleed across the door
+   *  (pre-start), and inside the 368px chat pane once the workspace shell
+   *  takes over. Only the container's max-width and padding differ; the
+   *  textarea, the voice/attach/send handlers and every piece of state
+   *  are the same in both. */
+  const composerWide = !started;
+  const composerBlock = (
       <div
-        className="relative border-b"
+        className={composerWide ? "relative border-b" : "relative"}
         style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
       >
-        <div className="mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]">
+        <div className={composerWide ? "mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]" : "w-full px-0 py-3 lg:px-6"}>
           {/* The prompt (the input method, never the subject). Styled as a
               real chat composer (round 9, 2 Aug 2026, Robert: "style it
               exactly the same as a ChatGPT input or gemini"), not a form
@@ -3827,290 +3827,103 @@ export default function ProjectDesk({
           {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">{voiceError}</p>}
         </div>
       </div>
+  );
 
-      {/* Sector quick-start chips, shown only before a sector stands: kept
-          in normal page flow immediately below the composer, which (as of
-          19 Aug 2026) is now also in normal page flow itself -- see the
-          COMMAND COMPOSER comment above. */}
-      {!coreFive.sector && (
-        <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
-          {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
-              E: at 390px this row is narrower than "Or start from your
-              sector:" plus even one chip, so with `overflow-x-auto`
-              genuinely scrollable but `scrollbarWidth: "none"` hiding the
-              ONLY affordance that could tell a buyer so, the visible chip
-              was hard-clipped mid-word ("Multinational / glo…") with
-              nothing suggesting more existed -- confirmed via a live
-              390px screenshot. Content itself is untouched (still scrolls,
-              still every chip's full label exists) -- a right-edge fade
-              mask now makes the cut a visibly intentional "more this way"
-              hint instead of a hard, silent clip, exactly the "scroll
-              intentionally with a clear affordance" option this
-              correction allows. `sm:[mask-image:none]` turns it off once
-              the row switches to `flex-wrap` (nothing to hint at once
-              everything's visible). */}
-          <div
-            className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]"
-            style={{ scrollbarWidth: "none" }}
+  /** "MOST USEFUL NEXT — from sections needing a decision" (reference
+   *  screenshots 01-05, left pane). Every chip is a REAL outline row
+   *  that is genuinely still open — `sectionOutline` is the same
+   *  projection the document's own section list renders, so a chip can
+   *  never name a section the outline shows as confirmed. The verb is
+   *  chosen by the row's own state (needs_decision -> "Decide",
+   *  needs_input -> "Add"), never guessed, and `later` rows are excluded
+   *  because they are deliberately not yet useful.
+   *
+   *  Clicking navigates to the Decisions station. It deliberately does
+   *  NOT prefill the composer: `procurement-next-questions.ts`'s own
+   *  binding rule is that Netify-authored question text must never enter
+   *  the buyer's source ledger, and a prefilled draft is one Enter press
+   *  away from doing exactly that. */
+  const usefulNextChips = sectionOutline
+    .filter((r) => r.state === "needs_decision" || r.state === "needs_input")
+    .slice(0, 4)
+    .map((r) => ({ key: r.key, label: `${r.state === "needs_decision" ? "Decide" : "Add"}: ${r.title.toLowerCase()}` }));
+
+  const usefulNextBlock = usefulNextChips.length > 0 && (
+    <div className="w-full border-t px-0 pt-3.5 lg:px-6" style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}>
+      <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.09em", color: "var(--nf-ink-600, #66635e)" }}>
+        Most useful next — from sections needing a decision
+      </div>
+      <div className="mt-2.5 flex flex-wrap gap-2">
+        {usefulNextChips.map((c) => (
+          <button
+            key={c.key}
+            type="button"
+            onClick={() => goToStep("decisions")}
+            className="cursor-pointer rounded-[3px] border px-3 py-2 text-left text-[12.5px] font-semibold transition-colors hover:bg-white"
+            style={{
+              borderColor: "var(--nf-orange-soft-border, #db9f76)",
+              background: "var(--nf-orange-soft, #ffe3cc)",
+              color: "var(--nf-orange-strong, #832f00)",
+            }}
           >
-            <span className="flex-none text-[12.5px] text-[#66635e]">Or start from your sector:</span>
-            {SECTOR_CHIPS.map((c) => (
-              <button
-                key={c.label}
-                type="button"
-                onClick={() => pickChip(c)}
-                className="flex-none cursor-pointer whitespace-nowrap rounded-[4px] border border-[#d3d0cd] bg-[#fefdfc] px-3.5 py-[7px] text-[13px] text-[#1c1a18] hover:border-[#110f0d] hover:bg-white"
+            {c.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const sectorChips = (
+          !coreFive.sector && (
+            <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
+              {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
+                  E: at 390px this row is narrower than "Or start from your
+                  sector:" plus even one chip, so with `overflow-x-auto`
+                  genuinely scrollable but `scrollbarWidth: "none"` hiding the
+                  ONLY affordance that could tell a buyer so, the visible chip
+                  was hard-clipped mid-word ("Multinational / glo…") with
+                  nothing suggesting more existed -- confirmed via a live
+                  390px screenshot. Content itself is untouched (still scrolls,
+                  still every chip's full label exists) -- a right-edge fade
+                  mask now makes the cut a visibly intentional "more this way"
+                  hint instead of a hard, silent clip, exactly the "scroll
+                  intentionally with a clear affordance" option this
+                  correction allows. `sm:[mask-image:none]` turns it off once
+                  the row switches to `flex-wrap` (nothing to hint at once
+                  everything's visible). */}
+              <div
+                className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]"
+                style={{ scrollbarWidth: "none" }}
               >
-                {c.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── 2030 SHELL RESET: DOCUMENT / MISSION-RAIL GRID (16 Aug 2026) ──
-          Blueprint §3, binding desktop composition: living document
-          canvas ~70% of the working width, mission rail ~30%, sticky
-          within the viewport, maximum three decision cards visible. The
-          rail renders the SAME `nextQuestionCards` (and the same
-          `landOption`/`pickChip`-driven onClick handlers) the canvas used
-          to render inline via `LivingProcurementCanvas`'s own
-          `NextQuestions` — that inline render is now suppressed (see the
-          `nextQuestionCards={undefined}` a few lines below) so the same
-          three cards appear exactly once, in the rail, never duplicated.
-          Below `lg`, the grid collapses to a single column and the rail
-          renders first (see the `order` classes), so the single highest-
-          priority decision is the first thing a 390px viewport shows
-          under the delta receipt — the blueprint's mobile rule ("one
-          decision card is fully readable above the fold"). The generous
-          `pb-[220px]`/`pb-[150px]` reserves this section used to carry
-          (17-18 Aug 2026 corrections) existed only to keep content clear
-          of the composer's old fixed-bottom footprint on desktop and
-          mobile respectively; both are superseded 19 Aug 2026 now that
-          the composer is no longer fixed to the viewport (see the COMMAND
-          COMPOSER comment above) -- a plain, modest `pb-16` closes out the
-          page instead. */}
-      <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-16 pt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-[42px]">
-      {/* Mission Control (2030 visual pass, 18 Aug 2026): restyled to the
-          approved prototype's dark `.card.dark` treatment (index.html) --
-          the one panel across states 0/1 the closure package specifically
-          names ("Mission Control... governed MCP approval flow"). Only
-          colour/typography change here; the sticky/order/mobile-height
-          logic above (lg:sticky, lg:top-[132px]) is untouched -- that's
-          spacing/hierarchy the prototype itself doesn't govern.
-
-          Dead-zone correction (18 Aug 2026, real bug found via mobile
-          screenshot), superseded 19 Aug 2026: the 150px bottom clearance
-          this used to carry existed to guard the card's last decision row
-          from the composer's old fixed-bottom position. Robert's 19 Aug
-          2026 request moved the composer out of fixed positioning (now
-          inline, near the top of the page), so there is no longer
-          anything pinned to the viewport for this aside to clear on
-          mobile -- a single, plain bottom margin is enough regardless of
-          `mcExpanded`. */}
-      <aside className="order-1 mb-6 pb-6 lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start">
-        {/* No .procurement-2030 class needed here: this div is already
-            inside ProcurementEntry's own .procurement-2030 wrapper (the
-            --nf-* custom properties inherit down the DOM tree), unlike
-            WorkspaceHeader.tsx, which is a layout-level sibling and does
-            need its own application. */}
-        {/* Mandatory visual correction (18 Aug 2026), superseded 19 Aug
-            2026: this card's `lg:max-h-*` used to be fed by a JS
-            measurement guarding against the composer's old fixed-bottom
-            position (see the removed `mcMaxHeightPx` doc comment near this
-            component's other state). The composer is no longer fixed --
-            it now renders inline, near the top of the page -- so this is
-            back to a plain static cap: generous for normal content, with
-            `overflow-y-auto` still letting the card scroll internally on
-            the rare occasion content exceeds it. */}
-        <div
-          className="rounded-[4px] border p-4 lg:max-h-[min(60vh,calc(100vh-170px))] lg:overflow-y-auto"
-          style={{
-            background: "var(--nf-ink-950)",
-            borderColor: "#2b2825",
-            color: "#f7f5f2",
-          }}
-        >
-          <div style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "#bab7b3" }}>
-            Mission control
-          </div>
-          {/* Real bug found via screenshot verification (18 Aug 2026): this
-              heading rendered near-invisible on the dark card -- `text-white`
-              LOSES to globals.css's sitewide `h1, h2, h3 { color:
-              var(--ink-900) }` rule, because that rule sits outside any
-              Tailwind `@layer` block and CSS cascade layers always rank
-              unlayered author CSS above layered CSS regardless of selector
-              specificity (confirmed via getComputedStyle: color resolved
-              to rgb(24,24,27), not white). Inline `style.color` beats any
-              class or unlayered selector, so the colour moved here rather
-              than relying on the class.
-
-              Accessibility correction (18 Aug 2026, real bug found via an
-              axe-core scan): this was an `<h3>`, but Mission Control is a
-              sibling SECTION alongside the living document (not nested
-              inside it), and it sits earlier in DOM order than the
-              document's own `<h2>` title (LivingProcurementCanvas.tsx /
-              ProjectDesk.tsx's docTitle) -- the CSS `order-*` classes that
-              visually reorder it for desktop don't change DOM/accessibility
-              tree order. That produced a real h1 -> h3 -> h2 sequence
-              (skipping a level, then stepping back down), which axe's
-              heading-order rule correctly flags: it breaks screen-reader
-              heading-list navigation. `<h2>` is the correct level -- a
-              sibling section heading, same rank as the document title,
-              not a subsection three levels below the page's own h1. */}
-          {/* Honesty fix (verification pass, 18 Aug 2026): "Nothing material
-              outstanding" used to render directly above a live grid of
-              question cards (nextQuestionCards is the FULL ranked list,
-              never filtered to material-only -- see topThreeQuestions above)
-              whenever any non-material/optional question existed -- reading
-              as a direct contradiction ("nothing outstanding", right above
-              something visibly presented). The cards themselves already say
-              which they are (LivingProcurementCanvas.tsx's own isMaterial
-              fix, same MATERIAL_IMPACTS classification, "Open decision" vs
-              "Optional - not required to publish"); this heading now uses
-              the same true/false split the cards use, in the buyer's own
-              words: "No blocking decisions" when materialDecisionsRemaining
-              is genuinely 0, never a phrase that could be misread as "there
-              is nothing here at all." Whatever optional cards remain below
-              get their own "Optional refinements" label (just below) so the
-              two never disagree.
-
-              Lifecycle-consistency closure pass (18 Aug 2026), correction
-              A: "before publish" is only ever true before publish -- once
-              `published` is set, publication has already happened, so a
-              remaining `materialDecisionsRemaining` count no longer blocks
-              anything; it can only shape the NEXT revision. Saying "N
-              decisions before publish" (or even "No blocking decisions",
-              which still frames the card around a not-yet-completed
-              publish) after a real publish would misstate a completed
-              action as still pending -- exactly the contradiction this
-              pass exists to remove. */}
-          <h2 className="mb-0 mt-1.5 text-[19px] font-semibold leading-[1.3]" style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "#fff" }}>
-            {published
-              ? materialDecisionsRemaining
-                ? `Project published · ${materialDecisionsRemaining} optional refinement${materialDecisionsRemaining === 1 ? "" : "s"} for the next revision`
-                : "Project published"
-              : materialDecisionsRemaining
-                ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before publish`
-                : "No blocking decisions"}
-          </h2>
-          {/* Mobile-only compact toggle -- `lg:hidden` so desktop never
-              sees it (the full card is always expanded there). Only shown
-              when there's actually something to expand into. */}
-          {materialDecisionsRemaining > 0 && (
-            <button
-              type="button"
-              onClick={() => setMcExpanded((v) => !v)}
-              className="mt-2 cursor-pointer rounded-[4px] border-0 px-3 py-1.5 text-[11px] font-semibold uppercase lg:hidden"
-              /* Contrast fix (verification pass, 18 Aug 2026): white text on
-                 --nf-orange (#c66000) measured 3.58:1, below WCAG AA's
-                 4.5:1 for this button's normal-weight small text.
-                 --nf-orange-strong (#832f00, already the design system's
-                 own darker/contrast-fixed orange -- see globals.css) gives
-                 white text 6.17:1 here, comfortably safe, same accent hue. */
-              style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.06em", background: "var(--nf-orange-strong, #832f00)", color: "#fff" }}
-              aria-expanded={mcExpanded}
-            >
-              {mcExpanded ? "Hide decisions" : "View decisions"}
-            </button>
-          )}
-          <div className={`${mcExpanded ? "" : "hidden"} lg:block`}>
-            <p className="m-0 mt-3 text-[12px] leading-[1.5] lg:mt-1" style={{ color: "#a7a4a0" }}>
-              {published
-                ? "Publication is already complete — nothing below reopens it. These only shape your next revision."
-                : materialDecisionsRemaining
-                  ? "The agent ranks only choices that change price, risk, compliance or delivery."
-                  : "Nothing below blocks publishing — every card here is optional."}
-            </p>
-            {nextQuestionCards && nextQuestionCards.length > 0 ? (
-              <div className="mt-4">
-                {/* Bullet 2 of the same honesty fix: when nothing is
-                    material, the cards still shown (governed suggestions,
-                    delivery/evaluation-only earned questions) get their own
-                    named group instead of sitting under a bare "no blocking
-                    decisions" heading with no label of their own — never
-                    presented as though they were the blocking decisions the
-                    heading just said there were none of.
-
-                    Lifecycle-consistency closure pass, correction A: once
-                    `published` is true, EVERY remaining card gets this
-                    label, even ones `materialDecisionsRemaining` still
-                    counts as material -- material only ever meant "would
-                    have blocked publication," and publication has already
-                    happened, so nothing here is a blocker of anything
-                    anymore, regardless of its pre-publish classification. */}
-                {(published || !materialDecisionsRemaining) && (
-                  <div className="mb-2 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.1em", color: "#83807b" }}>
-                    Optional refinements
-                  </div>
-                )}
-                <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare dark />
+                <span className="flex-none text-[12.5px] text-[#66635e]">Or start from your sector:</span>
+                {SECTOR_CHIPS.map((c) => (
+                  <button
+                    key={c.label}
+                    type="button"
+                    onClick={() => pickChip(c)}
+                    className="flex-none cursor-pointer whitespace-nowrap rounded-[4px] border border-[#d3d0cd] bg-[#fefdfc] px-3.5 py-[7px] text-[13px] text-[#1c1a18] hover:border-[#110f0d] hover:bg-white"
+                  >
+                    {c.label}
+                  </button>
+                ))}
               </div>
-            ) : (
-              <p className="m-0 mt-4 text-[12.5px] leading-[1.5]" style={{ color: "#83807b" }}>
-                No material decision is open right now — the document reflects everything stated so far.
-              </p>
-            )}
-          </div>
-          {/* Real, honestly-empty-until-earned "MCP RECEIPT" line -- see
-              the `latestMcpReceipt` doc comment above. Sits outside the
-              `mcExpanded` collapse (mobile always sees a genuine receipt
-              if one exists, matching the mockup treating it as
-              foot-of-card chrome, not a decision card). */}
-          {latestMcpReceipt && (
-            <div className="mt-3 border-t pt-2.5" style={{ borderColor: "#2b2825" }}>
-              <span style={{ fontFamily: "var(--nf-font-mono)", fontSize: "9px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--nf-lilac-on-dark, #ae96da)", fontWeight: 700 }}>
-                MCP receipt
-              </span>
-              <p className="m-0 mt-1 text-[12px] leading-[1.4]" style={{ color: "#d0cdc9" }}>
-                {latestMcpReceipt.label} · {latestMcpReceipt.time}
-              </p>
             </div>
-          )}
-        </div>
-      </aside>
-      {/* Accessibility correction (18 Aug 2026, real bug found via an
-          axe-core scan): this was a second/third `<main>` on the page
-          (alongside (workspace)/layout.tsx's real page-level
-          `<main id="main-content">` and, until the same pass, Procurement
-          Entry's own) -- this is the document CANVAS COLUMN of a two-
-          column grid, a sub-region, not the page's primary-content
-          landmark. The `order-*`/`lg:order-*` classes here reorder it
-          visually only (CSS `order` never changes DOM/accessibility tree
-          order), so demoting this to a plain `<div>` changes no layout,
-          only removes the duplicate landmark. */}
-      <div className="order-2 min-w-0 lg:order-1">
-      {/* ── THE THREAD (round 7, 1 Aug 2026: Robert — "the idea was
-          this section had a memory and users could keep typing to
-          generate the living statement, so there would be a scrolling
-          window as per Claude, ChatGPT interface etc"). The memory was
-          already unbounded (say/sayYou only ever append, nothing is
-          dropped) — the gap was purely visual: a 110-150px sliver from
-          his 31 Jul ruling ("small persistent chat window"). Chose a
-          large panel (his pick, ~600px+) but pulled it OUT of the sticky
-          dock rather than growing the dock itself: the dock stays pinned
-          to the viewport top on every scroll position, so a Claude-sized
-          panel living inside it would permanently cover most of the
-          screen. Here it scrolls with the page like the statement below
-          it, and scrolls internally once its own history outgrows the
-          panel, the same way a real chat column does.
+          )
+  );
 
-          Round 10 catch (2 Aug 2026, Robert, pointing at the screenshot:
-          "I said I wanted a single chat as per ChatGPT, there's 2
-          separate sections"). Round 9 restyled the input to look like a
-          chat composer but this panel kept its own rounded border, card
-          background and drop shadow, so the composer and the thread
-          still read as two framed boxes with a visible seam between
-          them — no chat app boxes its input separately from its own
-          history. The fix is visual only: this panel no longer carries
-          a border, card background or shadow of its own, so it reads as
-          the same continuous surface the sticky composer sits on, one
-          chat column rather than two stacked cards. Nothing about the
-          data, the memory, or the scroll behaviour changes. */}
-      <div className="mx-auto w-full max-w-[1000px] px-[26px] pt-3">
+  /** The transcript. Structural pass (19 Aug 2026): the reference draws
+   *  this as real chat bubbles — the buyer's own words in a dark ink
+   *  bubble, Netify's replies in a pale bordered one — in place of the
+   *  52px "YOU / NETIFY" gutter labels this used to carry. Presentation
+   *  only: same `msgs` array, same append-only memory, same scroll
+   *  container, same keyboard-focusable a11y treatment. The `who` field
+   *  still drives everything, it just drives colour and alignment now
+   *  instead of a label column. */
+  const threadBlock = (
+      <div className="w-full px-0 pt-4 lg:px-6">
         {msgs.length > 0 && (
-          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#66635e]">
-            Feedback only, kept for this sitting — the statement below is the record.
+          <p className="m-0 mb-2.5 text-[11.5px] leading-[1.5]" style={{ color: "var(--nf-ink-400, #83807b)" }}>
+            Feedback only, kept for this sitting — the document is the record.
           </p>
         )}
         {/* Accessibility correction (18 Aug 2026, real bug found via an
@@ -4126,767 +3939,1044 @@ export default function ProjectDesk({
           ref={threadRef}
           tabIndex={0}
           aria-label="Feedback transcript"
-          className="flex max-h-[420px] flex-col gap-[11px] overflow-y-auto px-1 sm:max-h-[620px]"
+          className="flex max-h-[300px] flex-col gap-2.5 overflow-y-auto lg:max-h-[46vh]"
         >
           {msgs.map((m, i) => (
-            <div key={i} className="flex items-start gap-2.5">
+            <div key={i} className={`flex ${m.who === "you" ? "justify-end" : "justify-start"}`}>
               <span
-                className="w-[52px] flex-none pt-[3px] text-[10px] font-semibold uppercase"
-                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#66635e" : "var(--nf-orange-strong)" }}
+                className="max-w-[92%] rounded-[4px] px-3.5 py-2.5 text-[13px] leading-[1.55]"
+                style={
+                  m.who === "you"
+                    ? { background: "var(--nf-ink-950, #110f0d)", color: "var(--nf-ivory, #f7f5f2)", textWrap: "pretty" }
+                    : {
+                        background: "var(--nf-ink-100, #e3e1de)",
+                        color: "var(--nf-ink-800, #302d2a)",
+                        border: "1px solid var(--nf-ink-200, #d3d0cd)",
+                        textWrap: "pretty",
+                      }
+                }
               >
-                {m.who === "you" ? "You" : "Netify"}
-              </span>
-              <span className="max-w-[56em] text-[13.5px] leading-[1.55]" style={{ textWrap: "pretty", color: m.who === "you" ? "#110f0d" : "#66635e" }}>
                 {m.text}
               </span>
             </div>
           ))}
         </div>
       </div>
+  );
 
-      {/* ── LIVING PROCUREMENT CANVAS (Phase 3 Stage A, 14 Aug 2026) ──
-          The compiled projection of the SAME fact ledger the editable
-          statement below still owns: title/summary, readiness, the
-          fact-strip counts, the Living document / Supplier pack /
-          Evaluation view-switch, the architecture, the numbered
-          testable-clause list and open decisions -- all real
-          `compileProcurementDocument()` output, never mockup content.
-          Deliberately placed ABOVE the existing statement rather than
-          replacing it: this IS the primary visible surface the brief
-          calls for, while the slot-by-slot statement panel below remains
-          the exact, already-working correction/edit affordance for
-          individual facts (drop/clear/edit buttons, sector packs, notes)
-          -- nothing about that panel's own behaviour changes here. Only
-          shown once a project has started.
-
-          CORRECTION (Robert's follow-up visual-closure directive, 18 Aug
-          2026, item 7): this used to also hide once locked (`phase ===
-          "fits"`), on the reasoning that it must never render "anywhere
-          near" the pre-publication vendor-redaction panel below. That
-          reasoning doesn't hold up: this canvas (title/summary, readiness,
-          the fact-strip counts, the Living document / Supplier pack /
-          Evaluation switch, the architecture twin, the clause list, open
-          decisions) never names a single vendor or service provider --
-          the MarketUnlock boundary is enforced entirely inside the "fits"
-          panel and its own server route (fit/route.ts), untouched by this
-          change. Hiding the canvas instead broke the buyer-facing "value-
-          building story" the SAME directive requires end to end: buyer
-          wording -> structured facts -> living document -> supplier pack
-          -> frozen published revision -> vendor responses -> evidence-
-          backed comparison. Rendering through "fits" too (states 3-5, not
-          just state 2) keeps that story visible exactly where it matters
-          most -- right where the buyer is about to publish, and right
-          after they have. */}
-      {(phase === "live" || phase === "fits") && started && (
-        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2 pt-[6px]">
-          <LivingProcurementCanvas
-            document={canvasDocument}
-            view={procurementView}
-            onViewChange={setProcurementView}
-            factsKept={live.length}
-            factsStruck={Math.max(0, facts.length - live.length)}
-            sourceTurnCount={sourceTurns.length}
-            nextQuestionCards={undefined}
-            outline={sectionOutline}
-            materialDecisionsRemaining={materialDecisionsRemaining}
-            acceptedSuggestionCards={acceptedSuggestionCards}
-            acceptedSuggestionsTitle={sectorSectionTitle}
-          />
+  /** The compiled canvas (document outline, stat tiles, clause list,
+   *  architecture twin, MCP provenance). Structural pass (19 Aug 2026):
+   *  hoisted to a const because the reference shows this SAME material on
+   *  two stations — Describe (led by the architecture twin, the "did it
+   *  understand me" view) and Review ("here is everything a supplier will
+   *  see"). One render path, so the two stations can never disagree about
+   *  what the document contains. */
+  const canvasBlock = (
+    <>
+      {/* MCP RECEIPT -- the latest genuinely approved, consented MCP
+          action on this project. Structural pass (19 Aug 2026): this line
+          previously sat at the foot of the dark "Mission Control" card;
+          when that card was retired the receipt had to move somewhere
+          real rather than be dropped, because it is honestly-earned
+          provenance (gated on the SAME `prov.isMcp && prov.hasConsent`
+          condition McpEvidencePanel's approvedEvents uses, null when no
+          such event exists -- never a placeholder). It now leads the
+          document canvas, on a light surface, so it reads as what it is:
+          a receipt for something that already happened to this document.
+          The colour reverts from --nf-lilac-on-dark to --nf-lilac for
+          exactly the same accessibility reason the dark variant existed:
+          --nf-lilac is the reference's own text-on-LIGHT violet, and this
+          is now a light background. */}
+      {latestMcpReceipt && (
+        <div
+          className="mb-5 flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-[4px] border px-3.5 py-2.5"
+          style={{ borderColor: "var(--nf-lilac-soft-border, #b6a2dc)", background: "var(--nf-lilac-soft, #eee6ff)" }}
+        >
+          <span
+            style={{ fontFamily: "var(--nf-font-mono)", fontSize: "9.5px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--nf-lilac, #573c7f)", fontWeight: 700 }}
+          >
+            MCP receipt
+          </span>
+          <span className="text-[12.5px] leading-[1.45]" style={{ color: "var(--nf-ink-800, #302d2a)" }}>
+            {latestMcpReceipt.label} · {latestMcpReceipt.time}
+          </span>
         </div>
       )}
+                    {/* ── LIVING PROCUREMENT CANVAS (Phase 3 Stage A, 14 Aug 2026) ──
+                        The compiled projection of the SAME fact ledger the editable
+                        statement below still owns: title/summary, readiness, the
+                        fact-strip counts, the Living document / Supplier pack /
+                        Evaluation view-switch, the architecture, the numbered
+                        testable-clause list and open decisions -- all real
+                        `compileProcurementDocument()` output, never mockup content.
+                        Deliberately placed ABOVE the existing statement rather than
+                        replacing it: this IS the primary visible surface the brief
+                        calls for, while the slot-by-slot statement panel below remains
+                        the exact, already-working correction/edit affordance for
+                        individual facts (drop/clear/edit buttons, sector packs, notes)
+                        -- nothing about that panel's own behaviour changes here. Only
+                        shown once a project has started.
 
-      {/* ── STATE 3: GOVERNED MCP / EVIDENCE (18 Aug 2026) ── real
-          project history, never fabricated connections/evidence/receipts
-          -- see McpEvidencePanel.tsx's own doc comment for exactly what
-          each of the seven states is grounded in. Only rendered once a
-          project has actually been saved (an id exists), since history
-          only exists on a persisted record -- an unsaved draft honestly
-          has no history to read, not an empty one worth rendering.
-          Rendered through `phase === "fits"` too, the same correction and
-          for the same reason as the canvas above: this is provenance
-          (who did what, when), never a vendor name, so keeping it visible
-          through states 3-5 preserves the value-building story instead of
-          breaking it at the exact moment (about to publish, just
-          published) it matters most. */}
-      {(phase === "live" || phase === "fits") && started && created?.id && (
-        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2">
-          <McpEvidencePanel history={projectHistory} />
-        </div>
-      )}
-
-      {/* ── THE LIVING STATEMENT ── one document card, five ruled
-          sections of labelled rows, from the very first paint (Robert's
-          ruling: the empty project IS the door): every empty line
-          visible, dashed and clickable at zero. Change is shown in the
-          rows; the thread above only ever repeats the diff.
-
-          Round 13 catch (2 Aug 2026, Robert, a ChatGPT screenshot: "does
-          this look like ChatGPT? I want it in one section"). Rounds
-          10-12 closed the seam between the composer and the conversation
-          thread, but this document was still its own bordered, shadowed
-          card -- a third box on the page, the exact thing the ChatGPT
-          reference never does (one continuous canvas, no boxes at all).
-          Asked directly rather than guessed, since this panel had been
-          ruled a deliberately distinct "document" earlier in the
-          project: his answer was to drop the boundary here too. The
-          card's own background was already #fefdfc, the same value as
-          the page's #fefdfc (round 12) -- only the border and the drop
-          shadow were drawing a line that color alone no longer needed
-          to. Both are gone; the padding stays, so the document still
-          reads as its own paragraph, just without a frame around it. */}
-      {/* Phase 3 Stage A correction round (Robert, 14 Aug 2026), item 8:
-          "do not render two complete procurement documents consecutively
-          ... There must remain one authoritative record." The Living
-          Procurement Canvas above is now the primary, always-visible
-          record; this slot-by-slot editable statement -- every control,
-          the fact ledger, drop/clear, sector packs -- is completely
-          UNCHANGED, just moved behind a native, clearly labelled
-          disclosure rather than rendering as its own second full
-          document immediately below the canvas. Collapsed by default
-          (native `<details>`, no JS needed to open/close, keyboard- and
-          screen-reader-accessible for free). */}
-      {phase === "live" && (
-        <details className="mx-auto w-full max-w-[1000px] px-[26px] pb-6 pt-[10px]">
-          <summary className="cursor-pointer select-none rounded-[4px] px-3 py-2.5 text-[13px] font-medium text-[#83807b] hover:bg-[#e3e1de] hover:text-[#110f0d]" style={mono}>
-            Project details / edit source facts
-          </summary>
-          <div className="px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]">
-          <div className="text-[10.5px] uppercase text-[var(--nf-orange-strong)]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
-          <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
-          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#66635e]">
-            This document is the project. It fills in as you talk, every line shows where it came from, and vendors and service providers bid against exactly what is on this page.
-          </p>
-
-          {TWIN_GROUPS.map((g) => {
-            if (g.id === "rules") {
-              const rows = ruleFacts;
-              const state = coreFive.sector ? (rows.length ? `${rows.length} applied` : "none yet") : "waiting";
-              return (
-                <div key={g.id} className="border-t border-[#e3e1de] pb-4 pt-[18px]">
-                  <div className="mb-2 flex items-baseline gap-[11px]">
-                    <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                    <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">{g.note}</span>
-                    <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{state}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    {rows.length > 0 ? (
-                      rows.map((f) => {
-                        const isNew = changedSlots.includes(`rule:${f.id}`);
-                        return (
-                          <div
-                            key={f.id}
-                            className="flex items-start gap-3.5 border-b border-dotted border-[#e3e1de] py-[9px]"
-                            style={isNew ? { background: "#fefdfc", boxShadow: "inset 2px 0 0 #c66000", paddingLeft: 10, marginLeft: -10 } : {}}
-                          >
-                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#66635e] sm:w-[150px]">Applied</span>
-                            <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                              <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>
-                                {COMPLIANCE_LABELS[String(f.value)] ?? String(f.value)}
-                              </span>
-                              <span className="text-[12px] italic text-[#66635e]">
-                                {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
-                              </span>
-                            </div>
-                            <span
-                              className="flex-none rounded-[4px] px-[5px] py-[3px] text-[9.5px] font-semibold uppercase"
-                              style={{ ...mono, letterSpacing: "0.07em", ...(f.provenance === "inferred" ? { background: "#ffe3cc", color: "#832f00" } : { background: "#d9f4d9", color: "#1e4e22" }) }}
-                            >
-                              {f.provenance === "inferred" ? "from your sector" : "your words"}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => dropRow(f)}
-                              className="flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e] hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]"
-                              style={{ ...mono, letterSpacing: "0.07em" }}
-                            >
-                              {f.provenance === "inferred" ? "drop" : "clear"}
-                            </button>
-                          </div>
-                        );
-                      })
-                    ) : coreFive.sector ? (
-                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#66635e]">
-                        No asserted rule pack for this sector yet. Any rule you state lands here with your words as its provenance.
-                      </div>
-                    ) : (
-                      <div className="flex items-start gap-3.5 py-[9px]">
-                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Sector rules</span>
-                        <button
-                          type="button"
-                          onClick={() => setEdit("sector")}
-                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e] hover:border-[#110f0d] hover:bg-white hover:text-[#110f0d]"
-                        >
-                          <span className="text-[12px] text-[#a7a4a0]" style={mono}>+</span>
-                          Set your sector to load these
-                        </button>
+                        CORRECTION (Robert's follow-up visual-closure directive, 18 Aug
+                        2026, item 7): this used to also hide once locked (`phase ===
+                        "fits"`), on the reasoning that it must never render "anywhere
+                        near" the pre-publication vendor-redaction panel below. That
+                        reasoning doesn't hold up: this canvas (title/summary, readiness,
+                        the fact-strip counts, the Living document / Supplier pack /
+                        Evaluation switch, the architecture twin, the clause list, open
+                        decisions) never names a single vendor or service provider --
+                        the MarketUnlock boundary is enforced entirely inside the "fits"
+                        panel and its own server route (fit/route.ts), untouched by this
+                        change. Hiding the canvas instead broke the buyer-facing "value-
+                        building story" the SAME directive requires end to end: buyer
+                        wording -> structured facts -> living document -> supplier pack
+                        -> frozen published revision -> vendor responses -> evidence-
+                        backed comparison. Rendering through "fits" too (states 3-5, not
+                        just state 2) keeps that story visible exactly where it matters
+                        most -- right where the buyer is about to publish, and right
+                        after they have. */}
+                    {(phase === "live" || phase === "fits") && started && (
+                      <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2 pt-[6px]">
+                        <LivingProcurementCanvas
+                          document={canvasDocument}
+                          view={procurementView}
+                          onViewChange={setProcurementView}
+                          factsKept={live.length}
+                          factsStruck={Math.max(0, facts.length - live.length)}
+                          sourceTurnCount={sourceTurns.length}
+                          nextQuestionCards={undefined}
+                          outline={sectionOutline}
+                          materialDecisionsRemaining={materialDecisionsRemaining}
+                          acceptedSuggestionCards={acceptedSuggestionCards}
+                          acceptedSuggestionsTitle={sectorSectionTitle}
+                        />
                       </div>
                     )}
-                    {/* Round 7 restore: the sector pack can only offer or
-                        assert; a compliance requirement the buyer knows
-                        outright (an auditor named it, a client mandates
-                        it) needs a manual way in. Same click-to-fact
-                        machinery every other slot uses; sector-shaped
-                        options (NHS DSPT, FCA) only appear once the
-                        standing sector matches. */}
-                    <div className="flex items-start gap-3.5 py-[9px]">
-                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Compliance</span>
-                      <button
-                        type="button"
-                        onClick={() => setEdit("compliance")}
-                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e] hover:border-[#110f0d] hover:bg-white hover:text-[#110f0d]"
-                      >
-                        <span className="text-[12px] text-[#a7a4a0]" style={mono}>+</span>
-                        Add a compliance requirement
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-            const slots = TWIN_SLOTS.filter((s) => s.group === g.id);
-            const filled = slots.filter(slotFilled).length;
-            return (
-              <div key={g.id} className="border-t border-[#e3e1de] pb-4 pt-[18px]">
-                <div className="mb-2 flex items-baseline gap-[11px]">
-                  <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                  <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">{g.note}</span>
-                  <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{filled} of {slots.length}</span>
-                </div>
-                <div className="flex flex-col">{slots.map(slotCell)}</div>
-              </div>
-            );
-          })}
 
-          {/* Round 8 (2 Aug 2026, Robert: "the AI Prompt should allow
-              users to add sections and areas to the statement that don't
-              exist in placeholder format"). This IS the placeholder: any
-              sentence that lands nowhere else was already being kept
-              verbatim (the receipts array, unchanged), but only surfaced
-              in the side "See the requirement" sheet under "Your notes" —
-              never as a real, always-visible line on the statement
-              itself. It now renders here as its own group, same shape as
-              every other one, present and dashed even at zero so it reads
-              as an open door rather than something that only appears
-              after the fact. Nothing new is invented: still the buyer's
-              own words, still kept, still feeding the published document
-              exactly as it already did. */}
-          <div className="border-t border-[#e3e1de] pb-4 pt-[18px]">
-            <div className="mb-2 flex items-baseline gap-[11px]">
-              <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>Other requirements</span>
-              <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">anything the statement above has no line for</span>
-              <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
-            </div>
-            <div className="flex flex-col">
-              {receipts.length > 0 ? (
-                receipts.map((r) => (
-                  <div key={r.id} className="flex items-start gap-3.5 border-b border-dotted border-[#e3e1de] py-[9px]">
-                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#66635e] sm:w-[150px]">Noted</span>
-                    <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                      <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>{r.text}</span>
-                      <span className="text-[12px] italic text-[#66635e]">kept verbatim</span>
-                    </div>
-                    <span style={{ ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none", background: "#d9f4d9", color: "#1e4e22" }}>
-                      your words
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => { dropReceipt(r.id); say(`Cleared: “${r.text}”. It will not come back unless you say it yourself.`); }}
-                      className="flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e] hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]"
-                      style={{ ...mono, letterSpacing: "0.07em" }}
-                    >
-                      clear
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="flex items-start gap-3.5 py-[9px]">
-                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Anything else</span>
-                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e]">
-                    Say it in the prompt above. Anything that doesn&apos;t fit a line elsewhere is kept here, word for word.
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+                    {/* ── STATE 3: GOVERNED MCP / EVIDENCE (18 Aug 2026) ── real
+                        project history, never fabricated connections/evidence/receipts
+                        -- see McpEvidencePanel.tsx's own doc comment for exactly what
+                        each of the seven states is grounded in. Only rendered once a
+                        project has actually been saved (an id exists), since history
+                        only exists on a persisted record -- an unsaved draft honestly
+                        has no history to read, not an empty one worth rendering.
+                        Rendered through `phase === "fits"` too, the same correction and
+                        for the same reason as the canvas above: this is provenance
+                        (who did what, when), never a vendor name, so keeping it visible
+                        through states 3-5 preserves the value-building story instead of
+                        breaking it at the exact moment (about to publish, just
+                        published) it matters most. */}
+                    {(phase === "live" || phase === "fits") && started && created?.id && (
+                      <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2">
+                        <McpEvidencePanel history={projectHistory} />
+                      </div>
+                    )}
 
-          {/* Readiness: once weighted completeness passes the threshold,
-              the action into the vendor list, inside the document. */}
-          {readyToFit && (
-            <div className="flex flex-wrap items-center gap-4 border-t border-[#e3e1de] pt-5">
-              <div className="min-w-[240px] flex-1">
-                <div className="text-[16px] font-semibold leading-[1.4]">Complete enough to be priced consistently.</div>
-                <div className="mt-[3px] max-w-[38em] text-[13.5px] leading-[1.55] text-[#66635e]">
-                  {created
-                    ? "The gaps left are ones vendors and service providers can quote around."
-                    : "The gaps left are ones vendors and service providers can quote around. Nothing has left this page."}
-                </div>
-                {/* Mid-funnel sell reinforcement (10 Aug 2026, Robert's
-                    standing goal: "the goal is to get a publish so that last
-                    step must be clear what the user gets out of the
-                    publish"). The sell case previously only lived at the
-                    hero and the publish panel itself; this is the one
-                    natural point in between, readiness just crossing
-                    threshold, so the payoff stays in view on the way there. */}
-                <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#832f00]">
-                  Next: see what publishing unlocks, then publish to get bids, pricing and vetted responses.
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleCommand({ kind: "whoFits" })}
-                className="flex-none cursor-pointer rounded-[4px] border-0 bg-[#c66000] px-[21px] py-3 text-[15px] font-semibold text-[#110f0d] hover:bg-[#ab4700]"
-              >
-                See what publishing unlocks
-              </button>
-            </div>
-          )}
-          </div>
-        </details>
-      )}
+    </>
+  );
 
-      {/* ── LOCKED OUTCOME (was "WHO FITS") ── Living Procurement Canvas
-          Phase 2 correction (14 Aug 2026): the product rule is that
-          publication is the boundary that unlocks a project's matched
-          vendors and service providers, not a UI event -- before
-          publication this panel MUST NOT reveal a project-specific ranked
-          match result: no matched vendor names, rankings, match counts,
-          positions, evidence badges, invitation selections or supplier
-          links (see /api/workspace/fit/route.ts's own doc comment, which
-          now enforces the identical boundary server-side so this panel
-          cannot be bypassed by a differently-shaped client). What remains
-          honest to show pre-publish: the general evaluated-market size,
-          this project's own document readiness, and what remains open --
-          never a result computed against this specific requirement's
-          vendor match. */}
-      {phase === "fits" && (
-        <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-6">
-          <button
-            type="button"
-            onClick={() => { setPhase("live"); scrollToWorkspace(); }}
-            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#66635e] hover:text-[#110f0d]"
+  return (
+    <div
+      className="pd-root"
+      style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', color: "#110f0d" }}
+      onDragOver={(e) => { e.preventDefault(); }}
+      onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
+    >
+      {started ? (
+        /* ============================================================ */
+        /* THE WORKSPACE (a real project exists).                        */
+        /* Reference screenshots 01-05: identity bar, five-station rail, */
+        /* then a two-pane split -- the chat pinned left at a fixed      */
+        /* column, the active station filling the rest.                  */
+        /* ============================================================ */
+        <>
+          <div
+            className="sticky top-[52px] z-30 border-b"
+            style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
           >
-            Back to the statement
-          </button>
-          {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
-              B: this explainer card is a pre-publish sales pitch --
-              "Publish to match this project…", "What publishing
-              unlocks…", and an "Open decisions remaining… before you
-              publish" stat. `phase` stays "fits" forever once a buyer
-              opens this panel (see `setPhase` call sites; nothing reverts
-              it to "live" after a real publish), so gating this on
-              `phase === "fits"` alone left it rendering verbatim ABOVE the
-              "Published. Signed-in vendors…" confirmation below it --
-              two contradictory cards stacked in the same view, as if the
-              already-completed publish were still pending. `!published`
-              is the real "hasn't happened yet" check (see its own
-              declaration); the confirmation card below already carries
-              everything a published state honestly needs (board status,
-              frozen matches/invitations, response status, next action),
-              so this one simply stops rendering once that's true, rather
-              than being replaced by a duplicate. */}
-          {!published && (
-            <div className="overflow-hidden rounded-[4px] border border-[#d3d0cd] bg-[#fefdfc] p-6">
-              <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
-                Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
-              </h2>
-              <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#66635e]">
-                Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
-              </p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
-                  <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
-                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
-                    Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
-                  </div>
-                </div>
-                <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
-                  <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
-                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
-                    Document readiness. {pctNote}
-                  </div>
-                </div>
-                {/* Lifecycle-consistency closure pass, correction C: this
-                    used to read `unansweredGaps.length` -- `brief.openGaps`,
-                    a security-verdict-only gap list that is hard-coded to
-                    `[]` for any non-security (SASE/SD-WAN/SSE network)
-                    engagement, so it read "0" here unconditionally while
-                    Mission Control's `materialDecisionsRemaining` (compiler
-                    openDecisions + earned questions + sector suggestions,
-                    ranked and material-impact-filtered) could genuinely be
-                    7 at the same time -- two different arrays answering
-                    "how many decisions are open," never reconciled. Both
-                    projections now read the SAME `materialDecisionsRemaining`
-                    value Mission Control uses, so the two views can never
-                    disagree again; `unansweredGaps` itself is untouched
-                    (still the real, correct input to the accept-gap
-                    submission loop above in `signAndPublish`, an unrelated
-                    concern from what this stat displays). */}
-                <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
-                  <div className="text-[22px] font-semibold" style={mono}>{materialDecisionsRemaining}</div>
-                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
-                    {materialDecisionsRemaining === 1 ? "Blocking decision" : "Blocking decisions"} remaining. Resolve or accept as a stated assumption before you publish.
-                  </div>
-                </div>
-              </div>
-              <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
-                What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
-              </p>
-            </div>
-          )}
+            <div className="mx-auto w-full max-w-[1400px] px-[26px] py-2.5 lg:px-[42px]">{identityBar}</div>
+          </div>
+          <div className="sticky top-[97px] z-20">
+            <WizardRail current={activeStep} completed={completed} reachable={reachable} onSelect={goToStep} />
+          </div>
 
-          {/* ---- Generate and publish: the only exit (R5), the ruled
-                  organs intact: what carries, what stays private, the
-                  consents verbatim, the identity read-back, the vetting
-                  standard linked so the claim is checkable. ---- */}
-          <div data-publish="1" className="mt-9 border-l-2 pl-4" style={{ scrollMarginTop: "90px", borderColor: "var(--nf-orange, #c66000)" }}>
-            {published ? (
-              <div>
-                <div className="mb-2 max-w-[36em] text-[16px] leading-[1.6]">
-                  Published. Signed-in vendors and service providers can now see your anonymous notice
-                  {published.boardId ? <>: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></> : "."}
-                  {published.invited.length > 0 && <> {cap(numWord(published.invited.length))} {published.invited.length === 1 ? "was" : "were"} invited directly.</>}
-                </div>
-                {/* Lifecycle-consistency closure pass (18 Aug 2026),
-                    correction D: this used to prove publication and
-                    invitation but never said anything about whether a
-                    supplier had actually responded -- a buyer reading
-                    only this card had no way to tell "just published,
-                    nothing back yet" from "vendors have replied." Never
-                    claims "responses received" or offers "Compare
-                    responses" without `responseCount` being a real,
-                    fetched, non-null, positive number (see
-                    `loadResponseStatus`); `responseCount === null` (not
-                    yet checked, or the check failed) renders identically
-                    to a real, confirmed zero -- the safe default never
-                    overclaims. The comparison link goes to RfpBuilder.tsx's
-                    own "Evaluate vendor responses" section, the genuine,
-                    already-correct response-comparison experience built
-                    from real stored records -- this never re-implements
-                    or duplicates that view. */}
-                <div className="mb-3 max-w-[36em] rounded-[4px] border p-3" style={{ borderColor: "#d3d0cd", background: responseCount ? "#d9f4d9" : "#fefdfc" }}>
-                  <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#110f0d" }}>
-                    {responseCount
-                      ? `${responseCount} of ${published.invited.length || responseCount} invited vendor${responseCount === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
-                      : `Published — awaiting supplier responses.${published.invited.length > 0 ? ` ${cap(numWord(published.invited.length))} invited so far.` : ""}`}
-                  </p>
-                  {Boolean(responseCount) && created?.id && (
-                    <p className="m-0 mt-1.5 text-[13px]">
-                      <a className="underline hover:text-[#832f00]" href={`/sase/rfp-builder/${created.id}/review${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
-                        Compare responses
-                      </a>
+          {/* `flex flex-col` below lg, not a plain block: the `order-*`
+              classes on the two panes only take effect inside a flex or
+              grid container, and without them mobile fell back to DOM
+              order and rendered the chat pane ABOVE the station content --
+              so tapping "Decisions" on a phone appeared to do nothing,
+              with the decisions themselves a full screen further down
+              (caught on a real 390px run, not assumed). Station first on
+              mobile, chat first on desktop. */}
+          <div className="mx-auto flex w-full max-w-[1400px] flex-col px-[26px] pb-16 lg:grid lg:grid-cols-[368px_minmax(0,1fr)] lg:items-start lg:gap-0 lg:px-0">
+            {/* LEFT PANE -- constant across all five stations, exactly as
+                every reference screenshot draws it: the buyer can correct
+                or add a sentence from any station without navigating
+                away. Its own scroll container on desktop so a long
+                transcript never pushes the station content down. */}
+            <div
+              className="order-2 min-w-0 lg:order-1 lg:sticky lg:top-[145px] lg:h-[calc(100vh-145px)] lg:overflow-y-auto lg:border-r"
+              style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}
+            >
+              <div className="px-0 pt-5 lg:px-6">
+                <h2
+                  className="m-0 text-[17px] font-semibold leading-[1.3]"
+                  style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "var(--nf-ink-950, #110f0d)" }}
+                >
+                  Describe what you&rsquo;re buying
+                </h2>
+                <p className="m-0 mt-1.5 text-[12.5px] leading-[1.5]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
+                  Write in your own words, from any screen &mdash; each sentence gets checked against the document.
+                </p>
+              </div>
+              {threadBlock}
+              {usefulNextBlock}
+              {sectorChips}
+              {composerBlock}
+            </div>
+
+            {/* RIGHT PANE -- the active station. */}
+            <div className="order-1 min-w-0 lg:order-2">
+              <div className="pt-6 lg:px-8">
+                {activeStep === "describe" && canvasBlock}
+
+
+                {activeStep === "decisions" && (
+                  <DecisionsStep
+                    cards={nextQuestionCards ?? []}
+                    materialDecisionsRemaining={materialDecisionsRemaining}
+                    published={publishedFlag}
+                    sectorSectionTitle={sectorSectionTitle}
+                  />
+                )}
+
+                {activeStep === "review" && (
+                  <>
+                    <h2
+                      className="m-0 text-[27px] font-semibold leading-[1.2]"
+                      style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.02em", color: "var(--nf-ink-950, #110f0d)" }}
+                    >
+                      Review before publishing
+                    </h2>
+                    <p className="m-0 mb-6 mt-2 max-w-[62ch] text-[13.5px] leading-[1.55]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
+                      Suppliers will see everything below. Nothing about price or preferred vendors is shared.
                     </p>
-                  )}
-                </div>
-                {/* Living Procurement Canvas Phase 2 correction (14 Aug
-                    2026): this list now renders ONLY what the publish
-                    response itself returned -- `invited` (the real invited
-                    suppliers `executePublish()` selected) -- never a
-                    freshly recalculated `workspaceFit()` result, which is
-                    exactly what the product rule (and Robert's own
-                    instruction, 14 Aug 2026) requires post-publish: "the
-                    frozen matched and invited suppliers from the published
-                    snapshot, not a freshly recalculated workspace fit."
-                    Round 4 correction (14 Aug 2026), Robert's findings
-                    3-5: `matchedVendors` is now sourced from
-                    `matched_vendor_ids`/`matched_vendors` -- the REAL
-                    `buildShortlist()` selection, the SAME one `invited` is
-                    drawn from -- never `market_report.matched.names` (a
-                    different, simpler `matchSuppliers()` ranking that
-                    could silently omit an invited vendor; proven live
-                    with Fortinet). The "invited" badge below now matches
-                    by SLUG, not name (name equality silently failed for
-                    any vendor whose display name differs even slightly).
-                    A buyer-pinned vendor can still be invited without
-                    being part of Netify's own ranked match (pins are the
-                    buyer's own selection, not a computed match) -- such
-                    entries are rendered in a second "also invited" list
-                    below rather than silently vanishing, matching
-                    Robert's suggestion of a stable union rather than one
-                    list that can quietly drop an invitee. Wording is
-                    conditional on `published.frozen`/`namesFrozen`
-                    (round 4, finding 2): "exactly as published" is only
-                    claimed when a real snapshot backs this read, and
-                    "frozen at the moment of publication" only when the
-                    NAMES themselves are frozen, not resolved from
-                    whatever the live marketplace directory says today. */}
-                {(published.matchedVendors.length > 0 || published.invited.length > 0) && (
-                  <div className="mt-3">
-                    <div className="mb-1 flex items-center justify-between gap-3">
-                      <p className="m-0 text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".12em", color: "var(--nf-orange-strong, #832f00)" }}>Your matches</p>
-                      <ProvenanceTag kind="intel" />
-                    </div>
-                    <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
-                      {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
-                      {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
-                      {cap(numWord(published.invited.length))} invited directly.
-                      {published.frozen && !published.namesFrozen && " Vendor names below are resolved from the current marketplace directory, not frozen at the moment of publication."}
-                    </p>
-                    {published.matchedVendors.length > 0 && (
-                      <ol className="m-0 list-none p-0">
-                        {published.matchedVendors.map((v, i) => {
-                          const inv = published.invited.some((iv) => iv.slug === v.slug);
+                    {canvasBlock}
+                    {/* ── THE LIVING STATEMENT ── one document card, five ruled
+                        sections of labelled rows, from the very first paint (Robert's
+                        ruling: the empty project IS the door): every empty line
+                        visible, dashed and clickable at zero. Change is shown in the
+                        rows; the thread above only ever repeats the diff.
+
+                        Round 13 catch (2 Aug 2026, Robert, a ChatGPT screenshot: "does
+                        this look like ChatGPT? I want it in one section"). Rounds
+                        10-12 closed the seam between the composer and the conversation
+                        thread, but this document was still its own bordered, shadowed
+                        card -- a third box on the page, the exact thing the ChatGPT
+                        reference never does (one continuous canvas, no boxes at all).
+                        Asked directly rather than guessed, since this panel had been
+                        ruled a deliberately distinct "document" earlier in the
+                        project: his answer was to drop the boundary here too. The
+                        card's own background was already #fefdfc, the same value as
+                        the page's #fefdfc (round 12) -- only the border and the drop
+                        shadow were drawing a line that color alone no longer needed
+                        to. Both are gone; the padding stays, so the document still
+                        reads as its own paragraph, just without a frame around it. */}
+                    {/* Phase 3 Stage A correction round (Robert, 14 Aug 2026), item 8:
+                        "do not render two complete procurement documents consecutively
+                        ... There must remain one authoritative record." The Living
+                        Procurement Canvas above is now the primary, always-visible
+                        record; this slot-by-slot editable statement -- every control,
+                        the fact ledger, drop/clear, sector packs -- is completely
+                        UNCHANGED, just moved behind a native, clearly labelled
+                        disclosure rather than rendering as its own second full
+                        document immediately below the canvas. Collapsed by default
+                        (native `<details>`, no JS needed to open/close, keyboard- and
+                        screen-reader-accessible for free). */}
+                    {phase === "live" && (
+                      <details className="mx-auto w-full max-w-[1000px] px-[26px] pb-6 pt-[10px]">
+                        <summary className="cursor-pointer select-none rounded-[4px] px-3 py-2.5 text-[13px] font-medium text-[#83807b] hover:bg-[#e3e1de] hover:text-[#110f0d]" style={mono}>
+                          Project details / edit source facts
+                        </summary>
+                        <div className="px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]">
+                        <div className="text-[10.5px] uppercase text-[var(--nf-orange-strong)]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
+                        <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
+                        <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#66635e]">
+                          This document is the project. It fills in as you talk, every line shows where it came from, and vendors and service providers bid against exactly what is on this page.
+                        </p>
+
+                        {TWIN_GROUPS.map((g) => {
+                          if (g.id === "rules") {
+                            const rows = ruleFacts;
+                            const state = coreFive.sector ? (rows.length ? `${rows.length} applied` : "none yet") : "waiting";
+                            return (
+                              <div key={g.id} className="border-t border-[#e3e1de] pb-4 pt-[18px]">
+                                <div className="mb-2 flex items-baseline gap-[11px]">
+                                  <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
+                                  <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">{g.note}</span>
+                                  <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{state}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                  {rows.length > 0 ? (
+                                    rows.map((f) => {
+                                      const isNew = changedSlots.includes(`rule:${f.id}`);
+                                      return (
+                                        <div
+                                          key={f.id}
+                                          className="flex items-start gap-3.5 border-b border-dotted border-[#e3e1de] py-[9px]"
+                                          style={isNew ? { background: "#fefdfc", boxShadow: "inset 2px 0 0 #c66000", paddingLeft: 10, marginLeft: -10 } : {}}
+                                        >
+                                          <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#66635e] sm:w-[150px]">Applied</span>
+                                          <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                                            <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>
+                                              {COMPLIANCE_LABELS[String(f.value)] ?? String(f.value)}
+                                            </span>
+                                            <span className="text-[12px] italic text-[#66635e]">
+                                              {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
+                                            </span>
+                                          </div>
+                                          <span
+                                            className="flex-none rounded-[4px] px-[5px] py-[3px] text-[9.5px] font-semibold uppercase"
+                                            style={{ ...mono, letterSpacing: "0.07em", ...(f.provenance === "inferred" ? { background: "#ffe3cc", color: "#832f00" } : { background: "#d9f4d9", color: "#1e4e22" }) }}
+                                          >
+                                            {f.provenance === "inferred" ? "from your sector" : "your words"}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => dropRow(f)}
+                                            className="flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e] hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]"
+                                            style={{ ...mono, letterSpacing: "0.07em" }}
+                                          >
+                                            {f.provenance === "inferred" ? "drop" : "clear"}
+                                          </button>
+                                        </div>
+                                      );
+                                    })
+                                  ) : coreFive.sector ? (
+                                    <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#66635e]">
+                                      No asserted rule pack for this sector yet. Any rule you state lands here with your words as its provenance.
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-start gap-3.5 py-[9px]">
+                                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Sector rules</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEdit("sector")}
+                                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e] hover:border-[#110f0d] hover:bg-white hover:text-[#110f0d]"
+                                      >
+                                        <span className="text-[12px] text-[#a7a4a0]" style={mono}>+</span>
+                                        Set your sector to load these
+                                      </button>
+                                    </div>
+                                  )}
+                                  {/* Round 7 restore: the sector pack can only offer or
+                                      assert; a compliance requirement the buyer knows
+                                      outright (an auditor named it, a client mandates
+                                      it) needs a manual way in. Same click-to-fact
+                                      machinery every other slot uses; sector-shaped
+                                      options (NHS DSPT, FCA) only appear once the
+                                      standing sector matches. */}
+                                  <div className="flex items-start gap-3.5 py-[9px]">
+                                    <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Compliance</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEdit("compliance")}
+                                      className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e] hover:border-[#110f0d] hover:bg-white hover:text-[#110f0d]"
+                                    >
+                                      <span className="text-[12px] text-[#a7a4a0]" style={mono}>+</span>
+                                      Add a compliance requirement
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          const slots = TWIN_SLOTS.filter((s) => s.group === g.id);
+                          const filled = slots.filter(slotFilled).length;
                           return (
-                            <li key={`${v.slug}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#e3e1de] py-2.5 first:border-t-0 first:pt-0">
-                              <span className="text-[11px] text-[#66635e]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
-                              <span className="text-[14px] font-semibold text-[#110f0d]">{v.name}</span>
-                              {inv && (
-                                <span className="rounded-[3px] px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}>invited</span>
-                              )}
-                            </li>
+                            <div key={g.id} className="border-t border-[#e3e1de] pb-4 pt-[18px]">
+                              <div className="mb-2 flex items-baseline gap-[11px]">
+                                <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
+                                <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">{g.note}</span>
+                                <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{filled} of {slots.length}</span>
+                              </div>
+                              <div className="flex flex-col">{slots.map(slotCell)}</div>
+                            </div>
                           );
                         })}
-                      </ol>
+
+                        {/* Round 8 (2 Aug 2026, Robert: "the AI Prompt should allow
+                            users to add sections and areas to the statement that don't
+                            exist in placeholder format"). This IS the placeholder: any
+                            sentence that lands nowhere else was already being kept
+                            verbatim (the receipts array, unchanged), but only surfaced
+                            in the side "See the requirement" sheet under "Your notes" —
+                            never as a real, always-visible line on the statement
+                            itself. It now renders here as its own group, same shape as
+                            every other one, present and dashed even at zero so it reads
+                            as an open door rather than something that only appears
+                            after the fact. Nothing new is invented: still the buyer's
+                            own words, still kept, still feeding the published document
+                            exactly as it already did. */}
+                        <div className="border-t border-[#e3e1de] pb-4 pt-[18px]">
+                          <div className="mb-2 flex items-baseline gap-[11px]">
+                            <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>Other requirements</span>
+                            <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">anything the statement above has no line for</span>
+                            <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            {receipts.length > 0 ? (
+                              receipts.map((r) => (
+                                <div key={r.id} className="flex items-start gap-3.5 border-b border-dotted border-[#e3e1de] py-[9px]">
+                                  <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#66635e] sm:w-[150px]">Noted</span>
+                                  <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                                    <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>{r.text}</span>
+                                    <span className="text-[12px] italic text-[#66635e]">kept verbatim</span>
+                                  </div>
+                                  <span style={{ ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none", background: "#d9f4d9", color: "#1e4e22" }}>
+                                    your words
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => { dropReceipt(r.id); say(`Cleared: “${r.text}”. It will not come back unless you say it yourself.`); }}
+                                    className="flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e] hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]"
+                                    style={{ ...mono, letterSpacing: "0.07em" }}
+                                  >
+                                    clear
+                                  </button>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="flex items-start gap-3.5 py-[9px]">
+                                <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Anything else</span>
+                                <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e]">
+                                  Say it in the prompt above. Anything that doesn&apos;t fit a line elsewhere is kept here, word for word.
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Readiness: once weighted completeness passes the threshold,
+                            the action into the vendor list, inside the document. */}
+                        {readyToFit && (
+                          <div className="flex flex-wrap items-center gap-4 border-t border-[#e3e1de] pt-5">
+                            <div className="min-w-[240px] flex-1">
+                              <div className="text-[16px] font-semibold leading-[1.4]">Complete enough to be priced consistently.</div>
+                              <div className="mt-[3px] max-w-[38em] text-[13.5px] leading-[1.55] text-[#66635e]">
+                                {created
+                                  ? "The gaps left are ones vendors and service providers can quote around."
+                                  : "The gaps left are ones vendors and service providers can quote around. Nothing has left this page."}
+                              </div>
+                              {/* Mid-funnel sell reinforcement (10 Aug 2026, Robert's
+                                  standing goal: "the goal is to get a publish so that last
+                                  step must be clear what the user gets out of the
+                                  publish"). The sell case previously only lived at the
+                                  hero and the publish panel itself; this is the one
+                                  natural point in between, readiness just crossing
+                                  threshold, so the payoff stays in view on the way there. */}
+                              <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#832f00]">
+                                Next: see what publishing unlocks, then publish to get bids, pricing and vetted responses.
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCommand({ kind: "whoFits" })}
+                              className="flex-none cursor-pointer rounded-[4px] border-0 bg-[#c66000] px-[21px] py-3 text-[15px] font-semibold text-[#110f0d] hover:bg-[#ab4700]"
+                            >
+                              See what publishing unlocks
+                            </button>
+                          </div>
+                        )}
+                        </div>
+                      </details>
                     )}
-                    {(() => {
-                      const matchedSlugs = new Set(published.matchedVendors.map((v) => v.slug));
-                      const invitedOnly = published.invited.filter((v) => !matchedSlugs.has(v.slug));
-                      if (invitedOnly.length === 0) return null;
-                      return (
-                        <div className="mt-2">
-                          <p className="m-0 mb-1 text-[11px] text-[#66635e]">
-                            Also invited (your own pinned {invitedOnly.length === 1 ? "vendor" : "vendors"}, not part of the ranked match):
-                          </p>
-                          <ol className="m-0 list-none p-0">
-                            {invitedOnly.map((v, i) => (
-                              <li key={`${v.slug}-invited-only-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#e3e1de] py-2 first:border-t-0 first:pt-0">
-                                <span className="text-[14px] font-semibold text-[#110f0d]">{v.name}</span>
-                                <span className="rounded-[3px] px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}>invited</span>
-                              </li>
-                            ))}
-                          </ol>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-                {created?.id && (
-                  <p className="m-0 mt-3 text-[13px] leading-relaxed text-[#1c1a18]">
-                    <a className="underline hover:text-[#832f00]" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
-                      Open your project record
-                    </a>{" "}
-                    to see responses as they arrive.
-                  </p>
-                )}
-              </div>
-            ) : created?.test ? (
-              <div className="max-w-[36em] text-[15px] leading-[1.6] text-[#66635e]">
-                Test position created, id {created.id}. Test positions never touch the live board; drop ?test=1 to publish for real.
-              </div>
-            ) : (
-              <div>
-                {/* Sell block (Robert's ask, 10 Aug 2026, tightened same day
-                    on his "more concise and harder hitting" feedback): the
-                    mechanics/trust copy below this earns confidence, but
-                    nothing on the panel made the case for WHY to publish.
-                    One headline stating exactly what this gets you + a row
-                    of plain benefit chips; the old separate closing line is
-                    folded into the headline so there's one less text block.
-                    No new colours, same tokens as the diagram and chips
-                    elsewhere in this panel. */}
-                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5]" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #110f0d)" }}>
-                  Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson required.
-                </p>
-                <div className="mt-2.5 flex max-w-[36em] flex-wrap gap-1.5">
-                  {["Get bids", "Get pricing", "Get vetted responses", "Send messages", "Request demos"].map((chip) => (
-                    <span
-                      key={chip}
-                      className="rounded-[3px] border px-2.5 py-1 text-[12.5px] font-medium"
-                      style={{ borderColor: "var(--nf-orange-soft-border, #c6600066)", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}
-                    >
-                      {chip}
-                    </span>
-                  ))}
-                </div>
 
-                <div className="mt-4 max-w-[36em] text-[16px] leading-[1.6]">
-                  Publishing lists your project anonymously on the Netify opportunity board and notifies matched vendors. Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted</a> vendors and service providers can view the opportunity in full or respond. Everyone else, including search engines, sees only the anonymous notice and can register to become vetted first.
-                </div>
+                  </>
+                )}
 
-                {/* Publish-mechanics diagram (Robert's ask, 10 Aug 2026): the
-                    board/notify/vetted-view structure stated in prose above,
-                    shown as a shape so it reads in one glance. Same colour
-                    tokens as the rest of this panel; no new palette. */}
-                <div className="my-4 max-w-[38em] rounded-[4px] border p-4 text-[12px] leading-snug" style={{ borderColor: "var(--nf-rule, #e3e1de)", background: "var(--nf-ivory-raised, #e3e1de)" }}>
-                  <div className="mb-2 flex justify-end">
-                    <ProvenanceTag kind="intel" />
-                  </div>
-                  <div className="flex flex-col items-center gap-1.5">
-                    <div className="rounded-[4px] border border-[#e3e1de] bg-white px-3 py-1 font-semibold text-[#1c1a18]">Your project</div>
-                    <div className="text-[#66635e]" style={mono}>publish ↓</div>
-                    <div className="rounded-[4px] border px-3 py-1.5 text-center" style={{ borderColor: "var(--nf-orange, #c66000)", background: "var(--nf-orange-soft, #ffe3cc)" }}>
-                      <p className="m-0 font-semibold" style={{ color: "var(--nf-orange-strong, #832f00)" }}>Opportunity board</p>
-                      <p className="m-0 text-[11px] text-[#83807b]">Anonymous notice: sector, size band. No name, no contact details.</p>
-                    </div>
-                    <div className="grid w-full grid-cols-2 gap-3 pt-1">
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#66635e]" style={mono}>↓ notified</div>
-                        <div className="w-full rounded-[4px] border border-[#e3e1de] bg-white p-2 text-center">
-                          <p className="m-0 font-semibold text-[#1c1a18]">Matched, vetted vendors</p>
-                          <p className="m-0 mt-1 text-[11px] text-[#66635e]">See the opportunity in full. Can respond directly.</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#66635e]" style={mono}>↓ can find it</div>
-                        <div className="w-full rounded-[4px] border border-[#e3e1de] bg-white p-2 text-center">
-                          <p className="m-0 font-semibold text-[#1c1a18]">Everyone else</p>
-                          <p className="m-0 mt-1 text-[11px] text-[#66635e]">Public web, search engines, unvetted vendors. Sees the notice only. Can register to become vetted.</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-[#66635e]" style={mono}>↓</div>
-                    <div className="rounded-[4px] border border-[#e3e1de] bg-white px-3 py-1 text-center font-semibold text-[#1c1a18]">
-                      You choose who gets your contact details, and when
-                    </div>
-                  </div>
-                </div>
-
-                <p className="m-0 mt-2 max-w-[38em] text-[12.5px] leading-relaxed text-[#66635e]">
-                  <span className="font-semibold text-[#1c1a18]">Your project publishes anonymously.</span>{" "}
-                  Nobody browsing Netify, and no search engine, sees your company name or your contact details
-                  {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
-                    ? ` (the notice reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
-                    : ""}
-                  . You choose which of them receive your contact details, and when. Assumptions publish labelled as assumptions; example content never publishes at all.
-                </p>
-                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#66635e]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
-                <p className="m-0 mb-1.5 text-[12.5px] leading-loose">
-                  {[
-                    typeof requirement.estate?.sites === "number"
-                      ? (siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
-                        ? (siteBandLabelFor(requirement.estate.sites) ?? `${requirement.estate.sites} sites`)
-                        : `${requirement.estate.sites} sites`)
-                      : null,
-                    typeof requirement.estate?.users === "number" ? `${requirement.estate.users} users` : null,
-                    buying ? ({ sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>)[buying] ?? buying : null,
-                    opModel === "managed" ? "Fully managed" : opModel === "co_managed" ? "Co-managed" : null,
-                    (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", ")}` : null,
-                    (requirement.constraints?.complianceRequirements ?? []).length ? (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") : null,
-                  ].filter(Boolean).map((chip) => (
-                    <span key={String(chip)} className="mr-1.5 inline-block rounded-[4px] border border-[#e3e1de] bg-white px-2 py-[1px] text-[12.5px] text-[#1c1a18]">{chip}</span>
-                  ))}
-                  <span className="text-[12.5px] text-[#66635e]">
-                    {typeof requirement.estate?.sites === "number" && siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
-                      ? "as written, except the site count: sector plus one region could identify you, so the notice shows the range, and the exact count is seen only after the gate"
-                      : "exactly as written, nothing retyped"}
-                  </span>
-                </p>
-                <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#66635e]">
-                  <span className="font-semibold text-[#83807b]">Stays private:</span> your identity and contacts, your notes,
-                  {unansweredGaps.length > 0 ? ` ${numWord(unansweredGaps.length)} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
-                  {" "}and anything you have dropped from the record.
-                </p>
-                {signLocked && lockLine && (
-                  <p className="m-0 mb-2 text-[13px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>{lockLine}</p>
-                )}
-                <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
-                  <input type="checkbox" checked={consentCreate} onChange={(e) => setConsentCreate(e.target.checked)} className="mt-0.5" />
-                  <span>{securityScope ? CREATE_CONSENT_TEXT : WORKSPACE_AGREEMENT_TEXT}</span>
-                </label>
-                {securityScope && unansweredGaps.length > 0 && (
-                  <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
-                    <input type="checkbox" checked={consentGaps} onChange={(e) => setConsentGaps(e.target.checked)} className="mt-0.5" />
-                    <span>
-                      {ACCEPT_GAP_PREFIX}
-                      {unansweredGaps.map((g) => g.question).join(" ")} Accepted gaps publish as stated assumptions.
-                    </span>
-                  </label>
-                )}
-                {securityScope && (
-                  <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
-                    <input type="checkbox" checked={consentPublish} onChange={(e) => setConsentPublish(e.target.checked)} className="mt-0.5" />
-                    <span>{ENGINE_PUBLISH_CONSENT_TEXT}</span>
-                  </label>
-                )}
-                <button
-                  type="button"
-                  onClick={() => void signAndPublish()}
-                  disabled={signLocked || !consentsOk || Boolean(signStage) || (testMode && !securityScope)}
-                  className="mt-1 cursor-pointer rounded-[4px] border-0 px-[22px] py-[13px] text-[15.5px] font-semibold text-[#110f0d] disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{ background: "var(--nf-orange, #c66000)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nf-orange-strong, #ab4700)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--nf-orange, #c66000)"; }}
-                >
-                  {signStage ?? (testMode ? "Sign · create the test position" : "Generate and publish")}
-                </button>
-                {testMode && !securityScope && (
-                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
-                    Test mode covers the security engine today, and this is a network requirement. Drop <span style={mono}>?test=1</span> from the address to publish it for real.
-                  </p>
-                )}
-                {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
-                {signedIn && sessId && (
-                  sessId.work ? (
-                    <p className="m-0 mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] leading-relaxed text-[#83807b]">
-                      <span>
-                        Publishing as <span className="font-medium text-[#1c1a18]">{sessId.email}</span>
-                        {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
-                      </span>
-                      <ProvenanceTag kind="approved" />
-                    </p>
-                  ) : (
-                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
-                      Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays as it is while you switch.
-                    </p>
-                  )
-                )}
-                {needAuth && (
-                  <div className="mt-2 rounded-[4px] bg-[#fefdfc] p-3">
-                    <p className="m-0 mb-1 text-[12.5px] text-[#66635e]">
-                      One step first: publishing reaches named vendors and service providers, so it needs a verified sign-in. Your position is untouched.
-                    </p>
-                    <SignIn
-                      role="buyer"
-                      prompt="Verify yourself to publish."
-                      onAuthed={() => {
-                        setSignedIn(true);
-                        setNeedAuth(false);
-                        fetch("/sase/api/auth/session")
-                          .then((r) => r.json())
-                          .then((d: { authenticated?: boolean; email?: string; work_address?: boolean; company_hint?: string | null }) => {
-                            setSessId(d?.authenticated ? { email: d.email ?? "", work: Boolean(d.work_address), company: d.company_hint ?? null } : null);
-                          })
-                          .catch(() => {});
-                        void signAndPublish();
+                {activeStep === "publish" && (
+                  <>
+                    {/* The buyer's own board listing (reference screenshot
+                        04-opportunities.png, the card pinned above the live
+                        board). Every value here is real: the title and facts
+                        come from the same compiled document the rest of this
+                        surface reads, and the status chip reports the ACTUAL
+                        publication state — "Draft — not yet published" until a
+                        real publish has happened, never a preview dressed up
+                        as a listing. The live board itself is deliberately not
+                        duplicated here: it is a separate public, SEO-indexed
+                        route with its own data pipeline, and a second in-app
+                        copy could silently drift from what the market actually
+                        sees. The link goes to the real one. */}
+                    <div
+                      className="mb-7 rounded-[4px] border p-5"
+                      style={{
+                        borderColor: published ? "var(--nf-emerald-soft-border, #91bb91)" : "var(--nf-orange-soft-border, #db9f76)",
+                        background: "var(--nf-ivory-raised, #fefdfc)",
                       }}
-                    />
-                  </div>
+                    >
+                      <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
+                        <div className="min-w-0 flex-1">
+                          <h3
+                            className="m-0 text-[17px] font-semibold leading-[1.3]"
+                            style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "var(--nf-ink-950, #110f0d)" }}
+                          >
+                            {canvasDocument.title}
+                          </h3>
+                          <p className="m-0 mt-1 text-[12.5px] leading-[1.5]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
+                            {canvasDocument.summary}
+                          </p>
+                        </div>
+                        <span
+                          className="flex-none rounded-[3px] px-[7px] py-[3px] text-[10px] font-semibold uppercase"
+                          style={{
+                            ...mono,
+                            letterSpacing: "0.06em",
+                            background: published ? "var(--nf-emerald-soft, #d9f4d9)" : "var(--nf-neutral-tag-soft, #e7e4e0)",
+                            color: published ? "var(--nf-emerald, #1e4e22)" : "var(--nf-neutral-tag, #47413a)",
+                          }}
+                        >
+                          {published ? "Open for bids" : "Draft — not yet published"}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+                        <button
+                          type="button"
+                          onClick={() => goToStep("compare")}
+                          disabled={!publishedFlag}
+                          className={`border-0 bg-transparent p-0 text-[12.5px] font-semibold ${publishedFlag ? "cursor-pointer" : "cursor-default"}`}
+                          style={{ color: publishedFlag ? "var(--nf-orange-strong, #832f00)" : "var(--nf-ink-300, #a7a4a0)" }}
+                          title={publishedFlag ? undefined : "Available once this project is published"}
+                        >
+                          See what suppliers see &rarr;
+                        </button>
+                        <a
+                          href={BOARD_LINK.href}
+                          className="text-[12.5px] no-underline hover:underline"
+                          style={{ color: "var(--nf-ink-600, #66635e)" }}
+                        >
+                          Open the live opportunities board
+                        </a>
+                      </div>
+                    </div>
+                    {/* ── LOCKED OUTCOME (was "WHO FITS") ── Living Procurement Canvas
+                        Phase 2 correction (14 Aug 2026): the product rule is that
+                        publication is the boundary that unlocks a project's matched
+                        vendors and service providers, not a UI event -- before
+                        publication this panel MUST NOT reveal a project-specific ranked
+                        match result: no matched vendor names, rankings, match counts,
+                        positions, evidence badges, invitation selections or supplier
+                        links (see /api/workspace/fit/route.ts's own doc comment, which
+                        now enforces the identical boundary server-side so this panel
+                        cannot be bypassed by a differently-shaped client). What remains
+                        honest to show pre-publish: the general evaluated-market size,
+                        this project's own document readiness, and what remains open --
+                        never a result computed against this specific requirement's
+                        vendor match. */}
+                    {phase === "fits" && (
+                      <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-6">
+                        <button
+                          type="button"
+                          onClick={() => { goToStep("review"); scrollToWorkspace(); }}
+                          className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#66635e] hover:text-[#110f0d]"
+                        >
+                          Back to the statement
+                        </button>
+                        {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
+                            B: this explainer card is a pre-publish sales pitch --
+                            "Publish to match this project…", "What publishing
+                            unlocks…", and an "Open decisions remaining… before you
+                            publish" stat. `phase` stays "fits" forever once a buyer
+                            opens this panel (see `setPhase` call sites; nothing reverts
+                            it to "live" after a real publish), so gating this on
+                            `phase === "fits"` alone left it rendering verbatim ABOVE the
+                            "Published. Signed-in vendors…" confirmation below it --
+                            two contradictory cards stacked in the same view, as if the
+                            already-completed publish were still pending. `!published`
+                            is the real "hasn't happened yet" check (see its own
+                            declaration); the confirmation card below already carries
+                            everything a published state honestly needs (board status,
+                            frozen matches/invitations, response status, next action),
+                            so this one simply stops rendering once that's true, rather
+                            than being replaced by a duplicate. */}
+                        {!published && (
+                          <div className="overflow-hidden rounded-[4px] border border-[#d3d0cd] bg-[#fefdfc] p-6">
+                            <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
+                              Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
+                            </h2>
+                            <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#66635e]">
+                              Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
+                            </p>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                              <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
+                                <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
+                                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
+                                  Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
+                                </div>
+                              </div>
+                              <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
+                                <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
+                                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
+                                  Document readiness. {pctNote}
+                                </div>
+                              </div>
+                              {/* Lifecycle-consistency closure pass, correction C: this
+                                  used to read `unansweredGaps.length` -- `brief.openGaps`,
+                                  a security-verdict-only gap list that is hard-coded to
+                                  `[]` for any non-security (SASE/SD-WAN/SSE network)
+                                  engagement, so it read "0" here unconditionally while
+                                  Mission Control's `materialDecisionsRemaining` (compiler
+                                  openDecisions + earned questions + sector suggestions,
+                                  ranked and material-impact-filtered) could genuinely be
+                                  7 at the same time -- two different arrays answering
+                                  "how many decisions are open," never reconciled. Both
+                                  projections now read the SAME `materialDecisionsRemaining`
+                                  value Mission Control uses, so the two views can never
+                                  disagree again; `unansweredGaps` itself is untouched
+                                  (still the real, correct input to the accept-gap
+                                  submission loop above in `signAndPublish`, an unrelated
+                                  concern from what this stat displays). */}
+                              <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
+                                <div className="text-[22px] font-semibold" style={mono}>{materialDecisionsRemaining}</div>
+                                <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
+                                  {materialDecisionsRemaining === 1 ? "Blocking decision" : "Blocking decisions"} remaining. Resolve or accept as a stated assumption before you publish.
+                                </div>
+                              </div>
+                            </div>
+                            <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
+                              What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* ---- Generate and publish: the only exit (R5), the ruled
+                                organs intact: what carries, what stays private, the
+                                consents verbatim, the identity read-back, the vetting
+                                standard linked so the claim is checkable. ---- */}
+                        <div data-publish="1" className="mt-9 border-l-2 pl-4" style={{ scrollMarginTop: "90px", borderColor: "var(--nf-orange, #c66000)" }}>
+                          {published ? (
+                            <div>
+                              <div className="mb-2 max-w-[36em] text-[16px] leading-[1.6]">
+                                Published. Signed-in vendors and service providers can now see your anonymous notice
+                                {published.boardId ? <>: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></> : "."}
+                                {published.invited.length > 0 && <> {cap(numWord(published.invited.length))} {published.invited.length === 1 ? "was" : "were"} invited directly.</>}
+                              </div>
+                              {/* Lifecycle-consistency closure pass (18 Aug 2026),
+                                  correction D: this used to prove publication and
+                                  invitation but never said anything about whether a
+                                  supplier had actually responded -- a buyer reading
+                                  only this card had no way to tell "just published,
+                                  nothing back yet" from "vendors have replied." Never
+                                  claims "responses received" or offers "Compare
+                                  responses" without `responseCount` being a real,
+                                  fetched, non-null, positive number (see
+                                  `loadResponseStatus`); `responseCount === null` (not
+                                  yet checked, or the check failed) renders identically
+                                  to a real, confirmed zero -- the safe default never
+                                  overclaims. The comparison link goes to RfpBuilder.tsx's
+                                  own "Evaluate vendor responses" section, the genuine,
+                                  already-correct response-comparison experience built
+                                  from real stored records -- this never re-implements
+                                  or duplicates that view. */}
+                              <div className="mb-3 max-w-[36em] rounded-[4px] border p-3" style={{ borderColor: "#d3d0cd", background: responseCount ? "#d9f4d9" : "#fefdfc" }}>
+                                <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#110f0d" }}>
+                                  {responseCount
+                                    ? `${responseCount} of ${published.invited.length || responseCount} invited vendor${responseCount === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
+                                    : `Published — awaiting supplier responses.${published.invited.length > 0 ? ` ${cap(numWord(published.invited.length))} invited so far.` : ""}`}
+                                </p>
+                                {Boolean(responseCount) && created?.id && (
+                                  <p className="m-0 mt-1.5 text-[13px]">
+                                    <a className="underline hover:text-[#832f00]" href={`/sase/rfp-builder/${created.id}/review${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
+                                      Compare responses
+                                    </a>
+                                  </p>
+                                )}
+                              </div>
+                              {/* Living Procurement Canvas Phase 2 correction (14 Aug
+                                  2026): this list now renders ONLY what the publish
+                                  response itself returned -- `invited` (the real invited
+                                  suppliers `executePublish()` selected) -- never a
+                                  freshly recalculated `workspaceFit()` result, which is
+                                  exactly what the product rule (and Robert's own
+                                  instruction, 14 Aug 2026) requires post-publish: "the
+                                  frozen matched and invited suppliers from the published
+                                  snapshot, not a freshly recalculated workspace fit."
+                                  Round 4 correction (14 Aug 2026), Robert's findings
+                                  3-5: `matchedVendors` is now sourced from
+                                  `matched_vendor_ids`/`matched_vendors` -- the REAL
+                                  `buildShortlist()` selection, the SAME one `invited` is
+                                  drawn from -- never `market_report.matched.names` (a
+                                  different, simpler `matchSuppliers()` ranking that
+                                  could silently omit an invited vendor; proven live
+                                  with Fortinet). The "invited" badge below now matches
+                                  by SLUG, not name (name equality silently failed for
+                                  any vendor whose display name differs even slightly).
+                                  A buyer-pinned vendor can still be invited without
+                                  being part of Netify's own ranked match (pins are the
+                                  buyer's own selection, not a computed match) -- such
+                                  entries are rendered in a second "also invited" list
+                                  below rather than silently vanishing, matching
+                                  Robert's suggestion of a stable union rather than one
+                                  list that can quietly drop an invitee. Wording is
+                                  conditional on `published.frozen`/`namesFrozen`
+                                  (round 4, finding 2): "exactly as published" is only
+                                  claimed when a real snapshot backs this read, and
+                                  "frozen at the moment of publication" only when the
+                                  NAMES themselves are frozen, not resolved from
+                                  whatever the live marketplace directory says today. */}
+                              {(published.matchedVendors.length > 0 || published.invited.length > 0) && (
+                                <div className="mt-3">
+                                  <div className="mb-1 flex items-center justify-between gap-3">
+                                    <p className="m-0 text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".12em", color: "var(--nf-orange-strong, #832f00)" }}>Your matches</p>
+                                    <ProvenanceTag kind="intel" />
+                                  </div>
+                                  <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
+                                    {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
+                                    {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
+                                    {cap(numWord(published.invited.length))} invited directly.
+                                    {published.frozen && !published.namesFrozen && " Vendor names below are resolved from the current marketplace directory, not frozen at the moment of publication."}
+                                  </p>
+                                  {published.matchedVendors.length > 0 && (
+                                    <ol className="m-0 list-none p-0">
+                                      {published.matchedVendors.map((v, i) => {
+                                        const inv = published.invited.some((iv) => iv.slug === v.slug);
+                                        return (
+                                          <li key={`${v.slug}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#e3e1de] py-2.5 first:border-t-0 first:pt-0">
+                                            <span className="text-[11px] text-[#66635e]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
+                                            <span className="text-[14px] font-semibold text-[#110f0d]">{v.name}</span>
+                                            {inv && (
+                                              <span className="rounded-[3px] px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}>invited</span>
+                                            )}
+                                          </li>
+                                        );
+                                      })}
+                                    </ol>
+                                  )}
+                                  {(() => {
+                                    const matchedSlugs = new Set(published.matchedVendors.map((v) => v.slug));
+                                    const invitedOnly = published.invited.filter((v) => !matchedSlugs.has(v.slug));
+                                    if (invitedOnly.length === 0) return null;
+                                    return (
+                                      <div className="mt-2">
+                                        <p className="m-0 mb-1 text-[11px] text-[#66635e]">
+                                          Also invited (your own pinned {invitedOnly.length === 1 ? "vendor" : "vendors"}, not part of the ranked match):
+                                        </p>
+                                        <ol className="m-0 list-none p-0">
+                                          {invitedOnly.map((v, i) => (
+                                            <li key={`${v.slug}-invited-only-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#e3e1de] py-2 first:border-t-0 first:pt-0">
+                                              <span className="text-[14px] font-semibold text-[#110f0d]">{v.name}</span>
+                                              <span className="rounded-[3px] px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}>invited</span>
+                                            </li>
+                                          ))}
+                                        </ol>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              )}
+                              {created?.id && (
+                                <p className="m-0 mt-3 text-[13px] leading-relaxed text-[#1c1a18]">
+                                  <a className="underline hover:text-[#832f00]" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
+                                    Open your project record
+                                  </a>{" "}
+                                  to see responses as they arrive.
+                                </p>
+                              )}
+                            </div>
+                          ) : created?.test ? (
+                            <div className="max-w-[36em] text-[15px] leading-[1.6] text-[#66635e]">
+                              Test position created, id {created.id}. Test positions never touch the live board; drop ?test=1 to publish for real.
+                            </div>
+                          ) : (
+                            <div>
+                              {/* Sell block (Robert's ask, 10 Aug 2026, tightened same day
+                                  on his "more concise and harder hitting" feedback): the
+                                  mechanics/trust copy below this earns confidence, but
+                                  nothing on the panel made the case for WHY to publish.
+                                  One headline stating exactly what this gets you + a row
+                                  of plain benefit chips; the old separate closing line is
+                                  folded into the headline so there's one less text block.
+                                  No new colours, same tokens as the diagram and chips
+                                  elsewhere in this panel. */}
+                              <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5]" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #110f0d)" }}>
+                                Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson required.
+                              </p>
+                              <div className="mt-2.5 flex max-w-[36em] flex-wrap gap-1.5">
+                                {["Get bids", "Get pricing", "Get vetted responses", "Send messages", "Request demos"].map((chip) => (
+                                  <span
+                                    key={chip}
+                                    className="rounded-[3px] border px-2.5 py-1 text-[12.5px] font-medium"
+                                    style={{ borderColor: "var(--nf-orange-soft-border, #c6600066)", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}
+                                  >
+                                    {chip}
+                                  </span>
+                                ))}
+                              </div>
+
+                              <div className="mt-4 max-w-[36em] text-[16px] leading-[1.6]">
+                                Publishing lists your project anonymously on the Netify opportunity board and notifies matched vendors. Only <a href="/sase/supplier-vetting-standard/" className="underline" target="_blank" rel="noreferrer">vetted</a> vendors and service providers can view the opportunity in full or respond. Everyone else, including search engines, sees only the anonymous notice and can register to become vetted first.
+                              </div>
+
+                              {/* Publish-mechanics diagram (Robert's ask, 10 Aug 2026): the
+                                  board/notify/vetted-view structure stated in prose above,
+                                  shown as a shape so it reads in one glance. Same colour
+                                  tokens as the rest of this panel; no new palette. */}
+                              <div className="my-4 max-w-[38em] rounded-[4px] border p-4 text-[12px] leading-snug" style={{ borderColor: "var(--nf-rule, #e3e1de)", background: "var(--nf-ivory-raised, #e3e1de)" }}>
+                                <div className="mb-2 flex justify-end">
+                                  <ProvenanceTag kind="intel" />
+                                </div>
+                                <div className="flex flex-col items-center gap-1.5">
+                                  <div className="rounded-[4px] border border-[#e3e1de] bg-white px-3 py-1 font-semibold text-[#1c1a18]">Your project</div>
+                                  <div className="text-[#66635e]" style={mono}>publish ↓</div>
+                                  <div className="rounded-[4px] border px-3 py-1.5 text-center" style={{ borderColor: "var(--nf-orange, #c66000)", background: "var(--nf-orange-soft, #ffe3cc)" }}>
+                                    <p className="m-0 font-semibold" style={{ color: "var(--nf-orange-strong, #832f00)" }}>Opportunity board</p>
+                                    <p className="m-0 text-[11px] text-[#83807b]">Anonymous notice: sector, size band. No name, no contact details.</p>
+                                  </div>
+                                  <div className="grid w-full grid-cols-2 gap-3 pt-1">
+                                    <div className="flex flex-col items-center gap-1">
+                                      <div className="text-[#66635e]" style={mono}>↓ notified</div>
+                                      <div className="w-full rounded-[4px] border border-[#e3e1de] bg-white p-2 text-center">
+                                        <p className="m-0 font-semibold text-[#1c1a18]">Matched, vetted vendors</p>
+                                        <p className="m-0 mt-1 text-[11px] text-[#66635e]">See the opportunity in full. Can respond directly.</p>
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-1">
+                                      <div className="text-[#66635e]" style={mono}>↓ can find it</div>
+                                      <div className="w-full rounded-[4px] border border-[#e3e1de] bg-white p-2 text-center">
+                                        <p className="m-0 font-semibold text-[#1c1a18]">Everyone else</p>
+                                        <p className="m-0 mt-1 text-[11px] text-[#66635e]">Public web, search engines, unvetted vendors. Sees the notice only. Can register to become vetted.</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-[#66635e]" style={mono}>↓</div>
+                                  <div className="rounded-[4px] border border-[#e3e1de] bg-white px-3 py-1 text-center font-semibold text-[#1c1a18]">
+                                    You choose who gets your contact details, and when
+                                  </div>
+                                </div>
+                              </div>
+
+                              <p className="m-0 mt-2 max-w-[38em] text-[12.5px] leading-relaxed text-[#66635e]">
+                                <span className="font-semibold text-[#1c1a18]">Your project publishes anonymously.</span>{" "}
+                                Nobody browsing Netify, and no search engine, sees your company name or your contact details
+                                {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
+                                  ? ` (the notice reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
+                                  : ""}
+                                . You choose which of them receive your contact details, and when. Assumptions publish labelled as assumptions; example content never publishes at all.
+                              </p>
+                              <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#66635e]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
+                              <p className="m-0 mb-1.5 text-[12.5px] leading-loose">
+                                {[
+                                  typeof requirement.estate?.sites === "number"
+                                    ? (siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
+                                      ? (siteBandLabelFor(requirement.estate.sites) ?? `${requirement.estate.sites} sites`)
+                                      : `${requirement.estate.sites} sites`)
+                                    : null,
+                                  typeof requirement.estate?.users === "number" ? `${requirement.estate.users} users` : null,
+                                  buying ? ({ sase: "SASE", sdwan: "SD-WAN", sse: "SSE", managed_security: "managed security" } as Record<string, string>)[buying] ?? buying : null,
+                                  opModel === "managed" ? "Fully managed" : opModel === "co_managed" ? "Co-managed" : null,
+                                  (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", ")}` : null,
+                                  (requirement.constraints?.complianceRequirements ?? []).length ? (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") : null,
+                                ].filter(Boolean).map((chip) => (
+                                  <span key={String(chip)} className="mr-1.5 inline-block rounded-[4px] border border-[#e3e1de] bg-white px-2 py-[1px] text-[12.5px] text-[#1c1a18]">{chip}</span>
+                                ))}
+                                <span className="text-[12.5px] text-[#66635e]">
+                                  {typeof requirement.estate?.sites === "number" && siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
+                                    ? "as written, except the site count: sector plus one region could identify you, so the notice shows the range, and the exact count is seen only after the gate"
+                                    : "exactly as written, nothing retyped"}
+                                </span>
+                              </p>
+                              <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#66635e]">
+                                <span className="font-semibold text-[#83807b]">Stays private:</span> your identity and contacts, your notes,
+                                {unansweredGaps.length > 0 ? ` ${numWord(unansweredGaps.length)} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
+                                {" "}and anything you have dropped from the record.
+                              </p>
+                              {signLocked && lockLine && (
+                                <p className="m-0 mb-2 text-[13px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>{lockLine}</p>
+                              )}
+                              <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
+                                <input type="checkbox" checked={consentCreate} onChange={(e) => setConsentCreate(e.target.checked)} className="mt-0.5" />
+                                <span>{securityScope ? CREATE_CONSENT_TEXT : WORKSPACE_AGREEMENT_TEXT}</span>
+                              </label>
+                              {securityScope && unansweredGaps.length > 0 && (
+                                <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
+                                  <input type="checkbox" checked={consentGaps} onChange={(e) => setConsentGaps(e.target.checked)} className="mt-0.5" />
+                                  <span>
+                                    {ACCEPT_GAP_PREFIX}
+                                    {unansweredGaps.map((g) => g.question).join(" ")} Accepted gaps publish as stated assumptions.
+                                  </span>
+                                </label>
+                              )}
+                              {securityScope && (
+                                <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
+                                  <input type="checkbox" checked={consentPublish} onChange={(e) => setConsentPublish(e.target.checked)} className="mt-0.5" />
+                                  <span>{ENGINE_PUBLISH_CONSENT_TEXT}</span>
+                                </label>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => void signAndPublish()}
+                                disabled={signLocked || !consentsOk || Boolean(signStage) || (testMode && !securityScope)}
+                                className="mt-1 cursor-pointer rounded-[4px] border-0 px-[22px] py-[13px] text-[15.5px] font-semibold text-[#110f0d] disabled:cursor-not-allowed disabled:opacity-40"
+                                style={{ background: "var(--nf-orange, #c66000)" }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nf-orange-strong, #ab4700)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "var(--nf-orange, #c66000)"; }}
+                              >
+                                {signStage ?? (testMode ? "Sign · create the test position" : "Generate and publish")}
+                              </button>
+                              {testMode && !securityScope && (
+                                <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
+                                  Test mode covers the security engine today, and this is a network requirement. Drop <span style={mono}>?test=1</span> from the address to publish it for real.
+                                </p>
+                              )}
+                              {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
+                              {signedIn && sessId && (
+                                sessId.work ? (
+                                  <p className="m-0 mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] leading-relaxed text-[#83807b]">
+                                    <span>
+                                      Publishing as <span className="font-medium text-[#1c1a18]">{sessId.email}</span>
+                                      {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
+                                    </span>
+                                    <ProvenanceTag kind="approved" />
+                                  </p>
+                                ) : (
+                                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
+                                    Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays as it is while you switch.
+                                  </p>
+                                )
+                              )}
+                              {needAuth && (
+                                <div className="mt-2 rounded-[4px] bg-[#fefdfc] p-3">
+                                  <p className="m-0 mb-1 text-[12.5px] text-[#66635e]">
+                                    One step first: publishing reaches named vendors and service providers, so it needs a verified sign-in. Your position is untouched.
+                                  </p>
+                                  <SignIn
+                                    role="buyer"
+                                    prompt="Verify yourself to publish."
+                                    onAuthed={() => {
+                                      setSignedIn(true);
+                                      setNeedAuth(false);
+                                      fetch("/sase/api/auth/session")
+                                        .then((r) => r.json())
+                                        .then((d: { authenticated?: boolean; email?: string; work_address?: boolean; company_hint?: string | null }) => {
+                                          setSessId(d?.authenticated ? { email: d.email ?? "", work: Boolean(d.work_address), company: d.company_hint ?? null } : null);
+                                        })
+                                        .catch(() => {});
+                                      void signAndPublish();
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  </>
+                )}
+
+                {activeStep === "compare" && (
+                  <>
+                    <span
+                      style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--nf-orange-strong, #832f00)", fontWeight: 700 }}
+                    >
+                      Supplier-facing preview &mdash; not what your team sees
+                    </span>
+                    <h2
+                      className="m-0 mt-2.5 text-[27px] font-semibold leading-[1.2]"
+                      style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.02em", color: "var(--nf-ink-950, #110f0d)" }}
+                    >
+                      {docTitle}
+                    </h2>
+                    <p className="m-0 mt-2 max-w-[62ch] text-[13.5px] leading-[1.55]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
+                      {responseCount
+                        ? `${responseCount} of ${published?.invited.length ?? 0} invited vendor${(published?.invited.length ?? 0) === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
+                        : "Published — awaiting supplier responses. This is exactly what a vendor is asked to answer against."}
+                    </p>
+                    {/* Station 5 renders the SAME LivingProcurementCanvas the
+                        Describe station does, with its view pinned to the
+                        supplier pack -- the real "what suppliers will be asked"
+                        projection (SupplierPackView) this codebase already
+                        owns, never a second, separately-built preview that
+                        could drift from what actually publishes. `onViewChange`
+                        still works, so a buyer can flip to Evaluation from
+                        here exactly as before. */}
+                    <div className="mt-5">
+                      <LivingProcurementCanvas
+                        document={canvasDocument}
+                        view={procurementView === "document" ? "supplier" : procurementView}
+                        onViewChange={setProcurementView}
+                        factsKept={live.length}
+                        factsStruck={Math.max(0, facts.length - live.length)}
+                        sourceTurnCount={sourceTurns.length}
+                        nextQuestionCards={undefined}
+                        outline={sectionOutline}
+                        materialDecisionsRemaining={materialDecisionsRemaining}
+                        acceptedSuggestionCards={acceptedSuggestionCards}
+                        acceptedSuggestionsTitle={sectorSectionTitle}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        </>
+      ) : (
+        /* ============================================================ */
+        /* THE DOOR (nothing stated yet).                                */
+        /* Deliberately NOT the reference's shell: every one of the five */
+        /* screenshots shows a project already in flight, and this same  */
+        /* route is netify.co.uk's public apex -- its H1, promise copy,  */
+        /* journey strip and FAQ carry the site's whole EEAT/speakable   */
+        /* surface (see (workspace)/workspace/page.tsx's own schemas).   */
+        /* Replacing them with an empty wizard would have silently cost  */
+        /* the homepage its indexable content to satisfy a mockup that   */
+        /* never depicted this state. The shell takes over the instant a */
+        /* real fact lands, which is exactly what the reference shows.   */
+        /* ============================================================ */
+        <>
+          <div
+            className="sticky z-30"
+            style={{ top: 52, background: "#fefdfc" }}
+          >
+            <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">{understandingBand}</div>
+          </div>
+          {composerBlock}
+          {sectorChips}
+          <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-16 lg:px-[42px]">
+            {/* Until the first real fact lands, the page's journey strip and
+                capability block sit beneath the empty project; the working
+                surface never carries them. */}
+            {phase === "live" && !started && afterPrompt}
+            {/* ── THE CONSTELLATION ── restored 1 Aug 2026. R1b (30 Jul,
+                Robert's half-a-coke rule): distance is fit, and a ranked view
+                is the half that generates at publish, so it renders here, at
+                the bottom of the page, once the notice is live and not
+                before. Nothing is hidden behind a padlock; it simply does not
+                exist yet. */}
+            <ConstellationScene
+              market={market}
+              fit={fit}
+              published={published ? { invited: published.invited.map((v) => v.slug) } : null}
+              buying={buying}
+              added={added}
+              namedSlugs={namedSlugs}
+              started={started}
+              // Living Procurement Canvas Phase 2 correction (14 Aug 2026): the
+              // "kept/ranked" signal the Constellation positions vendors by is
+              // now the REAL, frozen invited-vendor slugs from the publish
+              // response -- the same "matched and invited from the published
+              // snapshot" data the rest of the post-publish panel reads --
+              // never a live, still-recomputing workspaceFit() result (which
+              // this used to be, via the now-retired keptFits/fitSlugs).
+              fitSlugs={published?.invited.map((v) => v.slug) ?? []}
+            />
+          </div>
+        </>
       )}
 
-      {/* Until the first real fact lands, the page's journey strip and
-          capability block sit beneath the empty project; the working
-          surface never carries them. */}
-      {phase === "live" && !started && afterPrompt}
-
-      {/* ── THE CONSTELLATION ── restored 1 Aug 2026. R1b (30 Jul,
-          Robert's half-a-coke rule): distance is fit, and a ranked view
-          is the half that generates at publish, so it renders here, at
-          the bottom of the page, once the notice is live and not
-          before. Nothing is hidden behind a padlock; it simply does not
-          exist yet. */}
-      <ConstellationScene
-        market={market}
-        fit={fit}
-        published={published ? { invited: published.invited.map((v) => v.slug) } : null}
-        buying={buying}
-        added={added}
-        namedSlugs={namedSlugs}
-        started={started}
-        // Living Procurement Canvas Phase 2 correction (14 Aug 2026): the
-        // "kept/ranked" signal the Constellation positions vendors by is
-        // now the REAL, frozen invited-vendor slugs from the publish
-        // response -- the same "matched and invited from the published
-        // snapshot" data the rest of the post-publish panel reads --
-        // never a live, still-recomputing workspaceFit() result (which
-        // this used to be, via the now-retired keptFits/fitSlugs).
-        fitSlugs={published?.invited.map((v) => v.slug) ?? []}
-      />
-      </div>
-      </div>
       {/* ↑ closes the 2030 shell reset's document/mission-rail grid opened
           above THE THREAD. Everything below is a full-screen overlay
           (fixed inset-0), so it deliberately sits outside the grid. */}
@@ -5150,3 +5240,4 @@ export default function ProjectDesk({
     </div>
   );
 }
+
