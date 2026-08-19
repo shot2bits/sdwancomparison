@@ -154,8 +154,19 @@ export default function LivingProcurementCanvas({
   };
 
   return (
-    <section aria-label="Living procurement document" className="border-t border-[#e3e1de] pt-[22px]">
-      <div className="flex flex-wrap items-start justify-between gap-5">
+    <section aria-label="Living procurement document">
+      {/* Structural pass (19 Aug 2026, Robert's "UI mockups request"
+          handoff bundle): the architecture twin LEADS this pane. Every
+          reference screenshot of the Describe station puts it first --
+          it is the one surface that shows a buyer, at a glance, that the
+          product understood their sentence -- where it previously sat
+          buried inside the "Living document" tab below the outline, the
+          stat tiles and the clause list. Same component, same real
+          `document.architecture`, moved not rebuilt. */}
+      <div className="mb-7">
+        <ProcurementArchitecture architecture={document.architecture} deltaCaption={hasChange ? architectureDeltaCaption(document) : null} />
+      </div>
+      <div className="flex flex-wrap items-start justify-between gap-5 border-t border-[#e3e1de] pt-[22px]">
         <div className="min-w-0 flex-1">
           <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--nf-orange, #832f00)", fontWeight: 600 }}>
             Living procurement document · v{document.version}
@@ -246,8 +257,6 @@ export default function LivingProcurementCanvas({
         <AcceptedSuggestions cards={acceptedSuggestionCards} title={acceptedSuggestionsTitle ?? "Netify suggestions"} />
       )}
 
-      {outline && outline.length > 0 && <SectionOutline rows={outline} />}
-
       {/* Lifecycle-consistency closure pass (18 Aug 2026), correction C:
           this was labelled "Open decisions" -- the SAME word Mission
           Control uses for `materialDecisionsRemaining` (compiler
@@ -269,6 +278,12 @@ export default function LivingProcurementCanvas({
         <StatTile label="Pass/fail gates" value={document.counts.gates} />
         <StatTile label="Document gaps" value={document.counts.decisions} warn={document.counts.decisions > 0} />
       </div>
+
+      {/* Structural pass (19 Aug 2026): the outline now follows the stat
+          row rather than preceding it, matching the reference's own
+          Describe/Review ordering (summary figures, then the section
+          list they summarise). Same rows, same states, same component. */}
+      {outline && outline.length > 0 && <SectionOutline rows={outline} />}
 
       <div role="tablist" aria-label="Document projection" className="mt-7 flex gap-1 overflow-x-auto border-b border-[#e3e1de]" style={{ scrollbarWidth: "none" }}>
         {(
@@ -300,7 +315,6 @@ export default function LivingProcurementCanvas({
       <div id={panelId(view)} role="tabpanel" aria-labelledby={tabId(view)} tabIndex={0} className="pt-2">
         {view === "document" && (
           <>
-            <ProcurementArchitecture architecture={document.architecture} deltaCaption={hasChange ? architectureDeltaCaption(document) : null} />
             <ProcurementClauseList clauses={document.clauses} changedClauseIds={changedClauseIds} />
             <OpenDecisions decisions={document.openDecisions} />
           </>

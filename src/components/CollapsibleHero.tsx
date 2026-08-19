@@ -78,12 +78,25 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
           {eyebrow}
         </p>
       )}
+      {/* Structural pass (19 Aug 2026, Robert's "UI mockups request"
+          handoff bundle): post-start, the H1 is now VISUALLY hidden
+          outright rather than shrunk to a 16px line. Every reference
+          screenshot shows the workspace carrying no marketing headline
+          at all — the top bar's project identity is the only title a
+          started project has — and the leftover 16px line read as
+          exactly the "huge marketing landing page" residue the
+          Constitution's own State-0 rule exists to remove.
+          `id="page-h1"` and its text stay in the DOM, unchanged and
+          unconditional, because the speakable schema's `cssSelector`
+          (structured-data.ts) and the site's h1-id audit
+          (scripts/full-audit.py) both read it on this route — sr-only
+          is a visual change, not a removal, so neither is affected. */}
       <h1
         id="page-h1"
-        className="mx-auto max-w-[1150px] text-center"
+        className={compact ? "sr-only" : "mx-auto max-w-[1150px] text-center"}
         style={
           compact
-            ? { fontFamily: "var(--nf-font-serif)", fontSize: "16px", lineHeight: 1.3, fontWeight: 650, letterSpacing: "-0.01em", color: "#110f0d", margin: "0 auto 6px", transition: "font-size 220ms ease, margin 220ms ease" }
+            ? undefined
             : { fontFamily: "var(--nf-font-serif)", fontSize: "clamp(30px, 1.6vw + 22px, 42px)", lineHeight: 1.12, fontWeight: 650, letterSpacing: "-0.015em", color: "#110f0d", margin: "0 auto 14px", transition: "font-size 220ms ease, margin 220ms ease" }
         }
       >

@@ -63,32 +63,35 @@ function main() {
   /* A. Post-publication Mission Control never says "before publish".   */
   /* ================================================================ */
   {
-    // Fixture 1 (draft state still says "before publish"): the FALSE
-    // branch of the new `published ? ... : ...` heading still produces
-    // the original, unchanged pre-publish string.
+    /* Superseded 19 Aug 2026 (structural pass, Robert's "UI mockups
+       request" handoff bundle): the dark Mission Control rail these
+       fixtures were written against is retired -- decisions are their own
+       full-pane station now (DecisionsStep.tsx). The GUARANTEE is
+       unchanged and still the whole point of this section: a published
+       project must never be told it has work to do "before publish". Only
+       the file that owns the heading moved, so the assertions follow it.
+       The pre-publish wording additionally picked up the reference's own
+       phrasing ("...before this can be published") while keeping the same
+       real `materialDecisionsRemaining` count in front of it. */
+    const decisions = src("src/components/procurement/DecisionsStep.tsx");
     record(
-      /`\$\{materialDecisionsRemaining\} decision\$\{materialDecisionsRemaining === 1 \? "" : "s"\} before publish`/.test(desk),
-      "1 (draft): Mission Control's pre-publish branch still renders \"N decision(s) before publish\" verbatim, unchanged",
+      /`\$\{materialDecisionsRemaining\} decision\$\{materialDecisionsRemaining === 1 \? "" : "s"\} before this can be published`/.test(decisions),
+      "1 (draft): the Decisions station's pre-publish branch renders the real \"N decision(s) before this can be published\" count",
       "",
     );
-    // Fixture 2 (published state never says "before publish"): the
-    // heading is now gated on `published` FIRST, and the published-true
-    // branch contains no "before publish" substring anywhere.
-    const headingBlock = desk.match(/<h2 className="mb-0 mt-1\.5[\s\S]{0,700}?<\/h2>/);
-    record(Boolean(headingBlock), "A setup: Mission Control's <h2> heading block was located for inspection", "");
+    const headingBlock = decisions.match(/<h2\b[\s\S]{0,1400}?<\/h2>/);
+    record(Boolean(headingBlock), "A setup: the Decisions station's <h2> heading block was located for inspection", "");
     if (headingBlock) {
       const publishedBranch = headingBlock[0].match(/\{published\s*\?([\s\S]*?):\s*materialDecisionsRemaining/);
       record(Boolean(publishedBranch), "A setup: the heading's `published ? ... : ...` branch structure was located", "");
       if (publishedBranch) {
-        record(!/before publish/i.test(publishedBranch[1]), "2 (published): Mission Control's published-true branch never contains the string \"before publish\"", publishedBranch[1].trim());
+        record(!/before publish/i.test(publishedBranch[1]), "2 (published): the published-true branch never contains the string \"before publish\"", publishedBranch[1].trim());
         record(/Project published/.test(publishedBranch[1]), "2 (published): the published-true branch says \"Project published\"", "");
         record(/optional refinement/i.test(publishedBranch[1]), "2 (published): remaining decisions after publish are labelled \"optional refinement(s)\", never blockers", "");
       }
     }
-    // The published-true body copy (just below the heading) also never
-    // frames remaining cards as blocking once published.
-    const bodyCopyBlock = desk.match(/\{published\s*\?\s*"Publication is already complete[\s\S]{0,50}/);
-    record(Boolean(bodyCopyBlock), "2 (published): Mission Control's body copy has its own published-aware branch (\"Publication is already complete...\")", "");
+    const bodyCopyBlock = decisions.match(/\{published\s*\?\s*"Publication is already complete[\s\S]{0,50}/);
+    record(Boolean(bodyCopyBlock), "2 (published): the Decisions station's body copy has its own published-aware branch (\"Publication is already complete...\")", "");
   }
 
   /* ================================================================ */
@@ -148,11 +151,23 @@ function main() {
       "",
     );
     // Fixture 5: optional refinements never masquerade as blockers --
-    // once published, EVERY remaining card (even ones classified
-    // material pre-publish) gets the "Optional refinements" label, since
-    // nothing blocks anything post-publish.
-    record(/\{\(published \|\| !materialDecisionsRemaining\) && \(/.test(desk),
-      "5: the \"Optional refinements\" label now shows whenever `published` is true, regardless of `materialDecisionsRemaining`'s own pre-publish material/non-material split -- post-publish, nothing left is a blocker",
+    // once published, nothing remaining can block anything, whatever its
+    // pre-publish material/non-material classification was.
+    //
+    // Superseded 19 Aug 2026 (structural pass): the rail's group-level
+    // "Optional refinements" heading is gone with the rail. The same
+    // guarantee is now carried by the Decisions station's own heading and
+    // body copy, both of which branch on `published` FIRST (asserted in
+    // section A above) -- and, more strongly than the old label managed,
+    // by per-card chips computed from the SAME MATERIAL_IMPACTS
+    // classification rather than one heading covering a mixed group.
+    const decisions5 = src("src/components/procurement/DecisionsStep.tsx");
+    record(/published\s*\?\s*"Publication is already complete/.test(decisions5),
+      "5: post-publish, the Decisions station states publication is complete instead of labelling anything a blocker -- regardless of `materialDecisionsRemaining`'s own pre-publish material/non-material split",
+      "",
+    );
+    record(/for the next revision`/.test(decisions5),
+      "5: remaining post-publish decisions are framed as shaping the next revision, never as outstanding work on a completed publication",
       "",
     );
     // The raw, unfiltered document-level count (a genuinely different,
