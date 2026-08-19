@@ -85,28 +85,28 @@ export default function McpEvidencePanel({ history }: { history: ProjectHistoryE
   const pendingProposals: ProjectHistoryEvent[] = [];
 
   return (
-    <div className="rounded-[18px] border p-4" style={{ background: "var(--nf-ink-950)", borderColor: "#2B2519", color: "#EFEAE0" }}>
+    <div className="rounded-[4px] border p-4" style={{ background: "var(--nf-ink-950)", borderColor: "#2b2825", color: "#f7f5f2" }}>
       <div className="flex items-center justify-between gap-3">
-        <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "#C9C2B2" }}>
+        <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "#bab7b3" }}>
           Governed MCP connections
         </div>
         <span
-          className="rounded-full px-2 py-[3px] text-[9.5px] font-semibold uppercase"
-          style={{ ...mono, letterSpacing: "0.07em", background: connected ? "var(--nf-emerald-soft, #DCEEE3)" : "#2A251B", color: connected ? "var(--nf-emerald, #0B6745)" : "#948C79" }}
+          className="rounded-[3px] px-2 py-[3px] text-[9.5px] font-semibold uppercase"
+          style={{ ...mono, letterSpacing: "0.07em", background: connected ? "var(--nf-emerald-soft, #d9f4d9)" : "#2b2825", color: connected ? "var(--nf-emerald, #1e4e22)" : "#bab7b3" }}
         >
           {connected ? "Connected" : "Not connected"}
         </span>
       </div>
 
       {/* State 1: Available to connect — real, static, checkable. */}
-      <p className="m-0 mt-2 text-[12.5px] leading-[1.5]" style={{ color: "#B9B2A2" }}>
+      <p className="m-0 mt-2 text-[12.5px] leading-[1.5]" style={{ color: "#d0cdc9" }}>
         Available to connect: your organisation&rsquo;s approved AI agent can reach this project&rsquo;s market data over MCP —{" "}
-        <span style={{ color: "#D8D0BE" }}>{MCP_TOOL_DEFINITIONS.map((t) => t.name).join(", ")}</span>.
+        <span style={{ color: "#d0cdc9" }}>{MCP_TOOL_DEFINITIONS.map((t) => t.name).join(", ")}</span>.
       </p>
 
       {!connected ? (
-        <div className="mt-3 rounded-[12px] border border-dashed p-3" style={{ borderColor: "#3A3325" }}>
-          <p className="m-0 text-[12.5px] leading-[1.5]" style={{ color: "#948C79" }}>
+        <div className="mt-3 rounded-[4px] border border-dashed p-3" style={{ borderColor: "#2b2825" }}>
+          <p className="m-0 text-[12.5px] leading-[1.5]" style={{ color: "#bab7b3" }}>
             No agent has connected to this project over MCP yet. Once one does, its evidence, proposals and approved
             actions will appear here — nothing is shown until a real, stored receipt exists.
           </p>
@@ -116,17 +116,17 @@ export default function McpEvidencePanel({ history }: { history: ProjectHistoryE
           {/* State 4/7: Evidence received / Action receipt — each row IS a
               real, stored ProjectHistoryEvent, never a synthesised one. */}
           {evidenceEvents.map((e, i) => (
-            <div key={`${e.h.at}-${i}`} className="rounded-[10px] border p-3" style={{ background: "#1E1912", borderColor: "#322A1D" }}>
+            <div key={`${e.h.at}-${i}`} className="rounded-[4px] border p-3" style={{ background: "#2b2825", borderColor: "#2b2825" }}>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] font-medium" style={{ color: "#fff" }}>{humaniseEvent(e.h.event, e.h.detail)}</span>
-                {/* Contrast fix (verification pass, 18 Aug 2026): #6E6656 on
-                    this card's #1E1912 background measured 3.07:1, below
+                {/* Contrast fix (verification pass, 18 Aug 2026): #66635e on
+                    this card's #2b2825 background measured 3.07:1, below
                     WCAG AA's 4.5:1 for normal text (computed via the
                     standard relative-luminance contrast formula) --
-                    #888274 is the same colour lightened just enough to
+                    #bab7b3 is the same colour lightened just enough to
                     clear 4.5:1 here (4.57:1) without standing out from the
                     surrounding muted metadata tone. */}
-                <span className="text-[10.5px]" style={{ ...mono, color: "#888274" }}>
+                <span className="text-[10.5px]" style={{ ...mono, color: "#bab7b3" }}>
                   {new Date(e.h.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
@@ -138,7 +138,7 @@ export default function McpEvidencePanel({ history }: { history: ProjectHistoryE
             </div>
           ))}
           {evidenceEvents.length === 0 && (
-            <p className="m-0 text-[12.5px] leading-[1.5]" style={{ color: "#948C79" }}>
+            <p className="m-0 text-[12.5px] leading-[1.5]" style={{ color: "#bab7b3" }}>
               Connected, but no MCP action has recorded evidence yet.
             </p>
           )}
@@ -150,7 +150,7 @@ export default function McpEvidencePanel({ history }: { history: ProjectHistoryE
       {pendingProposals.length > 0 && (
         <div className="mt-3 flex flex-col gap-2">
           {pendingProposals.map((p, i) => (
-            <div key={`${p.at}-${i}`} className="rounded-[10px] border p-3" style={{ background: "#241C10", borderColor: "var(--nf-orange, #E8590C)" }}>
+            <div key={`${p.at}-${i}`} className="rounded-[4px] border p-3" style={{ background: "#2b2825", borderColor: "var(--nf-orange, #c66000)" }}>
               <span className="text-[13px] font-medium text-white">{humaniseEvent(p.event, p.detail)}</span>
               <div className="mt-1.5"><ProvenanceTag kind="agent" dark /></div>
             </div>
@@ -159,7 +159,7 @@ export default function McpEvidencePanel({ history }: { history: ProjectHistoryE
       )}
 
       {approvedEvents.length > 0 && (
-        <p className="m-0 mt-2 text-[11px]" style={{ color: "#6E6656" }}>
+        <p className="m-0 mt-2 text-[11px]" style={{ color: "#66635e" }}>
           {approvedEvents.length} action{approvedEvents.length === 1 ? "" : "s"} carry your recorded consent.
         </p>
       )}

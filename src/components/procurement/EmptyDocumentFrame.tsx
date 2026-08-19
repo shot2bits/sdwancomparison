@@ -32,22 +32,22 @@ const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
 export default function EmptyDocumentFrame() {
   return (
     <div
-      className="mx-auto mt-6 w-full max-w-[1000px] rounded-[18px] border px-5 py-5 sm:px-7 sm:py-6"
-      style={{ borderColor: "var(--nf-rule, #E4D9C2)", background: "var(--nf-ivory-card, #FFFDF8)" }}
+      className="mx-auto mt-6 w-full max-w-[1000px] rounded-[4px] border px-5 py-5 sm:px-7 sm:py-6"
+      style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-card, #fefdfc)" }}
       aria-label="Your living procurement document, not yet started"
     >
       <div className="flex items-center justify-between gap-3">
-        <div style={{ ...mono, fontSize: "10.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#655F52" }}>
+        <div style={{ ...mono, fontSize: "10.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#66635e" }}>
           Your living procurement document
         </div>
         <span
-          className="rounded-full px-2 py-[3px] text-[9.5px] font-semibold uppercase"
-          style={{ ...mono, letterSpacing: "0.07em", background: "var(--nf-ink-100, #EDE7D9)", color: "#655F52" }}
+          className="rounded-[3px] px-2 py-[3px] text-[9.5px] font-semibold uppercase"
+          style={{ ...mono, letterSpacing: "0.07em", background: "var(--nf-ink-100, #e3e1de)", color: "#66635e" }}
         >
           Not started
         </span>
       </div>
-      <p className="m-0 mt-2 max-w-[46em] text-[14px] leading-[1.6]" style={{ color: "var(--nf-ink-600, #4A4438)" }}>
+      <p className="m-0 mt-2 max-w-[46em] text-[14px] leading-[1.6]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
         Say what you need in the prompt above. Every sentence lands here as a stated fact, and this frame fills in
         section by section — nothing is added until you say it.
       </p>
@@ -56,7 +56,7 @@ export default function EmptyDocumentFrame() {
           own header comment, an explicit approved-prototype aesthetic) used
           to apply `opacity` to the WHOLE row, diluting the row's TEXT along
           with its border -- axe-core caught the real result: rows 4-6
-          measured 1.88:1-3.32:1 against their own #FFFDF8 background, well
+          measured 1.88:1-3.32:1 against their own #fefdfc background, well
           under WCAG AA's 4.5:1. The fade now applies only to the row's own
           border colour (computed per-row as a real rgba alpha, not a fixed
           swatch) -- the "later sections feel further away" ghosting is
@@ -67,11 +67,11 @@ export default function EmptyDocumentFrame() {
         {GHOST_SECTIONS.map((title, i) => (
           <div
             key={title}
-            className="flex items-center justify-between gap-3 rounded-[10px] border border-dashed px-3.5 py-3"
-            style={{ borderColor: `rgba(220, 211, 192, ${1 - i * 0.12})` }}
+            className="flex items-center justify-between gap-3 rounded-[4px] border border-dashed px-3.5 py-3"
+            style={{ borderColor: `rgba(211, 208, 205, ${1 - i * 0.12})` }}
           >
-            <span className="text-[13px] font-medium" style={{ color: "#655F52" }}>{title}</span>
-            <span className="text-[10.5px]" style={{ ...mono, color: "#655F52" }}>not yet stated</span>
+            <span className="text-[13px] font-medium" style={{ color: "#66635e" }}>{title}</span>
+            <span className="text-[10.5px]" style={{ ...mono, color: "#66635e" }}>not yet stated</span>
           </div>
         ))}
       </div>

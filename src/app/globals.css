@@ -63,65 +63,155 @@
    surface itself. Values are the prototype's exact hex/font stacks —
    "implement... preserving its palette, typography roles", not a
    reinterpretation of them. */
+/* ====================================================================
+   AESTHETIC-ONLY RESTYLE (19 Aug 2026) -- Robert's "UI mockups request"
+   handoff bundle (design_handoff_sase_sourcing_builder): "the current
+   design is very confusing, janky... this really has to work now."
+   Explicit scope, per that bundle's own README: visual style ONLY --
+   colors, fonts, border radius, spacing -- never layout, structure,
+   copy, or behaviour. Every token below is replaced wall-to-wall with
+   the handoff doc's own values (oklch, warm-neutral canvas + amber
+   accent, sharp 3-4px corners, no shadows), not a reinterpretation of
+   them. This SUPERSEDES the palette that was here before (the 18 Aug
+   2026 "Netify 2030 Living Document Aesthetic Constitution" hex values,
+   including their axe-core-measured accessibility corrections) --
+   the new values are close enough in structure (dark saturated text on
+   a very light, low-chroma tint background) that contrast should hold,
+   and this pass re-verifies the ones that matter live rather than
+   assuming it, but the exact hex/ratio history in the old comments no
+   longer describes what ships.
+
+   Still deliberately namespaced --nf-*, still scoped to the
+   .procurement-2030 selector only (ProcurementEntry.tsx / WorkspaceHeader
+   .tsx) -- this reskin, like the one it replaces, only touches the
+   living-document workspace surface, never netify.co.uk's marketing
+   pages (their own --ink-900 etc. tokens above are untouched). */
 .procurement-2030 {
-  --nf-ivory: #F7F1E6;
-  --nf-ivory-raised: #FBF7EF;
-  --nf-ivory-card: #FFFDF8;
-  --nf-ink-950: #100E0A;
-  --nf-ink-900: #17140F;
-  --nf-ink-800: #252019;
-  --nf-ink-600: #4A4438;
-  --nf-ink-400: #7A7263;
-  --nf-ink-300: #A79E8C;
-  --nf-ink-200: #DCD3C0;
-  --nf-ink-100: #EDE7D9;
-  --nf-rule: #E4D9C2;
+  --nf-ivory: oklch(0.97 0.004 75);
+  --nf-ivory-raised: oklch(0.995 0.002 75);
+  --nf-ivory-card: #ffffff;
+  --nf-ink-950: oklch(0.17 0.006 75);
+  --nf-ink-900: oklch(0.22 0.006 75);
+  --nf-ink-800: oklch(0.30 0.007 75);
+  --nf-ink-600: oklch(0.50 0.009 75);
+  --nf-ink-400: oklch(0.60 0.008 75);
+  --nf-ink-300: oklch(0.72 0.007 75);
+  --nf-ink-200: oklch(0.86 0.006 75);
+  --nf-ink-100: oklch(0.91 0.005 75);
+  --nf-rule: oklch(0.87 0.0055 75);
 
-  --nf-orange: #E8590C;
-  /* Accessibility correction (18 Aug 2026, real bug found via an
-   * axe-core scan on this pass's own new eyebrow labels -- e.g.
-   * ProcurementArchitecture.tsx's "Live procurement twin" text directly
-   * on the ivory canvas): the original #C94A08 measured 4.18:1 against
-   * the ivory family (F7F1E6/FBF7EE), below WCAG AA's 4.5:1 for text
-   * this small (11px, not bold). Darkened just enough to clear 4.5:1
-   * everywhere this token is already used as TEXT on the ivory family
-   * (measured 5.49:1) -- every other usage is either a dot/line
-   * (WCAG 1.4.11's more lenient 3:1 non-text threshold, already met) or
-   * gets MORE contrast from a darker value, never less, so this is a
-   * pure fix with no other-usage tradeoff. */
-  --nf-orange-strong: #AA3E06;
-  --nf-orange-soft: #FCE7D6;
-  --nf-orange-soft-border: #F3B685;
+  /* Accent (primary action colour) -- replaces the earlier orange/amber
+   * with the handoff doc's own warm amber/ochre. Same three-tier
+   * structure as before: full-strength for fills/icons/focus rings,
+   * a darkened AA-safe variant for text-on-light, a soft tint for
+   * backgrounds, and a mid-tone for the tint's own border. */
+  --nf-orange: oklch(0.6 0.16 55);
+  --nf-orange-strong: oklch(0.42 0.14 55);
+  --nf-orange-soft: oklch(0.94 0.05 55);
+  --nf-orange-soft-border: oklch(0.75 0.09 55);
 
-  /* Accessibility correction (18 Aug 2026, same audit): the original
-   * #0E7A52 measured 4.43:1 as TEXT against --nf-emerald-soft
-   * (LivingProcurementCanvas.tsx's "What changed" eyebrow renders
-   * directly on that background) -- just under 4.5:1. Darkened to
-   * 5.72:1 against emerald-soft; every other real usage (the
-   * architecture edges/arrowheads, the delta caption on ivory-raised,
-   * ProvenanceTag's "approved" dot) is a non-text 3:1 case already
-   * passing or gets MORE contrast from the darker value. */
-  --nf-emerald: #0B6745;
-  --nf-emerald-soft: #DCEEE3;
-  --nf-emerald-soft-border: #9FCEB4;
+  /* Confirmed / success status (green) -- the handoff doc's exact
+   * CONFIRMED badge pair. */
+  --nf-emerald: oklch(0.38 0.09 145);
+  --nf-emerald-soft: oklch(0.94 0.045 145);
+  --nf-emerald-soft-border: oklch(0.75 0.075 145);
 
-  --nf-cobalt: #2757C6;
-  --nf-cobalt-soft: #E1E9FB;
-  --nf-cobalt-soft-border: #AEC2F0;
+  /* MCP evidence (blue) -- not one of the handoff doc's named statuses
+   * (it only names confirmed/needs-decision/suggested/mandatory/neutral),
+   * but this codebase has a real, distinct "observed via MCP" signal
+   * that predates this restyle and still needs its own identity. Kept,
+   * re-tuned to the same text-on-tint formula (dark saturated text,
+   * very light low-chroma background) the handoff doc uses for every
+   * other status, at a blue hue so it reads as its own thing rather
+   * than colliding with confirmed/suggested/mandatory. */
+  --nf-cobalt: oklch(0.42 0.12 250);
+  --nf-cobalt-soft: oklch(0.94 0.035 250);
+  --nf-cobalt-soft-border: oklch(0.75 0.09 250);
 
-  /* Accessibility correction (18 Aug 2026, same audit): the original
-   * #7A5FC7 measured 3.94:1 as TEXT against the Mission Control dark
-   * card's --nf-ink-950 background (ProjectDesk.tsx's new "MCP receipt"
-   * label -- the only real TEXT usage of this token; ProvenanceTag's
-   * "intel" dot is a non-text 3:1 case, unaffected either way).
-   * Lightened to 5.21:1 against ink-950. */
-  --nf-lilac: #8D77CF;
-  --nf-lilac-soft: #EDE7FA;
-  --nf-lilac-soft-border: #C9B9EE;
+  /* Suggested status (violet) -- the handoff doc's exact SUGGESTED
+   * badge pair; this maps directly onto the existing "intelligence /
+   * suggested" lilac role. */
+  --nf-lilac: oklch(0.42 0.11 300);
+  --nf-lilac-soft: oklch(0.94 0.035 300);
+  --nf-lilac-soft-border: oklch(0.75 0.085 300);
+  /* --nf-lilac itself is tuned as TEXT on a LIGHT background (matches the
+   * handoff doc's SUGGESTED badge pair exactly, ~7.4:1 on --nf-lilac-soft).
+   * ProjectDesk.tsx's "MCP RECEIPT" label is the one place this hue is
+   * used as text on the DARK Mission Control card (--nf-ink-950) instead
+   * -- a single flat value can't clear 4.5:1 in both directions (0.42
+   * lightness measures ~2.15:1 against ink-950), so that one usage reads
+   * this lighter variant instead (~7.45:1 against ink-950). */
+  --nf-lilac-on-dark: oklch(0.72 0.1 300);
 
-  --nf-font-serif: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
+  /* Mandatory / critical status (red-orange) -- new token, the handoff
+   * doc's exact MANDATORY tag pair (pass/fail gates, e.g. the supplier-
+   * facing "must be met to bid" callout). Nothing in the pre-restyle
+   * palette carried this distinction on its own. */
+  --nf-red: oklch(0.42 0.15 25);
+  --nf-red-soft: oklch(0.94 0.05 25);
+  --nf-red-soft-border: oklch(0.75 0.11 25);
+
+  /* Supporting tokens this restyle needed that the handoff doc's own
+   * table doesn't enumerate directly (it covers roles, not every derived
+   * shade this codebase happens to need):
+   * - a darker hover-state fill for the accent (buttons/pills darken on
+   *   hover elsewhere in this codebase; the handoff doc only gives the
+   *   one resting-state accent value)
+   * - a border tone for the dark Mission Control card (--nf-ink-950
+   *   surface needs its OWN border a touch lighter than its own
+   *   background, not the light-canvas --nf-rule)
+   * - two light "text on the dark card" tiers (bright for primary
+   *   labels, muted for secondary/eyebrow text), since every ink-* token
+   *   above is tuned for text on the LIGHT canvas and reads too dark on
+   *   ink-950 */
+  --nf-orange-hover: oklch(0.52 0.16 55);
+  --nf-ink-950-border: oklch(0.28 0.008 75);
+  --nf-on-dark: oklch(0.97 0.004 75);
+  --nf-on-dark-muted: oklch(0.85 0.006 75);
+  --nf-on-dark-muted-2: oklch(0.78 0.006 75);
+  --nf-green-dot: oklch(0.55 0.14 145);
+  --nf-red-on-dark: oklch(0.72 0.13 25);
+  --nf-ink-950-border-hover: oklch(0.38 0.01 75);
+
+  /* Handoff doc's own tagStyle() -- the neutral "SCORED · WEIGHT 3" tag
+   * pair (as distinct from the red MANDATORY tag above), reproduced
+   * exactly: near-neutral warm text on a near-neutral warm tint,
+   * deliberately NOT one of the hue-coded status colours. */
+  --nf-neutral-tag: oklch(0.38 0.015 75);
+  --nf-neutral-tag-soft: oklch(0.92 0.006 75);
+
+  /* 19 Aug 2026 (this pass): reinstates two custom webfonts inside the
+   * workspace surface ONLY, per the handoff doc's "2. Typography"
+   * section -- Space Grotesk for headings/card titles/nav labels/brand
+   * wordmark, JetBrains Mono for IDs/stat numbers/counts/percentages/any
+   * tabular value. This is a deliberate, knowing reversal of the
+   * system-default-font decision made earlier the SAME day -- but that
+   * decision was about netify.co.uk's marketing pages; this request is
+   * explicitly scoped to "the SASE sourcing builder" only, so the
+   * un-prefixed --font-* tokens below (marketing/sitewide) are
+   * untouched and stay system-ui. --nf-font-sans also stays system-ui
+   * inside the workspace -- the handoff doc calls for that explicitly
+   * ("no change needed if you already use system fonts"). Both webfonts
+   * are self-hosted (src/lib/workspace/fonts.ts, next/font/local) for
+   * the same build-hermeticity reason Inter was self-hosted before:
+   * next/font/google fetches bytes from fonts.googleapis.com at BUILD
+   * time, which this project's network-restricted build environment
+   * cannot reach. */
+  --nf-font-serif: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --nf-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --nf-font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --nf-font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Handoff doc, "1. Colors": "add a very subtle dot grid behind the main
+ * canvas (not inside white cards)". Applied by whichever element owns
+ * the workspace page background (see src/app/(workspace)/home/page.tsx
+ * and .../workspace/page.tsx) -- opaque white/ivory-card surfaces on top
+ * of it naturally hide the texture, satisfying "not inside white cards"
+ * without any extra exclusion logic. */
+.nf-canvas-texture {
+  background-color: var(--nf-ivory);
+  background-image: radial-gradient(oklch(0.9 0.006 75) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
 @theme inline {
@@ -138,9 +228,9 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
 
-  --font-display: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 html {

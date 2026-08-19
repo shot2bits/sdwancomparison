@@ -73,7 +73,7 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
       {!compact && eyebrow && (
         <p
           className="mx-auto mb-2 text-center"
-          style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--nf-orange-strong, #AA3E06)" }}
+          style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--nf-orange-strong, #832f00)" }}
         >
           {eyebrow}
         </p>
@@ -83,8 +83,8 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
         className="mx-auto max-w-[1150px] text-center"
         style={
           compact
-            ? { fontFamily: "var(--nf-font-serif)", fontSize: "16px", lineHeight: 1.3, fontWeight: 650, letterSpacing: "-0.01em", color: "#18181b", margin: "0 auto 6px", transition: "font-size 220ms ease, margin 220ms ease" }
-            : { fontFamily: "var(--nf-font-serif)", fontSize: "clamp(30px, 1.6vw + 22px, 42px)", lineHeight: 1.12, fontWeight: 650, letterSpacing: "-0.015em", color: "#18181b", margin: "0 auto 14px", transition: "font-size 220ms ease, margin 220ms ease" }
+            ? { fontFamily: "var(--nf-font-serif)", fontSize: "16px", lineHeight: 1.3, fontWeight: 650, letterSpacing: "-0.01em", color: "#110f0d", margin: "0 auto 6px", transition: "font-size 220ms ease, margin 220ms ease" }
+            : { fontFamily: "var(--nf-font-serif)", fontSize: "clamp(30px, 1.6vw + 22px, 42px)", lineHeight: 1.12, fontWeight: 650, letterSpacing: "-0.015em", color: "#110f0d", margin: "0 auto 14px", transition: "font-size 220ms ease, margin 220ms ease" }
         }
       >
         {h1}
@@ -100,7 +100,7 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
         <p
           id="page-subhead"
           className="mx-auto text-center"
-          style={{ fontSize: "clamp(16px, 0.6vw + 13px, 19px)", lineHeight: 1.5, color: "#52525b", margin: "0 auto 14px", maxWidth: "52em" }}
+          style={{ fontSize: "clamp(16px, 0.6vw + 13px, 19px)", lineHeight: 1.5, color: "#66635e", margin: "0 auto 14px", maxWidth: "52em" }}
         >
           {promise}
         </p>

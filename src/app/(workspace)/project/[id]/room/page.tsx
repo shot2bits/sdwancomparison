@@ -64,11 +64,11 @@ export default async function ProcurementRoomPage({ params, searchParams }: Prop
 
   if (!tokenOk && !sessionOwner) {
     return (
-      <div className="procurement-2030 min-h-[60vh]" style={{ background: "var(--nf-ivory, #F7F1E6)" }}>
+      <div className="procurement-2030 min-h-[60vh]" style={{ background: "var(--nf-ivory, #f7f5f2)" }}>
         <div className="mx-auto max-w-xl px-6 py-24">
-          <p className="m-0 mb-2 text-[11px] font-semibold uppercase" style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.12em", color: "var(--nf-ink-400, #7A7263)" }}>Procurement Room</p>
-          <h1 className="m-0 mb-3 text-2xl" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #17140F)" }}>This room is private to the buyer</h1>
-          <p className="mb-6 text-sm" style={{ color: "var(--nf-ink-600, #4A4438)" }}>
+          <p className="m-0 mb-2 text-[11px] font-semibold uppercase" style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.12em", color: "var(--nf-ink-400, #83807b)" }}>Procurement Room</p>
+          <h1 className="m-0 mb-3 text-2xl" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #1c1a18)" }}>This room is private to the buyer</h1>
+          <p className="mb-6 text-sm" style={{ color: "var(--nf-ink-600, #66635e)" }}>
             Open it from your builder link (it carries your private key), or sign in with the email that created it.
           </p>
           <div className="mb-6"><SignIn role="buyer" prompt="Sign in with the email that created this project." /></div>
@@ -94,45 +94,45 @@ export default async function ProcurementRoomPage({ params, searchParams }: Prop
   // this pass, no logic, no new fields.
   const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
   return (
-    <div className="procurement-2030" style={{ background: "var(--nf-ivory, #F7F1E6)" }}>
+    <div className="procurement-2030" style={{ background: "var(--nf-ivory, #f7f5f2)" }}>
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <p className="m-0 mb-1 text-[11px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.12em", color: "var(--nf-ink-400, #7A7263)" }}>Procurement Room</p>
-        <h1 className="m-0 mb-1 text-2xl" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #17140F)" }}>{project.title || "Untitled project"}</h1>
-        <p className="mb-5 text-sm" style={{ color: "var(--nf-ink-600, #4A4438)" }}>
+        <p className="m-0 mb-1 text-[11px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.12em", color: "var(--nf-ink-400, #83807b)" }}>Procurement Room</p>
+        <h1 className="m-0 mb-1 text-2xl" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #1c1a18)" }}>{project.title || "Untitled project"}</h1>
+        <p className="mb-5 text-sm" style={{ color: "var(--nf-ink-600, #66635e)" }}>
           The frozen record of exactly what was published -- the same content the board notice, your invited vendors and every export all read from.
         </p>
 
         <ProjectNav id={id} manage={tokenOk ? manage : undefined} active="room" engine={engine} />
 
         {roomState !== "frozen" || !snapshot ? (
-          <div className="mt-6 rounded-2xl border-2 border-dashed p-6 text-center" style={{ borderColor: "var(--nf-ink-200, #DCD3C0)" }}>
-            <p className="m-0 text-sm font-semibold" style={{ color: "var(--nf-ink-900, #17140F)" }}>
+          <div className="mt-6 rounded-2xl border-2 border-dashed p-6 text-center" style={{ borderColor: "var(--nf-ink-200, #d3d0cd)" }}>
+            <p className="m-0 text-sm font-semibold" style={{ color: "var(--nf-ink-900, #1c1a18)" }}>
               {roomState === "published_no_snapshot"
                 ? "Published, but no frozen record exists for this project."
                 : "This room opens once you publish."}
             </p>
-            <p className="m-0 mt-2 text-sm" style={{ color: "var(--nf-ink-600, #4A4438)" }}>
+            <p className="m-0 mt-2 text-sm" style={{ color: "var(--nf-ink-600, #66635e)" }}>
               {roomState === "published_no_snapshot"
                 ? "This project was published before the frozen-record system existed, so there is nothing here to show honestly -- the live requirement is still the source of truth for it. Republishing will create one."
                 : "Publishing freezes your requirement, your matched vendors and your market report into one durable record. Nothing here is guessed or partial -- it simply does not exist until you publish."}
             </p>
             <p className="m-0 mt-4 text-sm">
-              <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline" style={{ color: "var(--nf-orange-strong, #AA3E06)" }}>
+              <Link href={`/rfp-builder/${id}/preview${qs}`} className="underline" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
                 {roomState === "published_no_snapshot" ? "Open your published requirement" : "Preview and publish"}
               </Link>
             </p>
           </div>
         ) : (
           <>
-            <div className="mt-6 mb-6 rounded-[18px] border p-4" style={{ background: "var(--nf-ink-950, #100E0A)", borderColor: "#2B2519", color: "#EFEAE0" }}>
+            <div className="mt-6 mb-6 rounded-[4px] border p-4" style={{ background: "var(--nf-ink-950, #110f0d)", borderColor: "#2b2825", color: "#f7f5f2" }}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span aria-hidden className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: "var(--nf-emerald, #0B6745)" }} />
+                  <span aria-hidden className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: "var(--nf-emerald, #1e4e22)" }} />
                   <span className="text-[13px] font-semibold text-white">Frozen at publication</span>
-                  <span style={{ color: "#6E6656" }}>·</span>
-                  <span className="text-[12.5px]" style={{ color: "#D8D0BE" }}>Version {snapshot.document_version}</span>
-                  <span style={{ color: "#6E6656" }}>·</span>
-                  <span className="text-[12.5px]" style={{ color: "#D8D0BE" }}>
+                  <span style={{ color: "#66635e" }}>·</span>
+                  <span className="text-[12.5px]" style={{ color: "#d0cdc9" }}>Version {snapshot.document_version}</span>
+                  <span style={{ color: "#66635e" }}>·</span>
+                  <span className="text-[12.5px]" style={{ color: "#d0cdc9" }}>
                     {new Date(snapshot.published_at).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
@@ -140,9 +140,9 @@ export default async function ProcurementRoomPage({ params, searchParams }: Prop
               </div>
             </div>
 
-            <section className="mb-4 rounded-[14px] border p-4" style={{ borderColor: "var(--nf-rule, #E4D9C2)", background: "var(--nf-ivory-card, #FFFDF8)" }}>
+            <section className="mb-4 rounded-[4px] border p-4" style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-card, #fefdfc)" }}>
               <div className="mb-2 flex items-center justify-between gap-3">
-                <p className="m-0 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #7A7263)" }}>What was published</p>
+                <p className="m-0 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #83807b)" }}>What was published</p>
                 <ProvenanceTag kind="evidence" />
               </div>
               {snapshot.frozen_content.living_document ? (
@@ -150,7 +150,7 @@ export default async function ProcurementRoomPage({ params, searchParams }: Prop
                 // real persisted/frozen Living Procurement Document, when
                 // this snapshot has one -- clause and readiness figures
                 // read straight from it, never recomputed.
-                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #252019)" }}>
+                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #302d2a)" }}>
                   <span className="font-medium">{snapshot.frozen_content.living_document.title}</span> -- {snapshot.frozen_content.living_document.clauses.length} requirement{snapshot.frozen_content.living_document.clauses.length === 1 ? "" : "s"} across {new Set(snapshot.frozen_content.living_document.clauses.map((c) => c.section)).size} section{new Set(snapshot.frozen_content.living_document.clauses.map((c) => c.section)).size === 1 ? "" : "s"}, exactly as they stood at the moment of publication.
                 </p>
               ) : (
@@ -158,67 +158,67 @@ export default async function ProcurementRoomPage({ params, searchParams }: Prop
                 // from a save whose client had not yet started sending a
                 // living document -- honest about which content this is
                 // rather than fabricating a living-document reading.
-                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #252019)" }}>
+                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #302d2a)" }}>
                   <span className="font-medium">{snapshot.frozen_content.title}</span> -- {snapshot.frozen_content.rfp_sections.length} section{snapshot.frozen_content.rfp_sections.length === 1 ? "" : "s"} of requirements, exactly as they stood at the moment of publication.
                 </p>
               )}
               {snapshot.accepted_assumptions.length > 0 && (
-                <p className="m-0 mt-2 text-xs" style={{ color: "var(--nf-ink-600, #4A4438)" }}>
+                <p className="m-0 mt-2 text-xs" style={{ color: "var(--nf-ink-600, #66635e)" }}>
                   Accepted assumptions: {snapshot.accepted_assumptions.join("; ")}
                 </p>
               )}
               {snapshot.open_decisions.length > 0 && (
-                <p className="m-0 mt-2 text-xs" style={{ color: "var(--nf-ink-600, #4A4438)" }}>
+                <p className="m-0 mt-2 text-xs" style={{ color: "var(--nf-ink-600, #66635e)" }}>
                   Open at publication: {snapshot.open_decisions.join("; ")}
                 </p>
               )}
             </section>
 
-            <section className="mb-4 rounded-[14px] border p-4" style={{ borderColor: "var(--nf-rule, #E4D9C2)", background: "var(--nf-ivory-card, #FFFDF8)" }}>
-              <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #7A7263)" }}>Matched and invited</p>
+            <section className="mb-4 rounded-[4px] border p-4" style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-card, #fefdfc)" }}>
+              <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #83807b)" }}>Matched and invited</p>
               {snapshot.matched_vendors ? (
-                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #252019)" }}>
+                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #302d2a)" }}>
                   {snapshot.matched_vendors.length} matched at publication ({snapshot.matched_vendors.map((v) => v.name).join(", ") || "none"}); {(snapshot.invited_vendors ?? []).length} invited.
                 </p>
               ) : (
-                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #252019)" }}>
+                <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #302d2a)" }}>
                   {snapshot.matched_vendor_ids.length} matched at publication; {snapshot.invited_vendor_ids.length} invited. (Names not frozen on this snapshot -- written before this field existed.)
                 </p>
               )}
             </section>
 
-            <section className="mb-4 rounded-[14px] border p-4" style={{ borderColor: "var(--nf-rule, #E4D9C2)", background: "var(--nf-ivory-card, #FFFDF8)" }}>
-              <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #7A7263)" }}>Market report (frozen)</p>
-              <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #252019)" }}>
+            <section className="mb-4 rounded-[4px] border p-4" style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-card, #fefdfc)" }}>
+              <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #83807b)" }}>Market report (frozen)</p>
+              <p className="m-0 text-sm" style={{ color: "var(--nf-ink-800, #302d2a)" }}>
                 {snapshot.market_report.document.sections} sections, {snapshot.market_report.document.questions} questions.
                 {snapshot.market_report.estimate && (
                   <> Indicative monthly band £{snapshot.market_report.estimate.monthly_band_gbp[0].toLocaleString("en-GB")}–£{snapshot.market_report.estimate.monthly_band_gbp[1].toLocaleString("en-GB")}.</>
                 )}
               </p>
               {snapshot.market_report.gaps.length > 0 && (
-                <p className="m-0 mt-2 text-xs" style={{ color: "var(--nf-ink-600, #4A4438)" }}>Gaps at publication: {snapshot.market_report.gaps.join("; ")}</p>
+                <p className="m-0 mt-2 text-xs" style={{ color: "var(--nf-ink-600, #66635e)" }}>Gaps at publication: {snapshot.market_report.gaps.join("; ")}</p>
               )}
             </section>
 
-            <section className="mb-2 rounded-[14px] border p-4" style={{ borderColor: "var(--nf-rule, #E4D9C2)", background: "var(--nf-ivory-raised, #F5F3EE)" }}>
-              <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #7A7263)" }}>Provenance</p>
-              <p className="m-0 break-all text-xs" style={{ ...mono, color: "var(--nf-ink-300, #A79E8C)" }}>
+            <section className="mb-2 rounded-[4px] border p-4" style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-raised, #e3e1de)" }}>
+              <p className="m-0 mb-2 text-[10.5px] font-semibold uppercase" style={{ ...mono, letterSpacing: "0.11em", color: "var(--nf-ink-400, #83807b)" }}>Provenance</p>
+              <p className="m-0 break-all text-xs" style={{ ...mono, color: "var(--nf-ink-300, #a7a4a0)" }}>
                 Content hash: {snapshot.content_hash}
               </p>
-              <p className="m-0 mt-1 text-xs" style={{ color: "var(--nf-ink-300, #A79E8C)" }}>
+              <p className="m-0 mt-1 text-xs" style={{ color: "var(--nf-ink-300, #a7a4a0)" }}>
                 Methodology {snapshot.methodology_version}
                 {snapshot.rulebook_version ? ` · Rulebook ${snapshot.rulebook_version}` : ""}
               </p>
               {snapshot.public_projection.url && (
                 <p className="m-0 mt-2 text-xs">
-                  <a href={snapshot.public_projection.url} className="underline" style={{ color: "var(--nf-orange-strong, #AA3E06)" }}>View the public board listing</a>
+                  <a href={snapshot.public_projection.url} className="underline" style={{ color: "var(--nf-orange-strong, #832f00)" }}>View the public board listing</a>
                 </p>
               )}
             </section>
 
-            <p className="mt-6 text-xs" style={{ color: "var(--nf-ink-300, #A79E8C)" }}>
+            <p className="mt-6 text-xs" style={{ color: "var(--nf-ink-300, #a7a4a0)" }}>
               This room never shows a recomputed figure. If your requirement has changed since publication, the live draft is on{" "}
-              <Link href={`/project/${id}${qs}`} className="underline" style={{ color: "var(--nf-orange-strong, #AA3E06)" }}>Overview</Link>; republishing will freeze a new version here, keeping this one in history.
+              <Link href={`/project/${id}${qs}`} className="underline" style={{ color: "var(--nf-orange-strong, #832f00)" }}>Overview</Link>; republishing will freeze a new version here, keeping this one in history.
             </p>
           </>
         )}

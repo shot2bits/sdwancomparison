@@ -936,29 +936,19 @@ export default function ProjectDesk({
    *  always renders there via the `lg:block` override below, regardless of
    *  this flag; only the mobile default collapses. */
   const [mcExpanded, setMcExpanded] = useState(false);
-  /** Composer-overlap correction (18 Aug 2026, real bug measured via
-   *  Playwright at 1440x900): a static `lg:max-h-[min(60vh,...)]` clamp on
-   *  the Mission Control card cannot actually guarantee it clears the
-   *  fixed-bottom composer, because the card's TOP position differs
-   *  between its natural (pre-scroll, in-flow) placement and its later
-   *  `lg:sticky lg:top-[132px]` stuck placement -- the natural placement
-   *  sits LOWER (measured 304.6px at this viewport vs. the 132px stuck
-   *  offset), leaving strictly less clearance above the dock than any
-   *  fixed vh-based number can account for across different hero/content
-   *  heights. A CSS-only max-height cannot reference "how far this
-   *  element's own natural top already is," so this measures it directly:
-   *  once on mount (while still unscrolled, i.e. in its natural,
-   *  worst-case position) and again on resize, using the two refs below.
-   *  The stuck (scrolled) position always has MORE clearance than the
-   *  natural one (132px offset < 304.6px natural position, dock stays put
-   *  either way), so sizing for the natural, worst-case position is
-   *  always safe for the stuck position too. Mobile is unaffected -- the
-   *  card only ever measures/applies this at `lg` widths (see the
-   *  matchMedia guard in the effect below); mobile's own height is
-   *  already bounded by the `mcExpanded` collapse, not this. */
-  const [mcMaxHeightPx, setMcMaxHeightPx] = useState<number | null>(null);
-  const mcCardRef = useRef<HTMLDivElement | null>(null);
-  const composerDockRef = useRef<HTMLDivElement | null>(null);
+  /** 19 Aug 2026: the JS-measured `mcMaxHeightPx` clamp this comment used
+   *  to document existed solely to keep the Mission Control card clear of
+   *  the composer's old FIXED-BOTTOM position (measuring the live gap
+   *  between the card's natural top and the dock's viewport-pinned top,
+   *  since a static vh guess couldn't account for it). Robert's 19 Aug
+   *  2026 request moved the composer out of fixed positioning entirely
+   *  (now inline, near the top of the page -- see the PERSISTENT COMMAND
+   *  DOCK section below), so there is no longer a viewport-pinned element
+   *  for this card to clear, and the whole measurement (state, refs,
+   *  effect) is gone. The card's `lg:max-h-[min(60vh,calc(100vh-170px))]`
+   *  class (below, on the card itself) is now a plain static cap again --
+   *  generous enough for normal content, `overflow-y-auto` still lets it
+   *  scroll internally in the rare case content exceeds it. */
   /** Living Procurement Canvas Phase 2 correction (14 Aug 2026): carries
    *  exactly what the publish response itself returned -- real invited
    *  suppliers (name + credential link) -- so post-publish rendering below
@@ -1290,56 +1280,6 @@ export default function ProjectDesk({
    *  within a session; "Start again" fully reloads the page instead). */
   useEffect(() => {
     if (started) window.dispatchEvent(new Event("pd:project-started"));
-  }, [started]);
-  /** Measures the real gap above the fixed composer for the Mission
-   *  Control card's own natural (worst-case) top position -- see the
-   *  `mcMaxHeightPx` doc comment above for why a static CSS clamp can't
-   *  do this. Runs once `started` (the card doesn't render before then)
-   *  and on resize; a small settle delay lets the just-mounted layout
-   *  (hero collapse, card content) finish before measuring. Desktop-only
-   *  (`lg`, >=1024px, matching Tailwind's default `lg` breakpoint used
-   *  throughout this file) -- below that, the card isn't sticky/capped at
-   *  all, so no measurement applies. */
-  useEffect(() => {
-    if (!started) return;
-    const measure = () => {
-      if (!window.matchMedia("(min-width: 1024px)").matches) {
-        setMcMaxHeightPx(null);
-        return;
-      }
-      // Only trust this measurement near the unscrolled (natural,
-      // worst-case) position -- see the doc comment above. If the card
-      // is already `lg:sticky`-stuck (user has scrolled), its rect.top
-      // reads a smaller, more generous number that would let this grow
-      // past the value that's actually safe once scrolled back to the
-      // top, so skip rather than overwrite a known-safe value.
-      if (window.scrollY > 4) return;
-      const card = mcCardRef.current;
-      const dock = composerDockRef.current;
-      if (!card || !dock) return;
-      const cardTop = card.getBoundingClientRect().top;
-      const dockTop = dock.getBoundingClientRect().top;
-      const MARGIN = 16;
-      const available = dockTop - cardTop - MARGIN;
-      // Sane bounds: never collapse below a usable minimum, never grow
-      // past a sensible cap even when the viewport is very tall.
-      setMcMaxHeightPx(Math.max(220, Math.min(available, 640)));
-    };
-    const t1 = window.setTimeout(measure, 60);
-    const t2 = window.setTimeout(measure, 400);
-    window.addEventListener("resize", measure);
-    // Re-measure whenever the page's overall layout height changes (hero
-    // collapse animation settling, async content -- market/verdict/next-
-    // question data -- landing above the card) -- any of these can move
-    // the card's natural top even though nothing the user did changed.
-    const ro = new ResizeObserver(() => measure());
-    ro.observe(document.body);
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.removeEventListener("resize", measure);
-      ro.disconnect();
-    };
   }, [started]);
   const meter = meterOf(facts, verdict);
   const brief = useMemo(() => briefModel({ facts, verdict }), [facts, verdict]);
@@ -3506,11 +3446,11 @@ export default function ProjectDesk({
      label on the left, value with its provenance, tag, one control) ---- */
   const slotCell = (s: TwinSlot) => {
     const isNew = changedSlots.includes(s.id);
-    const rowCls = "flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]";
-    const rowStyle: React.CSSProperties = isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {};
-    const labCls = "w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]";
+    const rowCls = "flex items-start gap-3.5 border-b border-dotted border-[#e3e1de] py-[9px]";
+    const rowStyle: React.CSSProperties = isNew ? { background: "#fefdfc", boxShadow: "inset 2px 0 0 #c66000", paddingLeft: 10, marginLeft: -10 } : {};
+    const labCls = "w-[92px] flex-none pt-[2px] text-[13px] text-[#66635e] sm:w-[150px]";
     const tagBase: React.CSSProperties = { ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none" };
-    const ctlCls = "flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52]";
+    const ctlCls = "flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e]";
 
     const fs = s.path ? standingAt(s.path) : [];
     if (s.path && fs.length) {
@@ -3543,22 +3483,22 @@ export default function ProjectDesk({
               type="button"
               onClick={() => setEdit(s.id)}
               title={s.q}
-              className="cursor-pointer border-0 bg-transparent p-0 text-left text-[16px] font-medium leading-[1.4] text-[#141414]"
+              className="cursor-pointer border-0 bg-transparent p-0 text-left text-[16px] font-medium leading-[1.4] text-[#110f0d]"
               style={{ textWrap: "pretty" }}
             >
               {value}
             </button>
-            <span className="text-[12px] italic text-[#655F52]">{meta}</span>
+            <span className="text-[12px] italic text-[#66635e]">{meta}</span>
           </div>
-          <span style={{ ...tagBase, ...(anyInferred ? { background: "#F1EFE9", color: "#7A7770" } : { background: "#EAF6EE", color: "#256B3E" }) }}>
+          <span style={{ ...tagBase, ...(anyInferred ? { background: "#e3e1de", color: "#83807b" } : { background: "#d9f4d9", color: "#1e4e22" }) }}>
             {anyInferred ? "netify guessed" : "your words"}
           </span>
           {single ? (
-            <button type="button" onClick={() => dropRow(latest)} className={`${ctlCls} hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+            <button type="button" onClick={() => dropRow(latest)} className={`${ctlCls} hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]`} style={{ ...mono, letterSpacing: "0.07em" }}>
               {latest.provenance === "inferred" ? "drop" : "clear"}
             </button>
           ) : (
-            <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#141414] hover:text-[#141414]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+            <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#110f0d] hover:text-[#110f0d]`} style={{ ...mono, letterSpacing: "0.07em" }}>
               edit
             </button>
           )}
@@ -3581,14 +3521,14 @@ export default function ProjectDesk({
             <button
               type="button"
               onClick={() => setEdit(s.id)}
-              className="cursor-pointer border-0 bg-transparent p-0 text-left text-[16px] font-medium leading-[1.4] text-[#141414]"
+              className="cursor-pointer border-0 bg-transparent p-0 text-left text-[16px] font-medium leading-[1.4] text-[#110f0d]"
               style={{ textWrap: "pretty" }}
             >
               {value}
             </button>
-            <span className="text-[12px] italic text-[#655F52]">you chose this</span>
+            <span className="text-[12px] italic text-[#66635e]">you chose this</span>
           </div>
-          <span style={{ ...tagBase, background: "#EAF6EE", color: "#256B3E" }}>your words</span>
+          <span style={{ ...tagBase, background: "#d9f4d9", color: "#1e4e22" }}>your words</span>
           {/* Fix, 10 Aug 2026 (Harry's E2E, Test 1.6 -- same root cause as
               the fact-based row above): every note-based slot here is
               multi-select by design (round-7 comment above `ns`: "a buyer
@@ -3596,7 +3536,7 @@ export default function ProjectDesk({
               only "clear" at exactly one held note wrongly implied there
               was nothing left to add. Always "edit"; clearing one note (or
               the whole prefix) still happens from inside the edit sheet. */}
-          <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#141414] hover:text-[#141414]`} style={{ ...mono, letterSpacing: "0.07em" }}>
+          <button type="button" onClick={() => setEdit(s.id)} className={`${ctlCls} hover:border-[#110f0d] hover:text-[#110f0d]`} style={{ ...mono, letterSpacing: "0.07em" }}>
             edit
           </button>
         </div>
@@ -3611,9 +3551,9 @@ export default function ProjectDesk({
         <button
           type="button"
           onClick={() => setEdit(s.id)}
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e] hover:border-[#110f0d] hover:bg-white hover:text-[#110f0d]"
         >
-          <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
+          <span className="text-[12px] text-[#a7a4a0]" style={mono}>+</span>
           {s.cta}
         </button>
       </div>
@@ -3628,7 +3568,7 @@ export default function ProjectDesk({
   return (
     <div
       className="pd-root mt-8"
-      style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', color: "#141414" }}
+      style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', color: "#110f0d" }}
       onDragOver={(e) => { e.preventDefault(); }}
       onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
     >
@@ -3643,19 +3583,19 @@ export default function ProjectDesk({
           Round 11 catch (2 Aug 2026, Robert, second screenshot: "still
           not 1 section as requested"). Round 10 removed the conversation
           panel's own border/card/shadow, but this dock was still painted
-          its own solid colour (#F4F2EE, a warm beige) -- a real seam,
+          its own solid colour (#e3e1de, a warm beige) -- a real seam,
           but the first attempt at the fix (this comment, initially)
           mis-cited the page's colour: globals.css's --paper-base is
           #ffffff, but that is not what actually paints this page. Both
           src/app/home/page.tsx and src/app/workspace/page.tsx wrap their
-          entire route in `<div className="relative bg-[#fbfaf8]">` --
+          entire route in `<div className="relative bg-[#fefdfc]">` --
           an explicit override, so the true page background under the
           dock, the conversation thread and the statement of requirements
-          is #fbfaf8, a warm off-white, never pure white. Setting the
+          is #fefdfc, a warm off-white, never pure white. Setting the
           dock to #fff (the first attempt) actually painted a NEW seam,
           a white island on a cream page, in the opposite direction.
           Caught live on production, not assumed: the dock now matches
-          #fbfaf8, the colour every other inch of this route already
+          #fefdfc, the colour every other inch of this route already
           uses. It stays opaque (scrolled content still needs to
           disappear cleanly behind it, being sticky).
 
@@ -3675,36 +3615,36 @@ export default function ProjectDesk({
           dock is still sticky and still opaque, so scrolled content
           still disappears behind it cleanly; it just no longer looks
           like a card floating over the page it's part of. */}
-      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#fbfaf8" }}>
+      <div data-dock="1" className="sticky z-30" style={{ top: 52, background: "#fefdfc" }}>
         <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">
           {started && (
             <div className="flex w-full flex-wrap items-baseline gap-x-4 gap-y-1 pb-2">
-              <span className="text-[14.5px] font-medium text-[#33302C]">{projectName}</span>
+              <span className="text-[14.5px] font-medium text-[#1c1a18]">{projectName}</span>
               {created ? (
                 <a
                   href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}
-                  className="text-[11.5px] text-[#256B3E] underline decoration-[#BCD9C6] underline-offset-2 hover:decoration-[#256B3E]"
+                  className="text-[11.5px] text-[#1e4e22] underline decoration-[#91bb91] underline-offset-2 hover:decoration-[#1e4e22]"
                   style={mono}
                 >
                   {saveDirty ? "saved, edits since" : "saved"} · open your project record
                 </a>
               ) : (
-                <span className="text-[11.5px] text-[#655F52]" style={mono}>nothing leaves this page</span>
+                <span className="text-[11.5px] text-[#66635e]" style={mono}>nothing leaves this page</span>
               )}
               <span className="flex-1" />
               <button
                 type="button"
                 onClick={() => { setReqOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}
-                className="flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[13.5px] text-[#6E6C67] hover:text-[#141414]"
+                className="flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[13.5px] text-[#83807b] hover:text-[#110f0d]"
               >
-                <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#2E9E52]" aria-hidden="true" />
+                <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#308639]" aria-hidden="true" />
                 {understood} {understood === 1 ? "thing" : "things"} understood · see the requirement
               </button>
               {(!created || saveDirty) && (
                 <button
                   type="button"
                   onClick={() => { setSaveOpen(true); setSaveError(null); }}
-                  className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#6E6C67] underline decoration-[#C9C5BC] underline-offset-2 hover:text-[#141414]"
+                  className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#83807b] underline decoration-[#d3d0cd] underline-offset-2 hover:text-[#110f0d]"
                 >
                   {created ? "Save changes" : "Save this project"}
                 </button>
@@ -3712,7 +3652,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => window.location.assign(window.location.pathname)}
-                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#655F52] hover:text-[#141414]"
+                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#66635e] hover:text-[#110f0d]"
               >
                 Start again
               </button>
@@ -3733,42 +3673,53 @@ export default function ProjectDesk({
           <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
             <div className="min-w-[220px] flex-1">
               <div className="flex items-baseline gap-2.5">
-                <span className="text-[10.5px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
+                <span className="text-[10.5px] uppercase text-[#66635e]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
                 <span className="text-[15px] font-semibold" style={mono}>{pct}%</span>
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#655F52]">{pctNote}</span>
+                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#66635e]">{pctNote}</span>
               </div>
               <div className="mt-2 flex gap-[3px]">
                 {Array.from({ length: 12 }, (_, i) => (
-                  <span key={i} className="h-[6px] flex-1 rounded-[2px]" style={{ background: (i * 100) / 12 < pct ? "#F5A21B" : "#E8E4DC" }} />
+                  <span key={i} className="h-[6px] flex-1 rounded-[3px]" style={{ background: (i * 100) / 12 < pct ? "#c66000" : "#d3d0cd" }} />
                 ))}
               </div>
             </div>
-            <div className="flex-none border-l border-[#E5E1D9] pl-[22px]">
+            <div className="flex-none border-l border-[#d3d0cd] pl-[22px]">
               <div className="flex items-baseline gap-2">
                 <span className="text-[22px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>{marketTotal ?? "…"}</span>
-                <span className="text-[12.5px] text-[#655F52]">evaluated marketplace</span>
+                <span className="text-[12.5px] text-[#66635e]">evaluated marketplace</span>
               </div>
-              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#655F52]">{marketNote}</div>
+              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#66635e]">{marketNote}</div>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* ── PERSISTENT COMMAND DOCK (2030 shell reset, 16 Aug 2026) ──
-          Blueprint §3: "Command dock: Persistent bottom surface —
-          natural-language change, attachment/evidence and one primary
-          action." Extracted from the old sticky-top identity block so the
-          composer is reachable from any scroll position without pinning
-          the whole identity/readiness row to the viewport too. Same
-          textarea, same voice/attach/send handlers, same state — only the
-          position changed, from sticky-top to fixed-bottom. `pb-[26px]`
-          plus the page's own bottom padding (see the grid wrapper below)
-          keep it clear of the last document row. */}
+      {/* ── COMMAND COMPOSER (moved inline, 19 Aug 2026) ── Originally the
+          "PERSISTENT COMMAND DOCK" of the 16 Aug 2026 2030 shell reset,
+          following Blueprint §3 ("Command dock: Persistent bottom surface
+          — natural-language change, attachment/evidence and one primary
+          action") by pinning this to `fixed inset-x-0 bottom-0`.
+
+          Robert's explicit 19 Aug 2026 feedback, from an annotated
+          screenshot, asked for this moved out of that fixed bottom
+          position and placed inline near the top of the page instead,
+          around where the sector chips / initial prompt sit -- a
+          deliberate, knowing departure from Blueprint §3's "persistent
+          bottom surface" language, made at his direction. The composer
+          already sat right here in source/DOM order (immediately after
+          the sticky identity band above, immediately before the sector
+          chips below); the only thing that was ever pinning it to the
+          viewport bottom was the `fixed inset-x-0 bottom-0 z-40` class
+          itself, so removing just that positioning (now `relative`, and
+          `border-b` in place of `border-t` since content now flows below
+          it rather than above it) is enough to render it exactly here,
+          in normal page flow, near the top. Same textarea, same
+          voice/attach/send handlers, same state -- only the position
+          changed. */}
       <div
-        ref={composerDockRef}
-        className="fixed inset-x-0 bottom-0 z-40 border-t"
-        style={{ background: "var(--nf-ivory-raised, #fbfaf8)", borderColor: "var(--nf-rule, #DED8CE)" }}
+        className="relative border-b"
+        style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
       >
         <div className="mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]">
           {/* The prompt (the input method, never the subject). Styled as a
@@ -3781,7 +3732,7 @@ export default function ProjectDesk({
               up-arrow triggered a file picker, and the real send action
               was a separate text-labelled pill button ("Apply") to its
               right, which is not how any chat surface reads. */}
-          <div className="flex items-end gap-2 rounded-[24px] border border-[#DDD9D1] bg-white py-2 pl-[18px] pr-2" style={{ boxShadow: "0 4px 18px rgba(20,20,20,.06)" }}>
+          <div className="flex items-end gap-2 rounded-[4px] border border-[#d3d0cd] bg-white py-2 pl-[18px] pr-2">
             <textarea
               ref={inputRef}
               value={draft}
@@ -3802,7 +3753,7 @@ export default function ProjectDesk({
               placeholder={resuming ? PLACEHOLDER_RESUMING : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
               disabled={resuming}
               rows={1}
-              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#141414] outline-none placeholder:text-[#655F52] disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#110f0d] outline-none placeholder:text-[#66635e] disabled:cursor-not-allowed disabled:opacity-60"
             />
             <div className="flex flex-none items-center gap-1.5">
               {voiceSupported && (
@@ -3810,10 +3761,10 @@ export default function ProjectDesk({
                   type="button"
                   onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}
                   title={voiceState === "idle" ? "Say it out loud" : "Stop listening"}
-                  className={`flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border bg-white ${voiceState === "listening" ? "border-[#B4650B] text-[var(--nf-orange-strong)]" : "border-transparent text-[#655F52] hover:border-[#E3E0DA] hover:text-[#141414]"}`}
+                  className={`flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border bg-white ${voiceState === "listening" ? "border-[#832f00] text-[var(--nf-orange-strong)]" : "border-transparent text-[#66635e] hover:border-[#d3d0cd] hover:text-[#110f0d]"}`}
                 >
                   {voiceState === "listening" ? (
-                    <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#B4650B]" aria-hidden="true" />
+                    <span className="inline-block h-[10px] w-[10px] rounded-full bg-[#832f00]" aria-hidden="true" />
                   ) : (
                     <svg width="14" height="18" viewBox="0 0 14 18" fill="none" aria-hidden="true">
                       <rect x="4.5" y="1" width="5" height="10" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
@@ -3826,7 +3777,7 @@ export default function ProjectDesk({
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 title="Drop or choose a plain-text document and it will be read into the statement"
-                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#655F52] hover:border-[#E3E0DA] hover:text-[#141414]"
+                className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#66635e] hover:border-[#d3d0cd] hover:text-[#110f0d]"
               >
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M11.5 5.5 6 11a2.5 2.5 0 1 0 3.54 3.54L15 9.08a4 4 0 1 0-5.66-5.66L4 8.76" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -3839,7 +3790,7 @@ export default function ProjectDesk({
                 disabled={!sendReady}
                 title={busy ? "Reading…" : started ? "Send" : "Start"}
                 aria-label={busy ? "Reading" : started ? "Send" : "Start"}
-                className={`flex h-[36px] w-[36px] flex-none cursor-pointer items-center justify-center rounded-full border-0 transition-colors ${sendReady ? "bg-[#F5A21B] text-[#141414] hover:bg-[#E5940F]" : "bg-[#F0EEE9] text-[#C7C3BA]"} disabled:cursor-not-allowed`}
+                className={`flex h-[36px] w-[36px] flex-none cursor-pointer items-center justify-center rounded-full border-0 transition-colors ${sendReady ? "bg-[#c66000] text-[#110f0d] hover:bg-[#ab4700]" : "bg-[#e3e1de] text-[#a7a4a0]"} disabled:cursor-not-allowed`}
               >
                 {busy ? (
                   <span className="inline-block h-[14px] w-[14px] animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden="true" />
@@ -3862,25 +3813,25 @@ export default function ProjectDesk({
               answers in copy) still holds -- this describes the
               mechanism, it does not demonstrate an answer. */}
           {!started && (
-            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">
               Answers below fill in automatically as you describe your requirement above.
             </p>
           )}
           {wrongCompany && (
-            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">
+            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">
               Looking for website hosting? That is Netlify, a different company. This is Netify, the SASE and SD-WAN procurement marketplace; carry on if the network is what you came for.
             </p>
           )}
-          {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">{pasteSummary}</p>}
+          {pasteSummary && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">{pasteSummary}</p>}
           {cycleError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[var(--nf-orange-strong)]">{cycleError}</p>}
-          {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#655F52]">{voiceError}</p>}
+          {voiceError && <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">{voiceError}</p>}
         </div>
       </div>
 
-      {/* Sector quick-start chips, shown only before a sector stands:
-          kept in normal page flow (not the fixed dock) so the dock stays
-          exactly what the blueprint specifies -- text, attachment, send --
-          nothing else. */}
+      {/* Sector quick-start chips, shown only before a sector stands: kept
+          in normal page flow immediately below the composer, which (as of
+          19 Aug 2026) is now also in normal page flow itself -- see the
+          COMMAND COMPOSER comment above. */}
       {!coreFive.sector && (
         <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-2 pt-3 lg:px-[42px]">
           {/* Lifecycle-consistency closure pass (18 Aug 2026), correction
@@ -3902,13 +3853,13 @@ export default function ProjectDesk({
             className="flex items-center gap-[7px] overflow-x-auto sm:flex-wrap sm:overflow-visible [mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-28px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]"
             style={{ scrollbarWidth: "none" }}
           >
-            <span className="flex-none text-[12.5px] text-[#655F52]">Or start from your sector:</span>
+            <span className="flex-none text-[12.5px] text-[#66635e]">Or start from your sector:</span>
             {SECTOR_CHIPS.map((c) => (
               <button
                 key={c.label}
                 type="button"
                 onClick={() => pickChip(c)}
-                className="flex-none cursor-pointer whitespace-nowrap rounded-full border border-[#E0DCD3] bg-[#FBFAF8] px-3.5 py-[7px] text-[13px] text-[#33302C] hover:border-[#141414] hover:bg-white"
+                className="flex-none cursor-pointer whitespace-nowrap rounded-[4px] border border-[#d3d0cd] bg-[#fefdfc] px-3.5 py-[7px] text-[13px] text-[#1c1a18] hover:border-[#110f0d] hover:bg-white"
               >
                 {c.label}
               </button>
@@ -3931,75 +3882,56 @@ export default function ProjectDesk({
           renders first (see the `order` classes), so the single highest-
           priority decision is the first thing a 390px viewport shows
           under the delta receipt — the blueprint's mobile rule ("one
-          decision card is fully readable above the fold"). `pb-[220px]`
-          keeps the last canvas row clear of the fixed bottom dock. */}
-      <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-[220px] pt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-[42px]">
-      {/* `pb-[150px]` (mobile only, correction 17 Aug 2026): the fixed
-          bottom command dock measures ~121px tall on a 390px viewport
-          plus its own border/shadow -- with no reserve here, the last
-          ~120px of ANY content that happens to scroll to the bottom of
-          the viewport sits physically underneath the dock (confirmed via
-          Playwright boundingBox: aside bottom 1467px vs dock top 723px
-          at scroll 0, i.e. overlapping). The grid container's own
-          `pb-[220px]` only guards the very end of the whole stack
-          (after `<main>`), not the aside/main seam on mobile where the
-          aside — now capped to one visible card, see NextQuestions'
-          `bare` mode above — still needs its own clearance. */}
+          decision card is fully readable above the fold"). The generous
+          `pb-[220px]`/`pb-[150px]` reserves this section used to carry
+          (17-18 Aug 2026 corrections) existed only to keep content clear
+          of the composer's old fixed-bottom footprint on desktop and
+          mobile respectively; both are superseded 19 Aug 2026 now that
+          the composer is no longer fixed to the viewport (see the COMMAND
+          COMPOSER comment above) -- a plain, modest `pb-16` closes out the
+          page instead. */}
+      <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-16 pt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-8 lg:px-[42px]">
       {/* Mission Control (2030 visual pass, 18 Aug 2026): restyled to the
           approved prototype's dark `.card.dark` treatment (index.html) --
           the one panel across states 0/1 the closure package specifically
           names ("Mission Control... governed MCP approval flow"). Only
           colour/typography change here; the sticky/order/mobile-height
-          logic above (lg:sticky, lg:top-[132px], the mobile dock
-          clearance) is untouched -- that's spacing/hierarchy the prototype
-          itself doesn't govern (it has no fixed dock to clear).
+          logic above (lg:sticky, lg:top-[132px]) is untouched -- that's
+          spacing/hierarchy the prototype itself doesn't govern.
 
           Dead-zone correction (18 Aug 2026, real bug found via mobile
-          screenshot): the 150px bottom clearance below was written when
-          the mobile card was ALWAYS fully expanded (guarding its last
-          decision card from the fixed dock) -- now that it defaults to
-          the collapsed one-line summary (`mcExpanded`, added this same
-          pass), that same 150px reservation sits empty below a two-line
-          card, reading as exactly the "giant dead zone" the mobile
-          acceptance criteria rule out. Only reserve it while genuinely
-          expanded; collapsed keeps a plain, small gap instead. */}
-      <aside className={`order-1 mb-6 ${mcExpanded ? "pb-[150px]" : "pb-6"} lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start`}>
+          screenshot), superseded 19 Aug 2026: the 150px bottom clearance
+          this used to carry existed to guard the card's last decision row
+          from the composer's old fixed-bottom position. Robert's 19 Aug
+          2026 request moved the composer out of fixed positioning (now
+          inline, near the top of the page), so there is no longer
+          anything pinned to the viewport for this aside to clear on
+          mobile -- a single, plain bottom margin is enough regardless of
+          `mcExpanded`. */}
+      <aside className="order-1 mb-6 pb-6 lg:sticky lg:top-[132px] lg:order-2 lg:mb-0 lg:pb-0 lg:self-start">
         {/* No .procurement-2030 class needed here: this div is already
             inside ProcurementEntry's own .procurement-2030 wrapper (the
             --nf-* custom properties inherit down the DOM tree), unlike
             WorkspaceHeader.tsx, which is a layout-level sibling and does
             need its own application. */}
-        {/* Mandatory visual correction (18 Aug 2026): "the fixed composer
-            must never obscure content." Confirmed by real screenshot at
-            1440x900, unscrolled: this card's own natural height, added to
-            its sticky top-132px offset, ran into the fixed-bottom
-            composer's ~90px footprint before the card ever got to scroll
-            out from under it. `lg:max-h-*` reserves exactly the space
-            between the sticky offset and the composer (with margin) and
-            `overflow-y-auto` lets the card's own content scroll internally
-            instead of spilling under the dock -- the standard fix for a
-            sticky sidebar sharing the viewport with a fixed footer. Mobile
-            is unaffected (not sticky there, and now collapsed by default
-            via `mcExpanded`, so it's short regardless). */}
+        {/* Mandatory visual correction (18 Aug 2026), superseded 19 Aug
+            2026: this card's `lg:max-h-*` used to be fed by a JS
+            measurement guarding against the composer's old fixed-bottom
+            position (see the removed `mcMaxHeightPx` doc comment near this
+            component's other state). The composer is no longer fixed --
+            it now renders inline, near the top of the page -- so this is
+            back to a plain static cap: generous for normal content, with
+            `overflow-y-auto` still letting the card scroll internally on
+            the rare occasion content exceeds it. */}
         <div
-          ref={mcCardRef}
-          // The max-height itself stays `lg:`-scoped via the Tailwind
-          // class (never applied on mobile, exactly as before) -- only
-          // the VALUE now comes from the `--mc-max-h` custom property so
-          // the JS measurement below can feed it. Setting a CSS variable
-          // via inline style is harmless below `lg` since nothing reads
-          // it there; the `min(60vh,...)` fallback covers first paint
-          // (before the effect runs) and any case the effect can't
-          // measure (e.g. no ResizeObserver support).
-          className="rounded-[18px] border p-4 lg:max-h-[var(--mc-max-h,min(60vh,calc(100vh-170px)))] lg:overflow-y-auto"
+          className="rounded-[4px] border p-4 lg:max-h-[min(60vh,calc(100vh-170px))] lg:overflow-y-auto"
           style={{
             background: "var(--nf-ink-950)",
-            borderColor: "#2B2519",
-            color: "#EFEAE0",
-            ...(mcMaxHeightPx != null ? ({ "--mc-max-h": `${mcMaxHeightPx}px` } as React.CSSProperties) : {}),
+            borderColor: "#2b2825",
+            color: "#f7f5f2",
           }}
         >
-          <div style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "#C9C2B2" }}>
+          <div style={{ fontFamily: "var(--nf-font-mono)", fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "#bab7b3" }}>
             Mission control
           </div>
           {/* Real bug found via screenshot verification (18 Aug 2026): this
@@ -4069,21 +4001,21 @@ export default function ProjectDesk({
             <button
               type="button"
               onClick={() => setMcExpanded((v) => !v)}
-              className="mt-2 cursor-pointer rounded-full border-0 px-3 py-1.5 text-[11px] font-semibold uppercase lg:hidden"
+              className="mt-2 cursor-pointer rounded-[4px] border-0 px-3 py-1.5 text-[11px] font-semibold uppercase lg:hidden"
               /* Contrast fix (verification pass, 18 Aug 2026): white text on
-                 --nf-orange (#E8590C) measured 3.58:1, below WCAG AA's
+                 --nf-orange (#c66000) measured 3.58:1, below WCAG AA's
                  4.5:1 for this button's normal-weight small text.
-                 --nf-orange-strong (#AA3E06, already the design system's
+                 --nf-orange-strong (#832f00, already the design system's
                  own darker/contrast-fixed orange -- see globals.css) gives
                  white text 6.17:1 here, comfortably safe, same accent hue. */
-              style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.06em", background: "var(--nf-orange-strong, #AA3E06)", color: "#fff" }}
+              style={{ fontFamily: "var(--nf-font-mono)", letterSpacing: "0.06em", background: "var(--nf-orange-strong, #832f00)", color: "#fff" }}
               aria-expanded={mcExpanded}
             >
               {mcExpanded ? "Hide decisions" : "View decisions"}
             </button>
           )}
           <div className={`${mcExpanded ? "" : "hidden"} lg:block`}>
-            <p className="m-0 mt-3 text-[12px] leading-[1.5] lg:mt-1" style={{ color: "#B9B2A2" }}>
+            <p className="m-0 mt-3 text-[12px] leading-[1.5] lg:mt-1" style={{ color: "#a7a4a0" }}>
               {published
                 ? "Publication is already complete — nothing below reopens it. These only shape your next revision."
                 : materialDecisionsRemaining
@@ -4108,14 +4040,14 @@ export default function ProjectDesk({
                     happened, so nothing here is a blocker of anything
                     anymore, regardless of its pre-publish classification. */}
                 {(published || !materialDecisionsRemaining) && (
-                  <div className="mb-2 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.1em", color: "#948C79" }}>
+                  <div className="mb-2 text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.1em", color: "#83807b" }}>
                     Optional refinements
                   </div>
                 )}
                 <NextQuestions cards={nextQuestionCards.slice(0, 3)} bare dark />
               </div>
             ) : (
-              <p className="m-0 mt-4 text-[12.5px] leading-[1.5]" style={{ color: "#948C79" }}>
+              <p className="m-0 mt-4 text-[12.5px] leading-[1.5]" style={{ color: "#83807b" }}>
                 No material decision is open right now — the document reflects everything stated so far.
               </p>
             )}
@@ -4126,11 +4058,11 @@ export default function ProjectDesk({
               if one exists, matching the mockup treating it as
               foot-of-card chrome, not a decision card). */}
           {latestMcpReceipt && (
-            <div className="mt-3 border-t pt-2.5" style={{ borderColor: "#2B2519" }}>
-              <span style={{ fontFamily: "var(--nf-font-mono)", fontSize: "9px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--nf-lilac, #8D77CF)", fontWeight: 700 }}>
+            <div className="mt-3 border-t pt-2.5" style={{ borderColor: "#2b2825" }}>
+              <span style={{ fontFamily: "var(--nf-font-mono)", fontSize: "9px", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--nf-lilac-on-dark, #ae96da)", fontWeight: 700 }}>
                 MCP receipt
               </span>
-              <p className="m-0 mt-1 text-[12px] leading-[1.4]" style={{ color: "#D8D0BE" }}>
+              <p className="m-0 mt-1 text-[12px] leading-[1.4]" style={{ color: "#d0cdc9" }}>
                 {latestMcpReceipt.label} · {latestMcpReceipt.time}
               </p>
             </div>
@@ -4177,7 +4109,7 @@ export default function ProjectDesk({
           data, the memory, or the scroll behaviour changes. */}
       <div className="mx-auto w-full max-w-[1000px] px-[26px] pt-3">
         {msgs.length > 0 && (
-          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#655F52]">
+          <p className="m-0 mb-2 px-1 text-[11.5px] leading-[1.5] text-[#66635e]">
             Feedback only, kept for this sitting — the statement below is the record.
           </p>
         )}
@@ -4200,11 +4132,11 @@ export default function ProjectDesk({
             <div key={i} className="flex items-start gap-2.5">
               <span
                 className="w-[52px] flex-none pt-[3px] text-[10px] font-semibold uppercase"
-                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#655F52" : "var(--nf-orange-strong)" }}
+                style={{ ...mono, letterSpacing: "0.08em", color: m.who === "you" ? "#66635e" : "var(--nf-orange-strong)" }}
               >
                 {m.who === "you" ? "You" : "Netify"}
               </span>
-              <span className="max-w-[56em] text-[13.5px] leading-[1.55]" style={{ textWrap: "pretty", color: m.who === "you" ? "#141414" : "#5F5D59" }}>
+              <span className="max-w-[56em] text-[13.5px] leading-[1.55]" style={{ textWrap: "pretty", color: m.who === "you" ? "#110f0d" : "#66635e" }}>
                 {m.text}
               </span>
             </div>
@@ -4297,8 +4229,8 @@ export default function ProjectDesk({
           Asked directly rather than guessed, since this panel had been
           ruled a deliberately distinct "document" earlier in the
           project: his answer was to drop the boundary here too. The
-          card's own background was already #FBFAF8, the same value as
-          the page's #fbfaf8 (round 12) -- only the border and the drop
+          card's own background was already #fefdfc, the same value as
+          the page's #fefdfc (round 12) -- only the border and the drop
           shadow were drawing a line that color alone no longer needed
           to. Both are gone; the padding stays, so the document still
           reads as its own paragraph, just without a frame around it. */}
@@ -4315,13 +4247,13 @@ export default function ProjectDesk({
           screen-reader-accessible for free). */}
       {phase === "live" && (
         <details className="mx-auto w-full max-w-[1000px] px-[26px] pb-6 pt-[10px]">
-          <summary className="cursor-pointer select-none rounded-[9px] px-3 py-2.5 text-[13px] font-medium text-[#6E6C67] hover:bg-[#F4F2ED] hover:text-[#141414]" style={mono}>
+          <summary className="cursor-pointer select-none rounded-[4px] px-3 py-2.5 text-[13px] font-medium text-[#83807b] hover:bg-[#e3e1de] hover:text-[#110f0d]" style={mono}>
             Project details / edit source facts
           </summary>
           <div className="px-6 pb-7 pt-7 sm:px-[46px] sm:pb-[34px] sm:pt-[38px]">
           <div className="text-[10.5px] uppercase text-[var(--nf-orange-strong)]" style={{ ...mono, letterSpacing: "0.11em" }}>Statement of requirements · living</div>
           <h2 className="mb-1.5 mt-2.5 text-[26px] font-semibold leading-[1.2] sm:text-[29px]" style={{ letterSpacing: "-0.025em" }}>{docTitle}</h2>
-          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#655F52]">
+          <p className="m-0 mb-[26px] max-w-[44em] text-[14px] leading-[1.6] text-[#66635e]">
             This document is the project. It fills in as you talk, every line shows where it came from, and vendors and service providers bid against exactly what is on this page.
           </p>
 
@@ -4330,11 +4262,11 @@ export default function ProjectDesk({
               const rows = ruleFacts;
               const state = coreFive.sector ? (rows.length ? `${rows.length} applied` : "none yet") : "waiting";
               return (
-                <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+                <div key={g.id} className="border-t border-[#e3e1de] pb-4 pt-[18px]">
                   <div className="mb-2 flex items-baseline gap-[11px]">
-                    <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                    <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">{g.note}</span>
-                    <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{state}</span>
+                    <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
+                    <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">{g.note}</span>
+                    <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{state}</span>
                   </div>
                   <div className="flex flex-col">
                     {rows.length > 0 ? (
@@ -4343,28 +4275,28 @@ export default function ProjectDesk({
                         return (
                           <div
                             key={f.id}
-                            className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]"
-                            style={isNew ? { background: "#FFFCF3", boxShadow: "inset 2px 0 0 #F5A21B", paddingLeft: 10, marginLeft: -10 } : {}}
+                            className="flex items-start gap-3.5 border-b border-dotted border-[#e3e1de] py-[9px]"
+                            style={isNew ? { background: "#fefdfc", boxShadow: "inset 2px 0 0 #c66000", paddingLeft: 10, marginLeft: -10 } : {}}
                           >
-                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]">Applied</span>
+                            <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#66635e] sm:w-[150px]">Applied</span>
                             <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
                               <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>
                                 {COMPLIANCE_LABELS[String(f.value)] ?? String(f.value)}
                               </span>
-                              <span className="text-[12px] italic text-[#655F52]">
+                              <span className="text-[12px] italic text-[#66635e]">
                                 {f.provenance === "inferred" ? f.reason ?? "asserted by your sector pack" : f.quote ? `“${f.quote}”` : "your words"}
                               </span>
                             </div>
                             <span
                               className="flex-none rounded-[4px] px-[5px] py-[3px] text-[9.5px] font-semibold uppercase"
-                              style={{ ...mono, letterSpacing: "0.07em", ...(f.provenance === "inferred" ? { background: "#FFF3DC", color: "#8A4D08" } : { background: "#EAF6EE", color: "#256B3E" }) }}
+                              style={{ ...mono, letterSpacing: "0.07em", ...(f.provenance === "inferred" ? { background: "#ffe3cc", color: "#832f00" } : { background: "#d9f4d9", color: "#1e4e22" }) }}
                             >
                               {f.provenance === "inferred" ? "from your sector" : "your words"}
                             </span>
                             <button
                               type="button"
                               onClick={() => dropRow(f)}
-                              className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
+                              className="flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e] hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]"
                               style={{ ...mono, letterSpacing: "0.07em" }}
                             >
                               {f.provenance === "inferred" ? "drop" : "clear"}
@@ -4373,18 +4305,18 @@ export default function ProjectDesk({
                         );
                       })
                     ) : coreFive.sector ? (
-                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#655F52]">
+                      <div className="py-[9px] text-[13.5px] leading-[1.55] text-[#66635e]">
                         No asserted rule pack for this sector yet. Any rule you state lands here with your words as its provenance.
                       </div>
                     ) : (
                       <div className="flex items-start gap-3.5 py-[9px]">
-                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Sector rules</span>
+                        <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Sector rules</span>
                         <button
                           type="button"
                           onClick={() => setEdit("sector")}
-                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e] hover:border-[#110f0d] hover:bg-white hover:text-[#110f0d]"
                         >
-                          <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
+                          <span className="text-[12px] text-[#a7a4a0]" style={mono}>+</span>
                           Set your sector to load these
                         </button>
                       </div>
@@ -4397,13 +4329,13 @@ export default function ProjectDesk({
                         options (NHS DSPT, FCA) only appear once the
                         standing sector matches. */}
                     <div className="flex items-start gap-3.5 py-[9px]">
-                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Compliance</span>
+                      <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Compliance</span>
                       <button
                         type="button"
                         onClick={() => setEdit("compliance")}
-                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52] hover:border-[#141414] hover:bg-white hover:text-[#141414]"
+                        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e] hover:border-[#110f0d] hover:bg-white hover:text-[#110f0d]"
                       >
-                        <span className="text-[12px] text-[#C4C0B8]" style={mono}>+</span>
+                        <span className="text-[12px] text-[#a7a4a0]" style={mono}>+</span>
                         Add a compliance requirement
                       </button>
                     </div>
@@ -4414,11 +4346,11 @@ export default function ProjectDesk({
             const slots = TWIN_SLOTS.filter((s) => s.group === g.id);
             const filled = slots.filter(slotFilled).length;
             return (
-              <div key={g.id} className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+              <div key={g.id} className="border-t border-[#e3e1de] pb-4 pt-[18px]">
                 <div className="mb-2 flex items-baseline gap-[11px]">
-                  <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
-                  <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">{g.note}</span>
-                  <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{filled} of {slots.length}</span>
+                  <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>{g.title}</span>
+                  <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">{g.note}</span>
+                  <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{filled} of {slots.length}</span>
                 </div>
                 <div className="flex flex-col">{slots.map(slotCell)}</div>
               </div>
@@ -4438,28 +4370,28 @@ export default function ProjectDesk({
               after the fact. Nothing new is invented: still the buyer's
               own words, still kept, still feeding the published document
               exactly as it already did. */}
-          <div className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+          <div className="border-t border-[#e3e1de] pb-4 pt-[18px]">
             <div className="mb-2 flex items-baseline gap-[11px]">
-              <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>Other requirements</span>
-              <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">anything the statement above has no line for</span>
-              <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
+              <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>Other requirements</span>
+              <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">anything the statement above has no line for</span>
+              <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{receipts.length ? `${receipts.length} kept` : "none yet"}</span>
             </div>
             <div className="flex flex-col">
               {receipts.length > 0 ? (
                 receipts.map((r) => (
-                  <div key={r.id} className="flex items-start gap-3.5 border-b border-dotted border-[#EFECE5] py-[9px]">
-                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#655F52] sm:w-[150px]">Noted</span>
+                  <div key={r.id} className="flex items-start gap-3.5 border-b border-dotted border-[#e3e1de] py-[9px]">
+                    <span className="w-[92px] flex-none pt-[2px] text-[13px] text-[#66635e] sm:w-[150px]">Noted</span>
                     <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2.5 gap-y-1">
                       <span className="text-[16px] font-medium leading-[1.4]" style={{ textWrap: "pretty" }}>{r.text}</span>
-                      <span className="text-[12px] italic text-[#655F52]">kept verbatim</span>
+                      <span className="text-[12px] italic text-[#66635e]">kept verbatim</span>
                     </div>
-                    <span style={{ ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none", background: "#EAF6EE", color: "#256B3E" }}>
+                    <span style={{ ...mono, fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", borderRadius: "4px", padding: "3px 5px", flex: "none", background: "#d9f4d9", color: "#1e4e22" }}>
                       your words
                     </span>
                     <button
                       type="button"
                       onClick={() => { dropReceipt(r.id); say(`Cleared: “${r.text}”. It will not come back unless you say it yourself.`); }}
-                      className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
+                      className="flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e] hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]"
                       style={{ ...mono, letterSpacing: "0.07em" }}
                     >
                       clear
@@ -4468,8 +4400,8 @@ export default function ProjectDesk({
                 ))
               ) : (
                 <div className="flex items-start gap-3.5 py-[9px]">
-                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#655F52] sm:w-[150px]">Anything else</span>
-                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[9px] border border-dashed border-[#D3CFC6] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#655F52]">
+                  <span className="w-[92px] flex-none pt-[10px] text-[13px] text-[#66635e] sm:w-[150px]">Anything else</span>
+                  <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[4px] border border-dashed border-[#d3d0cd] bg-transparent px-3 py-[9px] text-left text-[13.5px] text-[#66635e]">
                     Say it in the prompt above. Anything that doesn&apos;t fit a line elsewhere is kept here, word for word.
                   </div>
                 </div>
@@ -4480,10 +4412,10 @@ export default function ProjectDesk({
           {/* Readiness: once weighted completeness passes the threshold,
               the action into the vendor list, inside the document. */}
           {readyToFit && (
-            <div className="flex flex-wrap items-center gap-4 border-t border-[#EFECE5] pt-5">
+            <div className="flex flex-wrap items-center gap-4 border-t border-[#e3e1de] pt-5">
               <div className="min-w-[240px] flex-1">
                 <div className="text-[16px] font-semibold leading-[1.4]">Complete enough to be priced consistently.</div>
-                <div className="mt-[3px] max-w-[38em] text-[13.5px] leading-[1.55] text-[#5F5D59]">
+                <div className="mt-[3px] max-w-[38em] text-[13.5px] leading-[1.55] text-[#66635e]">
                   {created
                     ? "The gaps left are ones vendors and service providers can quote around."
                     : "The gaps left are ones vendors and service providers can quote around. Nothing has left this page."}
@@ -4495,14 +4427,14 @@ export default function ProjectDesk({
                     hero and the publish panel itself; this is the one
                     natural point in between, readiness just crossing
                     threshold, so the payoff stays in view on the way there. */}
-                <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#8A4D08]">
+                <div className="mt-[6px] max-w-[38em] text-[13px] leading-[1.5] text-[#832f00]">
                   Next: see what publishing unlocks, then publish to get bids, pricing and vetted responses.
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => handleCommand({ kind: "whoFits" })}
-                className="flex-none cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[21px] py-3 text-[15px] font-semibold text-[#141414] hover:bg-[#E5940F]"
+                className="flex-none cursor-pointer rounded-[4px] border-0 bg-[#c66000] px-[21px] py-3 text-[15px] font-semibold text-[#110f0d] hover:bg-[#ab4700]"
               >
                 See what publishing unlocks
               </button>
@@ -4531,7 +4463,7 @@ export default function ProjectDesk({
           <button
             type="button"
             onClick={() => { setPhase("live"); scrollToWorkspace(); }}
-            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#655F52] hover:text-[#141414]"
+            className="mb-5 cursor-pointer border-0 bg-transparent p-0 text-[14px] text-[#66635e] hover:text-[#110f0d]"
           >
             Back to the statement
           </button>
@@ -4553,23 +4485,23 @@ export default function ProjectDesk({
               so this one simply stops rendering once that's true, rather
               than being replaced by a duplicate. */}
           {!published && (
-            <div className="overflow-hidden rounded-[14px] border border-[#E5E1D9] bg-[#FBFAF8] p-6">
+            <div className="overflow-hidden rounded-[4px] border border-[#d3d0cd] bg-[#fefdfc] p-6">
               <h2 className="m-0 mb-2.5 max-w-[26em] text-[27px] font-semibold leading-[1.25]" style={{ letterSpacing: "-0.022em" }}>
                 Publish to match this project against Netify&apos;s evaluated vendors and service providers, invite the strongest fits, and unlock your project documents.
               </h2>
-              <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#5F5D59]">
+              <p className="m-0 mb-5 max-w-[38em] text-[15.5px] leading-[1.6] text-[#66635e]">
                 Publishing is free. Who matches, why, and who is invited unlock together, the moment you publish — never before.
               </p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
                   <div className="text-[22px] font-semibold" style={mono}>{marketTotal ?? "…"}</div>
-                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
                     Vendors and service providers Netify has evaluated. The whole market, never narrowed by what anyone pays — this project&apos;s own matches are computed at publish.
                   </div>
                 </div>
-                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
                   <div className="text-[22px] font-semibold" style={mono}>{pct}%</div>
-                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
                     Document readiness. {pctNote}
                   </div>
                 </div>
@@ -4589,14 +4521,14 @@ export default function ProjectDesk({
                     (still the real, correct input to the accept-gap
                     submission loop above in `signAndPublish`, an unrelated
                     concern from what this stat displays). */}
-                <div className="rounded-[10px] border border-[#E5E1D9] bg-white p-4">
+                <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
                   <div className="text-[22px] font-semibold" style={mono}>{materialDecisionsRemaining}</div>
-                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#655F52]">
+                  <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
                     {materialDecisionsRemaining === 1 ? "Blocking decision" : "Blocking decisions"} remaining. Resolve or accept as a stated assumption before you publish.
                   </div>
                 </div>
               </div>
-              <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#655F52]">
+              <p className="m-0 mt-5 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
                 What publishing unlocks: your matched vendors and service providers, why each matched with evidence and dates, which were invited directly, the complete market report, and your Word and PDF documents.
               </p>
             </div>
@@ -4606,7 +4538,7 @@ export default function ProjectDesk({
                   organs intact: what carries, what stays private, the
                   consents verbatim, the identity read-back, the vetting
                   standard linked so the claim is checkable. ---- */}
-          <div data-publish="1" className="mt-9 border-l-2 pl-4" style={{ scrollMarginTop: "90px", borderColor: "var(--nf-orange, #F5A21B)" }}>
+          <div data-publish="1" className="mt-9 border-l-2 pl-4" style={{ scrollMarginTop: "90px", borderColor: "var(--nf-orange, #c66000)" }}>
             {published ? (
               <div>
                 <div className="mb-2 max-w-[36em] text-[16px] leading-[1.6]">
@@ -4631,15 +4563,15 @@ export default function ProjectDesk({
                     already-correct response-comparison experience built
                     from real stored records -- this never re-implements
                     or duplicates that view. */}
-                <div className="mb-3 max-w-[36em] rounded-[10px] border p-3" style={{ borderColor: "#E5E1D9", background: responseCount ? "#F3F8F4" : "#FBFAF8" }}>
-                  <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#141414" }}>
+                <div className="mb-3 max-w-[36em] rounded-[4px] border p-3" style={{ borderColor: "#d3d0cd", background: responseCount ? "#d9f4d9" : "#fefdfc" }}>
+                  <p className="m-0 text-[13.5px] leading-[1.6]" style={{ color: "#110f0d" }}>
                     {responseCount
                       ? `${responseCount} of ${published.invited.length || responseCount} invited vendor${responseCount === 1 ? "" : "s"} ${responseCount === 1 ? "has" : "have"} responded.`
                       : `Published — awaiting supplier responses.${published.invited.length > 0 ? ` ${cap(numWord(published.invited.length))} invited so far.` : ""}`}
                   </p>
                   {Boolean(responseCount) && created?.id && (
                     <p className="m-0 mt-1.5 text-[13px]">
-                      <a className="underline hover:text-[#8A4D08]" href={`/sase/rfp-builder/${created.id}/review${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
+                      <a className="underline hover:text-[#832f00]" href={`/sase/rfp-builder/${created.id}/review${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
                         Compare responses
                       </a>
                     </p>
@@ -4680,10 +4612,10 @@ export default function ProjectDesk({
                 {(published.matchedVendors.length > 0 || published.invited.length > 0) && (
                   <div className="mt-3">
                     <div className="mb-1 flex items-center justify-between gap-3">
-                      <p className="m-0 text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".12em", color: "var(--nf-orange-strong, #B4650B)" }}>Your matches</p>
+                      <p className="m-0 text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".12em", color: "var(--nf-orange-strong, #832f00)" }}>Your matches</p>
                       <ProvenanceTag kind="intel" />
                     </div>
-                    <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#5F5D59]">
+                    <p className="m-0 mb-2 max-w-[38em] text-[13px] leading-[1.6] text-[#66635e]">
                       {published.matchedVendors.length} matched out of {published.totalEvaluatedMarket} evaluated
                       {published.frozen ? ", from this publish's own frozen match" : ", recomputed today — no frozen snapshot exists for this project from before publication tracking began"}.{" "}
                       {cap(numWord(published.invited.length))} invited directly.
@@ -4694,11 +4626,11 @@ export default function ProjectDesk({
                         {published.matchedVendors.map((v, i) => {
                           const inv = published.invited.some((iv) => iv.slug === v.slug);
                           return (
-                            <li key={`${v.slug}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2.5 first:border-t-0 first:pt-0">
-                              <span className="text-[11px] text-[#655F52]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
-                              <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
+                            <li key={`${v.slug}-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#e3e1de] py-2.5 first:border-t-0 first:pt-0">
+                              <span className="text-[11px] text-[#66635e]" style={mono}>{String(i + 1).padStart(2, "0")}</span>
+                              <span className="text-[14px] font-semibold text-[#110f0d]">{v.name}</span>
                               {inv && (
-                                <span className="rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}>invited</span>
+                                <span className="rounded-[3px] px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}>invited</span>
                               )}
                             </li>
                           );
@@ -4711,14 +4643,14 @@ export default function ProjectDesk({
                       if (invitedOnly.length === 0) return null;
                       return (
                         <div className="mt-2">
-                          <p className="m-0 mb-1 text-[11px] text-[#655F52]">
+                          <p className="m-0 mb-1 text-[11px] text-[#66635e]">
                             Also invited (your own pinned {invitedOnly.length === 1 ? "vendor" : "vendors"}, not part of the ranked match):
                           </p>
                           <ol className="m-0 list-none p-0">
                             {invitedOnly.map((v, i) => (
-                              <li key={`${v.slug}-invited-only-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#F5F3EE] py-2 first:border-t-0 first:pt-0">
-                                <span className="text-[14px] font-semibold text-[#141414]">{v.name}</span>
-                                <span className="rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}>invited</span>
+                              <li key={`${v.slug}-invited-only-${i}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-[#e3e1de] py-2 first:border-t-0 first:pt-0">
+                                <span className="text-[14px] font-semibold text-[#110f0d]">{v.name}</span>
+                                <span className="rounded-[3px] px-1.5 py-[1px] text-[10px] font-semibold uppercase" style={{ ...mono, letterSpacing: ".08em", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}>invited</span>
                               </li>
                             ))}
                           </ol>
@@ -4728,8 +4660,8 @@ export default function ProjectDesk({
                   </div>
                 )}
                 {created?.id && (
-                  <p className="m-0 mt-3 text-[13px] leading-relaxed text-[#33302C]">
-                    <a className="underline hover:text-[#8A4D08]" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
+                  <p className="m-0 mt-3 text-[13px] leading-relaxed text-[#1c1a18]">
+                    <a className="underline hover:text-[#832f00]" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>
                       Open your project record
                     </a>{" "}
                     to see responses as they arrive.
@@ -4737,7 +4669,7 @@ export default function ProjectDesk({
                 )}
               </div>
             ) : created?.test ? (
-              <div className="max-w-[36em] text-[15px] leading-[1.6] text-[#5F5D59]">
+              <div className="max-w-[36em] text-[15px] leading-[1.6] text-[#66635e]">
                 Test position created, id {created.id}. Test positions never touch the live board; drop ?test=1 to publish for real.
               </div>
             ) : (
@@ -4751,15 +4683,15 @@ export default function ProjectDesk({
                     folded into the headline so there's one less text block.
                     No new colours, same tokens as the diagram and chips
                     elsewhere in this panel. */}
-                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5]" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #141414)" }}>
+                <p className="m-0 max-w-[36em] text-[17px] font-semibold leading-[1.5]" style={{ fontFamily: "var(--nf-font-serif)", color: "var(--nf-ink-900, #110f0d)" }}>
                   Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson required.
                 </p>
                 <div className="mt-2.5 flex max-w-[36em] flex-wrap gap-1.5">
                   {["Get bids", "Get pricing", "Get vetted responses", "Send messages", "Request demos"].map((chip) => (
                     <span
                       key={chip}
-                      className="rounded-full border px-2.5 py-1 text-[12.5px] font-medium"
-                      style={{ borderColor: "var(--nf-orange-soft-border, #F5A21B66)", background: "var(--nf-orange-soft, #FFF7E8)", color: "var(--nf-orange-strong, #8A4D08)" }}
+                      className="rounded-[3px] border px-2.5 py-1 text-[12.5px] font-medium"
+                      style={{ borderColor: "var(--nf-orange-soft-border, #c6600066)", background: "var(--nf-orange-soft, #ffe3cc)", color: "var(--nf-orange-strong, #832f00)" }}
                     >
                       {chip}
                     </span>
@@ -4774,49 +4706,49 @@ export default function ProjectDesk({
                     board/notify/vetted-view structure stated in prose above,
                     shown as a shape so it reads in one glance. Same colour
                     tokens as the rest of this panel; no new palette. */}
-                <div className="my-4 max-w-[38em] rounded-md border p-4 text-[12px] leading-snug" style={{ borderColor: "var(--nf-rule, #EAE7E1)", background: "var(--nf-ivory-raised, #F5F3EE)" }}>
+                <div className="my-4 max-w-[38em] rounded-[4px] border p-4 text-[12px] leading-snug" style={{ borderColor: "var(--nf-rule, #e3e1de)", background: "var(--nf-ivory-raised, #e3e1de)" }}>
                   <div className="mb-2 flex justify-end">
                     <ProvenanceTag kind="intel" />
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
-                    <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 font-semibold text-[#33302C]">Your project</div>
-                    <div className="text-[#655F52]" style={mono}>publish ↓</div>
-                    <div className="rounded-md border px-3 py-1.5 text-center" style={{ borderColor: "var(--nf-orange, #F5A21B)", background: "var(--nf-orange-soft, #FFF7E8)" }}>
-                      <p className="m-0 font-semibold" style={{ color: "var(--nf-orange-strong, #8A4D08)" }}>Opportunity board</p>
-                      <p className="m-0 text-[11px] text-[#6E6C67]">Anonymous notice: sector, size band. No name, no contact details.</p>
+                    <div className="rounded-[4px] border border-[#e3e1de] bg-white px-3 py-1 font-semibold text-[#1c1a18]">Your project</div>
+                    <div className="text-[#66635e]" style={mono}>publish ↓</div>
+                    <div className="rounded-[4px] border px-3 py-1.5 text-center" style={{ borderColor: "var(--nf-orange, #c66000)", background: "var(--nf-orange-soft, #ffe3cc)" }}>
+                      <p className="m-0 font-semibold" style={{ color: "var(--nf-orange-strong, #832f00)" }}>Opportunity board</p>
+                      <p className="m-0 text-[11px] text-[#83807b]">Anonymous notice: sector, size band. No name, no contact details.</p>
                     </div>
                     <div className="grid w-full grid-cols-2 gap-3 pt-1">
                       <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#655F52]" style={mono}>↓ notified</div>
-                        <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
-                          <p className="m-0 font-semibold text-[#33302C]">Matched, vetted vendors</p>
-                          <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">See the opportunity in full. Can respond directly.</p>
+                        <div className="text-[#66635e]" style={mono}>↓ notified</div>
+                        <div className="w-full rounded-[4px] border border-[#e3e1de] bg-white p-2 text-center">
+                          <p className="m-0 font-semibold text-[#1c1a18]">Matched, vetted vendors</p>
+                          <p className="m-0 mt-1 text-[11px] text-[#66635e]">See the opportunity in full. Can respond directly.</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-center gap-1">
-                        <div className="text-[#655F52]" style={mono}>↓ can find it</div>
-                        <div className="w-full rounded-md border border-[#EAE7E1] bg-white p-2 text-center">
-                          <p className="m-0 font-semibold text-[#33302C]">Everyone else</p>
-                          <p className="m-0 mt-1 text-[11px] text-[#5F5D59]">Public web, search engines, unvetted vendors. Sees the notice only. Can register to become vetted.</p>
+                        <div className="text-[#66635e]" style={mono}>↓ can find it</div>
+                        <div className="w-full rounded-[4px] border border-[#e3e1de] bg-white p-2 text-center">
+                          <p className="m-0 font-semibold text-[#1c1a18]">Everyone else</p>
+                          <p className="m-0 mt-1 text-[11px] text-[#66635e]">Public web, search engines, unvetted vendors. Sees the notice only. Can register to become vetted.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="text-[#655F52]" style={mono}>↓</div>
-                    <div className="rounded-full border border-[#EAE7E1] bg-white px-3 py-1 text-center font-semibold text-[#33302C]">
+                    <div className="text-[#66635e]" style={mono}>↓</div>
+                    <div className="rounded-[4px] border border-[#e3e1de] bg-white px-3 py-1 text-center font-semibold text-[#1c1a18]">
                       You choose who gets your contact details, and when
                     </div>
                   </div>
                 </div>
 
-                <p className="m-0 mt-2 max-w-[38em] text-[12.5px] leading-relaxed text-[#5F5D59]">
-                  <span className="font-semibold text-[#33302C]">Your project publishes anonymously.</span>{" "}
+                <p className="m-0 mt-2 max-w-[38em] text-[12.5px] leading-relaxed text-[#66635e]">
+                  <span className="font-semibold text-[#1c1a18]">Your project publishes anonymously.</span>{" "}
                   Nobody browsing Netify, and no search engine, sees your company name or your contact details
                   {requirement.organisation?.sector || usersBandLabel(requirement.estate?.users)
                     ? ` (the notice reads ${[requirement.organisation?.sector, usersBandLabel(requirement.estate?.users)].filter(Boolean).join(", ")}, nothing more)`
                     : ""}
                   . You choose which of them receive your contact details, and when. Assumptions publish labelled as assumptions; example content never publishes at all.
                 </p>
-                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#655F52]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
+                <p className="m-0 mb-1 mt-3 text-[10px] font-semibold uppercase text-[#66635e]" style={{ ...mono, letterSpacing: ".12em" }}>What the notice carries</p>
                 <p className="m-0 mb-1.5 text-[12.5px] leading-loose">
                   {[
                     typeof requirement.estate?.sites === "number"
@@ -4830,28 +4762,28 @@ export default function ProjectDesk({
                     (requirement.organisation?.regions ?? []).length ? `coverage: ${(requirement.organisation?.regions ?? []).map((r) => regionStandalone(r)).join(", ")}` : null,
                     (requirement.constraints?.complianceRequirements ?? []).length ? (requirement.constraints?.complianceRequirements ?? []).map((c) => COMPLIANCE_LABELS[c] ?? c).join(", ") : null,
                   ].filter(Boolean).map((chip) => (
-                    <span key={String(chip)} className="mr-1.5 inline-block rounded-full border border-[#EAE7E1] bg-white px-2 py-[1px] text-[12.5px] text-[#33302C]">{chip}</span>
+                    <span key={String(chip)} className="mr-1.5 inline-block rounded-[4px] border border-[#e3e1de] bg-white px-2 py-[1px] text-[12.5px] text-[#1c1a18]">{chip}</span>
                   ))}
-                  <span className="text-[12.5px] text-[#655F52]">
+                  <span className="text-[12.5px] text-[#66635e]">
                     {typeof requirement.estate?.sites === "number" && siteFigureIsIdentifying({ buyer_sector: requirement.organisation?.sector ?? "", regions: requirement.organisation?.regions ?? [] })
                       ? "as written, except the site count: sector plus one region could identify you, so the notice shows the range, and the exact count is seen only after the gate"
                       : "exactly as written, nothing retyped"}
                   </span>
                 </p>
-                <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#655F52]">
-                  <span className="font-semibold text-[#6E6C67]">Stays private:</span> your identity and contacts, your notes,
+                <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#66635e]">
+                  <span className="font-semibold text-[#83807b]">Stays private:</span> your identity and contacts, your notes,
                   {unansweredGaps.length > 0 ? ` ${numWord(unansweredGaps.length)} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
                   {" "}and anything you have dropped from the record.
                 </p>
                 {signLocked && lockLine && (
-                  <p className="m-0 mb-2 text-[13px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>{lockLine}</p>
+                  <p className="m-0 mb-2 text-[13px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>{lockLine}</p>
                 )}
-                <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5F5D59]">
+                <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
                   <input type="checkbox" checked={consentCreate} onChange={(e) => setConsentCreate(e.target.checked)} className="mt-0.5" />
                   <span>{securityScope ? CREATE_CONSENT_TEXT : WORKSPACE_AGREEMENT_TEXT}</span>
                 </label>
                 {securityScope && unansweredGaps.length > 0 && (
-                  <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5F5D59]">
+                  <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
                     <input type="checkbox" checked={consentGaps} onChange={(e) => setConsentGaps(e.target.checked)} className="mt-0.5" />
                     <span>
                       {ACCEPT_GAP_PREFIX}
@@ -4860,7 +4792,7 @@ export default function ProjectDesk({
                   </label>
                 )}
                 {securityScope && (
-                  <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#5F5D59]">
+                  <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
                     <input type="checkbox" checked={consentPublish} onChange={(e) => setConsentPublish(e.target.checked)} className="mt-0.5" />
                     <span>{ENGINE_PUBLISH_CONSENT_TEXT}</span>
                   </label>
@@ -4869,37 +4801,37 @@ export default function ProjectDesk({
                   type="button"
                   onClick={() => void signAndPublish()}
                   disabled={signLocked || !consentsOk || Boolean(signStage) || (testMode && !securityScope)}
-                  className="mt-1 cursor-pointer rounded-full border-0 px-[22px] py-[13px] text-[15.5px] font-semibold text-[#141414] disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{ background: "var(--nf-orange, #F5A21B)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nf-orange-strong, #E5940F)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--nf-orange, #F5A21B)"; }}
+                  className="mt-1 cursor-pointer rounded-[4px] border-0 px-[22px] py-[13px] text-[15.5px] font-semibold text-[#110f0d] disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "var(--nf-orange, #c66000)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nf-orange-strong, #ab4700)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "var(--nf-orange, #c66000)"; }}
                 >
                   {signStage ?? (testMode ? "Sign · create the test position" : "Generate and publish")}
                 </button>
                 {testMode && !securityScope && (
-                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>
+                  <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
                     Test mode covers the security engine today, and this is a network requirement. Drop <span style={mono}>?test=1</span> from the address to publish it for real.
                   </p>
                 )}
                 {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
                 {signedIn && sessId && (
                   sessId.work ? (
-                    <p className="m-0 mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] leading-relaxed text-[#6E6C67]">
+                    <p className="m-0 mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] leading-relaxed text-[#83807b]">
                       <span>
-                        Publishing as <span className="font-medium text-[#33302C]">{sessId.email}</span>
+                        Publishing as <span className="font-medium text-[#1c1a18]">{sessId.email}</span>
                         {sessId.company ? <> · {sessId.company}, resolved from your email domain. Nobody types a company name we cannot check.</> : "."}
                       </span>
                       <ProvenanceTag kind="approved" />
                     </p>
                   ) : (
-                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #B4650B)" }}>
+                    <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
                       Signed in as {sessId.email}, a personal address. Publishing needs a work email; everything here stays as it is while you switch.
                     </p>
                   )
                 )}
                 {needAuth && (
-                  <div className="mt-2 rounded-md bg-[#FBFAF8] p-3">
-                    <p className="m-0 mb-1 text-[12.5px] text-[#5F5D59]">
+                  <div className="mt-2 rounded-[4px] bg-[#fefdfc] p-3">
+                    <p className="m-0 mb-1 text-[12.5px] text-[#66635e]">
                       One step first: publishing reaches named vendors and service providers, so it needs a verified sign-in. Your position is untouched.
                     </p>
                     <SignIn
@@ -4970,8 +4902,8 @@ export default function ProjectDesk({
           onClick={() => setEdit(null)}
         >
           <div
-            className="w-full max-w-[620px] rounded-[18px] border border-[#DDD9D1] bg-white px-6 pb-5 pt-[22px]"
-            style={{ boxShadow: "0 14px 44px rgba(20,20,20,.18)", maxHeight: "min(76vh, 640px)", overflowY: "auto" }}
+            className="w-full max-w-[620px] rounded-[4px] border border-[#d3d0cd] bg-white px-6 pb-5 pt-[22px]"
+            style={{ maxHeight: "min(76vh, 640px)", overflowY: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-baseline gap-3">
@@ -4979,12 +4911,12 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => setEdit(null)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#655F52] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#66635e] hover:text-[#110f0d]"
               >
                 Close
               </button>
             </div>
-            <div className="mb-4 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#6E6C67]">{editSlot.why}</div>
+            <div className="mb-4 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#83807b]">{editSlot.why}</div>
             {(() => {
               const pathHeld = editSlot.path
                 ? standingAt(editSlot.path).map((f) => ({
@@ -5011,15 +4943,15 @@ export default function ProjectDesk({
               if (!held.length) return null;
               return (
                 <div className="mb-4">
-                  <div className="mb-1 text-[10px] font-semibold uppercase text-[#655F52]" style={{ ...mono, letterSpacing: ".11em" }}>Held now</div>
+                  <div className="mb-1 text-[10px] font-semibold uppercase text-[#66635e]" style={{ ...mono, letterSpacing: ".11em" }}>Held now</div>
                   {held.map((h) => (
-                    <div key={h.key} className="flex items-baseline gap-2.5 border-t border-[#F0EEE9] py-2">
+                    <div key={h.key} className="flex items-baseline gap-2.5 border-t border-[#e3e1de] py-2">
                       <span className="min-w-0 flex-1 text-[14.5px]">{h.label}</span>
-                      <span className="min-w-0 flex-[1.1] text-[12px] italic text-[#655F52]">{h.meta}</span>
+                      <span className="min-w-0 flex-[1.1] text-[12px] italic text-[#66635e]">{h.meta}</span>
                       <button
                         type="button"
                         onClick={h.act}
-                        className="flex-none cursor-pointer rounded-[4px] border border-[#E8E4DC] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#655F52] hover:border-[#B4650B] hover:text-[var(--nf-orange-strong)]"
+                        className="flex-none cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-[6px] py-[3px] text-[9.5px] uppercase text-[#66635e] hover:border-[#832f00] hover:text-[var(--nf-orange-strong)]"
                         style={{ ...mono, letterSpacing: "0.07em" }}
                       >
                         {h.kind}
@@ -5052,11 +4984,11 @@ export default function ProjectDesk({
                   step={1}
                   inputMode="numeric"
                   placeholder="Type the exact number"
-                  className="w-full rounded-[11px] border border-[#E3E0DA] bg-white px-[15px] py-[13px] text-[15.5px] outline-none focus:border-[#141414]"
+                  className="w-full rounded-[4px] border border-[#d3d0cd] bg-white px-[15px] py-[13px] text-[15.5px] outline-none focus:border-[#110f0d]"
                 />
                 <button
                   type="submit"
-                  className="flex-none cursor-pointer rounded-[11px] border-0 bg-[#141414] px-[18px] py-[13px] text-[14px] font-semibold text-white hover:bg-[#2b2b2b]"
+                  className="flex-none cursor-pointer rounded-[4px] border-0 bg-[#110f0d] px-[18px] py-[13px] text-[14px] font-semibold text-white hover:bg-[#2b2825]"
                 >
                   Set
                 </button>
@@ -5077,14 +5009,14 @@ export default function ProjectDesk({
                   key={o.label}
                   type="button"
                   onClick={() => landOption(editSlot, o)}
-                  className="flex w-full cursor-pointer items-center gap-3.5 rounded-[11px] border border-[#E3E0DA] bg-white px-[15px] py-[13px] hover:border-[#141414] hover:bg-[#FDFCFA]"
+                  className="flex w-full cursor-pointer items-center gap-3.5 rounded-[4px] border border-[#d3d0cd] bg-white px-[15px] py-[13px] hover:border-[#110f0d] hover:bg-[#fefdfc]"
                 >
                   <span className="flex-1 text-left text-[15.5px] leading-[1.45]">{o.label}</span>
-                  {o.effect && <span className="max-w-[15em] flex-none text-right text-[12.5px] leading-[1.4] text-[#655F52]">{o.effect}</span>}
+                  {o.effect && <span className="max-w-[15em] flex-none text-right text-[12.5px] leading-[1.4] text-[#66635e]">{o.effect}</span>}
                 </button>
               ))}
             </div>
-            <div className="mt-3.5 text-[13px] leading-[1.5] text-[#655F52]">
+            <div className="mt-3.5 text-[13px] leading-[1.5] text-[#66635e]">
               Or close this and say it in your own words in the prompt above. These are only the answers heard most.
             </div>
           </div>
@@ -5102,8 +5034,8 @@ export default function ProjectDesk({
           onClick={() => setSaveOpen(false)}
         >
           <div
-            className="w-full max-w-[560px] rounded-[18px] border border-[#DDD9D1] bg-white px-6 pb-5 pt-[22px]"
-            style={{ boxShadow: "0 14px 44px rgba(20,20,20,.18)", maxHeight: "min(76vh, 640px)", overflowY: "auto" }}
+            className="w-full max-w-[560px] rounded-[4px] border border-[#d3d0cd] bg-white px-6 pb-5 pt-[22px]"
+            style={{ maxHeight: "min(76vh, 640px)", overflowY: "auto" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-baseline gap-3">
@@ -5111,14 +5043,14 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => setSaveOpen(false)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#655F52] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[13.5px] text-[#66635e] hover:text-[#110f0d]"
               >
                 Close
               </button>
             </div>
             {!signedIn || !sessId?.work ? (
               <div>
-                <p className="m-0 mb-2 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#6E6C67]">
+                <p className="m-0 mb-2 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#83807b]">
                   Saving creates your private project record from this statement. It needs a verified work email; vendors and service
                   providers respond to verified work emails, so saving uses one too. Nothing is published and nobody is invited by saving.
                 </p>
@@ -5143,24 +5075,24 @@ export default function ProjectDesk({
               </div>
             ) : (
               <div>
-                <p className="m-0 mb-2 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#6E6C67]">
+                <p className="m-0 mb-2 mt-[7px] max-w-[40em] text-[13.5px] leading-[1.55] text-[#83807b]">
                   Saving creates your private project record from this statement, owned by{" "}
-                  <span className="font-medium text-[#33302C]">{sessId.email}</span>. It is not published, nobody is invited, and you can
+                  <span className="font-medium text-[#1c1a18]">{sessId.email}</span>. It is not published, nobody is invited, and you can
                   open or continue it any time from the link in the header.
                 </p>
                 {securityScope && (
-                  <label className="mb-2 flex items-start gap-2 text-[13px] leading-relaxed text-[#5F5D59]">
+                  <label className="mb-2 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
                     <input type="checkbox" checked={consentSave} onChange={(e) => setConsentSave(e.target.checked)} className="mt-0.5" />
                     <span>{CREATE_CONSENT_TEXT}</span>
                   </label>
                 )}
                 {saveError && <p className="m-0 mb-2 text-[12.5px] text-red-600">{saveError}</p>}
-                {resuming && <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#655F52]">Loading your saved project…</p>}
+                {resuming && <p className="m-0 mb-2 text-[12.5px] leading-relaxed text-[#66635e]">Loading your saved project…</p>}
                 <button
                   type="button"
                   onClick={() => void saveNow()}
                   disabled={saveBusy || resuming || (securityScope && !consentSave)}
-                  className="cursor-pointer rounded-full border-0 bg-[#F5A21B] px-[20px] py-[11px] text-[14.5px] font-semibold text-[#141414] hover:bg-[#E5940F] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="cursor-pointer rounded-[4px] border-0 bg-[#c66000] px-[20px] py-[11px] text-[14.5px] font-semibold text-[#110f0d] hover:bg-[#ab4700] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {saveBusy ? "Saving…" : resuming ? "Loading…" : created ? "Save changes" : "Save"}
                 </button>
@@ -5175,38 +5107,38 @@ export default function ProjectDesk({
       {reqOpen && (
         <div className="fixed inset-0 z-50 flex justify-end" style={{ background: "rgba(20,20,20,.34)" }} onClick={() => setReqOpen(false)}>
           <div
-            className="flex h-full flex-col bg-white"
-            style={{ width: "min(660px, 100%)", boxShadow: "-14px 0 44px rgba(20,20,20,.18)" }}
+            className="flex h-full flex-col border-l bg-white"
+            style={{ width: "min(660px, 100%)", borderColor: "#d3d0cd" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex flex-none items-start gap-3.5 border-b border-[#EAE7E1] px-7 pb-4 pt-[22px]">
+            <div className="flex flex-none items-start gap-3.5 border-b border-[#e3e1de] px-7 pb-4 pt-[22px]">
               <div className="min-w-0 flex-1">
                 <div className="text-[20px] font-semibold" style={{ letterSpacing: "-0.015em" }}>{publishTitle}</div>
-                <div className="mt-[5px] text-[13.5px] leading-normal text-[#655F52]">
+                <div className="mt-[5px] text-[13.5px] leading-normal text-[#66635e]">
                   This is what vendors and service providers would be answering. Say anything you want changed and it changes here.
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setReqOpen(false)}
-                className="flex-none cursor-pointer border-0 bg-transparent text-[15px] text-[#655F52] hover:text-[#141414]"
+                className="flex-none cursor-pointer border-0 bg-transparent text-[15px] text-[#66635e] hover:text-[#110f0d]"
               >
                 Close
               </button>
             </div>
             <div className="flex-1 overflow-auto px-7 pb-10 pt-[22px]">
               {sheetSections.length === 0 && (
-                <p className="m-0 text-[14.5px] leading-relaxed text-[#655F52]">Nothing yet. Say one sentence about the organisation and the requirement starts here.</p>
+                <p className="m-0 text-[14.5px] leading-relaxed text-[#66635e]">Nothing yet. Say one sentence about the organisation and the requirement starts here.</p>
               )}
               {sheetSections.map((sec) => (
                 <div key={sec.key} className="pb-6">
-                  <div className="border-b border-[#141414] pb-2 text-[11px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.11em" }}>
+                  <div className="border-b border-[#110f0d] pb-2 text-[11px] uppercase text-[#66635e]" style={{ ...mono, letterSpacing: "0.11em" }}>
                     {sec.title}
                   </div>
                   {sec.rows.map((r, j) => (
-                    <div key={j} className="border-b border-[#F5F3EE] py-2.5">
-                      <div className={`text-[15px] leading-normal ${r.open ? "text-[#655F52]" : ""}`} style={{ textWrap: "pretty" }}>{r.text}</div>
-                      {r.meta && <div className="mt-1 text-[13px] italic leading-[1.45] text-[#655F52]">{r.meta}</div>}
+                    <div key={j} className="border-b border-[#e3e1de] py-2.5">
+                      <div className={`text-[15px] leading-normal ${r.open ? "text-[#66635e]" : ""}`} style={{ textWrap: "pretty" }}>{r.text}</div>
+                      {r.meta && <div className="mt-1 text-[13px] italic leading-[1.45] text-[#66635e]">{r.meta}</div>}
                     </div>
                   ))}
                 </div>

@@ -1,4 +1,5 @@
 import WorkspaceHeader from "@/components/WorkspaceHeader";
+import { workspaceFontVars } from "@/lib/workspace/fonts";
 
 /**
  * Workspace route-group layout (2030 living-procurement workspace
@@ -23,7 +24,7 @@ import WorkspaceHeader from "@/components/WorkspaceHeader";
  */
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${workspaceFontVars}`}>
       <WorkspaceHeader />
       <main id="main-content" className="flex-1">{children}</main>
     </div>

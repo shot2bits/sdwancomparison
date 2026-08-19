@@ -100,7 +100,11 @@ function main() {
     // -- not merely `phase === "fits"`, which stays true forever once a
     // buyer opens the panel (no `setPhase` call in the publish success
     // path reverts it).
-    const explainerGate = desk.match(/\{!published && \(\s*<div className="overflow-hidden rounded-\[14px\][\s\S]{0,300}/);
+    // Radius updated 19 Aug 2026 (handoff-bundle aesthetic-only restyle:
+    // 14px -> 4px, matching every other card on the surface) -- the
+    // `!published` gate itself, which this fixture actually exists to
+    // confirm, is untouched by that visual change.
+    const explainerGate = desk.match(/\{!published && \(\s*<div className="overflow-hidden rounded-\[4px\][\s\S]{0,300}/);
     record(Boolean(explainerGate), "3: the pre-publish explainer card (\"Publish to match this project…\") is gated on `!published`", "");
     record(/Publish to match this project against Netify/.test(desk), "3 setup: the explainer heading string still exists in source (proving the fixture isn't vacuous -- the content exists, just conditionally)", "");
     record(/What publishing unlocks: your matched vendors/.test(desk), "3 setup: \"What publishing unlocks\" copy still exists in source, same reasoning", "");
@@ -128,7 +132,10 @@ function main() {
     // `unansweredGaps.length` in either display.
     const statBlock = desk.match(/Blocking decision[\s\S]{0,400}remaining\. Resolve or accept as a stated assumption before you publish\./);
     record(Boolean(statBlock), "4 setup: the publish-panel's blocking-decisions stat was located", "");
-    record(/\{materialDecisionsRemaining\}[\s\S]{0,10}<\/div>\s*<div className="mt-1 text-\[12\.5px\] leading-\[1\.5\] text-\[#655F52\]">\s*\{materialDecisionsRemaining === 1 \? "Blocking decision" : "Blocking decisions"\}/.test(desk),
+    // Hex updated 19 Aug 2026 (handoff-bundle restyle: #655F52 -> #66635e,
+    // the new palette's own ink-600) -- the identifier this fixture exists
+    // to confirm is unchanged by that visual swap.
+    record(/\{materialDecisionsRemaining\}[\s\S]{0,10}<\/div>\s*<div className="mt-1 text-\[12\.5px\] leading-\[1\.5\] text-\[#66635e\]">\s*\{materialDecisionsRemaining === 1 \? "Blocking decision" : "Blocking decisions"\}/.test(desk),
       "4: the publish-panel stat now reads `materialDecisionsRemaining` -- the SAME identifier Mission Control's heading uses, not a separately-sourced value",
       "",
     );
