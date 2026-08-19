@@ -623,7 +623,21 @@ function SectionOutline({ rows }: { rows: OutlineRow[] }) {
           return (
             <div key={r.key} className="flex flex-wrap items-center gap-x-3 gap-y-1 bg-white px-3.5 py-2.5 sm:flex-nowrap">
               <span className="w-full min-w-0 text-[13px] text-[#110f0d] sm:w-[190px] sm:flex-none">{r.title}</span>
-              <span className="min-w-0 flex-1 text-[12px] text-[#66635e]">{r.detail}</span>
+              <span className="min-w-0 flex-1 text-[12px] text-[#66635e]">
+                {r.detail}
+                {/* Named gaps (Robert, 19 Aug 2026). A composite row could
+                    only ever report what it already HAS in `detail`, so
+                    "Healthcare & pharma, 20 sites" sat beside a NEEDS INPUT
+                    chip with nothing saying what would clear it. Rendered as
+                    a second line, in the same amber the chip uses, so the
+                    two read as one statement rather than competing ones.
+                    Absent when the row has nothing left to name. */}
+                {r.missing && r.missing.length > 0 && (
+                  <span className="mt-0.5 block text-[11.5px] leading-[1.45]" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
+                    Still needed: {r.missing.join(", ")}
+                  </span>
+                )}
+              </span>
               <span
                 className="flex-none rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase"
                 style={{ ...mono, letterSpacing: "0.05em", background: st.bg, color: st.color }}

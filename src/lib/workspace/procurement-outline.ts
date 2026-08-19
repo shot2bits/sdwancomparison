@@ -43,6 +43,25 @@ export type OutlineRow = {
   /** One short, factual line -- never invented copy, always derived from
    *  a real value or count the caller already holds. */
   detail: string;
+  /** The specific, named things still unstated for this row (Robert, 19
+   *  Aug 2026: "make those rows name what's actually missing").
+   *
+   *  WHY THIS EXISTS. Some rows are satisfied by a COMPOSITE of several
+   *  facts, and a single `detail` string could only ever report the ones
+   *  already present -- so "Organisation and scale" rendered
+   *  "Healthcare & pharma, 20 sites" beside a NEEDS INPUT chip, which
+   *  reads as a contradiction: populated, yet incomplete, with no way to
+   *  tell what would complete it. Worse in the other direction, "Current
+   *  estate" is satisfied by ANY ONE of network/cloud/security, so a
+   *  buyer who stated only their MPLS network got a flat "Confirmed"
+   *  while two thirds of the row was genuinely unknown.
+   *
+   *  Every entry is a real, checkable gap the caller already evaluates to
+   *  decide the row's own state -- never a generic prompt, never a
+   *  suggestion about what the buyer SHOULD want. Absent or empty means
+   *  there is genuinely nothing left to name, which is why it is optional
+   *  rather than defaulted to []. */
+  missing?: string[];
 };
 
 const STATE_LABEL: Record<OutlineState, string> = {
@@ -124,12 +143,21 @@ export function buildSectionOutline(input: {
   /** Organisation and scale: sector/sites/regions/users all stated. */
   orgScaleComplete: boolean;
   orgScaleDetail: string;
+  /** Which of sector/sites/regions/user count are still unstated -- the
+   *  SAME four conditions `orgScaleComplete` is ANDed from, so the chip
+   *  and the named gaps can never disagree. */
+  orgScaleMissing?: string[];
   /** Solution scope: what is being bought is stated. */
   scopeComplete: boolean;
   scopeDetail: string;
   /** Current estate: any existing-network/cloud/security fact stated. */
   estateSignal: boolean;
   estateDetail: string;
+  /** Which of network/cloud/security estate are still unstated. Reported
+   *  even when `estateSignal` is true, because ANY ONE of the three
+   *  satisfies the row -- so "Confirmed" here has never meant "all three
+   *  known", and saying so is the honest reading. */
+  estateMissing?: string[];
   /** Resilience and availability: no open resilience-concept decision remains. */
   resilienceResolved: boolean;
   resilienceDetail: string;
@@ -157,6 +185,7 @@ export function buildSectionOutline(input: {
       title: "Organisation and scale",
       state: input.orgScaleComplete ? "confirmed" : "needs_input",
       detail: input.orgScaleDetail,
+      missing: input.orgScaleMissing,
     },
     {
       key: "solution_scope",
@@ -169,6 +198,7 @@ export function buildSectionOutline(input: {
       title: "Current estate",
       state: input.estateSignal ? "confirmed" : "needs_input",
       detail: input.estateDetail,
+      missing: input.estateMissing,
     },
     {
       key: "resilience_availability",

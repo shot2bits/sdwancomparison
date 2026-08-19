@@ -3296,13 +3296,39 @@ export default function ProjectDesk({
       buying,
       hasOperatingModelConflict: rankedIds.has("OD-operating-model-conflict"),
     });
+    /* Named gaps (Robert, 19 Aug 2026: "make those rows name what's
+       actually missing"). Both lists below are built from the EXACT same
+       conditions the row's own state is derived from just beneath them --
+       not a parallel re-derivation that could drift. A row that shows real
+       content while flagged incomplete now says which piece would complete
+       it, instead of leaving a buyer to infer it from a chip. */
+    const orgScaleMissing = [
+      !coreFive.sector && "sector",
+      !coreFive.sites && "site count",
+      !coreFive.regions && "regions",
+      !hasFact("estate.users") && "user count",
+    ].filter((x): x is string => typeof x === "string");
+    /* Reported even when the row reads Confirmed: ANY ONE of these three
+       satisfies `estateSignal`, so "Confirmed" has never meant all three
+       are known, and a buyer who stated only their existing network was
+       being told the whole row was settled. */
+    const estateMissing = [
+      !hasFact("estate.existingNetwork") && "network today",
+      !hasFact("estate.cloud") && "cloud",
+      !hasFact("estate.existingSecurity") && "security estate",
+    ].filter((x): x is string => typeof x === "string");
     return buildSectionOutline({
       orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && hasFact("estate.users"),
       orgScaleDetail: coreFive.sector && coreFive.sites ? `${cap(String(standingAt("organisation.sector")[0]?.value ?? ""))}, ${standingAt("estate.sites").slice(-1)[0]?.value ?? "?"} sites` : "Sector, sites and regions not yet all stated.",
+      orgScaleMissing,
       scopeComplete: coreFive.scope,
       scopeDetail: buying ? `Buying: ${buying === "sase" ? "SASE" : buying === "sdwan" ? "SD-WAN" : buying === "sse" ? "SSE" : "managed security"}.` : "What is being bought is not yet stated.",
       estateSignal: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity"),
       estateDetail: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity") ? "Existing estate stated." : "Network, cloud and security estate today not yet stated.",
+      /* Only when something IS stated: with nothing stated the row's own
+         detail already names all three, and repeating them as a "still
+         needed" list would be noise rather than information. */
+      estateMissing: estateMissing.length === 3 ? undefined : estateMissing,
       resilienceResolved: resilienceState.resolved,
       resilienceDetail: resilienceState.detail,
       securityResolved: !rankedIds.has("q-sse-scope"),
