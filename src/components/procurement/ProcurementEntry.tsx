@@ -59,16 +59,13 @@ export default function ProcurementEntry() {
     // globals.css) for everything inside this component and nothing
     // else on the site — CollapsibleHero and ProjectDesk are both
     // children, so both pick up the palette/typography-role variables.
-    // The ivory canvas background below reproduces the approved
-    // prototype's own body background exactly (index.html's :root +
-    // body rules), replacing the plain #fbfaf8 the pre-2030 shell used.
-    <div
-      className="procurement-2030 relative"
-      style={{
-        background:
-          "radial-gradient(1200px 700px at 15% -10%, #FBF3E4 0%, transparent 60%), linear-gradient(180deg, var(--nf-ivory) 0%, #F2EADA 100%)",
-      }}
-    >
+    // 19 Aug 2026 aesthetic-only restyle (Robert's handoff bundle):
+    // replaces the earlier dramatic warm-gradient canvas background
+    // with the handoff doc's own flat treatment -- a solid warm
+    // off-white plus a very subtle dot grid ("1. Colors" / "Background
+    // texture"), via the .nf-canvas-texture class in globals.css. The
+    // gradient "glow" this replaces was never part of that spec.
+    <div className="procurement-2030 nf-canvas-texture relative">
       {/* Accessibility correction (18 Aug 2026, real bug found via an
           axe-core scan): this was a second `<main>` -- both routes that
           render this component ((workspace)/home/page.tsx and

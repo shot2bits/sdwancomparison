@@ -64,7 +64,7 @@ const VIEW_ORDER: ProcurementView[] = ["document", "supplier", "evaluation"];
 const tabId = (v: ProcurementView) => `ldoc-tab-${v}`;
 const panelId = (v: ProcurementView) => `ldoc-panel-${v}`;
 
-const mono: React.CSSProperties = { fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' };
+const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
 
 export default function LivingProcurementCanvas({
   document,
@@ -124,11 +124,11 @@ export default function LivingProcurementCanvas({
   // (index.html tokens), applied here to the existing real readiness score
   // rather than inventing a new scoring concept.
   // Contrast fix (verification pass, 18 Aug 2026): the low-score ring
-  // colour (#A79E8C) measured 2.65:1 on white, below WCAG 1.4.11's 3:1
+  // colour (#a7a4a0) measured 2.65:1 on white, below WCAG 1.4.11's 3:1
   // threshold for meaningful non-text UI graphics (this ring conveys real
-  // status, not decoration) -- #9B9382 is the same neutral grey, darkened
+  // status, not decoration) -- #83807b is the same neutral grey, darkened
   // just enough to clear 3:1 (3.05:1).
-  const readinessColor = document.readiness.score >= 70 ? "#0E7A52" : document.readiness.score >= 40 ? "#E8590C" : "#9B9382";
+  const readinessColor = document.readiness.score >= 70 ? "#1e4e22" : document.readiness.score >= 40 ? "#c66000" : "#83807b";
   const circumference = 2 * Math.PI * 27;
   const tabRefs = useRef<Partial<Record<ProcurementView, HTMLButtonElement | null>>>({});
 
@@ -154,10 +154,10 @@ export default function LivingProcurementCanvas({
   };
 
   return (
-    <section aria-label="Living procurement document" className="border-t border-[#EFECE5] pt-[22px]">
+    <section aria-label="Living procurement document" className="border-t border-[#e3e1de] pt-[22px]">
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div className="min-w-0 flex-1">
-          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--nf-orange, #B4650B)", fontWeight: 600 }}>
+          <div style={{ ...mono, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase", color: "var(--nf-orange, #832f00)", fontWeight: 600 }}>
             Living procurement document · v{document.version}
           </div>
           {/* Typography role (2030 visual pass, 18 Aug 2026): the document's
@@ -169,7 +169,7 @@ export default function LivingProcurementCanvas({
           <h2 className="mb-1.5 mt-2.5 text-[24px] font-semibold leading-[1.2] sm:text-[27px]" style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.015em" }}>
             {document.title}
           </h2>
-          <p className="m-0 max-w-[48em] text-[13.5px] leading-[1.6] text-[#655F52]">{document.summary}</p>
+          <p className="m-0 max-w-[48em] text-[13.5px] leading-[1.6] text-[#66635e]">{document.summary}</p>
         </div>
 
         <div
@@ -178,7 +178,7 @@ export default function LivingProcurementCanvas({
           aria-label={`Readiness ${document.readiness.score} percent, ${document.readiness.label}`}
         >
           <svg width="60" height="60" viewBox="0 0 64 64" aria-hidden="true">
-            <circle cx="32" cy="32" r="27" fill="none" stroke="#EFECE5" strokeWidth="7" />
+            <circle cx="32" cy="32" r="27" fill="none" stroke="#e3e1de" strokeWidth="7" />
             <circle
               cx="32"
               cy="32"
@@ -190,18 +190,18 @@ export default function LivingProcurementCanvas({
               strokeDasharray={`${(Math.max(0, Math.min(100, document.readiness.score)) / 100) * circumference} ${circumference}`}
               transform="rotate(-90 32 32)"
             />
-            <text x="32" y="37" textAnchor="middle" fontSize="15" fontWeight={600} fill="#141414">
+            <text x="32" y="37" textAnchor="middle" fontSize="15" fontWeight={600} fill="#110f0d">
               {document.readiness.score}
             </text>
           </svg>
-          <span className="text-[10px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.07em" }}>
+          <span className="text-[10px] uppercase text-[#66635e]" style={{ ...mono, letterSpacing: "0.07em" }}>
             {document.readiness.label}
           </span>
         </div>
       </div>
 
       {typeof materialDecisionsRemaining === "number" && (
-        <p className="m-0 mt-2 max-w-[48em] text-[13px] leading-[1.6] text-[#655F52]">
+        <p className="m-0 mt-2 max-w-[48em] text-[13px] leading-[1.6] text-[#66635e]">
           {materialDecisionsRemaining > 0
             ? `Core scope captured. ${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain before suppliers can price consistently.`
             : "Every material decision this document tracks is resolved or deliberately accepted open."}
@@ -228,11 +228,11 @@ export default function LivingProcurementCanvas({
           Netify-computed summary, which the eyebrow label itself already
           says plainly. */}
       {hasChange && (
-        <div className="mt-4 rounded-[12px] border px-4 py-3" style={{ borderColor: "var(--nf-emerald-soft-border, #9FCEB4)", background: "var(--nf-emerald-soft, #DCEEE3)" }}>
-          <span style={{ ...mono, fontSize: "10.5px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--nf-emerald, #0B6745)", fontWeight: 700 }}>
+        <div className="mt-4 rounded-[4px] border px-4 py-3" style={{ borderColor: "var(--nf-emerald-soft-border, #91bb91)", background: "var(--nf-emerald-soft, #d9f4d9)" }}>
+          <span style={{ ...mono, fontSize: "10.5px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--nf-emerald, #1e4e22)", fontWeight: 700 }}>
             What changed
           </span>
-          <p className="m-0 mt-1 text-[13.5px] font-semibold leading-[1.4]" style={{ color: "var(--nf-ink-900, #33302C)" }}>
+          <p className="m-0 mt-1 text-[13.5px] font-semibold leading-[1.4]" style={{ color: "var(--nf-ink-900, #1c1a18)" }}>
             {changeSummaryLine(document)}
           </p>
         </div>
@@ -270,7 +270,7 @@ export default function LivingProcurementCanvas({
         <StatTile label="Document gaps" value={document.counts.decisions} warn={document.counts.decisions > 0} />
       </div>
 
-      <div role="tablist" aria-label="Document projection" className="mt-7 flex gap-1 overflow-x-auto border-b border-[#EFECE5]" style={{ scrollbarWidth: "none" }}>
+      <div role="tablist" aria-label="Document projection" className="mt-7 flex gap-1 overflow-x-auto border-b border-[#e3e1de]" style={{ scrollbarWidth: "none" }}>
         {(
           [
             ["document", "Living document"],
@@ -290,7 +290,7 @@ export default function LivingProcurementCanvas({
             onClick={() => onViewChange(key)}
             onKeyDown={(e) => onTabKeyDown(e, key)}
             className="flex-none cursor-pointer border-0 border-b-2 bg-transparent px-3 py-2.5 text-[13.5px] font-medium"
-            style={{ borderBottomColor: view === key ? "#F5A21B" : "transparent", color: view === key ? "#141414" : "#655F52" }}
+            style={{ borderBottomColor: view === key ? "#c66000" : "transparent", color: view === key ? "#110f0d" : "#66635e" }}
           >
             {label}
           </button>
@@ -309,7 +309,7 @@ export default function LivingProcurementCanvas({
         {view === "evaluation" && <EvaluationView evaluation={document.evaluation} gateChangedIds={gateChangedIds} />}
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-x-6 gap-y-1.5 border-t border-[#EFECE5] pt-4 text-[11px] text-[#655F52]" style={mono}>
+      <div className="mt-8 flex flex-wrap gap-x-6 gap-y-1.5 border-t border-[#e3e1de] pt-4 text-[11px] text-[#66635e]" style={mono}>
         <span className="uppercase" style={{ letterSpacing: "0.07em" }}>Project memory</span>
         <span>
           {factsKept} standing fact{factsKept === 1 ? "" : "s"}
@@ -381,7 +381,7 @@ const IMPACT_LABEL: Record<string, string> = {
  *  only call site that ever passes `bare`, and it now wraps this in the
  *  approved prototype's dark `.card.dark` panel (see that call site's own
  *  comment), so its decision cards need the matching dark `.decision`
- *  treatment (index.html: bg #1E1912, border #322A1D, orange hover) in
+ *  treatment (index.html: bg #2b2825, border #2b2825, orange hover) in
  *  place of the light card styling. The non-bare, non-dark path (used
  *  when this renders inline inside the canvas rather than the rail) is
  *  unchanged, since that path isn't reachable in production today
@@ -389,13 +389,13 @@ const IMPACT_LABEL: Record<string, string> = {
  *  it) but is left correct in case it's ever re-enabled. */
 export function NextQuestions({ cards, bare = false, dark = false }: { cards: NextQuestionCard[]; bare?: boolean; dark?: boolean }) {
   return (
-    <div className={bare ? "" : "mt-5 border-t border-[#EFECE5] pt-[18px]"}>
+    <div className={bare ? "" : "mt-5 border-t border-[#e3e1de] pt-[18px]"}>
       {!bare && (
         <div className="mb-2.5 flex items-baseline gap-[11px]">
-          <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+          <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>
             Best next decisions
           </span>
-          <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">answering moves this document closer to publish</span>
+          <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">answering moves this document closer to publish</span>
         </div>
       )}
       <div className={bare ? "flex flex-col gap-3" : "grid grid-cols-1 gap-2.5 sm:grid-cols-3"}>
@@ -413,11 +413,11 @@ export function NextQuestions({ cards, bare = false, dark = false }: { cards: Ne
             // desktop parity needs no extra fetch) but are hidden below
             // `lg`, where the rail is no longer sticky-sidebar-sized and
             // instead sits inline above the document.
-            className={`flex min-w-0 flex-col gap-2 rounded-[10px] border p-3.5 ${bare && i > 0 ? "hidden lg:flex" : ""}`}
+            className={`flex min-w-0 flex-col gap-2 rounded-[4px] border p-3.5 ${bare && i > 0 ? "hidden lg:flex" : ""}`}
             style={
               dark
-                ? { background: "#1E1912", borderColor: "#322A1D" }
-                : { background: nq.governedSuggestion ? "#FBF9FF" : "#fff", borderColor: "#EFECE5" }
+                ? { background: "#2b2825", borderColor: "#2b2825" }
+                : { background: nq.governedSuggestion ? "#eee6ff" : "#fff", borderColor: "#e3e1de" }
             }
           >
             {/* Honesty fix (Robert, 18 Aug 2026 correction, "state labels,
@@ -443,39 +443,39 @@ export function NextQuestions({ cards, bare = false, dark = false }: { cards: Ne
                     style={
                       dark
                         ? isMaterial
-                          ? { ...mono, letterSpacing: "0.06em", background: "var(--nf-orange-strong, #AA3E06)", color: "#fff" }
-                          : { ...mono, letterSpacing: "0.06em", background: "#2A251B", color: "#D8D0BE" }
-                        : { ...mono, letterSpacing: "0.06em", background: nq.governedSuggestion ? "#EDE6FB" : isMaterial ? "#F4F2ED" : "#F4F2ED", color: nq.governedSuggestion ? "#5B3E9C" : isMaterial ? "#655F52" : "#655F52" }
+                          ? { ...mono, letterSpacing: "0.06em", background: "var(--nf-orange-strong, #832f00)", color: "#fff" }
+                          : { ...mono, letterSpacing: "0.06em", background: "#2b2825", color: "#d0cdc9" }
+                        : { ...mono, letterSpacing: "0.06em", background: nq.governedSuggestion ? "#eee6ff" : isMaterial ? "#e3e1de" : "#e3e1de", color: nq.governedSuggestion ? "#ae96da" : isMaterial ? "#66635e" : "#66635e" }
                     }
                   >
                     {label}
                   </span>
                   {/* Contrast fix (verification pass, 18 Aug 2026): both
                       sides of this id label failed WCAG AA on their own
-                      background (#6E6656 on this card's #1E1912 measured
-                      3.07:1; #B8B5AD on the light card's white/#FBF9FF
-                      measured under 2:1) -- #888274/#74726D are the same
+                      background (#66635e on this card's #2b2825 measured
+                      3.07:1; #a7a4a0 on the light card's white/#eee6ff
+                      measured under 2:1) -- #bab7b3/#66635e are the same
                       hues moved just far enough to clear 4.5:1 on each. */}
-                  <span className="text-[9.5px]" style={{ ...mono, color: dark ? "#888274" : "#74726D" }} title="Stable question id">
+                  <span className="text-[9.5px]" style={{ ...mono, color: dark ? "#bab7b3" : "#66635e" }} title="Stable question id">
                     {nq.id}
                   </span>
                 </div>
               );
             })()}
-            <div className="text-[13.5px] leading-[1.5]" style={{ color: dark ? "#fff" : "#141414", fontWeight: dark ? 600 : 400 }}>{nq.question}</div>
+            <div className="text-[13.5px] leading-[1.5]" style={{ color: dark ? "#fff" : "#110f0d", fontWeight: dark ? 600 : 400 }}>{nq.question}</div>
             {/* defect 6 (correction pass, 15 Aug 2026): every governed
                 suggestion shows its own short "why Netify is raising this"
                 reason, straight from the sector pack -- never left as a
                 bare label the buyer has to take on faith. */}
-            {nq.reason && <div className="text-[12px] leading-[1.5]" style={{ color: dark ? "#B9B2A2" : "#655F52" }}>{nq.reason}</div>}
-            {nq.conflictReason && <div className="text-[12px] leading-[1.5]" style={{ color: dark ? "#E8A08F" : "#8A2E1F" }}>{nq.conflictReason}</div>}
+            {nq.reason && <div className="text-[12px] leading-[1.5]" style={{ color: dark ? "#d0cdc9" : "#66635e" }}>{nq.reason}</div>}
+            {nq.conflictReason && <div className="text-[12px] leading-[1.5]" style={{ color: dark ? "#eb827b" : "#8d1a1e" }}>{nq.conflictReason}</div>}
             {nq.impact.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {nq.impact.map((i) => (
                   <span
                     key={i}
                     className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase"
-                    style={dark ? { ...mono, letterSpacing: "0.05em", background: "#2A251B", color: "#D8D0BE" } : { ...mono, letterSpacing: "0.05em", background: "#F4F2ED", color: "#655F52" }}
+                    style={dark ? { ...mono, letterSpacing: "0.05em", background: "#2b2825", color: "#d0cdc9" } : { ...mono, letterSpacing: "0.05em", background: "#e3e1de", color: "#66635e" }}
                   >
                     {IMPACT_LABEL[i] ?? i}
                   </span>
@@ -501,11 +501,11 @@ export function NextQuestions({ cards, bare = false, dark = false }: { cards: Ne
                     key={b.label}
                     type="button"
                     onClick={b.onClick}
-                    className={`cursor-pointer rounded-[6px] border px-2.5 py-1.5 text-[12px] transition-colors ${dark ? "hover:border-[#5A4E33]" : "hover:border-[#D8D4CA]"}`}
+                    className={`cursor-pointer rounded-[4px] border px-2.5 py-1.5 text-[12px] transition-colors ${dark ? "hover:border-[#46423d]" : "hover:border-[#d3d0cd]"}`}
                     style={
                       dark
-                        ? { borderColor: "#3A3222", background: "transparent", color: "#EFEAE0" }
-                        : { borderColor: "#E8E4DC", background: "transparent", color: "#141414" }
+                        ? { borderColor: "#2b2825", background: "transparent", color: "#f7f5f2" }
+                        : { borderColor: "#d3d0cd", background: "transparent", color: "#110f0d" }
                     }
                   >
                     {b.label}
@@ -513,7 +513,7 @@ export function NextQuestions({ cards, bare = false, dark = false }: { cards: Ne
                 ))}
               </div>
             ) : hint ? (
-              <div className="text-[12px]" style={{ color: dark ? "#948C79" : "#655F52" }}>{hint}</div>
+              <div className="text-[12px]" style={{ color: dark ? "#bab7b3" : "#66635e" }}>{hint}</div>
             ) : null}
           </div>
         ))}
@@ -536,33 +536,33 @@ export function NextQuestions({ cards, bare = false, dark = false }: { cards: Ne
  *  with the rest of the outline. */
 function AcceptedSuggestions({ cards, title }: { cards: AcceptedSuggestionCard[]; title: string }) {
   return (
-    <div className="mt-5 border-t border-[#EFECE5] pt-[18px]">
+    <div className="mt-5 border-t border-[#e3e1de] pt-[18px]">
       <div className="mb-2.5 flex items-baseline gap-[11px]">
-        <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+        <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>
           {title} · accepted
         </span>
-        <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">
+        <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">
           Netify suggested these; you accepted them. Each compiles a governed clause until reversed.
         </span>
       </div>
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         {cards.map((c) => (
-          <div key={c.id} className="flex min-w-0 flex-col gap-2 rounded-[10px] border border-[#EFECE5] bg-white p-3.5">
+          <div key={c.id} className="flex min-w-0 flex-col gap-2 rounded-[4px] border border-[#e3e1de] bg-white p-3.5">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", background: "#EAF4EC", color: "#256B3E" }}>
+              <span className="rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", background: "#d9f4d9", color: "#1e4e22" }}>
                 Accepted
               </span>
-              <span className="text-[9.5px] text-[#B8B5AD]" style={mono} title="Stable suggestion id">
+              <span className="text-[9.5px] text-[#a7a4a0]" style={mono} title="Stable suggestion id">
                 {c.id}
               </span>
             </div>
-            <div className="text-[13.5px] leading-[1.5] text-[#141414]">{c.label}</div>
-            <div className="text-[12px] leading-[1.5] text-[#655F52]">{c.reason}</div>
+            <div className="text-[13.5px] leading-[1.5] text-[#110f0d]">{c.label}</div>
+            <div className="text-[12px] leading-[1.5] text-[#66635e]">{c.reason}</div>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <button
                 type="button"
                 onClick={c.onUndo}
-                className="cursor-pointer rounded-[6px] border border-[#E8E4DC] bg-transparent px-2.5 py-1.5 text-[12px] text-[#141414] hover:border-[#D8D4CA]"
+                className="cursor-pointer rounded-[4px] border border-[#d3d0cd] bg-transparent px-2.5 py-1.5 text-[12px] text-[#110f0d] hover:border-[#d3d0cd]"
               >
                 Mark as not needed
               </button>
@@ -574,19 +574,19 @@ function AcceptedSuggestions({ cards, title }: { cards: AcceptedSuggestionCard[]
   );
 }
 
-/* Contrast fix (verification pass, 18 Aug 2026): "#8C8A85"/"#A3A099" on this
- *  map's own "#F4F2ED" background measured 3.08:1 / 2.33:1, both well below
+/* Contrast fix (verification pass, 18 Aug 2026): "#83807b"/"#83807b" on this
+ *  map's own "#e3e1de" background measured 3.08:1 / 2.33:1, both well below
  *  WCAG AA's 4.5:1 for normal text -- and even the design system's own
- *  general-purpose muted token (--nf-ink-400, #7A7263) falls just short here
- *  (4.25:1) because #F4F2ED is a slightly warmer/lighter tint than the
- *  white/ivory it was tuned against. #655F52 is the same neutral hue, darkened
- *  just enough to clear 4.5:1 specifically against #F4F2ED (4.55:1). */
+ *  general-purpose muted token (--nf-ink-400, #83807b) falls just short here
+ *  (4.25:1) because #e3e1de is a slightly warmer/lighter tint than the
+ *  white/ivory it was tuned against. #66635e is the same neutral hue, darkened
+ *  just enough to clear 4.5:1 specifically against #e3e1de (4.55:1). */
 const OUTLINE_STATE_STYLE: Record<string, { bg: string; color: string }> = {
-  confirmed: { bg: "#EAF4EC", color: "#256B3E" },
-  needs_input: { bg: "#F4F2ED", color: "#655F52" },
-  needs_decision: { bg: "#FFF1DE", color: "var(--nf-orange-strong, #AA3E06)" },
-  netify_suggested: { bg: "#EDE6FB", color: "#5B3E9C" },
-  later: { bg: "#F4F2ED", color: "#655F52" },
+  confirmed: { bg: "#d9f4d9", color: "#1e4e22" },
+  needs_input: { bg: "#e3e1de", color: "#66635e" },
+  needs_decision: { bg: "#ffe3cc", color: "var(--nf-orange-strong, #832f00)" },
+  netify_suggested: { bg: "#eee6ff", color: "#ae96da" },
+  later: { bg: "#e3e1de", color: "#66635e" },
 };
 
 /** The document outline (implementation step 10): "which relevant
@@ -599,17 +599,17 @@ const OUTLINE_STATE_STYLE: Record<string, { bg: string; color: string }> = {
  *  target with a different, easier-to-miss behaviour. */
 function SectionOutline({ rows }: { rows: OutlineRow[] }) {
   return (
-    <div className="mt-5 border-t border-[#EFECE5] pt-[18px] pb-1">
-      <div className="mb-2.5 text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+    <div className="mt-5 border-t border-[#e3e1de] pt-[18px] pb-1">
+      <div className="mb-2.5 text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>
         Document outline
       </div>
-      <div className="flex flex-col gap-[1px] overflow-hidden rounded-[10px] border border-[#EFECE5]">
+      <div className="flex flex-col gap-[1px] overflow-hidden rounded-[4px] border border-[#e3e1de]">
         {rows.map((r) => {
           const st = OUTLINE_STATE_STYLE[r.state] ?? OUTLINE_STATE_STYLE.later;
           return (
             <div key={r.key} className="flex flex-wrap items-center gap-x-3 gap-y-1 bg-white px-3.5 py-2.5 sm:flex-nowrap">
-              <span className="w-full min-w-0 text-[13px] text-[#141414] sm:w-[190px] sm:flex-none">{r.title}</span>
-              <span className="min-w-0 flex-1 text-[12px] text-[#655F52]">{r.detail}</span>
+              <span className="w-full min-w-0 text-[13px] text-[#110f0d] sm:w-[190px] sm:flex-none">{r.title}</span>
+              <span className="min-w-0 flex-1 text-[12px] text-[#66635e]">{r.detail}</span>
               <span
                 className="flex-none rounded-[4px] px-[6px] py-[2px] text-[9.5px] uppercase"
                 style={{ ...mono, letterSpacing: "0.05em", background: st.bg, color: st.color }}
@@ -630,11 +630,11 @@ function SectionOutline({ rows }: { rows: OutlineRow[] }) {
 // document.counts data as before, only the accent border is new.
 function StatTile({ label, value, warn = false }: { label: string; value: number; warn?: boolean }) {
   return (
-    <div className="rounded-[10px] border border-[#EFECE5] px-3.5 py-3" style={{ borderLeft: "3px solid var(--nf-orange, #E8590C)" }}>
-      <div className="text-[19px] font-semibold leading-none" style={{ ...mono, color: warn && value > 0 ? "var(--nf-orange-strong, #AA3E06)" : "#141414" }}>
+    <div className="rounded-[4px] border border-[#e3e1de] px-3.5 py-3" style={{ borderLeft: "3px solid var(--nf-orange, #c66000)" }}>
+      <div className="text-[19px] font-semibold leading-none" style={{ ...mono, color: warn && value > 0 ? "var(--nf-orange-strong, #832f00)" : "#110f0d" }}>
         {value}
       </div>
-      <div className="mt-1 text-[10.5px] uppercase text-[#655F52]" style={{ ...mono, letterSpacing: "0.06em" }}>
+      <div className="mt-1 text-[10.5px] uppercase text-[#66635e]" style={{ ...mono, letterSpacing: "0.06em" }}>
         {label}
       </div>
     </div>
@@ -673,7 +673,7 @@ function changeSummaryLine(document: LivingProcurementDocument): string {
 function OpenDecisions({ decisions }: { decisions: LivingProcurementDocument["openDecisions"] }) {
   if (!decisions.length) return null;
   return (
-    <div className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+    <div className="border-t border-[#e3e1de] pb-4 pt-[18px]">
       <div className="mb-2 flex items-baseline gap-[11px]">
         {/* Lifecycle-consistency closure pass, correction C: same
             relabel as the StatTile above (same `document.openDecisions`
@@ -681,31 +681,31 @@ function OpenDecisions({ decisions }: { decisions: LivingProcurementDocument["op
             "blocking decisions" figure Mission Control and the publish
             panel share; the sub-copy already made clear these don't gate
             anything, this just stops the label implying otherwise. */}
-        <span className="text-[11px] uppercase text-[#33302C]" style={{ ...mono, letterSpacing: "0.1em" }}>
+        <span className="text-[11px] uppercase text-[#1c1a18]" style={{ ...mono, letterSpacing: "0.1em" }}>
           Document gaps
         </span>
-        <span className="min-w-0 flex-1 text-[12.5px] text-[#655F52]">nothing here becomes a gate or requirement until you decide</span>
-        <span className="flex-none text-[11px] text-[#655F52]" style={mono}>{decisions.length}</span>
+        <span className="min-w-0 flex-1 text-[12.5px] text-[#66635e]">nothing here becomes a gate or requirement until you decide</span>
+        <span className="flex-none text-[11px] text-[#66635e]" style={mono}>{decisions.length}</span>
       </div>
       <div className="flex flex-col gap-2">
         {decisions.map((d) => (
           <div
             key={d.id}
-            className="flex items-start gap-3 rounded-[10px] border px-3.5 py-3"
-            style={{ borderColor: d.conflict ? "#F2C1B8" : "#EFECE5", background: d.conflict ? "#FFF6F4" : "transparent" }}
+            className="flex items-start gap-3 rounded-[4px] border px-3.5 py-3"
+            style={{ borderColor: d.conflict ? "#ec928b" : "#e3e1de", background: d.conflict ? "#ffdfda" : "transparent" }}
           >
             <span
               className="mt-[4px] inline-block h-[7px] w-[7px] flex-none rounded-full"
-              style={{ background: d.conflict ? "#B42318" : "#A3A099" }}
+              style={{ background: d.conflict ? "#8d1a1e" : "#83807b" }}
               aria-hidden="true"
             />
             <div className="min-w-0 flex-1">
-              <div className="text-[13.5px] leading-[1.5] text-[#141414]">{d.question}</div>
-              {d.conflict && d.conflictReason && <div className="mt-1 text-[12px] leading-[1.5] text-[#8A2E1F]">{d.conflictReason}</div>}
+              <div className="text-[13.5px] leading-[1.5] text-[#110f0d]">{d.question}</div>
+              {d.conflict && d.conflictReason && <div className="mt-1 text-[12px] leading-[1.5] text-[#8d1a1e]">{d.conflictReason}</div>}
               {d.impact.length > 0 && (
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {d.impact.map((i) => (
-                    <span key={i} className="rounded-[4px] bg-[#F4F2ED] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", color: "#655F52" }}>
+                    <span key={i} className="rounded-[4px] bg-[#e3e1de] px-[6px] py-[2px] text-[9.5px] uppercase" style={{ ...mono, letterSpacing: "0.06em", color: "#66635e" }}>
                       {i}
                     </span>
                   ))}

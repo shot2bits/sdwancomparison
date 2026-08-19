@@ -1,29 +1,13 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import NetifyEvents from "@/components/NetifyEvents";
 import "./globals.css";
 
-// Inter matches the main netify.co.uk site (SF Pro approximation),
-// self-hosted via next/font so no layout shift and no runtime request.
-//
-// CORRECTED (visual closure pass, 18 Aug 2026): this was `next/font/google`,
-// which fetches the actual font bytes from fonts.googleapis.com at BUILD
-// time (every `next build`, even in CI/CD, needs live network access to
-// Google's font CDN at that moment). That's a real, if usually-invisible,
-// build-time fragility -- confirmed here when a network-restricted build
-// environment couldn't reach fonts.googleapis.com and `next build` failed
-// outright ("Failed to fetch font `Inter`"). The rendered font, weights
-// (variable 100-900), subset (latin) and `--font-inter` CSS variable
-// contract are byte-for-byte the same Inter typeface (sourced from the
-// `@fontsource-variable/inter` package's own latin variable-weight woff2,
-// checked into this repo at src/fonts/inter-variable-latin.woff2) -- this
-// is a build-hermeticity fix, not a font, weight or visual change.
-const inter = localFont({
-  src: "../fonts/inter-variable-latin.woff2",
-  display: "swap",
-  variable: "--font-inter",
-  weight: "100 900",
-});
+// 19 Aug 2026: Robert asked to drop the self-hosted Inter webfont entirely
+// and render in the platform's own default system UI font throughout (see
+// the --nf-font-* / --font-* tokens in globals.css, which no longer
+// reference --font-inter). No custom font file is fetched or loaded now;
+// every OS renders its own native UI typeface, exactly as an unstyled page
+// would.
 
 export const metadata: Metadata = {
   title: {
@@ -62,7 +46,7 @@ export default function RootLayout({
    * workspace included.
    */
   return (
-    <html lang="en-GB" className={inter.variable}>
+    <html lang="en-GB">
       <body className="paper-texture min-h-screen">
         {/* Accessibility skip link: invisible until keyboard-focused, then a
             fixed amber pill just below the top bar. Styled by .skip-link in

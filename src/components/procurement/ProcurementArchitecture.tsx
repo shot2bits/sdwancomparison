@@ -24,7 +24,7 @@
 
 import type { LivingProcurementDocument } from "@/lib/workspace/procurement-document";
 
-const mono: React.CSSProperties = { fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace' };
+const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
 
 type ArchNode = LivingProcurementDocument["architecture"]["nodes"][number];
 
@@ -80,7 +80,7 @@ export default function ProcurementArchitecture({
   const titleId = "arch-diagram-title";
 
   return (
-    <div className="border-t border-[#EFECE5] pb-4 pt-[18px]">
+    <div className="border-t border-[#e3e1de] pb-4 pt-[18px]">
       {/* Constitution correction (18 Aug 2026): the mockups (image2/
           image3) label this exact real diagram "LIVE PROCUREMENT TWIN"
           (an orange eyebrow, matching every other section eyebrow's
@@ -88,10 +88,10 @@ export default function ProcurementArchitecture({
           bordered card rather than a bare divider -- both are pure
           presentation changes over the SAME real `architecture` data;
           nothing about what is derived or how it's laid out changes. */}
-      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--nf-orange-strong, #AA3E06)" }}>
+      <span style={{ ...mono, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--nf-orange-strong, #832f00)" }}>
         Live procurement twin
       </span>
-      <div className="mt-3 rounded-[14px] border p-4" style={{ borderColor: "var(--nf-rule, #E4D9C2)", background: "var(--nf-ivory-raised, #FBF7EE)" }}>
+      <div className="mt-3 rounded-[4px] border p-4" style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-raised, #fefdfc)" }}>
         {nodes.length === 0 ? (
           <p className="m-0 text-[13.5px] leading-[1.55] text-[var(--nf-ink-400)]">
             Nothing derived yet — it fills in as you describe sites, users, network and cloud.
@@ -101,8 +101,8 @@ export default function ProcurementArchitecture({
             {nodes.map((n) => (
               <span
                 key={n.id}
-                className="rounded-[9px] border bg-white px-3 py-[7px] text-[12px] uppercase"
-                style={{ ...mono, letterSpacing: "0.04em", borderColor: "var(--nf-ink-900, #33302C)", color: "var(--nf-ink-900, #33302C)" }}
+                className="rounded-[4px] border bg-white px-3 py-[7px] text-[12px] uppercase"
+                style={{ ...mono, letterSpacing: "0.04em", borderColor: "var(--nf-ink-900, #1c1a18)", color: "var(--nf-ink-900, #1c1a18)" }}
               >
                 {n.label}
               </span>
@@ -121,7 +121,7 @@ export default function ProcurementArchitecture({
             <title id={titleId}>{architecture.accessibleSummary}</title>
             <defs>
               <marker id="arch-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--nf-emerald, #0B6745)" />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--nf-emerald, #1e4e22)" />
               </marker>
             </defs>
             {edges.map((e, i) => {
@@ -138,19 +138,19 @@ export default function ProcurementArchitecture({
                   <path
                     d={`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`}
                     fill="none"
-                    stroke="var(--nf-emerald, #0B6745)"
+                    stroke="var(--nf-emerald, #1e4e22)"
                     strokeWidth={1.5}
                     markerEnd="url(#arch-arrow)"
                   />
                   {/* Accessibility correction (18 Aug 2026, real bug
                       found via an axe-core scan): the original invented
-                      muted-green (#7A9E8C) measured 2.77:1 against this
+                      muted-green (#1e4e22) measured 2.77:1 against this
                       card's ivory-raised background, well under WCAG
                       AA's 4.5:1. Reusing the same emerald token the edge
                       line itself already uses (5.72:1+ on this
                       background) both fixes the contrast and avoids
                       inventing a second, one-off green shade. */}
-                  <text x={midX} y={(y1 + y2) / 2 - 5} textAnchor="middle" fontSize="10" fill="var(--nf-emerald, #0B6745)" style={mono}>
+                  <text x={midX} y={(y1 + y2) / 2 - 5} textAnchor="middle" fontSize="10" fill="var(--nf-emerald, #1e4e22)" style={mono}>
                     {e.label}
                   </text>
                 </g>
@@ -161,13 +161,13 @@ export default function ProcurementArchitecture({
               if (!p) return null;
               return (
                 <g key={n.id}>
-                  <rect x={p.x} y={p.y} width={BOX_W} height={BOX_H} rx={9} fill="white" stroke="var(--nf-ink-900, #33302C)" strokeWidth={1.3} />
+                  <rect x={p.x} y={p.y} width={BOX_W} height={BOX_H} rx={4} fill="white" stroke="var(--nf-ink-900, #1c1a18)" strokeWidth={1.3} />
                   <text
                     x={p.x + BOX_W / 2}
                     y={p.y + BOX_H / 2 + 4}
                     textAnchor="middle"
                     fontSize="11"
-                    fill="var(--nf-ink-900, #33302C)"
+                    fill="var(--nf-ink-900, #1c1a18)"
                     style={{ ...mono, letterSpacing: "0.02em", textTransform: "uppercase" }}
                   >
                     {n.label.length > 22 ? `${n.label.slice(0, 21)}…` : n.label}
@@ -178,7 +178,7 @@ export default function ProcurementArchitecture({
           </svg>
         )}
         {deltaCaption && (
-          <p className="m-0 mt-3 text-[11.5px]" style={{ ...mono, color: "var(--nf-emerald, #0B6745)" }}>
+          <p className="m-0 mt-3 text-[11.5px]" style={{ ...mono, color: "var(--nf-emerald, #1e4e22)" }}>
             {deltaCaption}
           </p>
         )}

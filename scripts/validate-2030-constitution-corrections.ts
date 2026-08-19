@@ -13,7 +13,7 @@
 // report, not repeated here since that tooling isn't part of `npm run
 // validate`'s deterministic, no-browser fixture set.
 
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -42,34 +42,35 @@ function main() {
   }
 
   /* ================================================================ */
-  /* 2. Mission Control / fixed composer overlap: a JS-measured max-   */
-  /*    height (not a static vh guess) must drive the card's clamp,    */
-  /*    and the measurement must be taken at the natural (unscrolled,  */
-  /*    worst-case) position, never trusted mid-scroll.                */
+  /* 2. Mission Control / composer overlap: superseded 19 Aug 2026.    */
+  /*    Robert's explicit feedback moved the composer out of its fixed-*/
+  /*    bottom position (now inline, near the top of the page), which  */
+  /*    removes the entire reason the JS-measured max-height existed.  */
+  /*    This section now asserts the measurement machinery is actually */
+  /*    GONE (not just unused) and that the card fell back to a plain, */
+  /*    static cap instead of silently losing its clamp altogether.    */
   /* ================================================================ */
   {
     const desk = src("src/components/ProjectDesk.tsx");
-    record(/const \[mcMaxHeightPx, setMcMaxHeightPx\]/.test(desk), "2: ProjectDesk carries a measured mcMaxHeightPx state (not a hardcoded constant alone)", "");
-    record(/mcCardRef = useRef<HTMLDivElement/.test(desk) && /composerDockRef = useRef<HTMLDivElement/.test(desk), "2: both the Mission Control card and the fixed composer dock carry real refs for measurement", "");
-    record(/if \(window\.scrollY > 4\) return;/.test(desk), "2: the measurement effect refuses to trust a mid-scroll (already-stuck) position, which would under-constrain the card", "");
-    record(/new ResizeObserver\(\(\) => measure\(\)\)/.test(desk), "2: a ResizeObserver re-measures on any layout change (hero collapse settling, async content), not just on mount", "");
-    record(/ref=\{mcCardRef\}/.test(desk) && /ref=\{composerDockRef\}/.test(desk), "2: both refs are actually attached to their JSX elements", "");
-    record(/--mc-max-h/.test(desk), "2: the measured value reaches the card only through the lg:-scoped CSS variable (never applied below lg, matching the mobile collapse's own bounds)", "");
+    record(!/const \[mcMaxHeightPx, setMcMaxHeightPx\]/.test(desk), "2: the mcMaxHeightPx measurement state is removed (the fixed composer it existed to clear no longer exists)", "");
+    record(!/composerDockRef/.test(desk), "2: composerDockRef is removed along with the measurement it fed", "");
+    record(!/mcCardRef/.test(desk), "2: mcCardRef is removed along with the measurement it fed", "");
+    record(/lg:max-h-\[min\(60vh,calc\(100vh-170px\)\)\]/.test(desk), "2: the Mission Control card keeps a static lg: max-height cap now that no JS measurement feeds it", "");
+    record(/className="relative border-b"/.test(desk), "2: the composer's outer wrapper is relatively positioned (no longer fixed/inset-x-0/bottom-0), matching Robert's 19 Aug 2026 request to move it inline near the top", "");
   }
 
   /* ================================================================ */
-  /* 3. Mobile Mission Control dead zone: the 150px dock-clearance      */
-  /*    padding must be conditional on the card actually being         */
-  /*    expanded, not applied unconditionally to a two-line collapsed  */
-  /*    summary.                                                       */
+  /* 3. Mobile Mission Control dead zone: superseded 19 Aug 2026 along  */
+  /*    with section 2 above -- the 150px reserve this used to require  */
+  /*    conditionally existed only to clear the composer's old fixed-   */
+  /*    bottom footprint. With the composer no longer fixed, the aside  */
+  /*    needs no special-cased clearance at all; assert the simple,     */
+  /*    unconditional padding replaced it.                              */
   /* ================================================================ */
   {
     const desk = src("src/components/ProjectDesk.tsx");
-    record(
-      /\$\{mcExpanded \? "pb-\[150px\]" : "pb-6"\}/.test(desk),
-      "3: the mobile aside's bottom clearance is conditional on mcExpanded, not a flat pb-[150px] regardless of collapsed state",
-      "",
-    );
+    record(!/mcExpanded \? "pb-\[150px\]" : "pb-6"/.test(desk), "3: the mobile aside no longer branches its bottom padding on mcExpanded (no fixed dock left to conditionally clear)", "");
+    record(/order-1 mb-6 pb-6 lg:sticky lg:top-\[132px\]/.test(desk), "3: the mobile aside carries a plain, unconditional pb-6 instead", "");
   }
 
   /* ================================================================ */
@@ -80,7 +81,12 @@ function main() {
   {
     const canvas = src("src/components/procurement/LivingProcurementCanvas.tsx");
     record(/What changed/.test(canvas), "4: the ribbon's eyebrow reads \"What changed\", matching the Constitution mockups' own label", "");
-    record(/nf-emerald-soft-border.*9FCEB4[\s\S]{0,40}nf-emerald-soft.*DCEEE3/.test(canvas), "4: the ribbon box uses the emerald-soft background/border tokens", "");
+    // Superseded 19 Aug 2026 (Robert's "UI mockups request" handoff bundle,
+    // aesthetic-only restyle): the emerald-soft pair was recomputed from the
+    // handoff's own oklch spec (oklch(0.38 0.09 145) / oklch(0.94 0.045 145))
+    // rather than the earlier invented shade -- new hex #91bb91 / #d9f4d9,
+    // same emerald-soft-border/emerald-soft token pairing, same ribbon box.
+    record(/nf-emerald-soft-border.*91bb91[\s\S]{0,40}nf-emerald-soft.*d9f4d9/.test(canvas), "4: the ribbon box uses the emerald-soft background/border tokens (19 Aug 2026 handoff palette)", "");
     record(!/Value created/.test(canvas), "4: the earlier \"Value created\" orange-soft label no longer exists", "");
   }
 
@@ -96,7 +102,15 @@ function main() {
     record(/prov\.isMcp && prov\.hasConsent/.test(desk), "5: latestMcpReceipt is gated on the SAME real isMcp && hasConsent condition McpEvidencePanel.tsx's approvedEvents already uses (not a separate, looser rule)", "");
     record(/if \(approved\.length === 0\) return null;/.test(desk), "5: with no real approved MCP event, latestMcpReceipt is genuinely null (renders nothing), never a placeholder", "");
     record(/\{latestMcpReceipt && \(/.test(desk), "5: the MCP RECEIPT block only renders when latestMcpReceipt is real and non-null", "");
-    record(/nf-lilac,\s*#[0-9A-Fa-f]{6}/.test(desk), "5: the MCP RECEIPT label uses the violet (lilac) token, distinct from the orange \"Agent proposed\" and cobalt \"MCP evidence\" tags", "");
+    // Superseded 19 Aug 2026 (accessibility fix made during the handoff-
+    // bundle restyle): the reference's lilac formula (oklch(0.42 0.11 300))
+    // is tuned as TEXT-ON-LIGHT-BACKGROUND -- correct for the SUGGESTED
+    // badge, but measured only 2.15:1 here, where this one raw-lilac usage
+    // sits as text on the dark Mission Control card. A dedicated
+    // --nf-lilac-on-dark token (oklch(0.72 0.1 300), 7.45:1 on that card)
+    // was added for this single usage; --nf-lilac itself is untouched and
+    // still used as-is by every light-background badge/dot elsewhere.
+    record(/nf-lilac-on-dark,\s*#[0-9A-Fa-f]{6}/.test(desk), "5: the MCP RECEIPT label uses the violet (lilac-on-dark) token, distinct from the orange \"Agent proposed\" and cobalt \"MCP evidence\" tags, and accessibility-corrected for its dark-card background", "");
   }
 
   /* ================================================================ */
@@ -154,7 +168,13 @@ function main() {
     // near-white/ivory backgrounds it sits on -- inconsistent and
     // sometimes below 4.5:1. #655F52 clears 4.5:1 with real margin (5.1:1
     // to 6.3:1) against every background this pass actually measured.
-    record(/text-\[#655F52\]|"#655F52"/.test(desk), "7: ProjectDesk's light-background muted/caption text uses #655F52 (axe-core-verified 5.1:1+ across every background this pass measured) instead of the inaccessible #A3A099/#8C8A85 hex literals (2.5:1-3.5:1) or the marginal --nf-ink-400 token (4.12:1-4.79:1 depending on background)", "");
+    // Superseded 19 Aug 2026 (handoff-bundle restyle): the muted/caption
+    // ink shade moved from the earlier accessibility-corrected #655F52 to
+    // the new palette's own ink-600 (oklch(0.50 0.009 75) -> #66635e),
+    // recomputed from the handoff's spec rather than invented -- axe-core-
+    // verified 5.1:1+ against every background this pass measured, same as
+    // #655F52 was. The old value is retired, not regressed.
+    record(/text-\[#66635e\]|"#66635e"/.test(desk), "7: ProjectDesk's light-background muted/caption text uses #66635e (the 19 Aug 2026 handoff palette's ink-600, axe-core-verified 5.1:1+ across every background this pass measured) instead of the inaccessible #A3A099/#8C8A85 hex literals (2.5:1-3.5:1)", "");
     record(!/text-\[#A3A099\]|text-\[#8C8A85\]/.test(desk), "7: no light-background Tailwind text-color class in ProjectDesk.tsx still uses the old sub-4.5:1 #A3A099/#8C8A85 hex literals", "");
 
     const header = src("src/components/WorkspaceHeader.tsx");
@@ -208,24 +228,41 @@ function main() {
   }
 
   /* ================================================================ */
-  /* 8. Production build hermeticity: `npm run build` (required        */
-  /*    evidence for this pass) failed outright in a network-          */
-  /*    restricted build environment because `next/font/google`        */
-  /*    fetches the actual Inter font bytes from fonts.googleapis.com  */
-  /*    at BUILD time, not just at first `next dev`. This is a build-  */
-  /*    tooling fix, not a visual or product change: same Inter        */
-  /*    typeface, same variable weight range (100-900), same latin     */
-  /*    subset, same `--font-inter` CSS variable contract -- just      */
-  /*    sourced from a font file checked into the repo instead of a    */
-  /*    live network fetch during the build.                           */
+  /* 8. Typeface: superseded a second time, 19 Aug 2026 (handoff-bundle */
+  /*    restyle). The 18 Aug system-font-only decision stands for the   */
+  /*    sitewide root layout (src/app/layout.tsx) and marketing pages   */
+  /*    -- untouched by this pass. But the handoff bundle's own spec    */
+  /*    explicitly calls for Space Grotesk (headings/labels) and        */
+  /*    JetBrains Mono (ids/stat numbers), scoped strictly to the       */
+  /*    .procurement-2030 workspace surface -- a deliberate, knowing    */
+  /*    reversal of the system-font-only rule for that one surface,     */
+  /*    not a regression. Self-hosted the same way Inter was (next/     */
+  /*    font/local, since this sandbox's build has no network path to   */
+  /*    fonts.googleapis.com), but wired up in the (workspace) route    */
+  /*    group's own layout.tsx / src/lib/workspace/fonts.ts, never in   */
+  /*    the sitewide src/app/layout.tsx -- so the checks below still    */
+  /*    hold the root layout to the system-font-only rule, while        */
+  /*    asserting the workspace tokens now deliberately reference the   */
+  /*    new webfonts instead of the system stack.                       */
   /* ================================================================ */
   {
     const layout = src("src/app/layout.tsx");
-    record(!/from "next\/font\/google"/.test(layout), "8: src/app/layout.tsx no longer imports from next/font/google (which fetches Inter from fonts.googleapis.com at build time)", "");
-    record(/next\/font\/local/.test(layout), "8: src/app/layout.tsx now sources Inter via next/font/local", "");
-    record(/variable:\s*"--font-inter"/.test(layout), "8: the --font-inter CSS variable contract (referenced by globals.css's --font-display/--font-sans) is unchanged", "");
-    record(/weight:\s*"100 900"/.test(layout), "8: the same variable weight range (100-900) that next/font/google previously fetched is preserved", "");
-    record(existsSync(path.join(ROOT, "src/fonts/inter-variable-latin.woff2")), "8: the self-hosted Inter variable woff2 (latin subset) is checked into the repo at src/fonts/inter-variable-latin.woff2", "");
+    record(!/from "next\/font\/google"/.test(layout), "8: src/app/layout.tsx (sitewide root layout) does not import from next/font/google", "");
+    record(!/from "next\/font\/local"/.test(layout), "8: src/app/layout.tsx does not import from next/font/local either -- the sitewide/marketing surface still loads no custom webfont, per Robert's 18 Aug 2026 request; the 19 Aug 2026 handoff bundle's webfonts are scoped to the (workspace) route group's own layout instead", "");
+    record(!/variable:\s*"--font-inter"/.test(layout) && !/className=\{inter\.variable\}/.test(layout), "8: layout.tsx no longer wires up an actual --font-inter variable binding (a comment may still reference the retired identifier by name for context)", "");
+
+    const workspaceLayout = src("src/app/(workspace)/layout.tsx");
+    record(/from "@\/lib\/workspace\/fonts"/.test(workspaceLayout), "8: the (workspace) route group's own layout.tsx -- not the sitewide root layout -- loads the handoff bundle's self-hosted fonts", "");
+
+    const globals = src("src/app/globals.css");
+    record(!/var\(--font-inter\)/.test(globals), "8: globals.css's font tokens no longer reference var(--font-inter) anywhere", "");
+    record(
+      /--nf-font-serif:\s*var\(--font-space-grotesk\)/.test(globals) &&
+        /--nf-font-sans:\s*-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;/.test(globals) &&
+        /--nf-font-mono:\s*var\(--font-jetbrains-mono\)/.test(globals),
+      "8: --nf-font-serif and --nf-font-mono deliberately reference the handoff bundle's self-hosted Space Grotesk / JetBrains Mono webfonts (19 Aug 2026), while --nf-font-sans stays the native system UI stack for body text, matching the handoff's typography rule exactly",
+      "",
+    );
   }
 
   /* ================================================================ */
