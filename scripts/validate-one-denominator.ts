@@ -46,7 +46,12 @@ const row = (title: string, state: OutlineRow["state"]): OutlineRow => ({ key: t
 function main() {
   const desk = src("src/components/ProjectDesk.tsx");
   const canvas = src("src/components/procurement/LivingProcurementCanvas.tsx");
-  const rail = src("src/components/procurement/WizardRail.tsx");
+  /* 2030 UI rebuild (20 Aug 2026): WizardRail.tsx is retired -- the
+     section outline is now the primary navigation itself (SectionNav.tsx),
+     not a read-only list a separate five-station rail summarised. Every
+     assertion this file made against the old rail now checks the SAME
+     property on its replacement. */
+  const nav = src("src/components/procurement/SectionNav.tsx");
   const answerNext = src("src/components/procurement/AnswerNext.tsx");
   const ready = src("src/components/procurement/RfpReady.tsx");
 
@@ -98,10 +103,15 @@ function main() {
   /* C. EVERY SURFACE READS THE SAME PROJECTION.                       */
   /* ================================================================ */
   record(/const sectionProgress = useMemo\(\(\) => outlineProgress\(sectionOutline\)/.test(desk), "C: ProjectDesk derives it from `sectionOutline` -- the same array the canvas renders as a list");
-  record(/progress=\{started \? sectionProgress : null\}/.test(desk), "C: the wizard rail reads it (and shows nothing before a project starts)");
+  /* The primary nav renders only inside ProjectDesk's own `started`
+     branch (the whole workspace shell, rail included, is unreachable
+     pre-start) -- so, unlike the retired rail's own belt-and-braces
+     ternary, SectionNav's `progress` prop is passed unconditionally; the
+     surrounding JSX branch is the real gate. */
+  record(/<SectionNav[\s\S]{0,400}progress=\{sectionProgress\}/.test(desk), "C: the primary navigation reads it (only rendered once a project has started)");
   record(/outlineProgress\(outline\)/.test(canvas), "C: the document header derives it from the outline it is about to render");
   record(/outlineProgressLine\(progress\)/.test(canvas), "C: the header uses the shared wording function, not its own sentence");
-  record(/sections ready/.test(rail), "C: the rail states the fraction in words, not just a bar");
+  record(/outlineProgressLine\(progress\)/.test(nav), "C: the primary nav states the fraction via the SAME shared wording function, not its own sentence");
 
   /* ================================================================ */
   /* D. A QUESTION KNOWS WHERE IT LANDS.                               */

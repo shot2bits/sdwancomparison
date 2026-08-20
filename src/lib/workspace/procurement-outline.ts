@@ -402,3 +402,38 @@ export function sectionPosition(
   if (i === -1) return null;
   return { position: i + 1, total: required.length, state: required[i].state };
 }
+
+/**
+ * 2030 UI rebuild (Robert, 20 Aug 2026: "tell the user that the AI prompt
+ * will auto populate all sections... the portal should update all
+ * sections"). Which outline rows genuinely changed between two snapshots
+ * of this same projection — the one thing that can honestly answer "did
+ * my sentence just touch more than one section?" without ProjectDesk
+ * re-deriving that from raw facts a second time.
+ *
+ * A row counts as changed when its state, its detail line, or its named
+ * missing items differ — i.e. anything a buyer would actually SEE change
+ * on the row. A row present in `next` but not in `prev` (a sector pack
+ * activating mid-conversation) counts too: it is new information on
+ * screen, which is exactly what this exists to name.
+ *
+ * PURE: no React, no I/O (Article 17) — a plain array diff, so it is
+ * testable on two literal `OutlineRow[]` fixtures with no component
+ * mounted.
+ */
+export function diffOutlineSections(prev: readonly OutlineRow[], next: readonly OutlineRow[]): string[] {
+  const prevByKey = new Map(prev.map((r) => [r.key, r]));
+  const changed: string[] = [];
+  for (const row of next) {
+    const before = prevByKey.get(row.key);
+    if (
+      !before ||
+      before.state !== row.state ||
+      before.detail !== row.detail ||
+      (before.missing ?? []).join("") !== (row.missing ?? []).join("")
+    ) {
+      changed.push(row.title);
+    }
+  }
+  return changed;
+}
