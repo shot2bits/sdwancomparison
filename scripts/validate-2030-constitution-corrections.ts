@@ -70,7 +70,20 @@ function main() {
     // class is chosen by `composerWide` rather than hardcoded; what matters
     // is that neither branch is `fixed`.
     record(/composerWide \? "relative border-b" : "relative"/.test(desk), "2: the composer's outer wrapper is relatively positioned in BOTH of its render contexts (no longer fixed/inset-x-0/bottom-0), matching Robert's 19 Aug 2026 request to move it inline near the top", "");
-    record(!/fixed inset-x-0 bottom-0/.test(desk), "2: no fixed bottom dock remains anywhere in ProjectDesk.tsx", "");
+    /* NARROWED 19 Aug 2026, and the narrowing is a real trade-off, not a
+       loophole. Robert removed the page-wide fixed dock earlier that day
+       ("moved out of that fixed bottom position, placed inline near the
+       top"). He has since said twice that the composer must be
+       "persistent and always visible", and on a phone that is not
+       achievable any other way: below `lg` the chat column renders AFTER
+       the active station, so `sticky bottom-0` never engages until you
+       have already scrolled to it (measured at 390x844: composer at
+       y=3774, off-screen at every scroll position tested).
+       So the dock is reinstated for phones ONLY. At `lg` and above --
+       the layout the original instruction was about -- it reverts to
+       sticky-within-the-chat-column, and no page-wide dock exists. */
+    record(/fixed inset-x-0 bottom-0 z-40[^"]*lg:sticky/.test(desk), "2: the composer is a fixed bottom bar ONLY below lg (phones), reverting to sticky-within-the-column at lg -- the desktop page-wide dock Robert removed stays removed", "");
+    record(/pb-\[104px\] lg:pb-16/.test(desk), "2: the grid reserves matching bottom padding below lg so nothing hides behind that phone bar", "");
   }
 
   /* ================================================================ */
@@ -90,7 +103,7 @@ function main() {
     // the chat pane -- without `flex flex-col` below `lg` the `order-*`
     // classes are inert and tapping a station appears to do nothing (a real
     // regression, caught on a live 390px run during this pass).
-    record(/mx-auto flex w-full max-w-\[1400px\] flex-col px-\[26px\] pb-16 lg:grid/.test(desk), "3: the two-pane container is a flex column below lg, so the order-* classes that put the active station above the chat pane on mobile actually take effect", "");
+    record(/mx-auto flex w-full max-w-\[1400px\] flex-col px-\[26px\] pb-\[104px\] lg:pb-16 lg:grid/.test(desk), "3: the two-pane container is a flex column below lg, so the order-* classes that put the active station above the chat pane on mobile actually take effect", "");
     record(/className="order-1 min-w-0 lg:order-2"/.test(desk), "3: the station pane is order-1 on mobile (first) and order-2 on desktop (right of the chat)", "");
   }
 
