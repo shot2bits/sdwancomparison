@@ -1307,6 +1307,35 @@ export default function ProjectDesk({
   const securityScope = buying === "managed_security" || buying === null;
   const live = standing(facts);
   const started = facts.length > 0 || noted.length > 0;
+
+  /** One-shot layout snap when the workspace shell first appears.
+   *
+   *  Robert, 19 Aug 2026: "The AI prompt window actually disappeared."
+   *  Pinning the composer inside the chat pane (see that pane's own
+   *  comment) fixed it for every scrolled state, but left one real gap:
+   *  on the very first paint after a send, the pane sits at ~330px with a
+   *  `calc(100vh-145px)` height, so its lower edge -- and the composer
+   *  pinned to it -- fell ~190px below a 900px viewport. The buyer had
+   *  just typed into that box and it vanished.
+   *
+   *  The pane's height assumes its top is at the sticky offset, which is
+   *  only true once scrolled. So scroll there, once, the moment the shell
+   *  mounts. Guarded by a ref rather than state: it must happen exactly
+   *  once per project, never again on later recompiles, and it must not
+   *  fight a buyer who has since scrolled somewhere themselves. */
+  const snappedRef = useRef(false);
+  useEffect(() => {
+    if (!started || snappedRef.current) return;
+    snappedRef.current = true;
+    const timer = setTimeout(() => {
+      const grid = document.querySelector("[data-workspace-grid]");
+      if (!grid) return;
+      const el = document.scrollingElement || document.documentElement;
+      const top = grid.getBoundingClientRect().top + el.scrollTop - 145;
+      el.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }, 140);
+    return () => clearTimeout(timer);
+  }, [started]);
   /** Phase 3 Stage A correction round (Robert, 14 Aug 2026), item 8: a
    *  small, undirected signal for the marketing hero (a SIBLING
    *  component under the same Server Component page, not a child of
@@ -4175,14 +4204,30 @@ export default function ProjectDesk({
               with the decisions themselves a full screen further down
               (caught on a real 390px run, not assumed). Station first on
               mobile, chat first on desktop. */}
-          <div className="mx-auto flex w-full max-w-[1400px] flex-col px-[26px] pb-16 lg:grid lg:grid-cols-[368px_minmax(0,1fr)] lg:items-start lg:gap-0 lg:px-0">
+          <div data-workspace-grid className="mx-auto flex w-full max-w-[1400px] flex-col px-[26px] pb-16 lg:grid lg:grid-cols-[368px_minmax(0,1fr)] lg:items-start lg:gap-0 lg:px-0">
             {/* LEFT PANE -- constant across all five stations, exactly as
                 every reference screenshot draws it: the buyer can correct
                 or add a sentence from any station without navigating
                 away. Its own scroll container on desktop so a long
                 transcript never pushes the station content down. */}
             <div
-              className="order-2 min-w-0 lg:order-1 lg:sticky lg:top-[145px] lg:h-[calc(100vh-145px)] lg:overflow-y-auto lg:border-r"
+              /* A REAL CHAT PANE, 19 Aug 2026. Robert: "The AI prompt
+                 window actually disappeared when a multiple choice
+                 question was asked, then re-appeared again."
+                 Reproduced and it is worse than intermittent: the
+                 composer sat at y=1414 on a 900px viewport BEFORE any
+                 interaction -- persistently ~500px below the fold --
+                 because the whole column (transcript + Answer next +
+                 chips + composer) scrolled as one block inside a fixed-
+                 height container. Anything that grew above it, such as
+                 expanding a decision to its answer buttons, pushed it
+                 further away; collapsing brought it back. That is the
+                 "disappeared, then re-appeared".
+                 The pane is now what a chat pane is everywhere else:
+                 a flex column whose TRANSCRIPT scrolls and whose
+                 composer is pinned to the bottom, always reachable
+                 without scrolling. */
+              className="order-2 flex min-w-0 flex-col lg:order-1 lg:sticky lg:top-[145px] lg:h-[calc(100vh-145px)] lg:border-r"
               style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}
             >
               <div className="px-0 pt-5 lg:px-6">
@@ -4196,10 +4241,17 @@ export default function ProjectDesk({
                   Write in your own words, from any screen &mdash; each sentence gets checked against the document.
                 </p>
               </div>
-              {threadBlock}
-              {answerNextBlock}
-              {sectorChips}
-              {composerBlock}
+              {/* Scrolls. */}
+              <div className="min-h-0 flex-1 lg:overflow-y-auto">
+                {threadBlock}
+                {answerNextBlock}
+                {sectorChips}
+              </div>
+              {/* Pinned. `flex-none` so a long transcript can never push
+                  it off the bottom of the pane. */}
+              <div className="flex-none border-t lg:border-t-0" style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}>
+                {composerBlock}
+              </div>
             </div>
 
             {/* RIGHT PANE -- the active station. */}
