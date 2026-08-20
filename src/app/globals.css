@@ -180,26 +180,21 @@
   --nf-neutral-tag: oklch(0.38 0.015 75);
   --nf-neutral-tag-soft: oklch(0.92 0.006 75);
 
-  /* 19 Aug 2026 (this pass): reinstates two custom webfonts inside the
-   * workspace surface ONLY, per the handoff doc's "2. Typography"
-   * section -- Space Grotesk for headings/card titles/nav labels/brand
-   * wordmark, JetBrains Mono for IDs/stat numbers/counts/percentages/any
-   * tabular value. This is a deliberate, knowing reversal of the
-   * system-default-font decision made earlier the SAME day -- but that
-   * decision was about netify.co.uk's marketing pages; this request is
-   * explicitly scoped to "the SASE sourcing builder" only, so the
-   * un-prefixed --font-* tokens below (marketing/sitewide) are
-   * untouched and stay system-ui. --nf-font-sans also stays system-ui
-   * inside the workspace -- the handoff doc calls for that explicitly
-   * ("no change needed if you already use system fonts"). Both webfonts
-   * are self-hosted (src/lib/workspace/fonts.ts, next/font/local) for
-   * the same build-hermeticity reason Inter was self-hosted before:
-   * next/font/google fetches bytes from fonts.googleapis.com at BUILD
-   * time, which this project's network-restricted build environment
-   * cannot reach. */
-  --nf-font-serif: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* 20 Aug 2026: Robert, "Default system font should be used" -- reverses
+   * the 19 Aug 2026 pass immediately above this comment, which had
+   * reinstated two custom webfonts (Space Grotesk, JetBrains Mono)
+   * inside the workspace surface only. That reversal is itself reversed
+   * here: every --nf-font-* token is now the plain system-ui stack,
+   * matching the un-prefixed --font-* tokens below (marketing/sitewide),
+   * which were never touched by the 19 Aug pass and so needed no change
+   * now. src/lib/workspace/fonts.ts (the next/font/local declarations)
+   * and the workspace layout's `workspaceFontVars` class are removed in
+   * the same pass -- nothing references --font-space-grotesk or
+   * --font-jetbrains-mono anywhere, so no stale CSS variable is left
+   * pointing at a font that no longer loads. */
+  --nf-font-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --nf-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --nf-font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --nf-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
 /* Handoff doc, "1. Colors": "add a very subtle dot grid behind the main
