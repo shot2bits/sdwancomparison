@@ -58,6 +58,7 @@ export default function WizardRail({
   badges?: Partial<Record<WizardStep, number>>;
   onSelect: (step: WizardStep) => void;
 }) {
+  const currentStep = WIZARD_STEPS.find((s) => s.step === current) ?? WIZARD_STEPS[0];
   return (
     <nav
       aria-label="Sourcing builder progress"
@@ -142,6 +143,20 @@ export default function WizardRail({
           );
         })}
       </ol>
+      {/* The current station's purpose. Robert, 19 Aug 2026: "I'd have no
+          idea what I was trying to accomplish here." The rail said
+          "Publish" where the journey strip it replaced said "Publish
+          anonymously -- your notice, your signature, your identity stays
+          off it", and that sentence only ever renders before a project
+          starts. Copy is unchanged and already-approved (see
+          wizard-steps.ts); it is only being shown where it is needed. */}
+      <div
+        className="mx-auto max-w-[1400px] px-[26px] pb-2.5 text-[12.5px] leading-[1.45] lg:px-[42px]"
+        style={{ color: "var(--nf-ink-600, #66635e)" }}
+      >
+        <span style={{ color: "var(--nf-ink-950, #110f0d)", fontWeight: 700 }}>{currentStep.label}</span>
+        {` \u2014 ${currentStep.purpose}`}
+      </div>
     </nav>
   );
 }

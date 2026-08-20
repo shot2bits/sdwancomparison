@@ -214,7 +214,7 @@ export default function LivingProcurementCanvas({
       {typeof materialDecisionsRemaining === "number" && (
         <p className="m-0 mt-2 max-w-[48em] text-[13px] leading-[1.6] text-[#66635e]">
           {materialDecisionsRemaining > 0
-            ? `Core scope captured. ${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain before suppliers can price consistently.`
+            ? `Core scope captured. ${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain${materialDecisionsRemaining === 1 ? "s" : ""} before suppliers can price consistently.`
             : "Every material decision this document tracks is resolved or deliberately accepted open."}
         </p>
       )}

@@ -13,12 +13,36 @@
 
 export type WizardStep = "describe" | "decisions" | "review" | "publish" | "compare";
 
-export const WIZARD_STEPS: ReadonlyArray<{ step: WizardStep; label: string }> = [
-  { step: "describe", label: "Describe" },
-  { step: "decisions", label: "Decisions" },
-  { step: "review", label: "Review" },
-  { step: "publish", label: "Publish" },
-  { step: "compare", label: "Compare" },
+/**
+ * `purpose` added 19 Aug 2026. Robert, on a live session PDF: "If I was a
+ * new user, I'd have no idea what I was trying to accomplish here. Just
+ * suggestion prompts but to what end?"
+ *
+ * He was right, and part of it was self-inflicted: the five-station rail
+ * built earlier the same day replaced JourneyStrip's 01-05 explainer, but
+ * carried only its LABELS. The sentences that told a buyer what a station
+ * was FOR ("Publish anonymously -- your notice, your signature, your
+ * identity stays off it") were left behind on the pre-start door, where a
+ * started project never sees them.
+ *
+ * EVERY LINE BELOW ALREADY EXISTED AND WAS ALREADY APPROVED -- none of it
+ * is newly-written product copy:
+ *   describe   JourneyStrip station 01's own detail
+ *   decisions  DecisionsStep's own subhead
+ *   review     the Review station's own subhead
+ *   publish    JourneyStrip station 04's own detail
+ *   compare    JourneyStrip station 05's own detail
+ * The rail's five stations do not map 1:1 onto the old 01-05 (there is no
+ * "identify suitable vendors" station, and Review/Decisions are finer
+ * grained), which is why two lines come from the stations themselves
+ * rather than from JourneyStrip.
+ */
+export const WIZARD_STEPS: ReadonlyArray<{ step: WizardStep; label: string; purpose: string }> = [
+  { step: "describe", label: "Describe", purpose: "Your words start it. One sentence is enough." },
+  { step: "decisions", label: "Decisions", purpose: "The choices that change price, risk, compliance or delivery." },
+  { step: "review", label: "Review", purpose: "Everything suppliers will see. Nothing about price or preferred vendors is shared." },
+  { step: "publish", label: "Publish", purpose: "Your notice, your signature. Your identity stays off it." },
+  { step: "compare", label: "Compare", purpose: "Structured responses side by side. Pricing private to you." },
 ];
 
 /**

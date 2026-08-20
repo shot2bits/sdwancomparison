@@ -102,6 +102,7 @@ import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClause
 import WizardRail from "@/components/procurement/WizardRail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import AnswerNext from "@/components/procurement/AnswerNext";
+import OrientationBand from "@/components/procurement/OrientationBand";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 
 /* ================================================================== */
@@ -4146,6 +4147,23 @@ export default function ProjectDesk({
                  beside a completed station is noise. */
               badges={{ decisions: materialDecisionsRemaining }}
               onSelect={goToStep}
+            />
+          </div>
+
+          {/* The orientation band -- what am I making / what's stopping me
+              / what do I get. Deliberately OUTSIDE the sticky rail: it is
+              context a buyer reads once per visit, not chrome that must
+              follow them down a long document. */}
+          <div className="mt-4">
+            <OrientationBand
+              summary={canvasDocument.summary}
+              materialDecisionsRemaining={materialDecisionsRemaining}
+              topDecisionQuestion={nextQuestionCards[0]?.nq.question ?? null}
+              published={publishedFlag}
+              responseCount={responseCount}
+              invitedCount={published?.invited.length ?? 0}
+              onReviewDecisions={() => goToStep("decisions")}
+              onCompare={() => goToStep("compare")}
             />
           </div>
 
