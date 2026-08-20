@@ -39,6 +39,8 @@
  * status surface in this codebase follows.
  */
 
+import type { PublishChecklist } from "@/lib/workspace/publish-checklist";
+
 const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
 
 /** A ranked question's own opening sentence. Several carry a second
@@ -112,8 +114,8 @@ function Cell({
 
 export default function OrientationBand({
   summary,
+  checklist,
   materialDecisionsRemaining,
-  topDecisionQuestion,
   published,
   responseCount,
   invitedCount,
@@ -123,18 +125,19 @@ export default function OrientationBand({
   /** `document.summary` — the compiler's own one-line description of what
    *  has been stated so far. Never invented here. */
   summary: string;
+  /** The REAL publish gate \u2014 finite, monotonic, and the SAME object
+   *  `signLocked` is built from, so what a buyer is told they need and
+   *  what actually stops them cannot differ. */
+  checklist: PublishChecklist;
+  /** Open decisions. Advisory: they sharpen what suppliers quote and gate
+   *  NOTHING, which is why they are never called blocking here. */
   materialDecisionsRemaining: number;
-  /** The top-ranked open decision's question, so the gate is NAMED rather
-   *  than left as a bare count. Null when nothing is outstanding. */
-  topDecisionQuestion: string | null;
   published: boolean;
   responseCount: number | null;
   invitedCount: number;
   onReviewDecisions: () => void;
   onCompare: () => void;
 }) {
-  const blocked = !published && materialDecisionsRemaining > 0;
-
   return (
     <div
       className="mx-auto w-full max-w-[1400px] px-[26px] lg:px-[42px]"
@@ -163,19 +166,21 @@ export default function OrientationBand({
           />
         ) : (
           <Cell
-            label="Before it's ready"
-            value={
-              materialDecisionsRemaining
-                ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} left`
-                : "Ready to publish"
-            }
+            label="To publish, you need"
+            value={checklist.ready ? "Ready to publish" : `${checklist.doneCount} of ${checklist.total} done`}
             detail={
-              blocked
-                ? `${topDecisionQuestion ? `Next: ${openingSentence(topDecisionQuestion)} ` : ""}Suppliers can't price consistently until ${materialDecisionsRemaining === 1 ? "it's" : "they're"} resolved.`
-                : "Nothing outstanding blocks publishing. You can keep adding detail, or publish now."
+              checklist.ready
+                ? materialDecisionsRemaining
+                  ? `Everything required is stated. ${materialDecisionsRemaining} open decision${materialDecisionsRemaining === 1 ? "" : "s"} would tighten what suppliers quote \u2014 optional, and ${materialDecisionsRemaining === 1 ? "it doesn't" : "they don't"} hold publishing up.`
+                  : "Everything required is stated."
+                : `Still needed: ${checklist.remaining.join(", ").toLowerCase()}.`
             }
             detailOnMobile
-            cta={blocked ? { text: "Answer it →", onClick: onReviewDecisions } : undefined}
+            cta={
+              checklist.ready && materialDecisionsRemaining
+                ? { text: "Sharpen it first \u2192", onClick: onReviewDecisions }
+                : undefined
+            }
           />
         )}
 

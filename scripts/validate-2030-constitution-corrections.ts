@@ -210,7 +210,19 @@ function main() {
     // the retired Mission Control rail and into the Decisions station, which
     // owns it now. Same honesty rule, same wording, new home -- so the
     // assertion follows it to DecisionsStep.tsx rather than being dropped.
-    record(/: "No blocking decisions"/.test(decisionsStep), "7: the Decisions station's zero-material heading reads \"No blocking decisions\", never \"Nothing material outstanding\" (which could render directly above a visible card grid)", "");
+    /* SUPERSEDED 19 Aug 2026. This asserted the heading reads "No blocking
+       decisions" -- but tracing the real publish path showed those
+       decisions block nothing at all. `signLocked` gates on the publish
+       CHECKLIST (five standing facts); the ranked decisions gate nothing,
+       and the set is generative, so answering one can earn another. The
+       product was showing an endless advisory stream as the gate and
+       hiding the actual, finite gate. Calling any of them "blocking" was
+       the falsehood, so the guarantee inverts: the station must NEVER
+       describe an open decision as blocking, and must not claim emptiness
+       while cards are on screen. */
+    record(!/blocking/i.test(decisionsStep), "7: the Decisions station never calls an open decision \"blocking\" -- they gate nothing, and the real gate is the publish checklist", "");
+    record(/: "Nothing open"/.test(decisionsStep), "7: its zero-state heading reads \"Nothing open\", never a phrase implying a cleared blocker", "");
+    record(/None of them holds publishing up/.test(decisionsStep), "7: the subhead states plainly that answering is optional and does not hold publishing up", "");
     record(!/"Nothing material outstanding"/.test(desk), "7: the old contradictory \"Nothing material outstanding\" string is fully removed from ProjectDesk.tsx", "");
     // Same supersession: the rail's group-level "Optional refinements"
     // label is replaced by a per-card "Not required to publish" chip in the
