@@ -2406,17 +2406,57 @@ export default function ProjectDesk({
         return;
       }
       if (answer.kind === "items") {
+        /* 20 Aug 2026 fix: a live screenshot showed the confirmation
+           strip firing ("Recorded: Single-vendor platform") while the
+           SAME question card stayed in the "answer next" list right
+           below it, still asking — Robert: "the system says 'recorded'
+           but then this message vanishes. The question remains?" Root
+           cause: most taxonomy items carry `path: null` (they resolve to
+           a NOTED tier, not a structured fact path -- see taxonomy.ts's
+           own doc comment on that field), but this branch pushed every
+           itemId into `applyMerge` unconditionally, landing a bogus
+           `{path: null, value: undefined}` fact and never touching
+           `noted`. `q-sase-shape`'s own earnedBy (questions.ts) reads
+           `notedIds` -- since `noted` never changed, the question kept
+           being re-earned on every render and the card never actually
+           left the list, even though the click had already "succeeded"
+           by every visible signal.
+
+           Fixed the same way landOption/pickChip already split fact vs.
+           note lands: an item with a real path still lands as a fact
+           through applyMerge; an item with `path: null` now lands
+           through `setNoted` instead, exactly like the free-text
+           objective-detection path just above (statedObjectivesIn) and
+           the "note"-kind branch immediately below -- same shape
+           ({id, label, section, own: true}), same
+           beginOrExtendSubmission/scheduleSettle governed-revision
+           bookkeeping those paths already do for a note-only answer. */
         const updates: FieldUpdate[] = [];
+        const notedAdds: NotedItem[] = [];
         for (const itemId of answer.itemIds) {
           const e = ITEM_BY_ID[itemId];
           if (!e) continue;
-          updates.push({ path: e.item.path as AllowedPath, value: e.item.value, provenance: "stated", quote: opt.label });
+          if (e.item.path) {
+            updates.push({ path: e.item.path as AllowedPath, value: e.item.value, provenance: "stated", quote: opt.label });
+          } else {
+            notedAdds.push({ id: e.item.id, label: e.item.label, section: e.section, own: true });
+          }
         }
         if (updates.length) {
           const m = applyMerge(updates, "answer");
           markChanged(m.changed.length ? m.changed : updates.map((u) => factId(u.path, u.value)), m.facts);
         }
-        recordDecision(nq.id, opt.label, { action: "items", optionId: answer.itemIds.join("+"), resultingFactPaths: updates.map((u) => u.path), resultingNoted: [] });
+        if (notedAdds.length) {
+          if (!updates.length) beginOrExtendSubmission();
+          setNoted((ns) => {
+            const fresh = notedAdds.filter((na) => !ns.some((n) => n.id === na.id));
+            return fresh.length ? [...ns, ...fresh] : ns;
+          });
+          setChangedSlots(notedAdds.map((na) => na.id));
+          setSaveDirty(true);
+          if (!updates.length) scheduleSettle();
+        }
+        recordDecision(nq.id, opt.label, { action: "items", optionId: answer.itemIds.join("+"), resultingFactPaths: updates.map((u) => u.path), resultingNoted: notedAdds });
         ev("workspace_earned_answered", { q: nq.id, kind: "items" });
       } else if (answer.kind === "note") {
         const noteId = nq.source === "sector_suggestion" ? `ps-${nq.id.replace(/^sector:/, "")}` : `${nq.id}:${optionIndex}`;
