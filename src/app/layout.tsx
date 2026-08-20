@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import NetifyEvents from "@/components/NetifyEvents";
+import { BUILD_SHA, BUILD_TIME } from "@/lib/build-info";
 import "./globals.css";
 
 // 19 Aug 2026: Robert asked to drop the self-hosted Inter webfont entirely
@@ -22,6 +23,18 @@ export const metadata: Metadata = {
     siteName: "Netify Vendor Comparison",
   },
   robots: { index: true, follow: true },
+  /* The build stamp, also as metadata (Robert, 20 Aug 2026: "so I can see
+     whether the page is cached or not"). The footer shows it to a human;
+     these let the same question be answered from view-source or devtools
+     without scrolling to the bottom, and let a script check it. Emitted
+     through the metadata API rather than a hand-written <head> so Next
+     owns head assembly, as it does for every other tag here. Baked in at
+     build time -- see build-info.ts for why a request-time value would
+     prove nothing. */
+  other: {
+    "netify-build": BUILD_SHA,
+    ...(BUILD_TIME ? { "netify-build-time": BUILD_TIME } : {}),
+  },
 };
 
 export default function RootLayout({
@@ -46,7 +59,7 @@ export default function RootLayout({
    * workspace included.
    */
   return (
-    <html lang="en-GB">
+    <html lang="en-GB" data-build={BUILD_SHA}>
       <body className="paper-texture min-h-screen">
         {/* Accessibility skip link: invisible until keyboard-focused, then a
             fixed amber pill just below the top bar. Styled by .skip-link in

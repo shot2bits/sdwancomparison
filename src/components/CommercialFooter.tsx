@@ -1,3 +1,5 @@
+import { buildStamp } from "@/lib/build-info";
+
 /**
  * The six-column commercial/trust footer, extracted (18 Aug 2026, 2030
  * living-procurement workspace separation) out of the old root layout.tsx
@@ -172,9 +174,16 @@ export default function CommercialFooter() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-[var(--ink-200)] pt-6">
+        <div className="mt-10 flex flex-wrap items-baseline justify-between gap-2 border-t border-[var(--ink-200)] pt-6">
           <p className="text-xs text-[var(--ink-500)]">
             © {new Date().getUTCFullYear()} Netify Group Limited. All rights reserved.
+          </p>
+          {/* The build stamp, on every page in both route groups. Baked in
+              at build time, so a cached page disagrees with a freshly
+              served one -- see build-info.ts for why it must not be
+              computed per request. */}
+          <p className="m-0 font-mono text-[11px] text-[var(--ink-500)]" title="The build this page was served from">
+            {buildStamp()}
           </p>
         </div>
       </div>
