@@ -22,10 +22,33 @@
  * the document genuinely carries it. If this panel says a thing was
  * recorded, the published notice will carry it; that is the entire point.
  *
- * SCOPE: chosen answers only (`source === "answer"` facts, `own` noted
- * items). Typed sentences are deliberately excluded — the buyer can see
- * their own typing in the transcript directly above, and the complaint
- * being answered here is specifically about CLICKING.
+ * SCOPE: everything the buyer has STATED, however they stated it —
+ * facts they chose from an option (`source: "answer"`) and facts
+ * extracted from their own typed sentence (`provenance: "stated"`), plus
+ * their own noted items. Facts Netify INFERRED are excluded, always: the
+ * question this answers is "what have I told you", and an inference is
+ * not something the buyer told anyone.
+ *
+ * Widened from chosen-only on 20 Aug 2026 after a live check. The
+ * narrower version was empty for a buyer who had typed a full opening
+ * sentence and clicked nothing — the exact moment they most need to see
+ * that their words landed. Robert's own reference mockup lists the
+ * typed-sentence extractions ("20 sites across the UK", "Healthcare
+ * sector") in this list, and it is right to: they are in the document.
+ * Each row carries HOW it was stated, so "you chose this" and "your
+ * words" stay distinguishable — the same split "Project details" has
+ * always drawn.
+ *
+ * ASSUMPTIONS ARE RETURNED TOO, AND NEVER AS ANSWERS. A live check on
+ * 20 Aug 2026 found "manufacturing sites" landing
+ * `organisation.sector: Manufacturing` with `provenance: "inferred"` —
+ * a real fact, silently driving the sector pack and the document title,
+ * that the buyer never stated and could see nowhere. Hiding it would be
+ * worse than showing it, and folding it in with what they DID say would
+ * be the "Netify decided this" failure this whole pass exists to end.
+ * So `assumed` is a second, separately-labelled list: same shape, same
+ * Edit affordance, so a buyer can confirm or correct an assumption
+ * instead of discovering it at publication.
  *
  * PURE: no React, no I/O (Article 17).
  */
@@ -41,6 +64,17 @@ export type AnsweredEntry = {
   /** What the buyer chose, in the words the document now carries. */
   answer: string;
   kind: "fact" | "note";
+  /** How this entered the document. Never collapsed into one label: a
+   *  clicked option, a typed sentence and a Netify inference are three
+   *  different kinds of evidence and this codebase distinguishes them
+   *  everywhere else. */
+  via: "chose" | "your words" | "netify assumed";
+  /** The fact path, when this row came from a fact — the only thing a
+   *  caller needs to offer an "Edit" affordance (SLOT_BY_PATH resolves it
+   *  to the existing edit sheet). Absent for noted items, which have no
+   *  slot to reopen. Returned rather than resolved here so this module
+   *  stays free of component-local tables (Article 17). */
+  path?: string;
 };
 
 export type NotedShape = { id: string; label: string; section: string; own?: boolean };
@@ -48,23 +82,29 @@ export type NotedShape = { id: string; label: string; section: string; own?: boo
 export function buildAnsweredLog(input: {
   facts: ReadonlyArray<WorkspaceFact>;
   noted: ReadonlyArray<NotedShape>;
-}): AnsweredEntry[] {
+}): { stated: AnsweredEntry[]; assumed: AnsweredEntry[] } {
   const out: AnsweredEntry[] = [];
+  const assumed: AnsweredEntry[] = [];
   /* `standing` drops struck facts — a removed answer must vanish from
      here the moment it vanishes from the document, or this panel becomes
      the one surface that lies about what will be published. */
   for (const f of standing(input.facts as WorkspaceFact[])) {
-    if (f.source !== "answer") continue;
-    out.push({
+    /* `provenance` is the gate, not `source`: it is the field this
+       codebase proves rather than claims (extract.ts's truth rule 2), and
+       it is exactly the buyer-said-it / Netify-guessed-it line. */
+    const row: AnsweredEntry = {
       key: f.id,
       label: PATH_LABELS[f.path] ?? f.path,
       answer: factLabel(f),
       kind: "fact",
-    });
+      via: f.provenance === "stated" ? (f.source === "answer" ? "chose" : "your words") : "netify assumed",
+      path: f.path,
+    };
+    (f.provenance === "stated" ? out : assumed).push(row);
   }
   for (const n of input.noted) {
     if (!n.own) continue;
-    out.push({ key: n.id, label: "Noted for suppliers", answer: n.label, kind: "note" });
+    out.push({ key: n.id, label: "Noted for suppliers", answer: n.label, kind: "note", via: "chose" });
   }
-  return out;
+  return { stated: out, assumed };
 }

@@ -39,21 +39,10 @@
  * status surface in this codebase follows.
  */
 
+import { useState } from "react";
 import type { PublishChecklist } from "@/lib/workspace/publish-checklist";
 
 const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
-
-/** A ranked question's own opening sentence. Several carry a second
- *  explanatory sentence ("...It changes the questions we put to vendors:
- *  your sector adds between 30 and 130 of its own."), which is useful on
- *  the decision card itself but turns this cell into a run-on paragraph.
- *  Never rewritten, only cut at the compiler's own sentence boundary, and
- *  returned whole if it has no boundary to cut at. */
-function openingSentence(q: string): string {
-  const m = q.match(/^[\s\S]*?[.?!](?=\s|$)/);
-  const first = (m ? m[0] : q).trim();
-  return first.length >= 12 ? first : q.trim();
-}
 
 function Cell({
   label,
@@ -121,6 +110,7 @@ export default function OrientationBand({
   invitedCount,
   onReviewDecisions,
   onCompare,
+  startCollapsed,
 }: {
   /** `document.summary` — the compiler's own one-line description of what
    *  has been stated so far. Never invented here. */
@@ -137,7 +127,47 @@ export default function OrientationBand({
   invitedCount: number;
   onReviewDecisions: () => void;
   onCompare: () => void;
+  /** Collapse to one line by default. Passed `true` once a project has
+   *  started (20 Aug 2026).
+   *
+   *  This band is ORIENTATION — the three facts a first-time buyer needs
+   *  before they have any of their own on screen. Once they do, it is
+   *  competing for the same space as the things that replaced its job:
+   *  the rail's "N of M sections ready", the captured list, and the end
+   *  state in the chat column. Measured on a live 1440x1000 screenshot,
+   *  expanded it cost ~250px at the top of a viewport-bounded persistent
+   *  pane and pushed "Your RFP can be published" under the composer.
+   *  Collapsed, not deleted: a new user still gets it in full, and one
+   *  click brings it back at any time. */
+  startCollapsed?: boolean;
 }) {
+  const [open, setOpen] = useState(!startCollapsed);
+  if (!open) {
+    return (
+      <div className="mx-auto w-full max-w-[1400px] px-[26px] lg:px-[42px]">
+        <div
+          className="flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-[4px] border px-3.5 py-2 text-[12px] leading-[1.45]"
+          style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-raised, #fefdfc)", color: "var(--nf-ink-600, #66635e)" }}
+        >
+          <span className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.08em" }}>
+            You&rsquo;re building
+          </span>
+          <span style={{ color: "var(--nf-ink-950, #110f0d)", fontWeight: 600 }}>
+            A requirement suppliers can price
+          </span>
+          <span className="flex-1" />
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="cursor-pointer border-0 bg-transparent p-0 text-[11.5px] font-semibold"
+            style={{ color: "var(--nf-orange-strong, #832f00)" }}
+          >
+            What happens next?
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className="mx-auto w-full max-w-[1400px] px-[26px] lg:px-[42px]"

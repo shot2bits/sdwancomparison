@@ -34,7 +34,6 @@
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 import { MATERIAL_IMPACTS } from "@/lib/workspace/procurement-next-questions";
 import { outlineRowForDecision } from "@/lib/workspace/procurement-outline";
-import type { AnsweredEntry } from "@/lib/workspace/answered-log";
 
 const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
 
@@ -50,17 +49,11 @@ const IMPACT_LABEL: Record<string, string> = {
 
 export default function DecisionsStep({
   cards,
-  answered,
   materialDecisionsRemaining,
   published,
   sectorSectionTitle,
 }: {
   cards: NextQuestionCard[];
-  /** Everything the buyer has already answered by choosing, projected off
-   *  the document itself (answered-log.ts). Robert, 19 Aug 2026: "I
-   *  cannot be sure if the system has recorded it. It's not clear what I
-   *  have answered or not." */
-  answered: AnsweredEntry[];
   materialDecisionsRemaining: number;
   published: boolean;
   /** The active sector pack's outline row title, when one is active —
@@ -102,47 +95,13 @@ export default function DecisionsStep({
             : "Nothing open right now \u2014 the document reflects everything stated so far."}
       </p>
 
-      {/* ANSWERED, first. A buyer arriving here needs the closed set
-          before the open one: it is the evidence that clicking did
-          something, and it is the reason the open list is shorter than it
-          was. Every row is a real standing fact or a real noted item —
-          strike one and it leaves this list at the same instant it leaves
-          the published notice. */}
-      {answered.length > 0 && (
-        <details
-          open
-          className="mt-6 rounded-[4px] border"
-          style={{ borderColor: "var(--nf-emerald-soft-border, #9dc3a5)", background: "var(--nf-emerald-soft, #eef6ef)" }}
-        >
-          <summary
-            className="cursor-pointer list-none px-5 py-3.5 text-[13px] font-semibold"
-            style={{ ...mono, letterSpacing: "0.04em", color: "var(--nf-emerald, #1e4e22)" }}
-          >
-            {`\u2713 Recorded so far \u00b7 ${answered.length} answer${answered.length === 1 ? "" : "s"}`}
-          </summary>
-          <ul className="m-0 list-none px-5 pb-4 pt-0">
-            {answered.map((a) => (
-              <li
-                key={a.key}
-                className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 border-t py-2 text-[13.5px] leading-[1.5] first:border-t-0"
-                style={{ borderColor: "var(--nf-emerald-soft-border, #9dc3a5)" }}
-              >
-                <span style={{ color: "var(--nf-ink-600, #66635e)" }}>{a.label}</span>
-                <span className="font-semibold" style={{ color: "var(--nf-ink-950, #110f0d)" }}>
-                  {a.answer}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p
-            className="m-0 border-t px-5 py-3 text-[12px] leading-[1.5]"
-            style={{ borderColor: "var(--nf-emerald-soft-border, #9dc3a5)", color: "var(--nf-ink-600, #66635e)" }}
-          >
-            These are in the document now. Change any of them from &ldquo;Project details&rdquo; below.
-          </p>
-        </details>
-      )}
-
+      {/* The "Recorded so far" panel that briefly lived here on 19 Aug
+          moved to the chat column (CapturedList.tsx) on 20 Aug. Robert
+          chose that placement, and it is the right one: the buyer is
+          looking at the chat pane at the moment they click an option, so
+          the confirmation that the click landed has to be there, not one
+          station away. Same `buildAnsweredLog` projection, same rows --
+          only the location changed, and it is not duplicated here. */}
       {cards.length === 0 ? (
         <div
           className="mt-6 rounded-[4px] border p-6"
@@ -154,10 +113,16 @@ export default function DecisionsStep({
         </div>
       ) : (
         <div className="mt-6 flex flex-col gap-4">
-          {cards.map(({ nq, buttons, hint }) => {
+          {cards.map(({ nq, buttons, hint, fills }) => {
             const isMaterial =
               !nq.governedSuggestion && nq.impact.some((i) => (MATERIAL_IMPACTS as readonly string[]).includes(i));
-            const section = outlineRowForDecision({
+            /* `fills` (resolved once, by ProjectDesk, from the SAME
+               sectionOutline the header fraction reads) is authoritative
+               and carries the section's POSITION as well as its title.
+               The local `outlineRowForDecision` call is kept only as the
+               fallback for a question that maps to a `later` row, which
+               deliberately has no position inside the fraction. */
+            const section = fills?.title ?? outlineRowForDecision({
               id: nq.id,
               target: nq.target,
               governedSuggestion: nq.governedSuggestion,
@@ -264,7 +229,9 @@ export default function DecisionsStep({
 
                 {section && (
                   <p className="m-0 mt-3.5 text-[12px] leading-[1.5]" style={{ color: "var(--nf-ink-400, #83807b)" }}>
-                    Resolves &ldquo;{section}&rdquo; in the outline once answered.
+                    {fills
+                      ? `Fills section ${fills.position} of ${fills.total} \u2014 \u201c${section}\u201d \u2014 in the outline once answered.`
+                      : `Resolves \u201c${section}\u201d in the outline once answered.`}
                   </p>
                 )}
               </div>

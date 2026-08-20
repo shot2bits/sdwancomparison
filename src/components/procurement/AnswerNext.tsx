@@ -42,6 +42,7 @@ const mono: React.CSSProperties = { fontFamily: "var(--nf-font-mono)" };
 export default function AnswerNext({
   cards,
   totalOutstanding,
+  demoted,
   onSeeAll,
 }: {
   /** The top-ranked open decisions, already resolved into real answer
@@ -52,6 +53,16 @@ export default function AnswerNext({
    *  figure the rail badge and the Decisions station heading read, so the
    *  "see all" line can never quote a different number from the rail. */
   totalOutstanding: number;
+  /** True once the REAL publish gate is satisfied (publish-checklist.ts).
+   *  Robert, 20 Aug 2026: "this cannot be an everlasting AI conversation
+   *  ... it has to end with a built RFP." `rankNextQuestions()` is
+   *  generative — it can always produce another refinement — so when the
+   *  document is genuinely publishable this block must stop presenting
+   *  itself as the next thing to do and say what it actually is:
+   *  optional. It is demoted, never hidden; suppressing real open
+   *  decisions to manufacture a finished feeling would be the same
+   *  dishonesty in the opposite direction. */
+  demoted?: boolean;
   onSeeAll: () => void;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
@@ -83,9 +94,9 @@ export default function AnswerNext({
   if (cards.length === 0 && !confirmed) return null;
 
   return (
-    <div className="w-full border-t px-0 pt-3.5 lg:px-6" style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}>
+    <div data-answer-next className="w-full border-t px-0 pt-3.5 lg:px-6" style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}>
       <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.09em", color: "var(--nf-ink-600, #66635e)" }}>
-        Answer next
+        {demoted ? "Optional \u2014 sharpen the quotes you get back" : "Answer next"}
       </div>
 
       {confirmed && (
@@ -105,7 +116,7 @@ export default function AnswerNext({
         </div>
       )}
       <div className="mt-2.5 flex flex-col gap-1.5">
-        {cards.map(({ nq, buttons, hint }) => {
+        {cards.map(({ nq, buttons, hint, fills }) => {
           const isOpen = openId === nq.id;
           const isMaterial =
             !nq.governedSuggestion && nq.impact.some((i) => (MATERIAL_IMPACTS as readonly string[]).includes(i));
@@ -160,8 +171,27 @@ export default function AnswerNext({
 
               {isOpen && (
                 <div className="px-2.5 pb-2.5 pl-[26px]">
+                  {/* WHERE THIS LANDS. Robert, 20 Aug 2026: "it is 100%
+                      not clear how the user is progressing... Feels like
+                      a list of random questions with no end in sight."
+                      Every card already knew which outline section it
+                      fills; it just never said so, so each question
+                      arrived unplaceable. `fills` is the SAME section run
+                      the header fraction and the rail count, so a card
+                      can never claim a position the fraction does not
+                      have -- and null (no line at all) rather than a
+                      guess when the question maps to no required row. */}
+                  {fills && (
+                    <p className="m-0 mb-2 text-[11px] leading-[1.4]" style={{ ...mono, color: "var(--nf-orange-strong, #832f00)" }}>
+                      {`Fills section ${fills.position} of ${fills.total} \u00b7 ${fills.title}`}
+                    </p>
+                  )}
+                  {/* The reason gains the mockup's own framing ("Why
+                      this matters"). Same `nq.reason` string, unchanged --
+                      the label is what was missing, not the sentence. */}
                   {nq.reason && (
                     <p className="m-0 mb-2 text-[11.5px] leading-[1.45]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
+                      <span style={{ ...mono, fontWeight: 700, color: "var(--nf-ink-800, #302d2a)" }}>Why this matters &middot; </span>
                       {nq.reason}
                     </p>
                   )}

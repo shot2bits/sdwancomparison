@@ -93,7 +93,7 @@ import type { ProjectHistoryEvent } from "@/lib/rfp-types";
 import { BOARD_LINK } from "@/lib/nav";
 import { rankNextQuestions, materialDecisionCount, type NextQuestion } from "@/lib/workspace/procurement-next-questions";
 import { buildReadiness } from "@/lib/workspace/procurement-readiness";
-import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists, type OutlineRow } from "@/lib/workspace/procurement-outline";
+import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists, outlineProgress, outlineRowForDecision, sectionPosition, type OutlineRow } from "@/lib/workspace/procurement-outline";
 /** The five-station shell (Robert's "UI mockups request" handoff bundle,
  *  structural pass 19 Aug 2026). `wizard-steps.ts` is the shared, pure
  *  vocabulary: WizardRail renders it, this file routes on it, and both
@@ -102,6 +102,8 @@ import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClause
 import WizardRail from "@/components/procurement/WizardRail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import { buildAnsweredLog } from "@/lib/workspace/answered-log";
+import CapturedList from "@/components/procurement/CapturedList";
+import RfpReady from "@/components/procurement/RfpReady";
 import AnswerNext from "@/components/procurement/AnswerNext";
 import OrientationBand from "@/components/procurement/OrientationBand";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
@@ -3459,6 +3461,13 @@ export default function ProjectDesk({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt]);
 
+  /** THE progress fraction. Robert, 20 Aug 2026: "right now, it is 100%
+   *  not clear how the user is progressing." Derived from `sectionOutline`
+   *  above — the same array the canvas renders as a list — so the rail,
+   *  the document header, the question cards and the outline itself are
+   *  four views of one number, not four numbers. */
+  const sectionProgress = useMemo(() => outlineProgress(sectionOutline), [sectionOutline]);
+
   /** Living Procurement UK Decision-Maker Blueprint, correction pass
    *  (Robert, 15 Aug 2026), defect 5: "Do not merely relabel the existing
    *  score bands. Readiness must be derived from: material section
@@ -3525,6 +3534,19 @@ export default function ProjectDesk({
    *  logic -- see the two memos just below. */
   const resolveQuestionCard = useCallback(
     (nq: NextQuestion) => {
+      /* Where answering lands, and where that sits in the run of required
+         sections -- the same `sectionOutline` the header fraction and the
+         outline list read, so a card can never claim a position the
+         fraction does not have. Null (never a guess) when the question
+         maps to no required row. */
+      const title = outlineRowForDecision({
+        id: nq.id,
+        target: nq.target,
+        governedSuggestion: Boolean(nq.governedSuggestion),
+        sectorSectionTitle,
+      });
+      const pos = sectionPosition(sectionOutline, title);
+      const fills = title && pos ? { title, position: pos.position, total: pos.total } : null;
       if (nq.source === "compiler_open_decision") {
         const slotId = OPEN_DECISION_SLOT[nq.id];
         const slot = slotId ? SLOT_BY_ID[slotId] : null;
@@ -3532,15 +3554,17 @@ export default function ProjectDesk({
           nq,
           buttons: slot ? slot.options.map((o) => ({ label: o.label, onClick: () => landOption(slot, o) })) : [],
           hint: slot ? null : "See “Project details” below for the full context.",
+          fills,
         };
       }
       return {
         nq,
         buttons: (nq.options ?? []).map((o, i) => ({ label: o.label, onClick: () => answerNextQuestion(nq, i) })),
         hint: null,
+        fills,
       };
     },
-    [landOption, answerNextQuestion],
+    [landOption, answerNextQuestion, sectionOutline, sectorSectionTitle],
   );
 
   /** The top three, for the chat pane's "Answer next" block -- the
@@ -4008,10 +4032,50 @@ export default function ProjectDesk({
    *  ("...or answer any open line in it directly"). Keeping both would
    *  have stacked two competing "what next" affordances in a 368px pane,
    *  one of which was strictly the weaker. */
+  /** The running "Netify captured" list, in the chat column where the
+   *  clicking happens (Robert, 20 Aug 2026, chose this placement over the
+   *  Decisions station). `onEdit` reopens the EXISTING twin edit sheet --
+   *  no new editing path. */
+  const capturedBlock = (
+    <CapturedList
+      entries={answeredLog.stated}
+      assumed={answeredLog.assumed}
+      onEdit={(e) => {
+        const sid = e.path ? SLOT_BY_PATH[e.path] : undefined;
+        if (sid) setEdit(sid);
+      }}
+    />
+  );
+
+  /* THE TERMINAL STATE (Robert, 20 Aug 2026: "it has to end with a built
+     RFP"). Once the REAL publish gate is satisfied the chat column stops
+     leading with questions and leads with the finished document instead.
+     `rankNextQuestions()` is generative and would otherwise never run
+     out, so without this the conversation has no ending by construction.
+     The remaining decisions are demoted, not hidden -- they are still
+     rendered below, now honestly labelled optional. */
+  const rfpIsBuilt = started && !published && publishChecklist.ready;
+
+  /* Rendered ABOVE the captured list, not below it. The end state is the
+     one thing in this column a buyer must never have to scroll for --
+     measured on a live 1440x1000 screenshot, sitting under the captured
+     list put "Publish anonymously" beneath the composer's top edge. The
+     captured list is reassurance; this is the exit. */
+  const rfpReadyBlock = rfpIsBuilt ? (
+    <RfpReady
+      sectionsReady={sectionProgress.ready}
+      sectionsTotal={sectionProgress.total}
+      optionalRemaining={materialDecisionsRemaining}
+      onReview={() => goToStep("review")}
+      onPublish={() => goToStep("publish")}
+    />
+  ) : null;
+
   const answerNextBlock = (
     <AnswerNext
       cards={nextQuestionCards}
       totalOutstanding={materialDecisionsRemaining}
+      demoted={rfpIsBuilt}
       onSeeAll={() => goToStep("decisions")}
     />
   );
@@ -4063,6 +4127,18 @@ export default function ProjectDesk({
    *  still drives everything, it just drives colour and alignment now
    *  instead of a label column. */
   const threadBlock = (
+      /* The transcript's own cap was cut from 46vh to 26vh on 20 Aug
+         2026. At 46vh a conversation three exchanges long filled the
+         persistent chat column on its own and pushed the captured list,
+         the end state and the open questions below the fold -- verified
+         on a live 1440x1000 screenshot -- which is the same "you cannot
+         see where you are" defect one layer down. The transcript is
+         history; the blocks under it are the work, and the work wins the
+         space. Nothing is lost: this box still scrolls, and every line
+         in it is still there. (Tried and rejected first: making this the
+         flexing member of the column. The sticky wrapper is bounded by
+         `max-h`, not a definite height, so `flex-1` resolved against auto
+         and the siblings overlapped -- caught on the same screenshot.) */
       <div className="w-full px-0 pt-4 lg:px-6">
         {msgs.length > 0 && (
           <p className="m-0 mb-2.5 text-[11.5px] leading-[1.5]" style={{ color: "var(--nf-ink-400, #83807b)" }}>
@@ -4082,10 +4158,10 @@ export default function ProjectDesk({
           ref={threadRef}
           tabIndex={0}
           aria-label="Feedback transcript"
-          className="flex max-h-[300px] flex-col gap-2.5 overflow-y-auto lg:max-h-[46vh]"
+          className="flex max-h-[300px] flex-col gap-2.5 overflow-y-auto lg:max-h-[22vh]"
         >
           {msgs.map((m, i) => (
-            <div key={i} className={`flex ${m.who === "you" ? "justify-end" : "justify-start"}`}>
+            <div key={i} data-who={m.who} className={`flex ${m.who === "you" ? "justify-end" : "justify-start"}`}>
               <span
                 className="max-w-[92%] rounded-[4px] px-3.5 py-2.5 text-[13px] leading-[1.55]"
                 style={
@@ -4262,6 +4338,7 @@ export default function ProjectDesk({
                  zero: the green tick already says that, and a "0" pill
                  beside a completed station is noise. */
               badges={{ decisions: materialDecisionsRemaining }}
+              progress={started ? sectionProgress : null}
               onSelect={goToStep}
             />
           </div>
@@ -4272,6 +4349,7 @@ export default function ProjectDesk({
               follow them down a long document. */}
           <div className="mt-4">
             <OrientationBand
+              startCollapsed={started}
               summary={canvasDocument.summary}
               checklist={publishChecklist}
               materialDecisionsRemaining={materialDecisionsRemaining}
@@ -4337,9 +4415,15 @@ export default function ProjectDesk({
                   Write in your own words, from any screen &mdash; each sentence gets checked against the document.
                 </p>
               </div>
-              {/* Scrolls. */}
+              {/* Below `lg` this is ordinary page flow. At `lg` it is the
+                  flex body of the persistent chat column: only the
+                  transcript inside `threadBlock` scrolls, so the captured
+                  list, the end state and the open questions can never be
+                  pushed off the bottom by a long conversation. */}
               <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
                 {threadBlock}
+                {rfpReadyBlock}
+                {capturedBlock}
                 {answerNextBlock}
                 {sectorChips}
               </div>
@@ -4432,7 +4516,6 @@ export default function ProjectDesk({
                 {activeStep === "decisions" && (
                   <DecisionsStep
                     cards={allNextQuestionCards}
-                    answered={answeredLog}
                     materialDecisionsRemaining={materialDecisionsRemaining}
                     published={publishedFlag}
                     sectorSectionTitle={sectorSectionTitle}

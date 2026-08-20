@@ -96,10 +96,11 @@ function main() {
   const f = (over: Partial<WorkspaceFact> & { id: string; path: string; value: unknown }): WorkspaceFact =>
     ({ struck: false, source: "answer", provenance: "stated", cycle: 1, ...over }) as unknown as WorkspaceFact;
 
-  const log = buildAnsweredLog({
+  const built = buildAnsweredLog({
     facts: [
       f({ id: "estate.sites", path: "estate.sites", value: 30 }),
       f({ id: "organisation.sector", path: "organisation.sector", value: "Manufacturing", source: "extract" }),
+      f({ id: "estate.cloud", path: "estate.cloud", value: "Azure", source: "extract", provenance: "inferred" }),
       f({ id: "estate.users", path: "estate.users", value: 4000, struck: true }),
     ],
     noted: [
@@ -107,11 +108,43 @@ function main() {
       { id: "ps-x", label: "A Netify-suggested clause", section: "estate", own: false },
     ],
   });
+  const log = built.stated;
   const keys = log.map((e) => e.key);
+  const assumedKeys = built.assumed.map((e) => e.key);
   record(keys.includes("estate.sites"), "B: a chosen (source \"answer\") standing fact IS listed", JSON.stringify(keys));
+  /* Widened 20 Aug 2026: the gate is `provenance`, not `source`. A fact
+     extracted from the buyer's OWN typed sentence is something they told
+     us and belongs here; a fact Netify INFERRED is not and never does.
+     The narrower chosen-only version rendered empty for a buyer who had
+     typed a full opening sentence and clicked nothing -- the exact moment
+     the reassurance is most needed. */
   record(
-    !keys.includes("organisation.sector"),
-    "B: an EXTRACTED fact is NOT listed -- this panel answers \"what did I choose\", not \"what did Netify infer\"",
+    keys.includes("organisation.sector"),
+    "B: a fact extracted from the buyer's OWN typed sentence IS listed -- they stated it",
+  );
+  record(
+    log.find((e) => e.key === "organisation.sector")?.via === "your words" &&
+      log.find((e) => e.key === "estate.sites")?.via === "chose",
+    "B: how each was stated is carried per row -- \"you chose\" and \"your words\" never collapse into one claim",
+  );
+  record(
+    !keys.includes("estate.cloud"),
+    "B: an INFERRED fact is never listed as something the buyer said",
+  );
+  /* But it IS returned, separately. Found live on 20 Aug 2026: "30 UK
+     manufacturing sites" lands `organisation.sector` as INFERRED, and
+     that inference was driving the sector pack and the document title
+     with nowhere on screen a buyer could see or correct it. Hiding it is
+     worse than showing it; folding it in with what they said is worse
+     still. */
+  record(
+    assumedKeys.includes("estate.cloud") && built.assumed[0]?.via === "netify assumed",
+    "B: an inferred standing fact IS surfaced, in a separate `assumed` list labelled as an assumption",
+    JSON.stringify(assumedKeys),
+  );
+  record(
+    built.assumed.every((e) => Boolean(e.path)),
+    "B: every assumption carries its path, so it can be corrected rather than merely disclosed",
   );
   record(
     !keys.includes("estate.users"),
@@ -126,19 +159,34 @@ function main() {
     sites ? `${sites.label}: ${sites.answer}` : "",
   );
   record(Boolean(sites && String(sites.answer).includes("30")), "B: the answer shown is the value the document carries", sites?.answer ?? "");
-  record(buildAnsweredLog({ facts: [], noted: [] }).length === 0, "B: an empty document produces an empty log (no invented rows)");
+  const empty = buildAnsweredLog({ facts: [], noted: [] });
+  record(empty.stated.length === 0 && empty.assumed.length === 0, "B: an empty document produces an empty log (no invented rows)");
 
   /* ================================================================ */
   /* C. THE DECISIONS STATION RENDERS IT.                              */
   /* ================================================================ */
+  /* Placement, 20 Aug 2026: the captured list lives in the CHAT COLUMN,
+     under the transcript, not on the Decisions station. Robert chose that
+     over keeping it a station away, and it is where the clicking happens
+     -- a confirmation the buyer has to change screens to read confirms
+     nothing. */
+  const captured = src("src/components/procurement/CapturedList.tsx");
   record(/buildAnsweredLog\(\{ facts, noted \}\)/.test(desk), "C: ProjectDesk projects the answered log off `facts`/`noted` directly");
-  record(/answered=\{answeredLog\}/.test(desk), "C: the Decisions station is handed it");
-  record(/answered: AnsweredEntry\[\]/.test(step), "C: DecisionsStep takes it as a typed prop");
-  record(/answered\.length > 0 &&/.test(step), "C: the panel renders only when there is something real to show");
-  record(/answered\.map\(/.test(step), "C: every entry is rendered -- no slice/cap that could hide a recorded answer");
+  record(/entries=\{answeredLog\.stated\}/.test(desk) && /assumed=\{answeredLog\.assumed\}/.test(desk), "C: CapturedList is handed both halves of the real projection");
+  record(/entries: AnsweredEntry\[\]/.test(captured), "C: CapturedList takes it as a typed prop");
   record(
-    /Recorded so far/.test(step),
-    "C: the panel is headed with the buyer's own question -- \"has it recorded it?\"",
+    /\{capturedBlock\}/.test(desk) && desk.indexOf("{capturedBlock}") > desk.indexOf("{threadBlock}"),
+    "C: it renders in the chat column, directly BELOW the transcript (the mockup's own placement)",
+  );
+  record(/entries\.length === 0 && assumed\.length === 0\) return null/.test(captured), "C: nothing renders when there is nothing real to show");
+  record(
+    /const VISIBLE = 3/.test(captured) && /Show \$\{hidden\} more/.test(captured),
+    "C: the list caps for the fixed-height pane but ALWAYS offers the rest -- capped, never truncated silently",
+  );
+  record(/Netify captured/.test(captured), "C: headed as a record of what was captured, not as advice");
+  record(
+    !/answered=\{answeredLog\}/.test(desk) && !/answered\.map\(/.test(step),
+    "C: it is NOT also duplicated on the Decisions station (Robert chose one placement, not both)",
   );
 
   /* The at-the-moment-of-clicking half, in the chat pane. */

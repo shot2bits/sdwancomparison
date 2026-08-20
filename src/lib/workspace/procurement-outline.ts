@@ -76,6 +76,69 @@ export function outlineStateLabel(s: OutlineState): string {
   return STATE_LABEL[s];
 }
 
+/* ------------------------------------------------------------------ */
+/* ONE DENOMINATOR (Robert, 20 Aug 2026)                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * "right now, it is 100% not clear how the user is progressing."
+ *
+ * The cause was four numbers that never agreed. The product showed, at
+ * once: a 0-100 readiness score, a "3 of 5" publish checklist, an
+ * "N open decisions" badge and a raw "Document gaps" tile — four
+ * different denominators for one question ("how far am I?"), three of
+ * them unbounded or opaque, and the ONE finite structure that genuinely
+ * answers it (this file's own section rows, each already carrying a real
+ * five-value state) was rendered as a list and counted by nothing.
+ *
+ * This function promotes that list to being the progress number. It
+ * derives, it does not store: give it the rows the canvas already renders
+ * and every surface — document subtitle, wizard rail, question card —
+ * reads the same fraction off the same array, so they cannot disagree.
+ *
+ * `later` rows are EXCLUDED from the denominator, deliberately. They are
+ * the rows this file has already judged not to be needed for a
+ * publishable, comparable enquiry (Commercial, Success). Counting them
+ * would make the fraction unreachable and recreate exactly the
+ * "no end in sight" feeling this exists to end — a buyer must be able to
+ * see the target and hit it. `laterCount` is returned separately so a
+ * surface can say so out loud rather than silently hiding rows.
+ *
+ * PURE: no React, no I/O (Article 17).
+ */
+export type OutlineProgress = {
+  /** Confirmed rows among those actually required. */
+  ready: number;
+  /** Rows required for a publishable enquiry (everything not `later`). */
+  total: number;
+  /** Rows deliberately deferred — shown, never counted against you. */
+  laterCount: number;
+  /** The first required row that is not yet confirmed, or null when done. */
+  next: OutlineRow | null;
+  /** 1-based position of `next` within the required rows; 0 when done. */
+  nextPosition: number;
+};
+
+export function outlineProgress(rows: readonly OutlineRow[]): OutlineProgress {
+  const required = rows.filter((r) => r.state !== "later");
+  const ready = required.filter((r) => r.state === "confirmed").length;
+  const idx = required.findIndex((r) => r.state !== "confirmed");
+  return {
+    ready,
+    total: required.length,
+    laterCount: rows.length - required.length,
+    next: idx === -1 ? null : required[idx],
+    nextPosition: idx === -1 ? 0 : idx + 1,
+  };
+}
+
+/** The one sentence every surface renders, so the wording cannot drift
+ *  either. Deliberately a fraction and never a percentage: a percentage
+ *  invites a second percentage, which is how four numbers happened. */
+export function outlineProgressLine(p: OutlineProgress): string {
+  return `${p.ready} of ${p.total} section${p.total === 1 ? "" : "s"} ready`;
+}
+
 /**
  * Living Procurement UK Decision-Maker Blueprint, correction pass
  * (Robert, 15 Aug 2026), defect 2: "The Resilience and availability
@@ -314,4 +377,28 @@ export function outlineRowForDecision(input: {
   if (OPEN_DECISION_TO_OUTLINE_TITLE[input.id]) return OPEN_DECISION_TO_OUTLINE_TITLE[input.id];
   const section = input.target.split(".")[0];
   return SECTION_TO_OUTLINE_TITLE[section] ?? null;
+}
+
+/**
+ * Where a section sits in the run of required rows — the other half of
+ * the one denominator (Robert, 20 Aug 2026). `outlineRowForDecision`
+ * already tells a question WHICH section it fills; this tells it WHERE
+ * that section is, so a card can say "section 5 of 8" instead of
+ * arriving with no position at all. That absence is most of why the
+ * questions read as "a list of random questions with no end in sight":
+ * each one was locally sensible and globally unplaceable.
+ *
+ * Returns null for a `later` section — deliberately. A row excluded from
+ * the denominator must not be given a position inside it, or the fraction
+ * and the card would quietly disagree.
+ */
+export function sectionPosition(
+  rows: readonly OutlineRow[],
+  title: string | null,
+): { position: number; total: number; state: OutlineState } | null {
+  if (!title) return null;
+  const required = rows.filter((r) => r.state !== "later");
+  const i = required.findIndex((r) => r.title === title);
+  if (i === -1) return null;
+  return { position: i + 1, total: required.length, state: required[i].state };
 }
