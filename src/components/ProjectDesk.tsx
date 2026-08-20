@@ -104,6 +104,7 @@ import DecisionsStep from "@/components/procurement/DecisionsStep";
 import AnswerNext from "@/components/procurement/AnswerNext";
 import OrientationBand from "@/components/procurement/OrientationBand";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
+import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -1978,17 +1979,41 @@ export default function ProjectDesk({
     ? `Narrowed by ${listJoin(narrowedBy)}. Never by what anyone pays.`
     : "The whole evaluated market, until you tell it more. Never narrowed by what anyone pays.";
 
-  /* ---- The publish gate (identical law to every round) ---- */
+  /* ---- The publish gate (identical law to every round) ----
+     19 Aug 2026: the gate's CONTENT requirements now come from
+     buildPublishChecklist(), the same object the workspace renders as a
+     visible checklist. Previously this boolean and the buyer-facing
+     surface were separate derivations, which is why a real, finite,
+     shrinking gate could sit here fully enforced and completely
+     invisible while an infinite advisory stream was labelled "blocking"
+     three screens away. One source now: if it is on the checklist it
+     locks publishing, and if it locks publishing it is on the checklist.
+     The non-content conditions (still resuming, nothing said yet,
+     already published) stay here — they are session state, not things a
+     buyer can tick off. */
+  const publishChecklist = useMemo(
+    () =>
+      buildPublishChecklist({
+        sector: coreFive.sector,
+        sites: coreFive.sites,
+        regions: coreFive.regions,
+        scope: coreFive.scope,
+        timeline: coreFive.timeline,
+        securityScope,
+        securityVerdictSettled: Boolean(verdict) && verdict?.confidence !== "low",
+      }),
+    [coreFive, securityScope, verdict],
+  );
   const signLocked =
-    resuming || !started || facts.length === 0 || Boolean(published) || !coreFiveComplete || (securityScope && (!verdict || verdict.confidence === "low")) || (!securityScope && !buying);
+    resuming || !started || facts.length === 0 || Boolean(published) || !publishChecklist.ready || (!securityScope && !buying);
   const lockLine = resuming
     ? "Loading your saved project…"
     : !started
       ? "Say one sentence about the organisation and the engine takes over."
       : facts.length === 0
         ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
-        : !coreFiveComplete
-          ? `A notice cannot publish without five details, and ${numWord(missingCore.length)} ${missingCore.length === 1 ? "is" : "are"} still open: ${missingCore.join(", ")}. Say it in the prompt, or answer the open lines in the statement.`
+          : !publishChecklist.ready
+            ? `A notice cannot publish without ${numWord(publishChecklist.total)} details, and ${numWord(publishChecklist.remaining.length)} ${publishChecklist.remaining.length === 1 ? "is" : "are"} still open: ${publishChecklist.remaining.join(", ").toLowerCase()}. Say it in the prompt, or answer the open lines in the statement.`
           : securityScope && (!verdict || verdict.confidence === "low")
             ? "Answer the open questions first: nothing is recorded on guesswork."
             : !securityScope && !buying
@@ -4186,8 +4211,8 @@ export default function ProjectDesk({
           <div className="mt-4">
             <OrientationBand
               summary={canvasDocument.summary}
+              checklist={publishChecklist}
               materialDecisionsRemaining={materialDecisionsRemaining}
-              topDecisionQuestion={nextQuestionCards[0]?.nq.question ?? null}
               published={publishedFlag}
               responseCount={responseCount}
               invitedCount={published?.invited.length ?? 0}
@@ -4696,7 +4721,7 @@ export default function ProjectDesk({
                               <div className="rounded-[4px] border border-[#d3d0cd] bg-white p-4">
                                 <div className="text-[22px] font-semibold" style={mono}>{materialDecisionsRemaining}</div>
                                 <div className="mt-1 text-[12.5px] leading-[1.5] text-[#66635e]">
-                                  {materialDecisionsRemaining === 1 ? "Blocking decision" : "Blocking decisions"} remaining. Resolve or accept as a stated assumption before you publish.
+                                  {materialDecisionsRemaining === 1 ? "Open decision" : "Open decisions"}. Answering {materialDecisionsRemaining === 1 ? "it" : "them"} tightens what suppliers quote; {materialDecisionsRemaining === 1 ? "it does" : "they do"} not hold publishing up.
                                 </div>
                               </div>
                             </div>

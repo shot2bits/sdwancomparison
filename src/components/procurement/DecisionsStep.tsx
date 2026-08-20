@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Step 2, "Decisions before this can be published" (Robert's "UI mockups
+ * Step 2, the open decisions (Robert's "UI mockups
  * request" handoff bundle, screenshot 02-decisions.png; structural pass
  * 19 Aug 2026).
  *
@@ -80,8 +80,8 @@ export default function DecisionsStep({
             ? `Project published · ${materialDecisionsRemaining} optional refinement${materialDecisionsRemaining === 1 ? "" : "s"} for the next revision`
             : "Project published"
           : materialDecisionsRemaining
-            ? `${materialDecisionsRemaining} decision${materialDecisionsRemaining === 1 ? "" : "s"} before this can be published`
-            : "No blocking decisions"}
+            ? `${materialDecisionsRemaining} open decision${materialDecisionsRemaining === 1 ? "" : "s"}`
+            : "Nothing open"}
       </h2>
       {/* Same honesty split every other status surface uses (see
           wizard-steps.ts's own completedSteps comment): post-publish,
@@ -91,8 +91,8 @@ export default function DecisionsStep({
         {published
           ? "Publication is already complete — nothing below reopens it. These only shape your next revision."
           : materialDecisionsRemaining
-            ? "These are the choices that change price, risk, compliance or delivery — ranked, not everything that's merely unfilled."
-            : "Nothing below blocks publishing — every card here is optional."}
+            ? "These sharpen what suppliers quote \u2014 the choices that change price, risk, compliance or delivery, ranked. None of them holds publishing up; answering them makes the responses easier to compare."
+            : "Nothing open right now \u2014 the document reflects everything stated so far."}
       </p>
 
       {cards.length === 0 ? (

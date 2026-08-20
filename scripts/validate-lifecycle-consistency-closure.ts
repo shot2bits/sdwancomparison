@@ -75,8 +75,8 @@ function main() {
        real `materialDecisionsRemaining` count in front of it. */
     const decisions = src("src/components/procurement/DecisionsStep.tsx");
     record(
-      /`\$\{materialDecisionsRemaining\} decision\$\{materialDecisionsRemaining === 1 \? "" : "s"\} before this can be published`/.test(decisions),
-      "1 (draft): the Decisions station's pre-publish branch renders the real \"N decision(s) before this can be published\" count",
+      /`\$\{materialDecisionsRemaining\} open decision\$\{materialDecisionsRemaining === 1 \? "" : "s"\}`/.test(decisions),
+      "1 (draft): the Decisions station's pre-publish branch renders the real open-decision count, WITHOUT claiming it gates publishing (19 Aug: it never did -- signLocked gates on the publish checklist)",
       "",
     );
     const headingBlock = decisions.match(/<h2\b[\s\S]{0,1400}?<\/h2>/);
@@ -133,12 +133,18 @@ function main() {
     // both read the SAME `materialDecisionsRemaining` value -- no
     // remaining reference to the old, structurally-disconnected
     // `unansweredGaps.length` in either display.
-    const statBlock = desk.match(/Blocking decision[\s\S]{0,400}remaining\. Resolve or accept as a stated assumption before you publish\./);
-    record(Boolean(statBlock), "4 setup: the publish-panel's blocking-decisions stat was located", "");
+    /* Relabelled 19 Aug 2026: these decisions gate nothing, so the stat no
+       longer tells a buyer to resolve them "before you publish". Same
+       figure, honest framing. */
+    /* Matches the source literal, not the rendered sentence: "do not" is
+       split across a JSX ternary ({... ? "it does" : "they do"} not hold
+       publishing up), so only "not hold publishing up." appears verbatim. */
+    const statBlock = desk.match(/Open decision[\s\S]{0,400}not hold publishing up\./);
+    record(Boolean(statBlock), "4 setup: the publish-panel's open-decisions stat was located", "");
     // Hex updated 19 Aug 2026 (handoff-bundle restyle: #655F52 -> #66635e,
     // the new palette's own ink-600) -- the identifier this fixture exists
     // to confirm is unchanged by that visual swap.
-    record(/\{materialDecisionsRemaining\}[\s\S]{0,10}<\/div>\s*<div className="mt-1 text-\[12\.5px\] leading-\[1\.5\] text-\[#66635e\]">\s*\{materialDecisionsRemaining === 1 \? "Blocking decision" : "Blocking decisions"\}/.test(desk),
+    record(/\{materialDecisionsRemaining\}[\s\S]{0,10}<\/div>\s*<div className="mt-1 text-\[12\.5px\] leading-\[1\.5\] text-\[#66635e\]">\s*\{materialDecisionsRemaining === 1 \? "Open decision" : "Open decisions"\}/.test(desk),
       "4: the publish-panel stat now reads `materialDecisionsRemaining` -- the SAME identifier Mission Control's heading uses, not a separately-sourced value",
       "",
     );

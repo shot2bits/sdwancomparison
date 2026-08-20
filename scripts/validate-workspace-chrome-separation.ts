@@ -29,6 +29,27 @@ const record = (pass: boolean, label: string, detail: string) => {
 
 function main() {
   /* ================================================================ */
+  /* 0. THE PUBLISH GATE IS ONE SOURCE (19 Aug 2026).                  */
+  /*    Robert: "no structure, nobody knows where they are... a list    */
+  /*    of random questions with no end in sight." Root cause: a real,  */
+  /*    finite, monotonic gate (five standing facts) was enforced in    */
+  /*    `signLocked` and never shown, while an infinite GENERATIVE      */
+  /*    advisory stream was labelled "blocking" and shown everywhere.   */
+  /*    The fix is that the checklist a buyer reads and the boolean     */
+  /*    that stops them are the same object. These assertions exist so  */
+  /*    they cannot silently drift apart again.                         */
+  /* ================================================================ */
+  {
+    const desk = src("src/components/ProjectDesk.tsx");
+    const checklist = src("src/lib/workspace/publish-checklist.ts");
+    record(/buildPublishChecklist\(/.test(desk), "0: ProjectDesk builds the publish checklist from the shared pure module", "");
+    record(/!publishChecklist\.ready/.test(desk), "0: signLocked is gated on that SAME checklist object, not a parallel re-derivation", "");
+    record(/checklist=\{publishChecklist\}/.test(desk), "0: the OrientationBand a buyer reads is handed the identical object", "");
+    record(/ready: doneCount === items\.length/.test(checklist), "0: `ready` is derived from the items themselves, so the count shown and the gate enforced cannot disagree", "");
+    record(!/materialDecisions/.test(checklist), "0: open decisions are NOT part of the gate -- they are advisory and generative, and including them could produce a gate that never empties", "");
+  }
+
+  /* ================================================================ */
   /* 1. The true root layout renders neither MegaNav nor SiteFooter --  */
   /*    the chrome moved one level down into (marketing)/layout.tsx so  */
   /*    the workspace group can opt out (App Router layout nesting is   */
