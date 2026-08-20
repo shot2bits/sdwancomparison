@@ -4117,12 +4117,23 @@ export default function ProjectDesk({
         /* ============================================================ */
         <>
           <div
-            className="sticky top-[52px] z-30 border-b"
+            /* Sticky only from `lg` up. The 52/97 offsets assume this bar
+               is ~53px, which holds on desktop -- but its content wraps to
+               FOUR lines at 390px (measured: 147px tall), so pinned at 52
+               it covered the wizard rail pinned at 97 completely. The rail
+               is the more important of the two to keep on screen (it is
+               how you move between stations), and the identity bar's
+               contents are reachable by scrolling up. Only visible when
+               the page is scrolled, which is why the earlier unscrolled
+               mobile screenshots did not catch it. */
+            className="z-30 border-b lg:sticky lg:top-[52px]"
             style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
           >
             <div className="mx-auto w-full max-w-[1400px] px-[26px] py-2.5 lg:px-[42px]">{identityBar}</div>
           </div>
-          <div className="sticky top-[97px] z-20">
+          {/* Below lg the identity bar above is no longer sticky, so the
+              rail pins directly under the header at 52 instead of 97. */}
+          <div className="sticky top-[52px] z-20 lg:top-[97px]">
             <WizardRail
               current={activeStep}
               completed={completed}

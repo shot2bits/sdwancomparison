@@ -237,8 +237,15 @@ function main() {
     record(/text-\[#66635e\]|"#66635e"/.test(desk), "7: ProjectDesk's light-background muted/caption text uses #66635e (the 19 Aug 2026 handoff palette's ink-600, axe-core-verified 5.1:1+ across every background this pass measured) instead of the inaccessible #A3A099/#8C8A85 hex literals (2.5:1-3.5:1)", "");
     record(!/text-\[#A3A099\]|text-\[#8C8A85\]/.test(desk), "7: no light-background Tailwind text-color class in ProjectDesk.tsx still uses the old sub-4.5:1 #A3A099/#8C8A85 hex literals", "");
 
-    const header = src("src/components/WorkspaceHeader.tsx");
-    record(/inline-flex items-center py-3/.test(header), "7: the workspace header's account/board nav links carry real vertical padding, growing their touch target from a measured 50x17px to ~41px tall without changing the header's visible height", "");
+    /* SUPERSEDED 19 Aug 2026 ("Add back the main menu as well"):
+       WorkspaceHeader is retired and the workspace now uses MegaNav, the
+       same header every marketing route and the opportunities board
+       already use. The touch-target guarantee this asserted moves with
+       it -- MegaNav's own nav links must still carry real vertical
+       padding rather than collapsing to their 17px text-line height,
+       which was the actual defect behind the original fixture. */
+    const header = src("src/components/MegaNav.tsx");
+    record(/px-2\.5 py-2 text-\[13px\]/.test(header), "7: the main nav's board/account links carry real vertical padding (py-2), not a bare text-line hit area", "");
 
     // A third, distinct false-positive 409, found the SAME way (a live
     // local-KV Playwright run through save -> edit -> publish): diffIds()

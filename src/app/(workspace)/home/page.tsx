@@ -151,10 +151,12 @@ export default function Page() {
 
      UPDATE (2030 living-procurement workspace separation, 18 Aug 2026):
      this route now lives in the (workspace) route group, whose own
-     layout — src/app/(workspace)/layout.tsx — renders WorkspaceHeader
+     layout — src/app/(workspace)/layout.tsx — renders MegaNav
      above and CommercialFooter below every workspace page, so the trust
      footer described above stays reachable without this page rendering
-     any chrome itself. It is deliberately WorkspaceHeader, not MegaNav:
+     any chrome itself. Chrome parity restored 19 Aug 2026 (Robert: "Add back the main
+     menu as well") — this group now carries the SAME MegaNav and
+     commercial footer as (marketing), superseding the 18 Aug split:
      the approved 2030 closure package's rule 14 keeps marketing chrome
      out of the workspace, so this route no longer inherits MegaNav at
      all (that moved to (marketing)/layout.tsx for every non-workspace
