@@ -87,28 +87,65 @@ const FAQS: { q: string; a: string }[] = [
   },
 ];
 
+/**
+ * COLLAPSED TO ONE LINE, 20 Aug 2026. Robert, on a screenshot of the
+ * entry page: "Probably best to remove this to the about page or
+ * somewhere else."
+ *
+ * He is right that twelve rows of FAQ under a single input box is the
+ * wrong weight for a page whose job is "type one sentence". But MOVING
+ * it would have cost real ground: this is the entry page's only FAQPage
+ * JSON-LD and its only crawlable depth, and /how-it-works already emits
+ * its own FAQPage (two on one page conflict -- a crawler picks one, and
+ * which one is not ours to choose).
+ *
+ * So the whole block is now itself a closed <details>. This costs
+ * nothing, for the exact reason the inner questions were built as
+ * <details> in the first place (see the header above): a collapsed
+ * <details> is FULLY PRESENT in the served HTML. A crawler and an agent
+ * still read every answer, the JSON-LD still describes content that is
+ * genuinely on the page (Google's own requirement -- which is why the
+ * schema was NOT simply left behind with the visible block removed), and
+ * a human sees one line instead of twelve.
+ *
+ * Nested <details> is deliberate and works natively: opening the outer
+ * one reveals the eleven inner ones, still individually collapsed.
+ */
 export default function CapabilityBlock() {
   return (
     <section
       aria-label="What Netify does"
-      className="mx-auto mt-5 w-[min(860px,100%)] rounded-md border border-zinc-200 bg-white p-5 sm:p-6"
+      className="mx-auto mt-5 w-[min(860px,100%)] rounded-md border border-zinc-200 bg-white"
     >
       {/* The same array the list below renders, so the structured data and
-          the visible answers can never disagree. */}
+          the visible answers can never disagree. Kept OUTSIDE the
+          <details> so it is unconditionally in the document head order,
+          though a collapsed <details> would serve it either way. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(getShortlistFaqSchema(FAQS)) }}
       />
-      <h2
-        className="m-0"
-        style={{ fontSize: "15px", lineHeight: 1.3, fontWeight: 700, color: "#18181b", letterSpacing: "-0.01em" }}
-      >
-        What Netify does
-      </h2>
-      <p className="m-0 mt-1.5 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
-        One description becomes a shortlist, an indicative price and a document you can send to vendors and service providers.
-      </p>
-      <div className="mt-3">
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-baseline gap-2 p-5 marker:hidden sm:p-6">
+          <span
+            aria-hidden="true"
+            className="mt-[2px] shrink-0 text-[11px] text-zinc-400 transition-transform group-open:rotate-90"
+          >
+            &#9654;
+          </span>
+          <span className="min-w-0 flex-1">
+            <h2
+              className="m-0"
+              style={{ fontSize: "15px", lineHeight: 1.3, fontWeight: 700, color: "#18181b", letterSpacing: "-0.01em" }}
+            >
+              What Netify does
+            </h2>
+            <span className="m-0 mt-1.5 block max-w-2xl text-[13px] leading-relaxed text-zinc-600">
+              One description becomes a shortlist, an indicative price and a document you can send to vendors and service providers.
+            </span>
+          </span>
+        </summary>
+      <div className="px-5 pb-5 sm:px-6 sm:pb-6">
         {FAQS.map((f) => (
           <details key={f.q} className="group border-t border-zinc-100 py-2 first:border-t-0">
             <summary className="flex cursor-pointer list-none items-baseline gap-2 text-[13.5px] font-semibold leading-relaxed text-zinc-900 marker:hidden hover:text-amber-800">
@@ -124,6 +161,7 @@ export default function CapabilityBlock() {
           </details>
         ))}
       </div>
+      </details>
     </section>
   );
 }
