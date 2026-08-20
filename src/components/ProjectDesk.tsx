@@ -94,13 +94,20 @@ import type { ProjectHistoryEvent } from "@/lib/rfp-types";
 import { BOARD_LINK } from "@/lib/nav";
 import { rankNextQuestions, materialDecisionCount, type NextQuestion } from "@/lib/workspace/procurement-next-questions";
 import { buildReadiness } from "@/lib/workspace/procurement-readiness";
-import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists, outlineProgress, outlineRowForDecision, sectionPosition, type OutlineRow } from "@/lib/workspace/procurement-outline";
+import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClauseExists, outlineProgress, outlineRowForDecision, sectionPosition, diffOutlineSections, type OutlineRow } from "@/lib/workspace/procurement-outline";
+import { coachingFor } from "@/lib/workspace/section-coaching";
 /** The five-station shell (Robert's "UI mockups request" handoff bundle,
- *  structural pass 19 Aug 2026). `wizard-steps.ts` is the shared, pure
- *  vocabulary: WizardRail renders it, this file routes on it, and both
- *  derive completion from the SAME real document state rather than from
- *  navigation history -- see that module's own header comment. */
-import WizardRail from "@/components/procurement/WizardRail";
+ *  structural pass 19 Aug 2026) still routes Decisions/Review/Publish/
+ *  Compare internally (wizard-steps.ts's WizardStep/goToStep/reachable/
+ *  completed are all unchanged) -- but WizardRail itself, the big
+ *  five-button bar, is RETIRED as of the 2030 UI rebuild (20 Aug 2026,
+ *  Robert: "totally change the UI... it's the UI that's a massive mess",
+ *  confirmed via direct question: the section outline REPLACES it as
+ *  primary navigation, full rebuild in one pass). SectionNav takes its
+ *  render slot below; Publish/Compare survive only as its own lightweight
+ *  strip, per Robert's explicit framing, not a parallel rail. */
+import SectionNav from "@/components/procurement/SectionNav";
+import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import { buildAnsweredLog } from "@/lib/workspace/answered-log";
 import CapturedList from "@/components/procurement/CapturedList";
@@ -370,7 +377,7 @@ const PLACEHOLDER_RESUMING = "Loading your saved project…";
  *  can only ever describe what actually landed in the statement. */
 type ThreadMsg = { who: "you" | "netify"; text: string };
 const THREAD_WELCOME =
-  "Describe what you are buying, in your own words. Every sentence you write fills in the statement below, or answer any open line in it directly.";
+  "Describe what you are buying, in your own words. One message can complete several sections at once — network, security, compliance and more — or answer any open line in the statement directly.";
 /** Phase 3 Stage A correction round (Robert, 14 Aug 2026), defect #3
  *  reproduction: send()'s final branch below keeps the message as a
  *  receipt EVERY time it is reached (either per-unplaced-clause, or this
@@ -1110,6 +1117,14 @@ export default function ProjectDesk({
    *  hasn't happened. `describe` is the honest default: it is the only
    *  station reachable before a single fact exists. */
   const [step, setStep] = useState<WizardStep>("describe");
+  /** 2030 UI rebuild (20 Aug 2026): which outline SECTION the buyer is
+   *  looking at in the new primary navigation (SectionNav/SectionDetail),
+   *  independent of `step` above. `null` means "no explicit choice yet" —
+   *  the active row then falls back to the outline's own `next` (the
+   *  first required row not yet confirmed), computed once `sectionOutline`
+   *  exists further down. Like `step`, this is NAVIGATION STATE ONLY: it
+   *  never changes what the outline says, only which row is on screen. */
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
    *  publish panel and everything downstream of it). Rather than rewrite
@@ -3645,6 +3660,65 @@ export default function ProjectDesk({
     });
   }, [sectionOutline, compiledDocument, requirement, buying, opModel, instrument, rfiSet, materialDecisionsRemaining, visibleSectorSuggestions]);
 
+  /** 2030 UI rebuild: the row SectionNav/SectionDetail actually render.
+   *  `activeSection` (buyer's own click) wins when it still names a real
+   *  row; otherwise falls back to `sectionProgress.next` -- the outline's
+   *  OWN "what's still open" pointer, the exact same one the old rail's
+   *  sparkline read -- and failing that, the first row, so this is never
+   *  null while any row exists. */
+  const activeRow: OutlineRow | null = useMemo(() => {
+    if (activeSection) {
+      const found = sectionOutline.find((r) => r.key === activeSection);
+      if (found) return found;
+    }
+    return sectionProgress.next ?? sectionOutline[0] ?? null;
+  }, [activeSection, sectionOutline, sectionProgress]);
+
+  const activeRowPosition = useMemo(
+    () => sectionPosition(sectionOutline, activeRow?.title ?? null),
+    [sectionOutline, activeRow],
+  );
+
+  /** Robert, 20 Aug 2026: "tell the user that the AI prompt will auto
+   *  populate all sections... the portal should update all sections."
+   *  Diffs the outline against its own last-seen shape (diffOutlineSections,
+   *  procurement-outline.ts) every time it changes, and surfaces an
+   *  explicit, named confirmation in SectionNav for a few seconds when a
+   *  single burst of change (a typed message, a paste, a click -- anything
+   *  that moves more than one row) genuinely touched more than one
+   *  section. A single-section change says nothing here: the section's own
+   *  chip and detail pane already show it, and a banner on every click
+   *  would be exactly the undifferentiated noise this rebuild removes
+   *  elsewhere. Guarded on a ref, not state, for the "first paint has
+   *  nothing to compare against" case. */
+  const prevOutlineForBannerRef = useRef<OutlineRow[] | null>(null);
+  const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [sectionsUpdatedBanner, setSectionsUpdatedBanner] = useState<string | null>(null);
+  useEffect(() => {
+    const prev = prevOutlineForBannerRef.current;
+    prevOutlineForBannerRef.current = sectionOutline;
+    if (!prev) return;
+    const changedTitles = diffOutlineSections(prev, sectionOutline);
+    if (changedTitles.length >= 2) {
+      setSectionsUpdatedBanner(`Updated ${changedTitles.length} sections: ${changedTitles.join(", ")}`);
+      if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+      bannerTimerRef.current = setTimeout(() => setSectionsUpdatedBanner(null), 6000);
+    }
+  }, [sectionOutline]);
+  useEffect(() => () => { if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current); }, []);
+
+  /** Jumps the primary navigation straight to the section a question (or
+   *  its footnote link) names -- the "visible linkage between a question
+   *  and the section it fills" the rebuild calls for. Always also returns
+   *  to the `describe` step, since that is where SectionDetail renders;
+   *  a buyer deep in Decisions/Review clicking a section jump lands back
+   *  on the section pane, not stranded on a station with no such row. */
+  const onJumpToSection = (title: string) => {
+    const found = sectionOutline.find((r) => r.title === title);
+    if (found) setActiveSection(found.key);
+    goToStep("describe");
+  };
+
   /** The document handed to the canvas for display: identical to
    *  `compiledDocument` in every field except `readiness`, which is the
    *  section-aware compile above. Never a second compile of the document
@@ -3723,6 +3797,15 @@ export default function ProjectDesk({
   const allNextQuestionCards = useMemo(
     () => rankedNextQuestions.map(resolveQuestionCard),
     [rankedNextQuestions, resolveQuestionCard],
+  );
+
+  /** Every open question that resolves the ACTIVE section specifically —
+   *  the same `fills` resolution every other card surface already trusts,
+   *  filtered rather than recomputed, so SectionDetail can never disagree
+   *  with Decisions/Answer next about what a question fills. */
+  const activeSectionCards = useMemo(
+    () => (activeRow ? allNextQuestionCards.filter((c) => c.fills?.title === activeRow.title) : []),
+    [allNextQuestionCards, activeRow],
   );
 
   /** Every decision the buyer has ANSWERED BY CHOOSING, read straight off
@@ -4149,7 +4232,7 @@ export default function ProjectDesk({
               mechanism, it does not demonstrate an answer. */}
           {!started && (
             <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">
-              Answers below fill in automatically as you describe your requirement above.
+              Answers below fill in automatically as you describe your requirement above — one message can complete several sections at once.
             </p>
           )}
           {wrongCompany && (
@@ -4217,6 +4300,7 @@ export default function ProjectDesk({
       totalOutstanding={materialDecisionsRemaining}
       demoted={rfpIsBuilt}
       onSeeAll={() => goToStep("decisions")}
+      onJumpToSection={onJumpToSection}
     />
   );
 
@@ -4404,7 +4488,18 @@ export default function ProjectDesk({
                           factsStruck={Math.max(0, facts.length - live.length)}
                           sourceTurnCount={sourceTurns.length}
                           nextQuestionCards={undefined}
-                          outline={sectionOutline}
+                          /* 2030 UI rebuild: `outline` intentionally omitted
+                             here. SectionNav (primary navigation) and
+                             SectionDetail (just above this canvas on the
+                             `describe`/`review` stations) now own the
+                             section-outline surface, interactively; this
+                             canvas rendering the SAME rows again, still
+                             read-only, would be exactly the "two
+                             competing lists" confusion the rebuild exists
+                             to remove. Nothing else about the canvas
+                             changes -- title/summary/readiness, the fact
+                             strip, the clause list and the architecture
+                             twin are all untouched. */
                           materialDecisionsRemaining={materialDecisionsRemaining}
                           acceptedSuggestionCards={acceptedSuggestionCards}
                           acceptedSuggestionsTitle={sectorSectionTitle}
@@ -4465,21 +4560,28 @@ export default function ProjectDesk({
             <div className="mx-auto w-full max-w-[1400px] px-[26px] py-2.5 lg:px-[42px]">{identityBar}</div>
           </div>
           {/* Below lg the identity bar above is no longer sticky, so the
-              rail pins directly under the header at 52 instead of 97. */}
+              nav pins directly under the header at 52 instead of 97.
+              2030 UI rebuild (20 Aug 2026): SectionNav replaces WizardRail
+              in this exact slot -- same position, same visual weight,
+              different content (sections you click, not stages you pass
+              through). Selecting a row sets the active SECTION and, if the
+              buyer is deep in Decisions/Review/Publish/Compare, also
+              returns them to the `describe` step, since that is the one
+              place SectionDetail renders. */}
           <div data-sticky-chrome-end className="sticky top-[52px] z-20 lg:top-[97px]">
-            <WizardRail
-              current={activeStep}
-              completed={completed}
-              reachable={reachable}
-              /* The SAME `materialDecisionsRemaining` the Decisions station's
-                 own heading, the publish panel's stat and the rail's
-                 completion tick all read -- so the badge, the count and the
-                 tick can never tell three different stories. No badge at
-                 zero: the green tick already says that, and a "0" pill
-                 beside a completed station is noise. */
-              badges={{ decisions: materialDecisionsRemaining }}
-              progress={started ? sectionProgress : null}
-              onSelect={goToStep}
+            <SectionNav
+              rows={sectionOutline}
+              activeKey={activeRow?.key ?? null}
+              onSelect={(key) => { setActiveSection(key); goToStep("describe"); }}
+              progress={sectionProgress}
+              updatedBanner={sectionsUpdatedBanner}
+              materialDecisionsRemaining={materialDecisionsRemaining}
+              onReviewDecisions={() => goToStep("decisions")}
+              publishReachable={reachable.has("publish")}
+              publishCompleted={completed.has("publish")}
+              compareReachable={reachable.has("compare")}
+              onPublish={() => goToStep("publish")}
+              onCompare={() => goToStep("compare")}
             />
           </div>
 
@@ -4615,6 +4717,27 @@ export default function ProjectDesk({
               <div className="pt-6 lg:px-8">
                 {activeStep === "describe" && (
                   <>
+                    {/* 2030 UI rebuild (20 Aug 2026): the section-aware
+                        pane leads -- what section you're on, why it
+                        matters, what's captured, what's still missing, and
+                        the open questions that resolve it, answerable in
+                        place. The full document twin (canvasBlock, right
+                        below) is unchanged and un-demoted -- this adds a
+                        focused entry point in front of it, it replaces
+                        nothing about what the twin itself shows. */}
+                    {activeRow && (
+                      <div className="mb-6">
+                        <SectionDetail
+                          row={activeRow}
+                          position={activeRowPosition?.position ?? 0}
+                          total={activeRowPosition?.total ?? sectionProgress.total}
+                          coaching={coachingFor(activeRow.key)}
+                          cards={activeSectionCards}
+                          onSeeAllDecisions={() => goToStep("decisions")}
+                          materialDecisionsRemaining={materialDecisionsRemaining}
+                        />
+                      </div>
+                    )}
                     {canvasBlock}
                     {/* The explicit forward step. Robert, on the first build:
                         "How does the user know when 2 Decisions is reached?"

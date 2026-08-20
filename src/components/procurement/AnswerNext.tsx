@@ -44,6 +44,7 @@ export default function AnswerNext({
   totalOutstanding,
   demoted,
   onSeeAll,
+  onJumpToSection,
 }: {
   /** The top-ranked open decisions, already resolved into real answer
    *  handlers by ProjectDesk (never resolved here — this stays a
@@ -64,6 +65,13 @@ export default function AnswerNext({
    *  dishonesty in the opposite direction. */
   demoted?: boolean;
   onSeeAll: () => void;
+  /** 2030 UI rebuild (20 Aug 2026): elevates the "Fills section N of M"
+   *  footnote from inert text into a jump link — clicking it takes the
+   *  buyer straight to that section in the new primary navigation
+   *  (SectionNav/SectionDetail), the "visible linkage between a question
+   *  and the section it completes" the rebuild calls for. Optional and
+   *  additive: when omitted the footnote renders exactly as before. */
+  onJumpToSection?: (title: string) => void;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   /** Robert, 19 Aug 2026: "when selecting the options for sites, I cannot
@@ -182,9 +190,20 @@ export default function AnswerNext({
                       have -- and null (no line at all) rather than a
                       guess when the question maps to no required row. */}
                   {fills && (
-                    <p className="m-0 mb-2 text-[11px] leading-[1.4]" style={{ ...mono, color: "var(--nf-orange-strong, #832f00)" }}>
-                      {`Fills section ${fills.position} of ${fills.total} \u00b7 ${fills.title}`}
-                    </p>
+                    onJumpToSection ? (
+                      <button
+                        type="button"
+                        onClick={() => onJumpToSection(fills.title)}
+                        className="m-0 mb-2 block cursor-pointer border-0 bg-transparent p-0 text-left text-[11px] leading-[1.4] underline decoration-dotted underline-offset-2"
+                        style={{ ...mono, color: "var(--nf-orange-strong, #832f00)" }}
+                      >
+                        {`Fills section ${fills.position} of ${fills.total} \u00b7 ${fills.title}`}
+                      </button>
+                    ) : (
+                      <p className="m-0 mb-2 text-[11px] leading-[1.4]" style={{ ...mono, color: "var(--nf-orange-strong, #832f00)" }}>
+                        {`Fills section ${fills.position} of ${fills.total} \u00b7 ${fills.title}`}
+                      </p>
+                    )
                   )}
                   {/* The reason gains the mockup's own framing ("Why
                       this matters"). Same `nq.reason` string, unchanged --

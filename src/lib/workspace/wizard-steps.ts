@@ -1,9 +1,20 @@
 /**
  * The five stations of the sourcing builder (Robert's "UI mockups
  * request" handoff bundle, structural pass 19 Aug 2026) — the shared
- * vocabulary for WizardRail.tsx and ProjectDesk.tsx's own step routing,
- * so the rail's labels and the pane that renders for each step can never
- * drift apart.
+ * vocabulary for ProjectDesk.tsx's own step routing (which right-pane
+ * content renders for `describe`/`decisions`/`review`/`publish`/
+ * `compare`) and, since the 2030 UI rebuild (20 Aug 2026), for
+ * SectionNav.tsx's Publish/Compare gating too.
+ *
+ * WizardRail.tsx — the five-button bar that used to be the PRIMARY way a
+ * buyer moved between these stations — is retired: the section outline
+ * (SectionNav.tsx/SectionDetail.tsx) replaced it as primary navigation,
+ * per Robert's own direct choice ("Replace it" over "sit alongside it").
+ * The five stations themselves did not go anywhere — Decisions/Review are
+ * still full-pane secondary views reachable via in-context links, and
+ * Publish/Compare are still gated by the exact same `reachableSteps()` /
+ * `completedSteps()` below — only the big rail rendering all five as
+ * equally-weighted, always-visible chrome is gone.
  *
  * PURE: no React, no I/O, like every other projection in this codebase
  * (Article 17). Order is the reference's order and is load-bearing — the
