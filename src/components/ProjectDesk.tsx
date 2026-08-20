@@ -1125,6 +1125,24 @@ export default function ProjectDesk({
    *  exists further down. Like `step`, this is NAVIGATION STATE ONLY: it
    *  never changes what the outline says, only which row is on screen. */
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  /** 2030 UI rebuild, correction pass (Robert, 20 Aug 2026, on a live
+   *  screenshot of the section pane with the full document twin dumped
+   *  underneath it: "really, really bad... not intuitive, not clear, not
+   *  clean. Just a jumble of words"). The first cut of SectionDetail
+   *  added a focused card but left the WHOLE compiled document --
+   *  architecture twin, stat tiles, view tabs, a testable-requirements
+   *  list with clause ids and quote marks -- rendering unconditionally
+   *  right underneath it on the `describe` station, in a completely
+   *  different visual register, introducing terms nobody has been told
+   *  about yet. That is the same "wall of text" defect this whole
+   *  rebuild exists to remove, just relocated one card lower. The
+   *  document itself is not going anywhere -- same canvasBlock, same
+   *  LivingProcurementCanvas, same everything -- it is only collapsed by
+   *  default now, one click away, so the DEFAULT view on `describe` is
+   *  just the section card. `review` still renders canvasBlock
+   *  unconditionally, unaffected by this -- reviewing the full document
+   *  is that station's entire job. */
+  const [showFullDocument, setShowFullDocument] = useState(false);
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
    *  publish panel and everything downstream of it). Rather than rewrite
@@ -4721,10 +4739,13 @@ export default function ProjectDesk({
                         pane leads -- what section you're on, why it
                         matters, what's captured, what's still missing, and
                         the open questions that resolve it, answerable in
-                        place. The full document twin (canvasBlock, right
-                        below) is unchanged and un-demoted -- this adds a
-                        focused entry point in front of it, it replaces
-                        nothing about what the twin itself shows. */}
+                        place. The full document twin (canvasBlock) is
+                        unchanged -- same component, same content -- but as
+                        of the correction pass below it is collapsed by
+                        default rather than always rendered underneath this
+                        card, which is what actually produced the "jumble
+                        of words" complaint: a focused card followed
+                        immediately by an unrelated wall of clause text. */}
                     {activeRow && (
                       <div className="mb-6">
                         <SectionDetail
@@ -4738,7 +4759,30 @@ export default function ProjectDesk({
                         />
                       </div>
                     )}
-                    {canvasBlock}
+                    {/* Correction pass: canvasBlock (the full compiled
+                        document -- architecture twin, stat tiles, testable
+                        requirements, document gaps, project memory) is
+                        collapsed by default here. Same content, same
+                        component, only reachable on demand now instead of
+                        always dumped under the section card. */}
+                    <button
+                      type="button"
+                      onClick={() => setShowFullDocument((v) => !v)}
+                      aria-expanded={showFullDocument}
+                      className="mt-2 flex w-full cursor-pointer items-center justify-between rounded-[4px] border px-4 py-3 text-left"
+                      style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-raised, #fefdfc)" }}
+                    >
+                      <span>
+                        <span className="text-[13.5px] font-semibold" style={{ color: "var(--nf-ink-950, #110f0d)" }}>
+                          {showFullDocument ? "Hide the full procurement document" : "View the full procurement document"}
+                        </span>
+                        <span className="ml-2 text-[12px]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
+                          Everything a supplier will see — architecture, testable requirements and open gates.
+                        </span>
+                      </span>
+                      <span aria-hidden="true" style={{ color: "var(--nf-ink-400, #83807b)" }}>{showFullDocument ? "−" : "+"}</span>
+                    </button>
+                    {showFullDocument && <div className="mt-4">{canvasBlock}</div>}
                     {/* The explicit forward step. Robert, on the first build:
                         "How does the user know when 2 Decisions is reached?"
                         -- and the honest answer was that they didn't, unless
