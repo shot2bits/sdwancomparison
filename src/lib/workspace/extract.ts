@@ -774,7 +774,48 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   const negativeOrDecimalCountMatch = (noun: string) =>
     hit(new RegExp(`${NEGATIVE_OR_DECIMAL_COUNT}\\s*(?:\\w+\\s+)?(?:${noun})\\b`));
 
-  const USER_NOUN = "users?|staff|employees?|people|seats?|heads";
+  /* HOW MANY WORDS MAY SIT BETWEEN A COUNT AND ITS NOUN (20 Aug 2026).
+   *
+   * Robert, from a live session: "30 UK manufacturing sites" landed
+   * nothing. `estate.sites` stayed unstated, the outline correctly said
+   * "Still needed: site count", and a buyer who had plainly said 30 was
+   * asked for it again -- the single worst thing an extraction layer can
+   * do, because it makes the whole document look like it is not
+   * listening.
+   *
+   * The cause was `(?:\w+\s+)?` -- exactly ONE optional describing word,
+   * sized for "50 remote users". Two qualifiers ("UK manufacturing") is
+   * an ordinary way to say it and matched nothing at all.
+   *
+   * Widening to three is only safe with a guard, because a longer reach
+   * can jump a clause: "within 6 months across all sites" would otherwise
+   * land estate.sites = 6, and "4000 users at sites" would land
+   * estate.sites = 4000. So the gap may not contain:
+   *   · the OTHER count noun -- the number belongs to whichever noun
+   *     comes first, and "4000 users ... sites" is a user count;
+   *   · a time noun -- "6 months" is a timeline, never an estate size;
+   *   · a conjunction -- "and"/"or"/"plus" start a new clause, and the
+   *     count before one is not the count after it.
+   * Punctuation already stops the run for free: the qualifier pattern
+   * matches word-then-whitespace, so a comma or full stop in "6 months,
+   * we have sites" ends it before the noun is reached.
+   *
+   * A qualifier must also START with a letter, so a second number can
+   * never be swallowed as a describing word ("4000 users and 30 sites"
+   * fails from 4000 and succeeds from 30, which is the correct reading).
+   *
+   * `t` is lowercased before matching (see its own definition), which is
+   * why these classes are lowercase-only. */
+  const CLAUSE_BREAK = "and|or|plus|but|months?|weeks?|years?|days?|quarters?";
+  const qualifierRun = (otherNoun: string) =>
+    `(?:(?!(?:${otherNoun}|${CLAUSE_BREAK})\\b)[a-z][\\w'\\-/]*\\s+){0,3}`;
+
+  /* USER_NOUN / SITE_NOUN are the module-scope constants (hoisted in
+     correction pass 2 so validate() shares this exact vocabulary). The
+     identical local re-declarations that used to sit here were removed
+     20 Aug 2026: `qualifierRun` needs the OTHER noun group, and a local
+     `const SITE_NOUN` declared further down put it in the temporal dead
+     zone for the users block above it. One definition, used everywhere. */
   const negUserMatch = negativeOrDecimalCountMatch(USER_NOUN);
   if (negUserMatch) {
     /* Fix (correction pass 2, Priority 3): use the same buyer-visible
@@ -786,19 +827,18 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
      * off this exact prefix) picks it up here too. */
     sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negUserMatch[0].trim(), 60)}" is negative or not a whole number, so no user count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
   } else {
-    const users = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:${USER_NOUN})\\b`));
+    const users = hit(new RegExp(`${NUM}\\s*${qualifierRun(SITE_NOUN)}(?:${USER_NOUN})\\b`));
     if (users) say("estate.users", magnitude(users[1], users[2]), users[0].trim(), undefined, hitPos(users));
   }
 
   /* "clinics" joined the noun list 31 Jul 2026 (round 6 dry run: "60
    * clinics" from an NHS buyer landed nothing while "60 shops" landed;
    * same in-lane precedent as the timeline patterns). */
-  const SITE_NOUN = "sites?|stores?|branch(?:es)?|offices?|locations?|shops?|practices?|clinics?";
   const negSiteMatch = negativeOrDecimalCountMatch(SITE_NOUN);
   if (negSiteMatch) {
     sink.push(`${QUANTITY_NOT_RECORDED_PREFIX}"${clean(negSiteMatch[0].trim(), 60)}" is negative or not a whole number, so no site count was recorded. The earlier value, if any, is unchanged — restate a whole positive number to set it.`);
   } else {
-    const sites = hit(new RegExp(`${NUM}\\s*(?:\\w+\\s+)?(?:${SITE_NOUN})\\b`));
+    const sites = hit(new RegExp(`${NUM}\\s*${qualifierRun(USER_NOUN)}(?:${SITE_NOUN})\\b`));
     if (sites) say("estate.sites", magnitude(sites[1], sites[2]), sites[0].trim(), undefined, hitPos(sites));
   }
 

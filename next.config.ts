@@ -6,6 +6,21 @@ const nextConfig: NextConfig = {
   // rewrite serves correct links and static files. Set NEXT_PUBLIC_SITE_URL
   // to https://netify.co.uk/sase in Vercel so canonicals, the sitemap, the
   // magic-link sign-in and structured data all use the new home.
+  /* THE BUILD STAMP (Robert, 20 Aug 2026: "include a version number on
+     the page so I can see whether the page is cached or not").
+
+     `env` values are INLINED at build time, which is exactly the property
+     needed: a cached page keeps the stamp of the build that produced it,
+     so a stale page is visibly stale. A request-time value (a header, a
+     runtime clock) would read fresh on months-old HTML and prove nothing.
+
+     VERCEL_GIT_COMMIT_SHA is set by Vercel on every deployment. Locally
+     there is no build to identify and nothing is cached, so "dev" is the
+     honest answer rather than a fabricated hash. */
+  env: {
+    NEXT_PUBLIC_BUILD_SHA: process.env.VERCEL_GIT_COMMIT_SHA || "dev",
+    NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
+  },
   basePath: "/sase",
   // Match the main netify.co.uk site (trailingSlash: true) so generated links,
   // the sitemap and canonicals all carry trailing slashes: /sase/<path>/.
