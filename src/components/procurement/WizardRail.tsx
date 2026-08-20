@@ -39,6 +39,7 @@ export default function WizardRail({
   completed,
   reachable,
   badges,
+  progress,
   onSelect,
 }: {
   current: WizardStep;
@@ -56,6 +57,14 @@ export default function WizardRail({
    *  already owns (see ProjectDesk's call site); a station with nothing
    *  outstanding renders no badge rather than a zero. */
   badges?: Partial<Record<WizardStep, number>>;
+  /** THE progress fraction (procurement-outline.ts `outlineProgress`) —
+   *  the same one the document header and every question card render.
+   *  Robert, 20 Aug 2026: "it is 100% not clear how the user is
+   *  progressing." The rail could say which STATION you were on but
+   *  nothing about how far through the work you were, and the four
+   *  numbers that tried to answer that all disagreed. This is the single
+   *  denominator; the rail is the one place a buyer always sees. */
+  progress?: { ready: number; total: number; laterCount: number } | null;
   onSelect: (step: WizardStep) => void;
 }) {
   const currentStep = WIZARD_STEPS.find((s) => s.step === current) ?? WIZARD_STEPS[0];
@@ -156,6 +165,25 @@ export default function WizardRail({
       >
         <span style={{ color: "var(--nf-ink-950, #110f0d)", fontWeight: 700 }}>{currentStep.label}</span>
         {` \u2014 ${currentStep.purpose}`}
+        {progress && progress.total > 0 && (
+          <span className="ml-2 inline-flex items-center gap-1.5 align-middle">
+            <span aria-hidden="true" className="inline-flex gap-[3px]">
+              {Array.from({ length: progress.total }).map((_, i) => (
+                <span
+                  key={i}
+                  className="inline-block h-[5px] w-[11px] rounded-[2px]"
+                  style={{ background: i < progress.ready ? "var(--nf-emerald, #1e4e22)" : "var(--nf-ink-200, #d3d0cd)" }}
+                />
+              ))}
+            </span>
+            <span style={{ color: "var(--nf-ink-950, #110f0d)", fontWeight: 700 }}>
+              {`${progress.ready} of ${progress.total} sections ready`}
+            </span>
+            {progress.laterCount > 0 && (
+              <span style={{ color: "var(--nf-ink-400, #83807b)" }}>{`(+${progress.laterCount} later)`}</span>
+            )}
+          </span>
+        )}
       </div>
     </nav>
   );

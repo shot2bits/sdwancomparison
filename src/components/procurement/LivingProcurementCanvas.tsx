@@ -32,7 +32,7 @@ import { useRef } from "react";
 import type { LivingProcurementDocument, ProcurementClause } from "@/lib/workspace/procurement-document";
 import { MATERIAL_IMPACTS, type NextQuestion } from "@/lib/workspace/procurement-next-questions";
 import type { OutlineRow } from "@/lib/workspace/procurement-outline";
-import { outlineStateLabel } from "@/lib/workspace/procurement-outline";
+import { outlineStateLabel, outlineProgress, outlineProgressLine } from "@/lib/workspace/procurement-outline";
 import ProcurementArchitecture from "./ProcurementArchitecture";
 import ProcurementClauseList from "./ProcurementClauseList";
 import SupplierPackView from "./SupplierPackView";
@@ -43,6 +43,14 @@ export type NextQuestionCard = {
   nq: NextQuestion;
   buttons: Array<{ label: string; onClick: () => void }>;
   hint: string | null;
+  /** Which outline section answering this fills, and where that section
+   *  sits in the run of required ones (procurement-outline.ts
+   *  `outlineRowForDecision` + `sectionPosition`). Added 20 Aug 2026:
+   *  every card was locally sensible and globally unplaceable, which is
+   *  most of why the stream read as "random questions with no end in
+   *  sight". Null when the question maps to no required section (a
+   *  `later` row, or no mapping) — never a guessed position. */
+  fills?: { title: string; position: number; total: number } | null;
 };
 
 /** Hotfix (Robert, 15 Aug 2026), post-f33f103 production verification: an
@@ -128,7 +136,11 @@ export default function LivingProcurementCanvas({
   // threshold for meaningful non-text UI graphics (this ring conveys real
   // status, not decoration) -- #83807b is the same neutral grey, darkened
   // just enough to clear 3:1 (3.05:1).
-  const readinessColor = document.readiness.score >= 70 ? "#1e4e22" : document.readiness.score >= 40 ? "#c66000" : "#83807b";
+  /* ONE DENOMINATOR (Robert, 20 Aug 2026: "it is 100% not clear how the
+     user is progressing"). Derived from the SAME `outline` array rendered
+     as SectionOutline a few hundred lines below, so the headline fraction
+     and the list it summarises are the same data by construction. */
+  const progress = outline && outline.length > 0 ? outlineProgress(outline) : null;
   const circumference = 2 * Math.PI * 27;
   const tabRefs = useRef<Partial<Record<ProcurementView, HTMLButtonElement | null>>>({});
 
@@ -181,40 +193,70 @@ export default function LivingProcurementCanvas({
             {document.title}
           </h2>
           <p className="m-0 max-w-[48em] text-[13.5px] leading-[1.6] text-[#66635e]">{document.summary}</p>
+          {progress && (
+            <p className="m-0 mt-2 text-[13px] font-semibold" style={{ color: "var(--nf-ink-800, #302d2a)" }}>
+              {progress.next
+                ? `${outlineProgressLine(progress)} \u00b7 next: ${progress.next.title}`
+                : `${outlineProgressLine(progress)} \u2014 every required section is confirmed.`}
+            </p>
+          )}
         </div>
 
-        <div
-          className="flex flex-none flex-col items-center gap-1"
-          role="img"
-          aria-label={`Readiness ${document.readiness.score} percent, ${document.readiness.label}`}
-        >
-          <svg width="60" height="60" viewBox="0 0 64 64" aria-hidden="true">
-            <circle cx="32" cy="32" r="27" fill="none" stroke="#e3e1de" strokeWidth="7" />
-            <circle
-              cx="32"
-              cy="32"
-              r="27"
-              fill="none"
-              stroke={readinessColor}
-              strokeWidth="7"
-              strokeLinecap="round"
-              strokeDasharray={`${(Math.max(0, Math.min(100, document.readiness.score)) / 100) * circumference} ${circumference}`}
-              transform="rotate(-90 32 32)"
-            />
-            <text x="32" y="37" textAnchor="middle" fontSize="15" fontWeight={600} fill="#110f0d">
-              {document.readiness.score}
-            </text>
-          </svg>
-          <span className="text-[10px] uppercase text-[#66635e]" style={{ ...mono, letterSpacing: "0.07em" }}>
-            {document.readiness.label}
-          </span>
-        </div>
+        {/* WAS: a 0-100 readiness dial. Removed 20 Aug 2026, deliberately.
+            It was the fourth competing progress number on this screen and
+            the only one a buyer could do nothing with -- a 57 names no
+            action, sits beside a "3 of 5" checklist that disagrees with
+            it, and moves for reasons no row on this page explains.
+            `buildReadiness()` and `document.readiness` are UNTOUCHED (the
+            compiler, the exports and the API still carry the score); only
+            this display is replaced, by the one fraction every other
+            surface now also reads. */}
+        {progress && (
+          <div className="flex flex-none flex-col items-end gap-1.5">
+            <div
+              className="flex items-baseline gap-1.5"
+              style={{ fontFamily: "var(--nf-font-serif)" }}
+              aria-label={outlineProgressLine(progress)}
+            >
+              <span className="text-[34px] font-semibold leading-none" style={{ color: "var(--nf-emerald, #1e4e22)", letterSpacing: "-0.02em" }}>
+                {progress.ready}
+              </span>
+              <span className="text-[19px] leading-none" style={{ color: "var(--nf-ink-400, #83807b)" }}>
+                {`of ${progress.total}`}
+              </span>
+            </div>
+            <span className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.07em", color: "var(--nf-ink-600, #66635e)" }}>
+              {`section${progress.total === 1 ? "" : "s"} ready`}
+            </span>
+            <div className="flex gap-[3px]" aria-hidden="true">
+              {Array.from({ length: progress.total }).map((_, i) => (
+                <span
+                  key={i}
+                  className="h-[5px] w-[13px] rounded-[2px]"
+                  style={{ background: i < progress.ready ? "var(--nf-emerald, #1e4e22)" : "var(--nf-ink-200, #d3d0cd)" }}
+                />
+              ))}
+            </div>
+            {progress.laterCount > 0 && (
+              <span className="text-[11px]" style={{ color: "var(--nf-ink-400, #83807b)" }}>
+                {`+ ${progress.laterCount} for later`}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {typeof materialDecisionsRemaining === "number" && (
         <p className="m-0 mt-2 max-w-[48em] text-[13px] leading-[1.6] text-[#66635e]">
+          {/* Aligned 20 Aug 2026 with the publish gate this codebase
+              actually enforces: open decisions are ADVISORY -- the server
+              gates publication on the five standing facts
+              (publish-checklist.ts), never on this count -- so the old
+              phrasing (a claim that suppliers could not price until these
+              were resolved) named a blocker that does not exist, which is
+              exactly how the product came to read as an endless list. */}
           {materialDecisionsRemaining > 0
-            ? `Core scope captured. ${materialDecisionsRemaining} material decision${materialDecisionsRemaining === 1 ? "" : "s"} remain${materialDecisionsRemaining === 1 ? "s" : ""} before suppliers can price consistently.`
+            ? `${materialDecisionsRemaining} open decision${materialDecisionsRemaining === 1 ? "" : "s"} will sharpen what suppliers quote. None of them holds publishing up.`
             : "Every material decision this document tracks is resolved or deliberately accepted open."}
         </p>
       )}
@@ -272,11 +314,17 @@ export default function LivingProcurementCanvas({
           blocking-decision count Mission Control and the publish panel
           both now share. Same real `document.counts.decisions` value,
           only the label changed. */}
-      <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+      {/* "Document gaps" (the raw, unfiltered `document.counts.decisions`)
+          was removed 20 Aug 2026 with the readiness dial, for the same
+          reason: it was a third progress number, larger than the two
+          real ones, labelled as a deficit and actionable by nobody --
+          every gap it counted is named, by section and by missing field,
+          in the outline immediately below. The three tiles that remain
+          are OUTPUTS (what suppliers will receive), not progress. */}
+      <div className="mt-6 grid grid-cols-3 gap-2.5">
         <StatTile label="Requirements" value={document.counts.requirements} />
         <StatTile label="Supplier questions" value={document.counts.questions} />
         <StatTile label="Pass/fail gates" value={document.counts.gates} />
-        <StatTile label="Document gaps" value={document.counts.decisions} warn={document.counts.decisions > 0} />
       </div>
 
       {/* Structural pass (19 Aug 2026): the outline now follows the stat

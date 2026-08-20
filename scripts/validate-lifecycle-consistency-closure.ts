@@ -176,12 +176,23 @@ function main() {
       "5: remaining post-publish decisions are framed as shaping the next revision, never as outstanding work on a completed publication",
       "",
     );
-    // The raw, unfiltered document-level count (a genuinely different,
-    // broader metric -- total unresolved fields, sector suggestions
-    // included, no material-impact filter) is now labelled distinctly
-    // from "decisions" so it can never be read as the same blocking count.
-    record(/<StatTile label="Document gaps" value=\{document\.counts\.decisions\}/.test(canvas),
-      "5: LivingProcurementCanvas's raw, unfiltered open-decisions count is labelled \"Document gaps\", never \"Open decisions\" -- can't be confused with Mission Control's \"blocking decisions\" figure",
+    // 18 Aug 2026 this asserted the raw, unfiltered document-level count
+    // was labelled "Document gaps" rather than "Open decisions", so it
+    // could not be misread as the blocking figure. On 20 Aug the tile was
+    // REMOVED outright (Robert: "it is 100% not clear how the user is
+    // progressing"), which satisfies the same concern absolutely rather
+    // than by careful labelling: a third progress number, larger than the
+    // two real ones and actionable by nobody, is gone. Every gap it
+    // counted is still named -- by section and by missing field -- in the
+    // outline directly below. The assertion now guards the stronger
+    // property: `document.counts.decisions` is not rendered as a headline
+    // figure on this canvas at all.
+    record(!/<StatTile label="[^"]*" value=\{document\.counts\.decisions\}/.test(canvas),
+      "5: LivingProcurementCanvas renders no StatTile for the raw, unfiltered open-decisions count -- it cannot compete with the one real progress fraction",
+      "",
+    );
+    record(/label="Requirements"/.test(canvas) && /label="Supplier questions"/.test(canvas) && /label="Pass\/fail gates"/.test(canvas),
+      "5: the three tiles that remain are OUTPUTS (what suppliers receive), not progress -- proving the tile row was narrowed, not deleted wholesale",
       "",
     );
     record(!/label="Open decisions"/.test(canvas), "5: no StatTile or section in LivingProcurementCanvas.tsx is still labelled \"Open decisions\"", "");

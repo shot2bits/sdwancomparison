@@ -95,6 +95,13 @@ export default function DecisionsStep({
             : "Nothing open right now \u2014 the document reflects everything stated so far."}
       </p>
 
+      {/* The "Recorded so far" panel that briefly lived here on 19 Aug
+          moved to the chat column (CapturedList.tsx) on 20 Aug. Robert
+          chose that placement, and it is the right one: the buyer is
+          looking at the chat pane at the moment they click an option, so
+          the confirmation that the click landed has to be there, not one
+          station away. Same `buildAnsweredLog` projection, same rows --
+          only the location changed, and it is not duplicated here. */}
       {cards.length === 0 ? (
         <div
           className="mt-6 rounded-[4px] border p-6"
@@ -106,10 +113,16 @@ export default function DecisionsStep({
         </div>
       ) : (
         <div className="mt-6 flex flex-col gap-4">
-          {cards.map(({ nq, buttons, hint }) => {
+          {cards.map(({ nq, buttons, hint, fills }) => {
             const isMaterial =
               !nq.governedSuggestion && nq.impact.some((i) => (MATERIAL_IMPACTS as readonly string[]).includes(i));
-            const section = outlineRowForDecision({
+            /* `fills` (resolved once, by ProjectDesk, from the SAME
+               sectionOutline the header fraction reads) is authoritative
+               and carries the section's POSITION as well as its title.
+               The local `outlineRowForDecision` call is kept only as the
+               fallback for a question that maps to a `later` row, which
+               deliberately has no position inside the fraction. */
+            const section = fills?.title ?? outlineRowForDecision({
               id: nq.id,
               target: nq.target,
               governedSuggestion: nq.governedSuggestion,
@@ -216,7 +229,9 @@ export default function DecisionsStep({
 
                 {section && (
                   <p className="m-0 mt-3.5 text-[12px] leading-[1.5]" style={{ color: "var(--nf-ink-400, #83807b)" }}>
-                    Resolves &ldquo;{section}&rdquo; in the outline once answered.
+                    {fills
+                      ? `Fills section ${fills.position} of ${fills.total} \u2014 \u201c${section}\u201d \u2014 in the outline once answered.`
+                      : `Resolves \u201c${section}\u201d in the outline once answered.`}
                   </p>
                 )}
               </div>
