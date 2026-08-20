@@ -48,11 +48,22 @@
 import { z } from "zod";
 import type { SecurityRequirementInput } from "@/lib/security/rulebook";
 
-/** How the buyer's words arrived. Mirrors ProjectDesk.tsx's own three
- *  non-command entry points (send()'s typed box, and ingestText()'s two
- *  callers for a pasted or dropped block) — never a fourth value invented
- *  here that the client doesn't actually have. */
-export const SOURCE_LEDGER_VIA = ["typed", "paste", "drop"] as const;
+/** How the buyer's words arrived. Mirrors ProjectDesk.tsx's own entry
+ *  points — never a value invented here that the client doesn't actually
+ *  have. Originally the three non-command paths (send()'s typed box, and
+ *  ingestText()'s two callers for a pasted or dropped plain-text block).
+ *
+ *  Widened 20 Aug 2026 (Robert: "It would support Word, Excel or text. Or
+ *  should be able to read web links (eg. to Google docs)."): a `.docx`/
+ *  `.xlsx` attachment (read server-side by /api/workspace/ingest-file,
+ *  the extracted text then run through the SAME ingestText a paste runs
+ *  through) is `"file"`; a Google Docs/Sheets link (read server-side by
+ *  /api/workspace/ingest-link, same downstream path) is `"link"`. `"drop"`
+ *  is unchanged and still means a dropped PLAIN-TEXT file, read directly
+ *  in the browser with no server round trip — a `.docx`/`.xlsx` dropped
+ *  onto the same target is `"file"` too, dispatched by extension before
+ *  ProjectDesk.tsx decides which path a dropped file takes. */
+export const SOURCE_LEDGER_VIA = ["typed", "paste", "drop", "file", "link"] as const;
 export type SourceLedgerVia = (typeof SOURCE_LEDGER_VIA)[number];
 
 /**

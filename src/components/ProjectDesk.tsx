@@ -27,6 +27,7 @@ import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeSta
 import type { DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
 import { mergeDecisionLedger, resumeDecisionsFromProject } from "@/lib/workspace/decision-ledger";
 import { parseCommand, type Command } from "@/lib/workspace/commands";
+import { parseGoogleDocLink } from "@/lib/workspace/links";
 import {
   briefModel,
   buyingOf,
@@ -2570,10 +2571,17 @@ export default function ProjectDesk({
     [busy, applyMerge, applyRemovals, markChanged, say],
   );
 
-  /* ---- Ingest (The Threshold): a paste or a dropped text file runs
-     through the same cycles a sentence runs. ---- */
+  /* ---- Ingest (The Threshold): a paste, a dropped text file, an
+     uploaded Word/Excel attachment, or a Google Docs/Sheets link all run
+     through the same cycles a sentence runs -- "file" and "link" added
+     20 Aug 2026 (Robert: "It would support Word, Excel or text. Or
+     should be able to read web links"). Whatever extracted the plain
+     text (the browser for "drop", /api/workspace/ingest-file for "file",
+     /api/workspace/ingest-link for "link") is the ONLY thing that
+     differs; from here on every source runs the identical chunking,
+     extraction and receipts path. ---- */
   const ingestText = useCallback(
-    async (raw: string, source: "paste" | "drop") => {
+    async (raw: string, source: "paste" | "drop" | "file" | "link") => {
       const plan = chunkForIngest(raw);
       if (!plan.chunks.length) return;
       setPasteSummary(null);
@@ -2655,6 +2663,17 @@ export default function ProjectDesk({
       handleCommand(cmd);
       return;
     }
+
+    /* Google Docs/Sheets links (20 Aug 2026, Robert: "should be able to
+       read web links (eg. to Google docs)"): a typed message that
+       contains one is not itself the content to extract from -- the URL
+       has no facts in it -- so it is diverted here, before
+       keepSourceTurn/runCycle would otherwise try to extract from the
+       literal link text and find nothing. The buyer's typed line already
+       echoed above via sayYou(); ingestGoogleLink() fetches the real
+       document server-side and runs ITS text through the same ingestText
+       every paste/drop/file does, via: "link". */
+    if (await ingestGoogleLink(text)) return;
 
     /* Reliability gate, third amendment (13 Aug 2026), item 1: a
        recognised command is an instruction, not buyer content, so it is
@@ -3333,15 +3352,90 @@ export default function ProjectDesk({
     try { rec.start(); } catch { if (watchdog) clearTimeout(watchdog); setVoiceState("idle"); voiceRec.current = null; }
   };
 
-  /* ---- Files: the arrow reads plain text documents; a drop anywhere
-     on the twin does the same. ---- */
+  /* ---- Files: the arrow reads plain text documents directly in the
+     browser; a drop anywhere on the twin does the same. Word (.docx) and
+     Excel (.xlsx) attachments (20 Aug 2026, Robert: "It would support
+     Word, Excel or text") are ZIP containers, not plain text -- reading
+     one with FileReader.readAsText() would produce garbled binary and
+     "ingest" it as if it were real content, which is exactly what
+     dropping ANY file onto this target used to do before this pass (the
+     file-type filter lived only on the picker's `accept` attribute, which
+     a drag-and-drop never consults). readOfficeFile() below sends those
+     two formats to a real parser server-side instead; anything that is
+     neither recognised plain text nor .docx/.xlsx is now rejected with an
+     honest message rather than silently misread. */
+  const readOfficeFile = useCallback(
+    async (f: File) => {
+      setPasteSummary(null);
+      const form = new FormData();
+      form.append("file", f);
+      try {
+        const res = await fetch("/sase/api/workspace/ingest-file", { method: "POST", body: form });
+        const data: { text?: string; error?: string } = await res.json().catch(() => ({}));
+        if (!res.ok || typeof data.text !== "string") {
+          setPasteSummary(data.error || "Could not read that file.");
+          return;
+        }
+        await ingestText(data.text, "file");
+      } catch {
+        setPasteSummary("Could not read that file -- try again in a moment.");
+      }
+    },
+    [ingestText],
+  );
+
   const readFile = (f: File | null | undefined) => {
     if (!f) return;
+    const name = f.name.toLowerCase();
+    const isOffice = name.endsWith(".docx") || name.endsWith(".xlsx");
+    if (isOffice) {
+      if (f.size > 8_000_000) { setPasteSummary("That file is too large to read here (8MB limit); paste the part that matters."); return; }
+      void readOfficeFile(f);
+      return;
+    }
+    const isText = name.endsWith(".txt") || name.endsWith(".md") || name.endsWith(".csv") || f.type === "text/plain";
+    if (!isText) {
+      setPasteSummary("Netify reads Word (.docx), Excel (.xlsx) or plain text here.");
+      return;
+    }
     if (f.size > 2_000_000) { setPasteSummary("That file is too large to read here; paste the part that matters."); return; }
     const reader = new FileReader();
     reader.onload = () => { void ingestText(String(reader.result ?? ""), "drop"); };
     reader.readAsText(f);
   };
+
+  /* ---- Google Docs/Sheets links (20 Aug 2026): scoped to Google only,
+     never an arbitrary URL -- parseGoogleDocLink (workspace/links.ts) is
+     the sole gate, and /api/workspace/ingest-link is the sole fetcher, so
+     no buyer-supplied URL is ever fetched server-side directly (see that
+     route's own SSRF note). Returns true when `raw` contained a
+     recognised link (whether or not the fetch itself then succeeded) so
+     send() knows to skip its normal extraction path for this message
+     either way -- a URL has no facts in it for the extractor to find. */
+  const ingestGoogleLink = useCallback(
+    async (raw: string): Promise<boolean> => {
+      const link = parseGoogleDocLink(raw);
+      if (!link) return false;
+      setPasteSummary(null);
+      try {
+        const res = await fetch("/sase/api/workspace/ingest-link", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text: raw }),
+        });
+        const data: { text?: string; error?: string } = await res.json().catch(() => ({}));
+        if (!res.ok || typeof data.text !== "string") {
+          setPasteSummary(data.error || "Could not read that link.");
+          return true;
+        }
+        await ingestText(data.text, "link");
+      } catch {
+        setPasteSummary("Could not reach that link -- try again in a moment.");
+      }
+      return true;
+    },
+    [ingestText],
+  );
 
   /* ---- The requirement sheet sections: every row with provenance ---- */
   const earnedAll = useMemo(() => {
@@ -3971,14 +4065,20 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                title="Drop or choose a plain-text document and it will be read into the statement"
+                title="Drop or choose a Word, Excel or plain-text document and it will be read into the statement — or paste a Google Docs/Sheets link"
                 className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#66635e] hover:border-[#d3d0cd] hover:text-[#110f0d]"
               >
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M11.5 5.5 6 11a2.5 2.5 0 1 0 3.54 3.54L15 9.08a4 4 0 1 0-5.66-5.66L4 8.76" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
                 </svg>
               </button>
-              <input ref={fileRef} type="file" accept=".txt,.md,.csv,text/plain" className="hidden" onChange={(e) => { readFile(e.target.files?.[0]); e.target.value = ""; }} />
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".txt,.md,.csv,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                className="hidden"
+                onChange={(e) => { readFile(e.target.files?.[0]); e.target.value = ""; }}
+              />
               <button
                 type="button"
                 onClick={() => void send(draft)}
