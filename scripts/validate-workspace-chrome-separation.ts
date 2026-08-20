@@ -55,15 +55,25 @@ function main() {
 
   /* ================================================================ */
   /* 3. (workspace)/layout.tsx -- home, workspace and the Procurement   */
-  /*    Room -- renders the minimal WorkspaceHeader instead, never      */
-  /*    MegaNav, and (Robert's 18 Aug correction, superseding the       */
-  /*    earlier 30 Jul EEAT exception) never the marketing footer.      */
+  /*    Room -- renders the minimal WorkspaceHeader instead of MegaNav. */
+  /*                                                                    */
+  /*    THE FOOTER ASSERTION IS INVERTED, 19 Aug 2026. This section     */
+  /*    previously asserted the workspace carries NO footer (Robert's   */
+  /*    18 Aug "remove the full marketing footer from the workspace     */
+  /*    lifecycle"). He has since reviewed the live apex against        */
+  /*    /sase/opportunities/board/ and asked for it back: the apex was  */
+  /*    left with three outbound internal links against the board's     */
+  /*    ~fifty, with About/Our Team/Editorial Policy/Research           */
+  /*    Methodology unreachable from the highest-authority page on the  */
+  /*    domain. Rule 14 still governs the HEADER -- MegaNav must stay   */
+  /*    out -- which is why that assertion below is unchanged.          */
   /* ================================================================ */
   {
     const workspaceLayout = src("src/app/(workspace)/layout.tsx");
     record(/<WorkspaceHeader\s*\/>/.test(workspaceLayout), "3: (workspace)/layout.tsx renders <WorkspaceHeader />", "");
-    record(!/^import .*MegaNav/m.test(workspaceLayout), "3: (workspace)/layout.tsx never imports MegaNav", "");
-    record(!/^import .*CommercialFooter/m.test(workspaceLayout), "3: (workspace)/layout.tsx does not import CommercialFooter (18 Aug correction)", "");
+    record(!/^import .*MegaNav/m.test(workspaceLayout), "3: (workspace)/layout.tsx never imports MegaNav (rule 14 still governs the header)", "");
+    record(/<CommercialFooter\s*\/>/.test(workspaceLayout), "3: (workspace)/layout.tsx renders <CommercialFooter /> (19 Aug restoration)", "");
+    record(/<SiteFooter>/.test(workspaceLayout), "3: it is wrapped in <SiteFooter>, the SAME composition (marketing)/layout.tsx uses -- so the workspace footer and the board footer cannot drift apart", "");
   }
 
   /* ================================================================ */
