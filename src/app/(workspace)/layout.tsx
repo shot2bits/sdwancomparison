@@ -1,7 +1,6 @@
 import MegaNav from "@/components/MegaNav";
 import SiteFooter from "@/components/SiteFooter";
 import CommercialFooter from "@/components/CommercialFooter";
-import { workspaceFontVars } from "@/lib/workspace/fonts";
 
 /**
  * Workspace route-group layout — /home, /workspace and the Procurement
@@ -56,7 +55,12 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   return (
     <>
       <MegaNav />
-      <div className={`min-h-screen flex flex-col ${workspaceFontVars}`}>
+      {/* 20 Aug 2026: dropped `workspaceFontVars` (Robert, "Default system
+          font should be used" -- see fonts.ts's removal and globals.css's
+          --nf-font-* tokens, both reverted the same pass). This div's own
+          job was only ever layout (min-height flex column); it never
+          carried any class of its own besides the now-removed font vars. */}
+      <div className="min-h-screen flex flex-col">
         <main id="main-content" className="flex-1">{children}</main>
 
         <SiteFooter>

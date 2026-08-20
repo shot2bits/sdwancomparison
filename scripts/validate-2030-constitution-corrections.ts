@@ -13,7 +13,7 @@
 // report, not repeated here since that tooling isn't part of `npm run
 // validate`'s deterministic, no-browser fixture set.
 
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -320,41 +320,44 @@ function main() {
   }
 
   /* ================================================================ */
-  /* 8. Typeface: superseded a second time, 19 Aug 2026 (handoff-bundle */
-  /*    restyle). The 18 Aug system-font-only decision stands for the   */
-  /*    sitewide root layout (src/app/layout.tsx) and marketing pages   */
-  /*    -- untouched by this pass. But the handoff bundle's own spec    */
-  /*    explicitly calls for Space Grotesk (headings/labels) and        */
-  /*    JetBrains Mono (ids/stat numbers), scoped strictly to the       */
-  /*    .procurement-2030 workspace surface -- a deliberate, knowing    */
-  /*    reversal of the system-font-only rule for that one surface,     */
-  /*    not a regression. Self-hosted the same way Inter was (next/     */
-  /*    font/local, since this sandbox's build has no network path to   */
-  /*    fonts.googleapis.com), but wired up in the (workspace) route    */
-  /*    group's own layout.tsx / src/lib/workspace/fonts.ts, never in   */
-  /*    the sitewide src/app/layout.tsx -- so the checks below still    */
-  /*    hold the root layout to the system-font-only rule, while        */
-  /*    asserting the workspace tokens now deliberately reference the   */
-  /*    new webfonts instead of the system stack.                       */
+  /* 8. Typeface: superseded a THIRD time, 20 Aug 2026 -- Robert:       */
+  /*    "Default system font should be used." This reverts the 19 Aug   */
+  /*    handoff-bundle restyle immediately below (which itself had      */
+  /*    reversed the 18 Aug system-font-only decision, scoped strictly  */
+  /*    to the .procurement-2030 workspace surface): Space Grotesk and  */
+  /*    JetBrains Mono are gone entirely -- src/lib/workspace/fonts.ts  */
+  /*    deleted, the vendored .woff2 files deleted, the workspace       */
+  /*    layout's `workspaceFontVars` class removed, and globals.css's   */
+  /*    --nf-font-serif/--nf-font-mono tokens reverted to the plain     */
+  /*    system-ui stack, matching --nf-font-sans and every un-prefixed  */
+  /*    --font-* token below. Every check in this section now holds     */
+  /*    root layout AND workspace layout AND globals.css to the SAME    */
+  /*    system-font-only rule -- there is no longer a surface-specific  */
+  /*    exception anywhere in the app.                                  */
   /* ================================================================ */
   {
     const layout = src("src/app/layout.tsx");
     record(!/from "next\/font\/google"/.test(layout), "8: src/app/layout.tsx (sitewide root layout) does not import from next/font/google", "");
-    record(!/from "next\/font\/local"/.test(layout), "8: src/app/layout.tsx does not import from next/font/local either -- the sitewide/marketing surface still loads no custom webfont, per Robert's 18 Aug 2026 request; the 19 Aug 2026 handoff bundle's webfonts are scoped to the (workspace) route group's own layout instead", "");
+    record(!/from "next\/font\/local"/.test(layout), "8: src/app/layout.tsx does not import from next/font/local either -- the sitewide/marketing surface loads no custom webfont", "");
     record(!/variable:\s*"--font-inter"/.test(layout) && !/className=\{inter\.variable\}/.test(layout), "8: layout.tsx no longer wires up an actual --font-inter variable binding (a comment may still reference the retired identifier by name for context)", "");
 
     const workspaceLayout = src("src/app/(workspace)/layout.tsx");
-    record(/from "@\/lib\/workspace\/fonts"/.test(workspaceLayout), "8: the (workspace) route group's own layout.tsx -- not the sitewide root layout -- loads the handoff bundle's self-hosted fonts", "");
+    record(!/from "@\/lib\/workspace\/fonts"/.test(workspaceLayout), "8: the (workspace) route group's own layout.tsx no longer imports the retired workspace/fonts module (removed 20 Aug 2026) -- the workspace surface loads no custom webfont either, same rule as the root layout", "");
+    record(!/className=\{`[^`]*\$\{workspaceFontVars\}/.test(workspaceLayout) && !/from "@\/lib\/workspace\/fonts"/.test(workspaceLayout), "8: the (workspace) layout's outer div no longer carries the retired workspaceFontVars class (a comment may still reference the retired identifier by name for context)", "");
 
     const globals = src("src/app/globals.css");
     record(!/var\(--font-inter\)/.test(globals), "8: globals.css's font tokens no longer reference var(--font-inter) anywhere", "");
+    record(!/var\(--font-space-grotesk\)/.test(globals) && !/var\(--font-jetbrains-mono\)/.test(globals), "8: globals.css no longer references var(--font-space-grotesk) or var(--font-jetbrains-mono) anywhere -- both retired 20 Aug 2026", "");
     record(
-      /--nf-font-serif:\s*var\(--font-space-grotesk\)/.test(globals) &&
+      /--nf-font-serif:\s*-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;/.test(globals) &&
         /--nf-font-sans:\s*-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;/.test(globals) &&
-        /--nf-font-mono:\s*var\(--font-jetbrains-mono\)/.test(globals),
-      "8: --nf-font-serif and --nf-font-mono deliberately reference the handoff bundle's self-hosted Space Grotesk / JetBrains Mono webfonts (19 Aug 2026), while --nf-font-sans stays the native system UI stack for body text, matching the handoff's typography rule exactly",
+        /--nf-font-mono:\s*ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;/.test(globals),
+      "8: --nf-font-serif, --nf-font-sans and --nf-font-mono are all plain system stacks (20 Aug 2026 reversal) -- no surface anywhere in the app loads a custom webfont",
       "",
     );
+
+    record(!existsSync(path.join(ROOT, "src/lib/workspace/fonts.ts")), "8: src/lib/workspace/fonts.ts (the self-hosted Space Grotesk/JetBrains Mono declarations) is deleted, not merely unwired", "");
+    record(!existsSync(path.join(ROOT, "src/fonts")), "8: the vendored .woff2 font files (src/fonts/) are deleted, not left as dead weight", "");
   }
 
   /* ================================================================ */
