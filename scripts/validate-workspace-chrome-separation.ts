@@ -51,6 +51,10 @@ function main() {
     const marketingLayout = src("src/app/(marketing)/layout.tsx");
     record(/<MegaNav\s*\/>/.test(marketingLayout), "2: (marketing)/layout.tsx renders <MegaNav />", "");
     record(/<CommercialFooter\s*\/>/.test(marketingLayout), "2: (marketing)/layout.tsx renders <CommercialFooter />", "");
+    /* Parity, 19 Aug 2026: both groups now carry identical chrome, so a
+       future change to one must be a deliberate divergence, not a
+       silent one. */
+    record(/<MegaNav\s*\/>/.test(marketingLayout), "2: (marketing)/layout.tsx renders <MegaNav /> -- the SAME header the workspace group now uses", "");
   }
 
   /* ================================================================ */
@@ -70,8 +74,21 @@ function main() {
   /* ================================================================ */
   {
     const workspaceLayout = src("src/app/(workspace)/layout.tsx");
-    record(/<WorkspaceHeader\s*\/>/.test(workspaceLayout), "3: (workspace)/layout.tsx renders <WorkspaceHeader />", "");
-    record(!/^import .*MegaNav/m.test(workspaceLayout), "3: (workspace)/layout.tsx never imports MegaNav (rule 14 still governs the header)", "");
+    /* INVERTED AGAIN, 19 Aug 2026: "Add back the main menu as well."
+       Rule 14's header clause is now superseded too -- the workspace
+       carries the SAME MegaNav as (marketing), and WorkspaceHeader is
+       retired. Offered stack-vs-replace, Robert chose replace, so there
+       must be exactly ONE header here: two `sticky top-0 z-40` bars at
+       the same offset is a bug MegaNav's own history already records. */
+    record(/<MegaNav\s*\/>/.test(workspaceLayout), "3: (workspace)/layout.tsx renders <MegaNav /> (19 Aug restoration)", "");
+    /* Matches the IMPORT and the JSX TAG, not the bare word: the doc
+       comment above legitimately narrates why WorkspaceHeader was
+       retired, and a fixture that trips over its own explanation is
+       testing prose. (Second time this exact trap has bitten in this
+       file's history -- see the --nf-lilac-on-dark note in
+       validate-2030-constitution-corrections.ts.) */
+    record(!/import .*WorkspaceHeader/.test(workspaceLayout) && !/<WorkspaceHeader/.test(workspaceLayout), "3: WorkspaceHeader is neither imported nor rendered -- exactly one header, never two stacked sticky bars", "");
+    record(!existsSync(path.join(ROOT, "src/components/WorkspaceHeader.tsx")), "3: WorkspaceHeader.tsx is deleted rather than left as dead code (git history holds it)", "");
     record(/<CommercialFooter\s*\/>/.test(workspaceLayout), "3: (workspace)/layout.tsx renders <CommercialFooter /> (19 Aug restoration)", "");
     record(/<SiteFooter>/.test(workspaceLayout), "3: it is wrapped in <SiteFooter>, the SAME composition (marketing)/layout.tsx uses -- so the workspace footer and the board footer cannot drift apart", "");
   }
