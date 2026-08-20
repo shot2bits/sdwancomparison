@@ -101,6 +101,7 @@ import { buildSectionOutline, deriveResilienceOutlineState, siteResilienceClause
  *  navigation history -- see that module's own header comment. */
 import WizardRail from "@/components/procurement/WizardRail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
+import AnswerNext from "@/components/procurement/AnswerNext";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 
 /* ================================================================== */
@@ -3408,25 +3409,52 @@ export default function ProjectDesk({
    *  via `landOption`, which is local to this component. The canvas
    *  receives only `{ nq, buttons, hint }`, never TWIN_SLOTS itself, so
    *  it stays a pure presentational layer, per its own header comment. */
-  const nextQuestionCards = useMemo(
-    () =>
-      topThreeQuestions.map((nq) => {
-        if (nq.source === "compiler_open_decision") {
-          const slotId = OPEN_DECISION_SLOT[nq.id];
-          const slot = slotId ? SLOT_BY_ID[slotId] : null;
-          return {
-            nq,
-            buttons: slot ? slot.options.map((o) => ({ label: o.label, onClick: () => landOption(slot, o) })) : [],
-            hint: slot ? null : "See “Project details” below for the full context.",
-          };
-        }
+  /** Resolve ONE ranked question into a clickable card. Hoisted out of the
+   *  `nextQuestionCards` memo (19 Aug 2026) so the same resolution can
+   *  serve two consumers at two different depths without forking the
+   *  logic -- see the two memos just below. */
+  const resolveQuestionCard = useCallback(
+    (nq: NextQuestion) => {
+      if (nq.source === "compiler_open_decision") {
+        const slotId = OPEN_DECISION_SLOT[nq.id];
+        const slot = slotId ? SLOT_BY_ID[slotId] : null;
         return {
           nq,
-          buttons: (nq.options ?? []).map((o, i) => ({ label: o.label, onClick: () => answerNextQuestion(nq, i) })),
-          hint: null,
+          buttons: slot ? slot.options.map((o) => ({ label: o.label, onClick: () => landOption(slot, o) })) : [],
+          hint: slot ? null : "See “Project details” below for the full context.",
         };
-      }),
-    [topThreeQuestions, landOption, answerNextQuestion],
+      }
+      return {
+        nq,
+        buttons: (nq.options ?? []).map((o, i) => ({ label: o.label, onClick: () => answerNextQuestion(nq, i) })),
+        hint: null,
+      };
+    },
+    [landOption, answerNextQuestion],
+  );
+
+  /** The top three, for the chat pane's "Answer next" block -- the
+   *  blueprint's own "show no more than three prioritised next decisions
+   *  in the primary flow" rule (procurement-next-questions.ts). */
+  const nextQuestionCards = useMemo(
+    () => topThreeQuestions.map(resolveQuestionCard),
+    [topThreeQuestions, resolveQuestionCard],
+  );
+
+  /** EVERY ranked question, for the Decisions station.
+   *
+   *  Real bug, found 19 Aug 2026 while wiring the chat pane's Answer-next
+   *  block: the station was being handed `nextQuestionCards`, which is
+   *  `rankedNextQuestions.slice(0, 3)`. The rail's badge and the station's
+   *  own heading both read `materialDecisionsRemaining`, which counts the
+   *  FULL set -- so a project with six material decisions showed "6" on
+   *  the rail, "6 decisions before this can be published" as the heading,
+   *  and then exactly three cards underneath it. The three-card cap is a
+   *  deliberate rule for the PRIMARY FLOW (see the memo above), never for
+   *  the station whose entire job is to show the decisions. */
+  const allNextQuestionCards = useMemo(
+    () => rankedNextQuestions.map(resolveQuestionCard),
+    [rankedNextQuestions, resolveQuestionCard],
   );
 
   /** Hotfix (Robert, 15 Aug 2026): resolves `acceptedSectorSuggestions`
@@ -3855,48 +3883,20 @@ export default function ProjectDesk({
       </div>
   );
 
-  /** "MOST USEFUL NEXT — from sections needing a decision" (reference
-   *  screenshots 01-05, left pane). Every chip is a REAL outline row
-   *  that is genuinely still open — `sectionOutline` is the same
-   *  projection the document's own section list renders, so a chip can
-   *  never name a section the outline shows as confirmed. The verb is
-   *  chosen by the row's own state (needs_decision -> "Decide",
-   *  needs_input -> "Add"), never guessed, and `later` rows are excluded
-   *  because they are deliberately not yet useful.
-   *
-   *  Clicking navigates to the Decisions station. It deliberately does
-   *  NOT prefill the composer: `procurement-next-questions.ts`'s own
-   *  binding rule is that Netify-authored question text must never enter
-   *  the buyer's source ledger, and a prefilled draft is one Enter press
-   *  away from doing exactly that. */
-  const usefulNextChips = sectionOutline
-    .filter((r) => r.state === "needs_decision" || r.state === "needs_input")
-    .slice(0, 4)
-    .map((r) => ({ key: r.key, label: `${r.state === "needs_decision" ? "Decide" : "Add"}: ${r.title.toLowerCase()}` }));
-
-  const usefulNextBlock = usefulNextChips.length > 0 && (
-    <div className="w-full border-t px-0 pt-3.5 lg:px-6" style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}>
-      <div className="text-[10px] uppercase" style={{ ...mono, letterSpacing: "0.09em", color: "var(--nf-ink-600, #66635e)" }}>
-        Most useful next — from sections needing a decision
-      </div>
-      <div className="mt-2.5 flex flex-wrap gap-2">
-        {usefulNextChips.map((c) => (
-          <button
-            key={c.key}
-            type="button"
-            onClick={() => goToStep("decisions")}
-            className="cursor-pointer rounded-[3px] border px-3 py-2 text-left text-[12.5px] font-semibold transition-colors hover:bg-white"
-            style={{
-              borderColor: "var(--nf-orange-soft-border, #db9f76)",
-              background: "var(--nf-orange-soft, #ffe3cc)",
-              color: "var(--nf-orange-strong, #832f00)",
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
-    </div>
+  /** SUPERSEDED 19 Aug 2026 by AnswerNext (below). The "MOST USEFUL NEXT
+   *  — from sections needing a decision" chip row named outline SECTIONS
+   *  and navigated away to the Decisions station. AnswerNext names the
+   *  actual ranked QUESTIONS and answers them in place, which is both
+   *  more specific and what the welcome message has always promised
+   *  ("...or answer any open line in it directly"). Keeping both would
+   *  have stacked two competing "what next" affordances in a 368px pane,
+   *  one of which was strictly the weaker. */
+  const answerNextBlock = (
+    <AnswerNext
+      cards={nextQuestionCards}
+      totalOutstanding={materialDecisionsRemaining}
+      onSeeAll={() => goToStep("decisions")}
+    />
   );
 
   const sectorChips = (
@@ -4168,7 +4168,7 @@ export default function ProjectDesk({
                 </p>
               </div>
               {threadBlock}
-              {usefulNextBlock}
+              {answerNextBlock}
               {sectorChips}
               {composerBlock}
             </div>
@@ -4218,7 +4218,7 @@ export default function ProjectDesk({
 
                 {activeStep === "decisions" && (
                   <DecisionsStep
-                    cards={nextQuestionCards ?? []}
+                    cards={allNextQuestionCards}
                     materialDecisionsRemaining={materialDecisionsRemaining}
                     published={publishedFlag}
                     sectorSectionTitle={sectorSectionTitle}
