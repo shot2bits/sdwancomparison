@@ -29,11 +29,11 @@ import { SITE_URL, getBreadcrumbSchema, getOrganizationSchema, getSpeakableSchem
  */
 
 export const metadata: Metadata = {
-  title: "The global SASE and SD-WAN sourcing engine",
+  title: "SASE & SD-WAN RFP/RFI Builder and Vendor Shortlist",
   description: ENGINE_DESCRIPTION,
   alternates: { canonical: "https://netify.co.uk/" },
   openGraph: {
-    title: "Netify | The global SASE and SD-WAN sourcing engine",
+    title: "Netify | SASE & SD-WAN RFP/RFI Builder",
     description: ENGINE_DESCRIPTION,
     url: `${SITE_URL}/workspace/`,
     type: "website",

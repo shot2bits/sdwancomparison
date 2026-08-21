@@ -40,12 +40,12 @@ import { getOrganizationSchema } from "@/lib/structured-data";
 const APEX = "https://netify.co.uk";
 
 export const metadata: Metadata = {
-  title: "The global SASE and SD-WAN sourcing engine",
+  title: "SASE & SD-WAN RFP/RFI Builder and Vendor Shortlist",
   description: ENGINE_DESCRIPTION,
   alternates: { canonical: `${APEX}/` },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Netify | The global SASE and SD-WAN sourcing engine",
+    title: "Netify | SASE & SD-WAN RFP/RFI Builder",
     description: ENGINE_DESCRIPTION,
     url: `${APEX}/`,
     type: "website",

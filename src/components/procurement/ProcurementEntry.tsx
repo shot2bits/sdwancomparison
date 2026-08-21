@@ -35,9 +35,9 @@ import { getAllVendors } from "@/lib/vendors";
  * page.tsx for the full per-line ruling provenance.
  */
 
-export const ENGINE_H1 = "The global SASE and SD-WAN sourcing engine";
+export const ENGINE_H1 = "Build a SASE or SD-WAN RFP, RFI and vendor shortlist";
 export const ENGINE_PROMISE =
-  "Describe your requirement in your own words. Netify structures it, identifies what’s missing, evaluates suitable vendors and service providers and prepares an anonymous opportunity for the market.";
+  "Describe your sector and requirements in your own words. Netify builds the RFP or RFI, identifies suitable vendors and service providers, and prepares an anonymous Opportunity Board listing so you can receive bids.";
 export const ENGINE_VALUE =
   `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors. Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson involved.`;
 export const ENGINE_AGENT =
@@ -51,7 +51,7 @@ export const ENGINE_DESCRIPTION = `${ENGINE_H1}. ${ENGINE_PROMISE} ${ENGINE_VALU
 // SENTENCE TO A MARKET-READY PROCUREMENT ASSET") -- describes what the
 // product actually does (one input -> a structured, evaluated, market-
 // ready procurement asset), not invented marketing filler.
-export const ENGINE_EYEBROW = "From one sentence to a market-ready procurement asset";
+export const ENGINE_EYEBROW = "SASE and SD-WAN procurement, from requirement to bids";
 
 export default function ProcurementEntry() {
   return (

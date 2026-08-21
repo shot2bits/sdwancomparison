@@ -364,7 +364,7 @@ const ITEM_BY_ID: Record<string, { item: TaxonomyItem; section: string }> = (() 
 /* Placeholders ask open questions only (round 6 law: no example
  * answers anywhere; the old rotating examples carried a site count, a
  * named standard and a named product, and they are dead). */
-const PLACEHOLDER_EMPTY = "Describe what you are buying, in your own words…";
+const PLACEHOLDER_EMPTY = "Describe your SASE or SD-WAN requirement, sector, sites and outcome…";
 const PLACEHOLDER_LIVE = "Say what changed, add a rule, or correct anything in the statement…";
 /** Sixth amendment (13 Aug 2026), Robert's item 3: shown while a resume
  *  fetch is in flight, so the composer visibly explains why it is
@@ -5521,21 +5521,35 @@ export default function ProjectDesk({
             </div>
           </header>
 
-          <section className="nf-2030-command-zone" aria-label="Start the procurement">
-            <div className="nf-2030-command-title">
-              <strong>Describe the outcome you need</strong>
-              <span>One sentence can structure several sections. Keep adding detail here at any time.</span>
-            </div>
-            {composerBlock}
-            <div className="nf-2030-command-actions">
-              <button type="button" onClick={() => fileRef.current?.click()}>+ Add document</button>
-              <button type="button" onClick={() => inputRef.current?.focus()}>Connect source</button>
-              {voiceSupported && <button type="button" onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}>{voiceState === "idle" ? "Voice" : "Stop listening"}</button>}
-            </div>
-            <div className="nf-2030-context-line">
-              <span>Start in your own words or add an existing brief</span>
-              <span>Every captured fact remains reviewable</span>
-              <span className="control">Nothing is issued and no supplier is contacted without your approval</span>
+          <section className="nf-2030-command-zone nf-2030-command-zone-empty" aria-label="Start the procurement">
+            <div className="nf-2030-command-inner">
+              <div className="nf-2030-command-intro">
+                <span>SASE &amp; SD-WAN procurement</span>
+                <h2>What do you need to source?</h2>
+                <p>Build a sector-specific RFP or RFI, see an instant shortlist of vendors and managed service providers, then publish anonymously to receive bids.</p>
+              </div>
+              {composerBlock}
+              <div className="nf-2030-command-actions">
+                <button type="button" onClick={() => fileRef.current?.click()}>+ Add document</button>
+                <button type="button" onClick={() => inputRef.current?.focus()}>Connect source</button>
+                {voiceSupported && <button type="button" onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}>{voiceState === "idle" ? "Voice" : "Stop listening"}</button>}
+              </div>
+              <div className="nf-2030-starters" aria-label="Sector starting points">
+                <span>Start with</span>
+                <button type="button" onClick={() => { setDraft("We need to build a SASE RFP for a healthcare organisation."); inputRef.current?.focus(); }}>Healthcare SASE RFP</button>
+                <button type="button" onClick={() => { setDraft("We need to build an SD-WAN RFI for a manufacturing organisation."); inputRef.current?.focus(); }}>Manufacturing SD-WAN RFI</button>
+                <button type="button" onClick={() => { setDraft("We need a managed SASE shortlist for a retail organisation."); inputRef.current?.focus(); }}>Retail managed SASE shortlist</button>
+              </div>
+              <div className="nf-2030-context-line">
+                <span>Start in your own words or add an existing brief</span>
+                <span>Every captured fact remains reviewable</span>
+                <span className="control">Nothing is issued and no supplier is contacted without your approval</span>
+              </div>
+              <ol className="nf-2030-outcomes" aria-label="What Netify produces">
+                <li><span>01</span><div><strong>Build</strong><p>A concise requirement, RFI or complete RFP for your sector.</p></div></li>
+                <li><span>02</span><div><strong>Shortlist</strong><p>Instant vendor and managed service provider matches.</p></div></li>
+                <li><span>03</span><div><strong>Get bids</strong><p>Publish anonymously to the Opportunity Board when ready.</p></div></li>
+              </ol>
             </div>
           </section>
 
