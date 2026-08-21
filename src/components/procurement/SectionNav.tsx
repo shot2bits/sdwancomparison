@@ -35,7 +35,6 @@
  */
 
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
-import { outlineStateLabel } from "@/lib/workspace/procurement-outline";
 
 export default function SectionNav({
   rows,
@@ -70,6 +69,14 @@ export default function SectionNav({
   onPublish: () => void;
   onCompare: () => void;
 }) {
+  const statusLabel = (state: OutlineRow["state"], active: boolean) => {
+    if (state === "confirmed") return "Ready";
+    if (active) return "In progress";
+    if (state === "netify_suggested") return "Review suggestion";
+    if (state === "later") return "Optional";
+    return "Not started";
+  };
+
   return (
     <nav
       aria-label="Procurement sections"
@@ -83,8 +90,7 @@ export default function SectionNav({
       )}
 
       <div className="nf-2030-section-nav-head">
-        <span>Core areas</span>
-        <strong>{progress.ready}/{progress.total}</strong>
+        <span><b>Your RFP</b><small>{progress.ready} of {progress.total} ready</small></span>
       </div>
 
       <ol>
@@ -102,7 +108,7 @@ export default function SectionNav({
                   </span>
                   <span className="nf-2030-area-copy">
                     <strong>{r.title}</strong>
-                    <small>{outlineStateLabel(r.state)}</small>
+                    <small>{statusLabel(r.state, isActive)}</small>
                   </span>
                 </button>
               </li>
@@ -110,7 +116,7 @@ export default function SectionNav({
           })}
       </ol>
 
-      <div className="nf-2030-section-actions">
+      <div className="nf-2030-section-actions" aria-label="Later stages">
         {materialDecisionsRemaining > 0 && (
           <button type="button" onClick={onReviewDecisions}>
             {materialDecisionsRemaining} open decision{materialDecisionsRemaining === 1 ? "" : "s"}

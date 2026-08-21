@@ -107,6 +107,7 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
  *  render slot below; Publish/Compare survive only as its own lightweight
  *  strip, per Robert's explicit framing, not a parallel rail. */
 import SectionNav from "@/components/procurement/SectionNav";
+import GuidedBuild from "@/components/procurement/GuidedBuild";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
@@ -2098,13 +2099,19 @@ export default function ProjectDesk({
     for (const f of facts) if (!f.struck) s.add(sectionForPath(f.path));
     return [...s];
   }, [facts]);
+  const instrumentCoveredSections = useMemo(
+    () => issueTarget === "formal"
+      ? [...new Set([...coveredSections, "estate", "drivers", "model", "change", "security", "support", "services", "compliance", "organisation", "commercial"])]
+      : coveredSections,
+    [coveredSections, issueTarget],
+  );
   const commercialClaims = useMemo(
     () => facts.filter((f) => !f.struck && sectionForPath(f.path) === "commercial").length,
     [facts],
   );
   const rfiSet = useMemo(
-    () => deriveRfiQuestionSet({ coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null }),
-    [coveredSections, requirement],
+    () => deriveRfiQuestionSet({ coveredSections: instrumentCoveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null }),
+    [instrumentCoveredSections, requirement],
   );
   const instrumentLadder = useMemo(
     () =>
@@ -2118,7 +2125,13 @@ export default function ProjectDesk({
       }),
     [started, live.length, unansweredGaps.length, rfiSet, commercialClaims],
   );
-  const instrument = earnedInstrument(instrumentLadder);
+  const automaticallyEarnedInstrument = earnedInstrument(instrumentLadder);
+  /* Quick and Full are two depths of the same living document. Selecting
+     Full is an explicit buyer instruction to compile the comprehensive
+     RFP instrument now; Quick continues to earn depth automatically as
+     facts accumulate. This makes the control change the supplier pack,
+     not merely its label. */
+  const instrument = issueTarget === "formal" ? "rfp" : automaticallyEarnedInstrument;
   const publishTitle = brief.title;
 
   /** Phase 3 Stage A correction round (Robert, 14 Aug 2026): the single
@@ -3005,7 +3018,7 @@ export default function ProjectDesk({
         ? { consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" } }
         : {}),
       position: {
-        covered_sections: coveredSections,
+        covered_sections: instrumentCoveredSections,
         sector: (requirement.organisation?.sector as string | undefined) ?? null,
       },
       /* Fourth amendment, gaps 2 & 3: the structured ledger, alongside the
@@ -3082,7 +3095,7 @@ export default function ProjectDesk({
           receipts,
           instrument,
           compiled_document: canvasDocument,
-          position: { covered_sections: coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
+          position: { covered_sections: instrumentCoveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
           base_revision: envelopeRevisionRef.current,
         }),
       });
@@ -3136,7 +3149,7 @@ export default function ProjectDesk({
           receipts,
           instrument,
           compiled_document: canvasDocument,
-          position: { covered_sections: coveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
+          position: { covered_sections: instrumentCoveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null },
           base_revision: envelopeRevisionRef.current,
         }),
       });
@@ -3627,8 +3640,18 @@ export default function ProjectDesk({
       successSignal: noted.some((n) => n.id.startsWith("twin-success")),
       successDetail: noted.some((n) => n.id.startsWith("twin-success")) ? "Success criteria stated." : "Add once the core scope and decisions above are settled.",
     });
-    if (started) return outline;
-    return outline.map((row) => row.state === "later" ? row : {
+    const buyerFacingOutline = outline
+      .filter((row) => row.key !== "sector_intelligence")
+      .filter((row) => issueTarget === "formal" || !["commercial_contractual", "success_evaluation"].includes(row.key))
+      .map((row) => issueTarget === "formal" && row.state === "later" ? {
+        ...row,
+        state: "needs_input" as const,
+        detail: row.key === "commercial_contractual"
+          ? "Commercial, contractual and exit requirements are part of the full RFP."
+          : "Evidence, scoring and success measures are part of the full RFP.",
+      } : row);
+    if (started) return buyerFacingOutline;
+    return buyerFacingOutline.map((row) => row.state === "later" ? row : {
       ...row,
       state: "needs_input" as const,
       detail: row.key === "resilience_availability"
@@ -3638,7 +3661,7 @@ export default function ProjectDesk({
           : row.detail,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt, started]);
+  }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt, started, issueTarget]);
 
   /** THE progress fraction. Robert, 20 Aug 2026: "right now, it is 100%
    *  not clear how the user is progressing." Derived from `sectionOutline`
@@ -3901,8 +3924,7 @@ export default function ProjectDesk({
     if (!s) return null;
     return String(s.value).replace(/\s*&.*$/, "").toLowerCase();
   })();
-  const sitesVal = standingAt("estate.sites").slice(-1)[0];
-  const projectName = (sitesVal ? `${sitesVal.value} sites` : "New project") + (sectorShort ? `, ${sectorShort}` : "");
+  const guidedProjectTitle = `${sectorShort ? cap(sectorShort) : "Your"} ${buying === "sdwan" ? "SD-WAN" : buying === "sase" ? "SASE" : buying === "sse" ? "SSE" : "SASE & SD-WAN"} procurement`;
   /* The document names itself from the sector (the reference's title,
      the estate's punctuation). */
   const docTitle = `Statement of requirements${sectorShort ? `, ${sectorShort}` : ""}`;
@@ -4479,29 +4501,16 @@ export default function ProjectDesk({
         /* column, the active station filling the rest.                  */
         /* ============================================================ */
         <>
-          <header className="nf-2030-header">
-            <div className="nf-2030-brand" aria-label="Netify">N</div>
-            <div className="nf-2030-project-title">
-              <strong>{projectName}</strong>
-              <span>{created ? (saveDirty ? "Saved · edits since" : "Saved just now") : "Private working draft"} · Draft {canvasDocument.version}</span>
-            </div>
+          <header className="nf-2030-header nf-2030-journey">
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
-              <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}>Build</button>
-              <button type="button" data-current={activeStep === "review"} onClick={() => goToStep("review")}>Review</button>
-              <button type="button" data-current={activeStep === "publish"} disabled={!reachable.has("publish")} onClick={() => goToStep("publish")}>Issue</button>
-              <button type="button" data-current={activeStep === "compare"} disabled={!reachable.has("compare")} onClick={() => goToStep("compare")}>Responses</button>
-              <button type="button" disabled>Decision</button>
+              <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}><span>Build requirements</span></button>
+              <button type="button" data-current={activeStep === "review"} onClick={() => goToStep("review")}><span>Review shortlist</span></button>
+              <button type="button" data-current={activeStep === "publish"} disabled={!reachable.has("publish")} onClick={() => goToStep("publish")}><span>Publish opportunity</span></button>
+              <button type="button" data-current={activeStep === "compare"} disabled={!reachable.has("compare")} onClick={() => goToStep("compare")}><span>Receive bids</span></button>
             </nav>
-            <div className="nf-2030-header-actions">
-              <button type="button" className="mobile-hide" onClick={() => { setReqOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}>Source facts</button>
-              {created && <a className="mobile-hide" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>Project record</a>}
-              {(!created || saveDirty) && <button type="button" onClick={() => { setSaveOpen(true); setSaveError(null); }}>{created ? "Save changes" : "Save"}</button>}
-              <button type="button" className="mobile-hide" onClick={() => goToStep("review")}>Preview</button>
-              <button type="button" className="primary" onClick={() => goToStep(reachable.has("publish") ? "publish" : "review")}>Review & issue</button>
-            </div>
           </header>
 
-          <section className="nf-2030-command-zone" aria-label="Describe or change the procurement">
+          {activeStep !== "describe" && <section className="nf-2030-command-zone" aria-label="Describe or change the procurement">
             <div className="nf-2030-command-title">
               <strong>Describe or change anything</strong>
               <span>Your words update the requirement, supplier pack, architecture and evaluation model together.</span>
@@ -4521,30 +4530,12 @@ export default function ProjectDesk({
               <span>{canvasDocument.provenance.sector} sector rules</span>
               <span className="control">All changes are reviewable · issuing always requires approval</span>
             </div>
-          </section>
+          </section>}
 
-          <section className="nf-2030-status" aria-label="Issue readiness">
-            <label>
-              <span>Issue target</span>
-              <select value={issueTarget} onChange={(event) => setIssueTarget(event.target.value as "concise" | "formal")}>
-                <option value="concise">Concise supplier requirement</option>
-                <option value="formal">Formal RFP</option>
-              </select>
-            </label>
-            <div className="nf-2030-readiness">
-              <div><strong>{sectionProgress.ready} of {sectionProgress.total} areas {issueTarget === "formal" ? "structured" : "ready"}</strong><span>{materialDecisionsRemaining} decision{materialDecisionsRemaining === 1 ? "" : "s"} remain</span></div>
-              <div className="nf-2030-progress" aria-label={`${sectionProgress.ready} of ${sectionProgress.total} areas ready`}>
-                {Array.from({ length: sectionProgress.total }, (_, index) => <span key={index} data-ready={index < sectionProgress.ready} />)}
-              </div>
-            </div>
-            <button
-              type="button"
-              className="nf-2030-next-action"
-              onClick={() => goToStep(nextQuestionCards.length > 0 ? "decisions" : "review")}
-            >
-              <span>Next step</span>
-              <strong>{nextQuestionCards[0]?.nq.question ?? "Review the document before issuing it."}</strong>
-              <em>{nextQuestionCards.length > 0 ? "Answer now" : "Review now"} &rarr;</em>
+          <section className="nf-2030-project-band" aria-label="Project and RFP depth">
+            <div><strong>{guidedProjectTitle}</strong><span>{issueTarget === "formal" ? `Full RFP · ${rfiSet?.total ?? 0} tailored supplier questions` : "Quick requirement · about 5 min"}</span></div>
+            <button type="button" onClick={() => setIssueTarget((value) => value === "concise" ? "formal" : "concise")}>
+              {issueTarget === "concise" ? "Expand to full RFP" : "Return to quick requirement"} <span aria-hidden="true">›</span>
             </button>
           </section>
 
@@ -4571,6 +4562,24 @@ export default function ProjectDesk({
               onPublish={() => goToStep("publish")}
               onCompare={() => goToStep("compare")}
             />
+            {activeStep === "describe" && (
+              <GuidedBuild
+                card={nextQuestionCards[0] ?? null}
+                position={activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
+                total={sectionProgress.total}
+                understood={`${sectorShort ? cap(sectorShort) : "Organisation"}${buying ? ` buying ${buying === "sdwan" ? "SD-WAN" : buying.toUpperCase()}` : " procurement"}`}
+                addedTo={nextQuestionCards[0]?.fills?.title ?? activeRow?.title ?? "Living requirement"}
+                stillNeeded={activeRow?.missing?.length ? activeRow.missing.join(", ") : activeRow?.detail ?? "Review the document"}
+                documentTitle={canvasDocument.title}
+                documentSummary={canvasDocument.summary}
+                clauses={canvasDocument.clauses}
+                composer={composerBlock}
+                issueTarget={issueTarget}
+                questionBankCount={rfiSet?.total ?? 0}
+                onFocusPrompt={() => inputRef.current?.focus()}
+                onOpenDocument={() => { setWorkspaceDocumentView("requirement"); goToStep("review"); }}
+              />
+            )}
             {/* LEFT PANE -- constant across all five stations, exactly as
                 every reference screenshot draws it: the buyer can correct
                 or add a sentence from any station without navigating
@@ -4594,6 +4603,7 @@ export default function ProjectDesk({
                  composer is pinned to the bottom, always reachable
                  without scrolling. */
               className="nf-2030-aside"
+              data-hidden={activeStep === "describe"}
             >
               {/* THE PERSISTENT CHAT WINDOW. Sticking only the composer
                   left the transcript scrolling away above it and a tall
@@ -4657,7 +4667,7 @@ export default function ProjectDesk({
             </div>
 
             {/* RIGHT PANE -- the active station. */}
-            <div className="nf-2030-main">
+            <div className="nf-2030-main" data-hidden={activeStep === "describe"}>
               <div>
                 {activeStep === "describe" && (
                   <>

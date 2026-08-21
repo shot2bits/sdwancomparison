@@ -111,7 +111,7 @@ function main() {
   record(/<SectionNav[\s\S]{0,400}progress=\{sectionProgress\}/.test(desk), "C: the primary navigation reads it (only rendered once a project has started)");
   record(/outlineProgress\(outline\)/.test(canvas), "C: the document header derives it from the outline it is about to render");
   record(/outlineProgressLine\(progress\)/.test(canvas), "C: the header uses the shared wording function, not its own sentence");
-  record(/progress\.ready\}\/\{progress\.total/.test(nav), "C: the primary nav reads ready and total directly from the SAME shared progress object");
+  record(/progress\.ready\}(?:\/| of )\{progress\.total/.test(nav), "C: the primary nav reads ready and total directly from the SAME shared progress object");
 
   /* ================================================================ */
   /* D. A QUESTION KNOWS WHERE IT LANDS.                               */
