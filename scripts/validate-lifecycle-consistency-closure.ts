@@ -271,6 +271,28 @@ function main() {
     );
   }
 
+  /* ================================================================ */
+  /* F. The lifecycle names the shortlist only after publication.      */
+  /* ================================================================ */
+  {
+    record(!/Review shortlist/.test(desk),
+      "12: the pre-publication lifecycle never promises a shortlist that the market boundary has not unlocked",
+      "",
+    );
+    record(/publishedFlag \? "View shortlist" : "Review requirement"/.test(desk),
+      "12: the review action is 'Review requirement' before publish and becomes 'View shortlist' only after a real publication",
+      "",
+    );
+    record(/goToStep\(publishedFlag \? "publish" : "review"\)/.test(desk),
+      "12: after publication, View shortlist opens the station that renders the frozen published matches; before publication it opens document review",
+      "",
+    );
+    record(/publishedFlag \? "Opportunity published" : "Publish opportunity"/.test(desk) && /disabled=\{publishedFlag \|\| !reachable\.has\("publish"\)\}/.test(desk),
+      "12: the separate publish action becomes a disabled completion state after submission instead of duplicating the shortlist destination",
+      "",
+    );
+  }
+
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);
   if (failures > 0) process.exit(1);
 }

@@ -4508,8 +4508,21 @@ export default function ProjectDesk({
           <header className="nf-2030-header nf-2030-journey">
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
               <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}><span>Build requirements</span></button>
-              <button type="button" data-current={activeStep === "review"} onClick={() => goToStep("review")}><span>Review shortlist</span></button>
-              <button type="button" data-current={activeStep === "publish"} disabled={!reachable.has("publish")} onClick={() => goToStep("publish")}><span>Publish opportunity</span></button>
+              <button
+                type="button"
+                data-current={publishedFlag ? activeStep === "publish" : activeStep === "review"}
+                onClick={() => goToStep(publishedFlag ? "publish" : "review")}
+              >
+                <span>{publishedFlag ? "View shortlist" : "Review requirement"}</span>
+              </button>
+              <button
+                type="button"
+                data-current={!publishedFlag && activeStep === "publish"}
+                disabled={publishedFlag || !reachable.has("publish")}
+                onClick={() => goToStep("publish")}
+              >
+                <span>{publishedFlag ? "Opportunity published" : "Publish opportunity"}</span>
+              </button>
               <button type="button" data-current={activeStep === "compare"} disabled={!reachable.has("compare")} onClick={() => goToStep("compare")}><span>Receive bids</span></button>
             </nav>
           </header>
