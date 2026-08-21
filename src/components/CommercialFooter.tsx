@@ -121,14 +121,14 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
 
 export default function CommercialFooter() {
   return (
-    <footer className="border-t border-[var(--ink-200)] mt-24">
-      <div className="max-w-6xl mx-auto px-6 py-16">
+    <footer className="mt-12 border-t border-[var(--ink-200)]">
+      <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Link columns - mirrors the netify.co.uk footer */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 text-sm">
+        <div className="grid gap-x-6 gap-y-6 text-[12px] leading-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.title}>
-              <p className="eyebrow mb-4">{col.title}</p>
-              <ul className="space-y-3">
+              <p className="eyebrow mb-2 text-[10px] leading-4">{col.title}</p>
+              <ul className="space-y-1.5">
                 {col.links.map((l) => {
                   const external = l.href.startsWith("http");
                   return (
@@ -149,14 +149,14 @@ export default function CommercialFooter() {
         </div>
 
         {/* Company details + research note */}
-        <div className="mt-16 grid gap-8 border-t border-[var(--ink-200)] pt-10 md:grid-cols-2 text-sm text-[var(--ink-500)]">
+        <div className="mt-8 grid gap-5 border-t border-[var(--ink-200)] pt-6 text-[11px] leading-4 text-[var(--ink-500)] md:grid-cols-2">
           <div>
-            <p className="display text-lg text-[var(--ink-900)] mb-2">Netify Group Limited</p>
+            <p className="mb-1 text-xs font-semibold text-[var(--ink-900)]">Netify Group Limited</p>
             <p>Moor Hall Barn</p>
             <p>Workhouse Lane</p>
             <p>Melton Constable, Norfolk</p>
             <p>NR24 2BE, England</p>
-            <p className="mt-3">Company No: 07087612</p>
+            <p className="mt-2">Company No: 07087612</p>
           </div>
           <div className="md:text-right">
             <p>
@@ -166,23 +166,23 @@ export default function CommercialFooter() {
               </a>
             </p>
             <p>Tel: +44 (0)333 202 1011</p>
-            <p className="mt-3">Netify® is a registered trademark (UK00003413742)</p>
-            <p className="mt-3">
+            <p className="mt-2">Netify® is a registered trademark (UK00003413742)</p>
+            <p className="mt-2">
               Vendor-neutral SD-WAN, SASE and managed network research. Capability grades are
               based on public source evidence; always confirm via RFP.
             </p>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-baseline justify-between gap-2 border-t border-[var(--ink-200)] pt-6">
-          <p className="text-xs text-[var(--ink-500)]">
+        <div className="mt-6 flex flex-wrap items-baseline justify-between gap-2 border-t border-[var(--ink-200)] pt-4">
+          <p className="text-[10px] leading-4 text-[var(--ink-500)]">
             © {new Date().getUTCFullYear()} Netify Group Limited. All rights reserved.
           </p>
           {/* The build stamp, on every page in both route groups. Baked in
               at build time, so a cached page disagrees with a freshly
               served one -- see build-info.ts for why it must not be
               computed per request. */}
-          <p className="m-0 font-mono text-[11px] text-[var(--ink-500)]" title="The build this page was served from">
+          <p className="m-0 font-mono text-[10px] leading-4 text-[var(--ink-500)]" title="The build this page was served from">
             {buildStamp()}
           </p>
         </div>
