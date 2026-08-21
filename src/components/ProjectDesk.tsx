@@ -5525,8 +5525,8 @@ export default function ProjectDesk({
             <div className="nf-2030-command-inner">
               <div className="nf-2030-command-intro">
                 <span>SASE &amp; SD-WAN procurement</span>
-                <h2>What do you need to source?</h2>
-                <p>Build a sector-specific RFP or RFI, see an instant shortlist of vendors and managed service providers, then publish anonymously to receive bids.</p>
+                <h2>Build your SASE or SD-WAN RFP. Shortlist vendors. Get bids.</h2>
+                <p>Describe your requirements, get matched with the right vendors and service providers, then publish your opportunity when ready.</p>
               </div>
               {composerBlock}
               <div className="nf-2030-command-actions">
