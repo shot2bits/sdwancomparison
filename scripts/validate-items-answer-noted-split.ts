@@ -125,5 +125,18 @@ const EMPTY_REQ = {} as SecurityRequirementInput;
   record(/own:\s*true/.test(branch), "C: a null-path item lands with own: true, same as every other buyer-clicked answer (landOption/pickChip/the note branch) -- so it counts as \"stated\" in answered-log.ts", "");
 }
 
+/* ================================================================ */
+/* D. A note answer uses the stable qn-<question-id> that earnedBy()  */
+/*    checks. The option itself remains in the decision ledger.       */
+/* ================================================================ */
+{
+  const desk = src("src/components/ProjectDesk.tsx");
+  const noteStart = desk.indexOf('} else if (answer.kind === "note") {');
+  const noteEnd = desk.indexOf('} else if (answer.kind === "path") {', noteStart);
+  const branch = desk.slice(noteStart, noteEnd);
+  record(/`qn-\$\{nq\.id\}`/.test(branch), "D: earned note answers land under the stable qn-<question-id> resolution key", "");
+  record(!/`\$\{nq\.id\}:\$\{optionIndex\}`/.test(branch), "D: the obsolete option-index note id cannot make an answered question reappear", "");
+}
+
 console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);
 if (failures > 0) process.exit(1);

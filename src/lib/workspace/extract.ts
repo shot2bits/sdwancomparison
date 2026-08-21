@@ -1299,7 +1299,30 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   const TENTATIVE_CONSIDERATION_RE = /\b(?:will|may|might|could|would)\s+consider\b|\bconsidering\b|\bpossibly\b|\bmight explore\b|\bmay explore\b|\bcould explore\b/;
   const managedSecurityIsTentative =
     Boolean(managedSecurityHit) && TENTATIVE_CONSIDERATION_RE.test(t.slice(Math.max(0, managedSecurityHit!.index - 40), managedSecurityHit!.index));
-  if (managedSecurityHit && !managedSecurityIsTentative) {
+  const saseBuyHit = hit(buyRe("sase"));
+  const sseBuyHit = hit(buyRe("sse|security service edge|secure service edge"));
+  /* SASE is the combined technology scope: SD-WAN plus SSE. A buyer who
+   * states both components has selected full SASE even when they do not
+   * use the umbrella acronym. Delivery/operation is deliberately a
+   * separate procurement.operatingModel decision. */
+  const combinedSaseHit = sdwanBuyHit && sseBuyHit;
+  if (saseBuyHit) {
+    say("procurement.buying", "sase", "SASE", saseBuyHit[0].trim(), hitPos(saseBuyHit));
+  } else if (combinedSaseHit) {
+    const first = sdwanBuyHit.index <= sseBuyHit.index ? sdwanBuyHit : sseBuyHit;
+    const last = first === sdwanBuyHit ? sseBuyHit : sdwanBuyHit;
+    const start = hitPos(first);
+    const end = hitPos(last) + last[0].length;
+    say("procurement.buying", "sase", "SD-WAN + SSE", text.slice(start, end).trim(), start);
+  } else if (sseBuyHit) {
+    say("procurement.buying", "sse", "SSE", sseBuyHit[0].trim(), hitPos(sseBuyHit));
+  } else if (sdwanBuyHit) {
+    say("procurement.buying", "sdwan", "SD-WAN", sdwanBuyHit[0].trim(), hitPos(sdwanBuyHit));
+    // The SD-WAN mention was a purchase intent, so it is not evidence of
+    // the estate: withdraw the blanket existing-network claim above.
+    const i = out.findIndex((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
+    if (i >= 0) out.splice(i, 1);
+  } else if (managedSecurityHit && !managedSecurityIsTentative) {
     /* Fact Ledger Reliability Gate (13 Aug 2026): the buyer-facing quote
      * stays the canonical "managed security" (unchanged -- that's the
      * clearer label, and no one asked for it to change), but the actual
@@ -1308,18 +1331,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
      * as represented even though "managed security" itself never
      * literally appears in it. */
     say("procurement.buying", "managed_security", "managed security", originalSpan(managedSecurityHit).trim(), hitPos(managedSecurityHit));
-  } else {
-    const saseBuyHit = hit(buyRe("sase"));
-    const sseBuyHit = hit(buyRe("sse|security service edge|secure service edge"));
-    if (saseBuyHit) say("procurement.buying", "sase", "SASE", saseBuyHit[0].trim(), hitPos(saseBuyHit));
-    else if (sseBuyHit) say("procurement.buying", "sse", "SSE", sseBuyHit[0].trim(), hitPos(sseBuyHit));
-    else if (sdwanBuyHit) {
-      say("procurement.buying", "sdwan", "SD-WAN", sdwanBuyHit[0].trim(), hitPos(sdwanBuyHit));
-      // The SD-WAN mention was a purchase intent, so it is not evidence of
-      // the estate: withdraw the blanket existing-network claim above.
-      const i = out.findIndex((u) => u.path === "estate.existingNetwork" && Array.isArray(u.value) && (u.value as string[]).includes("sdwan"));
-      if (i >= 0) out.splice(i, 1);
-    } else if (!existingEstateSignal.test(t)) {
+  } else if (!existingEstateSignal.test(t)) {
       /* 1 Aug 2026, Robert's live catch: none of the seeking-verb patterns
        * above require one, so a buyer who typed nothing but the bare term --
        * "SASE" on its own reached the ledger not at all; "SD-WAN" on its own
@@ -1332,7 +1344,6 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
       if (bareSase) say("procurement.buying", "sase", "SASE", undefined, hitPos(bareSase));
       else if (bareSse) say("procurement.buying", "sse", "SSE", bareSse[0].trim(), hitPos(bareSse));
       else if (sdwanBareHit) say("procurement.buying", "sdwan", "SD-WAN", sdwanBareHit[0].trim(), hitPos(sdwanBareHit));
-    }
   }
 
   // Operating model: the managed words must attach to the SERVICE BEING
@@ -1443,7 +1454,7 @@ const SYSTEM_PROMPT = `You extract structured procurement facts from a buyer's f
 Rules:
 - Allowed paths, exactly: ${ALLOWED_PATHS.join(", ")}.
 - Enumerations: drivers ${DRIVER_IDS.join("|")}; constraints.inHouseSocCapacity ${SOC_IDS.join("|")}; constraints.complianceRequirements ${COMPLIANCE_IDS.join("|")}; estate.cloud ${CLOUD_IDS.join("|")}; estate.existingNetwork ${NETWORK_IDS.join("|")}; organisation.regions ${REGION_IDS.join("|")}; organisation.sector one of ${WORKSPACE_SECTORS.join("; ")} (or the buyer's own words if none fits); procurement.buying ${BUYING_IDS.join("|")}; procurement.operatingModel ${OPERATING_MODEL_IDS.join("|")}.
-- procurement.buying is what they SEEK to buy (managed_security covers MDR, SOC, SIEM, MSSP and managed security services); estate.existingNetwork and estate.existingSecurity are what they already HAVE. Never confuse the two.
+- procurement.buying is what they SEEK to buy. Full SASE means the combined SD-WAN and SSE technology scope; if the buyer asks for both SD-WAN and SSE, return sase. managed_security covers a standalone MDR, SOC, SIEM, MSSP or managed-security service need. Whether a SASE/SD-WAN/SSE solution is managed, co-managed or self-managed belongs in procurement.operatingModel and must not replace its technology scope. estate.existingNetwork and estate.existingSecurity are what they already HAVE. Never confuse these concepts.
 - Drivers are exact meanings, not intensities: "incident" only for an actual or ongoing incident (phishing, breach, compromise); "ransomware_concern" only when the buyer names ransomware. Do not escalate one into the other. "renewal" only when the buyer names a contract, renewal, expiry or agreement ending; replacing outdated, legacy or end-of-life equipment is NOT a renewal, and if no driver fits, omit drivers entirely.
 - Mobile connectivity (4G, 5G) is not "broadband". If the estate runs on mobile and no listed network id fits, omit the field rather than approximating.
 - procurement.vendorsUnderConsideration is a vendor or product the buyer is evaluating or thinking about -- never one already in place or already chosen. Never propose this path for a vendor the buyer describes as already deployed or already selected (use estate.namedTechnologies / estate.existingProviders instead), and never imply selection just because a vendor is named.

@@ -599,14 +599,13 @@ const TWIN_SLOTS: TwinSlot[] = [
     ],
   },
   {
-    id: "scope", group: "buying", label: "Scope", w: 3, cta: "What are you buying?", q: "What are you actually buying?",
-    why: "It splits the market more cleanly than any other answer: one contract or several, one platform or parts.",
+    id: "scope", group: "buying", label: "Scope", w: 3, cta: "What are you buying?", q: "Which technology scope do you need?",
+    why: "Full SASE covers both network and cloud-security scope. The next decisions determine platform shape and who operates it.",
     path: "procurement.buying",
     options: [
-      { label: "Full SASE, one platform", effect: "network and security in one contract", land: fact("procurement.buying", "sase") },
+      { label: "Full SASE — SD-WAN + SSE", effect: "both network and cloud-security question sets", land: fact("procurement.buying", "sase") },
       { label: "SD-WAN only", effect: "the network layer; security stays as is", land: fact("procurement.buying", "sdwan") },
       { label: "SSE, cloud security only", effect: "the security half, over your network", land: fact("procurement.buying", "sse") },
-      { label: "Managed security service", effect: "a service need; the engine scopes it", land: fact("procurement.buying", "managed_security") },
     ],
   },
   {
@@ -2507,7 +2506,12 @@ export default function ProjectDesk({
         recordDecision(nq.id, opt.label, { action: "items", optionId: answer.itemIds.join("+"), resultingFactPaths: updates.map((u) => u.path), resultingNoted: notedAdds });
         ev("workspace_earned_answered", { q: nq.id, kind: "items" });
       } else if (answer.kind === "note") {
-        const noteId = nq.source === "sector_suggestion" ? `ps-${nq.id.replace(/^sector:/, "")}` : `${nq.id}:${optionIndex}`;
+        // Earned questions resolve against one stable per-question id.
+        // The selected option is preserved separately in the decision
+        // ledger, so encoding the option index here only made a recorded
+        // answer invisible to the question's earnedBy() guard and caused
+        // the same question to return immediately after being answered.
+        const noteId = nq.source === "sector_suggestion" ? `ps-${nq.id.replace(/^sector:/, "")}` : `qn-${nq.id}`;
         beginOrExtendSubmission();
         setNoted((ns) => (ns.some((n) => n.id === noteId) ? ns : [...ns, { id: noteId, label: answer.text, section: nq.target, own: true }]));
         recordDecision(nq.id, opt.label, { action: "note", optionId: noteId, resultingFactPaths: [], resultingNoted: [{ id: noteId, label: answer.text, section: nq.target, own: true }] });

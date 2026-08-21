@@ -114,7 +114,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
   },
   {
     id: "q-root-scope",
-    question: "Are you buying SASE, SD-WAN or SSE? The technology scope selects which question sets vendors answer.",
+    question: "Which technology scope do you need? Full SASE includes both SD-WAN and SSE security. Who operates it is a separate decision.",
     section: "objectives",
     weight: 93,
     earnedBy: (c) =>
@@ -124,11 +124,10 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
         (c.requirement.organisation?.regions ?? []).length > 0 ||
         (c.requirement.constraints?.complianceRequirements ?? []).length > 0),
     options: [
-      { label: "SASE", answer: { kind: "items", itemIds: ["buy-sase"] } },
-      { label: "SD-WAN", answer: { kind: "items", itemIds: ["buy-sdwan"] } },
-      { label: "SSE", answer: { kind: "items", itemIds: ["buy-sse"] } },
-      { label: "Managed security", answer: { kind: "items", itemIds: ["buy-sec"] } },
-      { label: "Not sure yet", answer: { kind: "dismiss" } },
+      { label: "Full SASE — SD-WAN + SSE security", answer: { kind: "items", itemIds: ["buy-sase"] } },
+      { label: "SD-WAN only", answer: { kind: "items", itemIds: ["buy-sdwan"] } },
+      { label: "SSE security only", answer: { kind: "items", itemIds: ["buy-sse"] } },
+      { label: "Not sure yet — decide later", answer: { kind: "dismiss" } },
     ],
     evidence: [{ source: "buyer_archetype", query: "What technology scope is being bought? The scope selects the vendor question sets." }],
   },
@@ -161,7 +160,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
     question: "You run Azure. Is Azure Virtual WAN integration in scope?",
     section: "estate",
     weight: 80,
-    earnedBy: (c) => hasCloud(c.requirement, "azure"),
+    earnedBy: (c) => hasCloud(c.requirement, "azure") && !c.notedIds.includes("qn-q-azure-vwan"),
     options: [
       { label: "In scope", answer: { kind: "note", text: "Azure Virtual WAN integration in scope" } },
       { label: "Not in scope", answer: { kind: "dismiss" } },
@@ -173,7 +172,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
     question: "You run MPLS today. Keep some circuits through migration, or full replacement?",
     section: "estate",
     weight: 85,
-    earnedBy: (c) => hasNet(c.requirement, "mpls") && networkBuying(c.buying),
+    earnedBy: (c) => hasNet(c.requirement, "mpls") && networkBuying(c.buying) && !c.notedIds.includes("qn-q-mpls-keep"),
     options: [
       { label: "Keep some circuits", answer: { kind: "note", text: "Some MPLS circuits retained through migration" } },
       { label: "Full replacement", answer: { kind: "note", text: "Full MPLS replacement" } },
@@ -188,7 +187,9 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
     question: "Sites beyond the UK: is in-country breakout and data residency required?",
     section: "estate",
     weight: 82,
-    earnedBy: (c) => (c.requirement.organisation?.regions ?? []).some((r) => r !== "uk" && r !== "ie"),
+    earnedBy: (c) =>
+      (c.requirement.organisation?.regions ?? []).some((r) => r !== "uk" && r !== "ie") &&
+      !c.notedIds.includes("qn-q-residency"),
     options: [
       { label: "Required", answer: { kind: "note", text: "In-country breakout and data residency required" } },
       { label: "Not required", answer: { kind: "dismiss" } },
@@ -279,7 +280,10 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
     question: "At your site count, is dual-circuit resilience per site required?",
     section: "estate",
     weight: 70,
-    earnedBy: (c) => (c.requirement.estate?.sites ?? 0) >= 10 && networkBuying(c.buying),
+    earnedBy: (c) =>
+      (c.requirement.estate?.sites ?? 0) >= 10 &&
+      networkBuying(c.buying) &&
+      !c.notedIds.includes("qn-q-resilience"),
     options: [
       { label: "Required", answer: { kind: "note", text: "Dual-circuit resilience per site required" } },
       { label: "Critical sites only", answer: { kind: "note", text: "Dual-circuit resilience at critical sites only" } },

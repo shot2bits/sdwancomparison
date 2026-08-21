@@ -429,6 +429,18 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     // The computed pack range is inside the question wording (counted claims).
     const worded = a.find((q) => q.id === "q-root-sector");
     expect(Boolean(worded && /adds between \d+ and \d+ of its own/.test(worded.question)), "the pack range is computed into the wording");
+    const scope = d.find((q) => q.id === "q-root-scope");
+    expect(Boolean(scope?.options.some((o) => /Full SASE.*SD-WAN.*SSE/.test(o.label))), "the combined SD-WAN + SSE choice is explicit");
+    expect(!scope?.options.some((o) => /Managed security/i.test(o.label)), "delivery model is not mixed into technology scope");
+  });
+
+  await ok("SD-WAN plus SSE is normalised to full SASE without changing its operating model", () => {
+    const combined = deterministicExtract("We need SD-WAN and SSE across our sites");
+    expect(combined.some((u) => u.path === "procurement.buying" && u.value === "sase"), "both technology halves land as full SASE");
+    expect(!combined.some((u) => u.path === "procurement.operatingModel"), "no delivery model is invented");
+    const managed = deterministicExtract("We need SD-WAN and SSE, fully managed by a provider");
+    expect(managed.some((u) => u.path === "procurement.buying" && u.value === "sase"), "managed delivery does not overwrite full SASE scope");
+    expect(managed.some((u) => u.path === "procurement.operatingModel" && u.value === "managed"), "managed delivery lands separately");
   });
 
   await ok("Pack 3, Geography: country names reach their regions instead of vanishing", () => {
@@ -815,6 +827,8 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(!dismissed.some((q) => q.id === "q-hc-clinical"), "dismissal is permanent for pack questions too");
     const answered = earnedQuestions(health, "sdwan", null, ["qn-q-hc-mdr"], []);
     expect(!answered.some((q) => q.id === "q-hc-mdr"), "a standing answer suppresses its question");
+    const genericAnswered = earnedQuestions({ organisation: { regions: ["eu"] } } as never, "sase", null, ["qn-q-residency"], []);
+    expect(!genericAnswered.some((q) => q.id === "q-residency"), "a standing answer suppresses a generic note question too");
   });
 
   await ok("F-A extension: no count without a stated number (the bridge walk's live catch)", () => {
