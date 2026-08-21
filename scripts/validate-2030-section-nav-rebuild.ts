@@ -15,9 +15,9 @@
  * THE REBUILD, guarded here:
  *  A. WizardRail.tsx is genuinely retired (deleted, not merely unwired)
  *     and SectionNav.tsx takes its render slot as primary navigation.
- *  B. SectionDetail renders ahead of the full document twin on the
- *     `describe` station -- "what section, why it matters, how complete,
- *     answerable in place" all in one pane, none of it removed elsewhere.
+ *  B. The living document leads the `describe` station. SectionDetail is
+ *     retained as optional, collapsed guidance so the primary surface is
+ *     the thing being built rather than another explanatory card.
  *  C. Every real outline-row key the compiler can ever produce
  *     (buildSectionOutline, procurement-outline.ts) has a coaching entry
  *     -- a blank pane for a real section is exactly the "no idea what's
@@ -30,8 +30,8 @@
  *  E. The priming promise ("one message can fill several sections") is
  *     stated before a buyer has typed anything, honestly (round-6 law:
  *     no fabricated example sentence).
- *  F. The AnswerNext "fills section" footnote is a real jump link, not
- *     inert text, wired to the SAME section state the nav reads.
+ *  F. The persistent decision rail's section link is real, not inert,
+ *     and is wired to the SAME section state the nav reads.
  */
 
 import { readFileSync, existsSync } from "node:fs";
@@ -53,7 +53,7 @@ const record = (pass: boolean, label: string, detail = "") => {
 const desk = src("src/components/ProjectDesk.tsx");
 const nav = src("src/components/procurement/SectionNav.tsx");
 const detail = src("src/components/procurement/SectionDetail.tsx");
-const answerNext = src("src/components/procurement/AnswerNext.tsx");
+const decisionRail = src("src/components/procurement/DecisionRail2030.tsx");
 
 /* ================================================================ */
 /* A. WizardRail is genuinely retired, SectionNav is the primary nav. */
@@ -63,11 +63,11 @@ record(exists("src/components/procurement/SectionNav.tsx"), "A: SectionNav.tsx e
 record(!/<WizardRail/.test(desk), "A: ProjectDesk.tsx no longer renders <WizardRail");
 record(/<SectionNav/.test(desk), "A: ProjectDesk.tsx renders <SectionNav in its place");
 record(
-  /data-sticky-chrome-end[\s\S]{0,80}<SectionNav/.test(desk),
-  "A: SectionNav sits in the SAME sticky chrome slot the retired rail occupied (position/visual weight preserved)",
+  /data-workspace-grid[\s\S]{0,500}<SectionNav/.test(desk),
+  "A: SectionNav sits in the workspace grid as the primary vertical area rail",
 );
 record(/rows=\{sectionOutline\}/.test(desk), "A: SectionNav is given the real sectionOutline, not a second computation");
-record(/onSelect=\{\(key\) => \{ setActiveSection\(key\); goToStep\("describe"\); \}\}/.test(desk), "A: selecting a row sets the active section AND returns to the pane it renders in");
+record(/onSelect=\{\(key\) => \{ setActiveSection\(key\); setWorkspaceDocumentView\("requirement"\); goToStep\("describe"\); \}\}/.test(desk), "A: selecting a row sets the active section, opens the requirement view and returns to the pane it renders in");
 
 /* ================================================================ */
 /* B. SectionDetail leads the `describe` station; the document twin   */
@@ -79,25 +79,16 @@ record(describeBranchStart !== -1 && describeBranchEnd > describeBranchStart, "B
 const describeBranch = desk.slice(describeBranchStart, describeBranchEnd);
 record(/<SectionDetail/.test(describeBranch), "B: SectionDetail renders on the `describe` station");
 record(/\{canvasBlock\}/.test(describeBranch), "B: the full document twin (canvasBlock) still renders on the same station, un-removed");
-record(
-  describeBranch.indexOf("<SectionDetail") < describeBranch.indexOf("{canvasBlock}"),
-  "B: SectionDetail leads, ahead of the document twin -- the focused entry point comes first",
-);
+record(describeBranch.indexOf("{canvasBlock}") < describeBranch.indexOf("<SectionDetail"), "B: the living document leads; optional section guidance follows");
 record(/coaching=\{coachingFor\(activeRow\.key\)\}/.test(describeBranch), "B: SectionDetail is given real per-section coaching copy, not invented inline text");
 record(/cards=\{activeSectionCards\}/.test(describeBranch), "B: SectionDetail is given the open questions actually filtered to this section");
 
-/* Correction pass (Robert, 20 Aug 2026, on a live screenshot: "really,
-   really bad... just a jumble of words" -- the full compiled document
-   was rendering unconditionally right under SectionDetail, in a
-   completely different visual register). canvasBlock must now be
-   collapsed by default on `describe`, one click away, not gone. */
-record(/const \[showFullDocument, setShowFullDocument\] = useState\(false\)/.test(desk), "B correction: a real collapse state exists and defaults to COLLAPSED (false), not expanded");
-record(/showFullDocument && <div className="mt-4">\{canvasBlock\}<\/div>/.test(describeBranch), "B correction: canvasBlock only renders on `describe` when showFullDocument is true -- gated, not unconditional");
+/* The approved final shell keeps the document permanently visible and
+   uses the former disclosure state for optional section guidance. */
+record(/const \[showFullDocument, setShowFullDocument\] = useState\(false\)/.test(desk), "B correction: optional guidance defaults to collapsed");
+record(/showFullDocument && activeRow/.test(describeBranch) && /<SectionDetail/.test(describeBranch), "B correction: SectionDetail, not the document, is gated by the disclosure state");
 record(/onClick=\{\(\) => setShowFullDocument\(\(v\) => !v\)\}/.test(describeBranch), "B correction: a real toggle button flips the collapse state (not a dead/decorative control)");
-record(
-  !/^\s*\{canvasBlock\}\s*$/m.test(describeBranch.replace(/\{showFullDocument && <div className="mt-4">\{canvasBlock\}<\/div>\}/, "")),
-  "B correction: no OTHER, still-unconditional `{canvasBlock}` remains in the `describe` branch once the gated one is excluded",
-);
+record(/^\s*\{canvasBlock\}\s*$/m.test(describeBranch), "B correction: one authoritative document remains unconditionally visible");
 
 /* ================================================================ */
 /* C. Every real outline-row key has a coaching entry.                */
@@ -182,11 +173,11 @@ record(/complete several sections at once/.test(desk), "E: the pre-start welcome
 record(!/SD-WAN and [Cc]ompliance/.test(desk), "E: round-6 law held -- the mechanism is described, not demonstrated with an invented example sentence");
 
 /* ================================================================ */
-/* F. The "fills section" footnote is a real jump link.               */
+/* F. The decision rail's section link is a real jump link.            */
 /* ================================================================ */
-record(/onJumpToSection\?\s*:\s*\(title: string\) => void/.test(answerNext), "F: AnswerNext accepts an optional onJumpToSection callback");
-record(/onClick=\{\(\) => onJumpToSection\(fills\.title\)\}/.test(answerNext), "F: clicking the footnote (when wired) jumps by the card's own real section title, not a guess");
-record(/onJumpToSection=\{onJumpToSection\}/.test(desk), "F: ProjectDesk actually wires AnswerNext's footnote to the real section-jump handler");
+record(/onJumpToSection: \(title: string\) => void/.test(decisionRail), "F: DecisionRail2030 requires a section-jump callback");
+record(/onClick=\{\(\) => onJumpToSection\(card\.fills!\.title\)\}/.test(decisionRail), "F: clicking the link jumps by the card's own real section title, not a guess");
+record(/onJumpToSection=\{onJumpToSection\}/.test(desk), "F: ProjectDesk wires the decision rail to the real section-jump handler");
 record(/const found = sectionOutline\.find\(\(r\) => r\.title === title\)/.test(desk), "F: the jump handler resolves the title against the SAME live outline, never a stale copy");
 
 console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);

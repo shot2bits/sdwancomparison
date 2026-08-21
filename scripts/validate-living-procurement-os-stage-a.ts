@@ -414,6 +414,7 @@ function main() {
   /* ================================================================ */
   const desk = readFileSync(new URL("../src/components/ProjectDesk.tsx", import.meta.url), "utf8");
   const canvas = readFileSync(new URL("../src/components/procurement/LivingProcurementCanvas.tsx", import.meta.url), "utf8");
+  const workspaceDocument = readFileSync(new URL("../src/components/procurement/ProcurementWorkspaceDocument.tsx", import.meta.url), "utf8");
   const arch = readFileSync(new URL("../src/components/procurement/ProcurementArchitecture.tsx", import.meta.url), "utf8");
   const clauseList = readFileSync(new URL("../src/components/procurement/ProcurementClauseList.tsx", import.meta.url), "utf8");
   const supplierPack = readFileSync(new URL("../src/components/procurement/SupplierPackView.tsx", import.meta.url), "utf8");
@@ -442,7 +443,7 @@ function main() {
     "Part B/THE CORRECTION: previousProcurementDocumentRef is frozen until a NAMED revision cycle actually lands -- the change ribbon compares complete buyer-event snapshots, not intermediate settling renders",
     "",
   );
-  record(desk.includes("<LivingProcurementCanvas"), "Part B: ProjectDesk.tsx actually renders <LivingProcurementCanvas", "");
+  record(desk.includes("<ProcurementWorkspaceDocument"), "Part B: ProjectDesk.tsx renders the final workspace document projection", "");
   // CORRECTED (Robert's follow-up visual-closure directive, 18 Aug 2026,
   // item 7 -- "visibly preserve the value-building story" through states
   // 3-5): this fixture originally required the canvas to be gated on
@@ -460,8 +461,9 @@ function main() {
   // must never be reachable while the new canvas is also shown.
   record(desk.includes('LOCKED OUTCOME (was "WHO FITS")'), "Part B: the Phase 2 locked-outcome panel's own header comment is still present, byte-identical marker", "");
   const fitsIdx = desk.indexOf('{phase === "fits" && (');
-  const canvasIdx = desk.indexOf("<LivingProcurementCanvas");
-  record(fitsIdx > 0 && canvasIdx > 0 && canvasIdx < fitsIdx, "Part B: the new canvas's own JSX appears strictly before the phase===\"fits\" locked panel in source order (not nested inside it, not after it)", `canvasIdx=${canvasIdx} fitsIdx=${fitsIdx}`);
+  const canvasIdx = desk.indexOf("<ProcurementWorkspaceDocument");
+  const canvasBlockIdx = desk.indexOf("const canvasBlock = (");
+  record(fitsIdx > 0 && canvasBlockIdx > 0 && canvasIdx > canvasBlockIdx, "Part B: the workspace document is isolated inside canvasBlock, separate from the phase===\"fits\" locked market panel", `canvasBlockIdx=${canvasBlockIdx} canvasIdx=${canvasIdx} fitsIdx=${fitsIdx}`);
   for (const forbidden of ["rankedFits", "matchInfo.count", ".suppliers", "invited_vendors", "matched_vendors"]) {
     // Only assert these SPECIFIC strings are absent from the NEW component
     // files (they legitimately exist elsewhere in ProjectDesk.tsx's own
@@ -520,9 +522,9 @@ function main() {
   // Mobile: no fixed pixel widths that would break small screens; the new
   // canvas relies on the same max-w-[1000px] mx-auto responsive wrapper
   // every other section of this page already uses.
-  record(desk.includes('max-w-[1000px] px-[26px] pb-2 pt-[6px]'), "Part B: the new canvas mounts inside the SAME responsive max-width wrapper the rest of the page uses (no new fixed-width container)", "");
-  record(/flex-wrap/.test(canvas), "Part B: the canvas cover/tabs layout wraps on narrow viewports", "");
-  record(/overflow-x-auto/.test(canvas), "Part B: the view-switch tabs scroll horizontally rather than overflow on narrow viewports", "");
+  record(/className="nf-2030-main"/.test(desk) && /\.nf-2030-main/.test(globalsCss), "Part B: the new document mounts in the responsive workspace main area (no fixed-width container)", "");
+  record(/nf-2030-document-tabs/.test(workspaceDocument) && /flex-wrap/.test(globalsCss), "Part B: the workspace document tabs wrap on wider layouts", "");
+  record(/nf-2030-document-tabs/.test(globalsCss) && /overflow-x: auto/.test(globalsCss), "Part B: the view-switch tabs scroll horizontally rather than overflow on narrow viewports", "");
 
   /* ================================================================ */
   /* Part D: Living Procurement UK Decision-Maker Blueprint             */

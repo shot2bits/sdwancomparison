@@ -44,7 +44,7 @@ function main() {
     const checklist = src("src/lib/workspace/publish-checklist.ts");
     record(/buildPublishChecklist\(/.test(desk), "0: ProjectDesk builds the publish checklist from the shared pure module", "");
     record(/!publishChecklist\.ready/.test(desk), "0: signLocked is gated on that SAME checklist object, not a parallel re-derivation", "");
-    record(/checklist=\{publishChecklist\}/.test(desk), "0: the OrientationBand a buyer reads is handed the identical object", "");
+    record(/sectionProgress\.ready/.test(desk) && /sectionProgress\.total/.test(desk), "0: the final workspace status band reads the canonical section progress projection", "");
     record(/ready: doneCount === items\.length/.test(checklist), "0: `ready` is derived from the items themselves, so the count shown and the gate enforced cannot disagree", "");
     record(!/materialDecisions/.test(checklist), "0: open decisions are NOT part of the gate -- they are advisory and generative, and including them could produce a gate that never empties", "");
   }

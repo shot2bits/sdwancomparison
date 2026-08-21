@@ -111,7 +111,7 @@ function main() {
   record(/<SectionNav[\s\S]{0,400}progress=\{sectionProgress\}/.test(desk), "C: the primary navigation reads it (only rendered once a project has started)");
   record(/outlineProgress\(outline\)/.test(canvas), "C: the document header derives it from the outline it is about to render");
   record(/outlineProgressLine\(progress\)/.test(canvas), "C: the header uses the shared wording function, not its own sentence");
-  record(/outlineProgressLine\(progress\)/.test(nav), "C: the primary nav states the fraction via the SAME shared wording function, not its own sentence");
+  record(/progress\.ready\}\/\{progress\.total/.test(nav), "C: the primary nav reads ready and total directly from the SAME shared progress object");
 
   /* ================================================================ */
   /* D. A QUESTION KNOWS WHERE IT LANDS.                               */
@@ -139,8 +139,8 @@ function main() {
   );
   record(/onPublish/.test(ready) && /onReview/.test(ready), "E: it hands over the two real next actions rather than another question");
   record(/holds publishing up/.test(ready), "E: remaining decisions are named optional out loud, not hidden");
-  record(/demoted \? "Optional/.test(answerNext), "E: the question block demotes itself rather than disappearing (suppressing real open decisions would be the opposite dishonesty)");
-  record(/demoted=\{rfpIsBuilt\}/.test(desk), "E: the demotion is driven by the same real gate");
+  record(/demoted \? "Optional/.test(answerNext), "E: the retained secondary AnswerNext component still supports honest optional framing");
+  record(/const rfpReadyBlock = rfpIsBuilt \?/.test(desk) && /\{rfpReadyBlock\}/.test(desk), "E: the publishable handoff shown in activity is driven by the same real gate");
 
   console.log(failures === 0 ? "\nALL PASS" : `\nFAILs: ${failures}`);
   if (failures) process.exit(1);

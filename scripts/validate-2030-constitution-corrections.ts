@@ -82,8 +82,8 @@ function main() {
        So the dock is reinstated for phones ONLY. At `lg` and above --
        the layout the original instruction was about -- it reverts to
        sticky-within-the-chat-column, and no page-wide dock exists. */
-    record(/fixed inset-x-0 bottom-0 z-40[^"]*lg:sticky/.test(desk), "2: the composer is a fixed bottom bar ONLY below lg (phones), reverting to sticky-within-the-column at lg -- the desktop page-wide dock Robert removed stays removed", "");
-    record(/pb-\[104px\] lg:pb-16/.test(desk), "2: the grid reserves matching bottom padding below lg so nothing hides behind that phone bar", "");
+    record(/nf-2030-command-zone[\s\S]{0,500}\{composerBlock\}/.test(desk), "2: once started, the one real composer renders in the global command zone above every procurement view", "");
+    record(!/fixed inset-x-0 bottom-0 z-40/.test(desk), "2: no phone or desktop page-wide composer dock remains", "");
   }
 
   /* ================================================================ */
@@ -96,6 +96,7 @@ function main() {
   /* ================================================================ */
   {
     const desk = src("src/components/ProjectDesk.tsx");
+    const globals = src("src/app/globals.css");
     record(!/mcExpanded \? "pb-\[150px\]" : "pb-6"/.test(desk), "3: no mobile aside branches its bottom padding on mcExpanded (no fixed dock left to conditionally clear)", "");
     // Superseded 19 Aug 2026 (structural pass): there is no mobile aside to
     // pad. The two-pane shell replaces it, and the ordering guarantee that
@@ -103,8 +104,8 @@ function main() {
     // the chat pane -- without `flex flex-col` below `lg` the `order-*`
     // classes are inert and tapping a station appears to do nothing (a real
     // regression, caught on a live 390px run during this pass).
-    record(/mx-auto flex w-full max-w-\[1400px\] flex-col px-\[26px\] pb-\[104px\] lg:pb-16 lg:grid/.test(desk), "3: the two-pane container is a flex column below lg, so the order-* classes that put the active station above the chat pane on mobile actually take effect", "");
-    record(/className="order-1 min-w-0 lg:order-2"/.test(desk), "3: the station pane is order-1 on mobile (first) and order-2 on desktop (right of the chat)", "");
+    record(/data-workspace-grid className="nf-2030-grid"/.test(desk) && /@media \(max-width: 720px\)[\s\S]*\.nf-2030-grid \{ display: flex; flex-direction: column; \}/.test(globals), "3: the three-area workspace becomes one clear vertical flow on phones", "");
+    record(/\.nf-2030-main \{ order: 2/.test(globals) && /\.nf-2030-aside \{ order: 3/.test(globals), "3: the living document precedes the decision rail on phones", "");
   }
 
   /* ================================================================ */

@@ -109,11 +109,11 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
 import SectionNav from "@/components/procurement/SectionNav";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
+import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
+import DecisionRail2030 from "@/components/procurement/DecisionRail2030";
 import { buildAnsweredLog } from "@/lib/workspace/answered-log";
 import CapturedList from "@/components/procurement/CapturedList";
 import RfpReady from "@/components/procurement/RfpReady";
-import AnswerNext from "@/components/procurement/AnswerNext";
-import OrientationBand from "@/components/procurement/OrientationBand";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
 
@@ -1143,6 +1143,8 @@ export default function ProjectDesk({
    *  unconditionally, unaffected by this -- reviewing the full document
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
+  const [issueTarget, setIssueTarget] = useState<"concise" | "formal">("concise");
+  const [workspaceDocumentView, setWorkspaceDocumentView] = useState<WorkspaceDocumentView>("requirement");
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
    *  publish panel and everything downstream of it). Rather than rewrite
@@ -3882,8 +3884,6 @@ export default function ProjectDesk({
     return out;
   }, [facts, noted, unansweredGaps, earnedAll, receipts]);
 
-  const understood = live.length + noted.length;
-
   /* ---- The header's derived name (the reference: the project names
      itself from what it holds) ---- */
   const sectorShort = (() => {
@@ -4071,50 +4071,6 @@ export default function ProjectDesk({
      open rather than rendering an empty pane. */
   const activeStep: WizardStep = reachable.has(step) ? step : "describe";
 
-  const identityBar = (
-          started && (
-            <div className="flex w-full flex-wrap items-baseline gap-x-4 gap-y-1 pb-2">
-              <span className="text-[14.5px] font-medium text-[#1c1a18]">{projectName}</span>
-              {created ? (
-                <a
-                  href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}
-                  className="text-[11.5px] text-[#1e4e22] underline decoration-[#91bb91] underline-offset-2 hover:decoration-[#1e4e22]"
-                  style={mono}
-                >
-                  {saveDirty ? "saved, edits since" : "saved"} · open your project record
-                </a>
-              ) : (
-                <span className="text-[11.5px] text-[#66635e]" style={mono}>nothing leaves this page</span>
-              )}
-              <span className="flex-1" />
-              <button
-                type="button"
-                onClick={() => { setReqOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}
-                className="flex cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-[13.5px] text-[#83807b] hover:text-[#110f0d]"
-              >
-                <span className="inline-block h-[6px] w-[6px] rounded-full bg-[#308639]" aria-hidden="true" />
-                {understood} {understood === 1 ? "thing" : "things"} understood · see the requirement
-              </button>
-              {(!created || saveDirty) && (
-                <button
-                  type="button"
-                  onClick={() => { setSaveOpen(true); setSaveError(null); }}
-                  className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#83807b] underline decoration-[#d3d0cd] underline-offset-2 hover:text-[#110f0d]"
-                >
-                  {created ? "Save changes" : "Save this project"}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => window.location.assign(window.location.pathname)}
-                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-[#66635e] hover:text-[#110f0d]"
-              >
-                Start again
-              </button>
-            </div>
-          )
-  );
-
   const understandingBand = (
           <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
             <div className="min-w-[220px] flex-1">
@@ -4148,7 +4104,7 @@ export default function ProjectDesk({
   const composerWide = !started;
   const composerBlock = (
       <div
-        className={composerWide ? "relative border-b" : "relative"}
+        className={`${composerWide ? "relative border-b" : "relative"}${composerWide ? "" : " nf-2030-composer-shell"}`}
         style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
       >
         <div className={composerWide ? "mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]" : "w-full px-0 py-3 lg:px-6"}>
@@ -4162,7 +4118,7 @@ export default function ProjectDesk({
               up-arrow triggered a file picker, and the real send action
               was a separate text-labelled pill button ("Apply") to its
               right, which is not how any chat surface reads. */}
-          <div className="flex items-end gap-2 rounded-[4px] border border-[#d3d0cd] bg-white py-2 pl-[18px] pr-2">
+          <div className="nf-2030-composer flex items-end gap-2 rounded-[4px] border border-[#d3d0cd] bg-white py-2 pl-[18px] pr-2">
             <textarea
               ref={inputRef}
               value={draft}
@@ -4311,16 +4267,6 @@ export default function ProjectDesk({
       onPublish={() => goToStep("publish")}
     />
   ) : null;
-
-  const answerNextBlock = (
-    <AnswerNext
-      cards={nextQuestionCards}
-      totalOutstanding={materialDecisionsRemaining}
-      demoted={rfpIsBuilt}
-      onSeeAll={() => goToStep("decisions")}
-      onJumpToSection={onJumpToSection}
-    />
-  );
 
   const sectorChips = (
           !coreFive.sector && (
@@ -4497,30 +4443,16 @@ export default function ProjectDesk({
                         most -- right where the buyer is about to publish, and right
                         after they have. */}
                     {(phase === "live" || phase === "fits") && started && (
-                      <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2 pt-[6px]">
-                        <LivingProcurementCanvas
+                      <div className="w-full">
+                        <ProcurementWorkspaceDocument
                           document={canvasDocument}
-                          view={procurementView}
-                          onViewChange={setProcurementView}
+                          activeSection={activeRow}
+                          view={workspaceDocumentView}
+                          onViewChange={setWorkspaceDocumentView}
+                          issueTarget={issueTarget}
                           factsKept={live.length}
                           factsStruck={Math.max(0, facts.length - live.length)}
                           sourceTurnCount={sourceTurns.length}
-                          nextQuestionCards={undefined}
-                          /* 2030 UI rebuild: `outline` intentionally omitted
-                             here. SectionNav (primary navigation) and
-                             SectionDetail (just above this canvas on the
-                             `describe`/`review` stations) now own the
-                             section-outline surface, interactively; this
-                             canvas rendering the SAME rows again, still
-                             read-only, would be exactly the "two
-                             competing lists" confusion the rebuild exists
-                             to remove. Nothing else about the canvas
-                             changes -- title/summary/readiness, the fact
-                             strip, the clause list and the architecture
-                             twin are all untouched. */
-                          materialDecisionsRemaining={materialDecisionsRemaining}
-                          acceptedSuggestionCards={acceptedSuggestionCards}
-                          acceptedSuggestionsTitle={sectorSectionTitle}
                         />
                       </div>
                     )}
@@ -4539,7 +4471,7 @@ export default function ProjectDesk({
                         breaking it at the exact moment (about to publish, just
                         published) it matters most. */}
                     {(phase === "live" || phase === "fits") && started && created?.id && (
-                      <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-2">
+                      <div className="mt-4 w-full">
                         <McpEvidencePanel history={projectHistory} />
                       </div>
                     )}
@@ -4549,8 +4481,9 @@ export default function ProjectDesk({
 
   return (
     <div
-      className="pd-root"
-      style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', color: "#110f0d" }}
+      className={`pd-root${started ? " nf-2030-workspace" : ""}`}
+      data-workspace-started={started ? "true" : "false"}
+      style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
       onDragOver={(e) => { e.preventDefault(); }}
       onDrop={(e) => { e.preventDefault(); readFile(e.dataTransfer?.files?.[0]); }}
     >
@@ -4562,35 +4495,80 @@ export default function ProjectDesk({
         /* column, the active station filling the rest.                  */
         /* ============================================================ */
         <>
-          <div
-            /* Sticky only from `lg` up. The 52/97 offsets assume this bar
-               is ~53px, which holds on desktop -- but its content wraps to
-               FOUR lines at 390px (measured: 147px tall), so pinned at 52
-               it covered the wizard rail pinned at 97 completely. The rail
-               is the more important of the two to keep on screen (it is
-               how you move between stations), and the identity bar's
-               contents are reachable by scrolling up. Only visible when
-               the page is scrolled, which is why the earlier unscrolled
-               mobile screenshots did not catch it. */
-            className="z-30 border-b lg:sticky lg:top-[52px]"
-            style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
-          >
-            <div className="mx-auto w-full max-w-[1400px] px-[26px] py-2.5 lg:px-[42px]">{identityBar}</div>
-          </div>
-          {/* Below lg the identity bar above is no longer sticky, so the
-              nav pins directly under the header at 52 instead of 97.
-              2030 UI rebuild (20 Aug 2026): SectionNav replaces WizardRail
-              in this exact slot -- same position, same visual weight,
-              different content (sections you click, not stages you pass
-              through). Selecting a row sets the active SECTION and, if the
-              buyer is deep in Decisions/Review/Publish/Compare, also
-              returns them to the `describe` step, since that is the one
-              place SectionDetail renders. */}
-          <div data-sticky-chrome-end className="sticky top-[52px] z-20 lg:top-[97px]">
+          <header className="nf-2030-header">
+            <div className="nf-2030-brand" aria-label="Netify">N</div>
+            <div className="nf-2030-project-title">
+              <strong>{projectName}</strong>
+              <span>{created ? (saveDirty ? "Saved · edits since" : "Saved just now") : "Private working draft"} · Draft {canvasDocument.version}</span>
+            </div>
+            <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
+              <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}>Build</button>
+              <button type="button" data-current={activeStep === "review"} onClick={() => goToStep("review")}>Review</button>
+              <button type="button" data-current={activeStep === "publish"} disabled={!reachable.has("publish")} onClick={() => goToStep("publish")}>Issue</button>
+              <button type="button" data-current={activeStep === "compare"} disabled={!reachable.has("compare")} onClick={() => goToStep("compare")}>Responses</button>
+              <button type="button" disabled>Decision</button>
+            </nav>
+            <div className="nf-2030-header-actions">
+              <button type="button" className="mobile-hide" onClick={() => { setReqOpen(true); ev("workspace_command", { kind: "sheet_open" }); }}>Source facts</button>
+              {created && <a className="mobile-hide" href={`/sase/project/${created.id}${created.manage ? `?manage=${encodeURIComponent(created.manage)}` : ""}`}>Project record</a>}
+              {(!created || saveDirty) && <button type="button" onClick={() => { setSaveOpen(true); setSaveError(null); }}>{created ? "Save changes" : "Save"}</button>}
+              <button type="button" className="mobile-hide" onClick={() => goToStep("review")}>Preview</button>
+              <button type="button" className="primary" onClick={() => goToStep(reachable.has("publish") ? "publish" : "review")}>Review & issue</button>
+            </div>
+          </header>
+
+          <section className="nf-2030-command-zone" aria-label="Describe or change the procurement">
+            <div className="nf-2030-command-title">
+              <strong>Describe or change anything</strong>
+              <span>Your words update the requirement, supplier pack, architecture and evaluation model together.</span>
+            </div>
+            {composerBlock}
+            <div className="nf-2030-command-actions">
+              <button type="button" onClick={() => fileRef.current?.click()}>+ Add document</button>
+              <button type="button" onClick={() => inputRef.current?.focus()}>Connect source</button>
+              {voiceSupported && <button type="button" onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}>{voiceState === "idle" ? "Voice" : "Stop listening"}</button>}
+              <button type="button" onClick={() => setWorkspaceDocumentView("architecture")}>Show architecture</button>
+              <button type="button" onClick={() => goToStep("decisions")}>What is missing?</button>
+            </div>
+            <div className="nf-2030-context-line">
+              <span>{canvasDocument.provenance.buyer} stated by you</span>
+              <span>{sourceTurns.length} recorded sources</span>
+              <span>{canvasDocument.provenance.netify} Netify suggestions</span>
+              <span>{canvasDocument.provenance.sector} sector rules</span>
+              <span className="control">All changes are reviewable · issuing always requires approval</span>
+            </div>
+          </section>
+
+          <section className="nf-2030-status" aria-label="Issue readiness">
+            <label>
+              <span>Issue target</span>
+              <select value={issueTarget} onChange={(event) => setIssueTarget(event.target.value as "concise" | "formal")}>
+                <option value="concise">Concise supplier requirement</option>
+                <option value="formal">Formal RFP</option>
+              </select>
+            </label>
+            <div className="nf-2030-readiness">
+              <div><strong>{sectionProgress.ready} of {sectionProgress.total} areas {issueTarget === "formal" ? "structured" : "ready"}</strong><span>{materialDecisionsRemaining} decision{materialDecisionsRemaining === 1 ? "" : "s"} remain</span></div>
+              <div className="nf-2030-progress" aria-label={`${sectionProgress.ready} of ${sectionProgress.total} areas ready`}>
+                {Array.from({ length: sectionProgress.total }, (_, index) => <span key={index} data-ready={index < sectionProgress.ready} />)}
+              </div>
+            </div>
+            <div className="nf-2030-next-summary"><strong>Next decision</strong><span>{nextQuestionCards[0]?.nq.question ?? "Review the document and prepare it for issue."}</span></div>
+          </section>
+
+          {/* `flex flex-col` below lg, not a plain block: the `order-*`
+              classes on the two panes only take effect inside a flex or
+              grid container, and without them mobile fell back to DOM
+              order and rendered the chat pane ABOVE the station content --
+              so tapping "Decisions" on a phone appeared to do nothing,
+              with the decisions themselves a full screen further down
+              (caught on a real 390px run, not assumed). Station first on
+              mobile, chat first on desktop. */}
+          <div data-workspace-grid className="nf-2030-grid">
             <SectionNav
               rows={sectionOutline}
               activeKey={activeRow?.key ?? null}
-              onSelect={(key) => { setActiveSection(key); goToStep("describe"); }}
+              onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); goToStep("describe"); }}
               progress={sectionProgress}
               updatedBanner={sectionsUpdatedBanner}
               materialDecisionsRemaining={materialDecisionsRemaining}
@@ -4601,35 +4579,6 @@ export default function ProjectDesk({
               onPublish={() => goToStep("publish")}
               onCompare={() => goToStep("compare")}
             />
-          </div>
-
-          {/* The orientation band -- what am I making / what's stopping me
-              / what do I get. Deliberately OUTSIDE the sticky rail: it is
-              context a buyer reads once per visit, not chrome that must
-              follow them down a long document. */}
-          <div className="mt-4">
-            <OrientationBand
-              startCollapsed={started}
-              summary={canvasDocument.summary}
-              checklist={publishChecklist}
-              materialDecisionsRemaining={materialDecisionsRemaining}
-              published={publishedFlag}
-              responseCount={responseCount}
-              invitedCount={published?.invited.length ?? 0}
-              onReviewDecisions={() => goToStep("decisions")}
-              onCompare={() => goToStep("compare")}
-            />
-          </div>
-
-          {/* `flex flex-col` below lg, not a plain block: the `order-*`
-              classes on the two panes only take effect inside a flex or
-              grid container, and without them mobile fell back to DOM
-              order and rendered the chat pane ABOVE the station content --
-              so tapping "Decisions" on a phone appeared to do nothing,
-              with the decisions themselves a full screen further down
-              (caught on a real 390px run, not assumed). Station first on
-              mobile, chat first on desktop. */}
-          <div data-workspace-grid className="mx-auto flex w-full max-w-[1400px] flex-col px-[26px] pb-[104px] lg:pb-16 lg:grid lg:grid-cols-[368px_minmax(0,1fr)] lg:gap-0 lg:px-0">
             {/* LEFT PANE -- constant across all five stations, exactly as
                 every reference screenshot draws it: the buyer can correct
                 or add a sentence from any station without navigating
@@ -4652,8 +4601,7 @@ export default function ProjectDesk({
                  a flex column whose TRANSCRIPT scrolls and whose
                  composer is pinned to the bottom, always reachable
                  without scrolling. */
-              className="order-2 min-w-0 lg:order-1 lg:border-r"
-              style={{ borderColor: "var(--nf-rule, #d6d4d0)" }}
+              className="nf-2030-aside"
             >
               {/* THE PERSISTENT CHAT WINDOW. Sticking only the composer
                   left the transcript scrolling away above it and a tall
@@ -4663,30 +4611,22 @@ export default function ProjectDesk({
                   inside it. So the last thing said, the open questions and
                   the box you type into stay on screen together at any
                   window height. */}
-              <div className="lg:sticky lg:top-[var(--nf-chrome-h,180px)] lg:flex lg:max-h-[calc(100vh-var(--nf-chrome-h,180px)-12px)] lg:flex-col">
-              <div className="px-0 pt-5 lg:px-6">
-                <h2
-                  className="m-0 text-[17px] font-semibold leading-[1.3]"
-                  style={{ fontFamily: "var(--nf-font-serif)", letterSpacing: "-0.01em", color: "var(--nf-ink-950, #110f0d)" }}
-                >
-                  Describe what you&rsquo;re buying
-                </h2>
-                <p className="m-0 mt-1.5 text-[12.5px] leading-[1.5]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
-                  Write in your own words, from any screen &mdash; each sentence gets checked against the document.
-                </p>
-              </div>
+              <div className="nf-2030-aside-inner">
+              <DecisionRail2030
+                cards={nextQuestionCards}
+                totalOutstanding={materialDecisionsRemaining}
+                onSeeAll={() => goToStep("decisions")}
+                onJumpToSection={onJumpToSection}
+              />
               {/* Below `lg` this is ordinary page flow. At `lg` it is the
                   flex body of the persistent chat column: only the
                   transcript inside `threadBlock` scrolls, so the captured
                   list, the end state and the open questions can never be
                   pushed off the bottom by a long conversation. */}
-              <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-                {threadBlock}
-                {rfpReadyBlock}
-                {capturedBlock}
-                {answerNextBlock}
-                {sectorChips}
-              </div>
+              <details className="nf-2030-activity">
+                <summary>Activity and captured inputs</summary>
+                <div>{threadBlock}{rfpReadyBlock}{capturedBlock}{sectorChips}</div>
+              </details>
               {/* Pinned. `flex-none` so a long transcript can never push
                   it off the bottom of the pane. */}
               {/* PERSISTENT COMPOSER, 19 Aug 2026. Robert: "The AI chat
@@ -4721,18 +4661,12 @@ export default function ProjectDesk({
                   page-wide dock Robert removed on desktop stays removed
                   there. The grid carries matching bottom padding below
                   `lg` so nothing hides behind it. */}
-              <div
-                className="fixed inset-x-0 bottom-0 z-40 flex-none border-t px-[26px] lg:sticky lg:inset-x-auto lg:z-20 lg:px-0"
-                style={{ borderColor: "var(--nf-rule, #d6d4d0)", background: "var(--nf-ivory-raised, #fefdfc)" }}
-              >
-                {composerBlock}
-              </div>
               </div>
             </div>
 
             {/* RIGHT PANE -- the active station. */}
-            <div className="order-1 min-w-0 lg:order-2">
-              <div className="pt-6 lg:px-8">
+            <div className="nf-2030-main">
+              <div>
                 {activeStep === "describe" && (
                   <>
                     {/* 2030 UI rebuild (20 Aug 2026): the section-aware
@@ -4746,19 +4680,7 @@ export default function ProjectDesk({
                         card, which is what actually produced the "jumble
                         of words" complaint: a focused card followed
                         immediately by an unrelated wall of clause text. */}
-                    {activeRow && (
-                      <div className="mb-6">
-                        <SectionDetail
-                          row={activeRow}
-                          position={activeRowPosition?.position ?? 0}
-                          total={activeRowPosition?.total ?? sectionProgress.total}
-                          coaching={coachingFor(activeRow.key)}
-                          cards={activeSectionCards}
-                          onSeeAllDecisions={() => goToStep("decisions")}
-                          materialDecisionsRemaining={materialDecisionsRemaining}
-                        />
-                      </div>
-                    )}
+                    {canvasBlock}
                     {/* Correction pass: canvasBlock (the full compiled
                         document -- architecture twin, stat tiles, testable
                         requirements, document gaps, project memory) is
@@ -4774,15 +4696,27 @@ export default function ProjectDesk({
                     >
                       <span>
                         <span className="text-[13.5px] font-semibold" style={{ color: "var(--nf-ink-950, #110f0d)" }}>
-                          {showFullDocument ? "Hide the full procurement document" : "View the full procurement document"}
+                          {showFullDocument ? "Hide section guidance" : "Why this area matters"}
                         </span>
                         <span className="ml-2 text-[12px]" style={{ color: "var(--nf-ink-600, #66635e)" }}>
-                          Everything a supplier will see — architecture, testable requirements and open gates.
+                          See what this area covers, why suppliers need it and the inputs still missing.
                         </span>
                       </span>
                       <span aria-hidden="true" style={{ color: "var(--nf-ink-400, #83807b)" }}>{showFullDocument ? "−" : "+"}</span>
                     </button>
-                    {showFullDocument && <div className="mt-4">{canvasBlock}</div>}
+                    {showFullDocument && activeRow && (
+                      <div className="mt-4">
+                        <SectionDetail
+                          row={activeRow}
+                          position={activeRowPosition?.position ?? 0}
+                          total={activeRowPosition?.total ?? sectionProgress.total}
+                          coaching={coachingFor(activeRow.key)}
+                          cards={activeSectionCards}
+                          onSeeAllDecisions={() => goToStep("decisions")}
+                          materialDecisionsRemaining={materialDecisionsRemaining}
+                        />
+                      </div>
+                    )}
                     {/* The explicit forward step. Robert, on the first build:
                         "How does the user know when 2 Decisions is reached?"
                         -- and the honest answer was that they didn't, unless
@@ -4793,29 +4727,6 @@ export default function ProjectDesk({
                         to act on it, instead of running out of page. Both
                         read `materialDecisionsRemaining`; neither invents a
                         recommendation about what to answer. */}
-                    {materialDecisionsRemaining > 0 && (
-                      <div
-                        className="mt-8 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 rounded-[4px] border p-5"
-                        style={{ borderColor: "var(--nf-orange-soft-border, #db9f76)", background: "var(--nf-orange-soft, #ffe3cc)" }}
-                      >
-                        <div className="min-w-0">
-                          <div className="text-[14.5px] font-semibold leading-[1.35]" style={{ color: "var(--nf-ink-950, #110f0d)" }}>
-                            {materialDecisionsRemaining} decision{materialDecisionsRemaining === 1 ? "" : "s"} {materialDecisionsRemaining === 1 ? "changes" : "change"} price, risk, compliance or delivery
-                          </div>
-                          <p className="m-0 mt-1 text-[12.5px] leading-[1.5]" style={{ color: "var(--nf-orange-strong, #832f00)" }}>
-                            Suppliers cannot price consistently until {materialDecisionsRemaining === 1 ? "it is" : "they are"} resolved or accepted as a stated assumption.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => goToStep("decisions")}
-                          className="flex-none cursor-pointer rounded-[3px] border-0 px-4 py-2.5 text-[13px] font-bold"
-                          style={{ background: "var(--nf-orange-strong, #832f00)", color: "#fff" }}
-                        >
-                          Review decisions &rarr;
-                        </button>
-                      </div>
-                    )}
                   </>
                 )}
 
@@ -5919,4 +5830,3 @@ export default function ProjectDesk({
     </div>
   );
 }
-
