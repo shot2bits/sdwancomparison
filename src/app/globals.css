@@ -421,8 +421,8 @@
 .nf-2030-document-tabs button[aria-selected="true"] { color: #f1eee8; background: #292a30; }
 .nf-2030-paper { min-height: 520px; border-radius: 5px; padding: clamp(24px, 4vw, 48px); color: var(--nf-2030-text); background: var(--nf-2030-paper); box-shadow: 0 16px 38px rgba(0,0,0,.22); }
 .nf-2030-kicker { margin: 0; color: #7e7d84; font-family: var(--nf-font-mono); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
-.nf-2030-paper > h2 { max-width: 720px; margin: 22px 0 11px; color: var(--nf-2030-text); font-family: Georgia, "Times New Roman", serif; font-size: clamp(28px, 3.1vw, 46px); font-weight: 500; line-height: 1.05; letter-spacing: -.035em; }
-.nf-2030-summary { max-width: 760px; margin: 0; color: #c1bdb6; font-family: Georgia, "Times New Roman", serif; font-size: 15px; line-height: 1.65; }
+.nf-2030-paper > h2 { max-width: 720px; margin: 22px 0 11px; color: var(--nf-2030-text); font-family: var(--nf-font-sans); font-size: clamp(28px, 3.1vw, 46px); font-weight: 600; line-height: 1.05; letter-spacing: -.035em; }
+.nf-2030-summary { max-width: 760px; margin: 0; color: #c1bdb6; font-family: var(--nf-font-sans); font-size: 15px; line-height: 1.65; }
 .nf-2030-active-section { margin: 26px 0 12px; padding-top: 18px; box-shadow: 0 -1px #38393f; }
 .nf-2030-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 12px; }
 .nf-2030-section-heading > span { font-weight: 650; }

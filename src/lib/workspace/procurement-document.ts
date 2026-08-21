@@ -862,9 +862,12 @@ function buildTitleAndSummary(requirement: SecurityRequirementInput, clauses: Pr
   if (has("identity-aware-ztna")) bits.push("Entra ID");
   if (has("legacy-circuit-coexistence")) bits.push("retained private Ethernet circuit");
 
+  const requirementSummary = clauses.length === 0
+    ? "No supplier requirements have been created yet. Describe what you need above to start building this document."
+    : `${clauses.length} supplier requirement${clauses.length === 1 ? " is" : "s are"} ready for vendors to answer.`;
   const summary = bits.length
-    ? `${bits.join(", ")}. ${clauses.length} testable requirement${clauses.length === 1 ? "" : "s"} compiled from the buyer's own words.`
-    : `${clauses.length} testable requirement${clauses.length === 1 ? "" : "s"} compiled from the buyer's own words.`;
+    ? `${bits.join(", ")}. ${requirementSummary}`
+    : requirementSummary;
   return { title, summary };
 }
 
