@@ -4550,7 +4550,9 @@ export default function ProjectDesk({
           <div data-workspace-grid className="nf-2030-grid">
             <SectionNav
               rows={sectionOutline}
-              activeKey={activeRow?.key ?? null}
+              activeKey={activeStep === "describe" && nextQuestionCards[0]?.fills?.title
+                ? sectionOutline.find((row) => row.title === nextQuestionCards[0]?.fills?.title)?.key ?? activeRow?.key ?? null
+                : activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); goToStep("describe"); }}
               progress={sectionProgress}
               updatedBanner={sectionsUpdatedBanner}
@@ -4565,7 +4567,7 @@ export default function ProjectDesk({
             {activeStep === "describe" && (
               <GuidedBuild
                 card={nextQuestionCards[0] ?? null}
-                position={activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
+                position={nextQuestionCards[0]?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
                 total={sectionProgress.total}
                 understood={`${sectorShort ? cap(sectorShort) : "Organisation"}${buying ? ` buying ${buying === "sdwan" ? "SD-WAN" : buying.toUpperCase()}` : " procurement"}`}
                 addedTo={nextQuestionCards[0]?.fills?.title ?? activeRow?.title ?? "Living requirement"}
