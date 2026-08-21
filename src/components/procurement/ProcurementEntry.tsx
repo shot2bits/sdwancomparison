@@ -75,7 +75,7 @@ export default function ProcurementEntry() {
           (landmark-no-duplicate-main, landmark-main-is-top-level). A
           plain `<div>` keeps every class/layout unchanged; the page's one
           true main landmark stays exactly where it already was. */}
-      <div className="mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-6 sm:pt-12">
+      <div className="mx-auto max-w-none px-0 pb-0 pt-0">
         {/* One visual hierarchy (Robert, 29 Jul, exact-copy prompt): H1,
             supporting paragraph, trust paragraph, input: nothing else.
             All three blocks inline-styled inside CollapsibleHero so global

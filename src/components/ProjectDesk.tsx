@@ -796,10 +796,10 @@ const TOTAL_WEIGHT = TWIN_SLOTS.reduce((a, s) => a + s.w, 0) + 3;
 /* The component                                                       */
 /* ================================================================== */
 
-/** afterPrompt: the page slots the journey strip and the capability
- *  block beneath the twin; they render on the door only. */
+/** `afterPrompt` remains an accepted compatibility prop for the shared
+ *  route composition, but the product now opens directly in the workspace
+ *  instead of rendering a separate marketing-door stack. */
 export default function ProjectDesk({
-  afterPrompt,
   /** Fourth amendment, item 4: seeds the source-turn log from an existing
    *  project's persisted `source_ledger` when a caller has one to offer.
    *  Still unused by both real callers -- the fifth amendment's "Minimal
@@ -3599,7 +3599,7 @@ export default function ProjectDesk({
       !hasFact("estate.cloud") && "cloud",
       !hasFact("estate.existingSecurity") && "security estate",
     ].filter((x): x is string => typeof x === "string");
-    return buildSectionOutline({
+    const outline = buildSectionOutline({
       orgScaleComplete: coreFive.sector && coreFive.sites && coreFive.regions && hasFact("estate.users"),
       orgScaleDetail: coreFive.sector && coreFive.sites ? `${cap(String(standingAt("organisation.sector")[0]?.value ?? ""))}, ${standingAt("estate.sites").slice(-1)[0]?.value ?? "?"} sites` : "Sector, sites and regions not yet all stated.",
       orgScaleMissing,
@@ -3627,8 +3627,18 @@ export default function ProjectDesk({
       successSignal: noted.some((n) => n.id.startsWith("twin-success")),
       successDetail: noted.some((n) => n.id.startsWith("twin-success")) ? "Success criteria stated." : "Add once the core scope and decisions above are settled.",
     });
+    if (started) return outline;
+    return outline.map((row) => row.state === "later" ? row : {
+      ...row,
+      state: "needs_input" as const,
+      detail: row.key === "resilience_availability"
+        ? "Availability and site resilience not yet stated."
+        : row.key === "security_identity_data"
+          ? "Security, identity and data scope not yet stated."
+          : row.detail,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt]);
+  }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt, started]);
 
   /** THE progress fraction. Robert, 20 Aug 2026: "right now, it is 100%
    *  not clear how the user is progressing." Derived from `sectionOutline`
@@ -4071,37 +4081,16 @@ export default function ProjectDesk({
      open rather than rendering an empty pane. */
   const activeStep: WizardStep = reachable.has(step) ? step : "describe";
 
-  const understandingBand = (
-          <div className="flex flex-wrap items-end gap-x-[22px] gap-y-2 pb-2.5">
-            <div className="min-w-[220px] flex-1">
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-[10.5px] uppercase text-[#66635e]" style={{ ...mono, letterSpacing: "0.1em" }}>Requirement understood</span>
-                <span className="text-[15px] font-semibold" style={mono}>{pct}%</span>
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-[#66635e]">{pctNote}</span>
-              </div>
-              <div className="mt-2 flex gap-[3px]">
-                {Array.from({ length: 12 }, (_, i) => (
-                  <span key={i} className="h-[6px] flex-1 rounded-[3px]" style={{ background: (i * 100) / 12 < pct ? "#c66000" : "#d3d0cd" }} />
-                ))}
-              </div>
-            </div>
-            <div className="flex-none border-l border-[#d3d0cd] pl-[22px]">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[22px] font-semibold leading-none" style={{ ...mono, letterSpacing: "-0.02em" }}>{marketTotal ?? "…"}</span>
-                <span className="text-[12.5px] text-[#66635e]">evaluated marketplace</span>
-              </div>
-              <div className="mt-1 max-w-[250px] text-[11.5px] leading-[1.45] text-[#66635e]">{marketNote}</div>
-            </div>
-          </div>
-  );
-
   /** Structural pass (19 Aug 2026): `composerWide` distinguishes the two
    *  places this same markup now renders — full-bleed across the door
    *  (pre-start), and inside the 368px chat pane once the workspace shell
    *  takes over. Only the container's max-width and padding differ; the
    *  textarea, the voice/attach/send handlers and every piece of state
    *  are the same in both. */
-  const composerWide = !started;
+  /* The blank project now opens inside the same 2030 workspace as an
+     active project. There is no longer a separate wide marketing-door
+     composer: one persistent command surface serves the whole lifecycle. */
+  const composerWide = false;
   const composerBlock = (
       <div
         className={`${composerWide ? "relative border-b" : "relative"}${composerWide ? "" : " nf-2030-composer-shell"}`}
@@ -4204,11 +4193,6 @@ export default function ProjectDesk({
               before the first fact lands. Round-6 law (no example
               answers in copy) still holds -- this describes the
               mechanism, it does not demonstrate an answer. */}
-          {!started && (
-            <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">
-              Answers below fill in automatically as you describe your requirement above — one message can complete several sections at once.
-            </p>
-          )}
           {wrongCompany && (
             <p className="m-0 px-1 pt-1.5 text-[12.5px] leading-relaxed text-[#66635e]">
               Looking for website hosting? That is Netlify, a different company. This is Netify, the SASE and SD-WAN procurement marketplace; carry on if the network is what you came for.
@@ -4481,7 +4465,7 @@ export default function ProjectDesk({
 
   return (
     <div
-      className={`pd-root${started ? " nf-2030-workspace" : ""}`}
+      className="pd-root nf-2030-workspace"
       data-workspace-started={started ? "true" : "false"}
       style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
       onDragOver={(e) => { e.preventDefault(); }}
@@ -5514,56 +5498,112 @@ export default function ProjectDesk({
           </div>
         </>
       ) : (
-        /* ============================================================ */
-        /* THE DOOR (nothing stated yet).                                */
-        /* Deliberately NOT the reference's shell: every one of the five */
-        /* screenshots shows a project already in flight, and this same  */
-        /* route is netify.co.uk's public apex -- its H1, promise copy,  */
-        /* journey strip and FAQ carry the site's whole EEAT/speakable   */
-        /* surface (see (workspace)/workspace/page.tsx's own schemas).   */
-        /* Replacing them with an empty wizard would have silently cost  */
-        /* the homepage its indexable content to satisfy a mockup that   */
-        /* never depicted this state. The shell takes over the instant a */
-        /* real fact lands, which is exactly what the reference shows.   */
-        /* ============================================================ */
+        /* A blank project is already a project. It uses the same product
+           grammar as every later state so the buyer immediately sees what
+           they are building, how complete it is and where it will go. */
         <>
-          <div
-            className="sticky z-30"
-            style={{ top: 52, background: "#fefdfc" }}
-          >
-            <div className="mx-auto w-full max-w-[1000px] px-[26px] pb-3 pt-1">{understandingBand}</div>
-          </div>
-          {composerBlock}
-          {sectorChips}
-          <div className="mx-auto w-full max-w-[1400px] px-[26px] pb-16 lg:px-[42px]">
-            {/* Until the first real fact lands, the page's journey strip and
-                capability block sit beneath the empty project; the working
-                surface never carries them. */}
-            {phase === "live" && !started && afterPrompt}
-            {/* ── THE CONSTELLATION ── restored 1 Aug 2026. R1b (30 Jul,
-                Robert's half-a-coke rule): distance is fit, and a ranked view
-                is the half that generates at publish, so it renders here, at
-                the bottom of the page, once the notice is live and not
-                before. Nothing is hidden behind a padlock; it simply does not
-                exist yet. */}
-            <ConstellationScene
-              market={market}
-              fit={fit}
-              published={published ? { invited: published.invited.map((v) => v.slug) } : null}
-              buying={buying}
-              added={added}
-              namedSlugs={namedSlugs}
-              started={started}
-              // Living Procurement Canvas Phase 2 correction (14 Aug 2026): the
-              // "kept/ranked" signal the Constellation positions vendors by is
-              // now the REAL, frozen invited-vendor slugs from the publish
-              // response -- the same "matched and invited from the published
-              // snapshot" data the rest of the post-publish panel reads --
-              // never a live, still-recomputing workspaceFit() result (which
-              // this used to be, via the now-retired keptFits/fitSlugs).
-              fitSlugs={published?.invited.map((v) => v.slug) ?? []}
+          <header className="nf-2030-header">
+            <div className="nf-2030-brand" aria-label="Netify">N</div>
+            <div className="nf-2030-project-title">
+              <strong>New procurement</strong>
+              <span>Private working draft · Not started</span>
+            </div>
+            <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
+              <button type="button" data-current="true" onClick={() => inputRef.current?.focus()}>Build</button>
+              <button type="button" disabled>Review</button>
+              <button type="button" disabled>Issue</button>
+              <button type="button" disabled>Responses</button>
+              <button type="button" disabled>Decision</button>
+            </nav>
+            <div className="nf-2030-header-actions">
+              <button type="button" className="mobile-hide" onClick={() => fileRef.current?.click()}>Add source</button>
+              <button type="button" className="primary" onClick={() => inputRef.current?.focus()}>Start with AI</button>
+            </div>
+          </header>
+
+          <section className="nf-2030-command-zone" aria-label="Start the procurement">
+            <div className="nf-2030-command-title">
+              <strong>Describe the outcome you need</strong>
+              <span>One sentence can structure several sections. Keep adding detail here at any time.</span>
+            </div>
+            {composerBlock}
+            <div className="nf-2030-command-actions">
+              <button type="button" onClick={() => fileRef.current?.click()}>+ Add document</button>
+              <button type="button" onClick={() => inputRef.current?.focus()}>Connect source</button>
+              {voiceSupported && <button type="button" onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}>{voiceState === "idle" ? "Voice" : "Stop listening"}</button>}
+            </div>
+            <div className="nf-2030-context-line">
+              <span>Start in your own words or add an existing brief</span>
+              <span>Every captured fact remains reviewable</span>
+              <span className="control">Nothing is issued and no supplier is contacted without your approval</span>
+            </div>
+          </section>
+
+          <section className="nf-2030-status" aria-label="Issue readiness">
+            <label>
+              <span>Issue target</span>
+              <select value={issueTarget} onChange={(event) => setIssueTarget(event.target.value as "concise" | "formal")}>
+                <option value="concise">Concise supplier requirement · about 5 min</option>
+                <option value="formal">Formal RFP · about 30 min</option>
+              </select>
+            </label>
+            <div className="nf-2030-readiness">
+              <div><strong>0 of {sectionProgress.total} areas ready</strong><span>Start with what you know</span></div>
+              <div className="nf-2030-progress" aria-label={`0 of ${sectionProgress.total} areas ready`}>
+                {Array.from({ length: sectionProgress.total }, (_, index) => <span key={index} data-ready="false" />)}
+              </div>
+            </div>
+            <div className="nf-2030-next-summary"><strong>First move</strong><span>State what you are buying, who it is for and the outcome that matters.</span></div>
+          </section>
+
+          <div data-workspace-grid className="nf-2030-grid">
+            <SectionNav
+              rows={sectionOutline}
+              activeKey={activeRow?.key ?? null}
+              onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
+              progress={sectionProgress}
+              updatedBanner={null}
+              materialDecisionsRemaining={0}
+              onReviewDecisions={() => inputRef.current?.focus()}
+              publishReachable={false}
+              publishCompleted={false}
+              compareReachable={false}
+              onPublish={() => undefined}
+              onCompare={() => undefined}
             />
+
+            <div className="nf-2030-main">
+              <ProcurementWorkspaceDocument
+                document={canvasDocument}
+                activeSection={activeRow}
+                view={workspaceDocumentView}
+                onViewChange={setWorkspaceDocumentView}
+                issueTarget={issueTarget}
+                factsKept={0}
+                factsStruck={0}
+                sourceTurnCount={0}
+              />
+            </div>
+
+            <div className="nf-2030-aside">
+              <div className="nf-2030-aside-inner">
+                <div className="nf-2030-decision nf-2030-start" role="complementary" aria-label="How to start">
+                  <p className="nf-2030-side-label">Start here</p>
+                  <h2>What are you buying, and why now?</h2>
+                  <p className="nf-2030-decision-reason">Write naturally. Netify will place each fact into the living requirement and show the next material decision.</p>
+                  <div className="nf-2030-start-options">
+                    <button type="button" onClick={() => { setIssueTarget("concise"); inputRef.current?.focus(); }}>Build a 5-minute requirement<span>Core scope, outcome and supplier response</span></button>
+                    <button type="button" onClick={() => { setIssueTarget("formal"); inputRef.current?.focus(); }}>Build a formal RFP<span>Evidence, scoring, commercial and governance depth</span></button>
+                  </div>
+                  <div className="nf-2030-control-note">
+                    <strong>One document, adjustable depth</strong>
+                    Start concise and expand later. You never need to restart or choose a separate template.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
         </>
       )}
 

@@ -69,7 +69,7 @@ export default function CollapsibleHero({ h1, promise, value, eyebrow }: { h1: s
   }, []);
 
   return (
-    <div>
+    <div className="sr-only">
       {!compact && eyebrow && (
         <p
           className="mx-auto mb-2 text-center"
