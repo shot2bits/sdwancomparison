@@ -190,15 +190,29 @@ export function deriveResilienceOutlineState(input: {
   hasOperatingModelConflict: boolean;
 }): { resolved: boolean; detail: string } {
   const hasSiteResilienceClause = siteResilienceClauseExists(input.clauses);
-  const materiallyApplicable =
-    (input.requirement.estate?.sites ?? 0) >= 10 &&
-    (input.buying === "sase" || input.buying === "sdwan" || input.buying === "sse");
-  const resolved = (hasSiteResilienceClause || !materiallyApplicable) && !input.hasOperatingModelConflict;
+  const siteCount = input.requirement.estate?.sites;
+  const siteCountKnown = typeof siteCount === "number" && siteCount > 0;
+  const networkScope = input.buying === "sase" || input.buying === "sdwan" || input.buying === "sse";
+  const materiallyApplicable = siteCountKnown && siteCount >= 10 && networkScope;
+  /* Unknown is not evidence of non-applicability. Previously an absent
+   * site count was coerced to zero, so a buyer who had said only "SASE
+   * RFP for healthcare" received a green resilience tick. A row may be
+   * complete without a resilience clause only when the inputs that make
+   * that judgement are themselves known: a sub-10-site network scope, or
+   * an explicitly non-network managed-security scope. */
+  const explicitlyNotApplicable =
+    input.buying === "managed_security" ||
+    (networkScope && siteCountKnown && siteCount < 10);
+  const resolved = (hasSiteResilienceClause || explicitlyNotApplicable) && !input.hasOperatingModelConflict;
   const detail = hasSiteResilienceClause
     ? "Per-site resilience requirement stated and compiled into the document."
     : materiallyApplicable
       ? "Dual-circuit resilience per site not yet decided."
-      : "Resilience requirement not yet applicable at this site count.";
+      : explicitlyNotApplicable
+        ? "Resilience requirement is not material for the stated scope."
+        : !input.buying
+          ? "Solution scope is needed before resilience can be assessed."
+          : "Site count is needed before resilience can be assessed.";
   return { resolved, detail };
 }
 

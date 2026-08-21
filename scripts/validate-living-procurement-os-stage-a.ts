@@ -941,6 +941,17 @@ function main() {
       hasOperatingModelConflict: false,
     });
     record(outlineStateNoClause.resolved === false, "Fixture K1/defect 2: with the SAME materially-applicable requirement but no site-resilience-scope clause present, the row correctly reads Needs decision (proves the row cannot be satisfied by absence of a question alone)", `detail=${outlineStateNoClause.detail}`);
+    const outlineStateUnknownSiteCount = deriveResilienceOutlineState({
+      clauses: [],
+      requirement: { organisation: { sector: "Healthcare & pharma" } },
+      buying: "sase",
+      hasOperatingModelConflict: false,
+    });
+    record(
+      outlineStateUnknownSiteCount.resolved === false && /site count/i.test(outlineStateUnknownSiteCount.detail),
+      "Fixture K1/unknown-site regression: a generic SASE RFP request with no site count cannot confirm resilience",
+      `detail=${outlineStateUnknownSiteCount.detail}`,
+    );
 
     // --- K3: correction pass round 2 (Robert, 15 Aug 2026), defect 1 --
     // "q-resilience must disappear from the full ranked NextQuestion

@@ -4537,7 +4537,15 @@ export default function ProjectDesk({
                 {Array.from({ length: sectionProgress.total }, (_, index) => <span key={index} data-ready={index < sectionProgress.ready} />)}
               </div>
             </div>
-            <div className="nf-2030-next-summary"><strong>Next decision</strong><span>{nextQuestionCards[0]?.nq.question ?? "Review the document and prepare it for issue."}</span></div>
+            <button
+              type="button"
+              className="nf-2030-next-action"
+              onClick={() => goToStep(nextQuestionCards.length > 0 ? "decisions" : "review")}
+            >
+              <span>Next step</span>
+              <strong>{nextQuestionCards[0]?.nq.question ?? "Review the document before issuing it."}</strong>
+              <em>{nextQuestionCards.length > 0 ? "Answer now" : "Review now"} &rarr;</em>
+            </button>
           </section>
 
           {/* `flex flex-col` below lg, not a plain block: the `order-*`
