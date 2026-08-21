@@ -86,6 +86,19 @@ record(
 record(/coaching=\{coachingFor\(activeRow\.key\)\}/.test(describeBranch), "B: SectionDetail is given real per-section coaching copy, not invented inline text");
 record(/cards=\{activeSectionCards\}/.test(describeBranch), "B: SectionDetail is given the open questions actually filtered to this section");
 
+/* Correction pass (Robert, 20 Aug 2026, on a live screenshot: "really,
+   really bad... just a jumble of words" -- the full compiled document
+   was rendering unconditionally right under SectionDetail, in a
+   completely different visual register). canvasBlock must now be
+   collapsed by default on `describe`, one click away, not gone. */
+record(/const \[showFullDocument, setShowFullDocument\] = useState\(false\)/.test(desk), "B correction: a real collapse state exists and defaults to COLLAPSED (false), not expanded");
+record(/showFullDocument && <div className="mt-4">\{canvasBlock\}<\/div>/.test(describeBranch), "B correction: canvasBlock only renders on `describe` when showFullDocument is true -- gated, not unconditional");
+record(/onClick=\{\(\) => setShowFullDocument\(\(v\) => !v\)\}/.test(describeBranch), "B correction: a real toggle button flips the collapse state (not a dead/decorative control)");
+record(
+  !/^\s*\{canvasBlock\}\s*$/m.test(describeBranch.replace(/\{showFullDocument && <div className="mt-4">\{canvasBlock\}<\/div>\}/, "")),
+  "B correction: no OTHER, still-unconditional `{canvasBlock}` remains in the `describe` branch once the gated one is excluded",
+);
+
 /* ================================================================ */
 /* C. Every real outline-row key has a coaching entry.                */
 /* ================================================================ */
