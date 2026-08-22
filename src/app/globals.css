@@ -613,9 +613,14 @@
 .nf-2030-control-note { margin-top: 28px; padding-top: 18px; box-shadow: 0 -1px #292a30; color: #727279; font-size: 9px; line-height: 1.55; }
 .nf-2030-control-note strong { display: block; margin-bottom: 5px; color: #aaa7a1; }
 .nf-2030-start-options { display: grid; gap: 8px; margin-top: 18px; }
-.nf-2030-start-options button { border: 0; border-radius: 9px; padding: 12px; color: #eeeae3; background: #292a30; cursor: pointer; font-size: 10px; font-weight: 650; text-align: left; }
+.nf-2030-start-options button { position: relative; border: 1px solid transparent; border-radius: 9px; padding: 12px; color: #eeeae3; background: #292a30; cursor: pointer; font-size: 10px; font-weight: 650; text-align: left; }
 .nf-2030-start-options button:hover { background: #34353b; }
+.nf-2030-start-options button[data-selected="true"] { border-color: #59c9ce; color: #6de1e5; background: #16262b; box-shadow: inset 3px 0 #59c9ce; }
+.nf-2030-start-options button[data-selected="true"]::after { content: "Selected"; position: absolute; top: 11px; right: 12px; color: #6de1e5; font-size: 7px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .nf-2030-start-options button span { display: block; margin-top: 5px; color: #88878d; font-size: 8px; font-weight: 400; line-height: 1.45; }
+.nf-2030-start-options button[data-selected="true"] span { color: #acd3d3; }
+.nf-2030-start-confirmation { margin: 10px 0 0; padding: 10px 11px; border-radius: 7px; color: #b8dedd; background: rgba(28, 103, 105, .24); font-size: 8px; line-height: 1.5; }
+.nf-2030-start-confirmation strong { display: block; margin-bottom: 2px; color: #6de1e5; font-size: 9px; }
 .nf-2030-activity { margin-top: 26px; color: #828188; }
 .nf-2030-activity summary { cursor: pointer; font-size: 9px; }
 .nf-2030-activity > div { margin-top: 10px; max-height: 320px; overflow: auto; }

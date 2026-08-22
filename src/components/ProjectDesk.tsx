@@ -1151,6 +1151,7 @@ export default function ProjectDesk({
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
   const [issueTarget, setIssueTarget] = useState<"concise" | "formal">("concise");
+  const [startModeChoice, setStartModeChoice] = useState<"concise" | "formal" | null>(null);
   const [workspaceDocumentView, setWorkspaceDocumentView] = useState<WorkspaceDocumentView>("requirement");
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
@@ -1170,6 +1171,18 @@ export default function ProjectDesk({
   const goToStep = (next: WizardStep) => {
     setStep(next);
     setPhase(next === "publish" || next === "compare" ? "fits" : "live");
+  };
+  const chooseStartMode = (target: "concise" | "formal") => {
+    setIssueTarget(target);
+    setStartModeChoice(target);
+
+    /* Keep focus inside the originating tap so iOS opens the keyboard.
+       The earlier handler changed hidden state and then called focus, but
+       offered no visible acknowledgement when "concise" was already the
+       default. The selected card and live status now persist if the user
+       returns to this choice. */
+    inputRef.current?.focus();
+    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
   const assertedPacks = useRef<Set<string>>(new Set());
   const acceptedGaps = useRef<Set<string>>(new Set());
@@ -5710,9 +5723,31 @@ export default function ProjectDesk({
                   <h2>What are you buying, and why now?</h2>
                   <p className="nf-2030-decision-reason">Write naturally. Netify will place each fact into the living requirement and show the next material decision.</p>
                   <div className="nf-2030-start-options">
-                    <button type="button" onClick={() => { setIssueTarget("concise"); inputRef.current?.focus(); }}>Build a 5-minute requirement<span>Core scope, outcome and supplier response</span></button>
-                    <button type="button" onClick={() => { setIssueTarget("formal"); inputRef.current?.focus(); }}>Build a formal RFP<span>Evidence, scoring, commercial and governance depth</span></button>
+                    <button
+                      type="button"
+                      aria-pressed={startModeChoice === "concise"}
+                      data-selected={startModeChoice === "concise"}
+                      onClick={() => chooseStartMode("concise")}
+                    >
+                      Build a 5-minute requirement
+                      <span>Core scope, outcome and supplier response</span>
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={startModeChoice === "formal"}
+                      data-selected={startModeChoice === "formal"}
+                      onClick={() => chooseStartMode("formal")}
+                    >
+                      Build a formal RFP
+                      <span>Evidence, scoring, commercial and governance depth</span>
+                    </button>
                   </div>
+                  {startModeChoice && (
+                    <p className="nf-2030-start-confirmation" role="status" aria-live="polite">
+                      <strong>{startModeChoice === "formal" ? "Full RFP selected" : "5-minute requirement selected"}</strong>
+                      The prompt is ready. Describe what you are buying and why now to begin.
+                    </p>
+                  )}
                   <div className="nf-2030-control-note">
                     <strong>One document, adjustable depth</strong>
                     Start concise and expand later. You never need to restart or choose a separate template.
