@@ -385,7 +385,19 @@
   background: var(--nf-2030-orange) !important;
 }
 .nf-2030-command-zone-empty .nf-2030-composer:focus-within { box-shadow: 0 0 0 2px rgba(83, 191, 190, .5); }
-.nf-2030-command-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: -46px 0 17px 14px; padding-right: 56px; position: relative; z-index: 1; }
+.nf-2030-composer-shell:has(+ .nf-2030-command-actions) .nf-2030-composer {
+  border-radius: 15px 15px 0 0 !important;
+  padding-bottom: 8px !important;
+}
+.nf-2030-command-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 17px;
+  padding: 0 68px 12px 14px;
+  border-radius: 0 0 15px 15px;
+  background: #f1eee8;
+}
 .nf-2030-command-actions button {
   border: 0;
   border-radius: 7px;
