@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 
 type ClausePreview = { id: string; statement: string };
+type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
 
 export default function GuidedBuild({
   card,
@@ -19,6 +20,9 @@ export default function GuidedBuild({
   issueTarget,
   questionBankCount,
   onFocusPrompt,
+  onDescribeQuestion,
+  customAnswerQuestionId,
+  customAnswerReceipt,
   onOpenDocument,
 }: {
   card: NextQuestionCard | null;
@@ -34,20 +38,24 @@ export default function GuidedBuild({
   issueTarget: "concise" | "formal";
   questionBankCount: number;
   onFocusPrompt: () => void;
+  onDescribeQuestion: (question: NextQuestionCard["nq"] | null) => void;
+  customAnswerQuestionId: string | null;
+  customAnswerReceipt: CustomAnswerReceipt | null;
   onOpenDocument: () => void;
 }) {
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selection, setSelection] = useState<{ questionId: string; index: number } | null>(null);
+  const selected = selection && selection.questionId === card?.nq.id ? selection.index : null;
+  const writingCustomAnswer = Boolean(card && customAnswerQuestionId === card.nq.id);
   const questionReason = card
     ? card.nq.reason ?? `This completes ${card.fills?.title ?? "the next part of the requirement"} and gives suppliers a clear basis for their response.`
     : "The core requirement is ready. Review the living document before you shortlist suppliers.";
 
-  useEffect(() => setSelected(null), [card?.nq.id]);
-
   const continueWithAnswer = () => {
-    if (selected === null || !card?.buttons[selected]) {
+    if (writingCustomAnswer) {
       onFocusPrompt();
       return;
     }
+    if (selected === null || !card?.buttons[selected]) return;
     card.buttons[selected].onClick();
   };
 
@@ -61,6 +69,14 @@ export default function GuidedBuild({
             {questionReason}
           </p>
 
+          {customAnswerReceipt && (
+            <div className="nf-guided-custom-receipt" role="status" aria-live="polite">
+              <strong>Added from your words</strong>
+              <span>“{customAnswerReceipt.text}”</span>
+              <small>Answer to “{customAnswerReceipt.question}” saved to {customAnswerReceipt.addedTo}. The next question is shown below.</small>
+            </div>
+          )}
+
           {card && card.buttons.length > 0 ? (
             <div className="nf-guided-choices" role="radiogroup" aria-label={card.nq.question}>
               {card.buttons.map((button, index) => (
@@ -70,13 +86,25 @@ export default function GuidedBuild({
                   role="radio"
                   aria-checked={selected === index}
                   data-selected={selected === index}
-                  onClick={() => setSelected(index)}
+                  onClick={() => {
+                    onDescribeQuestion(null);
+                    setSelection({ questionId: card.nq.id, index });
+                  }}
                 >
                   <span>{button.label}</span><span aria-hidden="true">›</span>
                 </button>
               ))}
-              <button type="button" onClick={onFocusPrompt}>
-                <span>Describe it in your own words</span><span aria-hidden="true">›</span>
+              <button
+                type="button"
+                aria-pressed={writingCustomAnswer}
+                data-selected={writingCustomAnswer}
+                onClick={() => {
+                  setSelection(null);
+                  onDescribeQuestion(card.nq);
+                }}
+              >
+                <span>{writingCustomAnswer ? "Write your answer in the prompt below" : "Describe it in your own words"}</span>
+                <span aria-hidden="true">{writingCustomAnswer ? "↓" : "›"}</span>
               </button>
             </div>
           ) : (
@@ -84,8 +112,13 @@ export default function GuidedBuild({
           )}
 
           {card && card.buttons.length > 0 && (
-            <button type="button" className="nf-guided-continue" onClick={continueWithAnswer}>
-              Continue
+            <button
+              type="button"
+              className="nf-guided-continue"
+              disabled={!writingCustomAnswer && selected === null}
+              onClick={continueWithAnswer}
+            >
+              {writingCustomAnswer ? "Use the prompt below" : selected === null ? "Choose an answer" : "Continue"}
             </button>
           )}
 

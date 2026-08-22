@@ -249,6 +249,10 @@ export type FitState = {
 
 /** `own` marks an answer the buyer typed: kept verbatim, theirs (1f). */
 type NotedItem = { id: string; label: string; section: string; own?: boolean };
+type GuidedCustomAnswerReceipt = { question: string; text: string; addedTo: string };
+
+const GUIDED_CUSTOM_ANSWER_PREFIX = "guided-answer:";
+const guidedCustomAnswerNoteId = (questionId: string) => `${GUIDED_CUSTOM_ANSWER_PREFIX}${questionId}`;
 type Receipt = { id: number; text: string };
 /** Reliability gate, third amendment (13 Aug 2026, Codex's third review,
  *  item 1): "persist every non-command buyer entry verbatim as an
@@ -891,6 +895,8 @@ export default function ProjectDesk({
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
+  const [guidedCustomQuestionId, setGuidedCustomQuestionId] = useState<string | null>(null);
+  const [guidedCustomAnswerReceipt, setGuidedCustomAnswerReceipt] = useState<GuidedCustomAnswerReceipt | null>(null);
   const [verdict, setVerdict] = useState<SecurityScopeVerdict | null>(null);
   const [fit, setFit] = useState<FitState | null>(null);
   const [added, setAdded] = useState<string[]>([]);
@@ -1037,6 +1043,7 @@ export default function ProjectDesk({
   const voiceRec = useRef<{ stop: () => void } | null>(null);
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const guidedCustomQuestionRef = useRef<NextQuestion | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const threadRef = useRef<HTMLDivElement | null>(null);
   const firstKeyAt = useRef<number | null>(null);
@@ -2433,6 +2440,50 @@ export default function ProjectDesk({
     [],
   );
 
+  const chooseGuidedCustomAnswer = useCallback((question: NextQuestion | null) => {
+    guidedCustomQuestionRef.current = question;
+    setGuidedCustomQuestionId(question?.id ?? null);
+    setGuidedCustomAnswerReceipt(null);
+    if (question) requestAnimationFrame(() => inputRef.current?.focus());
+  }, []);
+
+  /** A free-text answer entered from the guided question is both ordinary
+   *  buyer prose (kept by send() in the source ledger) and a durable
+   *  resolution of the question that invited it. Keeping the exact text
+   *  as a noted requirement makes it visible in the compiled document;
+   *  the decision ledger reconstructs that resolution after a reload. */
+  const landGuidedCustomAnswer = useCallback(
+    (question: NextQuestion, text: string) => {
+      const note: NotedItem = {
+        id: guidedCustomAnswerNoteId(question.id),
+        label: text,
+        section: question.target,
+      };
+      beginOrExtendSubmission();
+      setNoted((items) => items.some((item) => item.id === note.id) ? items : [...items, note]);
+      recordDecision(question.id, "Custom answer", {
+        action: "note",
+        optionId: "custom",
+        resultingFactPaths: [],
+        resultingNoted: [note],
+      });
+      setChangedSlots([note.id]);
+      setSaveDirty(true);
+      scheduleSettle();
+      guidedCustomQuestionRef.current = null;
+      setGuidedCustomQuestionId(null);
+      const addedTo = outlineRowForDecision({
+        id: question.id,
+        target: question.target,
+        governedSuggestion: question.governedSuggestion,
+        sectorSectionTitle,
+      }) ?? "the living requirement";
+      setGuidedCustomAnswerReceipt({ question: question.question, text, addedTo });
+      ev("workspace_earned_answered", { q: question.id, kind: "custom" });
+    },
+    [beginOrExtendSubmission, recordDecision, scheduleSettle, sectorSectionTitle],
+  );
+
   const answerNextQuestion = useCallback(
     (nq: NextQuestion, optionIndex: number) => {
       const opt = nq.options?.[optionIndex];
@@ -2746,6 +2797,7 @@ export default function ProjectDesk({
     // non-UI half, since Enter-to-send calls send() directly and does not
     // go through the button's `disabled` attribute at all).
     if (!text || busy || resuming) return;
+    const guidedQuestion = guidedCustomQuestionRef.current;
     setDraft("");
     if (!firstKeyAt.current) firstKeyAt.current = Date.now();
     sayYou(text);
@@ -2777,6 +2829,12 @@ export default function ProjectDesk({
 
     const r = await runCycle(text);
     if (r.error) return; /* the caption carries the engine error; the words stay in the prompt's history */
+
+    /* `Describe it in your own words` is a question-answering mode, not
+       merely a shortcut that focuses the textarea. Once extraction has
+       safely processed the buyer's sentence, resolve the exact question
+       that invited it and show a receipt in the visible guided surface. */
+    if (guidedQuestion) landGuidedCustomAnswer(guidedQuestion, text);
 
     /* Fact Ledger Reliability Gate (13 Aug 2026): keep EVERY clause the
        extractor could not place, even when OTHER clauses in the same
@@ -3554,14 +3612,20 @@ export default function ProjectDesk({
     () => siteResilienceClauseExists(compiledDocument.clauses),
     [compiledDocument.clauses],
   );
+  const guidedAnsweredQuestionIds = useMemo(
+    () => noted
+      .filter((item) => item.id.startsWith(GUIDED_CUSTOM_ANSWER_PREFIX))
+      .map((item) => item.id.slice(GUIDED_CUSTOM_ANSWER_PREFIX.length)),
+    [noted],
+  );
   const rankedNextQuestions = useMemo(
-    () => rankNextQuestions({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions, resilienceClauseResolved }),
-    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions, resilienceClauseResolved],
+    () => rankNextQuestions({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions, resilienceClauseResolved, answeredQuestionIds: guidedAnsweredQuestionIds }),
+    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions, resilienceClauseResolved, guidedAnsweredQuestionIds],
   );
   const topThreeQuestions = useMemo(() => rankedNextQuestions.slice(0, 3), [rankedNextQuestions]);
   const materialDecisionsRemaining = useMemo(
-    () => materialDecisionCount({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions, resilienceClauseResolved }),
-    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions, resilienceClauseResolved],
+    () => materialDecisionCount({ openDecisions: compiledDocument.openDecisions, earned: earnedAll, suggestions: visibleSectorSuggestions, resilienceClauseResolved, answeredQuestionIds: guidedAnsweredQuestionIds }),
+    [compiledDocument.openDecisions, earnedAll, visibleSectorSuggestions, resilienceClauseResolved, guidedAnsweredQuestionIds],
   );
 
   /** The section outline (implementation step 10): a coarser, buyer-
@@ -4596,6 +4660,9 @@ export default function ProjectDesk({
                 issueTarget={issueTarget}
                 questionBankCount={rfiSet?.total ?? 0}
                 onFocusPrompt={() => inputRef.current?.focus()}
+                onDescribeQuestion={chooseGuidedCustomAnswer}
+                customAnswerQuestionId={guidedCustomQuestionId}
+                customAnswerReceipt={guidedCustomAnswerReceipt}
                 onOpenDocument={() => { setWorkspaceDocumentView("requirement"); goToStep("review"); }}
               />
             )}

@@ -115,6 +115,11 @@ type Ctx = {
   openDecisions: OpenDecision[];
   earned: EarnedQuestion[];
   suggestions: PackSuggestion[];
+  /** Question ids already answered with buyer-authored prose. The prose
+   *  itself lives as a noted requirement and in the source ledger; this
+   *  list only prevents the same prompt being offered again after that
+   *  durable answer has landed. */
+  answeredQuestionIds?: readonly string[];
   /** Living Procurement UK Decision-Maker Blueprint, correction pass round 2
    *  (Robert, 15 Aug 2026), defect 1: whether the canonical governed
    *  `site-resilience-scope` clause already exists in the compiled
@@ -216,8 +221,10 @@ const SOURCE_RANK: Record<NextQuestionSource, number> = { compiler_open_decision
  *  report's assumptions section), not a silent guess. */
 export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
   const candidates: NextQuestion[] = [];
+  const answered = new Set(ctx.answeredQuestionIds ?? []);
 
   for (const d of ctx.openDecisions) {
+    if (answered.has(d.id)) continue;
     candidates.push({
       id: d.id,
       question: d.question,
@@ -233,6 +240,7 @@ export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
   }
 
   for (const q of ctx.earned) {
+    if (answered.has(q.id)) continue;
     // Defect 1 fix (correction pass round 2): q-resilience is earned
     // purely from site count/buying and never reflects whether the
     // buyer's answer already compiled into the canonical
@@ -255,6 +263,7 @@ export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
   }
 
   for (const s of ctx.suggestions) {
+    if (answered.has(`sector:${s.id}`)) continue;
     candidates.push({
       id: `sector:${s.id}`,
       question: s.label,
