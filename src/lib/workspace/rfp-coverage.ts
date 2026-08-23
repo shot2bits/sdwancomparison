@@ -22,7 +22,7 @@ export type RfpCoverage = {
 
 /**
  * The RFP quality threshold. This is intentionally independent from the
- * concise-opportunity publish gate: a buyer can enter the market early,
+ * opportunity publish gate: a buyer can enter the market early,
  * while only a document with five populated question records in every
  * included section may call itself RFP-ready.
  */

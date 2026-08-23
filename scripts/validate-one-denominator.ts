@@ -98,11 +98,11 @@ function main() {
   });
   record(RFP_SECTION_QUESTION_TARGET === 5, "A: the RFP-ready threshold is exactly five populated questions per included section");
   record(!coverage.ready && coverage.readySections === 1 && coverage.remainingAnswers === 1, "A: RFP coverage reports the exact incomplete section and remaining answer count");
-  const conciseOpportunity = buildPublishChecklist({
+  const publishableOpportunity = buildPublishChecklist({
     sector: true, sites: true, regions: true, scope: true, timeline: false,
     securityScope: true, securityVerdictSettled: false,
   });
-  record(conciseOpportunity.ready, "A: a useful concise opportunity can publish before timeline/security refinements make the living RFP deeper");
+  record(publishableOpportunity.ready, "A: a useful opportunity can publish before timeline/security refinements make the living RFP deeper");
 
   /* ================================================================ */
   /* B. THE COMPETING NUMBERS ARE GONE.                                */
@@ -147,7 +147,7 @@ function main() {
     /const contentReady = publishChecklist\.ready/.test(desk) &&
       /buildRfpCoverage\(sectionOutline, sectionQuestionProgressByKey\)/.test(desk) &&
       /const rfpIsBuilt = started && !published && rfpCoverage\.ready/.test(desk),
-    "E: concise opportunity publishing and the five-per-section RFP-ready state are separate, explicit gates",
+    "E: opportunity publishing and the five-per-section RFP-ready state are separate, explicit gates",
   );
   record(
     !/rfpIsBuilt = .*materialDecisionsRemaining/.test(desk),

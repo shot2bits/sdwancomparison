@@ -73,8 +73,8 @@ try {
   check(initialText.includes("RFP Builder · Retail"), "the workspace identifies itself as the RFP Builder");
 
   const publishNow = desktop.getByRole("button", { name: "Publish opportunity now" });
-  check((await publishNow.count()) === 1 && await publishNow.isEnabled(), "a concise opportunity can publish as soon as the essential facts stand");
-  check(initialText.includes("You can publish this as a concise opportunity now"), "the AI advisor explains that early publishing is available and recommends further RFP depth");
+  check((await publishNow.count()) === 1 && await publishNow.isEnabled(), "an opportunity can publish as soon as the essential facts stand");
+  check(initialText.includes("You can publish this opportunity now"), "the AI advisor explains that early publishing is available and recommends further RFP depth");
   check(initialText.includes("of 5 populated"), "every section exposes the five-populated-question RFP quality threshold");
   check(await desktop.evaluate(() => document.documentElement.scrollWidth === window.innerWidth), "desktop has no horizontal overflow");
   check(!initialText.match(/Quick requirement|Full RFP|Expand to full|Recommended questions|Expanded questions/i), "the UI contains no short/large RFP mode choice");

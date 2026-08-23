@@ -2115,11 +2115,8 @@ export default function ProjectDesk({
     [started, live.length, unansweredGaps.length, rfiSet, commercialClaims],
   );
   const automaticallyEarnedInstrument = earnedInstrument(instrumentLadder);
-  /* Quick and Full are two depths of the same living document. Selecting
-     Full is an explicit buyer instruction to compile the comprehensive
-     RFP instrument now; Quick continues to earn depth automatically as
-     facts accumulate. This makes the control change the supplier pack,
-     not merely its label. */
+  /* The document earns deeper supplier-response structure automatically as
+     facts accumulate. There is no buyer-facing document-size mode. */
   const instrument = automaticallyEarnedInstrument;
   const publishTitle = brief.title;
 
@@ -3751,7 +3748,7 @@ export default function ProjectDesk({
   const sectionProgress = useMemo(() => outlineProgress(sectionOutline), [sectionOutline]);
 
   /* Publishing and RFP depth are deliberately separate. A buyer may put a
-     useful concise opportunity to market once the identifying facts stand;
+     useful opportunity to market once the identifying facts stand;
      five populated questions per included section is the higher threshold
      for calling the living document RFP-ready. */
   const publishChecklist = useMemo(
@@ -4129,7 +4126,7 @@ export default function ProjectDesk({
     ? `To unlock publishing, ${publishChecklist.remaining.join(", ").toLowerCase()}. You can answer several in one message.`
     : rfpCoverage.ready
       ? "This document meets the RFP depth standard. Review it, then publish when you are ready."
-      : `You can publish this as a concise opportunity now. For an RFP-ready document, add ${rfpCoverage.remainingAnswers} more populated question${rfpCoverage.remainingAnswers === 1 ? "" : "s"} across the included sections. Consider next: ${nextAdvisorQuestion}`;
+      : `You can publish this opportunity now. To strengthen the living RFP, add ${rfpCoverage.remainingAnswers} more populated question${rfpCoverage.remainingAnswers === 1 ? "" : "s"} across the included sections. Consider next: ${nextAdvisorQuestion}`;
   const buyerQuestionCounts = useMemo(() => {
     const questions = Object.values(sectionQuestionItemsByKey).flat();
     return {
@@ -5887,7 +5884,7 @@ export default function ProjectDesk({
                 <span className="control">Nothing is issued and no supplier is contacted without your approval</span>
               </div>
               <ol className="nf-2030-outcomes" aria-label="What Netify produces">
-                <li><span>01</span><div><strong>Build</strong><p>A concise requirement, RFI or complete RFP for your sector.</p></div></li>
+                <li><span>01</span><div><strong>Build</strong><p>One living SASE or SD-WAN RFI/RFP for your sector.</p></div></li>
                 <li><span>02</span><div><strong>Shortlist</strong><p>Instant vendor and managed service provider matches.</p></div></li>
                 <li><span>03</span><div><strong>Get bids</strong><p>Publish anonymously to the Opportunity Board when ready.</p></div></li>
               </ol>
