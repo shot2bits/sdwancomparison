@@ -2,15 +2,19 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
+import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
 
 type ClausePreview = { id: string; statement: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
-export type SectionQuestionItem = {
-  id: string;
-  text: string;
-  status: "completed" | "required" | "suggested" | "custom";
-  answer?: string;
-};
+
+function splitQuestion(value: string): { prompt: string; context: string | null } {
+  const questionMark = value.indexOf("?");
+  if (questionMark < 0 || questionMark === value.length - 1) return { prompt: value, context: null };
+  return {
+    prompt: value.slice(0, questionMark + 1),
+    context: value.slice(questionMark + 1).trim() || null,
+  };
+}
 
 export default function GuidedBuild({
   card,
@@ -19,9 +23,6 @@ export default function GuidedBuild({
   incompleteSectionTitle,
   position,
   total,
-  understood,
-  addedTo,
-  stillNeeded,
   documentTitle,
   documentSummary,
   clauses,
@@ -44,9 +45,6 @@ export default function GuidedBuild({
   incompleteSectionTitle: string | null;
   position: number;
   total: number;
-  understood: string;
-  addedTo: string;
-  stillNeeded: string;
   documentTitle: string;
   documentSummary: string;
   clauses: ClausePreview[];
@@ -67,11 +65,20 @@ export default function GuidedBuild({
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionLocked = useRef(false);
+  const questionSectionRef = useRef<HTMLElement | null>(null);
+  const previousQuestionIdRef = useRef<string | null>(null);
   const [newQuestion, setNewQuestion] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
   useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
+  useEffect(() => {
+    const nextId = card?.nq.id ?? null;
+    const previousId = previousQuestionIdRef.current;
+    previousQuestionIdRef.current = nextId;
+    if (!previousId || !nextId || previousId === nextId || !window.matchMedia("(max-width: 1023px)").matches) return;
+    window.requestAnimationFrame(() => questionSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }, [card?.nq.id]);
   const selected = selection && selection.questionId === card?.nq.id ? selection.index : null;
   const writingCustomAnswer = Boolean(card && customAnswerQuestionId === card.nq.id);
   const questionReason = card
@@ -82,7 +89,15 @@ export default function GuidedBuild({
         ? `${sectionTitle} is complete. You can review its recorded answers below or continue to the next unfinished section.`
       : `${incompleteSectionTitle ?? "The next required section"} still needs an answer. Add it in the prompt below.`;
   const completedCount = sectionQuestions.filter((item) => item.status === "completed").length;
-  const outstandingCount = sectionQuestions.filter((item) => item.status === "required" || item.status === "suggested").length;
+  const outstandingCount = sectionQuestions.filter((item) => item.status === "required").length;
+  const suggestedCount = sectionQuestions.filter((item) => item.status === "suggested").length;
+  const coreTotal = completedCount + outstandingCount;
+  const fallbackPrompt = ready
+    ? "Review the requirement you have built"
+    : sectionComplete
+      ? `${sectionTitle} is complete`
+      : `Complete ${incompleteSectionTitle ?? "the next section"}`;
+  const visibleQuestion = splitQuestion(card?.nq.question ?? fallbackPrompt);
 
   const addSupplierQuestion = (value: string) => {
     const text = value.trim();
@@ -138,13 +153,16 @@ export default function GuidedBuild({
   return (
     <>
       <main className="nf-guided-main">
-        <section className="nf-guided-question" aria-label="Next requirement question">
-          <p className="nf-guided-kicker">Next step · {Math.max(1, position)} of {Math.max(1, total)}</p>
+        <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
+          <div className="nf-guided-builder-label"><strong>RFP Builder</strong><span>· {issueTarget === "formal" ? "Full RFP" : "Quick requirement"}</span></div>
+          <p className="nf-guided-kicker">Section {Math.max(1, position)} of {Math.max(1, total)}</p>
           <div className="nf-guided-section-progress" aria-label={`${sectionTitle} question progress`}>
-            <span><strong>{sectionTitle}</strong><small>{completedCount} answered · {outstandingCount} to complete</small></span>
-            <span aria-hidden="true"><i style={{ width: `${sectionQuestions.length ? Math.round((completedCount / sectionQuestions.length) * 100) : 0}%` }} /></span>
+            <span><strong>{sectionTitle}</strong><small>{completedCount} of {Math.max(coreTotal, 1)} core questions answered{suggestedCount ? ` · ${suggestedCount} optional` : ""}</small></span>
+            <span aria-hidden="true"><i style={{ width: `${coreTotal ? Math.round((completedCount / coreTotal) * 100) : sectionComplete ? 100 : 0}%` }} /></span>
           </div>
-          <h1>{card?.nq.question ?? (ready ? "Review the requirement you have built" : sectionComplete ? `${sectionTitle} is complete` : `Complete ${incompleteSectionTitle ?? "the next section"}`)}</h1>
+          <p className="nf-guided-next-label">{ready ? "RFP ready for review" : sectionComplete ? "Section complete" : "Next required question"}</p>
+          <h1>{visibleQuestion.prompt}</h1>
+          {visibleQuestion.context && <p className="nf-guided-question-context">{visibleQuestion.context}</p>}
           <p className="nf-guided-reason">
             {questionReason}
           </p>
@@ -211,19 +229,10 @@ export default function GuidedBuild({
             </button>
           )}
 
-          <div className="nf-guided-understood" aria-label="What Netify understood">
-            <p>What Netify understands</p>
-            <dl>
-              <div><dt>✓ <span>Understood</span></dt><dd>{understood}</dd></div>
-              <div><dt>＋ <span>Added to</span></dt><dd>{addedTo}</dd></div>
-              <div><dt>··· <span>Still needed</span></dt><dd>{stillNeeded}</dd></div>
-            </dl>
-          </div>
-
           <section className="nf-guided-register" aria-labelledby="section-question-register">
             <div className="nf-guided-register-head">
-              <div><p id="section-question-register">Section questions</p><span>Everything answered, outstanding and added by you.</span></div>
-              <strong>{completedCount}/{Math.max(completedCount + outstandingCount, 1)} complete</strong>
+              <div><p id="section-question-register">{sectionTitle} checklist</p><span>Every core answer, optional refinement and supplier question in this section.</span></div>
+              <strong>{completedCount}/{Math.max(coreTotal, 1)} core complete</strong>
             </div>
             <ul>
               {sectionQuestions.map((item) => (
@@ -235,15 +244,17 @@ export default function GuidedBuild({
               ))}
               {sectionQuestions.length === 0 && <li data-status="required"><span aria-hidden="true">○</span><div><strong>No questions recorded for this section yet.</strong></div><em>To do</em></li>}
             </ul>
-            <div className="nf-guided-add-question">
-              <label htmlFor="bespoke-supplier-question">Add your own question for suppliers</label>
+            <details className="nf-guided-add-question">
+              <summary>Add a bespoke supplier question</summary>
+              <p>Add your own wording, or ask Netify to suggest questions for this section. Nothing is added without your approval.</p>
+              <label htmlFor="bespoke-supplier-question">Question for suppliers</label>
               <div>
                 <input
                   id="bespoke-supplier-question"
                   value={newQuestion}
                   onChange={(event) => setNewQuestion(event.target.value)}
                   onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addSupplierQuestion(newQuestion); } }}
-                  placeholder="e.g. How will you evidence application performance during failover?"
+                  placeholder="Write the question suppliers must answer"
                 />
                 <button type="button" disabled={!newQuestion.trim()} onClick={() => addSupplierQuestion(newQuestion)}>Add</button>
               </div>
@@ -257,7 +268,7 @@ export default function GuidedBuild({
                   <small>Suggestions are never added until you choose them.</small>
                 </div>
               )}
-            </div>
+            </details>
           </section>
 
           <div className="nf-guided-prompt">

@@ -108,7 +108,7 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
  *  render slot below; Publish/Compare survive only as its own lightweight
  *  strip, per Robert's explicit framing, not a parallel rail. */
 import SectionNav from "@/components/procurement/SectionNav";
-import GuidedBuild, { type SectionQuestionItem } from "@/components/procurement/GuidedBuild";
+import GuidedBuild from "@/components/procurement/GuidedBuild";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
@@ -118,6 +118,7 @@ import CapturedList from "@/components/procurement/CapturedList";
 import RfpReady from "@/components/procurement/RfpReady";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
+import { buildSectionQuestionRegister, questionProgressBySection } from "@/lib/workspace/section-question-register";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -4054,28 +4055,34 @@ export default function ProjectDesk({
     say(`Added your supplier question to ${activeRow.title}.`);
   }, [activeRow, recordDecision, say]);
 
-  const activeSectionQuestionItems = useMemo<SectionQuestionItem[]>(() => {
-    if (!activeRow) return [];
-    const items: SectionQuestionItem[] = [];
-    for (const entry of answeredLog.stated) {
-      if (!entry.path || outlineKeyForPath(entry.path) !== activeRow.key) continue;
-      items.push({ id: `answered:${entry.key}`, text: PATH_LABELS[entry.path as AllowedPath] ?? entry.label, status: "completed", answer: entry.answer });
-    }
-    const openCards: NextQuestionCard[] = [...activeSectionCards];
-    if (guidedQuestionCard?.fills?.title === activeRow.title && !openCards.some((card) => card.nq.id === guidedQuestionCard.nq.id)) openCards.unshift(guidedQuestionCard);
-    for (const card of openCards) {
-      items.push({ id: `open:${card.nq.id}`, text: card.nq.question, status: card.nq.governedSuggestion ? "suggested" : "required" });
-    }
-    for (const missing of activeRow.missing ?? []) {
-      if (items.some((item) => item.status !== "completed" && item.text.toLowerCase().includes(missing.toLowerCase()))) continue;
-      items.push({ id: `missing:${activeRow.key}:${missing}`, text: `Confirm ${missing}`, status: "required" });
-    }
-    for (const item of noted) {
-      if (!item.id.startsWith(CUSTOM_SUPPLIER_QUESTION_PREFIX) || item.section !== activeRow.key) continue;
-      items.push({ id: item.id, text: item.label, status: "custom" });
-    }
-    return items;
-  }, [activeRow, activeSectionCards, answeredLog.stated, guidedQuestionCard, noted]);
+  const sectionQuestionItemsByKey = useMemo(() => {
+    const openCards: NextQuestionCard[] = [...allNextQuestionCards];
+    if (guidedQuestionCard && !openCards.some((card) => card.nq.id === guidedQuestionCard.nq.id)) openCards.unshift(guidedQuestionCard);
+    return buildSectionQuestionRegister({
+      rows: sectionOutline,
+      evidence: answeredLog.stated.flatMap((entry) => entry.path ? [{
+        id: entry.key,
+        sectionKey: outlineKeyForPath(entry.path),
+        text: PATH_LABELS[entry.path as AllowedPath] ?? entry.label,
+        answer: entry.answer,
+      }] : []),
+      openQuestions: openCards.flatMap((card) => {
+        const row = sectionOutline.find((candidate) => candidate.title === card.fills?.title);
+        return row ? [{ id: card.nq.id, sectionKey: row.key, text: card.nq.question, suggested: Boolean(card.nq.governedSuggestion) }] : [];
+      }),
+      customQuestions: noted.flatMap((item) => item.id.startsWith(CUSTOM_SUPPLIER_QUESTION_PREFIX) ? [{
+        id: item.id,
+        sectionKey: item.section,
+        text: item.label,
+      }] : []),
+    });
+  }, [sectionOutline, answeredLog.stated, allNextQuestionCards, guidedQuestionCard, noted]);
+
+  const activeSectionQuestionItems = activeRow ? sectionQuestionItemsByKey[activeRow.key] ?? [] : [];
+  const sectionQuestionProgressByKey = useMemo(
+    () => questionProgressBySection(sectionOutline, sectionQuestionItemsByKey),
+    [sectionOutline, sectionQuestionItemsByKey],
+  );
 
   /** Hotfix (Robert, 15 Aug 2026): resolves `acceptedSectorSuggestions`
    *  (the accepted mirror of `visibleSectorSuggestions`, defined above)
@@ -4756,7 +4763,7 @@ export default function ProjectDesk({
           </section>}
 
           <section className="nf-2030-project-band" aria-label="Project and RFP depth">
-            <div><strong>{guidedProjectTitle}</strong><span>{issueTarget === "formal" ? `Full RFP · ${rfiSet?.total ?? 0} tailored supplier questions` : "Quick requirement · about 5 min"}</span></div>
+            <div><strong>RFP Builder · {guidedProjectTitle}</strong><span>{issueTarget === "formal" ? `Full RFP · ${sectionProgress.ready} of ${sectionProgress.total} sections ready · ${rfiSet?.total ?? 0} tailored supplier questions` : `Quick requirement · ${sectionProgress.ready} of ${sectionProgress.total} sections ready · about 5 min`}</span></div>
             <button type="button" onClick={() => setIssueTarget((value) => value === "concise" ? "formal" : "concise")}>
               {issueTarget === "concise" ? "Expand to full RFP" : "Return to quick requirement"} <span aria-hidden="true">›</span>
             </button>
@@ -4776,6 +4783,7 @@ export default function ProjectDesk({
               activeKey={activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); goToStep("describe"); }}
               progress={sectionProgress}
+              questionProgressByKey={sectionQuestionProgressByKey}
               updatedBanner={sectionsUpdatedBanner}
               materialDecisionsRemaining={materialDecisionsRemaining}
               onReviewDecisions={() => goToStep("decisions")}
@@ -4793,9 +4801,6 @@ export default function ProjectDesk({
                 incompleteSectionTitle={sectionProgress.next?.title ?? null}
                 position={guidedQuestionCard?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
                 total={sectionProgress.total}
-                understood={`${sectorShort ? cap(sectorShort) : "Organisation"}${buying ? ` buying ${buying === "sdwan" ? "SD-WAN" : buying.toUpperCase()}` : " procurement"}`}
-                addedTo={guidedQuestionCard?.fills?.title ?? activeRow?.title ?? "Living requirement"}
-                stillNeeded={activeRow?.missing?.length ? activeRow.missing.join(", ") : activeRow?.detail ?? "Review the document"}
                 documentTitle={canvasDocument.title}
                 documentSummary={canvasDocument.summary}
                 clauses={canvasDocument.clauses}
@@ -5815,8 +5820,8 @@ export default function ProjectDesk({
               </select>
             </label>
             <div className="nf-2030-readiness">
-              <div><strong>0 of {sectionProgress.total} areas ready</strong><span>Start with what you know</span></div>
-              <div className="nf-2030-progress" aria-label={`0 of ${sectionProgress.total} areas ready`}>
+              <div><strong>0 of {sectionProgress.total} sections ready</strong><span>Start with what you know</span></div>
+              <div className="nf-2030-progress" aria-label={`0 of ${sectionProgress.total} sections ready`}>
                 {Array.from({ length: sectionProgress.total }, (_, index) => <span key={index} data-ready="false" />)}
               </div>
             </div>
@@ -5829,6 +5834,7 @@ export default function ProjectDesk({
               activeKey={activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
               progress={sectionProgress}
+              questionProgressByKey={sectionQuestionProgressByKey}
               updatedBanner={null}
               materialDecisionsRemaining={0}
               onReviewDecisions={() => inputRef.current?.focus()}

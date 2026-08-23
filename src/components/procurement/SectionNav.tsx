@@ -35,12 +35,14 @@
  */
 
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
+import type { SectionQuestionProgress } from "@/lib/workspace/section-question-register";
 
 export default function SectionNav({
   rows,
   activeKey,
   onSelect,
   progress,
+  questionProgressByKey,
   updatedBanner,
   materialDecisionsRemaining,
   onReviewDecisions,
@@ -54,6 +56,7 @@ export default function SectionNav({
   activeKey: string | null;
   onSelect: (key: string) => void;
   progress: OutlineProgress;
+  questionProgressByKey: Record<string, SectionQuestionProgress>;
   /** "Updated N sections: X, Y, Z" — set for a few seconds after a single
    *  message lands facts in more than one section at once. Robert, 20 Aug
    *  2026: "someone types SD-WAN and Compliance across XYZ regulation,
@@ -90,12 +93,14 @@ export default function SectionNav({
       )}
 
       <div className="nf-2030-section-nav-head">
-        <span><b>Your RFP</b><small>{progress.ready} of {progress.total} ready</small></span>
+        <span><b>RFP sections</b><small>{progress.ready} of {progress.total} sections ready</small></span>
       </div>
 
       <ol>
           {rows.map((r, index) => {
             const isActive = r.key === activeKey;
+            const questionProgress = questionProgressByKey[r.key] ?? { answered: 0, required: 1, optional: 0 };
+            const coreTotal = questionProgress.answered + questionProgress.required;
             return (
               <li key={r.key}>
                 <button
@@ -108,7 +113,8 @@ export default function SectionNav({
                   </span>
                   <span className="nf-2030-area-copy">
                     <strong>{r.title}</strong>
-                    <small>{statusLabel(r.state, isActive)}</small>
+                    <small>{statusLabel(r.state, isActive)} · {questionProgress.answered} of {Math.max(coreTotal, 1)} answered</small>
+                    {questionProgress.optional > 0 && <em>{questionProgress.optional} optional refinement{questionProgress.optional === 1 ? "" : "s"}</em>}
                   </span>
                 </button>
               </li>
