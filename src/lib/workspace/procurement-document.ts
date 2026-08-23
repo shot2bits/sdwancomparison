@@ -214,7 +214,7 @@ export interface SupplierQuestion {
    *  own generated per-clause wording -- see buildResponseGroups()'s own
    *  comment for the exclusivity rule that keeps a bank question and a
    *  generated question from ever covering the same clause twice. */
-  source: "bank" | "generated";
+  source: "bank" | "generated" | "custom";
   /** The bank's own native question id (e.g. "Q-IZ-01"), when `source`
    *  is "bank" -- null for a generated question. Provenance: which
    *  question-bank entry (deriveRfiQuestionSet's own BankCanonicalQuestion)
@@ -779,7 +779,16 @@ function questionsForClause(clause: ProcurementClause, bankQuestions: BankCanoni
   }));
 }
 
-function buildResponseGroups(clauses: ProcurementClause[], rfiSet: RfiQuestionSet | null, instrument: EarnedInstrument): SupplierResponseGroup[] {
+export const CUSTOM_SUPPLIER_QUESTION_PREFIX = "custom-supplier-question:";
+
+function customQuestionGroup(section: string): ResponseGroupKey {
+  if (["security_identity_data", "security", "compliance"].includes(section)) return "security_identity_data";
+  if (["operating_model_support", "migration_implementation", "model", "support", "services", "change"].includes(section)) return "managed_service_delivery";
+  if (["commercial_contractual", "success_evaluation", "commercial", "success"].includes(section)) return "commercial";
+  return "network_resilience";
+}
+
+function buildResponseGroups(clauses: ProcurementClause[], rfiSet: RfiQuestionSet | null, instrument: EarnedInstrument, noted: NotedItem[]): SupplierResponseGroup[] {
   const bankByCategory = new Map<string, BankCanonicalQuestion[]>();
   if (instrument !== "sor" && rfiSet) {
     for (const c of rfiSet.canonical) bankByCategory.set(c.category, c.questions);
@@ -797,6 +806,21 @@ function buildResponseGroups(clauses: ProcurementClause[], rfiSet: RfiQuestionSe
     }
     const qs = byGroup.get(group) ?? [];
     qs.push(...questionsForClause(clause, bankQuestions));
+    byGroup.set(group, qs);
+  }
+  for (const item of noted) {
+    if (!item.id.startsWith(CUSTOM_SUPPLIER_QUESTION_PREFIX)) continue;
+    const group = customQuestionGroup(item.section);
+    const qs = byGroup.get(group) ?? [];
+    qs.push({
+      id: `Q-${item.id}`,
+      clauseId: item.id,
+      text: item.label,
+      answerFormat: "narrative",
+      evidenceRequested: [],
+      source: "custom",
+      bankQuestionId: null,
+    });
     byGroup.set(group, qs);
   }
   const order: ResponseGroupKey[] = ["network_resilience", "security_identity_data", "managed_service_delivery", "commercial"];
@@ -1280,7 +1304,7 @@ export function compileProcurementDocument(input: ProcurementCompilerInput): Liv
   });
 
   const clauses = numberClauses(candidates);
-  const responseGroups = buildResponseGroups(clauses, rfiSet, instrument);
+  const responseGroups = buildResponseGroups(clauses, rfiSet, instrument, input.noted ?? []);
   const gates = buildGates(clauses);
 
   const rawCategoryTotals: Record<EvaluationCategoryKey, number> = {
@@ -1444,7 +1468,7 @@ const SupplierQuestionSchema = z.object({
   text: z.string(),
   answerFormat: AnswerFormatSchema,
   evidenceRequested: z.array(z.string()),
-  source: z.enum(["bank", "generated"]),
+  source: z.enum(["bank", "generated", "custom"]),
   bankQuestionId: z.string().nullable(),
 }).strict();
 

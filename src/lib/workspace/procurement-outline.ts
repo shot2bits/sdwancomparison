@@ -391,7 +391,14 @@ const OPEN_DECISION_TO_OUTLINE_TITLE: Record<string, string> = {
   "OD-operating-model-conflict": "Operating model and support",
   "OD-operating-model-ambiguous-correction": "Operating model and support",
   "OD-support-coverage-ambiguous": "Operating model and support",
-  "OD-timeline-unstated": "Success and evaluation",
+  "OD-timeline-unstated": "Migration and implementation",
+  "q-root-sector": "Organisation and scale",
+  "q-root-scope": "Solution scope",
+  "q-sase-shape": "Solution scope",
+  "q-resilience": "Resilience and availability",
+  "q-sse-scope": "Security, identity and data",
+  "q-support": "Operating model and support",
+  "q-contract-end": "Migration and implementation",
 };
 
 export function outlineRowForDecision(input: {

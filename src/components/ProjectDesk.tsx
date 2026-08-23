@@ -78,6 +78,7 @@ import {
   type LivingProcurementDocument,
   type CompilerRevision,
   type GovernedEvent,
+  CUSTOM_SUPPLIER_QUESTION_PREFIX,
 } from "@/lib/workspace/procurement-document";
 import LivingProcurementCanvas, { type NextQuestionCard, type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
 import { ProvenanceTag } from "@/components/procurement/ProvenanceTag";
@@ -107,7 +108,7 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
  *  render slot below; Publish/Compare survive only as its own lightweight
  *  strip, per Robert's explicit framing, not a parallel rail. */
 import SectionNav from "@/components/procurement/SectionNav";
-import GuidedBuild from "@/components/procurement/GuidedBuild";
+import GuidedBuild, { type SectionQuestionItem } from "@/components/procurement/GuidedBuild";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
@@ -253,6 +254,25 @@ type GuidedCustomAnswerReceipt = { question: string; text: string; addedTo: stri
 
 const GUIDED_CUSTOM_ANSWER_PREFIX = "guided-answer:";
 const guidedCustomAnswerNoteId = (questionId: string) => `${GUIDED_CUSTOM_ANSWER_PREFIX}${questionId}`;
+
+function outlineKeyForPath(path: string): string {
+  if (["organisation.sector", "organisation.sizeBand", "organisation.regions", "estate.users", "estate.sites"].includes(path)) return "organisation_scale";
+  if (path === "procurement.buying") return "solution_scope";
+  if (["estate.existingNetwork", "estate.cloud", "estate.existingSecurity", "estate.namedTechnologies", "estate.existingProviders"].includes(path)) return "current_estate";
+  if (["estate.siteResilience", "estate.locationCriticality", "estate.namedLocations"].includes(path)) return "resilience_availability";
+  if (path === "procurement.operatingModel") return "operating_model_support";
+  if (path === "constraints.timeline") return "migration_implementation";
+  if (path === "constraints.budgetBand") return "commercial_contractual";
+  if (path === "drivers") return "success_evaluation";
+  if (path.startsWith("constraints.") || path === "requirements.bespoke") return "security_identity_data";
+  return "current_estate";
+}
+
+function stableQuestionSuffix(value: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) hash = Math.imul(hash ^ value.charCodeAt(i), 16777619);
+  return (hash >>> 0).toString(36);
+}
 type Receipt = { id: number; text: string };
 /** Reliability gate, third amendment (13 Aug 2026, Codex's third review,
  *  item 1): "persist every non-command buyer entry verbatim as an
@@ -3942,7 +3962,8 @@ export default function ProjectDesk({
      this prevents the old impossible state where the centre said
      "Review your RFP" while the left rail still said Not started. */
   const guidedQuestionCard = useMemo<NextQuestionCard | null>(() => {
-    const nextRow = sectionProgress.next;
+    if (activeSection && activeRow?.state === "confirmed") return null;
+    const nextRow = activeSection && activeRow ? activeRow : sectionProgress.next;
     if (!nextRow) return null;
     const rankedForSection = allNextQuestionCards.find((candidate) => candidate.fills?.title === nextRow.title);
     if (rankedForSection) return rankedForSection;
@@ -3989,9 +4010,9 @@ export default function ProjectDesk({
       nq,
       buttons: slot.options.map((option) => ({ label: option.label, onClick: () => landOption(slot, option) })),
       hint: null,
-      fills: { title: nextRow.title, position: sectionProgress.nextPosition, total: sectionProgress.total },
+      fills: { title: nextRow.title, position: sectionPosition(sectionOutline, nextRow.title)?.position ?? sectionProgress.nextPosition, total: sectionProgress.total },
     };
-  }, [allNextQuestionCards, landOption, sectionProgress]);
+  }, [activeSection, activeRow, allNextQuestionCards, landOption, sectionOutline, sectionProgress]);
 
   /** Every open question that resolves the ACTIVE section specifically —
    *  the same `fills` resolution every other card surface already trusts,
@@ -4008,6 +4029,49 @@ export default function ProjectDesk({
    *  19 Aug 2026: "I cannot be sure if the system has recorded it. It's
    *  not clear what I have answered or not." */
   const answeredLog = useMemo(() => buildAnsweredLog({ facts, noted }), [facts, noted]);
+
+  const addCustomSupplierQuestion = useCallback((question: string) => {
+    if (!activeRow) return;
+    const normalized = `${question.trim().replace(/\s+/g, " ").replace(/[?.!]+$/, "")}?`;
+    if (normalized.length < 8) return;
+    const item: NotedItem = {
+      id: `${CUSTOM_SUPPLIER_QUESTION_PREFIX}${activeRow.key}:${stableQuestionSuffix(normalized.toLowerCase())}`,
+      label: normalized,
+      section: activeRow.key,
+      own: true,
+    };
+    setNoted((items) => items.some((existing) => existing.id === item.id) ? items : [...items, item]);
+    recordDecision(item.id, normalized, {
+      action: "note",
+      optionId: "custom_supplier_question",
+      resultingFactPaths: [],
+      resultingNoted: [item],
+    });
+    say(`Added your supplier question to ${activeRow.title}.`);
+  }, [activeRow, recordDecision, say]);
+
+  const activeSectionQuestionItems = useMemo<SectionQuestionItem[]>(() => {
+    if (!activeRow) return [];
+    const items: SectionQuestionItem[] = [];
+    for (const entry of answeredLog.stated) {
+      if (!entry.path || outlineKeyForPath(entry.path) !== activeRow.key) continue;
+      items.push({ id: `answered:${entry.key}`, text: PATH_LABELS[entry.path as AllowedPath] ?? entry.label, status: "completed", answer: entry.answer });
+    }
+    const openCards: NextQuestionCard[] = [...activeSectionCards];
+    if (guidedQuestionCard?.fills?.title === activeRow.title && !openCards.some((card) => card.nq.id === guidedQuestionCard.nq.id)) openCards.unshift(guidedQuestionCard);
+    for (const card of openCards) {
+      items.push({ id: `open:${card.nq.id}`, text: card.nq.question, status: card.nq.governedSuggestion ? "suggested" : "required" });
+    }
+    for (const missing of activeRow.missing ?? []) {
+      if (items.some((item) => item.status !== "completed" && item.text.toLowerCase().includes(missing.toLowerCase()))) continue;
+      items.push({ id: `missing:${activeRow.key}:${missing}`, text: `Confirm ${missing}`, status: "required" });
+    }
+    for (const item of noted) {
+      if (!item.id.startsWith(CUSTOM_SUPPLIER_QUESTION_PREFIX) || item.section !== activeRow.key) continue;
+      items.push({ id: item.id, text: item.label, status: "custom" });
+    }
+    return items;
+  }, [activeRow, activeSectionCards, answeredLog.stated, guidedQuestionCard, noted]);
 
   /** Hotfix (Robert, 15 Aug 2026): resolves `acceptedSectorSuggestions`
    *  (the accepted mirror of `visibleSectorSuggestions`, defined above)
@@ -4704,9 +4768,7 @@ export default function ProjectDesk({
           <div data-workspace-grid className="nf-2030-grid">
             <SectionNav
               rows={sectionOutline}
-              activeKey={activeStep === "describe" && guidedQuestionCard?.fills?.title
-                ? sectionOutline.find((row) => row.title === guidedQuestionCard.fills?.title)?.key ?? activeRow?.key ?? null
-                : activeRow?.key ?? null}
+              activeKey={activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); goToStep("describe"); }}
               progress={sectionProgress}
               updatedBanner={sectionsUpdatedBanner}
@@ -4722,6 +4784,7 @@ export default function ProjectDesk({
               <GuidedBuild
                 card={guidedQuestionCard}
                 ready={contentReady}
+                sectionComplete={activeRow?.state === "confirmed"}
                 incompleteSectionTitle={sectionProgress.next?.title ?? null}
                 position={guidedQuestionCard?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
                 total={sectionProgress.total}
@@ -4738,6 +4801,12 @@ export default function ProjectDesk({
                 onDescribeQuestion={chooseGuidedCustomAnswer}
                 customAnswerQuestionId={guidedCustomQuestionId}
                 customAnswerReceipt={guidedCustomAnswerReceipt}
+                sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Your requirement"}
+                sectionQuestions={activeSectionQuestionItems}
+                onAddSupplierQuestion={addCustomSupplierQuestion}
+                onGoToNextSection={() => {
+                  if (sectionProgress.next) setActiveSection(sectionProgress.next.key);
+                }}
                 onOpenDocument={() => { setWorkspaceDocumentView("requirement"); goToStep("review"); }}
               />
             )}
