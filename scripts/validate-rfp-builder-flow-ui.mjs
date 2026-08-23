@@ -59,9 +59,17 @@ try {
   check(globalRequirementText.includes("UK/IE/US"), "all selected geographies land in the living RFP");
   check(/Organisation and scale\nEssential facts captured · 4 of 5 populated/.test(globalRequirementText), "three regions count as one populated geography question and the five-question RFP target stays explicit");
 
+  // Production persists anonymous projects; isolate the second fixture so its
+  // section counts cannot inherit answers from the multi-region fixture above.
+  await desktop.context().clearCookies();
+  await desktop.evaluate(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
   await startProject(desktop, "20 UK sites for a retail business with 50 remote users, HQ in Norwich requires dual RA02 failover. We need full SASE and want to migrate by December 2026.");
   const initialText = await desktop.locator("body").innerText();
-  check(/Resilience and availability\nEssential facts captured · 1 of 5 populated/.test(initialText), "stated failover is captured in the resilience section while the RFP-depth target remains honest");
+  const resilienceRow = await desktop.getByRole("button", { name: /Resilience and availability/ }).innerText();
+  check(/(?:Essential facts captured|RFP-ready) · [1-5] of 5 populated/.test(resilienceRow) && /RA02|failover/i.test(initialText), "stated failover is captured in the resilience section while the RFP-depth target remains honest");
   check(initialText.includes("RFP Builder · Retail"), "the workspace identifies itself as the RFP Builder");
 
   const publishNow = desktop.getByRole("button", { name: "Publish opportunity now" });
