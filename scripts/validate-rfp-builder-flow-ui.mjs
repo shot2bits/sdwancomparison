@@ -22,7 +22,7 @@ try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await desktop.goto(BASE_URL, { waitUntil: "networkidle" });
   check((await desktop.locator(".nf-section-build-panel").count()) === 0, "the introductory prompt does not stack the RFP Builder underneath it");
-  await desktop.getByRole("button", { name: "Use recommended questions" }).click();
+  await desktop.getByRole("button", { name: "Answer one question at a time" }).click();
   check((await desktop.locator(".nf-2030-command-zone-empty").count()) === 0, "entering the question path removes the introductory landing content");
   const blankSection = await desktop.locator(".nf-section-build-panel").innerText();
   check(blankSection.includes("Organisation and scale"), "a blank RFP opens on the active first section");
@@ -57,39 +57,29 @@ try {
   await desktop.waitForTimeout(850);
   const globalRequirementText = await desktop.locator("body").innerText();
   check(globalRequirementText.includes("UK/IE/US"), "all selected geographies land in the living RFP");
-  check(/Organisation and scale\nReady · 4 of 4 answered/.test(globalRequirementText), "three regions count as one answered geography question, not three questions");
+  check(/Organisation and scale\nEssential facts captured · 4 of 5 populated/.test(globalRequirementText), "three regions count as one populated geography question and the five-question RFP target stays explicit");
 
   await startProject(desktop, "20 UK sites for a retail business with 50 remote users, HQ in Norwich requires dual RA02 failover. We need full SASE and want to migrate by December 2026.");
   const initialText = await desktop.locator("body").innerText();
-  check(/Resilience and availability\nReady · \d+ of \d+ answered/.test(initialText), "stated failover completes the resilience section");
+  check(/Resilience and availability\nEssential facts captured · 1 of 5 populated/.test(initialText), "stated failover is captured in the resilience section while the RFP-depth target remains honest");
   check(initialText.includes("RFP Builder · Retail"), "the workspace identifies itself as the RFP Builder");
 
-  for (let step = 0; step < 10; step += 1) {
-    if (await desktop.getByRole("button", { name: /Review your RFP/i }).count()) break;
-    const choices = desktop.getByRole("radio");
-    check((await choices.count()) > 0, "each unfinished section exposes a direct answer");
-    const before = await choices.first().evaluate((element) => element.getBoundingClientRect().top);
-    await choices.first().click();
-    const after = await choices.first().evaluate((element) => element.getBoundingClientRect().top);
-    check(Math.abs(after - before) < 1, "selecting an option does not move the target under the pointer", `shift=${after - before}`);
-    await desktop.getByRole("button", { name: "Continue", exact: true }).click();
-    await desktop.waitForTimeout(850);
-  }
-  const completedText = await desktop.locator("body").innerText();
-  check(completedText.includes("7 of 7 sections ready"), "the quick RFP reaches a finite visible completion state");
-  check((await desktop.getByRole("button", { name: /Review your RFP/i }).count()) === 1, "completion exposes one clear review action");
+  const publishNow = desktop.getByRole("button", { name: "Publish opportunity now" });
+  check((await publishNow.count()) === 1 && await publishNow.isEnabled(), "a concise opportunity can publish as soon as the essential facts stand");
+  check(initialText.includes("You can publish this as a concise opportunity now"), "the AI advisor explains that early publishing is available and recommends further RFP depth");
+  check(initialText.includes("of 5 populated"), "every section exposes the five-populated-question RFP quality threshold");
   check(await desktop.evaluate(() => document.documentElement.scrollWidth === window.innerWidth), "desktop has no horizontal overflow");
-  await desktop.getByRole("button", { name: /Expand to full RFP/i }).click();
-  await desktop.waitForTimeout(250);
-  const fullText = await desktop.locator("body").innerText();
-  check(/RFP sections\n\d+ of 9 sections ready/.test(fullText), "full mode expands the same document to nine required sections");
-  check(/Commercial and contractual\n(?:Not started|In progress) · 0 of \d+ answered/.test(fullText), "full mode makes commercial questions visibly required");
-  check(!fullText.includes("7 of 7 sections ready"), "expanding to a full RFP removes the quick-mode ready state");
+  check(!initialText.match(/Quick requirement|Full RFP|Expand to full|Recommended questions|Expanded questions/i), "the UI contains no short/large RFP mode choice");
+  await publishNow.click();
+  await desktop.locator(".nf-2030-publish").waitFor();
+  const publishBackground = await desktop.locator(".nf-2030-publish").evaluate((element) => getComputedStyle(element).backgroundColor);
+  check(publishBackground !== "rgb(255, 255, 255)", "the publish handoff remains on the dark workspace surface", publishBackground);
+  check((await desktop.getByRole("button", { name: /Generate and publish|create the test position/i }).count()) === 1, "the prominent publish path reaches the governed final action");
   await desktop.close();
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await mobile.goto(BASE_URL, { waitUntil: "networkidle" });
-  await mobile.getByRole("button", { name: "Use recommended questions" }).click();
+  await mobile.getByRole("button", { name: "Answer one question at a time" }).click();
   const mobileInlineAnswerBox = await mobile.locator(".nf-section-answer-panel textarea").evaluate((element) => {
     const box = element.getBoundingClientRect();
     return { top: box.top, bottom: box.bottom };

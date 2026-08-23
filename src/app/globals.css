@@ -610,6 +610,9 @@
 .nf-guided-question h1 { max-width: 670px; margin: 0; color: #f4f3f0; font-family: inherit; font-size: clamp(23px, 2vw, 31px); font-weight: 650; line-height: 1.12; letter-spacing: -.025em; }
 .nf-guided-question-context { margin: 8px 0 0; color: #d0d1d3; font-size: 13px; line-height: 1.45; }
 .nf-guided-reason { margin: 9px 0 14px; color: #a7a9b0; font-size: 13px; line-height: 1.5; }
+.nf-guided-advisor { display: flex; flex-direction: column; gap: 5px; margin: 14px 0 18px; padding: 14px 16px; color: #d9eeee; background: #183035; box-shadow: inset 3px 0 #55c9cc; }
+.nf-guided-advisor span { color: #67d1d3; font-size: 10px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.nf-guided-advisor strong { color: #edf4f3; font-size: 12px; font-weight: 550; line-height: 1.5; }
 .nf-guided-choices { display: flex; flex-direction: column; }
 .nf-guided-multi-help { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 6px; padding: 10px 5px; color: #a7a9b0; font-size: 11px; }
 .nf-guided-choices .nf-guided-multi-help button { flex: none; padding: 6px 10px; color: #62d2d4; background: rgba(79,197,200,.08); box-shadow: none; font-size: 11px; font-weight: 700; }
@@ -673,6 +676,10 @@
 .nf-guided-prompt details { margin-top: 9px; color: #53c7ca; font-size: 11px; }
 .nf-guided-prompt summary { cursor: pointer; }
 .nf-guided-prompt details p { color: #9b9da4; line-height: 1.5; }
+.nf-guided-publish-action { margin-top: 22px; padding-top: 18px; box-shadow: inset 0 1px #30333a; }
+.nf-guided-publish-action button { width: 100%; min-height: 54px; border: 0; border-radius: 4px; color: #071417; background: linear-gradient(135deg, #65d5d6, #3fb2b8); cursor: pointer; font-size: 15px; font-weight: 800; }
+.nf-guided-publish-action button:disabled { color: #777a81; background: #292c32; cursor: not-allowed; }
+.nf-guided-publish-action p { margin: 8px 2px 0; color: #92949b; font-size: 11px; line-height: 1.45; }
 .nf-guided-document { grid-area: aside; min-width: 0; padding: 26px 28px; background: #0d0f12; box-shadow: inset 1px 0 #292c32; }
 .nf-guided-document-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; }
 .nf-guided-document-head > div { display: flex; flex-direction: column; gap: 4px; }
@@ -686,6 +693,13 @@
 .nf-guided-clause-preview p[data-new="true"] { margin-left: -4px; padding: 4px 6px; color: #091516; background: linear-gradient(90deg, rgba(104,207,209,.9), rgba(104,207,209,.55)); }
 .nf-guided-document p.nf-guided-depth { margin-top: 22px; padding-top: 15px; color: #8fd4d5; box-shadow: inset 0 1px #292c32; font-size: 11px; }
 .nf-guided-document > button { border: 0; padding: 12px 0; color: #58c9cc; background: transparent; cursor: pointer; font-size: 12px; }
+
+/* Publish is part of the same workspace, not a sudden white legacy page. */
+.nf-2030-publish { color: #e8e8e5; background: #111318; }
+.nf-2030-publish > div, .nf-2030-publish section { border-color: #34373e !important; background-color: #171a20 !important; }
+.nf-2030-publish h1, .nf-2030-publish h2, .nf-2030-publish h3, .nf-2030-publish strong { color: #f2f2ef !important; }
+.nf-2030-publish p, .nf-2030-publish span, .nf-2030-publish label { color: #aaaeb5; }
+.nf-2030-publish input { accent-color: #55c9cc; }
 
 .nf-2030-document-tabs { display: flex; flex-wrap: wrap; gap: 3px; margin: 0 0 10px; }
 .nf-2030-document-tabs button { border: 0; border-radius: 8px; padding: 10px 12px; color: #7e7e85; background: transparent; cursor: pointer; font-size: 10px; }

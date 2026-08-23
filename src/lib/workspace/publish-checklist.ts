@@ -73,11 +73,10 @@ export function buildPublishChecklist(input: {
     { key: "sites", label: "How many sites", done: input.sites },
     { key: "regions", label: "Which regions", done: input.regions },
     { key: "scope", label: "What you're buying", done: input.scope },
-    { key: "timeline", label: "Your timeline", done: input.timeline },
   ];
-  if (input.securityScope) {
-    items.push({ key: "security_verdict", label: "Security scope settled", done: input.securityVerdictSettled });
-  }
+  // Timeline and security depth materially improve an RFP, but neither is
+  // required to publish a concise market opportunity. They remain advisor
+  // recommendations and contribute to RFP depth; they are not hidden locks.
   const doneCount = items.filter((i) => i.done).length;
   return {
     items,

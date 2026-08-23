@@ -32,6 +32,8 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { outlineProgress, outlineProgressLine, sectionPosition, siteResilienceClauseExists, type OutlineRow } from "../src/lib/workspace/procurement-outline";
 import { reachableSteps } from "../src/lib/workspace/wizard-steps";
+import { buildRfpCoverage, RFP_SECTION_QUESTION_TARGET } from "../src/lib/workspace/rfp-coverage";
+import { buildPublishChecklist } from "../src/lib/workspace/publish-checklist";
 
 const ROOT = path.dirname(fileURLToPath(new URL("../package.json", import.meta.url)));
 const src = (...parts: string[]) => readFileSync(path.join(ROOT, ...parts), "utf8");
@@ -90,6 +92,17 @@ function main() {
     siteResilienceClauseExists([{ templateId: "noted-selection", sourceNotedIds: ["twin-res-all"] }]),
     "A: a structured resilience selection shown in the living document also completes the resilience outline row",
   );
+  const coverage = buildRfpCoverage(rows.slice(0, 2), {
+    "Organisation and scale": { answered: 5, required: 0, optional: 0 },
+    "Solution scope": { answered: 4, required: 1, optional: 0 },
+  });
+  record(RFP_SECTION_QUESTION_TARGET === 5, "A: the RFP-ready threshold is exactly five populated questions per included section");
+  record(!coverage.ready && coverage.readySections === 1 && coverage.remainingAnswers === 1, "A: RFP coverage reports the exact incomplete section and remaining answer count");
+  const conciseOpportunity = buildPublishChecklist({
+    sector: true, sites: true, regions: true, scope: true, timeline: false,
+    securityScope: true, securityVerdictSettled: false,
+  });
+  record(conciseOpportunity.ready, "A: a useful concise opportunity can publish before timeline/security refinements make the living RFP deeper");
 
   /* ================================================================ */
   /* B. THE COMPETING NUMBERS ARE GONE.                                */
@@ -117,7 +130,7 @@ function main() {
   record(/<SectionNav[\s\S]{0,400}progress=\{sectionProgress\}/.test(desk), "C: the primary navigation reads it (only rendered once a project has started)");
   record(/outlineProgress\(outline\)/.test(canvas), "C: the document header derives it from the outline it is about to render");
   record(/outlineProgressLine\(progress\)/.test(canvas), "C: the header uses the shared wording function, not its own sentence");
-  record(/progress\.ready\}(?:\/| of )\{progress\.total/.test(nav), "C: the primary nav reads ready and total directly from the SAME shared progress object");
+  record(/rfpAnswered\} of \{RFP_SECTION_QUESTION_TARGET\} populated/.test(nav), "C: the primary nav shows the explicit five-populated-question RFP threshold for every section");
 
   /* ================================================================ */
   /* D. A QUESTION KNOWS WHERE IT LANDS.                               */
@@ -131,9 +144,10 @@ function main() {
   /* E. THE CONVERSATION ENDS.                                         */
   /* ================================================================ */
   record(
-    /const contentReady = publishChecklist\.ready && requiredSectionsReady/.test(desk) &&
-      /const rfpIsBuilt = started && !published && contentReady/.test(desk),
-    "E: the terminal state is gated on the combined factual + visible-section publish gate (`contentReady`, the same gate `signLocked` reads)",
+    /const contentReady = publishChecklist\.ready/.test(desk) &&
+      /buildRfpCoverage\(sectionOutline, sectionQuestionProgressByKey\)/.test(desk) &&
+      /const rfpIsBuilt = started && !published && rfpCoverage\.ready/.test(desk),
+    "E: concise opportunity publishing and the five-per-section RFP-ready state are separate, explicit gates",
   );
   record(
     !/rfpIsBuilt = .*materialDecisionsRemaining/.test(desk),

@@ -31,7 +31,6 @@ export default function ProcurementWorkspaceDocument({
   activeSection,
   view,
   onViewChange,
-  issueTarget,
   factsKept,
   factsStruck,
   sourceTurnCount,
@@ -40,7 +39,6 @@ export default function ProcurementWorkspaceDocument({
   activeSection: OutlineRow | null;
   view: WorkspaceDocumentView;
   onViewChange: (view: WorkspaceDocumentView) => void;
-  issueTarget: "concise" | "formal";
   factsKept: number;
   factsStruck: number;
   sourceTurnCount: number;
@@ -87,7 +85,7 @@ export default function ProcurementWorkspaceDocument({
         {view === "requirement" && (
           <>
             <p className="nf-2030-kicker">
-              {issueTarget === "formal" ? "Formal RFP" : "Concise supplier requirement"} · Draft {document.version}
+              Living RFP · Draft {document.version}
             </p>
             <h2>{document.title}</h2>
             <p className="nf-2030-summary">{document.summary}</p>
@@ -107,12 +105,10 @@ export default function ProcurementWorkspaceDocument({
 
             <ProcurementClauseList clauses={document.clauses} changedClauseIds={changedClauseIds} />
 
-            {issueTarget === "concise" && (
-              <div className="nf-2030-depth-note">
-                <strong>Expand this into a formal RFP</strong>
-                Add deeper evidence tests, scoring weights, commercial schedules, governance and contractual acceptance criteria without starting again.
-              </div>
-            )}
+            <div className="nf-2030-depth-note">
+              <strong>One document, continuously improving</strong>
+              Prompt, upload or answer directly. Each captured fact updates the same living RFP and its supplier questions.
+            </div>
           </>
         )}
 

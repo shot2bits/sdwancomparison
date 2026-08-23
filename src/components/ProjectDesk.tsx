@@ -119,6 +119,7 @@ import CapturedList from "@/components/procurement/CapturedList";
 import RfpReady from "@/components/procurement/RfpReady";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
+import { buildRfpCoverage } from "@/lib/workspace/rfp-coverage";
 import { buildSectionQuestionRegister, questionProgressBySection } from "@/lib/workspace/section-question-register";
 
 /* ================================================================== */
@@ -1178,7 +1179,6 @@ export default function ProjectDesk({
    *  unconditionally, unaffected by this -- reviewing the full document
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
-  const [issueTarget, setIssueTarget] = useState<"concise" | "formal">("concise");
   const [workspaceDocumentView, setWorkspaceDocumentView] = useState<WorkspaceDocumentView>("requirement");
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
@@ -1994,7 +1994,6 @@ export default function ProjectDesk({
     if (!coreFive.timeline) out.push("your timeline");
     return out;
   }, [coreFive]);
-  const coreFiveComplete = missingCore.length === 0;
 
   /* ---- The twin derivations: filled slots, weighted understanding,
      the top gaps line ---- */
@@ -2083,7 +2082,6 @@ export default function ProjectDesk({
     ? `Narrowed by ${listJoin(narrowedBy)}. Never by what anyone pays.`
     : "The whole evaluated market, until you tell it more. Never narrowed by what anyone pays.";
 
-  const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGapsLenOk() || consentGaps) : consentCreate;
   function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
   const unansweredGaps = brief.openGaps;
 
@@ -2093,12 +2091,7 @@ export default function ProjectDesk({
     for (const f of facts) if (!f.struck) s.add(sectionForPath(f.path));
     return [...s];
   }, [facts]);
-  const instrumentCoveredSections = useMemo(
-    () => issueTarget === "formal"
-      ? [...new Set([...coveredSections, "estate", "drivers", "model", "change", "security", "support", "services", "compliance", "organisation", "commercial"])]
-      : coveredSections,
-    [coveredSections, issueTarget],
-  );
+  const instrumentCoveredSections = coveredSections;
   const commercialClaims = useMemo(
     () => facts.filter((f) => !f.struck && sectionForPath(f.path) === "commercial").length,
     [facts],
@@ -2107,6 +2100,8 @@ export default function ProjectDesk({
     () => deriveRfiQuestionSet({ coveredSections: instrumentCoveredSections, sector: (requirement.organisation?.sector as string | undefined) ?? null }),
     [instrumentCoveredSections, requirement],
   );
+  const customSupplierQuestionCount = noted.filter((item) => item.id.startsWith(CUSTOM_SUPPLIER_QUESTION_PREFIX)).length;
+  const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGapsLenOk() || consentGaps) : consentCreate;
   const instrumentLadder = useMemo(
     () =>
       deriveInstrumentLadder({
@@ -2125,7 +2120,7 @@ export default function ProjectDesk({
      RFP instrument now; Quick continues to earn depth automatically as
      facts accumulate. This makes the control change the supplier pack,
      not merely its label. */
-  const instrument = issueTarget === "formal" ? "rfp" : automaticallyEarnedInstrument;
+  const instrument = automaticallyEarnedInstrument;
   const publishTitle = brief.title;
 
   /** Phase 3 Stage A correction round (Robert, 14 Aug 2026): the single
@@ -3734,14 +3729,7 @@ export default function ProjectDesk({
     });
     const buyerFacingOutline = outline
       .filter((row) => row.key !== "sector_intelligence")
-      .filter((row) => issueTarget === "formal" || !["commercial_contractual", "success_evaluation"].includes(row.key))
-      .map((row) => issueTarget === "formal" && row.state === "later" ? {
-        ...row,
-        state: "needs_input" as const,
-        detail: row.key === "commercial_contractual"
-          ? "Commercial, contractual and exit requirements are part of the full RFP."
-          : "Evidence, scoring and success measures are part of the full RFP.",
-      } : row);
+      .filter((row) => !["commercial_contractual", "success_evaluation"].includes(row.key));
     if (started) return buyerFacingOutline;
     return buyerFacingOutline.map((row) => row.state === "later" ? row : {
       ...row,
@@ -3753,7 +3741,7 @@ export default function ProjectDesk({
           : row.detail,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt, started, issueTarget]);
+  }, [facts, noted, coreFive, buying, opModel, pack, visibleSectorSuggestions, declinedSuggestionIds, rankedNextQuestions, standingAt, started]);
 
   /** THE progress fraction. Robert, 20 Aug 2026: "right now, it is 100%
    *  not clear how the user is progressing." Derived from `sectionOutline`
@@ -3762,12 +3750,10 @@ export default function ProjectDesk({
    *  four views of one number, not four numbers. */
   const sectionProgress = useMemo(() => outlineProgress(sectionOutline), [sectionOutline]);
 
-  /* One honest completion gate. The original five-fact checklist remains
-     the minimum data-quality check, but it can no longer pronounce a
-     document finished while the visible section outline still contains
-     Needs input / Needs decision rows. The same combined boolean drives
-     the terminal state, publish navigation and the publish action. */
-  const requiredSectionsReady = sectionProgress.ready === sectionProgress.total;
+  /* Publishing and RFP depth are deliberately separate. A buyer may put a
+     useful concise opportunity to market once the identifying facts stand;
+     five populated questions per included section is the higher threshold
+     for calling the living document RFP-ready. */
   const publishChecklist = useMemo(
     () =>
       buildPublishChecklist({
@@ -3781,8 +3767,7 @@ export default function ProjectDesk({
       }),
     [coreFive, securityScope, verdict],
   );
-  const contentReady = publishChecklist.ready && requiredSectionsReady && Boolean(securityScope || buying);
-  const incompleteRequiredSections = sectionOutline.filter((row) => row.state !== "confirmed" && row.state !== "later");
+  const contentReady = publishChecklist.ready && Boolean(securityScope || buying);
   const signLocked =
     resuming || !started || facts.length === 0 || Boolean(published) || !contentReady;
   const lockLine = resuming
@@ -3793,9 +3778,7 @@ export default function ProjectDesk({
         ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
         : !publishChecklist.ready
           ? `Publishing still needs ${publishChecklist.remaining.join(", ").toLowerCase()}. Say it in the prompt, or answer the next question.`
-          : !requiredSectionsReady
-            ? `Complete ${incompleteRequiredSections.map((row) => row.title).join(", ")} before publishing. The next unfinished section is shown in the builder.`
-            : !securityScope && !buying
+          : !securityScope && !buying
               ? "Say what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
               : null;
 
@@ -4135,6 +4118,38 @@ export default function ProjectDesk({
     () => questionProgressBySection(sectionOutline, sectionQuestionItemsByKey),
     [sectionOutline, sectionQuestionItemsByKey],
   );
+  const rfpCoverage = useMemo(
+    () => buildRfpCoverage(sectionOutline, sectionQuestionProgressByKey),
+    [sectionOutline, sectionQuestionProgressByKey],
+  );
+  const nextAdvisorQuestion = activePromptQuestion?.text
+    ?? publishChecklist.remaining[0]
+    ?? "Add the next material requirement, constraint or success measure";
+  const advisorMessage = !contentReady
+    ? `To unlock publishing, ${publishChecklist.remaining.join(", ").toLowerCase()}. You can answer several in one message.`
+    : rfpCoverage.ready
+      ? "This document meets the RFP depth standard. Review it, then publish when you are ready."
+      : `You can publish this as a concise opportunity now. For an RFP-ready document, add ${rfpCoverage.remainingAnswers} more populated question${rfpCoverage.remainingAnswers === 1 ? "" : "s"} across the included sections. Consider next: ${nextAdvisorQuestion}`;
+  const buyerQuestionCounts = useMemo(() => {
+    const questions = Object.values(sectionQuestionItemsByKey).flat();
+    return {
+      answered: questions.filter((item) => item.status === "completed").length,
+      remaining: questions.filter((item) => item.status === "required").length,
+      optional: questions.filter((item) => item.status === "suggested").length,
+      bespoke: questions.filter((item) => item.status === "custom").length,
+    };
+  }, [sectionQuestionItemsByKey]);
+
+  const openBespokeQuestionManager = () => {
+    goToStep("describe");
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      const details = document.querySelector<HTMLDetailsElement>(".nf-guided-add-question");
+      if (!details) return;
+      details.open = true;
+      details.scrollIntoView({ behavior: "smooth", block: "center" });
+      details.querySelector<HTMLInputElement>("input")?.focus();
+    }));
+  };
 
   /** Hotfix (Robert, 15 Aug 2026): resolves `acceptedSectorSuggestions`
    *  (the accepted mirror of `visibleSectorSuggestions`, defined above)
@@ -4526,7 +4541,7 @@ export default function ProjectDesk({
      out, so without this the conversation has no ending by construction.
      The remaining decisions are demoted, not hidden -- they are still
      rendered below, now honestly labelled optional. */
-  const rfpIsBuilt = started && !published && contentReady;
+  const rfpIsBuilt = started && !published && rfpCoverage.ready;
 
   /* Rendered ABOVE the captured list, not below it. The end state is the
      one thing in this column a buyer must never have to scroll for --
@@ -4724,7 +4739,6 @@ export default function ProjectDesk({
                           activeSection={activeRow}
                           view={workspaceDocumentView}
                           onViewChange={setWorkspaceDocumentView}
-                          issueTarget={issueTarget}
                           factsKept={live.length}
                           factsStruck={Math.max(0, facts.length - live.length)}
                           sourceTurnCount={sourceTurns.length}
@@ -4815,10 +4829,16 @@ export default function ProjectDesk({
           </section>}
 
           <section className="nf-2030-project-band" aria-label="Project and RFP depth">
-            <div><strong>RFP Builder · {guidedProjectTitle}</strong><span>{issueTarget === "formal" ? `Full RFP · ${sectionProgress.ready} of ${sectionProgress.total} sections ready · ${rfiSet?.total ?? 0} tailored supplier questions` : `Quick requirement · ${sectionProgress.ready} of ${sectionProgress.total} sections ready · about 5 min`}</span></div>
-            <button type="button" onClick={() => setIssueTarget((value) => value === "concise" ? "formal" : "concise")}>
-              {issueTarget === "concise" ? "Expand to full RFP" : "Return to quick requirement"} <span aria-hidden="true">›</span>
-            </button>
+            <div>
+              <strong>RFP Builder · {guidedProjectTitle}</strong>
+              <span>
+                {`${rfpCoverage.readySections} of ${rfpCoverage.totalSections} sections meet the 5-question RFP standard · ${buyerQuestionCounts.answered} answers captured · ${rfiSet?.total ?? 0} tailored supplier questions available`}
+                {buyerQuestionCounts.bespoke ? ` · ${buyerQuestionCounts.bespoke} bespoke` : ""}
+              </span>
+            </div>
+            <div className="nf-question-set-actions" role="group" aria-label="Control the RFP question set">
+              <button type="button" onClick={openBespokeQuestionManager}>Add bespoke question</button>
+            </div>
           </section>
 
           {/* `flex flex-col` below lg, not a plain block: the `order-*`
@@ -4848,8 +4868,10 @@ export default function ProjectDesk({
             {activeStep === "describe" && (
               <GuidedBuild
                 card={guidedQuestionCard}
-                ready={contentReady}
-                sectionComplete={activeRow?.state === "confirmed"}
+                ready={rfpCoverage.ready}
+                publishReady={contentReady}
+                advisorMessage={advisorMessage}
+                sectionComplete={Boolean(activeRow && rfpCoverage.sections.find((section) => section.key === activeRow.key)?.ready)}
                 incompleteSectionTitle={sectionProgress.next?.title ?? null}
                 position={guidedQuestionCard?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
                 total={sectionProgress.total}
@@ -4857,8 +4879,6 @@ export default function ProjectDesk({
                 documentSummary={canvasDocument.summary}
                 clauses={canvasDocument.clauses}
                 composer={composerBlock}
-                issueTarget={issueTarget}
-                questionBankCount={rfiSet?.total ?? 0}
                 onFocusPrompt={() => inputRef.current?.focus()}
                 onDescribeQuestion={chooseGuidedCustomAnswer}
                 customAnswerQuestionId={guidedCustomQuestionId}
@@ -4870,6 +4890,7 @@ export default function ProjectDesk({
                   if (sectionProgress.next) setActiveSection(sectionProgress.next.key);
                 }}
                 onOpenDocument={() => { setWorkspaceDocumentView("requirement"); goToStep("review"); }}
+                onPublish={() => goToStep("publish")}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -5280,7 +5301,7 @@ export default function ProjectDesk({
                 )}
 
                 {activeStep === "publish" && (
-                  <>
+                  <div className="nf-2030-publish">
                     {/* The buyer's own board listing (reference screenshot
                         04-opportunities.png, the card pinned above the live
                         board). Every value here is real: the title and facts
@@ -5675,6 +5696,13 @@ export default function ProjectDesk({
                                 {unansweredGaps.length > 0 ? ` ${numWord(unansweredGaps.length)} unanswered question${unansweredGaps.length === 1 ? "" : "s"} (published only as labelled assumptions if you accept them),` : ""}
                                 {" "}and anything you have dropped from the record.
                               </p>
+                              <div className="nf-publish-question-approval">
+                                <div>
+                                  <strong>Living RFP depth</strong>
+                                  <span>{rfpCoverage.readySections} of {rfpCoverage.totalSections} included sections meet the five-question standard · {customSupplierQuestionCount} bespoke question{customSupplierQuestionCount === 1 ? "" : "s"}</span>
+                                </div>
+                                <button type="button" onClick={() => { setWorkspaceDocumentView("supplier"); goToStep("review"); }}>Review questions</button>
+                              </div>
                               {signLocked && lockLine && (
                                 <p className="m-0 mb-2 text-[13px] leading-relaxed" style={{ color: "var(--nf-orange-strong, #832f00)" }}>{lockLine}</p>
                               )}
@@ -5757,7 +5785,7 @@ export default function ProjectDesk({
                       </div>
                     )}
 
-                  </>
+                  </div>
                 )}
 
                 {activeStep === "compare" && (
@@ -5845,7 +5873,7 @@ export default function ProjectDesk({
                 <button type="button" onClick={() => fileRef.current?.click()}>+ Add document</button>
                 <button type="button" onClick={() => inputRef.current?.focus()}>Connect source</button>
                 {voiceSupported && <button type="button" onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}>{voiceState === "idle" ? "Voice" : "Stop listening"}</button>}
-                <button type="button" className="questions" onClick={() => setPrestartSurface("questions")}>Use recommended questions</button>
+                <button type="button" className="questions" onClick={() => setPrestartSurface("questions")}>Answer one question at a time</button>
               </div>
               <div className="nf-2030-starters" aria-label="Sector starting points">
                 <span>Start with</span>
@@ -5867,7 +5895,7 @@ export default function ProjectDesk({
           </section> : <>
 
           <section className="nf-2030-status" aria-label="Issue readiness">
-            <div className="nf-2030-question-set"><span>Question set</span><strong>Recommended core questions</strong></div>
+            <div className="nf-2030-question-set"><span>Living RFP</span><strong>One document · depth grows as you answer</strong></div>
             <div className="nf-2030-readiness">
               <div><strong>0 of {sectionProgress.total} sections ready</strong><span>Start with what you know</span></div>
               <div className="nf-2030-progress" aria-label={`0 of ${sectionProgress.total} sections ready`}>
@@ -5899,7 +5927,6 @@ export default function ProjectDesk({
               questions={activeSectionQuestionItems}
               position={activeRowPosition?.["position"] ?? 1}
               total={sectionProgress.total}
-              issueTarget={issueTarget}
               composer={composerBlock}
               activeQuestionId={activePromptQuestion?.id ?? null}
               onSelectQuestion={(question) => setPromptQuestionId(question.id)}

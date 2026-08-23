@@ -9,7 +9,6 @@ export default function SectionBuildPanel({
   questions,
   position,
   total,
-  issueTarget,
   composer,
   activeQuestionId,
   onSelectQuestion,
@@ -18,7 +17,6 @@ export default function SectionBuildPanel({
   questions: SectionQuestionItem[];
   position: number;
   total: number;
-  issueTarget: "concise" | "formal";
   composer: ReactNode;
   activeQuestionId: string | null;
   onSelectQuestion: (question: SectionQuestionItem) => void;
@@ -33,7 +31,7 @@ export default function SectionBuildPanel({
   return (
     <main className="nf-section-build-panel" aria-label={`${row?.title ?? "RFP"} section builder`}>
       <header>
-        <div className="nf-section-build-eyebrow"><strong>RFP Builder</strong><span>· {issueTarget === "formal" ? "Full RFP" : "Quick requirement"}</span></div>
+        <div className="nf-section-build-eyebrow"><strong>RFP Builder</strong><span>· One living document</span></div>
         <p>Section {Math.max(position, 1)} of {Math.max(total, 1)}</p>
         <h1>{row?.title ?? "Organisation and scale"}</h1>
         <span>{ready ? "This section is ready. Review the captured answers below or choose the next section." : `Complete the ${required.length || 1} remaining core question${required.length === 1 ? "" : "s"}. Your answers build this section live.`}</span>

@@ -36,6 +36,7 @@
 
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
 import type { SectionQuestionProgress } from "@/lib/workspace/section-question-register";
+import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 
 export default function SectionNav({
   rows,
@@ -73,7 +74,7 @@ export default function SectionNav({
   onCompare: () => void;
 }) {
   const statusLabel = (state: OutlineRow["state"], active: boolean) => {
-    if (state === "confirmed") return "Ready";
+    if (state === "confirmed") return "Essential facts captured";
     if (active) return "In progress";
     if (state === "netify_suggested") return "Review suggestion";
     if (state === "later") return "Optional";
@@ -93,14 +94,15 @@ export default function SectionNav({
       )}
 
       <div className="nf-2030-section-nav-head">
-        <span><b>RFP sections</b><small>{progress.ready} of {progress.total} sections ready</small></span>
+        <span><b>Living RFP sections</b><small>{progress.ready} contain essential facts · five populated questions makes each section RFP-ready</small></span>
       </div>
 
       <ol>
           {rows.map((r, index) => {
             const isActive = r.key === activeKey;
             const questionProgress = questionProgressByKey[r.key] ?? { answered: 0, required: 1, optional: 0 };
-            const coreTotal = questionProgress.answered + questionProgress.required;
+            const rfpAnswered = Math.min(questionProgress.answered, RFP_SECTION_QUESTION_TARGET);
+            const sectionRfpReady = rfpAnswered >= RFP_SECTION_QUESTION_TARGET;
             return (
               <li key={r.key}>
                 <button
@@ -108,12 +110,12 @@ export default function SectionNav({
                   onClick={() => onSelect(r.key)}
                   aria-current={isActive ? "true" : undefined}
                 >
-                  <span className="nf-2030-area-mark" data-state={r.state} aria-hidden="true">
-                    {r.state === "confirmed" ? "✓" : index + 1}
+                  <span className="nf-2030-area-mark" data-state={sectionRfpReady ? "confirmed" : r.state} aria-hidden="true">
+                    {sectionRfpReady ? "✓" : index + 1}
                   </span>
                   <span className="nf-2030-area-copy">
                     <strong>{r.title}</strong>
-                    <small>{statusLabel(r.state, isActive)} · {questionProgress.answered} of {Math.max(coreTotal, 1)} answered</small>
+                    <small>{sectionRfpReady ? "RFP-ready" : statusLabel(r.state, isActive)} · {rfpAnswered} of {RFP_SECTION_QUESTION_TARGET} populated</small>
                     {questionProgress.optional > 0 && <em>{questionProgress.optional} optional refinement{questionProgress.optional === 1 ? "" : "s"}</em>}
                   </span>
                 </button>

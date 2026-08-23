@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
+import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 
 type ClausePreview = { id: string; statement: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
@@ -19,6 +20,8 @@ function splitQuestion(value: string): { prompt: string; context: string | null 
 export default function GuidedBuild({
   card,
   ready,
+  publishReady,
+  advisorMessage,
   sectionComplete,
   incompleteSectionTitle,
   position,
@@ -27,8 +30,6 @@ export default function GuidedBuild({
   documentSummary,
   clauses,
   composer,
-  issueTarget,
-  questionBankCount,
   onFocusPrompt,
   onDescribeQuestion,
   customAnswerQuestionId,
@@ -38,9 +39,12 @@ export default function GuidedBuild({
   onAddSupplierQuestion,
   onGoToNextSection,
   onOpenDocument,
+  onPublish,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
+  publishReady: boolean;
+  advisorMessage: string;
   sectionComplete: boolean;
   incompleteSectionTitle: string | null;
   position: number;
@@ -49,8 +53,6 @@ export default function GuidedBuild({
   documentSummary: string;
   clauses: ClausePreview[];
   composer: ReactNode;
-  issueTarget: "concise" | "formal";
-  questionBankCount: number;
   onFocusPrompt: () => void;
   onDescribeQuestion: (question: NextQuestionCard["nq"] | null) => void;
   customAnswerQuestionId: string | null;
@@ -60,6 +62,7 @@ export default function GuidedBuild({
   onAddSupplierQuestion: (question: string) => void;
   onGoToNextSection: () => void;
   onOpenDocument: () => void;
+  onPublish: () => void;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
@@ -90,9 +93,9 @@ export default function GuidedBuild({
         ? `${sectionTitle} is complete. You can review its recorded answers below or continue to the next unfinished section.`
       : `${incompleteSectionTitle ?? "The next required section"} still needs an answer. Add it in the prompt below.`;
   const completedCount = sectionQuestions.filter((item) => item.status === "completed").length;
-  const outstandingCount = sectionQuestions.filter((item) => item.status === "required").length;
   const suggestedCount = sectionQuestions.filter((item) => item.status === "suggested").length;
-  const coreTotal = completedCount + outstandingCount;
+  const rfpTarget = RFP_SECTION_QUESTION_TARGET;
+  const rfpAnswered = Math.min(completedCount, rfpTarget);
   const fallbackPrompt = ready
     ? "Review the requirement you have built"
     : sectionComplete
@@ -157,11 +160,11 @@ export default function GuidedBuild({
     <>
       <main className="nf-guided-main">
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
-          <div className="nf-guided-builder-label"><strong>RFP Builder</strong><span>· {issueTarget === "formal" ? "Full RFP" : "Quick requirement"}</span></div>
+          <div className="nf-guided-builder-label"><strong>RFP Builder</strong><span>· One living document</span></div>
           <p className="nf-guided-kicker">Section {Math.max(1, position)} of {Math.max(1, total)}</p>
           <div className="nf-guided-section-progress" aria-label={`${sectionTitle} question progress`}>
-            <span><strong>{sectionTitle}</strong><small>{completedCount} of {Math.max(coreTotal, 1)} core questions answered{suggestedCount ? ` · ${suggestedCount} optional` : ""}</small></span>
-            <span aria-hidden="true"><i style={{ width: `${coreTotal ? Math.round((completedCount / coreTotal) * 100) : sectionComplete ? 100 : 0}%` }} /></span>
+            <span><strong>{sectionTitle}</strong><small>{rfpAnswered} of {rfpTarget} questions populated for RFP depth{suggestedCount ? ` · ${suggestedCount} suggested` : ""}</small></span>
+            <span aria-hidden="true"><i style={{ width: `${Math.round((rfpAnswered / rfpTarget) * 100)}%` }} /></span>
           </div>
           <p className="nf-guided-next-label">{ready ? "RFP ready for review" : sectionComplete ? "Section complete" : "Next required question"}</p>
           <h1>{visibleQuestion.prompt}</h1>
@@ -169,6 +172,18 @@ export default function GuidedBuild({
           <p className="nf-guided-reason">
             {questionReason}
           </p>
+
+          <div className="nf-guided-advisor" role="status" aria-live="polite">
+            <span>AI advisor</span>
+            <strong>{advisorMessage}</strong>
+          </div>
+
+          <div className="nf-guided-publish-action">
+            <button type="button" disabled={!publishReady} onClick={onPublish}>
+              {ready ? "Review and publish RFP" : "Publish opportunity now"}
+            </button>
+            <p>{publishReady ? (ready ? "Every included section meets the five-question RFP standard." : "Publish the useful facts you have now; the remaining depth is shown above.") : "The advisor above shows the minimum facts still needed before publishing."}</p>
+          </div>
 
           {customAnswerReceipt && (
             <div className="nf-guided-custom-receipt" role="status" aria-live="polite">
@@ -225,6 +240,7 @@ export default function GuidedBuild({
                 onClick={() => {
                   setSelection(null);
                   onDescribeQuestion(card.nq);
+                  onFocusPrompt();
                 }}
               >
                 <span>{writingCustomAnswer ? "Write your answer in the prompt below" : "Describe it in your own words"}</span>
@@ -257,7 +273,7 @@ export default function GuidedBuild({
           <section className="nf-guided-register" aria-labelledby="section-question-register">
             <div className="nf-guided-register-head">
               <div><p id="section-question-register">{sectionTitle} checklist</p><span>Every core answer, optional refinement and supplier question in this section.</span></div>
-              <strong>{completedCount}/{Math.max(coreTotal, 1)} core complete</strong>
+              <strong>{rfpAnswered}/{rfpTarget} RFP depth</strong>
             </div>
             <ul>
               {sectionQuestions.map((item) => (
@@ -297,17 +313,18 @@ export default function GuidedBuild({
           </section>
 
           <div className="nf-guided-prompt">
-            <p>You can answer naturally at any time</p>
+            <p>Answer the highlighted question, or describe several requirements in one message</p>
             {composer}
             {card && <details><summary>Why Netify is asking this</summary><p>{questionReason}</p></details>}
           </div>
+
         </section>
       </main>
 
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
           <div><strong>Your living RFP</strong><span>Updated just now</span></div>
-          <span>{issueTarget === "formal" ? "Full RFP" : "Quick"}</span>
+          <span>{ready ? "RFP ready" : "Building"}</span>
         </div>
         <h2>{documentTitle}</h2>
         <p>{documentSummary}</p>
@@ -316,9 +333,6 @@ export default function GuidedBuild({
             <p key={clause.id} data-new={index === 0}>{clause.statement}</p>
           )) : <p>Answer the next question and the first supplier-ready requirement will appear here.</p>}
         </div>
-        {issueTarget === "formal" && (
-          <p className="nf-guided-depth">The full supplier pack includes {questionBankCount} tailored evidence and response questions from the Netify question bank and your sector pack.</p>
-        )}
         <button type="button" onClick={onOpenDocument}>Open full document <span aria-hidden="true">›</span></button>
       </aside>
     </>
