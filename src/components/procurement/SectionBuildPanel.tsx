@@ -10,6 +10,8 @@ export default function SectionBuildPanel({
   total,
   issueTarget,
   onAnswer,
+  activeQuestionId,
+  onSelectQuestion,
 }: {
   row: OutlineRow | null;
   questions: SectionQuestionItem[];
@@ -17,6 +19,8 @@ export default function SectionBuildPanel({
   total: number;
   issueTarget: "concise" | "formal";
   onAnswer: () => void;
+  activeQuestionId: string | null;
+  onSelectQuestion: (question: SectionQuestionItem) => void;
 }) {
   const completed = questions.filter((item) => item.status === "completed");
   const required = questions.filter((item) => item.status === "required");
@@ -42,10 +46,17 @@ export default function SectionBuildPanel({
         <div><h2 id="active-section-questions">Section questions</h2><span>Answer in any order, or cover several in one message.</span></div>
         <ol>
           {questions.map((item) => (
-            <li key={item.id} data-status={item.status}>
-              <span aria-hidden="true">{item.status === "completed" ? "✓" : item.status === "custom" ? "+" : "○"}</span>
-              <div><strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}</div>
-              <em>{item.status === "completed" ? "Answered" : item.status === "required" ? "To do" : item.status === "suggested" ? "Optional" : "Added by you"}</em>
+            <li key={item.id} data-status={item.status} data-selected={activeQuestionId === item.id}>
+              <button
+                type="button"
+                aria-pressed={activeQuestionId === item.id}
+                aria-label={`${activeQuestionId === item.id ? "Selected question" : "Answer question"}: ${item.text}`}
+                onClick={() => onSelectQuestion(item)}
+              >
+                <span aria-hidden="true">{item.status === "completed" ? "✓" : item.status === "custom" ? "+" : "○"}</span>
+                <div><strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}</div>
+                <em>{activeQuestionId === item.id ? "Selected" : item.status === "completed" ? "Answered" : item.status === "required" ? "Select" : item.status === "suggested" ? "Optional" : "Added by you"}</em>
+              </button>
             </li>
           ))}
         </ol>

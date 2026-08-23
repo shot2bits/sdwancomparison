@@ -917,6 +917,7 @@ export default function ProjectDesk({
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
+  const [promptQuestionId, setPromptQuestionId] = useState<string | null>(null);
   const [guidedCustomQuestionId, setGuidedCustomQuestionId] = useState<string | null>(null);
   const [guidedCustomAnswerReceipt, setGuidedCustomAnswerReceipt] = useState<GuidedCustomAnswerReceipt | null>(null);
   const [verdict, setVerdict] = useState<SecurityScopeVerdict | null>(null);
@@ -4080,6 +4081,10 @@ export default function ProjectDesk({
   }, [sectionOutline, answeredLog.stated, allNextQuestionCards, guidedQuestionCard, noted]);
 
   const activeSectionQuestionItems = activeRow ? sectionQuestionItemsByKey[activeRow.key] ?? [] : [];
+  const activePromptQuestion = activeSectionQuestionItems.find((item) => item.id === promptQuestionId)
+    ?? activeSectionQuestionItems.find((item) => item.status === "required")
+    ?? activeSectionQuestionItems.find((item) => item.status !== "completed")
+    ?? null;
   const sectionQuestionProgressByKey = useMemo(
     () => questionProgressBySection(sectionOutline, sectionQuestionItemsByKey),
     [sectionOutline, sectionQuestionItemsByKey],
@@ -4337,6 +4342,13 @@ export default function ProjectDesk({
         style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
       >
         <div className={composerWide ? "mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]" : "w-full px-0 py-3 lg:px-6"}>
+          {activePromptQuestion && (
+            <div className="nf-2030-prompt-question" role="status" aria-live="polite">
+              <span>Question to answer</span>
+              <strong>{activePromptQuestion.text}</strong>
+              <small>Answer this directly, or include several answers in one natural-language message.</small>
+            </div>
+          )}
           {/* The prompt (the input method, never the subject). Styled as a
               real chat composer (round 9, 2 Aug 2026, Robert: "style it
               exactly the same as a ChatGPT input or gemini"), not a form
@@ -5853,6 +5865,14 @@ export default function ProjectDesk({
               total={sectionProgress.total}
               issueTarget={issueTarget}
               onAnswer={() => inputRef.current?.focus()}
+              activeQuestionId={activePromptQuestion?.id ?? null}
+              onSelectQuestion={(question) => {
+                setPromptQuestionId(question.id);
+                requestAnimationFrame(() => {
+                  inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  inputRef.current?.focus({ preventScroll: true });
+                });
+              }}
             />
 
             <div className="nf-2030-aside">
