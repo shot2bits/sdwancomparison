@@ -20,6 +20,15 @@ async function startProject(page, text) {
 const browser = await chromium.launch();
 try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await desktop.goto(BASE_URL, { waitUntil: "networkidle" });
+  const blankSection = await desktop.locator(".nf-section-build-panel").innerText();
+  check(blankSection.includes("Organisation and scale"), "a blank RFP opens on the active first section");
+  check(["Which sector are you in?", "Confirm site count", "Confirm regions", "Confirm user count"].every((label) => blankSection.includes(label)), "the centre lists the same four questions counted in the section rail");
+  check(!blankSection.includes("Sourcing procurement"), "the generic sourcing-document shell no longer competes with the active section");
+  check(blankSection.includes("Live section build") && blankSection.includes("Waiting for your first answer"), "the centre shows where answers will populate live");
+  await desktop.getByRole("button", { name: /Solution scope/ }).click();
+  check((await desktop.locator(".nf-section-build-panel").innerText()).includes("Which technology scope do you need?"), "choosing a section in the rail replaces the centre with that section's questions");
+  await desktop.getByRole("button", { name: /Organisation and scale/ }).click();
   await startProject(desktop, "20 UK sites for a retail business with 50 remote users, HQ in Norwich requires dual RA02 failover. We need full SASE and want to migrate by December 2026.");
   const initialText = await desktop.locator("body").innerText();
   check(/Resilience and availability\nReady · \d+ of \d+ answered/.test(initialText), "stated failover completes the resilience section");

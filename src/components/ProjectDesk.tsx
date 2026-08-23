@@ -109,6 +109,7 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
  *  strip, per Robert's explicit framing, not a parallel rail. */
 import SectionNav from "@/components/procurement/SectionNav";
 import GuidedBuild from "@/components/procurement/GuidedBuild";
+import SectionBuildPanel from "@/components/procurement/SectionBuildPanel";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
@@ -5845,18 +5846,14 @@ export default function ProjectDesk({
               onCompare={() => undefined}
             />
 
-            <div className="nf-2030-main">
-              <ProcurementWorkspaceDocument
-                document={canvasDocument}
-                activeSection={activeRow}
-                view={workspaceDocumentView}
-                onViewChange={setWorkspaceDocumentView}
-                issueTarget={issueTarget}
-                factsKept={0}
-                factsStruck={0}
-                sourceTurnCount={0}
-              />
-            </div>
+            <SectionBuildPanel
+              row={activeRow}
+              questions={activeSectionQuestionItems}
+              position={activeRowPosition?.["position"] ?? 1}
+              total={sectionProgress.total}
+              issueTarget={issueTarget}
+              onAnswer={() => inputRef.current?.focus()}
+            />
 
             <div className="nf-2030-aside">
               <div className="nf-2030-aside-inner">
