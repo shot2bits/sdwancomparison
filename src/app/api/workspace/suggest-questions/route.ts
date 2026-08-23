@@ -5,6 +5,18 @@ export const maxDuration = 20;
 
 const MODEL = "claude-haiku-4-5-20251001";
 
+const SECTION_BOUNDARIES: Record<string, string> = {
+  "Organisation and scale": "Supplier capacity, relevant delivery experience and ability to support the stated organisational footprint. Do not ask the buyer for missing estate facts.",
+  "Solution scope": "How the supplier's proposed service covers the buyer's stated SASE, SD-WAN or SSE scope and clearly identifies exclusions.",
+  "Current estate": "Discovery, coexistence, interoperability and transition from the buyer's current network, cloud and security estate. Do not turn organisation-wide counts into per-site counts.",
+  "Resilience and availability": "Availability commitments, diversity, failover behaviour, recovery objectives, monitoring and evidence.",
+  "Security, identity and data": "Security controls, identity integration, data handling, policy enforcement, assurance and compliance evidence.",
+  "Operating model and support": "Service ownership, RACI, support coverage, escalation, reporting and operational handover.",
+  "Migration and implementation": "Discovery, design, pilot, rollout, dependencies, risk controls, acceptance and the stated timeline.",
+  "Commercial and contractual": "Pricing transparency, term, exit, indexation, service credits and contractual dependencies.",
+  "Success and evaluation": "Measurable outcomes, acceptance evidence, ongoing KPIs and how suppliers demonstrate them.",
+};
+
 export async function POST(req: Request) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json({ error: "AI suggestions are unavailable right now." }, { status: 503 });
@@ -23,6 +35,7 @@ export async function POST(req: Request) {
     ? (body.existing as unknown[]).map(String).map((s) => s.trim()).filter(Boolean).slice(0, 30)
     : [];
   if (!section) return Response.json({ error: "Choose a section first." }, { status: 400 });
+  const boundary = SECTION_BOUNDARIES[section] ?? `Only matters that directly belong in the ${section} section.`;
 
   const tool = {
     name: "suggest_supplier_questions",
@@ -52,9 +65,10 @@ export async function POST(req: Request) {
         role: "user",
         content: [
           `Section: ${section}`,
+          `Strict section boundary: ${boundary}`,
           `Current requirement: ${context || "No additional context supplied."}`,
           `Questions already present: ${existing.length ? existing.join(" | ") : "None"}`,
-          "Suggest up to four useful supplier questions. Do not invent buyer facts, standards, locations, budgets or dates. Avoid duplicates. Make each answer independently assessable and ask for evidence only where appropriate.",
+          "Suggest up to four useful questions that the SUPPLIER must answer, strictly within the named section boundary. Do not ask the buyer for information. Do not invent or reinterpret buyer facts, standards, locations, budgets, dates, totals or per-site values. Never transform an organisation-wide number into a per-site or per-location number. Avoid duplicates and questions belonging to another section. Make each supplier response independently assessable and ask for evidence only where appropriate.",
         ].join("\n"),
       }],
     });
