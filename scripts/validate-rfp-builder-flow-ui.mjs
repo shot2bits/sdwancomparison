@@ -21,22 +21,24 @@ const browser = await chromium.launch();
 try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await desktop.goto(BASE_URL, { waitUntil: "networkidle" });
+  check((await desktop.locator(".nf-section-build-panel").count()) === 0, "the introductory prompt does not stack the RFP Builder underneath it");
+  await desktop.getByRole("button", { name: "Use recommended questions" }).click();
+  check((await desktop.locator(".nf-2030-command-zone-empty").count()) === 0, "entering the question path removes the introductory landing content");
   const blankSection = await desktop.locator(".nf-section-build-panel").innerText();
   check(blankSection.includes("Organisation and scale"), "a blank RFP opens on the active first section");
   check(["Which sector are you in?", "Confirm site count", "Confirm regions", "Confirm user count"].every((label) => blankSection.includes(label)), "the centre lists the same four questions counted in the section rail");
   check(!blankSection.includes("Sourcing procurement"), "the generic sourcing-document shell no longer competes with the active section");
   check(blankSection.includes("Live section build") && blankSection.includes("Waiting for your first answer"), "the centre shows where answers will populate live");
-  check((await desktop.locator(".nf-2030-prompt-question").innerText()).includes("Which sector are you in?"), "the prompt calls out the next required question");
-  const siteCountQuestion = desktop.getByRole("button", { name: "Answer question: Confirm site count" });
+  check((await desktop.locator(".nf-section-answer-panel").innerText()).includes("Which sector are you in?"), "the active question and answer field share one visible panel");
+  check((await desktop.locator(".nf-section-answer-panel textarea").count()) === 1, "the AI answer field is physically inside the active question panel");
+  check((await desktop.locator(".nf-section-answer-panel textarea").getAttribute("placeholder"))?.includes("Which sector are you in?"), "the answer field names the active question instead of showing a generic sourcing prompt");
+  const siteCountQuestion = desktop.getByRole("button", { name: "Open question: Confirm site count" });
   await siteCountQuestion.scrollIntoViewIfNeeded();
   const beforeQuestionSelection = await desktop.evaluate(() => window.scrollY);
   await siteCountQuestion.click();
-  check((await desktop.locator(".nf-2030-prompt-question").innerText()).includes("Confirm site count"), "selecting a section question changes the prompt callout");
-  check((await desktop.locator(".nf-section-selected-question").innerText()).includes("Confirm site count"), "the selected question is acknowledged inside the section");
+  check((await desktop.locator(".nf-section-answer-panel").innerText()).includes("Confirm site count"), "selecting a question updates the adjacent answer panel");
   check(await desktop.evaluate((before) => window.scrollY === before, beforeQuestionSelection), "selecting a question does not jump away from the RFP section");
-  check(await desktop.getByRole("button", { name: "Selected question: Confirm site count" }).getAttribute("aria-pressed") === "true", "the chosen question has a visible selected state");
-  await desktop.getByRole("button", { name: "Answer selected question in the AI prompt" }).click();
-  check(await desktop.locator("textarea").first().evaluate((element) => element === document.activeElement), "moving to the AI prompt requires an explicit answer action");
+  check(await desktop.getByRole("button", { name: "Current question: Confirm site count" }).getAttribute("aria-pressed") === "true", "the chosen question has a visible current state");
   await desktop.getByRole("button", { name: /Solution scope/ }).click();
   check((await desktop.locator(".nf-section-build-panel").innerText()).includes("Which technology scope do you need?"), "choosing a section in the rail replaces the centre with that section's questions");
   await desktop.getByRole("button", { name: /Organisation and scale/ }).click();
@@ -69,6 +71,13 @@ try {
   await desktop.close();
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await mobile.goto(BASE_URL, { waitUntil: "networkidle" });
+  await mobile.getByRole("button", { name: "Use recommended questions" }).click();
+  const mobileInlineAnswerBox = await mobile.locator(".nf-section-answer-panel textarea").evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    return { top: box.top, bottom: box.bottom };
+  });
+  check(mobileInlineAnswerBox.bottom < 844, "mobile exposes the complete active answer field in the first viewport", `input=${Math.round(mobileInlineAnswerBox.top)}-${Math.round(mobileInlineAnswerBox.bottom)}`);
   await startProject(mobile, "We are a retail business with 20 UK sites and need full SASE by December 2026.");
   await mobile.getByRole("button", { name: /Describe it in your own words/i }).click();
   const mobilePrompt = mobile.locator("textarea").first();

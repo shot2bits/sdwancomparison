@@ -918,6 +918,7 @@ export default function ProjectDesk({
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
   const [promptQuestionId, setPromptQuestionId] = useState<string | null>(null);
+  const [prestartSurface, setPrestartSurface] = useState<"intro" | "questions">("intro");
   const [guidedCustomQuestionId, setGuidedCustomQuestionId] = useState<string | null>(null);
   const [guidedCustomAnswerReceipt, setGuidedCustomAnswerReceipt] = useState<GuidedCustomAnswerReceipt | null>(null);
   const [verdict, setVerdict] = useState<SecurityScopeVerdict | null>(null);
@@ -1174,7 +1175,6 @@ export default function ProjectDesk({
    *  is that station's entire job. */
   const [showFullDocument, setShowFullDocument] = useState(false);
   const [issueTarget, setIssueTarget] = useState<"concise" | "formal">("concise");
-  const [startModeChoice, setStartModeChoice] = useState<"concise" | "formal" | null>(null);
   const [workspaceDocumentView, setWorkspaceDocumentView] = useState<WorkspaceDocumentView>("requirement");
   /** `phase` predates the rail by three weeks and still gates a lot of
    *  existing JSX ("live" = working on the statement, "fits" = the
@@ -1194,18 +1194,6 @@ export default function ProjectDesk({
   const goToStep = (next: WizardStep) => {
     setStep(next);
     setPhase(next === "publish" || next === "compare" ? "fits" : "live");
-  };
-  const chooseStartMode = (target: "concise" | "formal") => {
-    setIssueTarget(target);
-    setStartModeChoice(target);
-
-    /* Keep focus inside the originating tap so iOS opens the keyboard.
-       The earlier handler changed hidden state and then called focus, but
-       offered no visible acknowledgement when "concise" was already the
-       default. The selected card and live status now persist if the user
-       returns to this choice. */
-    inputRef.current?.focus();
-    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
   const assertedPacks = useRef<Set<string>>(new Set());
   const acceptedGaps = useRef<Set<string>>(new Set());
@@ -4342,13 +4330,6 @@ export default function ProjectDesk({
         style={{ background: "var(--nf-ivory-raised, #fefdfc)", borderColor: "var(--nf-rule, #d6d4d0)" }}
       >
         <div className={composerWide ? "mx-auto w-full max-w-[1400px] px-[26px] py-3 lg:px-[42px]" : "w-full px-0 py-3 lg:px-6"}>
-          {activePromptQuestion && (
-            <div className="nf-2030-prompt-question" role="status" aria-live="polite">
-              <span>Question to answer</span>
-              <strong>{activePromptQuestion.text}</strong>
-              <small>Answer this directly, or include several answers in one natural-language message.</small>
-            </div>
-          )}
           {/* The prompt (the input method, never the subject). Styled as a
               real chat composer (round 9, 2 Aug 2026, Robert: "style it
               exactly the same as a ChatGPT input or gemini"), not a form
@@ -4377,7 +4358,7 @@ export default function ProjectDesk({
                   void ingestText(text, "paste");
                 }
               }}
-              placeholder={resuming ? PLACEHOLDER_RESUMING : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
+              placeholder={resuming ? PLACEHOLDER_RESUMING : !started && prestartSurface === "questions" && activePromptQuestion ? `Answer: ${activePromptQuestion.text}` : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
               disabled={resuming}
               rows={1}
               className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#110f0d] outline-none placeholder:text-[#66635e] disabled:cursor-not-allowed disabled:opacity-60"
@@ -5787,12 +5768,14 @@ export default function ProjectDesk({
               <button type="button" disabled>Decision</button>
             </nav>
             <div className="nf-2030-header-actions">
-              <button type="button" className="mobile-hide" onClick={() => fileRef.current?.click()}>Add source</button>
-              <button type="button" className="primary" onClick={() => inputRef.current?.focus()}>Start with AI</button>
+              {prestartSurface === "intro" && <>
+                <button type="button" className="mobile-hide" onClick={() => fileRef.current?.click()}>Add source</button>
+                <button type="button" className="primary" onClick={() => inputRef.current?.focus()}>Start with AI</button>
+              </>}
             </div>
           </header>
 
-          <section className="nf-2030-command-zone nf-2030-command-zone-empty" aria-label="Start the procurement">
+          {prestartSurface === "intro" ? <section className="nf-2030-command-zone nf-2030-command-zone-empty" aria-label="Start the procurement">
             <div className="nf-2030-command-inner">
               <div className="nf-2030-command-intro">
                 <span>SASE &amp; SD-WAN procurement</span>
@@ -5804,6 +5787,7 @@ export default function ProjectDesk({
                 <button type="button" onClick={() => fileRef.current?.click()}>+ Add document</button>
                 <button type="button" onClick={() => inputRef.current?.focus()}>Connect source</button>
                 {voiceSupported && <button type="button" onClick={() => (voiceState === "idle" ? startVoice() : voiceRec.current?.stop())}>{voiceState === "idle" ? "Voice" : "Stop listening"}</button>}
+                <button type="button" className="questions" onClick={() => setPrestartSurface("questions")}>Use recommended questions</button>
               </div>
               <div className="nf-2030-starters" aria-label="Sector starting points">
                 <span>Start with</span>
@@ -5822,16 +5806,10 @@ export default function ProjectDesk({
                 <li><span>03</span><div><strong>Get bids</strong><p>Publish anonymously to the Opportunity Board when ready.</p></div></li>
               </ol>
             </div>
-          </section>
+          </section> : <>
 
           <section className="nf-2030-status" aria-label="Issue readiness">
-            <label>
-              <span>Issue target</span>
-              <select value={issueTarget} onChange={(event) => setIssueTarget(event.target.value as "concise" | "formal")}>
-                <option value="concise">Concise supplier requirement · about 5 min</option>
-                <option value="formal">Formal RFP · about 30 min</option>
-              </select>
-            </label>
+            <div className="nf-2030-question-set"><span>Question set</span><strong>Recommended core questions</strong></div>
             <div className="nf-2030-readiness">
               <div><strong>0 of {sectionProgress.total} sections ready</strong><span>Start with what you know</span></div>
               <div className="nf-2030-progress" aria-label={`0 of ${sectionProgress.total} sections ready`}>
@@ -5864,52 +5842,24 @@ export default function ProjectDesk({
               position={activeRowPosition?.["position"] ?? 1}
               total={sectionProgress.total}
               issueTarget={issueTarget}
-              onAnswer={() => inputRef.current?.focus()}
+              composer={composerBlock}
               activeQuestionId={activePromptQuestion?.id ?? null}
               onSelectQuestion={(question) => setPromptQuestionId(question.id)}
             />
 
             <div className="nf-2030-aside">
               <div className="nf-2030-aside-inner">
-                <div className="nf-2030-decision nf-2030-start" role="complementary" aria-label="How to start">
-                  <p className="nf-2030-side-label">Start here</p>
-                  <h2>What are you buying, and why now?</h2>
-                  <p className="nf-2030-decision-reason">Write naturally. Netify will place each fact into the living requirement and show the next material decision.</p>
-                  <div className="nf-2030-start-options">
-                    <button
-                      type="button"
-                      aria-pressed={startModeChoice === "concise"}
-                      data-selected={startModeChoice === "concise"}
-                      onClick={() => chooseStartMode("concise")}
-                    >
-                      Build a 5-minute requirement
-                      <span>Core scope, outcome and supplier response</span>
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={startModeChoice === "formal"}
-                      data-selected={startModeChoice === "formal"}
-                      onClick={() => chooseStartMode("formal")}
-                    >
-                      Build a formal RFP
-                      <span>Evidence, scoring, commercial and governance depth</span>
-                    </button>
-                  </div>
-                  {startModeChoice && (
-                    <p className="nf-2030-start-confirmation" role="status" aria-live="polite">
-                      <strong>{startModeChoice === "formal" ? "Full RFP selected" : "5-minute requirement selected"}</strong>
-                      The prompt is ready. Describe what you are buying and why now to begin.
-                    </p>
-                  )}
-                  <div className="nf-2030-control-note">
-                    <strong>One document, adjustable depth</strong>
-                    Start concise and expand later. You never need to restart or choose a separate template.
-                  </div>
+                <div className="nf-prestart-live-rfp" role="complementary" aria-label="Living RFP preview">
+                  <p className="nf-2030-side-label">Living RFP</p>
+                  <h2>{activeRow?.title ?? "Organisation and scale"}</h2>
+                  <span>{activeSectionQuestionItems.filter((item) => item.status === "completed").length} answers captured</span>
+                  <p>Your confirmed answers appear here as the section is built. Nothing is published or sent to suppliers without your approval.</p>
+                  <button type="button" onClick={() => setPrestartSurface("intro")}>Back to describe everything</button>
                 </div>
               </div>
             </div>
           </div>
-
+          </>}
         </>
       )}
 

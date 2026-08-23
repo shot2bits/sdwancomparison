@@ -547,7 +547,9 @@
 .nf-section-build-progress span { color: #85878e; font-size: 10px; }
 .nf-section-build-progress > i { position: relative; width: 180px; height: 4px; overflow: hidden; border-radius: 999px; background: #30333a; }
 .nf-section-build-progress b { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: #55c9cc; }
-.nf-section-build-questions, .nf-section-live-build { max-width: 760px; margin-top: 24px; }
+.nf-section-question-workspace { display: grid; grid-template-columns: minmax(250px,.85fr) minmax(320px,1.15fr); gap: 22px; max-width: 920px; margin-top: 24px; }
+.nf-section-build-questions, .nf-section-live-build { max-width: 920px; margin-top: 24px; }
+.nf-section-question-workspace .nf-section-build-questions { margin-top: 0; }
 .nf-section-build-questions > div, .nf-section-live-build > div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .nf-section-build-questions h2, .nf-section-live-build h2 { margin: 0; color: #efeee9 !important; font-family: inherit !important; font-size: 15px; }
 .nf-section-build-questions > div > span, .nf-section-live-build > div > span { color: #85878e; font-size: 10px; }
@@ -563,15 +565,26 @@
 .nf-section-build-questions li small { display: block; margin-top: 4px; color: #9a9ca3; font-size: 11px; }
 .nf-section-build-questions li em { margin-top: 2px; color: #96989f; font-size: 9px; font-style: normal; letter-spacing: .06em; text-transform: uppercase; }
 .nf-section-build-questions li[data-status="completed"] em { color: #55cf91; }
-.nf-section-selected-question { display: grid !important; grid-template-columns: minmax(0,1fr) auto; gap: 4px 16px !important; align-items: center !important; margin-top: 16px; border-left: 3px solid #55c9cc; padding: 12px 14px; background: #1d2b2e; }
-.nf-section-selected-question > span { grid-column: 1; color: #71d7d9 !important; font-size: 9px !important; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
-.nf-section-selected-question > strong { grid-column: 1; color: #ecebe7; font-size: 12px; line-height: 1.4; }
-.nf-section-selected-question > button { grid-column: 2; grid-row: 1 / 3; border: 0; border-radius: 3px; padding: 10px 13px; color: #071417; background: #55c9cc; cursor: pointer; font-size: 10px; font-weight: 750; }
-.nf-section-selected-question > button:hover { background: #69d4d7; }
-.nf-2030-prompt-question { display: grid; gap: 3px; margin-bottom: 7px; border-left: 3px solid #55c9cc; padding: 9px 12px; color: #ecebe7; background: #1d2b2e; }
-.nf-2030-prompt-question span { color: #71d7d9; font-size: 9px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
-.nf-2030-prompt-question strong { font-size: 13px; line-height: 1.35; }
-.nf-2030-prompt-question small { color: #aeb3b5; font-size: 10px; line-height: 1.35; }
+.nf-section-answer-panel { min-width: 0; border-left: 3px solid #55c9cc; padding: 17px 18px; background: #1d2026; }
+.nf-section-answer-panel > span { color: #71d7d9; font-size: 9px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.nf-section-answer-panel > h2 { margin: 7px 0 0; color: #f2f1ed !important; font-family: inherit !important; font-size: 20px; line-height: 1.25; }
+.nf-section-answer-panel > p { margin: 9px 0 12px; color: #a9abb1; font-size: 11px; line-height: 1.5; }
+.nf-section-answer-panel > small { display: block; margin-top: 8px; color: #85878e; font-size: 9px; line-height: 1.4; }
+.nf-section-current-answer { display: grid; gap: 3px; padding: 9px 11px; color: #d8ebe3 !important; background: rgba(67,199,140,.08); }
+.nf-section-current-answer strong { color: #55cf91; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.nf-section-answer-panel .nf-2030-composer-shell { background: transparent !important; }
+.nf-section-answer-panel .nf-2030-composer-shell > div { padding: 0 !important; }
+.nf-section-answer-panel .nf-2030-composer { min-height: 96px; align-items: flex-end; border-color: #41444b !important; background: #292c32 !important; }
+.nf-section-answer-panel textarea { color: #f0efeb !important; placeholder-color: #85878e; }
+.nf-2030-question-set { display: flex; flex-direction: column; gap: 5px; }
+.nf-2030-question-set span { color: #8cdad8; font-size: 8px; letter-spacing: .09em; text-transform: uppercase; }
+.nf-2030-question-set strong { color: #ece8e1; font-size: 11px; }
+.nf-prestart-live-rfp { padding: 18px 16px; color: #a7a9b0; background: #17191e; }
+.nf-prestart-live-rfp h2 { margin: 7px 0 5px; color: #f0efeb !important; font-family: inherit !important; font-size: 18px; }
+.nf-prestart-live-rfp > span { color: #55c9cc; font-size: 10px; }
+.nf-prestart-live-rfp > p:not(.nf-2030-side-label) { font-size: 11px; line-height: 1.55; }
+.nf-prestart-live-rfp button { margin-top: 12px; border: 0; padding: 0; color: #55c9cc; background: transparent; cursor: pointer; font-size: 10px; }
+.nf-2030-command-actions .questions { margin-left: auto; color: #071417; background: #55c9cc; font-weight: 700; }
 .nf-section-live-build { padding: 18px 20px; background: #1b1e23; box-shadow: inset 3px 0 #55c9cc; }
 .nf-section-live-build > p { margin: 12px 0 0; color: #9da0a7; font-size: 12px; line-height: 1.55; }
 .nf-section-live-build dl { margin: 12px 0 0; }
@@ -750,6 +763,7 @@
   .nf-2030-project-band { align-items: flex-start; padding: 13px 16px; }
   .nf-2030-project-band button { max-width: 150px; padding: 0; text-align: right; }
   .nf-2030-header-actions { grid-column: 1 / -1; }
+  .nf-2030-header-actions:empty { display: none; }
   .nf-2030-header-actions button { flex: 1; }
   .nf-2030-header-actions .mobile-hide { display: none; }
   .nf-2030-command-zone { padding: 16px; }
@@ -762,24 +776,35 @@
   .nf-2030-context-line .control { width: 100%; margin-left: 0; }
   .nf-2030-outcomes { grid-template-columns: 1fr; gap: 15px; }
   .nf-2030-outcomes li { min-height: 0; padding: 15px 16px; }
-  .nf-2030-status { grid-template-columns: 1fr; padding: 14px 16px 18px; }
+  .nf-2030-status { grid-template-columns: 1fr; gap: 12px; padding: 10px 16px; }
+  .nf-2030-question-set { display: none; }
+  .nf-2030-next-summary { display: none; }
+  .nf-2030-readiness > div:first-child span { display: none; }
   .nf-2030-grid { display: flex; flex-direction: column; }
-  .nf-2030-section-nav { padding: 15px 16px 8px; overflow: hidden; }
+  .nf-2030-section-nav { padding: 8px 12px 4px; overflow: hidden; }
+  .nf-2030-section-nav-head { display: none; }
   .nf-2030-section-nav ol { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
   .nf-2030-section-nav li { flex: 0 0 auto; }
-  .nf-2030-section-nav li button { width: 170px; }
+  .nf-2030-section-nav li button { width: 150px; padding: 8px 7px; }
+  .nf-2030-area-copy em { display: none; }
   .nf-2030-section-actions { flex-direction: row; overflow-x: auto; margin-top: 6px; }
   .nf-2030-section-actions button { flex: 0 0 auto; }
   .nf-2030-main { order: 2; padding: 10px 12px 20px; }
-  .nf-section-build-panel { order: 2; padding: 24px 18px 145px; }
+  .nf-section-build-panel { display: flex; order: 2; flex-direction: column; padding: 20px 18px 145px; }
+  .nf-section-build-panel > header { order: 1; }
+  .nf-section-build-eyebrow { margin-bottom: 9px; }
+  .nf-section-build-panel > header > span { margin-top: 6px; font-size: 11px; }
+  .nf-section-question-workspace { order: 2; margin-top: 18px; }
+  .nf-section-build-progress { order: 3; margin-top: 18px; }
+  .nf-section-live-build { order: 4; }
   .nf-section-build-panel h1 { font-size: 26px; }
   .nf-section-build-progress { align-items: flex-start; flex-direction: column; gap: 10px; }
   .nf-section-build-progress > i { width: 100%; }
   .nf-section-build-questions > div, .nf-section-live-build > div { align-items: flex-start; flex-direction: column; gap: 4px; }
   .nf-section-build-questions li > button { grid-template-columns: 24px minmax(0,1fr); }
   .nf-section-build-questions li em { grid-column: 2; margin-top: -5px; }
-  .nf-section-selected-question { grid-template-columns: 1fr; }
-  .nf-section-selected-question > button { grid-column: 1; grid-row: auto; margin-top: 6px; }
+  .nf-section-question-workspace { grid-template-columns: 1fr; }
+  .nf-section-answer-panel { grid-row: 1; }
   .nf-section-live-build dl > div { grid-template-columns: 1fr; gap: 4px; }
   .nf-2030-aside { order: 3; padding: 20px 16px 34px; }
   .nf-guided-main { order: 2; padding: 24px 18px 145px; }
