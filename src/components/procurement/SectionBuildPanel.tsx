@@ -25,6 +25,7 @@ export default function SectionBuildPanel({
   const completed = questions.filter((item) => item.status === "completed");
   const required = questions.filter((item) => item.status === "required");
   const optional = questions.filter((item) => item.status === "suggested" || item.status === "custom");
+  const selectedQuestion = questions.find((item) => item.id === activeQuestionId) ?? null;
   const coreTotal = completed.length + required.length;
   const ready = row?.state === "confirmed" || (coreTotal > 0 && required.length === 0);
 
@@ -60,7 +61,13 @@ export default function SectionBuildPanel({
             </li>
           ))}
         </ol>
-        {!ready && <button type="button" onClick={onAnswer}>Answer in the AI prompt</button>}
+        {selectedQuestion && (
+          <div className="nf-section-selected-question" aria-live="polite">
+            <span>Selected question</span>
+            <strong>{selectedQuestion.text}</strong>
+            <button type="button" onClick={onAnswer}>Answer selected question in the AI prompt</button>
+          </div>
+        )}
       </section>
 
       <section className="nf-section-live-build" aria-labelledby="live-section-build">

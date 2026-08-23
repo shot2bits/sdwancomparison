@@ -27,10 +27,16 @@ try {
   check(!blankSection.includes("Sourcing procurement"), "the generic sourcing-document shell no longer competes with the active section");
   check(blankSection.includes("Live section build") && blankSection.includes("Waiting for your first answer"), "the centre shows where answers will populate live");
   check((await desktop.locator(".nf-2030-prompt-question").innerText()).includes("Which sector are you in?"), "the prompt calls out the next required question");
-  await desktop.getByRole("button", { name: "Answer question: Confirm site count" }).click();
+  const siteCountQuestion = desktop.getByRole("button", { name: "Answer question: Confirm site count" });
+  await siteCountQuestion.scrollIntoViewIfNeeded();
+  const beforeQuestionSelection = await desktop.evaluate(() => window.scrollY);
+  await siteCountQuestion.click();
   check((await desktop.locator(".nf-2030-prompt-question").innerText()).includes("Confirm site count"), "selecting a section question changes the prompt callout");
-  check(await desktop.locator("textarea").first().evaluate((element) => element === document.activeElement), "selecting a question focuses the AI answer field");
+  check((await desktop.locator(".nf-section-selected-question").innerText()).includes("Confirm site count"), "the selected question is acknowledged inside the section");
+  check(await desktop.evaluate((before) => window.scrollY === before, beforeQuestionSelection), "selecting a question does not jump away from the RFP section");
   check(await desktop.getByRole("button", { name: "Selected question: Confirm site count" }).getAttribute("aria-pressed") === "true", "the chosen question has a visible selected state");
+  await desktop.getByRole("button", { name: "Answer selected question in the AI prompt" }).click();
+  check(await desktop.locator("textarea").first().evaluate((element) => element === document.activeElement), "moving to the AI prompt requires an explicit answer action");
   await desktop.getByRole("button", { name: /Solution scope/ }).click();
   check((await desktop.locator(".nf-section-build-panel").innerText()).includes("Which technology scope do you need?"), "choosing a section in the rail replaces the centre with that section's questions");
   await desktop.getByRole("button", { name: /Organisation and scale/ }).click();

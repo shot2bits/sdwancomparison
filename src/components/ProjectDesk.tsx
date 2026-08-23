@@ -5866,13 +5866,7 @@ export default function ProjectDesk({
               issueTarget={issueTarget}
               onAnswer={() => inputRef.current?.focus()}
               activeQuestionId={activePromptQuestion?.id ?? null}
-              onSelectQuestion={(question) => {
-                setPromptQuestionId(question.id);
-                requestAnimationFrame(() => {
-                  inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-                  inputRef.current?.focus({ preventScroll: true });
-                });
-              }}
+              onSelectQuestion={(question) => setPromptQuestionId(question.id)}
             />
 
             <div className="nf-2030-aside">
