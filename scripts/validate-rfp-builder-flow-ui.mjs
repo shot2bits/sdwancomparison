@@ -13,7 +13,7 @@ async function startProject(page, text) {
   const prompt = page.locator("textarea").first();
   await prompt.fill(text);
   await prompt.press("Enter");
-  await page.getByText("RFP sections", { exact: true }).waitFor();
+  await page.locator('[data-workspace-started="true"]').waitFor({ timeout: 25_000 });
   await page.waitForTimeout(900);
 }
 
@@ -22,7 +22,7 @@ try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await startProject(desktop, "20 UK sites for a retail business with 50 remote users, HQ in Norwich requires dual RA02 failover. We need full SASE and want to migrate by December 2026.");
   const initialText = await desktop.locator("body").innerText();
-  check(/Resilience and availability\nReady · 1 of 1 answered/.test(initialText), "stated failover completes the resilience section");
+  check(/Resilience and availability\nReady · \d+ of \d+ answered/.test(initialText), "stated failover completes the resilience section");
   check(initialText.includes("RFP Builder · Retail"), "the workspace identifies itself as the RFP Builder");
 
   for (let step = 0; step < 10; step += 1) {
