@@ -3687,8 +3687,12 @@ export default function ProjectDesk({
       estateMissing: estateMissing.length === 3 ? undefined : estateMissing,
       resilienceResolved: resilienceState.resolved,
       resilienceDetail: resilienceState.detail,
-      securityResolved: !rankedIds.has("q-sse-scope"),
-      securityDetail: rankedIds.has("q-sse-scope") ? "Which security controls are in scope is not yet decided." : "Security control scope stated.",
+      securityResolved: Boolean(buying) && !rankedIds.has("q-sse-scope"),
+      securityDetail: !buying
+        ? "Solution scope is needed before security controls can be assessed."
+        : rankedIds.has("q-sse-scope")
+          ? "Which security controls are in scope is not yet decided."
+          : "Security control scope stated.",
       sector: pack && sectorSectionTitle
         ? { title: sectorSectionTitle, pendingSuggestions: visibleSectorSuggestions.length, acceptedOrDismissed: acceptedNotedCount + declinedCount }
         : null,
@@ -4129,7 +4133,8 @@ export default function ProjectDesk({
     if (!s) return null;
     return String(s.value).replace(/\s*&.*$/, "").toLowerCase();
   })();
-  const guidedProjectTitle = `${sectorShort ? cap(sectorShort) : "Your"} ${buying === "sdwan" ? "SD-WAN" : buying === "sase" ? "SASE" : buying === "sse" ? "SSE" : "SASE & SD-WAN"} procurement`;
+  const guidedScopeTitle = buying === "sdwan" ? "SD-WAN" : buying === "sase" ? "SASE" : buying === "sse" ? "SSE" : buying === "managed_security" ? "managed security" : null;
+  const guidedProjectTitle = `${sectorShort ? cap(sectorShort) : "Your"}${guidedScopeTitle ? ` ${guidedScopeTitle}` : ""} procurement`;
   /* The document names itself from the sector (the reference's title,
      the estate's punctuation). */
   const docTitle = `Statement of requirements${sectorShort ? `, ${sectorShort}` : ""}`;

@@ -1370,6 +1370,46 @@ function resilienceClauses(ctx: TextTemplateCtx): ClauseDraft[] {
   return out;
 }
 
+/** A buyer can state a perfectly real network-resilience requirement
+ *  without using our preferred "dual circuits" vocabulary or naming a
+ *  voice/application workload. Keep that wording as a governed network
+ *  clause instead of allowing it to fall through to the generic
+ *  additional-requirement receipt. Buyer-specific access identifiers
+ *  (for example a circuit/product code) remain verbatim provenance: the
+ *  supplier must map them to its design rather than Netify guessing what
+ *  they mean. */
+function networkFailoverClauses(ctx: TextTemplateCtx): ClauseDraft[] {
+  if (
+    !FAILOVER_RE.test(ctx.corpus) ||
+    VOICE_SUBJECT_RE.test(ctx.corpus) ||
+    APP_SUBJECT_RE.test(ctx.corpus) ||
+    DUAL_CIRCUIT_RE.test(ctx.corpus)
+  ) return [];
+  const { quote, sourceTurnIds } = quoteFor(ctx.corpusReceipts, [FAILOVER_RE]);
+  if (!quote) return [];
+  return [
+    {
+      section: "network",
+      statement: "The proposed network must implement the buyer's stated site/access failover requirement.",
+      supplierResponse: [
+        "Map the buyer's stated failover terminology and any named access identifiers to the proposed design.",
+        "Describe the active and standby paths, failover trigger, convergence behaviour and restoration process.",
+      ],
+      evidence: ["Network failover design", "Failover and restoration test evidence"],
+      acceptanceTest: "A documented failover test demonstrates automatic recovery and restoration against the buyer's stated arrangement.",
+      mandatory: textImpliesMandatory(quote),
+      sourceFactIds: [],
+      origin: "buyer",
+      reason: "The buyer stated an explicit network failover requirement.",
+      quote,
+      sourceTurnIds,
+      sourceNotedIds: [],
+      templateKey: "network:failover-scope",
+      templateId: "network-failover-scope",
+    },
+  ];
+}
+
 /** Phase 3 Stage A correction round (Robert, 14 Aug 2026), Prompt A
  *  reproduction: "support Teams Phone" (no continuity/failover language)
  *  named a real, in-scope voice service with no clause of its own --
@@ -2150,6 +2190,7 @@ export function buildCandidateClauses(input: {
   const textPattern = [
     ...resilienceClauses(ctx),
     ...siteResilienceClauses(ctx),
+    ...networkFailoverClauses(ctx),
     ...voiceScopeClauses(ctx),
     ...identityAndDataClauses(ctx),
     ...legacyCircuitClauses(ctx),

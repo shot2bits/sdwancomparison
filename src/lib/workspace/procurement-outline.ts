@@ -187,6 +187,7 @@ export function siteResilienceClauseExists(
 ): boolean {
   return clauses.some((c) =>
     c.templateId === "site-resilience-scope" ||
+    c.templateId === "network-failover-scope" ||
     c.sourceNotedIds?.some((id) =>
       id === "qn-q-resilience" ||
       id === "guided-answer:q-resilience" ||

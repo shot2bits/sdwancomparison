@@ -929,6 +929,31 @@ function main() {
       hasOperatingModelConflict: false,
     });
     record(outlineStateAfterB.resolved === true, "Fixture K1/defect 2: the outline's Resilience and availability row reads Confirmed once the real governed clause exists (real clause, not card-disappearance, drives the row)", `detail=${outlineStateAfterB.detail}`);
+
+    // Production regression, 23 Aug 2026: a buyer used a named access
+    // identifier rather than the literal phrase "dual circuits". The
+    // wording appeared in the living document but the resilience row
+    // stayed Not started because no governed resilience clause existed.
+    // The identifier must remain buyer wording, never be interpreted by
+    // Netify, while the explicit failover requirement still lands in the
+    // correct section and advances the same canonical outline state.
+    const namedAccessPrompt = "20 UK site for a retail business with 50 remote users, HQ in Norwich requires dual RA02 failover.";
+    const namedAccess = turn(namedAccessPrompt, [], [], { n: 0 }, 1, null);
+    const namedAccessClause = clauseByTemplate(namedAccess.doc, "network-failover-scope");
+    record(Boolean(namedAccessClause), "Fixture K1/production regression: named-access failover wording compiles into the governed resilience section", `statement=${namedAccessClause?.statement}`);
+    record(namedAccessClause?.quote === namedAccessPrompt, "Fixture K1/production regression: the buyer's exact failover wording remains attached as provenance; the access identifier is not guessed", `quote=${namedAccessClause?.quote}`);
+    record(
+      siteResilienceClauseExists(namedAccess.doc.clauses),
+      "Fixture K1/production regression: a governed network-failover clause advances the same Resilience and availability outline state",
+      `templates=${namedAccess.doc.clauses.map((c) => c.templateId).join(",")}`,
+    );
+    const namedAccessOutline = deriveResilienceOutlineState({
+      clauses: namedAccess.doc.clauses,
+      requirement: requirementFrom(namedAccess.facts),
+      buying: buyingOf(namedAccess.facts),
+      hasOperatingModelConflict: false,
+    });
+    record(namedAccessOutline.resolved === true, "Fixture K1/production regression: the visible resilience row resolves for the exact reported sentence", `detail=${namedAccessOutline.detail}`);
     // Counter-example: a project at the SAME material site count/buying
     // type that has NEVER stated a resilience decision (no clause) must
     // NOT read Confirmed merely because nothing asked about it yet, or
