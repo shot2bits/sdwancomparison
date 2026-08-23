@@ -61,7 +61,7 @@ export default function GuidedBuild({
   onGoToNextSection: () => void;
   onOpenDocument: () => void;
 }) {
-  const [selection, setSelection] = useState<{ questionId: string; index: number } | null>(null);
+  const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionLocked = useRef(false);
@@ -79,7 +79,8 @@ export default function GuidedBuild({
     if (!previousId || !nextId || previousId === nextId || !window.matchMedia("(max-width: 1023px)").matches) return;
     window.requestAnimationFrame(() => questionSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }, [card?.nq.id]);
-  const selected = selection && selection.questionId === card?.nq.id ? selection.index : null;
+  const selected = selection && selection.questionId === card?.nq.id ? selection.indices : [];
+  const multipleChoice = card?.selectionMode === "multiple";
   const writingCustomAnswer = Boolean(card && customAnswerQuestionId === card.nq.id);
   const questionReason = card
     ? card.nq.reason ?? `This completes ${card.fills?.title ?? "the next part of the requirement"} and gives suppliers a clear basis for their response.`
@@ -137,11 +138,13 @@ export default function GuidedBuild({
       onFocusPrompt();
       return;
     }
-    if (selected === null || !card?.buttons[selected]) return;
-    const answer = card.buttons[selected];
+    if (!selected.length || !card) return;
+    const answers = selected.map((index) => card.buttons[index]).filter(Boolean);
+    if (!answers.length) return;
     transitionLocked.current = true;
-    setTransitionReceipt({ question: card.nq.question, label: answer.label });
-    answer.onClick();
+    setTransitionReceipt({ question: card.nq.question, label: answers.map((answer) => answer.label).join(", ") });
+    if (multipleChoice && card.onConfirmSelection) card.onConfirmSelection(selected);
+    else answers[0].onClick();
     if (transitionTimer.current) clearTimeout(transitionTimer.current);
     transitionTimer.current = setTimeout(() => {
       transitionLocked.current = false;
@@ -181,20 +184,38 @@ export default function GuidedBuild({
               <div><strong>Recorded: {transitionReceipt.label}</strong><small>{transitionReceipt.question}</small></div>
             </div>
           ) : card && card.buttons.length > 0 ? (
-            <div className="nf-guided-choices" role="radiogroup" aria-label={card.nq.question}>
+            <div className="nf-guided-choices" role={multipleChoice ? "group" : "radiogroup"} aria-label={card.nq.question}>
+              {multipleChoice && (
+                <div className="nf-guided-multi-help">
+                  <span>Select every country or region in scope.</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelection({ questionId: card.nq.id, indices: card.buttons.map((_, index) => index) })}
+                  >
+                    {card.selectAllLabel ?? "Select all"}
+                  </button>
+                </div>
+              )}
               {card.buttons.map((button, index) => (
                 <button
                   key={`${card.nq.id}-${button.label}`}
                   type="button"
-                  role="radio"
-                  aria-checked={selected === index}
-                  data-selected={selected === index}
+                  role={multipleChoice ? "checkbox" : "radio"}
+                  aria-checked={selected.includes(index)}
+                  data-selected={selected.includes(index)}
                   onClick={() => {
                     onDescribeQuestion(null);
-                    setSelection({ questionId: card.nq.id, index });
+                    setSelection((current) => {
+                      const existing = current?.questionId === card.nq.id ? current.indices : [];
+                      if (!multipleChoice) return { questionId: card.nq.id, indices: [index] };
+                      return {
+                        questionId: card.nq.id,
+                        indices: existing.includes(index) ? existing.filter((value) => value !== index) : [...existing, index],
+                      };
+                    });
                   }}
                 >
-                  <span>{button.label}</span><span aria-hidden="true">›</span>
+                  <span>{button.label}</span><span aria-hidden="true">{multipleChoice ? selected.includes(index) ? "✓" : "+" : "›"}</span>
                 </button>
               ))}
               <button
@@ -222,10 +243,14 @@ export default function GuidedBuild({
             <button
               type="button"
               className="nf-guided-continue"
-              disabled={!writingCustomAnswer && selected === null}
+              disabled={!writingCustomAnswer && selected.length === 0}
               onClick={continueWithAnswer}
             >
-              {writingCustomAnswer ? "Use the prompt below" : selected === null ? "Choose an answer" : "Continue"}
+              {writingCustomAnswer
+                ? "Use the prompt below"
+                : selected.length === 0
+                  ? multipleChoice ? "Select one or more regions" : "Choose an answer"
+                  : multipleChoice ? `Save ${selected.length} region${selected.length === 1 ? "" : "s"}` : "Continue"}
             </button>
           )}
 

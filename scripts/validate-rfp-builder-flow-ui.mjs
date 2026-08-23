@@ -42,6 +42,23 @@ try {
   await desktop.getByRole("button", { name: /Solution scope/ }).click();
   check((await desktop.locator(".nf-section-build-panel").innerText()).includes("Which technology scope do you need?"), "choosing a section in the rail replaces the centre with that section's questions");
   await desktop.getByRole("button", { name: /Organisation and scale/ }).click();
+
+  await startProject(desktop, "We are a retail business with 20 sites and 50 users and need full SASE.");
+  check((await desktop.getByRole("checkbox").count()) >= 8, "the geography question is explicitly multi-select");
+  const ukRegion = desktop.getByRole("checkbox", { name: "United Kingdom" });
+  const irelandRegion = desktop.getByRole("checkbox", { name: "Ireland" });
+  const northAmericaRegion = desktop.getByRole("checkbox", { name: "North America" });
+  await ukRegion.click();
+  await irelandRegion.click();
+  await northAmericaRegion.click();
+  check(await ukRegion.getAttribute("aria-checked") === "true" && await irelandRegion.getAttribute("aria-checked") === "true" && await northAmericaRegion.getAttribute("aria-checked") === "true", "selecting another territory retains every previous geography");
+  check((await desktop.getByRole("button", { name: "Save 3 regions" }).count()) === 1, "the buyer confirms the region set once");
+  await desktop.getByRole("button", { name: "Save 3 regions" }).click();
+  await desktop.waitForTimeout(850);
+  const globalRequirementText = await desktop.locator("body").innerText();
+  check(globalRequirementText.includes("UK/IE/US"), "all selected geographies land in the living RFP");
+  check(/Organisation and scale\nReady · 4 of 4 answered/.test(globalRequirementText), "three regions count as one answered geography question, not three questions");
+
   await startProject(desktop, "20 UK sites for a retail business with 50 remote users, HQ in Norwich requires dual RA02 failover. We need full SASE and want to migrate by December 2026.");
   const initialText = await desktop.locator("body").innerText();
   check(/Resilience and availability\nReady · \d+ of \d+ answered/.test(initialText), "stated failover completes the resilience section");

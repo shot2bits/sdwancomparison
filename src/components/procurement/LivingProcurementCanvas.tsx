@@ -42,6 +42,12 @@ import { ProvenanceTag } from "./ProvenanceTag";
 export type NextQuestionCard = {
   nq: NextQuestion;
   buttons: Array<{ label: string; onClick: () => void }>;
+  /** Most decisions are exclusive. Geography is deliberately additive:
+   *  an international estate must be able to retain every selected region
+   *  and commit the set as one buyer answer. */
+  selectionMode?: "single" | "multiple";
+  onConfirmSelection?: (indices: number[]) => void;
+  selectAllLabel?: string;
   hint: string | null;
   /** Which outline section answering this fills, and where that section
    *  sits in the run of required ones (procurement-outline.ts

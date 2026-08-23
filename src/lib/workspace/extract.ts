@@ -121,7 +121,7 @@ const SOC_IDS: SocCapacity[] = ["none", "business_hours", "twenty_four_seven"];
 const COMPLIANCE_IDS = ["iso27001", "pci_dss", "cyber_essentials_plus", "fca", "nhs_dspt", "nis2", "uk_gdpr"];
 const CLOUD_IDS = ["m365", "google", "aws", "azure", "other_saas"];
 const NETWORK_IDS = ["btnet", "bt_broadband", "mpls", "sdwan", "vpn", "leased_line", "broadband"];
-const REGION_IDS = ["uk", "ie", "eu", "us", "apac", "me"];
+const REGION_IDS = ["uk", "ie", "eu", "us", "latam", "apac", "me", "china"];
 
 /** What the buyer is BUYING (W0 slice 2): the workspace serves security,
  *  SASE and SD-WAN through one surface, so the loop needs to hear the
@@ -603,10 +603,12 @@ const LIST_VALUE_PATTERNS: Array<{ path: AllowedPath; value: string; re: RegExp;
   { path: "drivers", value: "consolidation", re: /consolidation/, quote: "consolidation" },
   { path: "organisation.regions", value: "uk", re: /\buk\b|united kingdom/, quote: "UK" },
   { path: "organisation.regions", value: "ie", re: /(?<!northern )ireland/, quote: "Ireland" },
-  { path: "organisation.regions", value: "us", re: /\bu\.?s\.?\b|\busa\b|united states/, quote: "US" },
+  { path: "organisation.regions", value: "us", re: /\bu\.?s\.?\b|\busa\b|united states|north america|(?<!latin |south )\bamerica\b/, quote: "North America" },
+  { path: "organisation.regions", value: "latam", re: /\blatam\b|latin america|south america/, quote: "Latin America" },
   { path: "organisation.regions", value: "eu", re: /\beurope\b/, quote: "Europe" },
   { path: "organisation.regions", value: "apac", re: /\bapac\b|asia pacific/, quote: "Asia Pacific" },
   { path: "organisation.regions", value: "me", re: /middle east/, quote: "Middle East" },
+  { path: "organisation.regions", value: "china", re: /\bchina\b|mainland china/, quote: "China" },
 ];
 
 /**

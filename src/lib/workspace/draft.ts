@@ -289,8 +289,10 @@ export const REGION_LABELS: Record<string, string> = {
   ie: "Ireland",
   eu: "Europe",
   us: "North America",
+  latam: "Latin America",
   apac: "Asia Pacific",
-  me: "the Middle East",
+  me: "the Middle East and Africa",
+  china: "mainland China",
 };
 
 /** Standalone forms for chips, table rows and the notice-inherits row:
@@ -303,8 +305,10 @@ export const REGION_LABELS_STANDALONE: Record<string, string> = {
   ie: "Ireland",
   eu: "Europe",
   us: "North America",
+  latam: "Latin America",
   apac: "Asia Pacific",
-  me: "Middle East",
+  me: "Middle East and Africa",
+  china: "China (mainland)",
 };
 export function regionStandalone(id: string): string {
   return REGION_LABELS_STANDALONE[id] ?? REGION_LABELS[id] ?? id;
@@ -495,8 +499,10 @@ const REGION_BRIDGE: Record<string, string> = {
   ie: "uk_ireland",
   eu: "europe",
   us: "north_america",
+  latam: "latin_america",
   apac: "asia_pacific",
   me: "middle_east_africa",
+  china: "china_mainland",
 };
 
 export function wizardRegions(regions: string[]): string[] {

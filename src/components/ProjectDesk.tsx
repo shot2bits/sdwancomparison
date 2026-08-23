@@ -485,6 +485,7 @@ type TwinSlot = {
   why: string;
   path?: AllowedPath;
   notePrefix?: string;
+  selectionMode?: "single" | "multiple";
   options: TwinOption[];
 };
 
@@ -532,13 +533,16 @@ const TWIN_SLOTS: TwinSlot[] = [
     id: "region", group: "org", label: "Where", w: 2, cta: "Which countries?", q: "Where are the sites?",
     why: "Coverage and field engineering vary sharply by country, and where it runs filters who can serve it.",
     path: "organisation.regions",
+    selectionMode: "multiple",
     options: [
       { label: "United Kingdom", effect: "", land: fact("organisation.regions", "uk") },
       { label: "Ireland", effect: "", land: fact("organisation.regions", "ie") },
       { label: "Europe", effect: "", land: fact("organisation.regions", "eu") },
       { label: "North America", effect: "", land: fact("organisation.regions", "us") },
+      { label: "Latin America", effect: "", land: fact("organisation.regions", "latam") },
       { label: "Asia Pacific", effect: "", land: fact("organisation.regions", "apac") },
-      { label: "Middle East", effect: "", land: fact("organisation.regions", "me") },
+      { label: "Middle East & Africa", effect: "", land: fact("organisation.regions", "me") },
+      { label: "China (mainland)", effect: "", land: fact("organisation.regions", "china") },
     ],
   },
   {
@@ -2316,6 +2320,32 @@ export default function ProjectDesk({
     [applyMerge, markChanged, say, sayYou, beginOrExtendSubmission, scheduleSettle],
   );
 
+  /** Geography is not a radio question. Commit all selected territories in
+   *  one merge so the document, decision receipt and next-question advance
+   *  describe one buyer decision rather than a sequence of replacements. */
+  const landMultipleOptions = useCallback(
+    (slot: TwinSlot, options: TwinOption[]) => {
+      const lands = options
+        .map((option) => ({ option, land: option.land }))
+        .filter((entry): entry is { option: TwinOption; land: Extract<TwinLand, { kind: "fact" }> } => entry.land.kind === "fact");
+      if (!lands.length) return;
+      const updates = lands.map(({ option, land }) => ({
+        path: land.path,
+        value: land.value,
+        provenance: "stated" as const,
+        quote: option.label,
+      }));
+      const merged = applyMerge(updates, "answer");
+      markChanged(merged.changed.length ? merged.changed : updates.map((update) => factId(update.path, update.value)), merged.facts);
+      for (const update of updates) ev("workspace_gap_answered", { field: update.path });
+      const labels = options.map((option) => option.label);
+      sayYou(listJoin(labels));
+      say(`Recorded — ${slot.label}: ${listJoin(labels)}.`);
+      setEdit(null);
+    },
+    [applyMerge, markChanged, say, sayYou],
+  );
+
   /** A sector chip lands real values through the same machinery a
    *  click-answer uses (round 6, ruling 5): stated provenance, the
    *  chip's words as the quote, never an invented fact. */
@@ -3913,6 +3943,11 @@ export default function ProjectDesk({
         return {
           nq,
           buttons: slot ? slot.options.map((o) => ({ label: o.label, onClick: () => landOption(slot, o) })) : [],
+          selectionMode: slot?.selectionMode,
+          onConfirmSelection: slot?.selectionMode === "multiple"
+            ? (indices: number[]) => landMultipleOptions(slot, indices.map((index) => slot.options[index]).filter(Boolean))
+            : undefined,
+          selectAllLabel: slot?.selectionMode === "multiple" ? "Select worldwide" : undefined,
           hint: slot ? null : "See “Project details” below for the full context.",
           fills,
         };
@@ -3924,7 +3959,7 @@ export default function ProjectDesk({
         fills,
       };
     },
-    [landOption, answerNextQuestion, sectionOutline, sectorSectionTitle],
+    [landOption, landMultipleOptions, answerNextQuestion, sectionOutline, sectorSectionTitle],
   );
 
   /** The top three, for the chat pane's "Answer next" block -- the
@@ -4004,10 +4039,15 @@ export default function ProjectDesk({
     return {
       nq,
       buttons: slot.options.map((option) => ({ label: option.label, onClick: () => landOption(slot, option) })),
+      selectionMode: slot.selectionMode,
+      onConfirmSelection: slot.selectionMode === "multiple"
+        ? (indices: number[]) => landMultipleOptions(slot, indices.map((index) => slot.options[index]).filter(Boolean))
+        : undefined,
+      selectAllLabel: slot.selectionMode === "multiple" ? "Select worldwide" : undefined,
       hint: null,
       fills: { title: nextRow.title, position: sectionPosition(sectionOutline, nextRow.title)?.position ?? sectionProgress.nextPosition, total: sectionProgress.total },
     };
-  }, [activeSection, activeRow, allNextQuestionCards, landOption, sectionOutline, sectionProgress]);
+  }, [activeSection, activeRow, allNextQuestionCards, landOption, landMultipleOptions, sectionOutline, sectionProgress]);
 
   /** Every open question that resolves the ACTIVE section specifically —
    *  the same `fills` resolution every other card surface already trusts,
@@ -4048,14 +4088,32 @@ export default function ProjectDesk({
   const sectionQuestionItemsByKey = useMemo(() => {
     const openCards: NextQuestionCard[] = [...allNextQuestionCards];
     if (guidedQuestionCard && !openCards.some((card) => card.nq.id === guidedQuestionCard.nq.id)) openCards.unshift(guidedQuestionCard);
+    /* One question can legitimately produce several facts (regions is the
+       clearest example). Progress counts answered questions, not database
+       rows, so collapse values sharing a path into one visible answer. */
+    const evidenceByPath = new Map<string, { id: string; sectionKey: string; text: string; answers: string[] }>();
+    for (const entry of answeredLog.stated) {
+      if (!entry.path) continue;
+      const existing = evidenceByPath.get(entry.path);
+      if (existing) {
+        if (!existing.answers.includes(entry.answer)) existing.answers.push(entry.answer);
+      } else {
+        evidenceByPath.set(entry.path, {
+          id: entry.path,
+          sectionKey: outlineKeyForPath(entry.path),
+          text: PATH_LABELS[entry.path as AllowedPath] ?? entry.label,
+          answers: [entry.answer],
+        });
+      }
+    }
     return buildSectionQuestionRegister({
       rows: sectionOutline,
-      evidence: answeredLog.stated.flatMap((entry) => entry.path ? [{
-        id: entry.key,
-        sectionKey: outlineKeyForPath(entry.path),
-        text: PATH_LABELS[entry.path as AllowedPath] ?? entry.label,
-        answer: entry.answer,
-      }] : []),
+      evidence: [...evidenceByPath.values()].map((entry) => ({
+        id: entry.id,
+        sectionKey: entry.sectionKey,
+        text: entry.text,
+        answer: listJoin(entry.answers),
+      })),
       openQuestions: openCards.flatMap((card) => {
         const row = sectionOutline.find((candidate) => candidate.title === card.fills?.title);
         return row ? [{ id: card.nq.id, sectionKey: row.key, text: card.nq.question, suggested: Boolean(card.nq.governedSuggestion) }] : [];
