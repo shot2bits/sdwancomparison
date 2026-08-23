@@ -287,7 +287,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
     options: [
       { label: "Required", answer: { kind: "note", text: "Dual-circuit resilience per site required" } },
       { label: "Critical sites only", answer: { kind: "note", text: "Dual-circuit resilience at critical sites only" } },
-      { label: "Not required", answer: { kind: "dismiss" } },
+      { label: "Not required", answer: { kind: "note", text: "Dual-circuit resilience per site is not required" } },
     ],
     evidence: [{ source: "buyer_archetype", query: "Which providers support dual-carrier resilience?" }],
   },

@@ -79,7 +79,7 @@ import {
   type CompilerRevision,
   type GovernedEvent,
 } from "@/lib/workspace/procurement-document";
-import LivingProcurementCanvas, { type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
+import LivingProcurementCanvas, { type NextQuestionCard, type ProcurementView } from "@/components/procurement/LivingProcurementCanvas";
 import { ProvenanceTag } from "@/components/procurement/ProvenanceTag";
 import McpEvidencePanel from "@/components/procurement/McpEvidencePanel";
 import { historyProvenance } from "@/lib/history-provenance";
@@ -2068,46 +2068,6 @@ export default function ProjectDesk({
     ? `Narrowed by ${listJoin(narrowedBy)}. Never by what anyone pays.`
     : "The whole evaluated market, until you tell it more. Never narrowed by what anyone pays.";
 
-  /* ---- The publish gate (identical law to every round) ----
-     19 Aug 2026: the gate's CONTENT requirements now come from
-     buildPublishChecklist(), the same object the workspace renders as a
-     visible checklist. Previously this boolean and the buyer-facing
-     surface were separate derivations, which is why a real, finite,
-     shrinking gate could sit here fully enforced and completely
-     invisible while an infinite advisory stream was labelled "blocking"
-     three screens away. One source now: if it is on the checklist it
-     locks publishing, and if it locks publishing it is on the checklist.
-     The non-content conditions (still resuming, nothing said yet,
-     already published) stay here — they are session state, not things a
-     buyer can tick off. */
-  const publishChecklist = useMemo(
-    () =>
-      buildPublishChecklist({
-        sector: coreFive.sector,
-        sites: coreFive.sites,
-        regions: coreFive.regions,
-        scope: coreFive.scope,
-        timeline: coreFive.timeline,
-        securityScope,
-        securityVerdictSettled: Boolean(verdict) && verdict?.confidence !== "low",
-      }),
-    [coreFive, securityScope, verdict],
-  );
-  const signLocked =
-    resuming || !started || facts.length === 0 || Boolean(published) || !publishChecklist.ready || (!securityScope && !buying);
-  const lockLine = resuming
-    ? "Loading your saved project…"
-    : !started
-      ? "Say one sentence about the organisation and the engine takes over."
-      : facts.length === 0
-        ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
-          : !publishChecklist.ready
-            ? `A notice cannot publish without ${numWord(publishChecklist.total)} details, and ${numWord(publishChecklist.remaining.length)} ${publishChecklist.remaining.length === 1 ? "is" : "are"} still open: ${publishChecklist.remaining.join(", ").toLowerCase()}. Say it in the prompt, or answer the open lines in the statement.`
-          : securityScope && (!verdict || verdict.confidence === "low")
-            ? "Answer the open questions first: nothing is recorded on guesswork."
-            : !securityScope && !buying
-              ? "Say what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
-              : null;
   const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGapsLenOk() || consentGaps) : consentCreate;
   function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
   const unansweredGaps = brief.openGaps;
@@ -3699,8 +3659,8 @@ export default function ProjectDesk({
       orgScaleMissing,
       scopeComplete: coreFive.scope,
       scopeDetail: buying ? `Buying: ${buying === "sase" ? "SASE" : buying === "sdwan" ? "SD-WAN" : buying === "sse" ? "SSE" : "managed security"}.` : "What is being bought is not yet stated.",
-      estateSignal: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity"),
-      estateDetail: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity") ? "Existing estate stated." : "Network, cloud and security estate today not yet stated.",
+      estateSignal: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity") || noted.some((n) => n.id === "guided-answer:guided-section-current_estate"),
+      estateDetail: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity") || noted.some((n) => n.id === "guided-answer:guided-section-current_estate") ? "Existing estate stated." : "Network, cloud and security estate today not yet stated.",
       /* Only when something IS stated: with nothing stated the row's own
          detail already names all three, and repeating them as a "still
          needed" list would be noise rather than information. */
@@ -3714,8 +3674,14 @@ export default function ProjectDesk({
         : null,
       operatingModelResolved: Boolean(opModel) && !rankedIds.has("OD-support-coverage-ambiguous"),
       operatingModelDetail: opModel ? `Operating model stated.` : "Who runs it day to day is not yet stated.",
-      migrationSignal: noted.some((n) => n.id.startsWith("twin-services")),
-      migrationDetail: noted.some((n) => n.id.startsWith("twin-services")) ? "Migration/delivery scope stated." : "Migration and implementation scope not yet stated.",
+      migrationSignal: coreFive.timeline && noted.some((n) => n.id.startsWith("twin-services") || n.id === "guided-answer:guided-section-migration_implementation"),
+      migrationDetail: coreFive.timeline && noted.some((n) => n.id.startsWith("twin-services") || n.id === "guided-answer:guided-section-migration_implementation")
+        ? "Timeline and migration/delivery scope stated."
+        : "Timeline and migration/delivery scope are not yet both stated.",
+      migrationMissing: [
+        !coreFive.timeline && "timeline",
+        !noted.some((n) => n.id.startsWith("twin-services") || n.id === "guided-answer:guided-section-migration_implementation") && "migration/delivery scope",
+      ].filter((x): x is string => typeof x === "string"),
       commercialSignal: noted.some((n) => n.id.startsWith("twin-term") || n.id.startsWith("twin-commercial")),
       commercialDetail: noted.some((n) => n.id.startsWith("twin-term") || n.id.startsWith("twin-commercial")) ? "Commercial preference stated." : "Material once pricing starts; not needed to publish a comparable enquiry.",
       successSignal: noted.some((n) => n.id.startsWith("twin-success")),
@@ -3750,6 +3716,43 @@ export default function ProjectDesk({
    *  the document header, the question cards and the outline itself are
    *  four views of one number, not four numbers. */
   const sectionProgress = useMemo(() => outlineProgress(sectionOutline), [sectionOutline]);
+
+  /* One honest completion gate. The original five-fact checklist remains
+     the minimum data-quality check, but it can no longer pronounce a
+     document finished while the visible section outline still contains
+     Needs input / Needs decision rows. The same combined boolean drives
+     the terminal state, publish navigation and the publish action. */
+  const requiredSectionsReady = sectionProgress.ready === sectionProgress.total;
+  const publishChecklist = useMemo(
+    () =>
+      buildPublishChecklist({
+        sector: coreFive.sector,
+        sites: coreFive.sites,
+        regions: coreFive.regions,
+        scope: coreFive.scope,
+        timeline: coreFive.timeline,
+        securityScope,
+        securityVerdictSettled: Boolean(verdict) && verdict?.confidence !== "low",
+      }),
+    [coreFive, securityScope, verdict],
+  );
+  const contentReady = publishChecklist.ready && requiredSectionsReady && Boolean(securityScope || buying);
+  const incompleteRequiredSections = sectionOutline.filter((row) => row.state !== "confirmed" && row.state !== "later");
+  const signLocked =
+    resuming || !started || facts.length === 0 || Boolean(published) || !contentReady;
+  const lockLine = resuming
+    ? "Loading your saved project…"
+    : !started
+      ? "Say one sentence about the organisation and the engine takes over."
+      : facts.length === 0
+        ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
+        : !publishChecklist.ready
+          ? `Publishing still needs ${publishChecklist.remaining.join(", ").toLowerCase()}. Say it in the prompt, or answer the next question.`
+          : !requiredSectionsReady
+            ? `Complete ${incompleteRequiredSections.map((row) => row.title).join(", ")} before publishing. The next unfinished section is shown in the builder.`
+            : !securityScope && !buying
+              ? "Say what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
+              : null;
 
   /** Living Procurement UK Decision-Maker Blueprint, correction pass
    *  (Robert, 15 Aug 2026), defect 5: "Do not merely relabel the existing
@@ -3932,6 +3935,63 @@ export default function ProjectDesk({
     () => rankedNextQuestions.map(resolveQuestionCard),
     [rankedNextQuestions, resolveQuestionCard],
   );
+
+  /* The guided builder is section-linear even when the global ranked
+     decision queue is empty or prefers a later section. Every unfinished
+     outline row has a deterministic existing Twin slot to fall back to;
+     this prevents the old impossible state where the centre said
+     "Review your RFP" while the left rail still said Not started. */
+  const guidedQuestionCard = useMemo<NextQuestionCard | null>(() => {
+    const nextRow = sectionProgress.next;
+    if (!nextRow) return null;
+    const rankedForSection = allNextQuestionCards.find((candidate) => candidate.fills?.title === nextRow.title);
+    if (rankedForSection) return rankedForSection;
+
+    const firstMissing = nextRow.missing?.[0];
+    const slotId = nextRow.key === "organisation_scale"
+      ? firstMissing === "sector" ? "sector"
+        : firstMissing === "site count" ? "sites"
+          : firstMissing === "regions" ? "region"
+            : "people"
+      : nextRow.key === "solution_scope" ? "scope"
+        : nextRow.key === "current_estate" ? "network"
+          : nextRow.key === "resilience_availability" ? "resilience"
+            : nextRow.key === "operating_model_support" ? "model"
+              : nextRow.key === "migration_implementation" ? (firstMissing === "timeline" ? "timeline" : "services")
+                : nextRow.key === "commercial_contractual" ? "term"
+                  : nextRow.key === "success_evaluation" ? "success"
+                    : null;
+    const slot = slotId ? SLOT_BY_ID[slotId] : null;
+    if (!slot) return null;
+    const targetBySection: Record<string, string> = {
+      organisation_scale: "organisation",
+      solution_scope: "network",
+      current_estate: "estate",
+      resilience_availability: "estate",
+      operating_model_support: "model",
+      migration_implementation: "services",
+      commercial_contractual: "commercial",
+      success_evaluation: "success",
+    };
+    const nq: NextQuestion = {
+      id: `guided-section-${nextRow.key}`,
+      question: slot.q,
+      source: "compiler_open_decision",
+      target: targetBySection[nextRow.key] ?? "additional",
+      impact: ["delivery"],
+      options: null,
+      governedSuggestion: false,
+      conflictReason: null,
+      reason: slot.why,
+      weight: 0,
+    };
+    return {
+      nq,
+      buttons: slot.options.map((option) => ({ label: option.label, onClick: () => landOption(slot, option) })),
+      hint: null,
+      fills: { title: nextRow.title, position: sectionProgress.nextPosition, total: sectionProgress.total },
+    };
+  }, [allNextQuestionCards, landOption, sectionProgress]);
 
   /** Every open question that resolves the ACTIVE section specifically —
    *  the same `fills` resolution every other card surface already trusts,
@@ -4176,7 +4236,7 @@ export default function ProjectDesk({
   /* optional classification.                                           */
   /* ================================================================== */
   const publishedFlag = Boolean(published);
-  const reachable = reachableSteps({ started, published: publishedFlag });
+  const reachable = reachableSteps({ started, published: publishedFlag, publishReady: contentReady });
   const completed = completedSteps({ started, materialDecisionsRemaining, published: publishedFlag });
   /* Navigation can never strand the buyer on a station that stopped
      being reachable (e.g. "Start again" wipes the facts while they are
@@ -4338,7 +4398,7 @@ export default function ProjectDesk({
      out, so without this the conversation has no ending by construction.
      The remaining decisions are demoted, not hidden -- they are still
      rendered below, now honestly labelled optional. */
-  const rfpIsBuilt = started && !published && publishChecklist.ready;
+  const rfpIsBuilt = started && !published && contentReady;
 
   /* Rendered ABOVE the captured list, not below it. The end state is the
      one thing in this column a buyer must never have to scroll for --
@@ -4644,8 +4704,8 @@ export default function ProjectDesk({
           <div data-workspace-grid className="nf-2030-grid">
             <SectionNav
               rows={sectionOutline}
-              activeKey={activeStep === "describe" && nextQuestionCards[0]?.fills?.title
-                ? sectionOutline.find((row) => row.title === nextQuestionCards[0]?.fills?.title)?.key ?? activeRow?.key ?? null
+              activeKey={activeStep === "describe" && guidedQuestionCard?.fills?.title
+                ? sectionOutline.find((row) => row.title === guidedQuestionCard.fills?.title)?.key ?? activeRow?.key ?? null
                 : activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); goToStep("describe"); }}
               progress={sectionProgress}
@@ -4660,11 +4720,13 @@ export default function ProjectDesk({
             />
             {activeStep === "describe" && (
               <GuidedBuild
-                card={nextQuestionCards[0] ?? null}
-                position={nextQuestionCards[0]?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
+                card={guidedQuestionCard}
+                ready={contentReady}
+                incompleteSectionTitle={sectionProgress.next?.title ?? null}
+                position={guidedQuestionCard?.fills?.position ?? activeRowPosition?.position ?? Math.min(sectionProgress.ready + 1, sectionProgress.total)}
                 total={sectionProgress.total}
                 understood={`${sectorShort ? cap(sectorShort) : "Organisation"}${buying ? ` buying ${buying === "sdwan" ? "SD-WAN" : buying.toUpperCase()}` : " procurement"}`}
-                addedTo={nextQuestionCards[0]?.fills?.title ?? activeRow?.title ?? "Living requirement"}
+                addedTo={guidedQuestionCard?.fills?.title ?? activeRow?.title ?? "Living requirement"}
                 stillNeeded={activeRow?.missing?.length ? activeRow.missing.join(", ") : activeRow?.detail ?? "Review the document"}
                 documentTitle={canvasDocument.title}
                 documentSummary={canvasDocument.summary}

@@ -90,8 +90,14 @@ export default function AnswerNext({
    *  has gone — deliberately survives the card's removal, which is why it
    *  is kept here rather than as state on the card itself. */
   const [confirmed, setConfirmed] = useState<{ label: string; question: string } | null>(null);
+  const [answerLocked, setAnswerLocked] = useState(false);
   const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (confirmTimer.current) clearTimeout(confirmTimer.current); }, []);
+  const unlockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const answerLockedRef = useRef(false);
+  useEffect(() => () => {
+    if (confirmTimer.current) clearTimeout(confirmTimer.current);
+    if (unlockTimer.current) clearTimeout(unlockTimer.current);
+  }, []);
 
   const confirm = (question: string, label: string) => {
     setConfirmed({ question, label });
@@ -123,7 +129,7 @@ export default function AnswerNext({
           </span>
         </div>
       )}
-      <div className="mt-2.5 flex flex-col gap-1.5">
+      <div className="mt-2.5 flex flex-col gap-1.5" aria-busy={answerLocked}>
         {cards.map(({ nq, buttons, hint, fills }) => {
           const isOpen = openId === nq.id;
           const isMaterial =
@@ -220,12 +226,21 @@ export default function AnswerNext({
                         <button
                           key={b.label}
                           type="button"
+                          disabled={answerLocked}
                           onClick={() => {
+                            if (answerLockedRef.current) return;
+                            answerLockedRef.current = true;
+                            setAnswerLocked(true);
                             b.onClick();
                             confirm(nq.question, b.label);
                             setOpenId(null);
+                            if (unlockTimer.current) clearTimeout(unlockTimer.current);
+                            unlockTimer.current = setTimeout(() => {
+                              answerLockedRef.current = false;
+                              setAnswerLocked(false);
+                            }, 750);
                           }}
-                          className="cursor-pointer rounded-[3px] border px-2.5 py-1.5 text-[12px] font-semibold transition-colors hover:border-[var(--nf-ink-950,#110f0d)]"
+                          className="cursor-pointer rounded-[3px] border px-2.5 py-1.5 text-[12px] font-semibold transition-colors hover:border-[var(--nf-ink-950,#110f0d)] disabled:cursor-default disabled:opacity-55"
                           style={{ borderColor: "var(--nf-ink-200, #d3d0cd)", background: "#fff", color: "var(--nf-ink-950, #110f0d)" }}
                         >
                           {b.label}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 
 type ClausePreview = { id: string; statement: string };
@@ -8,6 +8,8 @@ type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
 
 export default function GuidedBuild({
   card,
+  ready,
+  incompleteSectionTitle,
   position,
   total,
   understood,
@@ -26,6 +28,8 @@ export default function GuidedBuild({
   onOpenDocument,
 }: {
   card: NextQuestionCard | null;
+  ready: boolean;
+  incompleteSectionTitle: string | null;
   position: number;
   total: number;
   understood: string;
@@ -44,19 +48,35 @@ export default function GuidedBuild({
   onOpenDocument: () => void;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; index: number } | null>(null);
+  const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionLocked = useRef(false);
+  useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
   const selected = selection && selection.questionId === card?.nq.id ? selection.index : null;
   const writingCustomAnswer = Boolean(card && customAnswerQuestionId === card.nq.id);
   const questionReason = card
     ? card.nq.reason ?? `This completes ${card.fills?.title ?? "the next part of the requirement"} and gives suppliers a clear basis for their response.`
-    : "The core requirement is ready. Review the living document before you shortlist suppliers.";
+    : ready
+      ? "Every required section is complete. Review the living document before publishing the opportunity."
+      : `${incompleteSectionTitle ?? "The next required section"} still needs an answer. Add it in the prompt below.`;
 
   const continueWithAnswer = () => {
+    if (transitionLocked.current) return;
     if (writingCustomAnswer) {
       onFocusPrompt();
       return;
     }
     if (selected === null || !card?.buttons[selected]) return;
-    card.buttons[selected].onClick();
+    const answer = card.buttons[selected];
+    transitionLocked.current = true;
+    setTransitionReceipt({ question: card.nq.question, label: answer.label });
+    answer.onClick();
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    transitionTimer.current = setTimeout(() => {
+      transitionLocked.current = false;
+      setSelection(null);
+      setTransitionReceipt(null);
+    }, 750);
   };
 
   return (
@@ -64,7 +84,7 @@ export default function GuidedBuild({
       <main className="nf-guided-main">
         <section className="nf-guided-question" aria-label="Next requirement question">
           <p className="nf-guided-kicker">Next step · {Math.max(1, position)} of {Math.max(1, total)}</p>
-          <h1>{card?.nq.question ?? "Review the requirement you have built"}</h1>
+          <h1>{card?.nq.question ?? (ready ? "Review the requirement you have built" : `Complete ${incompleteSectionTitle ?? "the next section"}`)}</h1>
           <p className="nf-guided-reason">
             {questionReason}
           </p>
@@ -77,7 +97,12 @@ export default function GuidedBuild({
             </div>
           )}
 
-          {card && card.buttons.length > 0 ? (
+          {transitionReceipt ? (
+            <div className="nf-guided-answer-recorded" role="status" aria-live="polite" aria-busy="true">
+              <span aria-hidden="true">✓</span>
+              <div><strong>Recorded: {transitionReceipt.label}</strong><small>{transitionReceipt.question}</small></div>
+            </div>
+          ) : card && card.buttons.length > 0 ? (
             <div className="nf-guided-choices" role="radiogroup" aria-label={card.nq.question}>
               {card.buttons.map((button, index) => (
                 <button
@@ -107,11 +132,13 @@ export default function GuidedBuild({
                 <span aria-hidden="true">{writingCustomAnswer ? "↓" : "›"}</span>
               </button>
             </div>
-          ) : (
+          ) : ready ? (
             <button type="button" className="nf-guided-review" onClick={onOpenDocument}>Review your RFP</button>
+          ) : (
+            <button type="button" className="nf-guided-review" onClick={onFocusPrompt}>Answer in the prompt below</button>
           )}
 
-          {card && card.buttons.length > 0 && (
+          {card && card.buttons.length > 0 && !transitionReceipt && (
             <button
               type="button"
               className="nf-guided-continue"

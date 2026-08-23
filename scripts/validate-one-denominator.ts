@@ -30,7 +30,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { outlineProgress, outlineProgressLine, sectionPosition, type OutlineRow } from "../src/lib/workspace/procurement-outline";
+import { outlineProgress, outlineProgressLine, sectionPosition, siteResilienceClauseExists, type OutlineRow } from "../src/lib/workspace/procurement-outline";
+import { reachableSteps } from "../src/lib/workspace/wizard-steps";
 
 const ROOT = path.dirname(fileURLToPath(new URL("../package.json", import.meta.url)));
 const src = (...parts: string[]) => readFileSync(path.join(ROOT, ...parts), "utf8");
@@ -53,6 +54,7 @@ function main() {
      property on its replacement. */
   const nav = src("src/components/procurement/SectionNav.tsx");
   const answerNext = src("src/components/procurement/AnswerNext.tsx");
+  const guidedBuild = src("src/components/procurement/GuidedBuild.tsx");
   const ready = src("src/components/procurement/RfpReady.tsx");
 
   /* ================================================================ */
@@ -84,6 +86,10 @@ function main() {
   record(sectionPosition(rows, "Commercial and contractual") === null, "A: a `later` section is given NO position inside the fraction (card and fraction cannot disagree)");
   record(sectionPosition(rows, "Nonexistent") === null, "A: an unmapped title yields null, never a guessed position");
   record(sectionPosition(rows, "Resilience and availability")?.position === 4, "A: a required section resolves to its 1-based position", JSON.stringify(sectionPosition(rows, "Resilience and availability")));
+  record(
+    siteResilienceClauseExists([{ templateId: "noted-selection", sourceNotedIds: ["twin-res-all"] }]),
+    "A: a structured resilience selection shown in the living document also completes the resilience outline row",
+  );
 
   /* ================================================================ */
   /* B. THE COMPETING NUMBERS ARE GONE.                                */
@@ -125,8 +131,9 @@ function main() {
   /* E. THE CONVERSATION ENDS.                                         */
   /* ================================================================ */
   record(
-    /const rfpIsBuilt = started && !published && publishChecklist\.ready/.test(desk),
-    "E: the terminal state is gated on the REAL publish gate (`publishChecklist.ready`, the same object `signLocked` reads)",
+    /const contentReady = publishChecklist\.ready && requiredSectionsReady/.test(desk) &&
+      /const rfpIsBuilt = started && !published && contentReady/.test(desk),
+    "E: the terminal state is gated on the combined factual + visible-section publish gate (`contentReady`, the same gate `signLocked` reads)",
   );
   record(
     !/rfpIsBuilt = .*materialDecisionsRemaining/.test(desk),
@@ -141,6 +148,16 @@ function main() {
   record(/holds publishing up/.test(ready), "E: remaining decisions are named optional out loud, not hidden");
   record(/demoted \? "Optional/.test(answerNext), "E: the retained secondary AnswerNext component still supports honest optional framing");
   record(/const rfpReadyBlock = rfpIsBuilt \?/.test(desk) && /\{rfpReadyBlock\}/.test(desk), "E: the publishable handoff shown in activity is driven by the same real gate");
+  record(
+    !reachableSteps({ started: true, published: false, publishReady: false }).has("publish") &&
+      reachableSteps({ started: true, published: false, publishReady: true }).has("publish"),
+    "E: Publish navigation uses that same completion gate rather than merely checking that a project started",
+  );
+  record(/const guidedQuestionCard = useMemo<NextQuestionCard \| null>/.test(desk), "E: an unfinished section receives a guided fallback question instead of the false Review terminal state");
+  record(
+    /transitionLocked\.current = true/.test(guidedBuild) && /nf-guided-answer-recorded/.test(guidedBuild),
+    "E: committing an answer locks the old control surface and shows a receipt before the next options appear",
+  );
 
   console.log(failures === 0 ? "\nALL PASS" : `\nFAILs: ${failures}`);
   if (failures) process.exit(1);

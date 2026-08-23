@@ -60,18 +60,28 @@ export const WIZARD_STEPS: ReadonlyArray<{ step: WizardStep; label: string; purp
  * Which stations are open right now, derived ONLY from real document
  * state — never from where the buyer has already clicked.
  *
- * `describe` is always open (it is the door). The middle three open once
- * a single real fact exists, since there is genuinely nothing to decide,
- * review or publish about an empty document. `compare` opens only after
- * a real publication, because supplier responses cannot exist before one
- * — showing it earlier would promise a surface that must render empty.
+ * `describe` is always open (it is the door). Decisions and review open
+ * once a single real fact exists. Publish opens only when the caller's
+ * content gate is satisfied; `compare` opens only after a real
+ * publication, because supplier responses cannot exist before one.
  */
-export function reachableSteps({ started, published }: { started: boolean; published: boolean }): Set<WizardStep> {
+export function reachableSteps({
+  started,
+  published,
+  publishReady = started,
+}: {
+  started: boolean;
+  published: boolean;
+  /** The publish station opens only when the same content gate used by
+   *  the publish action is satisfied. Review remains available while the
+   *  buyer is still completing sections. */
+  publishReady?: boolean;
+}): Set<WizardStep> {
   const out = new Set<WizardStep>(["describe"]);
   if (started) {
     out.add("decisions");
     out.add("review");
-    out.add("publish");
+    if (publishReady || published) out.add("publish");
   }
   if (published) out.add("compare");
   return out;

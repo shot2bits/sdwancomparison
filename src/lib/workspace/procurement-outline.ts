@@ -170,21 +170,33 @@ export function outlineProgressLine(p: OutlineProgress): string {
  * previously those two surfaces each answered "is resilience resolved?"
  * differently (this one from the compiled clause, that one from
  * dismissedIds/notedIds), which is exactly the drift this correction
- * closes. Deliberately just the clause check -- NOT `resolved` as a
- * whole -- because `resolved` here is additionally ANDed with
+ * closes. The canonical text-template clause and the compiled clause
+ * carrying a structured resilience answer's noted-id provenance are
+ * equivalent proof: both are real document clauses, not UI disappearance.
+ * This is deliberately NOT `resolved` as a whole, because `resolved` is
+ * additionally ANDed with
  * `!hasOperatingModelConflict`, and `hasOperatingModelConflict` is itself
  * derived FROM `rankedNextQuestions`, which is downstream of the earned
  * list this same boolean also filters. Reusing `resolved` directly at
- * that layer would be circular; the clause check alone is not, because
+ * that layer would be circular; the compiled-clause check alone is not,
  * `q-resilience`'s own `earnedBy` already re-derives materiality
  * (site count + buying) independently every time.
  */
-export function siteResilienceClauseExists(clauses: Pick<ProcurementClause, "templateId">[]): boolean {
-  return clauses.some((c) => c.templateId === "site-resilience-scope");
+export function siteResilienceClauseExists(
+  clauses: Array<Pick<ProcurementClause, "templateId"> & { sourceNotedIds?: readonly string[] }>,
+): boolean {
+  return clauses.some((c) =>
+    c.templateId === "site-resilience-scope" ||
+    c.sourceNotedIds?.some((id) =>
+      id === "qn-q-resilience" ||
+      id === "guided-answer:q-resilience" ||
+      id.startsWith("twin-res-"),
+    ) === true,
+  );
 }
 
 export function deriveResilienceOutlineState(input: {
-  clauses: Pick<ProcurementClause, "templateId">[];
+  clauses: Array<Pick<ProcurementClause, "templateId"> & { sourceNotedIds?: readonly string[] }>;
   requirement: SecurityRequirementInput;
   buying: BuyingId | null;
   hasOperatingModelConflict: boolean;
@@ -249,6 +261,7 @@ export function buildSectionOutline(input: {
   /** Migration and implementation: any migration/services signal stated. */
   migrationSignal: boolean;
   migrationDetail: string;
+  migrationMissing?: string[];
   /** Commercial and contractual: any term/commercial-preference signal stated. */
   commercialSignal: boolean;
   commercialDetail: string;
@@ -317,6 +330,7 @@ export function buildSectionOutline(input: {
       title: "Migration and implementation",
       state: input.migrationSignal ? "confirmed" : "needs_input",
       detail: input.migrationDetail,
+      missing: input.migrationMissing,
     },
     {
       key: "commercial_contractual",
