@@ -4841,6 +4841,7 @@ export default function ProjectDesk({
               rows={sectionOutline}
               activeKey={activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); goToStep("describe"); }}
+              progress={sectionProgress}
               questionProgressByKey={sectionQuestionProgressByKey}
               updatedBanner={sectionsUpdatedBanner}
               materialDecisionsRemaining={materialDecisionsRemaining}
@@ -5895,6 +5896,7 @@ export default function ProjectDesk({
               rows={sectionOutline}
               activeKey={activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
+              progress={sectionProgress}
               questionProgressByKey={sectionQuestionProgressByKey}
               updatedBanner={null}
               materialDecisionsRemaining={0}

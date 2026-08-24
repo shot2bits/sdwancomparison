@@ -34,7 +34,7 @@
  * button rather than a silent no-op.
  */
 
-import type { OutlineRow } from "@/lib/workspace/procurement-outline";
+import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
 import type { SectionQuestionProgress } from "@/lib/workspace/section-question-register";
 import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 
@@ -42,6 +42,7 @@ export default function SectionNav({
   rows,
   activeKey,
   onSelect,
+  progress,
   questionProgressByKey,
   updatedBanner,
   materialDecisionsRemaining,
@@ -55,6 +56,7 @@ export default function SectionNav({
   rows: OutlineRow[];
   activeKey: string | null;
   onSelect: (key: string) => void;
+  progress: OutlineProgress;
   questionProgressByKey: Record<string, SectionQuestionProgress>;
   /** "Updated N sections: X, Y, Z" — set for a few seconds after a single
    *  message lands facts in more than one section at once. Robert, 20 Aug
@@ -84,7 +86,7 @@ export default function SectionNav({
       )}
 
       <div className="nf-2030-section-nav-head">
-        <span><b>Living RFP sections</b><small>Select a section to see its questions and live output.</small></span>
+        <span><b>Living RFP sections</b><small>{progress.ready} of {progress.total} contain essential facts. Select a section to see its questions and live output.</small></span>
       </div>
 
       <ol>
