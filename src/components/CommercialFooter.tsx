@@ -40,13 +40,13 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Marketplace and procurement",
     links: [
       { label: "How It Works", href: "/sase/how-it-works/" },
-      { label: "SASE & SD-WAN RFP Builder", href: "https://netify.co.uk/" },
+      { label: "SASE & SD-WAN RFP Builder", href: "/sase-sd-wan-rfp-builder/" },
       { label: "Publish a project notice", href: "/sase/opportunities/new/" },
       { label: "Opportunities board", href: "/sase/opportunities/board/" },
       { label: "Question bank", href: "/sase/rfp-builder/questions/" },
       { label: "Sample RFP", href: "/sase/rfp-builder/sample-rfp/" },
       { label: "SD-WAN RFI Builder App", href: "/sd-wan-rfi-builder-app/" },
-      { label: "For vendors and providers", href: "/sase/for-suppliers/" },
+      { label: "For suppliers", href: "/sase/for-suppliers/" },
     ],
   },
   {
@@ -54,7 +54,7 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     links: [
       { label: "Build your shortlist", href: "/sase/shortlist/" },
       { label: "Evaluated providers", href: "/sase/vendors/" },
-      { label: "All listed vendors", href: "/marketplace/" },
+      { label: "All listed suppliers", href: "/marketplace/" },
       { label: "Provider comparisons", href: "/vendor-comparison/" },
       { label: "Best providers by sector", href: "/sase/best/" },
       { label: "What the market is buying", href: "/sase/demand/" },
@@ -87,14 +87,16 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     ],
   },
   {
-    title: "Partner Programmes",
+    title: "Providers and partners",
     links: [
+      { label: "BT Fortinet and Cisco Meraki", href: "/bt-fortinet-meraki/" },
       { label: "Compare reseller programmes", href: "/insights/broadband-reseller-companies/" },
-      { label: "Broadband reseller opportunities", href: "/resell/bt-business-broadband/" },
+      { label: "Resell BT Business Broadband", href: "/resell/bt-business-broadband/" },
       { label: "SD-WAN reseller opportunities", href: "/resell/sd-wan-reseller/" },
       { label: "VoIP reseller opportunities", href: "/resell/voip-reseller/" },
-      { label: "BT Business Partner Programme", href: "/bt-reseller-programme/" },
+      { label: "Netify Reseller Programme (BT)", href: "/netify-reseller-programme/" },
       { label: "BT Business portfolio", href: "/resell/bt-business-services/" },
+      { label: "Virgin Media Business profile", href: "/marketplace/virgin-media/" },
       { label: "Virgin Media Business", href: "/resell/virgin-media-business/" },
       { label: "Reseller order portal", href: "https://reseller.netify.co.uk/" },
     ],
@@ -121,21 +123,21 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
 
 export default function CommercialFooter() {
   return (
-    <footer className="mt-12 border-t border-[var(--ink-200)]">
-      <div className="mx-auto max-w-6xl px-6 py-8">
+    <footer className="border-t border-zinc-200 bg-white text-zinc-600">
+      <div className="mx-auto max-w-7xl px-6 py-6">
         {/* Link columns - mirrors the netify.co.uk footer */}
-        <div className="grid gap-x-6 gap-y-6 text-[12px] leading-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.title}>
-              <p className="eyebrow mb-2 text-[10px] leading-4">{col.title}</p>
-              <ul className="space-y-1.5">
+              <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-zinc-900">{col.title}</p>
+              <ul className="space-y-0.5 text-[10px] leading-[1.35]">
                 {col.links.map((l) => {
                   const external = l.href.startsWith("http");
                   return (
                     <li key={`${col.title}-${l.href}-${l.label}`}>
                       <a
                         href={l.href}
-                        className="text-[var(--ink-500)] hover:text-[var(--ink-900)] transition-colors"
+                        className="text-zinc-500 transition-colors hover:text-zinc-900"
                         {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                       >
                         {l.label}
@@ -149,42 +151,26 @@ export default function CommercialFooter() {
         </div>
 
         {/* Company details + research note */}
-        <div className="mt-8 grid gap-5 border-t border-[var(--ink-200)] pt-6 text-[11px] leading-4 text-[var(--ink-500)] md:grid-cols-2">
+        <div className="mt-5 grid gap-3 border-t border-zinc-200 pt-4 text-[10px] leading-4 text-zinc-500 md:grid-cols-[1.2fr_1fr_auto] md:items-start">
           <div>
-            <p className="mb-1 text-xs font-semibold text-[var(--ink-900)]">Netify Group Limited</p>
-            <p>Moor Hall Barn</p>
-            <p>Workhouse Lane</p>
-            <p>Melton Constable, Norfolk</p>
-            <p>NR24 2BE, England</p>
-            <p className="mt-2">Company No: 07087612</p>
+            <p className="font-medium text-zinc-900">Netify Group Limited</p>
+            <p>Moor Hall Barn, Workhouse Lane, Melton Constable, Norfolk, NR24 2BE, England</p>
+            <p>Company No: 07087612</p>
           </div>
-          <div className="md:text-right">
+          <div className="md:text-center">
             <p>
               Email:{" "}
-              <a href="mailto:support@netify.com" className="hover:text-[var(--ink-900)]">
+              <a href="mailto:support@netify.com" className="hover:text-zinc-900">
                 support@netify.com
               </a>
             </p>
             <p>Tel: +44 (0)333 202 1011</p>
-            <p className="mt-2">Netify® is a registered trademark (UK00003413742)</p>
-            <p className="mt-2">
-              Vendor-neutral SD-WAN, SASE and managed network research. Capability grades are
-              based on public source evidence; always confirm via RFP.
-            </p>
+            <p>Netify® is a registered trademark (UK00003413742)</p>
           </div>
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-baseline justify-between gap-2 border-t border-[var(--ink-200)] pt-4">
-          <p className="text-[10px] leading-4 text-[var(--ink-500)]">
-            © {new Date().getUTCFullYear()} Netify Group Limited. All rights reserved.
-          </p>
-          {/* The build stamp, on every page in both route groups. Baked in
-              at build time, so a cached page disagrees with a freshly
-              served one -- see build-info.ts for why it must not be
-              computed per request. */}
-          <p className="m-0 font-mono text-[10px] leading-4 text-[var(--ink-500)]" title="The build this page was served from">
-            {buildStamp()}
-          </p>
+          <div className="md:text-right">
+            <p>© {new Date().getUTCFullYear()} Netify Group Limited. All rights reserved.</p>
+            <p className="font-mono" title="The build this page was served from">{buildStamp()}</p>
+          </div>
         </div>
       </div>
     </footer>

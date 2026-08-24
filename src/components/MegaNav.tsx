@@ -20,7 +20,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { MEGA_GROUPS, BOARD_LINK, NAV_CTA, SIGN_IN, ACCOUNT, type MegaGroup } from "@/lib/nav";
+import { MEGA_GROUPS, NAV_CTA, SIGN_IN, ACCOUNT, type MegaGroup } from "@/lib/nav";
 
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null; admin?: boolean };
 
@@ -105,10 +105,8 @@ export default function MegaNav() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hoverOpenedAt = useRef(0);
-  useEffect(() => setMounted(true), []);
 
   const [session, setSession] = useState<Session | null>(null);
   useEffect(() => {
@@ -124,7 +122,6 @@ export default function MegaNav() {
      sign-in box: an account is produced by publishing (30 Jul 2026). */
   const accountHref = session?.authenticated ? ACCOUNT.href : SIGN_IN.href;
 
-  useEffect(() => { setMobileOpen(false); setOpenGroup(null); }, [pathname]);
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -138,12 +135,12 @@ export default function MegaNav() {
   }, []);
 
 
-  const hold = (label: string | null) => {
+  const hold = (label: string | null, eventTime = 0) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     if (label === null) {
       closeTimer.current = setTimeout(() => setOpenGroup(null), 140);
     } else {
-      hoverOpenedAt.current = Date.now();
+      hoverOpenedAt.current = eventTime;
       setOpenGroup(label);
     }
   };
@@ -151,7 +148,7 @@ export default function MegaNav() {
   return (
     <header style={{ backgroundColor: "rgba(255,255,255,0.94)" }} className="sticky top-0 z-40 border-b border-zinc-200/80 bg-white/90 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-all duration-200">
       <div className="mx-auto flex h-13 max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
-        <a href="/" className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
+        <a href="https://netify.co.uk/" className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
           <span className="grid h-7 w-7 place-items-center rounded-md bg-zinc-950 text-sm font-bold text-white">N</span>
           <span>Netify</span>
         </a>
@@ -164,17 +161,17 @@ export default function MegaNav() {
               <div
                 key={group.label}
                 className="group relative"
-                onMouseEnter={() => hold(group.label)}
+                onMouseEnter={(event) => hold(group.label, event.timeStamp)}
                 onMouseLeave={() => hold(null)}
               >
                 <button
                   type="button"
                   aria-expanded={open}
                   aria-haspopup="true"
-                  onClick={() => {
+                  onClick={(event) => {
                     /* Touch fires mouseenter then click: if the hover just
                      * opened this panel, the click must not snap it shut. */
-                    if (open && Date.now() - hoverOpenedAt.current < 600) return;
+                    if (open && event.timeStamp - hoverOpenedAt.current < 600) return;
                     setOpenGroup(open ? null : group.label);
                   }}
                   className="flex items-center gap-1 rounded-md px-2.5 py-2 text-[13px] font-medium text-zinc-600 transition-colors hover:text-zinc-950"
@@ -195,9 +192,6 @@ export default function MegaNav() {
               </div>
             );
           })}
-          <a href={BOARD_LINK.href} className="rounded-md px-2.5 py-2 text-[13px] font-medium text-zinc-600 no-underline transition-colors hover:text-zinc-950">
-            {BOARD_LINK.label}
-          </a>
         </nav>
 
         {/* Right actions */}
@@ -229,12 +223,12 @@ export default function MegaNav() {
       </div>
 
       {/* Mobile: the right slide-over drawer */}
-      {mobileOpen && mounted && createPortal(
+      {mobileOpen && createPortal(
         <div className="fixed inset-0 z-[100] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
           <button type="button" aria-label="Close menu" onClick={() => setMobileOpen(false)} className="absolute inset-0 border-0 bg-zinc-950/20" />
           <div className="absolute inset-y-0 right-0 w-full max-w-sm overflow-y-auto border-l border-zinc-200 bg-white p-6 shadow-2xl" style={{ backgroundColor: "#ffffff" }}>
             <div className="mb-4 flex items-center justify-between">
-              <a href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
+              <a href="https://netify.co.uk/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900 no-underline">
                 <span className="grid h-7 w-7 place-items-center rounded-md bg-zinc-950 text-sm font-bold text-white">N</span>
                 <span>Netify</span>
               </a>
@@ -264,9 +258,6 @@ export default function MegaNav() {
                   </div>
                 );
               })}
-              <a href={BOARD_LINK.href} onClick={() => setMobileOpen(false)} className="block border-b border-zinc-100 py-3 text-[14px] font-semibold text-zinc-900 no-underline">
-                {BOARD_LINK.label}
-              </a>
             </nav>
             <div className="mt-5 space-y-3">
               <a href={accountHref} onClick={() => setMobileOpen(false)} className="flex items-center py-1 text-sm font-medium text-zinc-900 no-underline">
