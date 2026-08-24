@@ -37,7 +37,7 @@ export async function GET() {
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
     { loc: `${SITE_URL}/for-suppliers`, priority: "0.8" },
-    { loc: `${SITE_URL}/shortlist`, priority: "1.0" },
+    { loc: `${SITE_URL}/shortlist/`, priority: "1.0" },
     // /workspace/ and the wizard's entry surfaces 301 now (One Door,
     // 23 Jul 2026): a sitemap must never list redirecting URLs, so only
     // the serving research surfaces below remain.

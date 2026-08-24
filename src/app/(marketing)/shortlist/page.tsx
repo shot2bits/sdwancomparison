@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Best SD-WAN and SASE Providers (2026): Compare the Market, Build a Shortlist",
     description:
       "Compare the SASE and SD-WAN UK and North American market from 30 graded providers, then publish an RFP within minutes.",
-    url: `${SITE_URL}/shortlist`,
+    url: `${SITE_URL}/shortlist/`,
     type: "website",
     locale: "en_GB",
   },
@@ -41,8 +41,8 @@ export default function ShortlistPage() {
 
   const schemas = [
     getOrganizationSchema(),
-    getBreadcrumbSchema("Shortlist builder", "/shortlist"),
-    getSpeakableSchema("/shortlist"),
+    getBreadcrumbSchema("Shortlist builder", "/shortlist/"),
+    getSpeakableSchema("/shortlist/"),
     getShortlistWebApplicationSchema(),
     getShortlistDatasetSchema(vendors.length, features.length),
     getShortlistFaqSchema(SHORTLIST_FAQS),

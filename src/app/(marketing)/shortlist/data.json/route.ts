@@ -14,7 +14,7 @@ export async function GET() {
 
   return Response.json(
     {
-      page: `${SITE_URL}/shortlist`,
+      page: `${SITE_URL}/shortlist/`,
       title: SHORTLIST_INTRO.h1,
       description: SHORTLIST_INTRO.subhead,
       publisher: "Netify Group Limited",
@@ -39,7 +39,7 @@ export async function GET() {
         {
           id: "shortlist-builder",
           kind: "filter-ui",
-          url: `${SITE_URL}/shortlist`,
+          url: `${SITE_URL}/shortlist/`,
           description:
             "Interactive shortlist builder. Filter state is encoded in URL query parameters, so any scenario URL is shareable and citable.",
           backingTool: "build_sase_shortlist",

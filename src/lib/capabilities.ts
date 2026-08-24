@@ -60,7 +60,7 @@ export const CAPABILITIES: Capability[] = [
     id: "build_shortlist",
     title: "Build a ranked shortlist",
     description: "Filter by sector, region, organisation size, delivery model and the 40 capabilities to produce a ranked, graded shortlist. No sign-in.",
-    access: "open", page: "/shortlist", api: "/api/openapi/build_sase_shortlist", mcp: "build_sase_shortlist", data: "/shortlist/data.json",
+    access: "open", page: "/shortlist/", api: "/api/openapi/build_sase_shortlist", mcp: "build_sase_shortlist", data: "/shortlist/data.json",
     status: "live", capabilityType: "compute", accessLevel: "public",
     requiresIdentity: false, requiresApproval: false, sendsExternally: false, executesExternally: false,
     invocableByExternalAgent: true, humanSupervision: "none",

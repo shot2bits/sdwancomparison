@@ -5,6 +5,7 @@
 
 export const SITE_URL =
   "https://netify.co.uk/sase";
+const SHORTLIST_URL = `${SITE_URL}/shortlist/`;
 
 export function getOrganizationSchema() {
   return {
@@ -45,9 +46,9 @@ export function getShortlistWebApplicationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "@id": `${SITE_URL}/shortlist#webapplication`,
+    "@id": `${SHORTLIST_URL}#webapplication`,
     name: "Netify SASE and SD-WAN Shortlist Builder",
-    url: `${SITE_URL}/shortlist`,
+    url: SHORTLIST_URL,
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
@@ -61,17 +62,17 @@ export function getShortlistDatasetSchema(vendorCount: number, featureCount: num
   return {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    "@id": `${SITE_URL}/shortlist#dataset`,
+    "@id": `${SHORTLIST_URL}#dataset`,
     name: "Netify SASE and SD-WAN vendor capability matrix",
     description: `Capability grades for ${vendorCount} SASE and SD-WAN vendors across ${featureCount} features plus regional coverage, cloud support, AI capability, resilience and deployment speed. Grades reflect public source evidence reviewed by Netify.`,
-    url: `${SITE_URL}/shortlist`,
+    url: SHORTLIST_URL,
     license: "https://netify.co.uk/terms-conditions/",
     creator: { "@id": `${SITE_URL}/#organization` },
     distribution: [
       {
         "@type": "DataDownload",
         encodingFormat: "application/json",
-        contentUrl: `${SITE_URL}/shortlist/data.json`,
+        contentUrl: `${SHORTLIST_URL}data.json`,
       },
     ],
   };

@@ -25,12 +25,12 @@ export function callMcpTool(name: string, args: unknown): unknown | Promise<unkn
       // own defaults so the address decodes to the state that recomputes
       // this result.
       const scenario = encodeScenario({ ...DEFAULT_INPUT, ...((args ?? {}) as Partial<ShortlistInput>) } as ShortlistInput);
-      const resumeUrl = `${SITE_URL}/shortlist${scenario ? `?${scenario}` : ""}`;
+      const resumeUrl = `${SITE_URL}/shortlist/${scenario ? `?${scenario}` : ""}`;
       return {
         ...result,
         resume_url: resumeUrl,
         _meta: {
-          canonicalUrl: `${SITE_URL}/shortlist`,
+          canonicalUrl: `${SITE_URL}/shortlist/`,
           resume_url: resumeUrl,
           note: "Hand resume_url to the human: it opens the live shortlist with these criteria applied and editable, one step from inviting these providers to respond in the workspace.",
         },
@@ -45,7 +45,7 @@ export function callMcpTool(name: string, args: unknown): unknown | Promise<unkn
           ai: ["ai_driven_operations", "ai_security_analytics", "ai_assistant"],
           other: ["disaster_recovery", "deployment_speed"],
         },
-        _meta: { canonicalUrl: `${SITE_URL}/shortlist` },
+        _meta: { canonicalUrl: `${SITE_URL}/shortlist/` },
       };
     case "list_sase_vendors":
       return {

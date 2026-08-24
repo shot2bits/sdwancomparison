@@ -39,7 +39,7 @@ export async function GET() {
   }
   sections.push("");
   sections.push(`Netify Demand Index (live, anonymised marketplace demand by sector and technology): ${SITE_URL}/demand?utm_source=ai_assistant&utm_medium=llms · twin: ${SITE_URL}/demand/data.json`);
-  sections.push(`Interactive shortlist builder: ${SITE_URL}/shortlist?utm_source=ai_assistant&utm_medium=llms (filter state encodes into shareable URLs)`);
+  sections.push(`Interactive shortlist builder: ${SITE_URL}/shortlist/?utm_source=ai_assistant&utm_medium=llms (filter state encodes into shareable URLs)`);
   sections.push(`MCP server: POST ${SITE_URL}/api/mcp/ (tools: build_sase_shortlist, list_sase_features, list_sase_vendors, get_sase_vendor_profile)`);
 
   return new Response(sections.join("\n"), {

@@ -54,6 +54,23 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // The old shortlist subdomain is present in Bing AI citation data.
+      // Give both slash variants a direct permanent hop to the exact
+      // canonical URL before the generic subdomain retirement rule.
+      {
+        source: "/shortlist",
+        has: [{ type: "host", value: "sase.netify.co.uk" }],
+        destination: "https://netify.co.uk/sase/shortlist/",
+        statusCode: 301,
+        basePath: false,
+      },
+      {
+        source: "/shortlist/",
+        has: [{ type: "host", value: "sase.netify.co.uk" }],
+        destination: "https://netify.co.uk/sase/shortlist/",
+        statusCode: 301,
+        basePath: false,
+      },
       // Retire the sase.netify.co.uk subdomain: 301 every path on the old host
       // to the new canonical home under the main domain. Host-scoped so it only
       // fires on the subdomain, never on netify.co.uk/sase/*. basePath:false
