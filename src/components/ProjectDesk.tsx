@@ -923,7 +923,10 @@ export default function ProjectDesk({
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
   const [promptQuestionId, setPromptQuestionId] = useState<string | null>(null);
-  const [prestartSurface, setPrestartSurface] = useState<"intro" | "questions">("intro");
+  // The RFP Builder is the product, so a new buyer lands in the builder
+  // immediately. The older promotional start panel remains available only as
+  // a transitional code path while the started-project flow is migrated.
+  const [prestartSurface, setPrestartSurface] = useState<"intro" | "questions">("questions");
   const [guidedCustomQuestionId, setGuidedCustomQuestionId] = useState<string | null>(null);
   const [guidedCustomAnswerReceipt, setGuidedCustomAnswerReceipt] = useState<GuidedCustomAnswerReceipt | null>(null);
   const [verdict, setVerdict] = useState<SecurityScopeVerdict | null>(null);
@@ -5840,10 +5843,8 @@ export default function ProjectDesk({
               <button type="button" disabled>Decision</button>
             </nav>
             <div className="nf-2030-header-actions">
-              {prestartSurface === "intro" && <>
-                <button type="button" className="mobile-hide" onClick={() => fileRef.current?.click()}>Add source</button>
-                <button type="button" className="primary" onClick={() => inputRef.current?.focus()}>Start with AI</button>
-              </>}
+              <button type="button" className="mobile-hide" onClick={() => fileRef.current?.click()}>Import RFP</button>
+              <button type="button" className="primary" onClick={() => inputRef.current?.focus()}>Answer with AI</button>
             </div>
           </header>
 
@@ -5925,7 +5926,7 @@ export default function ProjectDesk({
                   <h2>{activeRow?.title ?? "Organisation and scale"}</h2>
                   <span>{activeSectionQuestionItems.filter((item) => item.status === "completed").length} answers captured</span>
                   <p>Your confirmed answers appear here as the section is built. Nothing is published or sent to suppliers without your approval.</p>
-                  <button type="button" onClick={() => setPrestartSurface("intro")}>Back to describe everything</button>
+                  <button type="button" onClick={() => inputRef.current?.focus()}>Answer the highlighted question</button>
                 </div>
               </div>
             </div>

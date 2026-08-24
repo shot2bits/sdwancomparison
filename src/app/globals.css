@@ -598,6 +598,25 @@
 .nf-section-live-build dd { margin: 0; color: #efeee9; font-size: 12px; }
 .nf-section-live-build > small { display: block; margin-top: 11px; color: #8f9198; font-size: 10px; }
 
+/* The entry state is the same pale-blue RFP workspace as an active project. */
+.nf-2030-workspace .nf-section-build-eyebrow span,
+.nf-2030-workspace .nf-section-build-panel > header > p,
+.nf-2030-workspace .nf-2030-question-set span,
+.nf-2030-workspace .nf-prestart-live-rfp > span,
+.nf-2030-workspace .nf-prestart-live-rfp button { color: var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-build-progress b { background: var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-build-questions li > button:hover { background: rgba(139,205,240,.06); }
+.nf-2030-workspace .nf-section-build-questions li[data-selected="true"] > button { background: rgba(139,205,240,.1); box-shadow: inset 3px 0 var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-build-questions li > button:focus-visible { outline-color: var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-build-questions li[data-status="completed"] button > span { color: #07141b; background: var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-build-questions li[data-status="completed"] em { color: var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-answer-panel { border-left-color: var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-answer-panel > span { color: #b6dff5; }
+.nf-2030-workspace .nf-section-current-answer { color: #dceef8 !important; background: var(--nf-2030-accent-soft); }
+.nf-2030-workspace .nf-section-current-answer strong { color: var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-live-build { box-shadow: inset 3px 0 var(--nf-2030-accent); }
+.nf-2030-workspace .nf-section-answer-panel .nf-2030-composer:focus-within { border-color: var(--nf-2030-accent) !important; box-shadow: 0 0 0 1px var(--nf-2030-accent); }
+
 /* Guided build: one question, one receipt, one living document. */
 .nf-guided-main { grid-area: main; min-width: 0; padding: 24px 30px 34px; background: radial-gradient(circle at 50% 15%, #171a20 0, #111318 65%); }
 .nf-guided-question { width: min(880px, 100%); margin-inline: auto; scroll-margin-top: 58px; }

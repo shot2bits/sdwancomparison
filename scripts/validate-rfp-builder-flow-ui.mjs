@@ -21,9 +21,8 @@ const browser = await chromium.launch();
 try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   await desktop.goto(BASE_URL, { waitUntil: "networkidle" });
-  check((await desktop.locator(".nf-section-build-panel").count()) === 0, "the introductory prompt does not stack the RFP Builder underneath it");
-  await desktop.getByRole("button", { name: "Answer one question at a time" }).click();
-  check((await desktop.locator(".nf-2030-command-zone-empty").count()) === 0, "entering the question path removes the introductory landing content");
+  check((await desktop.locator(".nf-section-build-panel").count()) === 1, "the RFP Builder is the entry screen rather than a separate promotional start page");
+  check((await desktop.locator(".nf-2030-command-zone-empty").count()) === 0, "the old introductory landing panel is not shown on arrival");
   const blankSection = await desktop.locator(".nf-section-build-panel").innerText();
   check(blankSection.includes("Organisation and scale"), "a blank RFP opens on the active first section");
   check(["Which sector are you in?", "Confirm site count", "Confirm regions", "Confirm user count"].every((label) => blankSection.includes(label)), "the centre lists the same four questions counted in the section rail");
@@ -87,7 +86,6 @@ try {
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await mobile.goto(BASE_URL, { waitUntil: "networkidle" });
-  await mobile.getByRole("button", { name: "Answer one question at a time" }).click();
   const mobileInlineAnswerBox = await mobile.locator(".nf-section-answer-panel textarea").evaluate((element) => {
     const box = element.getBoundingClientRect();
     return { top: box.top, bottom: box.bottom };
