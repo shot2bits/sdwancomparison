@@ -34,7 +34,7 @@
  * button rather than a silent no-op.
  */
 
-import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
+import type { OutlineRow } from "@/lib/workspace/procurement-outline";
 import type { SectionQuestionProgress } from "@/lib/workspace/section-question-register";
 import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 
@@ -42,7 +42,6 @@ export default function SectionNav({
   rows,
   activeKey,
   onSelect,
-  progress,
   questionProgressByKey,
   updatedBanner,
   materialDecisionsRemaining,
@@ -56,7 +55,6 @@ export default function SectionNav({
   rows: OutlineRow[];
   activeKey: string | null;
   onSelect: (key: string) => void;
-  progress: OutlineProgress;
   questionProgressByKey: Record<string, SectionQuestionProgress>;
   /** "Updated N sections: X, Y, Z" — set for a few seconds after a single
    *  message lands facts in more than one section at once. Robert, 20 Aug
@@ -73,14 +71,6 @@ export default function SectionNav({
   onPublish: () => void;
   onCompare: () => void;
 }) {
-  const statusLabel = (state: OutlineRow["state"], active: boolean) => {
-    if (state === "confirmed") return "Essential facts captured";
-    if (active) return "In progress";
-    if (state === "netify_suggested") return "Review suggestion";
-    if (state === "later") return "Optional";
-    return "Not started";
-  };
-
   return (
     <nav
       aria-label="Procurement sections"
@@ -94,7 +84,7 @@ export default function SectionNav({
       )}
 
       <div className="nf-2030-section-nav-head">
-        <span><b>Living RFP sections</b><small>{progress.ready} contain essential facts · five populated questions makes each section RFP-ready</small></span>
+        <span><b>Living RFP sections</b><small>Select a section to see its questions and live output.</small></span>
       </div>
 
       <ol>
@@ -115,7 +105,7 @@ export default function SectionNav({
                   </span>
                   <span className="nf-2030-area-copy">
                     <strong>{r.title}</strong>
-                    <small>{sectionRfpReady ? "RFP-ready" : statusLabel(r.state, isActive)} · {rfpAnswered} of {RFP_SECTION_QUESTION_TARGET} populated</small>
+                    <small>{rfpAnswered} of {RFP_SECTION_QUESTION_TARGET} populated{sectionRfpReady ? " · RFP-ready" : isActive ? " · In progress" : ""}</small>
                     {questionProgress.optional > 0 && <em>{questionProgress.optional} optional refinement{questionProgress.optional === 1 ? "" : "s"}</em>}
                   </span>
                 </button>

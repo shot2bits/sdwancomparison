@@ -20,7 +20,6 @@ function splitQuestion(value: string): { prompt: string; context: string | null 
 export default function GuidedBuild({
   card,
   ready,
-  publishReady,
   advisorMessage,
   sectionComplete,
   incompleteSectionTitle,
@@ -37,13 +36,12 @@ export default function GuidedBuild({
   sectionTitle,
   sectionQuestions,
   onAddSupplierQuestion,
+  onImportQuestions,
   onGoToNextSection,
   onOpenDocument,
-  onPublish,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
-  publishReady: boolean;
   advisorMessage: string;
   sectionComplete: boolean;
   incompleteSectionTitle: string | null;
@@ -60,9 +58,9 @@ export default function GuidedBuild({
   sectionTitle: string;
   sectionQuestions: SectionQuestionItem[];
   onAddSupplierQuestion: (question: string) => void;
+  onImportQuestions: () => void;
   onGoToNextSection: () => void;
   onOpenDocument: () => void;
-  onPublish: () => void;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
@@ -74,6 +72,7 @@ export default function GuidedBuild({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  const questionManagerRef = useRef<HTMLDetailsElement | null>(null);
   useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
   useEffect(() => {
     const nextId = card?.nq.id ?? null;
@@ -102,6 +101,14 @@ export default function GuidedBuild({
       ? `${sectionTitle} is complete`
       : `Complete ${incompleteSectionTitle ?? "the next section"}`;
   const visibleQuestion = splitQuestion(card?.nq.question ?? fallbackPrompt);
+  const bespokeCount = sectionQuestions.filter((item) => item.status === "custom").length;
+  const additionalCount = sectionQuestions.filter((item) => item.status === "suggested").length;
+
+  const openQuestionManager = (suggest = false) => {
+    if (questionManagerRef.current) questionManagerRef.current.open = true;
+    window.requestAnimationFrame(() => questionManagerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
+    if (suggest) void askForSuggestions();
+  };
 
   const addSupplierQuestion = (value: string) => {
     const text = value.trim();
@@ -166,23 +173,15 @@ export default function GuidedBuild({
             <span><strong>{sectionTitle}</strong><small>{rfpAnswered} of {rfpTarget} questions populated for RFP depth{suggestedCount ? ` · ${suggestedCount} suggested` : ""}</small></span>
             <span aria-hidden="true"><i style={{ width: `${Math.round((rfpAnswered / rfpTarget) * 100)}%` }} /></span>
           </div>
-          <p className="nf-guided-next-label">{ready ? "RFP ready for review" : sectionComplete ? "Section complete" : "Next required question"}</p>
-          <h1>{visibleQuestion.prompt}</h1>
-          {visibleQuestion.context && <p className="nf-guided-question-context">{visibleQuestion.context}</p>}
-          <p className="nf-guided-reason">
-            {questionReason}
-          </p>
-
-          <div className="nf-guided-advisor" role="status" aria-live="polite">
-            <span>AI advisor</span>
-            <strong>{advisorMessage}</strong>
-          </div>
-
-          <div className="nf-guided-publish-action">
-            <button type="button" disabled={!publishReady} onClick={onPublish}>
-              {ready ? "Review and publish RFP" : "Publish opportunity now"}
-            </button>
-            <p>{publishReady ? (ready ? "Every included section meets the five-question RFP standard." : "Publish the useful facts you have now; the remaining depth is shown above.") : "The advisor above shows the minimum facts still needed before publishing."}</p>
+          <div className="nf-guided-focus">
+            <p className="nf-guided-next-label">{ready ? "RFP ready for review" : sectionComplete ? "Section complete" : "Next best question"}</p>
+            <h1>{visibleQuestion.prompt}</h1>
+            {visibleQuestion.context && <p className="nf-guided-question-context">{visibleQuestion.context}</p>}
+            <p className="nf-guided-reason">{questionReason}</p>
+            <div className="nf-guided-prompt">
+              {composer}
+              {card && <details><summary>Why Netify is asking this</summary><p>{questionReason}</p></details>}
+            </div>
           </div>
 
           {customAnswerReceipt && (
@@ -272,8 +271,8 @@ export default function GuidedBuild({
 
           <section className="nf-guided-register" aria-labelledby="section-question-register">
             <div className="nf-guided-register-head">
-              <div><p id="section-question-register">{sectionTitle} checklist</p><span>Every core answer, optional refinement and supplier question in this section.</span></div>
-              <strong>{rfpAnswered}/{rfpTarget} RFP depth</strong>
+              <div><p id="section-question-register">Questions in this section</p><span>Every core answer, optional refinement and supplier question in this section. {rfpTarget} core · {additionalCount} additional available · {bespokeCount} bespoke</span></div>
+              <strong>{rfpAnswered}/{rfpTarget} core populated</strong>
             </div>
             <ul>
               {sectionQuestions.map((item) => (
@@ -285,7 +284,13 @@ export default function GuidedBuild({
               ))}
               {sectionQuestions.length === 0 && <li data-status="required"><span aria-hidden="true">○</span><div><strong>No questions recorded for this section yet.</strong></div><em>To do</em></li>}
             </ul>
-            <details className="nf-guided-add-question">
+            <div className="nf-guided-question-actions" aria-label="Extend this RFP section">
+              <button type="button" onClick={() => openQuestionManager(true)}>＋ Add recommended question</button>
+              <button type="button" onClick={() => openQuestionManager(true)}>Browse additional questions</button>
+              <button type="button" onClick={() => openQuestionManager(false)}>＋ Add bespoke question</button>
+              <button type="button" onClick={onImportQuestions}>Import from Word or spreadsheet</button>
+            </div>
+            <details ref={questionManagerRef} className="nf-guided-add-question">
               <summary>Add a bespoke supplier question</summary>
               <p>Add your own wording, or ask Netify to suggest questions for this section. Nothing is added without your approval.</p>
               <label htmlFor="bespoke-supplier-question">Question for suppliers</label>
@@ -312,12 +317,6 @@ export default function GuidedBuild({
             </details>
           </section>
 
-          <div className="nf-guided-prompt">
-            <p>Answer the highlighted question, or describe several requirements in one message</p>
-            {composer}
-            {card && <details><summary>Why Netify is asking this</summary><p>{questionReason}</p></details>}
-          </div>
-
         </section>
       </main>
 
@@ -332,6 +331,12 @@ export default function GuidedBuild({
           {clauses.length > 0 ? clauses.slice(0, 4).map((clause, index) => (
             <p key={clause.id} data-new={index === 0}>{clause.statement}</p>
           )) : <p>Answer the next question and the first supplier-ready requirement will appear here.</p>}
+        </div>
+        <div className="nf-guided-before-publish">
+          <strong>Before publishing</strong>
+          <button type="button" onClick={onFocusPrompt}><span>Complete the next answer</span><small>{visibleQuestion.prompt}</small></button>
+          {!sectionComplete && <button type="button" onClick={() => openQuestionManager(true)}><span>Add recommended depth</span><small>Let Netify suggest useful supplier questions.</small></button>}
+          <p>{advisorMessage}</p>
         </div>
         <button type="button" onClick={onOpenDocument}>Open full document <span aria-hidden="true">›</span></button>
       </aside>

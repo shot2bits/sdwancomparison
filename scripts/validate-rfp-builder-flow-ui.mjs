@@ -57,7 +57,7 @@ try {
   await desktop.waitForTimeout(850);
   const globalRequirementText = await desktop.locator("body").innerText();
   check(globalRequirementText.includes("UK/IE/US"), "all selected geographies land in the living RFP");
-  check(/Organisation and scale\nEssential facts captured · 4 of 5 populated/.test(globalRequirementText), "three regions count as one populated geography question and the five-question RFP target stays explicit");
+  check(/Organisation and scale\n4 of 5 populated/.test(globalRequirementText), "three regions count as one populated geography question and the five-question RFP target stays explicit");
 
   // Production persists anonymous projects; isolate the second fixture so its
   // section counts cannot inherit answers from the multi-region fixture above.
@@ -69,10 +69,10 @@ try {
   await startProject(desktop, "20 UK sites for a retail business with 50 remote users, HQ in Norwich requires dual RA02 failover. We need full SASE and want to migrate by December 2026.");
   const initialText = await desktop.locator("body").innerText();
   const resilienceRow = await desktop.getByRole("button", { name: /Resilience and availability/ }).innerText();
-  check(/(?:Essential facts captured|RFP-ready) · [1-5] of 5 populated/.test(resilienceRow) && /RA02|failover/i.test(initialText), "stated failover is captured in the resilience section while the RFP-depth target remains honest");
-  check(initialText.includes("RFP Builder · Retail"), "the workspace identifies itself as the RFP Builder");
+  check(/[1-5] of 5 populated(?: · RFP-ready)?/.test(resilienceRow) && /RA02|failover/i.test(initialText), "stated failover is captured in the resilience section while the RFP-depth target remains honest");
+  check(initialText.includes("RFP Builder"), "the workspace identifies itself as the RFP Builder");
 
-  const publishNow = desktop.getByRole("button", { name: "Publish opportunity now" });
+  const publishNow = desktop.getByRole("button", { name: "Review & publish" });
   check((await publishNow.count()) === 1 && await publishNow.isEnabled(), "an opportunity can publish as soon as the essential facts stand");
   check(initialText.includes("You can publish this opportunity now"), "the AI advisor explains that early publishing is available and recommends further RFP depth");
   check(initialText.includes("of 5 populated"), "every section exposes the five-populated-question RFP quality threshold");

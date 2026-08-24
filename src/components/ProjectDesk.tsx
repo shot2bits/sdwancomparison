@@ -4137,17 +4137,6 @@ export default function ProjectDesk({
     };
   }, [sectionQuestionItemsByKey]);
 
-  const openBespokeQuestionManager = () => {
-    goToStep("describe");
-    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-      const details = document.querySelector<HTMLDetailsElement>(".nf-guided-add-question");
-      if (!details) return;
-      details.open = true;
-      details.scrollIntoView({ behavior: "smooth", block: "center" });
-      details.querySelector<HTMLInputElement>("input")?.focus();
-    }));
-  };
-
   /** Hotfix (Robert, 15 Aug 2026): resolves `acceptedSectorSuggestions`
    *  (the accepted mirror of `visibleSectorSuggestions`, defined above)
    *  into concrete, clickable cards for the canvas -- same resolve-here-
@@ -4827,14 +4816,15 @@ export default function ProjectDesk({
 
           <section className="nf-2030-project-band" aria-label="Project and RFP depth">
             <div>
-              <strong>RFP Builder · {guidedProjectTitle}</strong>
+              <strong>{guidedProjectTitle}</strong>
               <span>
-                {`${rfpCoverage.readySections} of ${rfpCoverage.totalSections} sections meet the 5-question RFP standard · ${buyerQuestionCounts.answered} answers captured · ${rfiSet?.total ?? 0} tailored supplier questions available`}
+                {`${buyerQuestionCounts.answered} of ${rfpCoverage.totalSections * 5} core answers populated · ${rfpCoverage.readySections} of ${rfpCoverage.totalSections} sections RFP-ready`}
                 {buyerQuestionCounts.bespoke ? ` · ${buyerQuestionCounts.bespoke} bespoke` : ""}
               </span>
             </div>
-            <div className="nf-question-set-actions" role="group" aria-label="Control the RFP question set">
-              <button type="button" onClick={openBespokeQuestionManager}>Add bespoke question</button>
+            <div className="nf-project-publish" role="group" aria-label="Review and publish this RFP">
+              <button type="button" disabled={!contentReady} onClick={() => goToStep("publish")}>Review &amp; publish</button>
+              <span>{contentReady ? `Publishable now · ${materialDecisionsRemaining} recommendation${materialDecisionsRemaining === 1 ? "" : "s"} remain` : "Add the minimum buyer facts to unlock publishing"}</span>
             </div>
           </section>
 
@@ -4851,7 +4841,6 @@ export default function ProjectDesk({
               rows={sectionOutline}
               activeKey={activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); goToStep("describe"); }}
-              progress={sectionProgress}
               questionProgressByKey={sectionQuestionProgressByKey}
               updatedBanner={sectionsUpdatedBanner}
               materialDecisionsRemaining={materialDecisionsRemaining}
@@ -4866,7 +4855,6 @@ export default function ProjectDesk({
               <GuidedBuild
                 card={guidedQuestionCard}
                 ready={rfpCoverage.ready}
-                publishReady={contentReady}
                 advisorMessage={advisorMessage}
                 sectionComplete={Boolean(activeRow && rfpCoverage.sections.find((section) => section.key === activeRow.key)?.ready)}
                 incompleteSectionTitle={sectionProgress.next?.title ?? null}
@@ -4883,11 +4871,11 @@ export default function ProjectDesk({
                 sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Your requirement"}
                 sectionQuestions={activeSectionQuestionItems}
                 onAddSupplierQuestion={addCustomSupplierQuestion}
+                onImportQuestions={() => fileRef.current?.click()}
                 onGoToNextSection={() => {
                   if (sectionProgress.next) setActiveSection(sectionProgress.next.key);
                 }}
                 onOpenDocument={() => { setWorkspaceDocumentView("requirement"); goToStep("review"); }}
-                onPublish={() => goToStep("publish")}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -5907,7 +5895,6 @@ export default function ProjectDesk({
               rows={sectionOutline}
               activeKey={activeRow?.key ?? null}
               onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
-              progress={sectionProgress}
               questionProgressByKey={sectionQuestionProgressByKey}
               updatedBanner={null}
               materialDecisionsRemaining={0}
