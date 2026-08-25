@@ -4790,10 +4790,10 @@ export default function ProjectDesk({
         {[
           ["⌂", "Overview"], ["▤", "Requirements"], ["♧", "Suppliers"], ["▧", "Responses"],
           ["▣", "Evidence"], ["▥", "Reports"], ["▱", "Exports"],
-        ].map(([icon, label]) => <button key={label} type="button" data-current={label === "Requirements"}><span aria-hidden="true">{icon}</span>{label}</button>)}
+        ].map(([icon, label]) => <button key={label} type="button" aria-label={label} data-current={label === "Requirements"}><span aria-hidden="true">{icon}</span><span className="lpos-rail-label">{label}</span></button>)}
       </nav>
-      <button type="button" onClick={() => goToStep("describe")}><span aria-hidden="true">⚙</span>Settings</button>
-      <button type="button" className="lpos-collapse"><span aria-hidden="true">‹</span>Collapse</button>
+      <button type="button" aria-label="Settings" onClick={() => goToStep("describe")}><span aria-hidden="true">⚙</span><span className="lpos-rail-label">Settings</span></button>
+      <button type="button" aria-label="Collapse navigation" className="lpos-collapse"><span aria-hidden="true">‹</span><span className="lpos-rail-label">Collapse</span></button>
     </div>
   );
 

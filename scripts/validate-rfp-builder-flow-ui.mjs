@@ -86,6 +86,13 @@ try {
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await reset(mobile);
   check(await mobile.locator(".lpos-builder").evaluate((el) => getComputedStyle(el).display) === "block", "mobile stacks the procurement panes");
+  check(await mobile.locator(".lpos-rail-label").evaluateAll((labels) => labels.every((label) => getComputedStyle(label).display === "none")), "mobile hides rail labels so they cannot spill into the workspace");
+  const mobileShell = await mobile.evaluate(() => {
+    const rail = document.querySelector(".lpos-product-rail")?.getBoundingClientRect();
+    const workspace = document.querySelector(".nf-2030-grid")?.getBoundingClientRect();
+    return { railRight: rail?.right ?? 0, workspaceLeft: workspace?.left ?? 0, railWidth: rail?.width ?? 0 };
+  });
+  check(mobileShell.railWidth === 58 && mobileShell.workspaceLeft >= mobileShell.railRight, "the mobile workspace starts after the icon rail with no overlap", JSON.stringify(mobileShell));
   check(await mobile.evaluate(() => document.documentElement.scrollWidth === innerWidth), "mobile has no horizontal overflow");
   check(await mobile.locator("textarea").first().count() === 1, "mobile keeps the own-words answer path available");
   const mobilePrompt = await mobile.locator(".lpos-persistent-prompt").evaluate((element) => ({ top: element.getBoundingClientRect().top, position: getComputedStyle(element).position }));
