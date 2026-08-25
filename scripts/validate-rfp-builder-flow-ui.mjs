@@ -39,7 +39,7 @@ try {
   check(await desktop.locator(".lpos-sections > li").count() === 8, "the living document exposes the approved eight-section outline");
   check(await desktop.getByRole("button", { name: /Recommended questions/ }).count() === 1, "recommended questions are available in the active section");
   check(await desktop.getByRole("button", { name: /Bespoke question/ }).count() === 1, "bespoke questions are available in the active section");
-  check((await desktop.locator(".lpos-unlock").innerText()).includes("Almost ready to publish"), "publishing is visibly gated before the essential baseline exists");
+  check((await desktop.locator(".lpos-unlock").innerText()).includes("Start your RFP"), "an empty RFP is described as not started rather than almost publishable");
   check(await desktop.evaluate(() => document.documentElement.scrollWidth === innerWidth), "desktop has no horizontal overflow");
 
   await startProject(desktop, "We are a healthcare organisation with 20 UK sites and 200 users. We need SASE and SD-WAN by December 2026.");

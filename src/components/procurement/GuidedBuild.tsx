@@ -178,6 +178,8 @@ export default function GuidedBuild({
     }, 750);
   };
 
+  const hasStarted = clauses.length > 0 || progress.ready > 0;
+
   return (
     <div className="lpos-builder">
       <main className="nf-guided-main">
@@ -365,7 +367,7 @@ export default function GuidedBuild({
             return <li key={row.key} data-current={current} data-state={row.state}><button type="button" onClick={() => onSelectSection(row.key)}><b>{index + 1}</b><strong>{row.title}</strong><span>{row.detail}</span><em>{row.state === "confirmed" ? "✓ Confirmed" : current ? "● Needs input" : row.state === "needs_decision" ? "● Needs decision" : "○ Later"}</em><i>⌄</i></button>{current && <div className="lpos-section-extensions"><button type="button" onClick={() => openQuestionManager(true)}>＋ Recommended questions</button><button type="button" onClick={() => openQuestionManager(false)}>＋ Bespoke question</button></div>}</li>;
           })}
         </ol>
-        <div className="lpos-unlock"><span aria-hidden="true">🔒</span><div><strong>{publishReachable ? "Ready to publish" : "Almost ready to publish"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : advisorMessage}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
+        <div className="lpos-unlock"><span aria-hidden="true">{publishReachable ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{publishReachable ? "Ready to publish" : hasStarted ? "Continue building your RFP" : "Start your RFP"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : hasStarted ? advisorMessage : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
         <div className="lpos-document-actions"><button type="button" className="primary" onClick={publishReachable ? onPublish : onFocusPrompt}>{publishReachable ? "Review & publish" : "Continue building"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
       </aside>
     </div>
