@@ -3729,7 +3729,7 @@ export default function ProjectDesk({
     });
     const buyerFacingOutline = outline
       .filter((row) => row.key !== "sector_intelligence")
-      .filter((row) => !["commercial_contractual", "success_evaluation"].includes(row.key));
+      .filter((row) => row.key !== "success_evaluation");
     if (started) return buyerFacingOutline;
     return buyerFacingOutline.map((row) => row.state === "later" ? row : {
       ...row,
@@ -4757,6 +4757,19 @@ export default function ProjectDesk({
     </>
   );
 
+  const livingOsRail = (
+    <div className="lpos-product-rail" role="navigation" aria-label="Living Procurement OS navigation">
+      <nav>
+        {[
+          ["⌂", "Overview"], ["▤", "Requirements"], ["♧", "Suppliers"], ["▧", "Responses"],
+          ["▣", "Evidence"], ["▥", "Reports"], ["▱", "Exports"],
+        ].map(([icon, label]) => <button key={label} type="button" data-current={label === "Requirements"}><span aria-hidden="true">{icon}</span>{label}</button>)}
+      </nav>
+      <button type="button" onClick={() => goToStep("describe")}><span aria-hidden="true">⚙</span>Settings</button>
+      <button type="button" className="lpos-collapse"><span aria-hidden="true">‹</span>Collapse</button>
+    </div>
+  );
+
   return (
     <div
       className="pd-root nf-2030-workspace"
@@ -4773,27 +4786,34 @@ export default function ProjectDesk({
         /* column, the active station filling the rest.                  */
         /* ============================================================ */
         <>
-          <header className="nf-2030-header nf-2030-journey">
+          <header className="nf-2030-header nf-2030-journey lpos-header">
+            <div className="lpos-brand"><span>N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
-              <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}><span>Build requirements</span></button>
+              <button type="button" data-complete="true" onClick={() => goToStep("describe")}><b>✓</b><span>Describe project</span></button>
+              <button type="button" data-current={activeStep === "describe" || activeStep === "decisions"} onClick={() => goToStep("describe")}><b>2</b><span>Complete essentials</span></button>
               <button
                 type="button"
+                aria-label={publishedFlag ? "View shortlist" : "Review requirement"}
                 data-current={publishedFlag ? activeStep === "publish" : activeStep === "review"}
                 onClick={() => goToStep(publishedFlag ? "publish" : "review")}
               >
-                <span>{publishedFlag ? "View shortlist" : "Review requirement"}</span>
+                <b>3</b><span>Review supplier pack</span>
               </button>
               <button
                 type="button"
+                aria-label={publishedFlag ? "Opportunity published" : "Publish opportunity"}
                 data-current={!publishedFlag && activeStep === "publish"}
                 disabled={publishedFlag || !reachable.has("publish")}
                 onClick={() => goToStep("publish")}
               >
-                <span>{publishedFlag ? "Opportunity published" : "Publish opportunity"}</span>
+                <b>4</b><span>Publish anonymously</span>
               </button>
-              <button type="button" data-current={activeStep === "compare"} disabled={!reachable.has("compare")} onClick={() => goToStep("compare")}><span>Receive bids</span></button>
+              <button type="button" data-current={activeStep === "compare"} disabled={!reachable.has("compare")} onClick={() => goToStep("compare")}><b>5</b><span>Compare responses</span></button>
             </nav>
+            <div className="lpos-profile"><button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><div><strong>Procurement lead</strong><span>Private workspace</span></div><b>PL</b></div>
           </header>
+
+          {livingOsRail}
 
           {activeStep !== "describe" && <section className="nf-2030-command-zone" aria-label="Describe or change the procurement">
             <div className="nf-2030-command-title">
@@ -4880,6 +4900,13 @@ export default function ProjectDesk({
                   if (sectionProgress.next) setActiveSection(sectionProgress.next.key);
                 }}
                 onOpenDocument={() => { setWorkspaceDocumentView("requirement"); goToStep("review"); }}
+                rows={sectionOutline}
+                activeKey={activeRow?.key ?? null}
+                progress={sectionProgress}
+                materialDecisionsRemaining={materialDecisionsRemaining}
+                publishReachable={reachable.has("publish")}
+                onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
+                onPublish={() => goToStep("publish")}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -5829,24 +5856,19 @@ export default function ProjectDesk({
            grammar as every later state so the buyer immediately sees what
            they are building, how complete it is and where it will go. */
         <>
-          <header className="nf-2030-header">
-            <div className="nf-2030-brand" aria-label="Netify">N</div>
-            <div className="nf-2030-project-title">
-              <strong>New procurement</strong>
-              <span>Private working draft · Not started</span>
-            </div>
+          <header className="nf-2030-header nf-2030-journey lpos-header">
+            <div className="lpos-brand"><span>N</span><div><strong>Netify Living</strong><small>Procurement OS</small></div></div>
             <nav className="nf-2030-lifecycle" aria-label="Procurement lifecycle">
-              <button type="button" data-current="true" onClick={() => inputRef.current?.focus()}>Build</button>
-              <button type="button" disabled>Review</button>
-              <button type="button" disabled>Issue</button>
-              <button type="button" disabled>Responses</button>
-              <button type="button" disabled>Decision</button>
+              <button type="button" data-current="true" onClick={() => inputRef.current?.focus()}><b>1</b><span>Describe project</span></button>
+              <button type="button" disabled><b>2</b><span>Complete essentials</span></button>
+              <button type="button" disabled><b>3</b><span>Review supplier pack</span></button>
+              <button type="button" disabled><b>4</b><span>Publish anonymously</span></button>
+              <button type="button" disabled><b>5</b><span>Compare responses</span></button>
             </nav>
-            <div className="nf-2030-header-actions">
-              <button type="button" className="mobile-hide" onClick={() => fileRef.current?.click()}>Import RFP</button>
-              <button type="button" className="primary" onClick={() => inputRef.current?.focus()}>Answer with AI</button>
-            </div>
+            <div className="lpos-profile"><button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><div><strong>Procurement lead</strong><span>Private workspace</span></div><b>PL</b></div>
           </header>
+
+          {livingOsRail}
 
           {prestartSurface === "intro" ? <section className="nf-2030-command-zone nf-2030-command-zone-empty" aria-label="Start the procurement">
             <div className="nf-2030-command-inner">
@@ -5881,55 +5903,37 @@ export default function ProjectDesk({
             </div>
           </section> : <>
 
-          <section className="nf-2030-status" aria-label="Issue readiness">
-            <div className="nf-2030-question-set"><span>Living RFP</span><strong>One document · depth grows as you answer</strong></div>
-            <div className="nf-2030-readiness">
-              <div><strong>0 of {sectionProgress.total} sections ready</strong><span>Start with what you know</span></div>
-              <div className="nf-2030-progress" aria-label={`0 of ${sectionProgress.total} sections ready`}>
-                {Array.from({ length: sectionProgress.total }, (_, index) => <span key={index} data-ready="false" />)}
-              </div>
-            </div>
-            <div className="nf-2030-next-summary"><strong>First move</strong><span>State what you are buying, who it is for and the outcome that matters.</span></div>
-          </section>
-
           <div data-workspace-grid className="nf-2030-grid">
-            <SectionNav
-              rows={sectionOutline}
-              activeKey={activeRow?.key ?? null}
-              onSelect={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
-              progress={sectionProgress}
-              questionProgressByKey={sectionQuestionProgressByKey}
-              updatedBanner={null}
-              materialDecisionsRemaining={0}
-              onReviewDecisions={() => inputRef.current?.focus()}
-              publishReachable={false}
-              publishCompleted={false}
-              compareReachable={false}
-              onPublish={() => undefined}
-              onCompare={() => undefined}
-            />
-
-            <SectionBuildPanel
-              row={activeRow}
-              questions={activeSectionQuestionItems}
+            <GuidedBuild
+              card={guidedQuestionCard}
+              ready={rfpCoverage.ready}
+              advisorMessage={advisorMessage}
+              sectionComplete={false}
+              incompleteSectionTitle={sectionProgress.next?.title ?? null}
               position={activeRowPosition?.["position"] ?? 1}
               total={sectionProgress.total}
+              documentTitle={canvasDocument.title}
+              documentSummary={canvasDocument.summary}
+              clauses={canvasDocument.clauses}
               composer={composerBlock}
-              activeQuestionId={activePromptQuestion?.id ?? null}
-              onSelectQuestion={(question) => setPromptQuestionId(question.id)}
+              onFocusPrompt={() => inputRef.current?.focus()}
+              onDescribeQuestion={chooseGuidedCustomAnswer}
+              customAnswerQuestionId={guidedCustomQuestionId}
+              customAnswerReceipt={guidedCustomAnswerReceipt}
+              sectionTitle={activeRow?.title ?? "Project overview"}
+              sectionQuestions={activeSectionQuestionItems}
+              onAddSupplierQuestion={addCustomSupplierQuestion}
+              onImportQuestions={() => fileRef.current?.click()}
+              onGoToNextSection={() => { if (sectionProgress.next) setActiveSection(sectionProgress.next.key); }}
+              onOpenDocument={() => inputRef.current?.focus()}
+              rows={sectionOutline}
+              activeKey={activeRow?.key ?? null}
+              progress={sectionProgress}
+              materialDecisionsRemaining={materialDecisionsRemaining}
+              publishReachable={false}
+              onSelectSection={(key) => setActiveSection(key)}
+              onPublish={() => undefined}
             />
-
-            <div className="nf-2030-aside">
-              <div className="nf-2030-aside-inner">
-                <div className="nf-prestart-live-rfp" role="complementary" aria-label="Living RFP preview">
-                  <p className="nf-2030-side-label">Living RFP</p>
-                  <h2>{activeRow?.title ?? "Organisation and scale"}</h2>
-                  <span>{activeSectionQuestionItems.filter((item) => item.status === "completed").length} answers captured</span>
-                  <p>Your confirmed answers appear here as the section is built. Nothing is published or sent to suppliers without your approval.</p>
-                  <button type="button" onClick={() => inputRef.current?.focus()}>Answer the highlighted question</button>
-                </div>
-              </div>
-            </div>
           </div>
           </>}
         </>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
+import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
 
 type ClausePreview = { id: string; statement: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
@@ -39,6 +40,13 @@ export default function GuidedBuild({
   onImportQuestions,
   onGoToNextSection,
   onOpenDocument,
+  rows,
+  activeKey,
+  progress,
+  materialDecisionsRemaining,
+  publishReachable,
+  onSelectSection,
+  onPublish,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
@@ -61,6 +69,13 @@ export default function GuidedBuild({
   onImportQuestions: () => void;
   onGoToNextSection: () => void;
   onOpenDocument: () => void;
+  rows: OutlineRow[];
+  activeKey: string | null;
+  progress: OutlineProgress;
+  materialDecisionsRemaining: number;
+  publishReachable: boolean;
+  onSelectSection: (key: string) => void;
+  onPublish: () => void;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
@@ -164,24 +179,24 @@ export default function GuidedBuild({
   };
 
   return (
-    <>
+    <div className="lpos-builder">
       <main className="nf-guided-main">
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
-          <div className="nf-guided-builder-label"><strong>RFP Builder</strong><span>· One living document</span></div>
-          <p className="nf-guided-kicker">Section {Math.max(1, position)} of {Math.max(1, total)}</p>
-          <div className="nf-guided-section-progress" aria-label={`${sectionTitle} question progress`}>
-            <span><strong>{sectionTitle}</strong><small>{rfpAnswered} of {rfpTarget} questions populated for RFP depth{suggestedCount ? ` · ${suggestedCount} suggested` : ""}</small></span>
-            <span aria-hidden="true"><i style={{ width: `${Math.round((rfpAnswered / rfpTarget) * 100)}%` }} /></span>
+          <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Guided conversation</strong></div>
+          <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
+          <div className="lpos-you-said"><small>You said</small><strong>{documentSummary || "Start with what you know about the project."}</strong><time>Now</time></div>
+          <div className="lpos-captured">
+            <small>Netify captured</small>
+            {(clauses.length ? clauses.slice(0, 4) : [{ id: "empty", statement: "Your confirmed requirements will appear here" }]).map((clause) => (
+              <div key={clause.id}><span aria-hidden="true">✓</span><p>{clause.statement}</p><button type="button" onClick={onFocusPrompt}>Edit</button></div>
+            ))}
           </div>
           <div className="nf-guided-focus">
-            <p className="nf-guided-next-label">{ready ? "RFP ready for review" : sectionComplete ? "Section complete" : "Next best question"}</p>
+            <div className="lpos-question-heading"><p className="nf-guided-next-label">{ready ? "Essential baseline complete" : sectionComplete ? "Section complete" : "Next essential question"}</p><span>{Math.max(1, position)} of {Math.max(1, total)}</span></div>
             <h1>{visibleQuestion.prompt}</h1>
             {visibleQuestion.context && <p className="nf-guided-question-context">{visibleQuestion.context}</p>}
-            <p className="nf-guided-reason">{questionReason}</p>
-            <div className="nf-guided-prompt">
-              {composer}
-              {card && <details><summary>Why Netify is asking this</summary><p>{questionReason}</p></details>}
-            </div>
+            <div className="lpos-why"><strong>♙ &nbsp; Why this matters</strong><p>{questionReason}</p></div>
+            <p className="lpos-adds"><span aria-hidden="true">▣</span> Adds to your document: <strong>{sectionTitle}</strong></p>
           </div>
 
           {customAnswerReceipt && (
@@ -269,6 +284,9 @@ export default function GuidedBuild({
             </button>
           )}
 
+          <div className="lpos-impact"><span aria-hidden="true">✦</span><div><strong>Impact preview</strong><p>Your answer updates the requirement, supplier questions and evidence request together.</p></div><b aria-hidden="true">✓</b></div>
+          <div className="lpos-own-words"><strong>Or add details in your own words</strong><div className="nf-guided-prompt">{composer}</div></div>
+
           <section className="nf-guided-register" aria-labelledby="section-question-register">
             <div className="nf-guided-register-head">
               <div><p id="section-question-register">Questions in this section</p><span>Every core answer, optional refinement and supplier question in this section. {rfpTarget} core · {additionalCount} additional available · {bespokeCount} bespoke</span></div>
@@ -322,24 +340,28 @@ export default function GuidedBuild({
 
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
-          <div><strong>Your living RFP</strong><span>Updated just now</span></div>
-          <span>{ready ? "RFP ready" : "Building"}</span>
+          <div><h2>{documentTitle}</h2><span>{progress.ready} of {progress.total} essential sections ready</span></div>
+          <span>● &nbsp; DRAFT · UPDATES LIVE</span>
+          <button type="button" onClick={onOpenDocument}>⚙ &nbsp; Document settings</button>
         </div>
-        <h2>{documentTitle}</h2>
-        <p>{documentSummary}</p>
-        <div className="nf-guided-clause-preview">
-          {clauses.length > 0 ? clauses.slice(0, 4).map((clause, index) => (
-            <p key={clause.id} data-new={index === 0}>{clause.statement}</p>
-          )) : <p>Answer the next question and the first supplier-ready requirement will appear here.</p>}
+        <div className="lpos-metrics">
+          <div className="lpos-completeness"><span>Document completeness</span><p><i><b style={{ width: `${Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%` }} /></i><strong>{Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%</strong></p></div>
+          <div><strong>{clauses.length}</strong><span>Requirements<br/>confirmed</span></div>
+          <div><strong>{sectionQuestions.length}</strong><span>Supplier questions<br/>prepared</span></div>
+          <div><strong>{Math.max(0, materialDecisionsRemaining)}</strong><span>Open decisions<br/>remaining</span></div>
         </div>
-        <div className="nf-guided-before-publish">
-          <strong>Before publishing</strong>
-          <button type="button" onClick={onFocusPrompt}><span>Complete the next answer</span><small>{visibleQuestion.prompt}</small></button>
-          {!sectionComplete && <button type="button" onClick={() => openQuestionManager(true)}><span>Add recommended depth</span><small>Let Netify suggest useful supplier questions.</small></button>}
-          <p>{advisorMessage}</p>
+        <div className="lpos-architecture" aria-label="Procurement architecture">
+          <div><strong>Sites</strong><span>your estate</span></div><b>→</b><div><strong>SD-WAN</strong><span>secure connectivity</span></div><b>→</b><div><strong>SASE</strong><span>security &amp; access</span></div><b>→</b><div><strong>Cloud apps</strong><span>apps and data</span></div>
         </div>
-        <button type="button" onClick={onOpenDocument}>Open full document <span aria-hidden="true">›</span></button>
+        <ol className="lpos-sections" aria-label="Essential document sections">
+          {rows.map((row, index) => {
+            const current = row.key === activeKey;
+            return <li key={row.key} data-current={current} data-state={row.state}><button type="button" onClick={() => onSelectSection(row.key)}><b>{index + 1}</b><strong>{row.title}</strong><span>{row.detail}</span><em>{row.state === "confirmed" ? "✓ Confirmed" : current ? "● Needs input" : row.state === "needs_decision" ? "● Needs decision" : "○ Later"}</em><i>⌄</i></button>{current && <div className="lpos-section-extensions"><button type="button" onClick={() => openQuestionManager(true)}>＋ Recommended questions</button><button type="button" onClick={() => openQuestionManager(false)}>＋ Bespoke question</button></div>}</li>;
+          })}
+        </ol>
+        <div className="lpos-unlock"><span aria-hidden="true">🔒</span><div><strong>{publishReachable ? "Ready to publish" : "Almost ready to publish"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : advisorMessage}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
+        <div className="lpos-document-actions"><button type="button" className="primary" onClick={publishReachable ? onPublish : onFocusPrompt}>{publishReachable ? "Review & publish" : "Continue building"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
       </aside>
-    </>
+    </div>
   );
 }
