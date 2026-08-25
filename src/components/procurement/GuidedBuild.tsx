@@ -5,6 +5,7 @@ import type { NextQuestionCard } from "@/components/procurement/LivingProcuremen
 import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
+import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 
 type ClausePreview = { id: string; statement: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
@@ -75,6 +76,11 @@ export default function GuidedBuild({
   publishReachable,
   onSelectSection,
   onPublish,
+  entryMode,
+  onEntryModeChange,
+  validationReport,
+  validatingRfp,
+  validationError,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
@@ -104,6 +110,11 @@ export default function GuidedBuild({
   publishReachable: boolean;
   onSelectSection: (key: string) => void;
   onPublish: () => void;
+  entryMode: "build" | "check";
+  onEntryModeChange: (mode: "build" | "check") => void;
+  validationReport: RfpValidationReport | null;
+  validatingRfp: boolean;
+  validationError: string | null;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
@@ -226,10 +237,17 @@ export default function GuidedBuild({
           <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
           <div className="lpos-own-words lpos-persistent-prompt">
             <div className="lpos-prompt-heading">
-              <strong>Tell Netify what you need</strong>
-              <span>Answer, add context or change anything</span>
+              <strong>{entryMode === "check" ? "Check an existing RFP" : "Tell Netify what you need"}</strong>
+              <span>{entryMode === "check" ? "Paste or upload; Netify checks and rebuilds it" : "Answer, add context or change anything"}</span>
+            </div>
+            <div className="lpos-entry-mode" role="group" aria-label="How do you want to start?">
+              <span>Start from</span>
+              <button type="button" data-selected={entryMode === "build"} onClick={() => onEntryModeChange("build")}>New requirements</button>
+              <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Existing or AI-generated RFP</button>
             </div>
             <div className="nf-guided-prompt">{composer}</div>
+            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking coverage against the Netify question bank…" : "Paste the RFP above or upload Word, PDF, text or a spreadsheet. Its original wording is preserved."}</span><button type="button" onClick={onImportQuestions}>Upload RFP</button></div>}
+            {validationError && <p className="lpos-validation-error" role="alert">{validationError}</p>}
             <div className="lpos-depth" data-depth={rfpDepth}>
               <span>RFP depth</span>
               <button type="button" data-selected={rfpDepth === "short"} onClick={() => setRfpDepth("short")}><strong>Short RFP</strong><small>Minimum valid brief</small></button>
@@ -402,6 +420,16 @@ export default function GuidedBuild({
           <span>● &nbsp; DRAFT · UPDATES LIVE</span>
           <button type="button" onClick={onOpenDocument}>⚙ &nbsp; Document settings</button>
         </div>
+        {validationReport && (
+          <section className="lpos-validation-report" aria-label="RFP validation report">
+            <div className="lpos-validation-score"><strong>{validationReport.score}</strong><span>/100</span><small>{validationReport.label}</small></div>
+            <div className="lpos-validation-body">
+              <div className="lpos-validation-head"><div><strong>Netify RFP check</strong><span>{validationReport.wordCount.toLocaleString("en-GB")} words · {validationReport.questionCount} supplier questions · {validationReport.bank.totalQuestions}-question bank v{validationReport.bank.version}</span></div><b data-valid={validationReport.validBaseline}>{validationReport.validBaseline ? "Valid baseline" : "Baseline incomplete"}</b></div>
+              <div className="lpos-validation-sections">{validationReport.sections.map((section) => <button type="button" key={section.key} onClick={() => onSelectSection(section.key)}><span>{section.title}</span><i><b style={{ width: `${section.score}%` }} /></i><em>{section.score}%</em></button>)}</div>
+              <div className="lpos-validation-findings"><div><strong>Most important gaps</strong>{validationReport.gaps.slice(0, 3).map((gap) => <p key={gap}>• {gap}</p>)}</div><div><strong>Bank questions to consider</strong>{validationReport.recommendedQuestions.slice(0, 3).map((question) => <p key={question.id}><span>{question.category}</span>{question.text}</p>)}</div></div>
+            </div>
+          </section>
+        )}
         <div className="lpos-metrics">
           <div className="lpos-completeness"><span>Document completeness</span><p><i><b style={{ width: `${Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%` }} /></i><strong>{Math.round((progress.ready / Math.max(1, progress.total)) * 100)}%</strong></p></div>
           <div><strong>{clauses.length}</strong><span>Requirements<br/>confirmed</span></div>

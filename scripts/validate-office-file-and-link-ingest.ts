@@ -16,9 +16,10 @@
  *      claims to reject.
  *
  *   B. /api/workspace/ingest-file is exercised as a REAL route: a real
- *      .docx built with the `docx` package and a real .xlsx built with
- *      `exceljs` are POSTed through the actual exported POST handler as
- *      real multipart form data, proving mammoth/exceljs extraction,
+ *      .docx built with the `docx` package, a real .xlsx built with
+ *      `exceljs`, and a real PDF built with `pdf-lib` are POSTed through
+ *      the actual exported POST handler as real multipart form data,
+ *      proving mammoth/exceljs/pdf-parse extraction,
  *      the size cap, and the unsupported-type rejection all work against
  *      the real parser libraries -- not a hand-rolled stand-in that
  *      could silently drift from what production actually runs.
@@ -143,14 +144,35 @@ async function partB() {
   expect(typeof xlsxBody.text === "string" && xlsxBody.text.includes("Leeds Branch") && xlsxBody.text.includes("250"), "[B] both data rows of the first sheet are present, numbers included");
   expect(typeof xlsxBody.text === "string" && xlsxBody.text.includes("Existing MPLS contract"), "[B] the SECOND sheet's content is present too -- multi-sheet workbooks are not silently truncated to sheet one");
 
+  // --- a real text PDF. Scanned/image-only PDFs are deliberately rejected
+  // because silently pretending OCR happened would make the RFP check unsafe.
+  const { PDFDocument, StandardFonts } = await import("pdf-lib");
+  const pdfDoc = await PDFDocument.create();
+  const pdfPage = pdfDoc.addPage([595, 842]);
+  const pdfFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  pdfPage.drawText("SASE RFP for 30 UK healthcare sites", { x: 50, y: 760, size: 14, font: pdfFont });
+  pdfPage.drawText("Suppliers must provide evidence of managed service SLAs.", { x: 50, y: 730, size: 11, font: pdfFont });
+  const pdfBytes = await pdfDoc.save();
+  const pdfArrayBuffer = pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength) as ArrayBuffer;
+  const pdfFile = new File([pdfArrayBuffer], "existing-rfp.pdf", { type: "application/pdf" });
+  const pdfRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", pdfFile));
+  const pdfBody = (await pdfRes.json()) as { text?: string; error?: string };
+  expect(pdfRes.status === 200, "[B] a real text PDF upload returns 200", pdfRes.status);
+  expect(typeof pdfBody.text === "string" && pdfBody.text.includes("30 UK healthcare sites"), "[B] PDF extraction preserves the buyer context", pdfBody.text?.slice(0, 120));
+  expect(typeof pdfBody.text === "string" && pdfBody.text.includes("managed service SLAs"), "[B] PDF extraction preserves supplier requirements");
+
   // --- rejections
   const oversized = new File([new Uint8Array(8_000_001)], "huge.docx", { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
   const oversizedRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", oversized));
   expect(oversizedRes.status === 413, "[B] a file over the 8MB cap is rejected with 413 before any parsing is attempted", oversizedRes.status);
 
-  const unsupported = new File([new TextEncoder().encode("just some text")], "notes.pdf", { type: "application/pdf" });
+  const unsupported = new File([new TextEncoder().encode("not a supported procurement source")], "slides.pptx", { type: "application/vnd.openxmlformats-officedocument.presentationml.presentation" });
   const unsupportedRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", unsupported));
-  expect(unsupportedRes.status === 415, "[B] an unsupported extension (.pdf) is rejected with 415, not silently misread as text", unsupportedRes.status);
+  expect(unsupportedRes.status === 415, "[B] an unsupported extension (.pptx) is rejected with 415, not silently misread as text", unsupportedRes.status);
+
+  const corruptPdf = new File([new Uint8Array([1, 2, 3, 4, 5])], "broken.pdf", { type: "application/pdf" });
+  const corruptPdfRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", corruptPdf));
+  expect(corruptPdfRes.status === 422, "[B] a corrupt PDF fails cleanly with 422", corruptPdfRes.status);
 
   const corrupt = new File([new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])], "broken.xlsx", { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   const corruptRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", corrupt));

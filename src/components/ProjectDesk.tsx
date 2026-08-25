@@ -121,6 +121,7 @@ import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace
 import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
 import { buildRfpCoverage } from "@/lib/workspace/rfp-coverage";
 import { buildSectionQuestionRegister, questionProgressBySection } from "@/lib/workspace/section-question-register";
+import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -946,6 +947,10 @@ export default function ProjectDesk({
   const [testMode, setTestMode] = useState(false);
   const [wrongCompany, setWrongCompany] = useState(false);
   const [pasteSummary, setPasteSummary] = useState<string | null>(null);
+  const [rfpEntryMode, setRfpEntryMode] = useState<"build" | "check">("build");
+  const [rfpValidation, setRfpValidation] = useState<RfpValidationReport | null>(null);
+  const [rfpValidationError, setRfpValidationError] = useState<string | null>(null);
+  const [validatingRfp, setValidatingRfp] = useState(false);
 
   const [signedIn, setSignedIn] = useState(false);
   const [sessId, setSessId] = useState<{ email: string; work: boolean; company: string | null } | null>(null);
@@ -2723,6 +2728,26 @@ export default function ProjectDesk({
     [busy, applyMerge, applyRemovals, markChanged, say],
   );
 
+  const validateExistingRfp = useCallback(async (text: string) => {
+    setValidatingRfp(true);
+    setRfpValidationError(null);
+    try {
+      const res = await fetch("/sase/api/workspace/validate-rfp", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { report?: RfpValidationReport; error?: string };
+      if (!res.ok || !data.report) throw new Error(data.error || "Could not check that RFP.");
+      setRfpValidation(data.report);
+      ev("workspace_rfp_validated", { score: data.report.score, questions: data.report.questionCount, words: data.report.wordCount });
+    } catch (error) {
+      setRfpValidationError(error instanceof Error ? error.message : "Could not check that RFP.");
+    } finally {
+      setValidatingRfp(false);
+    }
+  }, []);
+
   /* ---- Ingest (The Threshold): a paste, a dropped text file, an
      uploaded Word/Excel attachment, or a Google Docs/Sheets link all run
      through the same cycles a sentence runs -- "file" and "link" added
@@ -2773,11 +2798,12 @@ export default function ProjectDesk({
            hand would have survived. Same fix, same place in the flow: */
         for (const clause of r.unplaced) keepReceipt(clause);
       }
+      if (rfpEntryMode === "check") await validateExistingRfp(raw);
       const landed = Math.max(0, factsRef.current.filter((f) => !f.struck).length - factsBefore);
       const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
       setPasteSummary(ingestSummary(landed, kept, plan));
     },
-    [runCycle, keepReceipt, keepSourceTurn],
+    [runCycle, keepReceipt, keepSourceTurn, rfpEntryMode, validateExistingRfp],
   );
 
   /** What is most useful next, computed off the fresh refs so the reply
@@ -2855,6 +2881,7 @@ export default function ProjectDesk({
        anywhere. Runs before the landed/not-landed branch so both paths
        below share it, once. */
     for (const clause of r.unplaced) keepReceipt(clause);
+    if (rfpEntryMode === "check") await validateExistingRfp(text);
 
     /* Seventh amendment: a retraction alone (e.g. "We no longer use
        MPLS.", nothing else in the same message) must not fall through to
@@ -3546,7 +3573,7 @@ export default function ProjectDesk({
   const readFile = (f: File | null | undefined) => {
     if (!f) return;
     const name = f.name.toLowerCase();
-    const isOffice = name.endsWith(".docx") || name.endsWith(".xlsx");
+    const isOffice = name.endsWith(".docx") || name.endsWith(".xlsx") || name.endsWith(".pdf");
     if (isOffice) {
       if (f.size > 8_000_000) { setPasteSummary("That file is too large to read here (8MB limit); paste the part that matters."); return; }
       void readOfficeFile(f);
@@ -3554,7 +3581,7 @@ export default function ProjectDesk({
     }
     const isText = name.endsWith(".txt") || name.endsWith(".md") || name.endsWith(".csv") || f.type === "text/plain";
     if (!isText) {
-      setPasteSummary("Netify reads Word (.docx), Excel (.xlsx) or plain text here.");
+      setPasteSummary("Netify reads Word (.docx), PDF, Excel (.xlsx) or plain text here.");
       return;
     }
     if (f.size > 2_000_000) { setPasteSummary("That file is too large to read here; paste the part that matters."); return; }
@@ -4420,7 +4447,7 @@ export default function ProjectDesk({
                   void ingestText(text, "paste");
                 }
               }}
-              placeholder={resuming ? PLACEHOLDER_RESUMING : !started && prestartSurface === "questions" && activePromptQuestion ? `Answer: ${activePromptQuestion.text}` : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
+              placeholder={resuming ? PLACEHOLDER_RESUMING : rfpEntryMode === "check" ? "Paste an existing or AI-generated RFP here, or attach Word, PDF, text or a spreadsheet" : !started && prestartSurface === "questions" && activePromptQuestion ? `Answer: ${activePromptQuestion.text}` : started ? PLACEHOLDER_LIVE : PLACEHOLDER_EMPTY}
               disabled={resuming}
               rows={1}
               className="min-h-[24px] max-h-[160px] flex-1 resize-none overflow-y-auto border-0 bg-transparent py-1 text-[16px] leading-[1.45] text-[#110f0d] outline-none placeholder:text-[#66635e] disabled:cursor-not-allowed disabled:opacity-60"
@@ -4456,7 +4483,7 @@ export default function ProjectDesk({
               <input
                 ref={fileRef}
                 type="file"
-                accept=".txt,.md,.csv,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".txt,.md,.csv,text/plain,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,application/pdf,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 className="hidden"
                 onChange={(e) => { readFile(e.target.files?.[0]); e.target.value = ""; }}
               />
@@ -4907,6 +4934,11 @@ export default function ProjectDesk({
                 publishReachable={reachable.has("publish")}
                 onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
                 onPublish={() => goToStep("publish")}
+                entryMode={rfpEntryMode}
+                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+                validationReport={rfpValidation}
+                validatingRfp={validatingRfp}
+                validationError={rfpValidationError}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -5931,6 +5963,11 @@ export default function ProjectDesk({
               publishReachable={false}
               onSelectSection={(key) => setActiveSection(key)}
               onPublish={() => undefined}
+              entryMode={rfpEntryMode}
+              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+              validationReport={rfpValidation}
+              validatingRfp={validatingRfp}
+              validationError={rfpValidationError}
             />
           </div>
           </>}

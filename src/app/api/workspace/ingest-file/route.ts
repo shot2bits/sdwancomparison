@@ -1,5 +1,5 @@
 /**
- * Live Sourcing Workspace: read a Word (.docx) or Excel (.xlsx) attachment
+ * Live Sourcing Workspace: read a Word (.docx), Excel (.xlsx) or PDF attachment
  * into plain text. Robert, 20 Aug 2026: "It would support Word, Excel or
  * text." The plain-text/markdown/CSV path (ProjectDesk.tsx's readFile)
  * never needed a server round trip — a browser can read those directly.
@@ -90,5 +90,19 @@ export async function POST(req: Request) {
     }
   }
 
-  return Response.json({ error: "Netify reads Word (.docx), Excel (.xlsx) or plain text here." }, { status: 415, headers: cors });
+  if (name.endsWith(".pdf")) {
+    try {
+      const { PDFParse } = await import("pdf-parse");
+      const parser = new PDFParse({ data: buf });
+      const result = await parser.getText();
+      await parser.destroy();
+      const text = result.text.slice(0, MAX_TEXT_CHARS);
+      if (!text.trim()) return Response.json({ error: "That PDF contains no readable text. It may be a scanned image; paste the relevant text instead." }, { status: 422, headers: cors });
+      return Response.json({ text }, { headers: cors });
+    } catch {
+      return Response.json({ error: "Could not read that PDF — it may be scanned, corrupt or password-protected." }, { status: 422, headers: cors });
+    }
+  }
+
+  return Response.json({ error: "Netify reads Word (.docx), PDF, Excel (.xlsx) or plain text here." }, { status: 415, headers: cors });
 }
