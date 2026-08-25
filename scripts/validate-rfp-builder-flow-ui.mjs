@@ -56,6 +56,13 @@ try {
   check(await desktop.locator('.nf-guided-register li[data-status="custom"]').count() >= 1, "buyer-added wording is distinguished from bank and recommended questions");
   await desktop.close();
 
+  const tablet = await browser.newPage({ viewport: { width: 900, height: 900 } });
+  await reset(tablet);
+  check(await tablet.locator(".lpos-builder").evaluate((el) => getComputedStyle(el).display) === "block", "narrow browser and tablet widths stack the panes instead of clipping them");
+  check(await tablet.evaluate(() => document.documentElement.scrollWidth === innerWidth), "tablet has no horizontal overflow");
+  check(await tablet.locator(".lpos-persistent-prompt").evaluate((el) => getComputedStyle(el).position) === "static", "tablet keeps the prominent prompt in flow so it cannot cover the stacked document");
+  await tablet.close();
+
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await reset(mobile);
   check(await mobile.locator(".lpos-builder").evaluate((el) => getComputedStyle(el).display) === "block", "mobile stacks the procurement panes");

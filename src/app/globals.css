@@ -1323,3 +1323,40 @@ body:has(.nf-2030-workspace) > .min-h-screen > main { min-height: 100vh; }
     backdrop-filter: none;
   }
 }
+
+/* A split document needs real desktop width. Narrow browser panels and
+   tablets use the same non-overlapping stack as mobile rather than forcing
+   the two minimum-width panes through one another. */
+@media (max-width: 1100px) {
+  .nf-2030-workspace .lpos-header {
+    min-height: 64px !important;
+    grid-template-columns: 1fr !important;
+    padding: 0 16px !important;
+  }
+  .nf-2030-workspace .lpos-header .nf-2030-lifecycle,
+  .nf-2030-workspace .lpos-profile { display: none !important; }
+  .nf-2030-workspace .lpos-header .lpos-brand { width: auto !important; }
+  .nf-2030-workspace .lpos-product-rail { top: 64px; width: 76px; }
+  .nf-2030-workspace .lpos-product-rail button { min-height: 62px; font-size: 9px; }
+  .nf-2030-workspace .lpos-product-rail button span { font-size: 19px; }
+  .nf-2030-workspace > .nf-2030-grid {
+    min-height: calc(100vh - 64px) !important;
+    margin-left: 76px !important;
+  }
+  .nf-2030-workspace .lpos-builder { display: block !important; }
+  .nf-2030-workspace .lpos-builder > .nf-guided-main {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+  .nf-2030-workspace .lpos-persistent-prompt {
+    position: static;
+    backdrop-filter: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .nf-2030-workspace .lpos-product-rail { width: 58px; }
+  .nf-2030-workspace .lpos-product-rail button { min-height: 58px; font-size: 0; }
+  .nf-2030-workspace > .nf-2030-grid { margin-left: 58px !important; }
+}
