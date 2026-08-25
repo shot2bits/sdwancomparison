@@ -184,6 +184,13 @@ export default function GuidedBuild({
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
           <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Guided conversation</strong></div>
           <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
+          <div className="lpos-own-words lpos-persistent-prompt">
+            <div className="lpos-prompt-heading">
+              <strong>Tell Netify what you need</strong>
+              <span>Answer, add context or change anything</span>
+            </div>
+            <div className="nf-guided-prompt">{composer}</div>
+          </div>
           <div className="lpos-you-said"><small>You said</small><strong>{documentSummary || "Start with what you know about the project."}</strong><time>Now</time></div>
           <div className="lpos-captured">
             <small>Netify captured</small>
@@ -285,7 +292,6 @@ export default function GuidedBuild({
           )}
 
           <div className="lpos-impact"><span aria-hidden="true">✦</span><div><strong>Impact preview</strong><p>Your answer updates the requirement, supplier questions and evidence request together.</p></div><b aria-hidden="true">✓</b></div>
-          <div className="lpos-own-words"><strong>Or add details in your own words</strong><div className="nf-guided-prompt">{composer}</div></div>
 
           <section className="nf-guided-register" aria-labelledby="section-question-register">
             <div className="nf-guided-register-head">

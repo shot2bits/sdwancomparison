@@ -28,6 +28,14 @@ try {
   check(await desktop.locator("body > header").evaluate((el) => getComputedStyle(el).display) === "none", "the marketing header is suppressed inside the procurement OS");
   check(await desktop.locator(".lpos-product-rail").count() === 1, "the dark product rail is present");
   check(await desktop.locator(".lpos-builder > .nf-guided-main").count() === 1 && await desktop.locator(".lpos-builder > .nf-guided-document").count() === 1, "the workspace is split into guided conversation and living document panes");
+  check(await desktop.locator(".lpos-persistent-prompt").count() === 1, "the guided pane contains one prominent persistent AI prompt");
+  const desktopPrompt = await desktop.locator(".lpos-persistent-prompt").evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const captured = document.querySelector(".lpos-you-said")?.getBoundingClientRect();
+    return { top: box.top, bottom: box.bottom, beforeCaptured: Boolean(captured && box.bottom <= captured.top), position: getComputedStyle(element).position };
+  });
+  check(desktopPrompt.top < 320 && desktopPrompt.beforeCaptured, "the AI prompt appears near the top before captured context", JSON.stringify(desktopPrompt));
+  check(desktopPrompt.position === "sticky", "the desktop AI prompt remains available while its guided pane scrolls");
   check(await desktop.locator(".lpos-sections > li").count() === 8, "the living document exposes the approved eight-section outline");
   check(await desktop.getByRole("button", { name: /Recommended questions/ }).count() === 1, "recommended questions are available in the active section");
   check(await desktop.getByRole("button", { name: /Bespoke question/ }).count() === 1, "bespoke questions are available in the active section");
@@ -53,6 +61,8 @@ try {
   check(await mobile.locator(".lpos-builder").evaluate((el) => getComputedStyle(el).display) === "block", "mobile stacks the procurement panes");
   check(await mobile.evaluate(() => document.documentElement.scrollWidth === innerWidth), "mobile has no horizontal overflow");
   check(await mobile.locator("textarea").first().count() === 1, "mobile keeps the own-words answer path available");
+  const mobilePrompt = await mobile.locator(".lpos-persistent-prompt").evaluate((element) => ({ top: element.getBoundingClientRect().top, position: getComputedStyle(element).position }));
+  check(mobilePrompt.top < 360 && mobilePrompt.position === "static", "mobile keeps the prompt near the top without a covering sticky overlay", JSON.stringify(mobilePrompt));
   await mobile.close();
 } finally {
   await browser.close();
