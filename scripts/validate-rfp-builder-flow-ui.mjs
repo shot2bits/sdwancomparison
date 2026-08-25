@@ -41,6 +41,8 @@ try {
   check(desktopPrompt.top < 320 && desktopPrompt.beforeCaptured, "the AI prompt appears near the top before captured context", JSON.stringify(desktopPrompt));
   check(desktopPrompt.position === "sticky", "the desktop AI prompt remains available while its guided pane scrolls");
   check(await desktop.locator(".lpos-sections > li").count() === 8, "the living document exposes the approved eight-section outline");
+  check((await desktop.locator(".lpos-bank-depth").innerText()).includes("386 analyst-written questions"), "the outline communicates the depth of the underlying question bank");
+  check(await desktop.locator(".lpos-sections > li > button > span > small").count() === 8, "every section previews its substantive coverage areas without expanding into a question wall");
   check(await desktop.getByRole("button", { name: /Recommended questions/ }).count() === 1, "recommended questions are available in the active section");
   check(await desktop.getByRole("button", { name: /Bespoke question/ }).count() === 1, "bespoke questions are available in the active section");
   check((await desktop.locator(".lpos-unlock").innerText()).includes("Start your RFP"), "an empty RFP is described as not started rather than almost publishable");

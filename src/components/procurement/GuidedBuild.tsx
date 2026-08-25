@@ -10,6 +10,19 @@ type ClausePreview = { id: string; statement: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
 type RfpDepth = "short" | "detailed";
 
+const SECTION_COVERAGE: Record<string, string[]> = {
+  organisation_scale: ["organisation profile", "users and devices", "sites and regions", "stakeholders", "procurement route"],
+  solution_scope: ["SD-WAN and SASE scope", "SSE components", "use cases", "integrations", "exclusions"],
+  current_estate: ["underlay inventory", "WAN topology", "cloud and SaaS", "identity", "tools and contracts"],
+  resilience_availability: ["availability targets", "access diversity", "failover", "performance", "disaster recovery"],
+  security_identity_data: ["ZTNA", "SWG, CASB and DLP", "FWaaS and threat", "logging and SIEM", "data and compliance"],
+  sector_intelligence: ["sector regulation", "critical workflows", "operational risks", "assurance evidence", "industry SLAs"],
+  operating_model_support: ["service ownership", "service desk", "SLAs", "RACI and escalation", "reporting"],
+  migration_implementation: ["discovery and pilot", "migration waves", "cutover and rollback", "dependencies", "training"],
+  commercial_contractual: ["pricing model", "licensing", "contract term", "indexation", "exit and benchmarking"],
+  success_evaluation: ["evaluation criteria", "weightings", "evidence", "acceptance tests", "success measures"],
+};
+
 function recommendationTopics(value: string): string[] {
   const text = value.toLowerCase();
   const topics: string[] = [];
@@ -398,10 +411,12 @@ export default function GuidedBuild({
         <div className="lpos-architecture" aria-label="Procurement architecture">
           <div><strong>Sites</strong><span>your estate</span></div><b>→</b><div><strong>SD-WAN</strong><span>secure connectivity</span></div><b>→</b><div><strong>SASE</strong><span>security &amp; access</span></div><b>→</b><div><strong>Cloud apps</strong><span>apps and data</span></div>
         </div>
+        <div className="lpos-bank-depth"><strong>Question-bank depth</strong><span>386 analyst-written questions · 43 extended SASE questions · sector-specific packs</span><small>Netify selects only the relevant questions as your requirement develops.</small></div>
         <ol className="lpos-sections" aria-label="Essential document sections">
           {rows.map((row, index) => {
             const current = row.key === activeKey;
-            return <li key={row.key} data-current={current} data-state={row.state}><button type="button" onClick={() => onSelectSection(row.key)}><b>{index + 1}</b><strong>{row.title}</strong><span>{row.detail}</span><em>{row.state === "confirmed" ? "✓ Confirmed" : current ? "● Needs input" : row.state === "needs_decision" ? "● Needs decision" : "○ Later"}</em><i>⌄</i></button>{current && <div className="lpos-section-extensions"><button type="button" onClick={() => openQuestionManager(true)}>＋ Recommended questions</button><button type="button" onClick={() => openQuestionManager(false)}>＋ Bespoke question</button></div>}</li>;
+            const coverage = SECTION_COVERAGE[row.key] ?? ["requirements", "supplier evidence", "response format", "evaluation", "buyer-specific questions"];
+            return <li key={row.key} data-current={current} data-state={row.state}><button type="button" onClick={() => onSelectSection(row.key)}><b>{index + 1}</b><strong>{row.title}</strong><span><b>{row.detail}</b><small>{coverage.join(" · ")}</small></span><em>{row.state === "confirmed" ? "✓ Confirmed" : current ? "● Needs input" : row.state === "needs_decision" ? "● Needs decision" : "○ Later"}</em><i>⌄</i></button>{current && <div className="lpos-section-extensions"><button type="button" onClick={() => openQuestionManager(true)}>＋ Recommended questions</button><button type="button" onClick={() => openQuestionManager(false)}>＋ Bespoke question</button></div>}</li>;
           })}
         </ol>
         <div className="lpos-unlock"><span aria-hidden="true">{publishReachable ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{publishReachable ? "Ready to publish" : hasStarted ? "Continue building your RFP" : "Start your RFP"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : hasStarted ? advisorMessage : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
