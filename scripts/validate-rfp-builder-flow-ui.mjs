@@ -58,6 +58,12 @@ try {
   const registerText = await desktop.locator(".nf-guided-register").innerText();
   check(registerText.includes("Describe your service credit approval process?"), "a bespoke question is added to the canonical section register");
   check(await desktop.locator('.nf-guided-register li[data-status="custom"]').count() >= 1, "buyer-added wording is distinguished from bank and recommended questions");
+  await desktop.getByRole("button", { name: /Review & publish/ }).click();
+  const boardConsent = desktop.locator("label").filter({ hasText: "Opportunity Board and GDPR acknowledgement" });
+  await boardConsent.waitFor();
+  check((await boardConsent.innerText()).includes("Signed-in curated vendors and managed service providers"), "publish consent explains who can view the anonymous Opportunity Board listing");
+  check(parseFloat(await boardConsent.evaluate((el) => getComputedStyle(el).fontSize)) <= 11, "the GDPR and board consent uses the requested small type");
+  check(await desktop.getByRole("button", { name: /Generate and publish|Sign · create the test position/ }).isDisabled(), "publishing stays disabled until the required acknowledgements are accepted");
   await desktop.close();
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });

@@ -38,7 +38,7 @@ export const PUBLISH_DESPITE_DECLINED_ACTION = "publish_despite_declined_approva
 /** The engine publish consent (Article 13), recorded verbatim when an
  *  engine project publishes through the machine. */
 export const ENGINE_PUBLISH_CONSENT_TEXT =
-  "Publish this RFP to the Netify marketplace and invite the matched vendors. Responses arrive side by side; pricing stays private to me; no further vendor is contacted without my action.";
+  "I agree to publish this RFP anonymously to the Netify RFP Opportunity Board. Signed-in curated vendors and managed service providers may view the opportunity and respond. Netify will process my account and contact details to operate the service, keep them private from suppliers unless I choose to share them, and handle them under the Netify Privacy Policy. I may request access, correction or deletion of my personal data, subject to records Netify must retain.";
 
 /**
  * The publication decision gate. Blocked only when an approval was

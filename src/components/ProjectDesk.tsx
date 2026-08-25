@@ -207,7 +207,7 @@ import { buildSectionQuestionRegister, questionProgressBySection } from "@/lib/w
 /* verified work email; without that, a project is one sitting.       */
 
 const WORKSPACE_AGREEMENT_TEXT =
-  "Publish this requirement: Netify lists an anonymous notice visible to signed-in vendors and service providers, and invites the best-fit evaluated vendors and service providers, who respond through the app. My identity and contact details stay private until I choose to reply, and pricing stays private to me.";
+  "Create the private project record used to generate this RFP. Nothing is published until I separately accept the Opportunity Board and privacy statement below.";
 
 /* The wrong-company guard (R9, Robert's ruling 30 Jul 2026): only for a
  * person whose own words say they came for one of the other companies.
@@ -2104,7 +2104,7 @@ export default function ProjectDesk({
     [instrumentCoveredSections, requirement],
   );
   const customSupplierQuestionCount = noted.filter((item) => item.id.startsWith(CUSTOM_SUPPLIER_QUESTION_PREFIX)).length;
-  const consentsOk = securityScope ? consentCreate && consentPublish && (unansweredGapsLenOk() || consentGaps) : consentCreate;
+  const consentsOk = consentCreate && consentPublish && (!securityScope || unansweredGapsLenOk() || consentGaps);
   const instrumentLadder = useMemo(
     () =>
       deriveInstrumentLadder({
@@ -5735,12 +5735,10 @@ export default function ProjectDesk({
                                   </span>
                                 </label>
                               )}
-                              {securityScope && (
-                                <label className="mb-1.5 flex items-start gap-2 text-[13px] leading-relaxed text-[#66635e]">
-                                  <input type="checkbox" checked={consentPublish} onChange={(e) => setConsentPublish(e.target.checked)} className="mt-0.5" />
-                                  <span>{ENGINE_PUBLISH_CONSENT_TEXT}</span>
-                                </label>
-                              )}
+                              <label className="mb-1.5 flex items-start gap-2 text-[10.5px] leading-relaxed text-[#66635e]">
+                                <input type="checkbox" checked={consentPublish} onChange={(e) => setConsentPublish(e.target.checked)} className="mt-0.5" />
+                                <span><strong className="text-[#1c1a18]">Opportunity Board and GDPR acknowledgement.</strong> {ENGINE_PUBLISH_CONSENT_TEXT} <a href="https://netify.co.uk/privacy-policy/" target="_blank" rel="noreferrer" className="underline">Read the Privacy Policy</a>.</span>
+                              </label>
                               <button
                                 type="button"
                                 onClick={() => void signAndPublish()}
