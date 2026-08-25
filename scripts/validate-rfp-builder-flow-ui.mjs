@@ -29,6 +29,10 @@ try {
   check(await desktop.locator(".lpos-product-rail").count() === 1, "the dark product rail is present");
   check(await desktop.locator(".lpos-builder > .nf-guided-main").count() === 1 && await desktop.locator(".lpos-builder > .nf-guided-document").count() === 1, "the workspace is split into guided conversation and living document panes");
   check(await desktop.locator(".lpos-persistent-prompt").count() === 1, "the guided pane contains one prominent persistent AI prompt");
+  check(await desktop.getByRole("button", { name: /Short RFP/ }).count() === 1 && await desktop.getByRole("button", { name: /Detailed RFP/ }).count() === 1, "buyers can choose a short valid RFP or a detailed guided RFP");
+  await desktop.getByRole("button", { name: /Detailed RFP/ }).click();
+  check(await desktop.locator(".lpos-depth-recommendations").count() === 1, "detailed mode exposes contextual recommendations from the existing question workflow");
+  await desktop.getByRole("button", { name: /Short RFP/ }).click();
   const desktopPrompt = await desktop.locator(".lpos-persistent-prompt").evaluate((element) => {
     const box = element.getBoundingClientRect();
     const captured = document.querySelector(".lpos-you-said")?.getBoundingClientRect();

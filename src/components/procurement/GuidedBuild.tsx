@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
@@ -8,6 +8,21 @@ import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-ou
 
 type ClausePreview = { id: string; statement: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
+type RfpDepth = "short" | "detailed";
+
+function recommendationTopics(value: string): string[] {
+  const text = value.toLowerCase();
+  const topics: string[] = [];
+  if (/health|nhs|clinic|hospital/.test(text)) topics.push("Clinical continuity and data protection");
+  if (/manufactur|factory|plant|warehouse|\bot\b|ics/.test(text)) topics.push("OT separation and site resilience");
+  if (/retail|store|shop|pos|pci/.test(text)) topics.push("PCI, branch resilience and rollout");
+  if (/financ|bank|insurance|fca/.test(text)) topics.push("Regulatory evidence and auditability");
+  if (/\b(?:[2-9]|[1-9]\d+)\s+(?:uk\s+)?(?:sites?|branches|stores|offices|locations)\b/.test(text)) topics.push("Underlay diversity, failover and migration waves");
+  if (/mpls|ethernet|leased line|broadband|internet|4g|5g|underlay/.test(text)) topics.push("Underlay performance and transition");
+  if (/casb|ztna|swg|fwaa?s|sase|sse/.test(text)) topics.push("SASE controls, policy and integrations");
+  if (/managed|co-managed|service desk|noc|soc/.test(text)) topics.push("Operating model, SLAs and RACI");
+  return [...new Set(topics)].slice(0, 4);
+}
 
 function splitQuestion(value: string): { prompt: string; context: string | null } {
   const questionMark = value.indexOf("?");
@@ -87,8 +102,14 @@ export default function GuidedBuild({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  const [rfpDepth, setRfpDepth] = useState<RfpDepth>("short");
   const questionManagerRef = useRef<HTMLDetailsElement | null>(null);
   useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
+  useEffect(() => {
+    const saved = window.localStorage.getItem("netify-rfp-depth");
+    if (saved === "short" || saved === "detailed") setRfpDepth(saved);
+  }, []);
+  useEffect(() => { window.localStorage.setItem("netify-rfp-depth", rfpDepth); }, [rfpDepth]);
   useEffect(() => {
     const nextId = card?.nq.id ?? null;
     const previousId = previousQuestionIdRef.current;
@@ -118,6 +139,10 @@ export default function GuidedBuild({
   const visibleQuestion = splitQuestion(card?.nq.question ?? fallbackPrompt);
   const bespokeCount = sectionQuestions.filter((item) => item.status === "custom").length;
   const additionalCount = sectionQuestions.filter((item) => item.status === "suggested").length;
+  const recommendedTopics = useMemo(
+    () => recommendationTopics(`${documentTitle} ${documentSummary} ${clauses.map((clause) => clause.statement).join(" ")}`),
+    [clauses, documentSummary, documentTitle],
+  );
 
   const openQuestionManager = (suggest = false) => {
     if (questionManagerRef.current) questionManagerRef.current.open = true;
@@ -192,6 +217,18 @@ export default function GuidedBuild({
               <span>Answer, add context or change anything</span>
             </div>
             <div className="nf-guided-prompt">{composer}</div>
+            <div className="lpos-depth" data-depth={rfpDepth}>
+              <span>RFP depth</span>
+              <button type="button" data-selected={rfpDepth === "short"} onClick={() => setRfpDepth("short")}><strong>Short RFP</strong><small>Minimum valid brief</small></button>
+              <button type="button" data-selected={rfpDepth === "detailed"} onClick={() => setRfpDepth("detailed")}><strong>Detailed RFP</strong><small>Guided recommendations</small></button>
+            </div>
+            {rfpDepth === "detailed" && (
+              <div className="lpos-depth-recommendations">
+                <p><strong>Recommended focus</strong><span>Based on what you have entered</span></p>
+                <div>{(recommendedTopics.length ? recommendedTopics : ["Add sector, sites, SASE scope, underlay or service model for tailored recommendations"]).map((topic) => <span key={topic}>{topic}</span>)}</div>
+                <button type="button" onClick={() => openQuestionManager(true)}>Review recommended questions →</button>
+              </div>
+            )}
           </div>
           <div className="lpos-you-said"><small>You said</small><strong>{documentSummary || "Start with what you know about the project."}</strong><time>Now</time></div>
           <div className="lpos-captured">
