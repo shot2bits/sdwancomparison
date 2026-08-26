@@ -5909,8 +5909,8 @@ export default function ProjectDesk({
             <div className="nf-2030-command-inner">
               <div className="nf-2030-command-intro">
                 <span>SASE &amp; SD-WAN procurement</span>
-                <h2><strong>Build</strong> your SASE or SD-WAN RFP. <strong>Shortlist</strong> vendors. Get <strong>Bids</strong>.</h2>
-                <p>Build a valid RFP, then publish it anonymously to unlock vendor and managed-service-provider matching, downloads and bids.</p>
+                <h2><strong>Build</strong> a new RFP or <strong>validate</strong> one created by ChatGPT or another AI.</h2>
+                <p>Netify makes it procurement-ready, then anonymous publication unlocks provider matching, downloads and comparable bids.</p>
               </div>
               {composerBlock}
               <div className="nf-2030-command-actions">
@@ -5932,8 +5932,8 @@ export default function ProjectDesk({
               </div>
               <ol className="nf-2030-outcomes" aria-label="What Netify produces">
                 <li><span>01</span><div><strong>Build</strong><p>One living SASE or SD-WAN RFI/RFP for your sector.</p></div></li>
-                <li><span>02</span><div><strong>Shortlist</strong><p>Instant vendor and managed service provider matches.</p></div></li>
-                <li><span>03</span><div><strong>Get bids</strong><p>Publish anonymously to the Opportunity Board when ready.</p></div></li>
+                <li><span>02</span><div><strong>Validate</strong><p>Find missing requirements and improve supplier comparability.</p></div></li>
+                <li><span>03</span><div><strong>Publish &amp; match</strong><p>Publish anonymously to unlock providers, downloads and bids.</p></div></li>
               </ol>
             </div>
           </section> : <>

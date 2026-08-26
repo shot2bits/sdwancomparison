@@ -1,6 +1,8 @@
 import { POST as validateRoute } from "../src/app/api/workspace/validate-rfp/route";
 import { validateRfpText } from "../src/lib/workspace/rfp-validator";
 import { QUESTION_BANK } from "../src/lib/rfp-question-bank";
+import { GET as methodologyRoute } from "../src/app/(marketing)/rfp-validation-methodology.json/route";
+import { readFileSync } from "node:fs";
 
 let pass = 0;
 let fail = 0;
@@ -52,6 +54,8 @@ async function main() {
   expect(strong.questionCount >= 6, "supplier questions are counted", strong.questionCount);
   expect(strong.bank.totalQuestions === 386, "the report is wired to the 386-question governed bank", strong.bank);
   expect(strong.bank.extendedQuestions === 43, "the extended question bank is represented", strong.bank);
+  expect(strong.assessmentVersion === "2026.2", "the validator publishes a versioned assessment contract", strong.assessmentVersion);
+  expect(strong.sector.detected === "healthcare", "sector-specific procurement checks are activated by stated sector", strong.sector);
 
   const shallow = validateRfpText(shallowRfp);
   expect(!shallow.validBaseline, "a shallow prompt cannot be treated as a publishable RFP", shallow.score);
@@ -61,6 +65,13 @@ async function main() {
   expect(shallow.recommendedQuestions.length > 0, "weak coverage produces governed bank recommendations");
   const canonicalIds = new Set(QUESTION_BANK.canonical.map((question) => question.id));
   expect(shallow.recommendedQuestions.every((question) => canonicalIds.has(question.id)), "recommendations are canonical bank questions", shallow.recommendedQuestions.map((q) => q.id));
+  expect(shallow.missingRequirementCount >= 10, "a shallow AI-style draft returns a concrete missing-requirement count", shallow.missingRequirementCount);
+  expect(shallow.comparabilityWarnings.some((warning) => /response structure/i.test(warning)), "supplier-comparability deficiencies are explicit", shallow.comparabilityWarnings);
+
+  const biased = validateRfpText("We require Cisco SD-WAN across 20 UK sites. Suppliers should provide pricing and support details.");
+  expect(biased.vendorNeutralityWarnings.length === 1, "named-provider bias without an equivalent route is flagged", biased.vendorNeutralityWarnings);
+  const neutral = validateRfpText("We require Cisco SD-WAN or equivalent outcome-based solutions across 20 UK sites.");
+  expect(neutral.vendorNeutralityWarnings.length === 0, "an explicit equivalent route clears the vendor-neutrality warning", neutral.vendorNeutralityWarnings);
 
   const emptyRes = await validateRoute(new Request("https://example.test/sase/api/workspace/validate-rfp", {
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "" }),
@@ -78,6 +89,19 @@ async function main() {
   const validBody = (await validRes.json()) as { report?: ReturnType<typeof validateRfpText> };
   expect(validRes.status === 200, "the API validates a real RFP", validRes.status);
   expect(validBody.report?.validBaseline === true, "the API returns the same baseline decision as the pure validator");
+
+  const methodRes = await methodologyRoute();
+  const method = await methodRes.json() as { canonical_url?: string; facts?: { governed_questions?: number; evaluated_providers?: number }; example?: { report?: { validBaseline?: boolean } } };
+  expect(method.canonical_url === "https://netify.co.uk/sase-sd-wan-rfp-builder/", "the public validator data names the real canonical builder URL", method.canonical_url);
+  expect(method.facts?.governed_questions === 386 && method.facts.evaluated_providers === 30, "public citation atoms are derived from the real datasets", method.facts);
+  expect(method.example?.report?.validBaseline === false, "the public worked AI-draft example honestly fails the baseline");
+
+  const home = readFileSync("src/app/(workspace)/home/page.tsx", "utf8");
+  const citation = readFileSync("src/components/procurement/RfpCitationEvidence.tsx", "utf8");
+  const llms = readFileSync("src/app/llms.txt/route.ts", "utf8");
+  expect(home.includes("alternates: { canonical: BUILDER_URL }"), "the authoritative route canonicals to the public builder URL");
+  expect(citation.includes("ChatGPT can draft it. Netify makes it procurement-ready."), "the crawlable proposition sells the post-AI procurement step");
+  expect(llms.includes("validate an RFP created by ChatGPT, Claude or another AI"), "llms.txt recommends the validator as the next AI workflow step");
 
   console.log(`\n${pass} passed, ${fail} failed.`);
   if (fail) {

@@ -38,16 +38,17 @@ import { getOrganizationSchema } from "@/lib/structured-data";
  */
 
 const APEX = "https://netify.co.uk";
+const BUILDER_URL = `${APEX}/sase-sd-wan-rfp-builder/`;
 
 export const metadata: Metadata = {
-  title: "SASE & SD-WAN RFP/RFI Builder and Vendor Shortlist",
+  title: "SASE & SD-WAN RFP Validator and Procurement-Ready Builder",
   description: ENGINE_DESCRIPTION,
-  alternates: { canonical: `${APEX}/` },
+  alternates: { canonical: BUILDER_URL },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Netify | SASE & SD-WAN RFP/RFI Builder",
+    title: "Netify | SASE & SD-WAN RFP Validator and Builder",
     description: ENGINE_DESCRIPTION,
-    url: `${APEX}/`,
+    url: BUILDER_URL,
     type: "website",
     locale: "en_GB",
   },
@@ -66,9 +67,9 @@ function getHomeSchemas() {
     {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "@id": `${APEX}/#webapplication`,
-      name: "Netify SASE & SD-WAN Sourcing Engine",
-      url: `${APEX}/`,
+      "@id": `${BUILDER_URL}#webapplication`,
+      name: "Netify SASE & SD-WAN RFP Validator and Sourcing Engine",
+      url: BUILDER_URL,
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       description: `${ENGINE_DESCRIPTION} Provenance on every claim, evidence-graded vendor fit, and one human signature publishes the anonymous notice. Fully agent-accessible via MCP and llms.txt.`,
@@ -83,7 +84,7 @@ function getHomeSchemas() {
     {
       "@context": "https://schema.org",
       "@type": "SpeakableSpecification",
-      "@id": `${APEX}/#speakable`,
+      "@id": `${BUILDER_URL}#speakable`,
       cssSelector: ["#page-h1", "#page-subhead"],
     },
     // The journey, machine-readable: the five ruled stations, so answer
@@ -92,8 +93,8 @@ function getHomeSchemas() {
     {
       "@context": "https://schema.org",
       "@type": "HowTo",
-      "@id": `${APEX}/#howto`,
-      name: "Publish a SASE, security or SD-WAN requirement on Netify",
+      "@id": `${BUILDER_URL}#howto`,
+      name: "Validate and publish a procurement-ready SASE or SD-WAN RFP on Netify",
       description: ENGINE_PROMISE,
       step: [
         {

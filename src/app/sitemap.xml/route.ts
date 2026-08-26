@@ -34,6 +34,7 @@ export async function GET() {
     /* sitemap stays valid without live notices */
   }
   const urls: { loc: string; priority: string }[] = [
+    { loc: "https://netify.co.uk/sase-sd-wan-rfp-builder/", priority: "1.0" },
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/how-it-works`, priority: "0.9" },
     { loc: `${SITE_URL}/for-suppliers`, priority: "0.8" },

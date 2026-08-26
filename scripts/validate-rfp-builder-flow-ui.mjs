@@ -30,7 +30,7 @@ try {
   check(await desktop.locator(".lpos-builder > .nf-guided-main").count() === 1 && await desktop.locator(".lpos-builder > .nf-guided-document").count() === 1, "the workspace is split into guided conversation and living document panes");
   check(await desktop.locator(".lpos-persistent-prompt").count() === 1, "the guided pane contains one prominent persistent AI prompt");
   check(await desktop.getByRole("button", { name: /Short RFP/ }).count() === 1 && await desktop.getByRole("button", { name: /Detailed RFP/ }).count() === 1, "buyers can choose a short valid RFP or a detailed guided RFP");
-  check(await desktop.getByRole("button", { name: /Existing or AI-generated RFP/ }).count() === 1, "buyers can switch from building to checking an existing RFP");
+  check(await desktop.getByRole("button", { name: /Check an AI-generated RFP/ }).count() === 1, "buyers can switch from building to checking an existing RFP");
   await desktop.getByRole("button", { name: /Detailed RFP/ }).click();
   check(await desktop.locator(".lpos-depth-recommendations").count() === 1, "detailed mode exposes contextual recommendations from the existing question workflow");
   await desktop.getByRole("button", { name: /Short RFP/ }).click();
@@ -71,13 +71,13 @@ try {
 
   const checker = await browser.newPage({ viewport: { width: 1728, height: 1180 } });
   await reset(checker);
-  await checker.getByRole("button", { name: /Existing or AI-generated RFP/ }).click();
+  await checker.getByRole("button", { name: /Check an AI-generated RFP/ }).click();
   check(await checker.getByRole("button", { name: /Upload RFP/ }).count() === 1, "check mode offers a clear RFP upload action");
   check((await checker.locator("textarea").first().getAttribute("placeholder"))?.includes("AI-generated RFP"), "check mode tells buyers they can paste an AI-generated RFP");
   const checkText = `SASE RFP for a UK healthcare organisation operating 30 sites and 4,000 users across three UK regions. Our objective is resilient access to Microsoft 365 and Azure. The existing estate uses MPLS, leased lines, broadband, legacy firewalls, Active Directory and SIEM. Scope includes SD-WAN, ZTNA, CASB, SWG, DLP and FWaaS. Suppliers must describe 99.99% availability, dual circuits, failover, latency and packet loss. Describe Entra ID, MFA, device posture, GDPR, UK data residency and ISO 27001. Provide dated certificates, audit reports and customer references. We require a fully managed 24/7 service desk, NOC and SOC with incident management, escalation, governance, reporting and RACI. Provide a six-month phased migration plan with pilot, cutover, rollback, training and handover. Provide per-site pricing, five-year TCO, licensing, contract term, termination, liability and service credits. Response format: complete a compliance matrix and pricing table. Mandatory requirements are pass/fail and weighted. Describe the architecture? Explain availability evidence? Confirm support and escalation? Provide the migration plan? Demonstrate compliance? State all commercial assumptions?`;
   await startProject(checker, checkText);
   await checker.locator(".lpos-validation-report").waitFor({ timeout: 20_000 });
-  check((await checker.locator(".lpos-validation-report").innerText()).includes("Netify RFP check"), "the governed RFP report is shown in the living document pane");
+  check((await checker.locator(".lpos-validation-report").innerText()).includes("Netify procurement-readiness check"), "the governed RFP report is shown in the living document pane");
   check(await checker.locator(".lpos-validation-sections > button").count() === 8, "the report checks all eight RFP sections");
   check((await checker.locator(".lpos-validation-report").innerText()).includes("386-question bank"), "the report identifies the governed question bank used for validation");
   check(await checker.evaluate(() => document.documentElement.scrollWidth === innerWidth), "the validation report does not create desktop overflow");

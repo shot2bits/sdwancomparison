@@ -1,4 +1,5 @@
 import { BANK_VERSION, QUESTION_BANK, SASE_EXTENDED_BANK } from "@/lib/rfp-question-bank";
+import { getAllVendors } from "@/lib/vendors";
 
 export type RfpValidationSection = {
   key: string;
@@ -16,17 +17,25 @@ export type RfpValidationQuestion = {
 };
 
 export type RfpValidationReport = {
+  assessmentVersion: string;
   score: number;
   label: "Needs work" | "Usable foundation" | "Strong" | "Procurement-ready";
   wordCount: number;
   questionCount: number;
+  missingRequirementCount: number;
   validBaseline: boolean;
   sections: RfpValidationSection[];
   strengths: string[];
   gaps: string[];
   recommendedQuestions: RfpValidationQuestion[];
+  sector: { detected: string | null; label: string | null; gaps: string[] };
+  comparabilityWarnings: string[];
+  vendorNeutralityWarnings: string[];
   bank: { version: string; totalQuestions: number; extendedQuestions: number };
 };
+
+export const RFP_VALIDATION_VERSION = "2026.2";
+export const RFP_VALIDATION_REVIEWED = "2026-08-26";
 
 type Check = { label: string; pattern: RegExp };
 type SectionDefinition = { key: string; title: string; checks: Check[] };
@@ -84,6 +93,25 @@ const CATEGORY_FOR_SECTION: Record<string, string[]> = {
   commercial_contractual: ["Commercials"],
 };
 
+const SECTOR_RULES = [
+  { key: "healthcare", label: "Healthcare", pattern: /\b(healthcare|nhs|hospital|clinic|patient)\b/i, checks: [
+    { label: "patient-data and clinical-system protection", pattern: /\b(patient data|clinical system|ehr|electronic health|nhs data|medical device)\b/i },
+    { label: "clinical-service continuity and critical-site resilience", pattern: /\b(clinical continuity|critical site|hospital resilience|patient safety|life safety)\b/i },
+  ] },
+  { key: "financial_services", label: "Financial services", pattern: /\b(financial services|banking|bank|insurer|insurance|fintech)\b/i, checks: [
+    { label: "operational-resilience and regulated-service obligations", pattern: /\b(dora|operational resilience|important business service|impact tolerance|fca|pra)\b/i },
+    { label: "auditability and third-party risk", pattern: /\b(third.party risk|supplier risk|audit trail|regulatory reporting)\b/i },
+  ] },
+  { key: "retail", label: "Retail", pattern: /\b(retail|retailer|stores?|point of sale|pos)\b/i, checks: [
+    { label: "PCI DSS and payment-environment segmentation", pattern: /\b(pci(?: dss)?|cardholder data|payment environment|pos segmentation)\b/i },
+    { label: "store continuity, guest access or seasonal demand", pattern: /\b(store continuity|guest wi.?fi|seasonal peak|peak trading|point of sale continuity)\b/i },
+  ] },
+  { key: "manufacturing", label: "Manufacturing", pattern: /\b(manufactur|factory|plant|warehouse|industrial)\w*/i, checks: [
+    { label: "IT/OT segmentation and industrial security", pattern: /\b(ot|operational technology|ics|scada|iec 62443|industrial security)\b/i },
+    { label: "plant, production or warehouse continuity", pattern: /\b(production continuity|plant resilience|factory uptime|warehouse connectivity|industrial site)\b/i },
+  ] },
+] as const;
+
 function countQuestions(text: string): number {
   const marks = text.match(/\?/g)?.length ?? 0;
   const imperativeLines = text.split(/\r?\n/).filter((line) => /^\s*(?:\d+[.)]|[-*•])?\s*(describe|explain|provide|confirm|detail|demonstrate|state|identify|outline|which|what|how)\b/i.test(line)).length;
@@ -109,6 +137,11 @@ export function validateRfpText(raw: string): RfpValidationReport {
     || new RegExp(`\\b(?:provide|attach|submit|demonstrate)\\b.{0,80}\\b(?:${evidenceNoun})\\b`, "i").test(text);
   const evaluation = /\b(weight|scor|evaluation criteria|pass\/fail|mandatory|must have|priority|disqualif|red flag)\w*/i.test(text);
   const responseStructure = /\b(response format|response template|word limit|yes\/no|compliance matrix|pricing table|complete the table)\b/i.test(text);
+  const mandatoryClarity = /\b(mandatory|must|shall|minimum requirement|pass\/fail|disqualif)\w*/i.test(text);
+  const pricingStructure = /\b(pricing table|price schedule|bill of materials|bom|one.off|recurring charge|tco|total cost)\b/i.test(text);
+  const evidenceCurrency = /\b(dated evidence|within the last|no older than|current certificate|expiry date|valid until)\b/i.test(text);
+  const namedVendors = getAllVendors().filter((vendor) => new RegExp(`\\b${vendor.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(text));
+  const equivalentAllowed = /\b(or equivalent|equivalent solution|outcome.based|vendor.neutral|technology agnostic)\b/i.test(text);
   const buyerContext = sections[0].score >= 67 && sections[1].score >= 67;
   const sectionAverage = sections.reduce((sum, section) => sum + section.score, 0) / sections.length;
   const score = Math.max(0, Math.min(100, Math.round(sectionAverage * 0.7 + (evidence ? 10 : 0) + (evaluation ? 10 : 0) + (responseStructure ? 5 : 0) + (buyerContext ? 5 : 0))));
@@ -130,6 +163,25 @@ export function validateRfpText(raw: string): RfpValidationReport {
     ...(!responseStructure ? ["Specify a common response and pricing format so bids can be compared"] : []),
   ];
 
+  const detectedSector = SECTOR_RULES.find((sector) => sector.pattern.test(text)) ?? null;
+  const sectorGaps = detectedSector
+    ? detectedSector.checks.filter((check) => !check.pattern.test(text)).map((check) => `${detectedSector.label}: add ${check.label}`)
+    : ["State the buyer's sector so Netify can apply sector-specific procurement checks"];
+  gaps.splice(Math.min(2, gaps.length), 0, ...sectorGaps);
+
+  const comparabilityWarnings = [
+    ...(!mandatoryClarity ? ["Mandatory and desirable requirements are not clearly separated"] : []),
+    ...(!responseStructure ? ["Suppliers are not given one common response structure"] : []),
+    ...(!pricingStructure ? ["Pricing is not requested in a common one-off, recurring and total-cost structure"] : []),
+    ...(!evidenceCurrency ? ["Evidence requests do not state how current the evidence must be"] : []),
+  ];
+  const vendorNeutralityWarnings = namedVendors.length && !equivalentAllowed
+    ? [`Named provider${namedVendors.length === 1 ? "" : "s"} (${namedVendors.slice(0, 3).map((vendor) => vendor.name).join(", ")}) ${namedVendors.length === 1 ? "appears" : "appear"} without an “or equivalent” or outcome-based alternative`]
+    : [];
+  const missingRequirementCount = sections.reduce((sum, section) => sum + section.missing.length, 0)
+    + Number(!evidence) + Number(!evaluation) + Number(!responseStructure)
+    + sectorGaps.length + comparabilityWarnings.length + vendorNeutralityWarnings.length;
+
   const weakCategories = new Set(sections.filter((section) => section.score < 67).flatMap((section) => CATEGORY_FOR_SECTION[section.key] ?? []));
   const recommendedQuestions = QUESTION_BANK.canonical
     .filter((question) => weakCategories.has(question.category) && !text.toLowerCase().includes(question.text.toLowerCase().slice(0, 45)))
@@ -138,15 +190,20 @@ export function validateRfpText(raw: string): RfpValidationReport {
     .map((question) => ({ id: question.id, category: question.category, text: question.text, reason: `Closes a gap in ${question.category}.` }));
 
   return {
+    assessmentVersion: RFP_VALIDATION_VERSION,
     score,
     label,
     wordCount,
     questionCount,
+    missingRequirementCount,
     validBaseline,
     sections,
     strengths: strengths.length ? strengths : ["The original wording has been preserved for review"],
-    gaps: gaps.slice(0, 10),
+    gaps: gaps.slice(0, 14),
     recommendedQuestions,
+    sector: { detected: detectedSector?.key ?? null, label: detectedSector?.label ?? null, gaps: sectorGaps },
+    comparabilityWarnings,
+    vendorNeutralityWarnings,
     bank: { version: BANK_VERSION, totalQuestions: bankTotal(), extendedQuestions: SASE_EXTENDED_BANK.questions.length },
   };
 }

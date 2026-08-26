@@ -3,6 +3,7 @@ import JourneyStrip from "@/components/JourneyStrip";
 import CapabilityBlock from "@/components/CapabilityBlock";
 import CollapsibleHero from "@/components/CollapsibleHero";
 import EmptyDocumentFrame from "@/components/procurement/EmptyDocumentFrame";
+import RfpCitationEvidence from "@/components/procurement/RfpCitationEvidence";
 import { getAllVendors } from "@/lib/vendors";
 
 /**
@@ -35,9 +36,9 @@ import { getAllVendors } from "@/lib/vendors";
  * page.tsx for the full per-line ruling provenance.
  */
 
-export const ENGINE_H1 = "Build a SASE or SD-WAN RFP, RFI and vendor shortlist";
+export const ENGINE_H1 = "Build or validate a procurement-ready SASE or SD-WAN RFP";
 export const ENGINE_PROMISE =
-  "Describe your sector and requirements in your own words. Netify builds the RFP or RFI, identifies suitable vendors and service providers, and prepares an anonymous Opportunity Board listing so you can receive bids.";
+  "ChatGPT can draft an RFP. Netify checks what is missing, rebuilds it against a governed question bank and prepares an anonymous Opportunity Board listing. Publishing unlocks suitable vendors, downloads and comparable bids.";
 export const ENGINE_VALUE =
   `Connected to ${getAllVendors().length} leading vendors and managed service providers, Netify combines specialist AI with continuously updated market intelligence and years of networking and procurement expertise across healthcare, manufacturing, retail, financial services and other sectors. Get bids. Get pricing. Get vetted responses. Send messages. Request demos. No salesperson involved.`;
 export const ENGINE_AGENT =
@@ -96,7 +97,7 @@ export default function ProcurementEntry() {
             native <details>, collapsed by default, not a rendered wall
             of text) follow beneath it rather than being the first thing
             in view. */}
-        <ProjectDesk afterPrompt={<><EmptyDocumentFrame /><JourneyStrip /><CapabilityBlock /></>} />
+        <ProjectDesk afterPrompt={<><EmptyDocumentFrame /><JourneyStrip /><CapabilityBlock /><RfpCitationEvidence /></>} />
       </div>
     </div>
   );

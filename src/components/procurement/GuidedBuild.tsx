@@ -243,10 +243,10 @@ export default function GuidedBuild({
             <div className="lpos-entry-mode" role="group" aria-label="How do you want to start?">
               <span>Start from</span>
               <button type="button" data-selected={entryMode === "build"} onClick={() => onEntryModeChange("build")}>New requirements</button>
-              <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Existing or AI-generated RFP</button>
+              <button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}>Check an AI-generated RFP</button>
             </div>
             <div className="nf-guided-prompt">{composer}</div>
-            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking coverage against the Netify question bank…" : "Paste the RFP above or upload Word, PDF, text or a spreadsheet. Its original wording is preserved."}</span><button type="button" onClick={onImportQuestions}>Upload RFP</button></div>}
+            {entryMode === "check" && <div className="lpos-check-intro"><span>{validatingRfp ? "Checking procurement readiness against the Netify question bank…" : "Already created an RFP with ChatGPT, Claude or another AI? Paste it above or upload Word, PDF, text or a spreadsheet. Netify finds what is missing and preserves the original wording."}</span><button type="button" onClick={onImportQuestions}>Upload RFP</button></div>}
             {validationError && <p className="lpos-validation-error" role="alert">{validationError}</p>}
             <div className="lpos-depth" data-depth={rfpDepth}>
               <span>RFP depth</span>
@@ -424,9 +424,11 @@ export default function GuidedBuild({
           <section className="lpos-validation-report" aria-label="RFP validation report">
             <div className="lpos-validation-score"><strong>{validationReport.score}</strong><span>/100</span><small>{validationReport.label}</small></div>
             <div className="lpos-validation-body">
-              <div className="lpos-validation-head"><div><strong>Netify RFP check</strong><span>{validationReport.wordCount.toLocaleString("en-GB")} words · {validationReport.questionCount} supplier questions · {validationReport.bank.totalQuestions}-question bank v{validationReport.bank.version}</span></div><b data-valid={validationReport.validBaseline}>{validationReport.validBaseline ? "Valid baseline" : "Baseline incomplete"}</b></div>
+              <div className="lpos-validation-head"><div><strong>Netify procurement-readiness check</strong><span>{validationReport.wordCount.toLocaleString("en-GB")} words · {validationReport.questionCount} supplier questions · {validationReport.bank.totalQuestions}-question bank v{validationReport.bank.version}</span></div><b data-valid={validationReport.validBaseline}>{validationReport.validBaseline ? "Valid baseline" : "Baseline incomplete"}</b></div>
+              <p className="lpos-validation-missing"><strong>{validationReport.missingRequirementCount}</strong> important requirement{validationReport.missingRequirementCount === 1 ? "" : "s"} missing or unclear</p>
               <div className="lpos-validation-sections">{validationReport.sections.map((section) => <button type="button" key={section.key} onClick={() => onSelectSection(section.key)}><span>{section.title}</span><i><b style={{ width: `${section.score}%` }} /></i><em>{section.score}%</em></button>)}</div>
-              <div className="lpos-validation-findings"><div><strong>Most important gaps</strong>{validationReport.gaps.slice(0, 3).map((gap) => <p key={gap}>• {gap}</p>)}</div><div><strong>Bank questions to consider</strong>{validationReport.recommendedQuestions.slice(0, 3).map((question) => <p key={question.id}><span>{question.category}</span>{question.text}</p>)}</div></div>
+              <div className="lpos-validation-findings"><div><strong>Most important gaps</strong>{[...validationReport.gaps, ...validationReport.comparabilityWarnings, ...validationReport.vendorNeutralityWarnings].slice(0, 4).map((gap) => <p key={gap}>• {gap}</p>)}</div><div><strong>Bank questions to consider</strong>{validationReport.recommendedQuestions.slice(0, 3).map((question) => <p key={question.id}><span>{question.id} · {question.category}</span>{question.text}</p>)}</div></div>
+              <button type="button" className="lpos-validation-improve" onClick={() => { const weak = validationReport.sections.find((section) => section.score < 67); if (weak) onSelectSection(weak.key); openQuestionManager(true); }}>Improve this RFP with Netify →</button>
             </div>
           </section>
         )}

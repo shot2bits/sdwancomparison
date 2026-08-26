@@ -42,6 +42,10 @@ import { getShortlistFaqSchema } from "@/lib/structured-data";
  *  a query with real volume. Rephrase freely around them; do not drop them. */
 const FAQS: { q: string; a: string }[] = [
   {
+    q: "Can Netify check an RFP created by ChatGPT, Claude or another AI?",
+    a: "Yes. Paste the text or upload the Word, PDF, text or spreadsheet file. Netify gives it a deterministic procurement-readiness score, identifies missing technical, security, resilience, commercial, implementation, support, evidence, scoring and response-format requirements, and maps the gaps to its governed question bank. Your original wording is preserved and no recommended question is added without your approval.",
+  },
+  {
     q: "What is Netify?",
     a: "Netify is a procurement platform for SASE, SD-WAN, SSE and managed network security. It does four jobs in one place. Netify builds your requirement into a project notice, an RFI or a full RFP. Netify compares vendors and service providers on graded evidence rather than on marketing claims. Netify publishes your opportunity anonymously to a marketplace of evaluated vendors. And Netify brings their responses back side by side so you can compare them. 30 vendors and service providers are graded on 40 capabilities, every grade carrying the date it was verified and the source it came from.",
   },
@@ -79,7 +83,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Do I need an account to use Netify?",
-    a: "No. You can describe your project, build the requirement and see who fits without an account. Signing in is needed only to publish, because publishing puts a notice on the board and reaches named vendors and service providers, so it has to be a verified person. A work email address is required for that.",
+    a: "No account is needed to build, paste, upload, check or preview an RFP. A verified work email is required when you publish it anonymously to the Netify Opportunity Board. Publication creates the buyer account and unlocks the final document downloads, provider matching and structured supplier responses.",
   },
   {
     q: "Can an AI agent use Netify on our behalf?",
