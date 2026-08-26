@@ -21,7 +21,7 @@ type Session = { authenticated: boolean; role?: string; email?: string; vendor_s
  * caller passed one (the publish gates auto-continue), otherwise a full
  * reload so server-rendered surfaces pick up the session.
  */
-export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void }) {
+export default function SignIn({ role, prompt, onAuthed, publishRfpId }: { role: "supplier" | "buyer"; prompt?: string; onAuthed?: () => void; publishRfpId?: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState<string | null>(null);
@@ -29,8 +29,24 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [codeOpen, setCodeOpen] = useState(false);
+  const [challenge, setChallenge] = useState("");
+  const [website, setWebsite] = useState("");
 
   useEffect(() => { fetch("/sase/api/auth/session").then((r) => r.json()).then(setSession).catch(() => {}); }, []);
+  async function refreshChallenge() {
+    if (role !== "buyer") return;
+    setChallenge("");
+    try {
+      const response = await fetch("/sase/api/auth/challenge", { cache: "no-store" });
+      const data = (await response.json()) as { challenge?: string };
+      setChallenge(data.challenge ?? "");
+    } catch { /* the disabled button prevents an unprotected request */ }
+  }
+  useEffect(() => {
+    void refreshChallenge();
+    // The role is the only input; each completed request refreshes explicitly.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role]);
 
   async function request() {
     if (busy) return;
@@ -39,8 +55,8 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
     try {
       // Where sign-in was requested from: carried through the magic link so
       // the verify page can send the person straight back here afterwards.
-      const return_to = window.location.pathname + window.location.search;
-      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, attribution: firstTouch() }) });
+      const return_to = publishRfpId ? `/sase/rfp-builder/${publishRfpId}/?welcome=submitting` : window.location.pathname + window.location.search;
+      const res = await fetch("/sase/api/auth/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, role, return_to, attribution: firstTouch(), ...(role === "buyer" ? { bot_proof: { challenge, website } } : {}) }) });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error ?? "Could not send a link.");
@@ -62,7 +78,10 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
         if (data.dev_link) setDevLink(data.dev_link);
       }
     } catch (e) { setError(e instanceof Error ? e.message : "Could not send a link."); }
-    finally { setBusy(false); }
+    finally {
+      setBusy(false);
+      if (role === "buyer") void refreshChallenge();
+    }
   }
 
   async function logout() {
@@ -94,8 +113,9 @@ export default function SignIn({ role, prompt, onAuthed }: { role: "supplier" | 
       <p className="text-sm text-[var(--ink-600,#555)] mb-2">{prompt ?? (role === "supplier" ? "Sign in with your work email to respond. We verify your email domain against the listed vendor." : "Verify yourself once and everything you build stays yours.")}</p>
 
       <div className="flex gap-2">
+        <input value={website} onChange={(e) => setWebsite(e.target.value)} name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute h-px w-px overflow-hidden opacity-0 pointer-events-none" />
         <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="you@yourcompany.com" className="flex-1 border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" onKeyDown={(e) => { if (e.key === "Enter") void request(); }} />
-        <button onClick={request} disabled={busy || !email.includes("@")} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{busy ? "Sending…" : "Send link"}</button>
+        <button onClick={request} disabled={busy || !email.includes("@") || (role === "buyer" && !challenge)} className="px-4 py-2 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full hover:bg-amber-400 transition-colors disabled:opacity-50">{busy ? "Sending…" : "Send link"}</button>
       </div>
       {sent && (
         <>

@@ -7,7 +7,7 @@
  */
 
 import { corsHeaders, preflight } from "@/lib/cors";
-import { kvConfigured } from "@/lib/rfp-store";
+import { kvConfigured, saveProject } from "@/lib/rfp-store";
 import { sessionFromRequest } from "@/lib/auth";
 import { createSecurityProject } from "@/lib/security/persist-project";
 import { CREATE_CONSENT_TEXT } from "@/lib/security/create-project";
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     custom_title?: string;
     requirement?: SecurityRequirementInput;
     consent?: boolean;
+    publish_intent?: boolean;
     test?: boolean;
     preferred_vendors?: string[];
     /** Reliability gate, fourth amendment (13 Aug 2026): the buyer's own
@@ -101,7 +102,14 @@ export async function POST(req: Request) {
   if ("rejected" in created) {
     return Response.json({ error: created.rejected.error }, { status: created.rejected.status, headers: cors });
   }
-  const { project, verdict, builderPath } = created;
+  let { project } = created;
+  const { verdict, builderPath } = created;
+  if (body.publish_intent === true && !project.test) {
+    project = await saveProject({
+      ...project,
+      pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: false, requested_at: Date.now() },
+    }, { engineWrite: true });
+  }
 
   // manage_token is returned at creation only (existing convention): the
   // creator holds the push credential; public reads never see it.

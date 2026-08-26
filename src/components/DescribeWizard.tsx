@@ -132,6 +132,8 @@ export default function DescribeWizard() {
   const [match, setMatch] = useState<Match | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authChallenge, setAuthChallenge] = useState("");
+  const [website, setWebsite] = useState("");
   // Vendors named for evaluation via ?vendors= (20 July 2026, the agentic
   // evaluation kits). Pinned into the invite list at publish, capped at 5,
   // validated server-side against the marketplace dataset.
@@ -168,6 +170,13 @@ export default function DescribeWizard() {
         fireNetifyEvent("describe_started", { from: "hero" });
       }
     }
+  }, []);
+
+  useEffect(() => {
+    fetch("/sase/api/auth/challenge", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { challenge?: string }) => setAuthChallenge(data.challenge ?? ""))
+      .catch(() => {});
   }, []);
 
   // The auto-drafted project title: composed from the answers so nobody
@@ -342,7 +351,7 @@ export default function DescribeWizard() {
         const ar = await fetch("/sase/api/auth/request", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: `/sase/rfp-builder/${id}/?welcome=submitting`, marketing_opt_in: optIn, attribution: firstTouch() }),
+          body: JSON.stringify({ email: email.trim(), role: "buyer", return_to: `/sase/rfp-builder/${id}/?welcome=submitting`, marketing_opt_in: optIn, attribution: firstTouch(), bot_proof: { challenge: authChallenge, website } }),
         });
         const ad = (await ar.json().catch(() => ({}))) as { error?: string; message?: string; emailed?: boolean; dev_link?: string };
         if (!ar.ok) {
@@ -545,6 +554,7 @@ export default function DescribeWizard() {
             ) : (
               <div className="mb-3">
                 <label className="text-sm font-medium block mb-1">Work email</label>
+                <input value={website} onChange={(e) => setWebsite(e.target.value)} name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute h-px w-px overflow-hidden opacity-0 pointer-events-none" />
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -587,7 +597,7 @@ export default function DescribeWizard() {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={() => create(true)}
-                disabled={creating || (authed !== true && !email.includes("@"))}
+                disabled={creating || (authed !== true && (!email.includes("@") || !authChallenge))}
                 className={nextBtn}
               >
                 {creating ? "Publishing..." : `Generate and publish opportunity`}
@@ -595,9 +605,6 @@ export default function DescribeWizard() {
               <button onClick={() => setStep(4)} className={backBtn}>Back</button>
             </div>
             <p className="mt-2 text-xs text-[var(--ink-600,#555)]">Free and no obligation to award. You choose who to speak with.</p>
-            <button onClick={() => create(false)} disabled={creating} className="mt-3 block text-[11px] text-[var(--ink-500)] underline">
-              Generate only, review first
-            </button>
           </div>
         )}
       </div>

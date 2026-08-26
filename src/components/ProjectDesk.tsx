@@ -3113,7 +3113,10 @@ export default function ProjectDesk({
         notes: notesLine,
       },
       ...(withSubmitConsent
-        ? { consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" } }
+        ? {
+            consent: { version: "submit-agreement v3, 17 July 2026", agreed_at: Date.now(), flow: "workspace" },
+            pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: false },
+          }
         : {}),
       position: {
         covered_sections: instrumentCoveredSections,
@@ -3165,6 +3168,7 @@ export default function ProjectDesk({
         body: JSON.stringify({
           requirement,
           consent: true,
+          publish_intent: withSubmitConsent,
           preferred_vendors: pins,
           /* Reliability gate, third amendment (13 Aug 2026), item 6: this
              was the one save/publish path with NO route for the buyer's
@@ -5811,6 +5815,7 @@ export default function ProjectDesk({
                                   <SignIn
                                     role="buyer"
                                     prompt="Verify yourself to publish."
+                                    publishRfpId={created?.id}
                                     onAuthed={() => {
                                       setSignedIn(true);
                                       setNeedAuth(false);
@@ -5905,7 +5910,7 @@ export default function ProjectDesk({
               <div className="nf-2030-command-intro">
                 <span>SASE &amp; SD-WAN procurement</span>
                 <h2><strong>Build</strong> your SASE or SD-WAN RFP. <strong>Shortlist</strong> vendors. Get <strong>Bids</strong>.</h2>
-                <p>Describe your requirements, get matched with the right vendors and service providers, then publish your opportunity when ready.</p>
+                <p>Build a valid RFP, then publish it anonymously to unlock vendor and managed-service-provider matching, downloads and bids.</p>
               </div>
               {composerBlock}
               <div className="nf-2030-command-actions">

@@ -51,9 +51,18 @@ export async function startFakeKv() {
         return e ? e.value : null;
       }
       case "SET": {
+        const flags = args.slice(2).map((value) => String(value).toUpperCase());
+        if (flags.includes("NX") && get(args[0])) return null;
         store.set(args[0], { type: "string", value: String(args[1]) });
         expiries.delete(args[0]);
+        const exIndex = flags.indexOf("EX");
+        if (exIndex >= 0) expiries.set(args[0], Date.now() + Number(args[exIndex + 3]) * 1000);
         return "OK";
+      }
+      case "INCR": {
+        const next = Number(get(args[0])?.value ?? 0) + 1;
+        store.set(args[0], { type: "string", value: String(next) });
+        return next;
       }
       case "DEL": {
         let n = 0;

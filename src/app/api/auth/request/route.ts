@@ -1,5 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
-import { createMagicToken, kvConfigured, kvGetJson, kvSetJson, kvRaw, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
+import { createMagicToken, getProject, getProjectsBulk, kvConfigured, kvGetJson, kvSetJson, kvRaw, listAllRfpIds, recordPendingRequest, isBuyerAllowedDomain, recordRejectedAttempt } from "@/lib/rfp-store";
 import { sendMagicLink, resendConfigured } from "@/lib/auth";
 import { getBounce, recordResendSend } from "@/lib/email-bounces";
 import {
@@ -11,6 +11,9 @@ import {
   emailDomain,
 } from "@/lib/access-control";
 import { SITE_URL } from "@/lib/structured-data";
+import { verifyAuthChallenge } from "@/lib/auth-challenge";
+import { isMarketUnlocked } from "@/lib/market-unlock";
+import { createHash } from "node:crypto";
 
 export const runtime = "nodejs";
 export async function OPTIONS(req: Request) { return preflight(req); }
@@ -28,7 +31,7 @@ export async function OPTIONS(req: Request) { return preflight(req); }
 export async function POST(req: Request) {
   const cors = corsHeaders(req);
   if (!kvConfigured()) return Response.json({ error: "Storage not configured." }, { status: 503, headers: cors });
-  let body: { email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean; attribution?: { ref?: unknown; landing?: unknown } | null };
+  let body: { email?: string; role?: string; return_to?: string; marketing_opt_in?: boolean; attribution?: { ref?: unknown; landing?: unknown } | null; bot_proof?: { challenge?: unknown; website?: unknown } | null };
   try { body = await req.json(); } catch { return Response.json({ error: "Invalid JSON." }, { status: 400, headers: cors }); }
   const email = (body.email ?? "").trim().toLowerCase();
   const role = body.role === "supplier" ? "supplier" : "buyer";
@@ -42,6 +45,36 @@ export async function POST(req: Request) {
   const returnTo = rawReturn.length <= 400 && /^\/sase\/[\w\-/.~%?=&]*$/.test(rawReturn) ? rawReturn : "";
 
   const admin = isAdminEmail(email);
+
+  // Invisible browser proof: a signed, short-lived challenge must have
+  // spent at least a moment in the page, may be used once, and carries a
+  // honeypot field legitimate users never see. This is deliberately not a
+  // domain-age check: new legitimate companies remain welcome.
+  let proofNonce: string | null = null;
+  if (role === "buyer" && !admin) {
+    const website = typeof body.bot_proof?.website === "string" ? body.bot_proof.website.trim() : "";
+    const proof = verifyAuthChallenge(typeof body.bot_proof?.challenge === "string" ? body.bot_proof.challenge : "");
+    if (website || !proof.ok) return Response.json({ error: "We could not verify this sign-in request. Refresh the page and try again." }, { status: 403, headers: cors });
+    proofNonce = proof.nonce;
+  }
+
+  // Global application-level throttles protect the mail sender even when a
+  // caller bypasses the UI. Values are hashed so rate-limit keys contain no
+  // email address or IP address. Limits are intentionally generous for a
+  // human retrying delivery, but stop scripted mailbox farms.
+  const digest = (value: string) => createHash("sha256").update(value).digest("hex").slice(0, 24);
+  const ip = (req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "").trim();
+  async function withinLimit(key: string, maximum: number, seconds: number) {
+    const count = Number(await kvRaw(["INCR", key]));
+    if (count === 1) await kvRaw(["EXPIRE", key, seconds]);
+    return count <= maximum;
+  }
+  const allowedByRate = await Promise.all([
+    ip ? withinLimit(`auth:rate:ip:${digest(ip)}`, 10, 900) : Promise.resolve(true),
+    withinLimit(`auth:rate:email:${digest(email)}`, 5, 3600),
+    withinLimit(`auth:rate:domain:${digest(domain)}`, 12, 3600),
+  ]).then((checks) => checks.every(Boolean)).catch(() => true);
+  if (!allowedByRate) return Response.json({ error: "Too many sign-in requests. Please wait before trying again." }, { status: 429, headers: { ...cors, "retry-after": "900" } });
 
   // Business-only identity policy, enforced for every role. Admins are exempt.
   //
@@ -71,6 +104,39 @@ export async function POST(req: Request) {
       },
       { status: 422, headers: cors },
     );
+  }
+
+  // A buyer account is not a standalone product. First access must be tied
+  // to a real RFP carrying explicit board-publication intent; returning
+  // buyers may sign in only when they already own a market-unlocked RFP.
+  // Merely requesting a link can therefore never create an empty account.
+  if (role === "buyer" && !admin) {
+    const rfpId = returnTo.match(/\/rfp-builder\/(rfp_[a-z0-9]+)/i)?.[1] ?? null;
+    let publicationBound = false;
+    if (rfpId) {
+      const project = await getProject(rfpId);
+      const belongsToEmail = Boolean(project && (!project.owner_email || project.owner_email.toLowerCase() === email));
+      publicationBound = Boolean(
+        project && belongsToEmail &&
+        ((project.pending_submit?.list_on_board === true) || (await isMarketUnlocked(project.id)))
+      );
+    } else {
+      const projects = await getProjectsBulk(await listAllRfpIds());
+      for (const project of projects.filter((item) => (item.owner_email ?? "").toLowerCase() === email)) {
+        if (await isMarketUnlocked(project.id)) { publicationBound = true; break; }
+      }
+    }
+    if (!publicationBound) {
+      return Response.json(
+        { error: "Buyer access is created when you publish an RFP to the Netify Opportunity Board. Build and preview your RFP first, then publish to continue.", publish_required: true },
+        { status: 403, headers: cors },
+      );
+    }
+  }
+
+  if (proofNonce) {
+    const consumed = await kvRaw(["SET", `auth:challenge:${proofNonce}`, "1", "NX", "EX", "1800"]).catch(() => null);
+    if (consumed !== "OK") return Response.json({ error: "That sign-in request has expired. Refresh the page and try again." }, { status: 403, headers: cors });
   }
 
   let resolvedRole: "supplier" | "buyer" | "netify" = role;

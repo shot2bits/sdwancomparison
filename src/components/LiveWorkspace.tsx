@@ -284,7 +284,7 @@ export default function LiveWorkspace() {
   const [added, setAdded] = useState<string[]>([]);
   const [restored, setRestored] = useState(false);
   const [testMode, setTestMode] = useState(false);
-  const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
+  const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("dismissed");
   const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
   const [signedIn, setSignedIn] = useState(false);
 

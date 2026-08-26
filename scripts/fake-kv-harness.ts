@@ -84,9 +84,17 @@ export class FakeKvStore {
     switch (op) {
       case "GET":
         return this.str(String(args[0]));
-      case "SET":
+      case "SET": {
+        const flags = args.slice(2).map((value) => String(value).toUpperCase());
+        if (flags.includes("NX") && this.store.has(String(args[0]))) return null;
         this.store.set(String(args[0]), { type: "string", value: String(args[1]) });
         return "OK";
+      }
+      case "INCR": {
+        const next = Number(this.str(String(args[0])) ?? 0) + 1;
+        this.store.set(String(args[0]), { type: "string", value: String(next) });
+        return next;
+      }
       case "DEL": {
         let n = 0;
         for (const k of args) if (this.store.delete(String(k))) n++;

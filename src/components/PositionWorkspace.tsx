@@ -155,7 +155,7 @@ export default function PositionWorkspace() {
   const [motes, setMotes] = useState<Array<{ id: number; prov: string }>>([]);
   const [cascade, setCascade] = useState(false);
 
-  const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("hidden");
+  const [saveLite, setSaveLite] = useState<"hidden" | "shown" | "sent" | "dismissed">("dismissed");
   const [saveLiteSentTo, setSaveLiteSentTo] = useState("");
   const [signedIn, setSignedIn] = useState(false);
 
