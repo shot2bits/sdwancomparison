@@ -2,6 +2,7 @@ import type { OutlineRow } from "@/lib/workspace/procurement-outline";
 import type { SectionQuestionProgress } from "@/lib/workspace/section-question-register";
 
 export const RFP_SECTION_QUESTION_TARGET = 5;
+export const SHORT_RFP_SECTION_QUESTION_TARGET = 1;
 
 export type RfpSectionCoverage = {
   key: string;
@@ -29,15 +30,16 @@ export type RfpCoverage = {
 export function buildRfpCoverage(
   rows: readonly OutlineRow[],
   progressByKey: Readonly<Record<string, SectionQuestionProgress>>,
+  target = RFP_SECTION_QUESTION_TARGET,
 ): RfpCoverage {
   const sections = rows.map((row) => {
     const answered = progressByKey[row.key]?.answered ?? 0;
-    const remaining = Math.max(0, RFP_SECTION_QUESTION_TARGET - answered);
+    const remaining = Math.max(0, target - answered);
     return {
       key: row.key,
       title: row.title,
       answered,
-      target: RFP_SECTION_QUESTION_TARGET,
+      target,
       remaining,
       ready: remaining === 0,
     };

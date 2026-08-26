@@ -130,7 +130,7 @@ function main() {
   record(/<SectionNav[\s\S]{0,400}progress=\{sectionProgress\}/.test(desk), "C: the primary navigation reads it (only rendered once a project has started)");
   record(/outlineProgress\(outline\)/.test(canvas), "C: the document header derives it from the outline it is about to render");
   record(/outlineProgressLine\(progress\)/.test(canvas), "C: the header uses the shared wording function, not its own sentence");
-  record(/rfpAnswered\} of \{RFP_SECTION_QUESTION_TARGET\} populated/.test(nav), "C: the primary nav shows the explicit five-populated-question RFP threshold for every section");
+  record(/rfpAnswered\} of \{questionTarget\} populated/.test(nav), "C: the primary nav shows the selected short or detailed populated-question threshold for every section");
 
   /* ================================================================ */
   /* D. A QUESTION KNOWS WHERE IT LANDS.                               */
@@ -145,9 +145,9 @@ function main() {
   /* ================================================================ */
   record(
     /const contentReady = publishChecklist\.ready/.test(desk) &&
-      /buildRfpCoverage\(sectionOutline, sectionQuestionProgressByKey\)/.test(desk) &&
+      /buildRfpCoverage\(sectionOutline, sectionQuestionProgressByKey, rfpQuestionTarget\)/.test(desk) &&
       /const rfpIsBuilt = started && !published && rfpCoverage\.ready/.test(desk),
-    "E: opportunity publishing and the five-per-section RFP-ready state are separate, explicit gates",
+    "E: opportunity publishing and the selected short/detailed RFP-ready state are separate, explicit gates",
   );
   record(
     !/rfpIsBuilt = .*materialDecisionsRemaining/.test(desk),

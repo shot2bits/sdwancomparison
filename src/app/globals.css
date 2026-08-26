@@ -103,7 +103,7 @@
 .lpos-builder .nf-guided-continue,.lpos-builder .nf-guided-review { margin: 0 20px 12px; color: #fff; background: var(--lpos-orange); }
 .lpos-impact { display: grid; grid-template-columns: 28px minmax(0,1fr) 32px; align-items: center; gap: 10px; margin: 14px 0; border: 1px solid #b9cfaa; border-radius: 10px; padding: 14px 16px; color: #35722e; background: #f5fbf1; }.lpos-impact > span { font-size: 24px; }.lpos-impact strong { font-size: 11px; }.lpos-impact p { margin: 5px 0 0; color: #454841; font-size: 10.5px; line-height: 1.45; }.lpos-impact > b { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; color: #fff; background: #3e8c39; }
 .lpos-own-words { margin-top: 12px; border: 1px solid var(--lpos-line); border-radius: 10px; padding: 14px 16px; background: #fffdfa; }.lpos-own-words > strong { font-size: 10.5px; }.lpos-own-words .nf-guided-prompt { margin-top: 10px; }.lpos-own-words .nf-2030-composer { min-height: 100px !important; border: 1px solid var(--lpos-line) !important; background: #fff !important; }.lpos-own-words .nf-2030-composer textarea { color: #24231f !important; }.lpos-own-words .nf-2030-composer button:last-child { color: #fff !important; background: var(--lpos-orange) !important; }
-.lpos-persistent-prompt { position: sticky; z-index: 12; top: 0; margin: 0 0 14px; border: 1.5px solid #ef9a5e; padding: 14px; background: rgba(255,253,250,.97); box-shadow: 0 10px 28px rgba(40,28,17,.12); backdrop-filter: blur(12px); }
+.lpos-persistent-prompt { position: static; z-index: 12; margin: 0 0 14px; border: 1.5px solid #ef9a5e; padding: 14px; background: #fffaf4; box-shadow: 0 5px 16px rgba(40,28,17,.08); }
 .lpos-prompt-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .lpos-prompt-heading strong { color: #24211d; font-size: 12px; }
 .lpos-prompt-heading span { color: #77716a; font-size: 9px; text-align: right; }
@@ -132,6 +132,15 @@
 .lpos-depth-recommendations > div { display: flex; flex-wrap: wrap; gap: 5px; }.lpos-depth-recommendations > div > span { border-radius: 10px; padding: 4px 7px; color: #47604c; background: #eaf3e8; font-size: 7.5px; }
 .lpos-depth-recommendations > button { margin-top: 8px; border: 0; padding: 0; color: #b9530d; background: transparent; font-size: 8.5px; font-weight: 700; }
 .lpos-builder .nf-guided-register { margin: 16px 0 0; border: 1px solid var(--lpos-line); border-radius: 10px; padding: 14px; box-shadow: none; }.lpos-builder .nf-guided-register-head p,.lpos-builder .nf-guided-register li strong { color: #24231f; }.lpos-builder .nf-guided-register-head span,.lpos-builder .nf-guided-register li small { color: #77736d; }.lpos-builder .nf-guided-register li { box-shadow: inset 0 -1px var(--lpos-line); }.lpos-builder .nf-guided-register li > span { color: #666; background: #eeeae3; }.lpos-builder .nf-guided-question-actions button { border-color: var(--lpos-line); color: #4c4943; background: #fff; }.lpos-builder .nf-guided-add-question { color: #333; background: #f4f1eb; }.lpos-builder .nf-guided-add-question label { color: #333; }.lpos-builder .nf-guided-add-question input { color: #222; background: #fff; }
+.nf-guided-inline-answer { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 7px; margin-top: 8px; }
+.nf-guided-inline-answer input { min-width: 0; border: 1px solid var(--lpos-line); border-radius: 6px; padding: 8px 9px; color: #24231f; background: #fff; font-size: 11px; }
+.nf-guided-inline-answer button { border: 1px solid #d55b08; border-radius: 6px; padding: 7px 9px; color: #8a3500; background: #fff7ef; font-size: 10px; font-weight: 700; }
+.nf-guided-inline-answer button:disabled { cursor: not-allowed; opacity: .45; }
+.nf-guided-suggestions .nf-guided-add-all { border-color: var(--lpos-orange); color: #8a3500; background: #fff7ef; font-weight: 750; }
+.lpos-settings-backdrop { position: fixed; z-index: 80; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(10,10,8,.56); }
+.lpos-settings-panel { width: min(540px,100%); max-height: min(760px,90vh); overflow-y: auto; border: 1px solid #d9d2c8; border-radius: 16px; padding: 24px; color: #25231f; background: #fffdfa; box-shadow: 0 24px 70px rgba(0,0,0,.28); }
+.lpos-settings-panel > div { display: flex; align-items: center; justify-content: space-between; }.lpos-settings-panel > div p { margin: 0; color: #9b4a0e; font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }.lpos-settings-panel > div button { border: 0; color: #555; background: transparent; font-size: 24px; }
+.lpos-settings-panel h2 { margin: 8px 0 20px; font-size: 26px; }.lpos-settings-panel fieldset { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 0 0 18px; border: 0; padding: 0; }.lpos-settings-panel legend { grid-column: 1/-1; margin-bottom: 8px; font-size: 13px; font-weight: 750; }.lpos-settings-panel fieldset button { min-height: 76px; border: 1px solid #d8d1c7; border-radius: 9px; padding: 12px; text-align: left; color: #34312d; background: #fff; }.lpos-settings-panel fieldset button[data-selected="true"] { border-color: var(--lpos-orange); background: #fff5ec; box-shadow: inset 3px 0 var(--lpos-orange); }.lpos-settings-panel fieldset strong,.lpos-settings-panel fieldset span { display: block; }.lpos-settings-panel fieldset span { margin-top: 4px; color: #716d67; font-size: 11px; line-height: 1.4; }.lpos-settings-panel .lpos-settings-done { width: 100%; border: 0; border-radius: 8px; padding: 12px; color: #fff; background: var(--lpos-orange); font-weight: 750; }.lpos-settings-methodology { margin: 4px 0 18px; border-top: 1px solid #e7e1d8; padding-top: 14px; color: #746f68; font-size: 11px; line-height: 1.5; }
 .lpos-builder .nf-guided-document { min-width: 0; padding: 28px 30px 30px; color: var(--lpos-ink); background: #fffefa; box-shadow: none; overflow-y: auto; }
 .lpos-builder .nf-guided-document-head { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: start; gap: 16px; }.lpos-builder .nf-guided-document-head > div { gap: 3px; }.lpos-builder .nf-guided-document-head h2 { margin: 0; color: #151511; font-size: 24px; }.lpos-builder .nf-guided-document-head div span { color: #5d5b55; font-size: 12px; }.lpos-builder .nf-guided-document-head > span { margin-top: 3px; border: 1px solid #cbdac0; border-radius: 18px; padding: 6px 11px; color: #4f7f3e; background: #f2f8ee; font-size: 9px; font-weight: 700; }.lpos-builder .nf-guided-document-head > button { margin: 0; border: 1px solid var(--lpos-line); border-radius: 5px; padding: 9px 12px; color: #34322e; background: #fff; font-size: 10px; }
 .lpos-metrics { display: grid; grid-template-columns: minmax(250px,1.6fr) repeat(3,minmax(100px,.7fr)); margin-top: 20px; border: 1px solid var(--lpos-line); border-radius: 8px; background: #fff; }.lpos-metrics > div { min-height: 72px; padding: 14px; border-left: 1px solid var(--lpos-line); }.lpos-metrics > div:first-child { border-left: 0; }.lpos-metrics > div > strong { display: block; color: #1d1c18; font-size: 19px; }.lpos-metrics > div > span { color: #4c4943; font-size: 9px; line-height: 1.45; }.lpos-completeness > span { color: #393732 !important; font-size: 10px !important; }.lpos-completeness p { display: flex; align-items: center; gap: 12px; margin: 10px 0 0; }.lpos-completeness i { position: relative; height: 6px; flex: 1; overflow: hidden; border-radius: 10px; background: #ebe8e1; }.lpos-completeness i b { position: absolute; inset: 0 auto 0 0; background: var(--lpos-green); }.lpos-completeness p strong { font-size: 16px; }
@@ -1319,6 +1328,11 @@ body:has(.nf-2030-workspace) > .min-h-screen > main { min-height: 100vh; }
 .nf-2030-workspace { min-height: 100vh !important; background: #080a09 !important; }
 .nf-2030-workspace .lpos-header { min-height: 78px !important; }
 .nf-2030-workspace > .nf-2030-grid { display: block !important; min-height: calc(100vh - 78px) !important; margin-left: 106px !important; padding: 0 !important; }
+.nf-2030-workspace > .nf-2030-grid[data-rail-collapsed="true"] { margin-left: 58px !important; }
+.nf-2030-workspace .lpos-product-rail[data-collapsed="true"] { width: 58px; overflow: hidden; }
+.nf-2030-workspace .lpos-product-rail[data-collapsed="true"] button { gap: 0; }
+.nf-2030-workspace .lpos-product-rail[data-collapsed="true"] .lpos-rail-label { display: none; }
+.nf-2030-workspace .lpos-product-rail button:disabled { cursor: not-allowed; opacity: .42; }
 .nf-2030-workspace .lpos-builder { display: grid !important; width: 100%; grid-template-columns: minmax(390px,33%) minmax(620px,67%) !important; grid-template-areas: "conversation document" !important; }
 .nf-2030-workspace .lpos-builder > .nf-guided-main { grid-area: conversation !important; }
 .nf-2030-workspace .lpos-builder > .nf-guided-document { grid-area: document !important; }
@@ -1352,4 +1366,28 @@ body:has(.nf-2030-workspace) > .min-h-screen > main { min-height: 100vh; }
     margin-bottom: 16px;
     backdrop-filter: none;
   }
+}
+
+/* The two-pane desktop canvas needs roughly 1,070px after navigation.
+ * Between phone and full desktop widths, forcing both minimum columns
+ * created the 1,156px document Harry reproduced in a 900px window.
+ * Use the compact rail and a clean stacked reading order throughout that
+ * intermediate range; no horizontal pan is ever part of the workflow. */
+@media (max-width: 1100px) {
+  .nf-2030-workspace .lpos-product-rail { width: 58px; overflow: hidden; }
+  .nf-2030-workspace .lpos-product-rail button { gap: 0; }
+  .nf-2030-workspace .lpos-product-rail .lpos-rail-label { display: none; }
+  .nf-2030-workspace > .nf-2030-grid { margin-left: 58px !important; }
+  .nf-2030-workspace .lpos-builder { display: block !important; min-width: 0 !important; overflow: visible !important; }
+  .nf-2030-workspace .lpos-builder > .nf-guided-main {
+    position: static;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .nf-2030-workspace .lpos-builder > .nf-guided-document { width: 100%; min-width: 0; overflow: visible; }
+  .nf-2030-workspace .lpos-header .nf-2030-lifecycle { display: none !important; }
+}
+@media (max-width: 560px) {
+  .nf-guided-inline-answer,.lpos-settings-panel fieldset { grid-template-columns: 1fr; }
 }

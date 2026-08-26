@@ -27,6 +27,12 @@ try {
   check(await desktop.locator(".lpos-header").count() === 1, "the Living Procurement OS header is present");
   check(await desktop.locator("body > header").evaluate((el) => getComputedStyle(el).display) === "none", "the marketing header is suppressed inside the procurement OS");
   check(await desktop.locator(".lpos-product-rail").count() === 1, "the dark product rail is present");
+  check(await desktop.getByRole("button", { name: "Overview", exact: true }).isDisabled(), "Overview is honestly gated until an RFP exists");
+  check(await desktop.getByRole("button", { name: "Requirements", exact: true }).isEnabled(), "Requirements is a real navigation destination");
+  check(await desktop.getByRole("button", { name: "Suppliers", exact: true }).isDisabled(), "future supplier access is honestly gated before the baseline is complete");
+  await desktop.getByRole("button", { name: "Collapse navigation" }).click();
+  check(await desktop.locator(".lpos-product-rail").getAttribute("data-collapsed") === "true", "the product rail can be collapsed");
+  await desktop.getByRole("button", { name: "Expand navigation" }).click();
   check(await desktop.locator(".lpos-builder > .nf-guided-main").count() === 1 && await desktop.locator(".lpos-builder > .nf-guided-document").count() === 1, "the workspace is split into guided conversation and living document panes");
   check(await desktop.locator(".lpos-persistent-prompt").count() === 1, "the guided pane contains one prominent persistent AI prompt");
   check(await desktop.getByRole("button", { name: /Short RFP/ }).count() === 1 && await desktop.getByRole("button", { name: /Detailed RFP/ }).count() === 1, "buyers can choose a short valid RFP or a detailed guided RFP");
@@ -40,9 +46,9 @@ try {
     return { top: box.top, bottom: box.bottom, beforeCaptured: Boolean(captured && box.bottom <= captured.top), position: getComputedStyle(element).position };
   });
   check(desktopPrompt.top < 320 && desktopPrompt.beforeCaptured, "the AI prompt appears near the top before captured context", JSON.stringify(desktopPrompt));
-  check(desktopPrompt.position === "sticky", "the desktop AI prompt remains available while its guided pane scrolls");
+  check(desktopPrompt.position === "static", "the prompt remains prominent without covering later questions");
   check(await desktop.locator(".lpos-sections > li").count() === 8, "the living document exposes the approved eight-section outline");
-  check((await desktop.locator(".lpos-bank-depth").innerText()).includes("386 analyst-written questions"), "the outline communicates the depth of the underlying question bank");
+  check(await desktop.locator(".lpos-bank-depth").count() === 0, "internal question-bank statistics do not interrupt the buyer workflow");
   check(await desktop.locator(".lpos-sections > li > button > span > small").count() === 8, "every section previews its substantive coverage areas without expanding into a question wall");
   check(await desktop.getByRole("button", { name: /Recommended questions/ }).count() === 1, "recommended questions are available in the active section");
   check(await desktop.getByRole("button", { name: /Bespoke question/ }).count() === 1, "bespoke questions are available in the active section");
@@ -50,6 +56,13 @@ try {
   check(await desktop.evaluate(() => document.documentElement.scrollWidth === innerWidth), "desktop has no horizontal overflow");
 
   await startProject(desktop, "We are a healthcare organisation with 20 UK sites and 200 users. We need SASE and SD-WAN by December 2026.");
+  await desktop.getByRole("button", { name: "Overview", exact: true }).click();
+  check(await desktop.getByRole("heading", { name: "Review before publishing" }).count() === 1, "Overview opens the real document review surface");
+  await desktop.getByRole("button", { name: "Requirements", exact: true }).click();
+  check(await desktop.locator(".lpos-builder").count() === 1, "Requirements returns to the guided builder");
+  await desktop.getByRole("button", { name: "Settings", exact: true }).click();
+  check(await desktop.getByRole("dialog", { name: "Document settings" }).count() === 1, "rail Settings opens the real document settings");
+  await desktop.getByRole("button", { name: "Close document settings" }).click();
   const startedText = await desktop.locator("body").innerText();
   check(startedText.includes("Healthcare") && startedText.includes("20"), "guided input updates the living document through the existing question bank");
   check(await desktop.getByRole("button", { name: /Review & publish/ }).count() === 1, "the essential baseline unlocks review and publish");
@@ -82,6 +95,18 @@ try {
   check((await checker.locator(".lpos-validation-report").innerText()).includes("386-question bank"), "the report identifies the governed question bank used for validation");
   check(await checker.evaluate(() => document.documentElement.scrollWidth === innerWidth), "the validation report does not create desktop overflow");
   await checker.close();
+
+  const narrow = await browser.newPage({ viewport: { width: 900, height: 800 } });
+  await reset(narrow);
+  check(await narrow.locator(".lpos-builder").evaluate((el) => getComputedStyle(el).display) === "block", "narrow desktop stacks the procurement panes");
+  check(await narrow.evaluate(() => document.documentElement.scrollWidth === innerWidth), "narrow desktop has no horizontal overflow");
+  const narrowShell = await narrow.evaluate(() => {
+    const rail = document.querySelector(".lpos-product-rail")?.getBoundingClientRect();
+    const workspace = document.querySelector(".nf-2030-grid")?.getBoundingClientRect();
+    return { railRight: rail?.right ?? 0, workspaceLeft: workspace?.left ?? 0 };
+  });
+  check(narrowShell.workspaceLeft >= narrowShell.railRight, "narrow desktop content begins after the compact rail", JSON.stringify(narrowShell));
+  await narrow.close();
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await reset(mobile);

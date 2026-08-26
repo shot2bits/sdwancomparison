@@ -108,7 +108,7 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
  *  render slot below; Publish/Compare survive only as its own lightweight
  *  strip, per Robert's explicit framing, not a parallel rail. */
 import SectionNav from "@/components/procurement/SectionNav";
-import GuidedBuild from "@/components/procurement/GuidedBuild";
+import GuidedBuild, { type RfpDepth } from "@/components/procurement/GuidedBuild";
 import SectionBuildPanel from "@/components/procurement/SectionBuildPanel";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
@@ -119,8 +119,8 @@ import CapturedList from "@/components/procurement/CapturedList";
 import RfpReady from "@/components/procurement/RfpReady";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
 import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
-import { buildRfpCoverage } from "@/lib/workspace/rfp-coverage";
-import { buildSectionQuestionRegister, questionProgressBySection } from "@/lib/workspace/section-question-register";
+import { buildRfpCoverage, RFP_SECTION_QUESTION_TARGET, SHORT_RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
+import { buildSectionQuestionRegister, questionProgressBySection, type SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 
 /* ================================================================== */
@@ -1161,6 +1161,16 @@ export default function ProjectDesk({
    *  hasn't happened. `describe` is the honest default: it is the only
    *  station reachable before a single fact exists. */
   const [step, setStep] = useState<WizardStep>("describe");
+  const [productRailCollapsed, setProductRailCollapsed] = useState(false);
+  const [documentSettingsOpen, setDocumentSettingsOpen] = useState(false);
+  const [rfpDepth, setRfpDepth] = useState<RfpDepth>(() => {
+    if (typeof window === "undefined") return "short";
+    return window.localStorage.getItem("netify-rfp-depth") === "detailed" ? "detailed" : "short";
+  });
+  const changeRfpDepth = useCallback((depth: RfpDepth) => {
+    setRfpDepth(depth);
+    window.localStorage.setItem("netify-rfp-depth", depth);
+  }, []);
   /** 2030 UI rebuild (20 Aug 2026): which outline SECTION the buyer is
    *  looking at in the new primary navigation (SectionNav/SectionDetail),
    *  independent of `step` above. `null` means "no explicit choice yet" —
@@ -4129,6 +4139,7 @@ export default function ProjectDesk({
         answer: listJoin(entry.answers),
       })),
       openQuestions: openCards.flatMap((card) => {
+        if (rfpDepth === "short" && card.nq.governedSuggestion) return [];
         const row = sectionOutline.find((candidate) => candidate.title === card.fills?.title);
         return row ? [{ id: card.nq.id, sectionKey: row.key, text: card.nq.question, suggested: Boolean(card.nq.governedSuggestion) }] : [];
       }),
@@ -4138,9 +4149,27 @@ export default function ProjectDesk({
         text: item.label,
       }] : []),
     });
-  }, [sectionOutline, answeredLog.stated, allNextQuestionCards, guidedQuestionCard, noted]);
+  }, [sectionOutline, answeredLog.stated, allNextQuestionCards, guidedQuestionCard, noted, rfpDepth]);
 
   const activeSectionQuestionItems = activeRow ? sectionQuestionItemsByKey[activeRow.key] ?? [] : [];
+  async function answerSectionQuestion(item: SectionQuestionItem, answer: string) {
+    if (!activeRow || !answer.trim()) return;
+    const question: NextQuestion = {
+      id: item.id.replace(/^open:/, ""),
+      question: item.text,
+      source: "compiler_open_decision",
+      target: activeRow.key,
+      impact: ["delivery"],
+      options: null,
+      governedSuggestion: item.status === "suggested",
+      conflictReason: null,
+      reason: null,
+      weight: 0,
+    };
+    guidedCustomQuestionRef.current = question;
+    setGuidedCustomQuestionId(question.id);
+    await send(answer);
+  }
   const activePromptQuestion = activeSectionQuestionItems.find((item) => item.id === promptQuestionId)
     ?? activeSectionQuestionItems.find((item) => item.status === "required")
     ?? activeSectionQuestionItems.find((item) => item.status !== "completed")
@@ -4149,9 +4178,10 @@ export default function ProjectDesk({
     () => questionProgressBySection(sectionOutline, sectionQuestionItemsByKey),
     [sectionOutline, sectionQuestionItemsByKey],
   );
+  const rfpQuestionTarget = rfpDepth === "detailed" ? RFP_SECTION_QUESTION_TARGET : SHORT_RFP_SECTION_QUESTION_TARGET;
   const rfpCoverage = useMemo(
-    () => buildRfpCoverage(sectionOutline, sectionQuestionProgressByKey),
-    [sectionOutline, sectionQuestionProgressByKey],
+    () => buildRfpCoverage(sectionOutline, sectionQuestionProgressByKey, rfpQuestionTarget),
+    [sectionOutline, sectionQuestionProgressByKey, rfpQuestionTarget],
   );
   const nextAdvisorQuestion = activePromptQuestion?.text
     ?? publishChecklist.remaining[0]
@@ -4788,16 +4818,67 @@ export default function ProjectDesk({
     </>
   );
 
+  const railItems: Array<{
+    icon: string;
+    label: string;
+    current: boolean;
+    disabled?: boolean;
+    disabledReason?: string;
+    onClick: () => void;
+  }> = [
+    {
+      icon: "⌂", label: "Overview", current: activeStep === "review", disabled: !started,
+      disabledReason: "Add the first requirement before reviewing the RFP overview.",
+      onClick: () => goToStep("review"),
+    },
+    { icon: "▤", label: "Requirements", current: activeStep === "describe" || activeStep === "decisions", onClick: () => goToStep("describe") },
+    {
+      icon: "♧", label: "Suppliers", current: activeStep === "publish", disabled: !reachable.has("publish"),
+      disabledReason: "Complete the essential baseline before reviewing publication and supplier matching.",
+      onClick: () => goToStep("publish"),
+    },
+    {
+      icon: "▧", label: "Responses", current: activeStep === "compare", disabled: !reachable.has("compare"),
+      disabledReason: "Responses become available after the opportunity is published.",
+      onClick: () => goToStep("compare"),
+    },
+    {
+      icon: "▣", label: "Evidence", current: activeStep === "compare" && workspaceDocumentView === "evidence", disabled: !reachable.has("compare"),
+      disabledReason: "Evidence becomes available when suppliers respond to a published opportunity.",
+      onClick: () => { setWorkspaceDocumentView("evidence"); goToStep("compare"); },
+    },
+    {
+      icon: "▥", label: "Reports", current: false, disabled: !publishedFlag,
+      disabledReason: "Reports become available after publication.",
+      onClick: () => goToStep("compare"),
+    },
+    {
+      icon: "▱", label: "Exports", current: false, disabled: !publishedFlag,
+      disabledReason: "Word and PDF exports unlock after publication.",
+      onClick: () => goToStep("publish"),
+    },
+  ];
+
   const livingOsRail = (
-    <div className="lpos-product-rail" role="navigation" aria-label="Living Procurement OS navigation">
+    <div className="lpos-product-rail" role="navigation" aria-label="Living Procurement OS navigation" data-collapsed={productRailCollapsed}>
       <nav>
-        {[
-          ["⌂", "Overview"], ["▤", "Requirements"], ["♧", "Suppliers"], ["▧", "Responses"],
-          ["▣", "Evidence"], ["▥", "Reports"], ["▱", "Exports"],
-        ].map(([icon, label]) => <button key={label} type="button" aria-label={label} data-current={label === "Requirements"}><span aria-hidden="true">{icon}</span><span className="lpos-rail-label">{label}</span></button>)}
+        {railItems.map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            aria-label={item.label}
+            aria-current={item.current ? "page" : undefined}
+            data-current={item.current}
+            disabled={item.disabled}
+            title={item.disabled ? item.disabledReason : `Open ${item.label}`}
+            onClick={item.onClick}
+          >
+            <span aria-hidden="true">{item.icon}</span><span className="lpos-rail-label">{item.label}</span>
+          </button>
+        ))}
       </nav>
-      <button type="button" aria-label="Settings" onClick={() => goToStep("describe")}><span aria-hidden="true">⚙</span><span className="lpos-rail-label">Settings</span></button>
-      <button type="button" aria-label="Collapse navigation" className="lpos-collapse"><span aria-hidden="true">‹</span><span className="lpos-rail-label">Collapse</span></button>
+      <button type="button" aria-label="Settings" onClick={() => { goToStep("describe"); setDocumentSettingsOpen(true); }}><span aria-hidden="true">⚙</span><span className="lpos-rail-label">Settings</span></button>
+      <button type="button" aria-label={productRailCollapsed ? "Expand navigation" : "Collapse navigation"} aria-expanded={!productRailCollapsed} className="lpos-collapse" onClick={() => setProductRailCollapsed((value) => !value)}><span aria-hidden="true">{productRailCollapsed ? "›" : "‹"}</span><span className="lpos-rail-label">{productRailCollapsed ? "Expand" : "Collapse"}</span></button>
     </div>
   );
 
@@ -4890,7 +4971,7 @@ export default function ProjectDesk({
               with the decisions themselves a full screen further down
               (caught on a real 390px run, not assumed). Station first on
               mobile, chat first on desktop. */}
-          <div data-workspace-grid className="nf-2030-grid">
+          <div data-workspace-grid className="nf-2030-grid" data-rail-collapsed={productRailCollapsed}>
             <SectionNav
               rows={sectionOutline}
               activeKey={activeRow?.key ?? null}
@@ -4905,6 +4986,7 @@ export default function ProjectDesk({
               compareReachable={reachable.has("compare")}
               onPublish={() => goToStep("publish")}
               onCompare={() => goToStep("compare")}
+              questionTarget={rfpQuestionTarget}
             />
             {activeStep === "describe" && (
               <GuidedBuild
@@ -4943,6 +5025,18 @@ export default function ProjectDesk({
                 validationReport={rfpValidation}
                 validatingRfp={validatingRfp}
                 validationError={rfpValidationError}
+                rfpDepth={rfpDepth}
+                onRfpDepthChange={changeRfpDepth}
+                rfpQuestionTarget={rfpQuestionTarget}
+                onAnswerSectionQuestion={answerSectionQuestion}
+                onContinueBuilding={() => {
+                  const next = sectionProgress.next;
+                  if (next) setActiveSection(next.key);
+                  goToStep("describe");
+                  window.requestAnimationFrame(() => inputRef.current?.focus());
+                }}
+                settingsOpen={documentSettingsOpen}
+                onSettingsOpenChange={setDocumentSettingsOpen}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -5938,7 +6032,7 @@ export default function ProjectDesk({
             </div>
           </section> : <>
 
-          <div data-workspace-grid className="nf-2030-grid">
+          <div data-workspace-grid className="nf-2030-grid" data-rail-collapsed={productRailCollapsed}>
             <GuidedBuild
               card={guidedQuestionCard}
               ready={rfpCoverage.ready}
@@ -5973,6 +6067,17 @@ export default function ProjectDesk({
               validationReport={rfpValidation}
               validatingRfp={validatingRfp}
               validationError={rfpValidationError}
+              rfpDepth={rfpDepth}
+              onRfpDepthChange={changeRfpDepth}
+              rfpQuestionTarget={rfpQuestionTarget}
+              onAnswerSectionQuestion={answerSectionQuestion}
+              onContinueBuilding={() => {
+                const next = sectionProgress.next;
+                if (next) setActiveSection(next.key);
+                window.requestAnimationFrame(() => inputRef.current?.focus());
+              }}
+              settingsOpen={documentSettingsOpen}
+              onSettingsOpenChange={setDocumentSettingsOpen}
             />
           </div>
           </>}

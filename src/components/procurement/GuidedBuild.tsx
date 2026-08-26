@@ -3,13 +3,12 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { NextQuestionCard } from "@/components/procurement/LivingProcurementCanvas";
 import type { SectionQuestionItem } from "@/lib/workspace/section-question-register";
-import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 
 type ClausePreview = { id: string; statement: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
-type RfpDepth = "short" | "detailed";
+export type RfpDepth = "short" | "detailed";
 
 const SECTION_COVERAGE: Record<string, string[]> = {
   organisation_scale: ["organisation profile", "users and devices", "sites and regions", "stakeholders", "procurement route"],
@@ -81,6 +80,13 @@ export default function GuidedBuild({
   validationReport,
   validatingRfp,
   validationError,
+  rfpDepth,
+  onRfpDepthChange,
+  rfpQuestionTarget,
+  onAnswerSectionQuestion,
+  onContinueBuilding,
+  settingsOpen,
+  onSettingsOpenChange,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
@@ -115,6 +121,13 @@ export default function GuidedBuild({
   validationReport: RfpValidationReport | null;
   validatingRfp: boolean;
   validationError: string | null;
+  rfpDepth: RfpDepth;
+  onRfpDepthChange: (depth: RfpDepth) => void;
+  rfpQuestionTarget: number;
+  onAnswerSectionQuestion: (item: SectionQuestionItem, answer: string) => Promise<void> | void;
+  onContinueBuilding: () => void;
+  settingsOpen: boolean;
+  onSettingsOpenChange: (open: boolean) => void;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
@@ -126,14 +139,10 @@ export default function GuidedBuild({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
-  const [rfpDepth, setRfpDepth] = useState<RfpDepth>("short");
+  const [questionManagerOpen, setQuestionManagerOpen] = useState(false);
+  const [inlineAnswers, setInlineAnswers] = useState<Record<string, string>>({});
   const questionManagerRef = useRef<HTMLDetailsElement | null>(null);
   useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
-  useEffect(() => {
-    const saved = window.localStorage.getItem("netify-rfp-depth");
-    if (saved === "short" || saved === "detailed") setRfpDepth(saved);
-  }, []);
-  useEffect(() => { window.localStorage.setItem("netify-rfp-depth", rfpDepth); }, [rfpDepth]);
   useEffect(() => {
     const nextId = card?.nq.id ?? null;
     const previousId = previousQuestionIdRef.current;
@@ -152,8 +161,7 @@ export default function GuidedBuild({
         ? `${sectionTitle} is complete. You can review its recorded answers below or continue to the next unfinished section.`
       : `${incompleteSectionTitle ?? "The next required section"} still needs an answer. Add it in the prompt below.`;
   const completedCount = sectionQuestions.filter((item) => item.status === "completed").length;
-  const suggestedCount = sectionQuestions.filter((item) => item.status === "suggested").length;
-  const rfpTarget = RFP_SECTION_QUESTION_TARGET;
+  const rfpTarget = rfpQuestionTarget;
   const rfpAnswered = Math.min(completedCount, rfpTarget);
   const fallbackPrompt = ready
     ? "Review the requirement you have built"
@@ -169,7 +177,7 @@ export default function GuidedBuild({
   );
 
   const openQuestionManager = (suggest = false) => {
-    if (questionManagerRef.current) questionManagerRef.current.open = true;
+    setQuestionManagerOpen(true);
     window.requestAnimationFrame(() => questionManagerRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
     if (suggest) void askForSuggestions();
   };
@@ -180,6 +188,36 @@ export default function GuidedBuild({
     onAddSupplierQuestion(text);
     setNewQuestion("");
     setSuggestions((items) => items.filter((item) => item !== value));
+    setQuestionManagerOpen(true);
+  };
+
+  const addAllSuggestedQuestions = () => {
+    const pending = [...suggestions];
+    for (const suggestion of pending) onAddSupplierQuestion(suggestion);
+    setSuggestions([]);
+    setQuestionManagerOpen(true);
+  };
+
+  const chooseSingleAnswer = (question: NextQuestionCard, index: number) => {
+    if (transitionLocked.current) return;
+    const answer = question.buttons[index];
+    if (!answer) return;
+    transitionLocked.current = true;
+    setTransitionReceipt({ question: question.nq.question, label: answer.label });
+    answer.onClick();
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    transitionTimer.current = setTimeout(() => {
+      transitionLocked.current = false;
+      setSelection(null);
+      setTransitionReceipt(null);
+    }, 750);
+  };
+
+  const submitInlineAnswer = async (item: SectionQuestionItem) => {
+    const answer = (inlineAnswers[item.id] ?? "").trim();
+    if (!answer) return;
+    await onAnswerSectionQuestion(item, answer);
+    setInlineAnswers((values) => ({ ...values, [item.id]: "" }));
   };
 
   const askForSuggestions = async () => {
@@ -229,6 +267,8 @@ export default function GuidedBuild({
 
   const hasStarted = clauses.length > 0 || progress.ready > 0;
 
+  const displayDocumentTitle = documentTitle === "Sourcing procurement" ? "Your SASE & SD-WAN RFP" : documentTitle;
+
   return (
     <div className="lpos-builder">
       <main className="nf-guided-main">
@@ -250,12 +290,12 @@ export default function GuidedBuild({
             {validationError && <p className="lpos-validation-error" role="alert">{validationError}</p>}
             <div className="lpos-depth" data-depth={rfpDepth}>
               <span>RFP depth</span>
-              <button type="button" data-selected={rfpDepth === "short"} onClick={() => setRfpDepth("short")}><strong>Short RFP</strong><small>Minimum valid brief</small></button>
-              <button type="button" data-selected={rfpDepth === "detailed"} onClick={() => setRfpDepth("detailed")}><strong>Detailed RFP</strong><small>Guided recommendations</small></button>
+              <button type="button" data-selected={rfpDepth === "short"} onClick={() => onRfpDepthChange("short")}><strong>Short RFP</strong><small>Minimum valid brief</small></button>
+              <button type="button" data-selected={rfpDepth === "detailed"} onClick={() => onRfpDepthChange("detailed")}><strong>Detailed RFP</strong><small>Five-question section depth</small></button>
             </div>
             {rfpDepth === "detailed" && (
               <div className="lpos-depth-recommendations">
-                <p><strong>Recommended focus</strong><span>Based on what you have entered</span></p>
+                <p><strong>Detailed RFP enabled</strong><span>Target: {rfpQuestionTarget} populated questions in each included section</span></p>
                 <div>{(recommendedTopics.length ? recommendedTopics : ["Add sector, sites, SASE scope, underlay or service model for tailored recommendations"]).map((topic) => <span key={topic}>{topic}</span>)}</div>
                 <button type="button" onClick={() => openQuestionManager(true)}>Review recommended questions →</button>
               </div>
@@ -311,6 +351,10 @@ export default function GuidedBuild({
                   data-selected={selected.includes(index)}
                   onClick={() => {
                     onDescribeQuestion(null);
+                    if (!multipleChoice) {
+                      chooseSingleAnswer(card, index);
+                      return;
+                    }
                     setSelection((current) => {
                       const existing = current?.questionId === card.nq.id ? current.indices : [];
                       if (!multipleChoice) return { questionId: card.nq.id, indices: [index] };
@@ -346,7 +390,7 @@ export default function GuidedBuild({
             <button type="button" className="nf-guided-review" onClick={onFocusPrompt}>Answer in the prompt below</button>
           )}
 
-          {card && card.buttons.length > 0 && !transitionReceipt && (
+          {card && card.buttons.length > 0 && !transitionReceipt && (multipleChoice || writingCustomAnswer) && (
             <button
               type="button"
               className="nf-guided-continue"
@@ -361,7 +405,7 @@ export default function GuidedBuild({
             </button>
           )}
 
-          <div className="lpos-impact"><span aria-hidden="true">✦</span><div><strong>Impact preview</strong><p>Your answer updates the requirement, supplier questions and evidence request together.</p></div><b aria-hidden="true">✓</b></div>
+          <div className="lpos-impact"><span aria-hidden="true">✦</span><div><strong>What your answer changes</strong><p>We update the RFP wording, supplier questions and evidence request together.</p></div><b aria-hidden="true">✓</b></div>
 
           <section className="nf-guided-register" aria-labelledby="section-question-register">
             <div className="nf-guided-register-head">
@@ -372,7 +416,21 @@ export default function GuidedBuild({
               {sectionQuestions.map((item) => (
                 <li key={item.id} data-status={item.status}>
                   <span aria-hidden="true">{item.status === "completed" ? "✓" : item.status === "custom" ? "+" : "○"}</span>
-                  <div><strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}</div>
+                  <div>
+                    <strong>{item.text}</strong>{item.answer && <small>{item.answer}</small>}
+                    {item.status === "required" && (
+                      <div className="nf-guided-inline-answer">
+                        <input
+                          aria-label={`Answer: ${item.text}`}
+                          value={inlineAnswers[item.id] ?? ""}
+                          onChange={(event) => setInlineAnswers((values) => ({ ...values, [item.id]: event.target.value }))}
+                          onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void submitInlineAnswer(item); } }}
+                          placeholder="Type an answer"
+                        />
+                        <button type="button" disabled={!(inlineAnswers[item.id] ?? "").trim()} onClick={() => void submitInlineAnswer(item)}>Save answer</button>
+                      </div>
+                    )}
+                  </div>
                   <em>{item.status === "completed" ? "Answered" : item.status === "required" ? "To do" : item.status === "suggested" ? "Netify suggests" : "Added by you"}</em>
                 </li>
               ))}
@@ -384,7 +442,7 @@ export default function GuidedBuild({
               <button type="button" onClick={() => openQuestionManager(false)}>＋ Add bespoke question</button>
               <button type="button" onClick={onImportQuestions}>Import from Word or spreadsheet</button>
             </div>
-            <details ref={questionManagerRef} className="nf-guided-add-question">
+            <details ref={questionManagerRef} className="nf-guided-add-question" open={questionManagerOpen} onToggle={(event) => setQuestionManagerOpen(event.currentTarget.open)}>
               <summary>Add a bespoke supplier question</summary>
               <p>Add your own wording, or ask Netify to suggest questions for this section. Nothing is added without your approval.</p>
               <label htmlFor="bespoke-supplier-question">Question for suppliers</label>
@@ -404,6 +462,7 @@ export default function GuidedBuild({
               {suggestionError && <p role="alert">{suggestionError}</p>}
               {suggestions.length > 0 && (
                 <div className="nf-guided-suggestions" aria-label="AI suggested supplier questions">
+                  <button type="button" className="nf-guided-add-all" onClick={addAllSuggestedQuestions}><span>＋</span>Add all {suggestions.length} recommendations</button>
                   {suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => addSupplierQuestion(suggestion)}><span>＋</span>{suggestion}</button>)}
                   <small>Suggestions are never added until you choose them.</small>
                 </div>
@@ -416,9 +475,9 @@ export default function GuidedBuild({
 
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
-          <div><h2>{documentTitle}</h2><span>{progress.ready} of {progress.total} essential sections ready</span></div>
-          <span>● &nbsp; DRAFT · UPDATES LIVE</span>
-          <button type="button" onClick={onOpenDocument}>⚙ &nbsp; Document settings</button>
+          <div><h2>{displayDocumentTitle}</h2><span>{progress.ready} of {progress.total} essential sections ready</span></div>
+          <span>● &nbsp; DRAFT · NOT PUBLISHED</span>
+          <button type="button" onClick={() => onSettingsOpenChange(true)}>⚙ &nbsp; Document settings</button>
         </div>
         {validationReport && (
           <section className="lpos-validation-report" aria-label="RFP validation report">
@@ -441,7 +500,6 @@ export default function GuidedBuild({
         <div className="lpos-architecture" aria-label="Procurement architecture">
           <div><strong>Sites</strong><span>your estate</span></div><b>→</b><div><strong>SD-WAN</strong><span>secure connectivity</span></div><b>→</b><div><strong>SASE</strong><span>security &amp; access</span></div><b>→</b><div><strong>Cloud apps</strong><span>apps and data</span></div>
         </div>
-        <div className="lpos-bank-depth"><strong>Question-bank depth</strong><span>386 analyst-written questions · 43 extended SASE questions · sector-specific packs</span><small>Netify selects only the relevant questions as your requirement develops.</small></div>
         <ol className="lpos-sections" aria-label="Essential document sections">
           {rows.map((row, index) => {
             const current = row.key === activeKey;
@@ -450,8 +508,20 @@ export default function GuidedBuild({
           })}
         </ol>
         <div className="lpos-unlock"><span aria-hidden="true">{publishReachable ? "✓" : hasStarted ? "🔒" : "✦"}</span><div><strong>{publishReachable ? "Ready to publish" : hasStarted ? "Continue building your RFP" : "Start your RFP"}</strong><p>{publishReachable ? "Your essential baseline is complete. Publishing remains anonymous until you choose to unlock supplier identity." : hasStarted ? advisorMessage : "Nothing has been entered yet. Tell Netify your sector, site count, regions and what you are buying to begin."}</p></div><ul><li>Matched providers</li><li>Structured responses</li><li>Evidence pack</li><li>Pricing comparison</li></ul></div>
-        <div className="lpos-document-actions"><button type="button" className="primary" onClick={publishReachable ? onPublish : onFocusPrompt}>{publishReachable ? "Review & publish" : "Continue building"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
+        <div className="lpos-document-actions"><button type="button" className="primary" onClick={publishReachable ? onPublish : onContinueBuilding}>{publishReachable ? "Review & publish" : "Continue to next requirement"} →</button><button type="button" onClick={onOpenDocument}>◉ &nbsp; Preview what suppliers receive</button></div>
       </aside>
+      {settingsOpen && (
+        <div className="lpos-settings-backdrop" role="presentation" onMouseDown={() => onSettingsOpenChange(false)}>
+          <section className="lpos-settings-panel" role="dialog" aria-modal="true" aria-labelledby="lpos-document-settings" onMouseDown={(event) => event.stopPropagation()}>
+            <div><p>Document preferences</p><button type="button" aria-label="Close document settings" onClick={() => onSettingsOpenChange(false)}>×</button></div>
+            <h2 id="lpos-document-settings">Document settings</h2>
+            <fieldset><legend>RFP depth</legend><button type="button" data-selected={rfpDepth === "short"} onClick={() => onRfpDepthChange("short")}><strong>Short RFP</strong><span>Minimum valid procurement brief</span></button><button type="button" data-selected={rfpDepth === "detailed"} onClick={() => onRfpDepthChange("detailed")}><strong>Detailed RFP</strong><span>Five populated questions per included section</span></button></fieldset>
+            <fieldset><legend>Starting material</legend><button type="button" data-selected={entryMode === "build"} onClick={() => onEntryModeChange("build")}><strong>New requirements</strong><span>Build from your answers</span></button><button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}><strong>Existing RFP</strong><span>Check and improve an AI- or human-generated RFP</span></button></fieldset>
+            <p className="lpos-settings-methodology">Recommendations are selected from Netify&apos;s governed 386-question procurement bank, including 43 extended SASE questions and sector-specific packs.</p>
+            <button type="button" className="lpos-settings-done" onClick={() => onSettingsOpenChange(false)}>Save and close</button>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

@@ -36,7 +36,6 @@
 
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
 import type { SectionQuestionProgress } from "@/lib/workspace/section-question-register";
-import { RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 
 export default function SectionNav({
   rows,
@@ -52,6 +51,7 @@ export default function SectionNav({
   compareReachable,
   onPublish,
   onCompare,
+  questionTarget,
 }: {
   rows: OutlineRow[];
   activeKey: string | null;
@@ -72,6 +72,7 @@ export default function SectionNav({
   compareReachable: boolean;
   onPublish: () => void;
   onCompare: () => void;
+  questionTarget: number;
 }) {
   return (
     <nav
@@ -93,8 +94,8 @@ export default function SectionNav({
           {rows.map((r, index) => {
             const isActive = r.key === activeKey;
             const questionProgress = questionProgressByKey[r.key] ?? { answered: 0, required: 1, optional: 0 };
-            const rfpAnswered = Math.min(questionProgress.answered, RFP_SECTION_QUESTION_TARGET);
-            const sectionRfpReady = rfpAnswered >= RFP_SECTION_QUESTION_TARGET;
+            const rfpAnswered = Math.min(questionProgress.answered, questionTarget);
+            const sectionRfpReady = rfpAnswered >= questionTarget;
             return (
               <li key={r.key}>
                 <button
@@ -107,7 +108,7 @@ export default function SectionNav({
                   </span>
                   <span className="nf-2030-area-copy">
                     <strong>{r.title}</strong>
-                    <small>{rfpAnswered} of {RFP_SECTION_QUESTION_TARGET} populated{sectionRfpReady ? " · RFP-ready" : isActive ? " · In progress" : ""}</small>
+                    <small>{rfpAnswered} of {questionTarget} populated{sectionRfpReady ? " · RFP-ready" : isActive ? " · In progress" : ""}</small>
                     {questionProgress.optional > 0 && <em>{questionProgress.optional} optional refinement{questionProgress.optional === 1 ? "" : "s"}</em>}
                   </span>
                 </button>
