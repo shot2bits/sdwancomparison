@@ -6,12 +6,10 @@
  * asked, to what end? Feels like a list of random questions with no end
  * in sight."
  *
- * The diagnosis turned out to be the opposite of the obvious one. A real,
- * finite, monotonic publish gate ALREADY EXISTED — ProjectDesk's
- * `signLocked` has always refused to publish until five core facts stand
- * (sector, sites, regions, what you're buying, timeline), with `lockLine`
- * naming exactly which are missing. It was simply invisible: a buyer only
- * ever met it by reaching the publish panel and being turned away.
+ * The gate is the canonical essential-section projection already shown in
+ * the builder. A section marked Needs input or Needs decision cannot be
+ * described as ready in one place while a four-fact shortcut unlocks
+ * publishing somewhere else.
  *
  * Meanwhile the surface a buyer DID see — the ranked open decisions — was
  * labelled "N decisions before this can be published" and "Blocking
@@ -56,27 +54,15 @@ export type PublishChecklist = {
 };
 
 export function buildPublishChecklist(input: {
-  sector: boolean;
-  sites: boolean;
-  regions: boolean;
-  scope: boolean;
-  timeline: boolean;
-  /** Security-scope engagements additionally need a settled rulebook
-   *  verdict — the same condition `signLocked` has always carried. Passed
-   *  as an already-resolved boolean so this module never needs to know
-   *  what a verdict is. */
-  securityScope: boolean;
-  securityVerdictSettled: boolean;
+  /** The required rows from the canonical section outline. Rows already
+   *  classified as Later are deliberately excluded by the caller. */
+  essentialSections: Array<{ key: string; label: string; done: boolean }>;
 }): PublishChecklist {
-  const items: PublishRequirement[] = [
-    { key: "sector", label: "Your sector", done: input.sector },
-    { key: "sites", label: "How many sites", done: input.sites },
-    { key: "regions", label: "Which regions", done: input.regions },
-    { key: "scope", label: "What you're buying", done: input.scope },
-  ];
-  // Timeline and security depth materially improve an RFP, but neither is
-  // required to publish a useful market opportunity. They remain advisor
-  // recommendations and contribute to RFP depth; they are not hidden locks.
+  const items: PublishRequirement[] = input.essentialSections.map((section) => ({
+    key: section.key,
+    label: section.label,
+    done: section.done,
+  }));
   const doneCount = items.filter((i) => i.done).length;
   return {
     items,

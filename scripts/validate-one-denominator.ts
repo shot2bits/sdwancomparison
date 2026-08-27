@@ -99,10 +99,17 @@ function main() {
   record(RFP_SECTION_QUESTION_TARGET === 5, "A: the RFP-ready threshold is exactly five populated questions per included section");
   record(!coverage.ready && coverage.readySections === 1 && coverage.remainingAnswers === 1, "A: RFP coverage reports the exact incomplete section and remaining answer count");
   const publishableOpportunity = buildPublishChecklist({
-    sector: true, sites: true, regions: true, scope: true, timeline: false,
-    securityScope: true, securityVerdictSettled: false,
+    essentialSections: rows
+      .filter((candidate) => candidate.state !== "later")
+      .map((candidate) => ({ key: candidate.key, label: candidate.title, done: candidate.state === "confirmed" })),
   });
-  record(publishableOpportunity.ready, "A: a useful opportunity can publish before timeline/security refinements make the living RFP deeper");
+  record(!publishableOpportunity.ready, "A: publishing remains locked while any essential section still needs input or a decision");
+  const completedOpportunity = buildPublishChecklist({
+    essentialSections: rows
+      .filter((candidate) => candidate.state !== "later")
+      .map((candidate) => ({ key: candidate.key, label: candidate.title, done: true })),
+  });
+  record(completedOpportunity.ready, "A: publishing unlocks when every essential section is confirmed; Later rows remain optional");
 
   /* ================================================================ */
   /* B. THE COMPETING NUMBERS ARE GONE.                                */

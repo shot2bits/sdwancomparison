@@ -3997,17 +3997,13 @@ export default function ProjectDesk({
   const publishChecklist = useMemo(
     () =>
       buildPublishChecklist({
-        sector: coreFive.sector,
-        sites: coreFive.sites,
-        regions: coreFive.regions,
-        scope: coreFive.scope,
-        timeline: coreFive.timeline,
-        securityScope,
-        securityVerdictSettled: Boolean(verdict) && verdict?.confidence !== "low",
+        essentialSections: sectionOutline
+          .filter((row) => row.state !== "later")
+          .map((row) => ({ key: row.key, label: row.title, done: row.state === "confirmed" })),
       }),
-    [coreFive, securityScope, verdict],
+    [sectionOutline],
   );
-  const contentReady = publishChecklist.ready && Boolean(securityScope || buying);
+  const contentReady = publishChecklist.ready;
   const signLocked =
     resuming || !started || facts.length === 0 || Boolean(published) || !contentReady;
   const lockLine = resuming
@@ -4018,9 +4014,7 @@ export default function ProjectDesk({
         ? "Selections alone are notes so far: say one sentence about the organisation and the engine takes over."
         : !publishChecklist.ready
           ? `Publishing still needs ${publishChecklist.remaining.join(", ").toLowerCase()}. Say it in the prompt, or answer the next question.`
-          : !securityScope && !buying
-              ? "Say what you are buying (SASE, SD-WAN, SSE or managed security) and publishing unlocks."
-              : null;
+          : null;
 
   /** Living Procurement UK Decision-Maker Blueprint, correction pass
    *  (Robert, 15 Aug 2026), defect 5: "Do not merely relabel the existing
