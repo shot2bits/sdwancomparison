@@ -152,7 +152,7 @@ import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 /* never invents a fact about the buyer's estate), the evidence-dated  */
 /* fit organ, the R9 wrong-company guard, ingest for pasted and        */
 /* dropped documents, voice, the ?q=/?scope=/?vendors=/?test=1 doors   */
-/* (R3), no persistence of any kind (R2), and the whole ruled          */
+/* (R3), working-draft continuity on this device, and the whole ruled  */
 /* signature chain: consents recorded verbatim, core five holding the  */
 /* signature shut (R7), business email only, publish as the only exit. */
 /*                                                                     */
@@ -161,8 +161,8 @@ import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 /* Divergences from the reference, each deliberate and flagged:        */
 /* - The estate MegaNav, ruled door H1 and footer stay above and below */
 /*   (his one-navigation and EEAT rulings beat the bare header).       */
-/* - "Saved just now" would be false under R2 (no persistence), so the */
-/*   header states the truth instead: nothing leaves this page.        */
+/* - A small status reports only a real browser draft write. It never   */
+/*   claims publication, account storage or supplier access.           */
 /* - Option consequences render only when true by definition or        */
 /*   genuinely computed; no invented "narrows to N" figures.           */
 /* - The fixture's letter grades do not exist as data; rows carry the  */
@@ -202,10 +202,11 @@ import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 /*    date, or a named product. Placeholders ask open questions.       */
 /* ================================================================== */
 
-/* R2 (Robert, 30 Jul 2026): NO BROWSER PERSISTENCE. Nothing here      */
-/* writes to localStorage or sessionStorage. Amended 31 Jul: the       */
-/* buyer may opt in to saving as a real project record with a          */
-/* verified work email; without that, a project is one sitting.       */
+/* Harry full-test repair, Step 1 (27 Aug 2026): the working draft now */
+/* survives refresh and same-browser reopen. This continuity creates   */
+/* no marketplace record, exposes no supplier identity and unlocks no  */
+/* download, matching, response or export capability. Verified-account */
+/* Save and separately-consented Publish remain unchanged.             */
 
 const WORKSPACE_AGREEMENT_TEXT =
   "Create the private project record used to generate this RFP. Nothing is published until I separately accept the Opportunity Board and privacy statement below.";
@@ -407,6 +408,72 @@ const PLACEHOLDER_RESUMING = "Loading your saved project…";
 type ThreadMsg = { who: "you" | "netify"; text: string };
 const THREAD_WELCOME =
   "Describe what you are buying, in your own words. One message can complete several sections at once — network, security, compliance and more — or answer any open line in the statement directly.";
+
+const LOCAL_DRAFT_POINTER_KEY = "netify_living_rfp_active_draft_v1";
+const LOCAL_DRAFT_PREFIX = "netify_living_rfp_draft_v1_";
+
+type LocalWorkingDraft = {
+  schema: 1;
+  id: string;
+  updatedAt: number;
+  facts: WorkspaceFact[];
+  noted: NotedItem[];
+  dismissedQuestionIds: string[];
+  declinedSuggestionIds: string[];
+  receipts: Receipt[];
+  sourceTurns: SourceTurn[];
+  decisionTurns: DecisionTurn[];
+  resumeRemovals: string[];
+  messages: ThreadMsg[];
+  rfpDepth: RfpDepth;
+  rfpEntryMode: "build" | "check";
+};
+
+function newLocalDraftId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `draft-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+}
+
+function readLocalWorkingDraft(): LocalWorkingDraft | null {
+  try {
+    const id = window.localStorage.getItem(LOCAL_DRAFT_POINTER_KEY);
+    if (!id) return null;
+    const raw = window.localStorage.getItem(`${LOCAL_DRAFT_PREFIX}${id}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<LocalWorkingDraft>;
+    if (parsed.schema !== 1 || parsed.id !== id || !Array.isArray(parsed.facts)) return null;
+    return {
+      schema: 1,
+      id,
+      updatedAt: typeof parsed.updatedAt === "number" ? parsed.updatedAt : Date.now(),
+      facts: parsed.facts,
+      noted: Array.isArray(parsed.noted) ? parsed.noted : [],
+      dismissedQuestionIds: Array.isArray(parsed.dismissedQuestionIds) ? parsed.dismissedQuestionIds : [],
+      declinedSuggestionIds: Array.isArray(parsed.declinedSuggestionIds) ? parsed.declinedSuggestionIds : [],
+      receipts: Array.isArray(parsed.receipts) ? parsed.receipts : [],
+      sourceTurns: Array.isArray(parsed.sourceTurns) ? parsed.sourceTurns : [],
+      decisionTurns: Array.isArray(parsed.decisionTurns) ? parsed.decisionTurns : [],
+      resumeRemovals: Array.isArray(parsed.resumeRemovals) ? parsed.resumeRemovals : [],
+      messages: Array.isArray(parsed.messages) && parsed.messages.length ? parsed.messages : [{ who: "netify", text: THREAD_WELCOME }],
+      rfpDepth: parsed.rfpDepth === "detailed" ? "detailed" : "short",
+      rfpEntryMode: parsed.rfpEntryMode === "check" ? "check" : "build",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function clearLocalWorkingDraft(id: string | null): void {
+  try {
+    if (id) window.localStorage.removeItem(`${LOCAL_DRAFT_PREFIX}${id}`);
+    window.localStorage.removeItem(LOCAL_DRAFT_POINTER_KEY);
+  } catch {
+    /* Publication already succeeded; browser-storage cleanup is best-effort. */
+  }
+}
 /** Phase 3 Stage A correction round (Robert, 14 Aug 2026), defect #3
  *  reproduction: send()'s final branch below keeps the message as a
  *  receipt EVERY time it is reached (either per-unplaced-clause, or this
@@ -1073,6 +1140,14 @@ export default function ProjectDesk({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveDirty, setSaveDirty] = useState(false);
   const [consentSave, setConsentSave] = useState(false);
+  /** Step 1 continuity status describes only this origin's browser
+   *  storage. It is deliberately separate from
+   *  `created`: a local working draft is not a Netify project, is not on
+   *  the opportunity board and cannot cross MarketUnlock. */
+  const [localDraftStatus, setLocalDraftStatus] = useState<"idle" | "saved" | "error">("idle");
+  const [localDraftSavedAt, setLocalDraftSavedAt] = useState<number | null>(null);
+  const localDraftIdRef = useRef<string | null>(null);
+  const resumedFromUrlRef = useRef(false);
 
   const [voiceState, setVoiceState] = useState<"idle" | "starting" | "listening">("idle");
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -1496,6 +1571,39 @@ export default function ProjectDesk({
 
     const p = new URLSearchParams(window.location.search);
     if (p.get("test") === "1") setTestMode(true);
+    const resumeId = p.get("id");
+    const resumeManage = p.get("manage");
+    resumedFromUrlRef.current = Boolean(resumeId);
+
+    /* Step 1: restore the exact working ledgers before any link-carried
+       seed facts are applied. A URL-owned/server-owned project always
+       wins and never mixes with a browser draft. */
+    if (!resumeId) {
+      const local = readLocalWorkingDraft();
+      if (local) {
+        localDraftIdRef.current = local.id;
+        factsRef.current = local.facts;
+        setFacts(local.facts);
+        setNoted(local.noted);
+        setDismissedQuestionIds(local.dismissedQuestionIds);
+        setDeclinedSuggestionIds(local.declinedSuggestionIds);
+        setReceipts(local.receipts);
+        receiptsRef.current = local.receipts;
+        receiptId.current = local.receipts.reduce((max, item) => Math.max(max, item.id), 0);
+        setSourceTurns(local.sourceTurns);
+        sourceTurnsRef.current = local.sourceTurns;
+        setDecisionTurns(local.decisionTurns);
+        decisionTurnsRef.current = local.decisionTurns;
+        const restoredRemovals = new Set(local.resumeRemovals);
+        setResumeRemovals(restoredRemovals);
+        resumeRemovalsRef.current = restoredRemovals;
+        setMsgs(local.messages);
+        setRfpDepth(local.rfpDepth);
+        setRfpEntryMode(local.rfpEntryMode);
+        setLocalDraftSavedAt(local.updatedAt);
+        setLocalDraftStatus("saved");
+      }
+    }
     const scopeParam = p.get("scope");
     const seedFacts: FieldUpdate[] = [];
     if (scopeParam && ["security", "managed_security", "sase", "sdwan", "sse"].includes(scopeParam)) {
@@ -1571,8 +1679,6 @@ export default function ProjectDesk({
             though `resuming` should already have prevented that turn from
             being typed at all. Belt and braces: two independent guards
             against the same race, not one relied on alone. */
-    const resumeId = p.get("id");
-    const resumeManage = p.get("manage");
     if (resumeId) {
       setResuming(true);
       void (async () => {
@@ -1842,6 +1948,62 @@ export default function ProjectDesk({
     setBooted(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /** Harry full-test repair, Step 1: continuously preserve the canonical
+   *  working inputs on this device. This intentionally stores inputs and
+   *  ledgers, not the derived document: on reopen the document is compiled
+   *  again from the same canonical material, preventing two authorities.
+   *  Server-resumed projects use their existing envelope and are excluded
+   *  so an owner link can never be contaminated by an unrelated local
+   *  draft. */
+  useEffect(() => {
+    if (!booted || resumedFromUrlRef.current) return;
+    const hasWorkingDraft = facts.length > 0 || noted.length > 0 || receipts.length > 0 || sourceTurns.length > 0 || decisionTurns.length > 0;
+    if (!hasWorkingDraft) return;
+    const timer = window.setTimeout(() => {
+      try {
+        const id = localDraftIdRef.current ?? newLocalDraftId();
+        localDraftIdRef.current = id;
+        const updatedAt = Date.now();
+        const snapshot: LocalWorkingDraft = {
+          schema: 1,
+          id,
+          updatedAt,
+          facts,
+          noted,
+          dismissedQuestionIds,
+          declinedSuggestionIds,
+          receipts,
+          sourceTurns,
+          decisionTurns,
+          resumeRemovals: [...resumeRemovals],
+          messages: msgs,
+          rfpDepth,
+          rfpEntryMode,
+        };
+        window.localStorage.setItem(`${LOCAL_DRAFT_PREFIX}${id}`, JSON.stringify(snapshot));
+        window.localStorage.setItem(LOCAL_DRAFT_POINTER_KEY, id);
+        setLocalDraftSavedAt(updatedAt);
+        setLocalDraftStatus("saved");
+      } catch {
+        setLocalDraftStatus("error");
+      }
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [
+    booted,
+    facts,
+    noted,
+    dismissedQuestionIds,
+    declinedSuggestionIds,
+    receipts,
+    sourceTurns,
+    decisionTurns,
+    resumeRemovals,
+    msgs,
+    rfpDepth,
+    rfpEntryMode,
+  ]);
 
   /* Autofocus, pointer-fine only: on a desktop the caret waits in the
      prompt like any search engine's; touch devices are exempt. */
@@ -3425,6 +3587,9 @@ export default function ProjectDesk({
         const totalEvaluatedMarket = Number(data.market_report?.matched?.total_evaluated_market ?? 0);
         ev("board_listed", { board_id: data.board?.opportunity_id ?? "" });
         setPublished({ invited, boardId: data.board?.opportunity_id, matchedVendors, totalEvaluatedMarket, frozen: true, namesFrozen: true });
+        // The published server envelope is authoritative from this point.
+        clearLocalWorkingDraft(localDraftIdRef.current);
+        localDraftIdRef.current = null;
         setNeedAuth(false);
         ev("workspace_published", { scope: buying ?? "security", invited: invited.length });
         // Lifecycle-consistency closure pass, correction D: a fresh
@@ -4922,7 +5087,13 @@ export default function ProjectDesk({
               </button>
               <button type="button" data-current={activeStep === "compare"} disabled={!reachable.has("compare")} onClick={() => goToStep("compare")}><b>5</b><span>Compare responses</span></button>
             </nav>
-            <div className="lpos-profile"><button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><div><strong>Procurement lead</strong><span>Private workspace</span></div><b>PL</b></div>
+            <div className="lpos-profile">
+              <div aria-live="polite" title="This working draft is kept on this device. It is not published and no supplier can access it.">
+                <strong>{localDraftStatus === "error" ? "Draft not saved" : localDraftSavedAt ? "Draft saved" : "Private workspace"}</strong>
+                <span>{localDraftSavedAt ? "On this device" : "Not published"}</span>
+              </div>
+              <button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><b>PL</b>
+            </div>
           </header>
 
           {livingOsRail}
