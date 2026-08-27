@@ -6,7 +6,7 @@ import type { SectionQuestionItem } from "@/lib/workspace/section-question-regis
 import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-outline";
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 
-type ClausePreview = { id: string; statement: string };
+type ClausePreview = { id: string; statement: string; sourceFactIds?: string[] };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
 export type RfpDepth = "short" | "detailed";
 
@@ -59,6 +59,7 @@ export default function GuidedBuild({
   clauses,
   composer,
   onFocusPrompt,
+  onEditClause,
   onDescribeQuestion,
   customAnswerQuestionId,
   customAnswerReceipt,
@@ -100,6 +101,7 @@ export default function GuidedBuild({
   clauses: ClausePreview[];
   composer: ReactNode;
   onFocusPrompt: () => void;
+  onEditClause: (clause: ClausePreview) => void;
   onDescribeQuestion: (question: NextQuestionCard["nq"] | null) => void;
   customAnswerQuestionId: string | null;
   customAnswerReceipt: CustomAnswerReceipt | null;
@@ -305,7 +307,7 @@ export default function GuidedBuild({
           <div className="lpos-captured">
             <small>Netify captured</small>
             {(clauses.length ? clauses.slice(0, 4) : [{ id: "empty", statement: "Your confirmed requirements will appear here" }]).map((clause) => (
-              <div key={clause.id}><span aria-hidden="true">✓</span><p>{clause.statement}</p><button type="button" onClick={onFocusPrompt}>Edit</button></div>
+              <div key={clause.id}><span aria-hidden="true">✓</span><p>{clause.statement}</p><button type="button" onClick={() => onEditClause(clause)}>Edit</button></div>
             ))}
           </div>
           <div className="nf-guided-focus">

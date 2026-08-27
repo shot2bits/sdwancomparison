@@ -2635,25 +2635,41 @@ export default function ProjectDesk({
 
   /** A free-text answer entered from the guided question is both ordinary
    *  buyer prose (kept by send() in the source ledger) and a durable
-   *  resolution of the question that invited it. Keeping the exact text
-   *  as a noted requirement makes it visible in the compiled document;
-   *  the decision ledger reconstructs that resolution after a reload. */
+   *  resolution of the question that invited it. Structured answers live
+   *  in the fact ledger; otherwise the exact text occupies one replaceable
+   *  noted-answer slot. The decision ledger records either route. */
   const landGuidedCustomAnswer = useCallback(
-    (question: NextQuestion, text: string) => {
+    (question: NextQuestion, text: string, resultingFactPaths: string[] = []) => {
       const note: NotedItem = {
         id: guidedCustomAnswerNoteId(question.id),
         label: text,
         section: question.target,
       };
       beginOrExtendSubmission();
-      setNoted((items) => items.some((item) => item.id === note.id) ? items : [...items, note]);
+      if (resultingFactPaths.length === 0) {
+        /* One question owns one durable note slot. Re-answering or editing
+           replaces it instead of silently ignoring the new wording or
+           appending a conflicting second answer. */
+        setNoted((items) => {
+          const existing = items.findIndex((item) => item.id === note.id);
+          if (existing < 0) return [...items, note];
+          const next = items.slice();
+          next[existing] = note;
+          return next;
+        });
+      } else {
+        /* A structured answer belongs in the fact ledger only. Remove a
+           prior free-text fallback for this same question so editing the
+           fact cannot leave a contradictory duplicate requirement. */
+        setNoted((items) => items.filter((item) => item.id !== note.id));
+      }
       recordDecision(question.id, "Custom answer", {
-        action: "note",
+        action: resultingFactPaths.length ? "items" : "note",
         optionId: "custom",
-        resultingFactPaths: [],
-        resultingNoted: [note],
+        resultingFactPaths,
+        resultingNoted: resultingFactPaths.length ? [] : [note],
       });
-      setChangedSlots([note.id]);
+      setChangedSlots(resultingFactPaths.length ? resultingFactPaths : [note.id]);
       setSaveDirty(true);
       scheduleSettle();
       guidedCustomQuestionRef.current = null;
@@ -2819,11 +2835,11 @@ export default function ProjectDesk({
   /* ---- The extraction cycle (the same organ). Round 6: the cycle
      reports which slots it changed so the thread can say exactly that,
      a template line composed from the diff and nothing else. ---- */
-  type CycleResult = { landed: number; labels: string[]; rules: number; error: boolean; unplaced: string[]; removed: string[] };
+  type CycleResult = { landed: number; factPaths: string[]; labels: string[]; rules: number; error: boolean; unplaced: string[]; removed: string[] };
   const runCycle = useCallback(
     async (text: string): Promise<CycleResult> => {
       const trimmed = text.trim();
-      if (trimmed.length < 3 || busy) return { landed: 0, labels: [], rules: 0, error: false, unplaced: [], removed: [] };
+      if (trimmed.length < 3 || busy) return { landed: 0, factPaths: [], labels: [], rules: 0, error: false, unplaced: [], removed: [] };
       if (looksLikeAnotherNetify(trimmed)) setWrongCompany(true);
       setBusy(true);
       setCycleError(null);
@@ -2889,10 +2905,11 @@ export default function ProjectDesk({
           const lbl = (sid ? SLOT_BY_ID[sid].label : PATH_LABELS[f.path] ?? f.path).toLowerCase();
           if (!labels.includes(lbl)) labels.push(lbl);
         }
-        return { landed: merged.changed.length, labels, rules, error: false, unplaced: data.unplacedClauses ?? [], removed: removedLabels };
+        const factPaths = [...new Set(merged.changed.map((id) => byId.get(id)?.path).filter((path): path is AllowedPath => path !== undefined))];
+        return { landed: merged.changed.length, factPaths, labels, rules, error: false, unplaced: data.unplacedClauses ?? [], removed: removedLabels };
       } catch {
         setCycleError("The engine did not answer; your words are unchanged, say it again in a moment.");
-        return { landed: 0, labels: [], rules: 0, error: true, unplaced: [], removed: [] };
+        return { landed: 0, factPaths: [], labels: [], rules: 0, error: true, unplaced: [], removed: [] };
       } finally {
         setBusy(false);
       }
@@ -3034,14 +3051,19 @@ export default function ProjectDesk({
        verbatim regardless of what runCycle() below manages to place. */
     keepSourceTurn(text, "typed");
 
-    const r = await runCycle(text);
+    /* A short answer such as "25" or "fully managed" needs the question
+       context to be interpreted correctly. The context is used only for
+       extraction; the source ledger and transcript above retain exactly
+       the buyer's own text, never Netify's question wording. */
+    const extractionText = guidedQuestion ? `${guidedQuestion.question}: ${text}` : text;
+    const r = await runCycle(extractionText);
     if (r.error) return; /* the caption carries the engine error; the words stay in the prompt's history */
 
     /* `Describe it in your own words` is a question-answering mode, not
        merely a shortcut that focuses the textarea. Once extraction has
        safely processed the buyer's sentence, resolve the exact question
        that invited it and show a receipt in the visible guided surface. */
-    if (guidedQuestion) landGuidedCustomAnswer(guidedQuestion, text);
+    if (guidedQuestion) landGuidedCustomAnswer(guidedQuestion, text, r.factPaths);
 
     /* Fact Ledger Reliability Gate (13 Aug 2026): keep EVERY clause the
        extractor could not place, even when OTHER clauses in the same
@@ -3052,7 +3074,11 @@ export default function ProjectDesk({
        right here and that fifth sentence's words were never kept
        anywhere. Runs before the landed/not-landed branch so both paths
        below share it, once. */
-    for (const clause of r.unplaced) keepReceipt(clause);
+    /* In guided mode the exact buyer answer is already preserved as the
+       source turn and as the question's noted answer. Keeping an unplaced
+       extraction clause would also persist Netify's prefixed question and
+       falsely attribute it to the buyer. */
+    if (!guidedQuestion) for (const clause of r.unplaced) keepReceipt(clause);
     if (rfpEntryMode === "check") await validateExistingRfp(text);
 
     /* Seventh amendment: a retraction alone (e.g. "We no longer use
@@ -3067,7 +3093,7 @@ export default function ProjectDesk({
       if (r.labels.length) parts.push(`Written in: ${r.labels.join(", ")}.`);
       if (r.rules > 0) parts.push(`${cap(numWord(r.rules))} rule${r.rules === 1 ? "" : "s"} landed in the statement with your words as provenance.`);
       if (r.removed.length) parts.push(`Removed from the statement: ${r.removed.join(", ")}.`);
-      if (r.unplaced.length) parts.push(`${cap(numWord(r.unplaced.length))} other line${r.unplaced.length === 1 ? "" : "s"} kept with your notes, unplaced.`);
+      if (r.unplaced.length && !guidedQuestion) parts.push(`${cap(numWord(r.unplaced.length))} other line${r.unplaced.length === 1 ? "" : "s"} kept with your notes, unplaced.`);
       const miss = missingNow();
       parts.push(miss.length ? `Most useful next: ${miss.slice(0, 2).join(" and ")}.` : "Everything the statement tracks is in.");
       say(parts.join(" "));
@@ -3081,6 +3107,10 @@ export default function ProjectDesk({
        clause structure to keep in the first place (e.g. a short aside,
        or a glossary question, which never reaches coverDeclarativeClauses
        at all). Either way, said once in the thread. */
+    if (guidedQuestion) {
+      say(`Recorded — ${guidedQuestion.question}`);
+      return;
+    }
     if (!r.unplaced.length) keepReceipt(text);
     say(THREAD_KEPT_UNPLACED);
   }
@@ -3120,6 +3150,8 @@ export default function ProjectDesk({
         setReqOpen(cmd.open);
         return;
       case "reset":
+        clearLocalWorkingDraft(localDraftIdRef.current);
+        localDraftIdRef.current = null;
         window.location.assign(window.location.pathname);
         return;
       case "back":
@@ -5173,6 +5205,15 @@ export default function ProjectDesk({
                 clauses={canvasDocument.clauses}
                 composer={composerBlock}
                 onFocusPrompt={() => inputRef.current?.focus()}
+                onEditClause={(clause) => {
+                  const sourceFact = factsRef.current.find((fact) => clause.sourceFactIds?.includes(fact.id) && !fact.struck);
+                  const slotId = sourceFact ? SLOT_BY_PATH[sourceFact.path] : undefined;
+                  if (slotId) setEdit(slotId);
+                  else {
+                    setDraft(clause.statement);
+                    window.requestAnimationFrame(() => inputRef.current?.focus());
+                  }
+                }}
                 onDescribeQuestion={chooseGuidedCustomAnswer}
                 customAnswerQuestionId={guidedCustomQuestionId}
                 customAnswerReceipt={guidedCustomAnswerReceipt}
@@ -6217,6 +6258,15 @@ export default function ProjectDesk({
               clauses={canvasDocument.clauses}
               composer={composerBlock}
               onFocusPrompt={() => inputRef.current?.focus()}
+              onEditClause={(clause) => {
+                const sourceFact = factsRef.current.find((fact) => clause.sourceFactIds?.includes(fact.id) && !fact.struck);
+                const slotId = sourceFact ? SLOT_BY_PATH[sourceFact.path] : undefined;
+                if (slotId) setEdit(slotId);
+                else {
+                  setDraft(clause.statement);
+                  window.requestAnimationFrame(() => inputRef.current?.focus());
+                }
+              }}
               onDescribeQuestion={chooseGuidedCustomAnswer}
               customAnswerQuestionId={guidedCustomQuestionId}
               customAnswerReceipt={guidedCustomAnswerReceipt}
