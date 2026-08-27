@@ -26,6 +26,13 @@ const nextConfig: NextConfig = {
   // native canvas binary are sibling runtime files; bundling only the JS entry
   // made valid PDF uploads fail on Vercel because that worker disappeared.
   serverExternalPackages: ["pdf-parse", "@napi-rs/canvas"],
+  outputFileTracingIncludes: {
+    "/api/workspace/ingest-file": [
+      "./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs",
+      "./node_modules/@napi-rs/canvas/**/*",
+      "./node_modules/@napi-rs/canvas-linux-x64-gnu/**/*",
+    ],
+  },
   // Match the main netify.co.uk site (trailingSlash: true) so generated links,
   // the sitemap and canonicals all carry trailing slashes: /sase/<path>/.
   trailingSlash: true,
