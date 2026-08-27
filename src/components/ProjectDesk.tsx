@@ -5087,6 +5087,7 @@ export default function ProjectDesk({
             key={item.label}
             type="button"
             aria-label={item.label}
+            aria-description={item.disabled ? item.disabledReason : undefined}
             aria-current={item.current ? "page" : undefined}
             data-current={item.current}
             disabled={item.disabled}
@@ -5272,6 +5273,7 @@ export default function ProjectDesk({
                 }}
                 settingsOpen={documentSettingsOpen}
                 onSettingsOpenChange={setDocumentSettingsOpen}
+                published={publishedFlag}
               />
             )}
             {/* LEFT PANE -- constant across all five stations, exactly as
@@ -6348,6 +6350,7 @@ export default function ProjectDesk({
               }}
               settingsOpen={documentSettingsOpen}
               onSettingsOpenChange={setDocumentSettingsOpen}
+              published={publishedFlag}
             />
           </div>
           </>}

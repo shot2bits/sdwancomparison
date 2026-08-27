@@ -88,6 +88,7 @@ export default function GuidedBuild({
   onContinueBuilding,
   settingsOpen,
   onSettingsOpenChange,
+  published,
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
@@ -130,6 +131,7 @@ export default function GuidedBuild({
   onContinueBuilding: () => void;
   settingsOpen: boolean;
   onSettingsOpenChange: (open: boolean) => void;
+  published: boolean;
 }) {
   const [selection, setSelection] = useState<{ questionId: string; indices: number[] } | null>(null);
   const [transitionReceipt, setTransitionReceipt] = useState<{ question: string; label: string } | null>(null);
@@ -297,6 +299,11 @@ export default function GuidedBuild({
             <span>{ready ? "Review the RFP before publishing." : `Next: ${sectionTitle}`}</span>
             <i aria-hidden="true"><b style={{ width: `${ready ? 100 : Math.round((Math.max(0, position - 1) / Math.max(1, total)) * 100)}%` }} /></i>
           </div>
+          {!published && (
+            <p className="lpos-mobile-unlock-note">
+              Supplier matching, responses, evidence, reports and exports unlock after anonymous publication.
+            </p>
+          )}
           <div className="lpos-own-words lpos-persistent-prompt">
             <div className="lpos-prompt-heading">
               <strong>{entryMode === "check" ? "Check an existing RFP" : "Tell Netify what you need"}</strong>
@@ -499,9 +506,14 @@ export default function GuidedBuild({
       <aside className="nf-guided-document" aria-label="Your living RFP preview">
         <div className="nf-guided-document-head">
           <div><h2>{displayDocumentTitle}</h2><span>{progress.ready} of {progress.total} essential sections ready</span></div>
-          <span>● &nbsp; DRAFT · NOT PUBLISHED</span>
+          <span>● &nbsp; {published ? "PUBLISHED" : "DRAFT · NOT PUBLISHED"}</span>
           <button type="button" onClick={() => onSettingsOpenChange(true)}>⚙ &nbsp; Document settings</button>
         </div>
+        {!published && (
+          <p className="lpos-publish-unlock-note" role="note">
+            <strong>Private draft.</strong> Build and review your RFP now. Publishing it anonymously unlocks supplier matching, supplier responses, evidence, reports and Word/PDF exports.
+          </p>
+        )}
         {validationReport && (
           <section className="lpos-validation-report" aria-label="RFP validation report">
             <div className="lpos-validation-score"><strong>{validationReport.score}</strong><span>/100</span><small>{validationReport.label}</small></div>
