@@ -913,6 +913,9 @@
 }
 .nf-publish-eyebrow { margin: 0; color: var(--nf-orange-strong, #832f00); font-family: var(--nf-font-mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .nf-publish-success { max-width: 760px; padding: 22px; border: 1px solid var(--nf-emerald-soft-border, #91bb91); border-radius: 6px; background: var(--nf-emerald-soft, #eff8ed); }
+.nf-publish-success-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 16px; }
+.nf-publish-success-actions a { border: 1px solid var(--nf-emerald-soft-border, #91bb91); border-radius: 4px; padding: 9px 12px; color: var(--nf-emerald, #1e4e22); background: #fff; font-size: 13px; font-weight: 650; text-decoration: none; }
+.nf-publish-success-actions a:hover { text-decoration: underline; }
 @media (max-width: 640px) {
   .nf-2030-publish { padding: 14px 12px; }
   .nf-publish-document-preview { padding: 16px; }

@@ -3623,7 +3623,7 @@ export default function ProjectDesk({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok) {
+      if (res.ok && data.market_unlocked === true && typeof data.board?.opportunity_id === "string") {
         // Living Procurement Canvas Phase 2 correction (14 Aug 2026): keep
         // the FULL invited records (name, credential link) the route
         // returned rather than discarding them down to bare slugs -- this
@@ -3675,7 +3675,7 @@ export default function ProjectDesk({
         setNeedAuth(true);
         ev("workspace_auth_required", { scope: buying ?? "security" });
       } else {
-        throw new Error(data.error || "Could not publish; try again.");
+        throw new Error(data.error || "The opportunity was not listed on the board. Nothing was sent; review the RFP and try again.");
       }
     } catch (e) {
       setSignError(e instanceof Error ? e.message : "Something failed; nothing has been sent to vendors or service providers. Try again.");
@@ -5867,6 +5867,12 @@ export default function ProjectDesk({
                                 {published.boardId ? <>: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></> : "."}
                                 {published.invited.length > 0 && <> {cap(numWord(published.invited.length))} {published.invited.length === 1 ? "was" : "were"} invited directly.</>}
                               </div>
+                              {published.boardId && (
+                                <div className="nf-publish-success-actions">
+                                  <a href={`/sase/opportunities/${published.boardId}`}>View your public notice</a>
+                                  <a href={BOARD_LINK.href}>Open the Opportunity Board</a>
+                                </div>
+                              )}
                               {/* Lifecycle-consistency closure pass (18 Aug 2026),
                                   correction D: this used to prove publication and
                                   invitation but never said anything about whether a

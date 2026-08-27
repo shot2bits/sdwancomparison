@@ -375,7 +375,7 @@ function main() {
   {
     const desk = src("src/components/ProjectDesk.tsx");
     record(/window\.scrollTo\(\{ top: 0, behavior: "smooth" \}\)/.test(desk), "9: ProjectDesk.tsx scrolls to the top on a successful publish, so State 4 never renders under a scroll position left over from reviewing pre-publish decisions", "");
-    record(/if \(res\.ok\) \{[\s\S]{0,4000}window\.scrollTo/.test(desk), "9: the scroll-to-top runs specifically inside the publish success branch (res.ok), not on every render or on failure", "");
+    record(/if \(res\.ok && data\.market_unlocked === true && typeof data\.board\?\.opportunity_id === "string"\) \{[\s\S]{0,4000}window\.scrollTo/.test(desk), "9: the scroll-to-top runs specifically inside the verified publish-success branch (HTTP success + MarketUnlock + board id), not on every render or on failure", "");
   }
 
   console.log(`\n${failures === 0 ? "ALL PASS" : `${failures} FAILURE(S)`}`);

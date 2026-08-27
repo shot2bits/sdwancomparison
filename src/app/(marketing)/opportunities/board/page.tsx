@@ -20,18 +20,18 @@ export const metadata: Metadata = {
 };
 
 export default async function OpportunityBoardPage() {
-  // The regate (Robert, 23 Jul): listings are private to anonymous
-  // visitors and visible to the signed-in supply side. Counts stay
-  // public (an aggregate, not a listing); sample notices stay public
-  // (example class, clearly labelled).
+  // Step 10 board-journey closure: the anonymous notice is the public
+  // record; the complete RFP, response room, pricing and buyer identity
+  // remain gated. This matches the page's metadata, its public/gated table,
+  // the machine-readable feed and the publication consent. Previously the
+  // server fetched public projections but hid every real card from signed-
+  // out visitors, making a genuinely published notice appear absent.
   const jar = await cookies();
   const session = await getSession(jar.get(SESSION_COOKIE)?.value ?? null);
   const signedIn = Boolean(session);
   const [allOpps, allArchived] = kvConfigured()
     ? await Promise.all([listPublicOpportunities(), listArchivedPublicOpportunities(12)])
     : [[], []];
-  const opps = signedIn ? allOpps : [];
-  const archived = signedIn ? allArchived : [];
   const openCount = allOpps.length;
   const schemas = [
     getOrganizationSchema(),
@@ -46,24 +46,21 @@ export default async function OpportunityBoardPage() {
       <div className="mb-10 max-w-3xl">
         <p className="eyebrow mb-3">Live marketplace</p>
         <h1 id="page-h1" className="mb-4">Open SASE, SSE and SD-WAN opportunities</h1>
-        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Buyers post a need, from underlay circuits to appliances, cloud security or a full managed SASE rollout. Verified vendors bid and quote. Browsing is open to everyone; you sign in only to submit a bid.</p>
+        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">Buyers post an anonymous notice, from underlay circuits to appliances, cloud security or a full managed SASE rollout. The notices below are public. The complete RFP, buyer identity, responses and pricing stay gated; verified vendors sign in to view and respond.</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/opportunities/new" className="inline-flex items-center rounded-full bg-amber-500 px-5 py-2 text-sm font-medium text-zinc-950 no-underline transition-colors hover:bg-amber-400">Publish an RFI</Link>
           <Link href="/for-suppliers" className="inline-flex items-center rounded-full border border-[var(--ink-300,#ccc)] px-5 py-2 text-sm no-underline text-[var(--ink-800)] hover:bg-[var(--ink-100,#f5f5f5)]">For vendors and providers</Link>
         </div>
       </div>
 
-      {signedIn ? (
-        <BoardList opps={opps} />
-      ) : (
+      {!signedIn && (
         <div className="rounded-lg border border-zinc-200 bg-white p-5">
           <p className="m-0 text-[14px] font-semibold text-zinc-900">
             {openCount} opportunit{openCount === 1 ? "y is" : "ies are"} genuinely open on the board right now.
           </p>
           <p className="m-0 mt-1.5 text-[12.5px] leading-relaxed text-zinc-600">
-            Listings are anonymous about the buyer and private to Netify&rsquo;s signed-in vendor and provider community. Sign in
-            to see the open notices and respond; buyers publish from the workspace and stay anonymous until they choose
-            otherwise. The sample notices below show the shape of a listing.
+            The anonymous notices are visible below. Sign in as a verified vendor or service provider to open the complete RFP,
+            ask questions and respond. Buyer identity and all pricing remain private.
           </p>
           <a href="/sase/account/?return_to=/sase/opportunities/board/" className="mt-3 inline-block rounded-lg bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white no-underline hover:bg-black">
             Vendor sign in
@@ -71,12 +68,16 @@ export default async function OpportunityBoardPage() {
         </div>
       )}
 
-      {archived.length > 0 && (
+      <div className={signedIn ? "" : "mt-6"}>
+        <BoardList opps={allOpps} />
+      </div>
+
+      {allArchived.length > 0 && (
         <div className="mt-12">
           <h2 className="text-lg font-semibold mb-1">Recently closed and awarded</h2>
           <p className="text-sm text-[var(--ink-600)] mb-4">Every notice that was published here stays published, permanently, with its status and close date. Outcomes only, no responses or pricing. The most recent are shown below; the full permanent archive is in the <a className="underline" href="/sase/opportunities/board/data.json">board data feed</a>.</p>
           <div className="grid gap-4 sm:grid-cols-2">
-            {archived.map((o) => (
+            {allArchived.map((o) => (
               <Link key={o.id} href={`/opportunities/${o.id}`} className="block rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5 no-underline text-inherit opacity-80 transition-opacity hover:opacity-100">
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
                   <span className={`rounded-full px-2 py-0.5 font-medium uppercase tracking-wide ${o.status === "awarded" ? "bg-emerald-50 text-emerald-700" : "bg-[var(--ink-100,#f0f0f0)] text-[var(--ink-500)]"}`}>

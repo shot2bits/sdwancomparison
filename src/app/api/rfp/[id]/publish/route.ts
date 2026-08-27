@@ -73,6 +73,28 @@ export async function POST(req: Request, ctx: Ctx) {
   }
   const { published, invited, criteria, board, market_report, matched_vendors } = result;
 
+  // Step 10 board-journey closure: a completed HTTP response is not the
+  // same thing as a completed publication. `executePublish()` deliberately
+  // returns a locked result when the board write or MarketUnlock binding
+  // fails, leaving the project retryable and sending no invitations. The
+  // old route still returned 200/ok:true for that locked result, so clients
+  // announced "Published" even though there was no board id to visit. Make
+  // the lifecycle boundary explicit at the API: no public board id means
+  // publication did not complete.
+  if (!board.opportunity_id) {
+    return Response.json(
+      {
+        ok: false,
+        code: "board_publication_incomplete",
+        error: board.reason ?? "The opportunity could not be listed on the board. Nothing was sent; review the RFP and try again.",
+        retryable: true,
+        board,
+        market_unlocked: false,
+      },
+      { status: 409, headers: cors },
+    );
+  }
+
   // Round 4 correction (14 Aug 2026), Robert's finding 4: `matched_vendors`
   // is the REAL buildShortlist() selection (same source as `invited`), not
   // `market_report.matched.names` (a different, simpler matchSuppliers()
@@ -87,5 +109,5 @@ export async function POST(req: Request, ctx: Ctx) {
   // without a second KV read. Callers should still treat market-unlock.ts
   // as the single source of truth on any LATER read (the GET routes all
   // query it directly); this is only for this one immediate response.
-  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report, market_unlocked: Boolean(board.opportunity_id) }, { headers: cors });
+  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report, market_unlocked: true }, { headers: cors });
 }
