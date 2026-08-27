@@ -4727,7 +4727,7 @@ export default function ProjectDesk({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                title="Drop or choose a Word, Excel or plain-text document and it will be read into the statement — or paste a Google Docs/Sheets link"
+                title="Drop or choose a Word, PDF, Excel or plain-text document and it will be read into the statement — or paste a Google Docs/Sheets link"
                 className="flex h-[34px] w-[34px] flex-none cursor-pointer items-center justify-center rounded-full border border-transparent text-[#66635e] hover:border-[#d3d0cd] hover:text-[#110f0d]"
               >
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">

@@ -464,7 +464,7 @@ export default function GuidedBuild({
               <button type="button" onClick={() => openQuestionManager(true)}>＋ Add recommended question</button>
               <button type="button" onClick={() => openQuestionManager(true)}>Browse additional questions</button>
               <button type="button" onClick={() => openQuestionManager(false)}>＋ Add bespoke question</button>
-              <button type="button" onClick={onImportQuestions}>Import from Word or spreadsheet</button>
+              <button type="button" onClick={onImportQuestions}>Import Word, PDF, text or spreadsheet</button>
             </div>
             <details ref={questionManagerRef} className="nf-guided-add-question" open={questionManagerOpen} onToggle={(event) => setQuestionManagerOpen(event.currentTarget.open)}>
               <summary>Add a bespoke supplier question</summary>

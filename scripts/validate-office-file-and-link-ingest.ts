@@ -43,6 +43,7 @@
 import { parseGoogleDocLink } from "../src/lib/workspace/links";
 import { POST as ingestFileRoute } from "../src/app/api/workspace/ingest-file/route";
 import { POST as ingestLinkRoute } from "../src/app/api/workspace/ingest-link/route";
+import { readFileSync } from "node:fs";
 
 let pass = 0;
 let fail = 0;
@@ -95,6 +96,11 @@ function makeMultipartRequest(url: string, file: File): Request {
 
 async function partB() {
   console.log("=== Part B: /api/workspace/ingest-file (real route, real parsers) ===\n");
+
+  const projectDeskSource = readFileSync(new URL("../src/components/ProjectDesk.tsx", import.meta.url), "utf8");
+  const guidedBuildSource = readFileSync(new URL("../src/components/procurement/GuidedBuild.tsx", import.meta.url), "utf8");
+  expect(projectDeskSource.includes("Word, PDF, Excel or plain-text document"), "[B] the attachment control visibly names PDF support");
+  expect(guidedBuildSource.includes("Import Word, PDF, text or spreadsheet"), "[B] the section import action names every supported file family");
 
   // --- a real .docx, built with the `docx` package (same one the docx
   // skill uses), containing text this test can assert on verbatim.
