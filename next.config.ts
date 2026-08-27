@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
   },
   basePath: "/sase",
+  // Keep pdf-parse outside the webpack server bundle. Its PDF.js worker and
+  // native canvas binary are sibling runtime files; bundling only the JS entry
+  // made valid PDF uploads fail on Vercel because that worker disappeared.
+  serverExternalPackages: ["pdf-parse", "@napi-rs/canvas"],
   // Match the main netify.co.uk site (trailingSlash: true) so generated links,
   // the sitemap and canonicals all carry trailing slashes: /sase/<path>/.
   trailingSlash: true,

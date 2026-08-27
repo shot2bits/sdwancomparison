@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
+    "@napi-rs/canvas": "0.1.80",
     "docx": "^9.7.1",
     "exceljs": "^4.4.0",
     "mammoth": "^1.12.1",

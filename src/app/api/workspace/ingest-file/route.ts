@@ -34,6 +34,20 @@ export const dynamic = "force-dynamic";
 const MAX_BYTES = 8_000_000;
 const MAX_TEXT_CHARS = 200_000;
 
+function pdfFailureMessage(error: unknown): string {
+  const detail = error instanceof Error ? `${error.name} ${error.message}`.toLowerCase() : String(error).toLowerCase();
+  if (detail.includes("password") || detail.includes("encrypted")) {
+    return "That PDF is password-protected. Remove the password or paste the relevant text instead.";
+  }
+  return "That PDF is corrupt or is not a valid PDF. Try exporting it again, or paste the relevant text instead.";
+}
+
+function cleanPdfText(text: string): string {
+  // pdf-parse appends its own page separators even when a page contains no
+  // selectable text. They are parser metadata, not buyer-authored content.
+  return text.replace(/^\s*-- \d+ of \d+ --\s*$/gm, "").trim();
+}
+
 export async function OPTIONS(req: Request) {
   return preflight(req);
 }
@@ -91,16 +105,28 @@ export async function POST(req: Request) {
   }
 
   if (name.endsWith(".pdf")) {
+    if (buf.length < 5 || buf.subarray(0, 5).toString("ascii") !== "%PDF-") {
+      return Response.json({ error: "That file has a .pdf name but is not a valid PDF. Try exporting it again." }, { status: 422, headers: cors });
+    }
+    let parser: { getText: () => Promise<{ text: string }>; destroy: () => Promise<void> } | null = null;
     try {
       const { PDFParse } = await import("pdf-parse");
-      const parser = new PDFParse({ data: buf });
+      parser = new PDFParse({ data: buf });
       const result = await parser.getText();
-      await parser.destroy();
-      const text = result.text.slice(0, MAX_TEXT_CHARS);
-      if (!text.trim()) return Response.json({ error: "That PDF contains no readable text. It may be a scanned image; paste the relevant text instead." }, { status: 422, headers: cors });
+      const text = cleanPdfText(result.text).slice(0, MAX_TEXT_CHARS);
+      if (!text.trim()) return Response.json({ error: "That PDF contains no selectable text. It appears to be scanned; use a searchable PDF or paste the relevant text instead." }, { status: 422, headers: cors });
       return Response.json({ text }, { headers: cors });
-    } catch {
-      return Response.json({ error: "Could not read that PDF — it may be scanned, corrupt or password-protected." }, { status: 422, headers: cors });
+    } catch (error) {
+      // Keep the real parser exception in server logs so a deployment-only
+      // packaging failure cannot be hidden behind a generic buyer message.
+      console.error("[workspace/ingest-file] PDF extraction failed", {
+        fileName: file.name,
+        fileSize: file.size,
+        error: error instanceof Error ? `${error.name}: ${error.message}` : String(error),
+      });
+      return Response.json({ error: pdfFailureMessage(error) }, { status: 422, headers: cors });
+    } finally {
+      if (parser) await parser.destroy().catch(() => undefined);
     }
   }
 

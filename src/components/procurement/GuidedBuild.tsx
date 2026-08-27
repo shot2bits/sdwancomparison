@@ -510,7 +510,7 @@ export default function GuidedBuild({
               <p className="lpos-validation-missing"><strong>{validationReport.missingRequirementCount}</strong> important requirement{validationReport.missingRequirementCount === 1 ? "" : "s"} missing or unclear</p>
               <div className="lpos-validation-sections">{validationReport.sections.map((section) => <button type="button" key={section.key} onClick={() => onSelectSection(section.key)}><span>{section.title}</span><i><b style={{ width: `${section.score}%` }} /></i><em>{section.score}%</em></button>)}</div>
               <div className="lpos-validation-findings"><div><strong>Most important gaps</strong>{[...validationReport.gaps, ...validationReport.comparabilityWarnings, ...validationReport.vendorNeutralityWarnings].slice(0, 4).map((gap) => <p key={gap}>• {gap}</p>)}</div><div><strong>Bank questions to consider</strong>{validationReport.recommendedQuestions.slice(0, 3).map((question) => <p key={question.id}><span>{question.id} · {question.category}</span>{question.text}</p>)}</div></div>
-              <button type="button" className="lpos-validation-improve" onClick={() => { const weak = validationReport.sections.find((section) => section.score < 67); if (weak) onSelectSection(weak.key); openQuestionManager(true); }}>Improve this RFP with Netify →</button>
+              <button type="button" className="lpos-validation-improve" onClick={() => { const weak = validationReport.sections.find((section) => section.score < 67); if (weak) onSelectSection(weak.key); openQuestionManager(true); }}>{validationReport.score >= 90 ? "Prepare this RFP for the Opportunity Board" : "Complete this RFP with Netify"} →</button>
             </div>
           </section>
         )}

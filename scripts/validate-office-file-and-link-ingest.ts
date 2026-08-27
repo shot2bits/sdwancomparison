@@ -172,7 +172,19 @@ async function partB() {
 
   const corruptPdf = new File([new Uint8Array([1, 2, 3, 4, 5])], "broken.pdf", { type: "application/pdf" });
   const corruptPdfRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", corruptPdf));
+  const corruptPdfBody = (await corruptPdfRes.json()) as { error?: string };
   expect(corruptPdfRes.status === 422, "[B] a corrupt PDF fails cleanly with 422", corruptPdfRes.status);
+  expect(corruptPdfBody.error === "That file has a .pdf name but is not a valid PDF. Try exporting it again.", "[B] a false .pdf extension is identified precisely", corruptPdfBody.error);
+
+  const scannedPdfDoc = await PDFDocument.create();
+  scannedPdfDoc.addPage([595, 842]);
+  const scannedPdfBytes = await scannedPdfDoc.save();
+  const scannedPdfArrayBuffer = scannedPdfBytes.buffer.slice(scannedPdfBytes.byteOffset, scannedPdfBytes.byteOffset + scannedPdfBytes.byteLength) as ArrayBuffer;
+  const scannedPdf = new File([scannedPdfArrayBuffer], "scan.pdf", { type: "application/pdf" });
+  const scannedPdfRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", scannedPdf));
+  const scannedPdfBody = (await scannedPdfRes.json()) as { error?: string };
+  expect(scannedPdfRes.status === 422, "[B] an image-only/textless PDF fails cleanly with 422", scannedPdfRes.status);
+  expect(typeof scannedPdfBody.error === "string" && scannedPdfBody.error.includes("no selectable text") && scannedPdfBody.error.includes("scanned"), "[B] a scanned PDF gets a specific and actionable message", scannedPdfBody.error);
 
   const corrupt = new File([new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])], "broken.xlsx", { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   const corruptRes = await ingestFileRoute(makeMultipartRequest("https://example.test/api/workspace/ingest-file", corrupt));
