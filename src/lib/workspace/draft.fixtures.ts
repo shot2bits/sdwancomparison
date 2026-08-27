@@ -357,6 +357,18 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(estateOut.some((u) => u.path === "estate.cloud"), "a real SaaS estate statement still lands");
   });
 
+  await ok("Harry's B01 prompt captures its complete stated starting baseline without re-asking managed delivery", () => {
+    const out = deterministicExtract("Healthcare organisation, 12 UK sites, 600 users, buying managed SASE and SD-WAN.");
+    const has = (path: string, value?: unknown) => out.some((update) => update.path === path && (value === undefined || update.value === value || (Array.isArray(update.value) && update.value.includes(value))));
+    expect(has("organisation.sector", "Healthcare & pharma"), "healthcare sector lands");
+    expect(has("estate.sites", 12), "12 sites lands");
+    expect(has("estate.users", 600), "600 users lands");
+    expect(has("organisation.regions", "uk"), "UK region lands");
+    expect(has("procurement.buying", "sase"), "SASE technology scope lands");
+    expect(has("procurement.operatingModel", "managed"), "product-attached managed intent lands as the operating model");
+    expect(!deterministicExtract("We use managed SaaS applications today and need SD-WAN.").some((update) => update.path === "procurement.operatingModel"), "managed SaaS remains an estate description, never a managed-service instruction");
+  });
+
   /* ---- Robert's bank-set ruling (28 Jul 2026): the published document
           carries the earned bank set, exactly as the desk's chip counted
           it, in the document's native schema. ---- */
