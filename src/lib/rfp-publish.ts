@@ -29,6 +29,7 @@ import { hasPublished } from "@/lib/project-machine";
 import { commitMarketUnlock, isMarketUnlocked, MarketUnlockBindingError } from "@/lib/market-unlock";
 import { getPublicationAttempt, savePublicationAttempt, loadResumableAttempt, type PublicationAttempt } from "@/lib/publication-attempt";
 import type { ProjectDetails } from "@/lib/rfp-types";
+import { persistedEssentialBaselineChecklist } from "@/lib/workspace/publish-checklist";
 
 /**
  * The publish core, shared by the publish API route (buyer presses Submit in
@@ -663,6 +664,17 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     // snapshot exists (a pre-Phase-2 record, or a snapshot write that
     // failed after the state commit) -- fall through to a real publish
     // rather than returning nothing; the snapshot below will be created.
+  }
+
+  const essentialBaseline = persistedEssentialBaselineChecklist({
+    facts: project.facts,
+    decisionLedger: project.decision_ledger,
+    procurementDocument: project.procurement_document,
+  });
+  if (!essentialBaseline.ready) {
+    throw new Error(
+      `Complete the essential RFP baseline before publishing. Still needed: ${essentialBaseline.remaining.join(", ")}. Nothing has been sent.`,
+    );
   }
 
   // Minimum-content gate (Harry's QA, RFP Builder F2): submit was live at

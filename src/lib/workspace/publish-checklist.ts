@@ -34,6 +34,11 @@
  * PURE: no React, no I/O (Article 17).
  */
 
+import { buyingOf, operatingModelOf, type WorkspaceFact } from "@/lib/workspace/draft";
+import { replayDecisionLedger, type DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
+import { siteResilienceClauseExists } from "@/lib/workspace/procurement-outline";
+import type { LivingProcurementDocument } from "@/lib/workspace/procurement-document";
+
 export type PublishRequirement = {
   key: string;
   /** Buyer-facing, and deliberately the SAME wording `missingCore`
@@ -71,4 +76,59 @@ export function buildPublishChecklist(input: {
     remaining: items.filter((i) => !i.done).map((i) => i.label),
     ready: doneCount === items.length,
   };
+}
+
+/** Server-side mirror of the visible essential baseline. The publish API,
+ * auth continuation and MCP route all converge on executePublish(), so
+ * persisted facts and decisions are checked here rather than trusting a
+ * client-supplied ready flag. */
+export function persistedEssentialBaselineChecklist(input: {
+  facts: WorkspaceFact[];
+  decisionLedger: DecisionLedgerEntry[];
+  procurementDocument?: Pick<LivingProcurementDocument, "clauses" | "openDecisions"> | null;
+}): PublishChecklist {
+  const live = input.facts.filter((fact) => !fact.struck);
+  const hasFact = (path: string) => live.some((fact) => fact.path === path);
+  const { noted } = replayDecisionLedger(input.decisionLedger);
+  const notedIds = noted.map((item) => item.id);
+  const buying = buyingOf(input.facts);
+  const opModel = operatingModelOf(input.facts);
+  const openDecisionIds = new Set(input.procurementDocument?.openDecisions.map((decision) => decision.id) ?? []);
+  const clauses = input.procurementDocument?.clauses ?? [];
+
+  return buildPublishChecklist({
+    essentialSections: [
+      {
+        key: "organisation_scale",
+        label: "Organisation and scale",
+        done: hasFact("organisation.sector") && hasFact("estate.sites") && hasFact("organisation.regions") && hasFact("estate.users"),
+      },
+      { key: "solution_scope", label: "Solution scope", done: Boolean(buying) },
+      {
+        key: "current_estate",
+        label: "Current estate",
+        done: hasFact("estate.existingNetwork") || hasFact("estate.cloud") || hasFact("estate.existingSecurity") || notedIds.includes("guided-answer:guided-section-current_estate"),
+      },
+      {
+        key: "resilience_availability",
+        label: "Resilience and availability",
+        done: siteResilienceClauseExists(clauses) && !openDecisionIds.has("OD-operating-model-conflict"),
+      },
+      {
+        key: "security_identity_data",
+        label: "Security, identity and data",
+        done: Boolean(buying) && (buying !== "sase" || notedIds.some((id) => id.startsWith("sse-"))),
+      },
+      {
+        key: "operating_model_support",
+        label: "Operating model and support",
+        done: Boolean(opModel) && !openDecisionIds.has("OD-support-coverage-ambiguous") && !openDecisionIds.has("OD-operating-model-ambiguous-correction"),
+      },
+      {
+        key: "migration_implementation",
+        label: "Migration and implementation",
+        done: hasFact("constraints.timeline") && notedIds.some((id) => id.startsWith("twin-services") || id === "guided-answer:guided-section-migration_implementation"),
+      },
+    ],
+  });
 }

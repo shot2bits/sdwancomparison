@@ -33,7 +33,9 @@ import path from "node:path";
 import { outlineProgress, outlineProgressLine, sectionPosition, siteResilienceClauseExists, type OutlineRow } from "../src/lib/workspace/procurement-outline";
 import { reachableSteps } from "../src/lib/workspace/wizard-steps";
 import { buildRfpCoverage, RFP_SECTION_QUESTION_TARGET } from "../src/lib/workspace/rfp-coverage";
-import { buildPublishChecklist } from "../src/lib/workspace/publish-checklist";
+import { buildPublishChecklist, persistedEssentialBaselineChecklist } from "../src/lib/workspace/publish-checklist";
+import type { WorkspaceFact } from "../src/lib/workspace/draft";
+import type { DecisionLedgerEntry } from "../src/lib/workspace/decision-ledger";
 
 const ROOT = path.dirname(fileURLToPath(new URL("../package.json", import.meta.url)));
 const src = (...parts: string[]) => readFileSync(path.join(ROOT, ...parts), "utf8");
@@ -110,6 +112,28 @@ function main() {
       .map((candidate) => ({ key: candidate.key, label: candidate.title, done: true })),
   });
   record(completedOpportunity.ready, "A: publishing unlocks when every essential section is confirmed; Later rows remain optional");
+  const persistedIncomplete = persistedEssentialBaselineChecklist({ facts: [], decisionLedger: [], procurementDocument: null });
+  record(!persistedIncomplete.ready && persistedIncomplete.remaining.length === 7, "A: the server rejects an empty or partial persisted envelope across all seven essential sections");
+  const facts = [
+    ["organisation.sector", "Manufacturing"],
+    ["estate.sites", 12],
+    ["organisation.regions", ["uk"]],
+    ["estate.users", 250],
+    ["procurement.buying", "sase"],
+    ["estate.existingNetwork", ["mpls"]],
+    ["procurement.operatingModel", "managed"],
+    ["constraints.timeline", "Within 6 months"],
+  ].map(([path, value], index) => ({ id: `f-${index}`, path, value, provenance: "stated", source: "answer", cycle: 1, struck: false })) as WorkspaceFact[];
+  const decisionLedger = [
+    { id: "d-sse", at: 1, questionId: "q-sse-scope", optionId: "sse-ztna", optionLabel: "ZTNA", action: "note", resultingFactPaths: [], resultingNoted: [{ id: "sse-ztna", label: "ZTNA", section: "security", own: true }] },
+    { id: "d-migration", at: 2, questionId: "guided-section-migration_implementation", optionId: "custom", optionLabel: "Custom answer", action: "note", resultingFactPaths: [], resultingNoted: [{ id: "guided-answer:guided-section-migration_implementation", label: "Phased migration with pilot and rollback", section: "services", own: true }] },
+  ] as DecisionLedgerEntry[];
+  const persistedComplete = persistedEssentialBaselineChecklist({
+    facts,
+    decisionLedger,
+    procurementDocument: { clauses: [{ templateId: "site-resilience-scope" }] as never, openDecisions: [] },
+  });
+  record(persistedComplete.ready, "A: the server accepts a persisted envelope only when all seven essential sections are evidenced");
 
   /* ================================================================ */
   /* B. THE COMPETING NUMBERS ARE GONE.                                */
