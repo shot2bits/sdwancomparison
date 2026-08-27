@@ -77,8 +77,8 @@ export default function DecisionRail2030({
       )}
 
       <div className="nf-2030-control-note">
-        <strong>You remain in control</strong>
-        Research, drafting and connected tools may update the working model. Issuing, inviting suppliers and external actions always require explicit approval.
+        <strong>Nothing is shared automatically</strong>
+        Netify may refine the working draft as you answer questions. Nothing is published, sent to suppliers or shared externally until you review it, accept the acknowledgements and press Generate and publish.
       </div>
     </aside>
   );

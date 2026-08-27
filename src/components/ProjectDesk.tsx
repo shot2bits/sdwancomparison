@@ -5746,6 +5746,23 @@ export default function ProjectDesk({
                         </a>
                       </div>
                     </div>
+
+                    {!published && started && (
+                      <section className="nf-publish-document-preview" aria-labelledby="publish-document-preview-title">
+                        <div className="nf-publish-document-preview-heading">
+                          <div>
+                            <p className="nf-publish-eyebrow">Review before publishing</p>
+                            <h2 id="publish-document-preview-title">Your RFP as suppliers will receive it</h2>
+                            <p>
+                              Check the compiled requirements and supplier questions below. Return to Requirements to change anything before publishing.
+                            </p>
+                          </div>
+                          <button type="button" onClick={() => goToStep("describe")}>Edit requirements</button>
+                        </div>
+                        {canvasBlock}
+                      </section>
+                    )}
+
                     {/* ── LOCKED OUTCOME (was "WHO FITS") ── Living Procurement Canvas
                         Phase 2 correction (14 Aug 2026): the product rule is that
                         publication is the boundary that unlocks a project's matched
@@ -5842,9 +5859,11 @@ export default function ProjectDesk({
                                 standard linked so the claim is checkable. ---- */}
                         <div data-publish="1" className="mt-9 border-l-2 pl-4" style={{ scrollMarginTop: "90px", borderColor: "var(--nf-orange, #c66000)" }}>
                           {published ? (
-                            <div>
-                              <div className="mb-2 max-w-[36em] text-[16px] leading-[1.6]">
-                                Published. Signed-in vendors and service providers can now see your anonymous notice
+                            <div role="status" aria-live="polite" className="nf-publish-success">
+                              <p className="nf-publish-eyebrow">Publication complete</p>
+                              <h2>Published successfully</h2>
+                              <div className="mb-2 max-w-[42em] text-[16px] leading-[1.6]">
+                                Your anonymous opportunity is now live. Signed-in vendors and service providers can see the notice
                                 {published.boardId ? <>: <a href={`/sase/opportunities/${published.boardId}`} className="underline">see it on the board</a></> : "."}
                                 {published.invited.length > 0 && <> {cap(numWord(published.invited.length))} {published.invited.length === 1 ? "was" : "were"} invited directly.</>}
                               </div>
@@ -6108,6 +6127,7 @@ export default function ProjectDesk({
                                 type="button"
                                 onClick={() => void signAndPublish()}
                                 disabled={signLocked || !consentsOk || Boolean(signStage) || (testMode && !securityScope)}
+                                aria-busy={Boolean(signStage)}
                                 className="mt-1 cursor-pointer rounded-[4px] border-0 px-[22px] py-[13px] text-[15.5px] font-semibold text-[#110f0d] disabled:cursor-not-allowed disabled:opacity-40"
                                 style={{ background: "var(--nf-orange, #c66000)" }}
                                 onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nf-orange-strong, #ab4700)"; }}
@@ -6120,7 +6140,7 @@ export default function ProjectDesk({
                                   Test mode covers the security engine today, and this is a network requirement. Drop <span style={mono}>?test=1</span> from the address to publish it for real.
                                 </p>
                               )}
-                              {signError && <p className="m-0 mt-1.5 text-[12.5px] text-red-600">{signError}</p>}
+                              {signError && <p role="alert" className="m-0 mt-1.5 text-[12.5px] text-red-600">Publication failed: {signError}</p>}
                               {signedIn && sessId && (
                                 sessId.work ? (
                                   <p className="m-0 mt-1.5 flex flex-wrap items-center gap-2 text-[12.5px] leading-relaxed text-[#83807b]">
