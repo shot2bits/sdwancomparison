@@ -2607,7 +2607,7 @@ export default function ProjectDesk({
    *  been accepted (visibleSuggestions() has already dropped it), which
    *  is exactly the gap this hotfix closes. */
   const recordDecision = useCallback(
-    (questionId: string, optionLabel: string, entry: Pick<DecisionTurn, "action" | "optionId" | "resultingFactPaths" | "resultingNoted">) => {
+    (questionId: string, optionLabel: string, entry: Pick<DecisionTurn, "action" | "optionId" | "resultingFactPaths" | "resultingNoted"> & { clearedNotedIds?: string[] }) => {
       setDecisionTurns((ds) => [
         ...ds,
         {
@@ -2617,6 +2617,7 @@ export default function ProjectDesk({
           optionLabel,
           resultingFactPaths: entry.resultingFactPaths ?? [],
           resultingNoted: entry.resultingNoted ?? [],
+          clearedNotedIds: entry.clearedNotedIds ?? [],
           optionId: entry.optionId,
           action: entry.action,
         },
@@ -2668,6 +2669,7 @@ export default function ProjectDesk({
         optionId: "custom",
         resultingFactPaths,
         resultingNoted: resultingFactPaths.length ? [] : [note],
+        clearedNotedIds: [note.id],
       });
       setChangedSlots(resultingFactPaths.length ? resultingFactPaths : [note.id]);
       setSaveDirty(true);

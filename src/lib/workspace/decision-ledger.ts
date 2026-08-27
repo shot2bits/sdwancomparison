@@ -78,6 +78,10 @@ export const DecisionLedgerEntrySchema = z
      *  `note`-landing half of an accepted sector suggestion). Replayed
      *  verbatim into `noted` on resume. */
     resultingNoted: z.array(NotedItemShapeSchema).default([]),
+    /** Noted slots this action supersedes. This keeps the ledger
+     *  append-only while allowing a later structured correction to remove
+     *  an earlier free-text fallback during server-side resume. */
+    clearedNotedIds: z.array(z.string().min(1)).optional(),
   })
   .strict();
 export type DecisionLedgerEntry = z.infer<typeof DecisionLedgerEntrySchema>;
@@ -137,6 +141,10 @@ export function replayDecisionLedger(ledger: DecisionLedgerEntry[]): {
   const dismissed = new Set<string>();
   const declined = new Set<string>();
   for (const entry of ledger) {
+    for (const id of entry.clearedNotedIds ?? []) {
+      const index = noted.findIndex((n) => n.id === id);
+      if (index !== -1) noted.splice(index, 1);
+    }
     if (entry.action === "dismiss_question") {
       dismissed.add(entry.questionId);
     } else if (entry.action === "decline_suggestion") {
@@ -164,7 +172,9 @@ export function replayDecisionLedger(ledger: DecisionLedgerEntry[]): {
       // this ledger entry is strictly later in recorded order.
       for (const n of entry.resultingNoted) {
         if (n.id.startsWith("ps-")) declined.delete(n.id.replace(/^ps-/, ""));
-        if (!noted.some((x) => x.id === n.id)) noted.push(n);
+        const existing = noted.findIndex((x) => x.id === n.id);
+        if (existing === -1) noted.push(n);
+        else noted[existing] = n;
       }
     }
   }
