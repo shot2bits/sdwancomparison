@@ -110,6 +110,11 @@ export async function POST(req: Request) {
     }
     let parser: { getText: () => Promise<{ text: string }>; destroy: () => Promise<void> } | null = null;
     try {
+      // pdfjs loads these as an optional dependency, which Vercel's tracer
+      // cannot see. Import them directly so the Linux native package is
+      // included in the function and initialise the globals before pdfjs.
+      const { DOMMatrix, ImageData, Path2D } = await import("@napi-rs/canvas");
+      Object.assign(globalThis, { DOMMatrix, ImageData, Path2D });
       const { PDFParse } = await import("pdf-parse");
       parser = new PDFParse({ data: buf });
       const result = await parser.getText();
