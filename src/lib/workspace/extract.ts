@@ -1357,7 +1357,7 @@ export function deterministicExtract(text: string, externalNotes?: string[]): Fi
   // omission the receipt catches; wrongly landing records a lie. The
   // quote is the words actually matched, never a canned phrase.
   {
-    const m = hit(/fully managed|managed service|managed(?=\s+(?:sase|sd-?wan|sse\b|security service edge|secure service edge|network security (?:service|solution)))|manage it for us|no in.house it|outsourced?/);
+    const m = hit(/fully managed|managed service|\bmanaged(?=\s+(?:sase|sd-?wan|sse\b|security service edge|secure service edge|network security (?:service|solution)))|manage it for us|no in.house it|outsourced?/);
     const after = m ? t.slice(m.index + m[0].length, m.index + m[0].length + 44) : "";
     const foreignObject = /^\s*(?:\w+\s+)?(?:saas\b|software\b|apps?\b|applications?\b|desktops?\b|laptops?\b|endpoints?\b|devices?\b|printers?\b|payroll\b|crm\b|erp\b|m365\b|office ?365\b)/.test(after);
     const coManagedHit = hit(/co-?managed/);

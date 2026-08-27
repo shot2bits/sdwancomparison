@@ -367,6 +367,8 @@ export async function runWorkspaceDraftTests(): Promise<WorkspaceTestResult> {
     expect(has("procurement.buying", "sase"), "SASE technology scope lands");
     expect(has("procurement.operatingModel", "managed"), "product-attached managed intent lands as the operating model");
     expect(!deterministicExtract("We use managed SaaS applications today and need SD-WAN.").some((update) => update.path === "procurement.operatingModel"), "managed SaaS remains an estate description, never a managed-service instruction");
+    expect(!deterministicExtract("We need unmanaged SASE across 12 UK sites.").some((update) => update.path === "procurement.operatingModel"), "the substring inside unmanaged can never become a managed operating model");
+    expect(!deterministicExtract("We do not want managed SASE.").some((update) => update.path === "procurement.operatingModel"), "negated managed SASE remains excluded");
   });
 
   /* ---- Robert's bank-set ruling (28 Jul 2026): the published document
