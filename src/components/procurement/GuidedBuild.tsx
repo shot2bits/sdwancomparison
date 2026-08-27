@@ -147,7 +147,47 @@ export default function GuidedBuild({
   const [questionManagerOpen, setQuestionManagerOpen] = useState(false);
   const [inlineAnswers, setInlineAnswers] = useState<Record<string, string>>({});
   const questionManagerRef = useRef<HTMLDetailsElement | null>(null);
+  const settingsPanelRef = useRef<HTMLElement | null>(null);
+  const settingsReturnFocusRef = useRef<HTMLElement | null>(null);
+  const settingsWasOpenRef = useRef(false);
   useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
+  useEffect(() => {
+    if (!settingsOpen) {
+      if (settingsWasOpenRef.current) {
+        settingsWasOpenRef.current = false;
+        window.requestAnimationFrame(() => settingsReturnFocusRef.current?.focus());
+      }
+      return;
+    }
+
+    settingsWasOpenRef.current = true;
+    settingsReturnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const panel = settingsPanelRef.current;
+    window.requestAnimationFrame(() => panel?.querySelector<HTMLElement>("[data-settings-initial-focus]")?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onSettingsOpenChange(false);
+        return;
+      }
+      if (event.key !== "Tab" || !panel) return;
+      const focusable = [...panel.querySelectorAll<HTMLElement>("button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])")]
+        .filter((element) => element.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [settingsOpen, onSettingsOpenChange]);
   useEffect(() => {
     /* Recommendations belong to exactly one document section. Clear the
        previous section immediately and invalidate any slower response that
@@ -547,8 +587,8 @@ export default function GuidedBuild({
       </aside>
       {settingsOpen && (
         <div className="lpos-settings-backdrop" role="presentation" onMouseDown={() => onSettingsOpenChange(false)}>
-          <section className="lpos-settings-panel" role="dialog" aria-modal="true" aria-labelledby="lpos-document-settings" onMouseDown={(event) => event.stopPropagation()}>
-            <div><p>Document preferences</p><button type="button" aria-label="Close document settings" onClick={() => onSettingsOpenChange(false)}>×</button></div>
+          <section ref={settingsPanelRef} className="lpos-settings-panel" role="dialog" aria-modal="true" aria-labelledby="lpos-document-settings" onMouseDown={(event) => event.stopPropagation()}>
+            <div><p>Document preferences</p><button type="button" data-settings-initial-focus aria-label="Close document settings" onClick={() => onSettingsOpenChange(false)}>×</button></div>
             <h2 id="lpos-document-settings">Document settings</h2>
             <fieldset><legend>RFP depth</legend><button type="button" data-selected={rfpDepth === "short"} onClick={() => onRfpDepthChange("short")}><strong>Short RFP</strong><span>Minimum valid procurement brief</span></button><button type="button" data-selected={rfpDepth === "detailed"} onClick={() => onRfpDepthChange("detailed")}><strong>Detailed RFP</strong><span>Five populated questions per included section</span></button></fieldset>
             <fieldset><legend>Starting material</legend><button type="button" data-selected={entryMode === "build"} onClick={() => onEntryModeChange("build")}><strong>New requirements</strong><span>Build from your answers</span></button><button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}><strong>Existing RFP</strong><span>Check and improve an AI- or human-generated RFP</span></button></fieldset>
