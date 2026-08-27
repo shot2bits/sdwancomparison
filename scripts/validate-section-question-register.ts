@@ -33,6 +33,7 @@ expect(projectDesk.includes("activeRow?.state === \"confirmed\""), "a completed 
 expect(guidedBuild.includes("Every core answer, optional refinement and supplier question in this section."), "the register explains core, optional and bespoke questions");
 expect(guidedBuild.includes("Suggest questions with Netify AI"), "AI-assisted question suggestions are available explicitly");
 expect(guidedBuild.includes("Suggestions are never added until you choose them."), "AI suggestions require buyer approval before inclusion");
+expect(guidedBuild.includes('className="nf-guided-question-actions" role="group"'), "question-extension actions expose a valid accessible group");
 expect(guidedBuild.includes("nf-essential-progress"), "essential progress remains visible above the guided journey");
 expect(guidedBuild.includes("sectionComplete && incompleteSectionTitle"), "the final completed section cannot render a dead next-section button");
 

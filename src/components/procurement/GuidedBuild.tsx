@@ -445,7 +445,7 @@ export default function GuidedBuild({
               ))}
               {sectionQuestions.length === 0 && <li data-status="required"><span aria-hidden="true">○</span><div><strong>No questions recorded for this section yet.</strong></div><em>To do</em></li>}
             </ul>
-            <div className="nf-guided-question-actions" aria-label="Extend this RFP section">
+            <div className="nf-guided-question-actions" role="group" aria-label="Extend this RFP section">
               <button type="button" onClick={() => openQuestionManager(true)}>＋ Add recommended question</button>
               <button type="button" onClick={() => openQuestionManager(true)}>Browse additional questions</button>
               <button type="button" onClick={() => openQuestionManager(false)}>＋ Add bespoke question</button>
