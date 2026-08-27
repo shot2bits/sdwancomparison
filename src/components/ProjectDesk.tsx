@@ -122,6 +122,7 @@ import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
 import { buildRfpCoverage, RFP_SECTION_QUESTION_TARGET, SHORT_RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 import { buildSectionQuestionRegister, questionProgressBySection, type SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
+import { composeRfpValidationCorpus } from "@/lib/workspace/rfp-validation-corpus";
 
 /* ================================================================== */
 /* THE REQUIREMENT TWIN (round 5, 31 Jul 2026).                        */
@@ -1166,6 +1167,7 @@ export default function ProjectDesk({
   const factsRef = useRef<WorkspaceFact[]>([]);
   const receiptsRef = useRef<Receipt[]>([]);
   const sourceTurnsRef = useRef<SourceTurn[]>([]);
+  const rfpValidationCorpusRef = useRef("");
   /** Correction pass (Robert, 15 Aug 2026), defects 3 and 4: same purpose
    *  as sourceTurnsRef immediately above -- lets the resume effect read
    *  this session's own locally-captured decisions without closing over a
@@ -2919,17 +2921,22 @@ export default function ProjectDesk({
     [busy, applyMerge, applyRemovals, markChanged, say],
   );
 
-  const validateExistingRfp = useCallback(async (text: string) => {
+  const validateExistingRfp = useCallback(async (text: string, replaceBaseline = false) => {
     setValidatingRfp(true);
     setRfpValidationError(null);
     try {
+      const corpus = replaceBaseline
+        ? text.trim()
+        : composeRfpValidationCorpus(rfpValidationCorpusRef.current, text);
+      if (!corpus) throw new Error("Paste or upload an RFP to check.");
       const res = await fetch("/sase/api/workspace/validate-rfp", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: corpus }),
       });
       const data = (await res.json().catch(() => ({}))) as { report?: RfpValidationReport; error?: string };
       if (!res.ok || !data.report) throw new Error(data.error || "Could not check that RFP.");
+      rfpValidationCorpusRef.current = corpus;
       setRfpValidation(data.report);
       ev("workspace_rfp_validated", { score: data.report.score, questions: data.report.questionCount, words: data.report.wordCount });
     } catch (error) {
@@ -2989,7 +2996,7 @@ export default function ProjectDesk({
            hand would have survived. Same fix, same place in the flow: */
         for (const clause of r.unplaced) keepReceipt(clause);
       }
-      if (rfpEntryMode === "check") await validateExistingRfp(raw);
+      if (rfpEntryMode === "check") await validateExistingRfp(raw, true);
       const landed = Math.max(0, factsRef.current.filter((f) => !f.struck).length - factsBefore);
       const kept = Math.max(0, receiptsRef.current.length - receiptsBefore);
       setPasteSummary(ingestSummary(landed, kept, plan));
@@ -5229,7 +5236,7 @@ export default function ProjectDesk({
                 onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
                 onPublish={() => goToStep("publish")}
                 entryMode={rfpEntryMode}
-                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
                 validationReport={rfpValidation}
                 validatingRfp={validatingRfp}
                 validationError={rfpValidationError}
@@ -6280,7 +6287,7 @@ export default function ProjectDesk({
               onSelectSection={(key) => setActiveSection(key)}
               onPublish={() => undefined}
               entryMode={rfpEntryMode}
-              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
               validationReport={rfpValidation}
               validatingRfp={validatingRfp}
               validationError={rfpValidationError}

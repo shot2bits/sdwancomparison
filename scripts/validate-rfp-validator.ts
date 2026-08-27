@@ -1,5 +1,6 @@
 import { POST as validateRoute } from "../src/app/api/workspace/validate-rfp/route";
 import { validateRfpText } from "../src/lib/workspace/rfp-validator";
+import { composeRfpValidationCorpus } from "../src/lib/workspace/rfp-validation-corpus";
 import { QUESTION_BANK } from "../src/lib/rfp-question-bank";
 import { GET as methodologyRoute } from "../src/app/(marketing)/rfp-validation-methodology.json/route";
 import { readFileSync } from "node:fs";
@@ -67,6 +68,11 @@ async function main() {
   expect(shallow.recommendedQuestions.every((question) => canonicalIds.has(question.id)), "recommendations are canonical bank questions", shallow.recommendedQuestions.map((q) => q.id));
   expect(shallow.missingRequirementCount >= 10, "a shallow AI-style draft returns a concrete missing-requirement count", shallow.missingRequirementCount);
   expect(shallow.comparabilityWarnings.some((warning) => /response structure/i.test(warning)), "supplier-comparability deficiencies are explicit", shallow.comparabilityWarnings);
+
+  const improvedCorpus = composeRfpValidationCorpus(detailedRfp, "Suppliers must provide current ISO 27001 evidence and a dated implementation plan.");
+  const improved = validateRfpText(improvedCorpus);
+  expect(improved.wordCount > 150, "revalidation retains the complete imported RFP rather than scoring only the latest answer", improved.wordCount);
+  expect(improved.score >= strong.score, "an accepted improvement cannot reset a strong imported RFP to 0/100", { before: strong.score, after: improved.score });
 
   const biased = validateRfpText("We require Cisco SD-WAN across 20 UK sites. Suppliers should provide pricing and support details.");
   expect(biased.vendorNeutralityWarnings.length === 1, "named-provider bias without an equivalent route is flagged", biased.vendorNeutralityWarnings);
