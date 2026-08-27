@@ -816,6 +816,12 @@
 .nf-guided-suggestions button:hover { border-color: #55c9cc !important; color: #65d5d6 !important; }
 .nf-guided-suggestions button span { color: #55c9cc; }
 .nf-guided-suggestions small { color: #85878e; font-size: 9px; }
+.lpos-builder .nf-guided-suggestions button { border-color: #d8d1c7 !important; color: #34312d !important; background: #fffdfa !important; }
+.lpos-builder .nf-guided-suggestions button:hover { border-color: #b65310 !important; color: #743407 !important; background: #fff7ef !important; }
+.lpos-builder .nf-guided-suggestions button span { color: #a84300; }
+.lpos-builder .nf-guided-suggestions .nf-guided-add-all { border-color: #b65310 !important; color: #743407 !important; background: #fff7ef !important; }
+.lpos-builder .nf-guided-register li[data-status="custom"] > span { color: #fff; background: #4f7f3e; }
+.lpos-builder .nf-guided-register li[data-status="custom"] em { color: #3f6d32; font-weight: 700; }
 .nf-guided-prompt { margin-top: 15px; }
 .nf-guided-prompt > p { margin: 0 0 7px; color: #91939a; font-size: 11px; }
 .nf-guided-prompt .nf-2030-composer { min-height: 100px; border: 1px solid rgba(139,205,240,.55) !important; border-radius: 7px !important; background: #20262d !important; }

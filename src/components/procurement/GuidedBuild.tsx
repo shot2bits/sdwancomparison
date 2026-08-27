@@ -141,10 +141,21 @@ export default function GuidedBuild({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestionError, setSuggestionError] = useState<string | null>(null);
+  const suggestionRequestRef = useRef(0);
   const [questionManagerOpen, setQuestionManagerOpen] = useState(false);
   const [inlineAnswers, setInlineAnswers] = useState<Record<string, string>>({});
   const questionManagerRef = useRef<HTMLDetailsElement | null>(null);
   useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
+  useEffect(() => {
+    /* Recommendations belong to exactly one document section. Clear the
+       previous section immediately and invalidate any slower response that
+       returns after the buyer has moved elsewhere. */
+    suggestionRequestRef.current += 1;
+    setSuggestions([]);
+    setSuggestionError(null);
+    setSuggesting(false);
+    setQuestionManagerOpen(false);
+  }, [sectionTitle]);
   useEffect(() => {
     const nextId = card?.nq.id ?? null;
     const previousId = previousQuestionIdRef.current;
@@ -224,6 +235,8 @@ export default function GuidedBuild({
 
   const askForSuggestions = async () => {
     if (suggesting) return;
+    const requestId = suggestionRequestRef.current + 1;
+    suggestionRequestRef.current = requestId;
     setSuggesting(true);
     setSuggestionError(null);
     try {
@@ -238,11 +251,13 @@ export default function GuidedBuild({
       });
       const data = (await res.json().catch(() => ({}))) as { questions?: string[]; error?: string };
       if (!res.ok) throw new Error(data.error || "Suggestions are unavailable.");
+      if (requestId !== suggestionRequestRef.current) return;
       setSuggestions(Array.isArray(data.questions) ? data.questions : []);
     } catch (error) {
+      if (requestId !== suggestionRequestRef.current) return;
       setSuggestionError(error instanceof Error ? error.message : "Suggestions are unavailable.");
     } finally {
-      setSuggesting(false);
+      if (requestId === suggestionRequestRef.current) setSuggesting(false);
     }
   };
 
@@ -473,7 +488,6 @@ export default function GuidedBuild({
                 <div className="nf-guided-suggestions" aria-label="AI suggested supplier questions">
                   <button type="button" className="nf-guided-add-all" onClick={addAllSuggestedQuestions}><span>＋</span>Add all {suggestions.length} recommendations</button>
                   {suggestions.map((suggestion) => <button type="button" key={suggestion} onClick={() => addSupplierQuestion(suggestion)}><span>＋</span>{suggestion}</button>)}
-                  <small>Suggestions are never added until you choose them.</small>
                 </div>
               )}
             </details>

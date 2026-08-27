@@ -32,7 +32,10 @@ expect(projectDesk.includes("buildSectionQuestionRegister"), "the primary builde
 expect(projectDesk.includes("activeRow?.state === \"confirmed\""), "a completed selected section remains inspectable instead of snapping away");
 expect(guidedBuild.includes("Every core answer, optional refinement and supplier question in this section."), "the register explains core, optional and bespoke questions");
 expect(guidedBuild.includes("Suggest questions with Netify AI"), "AI-assisted question suggestions are available explicitly");
-expect(guidedBuild.includes("Suggestions are never added until you choose them."), "AI suggestions require buyer approval before inclusion");
+expect(guidedBuild.includes("Nothing is added without your approval."), "AI suggestions require buyer approval before inclusion");
+expect(!guidedBuild.includes("Suggestions are never added until you choose them."), "the recommendation panel states approval once, without duplicate reassurance");
+expect(guidedBuild.includes("suggestionRequestRef.current += 1") && guidedBuild.includes("[sectionTitle]"), "changing section invalidates and clears its previous AI recommendations");
+expect(guidedBuild.includes("requestId !== suggestionRequestRef.current"), "a slow response from the previous section cannot overwrite the current section");
 expect(guidedBuild.includes('className="nf-guided-question-actions" role="group"'), "question-extension actions expose a valid accessible group");
 expect(guidedBuild.includes("nf-essential-progress"), "essential progress remains visible above the guided journey");
 expect(guidedBuild.includes("sectionComplete && incompleteSectionTitle"), "the final completed section cannot render a dead next-section button");
