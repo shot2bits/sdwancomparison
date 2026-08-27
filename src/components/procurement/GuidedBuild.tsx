@@ -277,6 +277,11 @@ export default function GuidedBuild({
         <section ref={questionSectionRef} className="nf-guided-question" aria-label="Next requirement question">
           <div className="nf-guided-builder-label"><span aria-hidden="true">✦</span><strong>Guided conversation</strong></div>
           <p className="lpos-guided-intro">Describe what you need. Netify builds the document.</p>
+          <div className="nf-essential-progress" role="status" aria-live="polite">
+            <strong>{ready ? "Essential baseline complete" : `${Math.max(0, total - Math.max(0, position - 1))} essential section${Math.max(0, total - Math.max(0, position - 1)) === 1 ? "" : "s"} remaining`}</strong>
+            <span>{ready ? "Review the RFP before publishing." : `Next: ${sectionTitle}`}</span>
+            <i aria-hidden="true"><b style={{ width: `${ready ? 100 : Math.round((Math.max(0, position - 1) / Math.max(1, total)) * 100)}%` }} /></i>
+          </div>
           <div className="lpos-own-words lpos-persistent-prompt">
             <div className="lpos-prompt-heading">
               <strong>{entryMode === "check" ? "Check an existing RFP" : "Tell Netify what you need"}</strong>
@@ -386,8 +391,10 @@ export default function GuidedBuild({
             </div>
           ) : ready ? (
             <button type="button" className="nf-guided-review" onClick={onOpenDocument}>Review your RFP</button>
-          ) : sectionComplete ? (
+          ) : sectionComplete && incompleteSectionTitle ? (
             <button type="button" className="nf-guided-review" onClick={onGoToNextSection}>Continue to {incompleteSectionTitle ?? "the next section"}</button>
+          ) : sectionComplete ? (
+            <button type="button" className="nf-guided-review" onClick={onOpenDocument}>Review your RFP</button>
           ) : (
             <button type="button" className="nf-guided-review" onClick={onFocusPrompt}>Answer in the prompt below</button>
           )}
@@ -402,8 +409,8 @@ export default function GuidedBuild({
               {writingCustomAnswer
                 ? "Use the prompt below"
                 : selected.length === 0
-                  ? multipleChoice ? "Select one or more regions" : "Choose an answer"
-                  : multipleChoice ? `Save ${selected.length} region${selected.length === 1 ? "" : "s"}` : "Continue"}
+                  ? multipleChoice ? "Select one or more options" : "Choose an answer"
+                  : multipleChoice ? `Save ${selected.length} selection${selected.length === 1 ? "" : "s"}` : "Continue"}
             </button>
           )}
 

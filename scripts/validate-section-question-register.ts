@@ -3,6 +3,7 @@ import path from "node:path";
 import { compileProcurementDocument, CUSTOM_SUPPLIER_QUESTION_PREFIX } from "../src/lib/workspace/procurement-document";
 import { buildSectionQuestionRegister, questionProgressBySection } from "../src/lib/workspace/section-question-register";
 import type { OutlineRow } from "../src/lib/workspace/procurement-outline";
+import { earnedQuestions } from "../src/lib/workspace/questions";
 
 const root = process.cwd();
 const projectDesk = fs.readFileSync(path.join(root, "src/components/ProjectDesk.tsx"), "utf8");
@@ -32,6 +33,22 @@ expect(projectDesk.includes("activeRow?.state === \"confirmed\""), "a completed 
 expect(guidedBuild.includes("Every core answer, optional refinement and supplier question in this section."), "the register explains core, optional and bespoke questions");
 expect(guidedBuild.includes("Suggest questions with Netify AI"), "AI-assisted question suggestions are available explicitly");
 expect(guidedBuild.includes("Suggestions are never added until you choose them."), "AI suggestions require buyer approval before inclusion");
+expect(guidedBuild.includes("nf-essential-progress"), "essential progress remains visible above the guided journey");
+expect(guidedBuild.includes("sectionComplete && incompleteSectionTitle"), "the final completed section cannot render a dead next-section button");
+
+const guidedQuestions = earnedQuestions(
+  { organisation: { regions: ["uk"] }, estate: { sites: 12 } },
+  "sase",
+  "managed",
+  [],
+  [],
+);
+const saseScope = guidedQuestions.find((item) => item.id === "q-sse-scope");
+const resilienceScope = guidedQuestions.find((item) => item.id === "q-resilience");
+expect(saseScope?.selectionMode === "multiple", "SASE security controls are a genuine multi-select decision");
+expect(saseScope?.options.length === 5, "all five governed SASE controls remain available together");
+expect(resilienceScope?.options[0]?.label === "Required at all sites", "resilience wording names its site scope explicitly");
+expect(!guidedQuestions.some((item) => /fully managed.*co-managed.*self-managed/i.test(item.question)), "a captured managed-service fact is not asked again as a blank operating-model decision");
 
 const rows: OutlineRow[] = [
   { key: "current_estate", title: "Current estate", state: "confirmed", detail: "MPLS estate stated", missing: ["cloud estate", "existing security"] },

@@ -4194,6 +4194,11 @@ export default function ProjectDesk({
       return {
         nq,
         buttons: (nq.options ?? []).map((o, i) => ({ label: o.label, onClick: () => answerNextQuestion(nq, i) })),
+        selectionMode: nq.selectionMode,
+        onConfirmSelection: nq.selectionMode === "multiple"
+          ? (indices: number[]) => indices.forEach((index) => answerNextQuestion(nq, index))
+          : undefined,
+        selectAllLabel: nq.id === "q-sse-scope" ? "Select all SASE controls" : undefined,
         hint: null,
         fills,
       };

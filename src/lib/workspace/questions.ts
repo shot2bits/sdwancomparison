@@ -72,6 +72,8 @@ export type EarnedQuestion = {
   /** Priority when more questions are earned than the cap shows. */
   weight: number;
   options: Array<{ label: string; answer: QuestionAnswer }>;
+  /** Some procurement decisions are sets, not mutually-exclusive choices. */
+  selectionMode?: "single" | "multiple";
   evidence: QuestionEvidence[];
 };
 
@@ -220,6 +222,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
     question: "Full SASE covers several security controls. Which are in scope for you?",
     section: "security",
     weight: 88,
+    selectionMode: "multiple",
     earnedBy: (c) => c.buying === "sase" && !c.notedIds.some((n) => n.startsWith("sse-")),
     options: [
       { label: "ZTNA", answer: { kind: "items", itemIds: ["sse-ztna"] } },
@@ -285,7 +288,7 @@ const QUESTIONS: Array<EarnedQuestion & { earnedBy: (c: Ctx) => boolean }> = [
       networkBuying(c.buying) &&
       !c.notedIds.includes("qn-q-resilience"),
     options: [
-      { label: "Required", answer: { kind: "note", text: "Dual-circuit resilience per site required" } },
+      { label: "Required at all sites", answer: { kind: "note", text: "Dual-circuit resilience per site required" } },
       { label: "Critical sites only", answer: { kind: "note", text: "Dual-circuit resilience at critical sites only" } },
       { label: "Not required", answer: { kind: "note", text: "Dual-circuit resilience per site is not required" } },
     ],

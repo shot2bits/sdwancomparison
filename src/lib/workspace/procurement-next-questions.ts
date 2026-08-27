@@ -88,6 +88,8 @@ export type NextQuestion = {
    *  still a real, visible decision; the caller resolves how it is
    *  answered (see ProjectDesk.tsx's OPEN_DECISION_SLOT map). */
   options: Array<{ label: string; answer: QuestionAnswer }> | null;
+  /** Preserve set-valued earned questions through the ranking layer. */
+  selectionMode?: "single" | "multiple";
   /** True only for `source === "sector_suggestion"` -- the renderer must
    *  label this distinctly ("Netify suggests...") and never let an
    *  accept click land as buyer-stated provenance. */
@@ -255,6 +257,7 @@ export function rankNextQuestions(ctx: Ctx): NextQuestion[] {
       target: q.section,
       impact: impactForEarned(q),
       options: q.options,
+      selectionMode: q.selectionMode,
       governedSuggestion: false,
       conflictReason: null,
       reason: null,
