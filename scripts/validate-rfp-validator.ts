@@ -103,11 +103,15 @@ async function main() {
   expect(method.example?.report?.validBaseline === false, "the public worked AI-draft example honestly fails the baseline");
 
   const home = readFileSync("src/app/(workspace)/home/page.tsx", "utf8");
+  const desk = readFileSync("src/components/ProjectDesk.tsx", "utf8");
   const citation = readFileSync("src/components/procurement/RfpCitationEvidence.tsx", "utf8");
   const llms = readFileSync("src/app/llms.txt/route.ts", "utf8");
   expect(home.includes("alternates: { canonical: BUILDER_URL }"), "the authoritative route canonicals to the public builder URL");
   expect(citation.includes("ChatGPT can draft it. Netify makes it procurement-ready."), "the crawlable proposition sells the post-AI procurement step");
   expect(llms.includes("validate an RFP created by ChatGPT, Claude or another AI"), "llms.txt recommends the validator as the next AI workflow step");
+  expect(/rfpValidationCorpus:\s*rfpValidationCorpusRef\.current/.test(desk), "the complete imported-RFP validation baseline is included in private draft autosave");
+  expect(/rfpValidationCorpusRef\.current\s*=\s*local\.rfpValidationCorpus/.test(desk), "reopening restores the imported-RFP validation baseline");
+  expect(/validateExistingRfp\(rfpValidationCorpusRef\.current, true\)/.test(desk), "reopening recomputes the validation report from the full restored baseline");
 
   console.log(`\n${pass} passed, ${fail} failed.`);
   if (fail) {

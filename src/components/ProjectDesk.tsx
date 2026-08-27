@@ -428,6 +428,7 @@ type LocalWorkingDraft = {
   messages: ThreadMsg[];
   rfpDepth: RfpDepth;
   rfpEntryMode: "build" | "check";
+  rfpValidationCorpus: string;
 };
 
 function newLocalDraftId(): string {
@@ -461,6 +462,7 @@ function readLocalWorkingDraft(): LocalWorkingDraft | null {
       messages: Array.isArray(parsed.messages) && parsed.messages.length ? parsed.messages : [{ who: "netify", text: THREAD_WELCOME }],
       rfpDepth: parsed.rfpDepth === "detailed" ? "detailed" : "short",
       rfpEntryMode: parsed.rfpEntryMode === "check" ? "check" : "build",
+      rfpValidationCorpus: typeof parsed.rfpValidationCorpus === "string" ? parsed.rfpValidationCorpus.slice(0, 200_000) : "",
     };
   } catch {
     return null;
@@ -1168,6 +1170,7 @@ export default function ProjectDesk({
   const receiptsRef = useRef<Receipt[]>([]);
   const sourceTurnsRef = useRef<SourceTurn[]>([]);
   const rfpValidationCorpusRef = useRef("");
+  const rfpValidationRestoreAttemptedRef = useRef(false);
   /** Correction pass (Robert, 15 Aug 2026), defects 3 and 4: same purpose
    *  as sourceTurnsRef immediately above -- lets the resume effect read
    *  this session's own locally-captured decisions without closing over a
@@ -1602,6 +1605,7 @@ export default function ProjectDesk({
         setMsgs(local.messages);
         setRfpDepth(local.rfpDepth);
         setRfpEntryMode(local.rfpEntryMode);
+        rfpValidationCorpusRef.current = local.rfpValidationCorpus;
         setLocalDraftSavedAt(local.updatedAt);
         setLocalDraftStatus("saved");
       }
@@ -1982,6 +1986,7 @@ export default function ProjectDesk({
           messages: msgs,
           rfpDepth,
           rfpEntryMode,
+          rfpValidationCorpus: rfpValidationCorpusRef.current,
         };
         window.localStorage.setItem(`${LOCAL_DRAFT_PREFIX}${id}`, JSON.stringify(snapshot));
         window.localStorage.setItem(LOCAL_DRAFT_POINTER_KEY, id);
@@ -2005,6 +2010,7 @@ export default function ProjectDesk({
     msgs,
     rfpDepth,
     rfpEntryMode,
+    rfpValidation,
   ]);
 
   /* Autofocus, pointer-fine only: on a desktop the caret waits in the
@@ -2945,6 +2951,15 @@ export default function ProjectDesk({
       setValidatingRfp(false);
     }
   }, []);
+
+  /** Reopen fidelity for an imported-RFP working draft. The validation
+   * report is derived, so the private draft stores only its complete text
+   * baseline and this effect recomputes the current report on restore. */
+  useEffect(() => {
+    if (rfpEntryMode !== "check" || rfpValidation || validatingRfp || rfpValidationRestoreAttemptedRef.current || !rfpValidationCorpusRef.current) return;
+    rfpValidationRestoreAttemptedRef.current = true;
+    void validateExistingRfp(rfpValidationCorpusRef.current, true);
+  }, [rfpEntryMode, rfpValidation, validatingRfp, validateExistingRfp]);
 
   /* ---- Ingest (The Threshold): a paste, a dropped text file, an
      uploaded Word/Excel attachment, or a Google Docs/Sheets link all run
@@ -5236,7 +5251,7 @@ export default function ProjectDesk({
                 onSelectSection={(key) => { setActiveSection(key); setWorkspaceDocumentView("requirement"); }}
                 onPublish={() => goToStep("publish")}
                 entryMode={rfpEntryMode}
-                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+                onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
                 validationReport={rfpValidation}
                 validatingRfp={validatingRfp}
                 validationError={rfpValidationError}
@@ -6287,7 +6302,7 @@ export default function ProjectDesk({
               onSelectSection={(key) => setActiveSection(key)}
               onPublish={() => undefined}
               entryMode={rfpEntryMode}
-              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
+              onEntryModeChange={(mode) => { setRfpEntryMode(mode); if (mode === "build") { rfpValidationCorpusRef.current = ""; rfpValidationRestoreAttemptedRef.current = false; setRfpValidation(null); setRfpValidationError(null); } window.requestAnimationFrame(() => inputRef.current?.focus()); }}
               validationReport={rfpValidation}
               validatingRfp={validatingRfp}
               validationError={rfpValidationError}
