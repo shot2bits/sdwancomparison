@@ -5263,7 +5263,7 @@ export default function ProjectDesk({
                 onDescribeQuestion={chooseGuidedCustomAnswer}
                 customAnswerQuestionId={guidedCustomQuestionId}
                 customAnswerReceipt={guidedCustomAnswerReceipt}
-                sectionTitle={guidedQuestionCard?.fills?.title ?? activeRow?.title ?? "Your requirement"}
+                sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Your requirement"}
                 sectionQuestions={activeSectionQuestionItems}
                 onAddSupplierQuestion={addCustomSupplierQuestion}
                 onImportQuestions={() => fileRef.current?.click()}
@@ -6345,7 +6345,7 @@ export default function ProjectDesk({
               onDescribeQuestion={chooseGuidedCustomAnswer}
               customAnswerQuestionId={guidedCustomQuestionId}
               customAnswerReceipt={guidedCustomAnswerReceipt}
-              sectionTitle={guidedQuestionCard?.fills?.title ?? activeRow?.title ?? "Project overview"}
+              sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Project overview"}
               sectionQuestions={activeSectionQuestionItems}
               onAddSupplierQuestion={addCustomSupplierQuestion}
               onImportQuestions={() => fileRef.current?.click()}
