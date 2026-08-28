@@ -2464,6 +2464,9 @@ export default function ProjectDesk({
    *  answer uses, tagged as the buyer's own choice. */
   const landOption = useCallback(
     (slot: TwinSlot, opt: TwinOption) => {
+      const resultingNoted = opt.land.kind === "note"
+        ? [{ id: opt.land.id, label: opt.land.text, section: opt.land.section, own: true }]
+        : [];
       if (opt.land.kind === "fact") {
         const m = applyMerge([{ path: opt.land.path, value: opt.land.value, provenance: "stated", quote: opt.label }], "answer");
         markChanged(m.changed.length ? m.changed : [factId(opt.land.path, opt.land.value)], m.facts);
@@ -2489,6 +2492,26 @@ export default function ProjectDesk({
         scheduleSettle();
         ev("workspace_earned_answered", { q: l.id, kind: "note" });
       }
+      /* Guided fallback cards use the same Twin options as the edit sheet.
+         Their visible answer used to land in facts/noted only, while the
+         publish gate intentionally replays the durable decision ledger.
+         The result was a contradictory 7/7-complete screen with publishing
+         still locked. Record the structured click at this shared landing
+         point so both surfaces and a reopened draft resolve identically. */
+      setDecisionTurns((turns) => [
+        ...turns,
+        {
+          id: newDecisionTurnId(),
+          at: Date.now(),
+          questionId: `twin:${slot.id}`,
+          optionId: `${slot.id}:${opt.label}`,
+          optionLabel: opt.label,
+          action: opt.land.kind === "fact" ? "items" : "note",
+          resultingFactPaths: opt.land.kind === "fact" ? [opt.land.path] : [],
+          resultingNoted,
+        },
+      ]);
+      setSaveDirty(true);
       /* The buyer's own choice is recorded as THEIRS in the transcript —
          the same ruling `answerNextQuestion` carries below, applied here
          too because THIS is the function every `compiler_open_decision`
@@ -2527,6 +2550,20 @@ export default function ProjectDesk({
       const labels = options.map((option) => option.label);
       sayYou(listJoin(labels));
       say(`Recorded — ${slot.label}: ${listJoin(labels)}.`);
+      setDecisionTurns((turns) => [
+        ...turns,
+        {
+          id: newDecisionTurnId(),
+          at: Date.now(),
+          questionId: `twin:${slot.id}`,
+          optionId: `${slot.id}:multiple`,
+          optionLabel: listJoin(labels),
+          action: "items",
+          resultingFactPaths: updates.map((update) => update.path),
+          resultingNoted: [],
+        },
+      ]);
+      setSaveDirty(true);
       setEdit(null);
     },
     [applyMerge, markChanged, say, sayYou],
