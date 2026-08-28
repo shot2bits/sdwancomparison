@@ -588,11 +588,9 @@ export default function GuidedBuild({
       {settingsOpen && (
         <div className="lpos-settings-backdrop" role="presentation" onMouseDown={() => onSettingsOpenChange(false)}>
           <section ref={settingsPanelRef} className="lpos-settings-panel" role="dialog" aria-modal="true" aria-labelledby="lpos-document-settings" onMouseDown={(event) => event.stopPropagation()}>
-            <div><p>Document preferences</p><button type="button" data-settings-initial-focus aria-label="Close document settings" onClick={() => onSettingsOpenChange(false)}>×</button></div>
-            <h2 id="lpos-document-settings">Document settings</h2>
+            <div><h2 id="lpos-document-settings">RFP preferences</h2><button type="button" data-settings-initial-focus aria-label="Close RFP preferences" onClick={() => onSettingsOpenChange(false)}>×</button></div>
             <fieldset><legend>RFP depth</legend><button type="button" data-selected={rfpDepth === "short"} onClick={() => onRfpDepthChange("short")}><strong>Short RFP</strong><span>Minimum valid procurement brief</span></button><button type="button" data-selected={rfpDepth === "detailed"} onClick={() => onRfpDepthChange("detailed")}><strong>Detailed RFP</strong><span>Five populated questions per included section</span></button></fieldset>
             <fieldset><legend>Starting material</legend><button type="button" data-selected={entryMode === "build"} onClick={() => onEntryModeChange("build")}><strong>New requirements</strong><span>Build from your answers</span></button><button type="button" data-selected={entryMode === "check"} onClick={() => onEntryModeChange("check")}><strong>Existing RFP</strong><span>Check and improve an AI- or human-generated RFP</span></button></fieldset>
-            <p className="lpos-settings-methodology">Recommendations are selected from Netify&apos;s governed 386-question procurement bank, including 43 extended SASE questions and sector-specific packs.</p>
             <button type="button" className="lpos-settings-done" onClick={() => onSettingsOpenChange(false)}>Save and close</button>
           </section>
         </div>

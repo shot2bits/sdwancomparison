@@ -5039,45 +5039,56 @@ export default function ProjectDesk({
   );
 
   const railItems: Array<{
-    icon: string;
+    icon: "requirements" | "suppliers" | "responses" | "evidence" | "reports" | "review" | "exports";
     label: string;
     current: boolean;
     disabled?: boolean;
     disabledReason?: string;
     onClick: () => void;
   }> = [
+    { icon: "requirements", label: "Requirements", current: activeStep === "describe" || activeStep === "decisions", onClick: () => goToStep("describe") },
     {
-      icon: "⌂", label: "Overview", current: activeStep === "review", disabled: !started,
-      disabledReason: "Add the first requirement before reviewing the RFP overview.",
-      onClick: () => goToStep("review"),
-    },
-    { icon: "▤", label: "Requirements", current: activeStep === "describe" || activeStep === "decisions", onClick: () => goToStep("describe") },
-    {
-      icon: "♧", label: "Suppliers", current: activeStep === "publish", disabled: !reachable.has("publish"),
+      icon: "suppliers", label: "Suppliers", current: activeStep === "publish", disabled: !reachable.has("publish"),
       disabledReason: "Complete the essential baseline before reviewing publication and supplier matching.",
       onClick: () => goToStep("publish"),
     },
     {
-      icon: "▧", label: "Responses", current: activeStep === "compare", disabled: !reachable.has("compare"),
+      icon: "responses", label: "Responses", current: activeStep === "compare", disabled: !reachable.has("compare"),
       disabledReason: "Responses become available after the opportunity is published.",
       onClick: () => goToStep("compare"),
     },
     {
-      icon: "▣", label: "Evidence", current: activeStep === "compare" && workspaceDocumentView === "evidence", disabled: !reachable.has("compare"),
+      icon: "evidence", label: "Evidence", current: activeStep === "compare" && workspaceDocumentView === "evidence", disabled: !reachable.has("compare"),
       disabledReason: "Evidence becomes available when suppliers respond to a published opportunity.",
       onClick: () => { setWorkspaceDocumentView("evidence"); goToStep("compare"); },
     },
     {
-      icon: "▥", label: "Reports", current: false, disabled: !publishedFlag,
+      icon: "reports", label: "Reports", current: false, disabled: !publishedFlag,
       disabledReason: "Reports become available after publication.",
       onClick: () => goToStep("compare"),
     },
     {
-      icon: "▱", label: "Exports", current: false, disabled: !publishedFlag,
+      icon: "review", label: "Review", current: activeStep === "review", disabled: !started,
+      disabledReason: "Add your first requirement before reviewing the RFP.",
+      onClick: () => goToStep("review"),
+    },
+    {
+      icon: "exports", label: "Exports", current: false, disabled: !publishedFlag,
       disabledReason: "Word and PDF exports unlock after publication.",
       onClick: () => goToStep("publish"),
     },
   ];
+
+  const railIcon = (icon: (typeof railItems)[number]["icon"]) => {
+    const common = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+    if (icon === "requirements") return <svg {...common}><path d="M7 4h10a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2Z"/><path d="M9 4V2h6v2M8 9h8M8 13h8M8 17h5"/></svg>;
+    if (icon === "suppliers") return <svg {...common}><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3.5 20c.4-4 2.2-6 5.5-6s5.1 2 5.5 6M14 15c3.5-.6 5.7 1.1 6.5 4"/></svg>;
+    if (icon === "responses") return <svg {...common}><path d="M4 5h16v12H8l-4 4V5Z"/><path d="M8 9h8M8 13h5"/></svg>;
+    if (icon === "evidence") return <svg {...common}><path d="M6 3h9l4 4v14H6V3Z"/><path d="M15 3v5h4M9 13l2 2 4-4"/></svg>;
+    if (icon === "reports") return <svg {...common}><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>;
+    if (icon === "review") return <svg {...common}><path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>;
+    return <svg {...common}><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>;
+  };
 
   const livingOsRail = (
     <div className="lpos-product-rail" role="navigation" aria-label="Living Procurement OS navigation" data-collapsed={productRailCollapsed}>
@@ -5086,15 +5097,18 @@ export default function ProjectDesk({
           <button
             key={item.label}
             type="button"
-            aria-label={item.label}
+            aria-label={item.disabled ? `${item.label}, locked. ${item.disabledReason}` : item.label}
+            aria-disabled={item.disabled || undefined}
             aria-description={item.disabled ? item.disabledReason : undefined}
             aria-current={item.current ? "page" : undefined}
             data-current={item.current}
-            disabled={item.disabled}
+            data-locked={item.disabled || undefined}
+            data-disabled-reason={item.disabled ? item.disabledReason : undefined}
             title={item.disabled ? item.disabledReason : `Open ${item.label}`}
-            onClick={item.onClick}
+            onClick={() => { if (!item.disabled) item.onClick(); }}
           >
-            <span aria-hidden="true">{item.icon}</span><span className="lpos-rail-label">{item.label}</span>
+            <span className="lpos-rail-icon" aria-hidden="true">{railIcon(item.icon)}{item.disabled && <i><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="5" width="8" height="6" rx="1"/><path d="M4 5V3.5a2 2 0 0 1 4 0V5"/></svg></i>}</span>
+            <span className="lpos-rail-label">{item.label}</span>
           </button>
         ))}
       </nav>
