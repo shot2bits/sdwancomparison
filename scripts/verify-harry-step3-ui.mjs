@@ -28,10 +28,15 @@ try {
   await ownWords.click();
   const questionBefore = await page.locator(".nf-guided-focus h1").innerText();
   await send("We currently use MPLS with Azure and legacy firewalls.");
+  await page.locator(".nf-guided-custom-receipt").waitFor({ timeout: 25_000 }).catch(() => undefined);
   check("DEF-18 own-words answer is visibly recorded", await page.locator(".nf-guided-custom-receipt").count() === 1, questionBefore);
   check("DEF-18 essential journey advances after own-words answer", (await page.locator(".nf-guided-focus h1").innerText()) !== questionBefore);
 
   await send("Actually, we have 15 sites, not 12.");
+  await page.waitForFunction(() => {
+    const text = document.querySelector(".lpos-captured")?.textContent ?? "";
+    return /Sites\s*15/i.test(text);
+  }, null, { timeout: 25_000 }).catch(() => undefined);
   const captured = await page.locator(".lpos-captured").innerText();
   check("DEF-19 a typed correction replaces the captured site count", captured.includes("15") && !captured.includes("12 sites"), captured);
 
