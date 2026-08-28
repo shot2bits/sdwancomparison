@@ -25,7 +25,7 @@ import type { SourceLedgerEntry, SourceLedgerVia } from "@/lib/workspace/source-
 import type { RfpStatus } from "@/lib/rfp-types";
 import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeStateFromProject } from "@/lib/workspace/source-ledger";
 import type { DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
-import { mergeDecisionLedger, resumeDecisionsFromProject } from "@/lib/workspace/decision-ledger";
+import { mergeDecisionLedger, replayDecisionLedger, resumeDecisionsFromProject } from "@/lib/workspace/decision-ledger";
 import { parseCommand, type Command } from "@/lib/workspace/commands";
 import { parseGoogleDocLink } from "@/lib/workspace/links";
 import {
@@ -1756,19 +1756,15 @@ export default function ProjectDesk({
           };
           setProjectHistory(proj.history ?? []);
           const resumeState = resumeStateFromProject(proj);
-          if (!resumeState) {
-            // Scoped to Security Sourcing this round (see
-            // resumeStateFromProject()'s doc comment): a non-engine/wizard
-            // project's Save path is the wizard PUT route, which this
-            // resume flow does not yet drive, so resuming into one here
-            // would silently misroute the next save.
+          const hasCanonicalWorkspaceState = Array.isArray(proj.facts) && proj.facts.length > 0;
+          if (!resumeState && !hasCanonicalWorkspaceState) {
             say("This project isn't a Security Sourcing engagement yet, so it can't be reopened here -- starting fresh instead.");
             return;
           }
           // Merge, not replace (item 6): preserves anything this session
           // already captured locally during the fetch's own async gap.
-          setSourceTurns((current) => mergeSourceLedger(resumeState.sourceLedger, current));
-          setResumeRequirementBase(resumeState.requirementBase);
+          setSourceTurns((current) => mergeSourceLedger(resumeState?.sourceLedger ?? proj.source_ledger ?? [], current));
+          if (resumeState) setResumeRequirementBase(resumeState.requirementBase);
           /* Correction pass (Robert, 15 Aug 2026), defect 3: the SAME
            * merge-not-replace treatment for the decision ledger --
            * `resumeState` above already proved `proj.engine ===
@@ -1780,10 +1776,11 @@ export default function ProjectDesk({
            * "resolved or declined items do not reappear" true on a real
            * reload, not just on the ledger's own storage. */
           const decisionResume = resumeDecisionsFromProject(proj);
-          if (decisionResume) {
-            const mergedDecisionLedger = mergeDecisionLedger(decisionResume.decisionLedger, decisionTurnsRef.current);
+          const persistedDecisionLedger = decisionResume?.decisionLedger ?? proj.decision_ledger ?? [];
+          if (persistedDecisionLedger.length) {
+            const mergedDecisionLedger = mergeDecisionLedger(persistedDecisionLedger, decisionTurnsRef.current);
             setDecisionTurns(mergedDecisionLedger);
-            const replay = resumeDecisionsFromProject({ engine: proj.engine, decision_ledger: mergedDecisionLedger });
+            const replay = replayDecisionLedger(mergedDecisionLedger);
             if (replay) {
               setNoted((current) => {
                 const merged = current.slice();
@@ -1800,7 +1797,7 @@ export default function ProjectDesk({
           // and records the scope this project was saved under, so an
           // unrelated later scope change is still detected correctly.
           setCreated({ id: resumeId, manage: resumeManage ?? "", test: Boolean(proj.test) });
-          savedSecurity.current = true;
+          savedSecurity.current = proj.engine === "security_sourcing";
           // Seed the version/change-set chain from this project's own last
           // persisted document (see this effect's own `procurement_document`
           // field comment above) -- the FIRST compile after a reload still
@@ -1877,6 +1874,7 @@ export default function ProjectDesk({
                     invited_vendor_ids?: string[];
                     matched_vendors?: { slug: string; name: string }[] | null;
                     invited_vendors?: { slug: string; name: string; supplier_url: string }[] | null;
+                    board_opportunity_id?: string;
                   })
                 : null;
               if (reportBody?.ok) {
@@ -1908,7 +1906,7 @@ export default function ProjectDesk({
                 // record with truly nothing leaves `published` at null,
                 // same as today.
                 if (frozen || matchedVendors.length > 0 || invited.length > 0) {
-                  setPublished({ invited, boardId: undefined, matchedVendors, totalEvaluatedMarket, frozen, namesFrozen });
+                  setPublished({ invited, boardId: reportBody.board_opportunity_id, matchedVendors, totalEvaluatedMarket, frozen, namesFrozen });
                   // The post-publish matches section lives inside the same
                   // `phase === "fits"` block as the pre-publish locked
                   // panel (see that block's own doc comment); `phase`
@@ -1917,6 +1915,7 @@ export default function ProjectDesk({
                   // `published` would sit correctly in state but never
                   // actually render until the buyer happened to trigger
                   // that command again.
+                  setStep("publish");
                   setPhase("fits");
                   rehydratedPublished = true;
                   // Lifecycle-consistency closure pass, correction D: a
@@ -3686,6 +3685,16 @@ export default function ProjectDesk({
         const totalEvaluatedMarket = Number(data.market_report?.matched?.total_evaluated_market ?? 0);
         ev("board_listed", { board_id: data.board?.opportunity_id ?? "" });
         setPublished({ invited, boardId: data.board?.opportunity_id, matchedVendors, totalEvaluatedMarket, frozen: true, namesFrozen: true });
+        // A published project is now server-owned, so make that durable
+        // location the current browser URL before removing the private
+        // on-device draft. Refresh and reopen can then rehydrate this exact
+        // published record instead of starting an empty builder.
+        if (typeof window !== "undefined") {
+          const resumeUrl = new URL(window.location.href);
+          resumeUrl.searchParams.set("id", proj.id);
+          if (proj.manage) resumeUrl.searchParams.set("manage", proj.manage);
+          window.history.replaceState(window.history.state, "", resumeUrl.toString());
+        }
         // The published server envelope is authoritative from this point.
         clearLocalWorkingDraft(localDraftIdRef.current);
         localDraftIdRef.current = null;

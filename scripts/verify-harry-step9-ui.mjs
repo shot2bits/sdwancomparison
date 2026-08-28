@@ -7,6 +7,7 @@ page.setDefaultTimeout(15_000);
 const results = [];
 const badResponses = [];
 const publishRequests = [];
+let createdPayload = null;
 const check = (label, value, detail = "") => results.push([label, Boolean(value), detail]);
 page.on("response", (response) => { if (response.status() >= 400) badResponses.push(`${response.status()} ${response.url()}`); });
 
@@ -50,6 +51,7 @@ const publishPattern = "**/sase/api/rfp/step9-rfp/publish";
 try {
   await page.route("**/sase/api/rfp", async (route) => {
     if (route.request().method() !== "POST") return route.continue();
+    createdPayload = route.request().postDataJSON();
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -60,6 +62,36 @@ try {
     status: 200,
     contentType: "application/json",
     body: JSON.stringify({ evaluations: [] }),
+  }));
+  await page.route("**/sase/api/rfp/step9-rfp/report**", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      ok: true,
+      frozen: true,
+      board_opportunity_id: "step9-opportunity",
+      market_report: { matched: { total_evaluated_market: 30 } },
+      matched_vendor_ids: ["supplier-one"],
+      invited_vendor_ids: ["supplier-one"],
+      matched_vendors: [{ slug: "supplier-one", name: "Supplier One" }],
+      invited_vendors: [{ slug: "supplier-one", name: "Supplier One", supplier_url: "/supplier-one" }],
+    }),
+  }));
+  await page.route("**/sase/api/rfp/step9-rfp?**", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      id: "step9-rfp",
+      engine: "rfp_builder",
+      status: "published",
+      invited_vendors: ["supplier-one"],
+      source_ledger: createdPayload?.source_turns ?? [],
+      decision_ledger: createdPayload?.decision_turns ?? [],
+      facts: createdPayload?.facts ?? [],
+      receipts: createdPayload?.receipts ?? [],
+      procurement_document: createdPayload?.compiled_document,
+      envelope_revision: 1,
+    }),
   }));
 
   await page.goto(baseUrl, { waitUntil: "networkidle", timeout: 30_000 });
@@ -114,6 +146,13 @@ try {
   check("DEF-52 a successful publish has an unmistakable confirmation", /Publication complete|Published successfully/i.test(await success.innerText()));
   check("DEF-52 confirmation links to the published notice", await success.locator('a[href="/sase/opportunities/step9-opportunity"]').count() >= 1);
   check("DEF-52 the publish request lists on the board", publishRequests.length === 2 && publishRequests.every((request) => request?.list_on_board === true), JSON.stringify(publishRequests));
+
+  const publishedUrl = new URL(page.url());
+  check("DEF-53 successful publication writes a durable project URL", publishedUrl.searchParams.get("id") === "step9-rfp" && publishedUrl.searchParams.get("manage") === "step9-manage", publishedUrl.toString());
+  await page.reload({ waitUntil: "networkidle", timeout: 30_000 });
+  await page.locator(".nf-publish-success").waitFor({ timeout: 20_000 });
+  check("DEF-53 refresh reopens the published project", /Published successfully/i.test(await page.locator(".nf-publish-success").innerText()));
+  check("DEF-53 reopened project retains its board link", await page.locator('.nf-publish-success a[href="/sase/opportunities/step9-opportunity"]').count() >= 1);
 
   const relevantFailures = badResponses.filter((entry) => !entry.includes("/_vercel/insights/script.js") && !entry.includes("/step9-rfp/publish"));
   check("Step 9 has no unexpected failed browser requests", relevantFailures.length === 0, relevantFailures.join(" | "));

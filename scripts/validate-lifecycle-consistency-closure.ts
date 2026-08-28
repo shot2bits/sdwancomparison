@@ -115,7 +115,7 @@ function main() {
     // branch, confirming `phase === "fits"` alone cannot be trusted as a
     // "before publish" signal (this is WHY `!published` is the correct
     // gate, not a redundant belt-and-braces check).
-    const publishSuccessBlock = desk.match(/if \(res\.ok && data\.market_unlocked === true && typeof data\.board\?\.opportunity_id === "string"\) \{[\s\S]{0,3500}?window\.scrollTo/);
+    const publishSuccessBlock = desk.match(/if \(res\.ok && data\.market_unlocked === true && typeof data\.board\?\.opportunity_id === "string"\) \{[\s\S]{0,4500}?window\.scrollTo/);
     record(Boolean(publishSuccessBlock), "B setup: the publish success branch was located for inspection", "");
     if (publishSuccessBlock) {
       record(!/setPhase\(/.test(publishSuccessBlock[0]), "B: confirms `setPhase` is never called in the publish success path -- `phase` alone cannot detect \"already published\", so `!published` is the correct, necessary gate", "");

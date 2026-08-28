@@ -3,7 +3,7 @@ import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { buildMarketReport } from "@/lib/market-report";
 import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
-import { isMarketUnlocked } from "@/lib/market-unlock";
+import { getMarketUnlock, isMarketUnlocked } from "@/lib/market-unlock";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -94,6 +94,10 @@ export async function GET(req: Request, ctx: Ctx) {
         "Publish to match this project against Netify's evaluated vendors and service providers, invite the strongest fits, and unlock your project documents. The full vendor list, complete gap detail, the Word and PDF documents and delivery to your matched vendors and service providers unlock together, the moment you publish. Publishing is free.",
     }, { headers: cors });
   }
+  const marketUnlock = await getMarketUnlock(id);
+  if (!marketUnlock) {
+    return Response.json({ error: "The published board binding could not be verified." }, { status: 409, headers: cors });
+  }
   const snapshot = await getLatestPublishedSnapshot(id);
   return Response.json({
     ok: true,
@@ -118,5 +122,9 @@ export async function GET(req: Request, ctx: Ctx) {
     // from "frozen, and there happen to be none".
     matched_vendors: snapshot?.matched_vendors ?? null,
     invited_vendors: snapshot?.invited_vendors ?? null,
+    // The owner can reopen the exact anonymous notice after a refresh.
+    // This id comes only from the re-verified MarketUnlock binding above,
+    // never from client state or a freshly inferred board lookup.
+    board_opportunity_id: marketUnlock.board_opportunity_id,
   }, { headers: cors });
 }
