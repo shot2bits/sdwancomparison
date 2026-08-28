@@ -4236,8 +4236,10 @@ export default function ProjectDesk({
      this prevents the old impossible state where the centre said
      "Review your RFP" while the left rail still said Not started. */
   const guidedQuestionCard = useMemo<NextQuestionCard | null>(() => {
-    if (activeSection && activeRow?.state === "confirmed") return null;
-    const nextRow = activeSection && activeRow ? activeRow : sectionProgress.next;
+    /* Completing a section must advance the essential journey immediately.
+       The section list remains available for review, but it must not insert
+       a second "Continue to…" gate between essential questions. */
+    const nextRow = activeSection && activeRow?.state !== "confirmed" ? activeRow : sectionProgress.next;
     if (!nextRow) return null;
     const rankedForSection = allNextQuestionCards.find((candidate) => candidate.fills?.title === nextRow.title);
     if (rankedForSection) return rankedForSection;
@@ -5232,7 +5234,9 @@ export default function ProjectDesk({
             {activeStep === "describe" && (
               <GuidedBuild
                 card={guidedQuestionCard}
-                ready={rfpCoverage.ready}
+                ready={contentReady}
+                depthReady={rfpCoverage.ready}
+                depthRemainingAnswers={rfpCoverage.remainingAnswers}
                 advisorMessage={advisorMessage}
                 sectionComplete={Boolean(activeRow && rfpCoverage.sections.find((section) => section.key === activeRow.key)?.ready)}
                 incompleteSectionTitle={sectionProgress.next?.title ?? null}
@@ -5255,7 +5259,7 @@ export default function ProjectDesk({
                 onDescribeQuestion={chooseGuidedCustomAnswer}
                 customAnswerQuestionId={guidedCustomQuestionId}
                 customAnswerReceipt={guidedCustomAnswerReceipt}
-                sectionTitle={activeRow?.title ?? guidedQuestionCard?.fills?.title ?? "Your requirement"}
+                sectionTitle={guidedQuestionCard?.fills?.title ?? activeRow?.title ?? "Your requirement"}
                 sectionQuestions={activeSectionQuestionItems}
                 onAddSupplierQuestion={addCustomSupplierQuestion}
                 onImportQuestions={() => fileRef.current?.click()}
@@ -6312,7 +6316,9 @@ export default function ProjectDesk({
           <div data-workspace-grid className="nf-2030-grid" data-rail-collapsed={productRailCollapsed}>
             <GuidedBuild
               card={guidedQuestionCard}
-              ready={rfpCoverage.ready}
+              ready={contentReady}
+              depthReady={rfpCoverage.ready}
+              depthRemainingAnswers={rfpCoverage.remainingAnswers}
               advisorMessage={advisorMessage}
               sectionComplete={false}
               incompleteSectionTitle={sectionProgress.next?.title ?? null}
@@ -6335,7 +6341,7 @@ export default function ProjectDesk({
               onDescribeQuestion={chooseGuidedCustomAnswer}
               customAnswerQuestionId={guidedCustomQuestionId}
               customAnswerReceipt={guidedCustomAnswerReceipt}
-              sectionTitle={activeRow?.title ?? "Project overview"}
+              sectionTitle={guidedQuestionCard?.fills?.title ?? activeRow?.title ?? "Project overview"}
               sectionQuestions={activeSectionQuestionItems}
               onAddSupplierQuestion={addCustomSupplierQuestion}
               onImportQuestions={() => fileRef.current?.click()}

@@ -49,6 +49,8 @@ function splitQuestion(value: string): { prompt: string; context: string | null 
 export default function GuidedBuild({
   card,
   ready,
+  depthReady,
+  depthRemainingAnswers,
   advisorMessage,
   sectionComplete,
   incompleteSectionTitle,
@@ -92,6 +94,8 @@ export default function GuidedBuild({
 }: {
   card: NextQuestionCard | null;
   ready: boolean;
+  depthReady: boolean;
+  depthRemainingAnswers: number;
   advisorMessage: string;
   sectionComplete: boolean;
   incompleteSectionTitle: string | null;
@@ -362,9 +366,15 @@ export default function GuidedBuild({
               <button type="button" data-selected={rfpDepth === "short"} onClick={() => onRfpDepthChange("short")}><strong>Short RFP</strong><small>Minimum valid brief</small></button>
               <button type="button" data-selected={rfpDepth === "detailed"} onClick={() => onRfpDepthChange("detailed")}><strong>Detailed RFP</strong><small>Five-question section depth</small></button>
             </div>
+            <div className="lpos-depth-contract" role="status" aria-live="polite">
+              <strong>{rfpDepth === "short" ? "Short RFP" : "Detailed RFP"}</strong>
+              <span>{rfpDepth === "short"
+                ? "Complete the essential baseline, then review and publish a valid opportunity. Optional questions are not required."
+                : `Complete the same essential baseline, then build out each included section to ${rfpQuestionTarget} populated questions.`}</span>
+            </div>
             {rfpDepth === "detailed" && (
               <div className="lpos-depth-recommendations">
-                <p><strong>Detailed RFP enabled</strong><span>Target: {rfpQuestionTarget} populated questions in each included section</span></p>
+                <p><strong>{depthReady ? "Detailed question depth complete" : "Recommended expansion"}</strong><span>{depthReady ? "All included sections meet the detailed target" : `${depthRemainingAnswers} more populated question${depthRemainingAnswers === 1 ? "" : "s"} across the included sections`}</span></p>
                 <div>{(recommendedTopics.length ? recommendedTopics : ["Add sector, sites, SASE scope, underlay or service model for tailored recommendations"]).map((topic) => <span key={topic}>{topic}</span>)}</div>
                 <button type="button" onClick={() => openQuestionManager(true)}>Review recommended questions →</button>
               </div>
@@ -452,7 +462,9 @@ export default function GuidedBuild({
               </button>
             </div>
           ) : ready ? (
-            <button type="button" className="nf-guided-review" onClick={onOpenDocument}>Review your RFP</button>
+            rfpDepth === "detailed" && !depthReady
+              ? <button type="button" className="nf-guided-review" onClick={() => openQuestionManager(true)}>Add detailed questions to this section</button>
+              : <button type="button" className="nf-guided-review" onClick={onOpenDocument}>Review your RFP</button>
           ) : sectionComplete && incompleteSectionTitle ? (
             <button type="button" className="nf-guided-review" onClick={onGoToNextSection}>Continue to {incompleteSectionTitle ?? "the next section"}</button>
           ) : sectionComplete ? (
@@ -508,8 +520,7 @@ export default function GuidedBuild({
               {sectionQuestions.length === 0 && <li data-status="required"><span aria-hidden="true">○</span><div><strong>No questions recorded for this section yet.</strong></div><em>To do</em></li>}
             </ul>
             <div className="nf-guided-question-actions" role="group" aria-label="Extend this RFP section">
-              <button type="button" onClick={() => openQuestionManager(true)}>＋ Add recommended question</button>
-              <button type="button" onClick={() => openQuestionManager(true)}>Browse additional questions</button>
+              {rfpDepth === "detailed" ? <><button type="button" onClick={() => openQuestionManager(true)}>＋ Add recommended question</button><button type="button" onClick={() => openQuestionManager(true)}>Browse additional questions</button></> : <button type="button" onClick={() => onRfpDepthChange("detailed")}>Build a more detailed RFP</button>}
               <button type="button" onClick={() => openQuestionManager(false)}>＋ Add bespoke question</button>
               <button type="button" onClick={onImportQuestions}>Import Word, PDF, text or spreadsheet</button>
             </div>

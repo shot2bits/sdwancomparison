@@ -29,7 +29,7 @@ const compiledQuestion = document.responseGroups.flatMap((group) => group.questi
 
 expect(compiledQuestion?.source === "custom", "a buyer-added question is compiled into the supplier response pack");
 expect(projectDesk.includes("buildSectionQuestionRegister"), "the primary builder uses the canonical section question register");
-expect(projectDesk.includes("activeRow?.state === \"confirmed\""), "a completed selected section remains inspectable instead of snapping away");
+expect(projectDesk.includes('activeRow?.state !== "confirmed" ? activeRow : sectionProgress.next'), "the essential journey advances past a completed selected section without another Continue gate");
 expect(guidedBuild.includes("Every core answer, optional refinement and supplier question in this section."), "the register explains core, optional and bespoke questions");
 expect(guidedBuild.includes("Suggest questions with Netify AI"), "AI-assisted question suggestions are available explicitly");
 expect(guidedBuild.includes("Nothing is added without your approval."), "AI suggestions require buyer approval before inclusion");
@@ -39,6 +39,9 @@ expect(guidedBuild.includes("requestId !== suggestionRequestRef.current"), "a sl
 expect(guidedBuild.includes('className="nf-guided-question-actions" role="group"'), "question-extension actions expose a valid accessible group");
 expect(guidedBuild.includes("nf-essential-progress"), "essential progress remains visible above the guided journey");
 expect(guidedBuild.includes("sectionComplete && incompleteSectionTitle"), "the final completed section cannot render a dead next-section button");
+expect(guidedBuild.includes('rfpDepth === "short" ? "Short RFP" : "Detailed RFP"'), "short and detailed modes explain distinct completion contracts");
+expect(guidedBuild.includes('rfpDepth === "detailed" ? <><button'), "recommended-question controls are exposed by detailed mode rather than duplicated in short mode");
+expect(projectDesk.includes("ready={contentReady}") && projectDesk.includes("depthReady={rfpCoverage.ready}"), "essential readiness is separate from optional detailed depth");
 
 const guidedQuestions = earnedQuestions(
   { organisation: { regions: ["uk"] }, estate: { sites: 12 } },
