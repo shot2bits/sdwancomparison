@@ -5245,14 +5245,14 @@ export default function ProjectDesk({
                 documentTitle={canvasDocument.title}
                 documentSummary={canvasDocument.summary}
                 clauses={canvasDocument.clauses}
+                captured={answeredLog.stated.map((item) => ({ id: item.key, label: item.label, answer: item.answer, path: item.path }))}
                 composer={composerBlock}
                 onFocusPrompt={() => inputRef.current?.focus()}
-                onEditClause={(clause) => {
-                  const sourceFact = factsRef.current.find((fact) => clause.sourceFactIds?.includes(fact.id) && !fact.struck);
-                  const slotId = sourceFact ? SLOT_BY_PATH[sourceFact.path] : undefined;
+                onEditCaptured={(item) => {
+                  const slotId = item.path ? SLOT_BY_PATH[item.path] : undefined;
                   if (slotId) setEdit(slotId);
                   else {
-                    setDraft(clause.statement);
+                    setDraft(item.answer);
                     window.requestAnimationFrame(() => inputRef.current?.focus());
                   }
                 }}
@@ -6327,14 +6327,14 @@ export default function ProjectDesk({
               documentTitle={canvasDocument.title}
               documentSummary={canvasDocument.summary}
               clauses={canvasDocument.clauses}
+              captured={answeredLog.stated.map((item) => ({ id: item.key, label: item.label, answer: item.answer, path: item.path }))}
               composer={composerBlock}
               onFocusPrompt={() => inputRef.current?.focus()}
-              onEditClause={(clause) => {
-                const sourceFact = factsRef.current.find((fact) => clause.sourceFactIds?.includes(fact.id) && !fact.struck);
-                const slotId = sourceFact ? SLOT_BY_PATH[sourceFact.path] : undefined;
+              onEditCaptured={(item) => {
+                const slotId = item.path ? SLOT_BY_PATH[item.path] : undefined;
                 if (slotId) setEdit(slotId);
                 else {
-                  setDraft(clause.statement);
+                  setDraft(item.answer);
                   window.requestAnimationFrame(() => inputRef.current?.focus());
                 }
               }}

@@ -89,6 +89,15 @@ export function buildSectionQuestionRegister(input: {
         text: requiredQuestions[row.key] ?? `Complete ${row.title}`,
         status: "required",
       });
+    } else if (row.state === "later" && items.length === 0) {
+      /* Deferred sections still explain what belongs there. The core
+         question stays optional, so it adds depth without becoming a
+         publication gate. */
+      items.push({
+        id: `suggested:${row.key}`,
+        text: requiredQuestions[row.key] ?? `Add detail to ${row.title}`,
+        status: "suggested",
+      });
     }
 
     byKey[row.key] = items;

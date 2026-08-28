@@ -7,6 +7,7 @@ import type { OutlineProgress, OutlineRow } from "@/lib/workspace/procurement-ou
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
 
 type ClausePreview = { id: string; statement: string; sourceFactIds?: string[] };
+type CapturedPreview = { id: string; label: string; answer: string; path?: string };
 type CustomAnswerReceipt = { question: string; text: string; addedTo: string };
 export type RfpDepth = "short" | "detailed";
 
@@ -59,9 +60,10 @@ export default function GuidedBuild({
   documentTitle,
   documentSummary,
   clauses,
+  captured,
   composer,
   onFocusPrompt,
-  onEditClause,
+  onEditCaptured,
   onDescribeQuestion,
   customAnswerQuestionId,
   customAnswerReceipt,
@@ -104,9 +106,10 @@ export default function GuidedBuild({
   documentTitle: string;
   documentSummary: string;
   clauses: ClausePreview[];
+  captured: CapturedPreview[];
   composer: ReactNode;
   onFocusPrompt: () => void;
-  onEditClause: (clause: ClausePreview) => void;
+  onEditCaptured: (item: CapturedPreview) => void;
   onDescribeQuestion: (question: NextQuestionCard["nq"] | null) => void;
   customAnswerQuestionId: string | null;
   customAnswerReceipt: CustomAnswerReceipt | null;
@@ -383,8 +386,8 @@ export default function GuidedBuild({
           <div className="lpos-you-said"><small>You said</small><strong>{documentSummary || "Start with what you know about the project."}</strong><time>Now</time></div>
           <div className="lpos-captured">
             <small>Netify captured</small>
-            {(clauses.length ? clauses.slice(0, 4) : [{ id: "empty", statement: "Your confirmed requirements will appear here" }]).map((clause) => (
-              <div key={clause.id}><span aria-hidden="true">✓</span><p>{clause.statement}</p><button type="button" onClick={() => onEditClause(clause)}>Edit</button></div>
+            {(captured.length ? captured.slice(0, 5) : [{ id: "empty", label: "Requirements", answer: "Your confirmed requirements will appear here" }]).map((item) => (
+              <div key={item.id}><span aria-hidden="true">✓</span><p><strong>{item.label}</strong><small>{item.answer}</small></p>{item.id !== "empty" && <button type="button" onClick={() => onEditCaptured(item)}>Edit</button>}</div>
             ))}
           </div>
           <div className="nf-guided-focus">

@@ -61,6 +61,7 @@ const rows: OutlineRow[] = [
   { key: "current_estate", title: "Current estate", state: "confirmed", detail: "MPLS estate stated", missing: ["cloud estate", "existing security"] },
   { key: "resilience_availability", title: "Resilience and availability", state: "confirmed", detail: "Dual failover required" },
   { key: "security_identity_data", title: "Security, identity and data", state: "needs_input", detail: "Security controls not stated" },
+  { key: "commercial_contractual", title: "Commercial and contractual", state: "later", detail: "Add when pricing starts" },
 ];
 const register = buildSectionQuestionRegister({
   rows,
@@ -76,5 +77,6 @@ expect(register.resilience_availability.some((item) => item.status === "complete
 expect(progress.resilience_availability.answered === 1 && progress.resilience_availability.required === 0, "section navigation and checklist share the same completed state");
 expect(register.security_identity_data.some((item) => item.status === "required"), "an incomplete section always exposes at least one core question");
 expect(progress.resilience_availability.optional === 1, "buyer-added supplier questions are counted separately from completion");
+expect(register.commercial_contractual.some((item) => item.status === "suggested"), "a deferred section still exposes its real core question without becoming required");
 
 console.log("\nALL PASS");
