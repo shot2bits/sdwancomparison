@@ -19,6 +19,7 @@ async function send(text) {
 
 async function completeBaseline() {
   const publish = page.getByRole("button", { name: "Publish opportunity" });
+  let suppliedMigrationFallback = false;
   for (let attempt = 0; attempt < 14 && await publish.isDisabled(); attempt += 1) {
     const choices = page.locator(".nf-guided-choices");
     const checkbox = choices.locator('button[role="checkbox"]').first();
@@ -28,8 +29,16 @@ async function completeBaseline() {
       await page.locator(".nf-guided-continue").click();
     } else if (await radio.count()) {
       await radio.click();
+    } else if (!suppliedMigrationFallback) {
+      suppliedMigrationFallback = true;
+      await send("Migration and implementation must include discovery, detailed design, a pilot, phased site migration, rollback planning, testing, training, documentation and operational handover, completed within six months.");
+      await page.waitForTimeout(1_200);
     } else {
-      break;
+      const required = page.locator(".nf-guided-inline-answer input").first();
+      if (!(await required.count())) break;
+      await required.fill("Required for this procurement.");
+      await required.press("Enter");
+      await page.waitForTimeout(900);
     }
     await page.waitForTimeout(700);
   }
