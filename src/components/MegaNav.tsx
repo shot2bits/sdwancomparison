@@ -25,9 +25,12 @@ import { MEGA_GROUPS, NAV_CTA, SIGN_IN, ACCOUNT, type MegaGroup } from "@/lib/na
 type Session = { authenticated: boolean; role?: string; email?: string; vendor_slug?: string | null; admin?: boolean };
 
 /** Unpublished drafts in amber, otherwise the live count: real state only. */
-function ProjectsBadge() {
+function ProjectsBadge({ enabled }: { enabled: boolean }) {
   const [counts, setCounts] = useState<{ drafts: number; live: number } | null>(null);
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     const load = () =>
       fetch("/sase/api/rfp/mine")
         .then((r) => (r.ok ? r.json() : null))
@@ -40,8 +43,8 @@ function ProjectsBadge() {
     load();
     window.addEventListener("netify:rfps-changed", load);
     return () => window.removeEventListener("netify:rfps-changed", load);
-  }, []);
-  if (!counts || (counts.drafts === 0 && counts.live === 0)) return null;
+  }, [enabled]);
+  if (!enabled || !counts || (counts.drafts === 0 && counts.live === 0)) return null;
   return counts.drafts > 0 ? (
     <span className="ml-1.5 shrink-0 rounded-full bg-amber-100 px-1.5 py-[1px] text-[10px] font-medium text-amber-900">
       {counts.drafts} draft{counts.drafts === 1 ? "" : "s"}
@@ -203,7 +206,7 @@ export default function MegaNav() {
           )}
           <a href={accountHref} className="hidden items-center text-[12.5px] font-medium text-zinc-600 no-underline transition-colors hover:text-zinc-950 sm:inline-flex">
             {accountLabel}
-            <ProjectsBadge />
+            <ProjectsBadge enabled={Boolean(session?.authenticated)} />
           </a>
           <a
             href={NAV_CTA.href}
@@ -262,7 +265,7 @@ export default function MegaNav() {
             <div className="mt-5 space-y-3">
               <a href={accountHref} onClick={() => setMobileOpen(false)} className="flex items-center py-1 text-sm font-medium text-zinc-900 no-underline">
                 {accountLabel}
-                <ProjectsBadge />
+                <ProjectsBadge enabled={Boolean(session?.authenticated)} />
               </a>
               {session?.authenticated && session.admin && (
                 <a href="/sase/admin/" onClick={() => setMobileOpen(false)} className="block py-1 text-sm text-zinc-600 no-underline">Admin console</a>

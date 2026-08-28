@@ -4,9 +4,11 @@ import path from "node:path";
 const root = process.cwd();
 const desk = fs.readFileSync(path.join(root, "src/components/ProjectDesk.tsx"), "utf8");
 const guided = fs.readFileSync(path.join(root, "src/components/procurement/GuidedBuild.tsx"), "utf8");
+const megaNav = fs.readFileSync(path.join(root, "src/components/MegaNav.tsx"), "utf8");
 const css = fs.readFileSync(path.join(root, "src/app/globals.css"), "utf8");
 
 const checks: Array<[string, boolean]> = [
+  ["DEF-01: anonymous sessions do not request the private RFP list", megaNav.includes("if (!enabled)") && megaNav.includes("enabled={Boolean(session?.authenticated)}")],
   ["DEF-02: recognisable SVG navigation icons are rendered", desk.includes("const railIcon =") && desk.includes("<svg {...common}>")],
   ["DEF-02: compact labels remain visible below 1100px", css.includes(".nf-2030-workspace .lpos-product-rail .lpos-rail-label { display: block;")],
   ["DEF-03: locked items remain focusable and expose a reason", desk.includes("aria-disabled={item.disabled || undefined}") && desk.includes("data-disabled-reason={item.disabled ? item.disabledReason : undefined}") && css.includes("content: attr(data-disabled-reason)")],
