@@ -34,6 +34,8 @@ try {
   });
   check("DEF-44 a durable on-device draft is written", Boolean(savedBefore.pointer && savedBefore.raw));
   check("DEF-47 the exact buyer wording is retained in the draft", Boolean(savedBefore.raw?.includes(initial)), savedBefore.pointer ?? "");
+  const savedFacts = savedBefore.raw ? JSON.parse(savedBefore.raw).facts ?? [] : [];
+  check("DEF-43 saved acknowledgement covers the extracted canonical facts", savedFacts.some((fact) => fact.path === "estate.sites" && fact.value === 15), JSON.stringify(savedFacts));
 
   await page.reload({ waitUntil: "networkidle", timeout: 30_000 });
   await page.locator('[data-workspace-started="true"]').waitFor({ timeout: 15_000 });

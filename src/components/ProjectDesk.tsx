@@ -1966,6 +1966,12 @@ export default function ProjectDesk({
     if (!booted || resumedFromUrlRef.current) return;
     const hasWorkingDraft = facts.length > 0 || noted.length > 0 || receipts.length > 0 || sourceTurns.length > 0 || decisionTurns.length > 0;
     if (!hasWorkingDraft) return;
+    /* Do not leave the previous "Draft saved" acknowledgement on screen
+       while a newer canonical snapshot is waiting to be written. Without
+       this transition a fast refresh could trust the stale acknowledgement
+       and reopen the earlier source-only snapshot before extracted facts
+       had reached localStorage. */
+    setLocalDraftStatus("idle");
     const timer = window.setTimeout(() => {
       try {
         const id = localDraftIdRef.current ?? newLocalDraftId();
@@ -5165,8 +5171,8 @@ export default function ProjectDesk({
             </nav>
             <div className="lpos-profile">
               <div aria-live="polite" title="This working draft is kept on this device. It is not published and no supplier can access it.">
-                <strong>{localDraftStatus === "error" ? "Draft not saved" : localDraftSavedAt ? "Draft saved" : "Private workspace"}</strong>
-                <span>{localDraftSavedAt ? "On this device" : "Not published"}</span>
+                <strong>{localDraftStatus === "error" ? "Draft not saved" : localDraftStatus === "saved" ? "Draft saved" : localDraftSavedAt ? "Saving draft…" : "Private workspace"}</strong>
+                <span>{localDraftStatus === "saved" ? "On this device" : "Not published"}</span>
               </div>
               <button type="button" aria-label="Help">?</button><button type="button" aria-label="Notifications">♧</button><b>PL</b>
             </div>
