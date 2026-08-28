@@ -42,7 +42,7 @@ function main() {
   {
     const desk = src("src/components/ProjectDesk.tsx");
     const checklist = src("src/lib/workspace/publish-checklist.ts");
-    record(/buildPublishChecklist\(/.test(desk), "0: ProjectDesk builds the publish checklist from the shared pure module", "");
+    record(/persistedEssentialBaselineChecklist\(/.test(desk), "0: ProjectDesk builds the publish checklist from the same persisted seven-section baseline as the server", "");
     record(/!publishChecklist\.ready/.test(desk), "0: signLocked is gated on that SAME checklist object, not a parallel re-derivation", "");
     record(/sectionProgress\.ready/.test(desk) && /sectionProgress\.total/.test(desk), "0: the final workspace status band reads the canonical section progress projection", "");
     record(/ready: doneCount === items\.length/.test(checklist), "0: `ready` is derived from the items themselves, so the count shown and the gate enforced cannot disagree", "");

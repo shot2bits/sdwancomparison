@@ -59,8 +59,8 @@ export type PublishChecklist = {
 };
 
 export function buildPublishChecklist(input: {
-  /** The required rows from the canonical section outline. Rows already
-   *  classified as Later are deliberately excluded by the caller. */
+  /** The required rows for the caller's gate. The persisted publication
+   *  path always supplies the complete seven-section essential baseline. */
   essentialSections: Array<{ key: string; label: string; done: boolean }>;
 }): PublishChecklist {
   const items: PublishRequirement[] = input.essentialSections.map((section) => ({

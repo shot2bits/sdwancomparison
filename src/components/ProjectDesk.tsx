@@ -118,7 +118,7 @@ import { buildAnsweredLog } from "@/lib/workspace/answered-log";
 import CapturedList from "@/components/procurement/CapturedList";
 import RfpReady from "@/components/procurement/RfpReady";
 import { reachableSteps, completedSteps, type WizardStep } from "@/lib/workspace/wizard-steps";
-import { buildPublishChecklist } from "@/lib/workspace/publish-checklist";
+import { persistedEssentialBaselineChecklist } from "@/lib/workspace/publish-checklist";
 import { buildRfpCoverage, RFP_SECTION_QUESTION_TARGET, SHORT_RFP_SECTION_QUESTION_TARGET } from "@/lib/workspace/rfp-coverage";
 import { buildSectionQuestionRegister, questionProgressBySection, type SectionQuestionItem } from "@/lib/workspace/section-question-register";
 import type { RfpValidationReport } from "@/lib/workspace/rfp-validator";
@@ -4016,14 +4016,18 @@ export default function ProjectDesk({
      useful opportunity to market once the identifying facts stand;
      five populated questions per included section is the higher threshold
      for calling the living document RFP-ready. */
+  /* Use the exact persisted seven-section baseline enforced by the publish
+     API. Deriving this from visible outline rows used to omit rows labelled
+     "Later", which could unlock publishing before an essential section was
+     actually complete. */
   const publishChecklist = useMemo(
     () =>
-      buildPublishChecklist({
-        essentialSections: sectionOutline
-          .filter((row) => row.state !== "later")
-          .map((row) => ({ key: row.key, label: row.title, done: row.state === "confirmed" })),
+      persistedEssentialBaselineChecklist({
+        facts,
+        decisionLedger: decisionTurns,
+        procurementDocument: compiledDocument,
       }),
-    [sectionOutline],
+    [facts, decisionTurns, compiledDocument],
   );
   const contentReady = publishChecklist.ready;
   const signLocked =
