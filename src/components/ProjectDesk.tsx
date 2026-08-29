@@ -5151,13 +5151,16 @@ export default function ProjectDesk({
   const livingOsRail = (
     <div className="lpos-product-rail" role="navigation" aria-label="Living Procurement OS navigation" data-collapsed={productRailCollapsed}>
       <nav>
-        {railItems.map((item) => (
+        {railItems.map((item) => {
+          const tooltipId = `lpos-rail-tooltip-${item.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+          return (
           <button
             key={item.label}
             type="button"
             aria-label={item.disabled ? `${item.label}, locked. ${item.disabledReason}` : item.label}
             aria-disabled={item.disabled || undefined}
             aria-description={item.disabled ? item.disabledReason : undefined}
+            aria-describedby={item.disabled ? tooltipId : undefined}
             aria-current={item.current ? "page" : undefined}
             data-current={item.current}
             data-locked={item.disabled || undefined}
@@ -5167,8 +5170,10 @@ export default function ProjectDesk({
           >
             <span className="lpos-rail-icon" aria-hidden="true">{railIcon(item.icon)}{item.disabled && <i><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="5" width="8" height="6" rx="1"/><path d="M4 5V3.5a2 2 0 0 1 4 0V5"/></svg></i>}</span>
             <span className="lpos-rail-label">{item.label}</span>
+            {item.disabled && <span id={tooltipId} role="tooltip" className="lpos-rail-tooltip">{item.disabledReason}</span>}
           </button>
-        ))}
+          );
+        })}
       </nav>
       <button type="button" aria-label="Settings" onClick={() => { goToStep("describe"); setDocumentSettingsOpen(true); }}><span aria-hidden="true">⚙</span><span className="lpos-rail-label">Settings</span></button>
       <button type="button" aria-label={productRailCollapsed ? "Expand navigation" : "Collapse navigation"} aria-expanded={!productRailCollapsed} className="lpos-collapse" onClick={() => setProductRailCollapsed((value) => !value)}><span aria-hidden="true">{productRailCollapsed ? "›" : "‹"}</span><span className="lpos-rail-label">{productRailCollapsed ? "Expand" : "Collapse"}</span></button>

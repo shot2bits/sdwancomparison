@@ -82,8 +82,8 @@
 .lpos-product-rail > button { min-height: 66px; border-top: 1px solid #242522; }
 .lpos-product-rail .lpos-collapse { font-size: 9px; }.lpos-product-rail .lpos-collapse > span:first-child { font-size: 22px; }.lpos-product-rail .lpos-collapse .lpos-rail-label { font-size: 10px; }
 .lpos-product-rail button[data-locked="true"] { cursor: not-allowed; opacity: .58; }
-.lpos-product-rail button[data-locked="true"]::after { position: absolute; z-index: 80; top: 50%; left: calc(100% + 8px); display: none; width: 250px; transform: translateY(-50%); border: 1px solid #4a4b47; border-radius: 7px; padding: 9px 11px; content: attr(data-disabled-reason); color: #fff; background: #20221f; box-shadow: 0 8px 24px rgba(0,0,0,.28); font-size: 11px; font-weight: 500; line-height: 1.4; text-align: left; }
-.lpos-product-rail button[data-locked="true"]:hover::after,.lpos-product-rail button[data-locked="true"]:focus-visible::after { display: block; }
+.lpos-product-rail .lpos-rail-tooltip { position: absolute; z-index: 80; top: 50%; left: calc(100% + 8px); display: none; width: 250px; transform: translateY(-50%); border: 1px solid #4a4b47; border-radius: 7px; padding: 9px 11px; color: #fff; background: #20221f; box-shadow: 0 8px 24px rgba(0,0,0,.28); font-size: 11px; font-weight: 500; line-height: 1.4; text-align: left; }
+.lpos-product-rail button[data-locked="true"]:hover .lpos-rail-tooltip,.lpos-product-rail button[data-locked="true"]:focus-visible .lpos-rail-tooltip { display: block; }
 .lpos-product-rail button:focus-visible { outline: 2px solid #ff9800; outline-offset: -3px; }
 .nf-2030-workspace > .nf-2030-project-band,
 .nf-2030-workspace > .nf-2030-status { display: none; }
@@ -425,6 +425,13 @@
 .nf-2030-journey .nf-2030-lifecycle button[data-current="true"] { color: #54c8cb; }
 .nf-2030-journey .nf-2030-lifecycle button[data-current="true"]::before { background: #4fc5c8; box-shadow: 0 0 18px rgba(79,197,200,.32); }
 .nf-2030-journey .nf-2030-lifecycle button[data-current="true"]::after { background: linear-gradient(90deg, #4fc5c8, #4fc5c8 52%, #44474e 52%); }
+
+/* Living Procurement OS uses Netify orange for the current stage. Keep the
+   older cyan journey treatment available to other 2030 surfaces only. */
+.lpos-header.nf-2030-journey .nf-2030-lifecycle button[data-current="true"] { color: #fff; }
+.lpos-header.nf-2030-journey .nf-2030-lifecycle button[data-current="true"]::before { background: var(--lpos-orange); box-shadow: 0 0 18px rgba(255,106,0,.28); }
+.lpos-header.nf-2030-journey .nf-2030-lifecycle button[data-current="true"]::after { background: linear-gradient(90deg, var(--lpos-orange), var(--lpos-orange) 52%, #44474e 52%); }
+.lpos-header.nf-2030-journey .nf-2030-lifecycle button[data-current="true"] b { border-color: var(--lpos-orange); color: #fff; background: var(--lpos-orange); }
 
 .nf-2030-brand {
   width: 32px;

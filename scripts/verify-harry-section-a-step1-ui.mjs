@@ -23,9 +23,12 @@ try {
   const lockedSupplier = page.locator('.lpos-product-rail button[aria-label^="Suppliers, locked"]');
   await lockedSupplier.focus();
   check("DEF-03 locked navigation remains focusable", await lockedSupplier.evaluate((element) => document.activeElement === element));
-  const tooltipDisplay = await lockedSupplier.evaluate((element) => getComputedStyle(element, "::after").display);
+  const tooltipDisplay = await lockedSupplier.locator('[role="tooltip"]').evaluate((element) => getComputedStyle(element).display);
   const lockedReason = await lockedSupplier.getAttribute("data-disabled-reason");
   check("DEF-03 locked navigation explains why", tooltipDisplay === "block" && lockedReason?.includes("essential baseline"));
+
+  const activeStageColour = await page.locator('.lpos-header .nf-2030-lifecycle button[data-current="true"] b').evaluate((element) => getComputedStyle(element).backgroundColor);
+  check("NEW-01 current stage uses Netify orange", activeStageColour === "rgb(243, 107, 16)");
 
   check("DEF-04 Review follows Reports", railLabels.indexOf("Review") === railLabels.indexOf("Reports") + 1 && !railLabels.includes("Overview"));
 
@@ -33,7 +36,7 @@ try {
   const collapseSize = await collapse.locator(".lpos-rail-label").evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
   check("DEF-05 Collapse label matches navigation typography", collapseSize <= 11);
 
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await page.getByRole("button", { name: "Settings", exact: true }).evaluate((element) => element.click());
   const dialog = page.getByRole("dialog", { name: "RFP preferences" });
   check("DEF-07 one RFP preferences heading", await dialog.isVisible() && await dialog.getByRole("heading").count() === 1);
   check("DEF-08 no question-bank statistics in Settings", !((await dialog.textContent()) || "").includes("386-question"));
