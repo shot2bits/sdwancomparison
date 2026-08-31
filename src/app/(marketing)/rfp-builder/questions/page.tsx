@@ -2,46 +2,34 @@ import type { Metadata } from "next";
 import Continuation from "@/components/Continuation";
 import { deriveContinuationQuestion } from "@/lib/continuation/derive";
 import Link from "next/link";
-import { QUESTION_BANK, SASE_EXTENDED_BANK, EXTENDED_CATEGORY_LABELS, saseExtendedQuestions, bankSummary } from "@/lib/rfp-question-bank";
+import { QUESTION_BANK, SASE_EXTENDED_BANK, bankSummary } from "@/lib/rfp-question-bank";
 import { SITE_URL, getOrganizationSchema, getBreadcrumbSchema, getSpeakableSchema } from "@/lib/structured-data";
+import frameworkData from "@data/harry-rfp-framework.json";
 
 /**
  * The canonical, in-app home of the Netify RFP question bank. Fully
- * server-rendered and citable: the 43-question extended SASE canonical set
- * with evidence, weighting, red-flag and follow-up metadata, plus the four
- * sector packs. Machine-readable twin at /question-bank.json. This page (not
- * any external site) is what the app cites as its question-bank source.
+ * server-rendered and citable: Harry Yelland's 120-question, 20-pillar public
+ * procurement framework, with the governed canonical and sector banks kept
+ * intact behind it. Machine-readable twin at /question-bank.json.
  */
 
 export const metadata: Metadata = {
-  title: "Netify SASE & SD-WAN RFP Question Bank (2026.1)",
+  title: "Living SASE & SD-WAN RFP Template | 120 Questions | Netify",
   description:
-    "The analyst-written Netify question bank: 43 canonical SASE questions with evidence requirements, sector applicability, weighting and red-flag answers, plus retail, manufacturing, financial services and healthcare packs. 386+ questions, versioned and machine-readable.",
+    "A vendor-neutral SASE and SD-WAN RFP template with 120 supplier questions across 20 procurement pillars, evidence requests, strong-response markers and red flags.",
   alternates: { canonical: `${SITE_URL}/rfp-builder/questions/` },
   openGraph: {
-    title: "Netify SASE & SD-WAN RFP Question Bank (2026.1)",
-    description: "Analyst-written RFP questions with evidence requirements, weighting and red-flag answers. Versioned and machine-readable.",
+    title: "The Living SASE & SD-WAN RFP Template",
+    description: "120 vendor-neutral supplier questions across 20 procurement pillars, with evidence requests, strong-response markers and red flags.",
     url: `${SITE_URL}/rfp-builder/questions`,
     type: "website",
     locale: "en_GB",
   },
 };
 
-const WEIGHT_STYLE: Record<string, string> = {
-  high: "bg-amber-100 text-amber-800",
-  medium: "bg-[var(--ink-100,#f0f0f0)] text-[var(--ink-600)]",
-  low: "bg-[var(--ink-100,#f0f0f0)] text-[var(--ink-400,#9ca3af)]",
-};
-
 export default function QuestionBankPage() {
   const summary = bankSummary();
-  const extended = saseExtendedQuestions();
-  const byCategory = new Map<string, typeof extended>();
-  for (const q of extended) {
-    const list = byCategory.get(q.category_id) ?? [];
-    list.push(q);
-    byCategory.set(q.category_id, list);
-  }
+  const framework = frameworkData;
 
   const schemas = [
     getOrganizationSchema(),
@@ -51,9 +39,9 @@ export default function QuestionBankPage() {
       "@context": "https://schema.org",
       "@type": "Dataset",
       "@id": `${SITE_URL}/rfp-builder/questions/#dataset`,
-      name: "Netify SASE and SD-WAN RFP Question Bank",
+      name: "Netify Living SASE and SD-WAN RFP Template",
       description:
-        "Analyst-written RFP question bank for SASE, SSE and SD-WAN procurement: canonical questions with evidence requirements, sector applicability, weighting hints and red-flag answers, plus sector packs with buyer and vendor lenses.",
+        "Vendor-neutral SASE and SD-WAN procurement framework with 120 supplier questions across 20 pillars, evidence requests, strong-response markers and red flags.",
       version: SASE_EXTENDED_BANK.question_bank_version,
       dateModified: SASE_EXTENDED_BANK.last_reviewed,
       license: "Public methodology. Reuse permitted with attribution to Netify and the canonical URL.",
@@ -77,82 +65,97 @@ export default function QuestionBankPage() {
         <Link href="/rfp-builder" className="underline">RFP Builder</Link> / Question bank
       </nav>
 
-      <div className="mb-8 max-w-3xl">
-        <p className="eyebrow mb-3">Netify question bank</p>
-        <h1 id="page-h1" className="mb-4">The Netify SASE &amp; SD-WAN RFP question bank</h1>
-        <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
-          These questions were written by our analyst team, and they are the same set the RFP Builder and the
-          marketplace run on. Every question tells you what evidence a vendor should be able to show you, which
-          sectors it is mandatory for, how much weight to give the answer, the responses that should ring alarm bells
-          and the follow-up worth asking. Alongside the main set sit four sector packs, each written with a buyer lens
-          and a vendor lens. You are welcome to use the questions in your own procurement with attribution, or{" "}
-          <a href="/sase/rfp-builder/" className="underline">let the builder assemble everything for you</a>.
-        </p>
+      <div className="mb-10 rounded-3xl bg-[#081f33] px-6 py-10 text-white sm:px-10 sm:py-14">
+        <p className="eyebrow mb-3 text-amber-300">Netify SASE &amp; SD-WAN Procurement Framework</p>
+        <h1 id="page-h1" className="mb-4 max-w-4xl text-white">{framework.title}</h1>
+        <p className="max-w-3xl text-xl leading-8 text-slate-200">{framework.strapline}</p>
+        <p id="page-subhead" className="mt-5 max-w-3xl text-base leading-7 text-slate-300">{framework.introduction}</p>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <a href="/sase/rfp-builder/" className="rounded-full bg-amber-400 px-5 py-3 font-semibold text-slate-950">Build my living RFP</a>
+          <a href="#supplier-questions" className="rounded-full border border-white/30 px-5 py-3 font-semibold text-white">Explore all 120 questions</a>
+        </div>
+        <p className="mt-6 text-sm text-slate-300">Your project stays private until you choose to publish it. A public opportunity can be listed anonymously, with you controlling when your identity is disclosed.</p>
       </div>
+
+      <section className="mb-10 max-w-4xl">
+        <h2 className="mb-3">How to use this living template</h2>
+        <p className="leading-7 text-[var(--ink-700)]">{framework.useIntroduction}</p>
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-[var(--ink-200,#e5e5e5)] p-5">
+            <h3 className="font-semibold">Question classifications</h3>
+            <ul className="mt-3 space-y-2 text-sm text-[var(--ink-700)]">
+              <li><strong>M, Mandatory:</strong> a failed requirement can disqualify a response.</li>
+              <li><strong>W, Weighted:</strong> the answer contributes to the evaluated score.</li>
+              <li><strong>I, Informational:</strong> the answer provides context but is not scored by default.</li>
+              <li><strong>PoC, Validate:</strong> the claim should be tested before contract award.</li>
+            </ul>
+          </div>
+          <div className="rounded-xl border border-[var(--ink-200,#e5e5e5)] p-5">
+            <h3 className="font-semibold">Recommended scoring method</h3>
+            <p className="mt-3 text-sm leading-6 text-[var(--ink-700)]">Score each weighted response from 0 to 5, then multiply it by the question weight. Keep mandatory requirements as separate pass or fail gates. A high weighted score must not compensate for a failed mandatory control.</p>
+          </div>
+        </div>
+      </section>
 
       {/* Citation block */}
       <div className="mb-10 rounded-sm border border-[var(--ink-200,#e5e5e5)] p-5">
         <p className="eyebrow mb-2">Suggested citation</p>
         <p className="mb-4 text-sm font-medium">
-          Netify SASE &amp; SD-WAN RFP Question Bank {QUESTION_BANK.version}, Netify, available at {SITE_URL}/rfp-builder/questions/
+          Netify Living SASE &amp; SD-WAN RFP Template, 120 questions across 20 procurement pillars, Netify, available at {SITE_URL}/rfp-builder/questions/
         </p>
         <div className="grid gap-x-8 gap-y-1 text-sm sm:grid-cols-2">
           <p><span className="text-[var(--ink-500)]">Question bank version:</span> {SASE_EXTENDED_BANK.question_bank_version}</p>
           <p><span className="text-[var(--ink-500)]">Methodology version:</span> {SASE_EXTENDED_BANK.methodology_version}</p>
           <p><span className="text-[var(--ink-500)]">Last reviewed:</span> {SASE_EXTENDED_BANK.last_reviewed}</p>
-          <p><span className="text-[var(--ink-500)]">Total questions:</span> {summary.total} ({summary.sase_extended_count} canonical + sector packs)</p>
+          <p><span className="text-[var(--ink-500)]">Public framework:</span> 120 questions across 20 pillars</p>
+          <p><span className="text-[var(--ink-500)]">Governed bank retained:</span> {summary.total} questions plus canonical metadata</p>
           <p><span className="text-[var(--ink-500)]">Canonical URL:</span> /sase/rfp-builder/questions/</p>
           <p><span className="text-[var(--ink-500)]">Machine-readable:</span> <a href="/sase/question-bank.json" className="underline">/question-bank.json</a></p>
         </div>
         <p className="mt-3 text-xs text-[var(--ink-500)]">Licence: public methodology. Reuse permitted with attribution to Netify and the canonical URL. Agents can also read the bank over the marketplace MCP at <a href="/sase/api/mcp/" className="underline">/sase/api/mcp/</a>.</p>
       </div>
 
-      {/* Extended canonical bank, in full */}
-      <div className="mb-12">
-        <h2 className="mb-1 text-lg font-semibold">SASE canonical bank ({summary.sase_extended_count} questions)</h2>
-        <p className="mb-5 text-sm text-[var(--ink-600)]">
-          The core set behind every Netify SASE, SSE and SD-WAN RFP. Sector tags show where a question is mandatory.
-        </p>
-        {[...byCategory.entries()].map(([catId, qs]) => (
-          <section key={catId} className="mb-8">
-            <h3 className="mb-3 text-base font-semibold">{EXTENDED_CATEGORY_LABELS[catId] ?? catId} ({qs.length})</h3>
-            <div className="space-y-4">
-              {qs.map((q) => (
-                <article key={q.question_id} className="rounded-sm border border-[var(--ink-200,#e5e5e5)] p-4">
-                  <p className="mb-1.5 flex flex-wrap items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide">
-                    <span className="text-[var(--ink-400,#9ca3af)]">{q.question_id}</span>
-                    <span className={`rounded-full px-1.5 py-0 ${WEIGHT_STYLE[q.weighting_hint] ?? WEIGHT_STYLE.medium}`}>{q.weighting_hint} weight</span>
-                    {q.mandatory_for.map((s) => (
-                      <span key={s} className="rounded-full bg-red-50 px-1.5 py-0 text-red-700">mandatory: {s.replace(/-/g, " ")}</span>
-                    ))}
-                  </p>
-                  <p className="text-sm font-medium">{q.question}</p>
-                  <p className="mt-1 text-xs text-[var(--ink-600)]">{q.why_it_matters}</p>
-                  <p className="mt-1 text-xs text-[var(--ink-600)]"><span className="font-medium">Evidence:</span> {q.evidence_required.join("; ")}</p>
-                  {q.red_flag_answers.length > 0 && (
-                    <p className="mt-1 text-xs text-red-700"><span className="font-medium">Red flags:</span> {q.red_flag_answers.join("; ")}</p>
-                  )}
-                  {q.follow_up_questions.length > 0 && (
-                    <p className="mt-1 text-xs text-[var(--ink-500)]"><span className="font-medium">Follow-ups:</span> {q.follow_up_questions.join(" ")}</p>
-                  )}
-                </article>
-              ))}
-            </div>
-          </section>
-        ))}
+      {/* Harry Yelland's revised public framework, in full. */}
+      <div id="supplier-questions" className="mb-12 scroll-mt-24">
+        <h2 className="mb-1 text-2xl font-semibold">The 20-pillar supplier question set</h2>
+        <p className="mb-6 max-w-3xl text-sm leading-6 text-[var(--ink-600)]">120 core questions across 20 procurement pillars. Each question carries a classification tag, the exact wording suppliers must answer, and the evidence, strong-response and red-flag markers evaluators should use.</p>
+        <div className="space-y-5">
+          {framework.pillars.map((pillar) => (
+            <details key={pillar.id} id={pillar.id.toLowerCase()} className="scroll-mt-24 rounded-xl border border-[var(--ink-200,#e5e5e5)] bg-white" open={pillar.id === "P01"}>
+              <summary className="cursor-pointer px-5 py-4 text-lg font-semibold">{pillar.title}</summary>
+              <div className="border-t border-[var(--ink-200,#e5e5e5)] px-5 py-5">
+                <p className="mb-5 max-w-4xl leading-7 text-[var(--ink-700)]">{pillar.introduction}</p>
+                <div className="space-y-4">
+                  {pillar.questions.map((q) => (
+                    <article key={q.id} id={q.id.toLowerCase().replace(".", "-")} className="scroll-mt-24 rounded-lg bg-[var(--ink-50,#fafafa)] p-4">
+                      <p className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--ink-500)]"><span>{q.id}</span><span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900">{q.classification}</span></p>
+                      <h3 className="mt-2 text-base font-semibold">{q.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{q.question}</p>
+                      <dl className="mt-3 grid gap-2 text-xs text-[var(--ink-600)] md:grid-cols-3">
+                        <div><dt className="font-semibold text-[var(--ink-800)]">Evidence requested</dt><dd>{q.evidence}</dd></div>
+                        <div><dt className="font-semibold text-[var(--ink-800)]">Strong response</dt><dd>{q.strongResponse}</dd></div>
+                        <div><dt className="font-semibold text-red-800">Red flag</dt><dd>{q.redFlag}</dd></div>
+                      </dl>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
       </div>
 
       {/* Sector packs */}
       <div className="mb-12">
-        <h2 className="mb-1 text-lg font-semibold">Sector packs</h2>
+        <h2 className="mb-1 text-lg font-semibold">Optional sector packs</h2>
         <p className="mb-5 text-sm text-[var(--ink-600)]">
-          Deep, sector-specific question sets with buyer and vendor lenses on every question. Browse them in full
+          The governed bank remains available beneath Harry&apos;s public 120-question framework. These deeper, sector-specific sets carry buyer and vendor lenses on every question. Browse them in full
           inside the <a href="/sase/rfp-builder/" className="underline">RFP Builder</a> or via the <a href="/sase/question-bank.json" className="underline">machine-readable bank</a>.
         </p>
         <div className="space-y-3">
           {Object.entries(QUESTION_BANK.sector_packs).map(([key, pack]) => (
             <details key={key} className="rounded-sm border border-[var(--ink-200,#e5e5e5)]">
-              <summary className="cursor-pointer px-4 py-2.5 text-sm font-medium">{pack.label} — {pack.count} questions in {pack.sections.length} sections</summary>
+              <summary className="cursor-pointer px-4 py-2.5 text-sm font-medium">{pack.label}: {pack.count} questions in {pack.sections.length} sections</summary>
               <div className="px-4 pb-3">
                 {pack.sections.map((sec) => (
                   <details key={sec.title} className="mb-1 rounded-sm border border-[var(--ink-100,#f1f1f1)]">
@@ -169,6 +172,20 @@ export default function QuestionBankPage() {
           ))}
         </div>
       </div>
+
+      <section className="mb-12">
+        <h2 className="mb-5 text-2xl font-semibold">Frequently asked questions</h2>
+        <div className="space-y-3">
+          {framework.faqs.map((faq) => (
+            <details key={faq.question} className="rounded-xl border border-[var(--ink-200,#e5e5e5)] bg-white">
+              <summary className="cursor-pointer px-5 py-4 font-semibold">{faq.question}</summary>
+              <div className="space-y-3 border-t border-[var(--ink-200,#e5e5e5)] px-5 py-4 text-sm leading-7 text-[var(--ink-700)]">
+                {faq.answer.map((paragraph, index) => <p key={`${faq.question}-${index}`}>{paragraph}</p>)}
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
 
       {/* The Continuation (DEF wave one): derived from the bank's own
           live counts or not rendered at all. */}

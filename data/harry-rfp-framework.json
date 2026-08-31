@@ -1,0 +1,1282 @@
+{
+  "source": "Netify RFP - Page Content (1).docx",
+  "lastEditedBy": "Harry Yelland",
+  "title": "The Living SASE & SD-WAN RFP Template",
+  "strapline": "A continuously updated, vendor-neutral procurement framework for specifying requirements, collecting evidence and comparing SASE and SD-WAN vendors and managed service providers.",
+  "introduction": "Use the complete template on this page as it stands, or turn it into a living Request for Proposal tailored to your organisation, sites, users, applications, security obligations and operating model. From there, Netify can identify relevant vendors and providers, publish an anonymous opportunity to the market, and collect structured technical and commercial responses for side-by-side evaluation.",
+  "useIntroduction": "Not every buyer needs all 120 questions, and sending the full set regardless of what you're actually procuring is one of the quickest ways to waste a supplier's time and your own. Before anything goes out the door, there are three things we'd recommend getting straight first: which scope you're actually running (SD-WAN, SSE, full SASE, managed or phased), what the M/W/I/PoC tags against each question mean for how strictly you'll hold suppliers to them, and how you're going to turn a stack of written answers into something you can defend to a board or an auditor. Get those three sorted and the rest of the framework more or less runs itself. Skip them, and you'll end up arguing about method halfway through evaluation, which is a miserable place for any procurement team to be.",
+  "pillars": [
+    {
+      "id": "P01",
+      "title": "P01 - Business outcomes and project understanding",
+      "introduction": "Suppliers should be solving your actual operational problem here, not just mapping their product catalogue onto whatever the RFP happens to ask for. The questions in this pillar exist to expose assumptions early, and, just as importantly, to make sure whatever outcome gets proposed is genuinely measurable rather than described nicely and left vague.",
+      "questions": [
+        {
+          "id": "P01.01",
+          "classification": "I | All",
+          "title": "Understanding of the requirement",
+          "question": "Restate the buyer's business objectives, technical scope, material constraints and intended outcomes in your own words. Identify any area where the requirement is ambiguous.",
+          "evidence": "Requirements traceability table.",
+          "strongResponse": "Maps every objective to a proposed outcome.",
+          "redFlag": "Generic executive summary that could describe any customer."
+        },
+        {
+          "id": "P01.02",
+          "classification": "W | All",
+          "title": "Outcome measures",
+          "question": "For each stated objective, propose a measurable baseline, target, measurement source and reporting frequency. Distinguish technical service measures from business outcomes.",
+          "evidence": "Benefits and KPI register.",
+          "strongResponse": "Names data sources and owners.",
+          "redFlag": "Benefits are described only as “improved”, “simplified” or “optimised”."
+        },
+        {
+          "id": "P01.03",
+          "classification": "M | All",
+          "title": "Assumptions and exclusions",
+          "question": "List every architectural, service, resource, volume, commercial and timing assumption used in the response, together with the consequence if it proves false.",
+          "evidence": "Numbered assumptions and exclusions schedule.",
+          "strongResponse": "Prices or bounds material assumptions.",
+          "redFlag": "Assumptions remain embedded in narrative or small print."
+        },
+        {
+          "id": "P01.04",
+          "classification": "W | All",
+          "title": "Scope deviations and alternatives",
+          "question": "Identify every deviation from the stated requirement. Where an alternative is proposed, explain the buyer outcome it improves, the trade-off introduced and any effect on price, risk or timescale.",
+          "evidence": "Compliance and deviation matrix.",
+          "strongResponse": "Separates compliant base bid from options.",
+          "redFlag": "Reframes a missing capability as an innovation without acknowledging the gap."
+        },
+        {
+          "id": "P01.05",
+          "classification": "W | All",
+          "title": "Critical service mapping",
+          "question": "Show how the proposed service supports the buyer's critical applications and business services, including the network, identity, security, cloud and third-party dependencies for each.",
+          "evidence": "Service dependency map.",
+          "strongResponse": "Connects business impact to technical controls.",
+          "redFlag": "Treats every application as having the same availability and security need."
+        },
+        {
+          "id": "P01.06",
+          "classification": "W | All",
+          "title": "Responsibility for outcomes",
+          "question": "Name the party accountable for achieving each proposed outcome during design, migration and live service, including responsibilities retained by the buyer and passed to subcontractors.",
+          "evidence": "Outcome-level RACI.",
+          "strongResponse": "One accountable owner per outcome.",
+          "redFlag": "“Shared responsibility” without decision or escalation ownership."
+        }
+      ]
+    },
+    {
+      "id": "P02",
+      "title": "P02 - Current estate, discovery and application dependency",
+      "introduction": "An incomplete estate inventory is where a lot of RFPs quietly go wrong, since it produces an optimistic design on paper followed by change requests once reality actually catches up with it. Discovery, in this pillar, should be validating what the buyer already knows about their own estate, not replacing it with the supplier's assumptions without anyone noticing.",
+      "questions": [
+        {
+          "id": "P02.01",
+          "classification": "W | All",
+          "title": "Discovery method",
+          "question": "Describe the discovery process, data sources, tooling, sampling period and buyer access required to validate sites, circuits, devices, applications, identities and traffic flows.",
+          "evidence": "Discovery plan and example output.",
+          "strongResponse": "Uses multiple sources and reconciles conflicts.",
+          "redFlag": "Relies only on a buyer spreadsheet or a short packet capture."
+        },
+        {
+          "id": "P02.02",
+          "classification": "M | SD-WAN/Full SASE",
+          "title": "Circuit and site baseline",
+          "question": "Explain how you will verify circuit inventory, demarcation, provider, bandwidth, utilisation, diversity, contract status and site criticality before design approval.",
+          "evidence": "Site and circuit inventory template.",
+          "strongResponse": "Includes physical diversity validation.",
+          "redFlag": "Assumes two access products from different brands are physically diverse."
+        },
+        {
+          "id": "P02.03",
+          "classification": "W | All",
+          "title": "Application identification",
+          "question": "Explain how applications and services are discovered, classified and associated with owners, data sensitivity, performance needs and business criticality.",
+          "evidence": "Application catalogue example.",
+          "strongResponse": "Supports custom and encrypted applications.",
+          "redFlag": "Depends solely on public application signatures."
+        },
+        {
+          "id": "P02.04",
+          "classification": "W | All",
+          "title": "Traffic and capacity baseline",
+          "question": "State how normal, peak and failure-state traffic will be measured and translated into edge, tunnel, PoP and licence sizing, including seasonal or event-driven peaks.",
+          "evidence": "Capacity model with headroom assumptions.",
+          "strongResponse": "Models failover and security inspection overhead.",
+          "redFlag": "Sizes only from contracted circuit bandwidth."
+        },
+        {
+          "id": "P02.05",
+          "classification": "W | All",
+          "title": "Identity and device baseline",
+          "question": "Describe how users, service accounts, contractors, devices and unmanaged endpoints will be inventoried and mapped to identity providers, device-management systems and access policies.",
+          "evidence": "Identity and device source map.",
+          "strongResponse": "Includes non-human identities.",
+          "redFlag": "Treats all access as employee access from managed laptops."
+        },
+        {
+          "id": "P02.06",
+          "classification": "W | All",
+          "title": "Discovery risk and remediation",
+          "question": "Explain how unknown applications, shadow IT, duplicate address space, unsupported devices, undocumented firewall rules and other discovery findings will be reported and resolved.",
+          "evidence": "Risk register and remediation workflow.",
+          "strongResponse": "Defines decision gates before migration.",
+          "redFlag": "Defers all findings to implementation without commercial or schedule impact."
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "title": "P03 - Service model, supplier structure and accountability",
+      "introduction": "We come across buyers comparing a technology vendor, a reseller and a managed service provider fairly often as though the three carry identical responsibilities, and they don't, not even close. Who actually designs, operates, supports and contracts each component is what this pillar is trying to expose, rather than just who's named on the cover page of the proposal.",
+      "questions": [
+        {
+          "id": "P03.01",
+          "classification": "M | All",
+          "title": "Contracting and delivery parties",
+          "question": "Identify the contracting entity, technology vendors, carriers, cloud providers, distributors, implementation partners, support partners and subcontractors involved in the service.",
+          "evidence": "Legal and delivery-party diagram.",
+          "strongResponse": "Names every material dependency.",
+          "redFlag": "Describes third parties only as “strategic partners”."
+        },
+        {
+          "id": "P03.02",
+          "classification": "M | All",
+          "title": "End-to-end accountability",
+          "question": "State which party owns end-to-end service accountability when an incident crosses SD-WAN, underlay, SASE security, identity, endpoint or cloud boundaries.",
+          "evidence": "Incident RACI and escalation path.",
+          "strongResponse": "Provides one accountable service owner.",
+          "redFlag": "Requires the buyer to coordinate multiple suppliers during a P1 incident."
+        },
+        {
+          "id": "P03.03",
+          "classification": "W | Managed",
+          "title": "Management boundary",
+          "question": "Define the activities included in self-managed, co-managed and fully managed options, including monitoring, policy changes, upgrades, incident response, reporting and optimisation.",
+          "evidence": "Comparative service matrix.",
+          "strongResponse": "Identifies buyer permissions in each model.",
+          "redFlag": "“Managed” means alert forwarding rather than operational ownership."
+        },
+        {
+          "id": "P03.04",
+          "classification": "W | All",
+          "title": "Supplier viability and service commitment",
+          "question": "Provide the service's general-availability date, customer adoption, investment roadmap, end-of-life policy and evidence that support can continue for the proposed contract term.",
+          "evidence": "Product lifecycle policy and audited corporate information where available.",
+          "strongResponse": "Contractually addresses acquisition or product withdrawal.",
+          "redFlag": "Relies on market-growth claims instead of support commitments."
+        },
+        {
+          "id": "P03.05",
+          "classification": "W | All",
+          "title": "Skills and geographic coverage",
+          "question": "Quantify certified engineering, service-management and security resources by relevant region and shift. Explain which skills are employees and which are subcontracted.",
+          "evidence": "Anonymised resource and certification matrix.",
+          "strongResponse": "Matches skills to the proposed technology.",
+          "redFlag": "Global support is a call-handling centre without regional engineering depth."
+        },
+        {
+          "id": "P03.06",
+          "classification": "W | All",
+          "title": "Conflicts and commercial incentives",
+          "question": "Disclose rebates, exclusivity, preferred-vendor status or other incentives that could influence the recommended architecture, carrier or security platform.",
+          "evidence": "Conflict-of-interest declaration.",
+          "strongResponse": "Explains controls around recommendations.",
+          "redFlag": "Claims “vendor neutral” while proposing only products tied to undisclosed incentives."
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "title": "P04 - SASE architecture and component provenance",
+      "introduction": "There's a lot hiding behind a single SASE label, and it can mean a genuinely unified platform, a set of integrated products, or a managed bundle stitched together behind the scenes, none of which is automatically the better option over the others. What actually matters is understanding the operational, performance and contractual consequences of whichever one's actually being sold to you.",
+      "questions": [
+        {
+          "id": "P04.01",
+          "classification": "M | Full SASE",
+          "title": "Component provenance",
+          "question": "For SD-WAN, ZTNA, SWG, CASB, DLP, FWaaS, DNS security, RBI, DEM and threat prevention, identify whether the capability is native, acquired, OEM, third-party integrated or roadmap.",
+          "evidence": "Component provenance matrix with product and version names.",
+          "strongResponse": "States limitations and separate licences.",
+          "redFlag": "Uses a single “included” label for materially different integrations."
+        },
+        {
+          "id": "P04.02",
+          "classification": "W | Full SASE",
+          "title": "Control-plane and policy integration",
+          "question": "Explain which network and security policies share the same data model, administration plane, identity context, workflow and audit trail. Identify policies that must be recreated between products.",
+          "evidence": "Live demonstration and policy architecture.",
+          "strongResponse": "Shows a single change propagating end to end.",
+          "redFlag": "Multiple consoles are hidden behind single sign-on and presented as unified management."
+        },
+        {
+          "id": "P04.03",
+          "classification": "PoC | Full SASE",
+          "title": "Traffic-processing path",
+          "question": "Show the packet and session path through decryption, security inspection, routing and re-encryption for web, private application, branch-to-branch and cloud traffic. Quantify repeated processing.",
+          "evidence": "Architecture diagram, packet capture or test trace.",
+          "strongResponse": "Documents the real data path under full policy.",
+          "redFlag": "Supplies only a conceptual marketing diagram."
+        },
+        {
+          "id": "P04.04",
+          "classification": "W | All",
+          "title": "Deployment forms and boundaries",
+          "question": "Describe supported physical, virtual, cloud-native, browser-based, client-based and clientless deployment forms, including the functional differences between them.",
+          "evidence": "Feature-parity table.",
+          "strongResponse": "Identifies unsupported controls by form.",
+          "redFlag": "Calls a browser extension or downloaded helper “clientless” without qualification."
+        },
+        {
+          "id": "P04.05",
+          "classification": "W | Full SASE",
+          "title": "Incremental adoption and coexistence",
+          "question": "Explain how the buyer can deploy SD-WAN first, SSE first or region by region without duplicating policies or preventing later convergence.",
+          "evidence": "Phased reference architecture and migration sequence.",
+          "strongResponse": "Defines interim operating states.",
+          "redFlag": "Convergence requires replacement of the initially purchased product."
+        },
+        {
+          "id": "P04.06",
+          "classification": "W | All",
+          "title": "Standards and interoperability",
+          "question": "Identify the open standards, routing protocols, identity protocols, log formats and APIs used at each integration boundary, plus any proprietary dependency that limits replacement or coexistence.",
+          "evidence": "Interface catalogue and API documentation.",
+          "strongResponse": "Shows export and third-party integration.",
+          "redFlag": "“Open API” is available only through paid professional services."
+        }
+      ]
+    },
+    {
+      "id": "P05",
+      "title": "P05 - SD-WAN underlay, edge and site architecture",
+      "introduction": "Underlay, edge design and where responsibility gets handed off between parties, that's really what SD-WAN performance comes down to in practice. Worth remembering too that logical diversity isn't the same thing as physical diversity, and headline throughput figures rarely reflect what you'll actually see once full policy gets applied on top.",
+      "questions": [
+        {
+          "id": "P05.01",
+          "classification": "M | SD-WAN/Full SASE",
+          "title": "Underlay support and independence",
+          "question": "List supported MPLS, Ethernet, DIA, broadband, 4G/5G, satellite and customer-provided services. State whether the buyer can retain existing circuits and carriers.",
+          "evidence": "Supported-access matrix and design constraints.",
+          "strongResponse": "Applies consistent monitoring and policy across carrier types.",
+          "redFlag": "“Carrier agnostic” excludes support responsibility for third-party circuits."
+        },
+        {
+          "id": "P05.02",
+          "classification": "W | SD-WAN/Full SASE",
+          "title": "Physical diversity",
+          "question": "Explain how access-path, duct, exchange, carrier, power and building-entry diversity will be verified for resilient sites.",
+          "evidence": "Site diversity report or provider confirmation.",
+          "strongResponse": "Distinguishes logical from physical separation.",
+          "redFlag": "Assumes different carrier names mean diverse infrastructure."
+        },
+        {
+          "id": "P05.03",
+          "classification": "W | SD-WAN/Full SASE",
+          "title": "Edge form factors and sizing",
+          "question": "Provide physical, virtual and cloud edge options with encrypted and full-security throughput, tunnel limits, interfaces, environmental tolerances and high-availability models.",
+          "evidence": "Current data sheets plus sizing calculation.",
+          "strongResponse": "Sizes against measured traffic and failover.",
+          "redFlag": "Quotes firewall throughput with security functions disabled."
+        },
+        {
+          "id": "P05.04",
+          "classification": "W | SD-WAN/Full SASE",
+          "title": "Zero-touch provisioning",
+          "question": "Describe the order, staging, shipping, activation, authentication and rollback process for a new site, including what local skills and access are required.",
+          "evidence": "Workflow and typical elapsed times by region.",
+          "strongResponse": "Prevents unauthorised device activation.",
+          "redFlag": "“Zero touch” still requires local CLI configuration."
+        },
+        {
+          "id": "P05.05",
+          "classification": "W | SD-WAN/Full SASE",
+          "title": "Addressing, routing and segmentation",
+          "question": "Explain support for IPv4, IPv6, overlapping address space, BGP, OSPF, static routing, multicast, VRFs or equivalent segmentation and route-leak controls.",
+          "evidence": "Configuration examples and scale limits.",
+          "strongResponse": "Demonstrates IPv4/IPv6 feature parity.",
+          "redFlag": "IPv6 is routed but bypasses equivalent security or analytics."
+        },
+        {
+          "id": "P05.06",
+          "classification": "W | SD-WAN/Full SASE",
+          "title": "Hardware lifecycle and sparing",
+          "question": "State hardware warranty, RMA service, regional sparing, software support, end-of-sale and end-of-support notice periods, and migration assistance.",
+          "evidence": "Lifecycle and RMA policy.",
+          "strongResponse": "Contract term fits within support life.",
+          "redFlag": "Proposed hardware is already within the vendor's published retirement window."
+        }
+      ]
+    },
+    {
+      "id": "P06",
+      "title": "P06 - Routing, application performance and quality of service",
+      "introduction": "How the service behaves when something's actually gone wrong is really what application experience comes down to, not just whether a link's technically up or down. Brownouts, real-time applications and policy behaviour under failure are worth testing specifically, since that's usually where the real difference between suppliers shows up.",
+      "questions": [
+        {
+          "id": "P06.01",
+          "classification": "PoC | SD-WAN/Full SASE",
+          "title": "Path measurement and selection",
+          "question": "Identify the loss, latency, jitter, availability and application metrics used for path selection, their sampling interval and configurable thresholds.",
+          "evidence": "Policy example and telemetry output.",
+          "strongResponse": "Supports application-specific thresholds.",
+          "redFlag": "Changes path only after physical link failure."
+        },
+        {
+          "id": "P06.02",
+          "classification": "PoC | SD-WAN/Full SASE",
+          "title": "Brownout and failover behaviour",
+          "question": "Demonstrate how active sessions respond when packet loss, latency or jitter gradually exceeds policy, including failover time, packet loss and session preservation.",
+          "evidence": "Controlled impairment test.",
+          "strongResponse": "Meets a pre-agreed application threshold.",
+          "redFlag": "Demonstrates cable removal rather than degradation."
+        },
+        {
+          "id": "P06.03",
+          "classification": "W | SD-WAN/Full SASE",
+          "title": "Application identification",
+          "question": "Explain signature, heuristic, DNS, TLS, user-defined and machine-learning methods used to identify applications, including custom and encrypted applications.",
+          "evidence": "Recognition catalogue and custom-app workflow.",
+          "strongResponse": "Reports confidence and fallback behaviour.",
+          "redFlag": "Unknown traffic silently inherits an unsafe default class."
+        },
+        {
+          "id": "P06.04",
+          "classification": "PoC | SD-WAN/Full SASE",
+          "title": "Voice, video and real-time traffic",
+          "question": "Show how QoS, prioritisation, duplication, forward-error correction or other mechanisms protect voice and video during impairment, and quantify their overhead.",
+          "evidence": "Call-quality test with MOS, loss, latency and jitter.",
+          "strongResponse": "Includes failure-state results.",
+          "redFlag": "Relies on bandwidth alone."
+        },
+        {
+          "id": "P06.05",
+          "classification": "W | SD-WAN/Full SASE",
+          "title": "WAN optimisation and acceleration",
+          "question": "Describe supported optimisation for SaaS, private applications, file transfer and high-latency paths, including protocol limitations and interactions with encryption.",
+          "evidence": "Feature matrix and measured use case.",
+          "strongResponse": "Separates routing improvement from genuine optimisation.",
+          "redFlag": "Rebrands local breakout as WAN optimisation."
+        },
+        {
+          "id": "P06.06",
+          "classification": "W | All",
+          "title": "Digital experience monitoring",
+          "question": "Describe endpoint, network, DNS, SaaS and application measurements available to isolate whether poor experience originates at the device, access circuit, backbone, security inspection, cloud or application.",
+          "evidence": "Example troubleshooting timeline.",
+          "strongResponse": "Correlates user experience with service telemetry.",
+          "redFlag": "Provides only aggregate tunnel uptime."
+        }
+      ]
+    },
+    {
+      "id": "P07",
+      "title": "P07 - Global backbone, PoPs and cloud connectivity",
+      "introduction": "A big PoP count on a slide doesn't prove much on its own, certainly not usable regional capacity, resilience or control. We'd want to understand where traffic's actually processed, who owns each dependency along the way, and what's contractually assured here versus what's just been implied in the pitch.",
+      "questions": [
+        {
+          "id": "P07.01",
+          "classification": "M | All",
+          "title": "PoP and processing-location disclosure",
+          "question": "List production PoPs relevant to the buyer, their country, facility or cloud region, services processed there and whether the infrastructure is owned, leased, colocated or cloud-hosted.",
+          "evidence": "Dated PoP inventory.",
+          "strongResponse": "Separates control, data and logging locations.",
+          "redFlag": "Provides city dots without underlying facility or platform detail."
+        },
+        {
+          "id": "P07.02",
+          "classification": "W | All",
+          "title": "Capacity and oversubscription",
+          "question": "Explain how PoP, backbone and inspection capacity are planned, monitored and expanded, including customer isolation, oversubscription policy and peak utilisation thresholds.",
+          "evidence": "Capacity-management policy and anonymised trend.",
+          "strongResponse": "Defines action thresholds.",
+          "redFlag": "States “elastic cloud scale” without limits or evidence."
+        },
+        {
+          "id": "P07.03",
+          "classification": "W | All",
+          "title": "Backbone and transit model",
+          "question": "Describe inter-PoP connectivity, ownership or control, internet transit, peering, routing authority and how path changes affect performance guarantees.",
+          "evidence": "Network architecture and representative route evidence.",
+          "strongResponse": "Distinguishes a private operational backbone from leased capacity.",
+          "redFlag": "Equates good peering with wholly owned infrastructure."
+        },
+        {
+          "id": "P07.04",
+          "classification": "PoC | All",
+          "title": "Regional latency and performance",
+          "question": "Provide current median and 95th-percentile latency, loss and jitter for the buyer's relevant site-to-PoP, PoP-to-PoP and PoP-to-cloud paths under the proposed security policy.",
+          "evidence": "Dated measurement methodology and test data.",
+          "strongResponse": "Allows buyer validation.",
+          "redFlag": "Quotes global averages or laboratory minimums."
+        },
+        {
+          "id": "P07.05",
+          "classification": "W | All",
+          "title": "Public cloud integration",
+          "question": "Describe connectivity to the buyer's specified AWS, Azure, Google Cloud or other regions, including native constructs, routing, redundancy, inspection and egress-cost implications.",
+          "evidence": "Reference design and responsibility matrix.",
+          "strongResponse": "Prices cloud networking dependencies.",
+          "redFlag": "“Cloud on-ramp” is an unmanaged IPsec tunnel."
+        },
+        {
+          "id": "P07.06",
+          "classification": "W | All",
+          "title": "Egress IP and allow-list stability",
+          "question": "Provide the egress-IP model by region, change-notice process, dedicated-IP options and continuity arrangements for applications that allow-list source addresses.",
+          "evidence": "Current ranges and contractual notice proposal.",
+          "strongResponse": "Supports controlled transition between ranges.",
+          "redFlag": "Changes are communicated only through a portal after implementation."
+        }
+      ]
+    },
+    {
+      "id": "P08",
+      "title": "P08 - Zero Trust Network Access and identity integration",
+      "introduction": "Removing implicit trust based on network location, and putting the access decision on users, devices and resources instead, that's NIST's definition of zero trust in a nutshell. An RFP should be testing the actual policy decision and enforcement chain in this pillar, not just accepting a ZTNA label at face value because it's on the box.",
+      "questions": [
+        {
+          "id": "P08.01",
+          "classification": "M | SSE/Full SASE",
+          "title": "Identity-provider integration",
+          "question": "List supported SAML, OIDC, OAuth, SCIM, LDAP and certificate-based integrations for the buyer's identity providers, including high availability and failure behaviour.",
+          "evidence": "Supported-integration matrix and reference architecture.",
+          "strongResponse": "Describes token, attribute and group handling.",
+          "redFlag": "Requires directory duplication into a vendor-owned identity store."
+        },
+        {
+          "id": "P08.02",
+          "classification": "M | SSE/Full SASE",
+          "title": "Resource-level access",
+          "question": "Demonstrate how a user receives access to a named application or resource without receiving broad network access, and how lateral movement is prevented.",
+          "evidence": "Policy configuration and network test.",
+          "strongResponse": "Default-deny is visible and auditable.",
+          "redFlag": "ZTNA establishes a network tunnel equivalent to a legacy VPN."
+        },
+        {
+          "id": "P08.03",
+          "classification": "W | SSE/Full SASE",
+          "title": "Continuous policy evaluation",
+          "question": "Explain which identity, device, risk, location, application and behaviour signals can change access during a session and what action is taken when risk changes.",
+          "evidence": "Signal catalogue and live demonstration.",
+          "strongResponse": "Supports step-up, restriction and termination.",
+          "redFlag": "Evaluation occurs only at initial login."
+        },
+        {
+          "id": "P08.04",
+          "classification": "W | SSE/Full SASE",
+          "title": "Strong authentication and phishing resistance",
+          "question": "Describe supported MFA and passwordless methods, including FIDO2/WebAuthn, certificate and device-bound options, and how policy varies by risk and resource.",
+          "evidence": "Authentication policy examples.",
+          "strongResponse": "Supports phishing-resistant controls for privileged access.",
+          "redFlag": "All MFA methods are treated as equivalent."
+        },
+        {
+          "id": "P08.05",
+          "classification": "PoC | SSE/Full SASE",
+          "title": "Client and clientless access",
+          "question": "Provide a side-by-side comparison of client, browser and clientless access for private web, SSH, RDP and other required applications, including security and audit differences.",
+          "evidence": "Feature-parity matrix and demonstration.",
+          "strongResponse": "Clearly states limitations.",
+          "redFlag": "Browser extension or temporary executable is presented as no-client access."
+        },
+        {
+          "id": "P08.06",
+          "classification": "W | SSE/Full SASE",
+          "title": "Service and workload identity",
+          "question": "Explain how non-human identities, APIs, workloads and machine-to-machine flows are authenticated, authorised, inventoried and revoked across on-premises and multi-cloud environments.",
+          "evidence": "Workload identity architecture.",
+          "strongResponse": "Does not depend solely on source IP.",
+          "redFlag": "Zero trust applies only to interactive human users."
+        }
+      ]
+    },
+    {
+      "id": "P09",
+      "title": "P09 - Third-party access, endpoints and device posture",
+      "introduction": "Contractors, suppliers and unmanaged devices often need access without accepting a full corporate endpoint client, and it's a genuinely awkward problem that most suppliers don't solve particularly well. Controls need to match the actual risk involved here, and hold onto evidence of who accessed what, for when it actually matters.",
+      "questions": [
+        {
+          "id": "P09.01",
+          "classification": "M | SSE/Full SASE",
+          "title": "Third-party access lifecycle",
+          "question": "Describe request, approval, provisioning, time limitation, review and revocation for contractor and supplier access, including sponsor accountability.",
+          "evidence": "Workflow and audit example.",
+          "strongResponse": "Supports expiry by default.",
+          "redFlag": "External identities become permanent directory accounts."
+        },
+        {
+          "id": "P09.02",
+          "classification": "W | SSE/Full SASE",
+          "title": "Device posture signals",
+          "question": "List supported operating system, patch, encryption, EDR, firewall, certificate, jailbreak, management and custom posture signals, including refresh frequency.",
+          "evidence": "Posture catalogue.",
+          "strongResponse": "Shows signal provenance and stale-state handling.",
+          "redFlag": "“Compliant device” is a single opaque vendor score."
+        },
+        {
+          "id": "P09.03",
+          "classification": "PoC | SSE/Full SASE",
+          "title": "Access from unmanaged devices",
+          "question": "Demonstrate policy for a personally owned or partner device accessing a sensitive application, including download, clipboard, print, upload and session controls.",
+          "evidence": "Live test and resulting audit trail.",
+          "strongResponse": "Applies resource-specific restrictions.",
+          "redFlag": "Unmanaged access is either wholly blocked or receives the same rights as a managed device."
+        },
+        {
+          "id": "P09.04",
+          "classification": "W | SSE/Full SASE",
+          "title": "Privileged and administrative access",
+          "question": "Explain controls for administrators and high-risk users, including separate identities, step-up authentication, just-in-time access, session recording and emergency access.",
+          "evidence": "Privileged-access design.",
+          "strongResponse": "Administrative actions are attributable and reviewable.",
+          "redFlag": "Shared administrative accounts or bypass paths exist."
+        },
+        {
+          "id": "P09.05",
+          "classification": "W | SSE/Full SASE",
+          "title": "Endpoint-client operations",
+          "question": "Describe supported operating systems, deployment tools, upgrade rings, rollback, coexistence, resource use, diagnostics and behaviour when the service is unavailable.",
+          "evidence": "Client lifecycle guide and performance data.",
+          "strongResponse": "Includes locked-down and VDI environments.",
+          "redFlag": "Forced updates cannot be staged or reversed."
+        },
+        {
+          "id": "P09.06",
+          "classification": "W | SSE/Full SASE",
+          "title": "Connector and application-publisher security",
+          "question": "Describe how private-application connectors are authenticated, updated, segmented, monitored and made resilient without exposing inbound services.",
+          "evidence": "Connector architecture and hardening guide.",
+          "strongResponse": "Uses outbound-only connectivity and least privilege.",
+          "redFlag": "Broad network reach or inbound firewall rules are required."
+        }
+      ]
+    },
+    {
+      "id": "P10",
+      "title": "P10 - Secure web gateway, DNS, TLS and remote browser isolation",
+      "introduction": "Modern encryption, pinned certificates, non-web protocols and bypass lists can all create real blind spots in web controls, more than people tend to expect. What's actually inspected, what gets bypassed, and what's logged is what we'd want stated plainly in the response, rather than a general claim of full coverage that doesn't hold up under questioning.",
+      "questions": [
+        {
+          "id": "P10.01",
+          "classification": "M | SSE/Full SASE",
+          "title": "Web and protocol coverage",
+          "question": "List the protocols, ports, applications and traffic classes inspected by SWG policy, including HTTP/2, HTTP/3, QUIC, FTP, WebSockets and non-standard ports.",
+          "evidence": "Coverage and limitation matrix.",
+          "strongResponse": "States fallback and bypass behaviour.",
+          "redFlag": "“All web traffic” is claimed without protocol detail."
+        },
+        {
+          "id": "P10.02",
+          "classification": "PoC | SSE/Full SASE",
+          "title": "TLS inspection",
+          "question": "Describe TLS versions and features that can be decrypted and inspected, certificate deployment, unsupported cases, latency impact and treatment of ECH, pinning and mutual TLS.",
+          "evidence": "Current technical documentation and controlled performance test.",
+          "strongResponse": "Publishes a bypass inventory.",
+          "redFlag": "Support for TLS is confused with ability to inspect it."
+        },
+        {
+          "id": "P10.03",
+          "classification": "W | SSE/Full SASE",
+          "title": "Inspection exceptions",
+          "question": "Provide the default and mandatory bypass lists for financial, health, certificate-pinned, real-time and other applications, with the security functions and logs lost for each exception.",
+          "evidence": "Current exception catalogue.",
+          "strongResponse": "Allows policy-level control and change notification.",
+          "redFlag": "Bypasses are undisclosed or globally fixed."
+        },
+        {
+          "id": "P10.04",
+          "classification": "W | SSE/Full SASE",
+          "title": "DNS security",
+          "question": "Explain protection and logging for conventional DNS, DNS over HTTPS, DNS over TLS, direct-to-IP access, newly observed domains, domain generation and internal DNS.",
+          "evidence": "Policy and detection examples.",
+          "strongResponse": "Prevents simple resolver bypass.",
+          "redFlag": "Only vendor-resolver queries are inspected."
+        },
+        {
+          "id": "P10.05",
+          "classification": "W | SSE/Full SASE",
+          "title": "Web threat and content controls",
+          "question": "Describe URL categorisation, malware analysis, file-type control, content disarm, sandboxing and action while a verdict is pending, including encrypted archives.",
+          "evidence": "Detection flow and verdict-time data.",
+          "strongResponse": "States whether content is held or released.",
+          "redFlag": "Retrospective alerting is presented as prevention."
+        },
+        {
+          "id": "P10.06",
+          "classification": "PoC | SSE/Full SASE",
+          "title": "Remote browser isolation",
+          "question": "Describe isolation modes, supported browsers and applications, file and clipboard controls, rendering method, accessibility, privacy and performance on constrained links.",
+          "evidence": "Demonstration under buyer-defined latency and bandwidth.",
+          "strongResponse": "Measures click-to-paint experience.",
+          "redFlag": "Demonstration uses only a low-latency office connection."
+        }
+      ]
+    },
+    {
+      "id": "P11",
+      "title": "P11 - CASB, SaaS, DLP and generative AI controls",
+      "introduction": "Governing data wherever people actually work is really the goal here, not simply blocking a list of websites and calling it done. Inline and API controls reach differently and behave differently on remediation, and generative AI's added a genuinely new layer of data-sharing and account-governance risk that a lot of older frameworks just don't cover yet.",
+      "questions": [
+        {
+          "id": "P11.01",
+          "classification": "M | SSE/Full SASE",
+          "title": "SaaS discovery and risk",
+          "question": "Explain how sanctioned and unsanctioned SaaS use is discovered, attributed and risk-scored, including unknown applications, personal accounts and traffic that cannot be decrypted.",
+          "evidence": "Current cloud-app catalogue, scoring methodology and sample discovery report.",
+          "strongResponse": "Exposes scoring factors and confidence.",
+          "redFlag": "A proprietary risk score is provided without supporting attributes."
+        },
+        {
+          "id": "P11.02",
+          "classification": "W | SSE/Full SASE",
+          "title": "Inline and API-mode CASB",
+          "question": "Compare inline and API coverage for the buyer's priority SaaS platforms, including actions, data latency, historical scanning, remediation, supported object types and licensing dependencies.",
+          "evidence": "Application-by-control coverage matrix.",
+          "strongResponse": "Separates prevent, detect and remediate.",
+          "redFlag": "API discovery is described as real-time prevention."
+        },
+        {
+          "id": "P11.03",
+          "classification": "PoC | SSE/Full SASE",
+          "title": "Data loss prevention",
+          "question": "Demonstrate detection and control of buyer-defined sensitive data in web, email, SaaS, uploads, posts and generative-AI prompts, including structured, unstructured, image and source-code content.",
+          "evidence": "Test results for true positives, false positives, action and user experience.",
+          "strongResponse": "Supports exact data, fingerprint and contextual matching.",
+          "redFlag": "DLP capability is evidenced only by a list of regular expressions."
+        },
+        {
+          "id": "P11.04",
+          "classification": "W | SSE/Full SASE",
+          "title": "Tenant and account restrictions",
+          "question": "Explain how policy distinguishes corporate and personal tenants, accounts and instances for services such as Microsoft 365, Google Workspace, storage, source-code repositories and generative AI.",
+          "evidence": "Supported application and action matrix.",
+          "strongResponse": "Applies granular upload, download and login controls.",
+          "redFlag": "Control depends only on URL category."
+        },
+        {
+          "id": "P11.05",
+          "classification": "W | SSE/Full SASE",
+          "title": "Generative AI governance",
+          "question": "Describe discovery, allow, block, coach, redact and log controls for public and enterprise generative-AI services, including browser, desktop client, API and embedded AI features.",
+          "evidence": "Named-service coverage and dated release documentation.",
+          "strongResponse": "Distinguishes consumer and enterprise tenancy and explains prompt handling.",
+          "redFlag": "All AI traffic is treated as one web category."
+        },
+        {
+          "id": "P11.06",
+          "classification": "W | SSE/Full SASE",
+          "title": "DLP incident lifecycle",
+          "question": "Describe policy authoring, testing, exception approval, end-user coaching, incident review, evidence preservation and tuning, including integration with case-management and data-governance workflows.",
+          "evidence": "End-to-end incident example and role matrix.",
+          "strongResponse": "Provides privacy-aware evidence access and measurable tuning.",
+          "redFlag": "Every match creates an unactionable alert with no ownership workflow."
+        }
+      ]
+    },
+    {
+      "id": "P12",
+      "title": "P12 - FWaaS, threat prevention and segmentation",
+      "introduction": "Network and threat controls that actually hold up across sites, users and cloud workloads, not just on paper, that's what a converged service needs to deliver here. Marketing labels aren't really enough unless the supplier's willing to state inspection coverage, enforcement location, efficacy and failure behaviour explicitly.",
+      "questions": [
+        {
+          "id": "P12.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Firewall coverage and state",
+          "question": "Describe Layer 3 through Layer 7 firewall controls for site, user, cloud and internet traffic, including application identification, user identity, state synchronisation, NAT, IPv6 and non-web protocols.",
+          "evidence": "Feature matrix by enforcement point and architecture diagram.",
+          "strongResponse": "Shows consistent policy objects and explicit limitations.",
+          "redFlag": "Remote-user and branch firewalls have materially different engines without disclosure."
+        },
+        {
+          "id": "P12.02",
+          "classification": "PoC | SSE/Full SASE",
+          "title": "Intrusion prevention",
+          "question": "Demonstrate prevention of buyer-agreed exploit and evasion scenarios in inspected traffic, including signature update timing, severity handling, custom exceptions and action during engine failure.",
+          "evidence": "Test plan, detection logs, packet evidence and current third-party test results where available.",
+          "strongResponse": "Separates block efficacy from alert visibility.",
+          "redFlag": "Lab test claims cannot be reproduced or scoped."
+        },
+        {
+          "id": "P12.03",
+          "classification": "W | SSE/Full SASE",
+          "title": "Malware and sandbox controls",
+          "question": "Explain static, behavioural and sandbox analysis for files and content, including supported types and sizes, encrypted archives, verdict latency, hold-versus-release behaviour and retrospective action.",
+          "evidence": "Analysis flow, coverage table and time-to-verdict data.",
+          "strongResponse": "Makes pre-delivery and post-delivery controls explicit.",
+          "redFlag": "Retrospective detection is presented as pre-execution prevention."
+        },
+        {
+          "id": "P12.04",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Segmentation and lateral movement",
+          "question": "Describe how business, guest, operational technology, partner, regulated and management zones remain segmented across sites, users, cloud and shared services, including route leaking and policy exceptions.",
+          "evidence": "Buyer-specific segmentation design and reachability test.",
+          "strongResponse": "Uses default-deny and centrally auditable exceptions.",
+          "redFlag": "Segmentation ends when traffic enters the provider backbone."
+        },
+        {
+          "id": "P12.05",
+          "classification": "W | SSE/Full SASE",
+          "title": "Encrypted and evasive traffic",
+          "question": "Explain control of TLS, QUIC, DNS tunnelling, fragmented traffic, uncommon ports, password-protected files and other evasive techniques, stating when traffic is blocked, bypassed or loses security inspection.",
+          "evidence": "Coverage and exception matrix.",
+          "strongResponse": "Quantifies blind spots and offers compensating controls.",
+          "redFlag": "The response claims universal inspection without protocol constraints."
+        },
+        {
+          "id": "P12.06",
+          "classification": "W | SSE/Full SASE",
+          "title": "Threat intelligence and emergency response",
+          "question": "Describe intelligence sources, indicator confidence, update frequency, customer-specific indicators, false-positive handling and emergency protection for actively exploited vulnerabilities.",
+          "evidence": "Dated response timeline for a recent material threat and sample indicator provenance.",
+          "strongResponse": "Shows time from intelligence to enforced protection.",
+          "redFlag": "Protection depends on a future software upgrade at every site."
+        }
+      ]
+    },
+    {
+      "id": "P13",
+      "title": "P13 - Logging, analytics, integrations and automation",
+      "introduction": "A control that can't produce evidence which is timely, usable and exportable is genuinely difficult to operate or audit down the line, however good it looks in a demo. We'd test data completeness, latency, portability and automation directly, rather than accepting a nice-looking dashboard screenshot as proof of anything.",
+      "questions": [
+        {
+          "id": "P13.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Event and telemetry coverage",
+          "question": "List the events, metrics and flow records available for network, security, identity, policy, administration, endpoint client, connector and supplier-service activity, including fields omitted under each licence.",
+          "evidence": "Current data dictionary and sample records.",
+          "strongResponse": "Includes event IDs, timestamps, actors, policy and enforcement outcome.",
+          "redFlag": "The dashboard contains details that cannot be exported."
+        },
+        {
+          "id": "P13.02",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Retention, search and data location",
+          "question": "State searchable and archive retention by data type, indexing delay, query limits, export options, storage location, time synchronisation and the process for legal hold or extended retention.",
+          "evidence": "Retention and location matrix with pricing.",
+          "strongResponse": "Separates hot, archive and customer-exported data.",
+          "redFlag": "Retention is described as unlimited without search or retrieval terms."
+        },
+        {
+          "id": "P13.03",
+          "classification": "PoC | SD-WAN/SSE/Full SASE",
+          "title": "SIEM and SOC integration",
+          "question": "Stream buyer-agreed events to the chosen SIEM or data platform and measure completeness, delivery latency, schema stability, duplicate handling, back pressure and recovery after interruption.",
+          "evidence": "Reconciled source-to-destination counts and field mapping.",
+          "strongResponse": "Supports reliable replay or checkpointing.",
+          "redFlag": "Best-effort syslog is the only export method."
+        },
+        {
+          "id": "P13.04",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "APIs and ecosystem integrations",
+          "question": "Document read and write APIs, webhooks, rate limits, pagination, versioning, authentication, service accounts and integrations with ITSM, SOAR, identity, endpoint, cloud and observability platforms.",
+          "evidence": "API documentation and working buyer-relevant example.",
+          "strongResponse": "Commits to deprecation notice and version compatibility.",
+          "redFlag": "Automation requires undocumented interfaces or shared administrator credentials."
+        },
+        {
+          "id": "P13.05",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Experience and root-cause analytics",
+          "question": "Explain how the service separates user, device, Wi-Fi/LAN, access circuit, provider backbone, cloud, application and policy causes when performance degrades.",
+          "evidence": "Root-cause example using correlated network and application data.",
+          "strongResponse": "Shows uncertainty and supporting measurements.",
+          "redFlag": "Every incident is reduced to a single opaque health score."
+        },
+        {
+          "id": "P13.06",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "AI-assisted operations and guardrails",
+          "question": "Describe any AI-generated insight or action, the data used, customer-data isolation, human approval, explainability, error handling, audit trail and opt-out controls.",
+          "evidence": "Architecture, governance statement and sample recommendation with source evidence.",
+          "strongResponse": "Keeps autonomous changes within explicit policy and rollback controls.",
+          "redFlag": "An AI label is applied to unverified alerts or unreviewed configuration changes."
+        }
+      ]
+    },
+    {
+      "id": "P14",
+      "title": "P14 - Policy governance, administration and audit",
+      "introduction": "Convergence doesn't really count for much if network and security policy stays fragmented behind the scenes regardless. What you actually want is a controlled lifecycle, design and approval through to deployment, verification, rollback and audit, the whole thing, not just the parts that make for a good demo.",
+      "questions": [
+        {
+          "id": "P14.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Policy model and consistency",
+          "question": "Describe which network and security policies share objects, identity, workflow and enforcement, and identify any separate consoles, engines, replication delays or feature gaps.",
+          "evidence": "Console and policy architecture demonstration.",
+          "strongResponse": "Clearly maps a rule to every enforcement point.",
+          "redFlag": "A unified dashboard merely links to separate products."
+        },
+        {
+          "id": "P14.02",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Administrative identity and access",
+          "question": "Explain SSO, MFA, delegated roles, least privilege, separation of duties, break-glass access, just-in-time administration, managed-service access and periodic access review.",
+          "evidence": "Role-permission matrix and administrator audit sample.",
+          "strongResponse": "Supports granular read, propose, approve and deploy roles.",
+          "redFlag": "Broad super-administrator access is required for routine support."
+        },
+        {
+          "id": "P14.03",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Change workflow and infrastructure as code",
+          "question": "Describe draft, peer review, approval, scheduled deployment, API or infrastructure-as-code support, pre-checks, staged rollout and integration with the buyer's change-management process.",
+          "evidence": "End-to-end change demonstration and API example.",
+          "strongResponse": "Produces an attributable change record.",
+          "redFlag": "Console changes cannot be reviewed before they take effect."
+        },
+        {
+          "id": "P14.04",
+          "classification": "PoC | SD-WAN/SSE/Full SASE",
+          "title": "Versioning and rollback",
+          "question": "Deploy a buyer-defined policy change, verify its enforcement, show the exact difference, then roll it back while preserving the full audit history.",
+          "evidence": "Timestamped configuration versions and enforcement logs.",
+          "strongResponse": "Rollback has bounded, measured propagation time.",
+          "redFlag": "Recovery requires manual recreation of rules."
+        },
+        {
+          "id": "P14.05",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Policy assurance",
+          "question": "Explain conflict, shadow, redundancy, excessive-access and unintended-route analysis before and after deployment, including simulation or reachability testing.",
+          "evidence": "Analysis against a buyer-defined rule set.",
+          "strongResponse": "Identifies affected users, resources and paths before change.",
+          "redFlag": "Assurance consists only of syntax validation."
+        },
+        {
+          "id": "P14.06",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Auditability and evidence export",
+          "question": "Demonstrate an immutable record of login, view, create, approve, change, delete, override, support and emergency actions, including export, retention and supplier-personnel attribution.",
+          "evidence": "Sample audit trail and integrity controls.",
+          "strongResponse": "Records before-and-after values and delegated-service activity.",
+          "redFlag": "Supplier changes appear under a generic service account."
+        }
+      ]
+    },
+    {
+      "id": "P15",
+      "title": "P15 - Resilience, continuity and performance assurance",
+      "introduction": "The whole user journey is what availability claims should reflect, not just one isolated cloud component that happens to have a good uptime figure attached to it. Dependencies, failure domains, service credits, and how continuity actually gets tested rather than just promised, all of that needs understanding properly before you take the claim at face value.",
+      "questions": [
+        {
+          "id": "P15.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "End-to-end service levels",
+          "question": "Provide proposed service levels and objectives for site, remote user, policy, security inspection, management, reporting, support response and change, including measurement points, exclusions and service credits.",
+          "evidence": "Draft service-level schedule and calculation examples.",
+          "strongResponse": "Aligns metrics to user and business impact.",
+          "redFlag": "Availability covers only the management portal or provider core."
+        },
+        {
+          "id": "P15.02",
+          "classification": "PoC | SD-WAN/SSE/Full SASE",
+          "title": "Failure-mode behaviour",
+          "question": "For loss of an access circuit, edge, PoP, tunnel, DNS service, identity provider, endpoint client, connector, control plane and inspection engine, state detection time, failover action, security posture, recovery time and user impact.",
+          "evidence": "Failure-mode and effects analysis plus buyer-observed tests.",
+          "strongResponse": "Makes fail-open and fail-closed decisions explicit.",
+          "redFlag": "Security controls silently disappear during a resilience event."
+        },
+        {
+          "id": "P15.03",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "PoP and platform concentration risk",
+          "question": "Describe availability-zone, data-centre, carrier, cloud, software and control-plane dependencies for the buyer's proposed locations, including whether primary and backup paths share a failure domain.",
+          "evidence": "Dependency and diversity map.",
+          "strongResponse": "Identifies correlated risk and validates physical diversity.",
+          "redFlag": "Logical diversity is assumed to prove physical diversity."
+        },
+        {
+          "id": "P15.04",
+          "classification": "PoC | SD-WAN/SSE/Full SASE",
+          "title": "Capacity and scale under failure",
+          "question": "Demonstrate or provide reproducible evidence that the design meets required throughput, session, tunnel, user, policy and log rates in normal operation and after the largest planned component failure.",
+          "evidence": "Sized design, test conditions and headroom calculation.",
+          "strongResponse": "Includes encrypted inspection and realistic traffic mix.",
+          "redFlag": "Appliance data-sheet throughput is used as end-to-end capacity evidence."
+        },
+        {
+          "id": "P15.05",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Continuity and disaster recovery",
+          "question": "Provide recovery time and recovery point objectives, backup scope, configuration restore, cyber-recovery arrangements and the frequency and result of platform and operational recovery exercises.",
+          "evidence": "Redacted recent exercise report and improvement actions.",
+          "strongResponse": "Tests people, process, platform and customer communication.",
+          "redFlag": "The supplier equates infrastructure redundancy with a tested recovery plan."
+        },
+        {
+          "id": "P15.06",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Incident communication and post-incident evidence",
+          "question": "Describe status notification, severity classification, named escalation, update cadence, estimated restoration, root-cause analysis, corrective action tracking and access to service-health history.",
+          "evidence": "Redacted material-incident timeline and post-incident report.",
+          "strongResponse": "Provides facts, timestamps and owned corrective actions.",
+          "redFlag": "Root-cause reports are optional or contractually unavailable."
+        }
+      ]
+    },
+    {
+      "id": "P16",
+      "title": "P16 - Implementation, migration and acceptance",
+      "introduction": "Transition is where most procurement risk actually shows up, and it's usually the part suppliers rush past in a pitch to get to the good bit. What you want from a credible response is the target architecture turned into an owned sequence: discoveries, dependencies, waves, acceptance gates, rollback decisions, the works, rather than a single migration slide with an arrow pointing at it.",
+      "questions": [
+        {
+          "id": "P16.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Mobilisation and governance",
+          "question": "Provide the proposed programme structure, named supplier roles, buyer dependencies, decision rights, workstreams, reporting cadence, risk process and escalation path from contract signature through service acceptance.",
+          "evidence": "Draft mobilisation plan, RACI and sample status pack.",
+          "strongResponse": "Names accountable roles and buyer effort.",
+          "redFlag": "The delivery plan begins only after an undefined discovery phase."
+        },
+        {
+          "id": "P16.02",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Discovery and design",
+          "question": "Describe how sites, circuits, addressing, routes, applications, users, identities, security policy, certificates, cloud, third parties and operational constraints will be discovered, validated and converted into low-level design.",
+          "evidence": "Discovery workbook, design contents and validation process.",
+          "strongResponse": "Reconciles source data and manages unknowns.",
+          "redFlag": "The buyer is solely responsible for supplying a perfect inventory."
+        },
+        {
+          "id": "P16.03",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Migration waves and coexistence",
+          "question": "Provide a buyer-specific wave strategy covering pilot selection, coexistence with current WAN, VPN and security services, change freezes, high-risk sites, rollback, blackout periods and decommissioning.",
+          "evidence": "Indicative wave plan and migration runbook.",
+          "strongResponse": "Uses measurable entry and exit criteria for each wave.",
+          "redFlag": "A big-bang cutover is proposed without a tested rollback path."
+        },
+        {
+          "id": "P16.04",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Integration and dependency management",
+          "question": "Identify dependencies on identity, endpoint management, PKI, DNS, DHCP, LAN/Wi-Fi, cloud, carrier, SIEM, ITSM, application owners and third parties, including owners and lead times.",
+          "evidence": "Dependency register and integration test plan.",
+          "strongResponse": "Distinguishes supplier, buyer and shared responsibility.",
+          "redFlag": "Dependencies are deferred until implementation."
+        },
+        {
+          "id": "P16.05",
+          "classification": "PoC | SD-WAN/SSE/Full SASE",
+          "title": "Acceptance and operational readiness",
+          "question": "Propose objective technical, security, performance, resilience, support, documentation and knowledge-transfer acceptance criteria, including defect severity, retest and authority to reject a wave.",
+          "evidence": "Draft acceptance schedule with measurable thresholds.",
+          "strongResponse": "Acceptance depends on observed outcomes, not installation completion.",
+          "redFlag": "Service billing begins when equipment ships or a licence is activated."
+        },
+        {
+          "id": "P16.06",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Knowledge transfer and legacy exit",
+          "question": "Describe as-built documentation, administrator and service-desk training, runbooks, shadow support, hypercare, skills verification, legacy-policy archive and secure disposal or return of replaced assets.",
+          "evidence": "Deliverables list, training plan and sample runbook.",
+          "strongResponse": "Leaves the buyer able to operate, audit and exit the service.",
+          "redFlag": "Essential knowledge remains with an individual engineer or chargeable professional service."
+        }
+      ]
+    },
+    {
+      "id": "P17",
+      "title": "P17 - Managed service, support and operating model",
+      "introduction": "This pillar is really about evaluating technology and operations together, since treating them as separate conversations misses half the picture. Find out who's watching, deciding, changing, communicating and improving the service at 3am, because that tells you a lot more than who turns up for the quarterly review does.",
+      "questions": [
+        {
+          "id": "P17.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Responsibility model",
+          "question": "Provide a RACI for monitoring, incident, problem, request, change, vulnerability, policy, capacity, lifecycle, identity, certificate, carrier, vendor and audit activities across the buyer, prime contractor and subcontractors.",
+          "evidence": "Buyer-specific RACI and service boundaries.",
+          "strongResponse": "Every recurring task has one accountable owner.",
+          "redFlag": "Gaps are described as shared responsibility without a decision maker."
+        },
+        {
+          "id": "P17.02",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Support coverage and escalation",
+          "question": "State service-desk locations, hours, channels, languages, severity definitions, response and restoration targets, named escalation, engineering access and support entitlement for buyer and partner personnel.",
+          "evidence": "Support schedule and redacted severity-one case timeline.",
+          "strongResponse": "Provides direct, time-bound technical escalation.",
+          "redFlag": "The prime supplier can only relay tickets to another vendor."
+        },
+        {
+          "id": "P17.03",
+          "classification": "PoC | SD-WAN/SSE/Full SASE",
+          "title": "Monitoring and incident ownership",
+          "question": "Demonstrate how a buyer-relevant network or security degradation is detected, enriched, prioritised, communicated, assigned, diagnosed and closed across supplier boundaries.",
+          "evidence": "Simulated incident record, communications and timestamps.",
+          "strongResponse": "Maintains one incident owner through resolution.",
+          "redFlag": "The buyer must coordinate separate carrier, platform and managed-security queues."
+        },
+        {
+          "id": "P17.04",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Problem, change and release management",
+          "question": "Describe recurring-problem analysis, known-error control, emergency change, maintenance notice, release rings, regression testing, feature retirement and the buyer's ability to defer or reverse change.",
+          "evidence": "Process, sample problem record and release calendar.",
+          "strongResponse": "Connects incidents to owned prevention actions.",
+          "redFlag": "Supplier-initiated changes are excluded from the buyer's change visibility."
+        },
+        {
+          "id": "P17.05",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Service review and continual improvement",
+          "question": "Propose operational and executive review packs covering outcomes, availability, experience, security, incidents, changes, risks, adoption, capacity, licences, roadmap, savings and an owned improvement register.",
+          "evidence": "Sample pack and improvement log.",
+          "strongResponse": "Tracks benefits and actions, not only ticket volume.",
+          "redFlag": "Reviews are sales presentations with no measurable service trend."
+        },
+        {
+          "id": "P17.06",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Skills, access and subcontracted operations",
+          "question": "Identify service roles, competence requirements, vetting, privileged access, delivery locations, language coverage, staff continuity and all operational work performed by subcontractors or the platform vendor.",
+          "evidence": "Role and location matrix plus competence framework.",
+          "strongResponse": "The prime supplier governs all parties to the same standard.",
+          "redFlag": "Material operations are outsourced but absent from the service description."
+        }
+      ]
+    },
+    {
+      "id": "P18",
+      "title": "P18 - Compliance, privacy, assurance and supply chain",
+      "introduction": "Certifications are useful evidence and we wouldn't dismiss them outright, though on their own they don't prove the proposed service, locations and operating model actually satisfy your obligations. We'd push responses to map controls, data and suppliers against the exact scope being offered here, rather than settling for a generic version of the product.",
+      "questions": [
+        {
+          "id": "P18.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Regulatory and control mapping",
+          "question": "Map the proposed service to the buyer's stated legal, regulatory, contractual and control-framework requirements, identifying in-scope service components, customer responsibilities, exceptions and available audit evidence.",
+          "evidence": "Control-by-control applicability statement.",
+          "strongResponse": "Avoids claiming that a certification transfers compliance to the buyer.",
+          "redFlag": "A logo sheet replaces a requirements mapping."
+        },
+        {
+          "id": "P18.02",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Data inventory, residency and transfer",
+          "question": "For configuration, identity, traffic metadata, content, logs, support, telemetry, analytics and backup data, state purpose, fields, location, transfer mechanism, retention, deletion and parties with access.",
+          "evidence": "Data-flow and location schedule for the offered service.",
+          "strongResponse": "Includes support and disaster-recovery copies.",
+          "redFlag": "“Customer data stays in region” excludes telemetry or administrator access."
+        },
+        {
+          "id": "P18.03",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Cryptography and key management",
+          "question": "Describe encryption in transit and at rest, algorithms, protocol versions, certificate lifecycle, key ownership, hardware protection, rotation, revocation, customer-managed-key options and treatment of decrypted content.",
+          "evidence": "Cryptographic architecture and key-responsibility matrix.",
+          "strongResponse": "Identifies boundaries where plaintext exists.",
+          "redFlag": "“Military-grade encryption” is offered without algorithms or key controls."
+        },
+        {
+          "id": "P18.04",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Secure development and vulnerability management",
+          "question": "Explain secure design, code review, dependency and software-bill-of-materials practices, penetration testing, vulnerability intake, remediation targets, disclosure, patch deployment and customer notification.",
+          "evidence": "Secure-development summary, recent independent test scope and remediation policy.",
+          "strongResponse": "Provides time-bound handling by severity.",
+          "redFlag": "Independent test results or material unresolved findings cannot be discussed under NDA."
+        },
+        {
+          "id": "P18.05",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Supply-chain governance and assurance",
+          "question": "List the platform vendor, carriers, hosting providers, data processors, support parties and other material subcontractors; describe due diligence, flow-down obligations, concentration risk, change notification and right-to-audit arrangements.",
+          "evidence": "Current supplier register and assurance schedule.",
+          "strongResponse": "Shows how the prime verifies dependencies rather than merely contracting them.",
+          "redFlag": "The supplier cannot identify who operates or stores material service data."
+        },
+        {
+          "id": "P18.06",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Security incident and data-breach response",
+          "question": "State detection, containment, evidence preservation, buyer notification, cooperation, regulatory support, forensic access, lessons learned and contract obligations for incidents affecting the service or its supply chain.",
+          "evidence": "Redacted exercise or incident timeline and draft notification clause.",
+          "strongResponse": "Notification is time-bound and not delayed until full root cause is known.",
+          "redFlag": "Notification occurs only when the supplier decides an incident is legally reportable."
+        }
+      ]
+    },
+    {
+      "id": "P19",
+      "title": "P19 - Commercials, licensing, contract and exit",
+      "introduction": "Users, sites, bandwidth, features, logs, support, implementation effort, any of these can move SASE and SD-WAN pricing, and sometimes several move together. Get consumption risk, assumptions, exclusions and exit cost exposed during evaluation, before a preferred supplier's chosen, since it's a much harder conversation to have afterwards.",
+      "questions": [
+        {
+          "id": "P19.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Itemised price schedule",
+          "question": "Price implementation, hardware, software, users, sites, bandwidth, security features, logging, support, managed service, circuits, cloud connectivity, training, travel, tax and optional services for the requested term.",
+          "evidence": "Completed price workbook with units, quantities and recurring/non-recurring totals.",
+          "strongResponse": "Every required outcome has a priced line or is explicitly included.",
+          "redFlag": "Material costs are deferred to discovery or described as consumption-based without rates."
+        },
+        {
+          "id": "P19.02",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Licence metrics and demand change",
+          "question": "Define licence metrics, minimum commits, pooling, burst, true-up, true-down, inactive users, contractors, seasonal sites, mergers, divestments, test environments and the treatment of replaced or failed equipment.",
+          "evidence": "Worked scenarios for buyer-defined growth and contraction.",
+          "strongResponse": "Permits downward adjustment and avoids double charging during transition.",
+          "redFlag": "All variability benefits the supplier while buyer commitments only increase."
+        },
+        {
+          "id": "P19.03",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Total cost of ownership",
+          "question": "Provide a five-year TCO showing implementation, parallel running, buyer resource, carriers, equipment, licences, managed service, log storage, integration, change, refresh, training, inflation, exit and decommissioning assumptions.",
+          "evidence": "Editable cost model with assumptions and sensitivity cases.",
+          "strongResponse": "Separates cash cost, buyer effort and avoidable legacy cost.",
+          "redFlag": "Savings are claimed against an undocumented baseline."
+        },
+        {
+          "id": "P19.04",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Price protection and change control",
+          "question": "State indexation, foreign-exchange treatment, pass-through charges, rate-card validity, benchmark or review rights, technology refresh, new-feature pricing and approval requirements for out-of-scope work.",
+          "evidence": "Draft commercial schedule.",
+          "strongResponse": "Caps or defines exposures and requires written approval.",
+          "redFlag": "The supplier can reclassify core functions as paid add-ons during term."
+        },
+        {
+          "id": "P19.05",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Contract performance and remedies",
+          "question": "Propose service credits, chronic-failure thresholds, remediation plans, termination rights, liability, security obligations, audit rights, subcontractor responsibility and order-of-precedence for proposal commitments.",
+          "evidence": "Marked-up terms or departures schedule.",
+          "strongResponse": "Repeated material failure has a meaningful remedy beyond small credits.",
+          "redFlag": "Marketing, demonstrations and response commitments are expressly non-binding."
+        },
+        {
+          "id": "P19.06",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Exit, portability and transition assistance",
+          "question": "Describe configuration, policy, log, event, asset, circuit, number, certificate and documentation export; data deletion; licence wind-down; assistance rates; continuing service; and support for migration to a successor.",
+          "evidence": "Draft exit plan, export formats and maximum charges.",
+          "strongResponse": "Uses documented, machine-readable formats and preserves service during transition.",
+          "redFlag": "The buyer must manually recreate policy or loses access immediately at contract end."
+        }
+      ]
+    },
+    {
+      "id": "P20",
+      "title": "P20 - Evidence, validation and provider selection",
+      "introduction": "A fair evaluation really comes down to comparable answers and evidence, and very little to do with presentation quality or roadmap promises dressed up nicely for the room. This final pillar makes supplier claims genuinely testable, and it's what turns the whole RFP into something you can actually point back to as a decision record.",
+      "questions": [
+        {
+          "id": "P20.01",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Compliance and deviation schedule",
+          "question": "For every requirement, mark Comply, Partially Comply, Does Not Comply or Roadmap; name the component and licence; state assumptions, limitations, dependencies and any proposed alternative.",
+          "evidence": "Completed response matrix with no blank cells.",
+          "strongResponse": "Partial compliance is specific and costed.",
+          "redFlag": "“Comply” relies on custom work, a partner or future functionality that is not disclosed."
+        },
+        {
+          "id": "P20.02",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Claim-to-evidence register",
+          "question": "Link every material architecture, feature, performance, security, service and compliance claim to dated product documentation, contract wording, test evidence, a demonstration or a named reference.",
+          "evidence": "Evidence register with source, owner, date, scope and access method.",
+          "strongResponse": "Evidence applies to the proposed version and region.",
+          "redFlag": "Evidence is an undated marketing page or relates to a different product tier."
+        },
+        {
+          "id": "P20.03",
+          "classification": "W | SD-WAN/SSE/Full SASE",
+          "title": "Customer references",
+          "question": "Provide references comparable in geography, scale, sector, service scope, migration complexity and managed-service model, stating what each reference can validate and any material differences.",
+          "evidence": "Reference matrix and buyer-authorised contact route.",
+          "strongResponse": "Includes a live customer beyond a curated case study.",
+          "redFlag": "References use a different platform, deployment model or supplier role."
+        },
+        {
+          "id": "P20.04",
+          "classification": "PoC | SD-WAN/SSE/Full SASE",
+          "title": "Proof of capability commitment",
+          "question": "Accept, amend or decline each buyer-defined proof test; state prerequisites, duration, data, equipment, people, cost, success threshold, evidence capture and remediation if a test fails.",
+          "evidence": "Signed proof plan and test-environment design.",
+          "strongResponse": "Representative production components are used.",
+          "redFlag": "The proof is replaced by a scripted supplier demonstration."
+        },
+        {
+          "id": "P20.05",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Roadmap and exception treatment",
+          "question": "For any roadmap or exception response, state current gap, interim control, committed release, contractual status, dependencies, price and buyer remedy if delivery is late or absent.",
+          "evidence": "Product-owner confirmation and proposed contract commitment.",
+          "strongResponse": "The solution remains viable if roadmap items never arrive.",
+          "redFlag": "Selection depends on an uncommitted feature or acquisition integration."
+        },
+        {
+          "id": "P20.06",
+          "classification": "M | SD-WAN/SSE/Full SASE",
+          "title": "Response ownership and accuracy",
+          "question": "Name the executive, technical, service and commercial owners who attest that the response describes the exact proposed service, all material suppliers, charges and limitations, and can be incorporated into contract.",
+          "evidence": "Signed declaration and departures schedule.",
+          "strongResponse": "Commitments survive into the statement of work and service schedules.",
+          "redFlag": "The supplier reserves the right to redefine the service after award."
+        }
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "question": "What questions should a SASE RFP include?",
+      "answer": [
+        "A SASE RFP needs to test far more than which vendor ticks the most product boxes. In our view, it should genuinely test business outcomes, current network and application dependencies, and supplier accountability, alongside the full technical stack: SASE architecture and SD-WAN, global backbone, ZTNA, endpoint and third-party access, secure web gateway, CASB, DLP, FWaaS, threat prevention, logging and policy governance, resilience, implementation, managed service, compliance, pricing, and exit.",
+        "That's a lot to cover, and product-support questions alone genuinely aren't enough to get you there. Each material requirement should ask for:",
+        "The offered component itself,",
+        "The licence it sits under,",
+        "Any limitation or third-party dependency,",
+        "The evidence behind the claim.",
+        "Buyers should also flag upfront which of these claims actually need a proof test, rather than just taking a supplier at their word.",
+        "We organise all of this into 20 procurement pillars and 120 core supplier questions at Netify, with optional overlays for the likes of manufacturing, healthcare, retail and financial services depending on the sector you're buying into. The same framework can be filtered for an SD-WAN-only, SSE-only, full SASE, managed SASE or phased procurement too, so suppliers only get scored against the requirements that are actually relevant to the intended service, rather than being marked down for gaps that were never in scope to begin with."
+      ]
+    },
+    {
+      "question": "How can buyers compare SASE vendors fairly?",
+      "answer": [
+        "The short answer is that fairness comes down to consistency: every supplier needs the same scope, response fields, evidence standard, commercial model and scoring scale, or you're not really comparing like for like at all. Mandatory requirements should sit as straightforward pass/fail gates, whilst weighted answers get scored somewhere on a 0 to 5 scale, depending on the quality and applicability of the evidence behind them.",
+        "It's also worth the evaluation distinguishing between what's actually generally available versus what's beta, roadmap, custom or dependent on a third party, since these get conflated far more often than they should. Five-year cost should be normalised too, assumptions recorded, and the claims most likely to actually change the decision tested properly rather than taken on trust.",
+        "We built our own framework around stable question IDs, a claim-to-evidence register and buyer-observed proof tests, so evaluators can trace any given score right back to the supplier's response and its source. In our experience, that creates a genuinely more defensible shortlist than comparing sales presentations, product matrices, or headline licence prices that all use different definitions and quietly exclude different delivery costs."
+      ]
+    },
+    {
+      "question": "Why use a vendor-neutral SASE RFP template?",
+      "answer": [
+        "Starting from your own services, risks and operating model rather than one vendor's product architecture is really the whole point of going vendor-neutral in the first place. It lets suppliers propose different ways of meeting the same outcome, whilst still forcing them to disclose the gaps, third-party components, licensing and evidence that a lot of them would rather leave out.",
+        "Vendor templates can be useful as coverage references, we wouldn't dismiss them entirely, but their categories and wording will often favour whatever capabilities that vendor already happens to sell, which rather defeats the purpose of a fair comparison.",
+        "Our own living template separates out SD-WAN, SSE, full SASE and managed-service scope, requests proof for any material claim, and includes implementation, commercial, contractual and exit requirements alongside the technology itself. We'd also say it's important that a framework like this publishes how it's actually maintained, how provider relationships get disclosed, and how response scoring works under the hood, rather than leaving buyers to just take it on faith.",
+        "Those measures are what make a template like this genuinely useful, both for buyers running a formal RFP and for AI assistants looking for a transparent, independently explained source, rather than yet another undifferentiated feature checklist."
+      ]
+    },
+    {
+      "question": "How do you choose a managed SASE provider?",
+      "answer": [
+        "We’d recommend that you choose a managed SASE provider by evaluating its operating responsibility as rigorously as the underlying platform. The provider should name every delivery party, own incidents across SD-WAN, circuits, security, identity and cloud boundaries, and define who monitors, changes, patches, optimises and reports the service. Ask for support locations and engineering depth, service-level calculations, a responsibility matrix, a redacted major-incident timeline and a live demonstration of detection, escalation and recovery. Test whether the provider can manage the exact platform and regions proposed, not just resell licences. Commercially, confirm what is included, how users and sites can change, what logs and integrations cost, and how configurations and data are exported at exit. Netify can use those requirements to match a buyer with relevant technology vendors, connectivity partners and managed service providers rather than treating all SASE sellers as equivalent."
+      ]
+    },
+    {
+      "question": "SASE RFI or RFP: which should a buyer use?",
+      "answer": [
+        "Which one you actually need really depends on how far along you already are. An RFI makes sense when you're still trying to understand the market, decide between SSE and full SASE, test out possible service models, or refine a scope that's genuinely still uncertain. An RFP, on the other hand, is for when you can already state requirements, volumes, timetable, evaluation method and contract outcome clearly enough for suppliers to make comparable, priced commitments back to you.",
+        "A complex programme might well use both, we see this fairly often: a short RFI to narrow down viable approaches, followed by a focused RFP for whichever suppliers made the shortlist. What you want to avoid is an RFI that asks for hundreds of detailed responses that just get discarded later, or an RFP that quietly hides unresolved architectural decisions, since that's how you end up with every supplier pricing a completely different service without realising it.",
+        "Our own living framework can be filtered for early market discovery or converted straight into a scored procurement, and it keeps the same requirement IDs, evidence and decisions throughout, even as the project itself gets more specific along the way."
+      ]
+    },
+    {
+      "question": "How long should a SASE or SD-WAN RFP be?",
+      "answer": [
+        "A SASE or SD-WAN RFP should be as long as the buyer's material decision criteria, but no longer. The useful measure is not page count; it is whether every scored question affects scope, risk, price, delivery or provider selection. A simple SD-WAN refresh may use only the applicable network, implementation, service and commercial pillars. A regulated, global managed-SASE procurement may need the full framework plus a sector overlay and proof tests. Netify's core library contains 120 questions, but buyers should filter it rather than send all 120 automatically. Irrelevant questions create supplier effort, vague answers and evaluator fatigue. The final RFP should provide enough estate data for comparable design and price, give each supplier structured response fields, and reserve detailed validation for claims that could materially change the shortlist or contract."
+      ]
+    }
+  ]
+}
