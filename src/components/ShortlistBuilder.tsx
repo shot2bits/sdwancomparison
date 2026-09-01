@@ -1090,16 +1090,25 @@ function VendorCard({
           >
             {compared ? "Comparing ✓" : "Compare"}
           </button>
-          <button
-            onClick={() => setOpen(!open)}
-            aria-expanded={open}
-            className="text-sm border border-[var(--ink-300,#ccc)] rounded-full px-3 py-1 hover:border-[var(--ink-900)]"
-          >
-            {open ? "Close expanded listing" : "View expanded listing"}
-          </button>
         </div>
       </div>
       <p className="text-sm text-[var(--ink-700)] mt-3">{v.shortlist_summary}</p>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink-700)] underline decoration-[var(--ink-300,#ccc)] underline-offset-4 hover:text-[var(--accent)]"
+      >
+        {open ? "Close expanded listing" : "View expanded listing"}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          fill="none"
+          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
       {open && (
         <div className="mt-4 border-t border-[var(--ink-300,#ccc)] pt-4 text-sm">
           <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-[var(--ink-300,#ccc)] bg-[var(--ink-300,#ccc)] sm:grid-cols-4">
