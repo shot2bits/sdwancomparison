@@ -43,6 +43,7 @@ import {
   type ShortlistVendor,
   type VendorVerdict,
 } from "@/lib/shortlist-core";
+import { shortlistEntrance } from "@/lib/project-entrance";
 
 type FeatureMeta = { id: string; name: string; category: string; description?: string };
 
@@ -93,6 +94,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   // Lead form state
   const [lead, setLead] = useState({ name: "", email: "", company: "", company_url: "" });
   const [leadState, setLeadState] = useState<"idle" | "busy" | "sent" | "error">("idle");
+  const [handoffState, setHandoffState] = useState<"idle" | "busy" | "error">("idle");
 
   const featureNames = useMemo(
     () => Object.fromEntries(features.map((f) => [f.id, f.name])),
@@ -186,42 +188,25 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     return `/sase/shortlist/print${qs ? `?${qs}` : ""}`;
   }
 
-  /**
-   * Shortlist → RFP handoff. Conversion rework (21 July 2026, Robert's build
-   * order): the destination is now the Describe wizard, not the deep
-   * builder's prefill=1 landing, because the old target silently minted an
-   * anonymous draft on arrival and asked nothing the visitor was ready to
-   * answer (the bridge was seen 464 times in 30 days and clicked zero).
-   * The wizard opens on one-click scope cards, and this URL carries the
-   * shortlist's context through the wizard's documented entry contract:
-   * the top three ranked vendors pinned into evaluation and the publish
-   * invite list (?vendors=), the sector, and scope=managed when the
-   * operating-model filter says a provider should run it.
-   */
-  // One Door (24 July 2026, Robert): this used to point at the wizard path,
-  // which now 301s to the apex and sheds its context on the way. Link the
-  // workspace directly (internal linking before redirects) and carry the
-  // buyer's context as the workspace prompt: their own advisor words when
-  // they typed, otherwise a plain sentence derived from the filters and the
-  // live shortlist, so what they built here travels with them.
-  function workspaceUrl(): string {
-    const words = chatMessages
-      .filter((m) => m.role === "user")
-      .map((m) => m.content.trim())
-      .filter(Boolean)
-      .join("; ")
-      .slice(0, 500)
-      .trim();
-    if (words) return `https://netify.co.uk/?q=${encodeURIComponent(words)}`;
-    const parts: string[] = [
-      input.sector
-        ? `We are a ${SECTOR_LABELS[input.sector]} organisation shortlisting SASE and SD-WAN providers.`
-        : "We are shortlisting SASE and SD-WAN providers.",
-    ];
-    if (input.service_model === "managed") parts.push("We want the service fully managed.");
-    const names = result.shortlist.slice(0, 3).map((v) => v.name).filter(Boolean);
-    if (names.length) parts.push(`Our shortlist so far: ${names.join(", ")}.`);
-    return `https://netify.co.uk/?q=${encodeURIComponent(parts.join(" "))}`;
+  /** The ranked state is persisted losslessly before navigation. */
+  async function continueCanonicalProject() {
+    if (handoffState === "busy") return;
+    setHandoffState("busy");
+    const words = chatMessages.filter((message) => message.role === "user").map((message) => message.content.trim()).filter(Boolean).join("; ").slice(0, 4000);
+    const rankedVendorSlugs = result.shortlist.slice(0, 5).map((vendor) => vendor.slug);
+    try {
+      const entrance = shortlistEntrance({ shortlist: input, rankedVendorSlugs, requirementText: words, sourceUrl: window.location.href });
+      const response = await fetch("/sase/api/rfp", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ title: input.sector ? `${SECTOR_LABELS[input.sector]} SASE / SD-WAN project` : "SASE / SD-WAN shortlist project", buyer: entrance.buyer_input, entrance_context: entrance, journey_mode: "find_providers" }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.id || !data.manage_token) throw new Error(data.error || "Could not continue the project.");
+      window.location.assign(`/sase-sd-wan-rfp-builder/?id=${encodeURIComponent(data.id)}&manage=${encodeURIComponent(data.manage_token)}`);
+    } catch {
+      setHandoffState("error");
+    }
   }
 
   async function askAgent() {
@@ -712,15 +697,17 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             >
               Download PDF
             </a>
-            <a
-              href={workspaceUrl()}
-              onClick={() => fireNetifyEvent("shortlist_get_bids_click")}
+            <button
+              type="button"
+              onClick={() => { fireNetifyEvent("shortlist_get_bids_click"); void continueCanonicalProject(); }}
+              disabled={handoffState === "busy"}
               className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors"
             >
-              Get competing bids →
-            </a>
+              {handoffState === "busy" ? "Opening your project…" : "Get competing bids →"}
+            </button>
           </div>
         </div>
+        {handoffState === "error" && <p className="mb-4 text-sm text-red-700">Your shortlist is still here, but the private project could not be created. Try again.</p>}
         <p className="text-sm text-[var(--ink-500)] mb-6">
           {isDefaultView
             ? "Balanced capability score across all 40 features. Set filters, pick your sector, or describe your needs to the AI advisor to build your bespoke shortlist."

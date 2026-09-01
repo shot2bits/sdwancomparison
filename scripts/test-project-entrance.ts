@@ -67,3 +67,9 @@ assert.match(createRoute, /entrance_context: entranceContext/);
 assert.match(securityCreate, /entrance_context: rfpBuilderEntrance/);
 
 console.log("PASS  all entrances preserve raw inputs and produce canonical ProjectDetails");
+
+const shortlistUi = fs.readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
+assert.match(shortlistUi, /shortlistEntrance\(/);
+assert.match(shortlistUi, /entrance_context: entrance/);
+assert.match(shortlistUi, /journey_mode: "find_providers"/);
+assert.doesNotMatch(shortlistUi, /function workspaceUrl/);
