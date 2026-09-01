@@ -24,6 +24,7 @@
     "test:provider-pilot-technical-review": "python3 scripts/test-provider-pilot-technical-review.py",
     "test:provider-matching": "tsx scripts/test-provider-matching.ts",
     "test:project-marketplace-envelope": "tsx scripts/test-project-marketplace-envelope.ts",
+    "test:sector-profiles": "tsx scripts/test-sector-profiles.ts",
     "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
     "validate:rfp-ui": "node scripts/validate-rfp-builder-flow-ui.mjs",
     "validate:ui:reversal": "node scripts/validate-sector-suggestion-reversal-ui.mjs",
