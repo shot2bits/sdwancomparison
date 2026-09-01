@@ -6,12 +6,12 @@
  * machine-callable object, not just a web form.
  */
 
-import { getProjectByToken, getProject, saveProject, listResponses, saveResponse, getConnectionByToken, newId, kvConfigured } from "@/lib/rfp-store";
+import { getProjectByToken, getProject, saveProject, listResponses, saveResponse, getConnectionByToken, newId, kvConfigured, kvRaw } from "@/lib/rfp-store";
 import { addMessage } from "@/lib/rfp-connect";
 import { resolveOpportunityToken, getOpportunity, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem, vendorName, maskedFeed } from "@/lib/opportunity";
 import { RfpResponseSchema, BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
-import { PUBLICATION_POLICY_VERSION, publicationAuthorization } from "@/lib/publication-policy";
+import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION, PUBLICATION_POLICY_VERSION, publicationAuthorization, publicationCompleted } from "@/lib/publication-policy";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { toPublicOpportunity } from "@/lib/opportunity-types";
 import { getSampleNotice } from "@/lib/sample-notices";
@@ -21,8 +21,19 @@ import { SITE_URL } from "@/lib/structured-data";
 import { resolveSupplierResponseAccess, RESPONSE_DENIAL_MESSAGES } from "@/lib/rfp-response-access";
 import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
 import { isMarketUnlocked } from "@/lib/market-unlock";
+import { authenticateMarketplaceProject, prepareMarketplacePublication, previewMarketplaceProject, startMarketplaceProject, updateMarketplaceProject } from "@/lib/marketplace-project-session";
+import { executePublish } from "@/lib/rfp-publish";
+import { loadProviderMatchRecords } from "@/lib/provider-match-source";
+import { matchProviders, revealProviderMatches } from "@/lib/provider-matching";
 
 export const MCP_RFP_TOOL_DEFINITIONS = [
+  { name: "start_project", description: "Create the canonical private ProjectDetails envelope with MCP journey attribution. Anonymous and rate-limited by the MCP transport; returns an expiring opaque project session token.", inputSchema: { type: "object", properties: { entrance_context: { type: "object" }, mode: { type: "string", enum: ["quick_list","find_providers","build_rfp","validate_rfp"] }, sector_profile: { type: "object" } }, required: ["entrance_context","mode"] } },
+  { name: "update_requirements", description: "Update a canonical private project using its opaque project session token, optimistic revision and idempotency key.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, idempotency_key: { type: "string" }, buyer_patch: { type: "object" }, raw_input: { type: "object" }, sector_profile: { type: "object" } }, required: ["project_id","project_session_token","base_revision","idempotency_key"] } },
+  { name: "preview_provider_matches", description: "Return aggregate provider coverage only. Never returns provider names, slugs, IDs, scores or hidden rows before publication.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, input: { type: "object" } }, required: ["project_id","project_session_token","base_revision","input"] } },
+  { name: "prepare_publication", description: "Record the current versioned anonymous-board consent intent against a private project. Does not publish; verified buyer identity is still required.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" }, marketing_opt_in: { type: "boolean" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
+  { name: "publish_opportunity", description: "Publish a prepared project exactly once. Requires the opaque project token, current revision, exact consent and a verified buyer session on the MCP HTTP request; cannot bypass the website policy.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
+  { name: "get_project_status", description: "Return private project, board and MarketUnlock status to the verified owner holding the opaque project session token.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" } }, required: ["project_id","project_session_token"] } },
+  { name: "get_unlocked_matches", description: "Return personalised provider identities and reasons only to the verified project owner after a live MarketUnlock binding passes.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, input: { type: "object" } }, required: ["project_id","project_session_token","input"] } },
   {
     name: "get_rfp",
     description: "Fetch a published SASE/SD-WAN RFP by its share token so a supplier agent can read the questions. Returns title, status, scope, delivery model and the active questions with the evidence requested.",
@@ -177,7 +188,7 @@ function activeQuestions(project: NonNullable<Awaited<ReturnType<typeof getProje
     .filter((s) => s.questions.length > 0);
 }
 
-export async function callRfpTool(name: string, args: Record<string, unknown>): Promise<unknown> {
+export async function callRfpTool(name: string, args: Record<string, unknown>, context: { verifiedBuyerEmail?: string; requestKey?: string } = {}): Promise<unknown> {
   // name validated against RFP_TOOL_NAMES by the caller
   // Public board read: open, no token. Safe before the storage guard.
   if (name === "list_opportunities") {
@@ -204,6 +215,55 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     const draft = (args.draft ?? {}) as Record<string, unknown>;
     const { validation } = normaliseNoticeDraft(draft);
     return validation;
+  }
+  if (name === "start_project") {
+    if (!kvConfigured()) return { error: "RFP storage not configured." };
+    const rateKey = String(context.requestKey ?? "anonymous").replace(/[^a-zA-Z0-9:_-]/g, "_").slice(0, 120);
+    const count = Number(await kvRaw(["INCR", `mcp:marketplace:start:${rateKey}`]));
+    if (count === 1) await kvRaw(["EXPIRE", `mcp:marketplace:start:${rateKey}`, "3600"]);
+    if (count > 20) return { error: "rate_limited", retry_after_seconds: 3600 };
+    const supplied = (args.entrance_context ?? {}) as Record<string, unknown>;
+    const entrance = { version: "project-entrance/1.0.0", source: "mcp", source_url: String(supplied.source_url ?? `${SITE_URL}/api/mcp/`), captured_at: Date.now(), requirement_text: String(supplied.requirement_text ?? ""), sector: typeof supplied.sector === "string" ? supplied.sector : null, marketplace_slug: typeof supplied.marketplace_slug === "string" ? supplied.marketplace_slug : null, vendor_slugs: Array.isArray(supplied.vendor_slugs) ? supplied.vendor_slugs : [], buyer_input: supplied.buyer_input && typeof supplied.buyer_input === "object" ? supplied.buyer_input : {}, shortlist_input: supplied.shortlist_input && typeof supplied.shortlist_input === "object" ? supplied.shortlist_input : null, raw_input: supplied.raw_input && typeof supplied.raw_input === "object" ? supplied.raw_input : supplied };
+    return startMarketplaceProject({ entrance_context: entrance, mode: args.mode as "quick_list" | "find_providers" | "build_rfp" | "validate_rfp", sector_profile: args.sector_profile });
+  }
+  if (name === "update_requirements") return updateMarketplaceProject(String(args.project_id ?? ""), String(args.project_session_token ?? ""), { base_revision: args.base_revision, idempotency_key: args.idempotency_key, buyer_patch: args.buyer_patch ?? {}, raw_input: args.raw_input ?? {}, ...(args.sector_profile ? { sector_profile: args.sector_profile } : {}) });
+  if (name === "preview_provider_matches") return previewMarketplaceProject(String(args.project_id ?? ""), String(args.project_session_token ?? ""), { base_revision: args.base_revision, input: args.input });
+  if (name === "prepare_publication") return prepareMarketplacePublication(String(args.project_id ?? ""), String(args.project_session_token ?? ""), { base_revision: args.base_revision, consent_version: args.consent_version, consent_text: args.consent_text, marketing_opt_in: args.marketing_opt_in ?? false });
+  if (name === "get_project_status") {
+    const projectId = String(args.project_id ?? "");
+    await authenticateMarketplaceProject(projectId, String(args.project_session_token ?? ""));
+    const project = await getProject(projectId);
+    if (!project) return { error: "Project not found." };
+    const owner = context.verifiedBuyerEmail && project.owner_email.toLowerCase() === context.verifiedBuyerEmail.toLowerCase();
+    if (!owner) return { error: "verified_owner_required" };
+    return { project_id: project.id, journey: project.journey, status: project.status, marketplace_state: project.marketplace_state, marketplace_revision: project.marketplace_revision, market_unlocked: await isMarketUnlocked(project.id), response_count: (await listResponses(project.id)).length };
+  }
+  if (name === "get_unlocked_matches") {
+    const projectId = String(args.project_id ?? "");
+    await authenticateMarketplaceProject(projectId, String(args.project_session_token ?? ""));
+    const project = await getProject(projectId);
+    const email = context.verifiedBuyerEmail ?? "";
+    if (!project || !email || project.owner_email.toLowerCase() !== email.toLowerCase()) return { error: "verified_owner_required" };
+    const result = matchProviders(args.input as never, await loadProviderMatchRecords());
+    const unlocked = await revealProviderMatches(projectId, result);
+    return unlocked ?? { error: "market_locked" };
+  }
+  if (name === "publish_opportunity") {
+    const projectId = String(args.project_id ?? "");
+    const marketplaceSession = await authenticateMarketplaceProject(projectId, String(args.project_session_token ?? ""));
+    const project = await getProject(projectId);
+    if (!project) return { error: "Project not found." };
+    const email = context.verifiedBuyerEmail ?? "";
+    const authorization = publicationAuthorization({ ownerAuthorized: Boolean(email) && (!project.owner_email || project.owner_email.toLowerCase() === email.toLowerCase()), verifiedSession: Boolean(email), channel: "mcp" });
+    if (!authorization.allowed) return { error: "verified_owner_required", publication_policy_version: PUBLICATION_POLICY_VERSION };
+    if (marketplaceSession.revision !== args.base_revision || args.consent_version !== MARKETPLACE_PUBLICATION_CONSENT_VERSION || args.consent_text !== MARKETPLACE_PUBLICATION_CONSENT_TEXT) return { error: "stale_revision_or_consent" };
+    const at = Date.now();
+    const prior = (project.consents ?? []).some((item) => item.action === "marketplace.publish" && item.granted_by === email && item.text === MARKETPLACE_PUBLICATION_CONSENT_TEXT);
+    const consented = await saveProject(ProjectDetailsSchema.parse({ ...project, owner_email: project.owner_email || email, consent: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION ? project.consent : { version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, agreed_at: at, flow: "mcp" }, consents: prior ? project.consents : [...(project.consents ?? []), { at, action: "marketplace.publish", granted_by: email, via: "mcp", text: MARKETPLACE_PUBLICATION_CONSENT_TEXT }] }));
+    const result = await executePublish(consented, email, { shortlist_size: 5, list_on_board: true, marketing_opt_in: false });
+    const unlocked = await isMarketUnlocked(projectId);
+    if (!publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })) return { error: "board_publication_incomplete", reason: result.board.reason, market_unlocked: false };
+    return { ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION };
   }
 
   // Public notice read: works for sample notices even without storage.

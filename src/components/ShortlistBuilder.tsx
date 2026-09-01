@@ -359,12 +359,13 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           )}
           {chatError && <p className="mt-3 text-sm text-red-700">{chatError}</p>}
           {chatMessages.some((m) => m.role === "assistant") && (
-            <a
-              href={workspaceUrl()}
+            <button type="button"
+              onClick={() => void continueCanonicalProject()}
+              disabled={handoffState === "busy"}
               className="mt-3 block w-full text-center px-4 py-2.5 border border-[var(--ink-900)] rounded-full text-sm font-medium no-underline hover:bg-zinc-900 hover:text-white transition-colors"
             >
               Continue in the workspace with what you just described
-            </a>
+            </button>
           )}
         </section>
 
@@ -730,12 +731,13 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
               <span key={c} className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[var(--ink-700)]">{c}</span>
             ))}
           </p>
-          <a
-            href={workspaceUrl()}
+          <button type="button"
+            onClick={() => void continueCanonicalProject()}
+            disabled={handoffState === "busy"}
             className="inline-block px-4 py-2 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm no-underline hover:bg-amber-400 transition-colors"
           >
             Start a project
-          </a>
+          </button>
         </section>
 
         {result.shortlist.length === 0 && (

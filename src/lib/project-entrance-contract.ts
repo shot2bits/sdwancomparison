@@ -7,6 +7,7 @@ export const PROJECT_ENTRANCE_SOURCES = [
   "shortlist",
   "marketplace",
   "sector",
+  "mcp",
 ] as const;
 
 export const ProjectEntranceContextSchema = z.object({

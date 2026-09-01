@@ -5,6 +5,7 @@ import { SECURITY_TOOL_DEFINITIONS_ALL, SECURITY_TOOL_NAMES, callSecurityTool } 
 import { WORKSPACE_TOOL_DEFINITIONS, WORKSPACE_TOOL_NAMES, callWorkspaceTool } from "@/lib/mcp-workspace-tools";
 import { TOOL_ANNOTATIONS, SERVER_INSTRUCTIONS } from "@/lib/mcp-annotations";
 import { SITE_URL } from "@/lib/structured-data";
+import { sessionFromRequest } from "@/lib/auth";
 
 const PLAIN_TOOL_NAMES = new Set<string>(MCP_TOOL_DEFINITIONS.map((t) => t.name));
 
@@ -195,7 +196,7 @@ export async function POST(req: Request) {
           : COST_TOOL_NAMES.has(name)
             ? await callCostTool(name, args)
             : RFP_TOOL_NAMES.has(name)
-              ? await callRfpTool(name, args)
+              ? await callRfpTool(name, args, { verifiedBuyerEmail: await sessionFromRequest(req).then((session) => session && (session.role === "buyer" || session.role === "netify") ? session.email : undefined), requestKey: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous" })
               : await callMcpTool(name, args);
       // Audit fix (19 July 2026): handlers signal failure as { error: ... }.
       // Surface that as isError so agents can branch without parsing prose.
