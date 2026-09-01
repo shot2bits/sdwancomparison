@@ -190,6 +190,7 @@ export async function PUT(req: Request, ctx: Ctx) {
   // dedicated matching/publication services, never by a whole-project PUT.
   delete body.match_preview;
   delete body.marketplace_state;
+  delete body.marketplace_revision;
   if (envelopeOutcome.participates && !envelopeOutcome.ok) {
     return Response.json({ error: envelopeOutcome.error }, { status: envelopeOutcome.status, headers: cors });
   }

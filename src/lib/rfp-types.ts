@@ -259,6 +259,8 @@ export const ProjectDetailsSchema = z.object({
   match_preview: ProviderMatchPreviewSchema.optional(),
   /** Server-owned publication/unlock projection; write routes strip client copies. */
   marketplace_state: ProjectMarketplaceStateSchema.optional(),
+  /** Optimistic revision for shared marketplace/shortlist/sector autosave. */
+  marketplace_revision: z.number().int().min(0).default(0),
   owner_email: z.string().default(""), // buyer account that owns this RFP (private, never in public projection); empty for anonymous drafts
   methodology_version: z.string().default("2026.1"),
   nda: NdaConfigSchema.default({ required: false, source: "template", text: "", link: "", version: 1, updated: 0 }), // defaulted so RFPs created before NDAs still validate
