@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FEATURE_NAMES, getAllVendorSlugs, getShortlistDataset } from "@/lib/vendors";
+import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist } from "@/lib/shortlist-core";
 import {
   SITE_URL,
@@ -18,7 +18,7 @@ export const dynamic = "force-static";
 type Props = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
-  return getAllVendorSlugs().map((slug) => ({ slug }));
+  return getShortlistDataset().map(({ slug }) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

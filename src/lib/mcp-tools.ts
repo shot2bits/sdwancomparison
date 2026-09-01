@@ -8,6 +8,7 @@ import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type Sh
 import { applyComparisonHandoff } from "@/lib/comparison-handoff";
 import { SITE_URL } from "@/lib/structured-data";
 import { getDemandIndex } from "@/lib/demand-index";
+import { getGovernedProviderSummary, GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
 // Moved to its own dependency-free module (18 Aug 2026) so a client
 // component (McpEvidencePanel.tsx) can import the tool catalogue without
 // pulling this file's server-only imports (`@/lib/vendors`, node:fs) into
@@ -16,6 +17,8 @@ import { getDemandIndex } from "@/lib/demand-index";
 export { MCP_TOOL_DEFINITIONS } from "@/lib/mcp-tool-definitions";
 
 export function callMcpTool(name: string, args: unknown): unknown | Promise<unknown> {
+  const shortlist = getShortlistDataset();
+  const knownShortlistSlugs = shortlist.map((vendor) => vendor.slug);
   switch (name) {
     case "build_sase_shortlist": {
       const result = buildShortlist(getShortlistDataset(), args ?? {}, FEATURE_NAMES);
@@ -50,27 +53,29 @@ export function callMcpTool(name: string, args: unknown): unknown | Promise<unkn
       };
     case "list_sase_vendors":
       return {
-        vendors: getShortlistDataset().map((v) => ({
+        contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
+        vendors: shortlist.map((v) => ({
           slug: v.slug,
           name: v.name,
           category: v.category,
           evidence_coverage_pct: v.evidence_coverage_pct,
-          profile_url: `${SITE_URL}/vendors/${v.slug}`,
+          profile_url: v.marketplace_url,
         })),
         _meta: { canonicalUrl: `${SITE_URL}/vendors` },
       };
     case "get_sase_vendor_profile": {
       const slug = (args as { slug?: string })?.slug ?? "";
-      if (!getAllVendorSlugs().includes(slug)) {
+      if (!knownShortlistSlugs.includes(slug)) {
         return { error: `Unknown vendor slug: ${slug}. Call list_sase_vendors for valid slugs.` };
       }
-      const v = getVendor(slug);
-      return { ...v, _meta: { canonicalUrl: `${SITE_URL}/vendors/${slug}` } };
+      const governed = getGovernedProviderSummary(slug);
+      const v = shortlist.find((vendor) => vendor.slug === slug);
+      return { ...v, governed_profile: governed, contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION, _meta: { canonicalUrl: v?.marketplace_url } };
     }
     case "compare_vendors": {
       const input = (args ?? {}) as { slugs?: string[]; question?: string };
       const slugs = (input.slugs ?? [])
-        .filter((slug, index, all) => getAllVendorSlugs().includes(slug) && all.indexOf(slug) === index)
+        .filter((slug, index, all) => knownShortlistSlugs.includes(slug) && all.indexOf(slug) === index)
         .slice(0, 3);
       const comparison = buildComparison(getShortlistDataset(), slugs, FEATURES);
       if (!comparison) return { error: "Provide two or three distinct valid provider slugs. Call list_sase_vendors for valid values." };

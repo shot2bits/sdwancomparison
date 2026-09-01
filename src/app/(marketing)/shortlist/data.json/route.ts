@@ -1,7 +1,8 @@
-import { FEATURES, FEATURE_NAMES, getAllVendors, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
 import { buildShortlist, DEFAULT_INPUT } from "@/lib/shortlist-core";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { SITE_URL } from "@/lib/structured-data";
+import { getGovernedProviderSummaries, GOVERNED_SHORTLIST_CONTRACT_VERSION, GOVERNED_SOURCE_VERSION } from "@/lib/governed-provider-catalogue";
 
 /**
  * JSON twin of /shortlist. Same content as the page, structured for machines.
@@ -9,8 +10,8 @@ import { SITE_URL } from "@/lib/structured-data";
  */
 export async function GET() {
   const vendors = getShortlistDataset();
-  const full = getAllVendors();
   const defaultResult = buildShortlist(vendors, DEFAULT_INPUT, FEATURE_NAMES);
+  const governedProviders = getGovernedProviderSummaries();
 
   return Response.json(
     {
@@ -18,22 +19,18 @@ export async function GET() {
       title: SHORTLIST_INTRO.h1,
       description: SHORTLIST_INTRO.subhead,
       publisher: "Netify Group Limited",
-      // Derived, never hand-typed. The page prose, this field and every
-      // record's last_verified were three different dates until 29 July 2026.
-      last_reviewed: full.map((v) => v.last_verified).sort().slice(-1)[0],
+      contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
+      source_contract_version: GOVERNED_SOURCE_VERSION,
+      last_reviewed: governedProviders.map((provider) => provider.reviewedAt).sort().slice(-1)[0],
       evidence: {
         method:
-          "Every graded fact carries a named source, a reliability tier and a sentence quoted from that source, confirmed present on the cited page by an independent check.",
-        sources_total: full.reduce((n, v) => n + (v.evidence_register?.length ?? 0), 0),
-        sources_rejected_tier_4: full.reduce(
-          (n, v) => n + (v.evidence_register?.filter((e) => e.tier === 4).length ?? 0),
-          0,
-        ),
-        conflicts_documented: full.reduce((n, v) => n + (v.conflicts?.length ?? 0), 0),
+          "Each public provider profile is a reviewed projection of the governed provider record. Capability states distinguish supported, partial, partner-delivered, unsupported, unknown and requires-confirmation evidence.",
+        sources_total: governedProviders.reduce((n, provider) => n + provider.evidenceSourceCount, 0),
       },
       faqs: SHORTLIST_FAQS,
       features: FEATURES,
       vendors,
+      governed_provider_profiles: governedProviders,
       default_shortlist: defaultResult,
       interactiveSurfaces: [
         {

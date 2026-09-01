@@ -165,6 +165,7 @@ export const STATUS_DESCRIPTIONS: Record<string, string> = {
 /* ------------------------------------------------------------------ */
 
 import type { ShortlistVendor } from "@/lib/shortlist-core";
+import { getGovernedShortlistDataset } from "@/lib/governed-provider-catalogue";
 
 /** Map of feature id to display name, shared with the engine and agent. */
 export const FEATURE_NAMES: Record<string, string> = Object.fromEntries(
@@ -173,7 +174,7 @@ export const FEATURE_NAMES: Record<string, string> = Object.fromEntries(
 
 /** Compact, client-safe dataset consumed by every shortlist surface. */
 export function getShortlistDataset(): ShortlistVendor[] {
-  return getAllVendors().map((v) => ({
+  const legacy = getAllVendors().map((v) => ({
     slug: v.slug,
     name: v.name,
     website: v.website,
@@ -208,4 +209,5 @@ export function getShortlistDataset(): ShortlistVendor[] {
     evidence_coverage_pct: v.score_summary.evidence_coverage_pct,
     last_verified: v.last_verified,
   }));
+  return getGovernedShortlistDataset(legacy);
 }

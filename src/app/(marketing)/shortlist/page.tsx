@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
-import ProviderTables from "@/components/ProviderTables";
+import GovernedProviderDirectory from "@/components/GovernedProviderDirectory";
 import { BEST_PAGES } from "@/lib/best-pages";
-import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST, getAllVendors, getShortlistDataset } from "@/lib/vendors";
+import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST, getShortlistDataset } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
+import { getGovernedProviderSummaries, GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -35,8 +36,8 @@ export default function ShortlistPage() {
   const vendors = getShortlistDataset();
   // Full records for the server-rendered tables: they carry the provenance
   // fields, which the compact shortlist dataset deliberately does not.
-  const fullVendors = getAllVendors();
-  const verified = fullVendors[0]?.last_verified ?? "";
+  const governed = getGovernedProviderSummaries();
+  const verified = governed.map((v) => v.reviewedAt.slice(0, 10)).sort().slice(-1)[0] ?? "";
   const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
 
   const schemas = [
@@ -46,6 +47,11 @@ export default function ShortlistPage() {
     getShortlistWebApplicationSchema(),
     getShortlistDatasetSchema(vendors.length, features.length),
     getShortlistFaqSchema(SHORTLIST_FAQS),
+    {
+      "@context": "https://schema.org", "@type": "ItemList", name: "SASE and SD-WAN providers compared by Netify",
+      numberOfItems: governed.length,
+      itemListElement: governed.map((provider, index) => ({ "@type": "ListItem", position: index + 1, url: provider.url, name: provider.name, description: provider.summary })),
+    },
     // The 40 capability definitions as a DefinedTermSet, mirroring the
     // visible glossary below so AI engines can quote a row's meaning
     // rather than guessing it from the label (Robert, 17 July 2026).
@@ -81,6 +87,9 @@ export default function ShortlistPage() {
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           {SHORTLIST_INTRO.subhead}
         </p>
+        <p className="mt-4 text-base leading-7 text-[var(--ink-800)]">
+          <strong>Short answer:</strong> this page compares 30 technology vendors, carriers and managed providers using one governed research dataset. Use the filters for a ranked shortlist, compare two providers feature by feature, or open each evidence profile before issuing an RFP.
+        </p>
         {/* The offer in one glance (Robert, 17 July 2026), server-rendered
             so agents and crawlers read it alongside the ranking data. */}
         <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
@@ -90,9 +99,7 @@ export default function ShortlistPage() {
           <li className="flex items-center gap-1.5"><span aria-hidden="true" className="text-emerald-600 font-bold">✓</span> No obligation to award</li>
         </ul>
         <p className="text-sm text-[var(--ink-500)] mt-3">
-          Written and reviewed by the Netify research team. Every vendor record
-          was re-verified against named primary sources on {verified}, with a
-          quoted sentence behind each graded fact. To act on a shortlist, describe the project once at{" "}
+          Written and reviewed by the Netify research team. The governed provider records were last updated on {verified}. Comparison contract {GOVERNED_SHORTLIST_CONTRACT_VERSION}. To act on a shortlist, describe the project once at{" "}
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
           {", "}raise it to a full RFP and publish to the providers it names, then
           compare structured responses, with pricing kept private to the buyer.
@@ -108,9 +115,7 @@ export default function ShortlistPage() {
         <ShortlistBuilder vendors={vendors} features={features} />
       </Suspense>
 
-      {/* Below the ranked list, per Robert 29 Jul: the builder answers the
-          buyer's question, these tables are the reference behind it. */}
-      <ProviderTables vendors={fullVendors} />
+      <GovernedProviderDirectory />
 
       <section className="mt-20">
         <p className="eyebrow mb-3">Ranked shortlists</p>

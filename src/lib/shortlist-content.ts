@@ -28,7 +28,7 @@ export const SHORTLIST_FAQS: { q: string; a: string }[] = [
 
 export const SHORTLIST_INTRO = {
   eyebrow: "SASE and SD-WAN shortlist builder",
-  h1: "Compare the SASE & SD-WAN UK and North American market",
+  h1: "Compare SASE and SD-WAN providers, vendors and managed services",
   subhead:
-    "Publish an RFP within minutes. Build your bespoke shortlist from 30 graded providers by filtering on operating model, region, cloud support, security features, AI capability and resilience, or describe your requirements in plain language and the AI advisor builds it for you. Then send one brief and your shortlisted vendors respond with structured answers and pricing that stays private to you.",
+    "Compare 30 researched SASE and SD-WAN providers across operating model, network and security capability. Build a ranked shortlist, inspect the evidence, compare two providers directly, then hand your requirements to the Netify RFP Builder.",
 };
