@@ -2,6 +2,8 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
 import { BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
+import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
+import { rfpBuilderEntrance } from "@/lib/project-entrance";
 import { recordProjectEvent } from "@/lib/project-machine";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { deriveRfiQuestionSet, bankRfpSections } from "@/lib/workspace/instrument";
@@ -95,6 +97,7 @@ export async function POST(req: Request) {
      *  security_sourcing project (resumeDecisionsFromProject's own
      *  documented scope, matching resumeStateFromProject's). */
     decision_turns?: unknown;
+    entrance_context?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -151,6 +154,10 @@ export async function POST(req: Request) {
   const ownerEmail = session && (session.role === "buyer" || session.role === "netify") ? session.email : "";
   const createSourceLedger = mergeSourceLedger([], parseIncomingSourceTurns(body.source_turns));
   const createDecisionLedger = mergeDecisionLedger([], parseIncomingDecisionTurns(body.decision_turns));
+  const suppliedEntrance = ProjectEntranceContextSchema.safeParse(body.entrance_context);
+  const entranceContext = suppliedEntrance.success
+    ? suppliedEntrance.data
+    : rfpBuilderEntrance({ rawInput: body as Record<string, unknown>, sourceUrl: req.url });
   // Full-unification CLOSURE pass (17 Aug 2026): a first save can already
   // carry a canonical envelope (Living Procurement Canvas's own first
   // Save, via ProjectDesk.tsx) -- ONE shared verifier for every writer
@@ -180,6 +187,7 @@ export async function POST(req: Request) {
     share_token: newId("tok"),
     manage_token: newId("mtok"),
     source: "wizard",
+    entrance_context: entranceContext,
     owner_email: ownerEmail,
     methodology_version: "2026.1",
     consent,

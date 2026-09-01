@@ -22,6 +22,7 @@ import {
 import { advanceProject, recordProjectEvent } from "@/lib/project-machine";
 import { generateRfpSections } from "@/lib/security/generate-rfp";
 import { ProjectDetailsSchema, type ProjectDetails } from "@/lib/rfp-types";
+import { rfpBuilderEntrance } from "@/lib/project-entrance";
 import type { Understanding } from "@/lib/workspace/understanding";
 import { notesWithSourceTurns } from "@/lib/workspace/extract";
 import { mergeSourceLedger, type SourceLedgerEntry } from "@/lib/workspace/source-ledger";
@@ -211,6 +212,17 @@ export async function buildSecurityProject(
     share_token: input.ids.shareToken,
     manage_token: input.ids.manageToken,
     source: input.via === "mcp" ? "mcp" : "wizard",
+    entrance_context: rfpBuilderEntrance({
+      rawInput: {
+        requirement: structuredClone(input.requirement),
+        buyer: structuredClone(buyerProfile),
+        preferred_vendors: [...pins],
+        source_turns: structuredClone(input.sourceTurns ?? []),
+        decision_turns: structuredClone(input.decisionTurns ?? []),
+      },
+      sourceUrl: input.via === "mcp" ? "/sase/api/mcp/" : "/sase-sd-wan-rfp-builder/",
+      capturedAt: now,
+    }),
     owner_email: input.ownerEmail ?? "",
     methodology_version: "2026.1",
     engine: "security_sourcing",

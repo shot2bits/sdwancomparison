@@ -10,6 +10,7 @@ import { SourceLedgerEntrySchema } from "@/lib/workspace/source-ledger";
 import { DecisionLedgerEntrySchema } from "@/lib/workspace/decision-ledger";
 import { LivingProcurementDocumentSchema } from "@/lib/workspace/procurement-document";
 import { WorkspaceFactSchema, ReceiptLikeSchema } from "@/lib/workspace/envelope-schemas";
+import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 
 // "not_stated" is a value, not a gap to fill (Robert's intake-truth ruling,
 // 28 Jul 2026): the Demand Index reported 96 per cent Full SASE because this
@@ -203,6 +204,13 @@ export const ProjectDetailsSchema = z.object({
   // Creation source (20 July 2026): segments the funnel honestly. "wizard"
   // = the UI, "mcp" = agent-created via tools, "unknown" = pre-stamp records.
   source: z.string().default("unknown"),
+  /**
+   * Step 2 marketplace foundation: lossless, versioned provenance for the
+   * input that originated this Project. Optional so every historic KV row
+   * remains readable without migration. The loose legacy `source` string
+   * stays unchanged for compatibility; new readers prefer this block.
+   */
+  entrance_context: ProjectEntranceContextSchema.optional(),
   owner_email: z.string().default(""), // buyer account that owns this RFP (private, never in public projection); empty for anonymous drafts
   methodology_version: z.string().default("2026.1"),
   nda: NdaConfigSchema.default({ required: false, source: "template", text: "", link: "", version: 1, updated: 0 }), // defaulted so RFPs created before NDAs still validate
