@@ -53,6 +53,15 @@ export async function GET() {
           description:
             "JSON-RPC 2.0 MCP server. tools/list returns available tools; tools/call executes build_sase_shortlist, list_sase_vendors or get_sase_vendor_profile.",
         },
+        {
+          id: "comparison-workspace",
+          kind: "agentic-comparison-ui",
+          url: `${SITE_URL}/shortlist/?compare=bt-business,vodafone-business&question=Which+provider+best+fits+this+project`,
+          contract: "provider-comparison/1.0.0",
+          description:
+            "Select two providers, calculate their deterministic evidence comparison and ask contextual follow-up questions. The compare query parameter accepts two comma-separated vendor slugs.",
+          backingTool: "compare_vendors",
+        },
       ],
     },
     { headers: { "X-Robots-Tag": "noindex" } },

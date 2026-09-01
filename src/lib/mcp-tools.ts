@@ -4,7 +4,8 @@
  */
 
 import { FEATURES, FEATURE_NAMES, getShortlistDataset, getVendor, getAllVendorSlugs } from "@/lib/vendors";
-import { buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput } from "@/lib/shortlist-core";
+import { buildComparison, buildShortlist, DEFAULT_INPUT, encodeScenario, type ShortlistInput } from "@/lib/shortlist-core";
+import { applyComparisonHandoff } from "@/lib/comparison-handoff";
 import { SITE_URL } from "@/lib/structured-data";
 import { getDemandIndex } from "@/lib/demand-index";
 // Moved to its own dependency-free module (18 Aug 2026) so a client
@@ -65,6 +66,29 @@ export function callMcpTool(name: string, args: unknown): unknown | Promise<unkn
       }
       const v = getVendor(slug);
       return { ...v, _meta: { canonicalUrl: `${SITE_URL}/vendors/${slug}` } };
+    }
+    case "compare_vendors": {
+      const input = (args ?? {}) as { slugs?: string[]; question?: string };
+      const slugs = (input.slugs ?? [])
+        .filter((slug, index, all) => getAllVendorSlugs().includes(slug) && all.indexOf(slug) === index)
+        .slice(0, 3);
+      const comparison = buildComparison(getShortlistDataset(), slugs, FEATURES);
+      if (!comparison) return { error: "Provide two or three distinct valid provider slugs. Call list_sase_vendors for valid values." };
+      const params = applyComparisonHandoff(new URLSearchParams(), {
+        providers: comparison.slugs,
+        question: (input.question ?? "").slice(0, 1000),
+        source: "mcp",
+      });
+      const resumeUrl = `${SITE_URL}/shortlist/?${params.toString()}#comparison-workspace`;
+      return {
+        ...comparison,
+        resume_url: resumeUrl,
+        _meta: {
+          canonicalUrl: `${SITE_URL}/shortlist/`,
+          resume_url: resumeUrl,
+          note: "The human workspace uses this same deterministic comparison result and can continue with contextual questions.",
+        },
+      };
     }
     case "get_demand_index":
       // Async: the route awaits callMcpTool, so returning the promise is safe.

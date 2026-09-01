@@ -44,6 +44,11 @@ import {
   type VendorVerdict,
 } from "@/lib/shortlist-core";
 import { shortlistEntrance } from "@/lib/project-entrance";
+import {
+  applyComparisonHandoff,
+  COMPARISON_HANDOFF_VERSION,
+  parseComparisonHandoff,
+} from "@/lib/comparison-handoff";
 
 type FeatureMeta = { id: string; name: string; category: string; description?: string };
 
@@ -90,6 +95,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
 
   // Manual compare selection
   const [compareSlugs, setCompareSlugs] = useState<string[]>([]);
+  const [comparisonSource, setComparisonSource] = useState("");
 
   // Lead form state
   const [lead, setLead] = useState({ name: "", email: "", company: "", company_url: "" });
@@ -118,7 +124,14 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   // testing: that handoff appeared to open an empty builder.)
   const searchParams = useSearchParams();
   useEffect(() => {
+    // URL state is the external source of truth for shareable scenarios and
+    // cross-project comparison handoffs.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInput(decodeScenario(searchParams.toString(), featureIds));
+    const handoff = parseComparisonHandoff(searchParams.toString(), vendors.map((vendor) => vendor.slug));
+    setCompareSlugs(handoff.providers);
+    setComparisonSource(handoff.source);
+    if (handoff.question) setChatPrompt(handoff.question);
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -129,11 +142,15 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     if (!hydrated) return;
     if (urlTimer.current) clearTimeout(urlTimer.current);
     urlTimer.current = setTimeout(() => {
-      const qs = encodeScenario(input);
+      const qs = applyComparisonHandoff(new URLSearchParams(encodeScenario(input)), {
+        providers: compareSlugs,
+        question: chatPrompt,
+        source: comparisonSource,
+      }).toString();
       const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
       window.history.replaceState(null, "", url);
     }, 250);
-  }, [input, hydrated]);
+  }, [input, hydrated, compareSlugs, chatPrompt, comparisonSource]);
 
   /** True until the user changes anything from the defaults. */
   const isDefaultView = useMemo(() => encodeScenario(input) === "", [input]);
@@ -209,9 +226,10 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     }
   }
 
-  async function askAgent() {
-    if (!chatPrompt.trim() || chatBusy) return;
-    const nextMessages = [...chatMessages, { role: "user" as const, content: chatPrompt }];
+  async function askAgent(promptOverride?: string) {
+    const prompt = (promptOverride ?? chatPrompt).trim();
+    if (!prompt || chatBusy) return;
+    const nextMessages = [...chatMessages, { role: "user" as const, content: prompt }];
     setChatMessages(nextMessages);
     setChatPrompt("");
     setChatBusy(true);
@@ -220,7 +238,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       const res = await fetch("/sase/api/agent", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages, current_input: input }),
+        body: JSON.stringify({ messages: nextMessages, current_input: input, comparison_slugs: compareSlugs }),
       });
       if (!res.ok) throw new Error(`Agent returned ${res.status}`);
       const data = (await res.json()) as {
@@ -316,13 +334,27 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         : "off";
 
   return (
+    <>
+      <ComparisonWorkspace
+        vendors={vendors}
+        comparison={activeComparison}
+        compareSlugs={compareSlugs}
+        setCompareSlugs={setCompareSlugs}
+        question={chatPrompt}
+        setQuestion={setChatPrompt}
+        ask={() => void askAgent()}
+        busy={chatBusy}
+        messages={chatMessages}
+        error={chatError}
+        source={comparisonSource}
+      />
     <div className="grid lg:grid-cols-12 gap-10">
       {/* ---------------- Filters column ---------------- */}
       <div className="lg:col-span-4 space-y-8">
         {/* AI advisor */}
         <section className="border border-[var(--ink-900)] rounded-sm p-5 bg-[var(--paper-base)]">
           <p className="eyebrow mb-2">AI advisor</p>
-          <h2 className="text-lg mb-3">Describe what you need</h2>
+          <h2 className="text-lg mb-3">Build around your requirements</h2>
           <p className="text-sm text-[var(--ink-700)] mb-3">
             Tell the advisor about your sites, regions, security needs and how you
             want the service run. It sets the filters below for you.
@@ -335,7 +367,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             className="w-full border border-[var(--ink-300,#ccc)] rounded-sm p-3 text-sm bg-white"
           />
           <button
-            onClick={askAgent}
+            onClick={() => void askAgent()}
             disabled={chatBusy || !chatPrompt.trim()}
             className="mt-3 w-full px-4 py-2.5 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm disabled:opacity-50 hover:bg-amber-400 transition-colors"
           >
@@ -646,7 +678,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       {/* ---------------- Results column ---------------- */}
       <div className="lg:col-span-8">
         {activeComparison && (
-          <section className="mb-10 border border-[var(--ink-900)] rounded-sm p-5">
+          <section id="comparison-table" className="mb-10 scroll-mt-24 border border-[var(--ink-900)] rounded-sm p-5">
             <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
               <h2 className="text-xl">
                 Comparing: {activeComparison.slugs.map((sl) => activeComparison.names[sl]).join(" vs ")}
@@ -857,6 +889,95 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         </section>
       </div>
     </div>
+    </>
+  );
+}
+
+function ComparisonWorkspace({
+  vendors,
+  comparison,
+  compareSlugs,
+  setCompareSlugs,
+  question,
+  setQuestion,
+  ask,
+  busy,
+  messages,
+  error,
+  source,
+}: {
+  vendors: ShortlistVendor[];
+  comparison: ComparisonResult | null;
+  compareSlugs: string[];
+  setCompareSlugs: React.Dispatch<React.SetStateAction<string[]>>;
+  question: string;
+  setQuestion: React.Dispatch<React.SetStateAction<string>>;
+  ask: () => void;
+  busy: boolean;
+  messages: { role: "user" | "assistant"; content: string }[];
+  error: string | null;
+  source: string;
+}) {
+  const choose = (index: number, slug: string) => {
+    setCompareSlugs((current) => {
+      const next = [...current];
+      next[index] = slug;
+      return next.filter(Boolean).slice(0, 2);
+    });
+  };
+
+  return (
+    <section id="comparison-workspace" className="mb-12 overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950 text-white shadow-[0_24px_70px_rgba(24,24,27,0.16)]">
+      <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="p-6 md:p-8">
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400">Netify comparison workspace</p>
+            <span className="rounded-full border border-zinc-700 px-2 py-1 font-mono text-[10px] text-zinc-400">{COMPARISON_HANDOFF_VERSION}</span>
+          </div>
+          <h2 className="mt-4 max-w-xl text-3xl font-semibold tracking-tight !text-white md:text-4xl">Compare providers, then interrogate the evidence.</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">Select two providers for a deterministic comparison across 40 capabilities. Ask a follow-up and the advisor uses the same comparison function exposed through Netify MCP.</p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
+            {[0, 1].map((index) => (
+              <label key={index} className="block text-xs font-medium text-zinc-300">
+                Provider {index === 0 ? "one" : "two"}
+                <select value={compareSlugs[index] ?? ""} onChange={(event) => choose(index, event.target.value)} className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-3 text-sm text-white outline-none focus:border-amber-400">
+                  <option value="">Choose a provider</option>
+                  {vendors.map((vendor) => <option key={vendor.slug} value={vendor.slug} disabled={compareSlugs[index === 0 ? 1 : 0] === vendor.slug}>{vendor.name}</option>)}
+                </select>
+              </label>
+            )).reduce<React.ReactNode[]>((nodes, field, index) => index === 0 ? [field, <span key="versus" className="hidden pb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500 sm:block">versus</span>] : [...nodes, field], [])}
+          </div>
+
+          <form className="mt-4" onSubmit={(event) => { event.preventDefault(); ask(); }}>
+            <label htmlFor="comparison-question" className="text-xs font-medium text-zinc-300">Ask about the comparison</label>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <input id="comparison-question" value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Which is stronger for a managed UK healthcare deployment?" maxLength={1000} className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-amber-400" />
+              <button disabled={busy || !question.trim()} className="rounded-lg bg-amber-400 px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400">{busy ? "Reading evidence…" : "Ask Netify AI"}</button>
+            </div>
+          </form>
+          {source && <p className="mt-3 text-xs text-zinc-500">Opened from {source.replaceAll("-", " ")}.</p>}
+        </div>
+
+        <div className="border-t border-zinc-800 bg-zinc-900/70 p-6 md:p-8 lg:border-l lg:border-t-0">
+          {comparison ? (
+            <>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">Live evidence comparison</p>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {comparison.slugs.slice(0, 2).map((slug) => <div key={slug} className="rounded-xl border border-zinc-700 bg-zinc-950 p-4"><p className="text-sm font-semibold text-white">{comparison.names[slug]}</p><p className="mt-3 text-3xl font-semibold text-amber-400">{comparison.meta[slug].score}</p><p className="mt-1 text-xs text-zinc-400">balanced evidence score</p><p className="mt-3 text-xs text-zinc-300">{comparison.wins[slug].length} clear capability leads</p></div>)}
+              </div>
+              <p className="mt-4 text-sm leading-6 text-zinc-300">{comparison.summary}</p>
+              <a href="#comparison-table" className="mt-5 inline-flex rounded-full border border-zinc-600 px-4 py-2 text-xs font-medium text-white no-underline hover:border-amber-400">Inspect every evidence row ↓</a>
+            </>
+          ) : (
+            <div className="flex min-h-64 flex-col justify-center">
+              {[['01', 'Select', 'Choose any two of the 30 researched providers.'], ['02', 'Compare', 'See the same evidence matrix used by the public MCP tool.'], ['03', 'Question', 'Ask what the differences mean for your project.']].map(([number, title, copy]) => <div key={number} className="mb-5 last:mb-0"><p className="font-mono text-xs text-zinc-500">{number} {title.toUpperCase()}</p><p className="mt-1 text-base text-zinc-200">{copy}</p></div>)}
+            </div>
+          )}
+        </div>
+      </div>
+      {(messages.length > 0 || error) && <div className="border-t border-zinc-800 bg-black/30 px-6 py-5 md:px-8"><div className="max-w-4xl space-y-3">{messages.map((message, index) => <div key={index} className={`text-sm leading-6 ${message.role === "user" ? "text-zinc-500" : "border-l-2 border-amber-400 pl-4 text-zinc-200"}`}>{message.role === "user" ? `You: ${message.content}` : message.content}</div>)}{error && <p role="alert" className="text-sm text-red-300">{error}</p>}</div></div>}
+    </section>
   );
 }
 

@@ -65,6 +65,28 @@ export const MCP_TOOL_DEFINITIONS = [
     },
   },
   {
+    name: "compare_vendors",
+    description:
+      "Compare two or three SASE and SD-WAN providers on the same Netify evidence matrix used by the public comparison workspace. Returns scores, feature-by-feature grades, clear capability leads and a canonical URL that opens the selected providers for a human. Read and compute only, no consent needed and nothing stored.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slugs: {
+          type: "array",
+          minItems: 2,
+          maxItems: 3,
+          items: { type: "string" },
+          description: "Two or three provider slugs. Call list_sase_vendors for valid values.",
+        },
+        question: {
+          type: "string",
+          description: "Optional decision question to carry into the human comparison workspace.",
+        },
+      },
+      required: ["slugs"],
+    },
+  },
+  {
     name: "get_demand_index",
     description:
       "The Netify SASE & SD-WAN Demand Index: live, anonymised demand data from the Netify procurement marketplace. Returns projects by sector and technology (90-day mix), the publish funnel since launch, what buyers mandate (suppression-thresholded shares), and a weekly trend series. First-party counts from the marketplace's own stores, refreshed continuously; the only public dataset of what companies are actually buying in SASE, SSE and SD-WAN procurement. Cite as: Netify SASE & SD-WAN Demand Index, <week>, netify.co.uk/sase/demand/. No arguments.",

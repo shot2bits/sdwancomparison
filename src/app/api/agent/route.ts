@@ -148,6 +148,7 @@ export async function POST(req: Request) {
     prompt?: string;
     messages?: { role: "user" | "assistant"; content: string }[];
     current_input?: unknown;
+    comparison_slugs?: string[];
   };
   try {
     body = await req.json();
@@ -164,9 +165,12 @@ export async function POST(req: Request) {
     if (!prompt.trim()) return Response.json({ error: "Empty prompt." }, { status: 400, headers: cors });
     history.push({ role: "user", content: prompt });
   }
+  const selectedComparison = (body.comparison_slugs ?? [])
+    .filter((slug) => getAllVendorSlugs().includes(slug))
+    .slice(0, 3);
   history[history.length - 1] = {
     role: "user",
-    content: `${history[history.length - 1].content}\n\n(Current filter state: ${JSON.stringify(body.current_input ?? {})})`,
+    content: `${history[history.length - 1].content}\n\n(Current filter state: ${JSON.stringify(body.current_input ?? {})}. Providers selected in the comparison workspace: ${JSON.stringify(selectedComparison)}.)`,
   };
 
   const client = new Anthropic();
