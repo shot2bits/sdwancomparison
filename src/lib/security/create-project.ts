@@ -223,6 +223,13 @@ export async function buildSecurityProject(
       sourceUrl: input.via === "mcp" ? "/sase/api/mcp/" : "/sase-sd-wan-rfp-builder/",
       capturedAt: now,
     }),
+    journey: {
+      contract_version: "project-journey/1.0.0",
+      source: input.via === "mcp" ? "mcp" : "rfp_builder",
+      mode: "build_rfp",
+      source_url: input.via === "mcp" ? "/sase/api/mcp/" : "/sase-sd-wan-rfp-builder/",
+      started_at: now,
+    },
     owner_email: input.ownerEmail ?? "",
     methodology_version: "2026.1",
     engine: "security_sourcing",

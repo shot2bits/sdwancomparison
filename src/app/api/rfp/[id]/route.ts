@@ -186,6 +186,10 @@ export async function PUT(req: Request, ctx: Ctx) {
   // bytes were trusted outright); closing it here, not just in the new
   // `facts`-bearing path, so an old field name can never resurrect it.
   delete body.procurement_document;
+  // Server-owned marketplace projections can only be changed by their
+  // dedicated matching/publication services, never by a whole-project PUT.
+  delete body.match_preview;
+  delete body.marketplace_state;
   if (envelopeOutcome.participates && !envelopeOutcome.ok) {
     return Response.json({ error: envelopeOutcome.error }, { status: envelopeOutcome.status, headers: cors });
   }

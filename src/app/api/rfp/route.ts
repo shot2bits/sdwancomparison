@@ -188,6 +188,13 @@ export async function POST(req: Request) {
     manage_token: newId("mtok"),
     source: "wizard",
     entrance_context: entranceContext,
+    journey: {
+      contract_version: "project-journey/1.0.0",
+      source: entranceContext.source,
+      mode: entranceContext.source === "rfp_builder" ? "build_rfp" : "find_providers",
+      source_url: entranceContext.source_url,
+      started_at: entranceContext.captured_at,
+    },
     owner_email: ownerEmail,
     methodology_version: "2026.1",
     consent,
