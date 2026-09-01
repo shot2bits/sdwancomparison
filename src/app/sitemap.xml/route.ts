@@ -4,6 +4,7 @@ import { COMPARE_PAIRS } from "@/lib/compare-pages";
 import { SAMPLE_NOTICES } from "@/lib/sample-notices";
 import { listPublicOpportunities, listArchivedPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { SITE_URL } from "@/lib/structured-data";
+import { MARKETPLACE_EXAMPLES } from "@/lib/marketplace-examples";
 
 export async function GET() {
   const today = new Date().toISOString().slice(0, 10);
@@ -60,17 +61,14 @@ export async function GET() {
     })),
     ...liveNotices,
     ...archivedNotices,
-    { loc: `${SITE_URL}/vendors`, priority: "0.9" },
+    { loc: "https://netify.co.uk/marketplace/", priority: "0.9" },
+    ...Object.keys(MARKETPLACE_EXAMPLES).map((slug) => ({ loc: `${SITE_URL}/examples/${slug}`, priority: "0.8" })),
     // The /best/ INDEX was missing while all 20 children were listed
     // (25 Jul): it is the hub Bing cites most from, so it belongs here.
     { loc: `${SITE_URL}/best`, priority: "0.9" },
     ...BEST_PAGES.map((p) => ({
       loc: `${SITE_URL}/best/${p.slug}`,
       priority: "0.9",
-    })),
-    ...getAllVendorSlugs().map((slug) => ({
-      loc: `${SITE_URL}/vendors/${slug}`,
-      priority: "0.8",
     })),
     ...getAllVendorSlugs().map((slug) => ({
       loc: `${SITE_URL}/alternatives/${slug}`,

@@ -106,6 +106,13 @@ const ESTATE_RESOURCES = [
 /** Templated twins: any curated comparison or ranking page as data. */
 const RESOURCE_TEMPLATES = [
   {
+    uriTemplate: `${SITE_URL}/examples/{slug}/data.json`,
+    name: "sase-marketplace-example",
+    title: "Permanent synthetic marketplace example",
+    description: "A quick-list, sector, RFP or provider-comparison example with methodology versions and explicit limitations. Synthetic; never private buyer data.",
+    mimeType: "application/json",
+  },
+  {
     uriTemplate: `${SITE_URL}/compare/{pair}/data.json`,
     name: "sase-vendor-comparison",
     title: "Head-to-head vendor comparison, machine twin",
@@ -124,6 +131,7 @@ const RESOURCE_TEMPLATES = [
 ] as const;
 
 const TEMPLATE_PATTERNS: Array<{ re: RegExp; toPath: (m: RegExpMatchArray) => string }> = [
+  { re: new RegExp(`^${SITE_URL}/examples/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/examples/${m[1]}/data.json` },
   { re: new RegExp(`^${SITE_URL}/compare/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/compare/${m[1]}/data.json` },
   { re: new RegExp(`^${SITE_URL}/best/([a-z0-9-]{2,80})/data\\.json$`), toPath: (m) => `/best/${m[1]}/data.json` },
 ];

@@ -1,0 +1,4 @@
+import { MARKETPLACE_EXAMPLES, MARKETPLACE_EXAMPLE_VERSION, type MarketplaceExampleSlug } from "@/lib/marketplace-examples";
+import { PROVIDER_MATCH_METHODOLOGY_VERSION } from "@/lib/provider-matching";
+import { PUBLICATION_POLICY_VERSION } from "@/lib/publication-policy";
+export async function GET(_req: Request, context: { params: Promise<{ slug: string }> }) { const { slug } = await context.params; const example = MARKETPLACE_EXAMPLES[slug as MarketplaceExampleSlug]; if (!example) return Response.json({ error: "Example not found." }, { status: 404 }); return Response.json({ contract_version: MARKETPLACE_EXAMPLE_VERSION, methodology: { matching: PROVIDER_MATCH_METHODOLOGY_VERSION, publication: PUBLICATION_POLICY_VERSION }, synthetic: true, example }, { headers: { "cache-control": "public, max-age=3600" } }); }
