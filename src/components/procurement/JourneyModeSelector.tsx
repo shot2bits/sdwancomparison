@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode } from "@/lib/rfp-types";
+import { PROJECT_ENTRANCE_CONTRACT_VERSION } from "@/lib/project-entrance-contract";
 
 const MODES: Array<{ id: ProjectJourneyMode; title: string; description: string }> = [
   { id: "quick_list", title: "List a project", description: "Create a short anonymous opportunity without writing an RFP first." },
@@ -17,6 +18,16 @@ function modeFromLocation(): ProjectJourneyMode {
 
 export default function JourneyModeSelector() {
   const [selected, setSelected] = useState<ProjectJourneyMode>("build_rfp");
+  const [scope, setScope] = useState("sase");
+  const [sector, setSector] = useState("");
+  const [sites, setSites] = useState("");
+  const [regions, setRegions] = useState("United Kingdom");
+  const [operatingModel, setOperatingModel] = useState("any");
+  const [outcome, setOutcome] = useState("");
+  const [timescale, setTimescale] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState<{ project_reference: string; revision: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => setSelected(modeFromLocation()), []);
 
   function choose(mode: ProjectJourneyMode) {
@@ -25,6 +36,47 @@ export default function JourneyModeSelector() {
     url.searchParams.set("journey", mode);
     window.history.replaceState(window.history.state, "", url);
     window.dispatchEvent(new CustomEvent("netify:journey-mode", { detail: { mode } }));
+  }
+
+  async function createCanonicalProject() {
+    if (!outcome.trim() || !sector || !sites || !regions.trim() || !timescale.trim()) {
+      setError("Add the sector, estate, geography, outcome and timescale to create the private project.");
+      return;
+    }
+    setCreating(true);
+    setError(null);
+    const capturedAt = Date.now();
+    const rawInput = { solution_scope: scope, sector, site_count: Number(sites), regions: [regions.trim()], operating_model: operatingModel, outcome: outcome.trim(), timescale: timescale.trim() };
+    try {
+      const response = await fetch("/sase/api/marketplace/projects", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          mode: selected,
+          entrance_context: {
+            version: PROJECT_ENTRANCE_CONTRACT_VERSION,
+            source: "rfp_builder",
+            source_url: window.location.href,
+            captured_at: capturedAt,
+            requirement_text: outcome.trim(),
+            sector,
+            marketplace_slug: null,
+            vendor_slugs: [],
+            buyer_input: { sector, site_count: Number(sites), regions: [regions.trim()], operating_model: operatingModel, product_scope: scope === "sdwan" ? "sdwan_only" : scope === "sse" ? "sse_only" : "full_sase", notes: outcome.trim() },
+            shortlist_input: null,
+            raw_input: rawInput,
+          },
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not create the private project.");
+      sessionStorage.setItem(`netify_marketplace_project_${data.project_reference}`, data.project_session_token);
+      setCreated({ project_reference: data.project_reference, revision: data.revision });
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not create the private project.");
+    } finally {
+      setCreating(false);
+    }
   }
 
   return (
@@ -41,6 +93,24 @@ export default function JourneyModeSelector() {
           </button>
         ))}
       </div>
+      {(selected === "quick_list" || selected === "find_providers") && (
+        <div className="mt-3 rounded-md border border-[#d8d3cc] bg-white p-4" aria-live="polite">
+          <div className="grid gap-3 md:grid-cols-3">
+            <label className="text-xs font-semibold text-[#4f4b46]">Solution scope<select value={scope} onChange={(e) => setScope(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="sase">SASE</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
+            <label className="text-xs font-semibold text-[#4f4b46]">Sector<input value={sector} onChange={(e) => setSector(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
+            <label className="text-xs font-semibold text-[#4f4b46]">Sites<input type="number" min="1" value={sites} onChange={(e) => setSites(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
+            <label className="text-xs font-semibold text-[#4f4b46]">Geography<input value={regions} onChange={(e) => setRegions(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
+            <label className="text-xs font-semibold text-[#4f4b46]">Operating model<select value={operatingModel} onChange={(e) => setOperatingModel(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="any">No preference</option><option value="managed">Managed</option><option value="co_managed">Co-managed</option><option value="self_managed">Self-managed</option></select></label>
+            <label className="text-xs font-semibold text-[#4f4b46]">Timescale<input value={timescale} onChange={(e) => setTimescale(e.target.value)} placeholder="e.g. within 6 months" className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
+          </div>
+          <label className="mt-3 block text-xs font-semibold text-[#4f4b46]">Problem or desired outcome<textarea value={outcome} onChange={(e) => setOutcome(e.target.value)} rows={2} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
+          <div className="mt-3 flex items-center gap-3">
+            <button type="button" disabled={creating || Boolean(created)} onClick={createCanonicalProject} className="rounded-full bg-[#b64b16] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50">{creating ? "Creating…" : created ? "Private project created" : selected === "quick_list" ? "Create opportunity draft" : "Create provider search"}</button>
+            {created && <span className="text-xs text-emerald-800">Saved privately as {created.project_reference}. Nothing has been published and no supplier can see it.</span>}
+            {error && <span className="text-xs text-red-700">{error}</span>}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
