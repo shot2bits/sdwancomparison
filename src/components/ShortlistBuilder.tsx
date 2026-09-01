@@ -350,9 +350,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         error={chatError}
         source={comparisonSource}
       />
-    <div className="grid lg:grid-cols-12 gap-10">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
       {/* ---------------- Filters column ---------------- */}
-      <div className="lg:col-span-4 space-y-8">
+      <div className="min-w-0 lg:col-span-4 space-y-8">
         {/* AI advisor */}
         <section className="border border-[var(--ink-900)] rounded-sm p-5 bg-[var(--paper-base)]">
           <p className="eyebrow mb-2">AI advisor</p>
@@ -683,7 +683,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       </div>
 
       {/* ---------------- Results column ---------------- */}
-      <div className="lg:col-span-8">
+      <div className="min-w-0 lg:col-span-8">
         {activeComparison && (
           <section id="comparison-table" className="mb-10 scroll-mt-24 border border-[var(--ink-900)] rounded-sm p-5">
             <div className="flex items-start justify-between gap-3 flex-wrap mb-2">
@@ -1008,8 +1008,8 @@ function VendorCard({
   const [open, setOpen] = useState(false);
   return (
     <li className="border border-[var(--ink-300,#ccc)] rounded-sm p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+        <div className="min-w-0">
           <p className="eyebrow mb-1">No. {v.rank} · Score {v.score}</p>
           <h3 className="text-lg mb-1">
             <a href={v.marketplace_url!} className="no-underline hover:text-[var(--accent)]">
@@ -1018,7 +1018,7 @@ function VendorCard({
           </h3>
           <p className="text-sm text-[var(--ink-500)]">{v.category} · Typical deployment: {v.deployment_speed} · {v.value_tier} pricing tier</p>
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex flex-wrap gap-2 sm:shrink-0">
           <button
             onClick={onCompare}
             className={`text-sm border rounded-full px-3 py-1 transition-colors ${
