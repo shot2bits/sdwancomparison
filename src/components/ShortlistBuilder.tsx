@@ -96,6 +96,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   // Manual compare selection
   const [compareSlugs, setCompareSlugs] = useState<string[]>([]);
   const [comparisonSource, setComparisonSource] = useState("");
+  const [providerCardReset, setProviderCardReset] = useState(0);
 
   // Lead form state
   const [lead, setLead] = useState({ name: "", email: "", company: "", company_url: "" });
@@ -183,6 +184,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     setChatError(null);
     setOpenCategory(null);
     setHandoffState("idle");
+    setProviderCardReset((value) => value + 1);
     window.history.replaceState(null, "", window.location.pathname);
   }
 
@@ -807,7 +809,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         <ol className="space-y-5 list-none p-0">
           {result.shortlist.map((v) => (
             <VendorCard
-              key={v.slug}
+              key={`${v.slug}-${providerCardReset}`}
               v={v}
               compared={compareSlugs.includes(v.slug)}
               onCompare={() => toggleCompare(v.slug)}

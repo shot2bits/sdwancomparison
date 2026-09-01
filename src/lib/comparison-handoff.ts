@@ -31,6 +31,10 @@ export function applyComparisonHandoff(params: URLSearchParams, handoff: Compari
   else next.delete("question");
   if (handoff.source) next.set("source", handoff.source);
   else next.delete("source");
-  next.set("comparison_contract", COMPARISON_HANDOFF_VERSION);
+  if (handoff.providers.length >= 2 || handoff.question || handoff.source) {
+    next.set("comparison_contract", COMPARISON_HANDOFF_VERSION);
+  } else {
+    next.delete("comparison_contract");
+  }
   return next;
 }
