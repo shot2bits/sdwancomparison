@@ -47,3 +47,4 @@ next-env.d.ts
 /.private/provider-source/
 /.private/provider-staging/
 /.private/provider-normalised/
+/.private/provider-review/

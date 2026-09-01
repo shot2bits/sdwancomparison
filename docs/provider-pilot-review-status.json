@@ -1,0 +1,8 @@
+{
+  "review_contract_version": "provider-editorial-review/1.0.0",
+  "pilots": [
+    { "provider_id": "provider:versa-networks", "technical_status": "pending", "editorial_status": "pending", "technical_reviewer": null, "editorial_reviewer": "Harry Yelland", "approved_revision": null },
+    { "provider_id": "provider:bt", "technical_status": "pending", "editorial_status": "pending", "technical_reviewer": null, "editorial_reviewer": "Harry Yelland", "approved_revision": null },
+    { "provider_id": "provider:cato-networks", "technical_status": "pending", "editorial_status": "pending", "technical_reviewer": null, "editorial_reviewer": "Harry Yelland", "approved_revision": null }
+  ]
+}
