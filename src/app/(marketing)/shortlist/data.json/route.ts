@@ -40,6 +40,7 @@ export async function GET() {
         dataset_version: provider.datasetVersion,
         products: provider.products.map((product) => product.name),
         evidence_source_count: provider.evidenceSourceCount,
+        independent_evidence_source_count: provider.independentEvidenceSourceCount,
         url: provider.url,
       })),
       default_shortlist: defaultResult,

@@ -209,6 +209,8 @@ export type ShortlistVendor = {
   best_fit_for: string[];
   watch_outs: string[];
   evidence_coverage_pct: number;
+  evidence_source_count?: number;
+  independent_evidence_source_count?: number;
   last_verified: string;
 };
 
@@ -342,6 +344,9 @@ export type VendorVerdict = {
   best_fit_for: string[];
   watch_outs: string[];
   evidence_coverage_pct: number;
+  evidence_source_count: number;
+  independent_evidence_source_count: number;
+  last_verified: string;
   website: string;
   marketplace_url: string | null;
   shortlist_summary: string;
@@ -684,6 +689,9 @@ export function buildShortlist(
       best_fit_for: v.best_fit_for,
       watch_outs: v.watch_outs,
       evidence_coverage_pct: v.evidence_coverage_pct,
+      evidence_source_count: v.evidence_source_count ?? 0,
+      independent_evidence_source_count: v.independent_evidence_source_count ?? 0,
+      last_verified: v.last_verified,
       website: v.website,
       marketplace_url: v.marketplace_url,
       shortlist_summary: v.shortlist_summary,

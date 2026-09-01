@@ -1113,10 +1113,10 @@ function VendorCard({
         <div className="mt-4 border-t border-[var(--ink-300,#ccc)] pt-4 text-sm">
           <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-[var(--ink-300,#ccc)] bg-[var(--ink-300,#ccc)] sm:grid-cols-4">
             {[
-              ["Evidence coverage", `${v.evidence_coverage_pct}%`],
+              ["Verified capability coverage", `${Math.round(v.evidence_coverage_pct * 100)}%`],
+              ["Cited sources", String(v.evidence_source_count ?? 0)],
               ["Deployment", v.deployment_speed],
-              ["Pricing", v.value_tier],
-              ["UK delivery", v.uk_delivery],
+              ["Reviewed", v.last_verified],
             ].map(([label, value]) => (
               <div key={label} className="bg-[var(--paper-base)] p-3">
                 <p className="text-xs text-[var(--ink-500)]">{label}</p>

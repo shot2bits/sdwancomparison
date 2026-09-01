@@ -1,4 +1,5 @@
 import snapshot from "@data/governed-provider-catalogue.json";
+import independentEvidence from "@data/independent-provider-evidence.json";
 import type { CapabilityStatus, ShortlistVendor } from "@/lib/shortlist-core";
 
 export const GOVERNED_SHORTLIST_CONTRACT_VERSION = "governed-shortlist/1.0.0" as const;
@@ -97,6 +98,8 @@ export function getGovernedShortlistDataset(legacy: ShortlistVendor[]): Shortlis
     provider.marketplace_url = `https://netify.co.uk/marketplace/${record.provider.slug}/`;
     provider.shortlist_summary = excerpt(record.editorial.overview);
     provider.last_verified = record.revision.reviewed_at.slice(0, 10);
+    provider.evidence_source_count = record.evidence_source_count + ((independentEvidence.sources as Record<string, unknown[]>)[comparisonSlug]?.length ?? 0);
+    provider.independent_evidence_source_count = (independentEvidence.sources as Record<string, unknown[]>)[comparisonSlug]?.length ?? 0;
     provider.evidence_coverage_pct = record.capabilities.filter((capability) => positive.has(capability.support_state) && capability.freshness_state === "current").length / record.capabilities.length;
     const capabilities = { ...provider.capabilities };
     for (const [feature, codes] of Object.entries(FEATURE_CODES)) {
@@ -115,8 +118,24 @@ export function getGovernedProviderSummaries() {
     datasetVersion: record.revision.dataset_version, products: record.products, capabilities: record.capabilities,
     geographies: record.geographies, serviceModels: record.service_models, sectors: record.sector_evidence,
     compliance: record.compliance, integrations: record.integrations, caseStudies: record.case_studies,
-    evidenceSources: record.evidence_sources, evaluations: record.evaluations,
-    evidenceSourceCount: record.evidence_source_count, url: `https://netify.co.uk/marketplace/${record.provider.slug}/`,
+    evidenceSources: [
+      ...record.evidence_sources,
+      ...((independentEvidence.sources as Record<string, Array<{ url: string; title: string; publisher: string; publication_date: string; supports: string }>>)[SLUGS[record.provider.slug]] ?? []).map((source, index) => ({
+        id: `independent:${record.provider.slug}:${index + 1}`,
+        url: source.url,
+        title: source.title,
+        publisher: source.publisher,
+        publication_date: source.publication_date,
+        verified_date: independentEvidence.reviewed_at,
+        reliability_tier: "tier_2" as const,
+        source_status: "current" as const,
+        supports: source.supports,
+      })),
+    ],
+    independentEvidenceSourceCount: (independentEvidence.sources as Record<string, unknown[]>)[SLUGS[record.provider.slug]]?.length ?? 0,
+    evaluations: record.evaluations,
+    evidenceSourceCount: record.evidence_source_count + ((independentEvidence.sources as Record<string, unknown[]>)[SLUGS[record.provider.slug]]?.length ?? 0),
+    url: `https://netify.co.uk/marketplace/${record.provider.slug}/`,
   }));
 }
 

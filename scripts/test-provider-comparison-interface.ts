@@ -36,6 +36,15 @@ const governedOnlyProfile = callMcpTool("get_sase_vendor_profile", { slug: "expe
 assert.equal(governedOnlyProfile.slug, "expereo");
 assert.ok((governedOnlyProfile.governed_profile?.evidenceSourceCount ?? 0) > 0, "MCP must expose the governed profile for a newly governed provider");
 
+const btProfile = callMcpTool("get_sase_vendor_profile", { slug: "bt-business" }) as {
+  evidence_source_count?: number;
+  independent_evidence_source_count?: number;
+  governed_profile?: { evidenceSources?: Array<{ publisher?: string }> };
+};
+assert.ok((btProfile.evidence_source_count ?? 0) >= 17, "BT must expose the combined governed and independent source count");
+assert.equal(btProfile.independent_evidence_source_count, 1, "BT must identify the independent evidence contribution");
+assert.ok(btProfile.governed_profile?.evidenceSources?.some((source) => source.publisher === "Computer Weekly"), "BT governed profile must include the independent Computer Weekly source");
+
 for (const sector of SECTOR_KEYS) {
   const decoded = decodeScenario(encodeScenario({ ...DEFAULT_INPUT, sector }), FEATURES.map((feature) => feature.id));
   assert.equal(decoded.sector, sector);

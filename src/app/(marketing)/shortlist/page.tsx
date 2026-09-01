@@ -44,7 +44,7 @@ export default function ShortlistPage() {
     getBreadcrumbSchema("Shortlist builder", "/shortlist/"),
     getSpeakableSchema("/shortlist/"),
     getShortlistWebApplicationSchema(),
-    getShortlistDatasetSchema(vendors.length, features.length),
+    getShortlistDatasetSchema(vendors.length, features.length, verified),
     getShortlistFaqSchema(SHORTLIST_FAQS),
     {
       "@context": "https://schema.org", "@type": "ItemList", name: "SASE and SD-WAN providers compared by Netify",
@@ -102,6 +102,7 @@ export default function ShortlistPage() {
           <a href="https://netify.co.uk/" className="underline">netify.co.uk</a>
           {", "}raise it to a full RFP and publish to the providers it names, then
           compare structured responses, with pricing kept private to the buyer.
+          {" "}<a href="/sase/shortlist/cite.bib" className="underline">Cite this dataset</a>.
         </p>
       </div>
 
