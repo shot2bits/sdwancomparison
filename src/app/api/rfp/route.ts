@@ -1,7 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
-import { BuyerContextSchema, PROJECT_JOURNEY_MODES, ProjectDetailsSchema, type ProjectJourneyMode } from "@/lib/rfp-types";
+import { BuyerContextSchema, PROJECT_JOURNEY_MODES, ProjectDetailsSchema, SectorProfileStateSchema, type ProjectJourneyMode } from "@/lib/rfp-types";
 import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 import { rfpBuilderEntrance } from "@/lib/project-entrance";
 import { recordProjectEvent } from "@/lib/project-machine";
@@ -99,6 +99,7 @@ export async function POST(req: Request) {
     decision_turns?: unknown;
     entrance_context?: unknown;
     journey_mode?: unknown;
+    sector_profile?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -162,6 +163,7 @@ export async function POST(req: Request) {
   const journeyMode = PROJECT_JOURNEY_MODES.includes(body.journey_mode as ProjectJourneyMode)
     ? body.journey_mode as ProjectJourneyMode
     : entranceContext.source === "rfp_builder" ? "build_rfp" : "find_providers";
+  const sectorProfile = SectorProfileStateSchema.safeParse(body.sector_profile);
   // Full-unification CLOSURE pass (17 Aug 2026): a first save can already
   // carry a canonical envelope (Living Procurement Canvas's own first
   // Save, via ProjectDesk.tsx) -- ONE shared verifier for every writer
@@ -199,6 +201,7 @@ export async function POST(req: Request) {
       source_url: entranceContext.source_url,
       started_at: entranceContext.captured_at,
     },
+    ...(sectorProfile.success ? { sector_profile: sectorProfile.data } : {}),
     owner_email: ownerEmail,
     methodology_version: "2026.1",
     consent,
