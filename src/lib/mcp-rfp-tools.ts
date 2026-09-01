@@ -25,6 +25,7 @@ import { authenticateMarketplaceProject, prepareMarketplacePublication, previewM
 import { executePublish } from "@/lib/rfp-publish";
 import { loadProviderMatchRecords } from "@/lib/provider-match-source";
 import { matchProviders, revealProviderMatches } from "@/lib/provider-matching";
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 
 export const MCP_RFP_TOOL_DEFINITIONS = [
   { name: "start_project", description: "Create the canonical private ProjectDetails envelope with MCP journey attribution. Anonymous and rate-limited by the MCP transport; returns an expiring opaque project session token.", inputSchema: { type: "object", properties: { entrance_context: { type: "object" }, mode: { type: "string", enum: ["quick_list","find_providers","build_rfp","validate_rfp"] }, sector_profile: { type: "object" } }, required: ["entrance_context","mode"] } },
@@ -262,7 +263,8 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     const consented = await saveProject(ProjectDetailsSchema.parse({ ...project, owner_email: project.owner_email || email, consent: project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION ? project.consent : { version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, agreed_at: at, flow: "mcp" }, consents: prior ? project.consents : [...(project.consents ?? []), { at, action: "marketplace.publish", granted_by: email, via: "mcp", text: MARKETPLACE_PUBLICATION_CONSENT_TEXT }] }));
     const result = await executePublish(consented, email, { shortlist_size: 5, list_on_board: true, marketing_opt_in: false });
     const unlocked = await isMarketUnlocked(projectId);
-    if (!publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })) return { error: "board_publication_incomplete", reason: result.board.reason, market_unlocked: false };
+    if (!publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })) { await recordMarketplaceFunnelEvent({ event: "publication_incomplete", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "mcp", detail: { board_created: Boolean(result.board.opportunity_id) } }); return { error: "board_publication_incomplete", reason: result.board.reason, market_unlocked: false }; }
+    await recordMarketplaceFunnelEvent({ event: "publication_completed", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "mcp", detail: { board_created: true } });
     return { ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION };
   }
 
@@ -372,6 +374,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
       (args.links ?? []) as string[],
       t === "response" ? ((args.answers ?? {}) as Record<string, string>) : {},
     );
+    if (opp.source_rfp_id && ["interest", "response"].includes(t)) await recordMarketplaceFunnelEvent({ event: t === "interest" ? "supplier_interest" : "supplier_response", project_id: opp.source_rfp_id, channel: "mcp", detail: { opportunity_id: opp.id } });
     return { ok: true, status: updated.status };
   }
 

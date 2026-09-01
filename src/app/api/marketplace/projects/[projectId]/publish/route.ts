@@ -6,6 +6,7 @@ import { executePublish } from "@/lib/rfp-publish";
 import { isMarketUnlocked } from "@/lib/market-unlock";
 import { ProjectDetailsSchema } from "@/lib/rfp-types";
 import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION, PUBLICATION_POLICY_VERSION, publicationAuthorization, publicationCompleted } from "@/lib/publication-policy";
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 
 const BodySchema = z.object({
   base_revision: z.number().int().min(0),
@@ -44,8 +45,10 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
     const result = await executePublish(consented, sessionEmail, { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in });
     const unlocked = await isMarketUnlocked(projectId);
     if (!publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })) {
+      await recordMarketplaceFunnelEvent({ event: "publication_incomplete", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web", detail: { board_created: Boolean(result.board.opportunity_id) } });
       return Response.json({ ok: false, code: "board_publication_incomplete", error: result.board.reason ?? "Board publication did not complete.", market_unlocked: false, publication_policy_version: PUBLICATION_POLICY_VERSION }, { status: 409 });
     }
+    await recordMarketplaceFunnelEvent({ event: "publication_completed", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web", detail: { board_created: true } });
     return Response.json({ ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION });
   } catch (error) {
     if (error instanceof MarketplaceProjectUnauthorised) return Response.json({ error: "Project not found." }, { status: 404 });

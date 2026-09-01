@@ -7,6 +7,7 @@ import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_V
 import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-store";
 import { loadProviderMatchRecords } from "@/lib/provider-match-source";
 import { matchProviders, ProviderMatchInputSchema, publicProviderMatchPreview } from "@/lib/provider-matching";
+import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 const SessionSchema = z.object({ project_id: z.string(), token_hash: z.string(), revision: z.number().int().min(0), created_at: z.number(), expires_at: z.number() }).strict();
@@ -40,6 +41,7 @@ export async function startMarketplaceProject(input: { entrance_context: unknown
   const token = randomBytes(32).toString("base64url");
   const session = SessionSchema.parse({ project_id: saved.id, token_hash: hash(token), revision: 0, created_at: now, expires_at: now + SESSION_TTL_SECONDS * 1000 });
   await persistSession(token, session);
+  await recordMarketplaceFunnelEvent({ event: "project_started", project_id: saved.id, source: entrance.source, mode: input.mode, channel: entrance.source === "mcp" ? "mcp" : "web" });
   return { project_reference: saved.id, project_session_token: token, revision: 0, expires_at: session.expires_at };
 }
 
@@ -56,6 +58,7 @@ export async function updateMarketplaceProject(projectId: string, token: string,
   const receipt = { project_reference: saved.id, revision: nextRevision, saved_at: saved.updated };
   await kvRaw(["SET", idempotencyKey(projectId, input.idempotency_key), JSON.stringify(receipt), "EX", SESSION_TTL_SECONDS]);
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
+  await recordMarketplaceFunnelEvent({ event: "requirements_updated", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision } });
   return receipt;
 }
 
@@ -73,6 +76,7 @@ export async function previewMarketplaceProject(projectId: string, token: string
   const nextRevision = session.revision + 1;
   const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, match_preview: preview, marketplace_revision: nextRevision }));
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
+  await recordMarketplaceFunnelEvent({ event: "match_previewed", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision, considered_count: preview.considered_count } });
   return { project_reference: saved.id, revision: nextRevision, preview };
 }
 
@@ -88,5 +92,6 @@ export async function prepareMarketplacePublication(projectId: string, token: st
   const at = Date.now();
   const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, consent: { version: input.consent_version, agreed_at: at, flow: "marketplace_project" }, pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in, requested_at: at }, marketplace_revision: nextRevision }));
   await persistSession(token, { ...session, revision: nextRevision, expires_at: at + SESSION_TTL_SECONDS * 1000 });
+  await recordMarketplaceFunnelEvent({ event: "publication_prepared", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision } });
   return { project_reference: saved.id, revision: nextRevision, prepared_at: at };
 }
