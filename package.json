@@ -27,6 +27,7 @@
     "test:sector-profiles": "tsx scripts/test-sector-profiles.ts",
     "test:marketplace-project-session": "tsx scripts/test-marketplace-project-session.ts",
     "test:journey-modes": "tsx scripts/test-journey-modes.ts",
+    "test:provider-match-preview": "tsx scripts/test-provider-match-preview-service.ts",
     "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
     "validate:rfp-ui": "node scripts/validate-rfp-builder-flow-ui.mjs",
     "validate:ui:reversal": "node scripts/validate-sector-suggestion-reversal-ui.mjs",

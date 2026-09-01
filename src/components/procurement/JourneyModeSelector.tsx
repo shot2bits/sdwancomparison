@@ -27,15 +27,40 @@ export default function JourneyModeSelector() {
   const [timescale, setTimescale] = useState("");
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<{ project_reference: string; revision: number } | null>(null);
+  const [preview, setPreview] = useState<{ considered_count: number; eligible_technology_count: number; eligible_managed_provider_count: number; meets_all_mandatory_count: number; unresolved_requirements: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => setSelected(modeFromLocation()), []);
 
   function choose(mode: ProjectJourneyMode) {
     setSelected(mode);
+    setCreated(null);
+    setPreview(null);
     const url = new URL(window.location.href);
     url.searchParams.set("journey", mode);
     window.history.replaceState(window.history.state, "", url);
     window.dispatchEvent(new CustomEvent("netify:journey-mode", { detail: { mode } }));
+  }
+
+  async function loadAggregatePreview() {
+    if (!created) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const token = sessionStorage.getItem(`netify_marketplace_project_${created.project_reference}`);
+      const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(created.project_reference)}/match-preview`, {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` },
+        body: JSON.stringify({ base_revision: created.revision, input: { mandatory_capabilities: [], preferred_capabilities: [], required_regions: [regions.trim()], service_model: operatingModel === "managed" ? "fully_managed" : operatingModel === "any" ? null : operatingModel, sector: sector.trim(), provider_scope: "both" } }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not calculate market coverage.");
+      setCreated({ ...created, revision: data.revision });
+      setPreview(data.preview);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not calculate market coverage.");
+    } finally {
+      setCreating(false);
+    }
   }
 
   async function createCanonicalProject() {
@@ -109,6 +134,8 @@ export default function JourneyModeSelector() {
             {created && <span className="text-xs text-emerald-800">Saved privately as {created.project_reference}. Nothing has been published and no supplier can see it.</span>}
             {error && <span className="text-xs text-red-700">{error}</span>}
           </div>
+          {created && selected === "find_providers" && !preview && <button type="button" disabled={creating} onClick={loadAggregatePreview} className="mt-3 text-sm font-semibold text-[#8c360d] underline">Show aggregate provider coverage</button>}
+          {preview && <div className="mt-3 rounded bg-[#f4f1ec] p-3 text-sm text-[#403c37]"><strong>{preview.meets_all_mandatory_count} providers currently meet the stated baseline</strong><span className="ml-2">({preview.eligible_technology_count} technology, {preview.eligible_managed_provider_count} managed; {preview.considered_count} reviewed). Provider identities stay locked until successful publication.</span>{preview.unresolved_requirements.length > 0 && <p className="mt-1 text-xs">Unresolved: {preview.unresolved_requirements.join(", ")}</p>}</div>}
         </div>
       )}
     </section>

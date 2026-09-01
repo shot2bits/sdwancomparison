@@ -4,6 +4,8 @@ import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 import { entranceToProjectDetails } from "@/lib/project-entrance";
 import { ProjectDetailsSchema, SectorProfileStateSchema } from "@/lib/rfp-types";
 import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-store";
+import { loadProviderMatchRecords } from "@/lib/provider-match-source";
+import { matchProviders, ProviderMatchInputSchema, publicProviderMatchPreview } from "@/lib/provider-matching";
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 const SessionSchema = z.object({ project_id: z.string(), token_hash: z.string(), revision: z.number().int().min(0), created_at: z.number(), expires_at: z.number() }).strict();
@@ -52,4 +54,21 @@ export async function updateMarketplaceProject(projectId: string, token: string,
   await kvRaw(["SET", idempotencyKey(projectId, input.idempotency_key), JSON.stringify(receipt), "EX", SESSION_TTL_SECONDS]);
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
   return receipt;
+}
+
+const PreviewRequestSchema = z.object({ base_revision: z.number().int().min(0), input: ProviderMatchInputSchema }).strict();
+
+export async function previewMarketplaceProject(projectId: string, token: string, rawInput: unknown) {
+  const session = await authenticateMarketplaceProject(projectId, token);
+  const request = PreviewRequestSchema.parse(rawInput);
+  if (session.revision !== request.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
+  const input = request.input;
+  const project = await getProject(projectId);
+  if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
+  const records = await loadProviderMatchRecords();
+  const preview = publicProviderMatchPreview(matchProviders(input, records));
+  const nextRevision = session.revision + 1;
+  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, match_preview: preview, marketplace_revision: nextRevision }));
+  await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
+  return { project_reference: saved.id, revision: nextRevision, preview };
 }
