@@ -56,6 +56,7 @@ for (const feature of FEATURES) {
 const agent = readFileSync("src/app/api/agent/route.ts", "utf8");
 const mcp = readFileSync("src/lib/mcp-tools.ts", "utf8");
 const interfaceSource = readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
+const leadRoute = readFileSync("src/app/api/lead/route.ts", "utf8");
 assert.match(agent, /comparison_slugs/);
 assert.match(agent, /buildComparison/);
 assert.match(mcp, /compare_vendors/);
@@ -64,6 +65,11 @@ assert.match(interfaceSource, /Compare providers and build around your requireme
 assert.match(interfaceSource, /Refine requirements/);
 assert.match(interfaceSource, /href=\{v\.marketplace_url!\}/);
 assert.doesNotMatch(interfaceSource, /Inspect every evidence row/);
+assert.match(interfaceSource, /marketplace_url: v\.marketplace_url/);
+assert.match(leadRoute, /sase-sd-wan-rfp-builder/);
+assert.match(leadRoute, /Reopen this shortlist/);
+assert.match(leadRoute, /Netify is an independent SASE and SD-WAN research and comparison service/);
+assert.doesNotMatch(leadRoute, /—/);
 assert.ok(
   interfaceSource.indexOf("Compare every feature across your selected providers") < interfaceSource.indexOf("Ask about the comparison"),
   "the full comparison action must appear before the optional AI question",

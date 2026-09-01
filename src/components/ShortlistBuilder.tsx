@@ -329,7 +329,12 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           // site and 404s (same class of bug as Harry's supplier link).
           shortlist_url: `${window.location.origin}/sase/shortlist${qs ? `?${qs}` : ""}`,
           criteria_summary: result.criteria_summary,
-          top_vendors: result.shortlist.slice(0, 10).map((v) => `${v.rank}. ${v.name} (${v.score})`),
+          top_vendors: result.shortlist.slice(0, 10).map((v) => ({
+            rank: v.rank,
+            name: v.name,
+            score: v.score,
+            marketplace_url: v.marketplace_url,
+          })),
         }),
       });
       if (!res.ok) throw new Error("lead failed");
@@ -857,8 +862,10 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           <p className="eyebrow mb-2">Keep this shortlist</p>
           <h3 className="text-lg mb-2">Email me this shortlist</h3>
           <p className="text-sm text-[var(--ink-700)] mb-4">
-            We send the shareable link and the ranked list to your inbox. Netify
-            can also issue this shortlist as a structured RFP to the vendors.
+            We will email your ranked shortlist with links to each provider and a
+            link that reopens these exact choices. The email also explains how to
+            take the shortlist into Netify&apos;s main RFP Builder and invite providers
+            to respond to the same requirements.
           </p>
           {leadState === "sent" ? (
             <p className="text-sm font-medium">Sent. Check your inbox.</p>
