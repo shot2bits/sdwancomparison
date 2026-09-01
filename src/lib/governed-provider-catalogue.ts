@@ -19,13 +19,14 @@ const SLUGS: Record<string, string> = {
 };
 
 const NAMES: Record<string, string> = {
-  att: "AT&T Business", "barracuda-secureedge": "Barracuda SecureEdge", bt: "BT", checkpoint: "Check Point",
+  aryaka: "Aryaka", att: "AT&T Business", "barracuda-secureedge": "Barracuda SecureEdge", bt: "BT", checkpoint: "Check Point",
+  "cato-networks": "Cato Networks", cisco: "Cisco", "cloudflare-one": "Cloudflare One", expereo: "Expereo", forcepoint: "Forcepoint", gtt: "GTT",
   colt: "Colt Technology Services", comcastbusiness: "Comcast Business", "ericsson-cradlepoint": "Ericsson Cradlepoint",
   "fortinet-fortisase": "Fortinet FortiSASE", "hpe-aruba-edgeconnect": "HPE Aruba EdgeConnect", juniper: "Juniper Networks",
-  "ntt-data": "NTT DATA", opensystems: "Open Systems", orangebusiness: "Orange Business",
+  lumen: "Lumen", netskope: "Netskope", "ntt-data": "NTT DATA", opensystems: "Open Systems", orangebusiness: "Orange Business",
   "palo-alto-prisma-sase": "Palo Alto Networks Prisma SASE", "sonicwall-cse": "SonicWall Cloud Secure Edge",
-  velocloud: "VeloCloud", verizon: "Verizon Business", "virgin-media-o2": "Virgin Media O2 Business",
-  vodafone: "Vodafone Business",
+  velocloud: "VeloCloud", verizon: "Verizon Business", "versa-networks": "Versa Networks", "virgin-media-o2": "Virgin Media O2 Business",
+  vodafone: "Vodafone Business", zscaler: "Zscaler",
 };
 
 const FEATURE_CODES: Partial<Record<keyof ShortlistVendor["capabilities"], string[]>> = {
@@ -113,6 +114,8 @@ export function getGovernedProviderSummaries() {
     providerTypes: record.provider.provider_types, summary: excerpt(record.editorial.overview), reviewedAt: record.revision.reviewed_at,
     datasetVersion: record.revision.dataset_version, products: record.products, capabilities: record.capabilities,
     geographies: record.geographies, serviceModels: record.service_models, sectors: record.sector_evidence,
+    compliance: record.compliance, integrations: record.integrations, caseStudies: record.case_studies,
+    evidenceSources: record.evidence_sources, evaluations: record.evaluations,
     evidenceSourceCount: record.evidence_source_count, url: `https://netify.co.uk/marketplace/${record.provider.slug}/`,
   }));
 }

@@ -334,7 +334,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         : "off";
 
   return (
-    <>
+    <section id="provider-decision-workspace" className="rounded-xl border border-[var(--ink-200,#e8ebef)] p-4 sm:p-6">
+      <p className="eyebrow mb-2">Netify comparison workspace</p>
+      <h2 className="mb-6">Compare providers and build around your requirements</h2>
       <ComparisonWorkspace
         vendors={vendors}
         comparison={activeComparison}
@@ -401,6 +403,9 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
           )}
         </section>
 
+        <details open className="rounded-lg border border-[var(--ink-200,#e8ebef)] p-4">
+          <summary className="cursor-pointer font-medium">Refine requirements</summary>
+          <div className="mt-5 space-y-8">
         {/* Sector */}
         <section>
           <p className="eyebrow mb-3">Your sector</p>
@@ -673,6 +678,8 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         >
           Reset all filters
         </button>
+          </div>
+        </details>
       </div>
 
       {/* ---------------- Results column ---------------- */}
@@ -889,7 +896,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         </section>
       </div>
     </div>
-    </>
+    </section>
   );
 }
 
@@ -1005,7 +1012,7 @@ function VendorCard({
         <div>
           <p className="eyebrow mb-1">No. {v.rank} · Score {v.score}</p>
           <h3 className="text-lg mb-1">
-            <a href={`/sase/vendors/${v.slug}`} className="no-underline hover:text-[var(--accent)]">
+            <a href={v.marketplace_url!} className="no-underline hover:text-[var(--accent)]">
               {v.name}
             </a>
           </h3>
