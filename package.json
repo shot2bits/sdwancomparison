@@ -22,6 +22,7 @@
     "test:provider-pilot-review": "python3 scripts/test-provider-pilot-review.py",
     "provider:pilot-technical-review": "python3 scripts/review-provider-pilots.py",
     "test:provider-pilot-technical-review": "python3 scripts/test-provider-pilot-technical-review.py",
+    "test:provider-matching": "tsx scripts/test-provider-matching.ts",
     "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
     "validate:rfp-ui": "node scripts/validate-rfp-builder-flow-ui.mjs",
     "validate:ui:reversal": "node scripts/validate-sector-suggestion-reversal-ui.mjs",
