@@ -105,6 +105,7 @@ test("web, API, auth continuation, OpenAPI and MCP converge on policy-controlled
   assert.match(publishRoute, /publicationAuthorization/);
   assert.match(publishRoute, /executePublish/);
   assert.match(authVerify, /executePublish/);
+  assert.match(authVerify, /publicationCompleted/);
   assert.match(mcpTools, /publicationAuthorization/);
   assert.match(mcpTools, /name === "publish_rfp"/);
   assert.match(mcpTools, /opp\.source_rfp_id && !\(await isMarketUnlocked/);

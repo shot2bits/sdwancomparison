@@ -8,6 +8,8 @@
  */
 
 export const PUBLICATION_POLICY_VERSION = "sase-publication-policy/1.0.0" as const;
+export const MARKETPLACE_PUBLICATION_CONSENT_VERSION = "marketplace-publication-consent/1.0.0" as const;
+export const MARKETPLACE_PUBLICATION_CONSENT_TEXT = "I confirm that this project information may be published anonymously and non-bindingly on the Netify Opportunity Board. My identity and contact details remain private. Publishing does not require me to buy, speak to a supplier or accept a response." as const;
 
 export const PUBLICATION_POLICY = Object.freeze({
   version: PUBLICATION_POLICY_VERSION,

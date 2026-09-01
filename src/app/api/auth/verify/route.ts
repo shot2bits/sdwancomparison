@@ -1,6 +1,8 @@
 import { consumeMagicToken, createSession, kvConfigured, kvGetJson, kvSetJson, kvRaw, markSignupSeen, getProject, saveProject } from "@/lib/rfp-store";
 import { executePublish, SavedUnpublishedError } from "@/lib/rfp-publish";
 import { sessionCookieHeader, notifyNewSignup } from "@/lib/auth";
+import { isMarketUnlocked } from "@/lib/market-unlock";
+import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION, publicationCompleted } from "@/lib/publication-policy";
 
 export const runtime = "nodejs";
 
@@ -63,8 +65,15 @@ export async function POST(req: Request) {
         project.status !== "published" &&
         project.owner_email === payload.email
       ) {
-        await executePublish(project, payload.email, project.pending_submit);
-        publishOutcome = { state: "published" };
+        const pendingSubmit = project.pending_submit;
+        if (project.consent?.version === MARKETPLACE_PUBLICATION_CONSENT_VERSION && !(project.consents ?? []).some((item) => item.action === "marketplace.publish" && item.granted_by === payload.email)) {
+          project = await saveProject({ ...project, consents: [...(project.consents ?? []), { at: project.consent.agreed_at, action: "marketplace.publish", granted_by: payload.email, via: "web", text: MARKETPLACE_PUBLICATION_CONSENT_TEXT }] });
+        }
+        const result = await executePublish(project, payload.email, pendingSubmit);
+        const unlocked = await isMarketUnlocked(project.id);
+        publishOutcome = publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })
+          ? { state: "published" }
+          : { state: "saved_unpublished", message: result.board.reason ?? "The board publication did not complete. Nothing was sent.", return_url: `/sase/rfp-builder/${project.id}/` };
       }
     }
   } catch (e) {

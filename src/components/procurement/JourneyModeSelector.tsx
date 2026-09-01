@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode } from "@/lib/rfp-types";
 import { PROJECT_ENTRANCE_CONTRACT_VERSION } from "@/lib/project-entrance-contract";
+import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION } from "@/lib/publication-policy";
+import SignIn from "@/components/SignIn";
 
 const MODES: Array<{ id: ProjectJourneyMode; title: string; description: string }> = [
   { id: "quick_list", title: "List a project", description: "Create a short anonymous opportunity without writing an RFP first." },
@@ -29,16 +31,55 @@ export default function JourneyModeSelector() {
   const [created, setCreated] = useState<{ project_reference: string; revision: number } | null>(null);
   const [preview, setPreview] = useState<{ considered_count: number; eligible_technology_count: number; eligible_managed_provider_count: number; meets_all_mandatory_count: number; unresolved_requirements: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => setSelected(modeFromLocation()), []);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [prepared, setPrepared] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  useEffect(() => {
+    setSelected(modeFromLocation());
+    fetch("/sase/api/auth/session").then((response) => response.json()).then((session) => setSignedIn(Boolean(session.authenticated))).catch(() => {});
+  }, []);
 
   function choose(mode: ProjectJourneyMode) {
     setSelected(mode);
     setCreated(null);
     setPreview(null);
+    setPrepared(false);
+    setConsentAccepted(false);
     const url = new URL(window.location.href);
     url.searchParams.set("journey", mode);
     window.history.replaceState(window.history.state, "", url);
     window.dispatchEvent(new CustomEvent("netify:journey-mode", { detail: { mode } }));
+  }
+
+  async function publishPreparedProject(project: { project_reference: string; revision: number }) {
+    const token = sessionStorage.getItem(`netify_marketplace_project_${project.project_reference}`);
+    const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(project.project_reference)}/publish`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` },
+      body: JSON.stringify({ base_revision: project.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT, marketing_opt_in: false }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Publication did not complete.");
+    setPublishedUrl(data.opportunity_url);
+  }
+
+  async function preparePublication() {
+    if (!created || !consentAccepted) return;
+    setCreating(true); setError(null);
+    try {
+      const token = sessionStorage.getItem(`netify_marketplace_project_${created.project_reference}`);
+      const response = await fetch(`/sase/api/marketplace/projects/${encodeURIComponent(created.project_reference)}/prepare-publication`, {
+        method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` },
+        body: JSON.stringify({ base_revision: created.revision, consent_version: MARKETPLACE_PUBLICATION_CONSENT_VERSION, consent_text: MARKETPLACE_PUBLICATION_CONSENT_TEXT, marketing_opt_in: false }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not prepare publication.");
+      const next = { ...created, revision: data.revision };
+      setCreated(next); setPrepared(true);
+      if (signedIn) await publishPreparedProject(next);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not prepare publication."); }
+    finally { setCreating(false); }
   }
 
   async function loadAggregatePreview() {
@@ -136,6 +177,10 @@ export default function JourneyModeSelector() {
           </div>
           {created && selected === "find_providers" && !preview && <button type="button" disabled={creating} onClick={loadAggregatePreview} className="mt-3 text-sm font-semibold text-[#8c360d] underline">Show aggregate provider coverage</button>}
           {preview && <div className="mt-3 rounded bg-[#f4f1ec] p-3 text-sm text-[#403c37]"><strong>{preview.meets_all_mandatory_count} providers currently meet the stated baseline</strong><span className="ml-2">({preview.eligible_technology_count} technology, {preview.eligible_managed_provider_count} managed; {preview.considered_count} reviewed). Provider identities stay locked until successful publication.</span>{preview.unresolved_requirements.length > 0 && <p className="mt-1 text-xs">Unresolved: {preview.unresolved_requirements.join(", ")}</p>}</div>}
+          {created && selected === "quick_list" && !publishedUrl && <div className="mt-4 border-t border-[#e3ded7] pt-4"><label className="flex items-start gap-2 text-xs leading-5 text-[#4f4b46]"><input type="checkbox" checked={consentAccepted} onChange={(event) => setConsentAccepted(event.target.checked)} className="mt-1" /><span>{MARKETPLACE_PUBLICATION_CONSENT_TEXT}</span></label><button type="button" disabled={!consentAccepted || creating || prepared} onClick={preparePublication} className="mt-3 rounded-full bg-[#151311] px-5 py-2 text-sm font-semibold text-white disabled:opacity-50">{prepared ? "Publication prepared" : "Publish anonymously"}</button></div>}
+          {prepared && !signedIn && created && <div className="mt-4"><SignIn role="buyer" publishRfpId={created.project_reference} prompt="Verify your work email to complete anonymous publication. Your company and contact details never appear on the board." onAuthed={() => setSignedIn(true)} /></div>}
+          {prepared && signedIn && !publishedUrl && <button type="button" onClick={() => created && publishPreparedProject(created).catch((reason) => setError(reason instanceof Error ? reason.message : "Publication failed."))} className="mt-3 text-sm font-semibold underline">Complete publication</button>}
+          {publishedUrl && <p className="mt-4 text-sm font-semibold text-emerald-800">Publication completed and MarketUnlock verified. <a href={publishedUrl} className="underline">View the anonymous opportunity</a>.</p>}
         </div>
       )}
     </section>

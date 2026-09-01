@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 import { entranceToProjectDetails } from "@/lib/project-entrance";
 import { ProjectDetailsSchema, SectorProfileStateSchema } from "@/lib/rfp-types";
+import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION } from "@/lib/publication-policy";
 import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-store";
 import { loadProviderMatchRecords } from "@/lib/provider-match-source";
 import { matchProviders, ProviderMatchInputSchema, publicProviderMatchPreview } from "@/lib/provider-matching";
@@ -73,4 +74,19 @@ export async function previewMarketplaceProject(projectId: string, token: string
   const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, match_preview: preview, marketplace_revision: nextRevision }));
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
   return { project_reference: saved.id, revision: nextRevision, preview };
+}
+
+const PreparePublicationSchema = z.object({ base_revision: z.number().int().min(0), consent_version: z.literal(MARKETPLACE_PUBLICATION_CONSENT_VERSION), consent_text: z.literal(MARKETPLACE_PUBLICATION_CONSENT_TEXT), marketing_opt_in: z.boolean().default(false) }).strict();
+
+export async function prepareMarketplacePublication(projectId: string, token: string, rawInput: unknown) {
+  const session = await authenticateMarketplaceProject(projectId, token);
+  const input = PreparePublicationSchema.parse(rawInput);
+  if (session.revision !== input.base_revision) throw new MarketplaceProjectConflict(`Revision conflict: expected ${session.revision}.`);
+  const project = await getProject(projectId);
+  if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
+  const nextRevision = session.revision + 1;
+  const at = Date.now();
+  const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, consent: { version: input.consent_version, agreed_at: at, flow: "marketplace_project" }, pending_submit: { shortlist_size: 5, list_on_board: true, marketing_opt_in: input.marketing_opt_in, requested_at: at }, marketplace_revision: nextRevision }));
+  await persistSession(token, { ...session, revision: nextRevision, expires_at: at + SESSION_TTL_SECONDS * 1000 });
+  return { project_reference: saved.id, revision: nextRevision, prepared_at: at };
 }
