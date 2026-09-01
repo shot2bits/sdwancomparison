@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
-import GovernedProviderDirectory from "@/components/GovernedProviderDirectory";
 import { BEST_PAGES } from "@/lib/best-pages";
 import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST, getShortlistDataset } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
@@ -114,8 +113,6 @@ export default function ShortlistPage() {
       <Suspense fallback={null}>
         <ShortlistBuilder vendors={vendors} features={features} />
       </Suspense>
-
-      <GovernedProviderDirectory />
 
       <section className="mt-20">
         <p className="eyebrow mb-3">Ranked shortlists</p>
