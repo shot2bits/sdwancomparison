@@ -392,7 +392,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
       <h2 className="mb-6">Compare providers and build around your requirements</h2>
       {comparisonCount !== null && (
         <p className="-mt-4 mb-6 text-xs text-[var(--ink-500)] tabular-nums">
-          {comparisonCount.toLocaleString("en-GB")} provider comparisons completed since 1 September 2026
+          {comparisonCount.toLocaleString("en-GB")} provider {comparisonCount === 1 ? "comparison" : "comparisons"} completed since 1 September 2026
         </p>
       )}
       <ComparisonWorkspace

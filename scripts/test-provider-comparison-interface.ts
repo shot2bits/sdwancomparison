@@ -71,7 +71,7 @@ assert.match(leadRoute, /sase-sd-wan-rfp-builder/);
 assert.match(leadRoute, /Reopen this shortlist/);
 assert.match(leadRoute, /Netify is an independent SASE and SD-WAN research and comparison service/);
 assert.doesNotMatch(leadRoute, /—/);
-assert.match(interfaceSource, /provider comparisons completed since 1 September 2026/);
+assert.match(interfaceSource, /comparisonCount === 1 \? "comparison" : "comparisons"/);
 assert.match(comparisonCountRoute, /metrics:provider_comparisons:2026-09-01/);
 assert.match(comparisonCountRoute, /"NX"/);
 assert.ok(
