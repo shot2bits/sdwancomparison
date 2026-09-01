@@ -11,6 +11,7 @@ import {
   publicationAuthorization,
   publicationCompleted,
   publicationReadiness,
+  quickListingReadiness,
   publicProjectionContainsPrivateIdentity,
   supplierCapabilitiesAllowed,
 } from "../src/lib/publication-policy";
@@ -38,6 +39,13 @@ test("incomplete projects cannot publish", () => {
   assert.equal(publicationReadiness({ baselineReady: false, baselineRemaining: ["Organisation and scale"], activeQuestionCount: 3 }).allowed, false);
   assert.equal(publicationReadiness({ baselineReady: true, baselineRemaining: [], activeQuestionCount: 0 }).allowed, false);
   assert.equal(publicationReadiness({ baselineReady: true, baselineRemaining: [], activeQuestionCount: 1 }).allowed, true);
+});
+
+test("quick listings require a meaningful opportunity but no RFP questions", () => {
+  const complete = { solutionScope: "sase", sector: "retail_ecommerce", siteCount: 40, regions: ["uk_ireland"], operatingModel: "managed", outcome: "Replace an expiring MPLS estate with resilient managed SASE.", timescale: "within six months" };
+  assert.equal(quickListingReadiness(complete).allowed, true);
+  assert.equal(quickListingReadiness({ ...complete, outcome: "Need SASE" }).allowed, false);
+  assert.equal(quickListingReadiness({ ...complete, regions: [] }).allowed, false);
 });
 
 test("public projections contain no buyer or company identity", () => {

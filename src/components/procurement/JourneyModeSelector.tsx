@@ -21,7 +21,7 @@ export default function JourneyModeSelector() {
   const [scope, setScope] = useState("sase");
   const [sector, setSector] = useState("");
   const [sites, setSites] = useState("");
-  const [regions, setRegions] = useState("United Kingdom");
+  const [regions, setRegions] = useState("uk_ireland");
   const [operatingModel, setOperatingModel] = useState("any");
   const [outcome, setOutcome] = useState("");
   const [timescale, setTimescale] = useState("");
@@ -122,9 +122,9 @@ export default function JourneyModeSelector() {
         <div className="mt-3 rounded-md border border-[#d8d3cc] bg-white p-4" aria-live="polite">
           <div className="grid gap-3 md:grid-cols-3">
             <label className="text-xs font-semibold text-[#4f4b46]">Solution scope<select value={scope} onChange={(e) => setScope(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="sase">SASE</option><option value="sdwan">SD-WAN</option><option value="sse">SSE</option></select></label>
-            <label className="text-xs font-semibold text-[#4f4b46]">Sector<input value={sector} onChange={(e) => setSector(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
+            <label className="text-xs font-semibold text-[#4f4b46]">Sector<select value={sector} onChange={(e) => setSector(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="">Choose sector</option><option value="healthcare">Healthcare</option><option value="manufacturing">Manufacturing</option><option value="retail_ecommerce">Retail and e-commerce</option><option value="financial_services">Financial services</option></select></label>
             <label className="text-xs font-semibold text-[#4f4b46]">Sites<input type="number" min="1" value={sites} onChange={(e) => setSites(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
-            <label className="text-xs font-semibold text-[#4f4b46]">Geography<input value={regions} onChange={(e) => setRegions(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
+            <label className="text-xs font-semibold text-[#4f4b46]">Geography<select value={regions} onChange={(e) => setRegions(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="uk_ireland">UK and Ireland</option><option value="europe">Europe</option><option value="north_america">North America</option><option value="asia_pacific">Asia Pacific</option><option value="middle_east_africa">Middle East and Africa</option><option value="latin_america">Latin America</option></select></label>
             <label className="text-xs font-semibold text-[#4f4b46]">Operating model<select value={operatingModel} onChange={(e) => setOperatingModel(e.target.value)} className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal"><option value="any">No preference</option><option value="managed">Managed</option><option value="co_managed">Co-managed</option><option value="self_managed">Self-managed</option></select></label>
             <label className="text-xs font-semibold text-[#4f4b46]">Timescale<input value={timescale} onChange={(e) => setTimescale(e.target.value)} placeholder="e.g. within 6 months" className="mt-1 block w-full rounded border border-[#cfc8bf] p-2 font-normal" /></label>
           </div>

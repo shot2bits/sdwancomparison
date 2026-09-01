@@ -67,6 +67,21 @@ export function publicationReadiness(input: {
   return { allowed: reasons.length === 0, reasons };
 }
 
+export function quickListingReadiness(input: {
+  solutionScope: string; sector: string | null; siteCount: number | null;
+  regions: string[]; operatingModel: string; outcome: string; timescale: string;
+}): { allowed: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+  if (!input.solutionScope.trim()) reasons.push("Solution scope");
+  if (!input.sector?.trim()) reasons.push("Sector");
+  if (!input.siteCount || input.siteCount < 1) reasons.push("Estate size");
+  if (!input.regions.some((region) => region.trim())) reasons.push("Geography");
+  if (!input.operatingModel.trim()) reasons.push("Operating model");
+  if (input.outcome.trim().length < 20) reasons.push("Meaningful problem or outcome");
+  if (!input.timescale.trim()) reasons.push("Timescale");
+  return { allowed: reasons.length === 0, reasons };
+}
+
 export function publicationCompleted(input: {
   publicBoardOpportunityId: string | null | undefined;
   marketUnlockValid: boolean;
