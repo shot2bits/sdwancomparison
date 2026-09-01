@@ -72,8 +72,12 @@ export async function previewMarketplaceProject(projectId: string, token: string
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
   const records = await loadProviderMatchRecords();
-  const preview = publicProviderMatchPreview(matchProviders(input, records));
   const nextRevision = session.revision + 1;
+  const preview = {
+    ...publicProviderMatchPreview(matchProviders(input, records)),
+    calculated_at: Date.now(),
+    project_revision: nextRevision,
+  };
   const saved = await saveProject(ProjectDetailsSchema.parse({ ...project, match_preview: preview, marketplace_revision: nextRevision }));
   await persistSession(token, { ...session, revision: nextRevision, expires_at: Date.now() + SESSION_TTL_SECONDS * 1000 });
   await recordMarketplaceFunnelEvent({ event: "match_previewed", project_id: saved.id, source: saved.journey?.source, mode: saved.journey?.mode, channel: saved.journey?.source === "mcp" ? "mcp" : "web", detail: { revision: nextRevision, considered_count: preview.considered_count } });

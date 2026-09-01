@@ -11,6 +11,8 @@ assert.match(source, /ProviderMatchRecordSchema/);
 assert.match(session, /authenticateMarketplaceProject\(projectId, token\)/);
 assert.match(session, /session\.revision !== request\.base_revision/);
 assert.match(session, /publicProviderMatchPreview\(matchProviders\(input, records\)\)/);
+assert.match(session, /calculated_at: Date\.now\(\)/);
+assert.match(session, /project_revision: nextRevision/);
 assert.doesNotMatch(route, /manage_token/);
 assert.doesNotMatch(route, /display_name|provider_id|slug/);
 console.log("PASS aggregate preview is session-bound, revision-controlled and identity-free");
