@@ -30,7 +30,18 @@ export async function GET() {
       faqs: SHORTLIST_FAQS,
       features: FEATURES,
       vendors,
-      governed_provider_profiles: governedProviders,
+      governed_provider_profiles: governedProviders.map((provider) => ({
+        slug: provider.slug,
+        comparison_slug: provider.comparisonSlug,
+        name: provider.name,
+        provider_types: provider.providerTypes,
+        summary: provider.summary,
+        reviewed_at: provider.reviewedAt,
+        dataset_version: provider.datasetVersion,
+        products: provider.products.map((product) => product.name),
+        evidence_source_count: provider.evidenceSourceCount,
+        url: provider.url,
+      })),
       default_shortlist: defaultResult,
       interactiveSurfaces: [
         {
