@@ -42,6 +42,7 @@ expect(guidedBuild.includes("sectionComplete && incompleteSectionTitle"), "the f
 expect(guidedBuild.includes('rfpDepth === "short" ? "Short RFP" : "Detailed RFP"'), "short and detailed modes explain distinct completion contracts");
 expect(guidedBuild.includes('rfpDepth === "detailed" ? <><button'), "recommended-question controls are exposed by detailed mode rather than duplicated in short mode");
 expect(projectDesk.includes("ready={contentReady}") && projectDesk.includes("depthReady={rfpCoverage.ready}"), "essential readiness is separate from optional detailed depth");
+expect(projectDesk.includes("const snapshot = JSON.parse(raw) as Partial<LocalWorkingDraft>") && projectDesk.includes("rfpDepth: depth, updatedAt: Date.now()"), "short or detailed depth is written into the active draft immediately, closing the fast-refresh race");
 
 const guidedQuestions = earnedQuestions(
   { organisation: { regions: ["uk"] }, estate: { sites: 12 } },

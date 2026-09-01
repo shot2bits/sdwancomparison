@@ -1250,6 +1250,28 @@ export default function ProjectDesk({
   const changeRfpDepth = useCallback((depth: RfpDepth) => {
     setRfpDepth(depth);
     window.localStorage.setItem("netify-rfp-depth", depth);
+    /* Persist the choice into the active working draft immediately. The
+       normal canonical-draft effect is deliberately debounced, but that
+       meant a buyer who selected Detailed RFP and refreshed straight away
+       could reopen the older Short RFP snapshot. Facts and answers survived;
+       only the selected depth regressed. Updating this one navigation choice
+       synchronously closes that refresh race without creating another
+       document authority: the next canonical snapshot still rewrites the
+       complete draft from React state as before. */
+    try {
+      const id = window.localStorage.getItem(LOCAL_DRAFT_POINTER_KEY);
+      if (!id) return;
+      const key = `${LOCAL_DRAFT_PREFIX}${id}`;
+      const raw = window.localStorage.getItem(key);
+      if (!raw) return;
+      const snapshot = JSON.parse(raw) as Partial<LocalWorkingDraft>;
+      if (snapshot.schema !== 1 || snapshot.id !== id) return;
+      window.localStorage.setItem(key, JSON.stringify({ ...snapshot, rfpDepth: depth, updatedAt: Date.now() }));
+    } catch {
+      /* Storage may be unavailable or a stale draft may be malformed. The
+         global preference above still preserves the choice for a clean
+         session, and the canonical save effect reports any real save error. */
+    }
   }, []);
   /** 2030 UI rebuild (20 Aug 2026): which outline SECTION the buyer is
    *  looking at in the new primary navigation (SectionNav/SectionDetail),
