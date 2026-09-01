@@ -97,6 +97,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   const [compareSlugs, setCompareSlugs] = useState<string[]>([]);
   const [comparisonSource, setComparisonSource] = useState("");
   const [providerCardReset, setProviderCardReset] = useState(0);
+  const [comparisonCount, setComparisonCount] = useState<number | null>(null);
 
   // Lead form state
   const [lead, setLead] = useState({ name: "", email: "", company: "", company_url: "" });
@@ -297,6 +298,38 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     [vendors, compareSlugs, features],
   );
   const activeComparison = manualComparison ?? chatComparison;
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/sase/api/comparison-count", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { count?: number }) => {
+        if (!cancelled && typeof data.count === "number") setComparisonCount(data.count);
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!activeComparison || activeComparison.slugs.length < 2) return;
+    const comparisonKey = activeComparison.slugs.slice().sort().join("_");
+    const storageKey = `netify-comparison-completed:2026-09-01:${comparisonKey}`;
+    let completionId = sessionStorage.getItem(storageKey);
+    if (!completionId) {
+      completionId = `${Date.now().toString(36)}_${crypto.randomUUID().replaceAll("-", "")}`;
+      sessionStorage.setItem(storageKey, completionId);
+    }
+    fetch("/sase/api/comparison-count", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ completion_id: completionId }),
+    })
+      .then((response) => response.json())
+      .then((data: { count?: number }) => {
+        if (typeof data.count === "number") setComparisonCount(data.count);
+      })
+      .catch(() => undefined);
+  }, [activeComparison]);
   const curatedPairUrl = useMemo(() => {
     if (!activeComparison || activeComparison.slugs.length !== 2) return null;
     const [x, y] = activeComparison.slugs;
@@ -357,6 +390,11 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     <section id="provider-decision-workspace" className="rounded-xl border border-[var(--ink-200,#e8ebef)] p-4 sm:p-6">
       <p className="eyebrow mb-2">Netify comparison workspace</p>
       <h2 className="mb-6">Compare providers and build around your requirements</h2>
+      {comparisonCount !== null && (
+        <p className="-mt-4 mb-6 text-xs text-[var(--ink-500)] tabular-nums">
+          {comparisonCount.toLocaleString("en-GB")} provider comparisons completed since 1 September 2026
+        </p>
+      )}
       <ComparisonWorkspace
         vendors={vendors}
         comparison={activeComparison}
