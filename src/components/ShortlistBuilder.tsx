@@ -949,7 +949,16 @@ function ComparisonWorkspace({
             )).reduce<React.ReactNode[]>((nodes, field, index) => index === 0 ? [field, <span key="versus" className="hidden pb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500 sm:block">versus</span>] : [...nodes, field], [])}
           </div>
 
-          <form className="mt-4" onSubmit={(event) => { event.preventDefault(); ask(); }}>
+          <a
+            href={comparison ? "#comparison-table" : undefined}
+            aria-disabled={!comparison}
+            className={`mt-5 flex w-full items-center justify-between rounded-xl border px-5 py-4 text-left text-sm font-semibold no-underline transition-colors ${comparison ? "border-amber-300 bg-amber-400 text-zinc-950 shadow-[0_10px_30px_rgba(251,191,36,0.18)] hover:bg-amber-300" : "pointer-events-none border-zinc-800 bg-zinc-900 text-zinc-600"}`}
+          >
+            <span>Compare every feature across your selected providers</span>
+            <span aria-hidden="true" className="ml-4 text-lg">↓</span>
+          </a>
+
+          <form className="mt-6 border-t border-zinc-800 pt-5" onSubmit={(event) => { event.preventDefault(); ask(); }}>
             <label htmlFor="comparison-question" className="text-xs font-medium text-zinc-300">Ask about the comparison</label>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
               <input id="comparison-question" value={question} onChange={(event) => setQuestion(event.target.value)} placeholder="Which is stronger for a managed UK healthcare deployment?" maxLength={1000} className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-amber-400" />
@@ -967,7 +976,6 @@ function ComparisonWorkspace({
                 {comparison.slugs.slice(0, 2).map((slug) => <div key={slug} className="rounded-xl border border-zinc-700 bg-zinc-950 p-4"><p className="text-sm font-semibold text-white">{comparison.names[slug]}</p><p className="mt-3 text-3xl font-semibold text-amber-400">{comparison.meta[slug].score}</p><p className="mt-1 text-xs text-zinc-400">balanced evidence score</p><p className="mt-3 text-xs text-zinc-300">{comparison.wins[slug].length} clear capability leads</p></div>)}
               </div>
               <p className="mt-4 text-sm leading-6 text-zinc-300">{comparison.summary}</p>
-              <a href="#comparison-table" className="mt-5 inline-flex rounded-full border border-zinc-600 px-4 py-2 text-xs font-medium text-white no-underline hover:border-amber-400">Inspect every evidence row ↓</a>
             </>
           ) : (
             <div className="flex min-h-64 flex-col justify-center">

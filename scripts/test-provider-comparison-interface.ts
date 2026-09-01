@@ -27,7 +27,14 @@ assert.match(mcpComparison.resume_url, /source=mcp/);
 
 const agent = readFileSync("src/app/api/agent/route.ts", "utf8");
 const mcp = readFileSync("src/lib/mcp-tools.ts", "utf8");
+const interfaceSource = readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
 assert.match(agent, /comparison_slugs/);
 assert.match(agent, /buildComparison/);
 assert.match(mcp, /compare_vendors/);
+assert.match(interfaceSource, /Compare every feature across your selected providers/);
+assert.doesNotMatch(interfaceSource, /Inspect every evidence row/);
+assert.ok(
+  interfaceSource.indexOf("Compare every feature across your selected providers") < interfaceSource.indexOf("Ask about the comparison"),
+  "the full comparison action must appear before the optional AI question",
+);
 console.log("provider comparison interface tests passed");
