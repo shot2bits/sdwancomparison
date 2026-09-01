@@ -9,10 +9,18 @@ export class ProviderMatchSourceUnavailable extends Error {}
 export async function loadProviderMatchRecords(): Promise<ProviderMatchRecord[]> {
   const url = process.env.PROVIDER_MATCH_DATA_URL;
   const token = process.env.PROVIDER_MATCH_SERVICE_TOKEN;
+  const protectionBypass = process.env.PROVIDER_MATCH_PROTECTION_BYPASS;
   if (!url || !token) throw new ProviderMatchSourceUnavailable("Provider matching source is not configured.");
   let response: Response;
   try {
-    response = await fetch(url, { headers: { authorization: `Bearer ${token}` }, cache: "no-store", signal: AbortSignal.timeout(8_000) });
+    response = await fetch(url, {
+      headers: {
+        authorization: `Bearer ${token}`,
+        ...(protectionBypass ? { "x-vercel-protection-bypass": protectionBypass } : {}),
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(8_000),
+    });
   } catch {
     throw new ProviderMatchSourceUnavailable("Provider matching source is unavailable.");
   }

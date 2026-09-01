@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const source = fs.readFileSync("src/lib/provider-match-source.ts", "utf8");
+assert.match(source, /x-vercel-protection-bypass/);
 const session = fs.readFileSync("src/lib/marketplace-project-session.ts", "utf8");
 const route = fs.readFileSync("src/app/api/marketplace/projects/[projectId]/match-preview/route.ts", "utf8");
 assert.match(source, /PROVIDER_MATCH_SERVICE_TOKEN/);
