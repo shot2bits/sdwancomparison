@@ -53,9 +53,8 @@ const FOOTER_COLUMNS: { title: string; links: { label: string; href: string }[] 
     title: "Providers and comparisons",
     links: [
       { label: "Build your shortlist", href: "/sase/shortlist/" },
-      { label: "Evaluated providers", href: "/sase/vendors/" },
-      { label: "All listed suppliers", href: "/marketplace/" },
-      { label: "Provider comparisons", href: "/vendor-comparison/" },
+      { label: "Provider research directory", href: "/marketplace/" },
+      { label: "Provider comparison engine", href: "/sase/shortlist/#comparison-workspace" },
       { label: "Best providers by sector", href: "/sase/best/" },
       { label: "What the market is buying", href: "/sase/demand/" },
       { label: "AI assistant connector", href: "/sase/connector/" },
