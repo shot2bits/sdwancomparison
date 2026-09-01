@@ -173,6 +173,19 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     return list.includes(value) ? list.filter((x) => x !== value) : [...list, value];
   }
 
+  function resetAllOptions() {
+    setInput(DEFAULT_INPUT);
+    setCompareSlugs([]);
+    setComparisonSource("");
+    setChatPrompt("");
+    setChatMessages([]);
+    setChatComparison(null);
+    setChatError(null);
+    setOpenCategory(null);
+    setHandoffState("idle");
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+
   /** Tri-state feature toggle: off, required, preferred. */
   function cycleFeature(fid: string) {
     setInput((prev) => {
@@ -673,10 +686,11 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         </section>
 
         <button
-          onClick={() => setInput(DEFAULT_INPUT)}
-          className="text-sm text-[var(--ink-500)] underline hover:text-[var(--accent)]"
+          type="button"
+          onClick={resetAllOptions}
+          className="w-full rounded-full border border-[var(--ink-900)] px-4 py-2 text-sm font-medium hover:bg-zinc-900 hover:text-white transition-colors"
         >
-          Reset all filters
+          Reset all options
         </button>
           </div>
         </details>
@@ -1031,17 +1045,36 @@ function VendorCard({
           </button>
           <button
             onClick={() => setOpen(!open)}
+            aria-expanded={open}
             className="text-sm border border-[var(--ink-300,#ccc)] rounded-full px-3 py-1 hover:border-[var(--ink-900)]"
           >
-            {open ? "Less" : "Why this rank?"}
+            {open ? "Close expanded listing" : "View expanded listing"}
           </button>
         </div>
       </div>
       <p className="text-sm text-[var(--ink-700)] mt-3">{v.shortlist_summary}</p>
       {open && (
-        <div className="mt-4 grid sm:grid-cols-2 gap-4 text-sm">
+        <div className="mt-4 border-t border-[var(--ink-300,#ccc)] pt-4 text-sm">
+          <div className="mb-4 grid grid-cols-2 gap-px overflow-hidden rounded-sm border border-[var(--ink-300,#ccc)] bg-[var(--ink-300,#ccc)] sm:grid-cols-4">
+            {[
+              ["Evidence coverage", `${v.evidence_coverage_pct}%`],
+              ["Deployment", v.deployment_speed],
+              ["Pricing", v.value_tier],
+              ["UK delivery", v.uk_delivery],
+            ].map(([label, value]) => (
+              <div key={label} className="bg-[var(--paper-base)] p-3">
+                <p className="text-xs text-[var(--ink-500)]">{label}</p>
+                <p className="mt-1 font-medium">{value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <p className="font-medium mb-1">Meets your requirements</p>
+            <p className="font-medium mb-1">Best fit for</p>
+            <ul className="list-disc pl-5 space-y-1 text-[var(--ink-700)]">
+              {v.best_fit_for.map((item, i) => <li key={i}>{item}</li>)}
+            </ul>
+            <p className="font-medium mt-3 mb-1">Meets your requirements</p>
             <ul className="list-disc pl-5 space-y-1 text-[var(--ink-700)]">
               {v.matched_requirements.length > 0 ? (
                 v.matched_requirements.map((m, i) => <li key={i}>{m}</li>)
@@ -1059,7 +1092,11 @@ function VendorCard({
             )}
           </div>
           <div>
-            <p className="font-medium mb-1">Watch-outs</p>
+            <p className="font-medium mb-1">Key differentiators</p>
+            <ul className="list-disc pl-5 space-y-1 text-[var(--ink-700)]">
+              {v.key_differentiators.map((item, i) => <li key={i}>{item}</li>)}
+            </ul>
+            <p className="font-medium mt-3 mb-1">Watch-outs</p>
             <ul className="list-disc pl-5 space-y-1 text-[var(--ink-700)]">
               {v.watch_outs.slice(0, 3).map((w, i) => <li key={i}>{w}</li>)}
             </ul>
@@ -1073,8 +1110,9 @@ function VendorCard({
               rel="noopener"
               className="inline-block mt-3 px-3.5 py-1.5 text-sm border border-[var(--ink-900)] rounded-full no-underline hover:bg-zinc-900 hover:text-white transition-colors"
             >
-              Contact {v.name} via Netify ↗
+              Read the full {v.name} research page ↗
             </a>
+          </div>
           </div>
         </div>
       )}
