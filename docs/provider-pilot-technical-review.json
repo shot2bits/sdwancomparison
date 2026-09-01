@@ -1,0 +1,60 @@
+{
+  "review_version": "provider-technical-review/1.0.0",
+  "reviewer": "ChatGPT/Codex",
+  "method": "Automated source-integrity, traceability, evidence-reference and publication-boundary review.",
+  "pilots": [
+    {
+      "provider_id": "provider:versa-networks",
+      "revision_id": "revision:05460064bfddb49a73b78910",
+      "source_checksum": "6e5eb605e5368d8d59b5ef2ac36c45caa18330ec42a32d13515c4e365540a24c",
+      "technical_status": "approved",
+      "failures": [],
+      "qualifications": {
+        "orphan_candidate_claim": 115
+      },
+      "counts": {
+        "tables": 22,
+        "products": 10,
+        "capabilities": 67,
+        "evidence_sources": 29,
+        "evidence_linked_claims": 39
+      }
+    },
+    {
+      "provider_id": "provider:bt",
+      "revision_id": "revision:59b8c21f282ae65477c1c3f8",
+      "source_checksum": "0489ff6960aec560d4da636b2874baf57e6e168b61e1f8d04ec0179bdb615f2d",
+      "technical_status": "approved",
+      "failures": [],
+      "qualifications": {
+        "orphan_candidate_claim": 97,
+        "positive_capability_without_evidence": 1
+      },
+      "counts": {
+        "tables": 22,
+        "products": 6,
+        "capabilities": 67,
+        "evidence_sources": 17,
+        "evidence_linked_claims": 52
+      }
+    },
+    {
+      "provider_id": "provider:cato-networks",
+      "revision_id": "revision:0b8c3f42d28c71efefe6ed68",
+      "source_checksum": "42776f317535bb78b25b53a1ed47c12d30203bf36ed31f84250b088e1efaa30e",
+      "technical_status": "approved",
+      "failures": [],
+      "qualifications": {
+        "orphan_candidate_claim": 84,
+        "positive_capability_without_evidence": 2
+      },
+      "counts": {
+        "tables": 22,
+        "products": 10,
+        "capabilities": 67,
+        "evidence_sources": 48,
+        "evidence_linked_claims": 71
+      }
+    }
+  ]
+}
