@@ -30,6 +30,12 @@ import { commitMarketUnlock, isMarketUnlocked, MarketUnlockBindingError } from "
 import { getPublicationAttempt, savePublicationAttempt, loadResumableAttempt, type PublicationAttempt } from "@/lib/publication-attempt";
 import type { ProjectDetails } from "@/lib/rfp-types";
 import { persistedEssentialBaselineChecklist } from "@/lib/workspace/publish-checklist";
+import {
+  anonymousBuyerOrganisation,
+  invitationsAllowed,
+  isPublicationReplay,
+  publicationReadiness,
+} from "@/lib/publication-policy";
 
 /**
  * The publish core, shared by the publish API route (buyer presses Submit in
@@ -206,7 +212,7 @@ export async function listRfpOnBoard(
     id: existing?.id ?? newId("opp"),
     created: existing?.created ?? Date.now(),
     updated: Date.now(),
-    buyer_org: existing?.buyer_org ?? "",
+    buyer_org: anonymousBuyerOrganisation(),
     title: distinctTitle,
     scope: boardScope(p),
     sites: p.buyer.site_count,
@@ -657,7 +663,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   const contentSnapshotForEvent = rfpContentSnapshot(project);
   const publishEventIdForRequest = publishEventId(project.id, contentSnapshotForEvent, opts);
   const priorGovernedState = await loadGovernedRevisionState(project.id);
-  if (priorGovernedState.lastAppliedEventId === publishEventIdForRequest) {
+  if (isPublicationReplay(priorGovernedState.lastAppliedEventId, publishEventIdForRequest)) {
     const priorSnapshot = await getLatestPublishedSnapshot(project.id);
     if (priorSnapshot) return replayResultFrom(project, priorSnapshot);
     // Governed state says this exact request already applied, but no
@@ -671,12 +677,6 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     decisionLedger: project.decision_ledger,
     procurementDocument: project.procurement_document,
   });
-  if (!essentialBaseline.ready) {
-    throw new Error(
-      `Complete the essential RFP baseline before publishing. Still needed: ${essentialBaseline.remaining.join(", ")}. Nothing has been sent.`,
-    );
-  }
-
   // Minimum-content gate (Harry's QA, RFP Builder F2): submit was live at
   // zero questions, one click from dispatching an empty requirement to real
   // supplier contacts. The gate is server-side so every client (the page,
@@ -685,10 +685,13 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // (below) so the fixture suite can exercise the REAL gate logic directly,
   // never a hand-duplicated copy that could silently drift from it.
   const activeQuestionCount = minimumContentQuestionCount(project);
-  if (activeQuestionCount === 0) {
-    throw new Error(
-      "This RFP has no questions yet, so there is nothing for vendors to respond to. Describe your project and generate the question set first; nothing has been sent.",
-    );
+  const readiness = publicationReadiness({
+    baselineReady: essentialBaseline.ready,
+    baselineRemaining: essentialBaseline.remaining,
+    activeQuestionCount,
+  });
+  if (!readiness.allowed) {
+    throw new Error(`Complete the meaningful RFP baseline before publishing. Still needed: ${readiness.reasons.join(", ")}. Nothing has been sent.`);
   }
 
   // The automatic business verification chain (Rulings One and Two, 29 Jul
@@ -962,8 +965,16 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     const reason = e instanceof MarketUnlockBindingError ? e.message : "Market-unlock verification failed; try re-publishing.";
     return { published: working, invited: [], criteria: "", board: { listed: false, reason }, market_report: lockedMarketReportFor(working), matched_vendors: [] };
   }
+  const marketUnlockValid = await isMarketUnlocked(working.id);
+  if (!marketUnlockValid) {
+    return { published: working, invited: [], criteria: "", board: { listed: false, reason: "Market-unlock verification failed; try re-publishing." }, market_report: lockedMarketReportFor(working), matched_vendors: [] };
+  }
   if (!attempt.unlocked) {
     attempt = await savePublicationAttempt({ ...attempt, unlocked: true });
+  }
+
+  if (!invitationsAllowed({ publicBoardOpportunityId: attempt.board_opportunity_id, marketUnlockValid })) {
+    return { published: working, invited: [], criteria: "", board: { listed: false, reason: "Publication policy did not permit supplier invitations." }, market_report: lockedMarketReportFor(working), matched_vendors: [] };
   }
 
   // STEP F: transition the project to published -- ONLY NOW, strictly

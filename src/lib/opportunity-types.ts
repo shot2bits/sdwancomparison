@@ -11,6 +11,7 @@
 import { z } from "zod";
 import { noticeDisplayTitle } from "@/lib/notice-title";
 import { siteBandLabelFor, siteFigureIsIdentifying } from "@/lib/notice-options";
+import { anonymousBuyerOrganisation } from "@/lib/publication-policy";
 
 export const OPP_SCOPES = [
   "underlay_circuits",
@@ -287,7 +288,10 @@ export function toPublicOpportunity(o: Opportunity): PublicOpportunity {
     created: o.created,
     updated: o.updated,
     // Anonymous notices never leak the organisation name to any public surface.
-    buyer_org: o.buyer_visibility === "anonymous" ? "" : o.buyer_org,
+    // Policy v1: company identity is never part of the public board
+    // projection. Historic named records remain readable in KV, but their
+    // private stored identity is not re-exposed by current public routes.
+    buyer_org: anonymousBuyerOrganisation(),
     // Display title, derived when the stored title carries no information
     // ("Untitled SASE / SD-WAN RFP", the F1 numeric-sector artefact). One
     // application point so every public client renders the same word

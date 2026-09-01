@@ -66,6 +66,7 @@ import { z } from "zod";
 import { kvGetJson, kvSetJson, newId } from "@/lib/rfp-store";
 import { getFrozenRevision } from "@/lib/published-snapshot";
 import { getOpportunity } from "@/lib/rfp-store";
+import { marketUnlockBindingValid, supplierCapabilitiesAllowed } from "@/lib/publication-policy";
 
 export const MarketUnlockSchema = z
   .object({
@@ -132,17 +133,16 @@ export async function verifyMarketUnlockBinding(candidate: {
   matching_basis_hash: string;
 }): Promise<boolean> {
   const revision = await getFrozenRevision(candidate.published_revision_id);
-  if (!revision) return false;
-  if (revision.project_id !== candidate.project_id) return false;
-  if (revision.content_hash !== candidate.matching_basis_hash) return false;
-
   const opportunity = await getOpportunity(candidate.board_opportunity_id);
-  if (!opportunity) return false;
-  if (opportunity.source_rfp_id !== candidate.project_id) return false;
-  if (opportunity.visibility !== "public") return false;
-  if (opportunity.source_published_revision_id !== candidate.published_revision_id) return false;
-
-  return true;
+  return marketUnlockBindingValid({
+    revisionExists: Boolean(revision),
+    revisionProjectMatches: revision?.project_id === candidate.project_id,
+    revisionHashMatches: revision?.content_hash === candidate.matching_basis_hash,
+    opportunityExists: Boolean(opportunity),
+    opportunityProjectMatches: opportunity?.source_rfp_id === candidate.project_id,
+    opportunityIsPublic: opportunity?.visibility === "public",
+    opportunityRevisionMatches: opportunity?.source_published_revision_id === candidate.published_revision_id,
+  });
 }
 
 /**
@@ -221,7 +221,10 @@ export async function commitMarketUnlock(input: {
     // SAME request): never overwrite, never move unlocked_at. Still
     // re-verified below via getMarketUnlock's own path when read -- here we
     // just avoid a redundant write.
-    return existing;
+    if (await verifyMarketUnlockBinding(existing)) return existing;
+    // A forged, stale or damaged exact-triple row is not an idempotent
+    // success. Continue through the persisted-record checks below; they
+    // either reconstruct the valid binding or refuse it.
   }
 
   const revision = await getFrozenRevision(input.published_revision_id);
@@ -266,5 +269,5 @@ export async function commitMarketUnlock(input: {
  * existence of a KV row.
  */
 export async function isMarketUnlocked(projectId: string): Promise<boolean> {
-  return (await getMarketUnlock(projectId)) !== null;
+  return supplierCapabilitiesAllowed((await getMarketUnlock(projectId)) !== null);
 }

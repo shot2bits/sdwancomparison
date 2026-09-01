@@ -11,6 +11,7 @@ import { addMessage } from "@/lib/rfp-connect";
 import { resolveOpportunityToken, getOpportunity, listPublicOpportunities } from "@/lib/rfp-store";
 import { addFeedItem, vendorName, maskedFeed } from "@/lib/opportunity";
 import { RfpResponseSchema, BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
+import { PUBLICATION_POLICY_VERSION, publicationAuthorization } from "@/lib/publication-policy";
 import { synthesiseSections } from "@/lib/rfp-methodology";
 import { toPublicOpportunity } from "@/lib/opportunity-types";
 import { getSampleNotice } from "@/lib/sample-notices";
@@ -19,6 +20,7 @@ import { matchVendorSlug } from "@/lib/rfp-evaluation";
 import { SITE_URL } from "@/lib/structured-data";
 import { resolveSupplierResponseAccess, RESPONSE_DENIAL_MESSAGES } from "@/lib/rfp-response-access";
 import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 
 export const MCP_RFP_TOOL_DEFINITIONS = [
   {
@@ -265,13 +267,19 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
   if (name === "publish_rfp") {
     const project = await getProject(String(args.rfp_id ?? ""));
     if (!project) return { error: "RFP not found." };
-    if (!project.manage_token || args.manage_token !== project.manage_token) return { error: "Invalid manage_token for this RFP." };
+    const authorization = publicationAuthorization({
+      ownerAuthorized: Boolean(project.manage_token) && args.manage_token === project.manage_token,
+      verifiedSession: false,
+      channel: "mcp",
+    });
+    if (authorization.reason === "owner_required") return { error: "Invalid manage_token for this RFP." };
     return {
       auth_required: true,
       error: "sign_in_required",
       message: "Publishing sends this RFP to suppliers, so it needs a verified work email. Take the buyer to the builder to sign in and press Publish; the draft is untouched and the manage link keeps working.",
       sign_in_url: `${SITE_URL}/rfp-builder/${project.id}/?utm_source=ai_assistant&utm_medium=mcp`,
       status: project.status,
+      publication_policy_version: PUBLICATION_POLICY_VERSION,
     };
   }
   // Opportunity supplier-agent tools use a per-supplier opportunity token.
@@ -282,6 +290,9 @@ export async function callRfpTool(name: string, args: Record<string, unknown>): 
     if (!ref) return { error: "Invalid opportunity token." };
     const opp = await getOpportunity(ref.opp_id);
     if (!opp) return { error: "Opportunity not found." };
+    if (opp.source_rfp_id && !(await isMarketUnlocked(opp.source_rfp_id))) {
+      return { error: "This supplier capability is locked until publication and MarketUnlock complete successfully." };
+    }
     if (name === "opportunity_inbox") {
       // Pricing amounts are private to the buyer: this supplier agent sees its
       // own figures; other suppliers' amounts are masked. Anonymous buyer names

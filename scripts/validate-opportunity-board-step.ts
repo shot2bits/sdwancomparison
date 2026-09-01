@@ -15,7 +15,7 @@ function check(name: string, condition: boolean) {
 
 check(
   "the publish API refuses to report success without a real board opportunity id",
-  route.includes("if (!board.opportunity_id)") && route.includes('code: "board_publication_incomplete"'),
+  route.includes("publicationCompleted({ publicBoardOpportunityId: board.opportunity_id, marketUnlockValid: marketUnlocked })") && route.includes('code: "board_publication_incomplete"'),
 );
 check(
   "an incomplete board publication is a non-2xx response and remains market locked",
@@ -23,7 +23,7 @@ check(
 );
 check(
   "the successful API contract states MarketUnlock only after the board-id guard",
-  route.includes("market_unlocked: true"),
+  route.includes("market_unlocked: marketUnlocked") && route.indexOf("market_unlocked: marketUnlocked") > route.indexOf('code: "board_publication_incomplete"'),
 );
 check(
   "the builder requires both MarketUnlock and a board id before showing publication success",

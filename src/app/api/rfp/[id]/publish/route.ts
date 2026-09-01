@@ -3,6 +3,8 @@ import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { executePublish, DeclinedApprovalError } from "@/lib/rfp-publish";
 import { SITE_URL } from "@/lib/structured-data";
+import { PUBLICATION_POLICY_VERSION, publicationAuthorization, publicationCompleted } from "@/lib/publication-policy";
+import { isMarketUnlocked } from "@/lib/market-unlock";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -28,13 +30,14 @@ export async function POST(req: Request, ctx: Ctx) {
   try { body = await req.json(); } catch { /* body optional */ }
 
   const access = await requireRfpOwner(req, project, body as Record<string, unknown>);
-  if (!access.ok) return ownerRequired("Publishing this RFP", cors);
+  const sessionEmail = access.session && (access.session.role === "buyer" || access.session.role === "netify") ? access.session.email : "";
+  const authorization = publicationAuthorization({ ownerAuthorized: access.ok, verifiedSession: Boolean(sessionEmail), channel: "api" });
+  if (authorization.reason === "owner_required") return ownerRequired("Publishing this RFP", cors);
 
   // Hard identity gate: signed-out owners and agents get a machine-readable
   // handoff instead of a silent token-only publish. Drafting stays open; the
   // manage_token remains the ownership proof, the session is the identity.
-  const sessionEmail = access.session && (access.session.role === "buyer" || access.session.role === "netify") ? access.session.email : "";
-  if (!sessionEmail) {
+  if (!authorization.allowed) {
     return Response.json(
       {
         error: "sign_in_required",
@@ -72,6 +75,7 @@ export async function POST(req: Request, ctx: Ctx) {
     return Response.json({ error: (e as Error).message }, { status: 409, headers: cors });
   }
   const { published, invited, criteria, board, market_report, matched_vendors } = result;
+  const marketUnlocked = await isMarketUnlocked(project.id);
 
   // Step 10 board-journey closure: a completed HTTP response is not the
   // same thing as a completed publication. `executePublish()` deliberately
@@ -81,7 +85,7 @@ export async function POST(req: Request, ctx: Ctx) {
   // announced "Published" even though there was no board id to visit. Make
   // the lifecycle boundary explicit at the API: no public board id means
   // publication did not complete.
-  if (!board.opportunity_id) {
+  if (!publicationCompleted({ publicBoardOpportunityId: board.opportunity_id, marketUnlockValid: marketUnlocked })) {
     return Response.json(
       {
         ok: false,
@@ -90,6 +94,7 @@ export async function POST(req: Request, ctx: Ctx) {
         retryable: true,
         board,
         market_unlocked: false,
+        publication_policy_version: PUBLICATION_POLICY_VERSION,
       },
       { status: 409, headers: cors },
     );
@@ -109,5 +114,5 @@ export async function POST(req: Request, ctx: Ctx) {
   // without a second KV read. Callers should still treat market-unlock.ts
   // as the single source of truth on any LATER read (the GET routes all
   // query it directly); this is only for this one immediate response.
-  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report, market_unlocked: true }, { headers: cors });
+  return Response.json({ ok: true, status: published.status, invited, matched_vendors, criteria, board, market_report, market_unlocked: marketUnlocked, publication_policy_version: PUBLICATION_POLICY_VERSION }, { headers: cors });
 }
