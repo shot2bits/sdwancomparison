@@ -1,7 +1,7 @@
 import { corsHeaders, preflight } from "@/lib/cors";
 import { saveProject, newId, kvConfigured, KvNotConfiguredError, kvSetJson } from "@/lib/rfp-store";
 import { getAllVendorSlugs } from "@/lib/vendors";
-import { BuyerContextSchema, ProjectDetailsSchema } from "@/lib/rfp-types";
+import { BuyerContextSchema, PROJECT_JOURNEY_MODES, ProjectDetailsSchema, type ProjectJourneyMode } from "@/lib/rfp-types";
 import { ProjectEntranceContextSchema } from "@/lib/project-entrance-contract";
 import { rfpBuilderEntrance } from "@/lib/project-entrance";
 import { recordProjectEvent } from "@/lib/project-machine";
@@ -98,6 +98,7 @@ export async function POST(req: Request) {
      *  documented scope, matching resumeStateFromProject's). */
     decision_turns?: unknown;
     entrance_context?: unknown;
+    journey_mode?: unknown;
   } = {};
   try {
     body = await req.json();
@@ -158,6 +159,9 @@ export async function POST(req: Request) {
   const entranceContext = suppliedEntrance.success
     ? suppliedEntrance.data
     : rfpBuilderEntrance({ rawInput: body as Record<string, unknown>, sourceUrl: req.url });
+  const journeyMode = PROJECT_JOURNEY_MODES.includes(body.journey_mode as ProjectJourneyMode)
+    ? body.journey_mode as ProjectJourneyMode
+    : entranceContext.source === "rfp_builder" ? "build_rfp" : "find_providers";
   // Full-unification CLOSURE pass (17 Aug 2026): a first save can already
   // carry a canonical envelope (Living Procurement Canvas's own first
   // Save, via ProjectDesk.tsx) -- ONE shared verifier for every writer
@@ -191,7 +195,7 @@ export async function POST(req: Request) {
     journey: {
       contract_version: "project-journey/1.0.0",
       source: entranceContext.source,
-      mode: entranceContext.source === "rfp_builder" ? "build_rfp" : "find_providers",
+      mode: journeyMode,
       source_url: entranceContext.source_url,
       started_at: entranceContext.captured_at,
     },

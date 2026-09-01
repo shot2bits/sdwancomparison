@@ -22,7 +22,7 @@ import {
   type FieldRemoval,
 } from "@/lib/workspace/extract";
 import type { SourceLedgerEntry, SourceLedgerVia } from "@/lib/workspace/source-ledger";
-import type { RfpStatus } from "@/lib/rfp-types";
+import { PROJECT_JOURNEY_MODES, type ProjectJourneyMode, type RfpStatus } from "@/lib/rfp-types";
 import { captureRawSourceEntry, hydrateSourceTurns, mergeSourceLedger, resumeStateFromProject } from "@/lib/workspace/source-ledger";
 import type { DecisionLedgerEntry } from "@/lib/workspace/decision-ledger";
 import { mergeDecisionLedger, replayDecisionLedger, resumeDecisionsFromProject } from "@/lib/workspace/decision-ledger";
@@ -913,6 +913,7 @@ export default function ProjectDesk({
    *  DOES already have the data (e.g. a server-rendered resume page). */
   initialSourceLedger,
 }: { afterPrompt?: ReactNode; initialSourceLedger?: SourceLedgerEntry[] }) {
+  const [journeyMode, setJourneyMode] = useState<ProjectJourneyMode>("build_rfp");
   const [phase, setPhase] = useState<"live" | "fits">("live");
   const [market, setMarket] = useState<Market | null>(null);
   const [facts, setFacts] = useState<WorkspaceFact[]>([]);
@@ -1597,6 +1598,8 @@ export default function ProjectDesk({
       .catch(() => {});
 
     const p = new URLSearchParams(window.location.search);
+    const requestedJourney = p.get("journey");
+    if (PROJECT_JOURNEY_MODES.includes(requestedJourney as ProjectJourneyMode)) setJourneyMode(requestedJourney as ProjectJourneyMode);
     if (p.get("test") === "1") setTestMode(true);
     const resumeId = p.get("id");
     const resumeManage = p.get("manage");
@@ -1976,6 +1979,19 @@ export default function ProjectDesk({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const receiveJourney = (event: Event) => {
+      const mode = (event as CustomEvent<{ mode?: string }>).detail?.mode;
+      if (PROJECT_JOURNEY_MODES.includes(mode as ProjectJourneyMode)) {
+        setJourneyMode(mode as ProjectJourneyMode);
+        if (mode === "validate_rfp") setPrestartSurface("intro");
+        window.requestAnimationFrame(() => inputRef.current?.focus());
+      }
+    };
+    window.addEventListener("netify:journey-mode", receiveJourney);
+    return () => window.removeEventListener("netify:journey-mode", receiveJourney);
+  }, []);
+
   /** Harry full-test repair, Step 1: continuously preserve the canonical
    *  working inputs on this device. This intentionally stores inputs and
    *  ledgers, not the derived document: on reopen the document is compiled
@@ -2193,6 +2209,7 @@ export default function ProjectDesk({
   const coreFive = useMemo(() => {
     const stands = (path: string) => facts.some((f) => !f.struck && f.path === path);
     return {
+      journey_mode: journeyMode,
       sector: stands("organisation.sector"),
       sites: stands("estate.sites"),
       regions: stands("organisation.regions"),

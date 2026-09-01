@@ -190,10 +190,13 @@ export const ProjectConsentSchema = z.object({
 }).strict();
 export type ProjectConsent = z.infer<typeof ProjectConsentSchema>;
 
+export const PROJECT_JOURNEY_MODES = ["quick_list", "find_providers", "build_rfp", "validate_rfp"] as const;
+export type ProjectJourneyMode = (typeof PROJECT_JOURNEY_MODES)[number];
+
 export const ProjectJourneySchema = z.object({
   contract_version: z.literal("project-journey/1.0.0"),
   source: z.enum(["rfp_builder", "shortlist", "marketplace", "sector", "mcp"]),
-  mode: z.enum(["quick_list", "find_providers", "build_rfp", "validate_rfp"]),
+  mode: z.enum(PROJECT_JOURNEY_MODES),
   source_url: z.string(),
   started_at: z.number(),
 }).strict();

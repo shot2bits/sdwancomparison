@@ -4,6 +4,7 @@ import CapabilityBlock from "@/components/CapabilityBlock";
 import CollapsibleHero from "@/components/CollapsibleHero";
 import EmptyDocumentFrame from "@/components/procurement/EmptyDocumentFrame";
 import RfpCitationEvidence from "@/components/procurement/RfpCitationEvidence";
+import JourneyModeSelector from "@/components/procurement/JourneyModeSelector";
 import { getAllVendors } from "@/lib/vendors";
 
 /**
@@ -87,6 +88,8 @@ export default function ProcurementEntry() {
             ProjectDesk's own mt-10 (40px) = 52px, inside his ruled
             44-56px range. */}
         <CollapsibleHero h1={ENGINE_H1} promise={ENGINE_PROMISE} value={ENGINE_VALUE} eyebrow={ENGINE_EYEBROW} />
+
+        <JourneyModeSelector />
 
         {/* State 0 correction (18 Aug 2026): "a blank project must still
             show a compelling empty living document -- not a huge
