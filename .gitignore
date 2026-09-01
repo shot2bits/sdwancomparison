@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code
 .claude/settings.local.json
+
+# Private governed provider source archive (never commit ZIP/DOCX inputs)
+/.private/provider-source/
