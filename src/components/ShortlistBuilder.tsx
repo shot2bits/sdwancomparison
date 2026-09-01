@@ -343,7 +343,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     e.preventDefault();
     if (leadState === "busy") return;
     setLeadState("busy");
-    // 11 Aug 2026: this form previously had no dedicated tracking at all —
+    // 11 Aug 2026: this form previously had no dedicated tracking at all.
     // NetifyEvents.tsx's delegated form_start/form_submit listeners fire for
     // every form on the site, so they couldn't tell this submission apart
     // from a sign-in or RFP-builder form, and neither distinguishes a submit
@@ -358,7 +358,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           ...lead,
-          // Must include the /sase basePath — origin alone points at the main
+          // Must include the /sase basePath. Origin alone points at the main
           // site and 404s (same class of bug as Harry's supplier link).
           shortlist_url: `${window.location.origin}/sase/shortlist${qs ? `?${qs}` : ""}`,
           criteria_summary: result.criteria_summary,
@@ -798,11 +798,14 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             </a>
             <button
               type="button"
-              onClick={() => { fireNetifyEvent("shortlist_get_bids_click"); void continueCanonicalProject(); }}
+              onClick={() => {
+                fireNetifyEvent("shortlist_rfp_continue_click", { placement: "results_header" });
+                void continueCanonicalProject();
+              }}
               disabled={handoffState === "busy"}
               className="px-3.5 py-1.5 text-sm bg-amber-500 text-zinc-950 font-medium rounded-full no-underline hover:bg-amber-400 transition-colors"
             >
-              {handoffState === "busy" ? "Opening your project…" : "Get competing bids →"}
+              {handoffState === "busy" ? "Opening the RFP Builder..." : "Continue to RFP Builder"}
             </button>
           </div>
         </div>
@@ -812,30 +815,53 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             ? "Balanced capability score across all 40 features. Set filters, pick your sector, or describe your needs to the AI advisor to build your bespoke shortlist."
             : result.criteria_summary}
         </p>
-        {/* The road onward (24 July 2026, Robert): the shortlist names the
-            right providers; the workspace gets them answering. Linked
-            directly to the apex, carrying the buyer's context in q. */}
-        <section className="border border-[var(--ink-900)] rounded-sm p-5 mb-6 bg-[var(--paper-base)]">
-          <p className="eyebrow mb-1">Next step</p>
-          <p className="text-sm text-[var(--ink-700)] mb-3">
-            You already have this for free: the right providers, named and ranked, no sign-in
-            required. Publishing is what gets them responding — structured written bids side by
-            side, indicative pricing private to you, and a single place to request demos. What you
-            have built on this page travels with you, and vendors never see your email or phone
-            number until you choose to share it.
-          </p>
-          <p className="mb-3 flex flex-wrap gap-1.5 text-xs">
-            {["Structured written responses", "Indicative pricing, private to you", "Demo requests", "Message vendors in-app", "Contact details, when you choose"].map((c) => (
-              <span key={c} className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[var(--ink-700)]">{c}</span>
-            ))}
-          </p>
-          <button type="button"
-            onClick={() => void continueCanonicalProject()}
-            disabled={handoffState === "busy"}
-            className="inline-block px-4 py-2 bg-amber-500 text-zinc-950 font-medium rounded-full text-sm no-underline hover:bg-amber-400 transition-colors"
-          >
-            Start a project
-          </button>
+        <section className="mb-6 overflow-hidden rounded-sm border border-zinc-950 bg-zinc-950 text-white">
+          <div className="grid gap-6 p-6 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.72fr)] md:p-8">
+            <div>
+              <p className="eyebrow mb-2 text-amber-400">Your shortlist is ready</p>
+              <h3 className="mb-3 text-2xl text-white">Turn this shortlist into a provider RFP</h3>
+              <p className="max-w-2xl text-sm leading-6 text-zinc-300">
+                Your requirements and top providers will carry into Netify&apos;s RFP Builder.
+                Review the project, publish it anonymously and invite providers to submit written
+                responses. Publishing is free and does not commit you to buy or speak to anyone.
+              </p>
+              <ul className="mt-5 grid list-none gap-2 p-0 text-sm text-zinc-200 sm:grid-cols-3">
+                <li className="flex items-start gap-2"><span className="text-amber-400" aria-hidden="true">✓</span>Free to publish</li>
+                <li className="flex items-start gap-2"><span className="text-amber-400" aria-hidden="true">✓</span>Anonymous and non-binding</li>
+                <li className="flex items-start gap-2"><span className="text-amber-400" aria-hidden="true">✓</span>Contact details stay private</li>
+              </ul>
+            </div>
+            <div className="rounded-sm border border-zinc-700 bg-zinc-900 p-5">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                Carried into the RFP Builder
+              </p>
+              <ol className="mb-5 list-none space-y-2 p-0 text-sm">
+                {result.shortlist.slice(0, 5).map((vendor, index) => (
+                  <li key={vendor.slug} className="flex items-center gap-3 border-b border-zinc-700 pb-2 last:border-0 last:pb-0">
+                    <span className="w-5 text-xs text-zinc-500">{index + 1}</span>
+                    <span className="font-medium text-white">{vendor.name}</span>
+                  </li>
+                ))}
+              </ol>
+              <button
+                type="button"
+                onClick={() => {
+                  fireNetifyEvent("shortlist_rfp_continue_click", {
+                    placement: "handoff_panel",
+                    provider_count: String(Math.min(result.shortlist.length, 5)),
+                  });
+                  void continueCanonicalProject();
+                }}
+                disabled={handoffState === "busy" || result.shortlist.length === 0}
+                className="w-full rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {handoffState === "busy" ? "Opening the RFP Builder..." : "Continue with this shortlist"}
+              </button>
+              <p className="mt-3 text-center text-xs text-zinc-400">
+                Review and edit everything before publishing.
+              </p>
+            </div>
+          </div>
         </section>
 
         {result.shortlist.length === 0 && (

@@ -81,6 +81,12 @@ assert.match(leadRoute, /Reopen this shortlist/);
 assert.match(leadRoute, /Netify is an independent SASE and SD-WAN research and comparison service/);
 assert.doesNotMatch(leadRoute, /—/);
 assert.match(interfaceSource, /comparisonCount === 1 \? "comparison" : "comparisons"/);
+assert.match(interfaceSource, /Turn this shortlist into a provider RFP/);
+assert.match(interfaceSource, /Continue with this shortlist/);
+assert.match(interfaceSource, /Publishing is free and does not commit you to buy or speak to anyone/);
+assert.doesNotMatch(interfaceSource, /You already have this for free/);
+assert.doesNotMatch(interfaceSource, /Publishing is what gets them responding/);
+assert.doesNotMatch(interfaceSource, /—/);
 assert.match(comparisonCountRoute, /metrics:provider_comparisons:2026-09-01/);
 assert.match(comparisonCountRoute, /"NX"/);
 assert.ok(
