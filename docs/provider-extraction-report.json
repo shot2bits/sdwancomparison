@@ -1,0 +1,343 @@
+{
+  "report_version": "provider-extraction-report/1.0.0",
+  "extractor_version": "provider-docx-extractor/1.0.0",
+  "source_version": "sha256-0f697fc7fc4690bb",
+  "mapping_version": "provider-source-mapping/1.0.0",
+  "profile_count": 30,
+  "successful_profiles": 29,
+  "text_complete_profiles": 30,
+  "profiles": [
+    {
+      "source_document_id": "provider-source:aryaka-sase-profile",
+      "supplied_filename": "Aryaka_SASE_Profile.docx",
+      "output_sha256": "4d8fbc8335614c3b965b9d338d1338e4171f2d0f3284a8afe7cba9fa2cee0ba1",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 27,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:att-managedsase-profile",
+      "supplied_filename": "ATT_ManagedSASE_Profile.docx",
+      "output_sha256": "209ba7af314c5ee5ad287ebf0f0bb3609fbcb22d2e92ba474d1e446e0cea965d",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 18,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:barracuda-secureedge-profile",
+      "supplied_filename": "Barracuda_SecureEdge_Profile.docx",
+      "output_sha256": "6a0c21707e07114ced5dc481cfd08b0037e5e611c0ae4573a0a630bec385d7c6",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 24,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:bt-managedsase-profile",
+      "supplied_filename": "BT_ManagedSASE_Profile.docx",
+      "output_sha256": "adf49080506adbb5e67316425d117534ce97d22975ccd27025c250b33232f17e",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 17,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:cato-networks-profile",
+      "supplied_filename": "Cato_Networks_Profile.docx",
+      "output_sha256": "a8df0748cccfbed2ea38550e06000e8110312df3e58469eaf461694c4882d73d",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 46,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:checkpoint-sase-profile",
+      "supplied_filename": "CheckPoint_SASE_Profile.docx",
+      "output_sha256": "8f483c0e7f93fc321d927d0f6774bc5162392107a3d5194409d4afa653a240e9",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 29,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:cisco-sase-profile",
+      "supplied_filename": "Cisco_SASE_Profile.docx",
+      "output_sha256": "52d89592d6eac1efbdf1be677573576f837a2358d769c0ce6ce10929973f812b",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 52,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:cloudflare-one-profile",
+      "supplied_filename": "Cloudflare_One_Profile.docx",
+      "output_sha256": "6043e7d7c15861af2a86aa7a4ab4d60fe7b7b1946c9448db1a86ee15c2f9b55f",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 48,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:colt-managedsase-profile",
+      "supplied_filename": "Colt_ManagedSASE_Profile.docx",
+      "output_sha256": "839086538e63ddf920438a9d0ec2b6bcaf79d63fcc1d21054480875d9ce0c118",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 13,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:comcastbusiness-managedsase-profile",
+      "supplied_filename": "ComcastBusiness_ManagedSASE_Profile.docx",
+      "output_sha256": "8c0171718a7bc5eb4c962af1ce76ecf5912240b5bea70552ceee41e410c6d0bf",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 12,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:ericssoncradlepoint-sase-profile",
+      "supplied_filename": "EricssonCradlepoint_SASE_Profile.docx",
+      "output_sha256": "2e7edf2ff2756c3a31e85b0177eec25d87c58485e847a091e85f10d93871441e",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 22,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:expereo-managedsase-profile",
+      "supplied_filename": "Expereo_ManagedSASE_Profile.docx",
+      "output_sha256": "258866201dc52c661e6e03f5ebd58030fa078d78206c9dd05fac280cfa89e8e8",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 20,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:forcepoint-profile",
+      "supplied_filename": "Forcepoint_Profile.docx",
+      "output_sha256": "fd0c0a05dc26c3c4da8b61f01b3cb313e1062964765b48fab40ebc151686c5f2",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 45,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:fortinet-fortisase-profile",
+      "supplied_filename": "Fortinet_FortiSASE_Profile.docx",
+      "output_sha256": "7979d62275ec0c859a968dec963f83c4b0b09ed78c17696fa320b25f510891a7",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 36,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:gtt-managedsase-profile",
+      "supplied_filename": "GTT_ManagedSASE_Profile.docx",
+      "output_sha256": "cf4d525ee3dfdd7fb4b0ef67668a95feba1b3c86e17110c419cb07507e64b3bf",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 18,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:hpe-aruba-edgeconnect-profile",
+      "supplied_filename": "HPE_Aruba_EdgeConnect_Profile.docx",
+      "output_sha256": "ae66d6488c5d4f15b9fae58ca64aae68d27a7ddbec8058e77d028feb839d31bc",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 38,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:juniper-sase-profile",
+      "supplied_filename": "Juniper_SASE_Profile.docx",
+      "output_sha256": "d021f907bb1feba26d55a280602bf5dc70c949584620d5a23e88dc7b92d69248",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 29,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:lumen-managedsase-profile",
+      "supplied_filename": "Lumen_ManagedSASE_Profile.docx",
+      "output_sha256": "ab0240947f615282973f8f6f1f1ce2419b99109122c7f7e914cdda33e1f26663",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 18,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:netskope-profile",
+      "supplied_filename": "Netskope_Profile.docx",
+      "output_sha256": "539797eea90829188852cbae131bdec6963d48e98f61e6b379503276e5ca4272",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 46,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:nttdata-managedsase-profile",
+      "supplied_filename": "NTTDATA_ManagedSASE_Profile.docx",
+      "output_sha256": "71d084363ffdc4a9dcdb37d3536cce181b54f848d44d5c5d591f4399e6a13d88",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 22,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:opensystems-sase-profile",
+      "supplied_filename": "OpenSystems_SASE_Profile.docx",
+      "output_sha256": "b8dc040cb573dc7e47b2eb029fb064180cb1f474d4fae837861a2df0ac5f7940",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 22,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:orangebusiness-managedsase-profile",
+      "supplied_filename": "OrangeBusiness_ManagedSASE_Profile.docx",
+      "output_sha256": "a913f1d819ae2ca1fc339f03fc50e59362b4a1f29dce331973e3935c0e456a58",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 20,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:paloalto-prisma-sase-profile",
+      "supplied_filename": "PaloAlto_Prisma_SASE_Profile.docx",
+      "output_sha256": "ea4337be0efa4a24c81b398ecac2241f4aefa8cde01d283e038a0b47ba240a5c",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 43,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:sonicwall-cse-profile",
+      "supplied_filename": "SonicWall_CSE_Profile.docx",
+      "output_sha256": "d1e1b03d201f06a3b7c6d1e062cce9d09b031fcf6c949bcdd1e0161743245bc6",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 25,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:velocloud-profile",
+      "supplied_filename": "VeloCloud_Profile.docx",
+      "output_sha256": "745455add75d7f3fecc7887202645a290aaf2f03289a60a4be24be77ad99563b",
+      "tables": 21,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 25,
+      "warnings": [
+        "missing_table_mapping:case_studies"
+      ]
+    },
+    {
+      "source_document_id": "provider-source:verizon-managedsase-profile",
+      "supplied_filename": "Verizon_ManagedSASE_Profile.docx",
+      "output_sha256": "3bad381c9a55d8853d7247f34a7877e3b047258263d877ea31a14ac3182242cd",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 21,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:versa-networks-profile",
+      "supplied_filename": "Versa_Networks_Profile.docx",
+      "output_sha256": "2524c518291bb41489f39b4c2d372591d5c34c7129722f8cf699d7dd1c468b93",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 29,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:vmo2-managedsase-profile",
+      "supplied_filename": "VMO2_ManagedSASE_Profile.docx",
+      "output_sha256": "fe82d39c44d2eec97b3acd3399a366f985d8fafe3282e103626a0e0b08d3476a",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 20,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:vodafone-managedsase-profile",
+      "supplied_filename": "Vodafone_ManagedSASE_Profile.docx",
+      "output_sha256": "0122cc1d78f11748172b1c369e4278d641538f541c28d66d378dcb5afa67f755",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 18,
+      "warnings": []
+    },
+    {
+      "source_document_id": "provider-source:zscaler-profile",
+      "supplied_filename": "Zscaler_Profile.docx",
+      "output_sha256": "85c85f3cc9864bcfe08610270b29ce1f5de0081504c860d1a107c403ffd0f9c6",
+      "tables": 22,
+      "hyperlinks": 0,
+      "footnotes": 0,
+      "text_complete": true,
+      "evidence_rows": 60,
+      "warnings": []
+    }
+  ]
+}

@@ -14,6 +14,8 @@
     "test:project-entrance": "tsx scripts/test-project-entrance.ts",
     "provider:archive": "node scripts/archive-provider-dataset.mjs",
     "test:provider-archive": "node scripts/test-provider-archive.mjs",
+    "provider:extract": "python3 scripts/extract-provider-profiles.py",
+    "test:provider-extractor": "python3 scripts/test-provider-extractor.py",
     "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
     "validate:rfp-ui": "node scripts/validate-rfp-builder-flow-ui.mjs",
     "validate:ui:reversal": "node scripts/validate-sector-suggestion-reversal-ui.mjs",

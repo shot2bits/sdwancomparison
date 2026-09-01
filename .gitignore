@@ -45,3 +45,4 @@ next-env.d.ts
 
 # Private governed provider source archive (never commit ZIP/DOCX inputs)
 /.private/provider-source/
+/.private/provider-staging/
