@@ -132,22 +132,25 @@ export default function NoticeBuilder() {
 
   // Restore draft, then apply any prefill query params (quick-pricing links).
   useEffect(() => {
+    let initialDraft = EMPTY;
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) setDraft({ ...EMPTY, ...(JSON.parse(raw) as Partial<Draft>) });
+      if (raw) initialDraft = { ...EMPTY, ...(JSON.parse(raw) as Partial<Draft>) };
     } catch { /* fresh draft */ }
     const p = new URLSearchParams(window.location.search);
     if (p.get("prefill") === "1") {
       const scope = (p.get("scope") ?? "").split(".").filter((s) => (OPP_SCOPES as readonly string[]).includes(s));
       const summary = p.get("summary") ?? "";
-      setDraft((d) => ({
-        ...d,
-        scope: scope.length ? scope : d.scope,
-        summary: summary || d.summary,
-        title: d.title || (summary ? summary.slice(0, 80) : ""),
-        response_mode: p.get("engagement") === "auction" ? "reverse_auction" : d.response_mode,
-      }));
+      initialDraft = {
+        ...initialDraft,
+        scope: scope.length ? scope : initialDraft.scope,
+        summary: summary || initialDraft.summary,
+        title: initialDraft.title || (summary ? summary.slice(0, 80) : ""),
+        response_mode: p.get("engagement") === "auction" ? "reverse_auction" : initialDraft.response_mode,
+      };
     }
+    const restoredDraft = initialDraft;
+    queueMicrotask(() => setDraft(restoredDraft));
     // Clone an existing public RFI page (or sample) as a starting template.
     // Only public projection fields are used; anything private never reaches
     // this endpoint. Buyer identity is intentionally NOT cloned.
@@ -187,10 +190,10 @@ export default function NoticeBuilder() {
           track("post_project_started", { conversionSource: "clone", sourceOpportunityId: cloneId });
         } catch { /* start blank */ }
       })();
-      setLoaded(true);
+      queueMicrotask(() => setLoaded(true));
       return; // clone path fires its own started event above
     }
-    setLoaded(true);
+    queueMicrotask(() => setLoaded(true));
     track("post_project_started");
   }, []);
 

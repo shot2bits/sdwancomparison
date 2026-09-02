@@ -87,9 +87,6 @@ export default async function BestPage({ params }: Props) {
 
   const result = buildShortlist(getShortlistDataset(), page.input, FEATURE_NAMES);
   const builderUrl = `/shortlist?${encodeScenario(result.input)}`;
-  const sector = page.input.sector;
-  const sectorLabel = sector ? SECTOR_LABELS[sector].toLowerCase() : null;
-
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",

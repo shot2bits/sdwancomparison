@@ -30,7 +30,7 @@ export default function SupplierDashboard() {
 
   useEffect(() => {
     if (session?.authenticated && session.role !== "buyer") {
-      load();
+      queueMicrotask(() => void load());
       fetch("/sase/api/supplier/claim").then((r) => r.json()).then((d) => setClaim({ status: d.status, vendor_slug: d.vendor_slug })).catch(() => {});
     }
   }, [session, load]);
@@ -102,7 +102,7 @@ export default function SupplierDashboard() {
       </div>
 
       {!slug ? (
-        <p className="text-sm text-[var(--ink-600)]">You are signed in as Netify staff (relay). Open a specific opportunity via its room link to act on a vendor's behalf.</p>
+        <p className="text-sm text-[var(--ink-600)]">You are signed in as Netify staff (relay). Open a specific opportunity via its room link to act on a vendor&apos;s behalf.</p>
       ) : !data ? (
         <p className="text-sm text-[var(--ink-600)]">Loading opportunities...</p>
       ) : (

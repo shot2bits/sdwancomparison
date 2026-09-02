@@ -199,11 +199,13 @@ export default function GuidedBuild({
     /* Recommendations belong to exactly one document section. Clear the
        previous section immediately and invalidate any slower response that
        returns after the buyer has moved elsewhere. */
-    suggestionRequestRef.current += 1;
-    setSuggestions([]);
-    setSuggestionError(null);
-    setSuggesting(false);
-    setQuestionManagerOpen(false);
+    queueMicrotask(() => {
+      suggestionRequestRef.current += 1;
+      setSuggestions([]);
+      setSuggestionError(null);
+      setSuggesting(false);
+      setQuestionManagerOpen(false);
+    });
   }, [sectionTitle]);
   useEffect(() => {
     const nextId = card?.nq.id ?? null;

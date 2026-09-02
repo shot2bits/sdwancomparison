@@ -43,9 +43,15 @@ export default function SignIn({ role, prompt, onAuthed, publishRfpId }: { role:
     } catch { /* the disabled button prevents an unprotected request */ }
   }
   useEffect(() => {
-    void refreshChallenge();
-    // The role is the only input; each completed request refreshes explicitly.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (role !== "buyer") return;
+    let current = true;
+    fetch("/sase/api/auth/challenge", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { challenge?: string }) => {
+        if (current) setChallenge(data.challenge ?? "");
+      })
+      .catch(() => {});
+    return () => { current = false; };
   }, [role]);
 
   async function request() {

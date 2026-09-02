@@ -150,26 +150,28 @@ export default function DescribeWizard() {
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
     const s = p.get("scope");
-    if (s && SCOPES.some((x) => x.key === s)) {
-      setScope(s);
-      if (s === "managed") setModel("managed");
-      setStep(1);
-      started.current = true;
-      fireNetifyEvent("describe_started", { from: "link" });
-    }
     const sec = p.get("sector");
-    if (sec && SECTORS.some((x) => x.key === sec)) setSector(sec);
     const v = (p.get("vendors") ?? "").trim();
-    if (v) setPinnedVendors(v.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean).slice(0, 5));
     const t = (p.get("title") ?? "").trim();
-    if (t.length >= 8) {
-      setTitle(t.slice(0, 120));
-      titleEdited.current = true;
-      if (!started.current) {
+    queueMicrotask(() => {
+      if (s && SCOPES.some((x) => x.key === s)) {
+        setScope(s);
+        if (s === "managed") setModel("managed");
+        setStep(1);
         started.current = true;
-        fireNetifyEvent("describe_started", { from: "hero" });
+        fireNetifyEvent("describe_started", { from: "link" });
       }
-    }
+      if (sec && SECTORS.some((x) => x.key === sec)) setSector(sec);
+      if (v) setPinnedVendors(v.split(",").map((x) => x.trim().toLowerCase()).filter(Boolean).slice(0, 5));
+      if (t.length >= 8) {
+        setTitle(t.slice(0, 120));
+        titleEdited.current = true;
+        if (!started.current) {
+          started.current = true;
+          fireNetifyEvent("describe_started", { from: "hero" });
+        }
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -202,7 +204,7 @@ export default function DescribeWizard() {
 
   // Keep the title tracking the answers until the buyer takes it over.
   useEffect(() => {
-    if (!titleEdited.current) setTitle(autoTitle());
+    if (!titleEdited.current) queueMicrotask(() => setTitle(autoTitle()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scope, model, sites, regions]);
 
@@ -211,7 +213,10 @@ export default function DescribeWizard() {
   // the Managed service scope used to freeze the model, so the step-four
   // buttons changed nothing and the count looked stuck).
   useEffect(() => {
-    if (!scope || scope === "unsure") { setMatch(null); return; }
+    if (!scope || scope === "unsure") {
+      queueMicrotask(() => setMatch(null));
+      return;
+    }
     const q = new URLSearchParams({ scope: scope === "managed" ? "sase" : scope, regions: regions.join("."), model });
     const t = window.setTimeout(() => {
       fetch(`/sase/api/rfp/match?${q.toString()}`)

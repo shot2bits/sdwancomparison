@@ -54,10 +54,6 @@ function band(b: Band): string {
   return `${gbp(b[0])} to ${gbp(b[1])}`;
 }
 
-function base64url(obj: unknown): string {
-  return btoa(JSON.stringify(obj)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
 export function CostEstimator() {
   const [users, setUsers] = useState(1000);
   const [sites, setSites] = useState(20);

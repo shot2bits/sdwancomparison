@@ -18,7 +18,8 @@ export default function OpportunityOwnerBanner({ id }: { id: string }) {
 
   useEffect(() => {
     try {
-      setIsOwner(Boolean(localStorage.getItem(`opp_btok_${id}`)));
+      const owner = Boolean(localStorage.getItem(`opp_btok_${id}`));
+      queueMicrotask(() => setIsOwner(owner));
     } catch {
       /* private mode: no banner */
     }

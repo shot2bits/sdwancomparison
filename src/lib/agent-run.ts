@@ -20,7 +20,7 @@ import {
   RUN_LOCK_TTL_MS, RFP_LOCK_TTL_MS, DIGEST_COOLDOWN_MS, STALE_APPROVAL_MS,
   DEADLINE_WINDOW_MS, MAX_OPEN_PROPOSALS_PER_SUPPLIER_PER_RFP,
   QUIET_START_HOUR, QUIET_END_HOUR,
-  type AgentRun, type Digest, type DigestItem, type BidReview, type ApprovalItem,
+  type AgentRun, type Digest, type DigestItem, type BidReview,
 } from "@/lib/agent-types";
 
 const MODEL = "claude-haiku-4-5-20251001";

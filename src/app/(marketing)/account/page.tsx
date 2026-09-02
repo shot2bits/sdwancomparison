@@ -43,7 +43,7 @@ export default function AccountPage() {
       <div className="mb-8 rounded-md border border-[var(--ink-200,#e5e5e5)] p-5">
         <p className="m-0 text-sm text-[var(--ink-600,#555)]">
           Accounts are created by publishing a project, not before it. If you have not published yet,{" "}
-          <a href="/#describe" className="underline">describe your project on the front page</a> and your account is
+          <Link href="/#describe" className="underline">describe your project on the front page</Link> and your account is
           made when you sign the publish.
         </p>
       </div>

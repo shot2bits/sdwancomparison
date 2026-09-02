@@ -35,7 +35,9 @@ export default function PartnerWorkspace() {
     setWs(d as Workspace);
     setLoading(false);
   }, []);
-  useEffect(() => { load().catch(() => setLoading(false)); }, [load]);
+  useEffect(() => {
+    queueMicrotask(() => void load().catch(() => setLoading(false)));
+  }, [load]);
 
   if (loading) return <p className="text-sm text-[var(--ink-500)]">Loading your workspace…</p>;
   if (needsAuth) return (

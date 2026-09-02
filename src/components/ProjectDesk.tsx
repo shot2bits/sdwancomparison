@@ -59,7 +59,6 @@ import { chunkForIngest, ingestSummary } from "@/lib/workspace/ingest";
 import { siteFigureIsIdentifying, siteBandLabelFor } from "@/lib/notice-options";
 import SignIn from "@/components/SignIn";
 import { fireNetifyEvent } from "@/components/NetifyEvents";
-import ConstellationScene from "@/components/ConstellationScene";
 import { hasPublished } from "@/lib/project-machine";
 /** Living Procurement OS · Phase 3 Stage A (14 Aug 2026): wires the
  *  existing, pure `compileProcurementDocument()` compiler into this real
@@ -109,7 +108,6 @@ import { coachingFor } from "@/lib/workspace/section-coaching";
  *  strip, per Robert's explicit framing, not a parallel rail. */
 import SectionNav from "@/components/procurement/SectionNav";
 import GuidedBuild, { type RfpDepth } from "@/components/procurement/GuidedBuild";
-import SectionBuildPanel from "@/components/procurement/SectionBuildPanel";
 import SectionDetail from "@/components/procurement/SectionDetail";
 import DecisionsStep from "@/components/procurement/DecisionsStep";
 import ProcurementWorkspaceDocument, { type WorkspaceDocumentView } from "@/components/procurement/ProcurementWorkspaceDocument";
@@ -994,7 +992,7 @@ export default function ProjectDesk({
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [cycleError, setCycleError] = useState<string | null>(null);
-  const [promptQuestionId, setPromptQuestionId] = useState<string | null>(null);
+  const [promptQuestionId] = useState<string | null>(null);
   // The RFP Builder is the product, so a new buyer lands in the builder
   // immediately. The older promotional start panel remains available only as
   // a transitional code path while the started-project flow is migrated.
@@ -1599,6 +1597,7 @@ export default function ProjectDesk({
 
     const p = new URLSearchParams(window.location.search);
     const requestedJourney = p.get("journey");
+    queueMicrotask(() => {
     if (PROJECT_JOURNEY_MODES.includes(requestedJourney as ProjectJourneyMode)) setJourneyMode(requestedJourney as ProjectJourneyMode);
     if (p.get("test") === "1") setTestMode(true);
     const resumeId = p.get("id");
@@ -1976,6 +1975,7 @@ export default function ProjectDesk({
       void send(q);
     }
     setBooted(true);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -2008,7 +2008,7 @@ export default function ProjectDesk({
        this transition a fast refresh could trust the stale acknowledgement
        and reopen the earlier source-only snapshot before extracted facts
        had reached localStorage. */
-    setLocalDraftStatus("idle");
+    queueMicrotask(() => setLocalDraftStatus("idle"));
     const timer = window.setTimeout(() => {
       try {
         const id = localDraftIdRef.current ?? newLocalDraftId();
@@ -2073,7 +2073,7 @@ export default function ProjectDesk({
   /* ---- Assess (the rulebook, client side, one truth) ---- */
   useEffect(() => {
     if (!securityScope || live.length === 0) {
-      setVerdict(null);
+      queueMicrotask(() => setVerdict(null));
       return;
     }
     let cancelled = false;
@@ -2174,33 +2174,35 @@ export default function ProjectDesk({
   );
   useEffect(() => {
     if (!pack || assertedPacks.current.has(pack.id)) return;
-    assertedPacks.current = new Set([...assertedPacks.current, pack.id]);
-    const sugs = visibleSuggestions(pack, packFlavours, factsRef.current, noted.map((n) => n.id), []);
-    const compliance: Array<{ sg: PackSuggestion; item: TaxonomyItem }> = [];
-    for (const sg of sugs) {
-      if (sg.accept.kind !== "items") continue;
-      for (const id of sg.accept.itemIds) {
-        const e = ITEM_BY_ID[id];
-        if (e && e.item.path === "constraints.complianceRequirements") compliance.push({ sg, item: e.item });
+    queueMicrotask(() => {
+      assertedPacks.current = new Set([...assertedPacks.current, pack.id]);
+      const sugs = visibleSuggestions(pack, packFlavours, factsRef.current, noted.map((n) => n.id), []);
+      const compliance: Array<{ sg: PackSuggestion; item: TaxonomyItem }> = [];
+      for (const sg of sugs) {
+        if (sg.accept.kind !== "items") continue;
+        for (const id of sg.accept.itemIds) {
+          const e = ITEM_BY_ID[id];
+          if (e && e.item.path === "constraints.complianceRequirements") compliance.push({ sg, item: e.item });
+        }
       }
-    }
-    if (!compliance.length) return;
-    const updates: FieldUpdate[] = compliance.map(({ sg, item }) => ({
-      path: item.path as AllowedPath,
-      value: item.value,
-      provenance: "inferred",
-      reason: sg.reason,
-    }));
-    const merged = applyMerge(updates, "extract");
-    if (!merged.changed.length) return;
-    const landed = compliance.filter(({ item }) => merged.changed.includes(factId(item.path as AllowedPath, item.value)));
-    const shown = landed.length ? landed : compliance;
-    for (const { sg } of shown) ev("workspace_pack_suggestion", { id: sg.id, verdict: "asserted" });
-    /* The change carries the marker AND one thread line (round 6): the
-       rules are already written in when the line appears. */
-    setChangedSlots((prev) => [...new Set([...prev, ...merged.changed.map((id) => `rule:${id}`)])]);
-    const n = merged.changed.length;
-    say(`Your sector writes ${numWord(n)} rule${n === 1 ? "" : "s"} into the statement; they are in already, each with its reason, and any one can be dropped.`);
+      if (!compliance.length) return;
+      const updates: FieldUpdate[] = compliance.map(({ sg, item }) => ({
+        path: item.path as AllowedPath,
+        value: item.value,
+        provenance: "inferred",
+        reason: sg.reason,
+      }));
+      const merged = applyMerge(updates, "extract");
+      if (!merged.changed.length) return;
+      const landed = compliance.filter(({ item }) => merged.changed.includes(factId(item.path as AllowedPath, item.value)));
+      const shown = landed.length ? landed : compliance;
+      for (const { sg } of shown) ev("workspace_pack_suggestion", { id: sg.id, verdict: "asserted" });
+      /* The change carries the marker AND one thread line (round 6): the
+         rules are already written in when the line appears. */
+      setChangedSlots((prev) => [...new Set([...prev, ...merged.changed.map((id) => `rule:${id}`)])]);
+      const n = merged.changed.length;
+      say(`Your sector writes ${numWord(n)} rule${n === 1 ? "" : "s"} into the statement; they are in already, each with its reason, and any one can be dropped.`);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pack, packFlavours]);
 
@@ -2216,7 +2218,7 @@ export default function ProjectDesk({
       scope: stands("procurement.buying"),
       timeline: stands("constraints.timeline"),
     };
-  }, [facts]);
+  }, [facts, journeyMode]);
   const missingCore = useMemo(() => {
     const out: string[] = [];
     if (!coreFive.sector) out.push("your sector");
@@ -2285,34 +2287,6 @@ export default function ProjectDesk({
      the corresponding removal. */
   const marketTotal = fit?.total ?? market?.counts.vendors ?? null;
   const pins = [...new Set(added)].slice(0, 5);
-
-  /** Vendors the buyer has NAMED in their own retained words (quotes,
-   *  receipts). A tag for the Constellation, never a rank change: naming
-   *  is not evidence. Restored 1 Aug 2026 alongside the Constellation
-   *  itself (see ConstellationScene.tsx). */
-  const namedSlugs = useMemo(() => {
-    const text = [
-      ...facts.map((f) => `${f.quote ?? ""} ${f.reason ?? ""}`),
-      ...receipts.map((r) => r.text),
-    ].join(" ").toLowerCase();
-    const out = new Set<string>();
-    if (text.trim())
-      for (const v of market?.vendors ?? []) {
-        const full = v.name.toLowerCase();
-        const first = full.split(/[\s/]+/)[0];
-        const hit = text.includes(full) || (first.length >= 4 && !["check", "orange"].includes(first) && new RegExp(`\\b${first}\\b`).test(text));
-        if (hit) out.add(v.slug);
-      }
-    return out;
-  }, [facts, receipts, market]);
-  const narrowedBy = [
-    buying ? "what you are buying" : null,
-    opModel ? "who runs it" : null,
-    buying && (requirement.organisation?.regions ?? []).length ? "where it runs" : null,
-  ].filter((x): x is string => Boolean(x));
-  const marketNote = narrowedBy.length
-    ? `Narrowed by ${listJoin(narrowedBy)}. Never by what anyone pays.`
-    : "The whole evaluated market, until you tell it more. Never narrowed by what anyone pays.";
 
   function unansweredGapsLenOk() { return brief.openGaps.length === 0; }
   const unansweredGaps = brief.openGaps;
@@ -3779,7 +3753,7 @@ export default function ProjectDesk({
      so a spoken command works exactly like a typed one). ---- */
   useEffect(() => {
     const w = window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
-    if (w.SpeechRecognition || w.webkitSpeechRecognition) setVoiceSupported(true);
+    if (w.SpeechRecognition || w.webkitSpeechRecognition) queueMicrotask(() => setVoiceSupported(true));
     return () => { try { voiceRec.current?.stop(); } catch { /* gone */ } };
   }, []);
   const startVoice = () => {
@@ -5198,7 +5172,6 @@ export default function ProjectDesk({
             type="button"
             aria-label={item.disabled ? `${item.label}, locked. ${item.disabledReason}` : item.label}
             aria-disabled={item.disabled || undefined}
-            aria-description={item.disabled ? item.disabledReason : undefined}
             aria-describedby={item.disabled ? tooltipId : undefined}
             aria-current={item.current ? "page" : undefined}
             data-current={item.current}

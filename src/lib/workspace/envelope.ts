@@ -175,8 +175,9 @@ export function envelopeContentHash(value: unknown): string {
  *  ON `readiness`". */
 function withoutReadiness(doc: unknown): unknown {
   if (!doc || typeof doc !== "object") return doc;
-  const { readiness: _readiness, ...rest } = doc as Record<string, unknown>;
-  return rest;
+  return Object.fromEntries(
+    Object.entries(doc as Record<string, unknown>).filter(([key]) => key !== "readiness"),
+  );
 }
 
 /* ------------------------------------------------------------------ */

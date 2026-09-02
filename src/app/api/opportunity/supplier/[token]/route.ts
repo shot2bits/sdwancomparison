@@ -42,6 +42,10 @@ export async function GET(req: Request, ctx: Ctx) {
   // here the same way buyer_token/owner_email already are, so it can
   // never leak by accident again.
   const { buyer_token: _bt, owner_email: _oe, introduced: _in, invited: _inv, ...rest } = opp;
+  void _bt;
+  void _oe;
+  void _in;
+  void _inv;
   // Contact details pass only after the buyer accepts an introduction
   // (Robert's E4 ruling, 29 Jul 2026). The spread above strips
   // owner_email unconditionally so it can never leak by accident; the
@@ -92,6 +96,10 @@ export async function POST(req: Request, ctx: Ctx) {
   // pricing amounts in the post-action snapshot. The introduction object
   // mirrors the GET so the room state never flickers.
   const { buyer_token: _bt2, owner_email: _oe2, introduced: _in2, invited: _inv2, ...rest2 } = updated;
+  void _bt2;
+  void _oe2;
+  void _in2;
+  void _inv2;
   const introducedNow = (updated.introduced ?? []).includes(ref.vendor_slug);
   return Response.json({
     ...rest2,

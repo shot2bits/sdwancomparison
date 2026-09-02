@@ -36,7 +36,7 @@ export default function JourneyModeSelector() {
   const [signedIn, setSignedIn] = useState(false);
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   useEffect(() => {
-    setSelected(modeFromLocation());
+    queueMicrotask(() => setSelected(modeFromLocation()));
     fetch("/sase/api/auth/session").then((response) => response.json()).then((session) => setSignedIn(Boolean(session.authenticated))).catch(() => {});
   }, []);
 

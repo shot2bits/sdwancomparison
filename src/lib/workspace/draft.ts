@@ -719,7 +719,6 @@ export function briefModel(opts: {
   const liveOne = (path: AllowedPath) => live.filter((f) => f.path === path).slice(-1)[0];
 
   const buying = buyingOf(facts);
-  const opModel = operatingModelOf(facts);
   const securityScope = buying === "managed_security" || buying === null;
   const networkScope = buying === "sase" || buying === "sdwan" || buying === "sse";
 

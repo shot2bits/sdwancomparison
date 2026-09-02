@@ -46,7 +46,7 @@ export interface EstimateResult {
   notes: string[];
 }
 
-const B = bands as any;
+const B = bands;
 
 function volumeMultiplier(users: number): Band {
   for (const tier of B.volumeMultiplierByUsers) {
@@ -69,7 +69,8 @@ const band = (o: { low: number; high: number }): Band => [o.low, o.high];
 /** Core estimate at a given term (used for both the chosen-term monthly view and the fixed 3-year TCO). */
 function coreMonthly(input: EstimateInputT, termYears: 1 | 3 | 5) {
   const vol = volumeMultiplier(input.users);
-  const term = band(B.termMultiplier[String(termYears)]);
+  const termKey = String(termYears) as "1" | "3" | "5";
+  const term = band(B.termMultiplier[termKey]);
 
   // Per-user licensing, split so the driver attribution is honest
   const network = scale(mul(band(B.perUserMonthly.baseNetworking), vol), input.users);

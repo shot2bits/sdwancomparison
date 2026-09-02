@@ -3,7 +3,7 @@
 /** Supplier portal: a vendor (or their agent) reads the buyer's messages on
  *  an RFP connection and replies, shares contact details or proposes a demo. */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type Msg = { id: string; from: "buyer" | "supplier"; type: string; body: string; payload: Record<string, string>; created: number };
 type Conn = { vendor_name: string; status: string; messages: Msg[] };
@@ -22,17 +22,18 @@ export default function SupplierPortal({ token }: { token: string }) {
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [now] = useState(() => Date.now());
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [token]);
-
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const res = await fetch(`/sase/api/supplier/${token}`);
       if (!res.ok) { setError("This connection could not be found."); return; }
       const data = (await res.json()) as { connection: Conn; rfp: Rfp | null };
       setConn(data.connection); setRfp(data.rfp);
     } catch { setError("This connection could not be loaded."); }
-  }
+  }, [token]);
+
+  useEffect(() => { queueMicrotask(() => void load()); }, [load]);
 
   async function post(action: string, body: string, payload: Record<string, string> = {}) {
     setError(null); setNotice(null);
@@ -55,10 +56,10 @@ export default function SupplierPortal({ token }: { token: string }) {
         {rfp && <p className="text-sm text-[var(--ink-500)]">RFP: {rfp.title} · {rfp.status} · {rfp.question_count} questions · scope {rfp.product_scope} · {rfp.operating_model}{rfp.sector ? ` · ${rfp.sector}` : ""}</p>}
         <p className="text-sm text-[var(--ink-500)] mt-1">Connection status: {conn.status}</p>
         {rfp?.response_deadline && (
-          <p className={`mt-1 text-sm ${rfp.response_deadline < Date.now() ? "text-red-700" : "text-[var(--ink-700)]"}`}>
-            {rfp.response_deadline < Date.now()
+          <p className={`mt-1 text-sm ${rfp.response_deadline < now ? "text-red-700" : "text-[var(--ink-700)]"}`}>
+            {rfp.response_deadline < now
               ? `The response window closed on ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}.`
-              : `Responses close ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(1, Math.ceil((rfp.response_deadline - Date.now()) / 86400000))} day${Math.ceil((rfp.response_deadline - Date.now()) / 86400000) === 1 ? "" : "s"} left).`}
+              : `Responses close ${new Date(rfp.response_deadline).toLocaleDateString("en-GB", { day: "numeric", month: "long" })} (${Math.max(1, Math.ceil((rfp.response_deadline - now) / 86400000))} day${Math.ceil((rfp.response_deadline - now) / 86400000) === 1 ? "" : "s"} left).`}
           </p>
         )}
       </div>

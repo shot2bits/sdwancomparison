@@ -69,9 +69,6 @@ export default async function VendorPage({ params }: Props) {
   const sourcedFacts = Object.entries(vendor.sourced_facts ?? {});
 
   const capByCat = getCapabilitiesByCategory(vendor);
-  const totalFeatures = 40;
-  const yesPct = Math.round((vendor.score_summary.yes_count / totalFeatures) * 100);
-
   // The derived edges (final architecture §4.2): head-to-heads, best-for
   // appearances, close peers and research, all computed from the datasets
   // at build time. Empty lists render nothing; no edge is ever invented.

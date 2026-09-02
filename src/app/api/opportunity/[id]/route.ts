@@ -32,6 +32,8 @@ export async function GET(req: Request, ctx: Ctx) {
   // Pricing amounts are masked (private to the buyer) and the buyer name is
   // masked when the notice is anonymous.
   const { buyer_token: _bt, owner_email: _oe, ...rest } = opp;
+  void _bt;
+  void _oe;
   const viewer = {
     ...rest,
     buyer_org: opp.buyer_visibility === "anonymous" ? "" : opp.buyer_org,

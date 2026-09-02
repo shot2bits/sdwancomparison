@@ -14,8 +14,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   NETIFY_NDA_TEMPLATE,
   type ProjectDetails,
-  type BuyerContext,
-  type RfpSection,
   type RfpQuestion,
   type NdaConfig,
   type NdaAcceptance,
@@ -256,7 +254,11 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     } catch { /* non-fatal */ }
   }
 
-  useEffect(() => { if (initialId) loadProject(initialId); /* eslint-disable-next-line */ }, [initialId]);
+  useEffect(() => {
+    if (initialId) queueMicrotask(() => void loadProject(initialId));
+    // loadProject is intentionally tied to the route id, not to its changing closure.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialId]);
 
   // Publish auto-resume (Harry's feedback, 06/07/2026). Two paths back from
   // the sign-in round trip: (a) the amber panel is still on screen because the
@@ -268,7 +270,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     if (!project) return;
     let flagged = false;
     try { flagged = localStorage.getItem(`rfp_pending_publish_${project.id}`) === "1"; } catch { /* ignore */ }
-    if (flagged && project.status !== "published" && !publishAuthNeeded) setPublishAuthNeeded(true);
+    if (flagged && project.status !== "published" && !publishAuthNeeded) queueMicrotask(() => setPublishAuthNeeded(true));
     /* eslint-disable-next-line */
   }, [project?.id]);
   useEffect(() => {
@@ -309,7 +311,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // Sticky-bar dismissal persists for the session only.
   useEffect(() => {
     if (!project) return;
-    try { setStickyGone(sessionStorage.getItem(`rfp_publish_bar_${project.id}`) === "1"); } catch { /* ignore */ }
+    try {
+      const gone = sessionStorage.getItem(`rfp_publish_bar_${project.id}`) === "1";
+      queueMicrotask(() => setStickyGone(gone));
+    } catch { /* ignore */ }
     /* eslint-disable-next-line */
   }, [project?.id]);
 
@@ -344,16 +349,22 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     const p = new URLSearchParams(window.location.search);
     const w = p.get("welcome");
     if (w !== "generated" && w !== "submitting") return;
-    if (w === "generated") setGeneratedWelcome(true);
+    let email = "";
     if (w === "submitting") {
-      setSubmitFlow(true);
-      try { setPendingEmail(sessionStorage.getItem("netify_pending_email") ?? ""); } catch { /* ignore */ }
+      try { email = sessionStorage.getItem("netify_pending_email") ?? ""; } catch { /* ignore */ }
     }
-    setMode("manual");
-    fireNetifyEvent("rfp_generated", { flow: w === "submitting" ? "submit" : "review" });
-    p.delete("welcome");
-    const qs = p.toString();
-    window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    queueMicrotask(() => {
+      if (w === "generated") setGeneratedWelcome(true);
+      if (w === "submitting") {
+        setSubmitFlow(true);
+        setPendingEmail(email);
+      }
+      setMode("manual");
+      fireNetifyEvent("rfp_generated", { flow: w === "submitting" ? "submit" : "review" });
+      p.delete("welcome");
+      const qs = p.toString();
+      window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    });
   }, []);
 
   // Sign-in confirmation carried over the verify redirect (sessionStorage,
@@ -366,7 +377,8 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       if (!raw) return;
       sessionStorage.removeItem("netify_signin_note");
       const d = JSON.parse(raw) as { claimed?: number };
-      setSigninNote(typeof d.claimed === "number" ? d.claimed : 0);
+      const claimed = typeof d.claimed === "number" ? d.claimed : 0;
+      queueMicrotask(() => setSigninNote(claimed));
     } catch { /* ignore */ }
   }, []);
 
@@ -415,7 +427,7 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
         }
       } catch { /* private mode */ }
     }
-  }, [project?.id]);
+  }, [project?.id, project?.status, project?.title]);
   const previewSeen = useRef(false);
   useEffect(() => {
     if (marketReport && project && project.status !== "published" && !previewSeen.current) {
@@ -424,7 +436,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
     }
     /* eslint-disable-next-line */
   }, [marketReport, project?.status]);
-  useEffect(() => { if (project) { refreshCoverage(); } /* eslint-disable-next-line */ }, [project?.id, project?.buyer.compliance?.join(",")]);
+  const complianceKey = project?.buyer.compliance?.join(",") ?? "";
+  useEffect(() => {
+    if (project) queueMicrotask(() => void refreshCoverage());
+    // The project id and compliance values are the refresh boundary.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, complianceKey]);
   useEffect(() => { fetch("/sase/api/rfp/benchmark").then((r) => r.json()).then(setBenchmark).catch(() => {}); }, []);
   // Row-8 hotfix (16 Aug 2026): only poll for supplier connections once the
   // project has actually published. Pre-publish there is nothing legitimate
@@ -434,8 +451,16 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
   // refreshConnections() calls elsewhere (after invite/message/publish) are
   // unaffected — they read the fresh publish result directly, not this
   // status-gated mount effect.
-  useEffect(() => { if (project && marketUnlocked) refreshConnections(); /* eslint-disable-next-line */ }, [project?.id, marketUnlocked]);
-  useEffect(() => { if (project?.nda?.required) refreshNdaAccepts(); /* eslint-disable-next-line */ }, [project?.id, project?.nda?.required, project?.nda?.version]);
+  useEffect(() => {
+    if (project && marketUnlocked) queueMicrotask(() => void refreshConnections());
+    // Connections refresh only when project identity or unlock state changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, marketUnlocked]);
+  useEffect(() => {
+    if (project?.nda?.required) queueMicrotask(() => void refreshNdaAccepts());
+    // NDA acceptances refresh only when the project or NDA version changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, project?.nda?.required, project?.nda?.version]);
   useEffect(() => { fetch("/sase/question-bank.json").then((r) => r.json()).then(setBank).catch(() => {}); }, []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [messages]);
 
@@ -706,8 +731,10 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
           notes: "Prefilled from the SASE cost estimator (Netify SASE Methodology v2026.1).",
         };
         prefilled.current = true;
-        setMode("manual");
-        startRfp(buyer);
+        queueMicrotask(() => {
+          setMode("manual");
+          void startRfp(buyer);
+        });
       } catch {
         /* malformed prefill payloads are ignored; the builder starts clean */
       }
@@ -725,9 +752,12 @@ export default function RfpBuilder({ initialId }: { initialId?: string }) {
       site_count: p.get("sites") ? Number(p.get("sites")) : null,
       notes: p.get("notes") || "",
     };
-    setMode("manual");
-    startRfp(buyer);
-    /* eslint-disable-next-line */
+    queueMicrotask(() => {
+      setMode("manual");
+      void startRfp(buyer);
+    });
+    // This prefill is a one-time mount handoff from the URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function persist(updated: ProjectDetails, regenerate = false) {
@@ -2276,7 +2306,6 @@ function CodeEntry({ defaultEmail, onVerified }: { defaultEmail: string; onVerif
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  useEffect(() => { if (defaultEmail && !addr) setAddr(defaultEmail); /* eslint-disable-next-line */ }, [defaultEmail]);
   async function submit() {
     const c = code.trim();
     const e = addr.trim();

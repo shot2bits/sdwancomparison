@@ -52,6 +52,10 @@ type Sel = { needs: string[]; sector: string | null; regions: string[]; project:
 
 const INITIAL: Sel = { needs: ["sase"], sector: null, regions: ["uk_ireland"], project: null, orgSize: null, delivery: "any", sdwan: [], sase: [], compliance: [], sites: "", budget: "", description: "" };
 
+function OptionGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>;
+}
+
 export default function GuidedStart() {
   const router = useRouter();
   const [s, setS] = useState<Sel>(INITIAL);
@@ -80,7 +84,12 @@ export default function GuidedStart() {
 
   // Remember the form across navigation, so opening an outcome and coming back
   // never loses what the user entered.
-  useEffect(() => { try { const raw = sessionStorage.getItem("netify_guided_start"); if (raw) setS({ ...INITIAL, ...JSON.parse(raw) }); } catch { /* ignore */ } }, []);
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("netify_guided_start");
+      if (raw) queueMicrotask(() => setS({ ...INITIAL, ...JSON.parse(raw) }));
+    } catch { /* ignore */ }
+  }, []);
   useEffect(() => { try { sessionStorage.setItem("netify_guided_start", JSON.stringify(s)); } catch { /* ignore */ } }, [s]);
 
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
@@ -141,9 +150,6 @@ export default function GuidedStart() {
 
   const chip = (active: boolean) =>
     `px-3 py-1.5 text-sm rounded-full border transition-colors ${active ? "bg-amber-500 border-amber-500 text-zinc-950 font-medium" : "border-[var(--ink-300,#ccc)] text-[var(--ink-800)] hover:border-[var(--ink-900)]"}`;
-  const Group = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div><p className="eyebrow mb-2">{title}</p><div className="flex flex-wrap gap-2">{children}</div></div>
-  );
 
   return (
     <div className="rounded-lg border border-[var(--ink-200,#e5e5e5)] p-6 md:p-8 bg-[var(--surface,#fff)]">
@@ -171,43 +177,43 @@ export default function GuidedStart() {
       </div>
 
       <div className="space-y-5">
-        <Group title="What do you need?">
+        <OptionGroup title="What do you need?">
           {NEEDS.map((n) => <button key={n.key} onClick={() => setS({ ...s, needs: toggle(s.needs, n.key) })} className={chip(s.needs.includes(n.key))}>{n.label}</button>)}
-        </Group>
+        </OptionGroup>
 
         <div className="grid md:grid-cols-2 gap-5">
-          <Group title="Sector">
+          <OptionGroup title="Sector">
             {SECTORS.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sector: s.sector === k ? null : k })} className={chip(s.sector === k)}>{l}</button>)}
-          </Group>
-          <Group title="Region">
+          </OptionGroup>
+          <OptionGroup title="Region">
             {REGIONS.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, regions: toggle(s.regions, k) })} className={chip(s.regions.includes(k))}>{l}</button>)}
-          </Group>
+          </OptionGroup>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
-          <Group title="Project type">
+          <OptionGroup title="Project type">
             {(["new", "migration"] as const).map((k) => <button key={k} onClick={() => setS({ ...s, project: s.project === k ? null : k })} className={chip(s.project === k)}>{k === "new" ? "New project" : "Migration"}</button>)}
-          </Group>
-          <Group title="Organisation">
+          </OptionGroup>
+          <OptionGroup title="Organisation">
             {ORG_SIZES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, orgSize: s.orgSize === k ? null : k })} className={chip(s.orgSize === k)}>{l}</button>)}
-          </Group>
-          <Group title="Delivery model">
+          </OptionGroup>
+          <OptionGroup title="Delivery model">
             {DELIVERY.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, delivery: k })} className={chip(s.delivery === k)}>{l}</button>)}
-          </Group>
+          </OptionGroup>
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
-          <Group title="SD-WAN features">
+          <OptionGroup title="SD-WAN features">
             {SDWAN_FEATURES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sdwan: toggle(s.sdwan, k) })} className={chip(s.sdwan.includes(k))}>{l}</button>)}
-          </Group>
-          <Group title="SASE features">
+          </OptionGroup>
+          <OptionGroup title="SASE features">
             {SASE_FEATURES.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, sase: toggle(s.sase, k) })} className={chip(s.sase.includes(k))}>{l}</button>)}
-          </Group>
+          </OptionGroup>
         </div>
 
-        <Group title="Compliance (optional)">
+        <OptionGroup title="Compliance (optional)">
           {COMPLIANCE.map(([k, l]) => <button key={k} onClick={() => setS({ ...s, compliance: toggle(s.compliance, k) })} className={chip(s.compliance.includes(k))}>{l}</button>)}
-        </Group>
+        </OptionGroup>
 
         <div className="grid sm:grid-cols-2 gap-3">
           <input value={s.sites} onChange={(e) => setS({ ...s, sites: e.target.value.replace(/[^0-9]/g, "") })} placeholder="Number of sites (optional)" className="border border-[var(--ink-300,#ccc)] rounded-sm p-2.5 text-sm" />

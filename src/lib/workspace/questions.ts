@@ -310,9 +310,16 @@ export function earnedQuestions(
   const ctx: Ctx = { requirement, buying, opModel, notedIds, dismissed, corpus };
   const packEarned = PACK_QUESTIONS.filter(
     (q) => !dismissed.includes(q.id) && q.earnedBy({ requirement, buying, opModel, notedIds, corpus }),
-  ).map(({ earnedBy: _e, earnedByProse: _p, ...q }) => q);
+  ).map(({ earnedBy: _e, earnedByProse: _p, ...q }) => {
+    void _e;
+    void _p;
+    return q;
+  });
   return [
-    ...QUESTIONS.filter((q) => !dismissed.includes(q.id) && q.earnedBy(ctx)).map(({ earnedBy: _e, ...q }) => q),
+    ...QUESTIONS.filter((q) => !dismissed.includes(q.id) && q.earnedBy(ctx)).map(({ earnedBy: _e, ...q }) => {
+      void _e;
+      return q;
+    }),
     ...packEarned,
   ].sort((a, b) => b.weight - a.weight);
 }
@@ -320,19 +327,25 @@ export function earnedQuestions(
 /** The full published set (triggers described in prose, for the machine
  *  feeds): what the desk asks and why each question earned its place. */
 export function publishedQuestionSet() {
-  const pack = PACK_QUESTIONS.map(({ earnedBy: _e, earnedByProse, ...q }) => ({ ...q, earned_by: earnedByProse }));
-  return [...QUESTIONS.map(({ earnedBy: _e, ...q }) => ({
-    ...q,
-    earned_by:
-      q.id === "q-fca" ? "the buyer's sector is financial services" :
-      q.id === "q-dspt" ? "the buyer's sector is healthcare" :
-      q.id === "q-azure-vwan" ? "Azure stands in the stated estate" :
-      q.id === "q-mpls-keep" ? "MPLS stands in the stated estate and a network service is being bought" :
-      q.id === "q-residency" ? "stated regions extend beyond the UK and Ireland" :
-      q.id === "q-support" ? "a fully managed operating model is stated" :
-      q.id === "q-sse-scope" ? "SASE is being bought and no SSE control is selected yet" :
-      q.id === "q-sase-shape" ? "SASE is being bought and neither platform shape is selected yet" :
-      q.id === "q-contract-end" ? "a contract renewal is a stated driver" :
-      "dual-circuit resilience: ten or more sites and a network service",
-  })), ...pack];
+  const pack = PACK_QUESTIONS.map(({ earnedBy: _e, earnedByProse, ...q }) => {
+    void _e;
+    return { ...q, earned_by: earnedByProse };
+  });
+  return [...QUESTIONS.map(({ earnedBy: _e, ...q }) => {
+    void _e;
+    return {
+      ...q,
+      earned_by:
+        q.id === "q-fca" ? "the buyer's sector is financial services" :
+        q.id === "q-dspt" ? "the buyer's sector is healthcare" :
+        q.id === "q-azure-vwan" ? "Azure stands in the stated estate" :
+        q.id === "q-mpls-keep" ? "MPLS stands in the stated estate and a network service is being bought" :
+        q.id === "q-residency" ? "stated regions extend beyond the UK and Ireland" :
+        q.id === "q-support" ? "a fully managed operating model is stated" :
+        q.id === "q-sse-scope" ? "SASE is being bought and no SSE control is selected yet" :
+        q.id === "q-sase-shape" ? "SASE is being bought and neither platform shape is selected yet" :
+        q.id === "q-contract-end" ? "a contract renewal is a stated driver" :
+        "dual-circuit resilience: ten or more sites and a network service",
+    };
+  }), ...pack];
 }

@@ -13,7 +13,7 @@ const checks: Array<[string, boolean]> = [
   ["mobile layouts hide the longer desktop notice instead of duplicating it", /\.lpos-builder \.lpos-publish-unlock-note \{ display: none; \}/.test(css)],
   ["the pre-publication notice disappears after publication", /\{!published && \(\s*<p className="lpos-publish-unlock-note"/.test(guided)],
   ["the document status no longer says draft after publication", /published \? "PUBLISHED" : "DRAFT · NOT PUBLISHED"/.test(guided)],
-  ["disabled navigation reasons are exposed to assistive technology", /aria-description=\{item\.disabled \? item\.disabledReason : undefined\}/.test(desk)],
+  ["disabled navigation reasons are exposed to assistive technology", /aria-describedby=\{item\.disabled \? tooltipId : undefined\}/.test(desk) && /role="tooltip"/.test(desk)],
   ["the guided builder receives the real publication state everywhere it renders", (desk.match(/<GuidedBuild[\s\S]{0,5000}?published=\{publishedFlag\}/g) ?? []).length === 2],
 ];
 
