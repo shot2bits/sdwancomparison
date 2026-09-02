@@ -41,6 +41,10 @@ assert.match(page, /Provider, product and differentiator/);
 assert.match(page, /comparison-chart\.png/);
 assert.match(page, /dateModified: verified/);
 assert.match(page, /Confirm through RFP/);
+assert.ok(
+  page.indexOf("<ShortlistBuilder") < page.indexOf('aria-labelledby="market-view-title"'),
+  "the comparison workspace must appear before the supporting market research",
+);
 assert.match(component, /SHORTLIST_VIEWS\[initialView\]\.eligible/);
 assert.match(component, /function encodedScenarioWithView\(\)/);
 assert.match(component, /params\.set\("view", initialView\)/);

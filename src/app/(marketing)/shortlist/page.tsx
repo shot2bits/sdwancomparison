@@ -101,6 +101,15 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           {SHORTLIST_INTRO.subhead}
         </p>
+      </div>
+
+      {/* The comparison, requirements and RFP routes are the primary user
+          task, so they appear before the supporting research content. */}
+      <Suspense fallback={null}>
+        <ShortlistBuilder vendors={vendors} features={features} initialView={selectedView} />
+      </Suspense>
+
+      <div className="mb-8 max-w-4xl">
         <p className="mt-4 text-base leading-7 text-[var(--ink-800)]">
           <strong>Short answer:</strong> compare 30 SD-WAN providers, SD-WAN vendors, SASE providers, carriers and managed services using one governed research dataset. Build a ranked shortlist, compare two providers feature by feature, or open each evidence profile before issuing an RFP.
         </p>
@@ -190,15 +199,6 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Comparison chart for the leading ${SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, ranked by the Netify governed evidence score`} className="h-auto w-full" />
         <figcaption className="mt-2 text-xs text-[var(--ink-600)]">Leading providers by the selected governed evidence score. Use the table above for the underlying decision fields.</figcaption>
       </figure>
-
-      {/* useSearchParams() inside ShortlistBuilder (fix, 10 Aug 2026: the
-          builder now reacts to URL changes after mount, not just the first
-          one) requires a Suspense boundary here to keep this page
-          statically prerendered rather than opting the whole route into
-          per-request dynamic rendering. */}
-      <Suspense fallback={null}>
-        <ShortlistBuilder vendors={vendors} features={features} initialView={selectedView} />
-      </Suspense>
 
       <section className="mt-20">
         <p className="eyebrow mb-3">Ranked shortlists</p>
