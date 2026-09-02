@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Suspense } from "react";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
 import { BEST_PAGES } from "@/lib/best-pages";
@@ -58,6 +59,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
     getShortlistWebApplicationSchema(),
     getShortlistDatasetSchema(vendors.length, features.length, verified),
     getShortlistFaqSchema(SHORTLIST_FAQS),
+    { "@context": "https://schema.org", "@type": "WebPage", name: SHORTLIST_VIEWS[selectedView].title, url: selectedView === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${selectedView}/`, dateModified: verified },
     {
       "@context": "https://schema.org", "@type": "ItemList", name: "SD-WAN and SASE providers ranked by Netify",
       numberOfItems: viewRanking.length,
@@ -124,7 +126,7 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
           {SHORTLIST_VIEW_KEYS.map((view) => (
             <Link
               key={view}
-              href={view === "all" ? "/shortlist/" : `/shortlist/?view=${view}`}
+              href={view === "all" ? "/shortlist/" : `/shortlist/${view}/`}
               aria-current={selectedView === view ? "page" : undefined}
               className={`rounded-full border px-4 py-2 text-sm font-medium no-underline ${selectedView === view ? "border-zinc-950 bg-zinc-950 text-white" : "border-[var(--ink-300,#ccc)] hover:border-zinc-950"}`}
             >
@@ -140,6 +142,20 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         </div>
       </section>
 
+      <section className="mb-10" aria-labelledby="leading-providers-title">
+        <p className="eyebrow mb-2">Leading providers</p>
+        <h2 id="leading-providers-title" className="text-xl">Provider, product and differentiator</h2>
+        <ul className="mt-4 grid list-none gap-3 p-0 md:grid-cols-2">
+          {viewRanking.slice(0, 10).map((provider) => {
+            const source = sourceBySlug.get(provider.slug)!;
+            return <li key={provider.slug} className="rounded-lg border border-[var(--ink-200,#e8ebef)] p-4 text-sm leading-6">
+              <a className="font-semibold underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a>
+              {source.product_focus ? ` (${source.product_focus})` : ""}: {provider.key_differentiators[0] || provider.shortlist_summary}
+            </li>;
+          })}
+        </ul>
+      </section>
+
       <section className="mb-10 overflow-hidden rounded-lg border border-[var(--ink-300,#d5d9df)]" aria-labelledby="comparison-summary-title">
         <div className="border-b border-[var(--ink-200,#e8ebef)] bg-white px-5 py-4">
           <p className="eyebrow mb-1">Comparison summary</p>
@@ -147,8 +163,9 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
+            <caption className="sr-only">Comparative overview of {viewRanking.length} {SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, updated {verified}</caption>
             <thead className="bg-[var(--ink-50,#f6f8fa)]">
-              <tr>{["Rank and provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
+              <tr>{["Rank and provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} scope="col" className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
             </thead>
             <tbody>
               {viewRanking.slice(0, 10).map((provider) => {
@@ -168,6 +185,11 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         </div>
         <p className="px-5 py-3 text-xs text-[var(--ink-600,#555)]">The table uses governed provider records. Unknown evidence is shown as a point to confirm, not a negative score.</p>
       </section>
+
+      <figure className="mb-10 rounded-lg border border-[var(--ink-200,#e8ebef)] p-4">
+        <Image unoptimized width={1200} height={675} src={`/sase/shortlist/comparison-chart.png?view=${selectedView}`} alt={`Comparison chart for the leading ${SHORTLIST_VIEWS[selectedView].label.toLowerCase()}, ranked by the Netify governed evidence score`} className="h-auto w-full" />
+        <figcaption className="mt-2 text-xs text-[var(--ink-600)]">Leading providers by the selected governed evidence score. Use the table above for the underlying decision fields.</figcaption>
+      </figure>
 
       {/* useSearchParams() inside ShortlistBuilder (fix, 10 Aug 2026: the
           builder now reacts to URL changes after mount, not just the first

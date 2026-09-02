@@ -55,7 +55,7 @@ export async function GET(request: Request) {
         label: SHORTLIST_VIEWS[view].label,
         title: SHORTLIST_VIEWS[view].title,
         answer: SHORTLIST_VIEWS[view].answer,
-        url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/?view=${view}`,
+        url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/${view}/`,
         ranking: buildShortlistMarketView(vendors, view),
       }])),
       default_shortlist: { ...defaultResult, generated_at: generatedAt },

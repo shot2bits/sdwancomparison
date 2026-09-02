@@ -5,6 +5,26 @@
 
 export const SHORTLIST_FAQS: { q: string; a: string }[] = [
   {
+    q: "Which SD-WAN vendor is best?",
+    a: "There is no single best vendor for every estate. The right shortlist depends on operating model, regions, applications, security requirements and the evidence a supplier can provide for the project.",
+  },
+  {
+    q: "Who are the leading SD-WAN providers?",
+    a: "The SD-WAN vendor view ranks the current governed records using network-led criteria. The order changes when a buyer adds required regions, managed service delivery, cloud platforms or individual capabilities.",
+  },
+  {
+    q: "Is SD-WAN obsolete?",
+    a: "No. SD-WAN remains the network layer in many SASE designs. SASE adds cloud-delivered security and access controls rather than removing the need to control WAN traffic.",
+  },
+  {
+    q: "Should a business choose SD-WAN or MPLS?",
+    a: "Many estates use both during migration. SD-WAN can use internet, cellular and MPLS underlays, while the RFP should define application performance, resilience and any sites that must retain private circuits.",
+  },
+  {
+    q: "Who are the leading SASE vendors?",
+    a: "The SASE vendor view ranks providers with public SASE, ZTNA or secure web gateway evidence. Buyers should compare the networking and security components separately before accepting a single-vendor claim.",
+  },
+  {
     q: "How does the shortlist builder rank vendors?",
     a: "The Netify shortlist builder ranks each and every provider based on their capabilities to deliver 40 different in-built features, alongside the likes of regional coverage, cloud support, AI capabilities, resilience and deployment speed, all of which is drawn from information we've been able to publicly source or find evidence for.",
   },

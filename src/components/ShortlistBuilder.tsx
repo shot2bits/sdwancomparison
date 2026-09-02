@@ -1098,7 +1098,7 @@ function VendorCard({
               {v.name}
             </a>
           </h3>
-          <p className="text-sm text-[var(--ink-500)]">{v.category} · Typical deployment: {v.deployment_speed} · {v.value_tier} pricing tier</p>
+          <p className="text-sm text-[var(--ink-500)]">{[v.category, v.deployment_speed === "unknown" ? null : `Typical deployment: ${v.deployment_speed}`, `${v.value_tier} pricing tier`].filter(Boolean).join(" · ")}</p>
         </div>
         <div className="flex flex-wrap gap-2 sm:shrink-0">
           <button

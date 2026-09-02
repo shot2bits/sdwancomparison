@@ -42,6 +42,9 @@ export async function GET() {
     { loc: `${SITE_URL}/shortlist/`, priority: "1.0" },
     { loc: `${SITE_URL}/shortlist/cite.bib`, priority: "0.5" },
     { loc: `${SITE_URL}/shortlist/research-methodology/`, priority: "0.7" },
+    { loc: `${SITE_URL}/shortlist/sd-wan-vendors/`, priority: "0.9" },
+    { loc: `${SITE_URL}/shortlist/sase-vendors/`, priority: "0.9" },
+    { loc: `${SITE_URL}/shortlist/managed-sd-wan/`, priority: "0.9" },
     // /workspace/ and the wizard's entry surfaces 301 now (One Door,
     // 23 Jul 2026): a sitemap must never list redirecting URLs, so only
     // the serving research surfaces below remain.
