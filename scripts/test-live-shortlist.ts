@@ -64,6 +64,8 @@ for (const source of [page, data, agent, mcp]) assert.match(source, /getLiveShor
 assert.match(data, /runtime_provider_source/);
 assert.match(data, /provider_contract_version:\s*live\.providerContractVersion/);
 assert.match(data, /generated_at:\s*generatedAt/);
+assert.match(data, /provider_loaded_at:\s*generatedAt/);
+assert.doesNotMatch(data, /provider_loaded_at:\s*live\.loadedAt/);
 assert.match(data, /createHash\("sha256"\)/);
 assert.match(data, /if-none-match/);
 assert.match(csvData, /'generated_at'/);

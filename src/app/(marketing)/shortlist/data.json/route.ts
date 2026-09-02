@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       provider_contract_version: live.providerContractVersion,
       runtime_provider_source: live.source,
       provider_dataset_versions: live.datasetVersions,
-      provider_loaded_at: live.loadedAt,
+      provider_loaded_at: generatedAt,
       generated_at: generatedAt,
       last_reviewed: vendors.map((provider) => provider.last_verified).sort().slice(-1)[0],
       evidence: {
