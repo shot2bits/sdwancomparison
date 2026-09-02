@@ -49,7 +49,7 @@ export async function GET(request: Request) {
         url: provider.marketplace_url,
       })),
       top_providers_at_balanced_setting: defaultResult.shortlist.slice(0, 10),
-      default_shortlist: defaultResult,
+      default_shortlist: { ...defaultResult, generated_at: generatedAt },
       interactiveSurfaces: [
         {
           id: "shortlist-builder",
