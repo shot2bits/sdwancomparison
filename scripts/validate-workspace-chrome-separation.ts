@@ -199,7 +199,7 @@ function main() {
       "layout.tsx", "not-found.tsx", "globals.css",
       "robots.txt", "sitemap.xml", ".well-known", "llms.txt",
       "llms-full.txt", "capabilities.json", "question-bank.json",
-      "methodology.json", "indexnow.txt", "favicon.ico",
+      "methodology.json", "openapi.json", "indexnow.txt", "favicon.ico",
     ]);
     const unexpected = entries.filter((e) => !allowedTopLevel.has(e));
     record(unexpected.length === 0, "7: no unexpected top-level entries remain directly under src/app/ (no stray pre-move route)", `unexpected=${JSON.stringify(unexpected)}`);
