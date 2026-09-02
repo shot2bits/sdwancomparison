@@ -11,7 +11,8 @@
 
 import { sessionFromRequest } from "@/lib/auth";
 import { corsHeaders, preflight } from "@/lib/cors";
-import { getAllVendors, getVendorGroup } from "@/lib/vendors";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
+import { getVendorGroup } from "@/lib/vendors";
 import { listPublicOpportunities, kvConfigured } from "@/lib/rfp-store";
 import { RULEBOOK_VERSION } from "@/lib/security/rulebook";
 
@@ -34,14 +35,14 @@ function scopesFor(category: string, group: string): string[] {
 
 export async function GET(req: Request) {
   const cors = corsHeaders(req);
-  const vendors = getAllVendors().map((v) => {
-    const score = (v.score_summary ?? {}) as Record<string, unknown>;
+  const live = await getLiveShortlistDataset();
+  const vendors = live.vendors.map((v) => {
     return {
       slug: v.slug,
       name: v.name,
       category: v.category,
       last_verified: String(v.last_verified ?? ""),
-      yes_count: Number(score.yes_count ?? 0),
+      yes_count: Object.values(v.capabilities).filter((grade) => grade === "yes").length,
       scopes: scopesFor(v.category, getVendorGroup(v)),
     };
   });
@@ -68,6 +69,9 @@ export async function GET(req: Request) {
     {
       ok: true,
       rulebook_version: RULEBOOK_VERSION,
+      runtime_provider_source: live.source,
+      provider_contract_version: live.providerContractVersion,
+      provider_dataset_versions: live.datasetVersions,
       vendors,
       latest_evaluation: latest,
       // The regate: anonymous callers get the honest COUNT (an aggregate)

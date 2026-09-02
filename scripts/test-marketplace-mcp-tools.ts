@@ -7,7 +7,9 @@ for (const name of ["start_project","update_requirements","preview_provider_matc
 assert.match(tools, /publicationAuthorization/);
 assert.match(tools, /publicationCompleted/);
 assert.match(tools, /authenticateMarketplaceProject/);
-assert.match(tools, /revealProviderMatches/);
+assert.match(tools, /getLatestPublishedSnapshot/);
+assert.match(tools, /provider_evidence/);
+assert.doesNotMatch(tools, /matchProviders\(args\.input/);
 assert.match(tools, /MARKETPLACE_PUBLICATION_CONSENT_VERSION/);
 assert.match(tools, /mcp:marketplace:start:/);
 assert.match(route, /sessionFromRequest/);

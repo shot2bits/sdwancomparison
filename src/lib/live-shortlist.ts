@@ -1,5 +1,5 @@
 import { comparisonSlugForGovernedProvider } from "@/lib/governed-provider-catalogue";
-import type { ProviderMatchRecord } from "@/lib/provider-matching";
+import type { ProviderMatchInput, ProviderMatchRecord } from "@/lib/provider-matching";
 import {
   CLOUD_KEYS,
   ORG_SIZE_KEYS,
@@ -10,12 +10,14 @@ import {
 } from "@/lib/shortlist-core";
 import { FEATURES, getShortlistDataset } from "@/lib/vendors";
 
-export const LIVE_SHORTLIST_CONTRACT_VERSION = "neon-shortlist/1.0.0" as const;
+export const LIVE_SHORTLIST_CONTRACT_VERSION = "neon-shortlist/2.0.0" as const;
 
 export type LiveShortlistDataset = {
   vendors: ShortlistVendor[];
   source: "neon" | "snapshot_fallback";
+  providerContractVersion: "provider-match-records/1.0.0" | "provider-match-records/2.0.0" | "snapshot";
   datasetVersions: string[];
+  providerRevisions: Array<{ providerId: string; slug: string; revisionId: string; datasetVersion: string }>;
   loadedAt: string;
 };
 
@@ -61,6 +63,32 @@ const FEATURE_CODES: Record<string, string[]> = {
   f39_apis_and_automation: ["automated_remediation", "configuration_generation"],
   f40_managed_service_assurance: ["network_health", "root_cause_analysis", "sla_reporting", "threat_reporting"],
 };
+
+const FEATURE_ID_BY_PROVIDER_CODE = new Map<string, string>();
+for (const [featureId, codes] of Object.entries(FEATURE_CODES)) {
+  FEATURE_ID_BY_PROVIDER_CODE.set(featureId, featureId);
+  for (const code of codes) if (!FEATURE_ID_BY_PROVIDER_CODE.has(code)) FEATURE_ID_BY_PROVIDER_CODE.set(code, featureId);
+}
+
+export function shortlistInputFromProviderMatchInput(input: ProviderMatchInput) {
+  const mapCapabilities = (values: string[]) => values.flatMap((value) => {
+    const mapped = FEATURE_ID_BY_PROVIDER_CODE.get(value);
+    return mapped ? [mapped] : [];
+  });
+  const requestedCapabilities = [...input.mandatory_capabilities, ...input.preferred_capabilities];
+  return {
+    input: {
+      required_features: [...new Set(mapCapabilities(input.mandatory_capabilities))],
+      preferred_features: [...new Set(mapCapabilities(input.preferred_capabilities))],
+      required_regions: input.required_regions,
+      service_model: input.service_model === "fully_managed" ? "managed" : input.service_model === "co_managed" ? "co_managed" : input.service_model === "self_managed" ? "diy" : "any",
+      sector: input.sector,
+      shortlist_size: 30,
+    },
+    unresolved: requestedCapabilities.filter((code) => !FEATURE_ID_BY_PROVIDER_CODE.has(code)),
+    featureIdFor: (code: string) => FEATURE_ID_BY_PROVIDER_CODE.get(code) ?? null,
+  };
+}
 
 type EvidenceState = { support_state: string; freshness_state: string };
 const positive = new Set(["supported", "partially_supported", "partner_delivered"]);
@@ -169,17 +197,40 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
+async function loadNeonShortlistDataset(): Promise<LiveShortlistDataset> {
+  const base = getShortlistDataset();
+  const loadedAt = new Date().toISOString();
+  const { loadProviderMatchRecordFeed } = await import("@/lib/provider-match-source");
+  const feed = await loadProviderMatchRecordFeed();
+  const records = feed.providers;
+  if (records.length !== base.length) throw new Error(`Expected ${base.length} published provider records, received ${records.length}`);
+  const vendors = mergeNeonProviderRecords(base, records);
+  return {
+    vendors,
+    source: "neon",
+    providerContractVersion: feed.contractVersion,
+    datasetVersions: [...new Set(records.map((record) => record.dataset_version))].sort(),
+    providerRevisions: records.map((record) => ({
+      providerId: record.provider_id,
+      slug: comparisonSlugForGovernedProvider(record.slug),
+      revisionId: record.revision_id,
+      datasetVersion: record.dataset_version,
+    })).sort((a, b) => a.slug.localeCompare(b.slug)),
+    loadedAt,
+  };
+}
+
+export async function getStrictLiveShortlistDataset(): Promise<LiveShortlistDataset> {
+  return loadNeonShortlistDataset();
+}
+
 export async function getLiveShortlistDataset(): Promise<LiveShortlistDataset> {
   const base = getShortlistDataset();
   const loadedAt = new Date().toISOString();
   try {
-    const { loadProviderMatchRecords } = await import("@/lib/provider-match-source");
-    const records = await loadProviderMatchRecords();
-    if (records.length !== base.length) throw new Error(`Expected ${base.length} published provider records, received ${records.length}`);
-    const vendors = mergeNeonProviderRecords(base, records);
-    return { vendors, source: "neon", datasetVersions: [...new Set(records.map((record) => record.dataset_version))].sort(), loadedAt };
+    return await loadNeonShortlistDataset();
   } catch (error) {
     console.error("Live shortlist provider source unavailable, using the reviewed snapshot.", error);
-    return { vendors: base, source: "snapshot_fallback", datasetVersions: [], loadedAt };
+    return { vendors: base, source: "snapshot_fallback", providerContractVersion: "snapshot", datasetVersions: [], providerRevisions: [], loadedAt };
   }
 }

@@ -5,7 +5,8 @@ import { publishDecisionGate, declinedConfirmationText, PUBLISH_DESPITE_DECLINED
 import { inviteSupplier, vendorBySlug } from "@/lib/rfp-connect";
 import { regionHintFromEmail } from "@/lib/region-hint";
 import { buildShortlist } from "@/lib/shortlist-core";
-import { FEATURE_NAMES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURE_NAMES } from "@/lib/vendors";
+import { getStrictLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 import { SITE_URL } from "@/lib/structured-data";
 import { emailDomain } from "@/lib/access-control";
 import { OpportunitySchema, type Opportunity, type OppScope } from "@/lib/opportunity-types";
@@ -823,6 +824,67 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   }
   const publishedRevisionId = attempt.id;
 
+  // Seal the exact published Neon provider revisions and the resulting
+  // invitation plan before any public board write. A provider-source
+  // failure therefore cannot leave a board opportunity behind and cannot
+  // unlock or invite suppliers. Existing resumable attempts keep their
+  // already-sealed plan and never recompute it against newer evidence.
+  if (opts.list_on_board !== false && (!attempt.invitation_plan || !attempt.provider_evidence || !attempt.match_input)) {
+    const live = await getStrictLiveShortlistDataset();
+    const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
+    const pinSlugs = (working.buyer.pinned_vendors ?? []).filter(Boolean);
+    const excluded = new Set(
+      (opts.excluded_vendors ?? [])
+        .filter((slug): slug is string => typeof slug === "string" && slug.length > 0 && slug.length <= 80)
+        .slice(0, 40)
+        .filter((slug) => !pinSlugs.includes(slug)),
+    );
+    const requestSize = Math.min(12, size + excluded.size);
+    const statedRegions = (working.buyer.regions ?? []).filter(Boolean);
+    const regionHint = statedRegions.length === 0 ? regionHintFromEmail(ownerEmail) : null;
+    const matchInput = {
+      sector: working.buyer.sector ?? null,
+      organisation_size: working.buyer.organisation_size ?? "any",
+      service_model: working.buyer.operating_model ?? "any",
+      required_regions: statedRegions,
+      ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
+      shortlist_size: requestSize,
+    };
+    const shortlist = buildShortlist(live.vendors, matchInput, FEATURE_NAMES);
+    const rankedFill = shortlist.shortlist.map((vendor) => vendor.slug).filter((slug) => !excluded.has(slug));
+    const inviteSlugs = [...new Set([...pinSlugs, ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
+    const revisionBySlug = new Map(live.providerRevisions.map((revision) => [revision.slug, revision]));
+    const vendorById = new Map(live.vendors.map((vendor) => [vendor.slug, vendor]));
+    const evidenceSlugs = [...new Set([...shortlist.shortlist.map((vendor) => vendor.slug), ...inviteSlugs])];
+    const providerEvidence = evidenceSlugs.flatMap((slug) => {
+      const vendor = vendorById.get(slug);
+      if (!vendor) return [];
+      const revision = revisionBySlug.get(slug);
+      return [{
+        slug,
+        name: vendor.name,
+        provider_id: revision?.providerId ?? null,
+        revision_id: revision?.revisionId ?? null,
+        dataset_version: revision?.datasetVersion ?? null,
+        record: vendor,
+      }];
+    });
+    attempt = await savePublicationAttempt({
+      ...attempt,
+      invitation_plan: inviteSlugs.map((slug) => ({ slug, name: vendorById.get(slug)?.name ?? slug })),
+      provider_evidence: providerEvidence,
+      provider_provenance: {
+        shortlist_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
+        provider_contract_version: live.providerContractVersion,
+        dataset_versions: live.datasetVersions,
+        loaded_at: live.loadedAt,
+      },
+      matched_provider_slugs: shortlist.shortlist.map((vendor) => vendor.slug),
+      match_input: shortlist.input,
+      match_criteria: shortlist.criteria_summary,
+    });
+  }
+
   // STEP C: create the PUBLIC Opportunities Board listing bound to that
   // exact revision -- the ONLY path onto the board this saga ever takes.
   // `list_on_board: false` no longer creates ANY Opportunity (public or
@@ -889,9 +951,10 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // means the market never unlocked for this attempt, and -- round 2's
   // literal fix -- the project's status is NEVER touched: `working` here
   // is exactly `project` (plus, at most, a D5 acknowledgement consent
-  // entry), never transitioned toward "published". No matching is
-  // computed, no supplier is invited, no MarketUnlock record is
-  // committed, and no governed-revision idempotency state is committed
+  // entry), never transitioned toward "published". The private match plan
+  // remains sealed but no provider identity is exposed, no supplier is
+  // invited, no MarketUnlock record is committed, and no governed-revision
+  // idempotency state is committed
   // either, so a retry (this same request again, or the standing
   // /list-on-board recovery action -- see retryBoardPublication() below)
   // is a genuine, safe re-attempt, not a silent no-op.
@@ -899,50 +962,12 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
     return { published: working, invited: [], criteria: "", board, market_report: lockedMarketReportFor(working), matched_vendors: [] };
   }
 
-  // STEP D: persist the matching basis and invitation plan for
-  // deterministic replay -- computed once and reused verbatim on any
-  // resume, never recomputed against a vendor dataset that may have moved
-  // on since. Deliberately runs against `working` (the frozen content),
-  // never a later-edited live project, since a resume only ever happens
-  // for the SAME content+options request.
-  const size = Math.min(Math.max(Number(opts.shortlist_size ?? 8), 3), 12);
-  // Buyer-named vendors are always invited (explicit intent beats inference),
-  // capped upstream at five; the ranked shortlist fills the remainder.
-  const pinSlugs = (working.buyer.pinned_vendors ?? []).filter(Boolean);
-  // Buyer exclusions (F3): sanitised, capped, and never allowed to beat a
-  // pin. They govern the ranked fill only; the board listing, the grading
-  // and the record are untouched.
-  const excluded = new Set(
-    (opts.excluded_vendors ?? [])
-      .filter((s): s is string => typeof s === "string" && s.length > 0 && s.length <= 80)
-      .slice(0, 40)
-      .filter((s) => !pinSlugs.includes(s)),
-  );
-  // Excluded seats backfill: ask the ranking for enough names that an
-  // exclusion shrinks nobody's field, capped at the engine's own ceiling.
-  const requestSize = Math.min(12, size + excluded.size);
-  // Region hint (20 July 2026, the ministry lesson): when the buyer stated no
-  // regions, weight the ranking by the email's country TLD. Never filters;
-  // declared to the buyer as an assumption in the confirmation email.
-  const statedRegions = (working.buyer.regions ?? []).filter(Boolean);
-  const regionHint = statedRegions.length === 0 ? regionHintFromEmail(ownerEmail) : null;
-  const result = buildShortlist(getShortlistDataset(), {
-    sector: working.buyer.sector ?? null,
-    organisation_size: working.buyer.organisation_size ?? "any",
-    service_model: working.buyer.operating_model ?? "any",
-    required_regions: statedRegions,
-    ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
-    shortlist_size: requestSize,
-  }, FEATURE_NAMES);
-
-  const rankedFill = result.shortlist.map((v) => v.slug).filter((s) => !excluded.has(s));
-  const inviteSlugs = [...new Set([...pinSlugs, ...rankedFill])].slice(0, Math.max(size, pinSlugs.length));
-  if (!attempt.invitation_plan) {
-    attempt = await savePublicationAttempt({
-      ...attempt,
-      invitation_plan: inviteSlugs.map((slug) => ({ slug, name: vendorBySlug(slug)?.name ?? slug })),
-    });
+  // STEP D was sealed before the board write. At this point a successful
+  // board opportunity can only proceed with that durable plan.
+  if (!attempt.invitation_plan || !attempt.provider_evidence || !attempt.match_input) {
+    return { published: working, invited: [], criteria: "", board: { listed: false, reason: "Provider evidence could not be sealed; publication remains incomplete." }, market_report: lockedMarketReportFor(working), matched_vendors: [] };
   }
+  const sealedProviderEvidence = attempt.provider_evidence;
 
   // STEP E: atomically/finally commit MarketUnlock -- the ONLY step that
   // may expose anything supplier-facing. Idempotent by
@@ -1069,6 +1094,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       published.id,
       entry.slug,
       `You are invited to respond to the RFP "${published.title}". Netify has pre-drafted evidence answers for your organisation from its public capability evaluation; open your response link, review the draft, correct anything and add your pricing. Most of the writing is already done.`,
+      sealedProviderEvidence.find((provider) => provider.slug === entry.slug)?.record,
     );
     if (!("error" in r)) {
       // Piece 3B-2 (hybrid model, Robert's ruling #2, 9 Aug 2026): mint this
@@ -1127,7 +1153,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // state. A report failure must never fail a publish.
   let market_report: MarketReport;
   try {
-    market_report = buildMarketReport(published);
+    market_report = buildMarketReport(published, sealedProviderEvidence.map((provider) => provider.record));
   } catch {
     market_report = {
       generated_at: Date.now(),
@@ -1170,7 +1196,12 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // moment -- computed once here so the snapshot, the return value below
   // (which the publish route's immediate response carries), and every
   // later resumed read all agree on the identical list.
-  const matchedVendorsFrozen = result.shortlist.map((v) => ({ slug: v.slug, name: v.name }));
+  const matchedProviderSlugs = attempt.matched_provider_slugs ?? sealedProviderEvidence.map((provider) => provider.slug);
+  const evidenceBySlug = new Map(sealedProviderEvidence.map((provider) => [provider.slug, provider]));
+  const matchedVendorsFrozen = matchedProviderSlugs.flatMap((slug) => {
+    const provider = evidenceBySlug.get(slug);
+    return provider ? [{ slug, name: provider.name }] : [];
+  });
   if (govResult.applied && govResult.revision) {
     const snapshot: PublishedSnapshot = {
       // Market-unlock correction round: the SAME id minted and bound into
@@ -1193,11 +1224,14 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
       frozen_content: { title: published.title, buyer: published.buyer, rfp_sections: published.rfp_sections, living_document: published.procurement_document ?? null },
       public_projection: { opportunity_id: board.opportunity_id ?? null, url: board.url ?? null },
       private_requirement: { rfp_id: published.id },
-      match_criteria: result.criteria_summary,
-      matched_vendor_ids: result.shortlist.map((v) => v.slug),
+      match_criteria: attempt.match_criteria ?? "",
+      matched_vendor_ids: matchedProviderSlugs,
       invited_vendor_ids: invited.map((i) => i.slug),
       matched_vendors: matchedVendorsFrozen,
       invited_vendors: invited,
+      provider_evidence: sealedProviderEvidence,
+      provider_provenance: attempt.provider_provenance,
+      provider_match_input: attempt.match_input,
       accepted_assumptions: market_report.assumptions,
       open_decisions: market_report.gaps,
       market_report,
@@ -1213,7 +1247,7 @@ export async function executePublish(project: ProjectDetails, sessionEmail: stri
   // this function's idempotency contract rather than throwing after the
   // buyer's vendors have already been invited.
 
-  return { published, invited, criteria: result.criteria_summary, board, market_report, matched_vendors: matchedVendorsFrozen };
+  return { published, invited, criteria: attempt.match_criteria ?? "", board, market_report, matched_vendors: matchedVendorsFrozen };
 }
 
 /**

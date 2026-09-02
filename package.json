@@ -33,6 +33,7 @@
     "test:marketplace-funnel": "tsx scripts/test-marketplace-funnel.ts",
     "test:provider-comparison-ui": "tsx scripts/test-provider-comparison-interface.ts",
     "test:live-shortlist": "tsx scripts/test-live-shortlist.ts",
+    "test:rfp-neon-integration": "tsx scripts/test-rfp-neon-integration.ts",
     "test:marketplace-foundation": "npm run test:publication-policy && npm run test:project-entrance && npm run test:provider-matching && npm run test:project-marketplace-envelope && npm run test:sector-profiles && npm run test:marketplace-project-session && npm run test:journey-modes && npm run test:provider-match-preview && npm run test:marketplace-mcp && npm run test:marketplace-examples && npm run test:marketplace-funnel",
     "validate:ui": "node scripts/validate-living-procurement-os-stage-a-ui.mjs",
     "validate:rfp-ui": "node scripts/validate-rfp-builder-flow-ui.mjs",

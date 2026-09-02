@@ -48,6 +48,7 @@ export async function POST(req: Request, context: { params: Promise<{ projectId:
       await recordMarketplaceFunnelEvent({ event: "publication_incomplete", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web", detail: { board_created: Boolean(result.board.opportunity_id) } });
       return Response.json({ ok: false, code: "board_publication_incomplete", error: result.board.reason ?? "Board publication did not complete.", market_unlocked: false, publication_policy_version: PUBLICATION_POLICY_VERSION }, { status: 409 });
     }
+    await saveProject(ProjectDetailsSchema.parse({ ...result.published, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "published", board_opportunity_id: result.board.opportunity_id!, market_unlock_status: "unlocked", server_updated_at: Date.now() } }));
     await recordMarketplaceFunnelEvent({ event: "publication_completed", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "web", detail: { board_created: true } });
     return Response.json({ ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION });
   } catch (error) {

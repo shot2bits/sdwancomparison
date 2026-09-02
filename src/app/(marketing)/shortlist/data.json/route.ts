@@ -22,6 +22,7 @@ export async function GET() {
       publisher: "Netify Group Limited",
       contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
       source_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
+      provider_contract_version: live.providerContractVersion,
       runtime_provider_source: live.source,
       provider_dataset_versions: live.datasetVersions,
       provider_loaded_at: live.loadedAt,

@@ -53,6 +53,7 @@ import { kvGetJson, kvSetJson } from "@/lib/rfp-store";
 import type { ProjectDetails, BuyerContext, RfpSection } from "@/lib/rfp-types";
 import type { MarketReport } from "@/lib/market-report";
 import type { LivingProcurementDocument } from "@/lib/workspace/procurement-document";
+import type { ShortlistInput, ShortlistVendor } from "@/lib/shortlist-core";
 import crypto from "node:crypto";
 
 /** Deterministic JSON stringify: object keys sorted recursively, so the
@@ -184,6 +185,23 @@ export type PublishedSnapshot = {
    *  honestly rather than claiming it is frozen. */
   matched_vendors?: { slug: string; name: string }[];
   invited_vendors?: { slug: string; name: string; supplier_url: string }[];
+  /** Exact provider records and revision identities used for this
+   *  publication. Optional for snapshots written before this contract. */
+  provider_evidence?: Array<{
+    slug: string;
+    name: string;
+    provider_id: string | null;
+    revision_id: string | null;
+    dataset_version: string | null;
+    record: ShortlistVendor;
+  }>;
+  provider_provenance?: {
+    shortlist_contract_version: string;
+    provider_contract_version: string;
+    dataset_versions: string[];
+    loaded_at: string;
+  };
+  provider_match_input?: ShortlistInput;
   accepted_assumptions: string[];
   open_decisions: string[];
   /** Cached at publish time so every later read (the report route, a

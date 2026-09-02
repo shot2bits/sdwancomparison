@@ -20,7 +20,11 @@
 
 import { getAllVendors, FEATURES, STATUS_DESCRIPTIONS } from "@/lib/vendors";
 import type { ProjectDetails } from "@/lib/rfp-types";
-import type { Vendor } from "@data/schema";
+import type { ShortlistVendor } from "@/lib/shortlist-core";
+
+type EvidenceVendor = Pick<ShortlistVendor, "slug" | "name" | "last_verified" | "capabilities" | "key_differentiators" | "shortlist_summary"> & {
+  evidence_summary?: string;
+};
 
 export type EvidenceDraftAnswer = {
   question_id: string;
@@ -54,10 +58,9 @@ function isCommercial(category: string, text: string): boolean {
 }
 
 /** Resolve a supplier-typed organisation name (or slug) to a dataset vendor. */
-export function resolveVendor(nameOrSlug: string): Vendor | null {
+export function resolveVendor(nameOrSlug: string, vendors: EvidenceVendor[] = getAllVendors()): EvidenceVendor | null {
   const q = nameOrSlug.trim().toLowerCase();
   if (q.length < 3) return null;
-  const vendors = getAllVendors();
   const bySlug = vendors.find((v) => v.slug === q);
   if (bySlug) return bySlug;
   const exact = vendors.find((v) => v.name.toLowerCase() === q);
@@ -69,7 +72,7 @@ export function resolveVendor(nameOrSlug: string): Vendor | null {
   return contains.length === 1 ? contains[0] : null;
 }
 
-function draftFor(vendor: Vendor, featureName: string, status: string, evaluated: string): { draft: string; needs_input: boolean; note: string } {
+function draftFor(vendor: EvidenceVendor, featureName: string, status: string, evaluated: string): { draft: string; needs_input: boolean; note: string } {
   const prov = (grade: string, instruction: string) =>
     ` [Netify evidence draft, grade ${grade}, public-evidence evaluation last verified ${evaluated}. ${instruction}]`;
   switch (status) {
@@ -120,8 +123,8 @@ function draftFor(vendor: Vendor, featureName: string, status: string, evaluated
   }
 }
 
-export function buildEvidenceDraft(project: ProjectDetails, vendorRef: string): EvidenceDraft {
-  const vendor = resolveVendor(vendorRef);
+export function buildEvidenceDraft(project: ProjectDetails, vendorRef: string, vendors?: EvidenceVendor[]): EvidenceDraft {
+  const vendor = resolveVendor(vendorRef, vendors);
   if (!vendor) {
     return {
       available: false,
@@ -168,7 +171,7 @@ export function buildEvidenceDraft(project: ProjectDetails, vendorRef: string): 
 
   const drafted = answers.filter((a) => !a.needs_input).length;
   const company_note =
-    `${vendor.evidence_summary} Key differentiators per Netify's evaluation: ${vendor.key_differentiators.join(" ")}`.trim();
+    `${vendor.evidence_summary ?? vendor.shortlist_summary} Key differentiators per Netify's evaluation: ${vendor.key_differentiators.join(" ")}`.trim();
 
   return {
     available: true,

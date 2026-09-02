@@ -1,4 +1,5 @@
 import { corsHeaders, preflight } from "@/lib/cors";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { matchSuppliers } from "@/lib/supplier-match";
 
 export const runtime = "nodejs";
@@ -35,9 +36,10 @@ export async function GET(req: Request) {
   const scope = url.searchParams.get("scope") ?? "any";
   const regions = (url.searchParams.get("regions") ?? "").split(".").filter(Boolean);
   const model = url.searchParams.get("model") ?? "any";
-  const result = matchSuppliers({ scope, regions, model });
+  const live = await getLiveShortlistDataset();
+  const result = matchSuppliers({ scope, regions, model }, live.vendors);
   return Response.json(
-    { ok: true, total: result.total, methodology: "Netify vendor dataset, live" },
+    { ok: true, total: result.total, methodology: "Netify published provider evidence, live", runtime_provider_source: live.source, provider_contract_version: live.providerContractVersion },
     { headers: { ...cors, "cache-control": "public, max-age=300, stale-while-revalidate=3600" } },
   );
 }

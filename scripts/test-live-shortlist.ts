@@ -35,7 +35,7 @@ const record: ProviderMatchRecord = {
 };
 
 const [provider] = mergeNeonProviderRecords(base, [record]);
-assert.equal(LIVE_SHORTLIST_CONTRACT_VERSION, "neon-shortlist/1.0.0");
+assert.equal(LIVE_SHORTLIST_CONTRACT_VERSION, "neon-shortlist/2.0.0");
 assert.equal(provider.slug, "hpe-aruba");
 assert.equal(provider.name, "HPE Aruba EdgeConnect", "the compact comparison label must remain readable while facts come from Neon");
 assert.equal(provider.marketplace_url, "https://netify.co.uk/marketplace/hpe-aruba-edgeconnect/");
@@ -61,5 +61,6 @@ const agent = readFileSync("src/app/api/agent/route.ts", "utf8");
 const mcp = readFileSync("src/lib/mcp-tools.ts", "utf8");
 for (const source of [page, data, agent, mcp]) assert.match(source, /getLiveShortlistDataset/);
 assert.match(data, /runtime_provider_source/);
+assert.match(data, /provider_contract_version:\s*live\.providerContractVersion/);
 assert.match(mcp, /runtime_provider_source/);
 console.log("live Neon shortlist tests passed");

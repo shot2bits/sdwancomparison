@@ -3,6 +3,8 @@ import { getProject, getConnection, kvConfigured } from "@/lib/rfp-store";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 import { inviteSupplier, addMessage } from "@/lib/rfp-connect";
 import { listApprovals, getApproval, setApprovalStatus, listReviews, listAudit, listDigests, recordAudit } from "@/lib/agent-store";
+import { isMarketUnlocked } from "@/lib/market-unlock";
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -64,9 +66,14 @@ export async function POST(req: Request, ctx: Ctx) {
   const question = (body.edited_question ?? item.payload.question ?? "").trim();
   try {
     if (item.kind === "send_clarification" && item.vendor_slug) {
+      if (!(await isMarketUnlocked(id))) {
+        return Response.json({ error: "This supplier action is locked until publication and MarketUnlock complete successfully.", code: "market_locked" }, { status: 409, headers: cors });
+      }
       let conn = await getConnection(id, item.vendor_slug);
       if (!conn) {
-        const inv = await inviteSupplier(id, item.vendor_slug, "");
+        const snapshot = await getLatestPublishedSnapshot(id);
+        const frozen = snapshot?.provider_evidence?.find((provider) => provider.slug === item.vendor_slug)?.record;
+        const inv = await inviteSupplier(id, item.vendor_slug, "", frozen);
         if ("error" in inv) throw new Error(inv.error);
         conn = inv;
       }

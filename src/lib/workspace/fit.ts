@@ -25,7 +25,8 @@
  */
 
 import { matchSuppliers } from "@/lib/supplier-match";
-import { getAllVendors } from "@/lib/vendors";
+import type { ShortlistVendor } from "@/lib/shortlist-core";
+import { getShortlistDataset } from "@/lib/vendors";
 import { wizardRegions } from "@/lib/workspace/draft";
 
 export const DATASET_BOUNDARY =
@@ -81,7 +82,7 @@ export type WorkspaceFitResult =
       checks: Array<{ id: string; label: string }>;
     };
 
-type VendorRecord = ReturnType<typeof getAllVendors>[number];
+type VendorRecord = ShortlistVendor;
 
 /* ------------------------------------------------------------------ */
 /* The checks: requirement specifics the dataset genuinely grades      */
@@ -183,7 +184,6 @@ function enrich(slugs: string[], regionKeys: string[], vendors: VendorRecord[], 
     const regions = recOf(v.regions);
     const coverage: Record<string, string> = {};
     for (const r of regionKeys) coverage[r] = String(regions[r] ?? "unknown");
-    const score = recOf(v.score_summary);
     const matched: FitEvidence[] = [];
     const missed: FitEvidence[] = [];
     for (const c of checks) {
@@ -195,8 +195,8 @@ function enrich(slugs: string[], regionKeys: string[], vendors: VendorRecord[], 
       name: v.name,
       category: v.category,
       last_verified: String(v.last_verified ?? ""),
-      evidence_coverage_pct: Number(score.evidence_coverage_pct ?? 0),
-      yes_count: Number(score.yes_count ?? 0),
+      evidence_coverage_pct: Number(v.evidence_coverage_pct ?? 0),
+      yes_count: Object.values(v.capabilities).filter((grade) => grade === "yes").length,
       coverage,
       matched,
       missed,
@@ -235,12 +235,11 @@ export function workspaceFit(opts: {
   clouds?: string[]; // workspace cloud ids (aws, azure, google)
   mplsEstate?: boolean; // MPLS stands in the stated estate
   wants?: string[]; // taxonomy selections with dataset homes (WANT_IDS)
-}): WorkspaceFitResult {
+}, vendors: ShortlistVendor[] = getShortlistDataset()): WorkspaceFitResult {
   const regionKeys = wizardRegions(opts.regions ?? []);
   const include = (opts.include ?? []).filter(Boolean).slice(0, 10);
-  const vendors = getAllVendors();
   const directory = vendors.map((v) => ({ slug: v.slug, name: v.name }));
-  const methodology = "Netify vendor dataset, live";
+  const methodology = "Netify published provider evidence, live";
   const checks = buildChecks({
     buying: opts.buying,
     regionKeys,
@@ -263,7 +262,7 @@ export function workspaceFit(opts: {
   }
 
   const scope = opts.buying === "sdwan" ? "sdwan" : opts.buying === "sse" ? "sse" : "sase";
-  const result = matchSuppliers({ scope, regions: regionKeys, model: opts.model ?? "any", preferred_regions: regionKeys });
+  const result = matchSuppliers({ scope, regions: regionKeys, model: opts.model ?? "any", preferred_regions: regionKeys }, vendors);
   const orderedSlugs = result.names
     .map((n) => vendors.find((v) => v.name === n)?.slug)
     .filter((s): s is string => Boolean(s));

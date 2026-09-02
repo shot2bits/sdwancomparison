@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { getMarketUnlock } from "@/lib/market-unlock";
 
 export const PROVIDER_MATCH_METHODOLOGY_VERSION = "provider-match/1.0.0" as const;
 
@@ -94,6 +93,7 @@ export function publicProviderMatchPreview(result: InternalProviderMatchResult) 
 }
 
 export async function revealProviderMatches(projectId: string, result: InternalProviderMatchResult) {
+  const { getMarketUnlock } = await import("@/lib/market-unlock");
   const unlock = await getMarketUnlock(projectId);
   if (!unlock) return null;
   return { methodology_version: result.methodology_version, market_unlock_id: unlock.id, published_revision_id: unlock.published_revision_id, matches: result.verdicts.filter((row) => row.eligible).map((row, index) => ({ rank: index + 1, provider_id: row.provider_id, slug: row.slug, name: row.display_name, score: row.score, reasons: row.contributions, unresolved: row.unresolved, provider_revision_id: row.revision_id })) };

@@ -19,6 +19,7 @@ import { assessSecurityRequirement, RULEBOOK_VERSION } from "@/lib/security/rule
 import type { SecurityRequirementInput, SecurityScopeVerdict } from "@/lib/security/rulebook";
 import { SITE_URL } from "@/lib/structured-data";
 import { chunkForIngest } from "@/lib/workspace/ingest";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 
 const CYCLE_DEFINITION = {
   name: "workspace_cycle",
@@ -173,6 +174,7 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
       verdict?.pathRecommendation === "escalate_sase",
   );
   const fitBuying = buying && buying !== "managed_security" ? buying : sseSignal ? "sse" : "managed_security";
+  const live = includeFit ? await getLiveShortlistDataset() : null;
   const fit = includeFit
     ? workspaceFit({
         buying: fitBuying,
@@ -182,7 +184,7 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
         // the page drives, so both read identical evidence (Article 17).
         clouds: result.requirement.estate?.cloud ?? [],
         mplsEstate: (result.requirement.estate?.existingNetwork ?? []).includes("mpls"),
-      })
+      }, live!.vendors)
     : undefined;
 
   return {
@@ -196,7 +198,7 @@ export async function callWorkspaceTool(name: string, args: Record<string, unkno
     // scope names WHICH ranking this is (an SSE list can honestly serve a
     // security requirement whose verdict includes SSE; it is never an MSSP
     // ranking in disguise).
-    ...(fit ? { fit: { scope: fitBuying, ...fit, directory: undefined } } : {}),
+    ...(fit ? { fit: { scope: fitBuying, runtime_provider_source: live!.source, provider_contract_version: live!.providerContractVersion, ...fit, directory: undefined } } : {}),
     // P3.4 parity (one truth, three doors): the same earned follow-up
     // questions the desk asks, each summoned by the buyer's own facts and
     // carrying the AI-search evidence that earned its place. Relay them;
@@ -257,6 +259,7 @@ async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unkno
       verdict?.pathRecommendation === "escalate_sase",
   );
   const fitBuying = buying && buying !== "managed_security" ? buying : sseSignal ? "sse" : "managed_security";
+  const live = includeFit ? await getLiveShortlistDataset() : null;
   const fit = includeFit
     ? workspaceFit({
         buying: fitBuying,
@@ -264,7 +267,7 @@ async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unkno
         model: operatingModel ?? "any",
         clouds: requirement.estate?.cloud ?? [],
         mplsEstate: (requirement.estate?.existingNetwork ?? []).includes("mpls"),
-      })
+      }, live!.vendors)
     : undefined;
 
   /* The receipts idea, stated for the agent: which of its material landed
@@ -282,7 +285,7 @@ async function callWorkspaceIngest(args: Record<string, unknown>): Promise<unkno
     requirement,
     procurement: { ...(buying ? { buying } : {}), ...(operatingModel ? { operatingModel } : {}) },
     ...(verdict ? { verdict } : {}),
-    ...(fit ? { fit: { scope: fitBuying, ...fit, directory: undefined } } : {}),
+    ...(fit ? { fit: { scope: fitBuying, runtime_provider_source: live!.source, provider_contract_version: live!.providerContractVersion, ...fit, directory: undefined } } : {}),
     earned_questions: earnedQuestions(requirement, buying, operatingModel ?? null, [], [], raw).map((q) => ({
       id: q.id,
       question: q.question,

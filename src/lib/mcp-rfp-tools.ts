@@ -23,9 +23,8 @@ import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/
 import { isMarketUnlocked } from "@/lib/market-unlock";
 import { authenticateMarketplaceProject, prepareMarketplacePublication, previewMarketplaceProject, startMarketplaceProject, updateMarketplaceProject } from "@/lib/marketplace-project-session";
 import { executePublish } from "@/lib/rfp-publish";
-import { loadProviderMatchRecords } from "@/lib/provider-match-source";
-import { matchProviders, revealProviderMatches } from "@/lib/provider-matching";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
 
 export const MCP_RFP_TOOL_DEFINITIONS = [
   { name: "start_project", description: "Create the canonical private ProjectDetails envelope with MCP journey attribution. Anonymous and rate-limited by the MCP transport; returns an expiring opaque project session token.", inputSchema: { type: "object", properties: { entrance_context: { type: "object" }, mode: { type: "string", enum: ["quick_list","find_providers","build_rfp","validate_rfp"] }, sector_profile: { type: "object" } }, required: ["entrance_context","mode"] } },
@@ -34,7 +33,7 @@ export const MCP_RFP_TOOL_DEFINITIONS = [
   { name: "prepare_publication", description: "Record the current versioned anonymous-board consent intent against a private project. Does not publish; verified buyer identity is still required.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" }, marketing_opt_in: { type: "boolean" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
   { name: "publish_opportunity", description: "Publish a prepared project exactly once. Requires the opaque project token, current revision, exact consent and a verified buyer session on the MCP HTTP request; cannot bypass the website policy.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, base_revision: { type: "integer" }, consent_version: { type: "string" }, consent_text: { type: "string" } }, required: ["project_id","project_session_token","base_revision","consent_version","consent_text"] } },
   { name: "get_project_status", description: "Return private project, board and MarketUnlock status to the verified owner holding the opaque project session token.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" } }, required: ["project_id","project_session_token"] } },
-  { name: "get_unlocked_matches", description: "Return personalised provider identities and reasons only to the verified project owner after a live MarketUnlock binding passes.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, input: { type: "object" } }, required: ["project_id","project_session_token","input"] } },
+  { name: "get_unlocked_matches", description: "Return the exact provider identities and evidence frozen at publication, only to the verified project owner after a live MarketUnlock binding passes.", inputSchema: { type: "object", properties: { project_id: { type: "string" }, project_session_token: { type: "string" }, input: { type: "object", description: "Accepted for compatibility. Published matches are never recalculated from this value." } }, required: ["project_id","project_session_token"] } },
   {
     name: "get_rfp",
     description: "Fetch a published SASE/SD-WAN RFP by its share token so a supplier agent can read the questions. Returns title, status, scope, delivery model and the active questions with the evidence requested.",
@@ -245,9 +244,31 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     const project = await getProject(projectId);
     const email = context.verifiedBuyerEmail ?? "";
     if (!project || !email || project.owner_email.toLowerCase() !== email.toLowerCase()) return { error: "verified_owner_required" };
-    const result = matchProviders(args.input as never, await loadProviderMatchRecords());
-    const unlocked = await revealProviderMatches(projectId, result);
-    return unlocked ?? { error: "market_locked" };
+    if (!(await isMarketUnlocked(projectId))) return { error: "market_locked" };
+    const snapshot = await getLatestPublishedSnapshot(projectId);
+    if (!snapshot) return { error: "published_snapshot_missing" };
+    const evidence = new Map((snapshot.provider_evidence ?? []).map((provider) => [provider.slug, provider]));
+    const matched = snapshot.matched_vendors ?? snapshot.matched_vendor_ids.map((slug) => ({ slug, name: evidence.get(slug)?.name ?? slug }));
+    return {
+      published_revision_id: snapshot.id,
+      match_criteria: snapshot.match_criteria,
+      provider_provenance: snapshot.provider_provenance ?? null,
+      provider_match_input: snapshot.provider_match_input ?? null,
+      matches: matched.map((provider, index) => {
+        const frozen = evidence.get(provider.slug);
+        return {
+          rank: index + 1,
+          slug: provider.slug,
+          name: provider.name,
+          provider_id: frozen?.provider_id ?? null,
+          provider_revision_id: frozen?.revision_id ?? null,
+          dataset_version: frozen?.dataset_version ?? null,
+          capabilities: frozen?.record.capabilities ?? null,
+          regions: frozen?.record.regions ?? null,
+          sectors: frozen?.record.sectors ?? null,
+        };
+      }),
+    };
   }
   if (name === "publish_opportunity") {
     const projectId = String(args.project_id ?? "");
@@ -264,6 +285,7 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
     const result = await executePublish(consented, email, { shortlist_size: 5, list_on_board: true, marketing_opt_in: false });
     const unlocked = await isMarketUnlocked(projectId);
     if (!publicationCompleted({ publicBoardOpportunityId: result.board.opportunity_id, marketUnlockValid: unlocked })) { await recordMarketplaceFunnelEvent({ event: "publication_incomplete", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "mcp", detail: { board_created: Boolean(result.board.opportunity_id) } }); return { error: "board_publication_incomplete", reason: result.board.reason, market_unlocked: false }; }
+    await saveProject(ProjectDetailsSchema.parse({ ...result.published, marketplace_state: { contract_version: "project-marketplace-state/1.0.0", publication_status: "published", board_opportunity_id: result.board.opportunity_id!, market_unlock_status: "unlocked", server_updated_at: Date.now() } }));
     await recordMarketplaceFunnelEvent({ event: "publication_completed", project_id: project.id, source: project.journey?.source, mode: project.journey?.mode, channel: "mcp", detail: { board_created: true } });
     return { ok: true, opportunity_id: result.board.opportunity_id, opportunity_url: result.board.url, market_unlocked: true, publication_policy_version: PUBLICATION_POLICY_VERSION };
   }
@@ -443,8 +465,11 @@ export async function callRfpTool(name: string, args: Record<string, unknown>, c
       return { error: principal.reason, allowed: false, message: SUPPLIER_PRINCIPAL_DENIAL_MESSAGES[principal.reason] };
     }
     const { buildEvidenceDraft } = await import("@/lib/evidence-response");
+    const snapshot = await getLatestPublishedSnapshot(p.id);
+    const frozen = snapshot?.provider_evidence?.map((provider) => provider.record);
+    const vendors = frozen?.length ? frozen : (await (await import("@/lib/live-shortlist")).getLiveShortlistDataset()).vendors;
     return {
-      ...buildEvidenceDraft(p, principal.vendorSlug),
+      ...buildEvidenceDraft(p, principal.vendorSlug, vendors),
       next: "Review and edit every draft, add pricing, then submit via respond_to_rfp with the same token and an answers map keyed by question_id.",
     };
   }

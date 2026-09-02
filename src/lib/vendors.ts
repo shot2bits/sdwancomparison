@@ -73,7 +73,7 @@ export const GROUP_DESCRIPTIONS: Record<VendorGroup, string> = {
     "Carriers and global service providers delivering managed SD-WAN and SASE on top of multi-vendor platforms.",
 };
 
-export function getVendorGroup(vendor: Vendor): VendorGroup {
+export function getVendorGroup(vendor: Pick<Vendor, "slug">): VendorGroup {
   const slug = vendor.slug;
   // Slug-based mapping is more reliable than fuzzy category text matching
   const SLUG_TO_GROUP: Record<string, VendorGroup> = {

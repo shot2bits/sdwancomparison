@@ -6,16 +6,16 @@
  */
 
 import { getShortlistDataset, getAllVendorSlugs } from "@/lib/vendors";
-import { STATUS_LABELS, type CapabilityStatus } from "@/lib/shortlist-core";
+import { STATUS_LABELS, type CapabilityStatus, type ShortlistVendor } from "@/lib/shortlist-core";
 import { saseExtendedQuestions } from "@/lib/rfp-question-bank";
 import type { ProjectDetails, RfpResponse } from "@/lib/rfp-types";
 
 /** Loose match a supplier-entered org name to a known matrix vendor slug. */
-export function matchVendorSlug(name: string): string | null {
+export function matchVendorSlug(name: string, vendors: ShortlistVendor[] = getShortlistDataset()): string | null {
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
   const target = norm(name);
   if (!target) return null;
-  const ds = getShortlistDataset();
+  const ds = vendors;
   for (const v of ds) {
     const vn = norm(v.name);
     if (vn === target || vn.includes(target) || target.includes(norm(v.slug)) || target.includes(vn)) return v.slug;
@@ -91,9 +91,9 @@ function referencesEvidence(answer: string, evidenceRequested: string): boolean 
   return tokens.some((t) => a.includes(t));
 }
 
-export function evaluateResponse(project: ProjectDetails, response: RfpResponse): ResponseEvaluation {
-  const slug = response.vendor_slug ?? matchVendorSlug(response.vendor);
-  const vendor = slug ? getShortlistDataset().find((v) => v.slug === slug) : undefined;
+export function evaluateResponse(project: ProjectDetails, response: RfpResponse, vendors: ShortlistVendor[] = getShortlistDataset()): ResponseEvaluation {
+  const slug = response.vendor_slug ?? matchVendorSlug(response.vendor, vendors);
+  const vendor = slug ? vendors.find((v) => v.slug === slug) : undefined;
   const activeQs = project.rfp_sections
     .filter((s) => s.included)
     .flatMap((s) => s.questions.filter((q) => q.priority !== "optional"));

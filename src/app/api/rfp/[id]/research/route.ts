@@ -3,7 +3,8 @@ import { corsHeaders, preflight } from "@/lib/cors";
 import { getProject, kvConfigured } from "@/lib/rfp-store";
 import { buildMethodology, METHODOLOGY_VERSION } from "@/lib/rfp-methodology";
 import { REGULATIONS } from "@/lib/rfp-compliance";
-import { FEATURE_CATEGORIES, getShortlistDataset } from "@/lib/vendors";
+import { FEATURE_CATEGORIES } from "@/lib/vendors";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 import { requireRfpOwner, ownerRequired } from "@/lib/rfp-access";
 
 export const runtime = "nodejs";
@@ -47,7 +48,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const regs = REGULATIONS.map((r) => `${r.key}: ${r.label}`).join("; ");
 
   // Live matrix signal: spread of grades per feature tells us where vendors differ.
-  const ds = getShortlistDataset();
+  const ds = (await getLiveShortlistDataset()).vendors;
   const variation = buildMethodology().features.map((f) => {
     const grades = ds.map((v) => v.capabilities[f.feature_id]).filter(Boolean);
     const yes = grades.filter((g) => g === "yes").length;

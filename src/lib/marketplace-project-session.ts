@@ -5,9 +5,11 @@ import { entranceToProjectDetails } from "@/lib/project-entrance";
 import { ProjectDetailsSchema, SectorProfileStateSchema } from "@/lib/rfp-types";
 import { MARKETPLACE_PUBLICATION_CONSENT_TEXT, MARKETPLACE_PUBLICATION_CONSENT_VERSION } from "@/lib/publication-policy";
 import { getProject, kvGetJson, kvRaw, newId, saveProject } from "@/lib/rfp-store";
-import { loadProviderMatchRecords } from "@/lib/provider-match-source";
-import { matchProviders, ProviderMatchInputSchema, publicProviderMatchPreview } from "@/lib/provider-matching";
+import { ProviderMatchInputSchema, PROVIDER_MATCH_METHODOLOGY_VERSION } from "@/lib/provider-matching";
 import { recordMarketplaceFunnelEvent } from "@/lib/marketplace-funnel";
+import { getStrictLiveShortlistDataset, shortlistInputFromProviderMatchInput } from "@/lib/live-shortlist";
+import { buildShortlist } from "@/lib/shortlist-core";
+import { FEATURE_NAMES } from "@/lib/vendors";
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 const SessionSchema = z.object({ project_id: z.string(), token_hash: z.string(), revision: z.number().int().min(0), created_at: z.number(), expires_at: z.number() }).strict();
@@ -71,10 +73,32 @@ export async function previewMarketplaceProject(projectId: string, token: string
   const input = request.input;
   const project = await getProject(projectId);
   if (!project) throw new MarketplaceProjectUnauthorised("Project not found.");
-  const records = await loadProviderMatchRecords();
+  const live = await getStrictLiveShortlistDataset();
+  const translated = shortlistInputFromProviderMatchInput(input);
+  const scoped = live.vendors.filter((provider) => {
+    if (input.provider_scope === "both") return true;
+    const category = provider.category.toLowerCase();
+    return input.provider_scope === "technology"
+      ? category.includes("technology vendor")
+      : /managed service provider|carrier network provider|integrator/.test(category);
+  });
+  const result = buildShortlist(scoped, translated.input, FEATURE_NAMES);
+  const eligibleSlugs = new Set(result.shortlist.map((provider) => provider.slug));
+  const eligible = scoped.filter((provider) => eligibleSlugs.has(provider.slug));
+  const satisfies = new Set(["yes", "partial", "partner_integrated", "managed_service_dependent"]);
   const nextRevision = session.revision + 1;
   const preview = {
-    ...publicProviderMatchPreview(matchProviders(input, records)),
+    methodology_version: PROVIDER_MATCH_METHODOLOGY_VERSION,
+    dataset_versions: live.datasetVersions,
+    considered_count: scoped.length,
+    eligible_technology_count: eligible.filter((provider) => provider.category.toLowerCase().includes("technology vendor")).length,
+    eligible_managed_provider_count: eligible.filter((provider) => /managed service provider|carrier network provider|integrator/.test(provider.category.toLowerCase())).length,
+    meets_all_mandatory_count: eligible.length,
+    capability_coverage: input.mandatory_capabilities.map((code) => {
+      const featureId = translated.featureIdFor(code);
+      return { code, supported_provider_count: featureId ? scoped.filter((provider) => satisfies.has(provider.capabilities[featureId])).length : 0 };
+    }),
+    unresolved_requirements: translated.unresolved,
     calculated_at: Date.now(),
     project_revision: nextRevision,
   };

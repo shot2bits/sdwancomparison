@@ -17,6 +17,7 @@ import { matchSuppliers } from "@/lib/supplier-match";
 import { regionHintFromEmail } from "@/lib/region-hint";
 import { includedSections } from "@/lib/rfp-document";
 import { USERS_BANDS } from "@/lib/notice-options";
+import type { ShortlistVendor } from "@/lib/shortlist-core";
 import type { ProjectDetails } from "@/lib/rfp-types";
 
 export type MarketReport = {
@@ -166,7 +167,7 @@ function gapChecks(p: ProjectDetails): string[] {
   return gaps;
 }
 
-export function buildMarketReport(p: ProjectDetails): MarketReport {
+export function buildMarketReport(p: ProjectDetails, vendors?: ShortlistVendor[]): MarketReport {
   const statedRegions = (p.buyer.regions ?? []).filter(Boolean);
   const regionHint = statedRegions.length === 0 ? regionHintFromEmail(p.owner_email) : null;
   const matched = matchSuppliers({
@@ -174,7 +175,7 @@ export function buildMarketReport(p: ProjectDetails): MarketReport {
     regions: statedRegions,
     model: p.buyer.operating_model,
     ...(regionHint ? { preferred_regions: [regionHint.region] } : {}),
-  });
+  }, vendors);
   const { result, assumptions } = estimateForProject(p);
   const sections = includedSections(p);
   return {

@@ -4,6 +4,8 @@ import { buildEvidenceDraft } from "@/lib/evidence-response";
 import { sessionFromRequest, supplierCredentialFromRequest } from "@/lib/auth";
 import { resolveSupplierPrincipal, SUPPLIER_PRINCIPAL_DENIAL_MESSAGES } from "@/lib/supplier-capability-access";
 import { isMarketUnlocked } from "@/lib/market-unlock";
+import { getLatestPublishedSnapshot } from "@/lib/published-snapshot";
+import { getLiveShortlistDataset } from "@/lib/live-shortlist";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ id: string }> };
@@ -69,5 +71,8 @@ export async function GET(req: Request, ctx: Ctx) {
   // resolveVendor() (evidence-response.ts) accepts a slug directly, so this
   // sidesteps the free-text fuzzy-match entirely for the actual content
   // lookup, using it only for the identity question above.
-  return Response.json(buildEvidenceDraft(project, principal.vendorSlug), { headers: cors });
+  const snapshot = await getLatestPublishedSnapshot(id);
+  const frozen = snapshot?.provider_evidence?.map((provider) => provider.record);
+  const vendors = frozen?.length ? frozen : (await getLiveShortlistDataset()).vendors;
+  return Response.json(buildEvidenceDraft(project, principal.vendorSlug, vendors), { headers: cors });
 }
