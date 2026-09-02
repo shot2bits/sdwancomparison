@@ -16,6 +16,7 @@ export async function GET() {
     FEATURE_NAMES,
   ).shortlist;
   const sourceBySlug = new Map(live.vendors.map((provider) => [provider.slug, provider]));
+  const lastModified = live.vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
   const headings = [
     'contract_version', 'rank', 'slug', 'name', 'provider_type', 'score',
     'summary', 'products', 'evidence_source_count', 'reviewed_at', 'profile_url',
@@ -42,7 +43,7 @@ export async function GET() {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': 'inline; filename="netify-sase-sd-wan-shortlist.csv"',
-      'X-Robots-Tag': 'noindex',
+      'Last-Modified': new Date(lastModified).toUTCString(),
     },
   });
 }

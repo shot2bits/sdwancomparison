@@ -12,6 +12,7 @@ import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/
 export async function GET() {
   const live = await getLiveShortlistDataset();
   const vendors = live.vendors;
+  const lastModified = vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
   const defaultResult = buildShortlist(vendors, { ...DEFAULT_INPUT, shortlist_size: vendors.length }, FEATURE_NAMES);
 
   return Response.json(
@@ -80,6 +81,6 @@ export async function GET() {
         csv: `${SITE_URL}/shortlist/data.csv`,
       },
     },
-    { headers: { "X-Robots-Tag": "noindex" } },
+    { headers: { "Last-Modified": new Date(lastModified).toUTCString() } },
   );
 }

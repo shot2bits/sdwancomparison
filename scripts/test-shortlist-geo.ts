@@ -6,6 +6,10 @@ import { getShortlistDatasetSchema } from "../src/lib/structured-data";
 const page = readFileSync("src/app/(marketing)/shortlist/page.tsx", "utf8");
 const dataRoute = readFileSync("src/app/(marketing)/shortlist/data.json/route.ts", "utf8");
 const csvRoute = readFileSync("src/app/(marketing)/shortlist/data.csv/route.ts", "utf8");
+assert.match(dataRoute, /Last-Modified/);
+assert.match(csvRoute, /Last-Modified/);
+assert.doesNotMatch(dataRoute, /X-Robots-Tag.*noindex/);
+assert.doesNotMatch(csvRoute, /X-Robots-Tag.*noindex/);
 const content = readFileSync("src/lib/shortlist-content.ts", "utf8");
 const interfaceSource = readFileSync("src/components/ShortlistBuilder.tsx", "utf8");
 
