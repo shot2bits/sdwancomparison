@@ -103,6 +103,22 @@ export default async function ShortlistPage({ searchParams }: { searchParams: Pr
         </p>
       </div>
 
+      <aside
+        aria-label="Netify RFP Builder"
+        className="mb-6 flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 px-5 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p className="font-medium text-zinc-900">
+          Need to create an RFP for your SD-WAN and SASE cybersecurity project?
+        </p>
+        <a
+          href="https://netify.co.uk/sase-sd-wan-rfp-builder/"
+          className="inline-flex shrink-0 items-center gap-2 font-semibold text-zinc-950 underline decoration-amber-500 decoration-2 underline-offset-4"
+        >
+          Use the free Netify RFP Builder and Marketplace
+          <span aria-hidden="true">→</span>
+        </a>
+      </aside>
+
       {/* The comparison, requirements and RFP routes are the primary user
           task, so they appear before the supporting research content. */}
       <Suspense fallback={null}>
