@@ -15,7 +15,9 @@ assert.match(page, /itemListOrder: "https:\/\/schema\.org\/ItemListOrderDescendi
 assert.match(page, /position: provider\.rank/);
 assert.match(dataRoute, /top_providers_at_balanced_setting: defaultResult\.shortlist\.slice\(0, 10\)/);
 assert.match(dataRoute, /shortlist_size: vendors\.length/);
-assert.match(interfaceSource, /Show the remaining \{result\.shortlist\.length - 10\} ranked providers/);
+assert.match(interfaceSource, /\{result\.shortlist\.map\(\(v\) => \(/);
+assert.doesNotMatch(interfaceSource, /isDefaultView \? result\.shortlist\.slice\(0, 10\) : result\.shortlist/);
+assert.doesNotMatch(interfaceSource, /Show the remaining .* ranked providers/);
 assert.match(interfaceSource, /Build from requirements/);
 assert.doesNotMatch(interfaceSource, /Build around your requirements/);
 

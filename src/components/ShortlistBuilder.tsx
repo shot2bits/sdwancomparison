@@ -826,7 +826,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         )}
 
         <ol className="space-y-5 list-none p-0">
-          {(isDefaultView ? result.shortlist.slice(0, 10) : result.shortlist).map((v) => (
+          {result.shortlist.map((v) => (
             <VendorCard
               key={`${v.slug}-${providerCardReset}`}
               v={v}
@@ -835,24 +835,6 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
             />
           ))}
         </ol>
-
-        {isDefaultView && result.shortlist.length > 10 && (
-          <details className="mt-5 rounded-sm border border-[var(--ink-300,#ccc)] p-4">
-            <summary className="cursor-pointer text-sm font-medium">
-              Show the remaining {result.shortlist.length - 10} ranked providers
-            </summary>
-            <ol start={11} className="mt-5 space-y-5 p-0">
-              {result.shortlist.slice(10).map((v) => (
-                <VendorCard
-                  key={`${v.slug}-${providerCardReset}`}
-                  v={v}
-                  compared={compareSlugs.includes(v.slug)}
-                  onCompare={() => toggleCompare(v.slug)}
-                />
-              ))}
-            </ol>
-          </details>
-        )}
 
         {result.near_misses.length > 0 && (
           <div className="mt-10">
