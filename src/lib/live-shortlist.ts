@@ -128,7 +128,6 @@ export function mergeNeonProviderRecords(base: ShortlistVendor[], records: Provi
     const original = bySlug.get(slug);
     if (!original) throw new Error(`No comparison record for governed provider ${record.slug}`);
     const provider: ShortlistVendor = JSON.parse(JSON.stringify(original));
-    provider.name = record.display_name;
     provider.category = record.provider_types.join(" / ").replaceAll("_", " ");
     provider.product_focus = record.product_names.slice(0, 4).join(", ");
     provider.shortlist_summary = excerpt(record.overview);

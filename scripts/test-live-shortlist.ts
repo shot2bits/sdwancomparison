@@ -13,7 +13,7 @@ const supported = (qualification: string | null = null) => ({ support_state: "su
 const record: ProviderMatchRecord = {
   provider_id: "provider:hpe-aruba-edgeconnect",
   slug: "hpe-aruba-edgeconnect",
-  display_name: "HPE Aruba EdgeConnect",
+  display_name: "Hewlett Packard Enterprise Company operating under the HPE Aruba Networking business unit",
   provider_types: ["technology_vendor"],
   primary_geographies: ["United Kingdom", "Europe"],
   revision_id: "revision:hpe",
@@ -37,6 +37,7 @@ const record: ProviderMatchRecord = {
 const [provider] = mergeNeonProviderRecords(base, [record]);
 assert.equal(LIVE_SHORTLIST_CONTRACT_VERSION, "neon-shortlist/1.0.0");
 assert.equal(provider.slug, "hpe-aruba");
+assert.equal(provider.name, "HPE Aruba EdgeConnect", "the compact comparison label must remain readable while facts come from Neon");
 assert.equal(provider.marketplace_url, "https://netify.co.uk/marketplace/hpe-aruba-edgeconnect/");
 assert.equal(provider.product_focus, "EdgeConnect SD-WAN, SSE");
 assert.equal(provider.shortlist_summary, "First researched sentence. Second researched sentence.");
