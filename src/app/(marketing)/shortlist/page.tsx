@@ -3,11 +3,18 @@ import Link from "next/link";
 import { Suspense } from "react";
 import ShortlistBuilder from "@/components/ShortlistBuilder";
 import { BEST_PAGES } from "@/lib/best-pages";
-import { buildShortlist, DEFAULT_INPUT } from "@/lib/shortlist-core";
 import { FEATURES, FEATURE_CATEGORIES as FEATURE_CATEGORIES_LIST } from "@/lib/vendors";
 import { SHORTLIST_FAQS, SHORTLIST_INTRO } from "@/lib/shortlist-content";
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
 import { getLiveShortlistDataset } from "@/lib/live-shortlist";
+import {
+  buildShortlistMarketView,
+  firstUnconfirmedDecision,
+  parseShortlistMarketView,
+  SHORTLIST_VIEW_CONTRACT_VERSION,
+  SHORTLIST_VIEW_KEYS,
+  SHORTLIST_VIEWS,
+} from "@/lib/shortlist-market-views";
 import {
   SITE_URL,
   getBreadcrumbSchema,
@@ -18,33 +25,31 @@ import {
   getSpeakableSchema,
 } from "@/lib/structured-data";
 
-export const metadata: Metadata = {
-  title: "Best SD-WAN and SASE Providers (2026): Compare the Market, Build a Shortlist",
-  description:
-    "Compare 30 SD-WAN providers, SD-WAN vendors, SASE providers and managed services using Netify's evidence-graded capability data. Build a shortlist and continue to an RFP.",
-  alternates: { canonical: `${SITE_URL}/shortlist/` },
-  openGraph: {
-    title: "Best SD-WAN and SASE Providers (2026): Compare the Market, Build a Shortlist",
-    description:
-      "Compare 30 SD-WAN and SASE providers using Netify's evidence-graded capability data, then build a shortlist and continue to an RFP.",
-    url: `${SITE_URL}/shortlist/`,
-    type: "website",
-    locale: "en_GB",
-  },
-};
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }): Promise<Metadata> {
+  const query = await searchParams;
+  const view = parseShortlistMarketView(typeof query.view === "string" ? query.view : undefined);
+  const viewTitle = SHORTLIST_VIEWS[view].title;
+  const title = `${viewTitle} (2026): 30-Provider Research Dataset`;
+  const description = `${SHORTLIST_VIEWS[view].answer} Compare governed evidence, build a shortlist and continue to an RFP.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `${SITE_URL}/shortlist/` },
+    openGraph: { title, description, url: `${SITE_URL}/shortlist/`, type: "website", locale: "en_GB" },
+  };
+}
 
 export const dynamic = "force-dynamic";
 
-export default async function ShortlistPage() {
+export default async function ShortlistPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const query = await searchParams;
+  const selectedView = parseShortlistMarketView(typeof query.view === "string" ? query.view : undefined);
   const live = await getLiveShortlistDataset();
   const vendors = live.vendors;
   const verified = vendors.map((v) => v.last_verified).sort().slice(-1)[0] ?? "";
   const features = FEATURES.map((f) => ({ id: f.id, name: f.name, category: f.category, description: f.description }));
-  const defaultRanking = buildShortlist(
-    vendors,
-    { ...DEFAULT_INPUT, shortlist_size: vendors.length },
-    Object.fromEntries(features.map((feature) => [feature.id, feature.name])),
-  ).shortlist;
+  const viewRanking = buildShortlistMarketView(vendors, selectedView);
+  const sourceBySlug = new Map(vendors.map((provider) => [provider.slug, provider]));
 
   const schemas = [
     getOrganizationSchema(),
@@ -55,9 +60,9 @@ export default async function ShortlistPage() {
     getShortlistFaqSchema(SHORTLIST_FAQS),
     {
       "@context": "https://schema.org", "@type": "ItemList", name: "SD-WAN and SASE providers ranked by Netify",
-      numberOfItems: defaultRanking.length,
+      numberOfItems: viewRanking.length,
       itemListOrder: "https://schema.org/ItemListOrderDescending",
-      itemListElement: defaultRanking.map((provider) => ({ "@type": "ListItem", position: provider.rank, url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
+      itemListElement: viewRanking.map((provider) => ({ "@type": "ListItem", position: provider.rank, url: provider.marketplace_url, name: provider.name, description: provider.shortlist_summary })),
     },
     // The 40 capability definitions as a DefinedTermSet, mirroring the
     // visible glossary below so AI engines can quote a row's meaning
@@ -88,26 +93,12 @@ export default async function ShortlistPage() {
         />
       ))}
 
-      <div className="mb-10 max-w-3xl fade-rise">
+      <div className="mb-8 max-w-4xl fade-rise">
         <p className="eyebrow mb-3">{SHORTLIST_INTRO.eyebrow}</p>
         <h1 id="page-h1" className="mb-4">{SHORTLIST_INTRO.h1}</h1>
         <p id="page-subhead" className="text-lg text-[var(--ink-700)]">
           {SHORTLIST_INTRO.subhead}
         </p>
-        <section className="mt-5 rounded-lg border border-[var(--ink-200,#e8ebef)] bg-[var(--ink-50,#f6f8fa)] p-4" aria-labelledby="top-sd-wan-providers">
-          <h2 id="top-sd-wan-providers" className="text-lg">Top SD-WAN providers at a glance</h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">
-            At the current balanced setting, the first ten providers are listed below. Change the requirements to recalculate the order against the same governed evidence.
-          </p>
-          <ol className="mt-3 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-sm">
-            {defaultRanking.slice(0, 10).map((provider) => (
-              <li key={provider.slug}>
-                <span className="mr-1 text-[var(--ink-500)]">{provider.rank}.</span>
-                <a href={provider.marketplace_url!} className="font-medium underline underline-offset-4">{provider.name}</a>
-              </li>
-            ))}
-          </ol>
-        </section>
         <p className="mt-4 text-base leading-7 text-[var(--ink-800)]">
           <strong>Short answer:</strong> compare 30 SD-WAN providers, SD-WAN vendors, SASE providers, carriers and managed services using one governed research dataset. Build a ranked shortlist, compare two providers feature by feature, or open each evidence profile before issuing an RFP.
         </p>
@@ -124,9 +115,59 @@ export default async function ShortlistPage() {
           <a href="https://netify.co.uk/sase-sd-wan-rfp-builder/" className="underline">the Netify RFP Builder</a>
           {", "}raise it to a full RFP and publish to the providers it names, then
           compare structured responses, with pricing kept private to the buyer.
-          {" "}<a href="/sase/shortlist/cite.bib" className="underline">Cite this dataset</a>.
+          {" "}<a href="/sase/shortlist/research-methodology/" className="underline">Read and cite the research method</a>.
         </p>
       </div>
+
+      <section className="mb-8" aria-labelledby="market-view-title">
+        <div className="flex flex-wrap gap-2" aria-label="Provider market view">
+          {SHORTLIST_VIEW_KEYS.map((view) => (
+            <Link
+              key={view}
+              href={view === "all" ? "/shortlist/" : `/shortlist/?view=${view}`}
+              aria-current={selectedView === view ? "page" : undefined}
+              className={`rounded-full border px-4 py-2 text-sm font-medium no-underline ${selectedView === view ? "border-zinc-950 bg-zinc-950 text-white" : "border-[var(--ink-300,#ccc)] hover:border-zinc-950"}`}
+            >
+              {SHORTLIST_VIEWS[view].label}
+            </Link>
+          ))}
+        </div>
+        <div className="mt-5 rounded-lg border border-[var(--ink-200,#e8ebef)] bg-[var(--ink-50,#f6f8fa)] p-5">
+          <p className="eyebrow mb-2">2026 market answer</p>
+          <h2 id="market-view-title" className="text-xl">{SHORTLIST_VIEWS[selectedView].title}</h2>
+          <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--ink-700)]">{SHORTLIST_VIEWS[selectedView].answer}</p>
+          <p className="mt-2 text-xs text-[var(--ink-500)]">{viewRanking.length} eligible providers. Reviewed {verified}. View contract {SHORTLIST_VIEW_CONTRACT_VERSION}.</p>
+        </div>
+      </section>
+
+      <section className="mb-10 overflow-hidden rounded-lg border border-[var(--ink-300,#d5d9df)]" aria-labelledby="comparison-summary-title">
+        <div className="border-b border-[var(--ink-200,#e8ebef)] bg-white px-5 py-4">
+          <p className="eyebrow mb-1">Comparison summary</p>
+          <h2 id="comparison-summary-title" className="text-xl">Leading {SHORTLIST_VIEWS[selectedView].label.toLowerCase()} at a glance</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[58rem] border-collapse text-left text-sm">
+            <thead className="bg-[var(--ink-50,#f6f8fa)]">
+              <tr>{["Rank and provider", "Type", "Products", "Best suited to", "Main strength", "Confirm through RFP", "Reviewed"].map((heading) => <th key={heading} className="border-b px-4 py-3 font-semibold">{heading}</th>)}</tr>
+            </thead>
+            <tbody>
+              {viewRanking.slice(0, 10).map((provider) => {
+                const source = sourceBySlug.get(provider.slug)!;
+                return <tr key={provider.slug} className="align-top even:bg-[var(--ink-50,#f8f9fa)]">
+                  <td className="border-b px-4 py-3 font-medium"><span className="mr-2 text-[var(--ink-500)]">{provider.rank}</span><a className="underline underline-offset-4" href={provider.marketplace_url!}>{provider.name}</a></td>
+                  <td className="border-b px-4 py-3">{provider.category}</td>
+                  <td className="border-b px-4 py-3">{source.product_focus || "Product names are listed in the full profile."}</td>
+                  <td className="border-b px-4 py-3">{provider.best_fit_for[0] || provider.shortlist_summary}</td>
+                  <td className="border-b px-4 py-3">{provider.key_differentiators[0] || provider.shortlist_summary}</td>
+                  <td className="border-b px-4 py-3">{firstUnconfirmedDecision(source)}</td>
+                  <td className="border-b px-4 py-3 whitespace-nowrap">{provider.last_verified}</td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="px-5 py-3 text-xs text-[var(--ink-600,#555)]">The table uses governed provider records. Unknown evidence is shown as a point to confirm, not a negative score.</p>
+      </section>
 
       {/* useSearchParams() inside ShortlistBuilder (fix, 10 Aug 2026: the
           builder now reacts to URL changes after mount, not just the first
@@ -134,7 +175,7 @@ export default async function ShortlistPage() {
           statically prerendered rather than opting the whole route into
           per-request dynamic rendering. */}
       <Suspense fallback={null}>
-        <ShortlistBuilder vendors={vendors} features={features} />
+        <ShortlistBuilder vendors={vendors} features={features} initialView={selectedView} />
       </Suspense>
 
       <section className="mt-20">

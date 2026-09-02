@@ -33,6 +33,7 @@
     "test:marketplace-funnel": "tsx scripts/test-marketplace-funnel.ts",
     "test:provider-comparison-ui": "tsx scripts/test-provider-comparison-interface.ts",
     "test:shortlist-geo": "tsx scripts/test-shortlist-geo.ts",
+    "test:shortlist-market-views": "tsx scripts/test-shortlist-market-views.ts",
     "test:live-shortlist": "tsx scripts/test-live-shortlist.ts",
     "test:rfp-neon-integration": "tsx scripts/test-rfp-neon-integration.ts",
     "test:rfp-responsive-accessibility": "tsx scripts/test-rfp-responsive-accessibility.ts",

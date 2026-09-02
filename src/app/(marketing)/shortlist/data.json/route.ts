@@ -5,6 +5,7 @@ import { SITE_URL } from "@/lib/structured-data";
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from "@/lib/governed-provider-catalogue";
 import { getLiveShortlistDataset, LIVE_SHORTLIST_CONTRACT_VERSION } from "@/lib/live-shortlist";
 import { createHash } from "node:crypto";
+import { buildShortlistMarketView, SHORTLIST_VIEW_CONTRACT_VERSION, SHORTLIST_VIEW_KEYS, SHORTLIST_VIEWS } from "@/lib/shortlist-market-views";
 
 /**
  * JSON twin of /shortlist. Same content as the page, structured for machines.
@@ -23,6 +24,7 @@ export async function GET(request: Request) {
       description: SHORTLIST_INTRO.subhead,
       publisher: "Netify Group Limited",
       contract_version: GOVERNED_SHORTLIST_CONTRACT_VERSION,
+      market_view_contract_version: SHORTLIST_VIEW_CONTRACT_VERSION,
       source_contract_version: LIVE_SHORTLIST_CONTRACT_VERSION,
       provider_contract_version: live.providerContractVersion,
       runtime_provider_source: live.source,
@@ -49,6 +51,13 @@ export async function GET(request: Request) {
         url: provider.marketplace_url,
       })),
       top_providers_at_balanced_setting: defaultResult.shortlist.slice(0, 10),
+      market_views: Object.fromEntries(SHORTLIST_VIEW_KEYS.map((view) => [view, {
+        label: SHORTLIST_VIEWS[view].label,
+        title: SHORTLIST_VIEWS[view].title,
+        answer: SHORTLIST_VIEWS[view].answer,
+        url: view === "all" ? `${SITE_URL}/shortlist/` : `${SITE_URL}/shortlist/?view=${view}`,
+        ranking: buildShortlistMarketView(vendors, view),
+      }])),
       default_shortlist: { ...defaultResult, generated_at: generatedAt },
       interactiveSurfaces: [
         {

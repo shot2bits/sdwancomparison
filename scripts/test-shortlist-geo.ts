@@ -20,8 +20,9 @@ const nav = readFileSync("src/lib/nav.ts", "utf8");
 const workspaceTools = readFileSync("src/lib/mcp-workspace-tools.ts", "utf8");
 
 assert.match(content, /Compare SD-WAN and SASE providers, vendors and managed services/);
-assert.match(page, /Top SD-WAN providers at a glance/);
-assert.match(page, /defaultRanking\.slice\(0, 10\)/);
+assert.match(page, /2026 market answer/);
+assert.match(page, /viewRanking\.slice\(0, 10\)/);
+assert.match(page, /Leading \{SHORTLIST_VIEWS\[selectedView\]\.label\.toLowerCase\(\)\} at a glance/);
 assert.match(page, /itemListOrder: "https:\/\/schema\.org\/ItemListOrderDescending"/);
 assert.match(page, /position: provider\.rank/);
 assert.match(dataRoute, /top_providers_at_balanced_setting: defaultResult\.shortlist\.slice\(0, 10\)/);

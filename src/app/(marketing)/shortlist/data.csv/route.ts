@@ -3,6 +3,7 @@ import { FEATURE_NAMES } from '@/lib/vendors';
 import { getLiveShortlistDataset } from '@/lib/live-shortlist';
 import { GOVERNED_SHORTLIST_CONTRACT_VERSION } from '@/lib/governed-provider-catalogue';
 import { createHash } from 'node:crypto';
+import { buildShortlistMarketView, parseShortlistMarketView, SHORTLIST_VIEW_CONTRACT_VERSION } from '@/lib/shortlist-market-views';
 
 function csv(value: unknown): string {
   const text = Array.isArray(value) ? value.join(' | ') : String(value ?? '');
@@ -11,15 +12,16 @@ function csv(value: unknown): string {
 
 export async function GET(request: Request) {
   const live = await getLiveShortlistDataset();
-  const ranked = buildShortlist(
-    live.vendors,
-    { ...DEFAULT_INPUT, shortlist_size: live.vendors.length },
-    FEATURE_NAMES,
-  ).shortlist;
+  const view = parseShortlistMarketView(new URL(request.url).searchParams.get('view'));
+  const ranked = view === 'all' ? buildShortlist(
+      live.vendors,
+      { ...DEFAULT_INPUT, shortlist_size: live.vendors.length },
+      FEATURE_NAMES,
+    ).shortlist : buildShortlistMarketView(live.vendors, view);
   const sourceBySlug = new Map(live.vendors.map((provider) => [provider.slug, provider]));
   const lastModified = live.vendors.map((provider) => provider.last_verified).sort().slice(-1)[0] ?? '2026-09-02';
   const headings = [
-    'contract_version', 'generated_at', 'rank', 'slug', 'name', 'provider_type', 'score',
+    'contract_version', 'market_view_contract_version', 'market_view', 'generated_at', 'rank', 'slug', 'name', 'provider_type', 'score',
     'summary', 'products', 'evidence_source_count', 'reviewed_at', 'profile_url',
   ];
   const rows = ranked.map((provider) => {
@@ -27,6 +29,8 @@ export async function GET(request: Request) {
     const generatedAt = new Date(`${lastModified}T00:00:00.000Z`).toISOString();
     return [
     GOVERNED_SHORTLIST_CONTRACT_VERSION,
+    SHORTLIST_VIEW_CONTRACT_VERSION,
+    view,
     generatedAt,
     provider.rank,
     provider.slug,

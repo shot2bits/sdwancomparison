@@ -30,7 +30,6 @@ import {
   SECTOR_LABELS,
   CLOUD_KEYS,
   CLOUD_LABELS,
-  DEFAULT_INPUT,
   REGION_KEYS,
   REGION_LABELS,
   buildShortlist,
@@ -47,12 +46,18 @@ import {
   COMPARISON_HANDOFF_VERSION,
   parseComparisonHandoff,
 } from "@/lib/comparison-handoff";
+import {
+  inputForShortlistMarketView,
+  SHORTLIST_VIEWS,
+  type ShortlistMarketView,
+} from "@/lib/shortlist-market-views";
 
 type FeatureMeta = { id: string; name: string; category: string; description?: string };
 
 type Props = {
   vendors: ShortlistVendor[];
   features: FeatureMeta[];
+  initialView?: ShortlistMarketView;
 };
 
 const MODEL_LABELS: Record<string, string> = {
@@ -78,8 +83,9 @@ const SPEED_LABELS: Record<string, string> = {
   months: "Months",
 };
 
-export default function ShortlistBuilder({ vendors, features }: Props) {
-  const [input, setInput] = useState<ShortlistInput>(DEFAULT_INPUT);
+export default function ShortlistBuilder({ vendors, features, initialView = "all" }: Props) {
+  const viewInput = useMemo(() => inputForShortlistMarketView(initialView), [initialView]);
+  const [input, setInput] = useState<ShortlistInput>(viewInput);
   const [hydrated, setHydrated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
@@ -127,15 +133,17 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   useEffect(() => {
     // URL state is the external source of truth for shareable scenarios and
     // cross-project comparison handoffs.
+    const decoded = decodeScenario(searchParams.toString(), featureIds);
+    const hasScoringParameters = Array.from(searchParams.keys()).some((key) => !["view", "compare", "question", "source", "comparison_contract"].includes(key));
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInput(decodeScenario(searchParams.toString(), featureIds));
+    setInput(hasScoringParameters ? decoded : viewInput);
     const handoff = parseComparisonHandoff(searchParams.toString(), vendors.map((vendor) => vendor.slug));
     setCompareSlugs(handoff.providers);
     setComparisonSource(handoff.source);
     if (handoff.question) setChatPrompt(handoff.question);
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, viewInput]);
 
   // Push state changes back into the URL (debounced)
   const urlTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -147,23 +155,30 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
         providers: compareSlugs,
         question: chatPrompt,
         source: comparisonSource,
-      }).toString();
-      const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+      });
+      if (initialView !== "all") qs.set("view", initialView);
+      const query = qs.toString();
+      const url = query ? `${window.location.pathname}?${query}` : window.location.pathname;
       window.history.replaceState(null, "", url);
     }, 250);
-  }, [input, hydrated, compareSlugs, chatPrompt, comparisonSource]);
+  }, [input, hydrated, compareSlugs, chatPrompt, comparisonSource, initialView]);
 
   /** True until the user changes anything from the defaults. */
-  const isDefaultView = useMemo(() => encodeScenario(input) === "", [input]);
+  const isDefaultView = useMemo(() => encodeScenario(input) === encodeScenario(viewInput), [input, viewInput]);
+
+  const scopedVendors = useMemo(
+    () => vendors.filter(SHORTLIST_VIEWS[initialView].eligible),
+    [vendors, initialView],
+  );
 
   const result = useMemo(
     () =>
       buildShortlist(
-        vendors,
+        scopedVendors,
         isDefaultView ? { ...input, shortlist_size: vendors.length } : input,
         featureNames,
       ),
-    [vendors, input, featureNames, isDefaultView],
+    [scopedVendors, input, featureNames, isDefaultView, vendors.length],
   );
 
   function set<K extends keyof ShortlistInput>(key: K, value: ShortlistInput[K]) {
@@ -175,7 +190,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   }
 
   function resetAllOptions() {
-    setInput(DEFAULT_INPUT);
+    setInput(viewInput);
     setCompareSlugs([]);
     setComparisonSource("");
     setChatPrompt("");
@@ -186,7 +201,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     setOpenCategory(null);
     setHandoffState("idle");
     setProviderCardReset((value) => value + 1);
-    window.history.replaceState(null, "", window.location.pathname);
+    window.history.replaceState(null, "", initialView === "all" ? window.location.pathname : `${window.location.pathname}?view=${initialView}`);
   }
 
   /** Tri-state feature toggle: off, required, preferred. */
@@ -208,8 +223,14 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     });
   }
 
+  function encodedScenarioWithView(): string {
+    const params = new URLSearchParams(encodeScenario(input));
+    if (initialView !== "all") params.set("view", initialView);
+    return params.toString();
+  }
+
   async function copyLink() {
-    const qs = encodeScenario(input);
+    const qs = encodedScenarioWithView();
     const url = `${window.location.origin}${window.location.pathname}${qs ? `?${qs}` : ""}`;
     await navigator.clipboard.writeText(url);
     setCopied(true);
@@ -217,7 +238,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
   }
 
   function printUrl(): string {
-    const qs = encodeScenario(input);
+    const qs = encodedScenarioWithView();
     return `/sase/shortlist/print/${qs ? `?${qs}` : ""}`;
   }
 
@@ -353,7 +374,7 @@ export default function ShortlistBuilder({ vendors, features }: Props) {
     // have a real answer going forward instead of relying on the Resend log.
     fireNetifyEvent("shortlist_lead_submit");
     try {
-      const qs = encodeScenario(input);
+      const qs = encodedScenarioWithView();
       const res = await fetch("/sase/api/lead", {
         method: "POST",
         headers: { "content-type": "application/json" },
